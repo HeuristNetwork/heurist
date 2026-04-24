@@ -34,7 +34,7 @@ final class RequestRouter
     private const ALLOWED_VERSIONS = ['heurist','h7-alpha','h7-ao','h7-bm','h7-hn'];
 
     // Actions supported in pretty routes
-    private const ALLOWED_ACTIONS = ['website','web','hml','tpl','view','edit','adm'];
+    private const ALLOWED_ACTIONS = ['website','web','hml','tpl','view','edit','adm','record'];
 
     // Content negotiation for /db/* when fmt not provided
     private const REQUEST_CONTENT = [
@@ -497,19 +497,29 @@ final class RequestRouter
                 break;
 
             case 'view':
-                if (isset($rest[0])) $params['recid'] = $rest[0];
+                if (isset($rest[0])) { $params['recid'] = $rest[0]; }
                 $params['fmt'] = $params['fmt'] ?? 'html';
                 break;
+            case 'hml':
+                $params['fmt'] = 'hml';
+            case 'record':
+                $params['fmt'] = $params['fmt'] ?? 'html';
+                if (isset($rest[0])) { $params['recid'] = $rest[0]; }
+                /*
+                if (isset($rest[0])){
+                    if(isPositiveInt($rest[0]) || isConceptCode($rest[0])){
+                        $params['recid'] = $rest[0];    
+                    }else{
+                        $params['q'] = $rest[0];    
+                    }
+                }*/
+                if (isset($rest[1]) && ctype_digit($rest[1])) $params['depth'] = (int)$rest[1];
+                break;
+
 
             case 'edit':
                 if (isset($rest[0])) $params['recid'] = $rest[0];
                 $params['edit'] = 1;
-                break;
-
-            case 'hml':
-                $params['fmt'] = $params['fmt'] ?? 'hml';
-                if (isset($rest[0])) $params['q'] = $rest[0];
-                if (isset($rest[1]) && ctype_digit($rest[1])) $params['depth'] = (int)$rest[1];
                 break;
 
             case 'tpl': {

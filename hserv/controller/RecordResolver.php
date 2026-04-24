@@ -46,12 +46,16 @@ final class RecordResolver
                 }
             }
         }
+        
+        
+        $query = null; //$params['q'] ?? null;
 
         // ---- Records
         $recToken = $params['recID'] ?? ($params['recid'] ?? ($params['id'] ?? null));
-        if ($recToken === null || $recToken === '') {
-            return null;
+        if (($recToken === null || $recToken === '') && ($query === null || $query === '')) {
+            return null; //neither query nor record id defined
         }
+        $useRecToken = !($recToken === null || $recToken === '');
 
         $db = $params['db'] ?? null;
 
@@ -73,45 +77,48 @@ final class RecordResolver
         }
         // Concept ID? DBID-RECID
         // Remote registry resolution
-        list($remote, $recid) = self::resolveRemoteDbUrl($recToken, $db);
-        if ($remote) {
-            // Remote endpoints expect parameterized URL (as per legacy resolver.php)
-            $q = ['recID' => $recid, 'fmt' => $fmt];
-            if (!empty($params['depth']))    $q['depth'] = (int)$params['depth'];
-            if (!empty($params['noheader'])) $q['noheader'] = 1;
-            if (!empty($params['action']))   $q['action'] = (string)$params['action'];
+        if($useRecToken){
+            list($remote, $recid) = self::resolveRemoteDbUrl($recToken, $db);
+            if ($remote) {
+                // Remote endpoints expect parameterized URL (as per legacy resolver.php)
+                $q = ['recID' => $recid, 'fmt' => $fmt];
+                if (!empty($params['depth']))    $q['depth'] = (int)$params['depth'];
+                if (!empty($params['noheader'])) $q['noheader'] = 1;
+                if (!empty($params['action']))   $q['action'] = (string)$params['action'];
 
-            $sep = (strpos($remote, '?') === false) ? '?' : '&';
-            return ['url' => $remote . $sep . http_build_query($q), 'status' => 302];
-        }
+                $sep = (strpos($remote, '?') === false) ? '?' : '&';
+                return ['url' => $remote . $sep . http_build_query($q), 'status' => 302];
+            }
+        
 
-        // Local routes require db
-        if (!$db) {
-            return null;
-        }
+            // Local routes require db
+            if (!$db) {
+                return null;
+            }
 
-        // Build redirect to concrete script
-        if ($fmt === 'html') {
-            if (!empty($params['noheader'])) {
-                $q = self::pick($params, ['db','recID','recid','id','noheader']);
+            // Build redirect to concrete script
+            if ($fmt === 'html') {
+                if (!empty($params['noheader'])) {
+                    $q = self::pick($params, ['db','recID','recid','id','noheader']);
+                    $q['db'] = $db;
+                    $q['recID'] = $recid;
+                    $q['noheader'] = 1;
+                    return ['url' => "/{$version}/viewers/record/renderRecordData.php?" . http_build_query($q), 'status' => 302];
+                }
+                $q = self::pick($params, ['db','recID','recid','id']);
                 $q['db'] = $db;
                 $q['recID'] = $recid;
-                $q['noheader'] = 1;
-                return ['url' => "/{$version}/viewers/record/renderRecordData.php?" . http_build_query($q), 'status' => 302];
+                return ['url' => "/{$version}/viewers/record/viewRecord.php?" . http_build_query($q), 'status' => 302];
             }
-            $q = self::pick($params, ['db','recID','recid','id']);
-            $q['db'] = $db;
-            $q['recID'] = $recid;
-            return ['url' => "/{$version}/viewers/record/viewRecord.php?" . http_build_query($q), 'status' => 302];
-        }
 
-        if ($fmt === 'edit') {
-            // Preserve as many params as possible (edit surface uses many)
-            $q = $params;
-            $q['db'] = $db;
-            $q['recID'] = $recid;
-            unset($q['fmt'], $q['format']);
-            return ['url' => "/{$version}/hclient/framecontent/recordEdit.php?" . http_build_query($q), 'status' => 302];
+            if ($fmt === 'edit') {
+                // Preserve as many params as possible (edit surface uses many)
+                $q = $params;
+                $q['db'] = $db;
+                $q['recID'] = $recid;
+                unset($q['fmt'], $q['format']);
+                return ['url' => "/{$version}/hclient/framecontent/recordEdit.php?" . http_build_query($q), 'status' => 302];
+            }
         }
 
         // Export
@@ -120,7 +127,7 @@ final class RecordResolver
                 'vers' => 2,
                 'fmt'  => $fmt,
                 'db'   => $db,
-                'q'    => 'ids:' . $recid,
+                'q'    => $query ?? ('ids:' . $recid),
             ];
             if (!empty($params['depth'])) $q['depth'] = (int)$params['depth'];
             return ['url' => "/{$version}/hserv/controller/record_output.php?" . http_build_query($q), 'status' => 302];
@@ -130,7 +137,7 @@ final class RecordResolver
         $q = [
             'w'  => 'a',
             'db' => $db,
-            'q'  => 'ids:' . $recid,
+            'q'  => $query ?? ('ids:' . $recid),
         ];
         if (!empty($params['depth'])) $q['depth'] = (int)$params['depth'];
         return ['url' => "/{$version}/export/xml/flathml.php?" . http_build_query($q), 'status' => 302];

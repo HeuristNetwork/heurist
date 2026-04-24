@@ -725,6 +725,26 @@ function findInArray(array $arr, string $key, $keyvalue): ?int {
 function isPositiveInt($val){
     return isset($val) && (is_int($val) || ctype_digit((string)$val)) && (int)$val > 0;
 }
+/* implemented - but not used
+function isConceptCode($val, $parse=false){
+    $database_id = 0;
+    $recid = 0;
+    if (is_string($val) && (strpos((string)$val, '-') !== false)){
+        [$database_id, $recid] = explode('-', (string)$val, 2);
+        $database_id = (int)isPositiveInt($database_id)?$database_id:0;
+        $recid = (int)isPositiveInt($database_id)?$recid:0;
+    }
+    $res = $recid>0 && $database_id>0;
+    if($parse){
+       $res = [$database_id, $recid];
+    }
+    return $res;
+}
+
+function getConceptCode($val):array{
+    return isConceptCode($val, true);
+}
+*/
 
 /**
  * Checks if the current server name is 'localhost' or '127.0.0.1'.
