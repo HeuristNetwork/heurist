@@ -6,7 +6,7 @@ set -euo pipefail
 # Fails and emails server managers if there are merge conflicts (successful merge does not mean the code is coherent ...)
 # ChatGPT 21 april 2026
 
-REPO_DIR="/var/www/html/HEURIST/h8-merge-work"
+REPO_DIR="/var/www/html/HEURIST/h8-alpha"
 LOG_PREFIX="[heurist-h8-merge]"
 OWNER="osmakov"
 GROUP="heurist"
