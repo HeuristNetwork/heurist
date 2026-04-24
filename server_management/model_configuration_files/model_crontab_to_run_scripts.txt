@@ -25,7 +25,7 @@ MAILTO=<email address(es)>
 #      Copy this file to both, then:
 #           REMOVE MYSQL SCRIPTS FROM WEB SERVER 
 #           REMOVE WEB SERVER SCRIPTS FROM MYSQL SERVER
-=======
+#
 # SERVER MONITORING
 
 # *********************

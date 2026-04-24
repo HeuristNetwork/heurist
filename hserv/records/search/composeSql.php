@@ -183,7 +183,7 @@ Valuew Prefixes to search record via registered files
  @  obfuscation id
 
 
-================================================
+-----------------------------------
 
 new simplified heurist query rules.
 
