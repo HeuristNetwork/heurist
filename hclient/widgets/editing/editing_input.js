@@ -6384,6 +6384,10 @@ $.widget( "heurist.editing_input", {
             disp_value = ''; //not used 
 
             //@todo NEW datatypes
+        } else if(this.detailType=="date"){
+            
+            disp_value = temporalToHumanReadableString(value);
+            
         } else if(this.detailType=="geo"){
 
             /*if(detailType=="query")
@@ -6534,7 +6538,6 @@ $.widget( "heurist.editing_input", {
     //
     //
     _createDateInput: function($input, $inputdiv){
-      
         $input.css('width', this.options.is_faceted_search?'13ex':'20ex');
         
         let that = this;
