@@ -44,12 +44,12 @@ git branch -r | grep -E 'upstream/(h7dev|h8dev)'
 
 ## Clone `h8dev`
 
-If `/var/www/html/HEURIST/h8-alpha` does not already exist, clone it first. Replace `<REPOSITORY_URL>` with the same repository URL used for the h7 checkout.
+If `/var/www/html/HEURIST/h8-alpha` does not already exist, clone it first.
 
 ```bash
 cd /var/www/html/HEURIST
 
-git clone --branch h8dev <REPOSITORY_URL> h8-alpha
+git clone --branch h8dev https://github.com/HeuristNetwork/heurist.git h8-alpha
 cd h8-alpha
 
 git remote -v

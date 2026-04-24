@@ -18,7 +18,7 @@
 // all parse routines to csvParser.php
 
 /*
-=================== parameters for csv/kml import
+********************* parameters for csv/kml import
 
 content
     Parses CSV from 'content' parameter and returns parsed array (used in import terms).
@@ -74,7 +74,7 @@ set_primary_rectype
 5) step5
     ImportAction::performImport - Performs the import, adding/updating records in the Heurist database.
 
-============== parameters for xml/json import
+***************** parameters for xml/json import
 
 filename - Name of the temporary file containing the import data.
 
