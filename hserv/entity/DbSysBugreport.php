@@ -52,21 +52,24 @@ class DbSysBugreport extends DbEntityBase
     private $reportEmail = <<<EMAIL
     Your ticket has been added to, or updated in, the Heurist Job tracker database. 
     <br>
+    <hr>
+    <b>__TITLE__</b>
     <br>
-    Description:__DESC__
+    __DESC__
  
     <hr>
-    
-    You can test in the hx-alpha version which is updated nightly (it may therefore not be updated until tomorrow). 
+    <br>
+    View your ticket at: <a href="__LINK__">__LINK__</a>  (For developers: <a href="__EDIT__">Edit</a>)
+    <br>
+    <br>
+    For current and resolved tickets: <a href="__DB_JOBTRAK__/web/64/1526">__DB_JOBTRAK__</a><br><br>
+    <br>
+    <br>    
+    You can test in the hx-alpha version which is updated nightly (CET). 
     <br>The standard /heurist/ version is updated infrequently (our target is monthly).
-    <br>If you are not running the alpha version, replace /heurist/ in the URL with /hx-alpha/ where x is the version required (7 as of 2026).
+    <br>If you are not running the alpha version, replace /heurist/ in the URL  
+    <br>with /hx-alpha/ where x is the version required (7 as of 2026).
     <br>
-    <br>
-    You can view your ticket at: <a href="__LINK__">__LINK__</a><br><br>
-
-    Heurist development team only: <a href="__EDIT__">Edit</a><br><br>
-    
-    For current and resolved tickets see: <a href="__DB_JOBTRAK__/web/64/1526">__DB_JOBTRAK__</a><br><br>
     <br>
     Reporter: __NAME__ [__EMAIL__]<br>
     Database: __DBLINK__<br>
@@ -443,9 +446,10 @@ class DbSysBugreport extends DbEntityBase
                 }
 
                 // Compose HTML email by replacing placeholders in the $reportEmail template.
-                $truncatedDesc = mb_substr($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 100) . '...';
-                $res = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
-                    [$report_link, $truncatedDesc, $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
+                // TODO: rationalise: the same code is repeated lower down using $truncateDesc
+                $truncatedDesc = mb_substr($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 250) . '...';
+                $res = str_replace(['__LINK__', '__TITLE__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
+                    [$report_link, $report_title, $truncatedDesc, $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
                     $this->reportEmail);
 
             }elseif(\is_array($res)){
@@ -624,9 +628,10 @@ class DbSysBugreport extends DbEntityBase
                 $memberString = '';
             }
 
-            $truncateDesc = mb_substr($record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 100) . '...';
-            $msg = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
-             [$report_link, $truncateDesc, $user_name, $user_email, $db_link, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
+            // ToDo: rationalise. the same code is repeated earlier in this file using $truncatedDesc
+            $truncateDesc = mb_substr($record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 250) . '...';
+            $msg = str_replace(['__LINK__', '__TITLE__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
+             [$report_link, $report_title, $truncateDesc, $user_name, $user_email, $db_link, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
               $this->reportEmail);
 
             $user_query = "SELECT ugr_eMail FROM sysUsrGrpLinks LEFT JOIN sysUGrps ON ugr_ID = ugl_UserID WHERE ugl_GroupID = 1 AND ugl_Role='admin'";
