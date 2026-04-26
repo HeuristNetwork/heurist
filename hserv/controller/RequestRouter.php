@@ -91,8 +91,10 @@ final class RequestRouter
             }
         }        
         
+        $query = self::queryParamsFromRequestUri();
+
         // If host is not mapped and request is root "/", show welcome page
-        if ($hostMap === null && empty($segments)) {
+        if ($hostMap === null && empty($segments) && empty($query['db'])) {
             $welcome = self::serverRoot() . "/index.html";
             if (is_file($welcome)) {
                 return self::resultInternal($welcome, []);
@@ -102,8 +104,6 @@ final class RequestRouter
             //or 404 self::result404();
         }        
         
-        $query = self::queryParamsFromRequestUri();
-
         // Parameterized entry: /<version>/?db=...
         if (!empty($query['db']) && !self::isApiRoute($segments)) {
             // normalize / apply DBREF if you want:
