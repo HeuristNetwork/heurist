@@ -820,6 +820,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         if(this.is_snippet_editor){
             //hide root - record type title
             treedata = treedata[0];
+            treedivContainer.css('top','100px');
         }
         
         let that = this;
