@@ -234,6 +234,10 @@ class ReportExecute
             
             $this->testForWidgetTemplate = isset($params['testwidget']);
         }
+
+        if(!empty($this->params['q']) && is_string($this->params['q'])){
+            $this->params['q'] = urldecode($this->params['q']);
+        }
     }
 
     /**
