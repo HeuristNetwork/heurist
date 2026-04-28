@@ -243,7 +243,7 @@ class ReportTemplateMgr
      * Ensures that the provided `$template_file` (basename) exists within the configured
      * template directory (`$this->dir`). It uses `basename()` to prevent directory traversal issues.
      *
-     * @param string $template_file The basename of the template file.
+     * @param string $templateFile The basename of the template file.
      * @return string The full, verified path to the template file.
      * @throws \Exception If the template file does not exist in the directory.
      */
@@ -265,6 +265,69 @@ class ReportTemplateMgr
         } else {
             throw new \Exception("Template file $safeFileName not found");
         }
+    }
+
+    /**
+     * Rename an existing template
+     *
+     * @param string $oldTemplateFile
+     * @param string $newTemplateName
+     * @return string Returns the string "renamed" on successful renaming.
+     * @throws \Exception If `checkTemplate` fails (e.g., file not found).
+     */
+    public function renameTemplate($oldTemplateFile, $newTemplateName){
+
+        $oldTemplateFile = $this->checkTemplate($oldTemplateFile);
+        $newTemplateName = !empty($newTemplateName) ? USanitize::sanitizeFileName(basename(urldecode($newTemplateName)), false) : '';
+
+        if(empty($newTemplateName)){
+            throw new \Exception('New template name is invalid');
+        }
+
+        $pathInfo = pathinfo($oldTemplateFile);
+        $oldFileName = "{$pathInfo['filename']}.tpl";
+        $newFileName = "{$newTemplateName}.tpl";
+        $newTemplateFile = str_replace($oldFileName, $newFileName, $oldTemplateFile);
+
+        // Ensure the new name isn't already taken
+        if(file_exists($newTemplateFile)){
+            throw new \Exception("Template \"$newTemplateName\" already exists");
+        }
+
+        // Rename template file
+        if(!rename($oldTemplateFile, $newTemplateFile)){
+            throw new \Exception('Failed to rename template');
+        }
+
+        // Update usages of the original template
+        $mysqli = $this->system->getMysqli();
+        $oldNameEncoded = rawurlencode($oldFileName);
+        $newNameEncoded = rawurlencode($newFileName);
+
+        // Update shorthand links to old template name
+        $dtlValues = mysql__select_assoc2($mysqli, "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_Value LIKE '%/{$oldNameEncoded}%'"); // \d*\/OLD_TEMPLATE_NAME\.tpl
+        $oldNameEncoded = str_replace('.', '\.', $oldNameEncoded);
+        foreach($dtlValues as $dtlID => $dtlValue){
+
+            $dtlValue = preg_replace("~/{$oldNameEncoded}~g", "/{$newNameEncoded}", $dtlValue);
+
+            mysql__insertupdate($mysqli, 'recDetails', 'dtl', ['dtl_ID' => $dtlID, 'dtl_Value' => $dtlValue]);
+        }
+
+        // Update widget settings that use the old template name
+        $dtlValues = mysql__select_assoc2($mysqli, "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_Value LIKE '%\"{$oldFileName}\"%'");
+        $oldFileNameReg = str_replace('.', '\.', $oldFileName);
+        foreach($dtlValues as $dtlID => $dtlValue){
+
+            $dtlValue = preg_replace("~\"{$oldFileNameReg}\"~g", "\"{$newFileName}\"", $dtlValue);
+
+            mysql__insertupdate($mysqli, 'recDetails', 'dtl', ['dtl_ID' => $dtlID, 'dtl_Value' => $dtlValue]);
+        }
+
+        // Update scheduled reports that use the old template name
+        $mysqli->query("UPDATE usrReportSchedule SET rps_Template='{$newFileName}' WHERE rps_Template='{$oldFileName}'");
+
+        return 'renamed';
     }
 
     /**

@@ -278,6 +278,9 @@ $.widget( "heurist.reportViewer", {
             case 'refresh':
                 this.onRefresh();
                 break;
+            case 'rename':
+                this.onTemplateRename();
+                break;
         }
         
     },
@@ -673,5 +676,45 @@ $.widget( "heurist.reportViewer", {
         
     },
     
+    onTemplateRename: function(){
 
+        let existingTemplates = [];
+        this._$('#selTemplates option').each((idx, element) => { existingTemplates.push(element.innerText); });
+
+        let $dlg;
+        let content = `<div>
+            Enter a new name for your template:<br>
+            <input type="text" class="text ui-corner-all" size="30" />
+        </div>`;
+
+        let btns = {};
+        btns[window.hWin.HR('Rename')] = () => {
+
+            let newTemplateName = $dlg.find('input').val();
+            if(existingTemplates.includes(newTemplateName)){
+                window.hWin.HEURIST4.msg.showMsgFlash(`"${newTemplateName}" is already taken...`, 3000);
+                return;
+            }
+
+            window.hWin.HAPI4.SystemMgr.reportAction({action:'rename', template: this._currentTemplate, new_name: newTemplateName}, 
+                (response) => {
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        $dlg.dialog('close');
+
+                        window.hWin.HAPI4.SystemMgr.save_prefs({'viewerCurrentTemplate': `${newTemplateName}.tpl`});
+
+                        this._updateTemplatesList();
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+            });
+        };
+        btns[window.hWin.HR('Cancel')] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: `Renaming ${this._currentTemplate}`}, {default_palette_class: 'ui-heurist-design', dialogId: 'report-rename-template'});
+    }
 });
