@@ -2769,3 +2769,17 @@ li.edit-form-tab > a{
 .rts-editor-actions .rts-editor-action:hover{
     background: lightblue;
 }
+
+/* Calendar picker, fix for jump button widths */
+.calendars-month{
+    width: 20em;
+}
+
+.calendars-month .calendars-month-header .calendars-cmd{
+    display: inline-block;
+    width: 10%;
+}
+
+.calendars-extended-header .calendars-month-header{
+    height: 3.5em;
+}

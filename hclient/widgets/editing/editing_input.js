@@ -6538,6 +6538,7 @@ $.widget( "heurist.editing_input", {
     //
     //
     _createDateInput: function($input, $inputdiv){
+
         $input.css('width', this.options.is_faceted_search?'13ex':'20ex');
         
         let that = this;
@@ -6708,7 +6709,7 @@ $.widget( "heurist.editing_input", {
             let minDate = '';
             let maxDate = '';
 
-            let $japanese_era = $('<select>', {class: 'calendars-eras'});
+            let $japanese_era = $('<select>', {class: 'calendars-eras', style: 'max-width: 100%;'});
             let eras = $.calendars.instance('japanese').getEras();
             for(let i = 0; i < eras.length; i ++){
                 window.hWin.HEURIST4.ui.addoption($japanese_era[0], i, eras[i]);
@@ -6730,10 +6731,13 @@ $.widget( "heurist.editing_input", {
                 onShow: function($calendar, calendar_locale, config){
                     config.div.css('z-index', 9999999);
 
+                    let $header = $calendar.find('.calendars-month-header');
+                    let $year_dropdown = $($header.find('.calendars-month-year')[1]);
+
                     if(calendar_locale.local.name.toLowerCase() === 'japanese'){ // Add eras dropdown to calendar
 
-                        let $year_dropdown = $($calendar.find('.calendars-month-year')[1]);
-                        let $era_sel = $japanese_era.clone().insertAfter($year_dropdown);
+                        $calendar.addClass('calendars-extended-header');
+                        let $era_sel = $japanese_era.clone().appendTo($header);
 
                         function updateYearTitle(){ // update year's rollover
 
