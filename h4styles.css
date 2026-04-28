@@ -360,9 +360,15 @@ input.text, select.text {
     padding: 5px 0 0 20px;
     text-align:left;
 }
-.explanation-separator,
-.explanation_break-separator{
+.explanation-separator-header,
+.explanation_break-separator-header{
     border-top: none !important;
+}
+.explanation-separator-header,
+.explanation-separator-helper,
+.explanation_break-separator-header,
+.explanation_break-separator-helper{
+    background-color: #E6E6E6;
 }
 
 .smallbutton, .smallicon{

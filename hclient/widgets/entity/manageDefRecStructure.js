@@ -408,8 +408,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             let sType = $Db.dty(dty_ID, 'dty_Type');
             let isSep = (sType=='separator');
             let sepType = isSep ? recset.fld(record, 'rst_DefaultValue') : '';
+            const isExplanation = sepType == 'explanation' || sepType == 'explanation_break';
             let title = recset.fld(record,'rst_DisplayName');
             let req = recset.fld(record,'rst_RequirementType');
+
             if(isSep){
                 let extraStyle = '';
                 if(title == '-'){
@@ -426,10 +428,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
             }
 
-            let node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req, folder:isSep, expanded:isSep};
+            let node = {title: title, key: dty_ID, extraClasses: isSep && !isExplanation ? 'separator2' : req, folder: isSep, expanded: isSep};
             node['data'] = {header:isSep, type:isSep?sepType:sType};
 
-            if(isSep){
+            if(isSep && !isExplanation){
 
                 if(available_outer_groups.includes(sepType)){ // new outer group
                     if(!$.isEmptyObject(inner_group)){
@@ -459,6 +461,18 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     outer_group = $.extend({}, node);
                     outer_group['children'] = [];
                 }
+            }else if(sepType == 'explanation_break'){
+
+                if(!$.isEmptyObject(inner_group)){ // reset inner groups
+                    outer_group['children'].push(inner_group);
+                    inner_group = {};
+                }
+                if(!$.isEmptyObject(outer_group)){ // reset outer groups
+                    treeData.push(outer_group);
+                    outer_group = {};
+                }
+                treeData.push(node);
+
             }else{
                 if(!$.isEmptyObject(inner_group)){
                     inner_group['children'].push(node);
@@ -1851,13 +1865,20 @@ console.log('onEditFormChange @todo check buttons!!!');
             }); 
         }
 
+        const dt_type = this._editing.getValue('dty_Type');
+
         // Add horizontal rules
         edit_ele = this._editing.getFieldByName('rst_SemanticReferenceURL');
         if(edit_ele){
 
-            let $hr = $('<hr>', {style: 'border-color: black; width: 95%;'});
-            $hr.clone().insertBefore(edit_ele);
-            $hr.clone().appendTo(this.editForm);
+            if(dt_type == 'separator'){
+                edit_ele.hide();
+                this._editing.getFieldByName('rst_NonOwnerVisibility').hide();
+            }else{
+                let $hr = $('<hr>', {style: 'border-color: black; width: 95%;'});
+                $hr.clone().insertBefore(edit_ele);
+                $hr.clone().appendTo(this.editForm);
+            }
         }
 
         //fill init values of virtual fields
@@ -1874,8 +1895,6 @@ console.log('onEditFormChange @todo check buttons!!!');
             window.hWin.HEURIST4.util.setDisabled(ele, true);
             this._onDetailTypeChange();
         }
-        
-        const dt_type = this._editing.getValue('dty_Type');
 
         // Always show help text
         this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3').show();
