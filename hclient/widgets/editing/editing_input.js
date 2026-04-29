@@ -2195,7 +2195,7 @@ $.widget( "heurist.editing_input", {
             this.child_terms = this.child_terms ? this.child_terms : allTerms;
 
             // Display term selector as radio buttons/checkboxes
-            if(this.f('rst_TermsAsButtons') == 1 && this.child_terms && this.child_terms.length<=20){
+            if(this.f('rst_TermsAsButtons') == 1 && !this.options.is_faceted_search && this.child_terms && this.child_terms.length<=20){
 
                 this.enum_buttons = Number.parseInt(this.f('rst_MaxValues')) != 1 ? 'checkbox' : 'radio';
                 let inpt_id = $input.attr('id');
