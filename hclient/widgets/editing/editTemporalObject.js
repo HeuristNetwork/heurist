@@ -608,10 +608,14 @@ let TemporalPopup = (function () {
 			onShow: function($calendar, calendar_locale, config){
 
 				let $ele = $(config.elem);
+
+				let $header = $calendar.find('.calendars-month-header');
+				let $year_dropdown = $($header.find('.calendars-month-year')[1]);
+
 				if($ele.length > 0 && calendar_locale.local.name.toLowerCase() === 'japanese'){ // Add eras dropdown to calendar
 
-					let $year_dropdown = $($calendar.find('.calendars-month-year')[1]);
-					let $era_sel = $eras_sel.clone().insertAfter($year_dropdown);
+					$calendar.addClass('calendars-extended-header');
+					let $era_sel = $eras_sel.clone().appendTo($header);
 
 					function updateYearTitle(){ // update year's rollover
 
@@ -742,7 +746,7 @@ let TemporalPopup = (function () {
 
 	function setupEras(){
 
-		$eras_sel = $('<select>', {class: 'calendars-eras'});
+		$eras_sel = $('<select>', {class: 'calendars-eras', style: 'max-width: 100%;'});
 		let options = calendar.getEras();
 		for(let i = 0; i < options.length; i ++){
 			window.hWin.HEURIST4.ui.addoption($eras_sel[0], i, options[i]);

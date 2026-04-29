@@ -3395,16 +3395,16 @@ $.widget( "heurist.search_faceted", {
                                 //window.hWin.HEURIST4.msg.showMsgDlg('Define data range <>',
                                 that._date_range_dialog_instance = window.hWin.HEURIST4.msg.showElementAsDialog(
                                 {
-                                   element: that._date_range_dialog[0], 
-                                   close: function(){
-                                        //let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();      
-                                   },
-                                   buttons: buttons,
-                                   title:'Define selection range',
-                                   resizable: false,
-                                   width:300,
-                                   height:212,
-                                   position:{my:'bottom left',at:'top left',of:$(event.target)} 
+                                    element: that._date_range_dialog[0], 
+                                    close: function(){
+                                        //let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                    },
+                                    buttons: buttons,
+                                    title:'Define selection range',
+                                    resizable: false,
+                                    width: 320,
+                                    height: 262,
+                                    position:{my: 'center left', at: 'center right', of: $(event.target)} 
                                 });
                             }
 

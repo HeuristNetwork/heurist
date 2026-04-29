@@ -360,9 +360,15 @@ input.text, select.text {
     padding: 5px 0 0 20px;
     text-align:left;
 }
-.explanation-separator,
-.explanation_break-separator{
+.explanation-separator-header,
+.explanation_break-separator-header{
     border-top: none !important;
+}
+.explanation-separator-header,
+.explanation-separator-helper,
+.explanation_break-separator-header,
+.explanation_break-separator-helper{
+    background-color: #E6E6E6;
 }
 
 .smallbutton, .smallicon{
@@ -2762,4 +2768,18 @@ li.edit-form-tab > a{
 }
 .rts-editor-actions .rts-editor-action:hover{
     background: lightblue;
+}
+
+/* Calendar picker, fix for jump button widths */
+.calendars-month{
+    width: 20em;
+}
+
+.calendars-month .calendars-month-header .calendars-cmd{
+    display: inline-block;
+    width: 10%;
+}
+
+.calendars-extended-header .calendars-month-header{
+    height: 3.5em;
 }

@@ -945,7 +945,7 @@ $.widget( "heurist.slidersMenu", {
 
         if (action_name === 'searchBuilder') {
             explore_height = 450;
-            explore_width = '850px';
+            explore_width = '62.5em';
         }
         
         if(position){

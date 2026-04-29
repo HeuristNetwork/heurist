@@ -153,6 +153,10 @@ class ReportController
                     $result = 'exist';
                     break;
 
+                case 'rename':
+                    $result = $this->repAction->renameTemplate($template_file, @$this->req_params['new_name']);
+                    break;
+
                 default:
                     throw new \Exception('Invalid "action" parameter');
             }

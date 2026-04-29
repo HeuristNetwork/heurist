@@ -139,21 +139,21 @@ $.widget( "heurist.searchBuilderItem", {
         // 3. comparison selector or relationtype selector
         // 4. value input
         // 5. OR button
-        
-        
+
+
         // 0. Label (header)
         this.label_token = $( "<div>" )
-            .css({"font-size":"smaller",'padding-left':'94px',width:'95%','margin-top':'4px'})
+            .css({'font-size': 'smaller', 'padding-left': '94px',width: '95%', 'margin-top': '4px'})
             .appendTo( this.element ); //10px 0 10px 20px,'border-top':'1px solid lightgray' 
 
         // selector container - for fields and comparison
         this.sel_container = $('<div>')
-            .css({'display':'inline-block','vertical-align':'top','padding-top':'3px'})
+            .css({display: 'inline-block', 'vertical-align': 'top', 'padding-top': '3px'})
             .appendTo(this.element);
 
         // values container - consists of set of inputs (editing_input) and add/remove buttons
         this.values_container = $( '<fieldset>' )
-            .css({'display':'inline-block','padding':0}) //,'margin-bottom': '2px'
+            .css({display: 'inline-block', padding: 0, 'max-width': '30em'}) //,'margin-bottom': '2px'
             .appendTo( this.element );
 
             

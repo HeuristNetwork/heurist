@@ -309,6 +309,8 @@ function HEditing(_options) {
             for (idx=0; idx<fields.length; idx++){
                 
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
+
+                    const groupType = fields[idx].groupType;
                     
                     if(fields[idx].groupHidden || fields[idx]['groupTitleVisible']===false){ //this group is hidden all fields goes to previous group
 
@@ -317,10 +319,10 @@ function HEditing(_options) {
                         }
 
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
-                        continue;                        
-                    }else if(fields[idx].groupType == 'group' || fields[idx].groupType == 'explanation'){ //group inside
+                        continue;
+                    }else if(groupType == 'group' || groupType == 'explanation'){ //group inside
 
-                        let headerText = fields[idx].groupType == 'explanation' ? '' : fields[idx]['groupHeader']; // hide header text for explanation text
+                        let headerText = fields[idx]['groupHeader'];
                         let headerHelpText = fields[idx]['groupHelpText'];
                         const is_header_visible = fields[idx]['groupTitleVisible'];
 
@@ -338,13 +340,14 @@ function HEditing(_options) {
                         headerHelpText = window.hWin.HEURIST4.util.removeInlineHandlers(headerHelpText);
 
                         let hele = $('<h4>')
-                            .html(headerText).addClass(`separator ${fields[idx].groupType}-separator`).appendTo(fieldContainer);
+                            .html(headerText)
+                            .addClass(`separator ${groupType}-separator-header`)
+                            .css({'margin-bottom': '0px', 'padding-bottom': '5px'})
+                            .appendTo(fieldContainer);
 
-                        hele.css({'margin-bottom':'4px'});
-                        
                         let div_prompt = $('<div>').html(headerHelpText)
-                               .addClass('heurist-helper1')
-                               .addClass('separator-helper').css({'padding-left':'20px','padding-bottom':'4px'})
+                               .addClass(`heurist-helper1 separator-helper ${groupType}-separator-helper`)
+                               .css({'padding-left': '20px', 'padding-bottom': '5px'})
                                .appendTo(fieldContainer);
                         if(!is_header_visible){
                             hele.addClass('separator-hidden').hide();
@@ -359,7 +362,7 @@ function HEditing(_options) {
                         
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
                         continue;
-                    }else if(fields[idx].groupType=='accordion_inner' || fields[idx].groupType=='expanded_inner'){ // accordion within another group
+                    }else if(groupType == 'accordion_inner' || groupType == 'expanded_inner'){ // accordion within another group
 
                         let headerText = fields[idx]['groupHeader'];
                         headerText = window.hWin.HEURIST4.util.removeInlineHandlers(headerText);
@@ -386,7 +389,7 @@ function HEditing(_options) {
 
                         $group_ele.accordion({
                             heightStyle: 'content',
-                            active: (fields[idx].groupType == 'expanded_inner') ? 0 : false,
+                            active: groupType == 'expanded_inner' ? 0 : false,
                             collapsible: true
                         }).css('width', '100%');
 
@@ -395,7 +398,7 @@ function HEditing(_options) {
                         continue;
                     }
                     
-                    if(fields[idx].groupType != currGroupType){ //create new group container and init previous
+                    if(groupType != currGroupType){ //create new group container and init previous
 
                         //init previous one 
                         if(groupEle!=null){
@@ -412,8 +415,8 @@ function HEditing(_options) {
                         }
                 
                         currGroupHeaderClass= fields[idx].groupHeaderClass;
-                        currGroupType = (fields[idx].groupType == 'tabs_new')
-                                                  ?'tabs':fields[idx].groupType;
+                        currGroupType = groupType == 'tabs_new' ? 'tabs' : groupType;
+
                         //create new accordion or tabcontrol
                         if(currGroupType == 'accordion' || currGroupType == 'expanded'){
                             groupEle = $('<div>').appendTo(groupContainer);
@@ -480,7 +483,7 @@ function HEditing(_options) {
                     }
                     else{
                         
-                        let ele = $('<h4>').text(headerText).addClass(`separator ${fields[idx].groupType}-separator`);
+                        let ele = $('<h4>').text(headerText).addClass(`separator ${groupType}-separator-header`);
                         
                         ele.appendTo(groupContainer);    
 
@@ -490,20 +493,34 @@ function HEditing(_options) {
 
                         newFieldContainer.appendTo(groupContainer);
                     }
+
                     const is_show_header_help_text = true; //This flag is always true.
                     if(is_show_header_help_text){
-                         let div_prompt = $('<div>').html(headerHelpText)
+
+                        let div_prompt = $('<div>').html(headerHelpText)
                             .addClass('heurist-helper1')
                             .appendTo(newFieldContainer);
-                         if(currGroupType == 'tabs' || currGroupType == 'accordion'){
-                            div_prompt.addClass('tab-separator-helper')
-                                .attr('separator-dtid',fields[idx]['dtID']).css({padding:'5px 0 0 5px',display:'inline-block'});
-                         }else{
-                            div_prompt.addClass('separator-helper').css({'padding-left':'14px'});
-                         }
-                         if(!is_header_visible){
+
+                        if(currGroupType == 'tabs' || currGroupType == 'accordion'){
+
+                            div_prompt
+                                .addClass('tab-separator-helper')
+                                .attr('separator-dtid',fields[idx]['dtID'])
+                                .css({padding:'5px 0 0 5px',display:'inline-block'});
+                        }else{
+
+                            div_prompt
+                                .addClass(`separator-helper ${groupType}-separator-helper`)
+                                .css({'padding-left': '14px'});
+                        }
+
+                        if(groupType == 'explanation_break'){
+                            div_prompt.insertBefore(newFieldContainer);
+                        }
+
+                        if(!is_header_visible){
                             div_prompt.addClass('separator-hidden').hide();
-                         }
+                        }
                     }
                     if(currGroupType == 'tabs'){ //some space on the top
                         $(newFieldContainer).append('<div style="min-height:10px">&nbsp;</div>');
@@ -526,7 +543,7 @@ function HEditing(_options) {
                     if(fields[idx]['dty_Type']=="separator"){
 
                         fields[idx].groupType ??= 'simple';
-                        $('<h4>').text(fields[idx]['rst_DisplayName']).addClass(`separator ${fields[idx].groupType}-separator`).appendTo(fieldContainer);
+                        $('<h4>').text(fields[idx]['rst_DisplayName']).addClass(`separator ${fields[idx].groupType}-separator-header`).appendTo(fieldContainer);
 
                         $('<div>')
                             .text(top.HEURIST4.ui.getRidGarbageHelp(fields[idx]['rst_DisplayHelpText']))

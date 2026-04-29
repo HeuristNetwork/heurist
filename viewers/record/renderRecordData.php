@@ -621,7 +621,7 @@ if(!$system->hasAccess()){
                         }
                     });
 
-                    if(group_name != '-' && (sep_type != 'explanation' || sep_type != 'explanation_break')){
+                    if(group_name != '-'){
                         if(inner_group){
                             $('<h5>').attr('data-order', order)
                                 .css({'margin': '5px 15px 2px', 'font-size': '1em', 'font-style': 'italic'})
