@@ -220,7 +220,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 +`<div data-action="edit" class="rts-editor-action">
                     <span class="ui-icon ui-icon-pencil" title="Edit" style="margin-right: 0.5em;"></span>
-                    edit field definition
+                    edit definition
                 </div>`
 
                 +`<div data-action="field" class="rts-editor-action" title="Add a new field to this record type">
