@@ -192,6 +192,9 @@ $.widget( "heurist.app_storymap", {
     /** @memberof heurist.app_storymap @instance @private @property {?jQuery} _print_button - Button to print the storymap. */
     _print_button: null,
 
+    /** @memberof heurist.app_storymap @instance @private @property {?jQuery} _edit_button - Button to edit the storymap record being viewed. */
+    _edit_button: null,
+
     /** @memberof heurist.app_storymap @instance @private @property {?jQuery} pnlOverview - jQuery panel for the story overview content. */
     pnlOverview: null,
     /** @memberof heurist.app_storymap @instance @private @property {?jQuery} pnlStory - jQuery panel containing the story elements list/viewer. */
@@ -260,15 +263,74 @@ $.widget( "heurist.app_storymap", {
                                     }
                                 },
                                 "rendererExpandDetails": function(recset, recID){
-                                    let rep = (recID==that.options.storyRecordID)
-                                        ?that.options.reportOverview
-                                        :(recID=='0'+that.options.storyRecordID?that.options.reportEndPage
-                                         :that.options.reportElement);
+
+                                    const isOverview = recID == that.options.storyRecordID;
+                                    const isEndPage = recID == `0${that.options.storyRecordID}`;
+                                    recset = isOverview || isEndPage ? that._resultset_main : recset;
+
+                                    let rep = isOverview
+                                        ? that.options.reportOverview
+                                        : (isEndPage ? that.options.reportEndPage
+                                         : that.options.reportElement);
                                     if(window.hWin.HEURIST4.util.isempty(rep)){
                                         rep = 'default';
                                     }
+
+                                    let $divContent = that._resultList.find('.div-result-list-content');
+                                    let $recDiv = $divContent.find(`[recid="${recID}"]`);console.log($recDiv, recID, $divContent);
+                                    if(!window.hWin.HAPI4.has_access() || $recDiv.length === 0){
+                                        return rep;
+                                    }
+
+                                    const isTabsView = that.options.reportElementMode === 'tabs';
+
+                                    let record = recset ? recset.getById(recID) : null;
+                                    let recTitle = record ? recset.fld(record, 'rec_Title') : '';
+                                    recTitle = recTitle !== '' ? `Edit story element ${window.hWin.HEURIST4.util.stripTags(recTitle)}` : window.hWin.HR('Edit the story element');
+
+                                    if(isTabsView && $divContent.find('.storymap-edit-link').length === 0
+                                        || !isTabsView && $recDiv.find('.storymap-edit-link').length === 0){ // add edit button
+
+                                        let $editLink = $('<span>', {
+                                            text: window.HR('Edit'),
+                                            class: 'record-expand-controls storymap-edit-link',
+                                            title: recTitle,
+                                            style: 'left: 0.5em; z-index: 998; border: 2px solid rgb(204, 204, 204); background: padding-box white;',
+                                            'data-id': recID
+                                        });
+
+                                        if(isTabsView){
+                                            $editLink.css({position: 'relative', top: '0.3em'}).insertAfter($divContent.find('.ui-tabs-nav'));
+                                        }else{
+                                            $editLink.css({position: 'absolute', top: '0.2em'}).appendTo($recDiv);
+                                        }
+
+                                        $editLink.button({
+                                            icon: 'ui-icon-pencil', 
+                                            showLabel: false
+                                        });
+
+                                        that._on($editLink, {
+                                            click: (event) => {
+
+                                                let $ele = $(event.target);
+                                                if(!$ele.attr('data-id')){
+                                                    $ele = $ele.parents('.storymap-edit-link');
+                                                }
+
+                                                const recID = Number.parseInt($ele.attr('data-id'));
+                                                if(!window.hWin.HEURIST4.util.isPositiveInt(recID)){
+                                                    return;
+                                                }
+
+                                                this.handleDoubleClick(recID);
+                                            }
+                                        });
+                                    }else if(isTabsView){ // update details for edit button
+                                        $divContent.find('.storymap-edit-link').attr('data-id', recID).attr('title', recTitle);
+                                    }
+
                                     return rep;
-                                                
                                 },
                                 "empty_remark": 
                                 '<h3 class="not-found" style="color:teal;">'
@@ -277,12 +339,10 @@ $.widget( "heurist.app_storymap", {
                                 "onScroll": function(event){ that._onScroll(event, that) },
                                 "expandDetailsWithoutWarning": true,
                                 "show_toolbar":false,
-                                /*"show_inner_header":false,
-                                "show_counter":false,
-                                "show_viewmode":false,*/
                                 "show_action_buttons":false,
                                 "init_at_once":true,
-                                "eventbased": false},
+                                "eventbased": false
+                            },
                             "dom_id":"storyList"}]
                     },
                     {"name":window.hWin.HR('End page'),"type":"group","css":cssEndPage,"folder":true,
@@ -328,9 +388,9 @@ $.widget( "heurist.app_storymap", {
             this.pnlStory.height(this.element.height() - h); //465
             this.pnlEndPage.height(this.element.height() - h);
             
-            this._tabs.tabs('option','activate',function(event, ui){
+            this._tabs.tabs('option','activate', function(event, ui){
                 if(that._resultset && that._resultset.length()>0){
-                    
+
                     if(!(that._currentElementID>0) && that._tabs.tabs('option','active')==1)
                     {
                         if(that.options.reportElementMode=='vertical'){
@@ -429,7 +489,6 @@ $.widget( "heurist.app_storymap", {
             this._mapping = $('#'+this.options.map_widget_id);
         }
 
-
         this._btn_clear_story = $('<button style="position:absolute;top:2px;right:12px;z-index:999;'
         +'border: 2px solid #ccc;background: white;background-clip: padding-box; border-radius: 4px;height: 31px;"'        
         +'">Close</button>')
@@ -440,6 +499,9 @@ $.widget( "heurist.app_storymap", {
 
         // Print storymap content
         if(this.options.show_print_button){
+
+            let rightPosition = this.options.reportElementMode === 'slide' ? '14.5em' : '6.5em';
+            rightPosition = this.options.reportElementMode === 'tabs' ? '4em' : rightPosition;
 
             this._print_button = $('<button>', {
                 text: window.HR('Print'), 
@@ -452,7 +514,7 @@ $.widget( "heurist.app_storymap", {
                 showLabel: false
             })
             .hide()
-            .css({position: 'absolute', top: '2px', right: '75px', 'z-index': '999', border: '2px solid rgb(204, 204, 204)', background: 'padding-box white'})
+            .css({position: 'absolute', top: '2px', right: rightPosition, 'z-index': '999', border: '2px solid rgb(204, 204, 204)', background: 'padding-box white'})
             .insertBefore(this._btn_clear_story);
 
             this._print_frame = $('<iframe>', {style: 'width:0px;height:0px;'}).insertBefore(this._print_button);
@@ -460,6 +522,7 @@ $.widget( "heurist.app_storymap", {
             this._on(this._print_button, {
                 click: function(){
 
+                    this._resultList.find('.record-expand-controls').hide();
                     let content = this._resultList.find('.div-result-list-content').html();
 
                     let print_doc = this._print_frame[0].contentDocument || this._print_frame[0].contentWindow.document;
@@ -470,6 +533,51 @@ $.widget( "heurist.app_storymap", {
                     print_doc.write(content);
                     print_doc.write('</body>');
                     print_doc.close();
+
+                    this._resultList.find('.record-expand-controls').show();
+                }
+            });
+        }
+
+        // Edit storymap (not for tabs mode)
+        if(window.hWin.HAPI4.has_access() && this.options.reportElementMode !== 'tabs'){
+
+            let rightPosition = this.options.reportElementMode === 'slide' ? '17.5em' : '9.5em';;
+            if(!this._print_button){
+                rightPosition = this.options.reportElementMode === 'slide' ? '14.5em' : '6.5em';
+            }
+
+            this._edit_button = $('<button>', {
+                text: window.HR('Edit'),
+                title: this.options.reportElementMode === 'slide' ? window.hWin.HR('Edit the current story element') : window.hWin.HR('Edit the current story base'),
+                style: `position: absolute; top: 0.2em; right: ${rightPosition}; z-index: 998; border: 2px solid rgb(204, 204, 204); background: padding-box white;`
+            })
+            .button({
+                icon: 'ui-icon-pencil',
+                showLabel: false
+            })
+            .hide()
+            .insertBefore(this.options.show_print_button ? this._print_button : this._btn_clear_story);
+
+            this._on(this._edit_button, {
+                click: () => {
+
+                    let recID = this.options.storyRecordID;
+                    if(this.options.reportElementMode === 'slide' && window.hWin.HEURIST4.util.isPositiveInt(this._currentElementID)){
+
+                        recID = this._currentElementID;
+                    }
+
+                    window.hWin.HEURIST4.ui.openRecordEdit(recID, null, {
+                        selectOnSave:true, 
+                        edit_obstacle: false,
+                        onselect: (event, data) => {
+                            if(window.hWin.HEURIST4.util.isRecordSet(data.selection)){ // force reload of story
+                                this._currentElementID = null;
+                                this._startNewStoryElement(recID);
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -777,9 +885,11 @@ $.widget( "heurist.app_storymap", {
         if(idx>=0 && idx<order.length){
             recID = order[idx];
         }
-        
+
+        let hideEditingBtn = true;
         if(recID>0){
-            this._startNewStoryElement( recID );    
+            this._startNewStoryElement( recID );
+            hideEditingBtn = false;
         }else if(this.options.reportEndPageMode=='inline' && idx == order.length){
             // Show end page for current story in inline mode if navigated past the last element
             this.updateEndPagePanel(this.options.storyRecordID);
@@ -787,6 +897,15 @@ $.widget( "heurist.app_storymap", {
             // Show overview for current story in inline mode if navigated before the first element
             this.updateOverviewPanel(this.options.storyRecordID);
         }
+
+        if(this._edit_button){
+            if(hideEditingBtn){
+                this._edit_button.hide();
+            }else{
+                this._edit_button.show();
+            }
+        }
+
         this._onNavigateStatus(idx); // Update navigation controls (e.g., "1 of X")
     },
 
@@ -1059,6 +1178,9 @@ $.widget( "heurist.app_storymap", {
         if(this.options.show_print_button && this._print_button){
             this._print_button.hide();
         }
+        if(this._edit_button){
+            this._edit_button.hide();
+        }
 
         if(this.options.reportOverviewMode=='tab' || this.options.reportEndPageMode=='tab') {
             if (this._tabs) this._tabs.hide();
@@ -1167,6 +1289,9 @@ $.widget( "heurist.app_storymap", {
         if(this.options.show_print_button && this._print_button){
             this._print_button.show();
         }
+        if(this._edit_button && this.options.reportOverviewMode !== 'tabs'){
+            this._edit_button.show();
+        }
         if(this._show_limit_message && this._limit_message){
             this._limit_message.show();
             
@@ -1273,7 +1398,7 @@ $.widget( "heurist.app_storymap", {
 
                             let $overview_ele = ele.find('.overview-panel');
                             if($overview_ele.length === 0){
-                                $overview_ele = $('<div class="recordDiv outline_suppress expanded overview-panel" recid="0" tabindex="0">').prependTo(ele);
+                                $overview_ele = $(`<div class="recordDiv outline_suppress expanded overview-panel" recid="${that.options.storyRecordID}" tabindex="0">`).prependTo(ele);
                             }
                             $overview_ele.html(that.pnlOverview.html());
                         }
@@ -1401,7 +1526,7 @@ $.widget( "heurist.app_storymap", {
 
                             let $end_panel = $ele.find('.end-panel');
                             if($end_panel.length === 0){
-                                $end_panel = $('<div class="recordDiv outline_suppress expanded end-panel" recid="0" tabindex="0">').html(that.pnlEndPage.html());
+                                $end_panel = $(`<div class="recordDiv outline_suppress expanded end-panel" recid="0${that.options.storyRecordID}" tabindex="0">`).html(that.pnlEndPage.html());
                             }
 
 

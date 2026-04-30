@@ -2415,7 +2415,7 @@ $.widget( "heurist.resultList", {
     //
     //
     //
-    expandDetailsInline: function(recID){
+    expandDetailsInline: function(recID, forceRefresh = false){
 
         let $rdiv = this.div_content.find('div[recid='+recID+']');
         if($rdiv.length==0) return; //no such recod in current page
@@ -2425,13 +2425,13 @@ $.widget( "heurist.resultList", {
         
             let exp_div = this.div_content.find('.record-expand-info[data-recid='+recID+']');
             let is_already_opened = (exp_div.length>0);
-            
-            if(is_already_opened){
+
+            if(is_already_opened && !forceRefresh){
                 if(!this._expandAllDivs) this.closeExpandedDivs();
             }else{
                 //close other expanded recordDivs
                 if(!this._expandAllDivs) this.closeExpandedDivs();
-                
+
                 let rendererTemplate = null;
                 //expand selected recordDiv and draw record details inline
                 if(window.hWin.HEURIST4.util.isFunction(this.options.rendererExpandDetails)){
@@ -2442,13 +2442,18 @@ $.widget( "heurist.resultList", {
                 if(!window.hWin.HEURIST4.util.isempty(rendererTemplate))
                 {
                     let placeholderH = this._expandedHeightCache?.[recID] || 300;
-                    
+
                     //add new record-expand-info 
-                    let ele = $('<div>')
-                        .attr('data-recid', recID)
-                        .css({'overflow':'hidden','padding-top':'5px','height':'auto', minHeight:placeholderH+'px'}) 
-                        .addClass('record-expand-info loading');
-                    
+                    let ele = exp_div;
+                    if(!is_already_opened){
+
+                        ele = $('<div>')
+                            .attr('data-recid', recID)
+                            .css({'overflow':'hidden','padding-top':'5px','height':'auto', minHeight:placeholderH+'px'}) 
+                            .addClass('record-expand-info loading');
+                    }
+                    ele.empty();
+
                     if(this.options.view_mode=='list'){
                         ele.appendTo($rdiv);
                     }else{
@@ -2462,13 +2467,11 @@ $.widget( "heurist.resultList", {
                                  'border-radius': '3px 3px 3px 3px',
                                  'border':'2px solid #62A7F8'});
                         }
-                        
-                        
-                                 
+
                         if(this.options.view_mode=='icons' && this._expandAllDivs){
 
                             $rdiv.addClass('expanded');
-                            $rdiv.children().not('.recTypeThumb').hide();
+                            $rdiv.children().not('.recTypeThumb,.record-expand-controls').hide();
                             //show on hover as usual 
                             let action_buttons = $rdiv.find('.action-button-container');
                             if(action_buttons.length>0 && window.hWin.HAPI4.has_access()){
@@ -3646,40 +3649,7 @@ $.widget( "heurist.resultList", {
             mouseover: this._recordDivOnHover,
             /* enable but specify entityName to edit in options */
             dblclick: function(event){ //start edit on dblclick
-                if(!window.hWin.HEURIST4.util.isFunction(this.options.renderer)){
-                    
-                    if(window.hWin.HAPI4.has_access()){
-                        
-                        let $rdiv = $(event.target);
-                        if(!$rdiv.hasClass('recordDiv')){
-                            $rdiv = $rdiv.parents('.recordDiv');
-                        }
-                        let selected_rec_ID = $rdiv.attr('recid');
-
-                        event.preventDefault();
-                        
-                        let ordered_recordset = null;
-                        if(this._currentRecordset){
-                            ordered_recordset = this._currentRecordset;
-                        }else{
-                            ordered_recordset = this._query_request;
-                        }
-
-                        let existing_dlg = $(`[id^="heurist-dialog-Record"][data-recid="${selected_rec_ID}"]`);
-                        if(selected_rec_ID > 0 && existing_dlg.length > 0 && existing_dlg.dialog('instance') !== undefined){ // record already opened
-                            return;
-                        }
-
-                        window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, ordered_recordset, true, null);                        
-                        
-                        //@todo callback to change rectitle    
-                    }else{
-                        this._recordDivOnClick(event);
-                    }
-                }else{
-                    let selected_recs = this.getSelected( false );
-                    this._trigger( "ondblclick", null, selected_recs );
-                }
+                this.handleDoubleClick(event);
             }
         });
         let inline_selectors = this.div_content.find('.recordDiv select');
@@ -4771,6 +4741,61 @@ $.widget( "heurist.resultList", {
                 }
             });
         }
+    },
+
+    handleDoubleClick: function(event){
+
+        let $rdiv = window.hWin.HEURIST4.util.isPositiveInt(event) ? this.div_content.find(`.recordDiv[recid="${event}"]`) : $(event.target);
+        if(!$rdiv.hasClass('recordDiv')){
+            $rdiv = $rdiv.parents('.recordDiv');
+        }
+
+        if(window.hWin.HEURIST4.util.isFunction(this.options.renderer)){
+            let selected_recs = this.getSelected( false );
+            this._trigger( "ondblclick", null, selected_recs );
+            return;
+        }else if(!window.hWin.HAPI4.has_access()){
+            $rdiv.trigger('click');
+            return;
+        }
+
+        let selected_rec_ID = $rdiv.attr('recid');
+
+        if(event?.target){
+            event.preventDefault();
+        }
+
+        let ordered_recordset = null;
+        if(this._currentRecordset){
+            ordered_recordset = this._currentRecordset;
+        }else{
+            ordered_recordset = this._query_request;
+        }
+
+        let existing_dlg = $(`[id^="heurist-dialog-Record"][data-recid="${selected_rec_ID}"]`);
+        if(selected_rec_ID > 0 && existing_dlg.length > 0 && existing_dlg.dialog('instance') !== undefined){ // record already opened
+            return;
+        }
+
+        window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, ordered_recordset, true, {
+            onselect: (event, data) => {
+
+                if(!data.selection){
+                    return;
+                }
+
+                let recset = data.selection;
+                let record = recset.getById(selected_rec_ID);
+                let recTitle = recset.fld(record, 'rec_Title');
+
+                this.div_content.find(`.recordDiv[recid="${selected_rec_ID}"] .recordTitle`).html(recTitle);
+                let $expandedDiv = this.div_content.find(`.record-expand-info[data-recid=${selected_rec_ID}]`);
+                if($expandedDiv.length > 0){ // force refresh of expanded content
+                    this.expandDetailsInline(selected_rec_ID, true);
+                }
+            },
+            selectOnSave: true
+        });
     }
     
 });
