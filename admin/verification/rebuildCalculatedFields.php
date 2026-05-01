@@ -132,7 +132,9 @@ if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
                 $('#rec_total').text(response.data['rec_total']);
                 $('#rec_processed').text(response.data['rec_processed']);
                 $('#fld_changed').text(response.data['fld_changed']);
+                $('#rec_updates').text(response.data['rec_updates']);
                 $('#fld_cleared').text(response.data['fld_cleared']);
+                $('#rec_cleared').text(response.data['rec_cleared']);
                 $('#fld_same').text(response.data['fld_same']);
 
                 if(response.data['q_updates']){

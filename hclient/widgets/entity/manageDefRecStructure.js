@@ -2716,6 +2716,10 @@ console.log('onEditFormChange @todo check buttons!!!');
         
         this._dragIsAllowed = true;
 
+        let calculatedFormula = this._editing?.getValue('rst_CalcFunctionID');
+        if(calculatedFormula){
+            this._updateCalculatedField(calculatedFormula);
+        }
         if(this.create_sub_record){
             this._createSubRecords(recID);
         }
@@ -3890,6 +3894,47 @@ console.log('onEditFormChange @todo check buttons!!!');
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Adding new explanation'}, {dialogId: 'new-explanation', default_palette_class: 'ui-heurist-design'});
 
         $dlg.parent().find('.ui-dialog-buttonpane button').first().addClass('ui-button-action');
+    },
+
+    _updateCalculatedField: function(cfn_ID){
+
+        if(!window.hWin.HEURIST4.util.isPositiveInt(cfn_ID)){
+            return;
+        }
+
+        let request = {};
+
+        request['rst_CalcFunctionID']  = cfn_ID;
+        request['a'] = 'search';
+        request['entity'] = 'defRecStructure';
+        request['details'] = 'rectype';
+        request['request_id'] = window.hWin.HEURIST4.util.random();
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => { // Renamed to avoid conflict
+
+            if(response.status != window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            let rectypes = null;
+            let recset = new HRecordSet(response.data); // Renamed
+            if(recset.length() > 0){
+                rectypes = [];
+                recset.each2(function(id, rec){
+                    rectypes.push(rec['rst_RecTypeID']);
+                });
+            }
+
+            let sURL = `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=calcfields&db=${window.hWin.HAPI4.database}&recTypeIDs=${rectypes.join(',')}`;
+
+            window.hWin.HEURIST4.msg.showDialog(sURL, {
+                'close-on-blur': false,
+                'no-resize': true,
+                height: 400,
+                width: 550
+            });
+        });
     }
 
 });
