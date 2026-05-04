@@ -1433,11 +1433,28 @@ if ($bkm_ID>0 || $rec_id>0) {
             .$bkm_ID.' and bkm_UGrpID='.$system->getUserId()
             .' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
 
+            if($bibInfo===null){
+               print 'Bookmark Id '.$rec_id.' not found'; 
+               $writeToCacheRes = 1;
+            }
+            
         } elseif($rec_id>0) {
             $bibInfo = mysql__select_row_assoc($system->getMysqli(),
             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
             .$rec_id.' and not rec_FlagTemporary');
+            
+            if($bibInfo===null){
+               print 'Record Id '.$rec_id.' not found'; 
+               $writeToCacheRes = 1;
+            }
         }
+}else{
+    print 'Resource (record or bookmark) Id not defined'; 
+    $writeToCacheRes = 1;
+}
+        
+if(is_array($bibInfo) && count($bibInfo)>0){
+        
             $writeToCache = $useCache && $bibInfo['rec_NonOwnerVisibility']==='public' && $forceCache;
             if($bibInfo['rec_NonOwnerVisibility']!=='public'){
                 $writeToCacheRes = 2;
@@ -1500,10 +1517,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                 print DIV_E;
 
             }
-        } else {
-            $writeToCacheRes = 1;
-            print 'No details found';
-        }
+        } 
         
  if(!$noclutter && $is_map_popup || $without_header){
 //    print DIV_E;

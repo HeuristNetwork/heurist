@@ -94,6 +94,18 @@ require_once dirname(__FILE__).'/../../autoload.php';
 
 if(is_bool($res) && $res==false){
     $response = $system->getError();
+    if(!is_array($response)){
+        $response = array('status'=>HEURIST_SYSTEM_FATAL, 'message'=>'Unknown registration error');
+    }
+    if(!array_key_exists('status', $response) || $response['status']==HEURIST_OK){
+        $response['status'] = HEURIST_SYSTEM_FATAL;
+    }
+    if(!array_key_exists('message', $response) && array_key_exists(1, $response)){
+        $response['message'] = $response[1];
+    }
+    if(!array_key_exists('code', $response)){
+        $response['code'] = 'REGISTRATION_ERROR';
+    }
 }else{
     $response = array("status"=>HEURIST_OK, "data"=> $res);
 }

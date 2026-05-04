@@ -23,12 +23,17 @@ require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 
 $system = new hserv\System();
 
+global $globalMessage;
+
 if(!defined('ERROR_INCLUDE')){
     define('ERROR_INCLUDE', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
 }
 
+define('ERROR_INCLUDE2', dirname(__FILE__).'/../../hclient/framecontent/infoMessage.php');
+
 if(!$system->init(@$_REQUEST['db'])){
-    include_once ERROR_INCLUDE;
+    $globalMessage = $system->getErrorMsg();
+    include_once ERROR_INCLUDE2;
     exit;
 }
 
@@ -40,15 +45,15 @@ $bkm_ID = intval($_REQUEST['bkmk_id']);
 if ($bkm_ID>0) {  //find record by bookmark id
     $rec_id = mysql__select_value($mysqli, 'select * from usrBookmarks where bkm_ID = ' . $bkm_ID);
     if(!($rec_id>0)){
-        $_REQUEST['error'] = 'Can\'t find record by bookmark ID';
-        include_once ERROR_INCLUDE;
+        $globalMessage = 'Can\'t find record by bookmark ID';
+        include_once ERROR_INCLUDE2;
         exit;
     }
 } else {
     $rec_id = intval(@$_REQUEST['recID']);
     if(!($rec_id>0)){
-        $_REQUEST['error'] = 'Parameter recID not defined';
-        include_once ERROR_INCLUDE;
+        $globalMessage = 'Parameter recID not defined';
+        include_once ERROR_INCLUDE2;
         exit;
     }
 }
@@ -61,8 +66,8 @@ $rec = mysql__select_row_assoc($mysqli,
         'select rec_Title, rec_NonOwnerVisibility, rec_OwnerUGrpID from Records where rec_ID='.$rec_id);
 
 if($rec==null){
-    $_REQUEST['error'] = 'Record #'.$rec_id.' not found';
-    include_once ERROR_INCLUDE;
+    $globalMessage = 'Record #'.$rec_id.' not found';
+    include_once ERROR_INCLUDE2;
     exit;
 }
 
@@ -71,9 +76,9 @@ $hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' ||
     $system->isMember($rec['rec_OwnerUGrpID']) );//owner
 
 if(!$hasAccess){
-        $_REQUEST['error'] = 'You are not a member of the workgroup that owns the Heurist record #'
+        $globalMessage = 'You are not a member of the workgroup that owns the Heurist record #'
         .$rec_id.', and cannot therefore view or edit this information.';
-        include_once ERROR_INCLUDE;
+        include_once ERROR_INCLUDE2;
         exit;
 }
 

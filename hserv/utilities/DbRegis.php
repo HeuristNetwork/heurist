@@ -48,6 +48,8 @@ class DbRegis {
     private static $system = null;
     private static $initialized = false;
 
+    private static $lastError = null;
+
     private static $isOutSideRequest = false;
 
     /**
@@ -98,7 +100,7 @@ class DbRegis {
     * @param mixed $params
     * @param string|null $serverBaseUrl Base Heurist URL, e.g. https://host/heurist/
     */
-    private static function registrationRemoteCall($params, $serverBaseUrl=null){
+    private static function registrationRemoteCall($params, $serverBaseUrl=null, $stage=null){
 
         if(@$params['db']!=null){
             unset($params['db']);//reset to avoid recursion
@@ -117,26 +119,67 @@ class DbRegis {
                 .http_build_query($params);
 
         $data = loadRemoteURLContentWithRange($remote_url, null, true);
-
+        
         if (!isset($data) || $data==null) {
             global $glb_curl_error;
-            $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
+            $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'no error code provided (curl)';
 
-            //transfer error into global system
-            self::addError(HEURIST_UNKNOWN_ERROR,
-                'Unable to connect Heurist reference server, possibly due to timeout or proxy setting<br><br>'
-                . $error_code . '<br>'
-                ."URL requested: ".htmlspecialchars($remote_url));
+            $error = self::makeError(
+                HEURIST_NETWORK_ERROR,
+                'Unable to connect Heurist reference server, possibly due to timeout or proxy setting',
+                array(
+                    'code' => 'REMOTE_CONNECT_FAILED',
+                    'stage' => $stage ?: 'remote_registry_call',
+                    'remote_url' => $remote_url,
+                    'transport_error' => $error_code
+                )
+            );
+
+            self::addError($error);
             return false;
         }else{
-            //add error
-            $data = json_decode($data, true);
-            if(@$data['status']==HEURIST_OK){
-               $reg_record =  $data['data'];
+            $decoded = json_decode($data, true);
+            if(!is_array($decoded)){
+                $error = self::makeError(
+                    HEURIST_UNKNOWN_ERROR,
+                    'Heurist reference server returned an invalid response',
+                    array(
+                        'code' => 'REMOTE_INVALID_RESPONSE',
+                        'stage' => $stage ?: 'remote_registry_call',
+                        'remote_url' => $remote_url
+                    )
+                );
+                self::addError($error);
+                return false;
+            }elseif (count($decoded)==0){
+                $error = self::makeError(
+                    HEURIST_NOT_FOUND,
+                    'Database server URL is not found in central index database',
+                    array(
+                        'code' => 'REMOTE_NOT_FOUND',
+                        'stage' => $stage ?: 'remote_registry_call',
+                        'remote_url' => $remote_url
+                    )
+                );
+                self::addError($error);
+                return false;
+            }
+
+            if(@$decoded['status']==HEURIST_OK){
+               $reg_record =  $decoded['data'];
             }else{
-                //transfer error into global syst+em
-                $data['message'] = 'Heurist reference server returns error message: '.@$data['message'];
-                self::addError($data);//transfer error to global $system
+                $message = @$decoded['message'] ?: 'Heurist reference server returned an error';
+                $error = self::makeError(
+                    @$decoded['status'] ?: HEURIST_UNKNOWN_ERROR,
+                    'Heurist reference server returns error message: '.$message,
+                    array(
+                        'code' => @$decoded['code'] ?: 'REMOTE_APPLICATION_ERROR',
+                        'stage' => $stage ?: 'remote_registry_call',
+                        'remote_url' => $remote_url,
+                        'remote_error' => $decoded
+                    )
+                );
+                self::addError($error);//transfer error to global $system
                 return false;
             }
         }
@@ -147,14 +190,50 @@ class DbRegis {
     /**
     * Adds/transfers error into global system variable
     */
+    private static function makeError($error, $msg=null, $extra=array())
+    {
+        if(is_array($error)){
+            $out = $error;
+        }else{
+            $out = array('status'=>$error, 'sysmsg'=>$extra, 'message'=>$msg);
+        }
+        /*
+        if(is_array($extra) && !empty($extra)){
+            $out = array_merge($out, $extra);
+        }*/
+        return $out;
+    }
+
+    /**
+    * Returns last error raised by this class in a resolver-friendly shape.
+    */
+    public static function getLastError()
+    {
+        if(self::$lastError!=null){
+            return self::$lastError;
+        }
+        if(self::$system!=null){
+            $err = self::$system->getError();
+            if(!empty($err)){
+                return $err;
+            }
+        }
+        return null;
+    }
+
+    /**
+    * Adds/transfers error into global system variable
+    */
     private static function addError($error=null, $msg=null)
     {
-        //global $system;
         if($error==null){
-            self::$system->addErrorArr(self::$system->getError());//transfer from this $system
+            self::$lastError = self::$system->getError();
+            self::$system->addErrorArr(self::$lastError);//transfer from this $system
         }elseif (is_array($error)){
+            self::$lastError = $error;
             self::$system->addErrorArr($error);
         }else{
+            self::$lastError = self::makeError($error, $msg);
             self::$system->addError($error, $msg);
         }
     }
@@ -570,7 +649,7 @@ class DbRegis {
         if(!self::initialize()) {return false;} //can not connect to index database
 
         if(self::$isOutSideRequest){
-            return self::registrationRemoteCall($params);
+            return self::registrationRemoteCall($params, null, 'remote_registry_call');
         }
 
         $mysqli = self::$mysqli;
@@ -633,7 +712,7 @@ class DbRegis {
         if(!self::initialize()) {return false;} //can not connect to index database
 
         if(self::$isOutSideRequest){
-            return self::registrationRemoteCall($params);
+            return self::registrationRemoteCall($params, null, 'remote_registry_call');
         }
 
         $sys = self::$system;
@@ -756,7 +835,17 @@ class DbRegis {
                 $server = self::normalizeServerUrl($resServer);
             }
             if($server===null || $server===''){
-                self::addErrorToCache($dbID, 'Database server URL is not defined in central index database');
+                
+                $err = self::getLastError();
+                $errorStatus = $err['status'] ?? null;
+                $errorMsg = $err['message'] ?? 'Database server URL is not defined in central index database';
+                
+                if($errorStatus===HEURIST_NOT_FOUND){
+                    self::setCachedDatabaseUrl($dbID, 'failure:'.$errorMsg);
+                }elseif($errorStatus===null){
+                    self::addErrorToCache($dbID, $errorMsg);    
+                }
+                
                 return false;
             }
 
@@ -770,7 +859,7 @@ class DbRegis {
                 //request to server where database can reside
                 $server = self::normalizeServerUrl($resServer, true);
                 $server = str_replace('/heurist/','/h7-alpha/',$server); //TEMPORARY
-                $dburl = self::registrationRemoteCall(array('action'=>'url', 'dbID'=>$dbID), $server);
+                $dburl = self::registrationRemoteCall(array('action'=>'url', 'dbID'=>$dbID), $server, 'registered_database_server_lookup');
             }
         }
         
@@ -805,7 +894,7 @@ class DbRegis {
         
         if(self::$isOutSideRequest){ //request goes not from index server
             $params['action'] = 'info';
-            return self::registrationRemoteCall($params); //send request to index server
+            return self::registrationRemoteCall($params, null, 'central_index_lookup'); //send request to index server
         }
 
             $database_url = null;

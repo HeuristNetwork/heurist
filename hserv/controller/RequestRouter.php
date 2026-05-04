@@ -34,7 +34,7 @@ final class RequestRouter
     private const ALLOWED_VERSIONS = ['heurist','h7-alpha','h7-ao','h7-bm','h7-hn'];
 
     // Actions supported in pretty routes
-    private const ALLOWED_ACTIONS = ['website','web','hml','tpl','view','edit','adm','record'];
+    private const ALLOWED_ACTIONS = ['website','web','hml','tpl','view','edit','adm','rec','record','rty','dty','trm'];
 
     // Content negotiation for /db/* when fmt not provided
     private const REQUEST_CONTENT = [
@@ -433,6 +433,20 @@ final class RequestRouter
         return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
     }
 
+    /*
+     * Pretty path format:
+     *   <domain>/<database>/<record|rty|rst|dty|trm>/<resource id>
+     *   resource id - either ID or concept ID (DBID-RECID)  
+     *   If resource id is concept code, it redirects to remote server if registry entry (DBID) exists. 
+     *   <database> specified in path is ignored in this case. So user can use placeholder "db"
+     * 
+     * For example
+     *  http://127.0.0.1/osmak_1/record/184 - search for rec 184 in db osmak_1
+     *  http://127.0.0.1/osmak_1/record/2-8 - search for rec 8 in db #2 
+     *  http://127.0.0.1/db/record/2-8      - the same
+     *  http://127.0.0.1/osmak_1/rty/10     - returns definitions (xml) for record type 10 
+     *  http://127.0.0.1/db/dty/2-4         - returns definitions for field type 4 from database #2
+    */
     private static function paramsFromDbResolverPath(array $segments): array
     {
         // patterns:
@@ -500,9 +514,16 @@ final class RequestRouter
                 if (isset($rest[0])) { $params['recid'] = $rest[0]; }
                 $params['fmt'] = $params['fmt'] ?? 'html';
                 break;
+            case 'rty':
+            case 'dty':
+            case 'rst':
+            case 'trm':
+                if (isset($rest[0])) { $params[$action] = $rest[0]; }
+                break;
             case 'hml':
                 $params['fmt'] = 'hml';
             case 'record':
+            case 'rec':
                 $params['fmt'] = $params['fmt'] ?? 'html';
                 if (isset($rest[0])) { $params['recid'] = $rest[0]; }
                 /*

@@ -175,6 +175,9 @@ define("HEURIST_SYSTEM_CONFIG", "syscfg");
 /** @const string API Status: System configuration error (fatal) (HTTP 500). */
 define("HEURIST_SYSTEM_FATAL", "system");
 
+define("HEURIST_NETWORK_ERROR", "network");
+
+
 // Email Configuration (values from configIni.php or defaults)
 /** @const string Email address for bug reports. */
 define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org');
