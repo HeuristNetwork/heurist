@@ -3233,25 +3233,28 @@ class RecordsBatch
                     ]);
 
                     if($rtn){ // register URL ($rtn)
-                        //$fileEntity->setRecords(null);// reset records
+
                         if($serviceID){
                             $fields = ['ulf_Parameters' => "{\"repository\":\"{$serviceID}\"}"];
                         }else{
                             $fields = null;
                         }
 
-                        $new_ulfID = $fileEntity->registerURL($rtn,false,0,$fields);// register nakala url
-                        if(!is_numeric($new_ulfID) || $new_ulfID > 0){
+                        $new_ulfID = $fileEntity->registerURL($rtn, false, 0, $fields);// register nakala url
+                        if(!isPositiveInt($new_ulfID)){
                             $sqlErrors[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $mysqli->error;
                             $failedIDs[] = $row[2];
                         }
                     }else{
+
                         $errMsg = $this->system->getError();
-                        if(array_key_exists('message', $errMsg)){
+
+                        if(array_key_exists('message', $errMsg) && !empty($errMsg['message'])){
                             $errMsg = $errMsg['message'];
                         }else{
                             $errMsg = 'Unknown error occurred while uploading to Nakala';
                         }
+
                         $uploadError[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $errMsg;
                         $failedIDs[] = $row[2];
                     }

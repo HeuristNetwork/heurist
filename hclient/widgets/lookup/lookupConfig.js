@@ -674,7 +674,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 change: () => {
 
                     const disableDumpControls = !$enableRecDump.is(':checked');
-                    const selectedField = this._$('[name="dump_field"]:checked').val(); console.log(selectedField);
+                    const selectedField = this._$('[name="dump_field"]:checked').val();
 
                     this.$H.setDisabled($dumpToSratchPad, disableDumpControls);
                     this.$H.setDisabled($dumpToRecField, disableDumpControls);

@@ -326,6 +326,7 @@ if ($mode > 1) {
 
                 // API call to fetch Nakala licenses
                 window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+
                     window.hWin.HEURIST4.msg.sendCoverallToBack(); // Hide loading overlay
                     data = window.hWin.HEURIST4.util.isJSON(data); // Ensure data is JSON
 
@@ -340,12 +341,20 @@ if ($mode > 1) {
                     }
 
                     if (data.length > 0) { // Licenses found
+
                         $.each(data, (idx, license) => { // Populate dropdown
                             window.hWin.HEURIST4.ui.addoption($sel_license[0], license, license);
                         });
+
+                        if($sel_license.attr('data-initial-value')){
+                            $sel_license.val($sel_license.attr('data-initial-value'));
+                        }
+
                         window.hWin.HEURIST4.ui.initHSelect($sel_license, false, {'margin-left': '21px'}); // Initialize HSelect
+
                         $sel_license.attr('data-init', 'Nakala'); // Mark as initialized
                         $sel_license.parent().parent().show(); // Show license section
+
                     } else { // No licenses found or other error
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: 'An unknown error has occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.',
@@ -401,7 +410,22 @@ if ($mode > 1) {
         // $please_advise is defined but not consistently used. It could be appended to error messages.
         $please_advise = "<br>Please consult with your system administrator for a resolution.";
 
+        $DB_LICENSE = '';
         $DB_DESCRIPTION = mysql__select_value($system->getMysqli(), "SELECT sys_dbDescription FROM sysIdentification WHERE sys_ID = 1");
+        $DB_LOCATION = '';
+        $DB_KEYWORDS = '';
+        $DB_COLLECTION = '';
+
+        // Load previous settings
+        $lastDetails = $system->settings->getDatabaseSetting('External IDs');
+        if($lastDetails && array_key_exists('data', $lastDetails)){
+
+            $DB_LICENSE = $lastDetails['data']['license'];
+            $DB_DESCRIPTION = $lastDetails['data']['desc'];
+            $DB_LOCATION = $lastDetails['data']['location'];
+            $DB_KEYWORDS = $lastDetails['data']['keywords'];
+            $DB_COLLECTION = $lastDetails['data']['collection'];
+        }
 
         // --- Display initial form if $mode is not set (i.e., initial page load) ---
         if (!$mode) {
@@ -516,7 +540,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     <div class="header recommended" style="display: inline-block">
                         Select a license
                     </div>
-                    <select id='sel_license' name='license'> <option value="">select a license...</option> </select>
+                    <select id='sel_license' name='license' data-initial-value="<?php echo $DB_LICENSE; ?>"> <option value="">select a license...</option> </select>
                 </div>
                 <div class="input-row repo-Nakala" style="display: none;padding: 5px 0 10px 0;">
                     <div class="header recommended">
@@ -528,13 +552,13 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     <div class="header optional">
                         Keywords (<em><strong>newline for each new keyword</strong></em>)
                     </div>
-                    <textarea name='keywords' rows="10" cols="75"></textarea>
+                    <textarea name='keywords' rows="10" cols="75"><?php echo $DB_KEYWORDS; ?></textarea>
                 </div>
                 <div class="input-row repo-Nakala" style="display: none;padding: 5px 0 10px 0;">
                     <div class="header optional">
                         Location
                     </div>
-                    <input type="text" name='location' size="75" />
+                    <input type="text" name='location' size="75" value="<?php echo $DB_LOCATION; ?>" />
                     <br>
                     <span class="heurist-helper2">
                         A simple Country or "Town, Country"; or alternatively you can use a link to a <a href="https://www.geonames.org/" target="_blank">GeoNames</a> record
@@ -544,7 +568,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     <div class="header optional">
                         Collection
                     </div>
-                    <textarea name='collection' rows="4" cols="75"></textarea>
+                    <textarea name='collection' rows="4" cols="75"><?php echo $DB_COLLECTION; ?></textarea>
                     <br>
                     <span class="heurist-helper2">
                         Collection name as a description, or a Nakala URL for a collection (lookup under development)
@@ -888,8 +912,11 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $msg .= ' Please check the credentials within Design > External repositories.';
                         report_message($msg, true, true);
                     } elseif ($repo == 'Nakala') { // Nakala specific upload logic
+
                         $date = date('Y-m-d');
                         $params = [];
+                        $data = [];
+
                         $params['file'] = [
                             'path' => FOLDER_BACKUP . '.' . $display_format, // Path to the generated archive
                             'type' => $mime,
@@ -911,19 +938,23 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
                             $usrID = "{$usr['ugr_FullName']} [#{$usrID}]";
                         }
+
                         $params['meta']['created'] = [
                             'value' => $date, 'lang' => null,
-                            'typeUri' => PURL_TERM_DATE, 'propertyUri' => NAKALA_REPO.'terms#created'
+                            'typeUri' => null, 'propertyUri' => NAKALA_REPO.'terms#created'
                         ];
+
                         $params['meta']['type'] = [ // Default type: Dataset
                             'value' => 'http://purl.org/coar/resource_type/c_ddb1', 'lang' => null,
                             'typeUri' => PURL_TERM_URI, 'propertyUri' => NAKALA_REPO.'terms#type'
                         ];
+
                         if (array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])) {
                             $params['meta']['license'] = [
                                 'value' => $_REQUEST['license'], 'lang' => null,
                                 'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => NAKALA_REPO.'terms#license'
                             ];
+                            $data['license'] = $_REQUEST['license'];
                         }
                         if(array_key_exists('desc', $_REQUEST) && !empty($_REQUEST['desc'])){
                             $params['meta']['description'] = [
@@ -932,6 +963,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 'typeUri' => W3_XML_SCHEMA_STRING,
                                 'propertyUri' => 'http://purl.org/dc/terms/description'
                             ];
+                            $data['desc'] = $_REQUEST['desc'];
                         }
                         if(array_key_exists('location', $_REQUEST) && !empty($_REQUEST['location'])){
 
@@ -944,11 +976,14 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 'typeUri' => $typeURI,
                                 'propertyUri' => 'http://purl.org/dc/terms/spatial'
                             ];
+
+                            $data['location'] = $_REQUEST['location'];
                         }
                         if(array_key_exists('keywords', $_REQUEST) && !empty($_REQUEST['keywords'])){
 
                             $keywords = htmlspecialchars($_REQUEST['keywords']);
                             $keywords = array_filter(preg_split('/\r\n|\r|\n/', $keywords));
+                            $data['keywords'] = $_REQUEST['keywords'];
 
                             foreach($keywords as $keyword){
 
@@ -972,6 +1007,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 'typeUri' => W3_XML_SCHEMA_STRING,
                                 'propertyUri' => 'http://purl.org/dc/terms/isPartOf'
                             ];
+                            $data['collection'] = $_REQUEST['collection'];
                         }
 
                         $params['apiKey'] = $repo_details['params']['writeApiKey'];
@@ -997,7 +1033,8 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 'Name' => 'Nakal - Database Archive',
                                 'URL' => $nakalaURL,
                                 'Date' => $date,
-                                'Note' => "Nakala DOI for Database Archive backup.\nHeurist User: {$usrID}\nNakala Account: {$repo_account}"
+                                'Note' => "Nakala DOI for Database Archive backup.\nHeurist User: {$usrID}\nNakala Account: {$repo_account}",
+                                'Data' => $data
                             ]], 1);
 
                             echo_flush2('finished<br>');

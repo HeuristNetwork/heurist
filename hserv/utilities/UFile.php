@@ -1806,7 +1806,7 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
  *                      'meta' (array): Array of Nakala metadata values.
  *                      'status' (string, optional): Status for the Nakala deposit (e.g., 'pending', 'published'). Defaults to 'pending'.
  *                      'returnType' (string, optional): If 'editor', returns URL to private view. Otherwise, public URL.
- * @return string|false The Nakala URL of the uploaded file on success, or false on failure.
+ * @return array|string|false The Nakala URL of the uploaded file on success, or false on failure.
  */
 function uploadFileToNakala($system, $params) {
 
@@ -1836,7 +1836,7 @@ function uploadFileToNakala($system, $params) {
  * @global int|string|null $glb_curl_code Stores cURL error code from Nakala API calls.
  * @global string|null $glb_curl_error Stores cURL error message from Nakala API calls.
  * @param \hserv\System $system The Heurist system instance.
- * @param array $params An associative array of parameters:
+ * @param array $parameters An associative array of parameters:
  *                      'apiKey' (string): User's Nakala API Key.
  *                      'status' (string, optional): Status for the Nakala deposit (e.g., 'pending', 'published'). Defaults to 'pending'.
  *                      'returnType' (string, optional): If 'editor', returns URL to private view. Otherwise, public URL.
@@ -1867,6 +1867,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
 
     $useTest = in_array($apiKey, $testAPIKeys);
     $NAKALA_BASE_URL = $useTest ? 'https://test.nakala.fr/u/datas/' : 'https://nakala.fr/u/datas/';
+    $NAKALA_BASE_URL_API_FILE = $useTest ? 'https://apitest.nakala.fr/data/' : 'https://api.nakala.fr/data/';
     $NAKALA_BASE_URL_API = $useTest ? 'https://apitest.nakala.fr/datas' : 'https://api.nakala.fr/datas';
 
     $missingApiKey = '<br><br>Your Nakala API key is either missing or invalid, please check it under Design > External repositories';
@@ -2075,7 +2076,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     $metas = [];
     prepareNakalaMetadata($datas, $metas);
 
-    $metadata = ['status' => $status, 'files' => $uploadedFiles, 'metas' => $datas];
+    $metadata = ['status' => $status, 'files' => $uploadedFiles, 'metas' => $metas];
 
     curl_setopt($curl, CURLOPT_HTTPHEADER, [$apiKey, 'Content-Type:application/json']); // Reset headers to specify the return type
     curl_setopt($curl, CURLOPT_URL, "{$NAKALA_BASE_URL_API}");
@@ -2156,14 +2157,18 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
             $externalURLs[] = "{$NAKALA_BASE_URL}{$nakalaID}";
         }else{ // returns link to publically available file
             foreach($uploadedFiles as $file){
-                $externalURLs[] = "{$NAKALA_BASE_URL_API}{$nakalaID}/{$file['sha1']}";
+                $externalURLs[] = "{$NAKALA_BASE_URL_API_FILE}{$nakalaID}/{$file['sha1']}";
             }
         }
 
     }else{
 
+        if(array_key_exists('validationErrors', $payload)){
+            $msg = 'Invalid metadata value(s) found:<br>' . implode('<br>', $payload['validationErrors']);
+        }
+
         unset($curl);
-        $msg = is_array($payload) ? implode('<br>', array_values($payload)) : $payload;
+        $msg = is_array($payload) ? json_encode($payload) : $payload;
 
         $system->addError($herror, $msg);
 
@@ -2184,6 +2189,19 @@ function prepareNakalaMetadata($datas, &$metas){
 
     $W3CDTF_REGEX = '/(\d{4}-\d{2}-\d{2}T\d{2}(:\d{2}){1,2}[-+]\d{2}:\d{2})|(\d{4}-\d{2}-\d{2})|(\d{4}-\d{2})|(\d{4})/';
     foreach($datas as $data){
+
+        if(array_key_exists('value', $data) && array_key_exists('lang', $data) &&
+            array_key_exists('typeUri', $data) && array_key_exists('propertyUri', $data)){ // pre-prepared value
+
+            $metas[] = [
+                'value' => $data['value'],
+                'lang' => $data['lang'],
+                'typeUri' => $data['typeUri'],
+                'propertyUri' => $data['propertyUri']
+            ];
+
+            continue;
+        }
 
         if(!is_array($data) || !array_key_exists('values', $data) || !array_key_exists('field', $data)){
             continue;
@@ -2508,7 +2526,7 @@ function getFileDetailsForNakala($mysqli, $ulfID){
     $metaValues['created'] = [
         'value' => $fileDetails[5],
         'lang' => null,
-        'typeUri' => PURL_TERM_DATE,
+        'typeUri' => null,
         'propertyUri' => NAKALA_REPO.'terms#created'
     ];
     

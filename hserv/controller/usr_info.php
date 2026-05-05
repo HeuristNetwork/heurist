@@ -762,15 +762,21 @@
                         $params['meta']['created'] = [
                             'value' => @$req_params['meta']['created'],
                             'lang' => null,
-                            'typeUri' => PURL_TERM_DATE,
+                            'typeUri' => null,
                             'propertyUri' => NAKALA_REPO.'terms#created'
                         ];
                     }else{
                         $params['meta']['created'] = [
-                            'value' => null,
+                            'value' => 'Unknown',
                             'lang' => null,
                             'typeUri' => null,
                             'propertyUri' => NAKALA_REPO.'terms#created'
+                        ];
+                        $params['meta']['created_backup'] = [
+                            'value' => date('Y-m-d'),
+                            'lang' => null,
+                            'typeUri' => null,
+                            'propertyUri' => 'http://purl.org/dc/terms/created'
                         ];
                     }
 
