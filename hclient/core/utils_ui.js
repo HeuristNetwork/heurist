@@ -1799,7 +1799,11 @@ window.hWin.HEURIST4.ui = {
                 })){
             return;
         }
-        
+
+        if(!window.hWin.HAPI4.SystemMgr.verifyRecordEditorScripts(window.hWin.HEURIST4.ui.openRecordEdit, [rec_ID, query_or_recordset, popup_options])){
+            return;
+        }
+
         if(popup_options && 
             $.isPlainObject(popup_options.new_record_params) && 
                 (popup_options.new_record_params['rt']>0 || popup_options.new_record_params['RecTypeID']>0)){

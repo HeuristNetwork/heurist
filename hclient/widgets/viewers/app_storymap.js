@@ -277,7 +277,7 @@ $.widget( "heurist.app_storymap", {
                                     }
 
                                     let $divContent = that._resultList.find('.div-result-list-content');
-                                    let $recDiv = $divContent.find(`[recid="${recID}"]`);console.log($recDiv, recID, $divContent);
+                                    let $recDiv = $divContent.find(`[recid="${recID}"]`);
                                     if(!window.hWin.HAPI4.has_access() || $recDiv.length === 0){
                                         return rep;
                                     }
