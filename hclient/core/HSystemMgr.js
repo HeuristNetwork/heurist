@@ -1480,5 +1480,73 @@ class HSystemMgr {
             chunkValue(key, value);
         }
     }
+
+    /**
+     * Loads the necessary scripts for editing records.
+     * Checks and loads any missing scripts from the following:
+     *  jquery.fileupload.js, wellknown.js, ui-tabs-paging.js, evol.colorpicker.js,
+     *  editing2.js, editing_inputs.js, editing_exts.js,
+     *  temporalObjectLibrary.js and utils_geo.js
+     *
+     * @param {function} callback callback function after all the scripts have been loaded
+     * @param {array} callbackParams any parameters to be sent to the callback function
+     * @returns {boolean} whether the scripts are already loaded
+     */
+    verifyRecordEditorScripts(callback, callbackParams){
+
+        if(typeof callback !== 'function'){
+            callback = () => {};
+        }
+        if(!window.hWin.HEURIST4.util.isArray(callbackParams)){
+            callbackParams = [];
+        }
+
+        let scripts = [];
+        let editingBase = `${window.hWin.HAPI4.baseURL}hclient/widgets/editing/`;
+        let coreBase = `${window.hWin.HAPI4.baseURL}hclient/core/`;
+        let externalBase = `${window.hWin.HAPI4.baseURL}external/`;
+
+        // External
+        if(typeof $.blueimp?.fileupload === 'undefined'){ // File upload handler
+            scripts.push(`${externalBase}jquery-file-upload/js/jquery.fileupload.js`);
+        }
+        if(typeof parseWKT === 'undefined'){ // WKT parser
+            scripts.push(`${externalBase}js/wellknown.js`);
+        }
+        if(typeof $.ui.tabs.prototype.paging === 'undefined'){ // UI Tabs paging
+            scripts.push(`${externalBase}jquery.widgets/ui.tabs.paging.js`);
+        }
+        if(typeof $.evol?.colorpicker === 'undefined'){ // Colorpicker
+            scripts.push(`${externalBase}jquery.widgets/evol.colorpicker.js`);
+            $.getStyles(`${externalBase}jquery.widgets/evol.colorpicker.css`);
+        }
+
+        // Core + Utils
+        if(typeof TDate === 'undefined'){ // Date values
+            scripts.push(`${coreBase}temporalObjectLibrary.js`);
+        }
+        if(typeof window.hWin.HEURIST4.geo === 'undefined'){ // Geospatial values
+            scripts.push(`${coreBase}utils_geo.js`);
+        }
+
+        // Editing
+        if(typeof HEditing === 'undefined'){
+            scripts.push(`${editingBase}editing2.js`);
+        }
+        if(typeof $.heurist.editing_input === 'undefined'){
+            scripts.push(`${editingBase}editing_input.js`);
+        }
+        if(typeof openSearchMenu === 'undefined'){
+            scripts.push(`${editingBase}editing_exts.js`);
+        }
+
+        if(scripts.length > 0){
+            $.getMultiScripts(scripts)
+                .then(() => callback(...callbackParams))
+                .catch((e) => window.hWin.HEURIST4.msg.showMsg_ScriptFail());
+        }
+
+        return scripts.length === 0;
+    }
   
 }
