@@ -871,7 +871,7 @@ $.widget( "heurist.slidersMenu", {
             let { explore_top, explore_left, explore_height, explore_width } = that._getMenuPosition(menu_item, action_name, position);
             if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
-                that.addSavedSearch( 'saved', false, explore_left, explore_top );
+                that.addSavedSearch( 'saved', false, explore_left ); //, explore_top
                 return;
             }
             else if(action_name=='svsAddFaceted'){
@@ -942,11 +942,6 @@ $.widget( "heurist.slidersMenu", {
         let explore_top = 2;
         let explore_height = 'auto';
         let explore_width = '300px';
-
-        if (action_name === 'searchBuilder') {
-            explore_height = 450;
-            explore_width = '62.5em';
-        }
         
         if(position){
             explore_top = position.top;
@@ -964,7 +959,10 @@ $.widget( "heurist.slidersMenu", {
         }
 
         if (action_name === 'searchBuilder') {
-            
+            explore_height = 450;
+            explore_width = '62.5em';
+            explore_top = 40;
+            /*
             let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
             if(widget){
                 explore_top = widget.position().top + 100;
@@ -975,6 +973,7 @@ $.widget( "heurist.slidersMenu", {
             if(this.element.innerHeight()>0 && explore_top+explore_height>this.element.innerHeight()){
                 explore_top = this.element.innerHeight() - explore_height;
             }
+            */
         }
         
         explore_top = Math.max(0, explore_top);
@@ -1396,11 +1395,11 @@ $.widget( "heurist.slidersMenu", {
         }
         if(this._svsListPinned){
             this.containers['explore'].css('left',608);
-            this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-w');
-            this.menues['explore'].find('#search_filters_pin').addClass('ui-icon-pin-s');
+            this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-w').css( 'transform', '').addClass('ui-icon-pin-s');
+            //this.menues['explore'].find('#search_filters_pin').addClass('ui-icon-pin-s');
         }else{
-            this.menues['explore'].find('#search_filters_pin').addClass('ui-icon-pin-w');
-            this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-s');
+            this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-s').addClass('ui-icon-pin-w').css( 'transform', 'rotate(180deg)');;
+            //this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-s');
             this.containers['explore'].css('left',302);
             if(!isForced){ this._closeExploreMenuPopup(); }
         }

@@ -1212,7 +1212,7 @@ $.widget( "heurist.search", {
             let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
             if(widget){
                 let pos = this.element.offset();
-                widget.slidersMenu('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
+                widget.slidersMenu('show_ExploreMenu', null, 'searchBuilder'); //, {top:pos.top+10, left:pos.left});
             }
         }else{
 

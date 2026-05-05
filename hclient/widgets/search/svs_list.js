@@ -335,7 +335,7 @@ $.widget( "heurist.svs_list", {
             this.div_header =  $('<div class="ui-heurist-header" style="top:0px;padding:9px;">'
 +'<span>'+window.hWin.HR('Saved Filters')
 +'</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" '
-+'style="float:right;height: 17px;min-width: 17px;" title="Close">'
++'style="float:right;height: 19px;min-width: 17px;" title="Close">'
 +'<span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button>'            
             +'</div>') 
             // <span style="font-style:italic;font-size:x-small">by workgroups</span>
