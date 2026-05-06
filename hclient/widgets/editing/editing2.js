@@ -302,16 +302,13 @@ function HEditing(_options) {
             let currGroupType = null, currGroupHeaderClass = null; //current accodion or tab control
             let groupTabHeader, groupEle;
             let hasVisibleFields = false;
-            
-            //    groupEle,      //current accordion or tab control
-           
-                
+
             for (idx=0; idx<fields.length; idx++){
                 
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
 
                     const groupType = fields[idx].groupType;
-                    
+
                     if(fields[idx].groupHidden || fields[idx]['groupTitleVisible']===false){ //this group is hidden all fields goes to previous group
 
                         if(fieldContainer == null){
@@ -359,7 +356,7 @@ function HEditing(_options) {
                         if(parseInt(fields[idx]['dtID'])>0){ //for Records only
                             ele.attr('data-dtid', fields[idx]['dtID']);
                         }
-                        
+
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
                         continue;
                     }else if(groupType == 'accordion_inner' || groupType == 'expanded_inner'){ // accordion within another group
@@ -392,7 +389,6 @@ function HEditing(_options) {
                             active: groupType == 'expanded_inner' ? 0 : false,
                             collapsible: true
                         }).css('width', '100%');
-
 
                         __createGroup(fields[idx].children, groupContainer, $field_ele);
                         continue;
@@ -444,7 +440,7 @@ function HEditing(_options) {
 
                     const is_header_visible = fields[idx]['groupTitleVisible'];
                     
-                    let newFieldContainer = $('<fieldset>').uniqueId();
+                    let newFieldContainer = $('<fieldset>').uniqueId().addClass(`${groupType}-fieldset`);
                     if(!$.isEmptyObject(fields[idx]['groupStyle'])){
                         newFieldContainer.css(fields[idx]['groupStyle']);    
                     }
@@ -548,7 +544,6 @@ function HEditing(_options) {
                         $('<div>')
                             .text(top.HEURIST4.ui.getRidGarbageHelp(fields[idx]['rst_DisplayHelpText']))
                             .addClass('heurist-helper1').appendTo(fieldContainer);
-                        //see applyCompetencyLevel
                     }else  
                     {
                         
@@ -610,8 +605,9 @@ function HEditing(_options) {
                     groupEle.tabs({active: 0}).addClass('edit-form-tabs');
                 }
             }
-            
-            if(!hasVisibleFields && (!currGroupType || !currGroupType.startsWith('explanation')) &&
+
+            let skipFieldCheck = fieldContainer && (fieldContainer.hasClass('explanation-fieldset') || fieldContainer.hasClass('explanation_break-fieldset'));
+            if(!skipFieldCheck && !hasVisibleFields && 
                 (fieldContainer==null || fieldContainer.find('.input-cell').length == 0)){ //fieldContainer could be null here if all items in `fields` were groups.
                 $('<div>There are no fields visible under this heading/tab. Please define new fields or move fields into this section.</div>')
                     .addClass('heurist-helper3').appendTo(fieldContainer);
