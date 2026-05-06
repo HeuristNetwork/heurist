@@ -931,15 +931,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         // show hourglass/wait icon
         $('body > div:not(.loading)').hide();
         $('.loading').show();
-        
-       
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
 
             $('body > div:not(.loading)').show();
             $('body > #ui-datepicker-div').hide();
             $('.loading').hide();
-            let  success = (response.status == window.hWin.ResponseStatus.OK);
+            let success = (response.status == window.hWin.ResponseStatus.OK);
             if(success){
                 $('#div_parameters').hide();
                 
@@ -1039,6 +1037,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 $('#div_result').hide();
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
         });
 
     }
