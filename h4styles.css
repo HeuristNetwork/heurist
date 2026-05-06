@@ -1503,6 +1503,54 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     margin:0px;
 }
 
+.horizontalmenu-toggle {
+    display: none;
+}
+
+/* Narrow screen mode */
+@media (max-width: 740px) {
+
+    .responsive-horizontal-menu {
+        position: relative;
+    }
+
+    .responsive-horizontal-menu .horizontalmenu-toggle {
+        display: inline-block;
+        cursor: pointer;
+        padding: 0.35em 0.75em;
+    }
+
+    .responsive-horizontal-menu > .horizontalmenu {
+        display: none;
+        position: absolute;
+        z-index: 9999;
+        top: 100%;
+        left: 0;
+        min-width: 220px;
+        background: var(--responsive-menu-bg, lightgray) !important;
+        border: 1px solid #ccc !important;
+        padding: 0.25em 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .responsive-horizontal-menu.horizontalmenu-open > .horizontalmenu {
+        display: block;
+    }
+
+    .responsive-horizontal-menu > .horizontalmenu > .ui-menu-item {
+        float: none;
+        display: block;
+        width: 100%;
+        margin: 0;
+    }
+
+    .responsive-horizontal-menu > .horizontalmenu > .ui-menu-item > a {
+        display: block;
+        padding: 0.45em 1em !important;
+        white-space: normal;
+    }
+}
+
 /* List view - Datatable */
 table.dataTable th{
     text-align: left;
