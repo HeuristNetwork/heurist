@@ -4837,6 +4837,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             let ishelp_on = $(event.target).is(':checked');
                             that.usrPreferences['help_on'] = ishelp_on;
                             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(that.element));
+                            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(that.element), '.explanation-separator-header');
+                            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(that.element), '.explanation_break-separator-header');
                         });
             
             
@@ -5211,6 +5213,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm);
         //show-hide help text below fields - it overrides comptency level
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element), '.explanation-separator-header');
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element), '.explanation_break-separator-header');
         
         this._afterInitEditForm_restoreGroupStatus();
 

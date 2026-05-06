@@ -611,7 +611,7 @@ function HEditing(_options) {
                 }
             }
             
-            if(!hasVisibleFields && 
+            if(!hasVisibleFields && !currGroupType.startsWith('explanation') &&
                 (fieldContainer==null || fieldContainer.find('.input-cell').length == 0)){ //fieldContainer could be null here if all items in `fields` were groups.
                 $('<div>There are no fields visible under this heading/tab. Please define new fields or move fields into this section.</div>')
                     .addClass('heurist-helper3').appendTo(fieldContainer);
