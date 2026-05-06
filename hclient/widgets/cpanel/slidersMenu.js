@@ -68,6 +68,8 @@ $.widget( "heurist.slidersMenu", {
     _is_prevent_expand_mainmenu: false,
     _explorer_menu_locked: false,
     _svsListPinned: false,
+    _explore_popup_fixed: false,
+    _fixed_explore_action: null,
     _active_section: null,
     _current_explore_action: null,
     
@@ -182,7 +184,7 @@ $.widget( "heurist.slidersMenu", {
                         if($(e.target).parent('#filter_by_groups').length==0){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
                             
-                            if (!this._isCurrentActionFilter()) { //close on mouse exit
+                            if (!this._isExplorePopupSticky()) { //close ephemeral popup on mouse exit
                             
                                 //this._resetCloseTimers();//reset
                                 this._myTimeoutId2 = setTimeout(function(){
@@ -403,6 +405,53 @@ $.widget( "heurist.slidersMenu", {
                     this._current_explore_action=='svsAddFaceted' ||
                     this._current_explore_action=='search_filters' ||
                     this._current_explore_action=='search_rules');
+    },
+
+    /**
+     * @function _isFixableExplorePopup
+     * @description Returns true for Explore popups that can switch between ephemeral, fixed, and pinned states.
+     * @param {string} action_name - The Explore action popup name.
+     * @returns {boolean}
+     * @private
+     */
+    _isFixableExplorePopup: function(action_name){
+        return (action_name=='searchByEntity' || action_name=='search_filters' || action_name=='search_rules');
+    },
+
+    /**
+     * @function _isExplorePopupSticky
+     * @description Returns true when the current Explore popup should not close on hover/mouseleave.
+     * @returns {boolean}
+     * @private
+     */
+    _isExplorePopupSticky: function(){
+        return (this._explore_popup_fixed || this._svsListPinned);
+    },
+
+    /**
+     * @function _fixExplorePopup
+     * @description Marks a fixable Explore popup as fixed after a menu click.
+     * @param {string} action_name - The Explore action popup name.
+     * @private
+     */
+    _fixExplorePopup: function(action_name){
+        if(this._isFixableExplorePopup(action_name)){
+            this._explore_popup_fixed = true;
+            this._fixed_explore_action = action_name;
+            this._resetCloseTimers();
+        }
+    },
+
+    /**
+     * @function _closeCurrentExplorePopupBeforeSwitch
+     * @description Closes the current fixed/pinned Explore popup before opening another Explore action.
+     * @param {string} next_action - The Explore action popup name that is about to be opened.
+     * @private
+     */
+    _closeCurrentExplorePopupBeforeSwitch: function(next_action){
+        if(this._current_explore_action && this._current_explore_action != next_action){
+            this._closeExploreMenuPopup(true);
+        }
     },
 
     /**
@@ -701,7 +750,7 @@ $.widget( "heurist.slidersMenu", {
         
         if(e){
             this._resetCloseTimers();//reset
-            if (!this._isCurrentActionFilter()){
+            if (!this._isExplorePopupSticky()){
                 this._myTimeoutId2 = setTimeout(function(){
                                                 that._closeExploreMenuPopup();
                                                 that._collapseMainMenuPanel();                                        
@@ -749,6 +798,18 @@ $.widget( "heurist.slidersMenu", {
 
         if (target.attr('id') === 'filter_by_groups' || hasAction === 'search_recent' || hasAction === 'databaseOverview') {
             return;
+        }
+
+        if(this._isExplorePopupSticky() && e.type !== 'click'){
+            return;
+        }
+
+        if(e.type === 'click'){
+            this._closeCurrentExplorePopupBeforeSwitch(hasAction);
+            this._fixExplorePopup(hasAction);
+        }else if(!this._isFixableExplorePopup(hasAction)){
+            this._explore_popup_fixed = false;
+            this._fixed_explore_action = null;
         }
 
         if (ele?.parents('.ui-heurist-quicklinks').length > 0) {
@@ -996,12 +1057,13 @@ $.widget( "heurist.slidersMenu", {
         
             if(action_name=='searchByEntity'){
 
-                if(!cont.searchByEntity('instance'))
+                if(!cont.searchByEntity('instance')){
                     cont.searchByEntity({use_combined_select:true, 
                         mouseover: function(){that._resetCloseTimers()}, //NOT USED
                         onClose: function() { 
                                 //start search on close
-                                that.switchContainer('explore'); 
+                                that.switchContainer('explore');
+                                that._closeExploreMenuPopup();
                         },
                         menu_locked: function(is_locked, is_mouseleave){ 
                             if(!is_mouseleave){
@@ -1010,6 +1072,7 @@ $.widget( "heurist.slidersMenu", {
                             }
                         }
                     });    
+                }
             }
             else if(action_name=='searchBuilder'){
                 
@@ -1313,7 +1376,8 @@ $.widget( "heurist.slidersMenu", {
                         
                         that._closeExploreMenuPopup();
                         that._collapseMainMenuPanel(true);
-                    }else if(!that._svsListPinned){
+                    }else{
+                        that._pinSvsList(true);
                         that._closeExploreMenuPopup();
                     } 
                 },
@@ -1445,9 +1509,12 @@ $.widget( "heurist.slidersMenu", {
      * @private
      * @memberof Widgets.Navigation.slidersMenu
      */
-    _closeExploreMenuPopup: function(){
+    _closeExploreMenuPopup: function(forcePinned){
 
         if(this.menues_saved_filters_popup && this.menues_explore_popup){
+            if(forcePinned && this._svsListPinned){
+                this._pinSvsList(true);
+            }
             if(!this._svsListPinned){
                 this.menues_saved_filters_popup.hide();
                 this.closeFacetedWizard();    
@@ -1456,6 +1523,8 @@ $.widget( "heurist.slidersMenu", {
             this.menues_explore_popup.hide(); 
                
             this._current_explore_action = null;
+            this._explore_popup_fixed = false;
+            this._fixed_explore_action = null;
             this.closeSavedSearch();
         }
         
@@ -1650,10 +1719,15 @@ $.widget( "heurist.slidersMenu", {
                 mouseleave: function(e){
                         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
                         //this._resetCloseTimers();//reset
-                        this._myTimeoutId2 = setTimeout(function(){
-                                    that._closeExploreMenuPopup();
-                                },  this._delayOnCollapse_ExploreMenu); //600
+                        if (!this._isExplorePopupSticky()) {
+                            this._myTimeoutId2 = setTimeout(function(){
+                                        that._closeExploreMenuPopup();
+                                    },  this._delayOnCollapse_ExploreMenu); //600
+                        }
                 }
+            });
+            this._on(this.menues['explore'].find('li[data-action-popup="searchByEntity"], li[data-action-popup="search_filters"], li[data-action-popup="search_rules"]'), {
+                click: this._mousein_ExploreMenu
             });
             this._on(this.menues['explore'].find('li[data-action-popup="recordAddSettings"]'), {
                 click: this._mousein_ExploreMenu
@@ -1685,7 +1759,12 @@ $.widget( "heurist.slidersMenu", {
             
             
             this._on(this.menues['explore'].find('#search_filters_pin'), {
-                click: ()=>this._pinSvsList()
+                click: function(event){
+                    event.stopPropagation();
+                    that._explore_popup_fixed = false;
+                    that._fixed_explore_action = null;
+                    that._pinSvsList();
+                }
             });
            
             //init 
