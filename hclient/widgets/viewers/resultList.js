@@ -3264,7 +3264,7 @@ $.widget( "heurist.resultList", {
     //
     // render the given page (called from navigator and on search finish)
     //
-    , _renderPage: function(pageno, recordset, is_retained_selection){
+    , _renderPage: function(pageno, recordset, is_retained_selection, preserve_selection_state){
 
         let len, pagesize;
         let that = this;
@@ -3317,7 +3317,19 @@ $.widget( "heurist.resultList", {
         let selected_recid = this.getSelected(true);
         selected_recid = (selected_recid && selected_recid.length>0)?selected_recid[0]:0;
 
+        // IntersectionObserver can asynchronously replace stub records with full
+        // records by calling _renderPage() via _onGetFullRecordData().  That
+        // redraw must not reset the user's current selection anchor, otherwise
+        // a later shift-click has no stable start point.
+        const preserve_selection = preserve_selection_state === true;
+        const preserved_last_selected = preserve_selection ? this._lastSelectedIndex : null;
+        const preserved_selection = preserve_selection ? this.getSelected(true) : null;        
+        
         this.clearAllRecordDivs(null);
+        
+        if(preserve_selection){
+            this._lastSelectedIndex = preserved_last_selected;
+        }        
         
         let html = '', html_groups = {}, tab_header = '', stitle;
         for(; (idx<len && this._count_of_divs<pagesize); idx++) {
@@ -3581,6 +3593,15 @@ $.widget( "heurist.resultList", {
         }
         
         let $allrecs = this.div_content.find('.recordDiv');
+       
+        if(preserve_selection && window.hWin.HEURIST4.util.isArrayNotEmpty(preserved_selection)){
+            preserved_selection.forEach(function(recID){
+                that.div_content.find('.recordDiv[recid="'+recID+'"]').addClass('selected');
+            });
+            if(preserved_last_selected!=null){
+                that.div_content.find('.recordDiv[recid="'+preserved_last_selected+'"]').addClass('selected_last');
+            }
+        }
         
         if(this.options.view_mode == 'horizontal'){ // || this.options.view_mode == 'icons_list'
             let h = this.div_content.height();
@@ -3910,7 +3931,7 @@ $.widget( "heurist.resultList", {
                     }        
                 }
 
-                this._renderPage( this.current_page );
+                this._renderPage( this.current_page, null, false, true );
             }
 
         }else{
