@@ -1910,6 +1910,32 @@ background: #8ea9b9
 .ent_footer{bottom:0px;height:2.6em;}
 /* Additional stylings for CSS footers */
 .static_footer{position: static;}
+#page-footer {
+    box-sizing: border-box;
+}
+
+#page-footer .footer-flex,
+#main-host {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 1rem;
+    justify-content: center;
+}
+
+#page-footer .footer-item,
+#main-host > div {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    white-space: normal;
+}
+
+#page-footer img {
+    max-height: 50px;
+    width: auto;
+}
+/*
 .ent_footer #main-host,
 .static_footer #main-host {
     display: flex;
@@ -1925,6 +1951,7 @@ background: #8ea9b9
 .static_footer #main-host {
     justify-content: center;
 }
+*/
 
 
 .ent_wrapper.editor fieldset > div{
