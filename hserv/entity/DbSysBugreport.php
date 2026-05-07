@@ -406,12 +406,26 @@ class DbSysBugreport extends DbEntityBase
             // loadRemoteURLContentWithRange() fetches the JSON response (with timeout 60s).
             $url = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php?' . http_build_query($params);
 
+            global $glb_curl_code, $glb_curl_error;
             $res = loadRemoteURLContentWithRange($url, null, true, 60);
 
-            $json = json_decode($res, true);
-            $res = json_last_error() === JSON_ERROR_NONE
-                    ? $json
-                    : ['status' => HEURIST_UNKNOWN_ERROR, 'message' => 'An unknown response was returned from the main Heurist server.<br>Please, ' . CONTACT_HEURIST_TEAM . ' directly'];
+            if($res === false){
+                $status = in_array($glb_curl_code, [
+                    HEURIST_INVALID_REQUEST,
+                    HEURIST_SYSTEM_FATAL,
+                    HEURIST_NETWORK_ERROR
+                ], true) ? $glb_curl_code : HEURIST_NETWORK_ERROR;
+
+                $message = !empty($glb_curl_error)
+                    ? 'Unable to contact the main Heurist server: ' . $glb_curl_error
+                    : 'Unable to contact the main Heurist server.';
+                $res = ['status' => $status, 'message' => $message . '<br>Please, ' . CONTACT_HEURIST_TEAM . ' directly'];
+            }else{
+                $json = json_decode($res, true);
+                $res = json_last_error() === JSON_ERROR_NONE
+                        ? $json
+                        : ['status' => HEURIST_ERROR, 'message' => 'An invalid response was returned from the main Heurist server.<br>Please, ' . CONTACT_HEURIST_TEAM . ' directly'];
+            }
         }
 
         // If we auto-logged-in as 'extern' earlier, we now logout to avoid persisting that session.
@@ -470,8 +484,8 @@ class DbSysBugreport extends DbEntityBase
         }else{
 
             // Generic failure path: if no email was sent, surface an error encouraging direct contact.
-            $error_msg = 'An unknown error has prevented Heurist from creating the ticket.<br>If you do not receive an email confirming the ticket, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
-            $email_already_sent || $this->system->addError(HEURIST_UNKNOWN_ERROR, $error_msg);
+            $error_msg = 'Failed to process bug report request.<br>If you do not receive an email confirming the ticket, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
+            $email_already_sent || $this->system->addError(HEURIST_ERROR, $error_msg);
             return false;
         }
     }

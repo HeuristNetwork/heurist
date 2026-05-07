@@ -125,9 +125,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
             
             if(response.status==window.hWin.ResponseStatus.SYSTEM_FATAL
-            || response.status==window.hWin.ResponseStatus.SYSTEM_CONFIG){
+            || response.status==window.hWin.ResponseStatus.SYSTEM_CONFIG
+            || response.status==window.hWin.ResponseStatus.NETWORK_ERROR){
 
-                let def_title = window.hWin.ResponseStatus.SYSTEM_CONFIG ? 'System misconfiguration' : 'Fatal error';
+                let def_title = window.hWin.ResponseStatus.SYSTEM_FATAL ? 'Fatal error' :'System misconfiguration';
                 dlg_title = window.hWin.HEURIST4.util.isempty(dlg_title) ? def_title : dlg_title;
                 msg = msg + '<br><br>'+window.hWin.HR('Error_System_Config');
 

@@ -94,7 +94,8 @@ if(!window.hWin.ResponseStatus){
             DB_ERROR: "database",          // A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
             UNKNOWN_ERROR: "unknown",      // A request could not be processed due to a server error. The request may succeed if you try again.
             SYSTEM_CONFIG: "syscfg",       // System NON-fatal configuration. Contact system admin
-            SYSTEM_FATAL: "system"         // System fatal configuration. Contact system admin
+            SYSTEM_FATAL: "system",         // System fatal configuration. Contact system admin
+            NETWORK_ERROR: "network"
     };
     
 }
