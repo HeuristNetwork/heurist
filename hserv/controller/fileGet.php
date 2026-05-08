@@ -95,7 +95,7 @@ if($filename){ //download from scratch (for csv import)
             if (!$handle) {
                 $s = null;
                 if (! file_exists($file_read)){
-                     $s = ' does not exist.<br><br>'
+                     $s = ' does not exist.This can be caused by bad characters in the source file name eg. use of = and unusual punctuation.<br><br>'
                     .'Please clear your browser cache and try again. if problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
                 }elseif (! is_readable($file_read)) {
                     $s = ' is not readable';
