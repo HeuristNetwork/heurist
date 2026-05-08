@@ -72,8 +72,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.options.use_cache = false;
        
         this.options.edit_need_load_fullrecord = true;
-        this.options.edit_height = 700;
-        this.options.edit_width = 950;
+        this.options.edit_height = 800;
+        this.options.edit_width = 1000;
         this.options.height = 800;
         
         //this.options.edit_addrecordfirst = true; //special behaviour - show editor first

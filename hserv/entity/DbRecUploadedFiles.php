@@ -177,6 +177,7 @@ class DbRecUploadedFiles extends DbEntityBase
         $needCheck = false;
         $needCalcFields = false;
         $calculatedFields = null;
+        $multiLanguage = false;
 
         //compose SELECT it depends on param 'details' ------------------------
         
@@ -199,6 +200,7 @@ class DbRecUploadedFiles extends DbEntityBase
             if($detailsMode!=='mediaViewer'){
                 $needRelations = true;
                 $needCalcFields = true;
+                $multiLanguage = $this->multilangFields;
             }
         }else{
             $needCheck = true;
@@ -258,7 +260,7 @@ class DbRecUploadedFiles extends DbEntityBase
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
 
-         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName'], $calculatedFields);
+         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName'], $calculatedFields, $multiLanguage);
 
         //find related records
         if($needRelations && !(is_bool($result) && $result==false) && !empty($result['order']) ){
@@ -1186,6 +1188,23 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $this->system->addError(HEURIST_ERROR, 'Data is in invalid format, ' . json_last_error_msg());
                 $ret = false;
             }
+        }
+        elseif(@$this->data['get_translations']){
+
+            $field = array_key_exists('search_by', $this->data) ? $this->data['search_by'] : 'ulf_ID';
+            $field = $field != 'ulf_ID' && $field != 'rec_ID' ? 'ulf_ID' : $field;
+
+            $ids = $this->data['get_translations'];
+            if($field == 'rec_ID'){
+                $ids = mysql__select_list2($mysqli, "SELECT dtl_UploadedFileID FROM recDetails WHERE dtl_RecID = {$ids[0]} AND dtl_UploadedFileID IS NOT NULL");
+            }
+            if(is_array($ids)){
+                $ids = implode(',', $ids);
+            }elseif(!is_int($ids) || $ids < 0){
+                $ids = '';
+            }
+
+            $ret = $this->getTranslations($ids);
         }
 
         mysql__end_transaction($mysqli, $ret, $keep_autocommit);

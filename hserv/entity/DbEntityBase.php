@@ -1491,5 +1491,93 @@ abstract class DbEntityBase
         }
     }
 
+    /**
+     * Retrieves entity translations from the `defTranslations` table.
+     *
+     * @param int|string|array|null $recordIDs A single record ID, an array of record IDs, or a comma-separated string of record IDs
+     *                                   to filter translations. If null, retrieves for all records matching the current entity.
+     * @param string|array|null $fieldNames Name of, comma-separated list, or array of entity field to retrieve translations for. Empty string or null will retrieve all translations.
+     * @return array{entityName: string, fields: string[], order: array, reccount: int, records: array}
+     */
+    protected function getTranslations($recordIDs = null, $fieldNames = []){
+
+        $fields = ['trn_ID', 'trn_Code', 'trn_Source', 'trn_LanguageCode', 'trn_Translation'];
+
+        $recordSet = [
+            'reccount' => 0,
+            'fields' => $fields,
+            'records' => [],
+            'order' => [],
+            'entityName' => $this->config['entityName']
+        ];
+
+        if(empty($this->multilangFields)){
+            return $recordSet;
+        }
+
+        $mysqli = $this->system->getMysqli();
+
+        $prefix = $this->config['tablePrefix'];
+
+        $preparedFields = [];
+        $fieldNames = is_string($fieldNames) && strpos($fieldNames, ',') ? explode(',', $fieldNames) : $fieldNames;
+        if(is_array($fieldNames) && !empty($fieldNames)){
+            foreach($fieldNames as $fieldName){
+                $fieldName = USanitize::cleanupSpaces(USanitize::sanitizeString($fieldName, false, false), true);
+                if($fieldName === '' || !in_array($fieldName, $this->multilangFields)){
+                    continue;
+                }
+                $preparedFields[] = $fieldName;
+            }
+        }else{
+            $fieldNames = USanitize::cleanupSpaces(USanitize::sanitizeString($fieldNames, false, false), true);
+            $preparedFields = in_array($fieldNames, $this->multilangFields) ? [$fieldNames] : [];
+        }
+
+        $where_clause = '';
+        if(!is_array($preparedFields) || empty($preparedFields)){
+            $where_clause = "trn_Source LIKE '{$prefix}_%'";
+        }elseif(count($preparedFields) === 1){
+            $where_clause = "trn_Source = '{$preparedFields[0]}'";
+        }else{
+            $where_clause = "trn_Source IN ('" . implode("','", $preparedFields) . "')";
+        }
+
+        if(!empty($recordIDs)){ // add term id filter
+
+            $code_clause = '';
+            $recordIDs = prepareIds($recordIDs);
+
+            if(\count($recordIDs) === 1){
+                $code_clause = "trn_Code = {$recordIDs[0]}";
+            }elseif(\count($recordIDs) > 0){
+                $code_clause = 'trn_Code IN (' . implode(',', $recordIDs) . ')';
+            }
+
+            $where_clause .= empty($code_clause) ? '' : SQL_AND . $code_clause;
+        }
+
+        $query = <<<QUERY
+        SELECT trn_ID, trn_Code, trn_Source, trn_LanguageCode, trn_Translation 
+        FROM defTranslations 
+        WHERE $where_clause
+        QUERY;
+
+        $records = [];
+        $res = $mysqli->query($query);
+        if($res){
+
+            while($row = $res->fetch_row()){
+                $records[$row[0]] = $row;
+            }
+        }
+
+        $recordSet['reccount'] = \count($records);
+        $recordSet['records'] = $records;
+        $recordSet['order'] = array_keys($records);
+
+        return $recordSet;
+    }
+
 }
 ?>

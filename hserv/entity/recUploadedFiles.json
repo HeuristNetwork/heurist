@@ -104,8 +104,10 @@
                         "dty_Type":"freetext",
                         "rst_DisplayName":"Name/caption:",
                         "dty_Size":255,
-                        "rst_DisplayWidth":40,
-                        "rst_DisplayHelpText": "A user-entered textual name of the file or image."
+                        "rst_DisplayWidth":80,
+                        "rst_DisplayHelpText": "A user-entered textual name of the file or image.",
+                        "rst_MaxValues":1,
+                        "rst_MultiLang":1
                     }
                 },
                 {
@@ -115,7 +117,9 @@
                         "rst_DisplayName":"Description:",
                         "dty_Size":65535,
                         "rst_DisplayWidth":"70",
-                        "rst_DisplayHelpText": "A user-entered copyright noticve and/or textual description of the file or image contents. URLs are recognised."
+                        "rst_DisplayHelpText": "A user-entered copyright noticve and/or textual description of the file or image contents. URLs are recognised.",
+                        "rst_MaxValues":1,
+                        "rst_MultiLang":1
                     }
                 },
                 {

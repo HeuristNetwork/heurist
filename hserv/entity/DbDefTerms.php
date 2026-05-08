@@ -1077,7 +1077,7 @@ class DbDefTerms extends DbEntityBase
                 $ids = '';
             }
 
-            return $this->_getTermTranslations(false, $ids);//see dbsData.php
+            return $this->getTranslations($ids, @$this->data['field']);
 
         }
         elseif(@$this->data['set_translations']){
@@ -1093,59 +1093,6 @@ class DbDefTerms extends DbEntityBase
         mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
-    }
-
-    /**
-     * Retrieves term translations from the `defTranslations` table.
-     *
-     * @param bool $label_only If true, only retrieves translations for 'trm_Label'. Otherwise, for all 'trm_%' sources.
-     * @param string|array|null $trm_ids A single term ID, an array of term IDs, or a comma-separated string of term IDs
-     *                                   to filter translations. If null, retrieves for all terms matching $label_only criteria.
-     * @return array An associative array representing a recordset of translations,
-     *               with keys 'reccount', 'fields', 'records', 'order', 'entityName'.
-     */
-    private function _getTermTranslations($label_only = true, $trm_ids = null){
-
-        $mysqli = $this->system->getMysqli();
-
-        $fields = array('trn_ID', 'trn_Code', 'trn_Source', 'trn_LanguageCode', 'trn_Translation');
-        $records = array();
-
-        $where_clause = $label_only ? 'trn_Source = "trm_Label"' : 'trn_Source LIKE "trm_%"';
-
-        if(!empty($trm_ids)){ // add term id filter
-
-            $code_clause = '';
-            if(is_array($trm_ids)){
-                $trm_ids = prepareIds($trm_ids);
-
-                $code_clause = !empty($trm_ids) ? 'trn_Code IN (' . implode(',', $trm_ids) . ')' : '';
-            }elseif(is_int($trm_ids) && $trm_ids > 0){
-                $code_clause = 'trn_Code = ' . intval($trm_ids);
-            }
-
-            $where_clause .= empty($code_clause) ? '' : SQL_AND . $code_clause;
-        }
-
-        $query = 'SELECT trn_ID, trn_Code, trn_Source, trn_LanguageCode, trn_Translation '
-        . 'FROM defTranslations '
-        . 'WHERE ' . $where_clause;
-
-        $res = $mysqli->query($query);
-        if($res){
-
-            while($row = $res->fetch_row()){
-                $records[$row[0]] = $row;
-            }
-        }
-
-        return array(
-            'reccount'=>count($records),
-            'fields'=>$fields,
-            'records'=>$records,
-            'order'=>array_keys($records),
-            'entityName'=>$this->config['entityName']
-        );
     }
 
     /**

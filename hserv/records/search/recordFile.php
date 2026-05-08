@@ -228,14 +228,12 @@ function fileRenameToOriginal($system, $orig_name, $new_name=null){
  * @param \hserv\System $system The Heurist system object.
  * @param int|string|array $file_ids A single file ID (numeric or obfuscated string),
  *                                   a comma-separated string of IDs, or an array of IDs.
- * @param bool $all_fields (Currently not fully implemented for specific field selection,
- *                         though original comment mentioned `ulf_Thumbnail` which is no longer in DB).
- *                         If true, might imply fetching more fields in future, but currently fetches a fixed set.
+ * @param string|null $language Language for translatable values
  * @return array|false An array of associative arrays, each representing a file's record,
  *                     or false if no file IDs provided or a database error occurs.
  *                     Returns an empty array if no files are found matching the IDs.
  */
-function fileGetFullInfo($system, $file_ids, $all_fields=false){
+function fileGetFullInfo($system, $file_ids, $language = 'def'){
 
     // @todo Use prepareIds() for numeric IDs and a similar function for string IDs if needed.
     if(is_string($file_ids)){
@@ -243,6 +241,8 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
     }elseif(!is_array($file_ids)){
         $file_ids = array($file_ids);
     }
+
+    $language = getLangCode3($language) ?? 'def';
 
     if(!isEmptyArray($file_ids)){
 
@@ -310,20 +310,18 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
             $result = array();
 
             while ($row = $res->fetch_assoc()){
-                array_push($result, $row);
 
-                /*
-                $filename = $row[0];
-                $extURL = $row[1];
-                $mimeType = $row[2];
+                $ulfID = $row['ulf_ID'];
+                if($language && $language !== 'def'){
 
-                if( $filename && file_exists($filename) ){
-                array_push($result, $filename);
-                }elseif($extURL && $type!='local'){
-                array_push($result, $extURL);
+                    $translatedCaption = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Caption' AND trn_Code = {$ulfID} AND trn_LanguageCode = '{$language}'");
+                    $translatedDesc = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Description' AND trn_Code = {$ulfID} AND trn_LanguageCode = '{$language}'");
+
+                    $row['ulf_Caption'] = !empty($translatedCaption) ? $translatedCaption : $row['ulf_Caption'];
+                    $row['ulf_Description'] = !empty($translatedDesc) ? $translatedDesc : $row['ulf_Description'];
                 }
-                */
 
+                array_push($result, $row);
             }
             $res->close();
             return $result;
@@ -1350,7 +1348,7 @@ function fileGetMetadata($fileinfo){
 function fileCreateThumbnail( $system, $fileid, $is_download ){
 
     $img = null; //image to be resized
-    $file = fileGetFullInfo($system, $fileid, true); // Request all fields just in case
+    $file = fileGetFullInfo($system, $fileid);
     $placeholder = '../../hclient/assets/100x100.gif';
     $thumbnail_file = null;
     $orientation = 0;

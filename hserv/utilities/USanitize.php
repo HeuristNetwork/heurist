@@ -419,18 +419,22 @@ class USanitize {
      * Removes leading, trailing, and multiple consecutive spaces/tabs from a string or an array of strings.
      *
      * @param string|array $value The input string or array of strings to clean up.
+     * @param bool $removeSpaces Whether to completely remove the spaces
      * @return string|array The cleaned string or array of strings.
      */
-    public static function cleanupSpaces($value){
+    public static function cleanupSpaces($value, $removeSpaces = false){
 
-        if(is_string($value)){
-            $value = mb_ereg_replace('[ \t]{2,}', ' ', $value);// strip double spaces and tabs
+        $regex = $removeSpaces ? '\s' : '[ \t]{2,}';
+        $replace = $removeSpaces ? '' : ' ';
+
+        if(\is_string($value)){
+            $value = mb_ereg_replace($regex, $replace, $value);// strip double spaces and tabs
             return function_exists('super_trim') ? super_trim($value) : trim($value);
         }
 
-        if(is_array($value)){ // need to traverse through the array
+        if(\is_array($value)){ // need to traverse through the array
             foreach($value as $idx => $val){
-                $value[$idx] = self::cleanupSpaces($val);
+                $value[$idx] = self::cleanupSpaces($val, $removeSpaces);
             }
         }
 

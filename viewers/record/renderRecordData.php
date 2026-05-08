@@ -284,6 +284,7 @@ if(!$system->hasAccess()){
             var database = '<?php echo $system->dbname();?>';
             var hint_popup = null, $map_frame = null;
             var connectedRecsCount = 0;
+            var language = '<?php echo $lang; ?>';
 
             function zoomInOut(obj,thumb,url) {
                 var thumb = thumb;
@@ -887,7 +888,7 @@ if(!$system->hasAccess()){
                     }
                     let ulf_recID = ele.attr('data-id');
 
-                    let url = `${baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${database}&recID=${ulf_recID}`;
+                    let url = `${baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${database}&recID=${ulf_recID}&lang=${language}`;
 
                     window.open(url, '_blank');
                 };
@@ -2156,9 +2157,9 @@ function print_public_details($bib) {
                      $ruf_entity = new DbRecUploadedFiles($system);
                      $fileinfo = $ruf_entity->registerURL($bd['val'], false, $bd['dtl_ID']);
                 }else{
-                    $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']);//see recordFile.php
+                    $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID'], $primary_language);//see recordFile.php
                     if(is_array($listpaths) && !empty($listpaths)){
-                        $fileinfo = $listpaths[0];//
+                        $fileinfo = $listpaths[0];
                     }
                 }
 
@@ -2271,8 +2272,8 @@ function print_public_details($bib) {
                     }
                     $geoimage =
                     "<img class='geo-image' style='vertical-align:top;' src='".HEURIST_BASE_URL
-                    ."hclient/assets/geo.gif' onmouseout='{if(typeof recviewer_hideMap === \"function\"){recviewer_hideMap();}else if(typeof mapViewer !== 'undefined'){mapViewer.hide();}}' "
-                    ."onmouseover='{if(typeof recviewer_showMap === \"function\"){recviewer_showMap(event,".$bib['rec_ID'].");}else if(typeof mapViewer !== 'undefined'){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
+                    ."hclient/assets/geo.gif' onmouseout='{if(typeof recviewer_hideMap === \"function\"){recviewer_hideMap();}else if(typeof mapViewer !== \"undefined\"){mapViewer.hide();}}' "
+                    ."onmouseover='{if(typeof recviewer_showMap === \"function\"){recviewer_showMap(event,".$bib['rec_ID'].");}else if(typeof mapViewer !== \"undefined\"){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
 
                     $bd['val'] = $geoimage.$bd['val'];
 

@@ -27,6 +27,9 @@ if(!$database || !$ulfID){
     exit;
 }
 
+$language = array_key_exists('lang', $requestParameters) ? $requestParameters['lang'] : 'FRE';
+$language = getLangCode3($language);
+
 $ulfQuery = '';
 $ulfIDs = prepareIds($ulfID);
 if(isPositiveInt($ulfID)){
@@ -53,14 +56,27 @@ $ulfRecords = mysql__select_assoc($mysqli, "SELECT * FROM recUploadedFiles WHERE
 $files = [];
 foreach($ulfRecords as $ulfRec){
 
+    $fileID = $ulfRec['ulf_ID'];
+
+    $caption = $ulfRec['ulf_Caption'] ?? '';
+    $description = $ulfRec['ulf_Description'] ?? '';
+    if($language && $language !== 'def'){
+
+        $translatedCaption = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Caption' AND trn_Code = {$fileID} AND trn_LanguageCode = '{$language}'");
+        $translatedDesc = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Description' AND trn_Code = {$fileID} AND trn_LanguageCode = '{$language}'");
+
+        $caption = !empty($translatedCaption) ? $translatedCaption : $caption;
+        $description = !empty($translatedDesc) ? $translatedDesc : $description;
+    }
+
     $filename = !empty($ulfRec['ulf_ExternalFileReference']) ? $ulfRec['ulf_ExternalFileReference'] : $ulfRec['ulf_OrigFileName'];
     $files[] = [
         'type' => 'image',
         'url' => HEURIST_BASE_URL . "?db={$database}&file={$ulfRec['ulf_ObfuscatedFileID']}",
         'buildPyramid' => false,
         'name' => $filename,
-        'caption' => $ulfRec['ulf_Caption'],
-        'desc' => $ulfRec['ulf_Description'],
+        'caption' => $caption,
+        'desc' => $description,
         'copyright' => $ulfRec['ulf_Copyright'],
         'owner' => $ulfRec['ulf_Copyowner'],
         'isManifest' => $ulfRec['ulf_OrigFileName'] == '_iiif'
