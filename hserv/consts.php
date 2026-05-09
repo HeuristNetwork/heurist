@@ -154,28 +154,29 @@ $date = new DateTime(); // Unused in current scope, potentially for future use o
 define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION);
 
 // API Response Status Constants (align with ResponseStatus in hapi.js)
+/** @const string API Status: Request successful (HTTP 200). */
+define("HEURIST_OK", "ok");
 /** @const string API Status: Invalid request (HTTP 400). */
 define("HEURIST_INVALID_REQUEST", "invalid");
 /** @const string API Status: Resource not found (HTTP 404). */
 define("HEURIST_NOT_FOUND", "notfound");
-/** @const string API Status: General error (e.g., wrong data, file I/O) (HTTP 500). */
-define("HEURIST_ERROR", "error");
-/** @const string API Status: Request successful (HTTP 200). */
-define("HEURIST_OK", "ok");
 /** @const string API Status: Request denied (insufficient rights, etc.) (HTTP 403). */
 define("HEURIST_REQUEST_DENIED", "denied");
 /** @const string API Status: Action blocked due to conflict (HTTP 409). */
 define("HEURIST_ACTION_BLOCKED", "blocked");
-/** @const string API Status: Unknown server error (HTTP 500). */
-define("HEURIST_UNKNOWN_ERROR", "unknown");
+
+/** @const string API Status: General error (e.g., wrong data, file I/O) (HTTP 500). */
+define("HEURIST_ERROR", "error");
 /** @const string API Status: Database error on server (HTTP 500). */
 define("HEURIST_DB_ERROR", "database");
 /** @const string API Status: System configuration error (non-fatal) (HTTP 500). */
 define("HEURIST_SYSTEM_CONFIG", "syscfg");
 /** @const string API Status: System configuration error (fatal) (HTTP 500). */
 define("HEURIST_SYSTEM_FATAL", "system");
-
+/** @const string API Status: Network (CURL requests) outage error (fatal) (HTTP 500). */
 define("HEURIST_NETWORK_ERROR", "network");
+/** @const string API Status: Unknown server error (HTTP 500). TO BE REMOVED */
+define("HEURIST_UNKNOWN_ERROR", "unknown");
 
 
 // Email Configuration (values from configIni.php or defaults)
