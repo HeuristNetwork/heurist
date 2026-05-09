@@ -197,7 +197,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit)\/.*/)>=0){
                 installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit)\/.*/, '') + '/';
             }else{
-                installDir = script_name.replace(/(((\?|admin|documentation|export|hapi|hclient|hserv|import|startup|redirects|viewers|help|ext|external)\/.*)|(index.*|test.php))/, "");
+                installDir = script_name.replace(/(((\?|admin|documentation|export|hapi|hclient|hserv|import|startup|redirects|viewers|help|ext|external|web|website)\/.*)|(index.*|test.php))/, "");
             }
         }
 
