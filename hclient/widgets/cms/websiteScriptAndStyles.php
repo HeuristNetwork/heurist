@@ -954,9 +954,9 @@ function afterPageLoad(document, pageid, eventdata){
             spath === '/' ||
             /^\/\d+\/?$/.test(spath) ||
             /^\/\d+\/\d+\/?$/.test(spath);
-
+            
         // If this is an own-domain website (no db/web prefix), keep numeric pretty URLs
-        if (isOwnDomainNumeric && !/\/([A-Za-z0-9_]+)\/(website|web)\//.test(spath)) {
+        if (isOwnDomainNumeric && !/\/([A-Za-z0-9_-]+)\/(website|web)\//.test(spath)) {
 
             // Always produce "/<website>/<pageid>" for own-domain numeric routes,
             // except when current page is the home page, then "/<website>/".
@@ -998,16 +998,19 @@ function afterPageLoad(document, pageid, eventdata){
                 operator = '&';
             }
 
-        } else if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 ){
+        } else if(spath.search(/\/([A-Za-z0-9_-]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 || 
+                    (/^\/h7-alpha\/\d+(\/\d+)?\/?$/.test(spath))){
             //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
 
             const org_spath = spath;
 
             //remove after web
-            if(spath.indexOf('/website/')>0){
+            if(spath.indexOf('/website/')>=0){
                 spath = spath.substring(0,spath.indexOf('/website/')+9);
-            }else{
+            }else if(spath.indexOf('/web/')>=0){
                 spath = spath.substring(0,spath.indexOf('/web/')+5);
+            }else if(spath.indexOf('/h7-alpha/')>=0){
+                spath = spath.substring(0,spath.indexOf('/h7-alpha/')+10);
             }
             
             surl = spath + home_page_record_id;

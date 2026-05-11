@@ -210,7 +210,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         const pathOnly = window.hWin.location.pathname || '/';
         if (/^\/\d+(\/\d+)?\/?$/.test(pathOnly)) {
             installDir = '/heurist/';
-        }     
+        }else if (/^\/h7-alpha\/\d+(\/\d+)?\/?$/.test(pathOnly)) {
+            installDir = '/h7-alpha/';
+        }
                 
         
         // critical: root pretty URLs on mapped domains must use production installDir
