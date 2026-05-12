@@ -929,7 +929,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
                 continue;
             }
 
-            if(parseInt(values[idx]) > 0){
+            if(this.$H.isPositiveInt(values[idx]) > 0){
                 new_values.push(values[idx]);
             }
         }

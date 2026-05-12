@@ -144,6 +144,7 @@
                 $val = trim(strip_tags($val));
             }
 
+            $pos = 0;
             if(substr($val,0,2)=='*:'){
                 $lang = 'ALL';
                 $pos = 2;
@@ -184,7 +185,7 @@
      * Retrieves a translation for a given input, typically used as a Smarty modifier.
      * It can handle translations for Heurist terms (labels or descriptions) or regular record detail fields.
      *
-     * @global Smarty|null $smarty The Smarty template engine instance.
+     * @global \Smarty\Smarty|null $smarty The Smarty template engine instance.
      * @param string|array $input The input value to translate. Can be a string (for record details) or an array (for terms).
      *                            If an array for a term, it should contain 'id' and the field to translate (e.g., 'label').
      * @param string $lang The target language code (2 or 3 letters).
@@ -201,24 +202,39 @@
         $lang = getLangCode3($lang);
 
         //detect if it is usual record or term
-        if(is_array($input) && (@$input['term'] || (is_array(@$input[0]) && @$input[0]['term']))){
+        $isArray = !isEmptyArray($input);
+        if($isArray && (@$input['term'] || is_array(@$input[0]) && @$input[0]['term'])){
 
             if($field==null) {$field = 'label';}
 
-            $trm = @$input[0]?$input[0]:$input;
+            $trm = @$input[0] ? $input[0] : $input;
 
             if(isset($smarty)){
-
-                //$heuristRec = @$smarty['tpl_vars']['heurist']['value'];
 
                 $heuristRec = $smarty->getTemplateVars('heurist');
                 if($heuristRec){
                     return $heuristRec->getTranslation('trm', $trm['id'], $field, $lang);
                 }
             }
-            return $trm[$field];
-        }
 
+            return $trm[$field];
+
+        }elseif($isArray && (@$input['ulf_ID'] || is_array(@$input[0]) && @$input[0]['ulf_ID'])){
+
+            $field = $field === null || strpos($field, 'cap') !== false ? 'ulf_Caption' : 'ulf_Description';
+
+            $file = @$input[0] ? $input[0] : $input;
+
+            if(isset($smarty)){
+
+                $heuristRec = $smarty->getTemplateVars('heurist');
+                if($heuristRec){
+                    return $heuristRec->getTranslation('ulf', $file['ulf_ID'], $field, $lang);
+                }
+            }
+
+            return $file[$field];
+        }
 
         // this is record detail field;
         $res = getCurrentTranslation($input, $lang);

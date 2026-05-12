@@ -406,7 +406,7 @@ function handleSettingsInUI() {
 
 
     let fontSize = getSetting('setting_fontsize', 12);
-    if(isNaN(fontSize) || fontSize<8) fontSize = 8;  //min
+    if(Number.isNaN(fontSize) || fontSize<8) fontSize = 8;  //min
     else if(fontSize>25) fontSize = 25; //max
 
     $('#fontSize').val(fontSize).on('change.visualiser', function(event){ // Added event parameter

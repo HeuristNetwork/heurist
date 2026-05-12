@@ -423,7 +423,7 @@ function getLineWidth(count) {
  * @returns {number} The calculated marker size.
  */
 function getMarkerWidth(count) {
-    if(isNaN(count)) count = 0;
+    if(Number.isNaN(count)) count = 0;
     return 4 + getLineWidth(count)*10; // Marker size scales with line width
 }
 
@@ -526,14 +526,14 @@ function addContainer() {
     let translateY = getSetting('setting_translatey', 200);
     
     let s ='';
-    if(isNaN(translateX) || isNaN(translateY) ||  translateX==null || translateY==null ||
+    if(Number.isNaN(translateX) || Number.isNaN(translateY) ||  translateX==null || translateY==null ||
         Math.abs(translateX)==Infinity || Math.abs(translateY)==Infinity){
         
         translateX = 0;
         translateY = 0;
     }
     s = "translate("+translateX+", "+translateY+")";    
-    if(!(isNaN(scale) || scale==null || Math.abs(scale)==Infinity || scale < 0.5) ){
+    if(!(Number.isNaN(scale) || scale==null || Math.abs(scale)==Infinity || scale < 0.5) ){
         s = s + "scale("+scale+")";
     }
 
@@ -637,7 +637,7 @@ function updateScalableElements(toScale = 'all'){
                     continue;
                 }
         
-                const count = parseInt(data[0]['targetcount']);
+                const count = Number.parseInt(data[0]['targetcount']);
                 let width = (getLineWidth(count) + thickness) * factor; // base line width
                 width /= scale; // scaled width
         
@@ -682,14 +682,14 @@ function zoomed() {
     let notDefined = false;
     let transform = "translate(0,0)";
     if(window.d3.event.translate !== undefined) {
-        if(isNaN(window.d3.event.translate[0]) || !isFinite(window.d3.event.translate[0])) {           
+        if(Number.isNaN(window.d3.event.translate[0]) || !Number.isFinite(window.d3.event.translate[0])) {           
             window.d3.event.translate[0] = 0;
             notDefined = true;
         }else{
             putSetting('setting_translatex', window.d3.event.translate[0]); 
         }
 
-        if(isNaN(window.d3.event.translate[1]) || !isFinite(window.d3.event.translate[1])) {           
+        if(Number.isNaN(window.d3.event.translate[1]) || !Number.isFinite(window.d3.event.translate[1])) {           
             window.d3.event.translate[1] = 0;
             notDefined = true;
         }else{
@@ -702,7 +702,7 @@ function zoomed() {
     }
 
     //keep current setting Scale
-    if(!isNaN(window.d3.event.scale) && isFinite(window.d3.event.scale) && scale != 0){
+    if(!Number.isNaN(window.d3.event.scale) && Number.isFinite(window.d3.event.scale) && scale != 0){
         putSetting('setting_scale', scale);
         transform = transform + "scale("+scale+")";
     }
@@ -714,7 +714,7 @@ function onZoom( transform ){
     window.d3.select("#container").attr("transform", transform);
     
     let scale = this.zoomBehaviour.scale();
-    if(isNaN(scale) || !isFinite(scale) || scale==0) scale = 1;
+    if(Number.isNaN(scale) || !Number.isFinite(scale) || scale==0) scale = 1;
 }
 
 //
@@ -735,7 +735,7 @@ console.log('DBG. zoomToFit');
         midY = box.y + height / 2;
 
     let scale = getFitToExtentScale();
-    if (scale == null && isNaN(Number(scale)) ) return; // nothing to fit
+    if (scale == null && Number.isNaN(Number(scale)) ) return; // nothing to fit
 
     let translate = [
         fullWidth  / 2 - scale * midX,
@@ -787,9 +787,9 @@ function zoomBtn(zoom_in){
         factor = zoom_in ? 1.3 : 1/1.3,
         target_scale = scale * factor;
 
-    if(isNaN(x) || !isFinite(x)) x = 0;
-    if(isNaN(y) || !isFinite(y)) y = 0;
-    if(isNaN(scale) || !isFinite(scale) || scale === 0) scale = 1;
+    if(Number.isNaN(x) || !Number.isFinite(x)) x = 0;
+    if(Number.isNaN(y) || !Number.isFinite(y)) y = 0;
+    if(Number.isNaN(scale) || !Number.isFinite(scale) || scale === 0) scale = 1;
 
     // If we're already at an extent, done
     if (target_scale === extent[0] || target_scale === extent[1]) { return false; }
@@ -818,8 +818,8 @@ function zoomBtn(zoom_in){
 * Constructs a force layout
 */
 function addForce() {
-    let width = parseInt(svg.style("width"));
-    let height = parseInt(svg.style("height"));
+    let width = Number.parseInt(svg.style("width"));
+    let height = Number.parseInt(svg.style("height"));
     let attraction = getSetting('setting_attraction');
     
     let force = window.d3.layout.force()
@@ -1112,7 +1112,7 @@ function tick() {
         let cur_scaleExtend = zoomBehaviour.scaleExtent();
         let lower_extent = getFitToExtentScale();
 
-        if(lower_extent != null && !isNaN(Number(lower_extent))){
+        if(lower_extent != null && !Number.isNaN(Number(lower_extent))){
             zoomBehaviour.scaleExtent([lower_extent, cur_scaleExtend[1]]);
         }
         if(zoomBehaviour.scale() < lower_extent){
@@ -1194,7 +1194,7 @@ function updateStraightLines(lines, type) {
         }
         
         //are source and target defined
-        let missingPosition = isNaN(d.source.x) || isNaN(d.source.y) || isNaN(d.target.x) || isNaN(d.target.y);
+        let missingPosition = Number.isNaN(d.source.x) || Number.isNaN(d.source.y) || Number.isNaN(d.target.x) || Number.isNaN(d.target.y);
         if(missingPosition){
             return '';
         }
@@ -1876,10 +1876,11 @@ function setupThematicSettings(){
         thematicSettings['nodes'][rtyID] = {name: rty['rty_Name'], icon: iconURL, settings: {}};
         let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, defaultNodeStyling);
         existingSettings = window.hWin.HEURIST4.util.isJSON(existingSettings) || defaultNodeStyling;
+        existingSettings.display = 1;
         thematicSettings['nodes'][rtyID].settings = existingSettings;
 
         let item = `
-        <input name="displayNode" type="checkbox" ${existingSettings.display == 1 ? 'checked="checked"' : ''}>
+        <input name="displayNode" type="checkbox" checked="checked">
         <img src="${thematicSettings['nodes'][rtyID].icon}" alt="${thematicSettings['nodes'][rtyID].name}" height="16" width="16" style="top: 5px;position: relative;" data-icon-id="${rtyID}">
         <!--<span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>-->
         <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['nodes'][rtyID].name}" class="truncate">${thematicSettings['nodes'][rtyID].name}</span>
@@ -1916,10 +1917,11 @@ function setupThematicSettings(){
         thematicSettings['edges'][trmID] = {name: link['name'], settings: {}};
         let existingSettings = getSetting(`setting_styling_edges${trmID}`, defaultLineStyling);
         existingSettings = window.hWin.HEURIST4.util.isJSON(existingSettings) || defaultLineStyling;
+        existingSettings.display = 1;
         thematicSettings['edges'][trmID].settings = existingSettings;
 
         let item = `
-        <input name="displayNode" type="checkbox" ${existingSettings.display == 1 ? 'checked="checked"' : ''}>
+        <input name="displayNode" type="checkbox" checked="checked">
         <span class="ui-icon ui-icon-minusthick" style="top: 5px; position: relative;" data-line-id="${trmID}"></span>
         <!--<span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>-->
         <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['edges'][trmID].name}" class="truncate">${thematicSettings['edges'][trmID].name}</span>

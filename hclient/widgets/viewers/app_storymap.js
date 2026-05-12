@@ -292,10 +292,11 @@ $.widget( "heurist.app_storymap", {
                                         || !isTabsView && $recDiv.find('.storymap-edit-link').length === 0){ // add edit button
 
                                         let $editLink = $('<span>', {
-                                            text: window.HR('Edit'),
+                                            html: `<span class="ui-icon ui-icon-pencil"></span>
+                                            <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg); font-size: 1.2em;"></span>`,
                                             class: 'record-expand-controls storymap-edit-link',
                                             title: recTitle,
-                                            style: 'left: 0.5em; z-index: 998; border: 2px solid rgb(204, 204, 204); background: padding-box white;',
+                                            style: 'left: 0.5em; z-index: 998; background: padding-box white; border: none; padding: 0.55em 0.5em;',
                                             'data-id': recID
                                         });
 
@@ -306,8 +307,7 @@ $.widget( "heurist.app_storymap", {
                                         }
 
                                         $editLink.button({
-                                            icon: 'ui-icon-pencil', 
-                                            showLabel: false
+                                            showLabel: true
                                         });
 
                                         that._on($editLink, {
@@ -550,7 +550,7 @@ $.widget( "heurist.app_storymap", {
             this._edit_button = $('<button>', {
                 text: window.HR('Edit'),
                 title: this.options.reportElementMode === 'slide' ? window.hWin.HR('Edit the current story element') : window.hWin.HR('Edit the current story base'),
-                style: `position: absolute; top: 0.2em; right: ${rightPosition}; z-index: 998; border: 2px solid rgb(204, 204, 204); background: padding-box white;`
+                style: `position: absolute; top: 0.2em; right: ${rightPosition}; z-index: 998; background: padding-box white; border: none; padding: 0.55em 0.5em;`
             })
             .button({
                 icon: 'ui-icon-pencil',
