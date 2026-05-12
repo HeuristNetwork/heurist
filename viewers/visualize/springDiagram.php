@@ -329,9 +329,9 @@ function expandNode(rec_ID){
 
 function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
 
-    mainRecID = parseInt(mainRecID);
-    rtyID = parseInt(rtyID);
-    parentRecID = parseInt(parentRecID);
+    mainRecID = Number.parseInt(mainRecID);
+    rtyID = Number.parseInt(rtyID);
+    parentRecID = Number.parseInt(parentRecID);
 
     const addToParentList = window.hWin.HEURIST4.util.isPositiveInt(parentRecID);
 
@@ -439,7 +439,7 @@ function addNewConnections(recordIDs, data){
                         const recTypeId = relations.headers[recId][1];
 
                         let node = {
-                            id: parseInt(recId),
+                            id: Number.parseInt(recId),
                             name: relations.headers[recId][0],  // record title
                             image: window.hWin.HAPI4.iconBaseURL+recTypeId,  // record type id for icon
                             count: 0, // Default count, might be updated later if applicable
