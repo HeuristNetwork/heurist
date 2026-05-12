@@ -1071,16 +1071,18 @@ function getWebImageCache($system, $fileinfo, $returnURL = true, $forceRefresh =
     }
 
     if(!$fileExists){ // already exists
-        $res = UImage::createScaledImageFile($file_path, $file_path_cached, 1000, 1000, false, 'jpg');
+        $res = UImage::createScaledImageFile($file_path, $file_path_cached, 800, 800, false, 'jpg');
+    }else{
+        $res = true;
     }
-
+/* AO 2026-05-12    
     $scaledFileSize = $res === true ? filesize($file_path_cached) : 0;
     $fileSizeLimit = floor(($fileinfo['ulf_FileSizeKB'] * 1024) / 2);
-    if($res === true && !$forceRefresh && $scaledFileSize >= $fileSizeLimit){
+    if($res === true && !$forceRefresh  && $scaledFileSize >= $fileSizeLimit){
         // if scaled image is more than half the size of original, use original
         $res = false;
     }
-
+*/
     if($res===true){
         return $returnURL ? $file_url_cached : $file_path_cached;
     }else{
