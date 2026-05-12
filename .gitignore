@@ -225,6 +225,8 @@ external/
 node_modules/
 tests/
 descriptors/
+composer.lock
+*.lock
 
 *.mjs
 package.json
@@ -233,10 +235,6 @@ package-lock.json
 #PHPStorm
 .idea/*
 *.zip
-composer.lock
-*.lock
-*.lock
-composer.lock
 
 # VSCode
 .vscode
