@@ -89,13 +89,20 @@ class ReportRecord
         $this->rtyNames = dbs_GetRectypeNames($system->getMysqli());
         $this->dtyTypes = dbs_GetDetailTypes($system, null, 4);   //dty_ID => dty_Type
         $this->recordsCache = array(); // Cache for loaded records
-        $this->translations = array('trm' => array());
+        
         $this->rstFields = array(); //Cache for rty structure
         
         //for backward capability
         if(!defined('HEURIST_DBNAME')){
             define('HEURIST_DBNAME', $this->system->dbname());
         }
+        
+        $this->translations = [
+            'trm' => [],
+            'ulf' => [],
+            'rty' => [],
+            'dty' => []
+        ];        
     }
 
     /**
@@ -237,7 +244,6 @@ class ReportRecord
     public function getRecord($rec, $details=true, $smarty_obj = null)
     {
         $rec_ID = intval(is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec);
-        
         if ($details===true && isset($this->recordsCache[$rec_ID])) {
             return $this->recordsCache[$rec_ID];
         }
@@ -264,7 +270,6 @@ class ReportRecord
             $this->recordsCache[$rec_ID] = $record;
         }
         return $record;
-
     }
     
     
