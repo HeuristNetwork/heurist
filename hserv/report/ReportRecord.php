@@ -89,20 +89,13 @@ class ReportRecord
         $this->rtyNames = dbs_GetRectypeNames($system->getMysqli());
         $this->dtyTypes = dbs_GetDetailTypes($system, null, 4);   //dty_ID => dty_Type
         $this->recordsCache = array(); // Cache for loaded records
-        
+        $this->translations = array('trm' => array());
         $this->rstFields = array(); //Cache for rty structure
         
         //for backward capability
         if(!defined('HEURIST_DBNAME')){
             define('HEURIST_DBNAME', $this->system->dbname());
         }
-        
-        $this->translations = [
-            'trm' => [],
-            'ulf' => [],
-            'rty' => [],
-            'dty' => []
-        ];        
     }
 
     /**
@@ -244,6 +237,7 @@ class ReportRecord
     public function getRecord($rec, $details=true, $smarty_obj = null)
     {
         $rec_ID = intval(is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec);
+        
         if ($details===true && isset($this->recordsCache[$rec_ID])) {
             return $this->recordsCache[$rec_ID];
         }
@@ -270,6 +264,7 @@ class ReportRecord
             $this->recordsCache[$rec_ID] = $record;
         }
         return $record;
+
     }
     
     
@@ -442,19 +437,19 @@ class ReportRecord
         $from_records = array();
 
         if ($direction == null || $direction == 'linkedto') {
-            $to_query = 'SELECT rl_TargetID as linkID FROM recLinks ' . str_replace('linkID', 'rl_TargetID', $where) . ' rl_RelationID IS NULL AND rl_SourceID=' . $rec_ID;
+            $from_query = 'SELECT rl_TargetID as linkID FROM recLinks ' . str_replace('linkID', 'rl_TargetID', $where) . ' rl_RelationID IS NULL AND rl_SourceID=' . $rec_ID;
             if($dty_ID>0){
                 $to_query = $to_query.' AND rl_DetailTypeID='.intval($dty_ID);
             }
-            $to_records = mysql__select_list2($mysqli, $to_query);
+            $to_records = mysql__select_list2($mysqli, $from_query);
         }
 
         if ($direction == null || $direction == 'linkedfrom') {
-            $from_query = 'SELECT rl_SourceID as linkID FROM recLinks ' . str_replace('linkID', 'rl_SourceID', $where) . ' rl_RelationID IS NULL AND rl_TargetID=' . $rec_ID;
+            $to_query = 'SELECT rl_SourceID as linkID FROM recLinks ' . str_replace('linkID', 'rl_SourceID', $where) . ' rl_RelationID IS NULL AND rl_TargetID=' . $rec_ID;
             if($dty_ID>0){
-                $from_query = $from_query.' AND rl_DetailTypeID='.intval($dty_ID);
+                $to_query = $to_query.' AND rl_DetailTypeID='.intval($dty_ID);
             }
-            $from_records = mysql__select_list2($mysqli, $from_query);
+            $from_records = mysql__select_list2($mysqli, $to_query);
         }
         
 
@@ -601,7 +596,7 @@ class ReportRecord
      * @param string $lang The current language code for translations.
      * @return array|null An associative array with formatted values for Smarty, or null if the detail type is unknown/unhandled.
      */
-    private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang){
+    private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recID, $lang){
 
         $dtname = null;
 
@@ -672,10 +667,7 @@ class ReportRecord
                 foreach ($dtValue as $value){
                     
                     //keep reference to record id
-                    $value['file']['rec_ID'] = $recordID;
-
-                    $value['file']['ulf_Caption'] = $this->getTranslation('ulf', $value['file']['ulf_ID'], 'ulf_Caption', $lang);
-                    $value['file']['ulf_Description'] = $this->getTranslation('ulf', $value['file']['ulf_ID'], 'ulf_Description', $lang);
+                    $value['file']['rec_ID'] = $recID;
 
                     $link = $this->composeFileLink($value['file']);
                     array_push($preparedvalues, $link);
@@ -716,7 +708,7 @@ class ReportRecord
 
                     //original value keeps whole geo array
                     $dtname2 = $dtname.RAW;
-                    $value['geo']['recid'] = $recordID;
+                    $value['geo']['recid'] = $recID;
                     $arres = array_merge($arres, array($dtname2=>$value['geo']));
                     array_push($origvalues, $value['geo']);
 
@@ -745,7 +737,7 @@ class ReportRecord
                             " Y ".round($bbox['miny'],7).", ".round($bbox['maxx'],7):'');
                         }   
 
-                        $url = HEURIST_BASE_URL.'viewers/map/map.php?q=ids:'.$recordID
+                        $url = HEURIST_BASE_URL.'viewers/map/map.php?q=ids:'.$recID
                             .'&db='.$this->system->dbname()
                             .'&notimeline=1&nocluster=1&basemap=OpenStreetMap&controls=none&published=true&popup=none';
                         
@@ -1002,7 +994,7 @@ class ReportRecord
             $functions = array($functions);
         }
         
-        if(count($functions)==1 && $functions[0]==0){
+        if(count($functions)==1 && $func[0]==0){
             return count($ids);
         }
 
@@ -1051,11 +1043,10 @@ class ReportRecord
      * and language. If a translation is not found for a specific ID in the requested language,
      * it falls back to the default label of the entity. Results are cached per language per entity type.
      *
-     * @param string $entity The type of entity to translate: 'trm' (term), 'rty' (record type), 'dty' (detail type), 'ulf' (record files).
+     * @param string $entity The type of entity to translate: 'trm' (term), 'rty' (record type), 'dty' (detail type).
      * @param int|string|array $ids A single ID, or a comma-separated string/array of IDs for the entities.
      * @param string|null $field The specific field to translate. For 'trm', can be 'trm_Label' (default) or 'trm_Description'.
      *                           For 'rty'/'dty', it defaults to 'rty_Name'/'dty_Name'.
-     *                           For 'ulf', can be 'ulf_Caption' (default) or 'ulf_Description'
      * @param string|null $language_code The 3-letter language code (e.g., 'fre'). If null, uses the current system language.
      * @return string|array If a single ID was provided, returns the translated string.
      *                      If multiple IDs were provided, returns an associative array `[ID => translated_string]`.
@@ -1081,9 +1072,7 @@ class ReportRecord
         $cache = $this->translations[$entity][$language_code];
 
         if ($entity == 'trm') {
-            $field = strpos(strtolower($field), 'desc') === false ? 'trm_Label' : 'trm_Description';
-        } elseif($entity == 'ulf') {
-            $field = strpos(strtolower($field), 'desc') === false ? 'ulf_Caption' : 'ulf_Description';
+            $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description';
         } else {
             $field = $entity . '_Name';
         }
@@ -1107,8 +1096,6 @@ class ReportRecord
 
             if ($entity == 'trm') {
                 $def_values = $this->fillTermNames($ids, $field);
-            } elseif ($entity == 'ulf') {
-                $def_values = $this->fillFileNames($ids, $field);
             }
 
             $mysqli = $this->system->getMysqli();
@@ -1150,29 +1137,6 @@ class ReportRecord
             $def_values[$trm_id] = $term ? $term[$this->dtTerms['fieldNamesToIndex'][$field]] : '';
         }
         return $def_values;
-    }
-
-    /**
-     * Helper function to get default file captions/descriptions for a list of file IDs/Obfuscated IDs.
-     * 
-     * Used by `getTranslation` as a fallback when a specific language translation is not found.
-     *
-     * @param array $ids Array of file IDs or Obfuscated IDs
-     * @param string $field The file field to retrieve ('ulf_Caption' or 'ulf_Description')
-     * @return array Associative array `[ulf_ID => default_value]`
-     */
-    private function fillFileNames($ids, $field){
-
-        $def_value = [];
-        $mysqli = $this->system->getMysqli();
-
-        $query = "SELECT {$field} FROM recUploadedFiles WHERE ";
-        foreach ($ids as $ulf_id) {
-            $where = isPositiveInt($ulf_id) ? "ulf_ID = {$ulf_id}" : "ulf_ObfuscatedFileID = '{$ulf_id}'";
-            $def_value[$ulf_id] = mysql__select_value($mysqli, "{$query}{$where}");
-        }
-
-        return $def_value;
     }
 
     /**
