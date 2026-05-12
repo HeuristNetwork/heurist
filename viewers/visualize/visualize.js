@@ -461,7 +461,7 @@ function getEntityRadius(count) {
 
 
 function visualizeData() {
-    
+console.log('DBG. visualizeData');
     svg.selectAll("*").remove();
     addSelectionBox();
 
@@ -509,9 +509,8 @@ function visualizeData() {
     if(!settings.isDatabaseStructure && settings.minimal){
         setupThematicSettings();
     }
-
     tick()// update display
-    
+console.log('DBG. Done');
 } //end visualizeData
 
 /****************************************** CONTAINER **************************************/
@@ -722,6 +721,7 @@ function onZoom( transform ){
 // Fit current extent 
 //
 function zoomToFit(){
+console.log('DBG. zoomToFit');
 
     let fullWidth = $("#divSvg").width();
     let fullHeight = $("#divSvg").height();
@@ -751,6 +751,8 @@ function zoomToFit(){
     onZoom(transform);
 
     updateScalableElements('all'); // fixup elements to avoid large/tiny text, nodes, lines, etc...
+    
+console.log('DBG. Done scale=',scale,'dim=',fullWidth,fullHeight,width,height);    
 }
 
 //
@@ -2143,6 +2145,7 @@ function autoHideToolbar(){
 };
 
 function setupAutoHideToolbar(){
+    return; //AO: IJ asked to disable this auto hide.
 
     let hideToolbarEle = document.querySelector('#hideSubToolbar');
     if(!hideToolbarEle || !hideToolbarEle.checkVisibility()){

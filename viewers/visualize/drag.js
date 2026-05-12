@@ -70,6 +70,7 @@ function addNodes() {
                  .on("dragend", dragend);
      
    let entitycolor = getSetting('setting_entitycolor');
+   let nodesCnt = 0;
       
    // Details for each node            
    nodes.each(function(d, i) {
@@ -189,7 +190,10 @@ function addNodes() {
          })
          .call(drag);
 
-     });            
+        nodesCnt++; 
+     });   
+     
+console.log('DBG. Nodes: ',nodesCnt);              
      return nodes;
 }
 

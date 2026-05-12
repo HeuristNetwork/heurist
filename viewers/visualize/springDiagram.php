@@ -139,7 +139,6 @@ function onPageInit(success){
 function performSearch(q){
 
     let getRelationDetails = (recordIDs, query) => {
-
         //Finds all directly related (linked or via relationship records) records for a given set of record IDs.
         window.hWin.HAPI4.RecordMgr.search_related({ids:recordIDs.join(',')}, (response_related) => {
 

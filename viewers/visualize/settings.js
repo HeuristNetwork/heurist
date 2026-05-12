@@ -307,8 +307,7 @@ function handleSettingsInUI() {
     $( "#setLinksMode" ).controlgroup();
 
     putSetting('setting_linecolor', '#0070c0');  // Default override
-    setLinkMode('straight'); // Default override
-    //_syncUI(); // Called later
+    putSetting('setting_linetype', 'straight'); // Default override
 
     let linksLength = 200; //getSetting('setting_linelength', 200); // Use stored or default
     $('#linksLength').val(linksLength).on('change.visualiser', function(event){ // Added event parameter
@@ -739,7 +738,7 @@ function setGravity(gravity) {
  */
 function setFormulaMode(formula) {
     putSetting('setting_formula', formula);
-    // visualizeData(); // Potentially too heavy
+
     window.d3.selectAll(".node > .background").attr("r", function(d) {
                         return getEntityRadius(d.count); // Re-calculate radius based on new formula
                     });
