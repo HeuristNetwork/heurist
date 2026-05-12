@@ -246,12 +246,12 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 }
 
                 if($(event.target).hasClass('ui-icon-arrowthick-1-e')){
-                    idx = idx == max ? 0 : parseInt(idx) + 1;
+                    idx = idx == max ? 0 : Number.parseInt(idx) + 1;
                 }else{
-                    idx = idx == 0 ? max : parseInt(idx) - 1;
+                    idx = idx == 0 ? max : Number.parseInt(idx) - 1;
                 }
 
-                that._$('#current_idx').text(parseInt(idx)+1);
+                that._$('#current_idx').text(Number.parseInt(idx)+1);
                 that._$('#tbl_matches').attr('data-idx', idx);
 
                 that._displayTestResults(service);

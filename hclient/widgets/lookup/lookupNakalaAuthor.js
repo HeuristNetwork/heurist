@@ -260,14 +260,14 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
         // Parse Nakala author records into HRecordSet structure
         for(const recID_idx in array_data){ // Iterate using index as recID for display
             let record = array_data[recID_idx];
-            let values = [parseInt(recID_idx), this.options.mapping.rty_ID]; // Use array index as local rec_ID
+            let values = [Number.parseInt(recID_idx), this.options.mapping.rty_ID]; // Use array index as local rec_ID
 
             for(const fld_Name of map_flds){ // Populate values based on defined mapping
                 values.push(record[fld_Name]);
             }
 
-            res_orders.push(parseInt(recID_idx));
-            res_records[parseInt(recID_idx)] = values;
+            res_orders.push(Number.parseInt(recID_idx));
+            res_records[Number.parseInt(recID_idx)] = values;
         }
 
         // Warn if more results are available than shown

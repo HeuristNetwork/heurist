@@ -635,7 +635,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
 
         for(const rec_ID_idx in response.data.results.bindings){ // Iterate through each result binding
 
-            let local_rec_ID = parseInt(rec_ID_idx); // Use array index as local ID for display
+            let local_rec_ID = Number.parseInt(rec_ID_idx); // Use array index as local ID for display
             let wikidata_binding = response.data.results.bindings[rec_ID_idx]; // Current SPARQL result object
 
             let record_values = this._processSPARQLRow(wikidata_binding);
