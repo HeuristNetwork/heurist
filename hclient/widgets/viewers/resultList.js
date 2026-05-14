@@ -4766,7 +4766,8 @@ $.widget( "heurist.resultList", {
 
     handleDoubleClick: function(event){
 
-        let $rdiv = window.hWin.HEURIST4.util.isPositiveInt(event) ? this.div_content.find(`.recordDiv[recid="${event}"]`) : $(event.target);
+        let manualTrigger = window.hWin.HEURIST4.util.isPositiveInt(event);
+        let $rdiv = manualTrigger ? this.div_content.find(`.recordDiv[recid="${event}"]`) : $(event?.target);
         if(!$rdiv.hasClass('recordDiv')){
             $rdiv = $rdiv.parents('.recordDiv');
         }
@@ -4815,7 +4816,7 @@ $.widget( "heurist.resultList", {
                     this.expandDetailsInline(selected_rec_ID, true);
                 }
             },
-            selectOnSave: true
+            selectOnSave: manualTrigger
         });
     }
     
