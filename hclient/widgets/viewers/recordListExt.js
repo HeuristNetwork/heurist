@@ -77,7 +77,7 @@ $.widget( "heurist.recordListExt", {
 
         //display range for current result set - all, page or selection
         is_single_selection: false, //work with the only record - reloads content on every selection event
-        is_multi_selection: false, //work with all selectd records
+        is_multi_selection: false, //work with all selected records
         show_page: false, //work with current page only
         show_all: true,
         
@@ -372,9 +372,15 @@ $.widget( "heurist.recordListExt", {
                 if(!that._isSameRealm(data)) return;
                 
                 that.options.recordset = data.recordset; //HRecordSet
+                let ignoreSelectionSetting = false;
 
-                if(that.options.show_all){
-                    that._run_initial = true;
+                if(that.options.is_multi_selection && Object.hasOwn(data, 'showing_collection')){
+                    that.options.selection = data.showing_collection && that.options.recordset && that.options.recordset.length() > 0 ? data.recordset.getIds() : null;
+                    ignoreSelectionSetting = true;
+                }
+
+                if(that.options.show_all || ignoreSelectionSetting){
+                    that._run_initial = !ignoreSelectionSetting;
 
                     that._refresh();
                 }
@@ -485,11 +491,6 @@ $.widget( "heurist.recordListExt", {
                 .css({'white-space': 'pre-wrap', 'padding-top': '20px'})
                 .prependTo(this.element)
                 .html(this.options.empty_remark);
-
-        // Force single selection for normal record viewer
-        if(!window.hWin.HEURIST4.util.isempty(this.options.url) && this.options.url.indexOf('renderRecordData.php') != -1){
-            this.options.is_single_selection = true;
-        }
 
     }, //end _create
 
@@ -800,14 +801,16 @@ $.widget( "heurist.recordListExt", {
                 if(recIDs_list.length>0){
                     
                     let recID = recIDs_list;
+                    let mainRecID = recIDs_list[0];
                     if(!show_all){
                         recID = this.options.is_single_selection ? recIDs_list[recIDs_list.length-1] : recIDs_list.join(',');
                     }
-                    
+
                     newurl = this.options.url;
                     
-                    if(newurl.indexOf('[recID]')>0){
-                        newurl = newurl.replace("[recID]", recID);
+                    if(newurl.indexOf('[recID]') > 0){
+                        newurl = newurl.replace("[recID]", recIDs_list[0]);
+                        newurl += this.options.is_multi_selection && recIDs_list.length > 1 ? `&ids=${recID}` : '';
                     }else{
                         newurl = newurl.replace("[query]", ('q=ids:'+recID));
                     }
