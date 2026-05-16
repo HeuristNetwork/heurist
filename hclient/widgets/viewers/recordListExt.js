@@ -810,7 +810,7 @@ $.widget( "heurist.recordListExt", {
                     
                     if(newurl.indexOf('[recID]') > 0){
                         newurl = newurl.replace("[recID]", recIDs_list[0]);
-                        newurl += this.options.is_multi_selection && recIDs_list.length > 1 ? `&ids=${recID}` : '';
+                        newurl += this.options.is_multi_selection && recIDs_list.length > 1 ? `&ids=${recIDs_list.join(',')}` : '';
                     }else{
                         newurl = newurl.replace("[query]", ('q=ids:'+recID));
                     }
