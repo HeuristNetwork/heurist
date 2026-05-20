@@ -91,8 +91,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
     _initControls: function(){
 
         // Extra field styling
-        this.element.find('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'}).addClass('truncate');
-        this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '2.5px'});
+        this._$('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'}).addClass('truncate');
+        this._$('.bnf_form_field').css({display:'inline-block', 'margin-top': '2.5px'});
 
         return this._super();
     },
@@ -171,6 +171,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
      */
     _rendererResultList: function(recordset, record){
 
+        let that = this;
+
         /**
          * Calculates the display width (in 'ex' units) for a field based on authority type and field name.
          * This is an inner helper function for `_rendererResultList`.
@@ -226,7 +228,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
             let s = recordset.fld(record, fldname);
             let authority_type = recordset.fld(record, 'authority_type');
 
-            s = window.hWin.HEURIST4.util.htmlEscape(s || '');
+            s = that.$H.htmlEscape(s || '');
 
             let title = s;
 
@@ -264,7 +266,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
      */
     doAction: function(){
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+        this.$Hmsg.bringCoverallToFront(this.element);
 
         let [recset, record] = this._getSelection(true);
         if(recset?.length() < 0 || !record){
@@ -318,7 +320,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
      */
     _doSearch: function(){
 
-        const maxRecords = $('#rec_limit').val(); // limit number of returned records
+        const maxRecords = this._$('#rec_limit').val(); // limit number of returned records
         let params = {
             version: '1.2',
             operation: 'searchRetrieve',
@@ -328,21 +330,21 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
         };
 
         // Check if input fields have values
-        let accesspointHasValue = this.element.find('#inpt_accesspoint').val() != '';
-        let typeHasValue = this.element.find('#inpt_type').val() != '';
-        let isniHasValue = this.element.find('#inpt_isni').val() != '';
-        let isnidateHasValue = this.element.find('#inpt_isnidate').val() != '';
-        let domainHasValue = this.element.find('#inpt_domain').val() != '';
-        let recidHasValue = this.element.find('#inpt_recordid').val() != '';
+        let accesspointHasValue = this._$('#inpt_accesspoint').val() != '';
+        let typeHasValue = this._$('#inpt_type').val() != '';
+        let isniHasValue = this._$('#inpt_isni').val() != '';
+        let isnidateHasValue = this._$('#inpt_isnidate').val() != '';
+        let domainHasValue = this._$('#inpt_domain').val() != '';
+        let recidHasValue = this._$('#inpt_recordid').val() != '';
 
         // Filter for any text input fields (excluding type inputs) that have a value
-        let has_filter = this.element.find('input.text:not(type)').filter((idx, input) => {
-            return !window.hWin.HEURIST4.util.isempty($(input).val());
+        let has_filter = this._$('input.text:not(type)').filter((idx, input) => {
+            return !this.$H.isempty($(input).val());
         });
 
         // Check that something has been entered
         if(has_filter.length == 0){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value in any of the search fields...', 1000);
+            this.$Hmsg.showMsgFlash('Please enter a value in any of the search fields...', 1000);
             return;
         }
         
@@ -363,49 +365,49 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
         // Each field has a value input, a link type selector (all, any, adj), and a logic operator selector (AND, OR, NOT)
 
         // Any field (aut.anywhere)
-        if(this.element.find('#inpt_any').val()!=''){
-            last_logic = ` ${this.element.find('#inpt_any_logic').val()} `;
-            query += `aut.anywhere ${this.element.find('#inpt_any_link').val()} "${this.element.find('#inpt_any').val()}"${last_logic}`;
+        if(this._$('#inpt_any').val()!=''){
+            last_logic = ` ${this._$('#inpt_any_logic').val()} `;
+            query += `aut.anywhere ${this._$('#inpt_any_link').val()} "${this._$('#inpt_any').val()}"${last_logic}`;
         }
 
         // Access point field (aut.accesspoint)
         if(accesspointHasValue){
-            last_logic = ` ${this.element.find('#inpt_accesspoint_logic').val()} `;
-            query += `aut.accesspoint ${this.element.find('#inpt_accesspoint_link').val()} "${this.element.find('#inpt_accesspoint').val()}"${last_logic}`;
+            last_logic = ` ${this._$('#inpt_accesspoint_logic').val()} `;
+            query += `aut.accesspoint ${this._$('#inpt_accesspoint_link').val()} "${this._$('#inpt_accesspoint').val()}"${last_logic}`;
         }
 
         // Type field (aut.type)
         if(typeHasValue){
-            last_logic = ` ${this.element.find('#inpt_type_logic').val()} `;
-            query += `aut.type ${this.element.find('#inpt_type_link').val()} "${this.element.find('#inpt_type').val()}"${last_logic}`;
+            last_logic = ` ${this._$('#inpt_type_logic').val()} `;
+            query += `aut.type ${this._$('#inpt_type_link').val()} "${this._$('#inpt_type').val()}"${last_logic}`;
         }
 
         // ISNI field (aut.isni)
         if(isniHasValue){
-            last_logic = ` ${this.element.find('#inpt_isni_logic').val()} `;
-            query += `aut.isni ${this.element.find('#inpt_isni_link').val()} "${this.element.find('#inpt_isni').val()}"${last_logic}`;
+            last_logic = ` ${this._$('#inpt_isni_logic').val()} `;
+            query += `aut.isni ${this._$('#inpt_isni_link').val()} "${this._$('#inpt_isni').val()}"${last_logic}`;
         }
 
         // ISNI date field (aut.isnidate)
         if(isnidateHasValue){
-            last_logic = ` ${this.element.find('#inpt_isnidate_logic').val()} `;
-            query += `aut.isnidate ${this.element.find('#inpt_isnidate_link').val()} "${this.element.find('#inpt_isnidate').val()}"${last_logic}`;
+            last_logic = ` ${this._$('#inpt_isnidate_logic').val()} `;
+            query += `aut.isnidate ${this._$('#inpt_isnidate_link').val()} "${this._$('#inpt_isnidate').val()}"${last_logic}`;
         }
 
         // Domain field (aut.domain)
         if(domainHasValue){
-            last_logic = ` ${this.element.find('#inpt_domain_logic').val()} `;
-            query += `aut.domain ${this.element.find('#inpt_domain_link').val()} "${this.element.find('#inpt_domain').val()}"${last_logic}`;
+            last_logic = ` ${this._$('#inpt_domain_logic').val()} `;
+            query += `aut.domain ${this._$('#inpt_domain_link').val()} "${this._$('#inpt_domain').val()}"${last_logic}`;
         }
 
         // Record ID field (aut.recordid) - this is typically the last field, so no logic operator follows
         if(recidHasValue){
             last_logic = ''; // No boolean operator after the last term
-            query += `aut.recordid ${this.element.find('#inpt_recordid_link').val()} "${this.element.find('#inpt_recordid').val()}"`;
+            query += `aut.recordid ${this._$('#inpt_recordid_link').val()} "${this._$('#inpt_recordid').val()}"`;
         }
 
         // Remove last trailing logic operator if it exists
-        if(!window.hWin.HEURIST4.util.isempty(last_logic)){
+        if(!this.$H.isempty(last_logic)){
             let regex = new RegExp(`${last_logic}$`);
             query = query.replace(regex, '');
         }

@@ -673,7 +673,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
                 this.url_field = field_var;
             } else if (cell_data && cell_data['type'] === 'literal' && Object.hasOwn(cell_data, 'xml:lang')){
                 // Prepend language code if literal has a language tag
-                let language = window.hWin.HAPI4.getLangCode3(cell_data['xml:lang'], 'MUL');
+                let language = this.HAPI.getLangCode3(cell_data['xml:lang'], 'MUL');
                 cell_value = language !== 'MUL' ? `${language}:${cell_value}` : cell_value;
             }
             values.push(cell_value);

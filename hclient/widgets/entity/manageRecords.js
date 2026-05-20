@@ -6330,7 +6330,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         serviceType: 'bnf_recdump'
                     };
 
-                    window.hWin.HAPI4.RecordMgr.lookup_external_service(req, (response) => {
+                    window.hWin.HAPI4.RecordMgr.lookupService(req, (response) => {
                         if(window.hWin.HEURIST4.util.isJSON(response)){
                             response = window.hWin.HEURIST4.util.isJSON(response);
                             if(response.record != null){

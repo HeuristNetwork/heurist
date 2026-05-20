@@ -198,7 +198,7 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
             return;
         }
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront( that._as_dialog.parent() );
+        this.$Hmsg.bringCoverallToFront( that._as_dialog.parent() );
 
         this._importRecords(sels.join(','));
     }

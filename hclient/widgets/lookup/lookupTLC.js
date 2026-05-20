@@ -94,9 +94,9 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
      * @returns {void|*} The result of `this._super()`.
      */
     _initControls: function(){
-        this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'});
+        this._$('fieldset > div > .header').css({width:'80px','min-width':'80px'});
 
-        window.hWin.HEURIST4.msg.showMsgErr({
+        this.$Hmsg.showMsgErr({
             error_title: 'Warning: broken lookup',
             message: 'Please beware that due to changes with the TLC map project this lookup is not currently 100% functional.<br><br>'
                     +'The issue appears when attempting to search, if the results are too large the server will response with a "un-supported format" error.<br>'
@@ -195,7 +195,7 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
         }
 
         //create new record 
-        let rectype_id = (!window.hWin.HEURIST4.util.isempty(this.options.rectype_for_new_record)) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
+        let rectype_id = !this.$H.isempty(this.options.rectype_for_new_record) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
         this._addNewRecord(rectype_id, recset);
     },
 
@@ -235,31 +235,31 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
         }else if(this.options.mapping.service=='tlcmap_old'){
             this.baseURL = 'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?';  
         }else{
-            window.hWin.HEURIST4.msg.showMsgFlash('Name of service not defined...', 500);
+            this.$Hmsg.showMsgFlash('Name of service not defined...', 500);
             return;
         }
 
         // check for input
-        if(this.element.find('#inpt_name').val()=='' && this.element.find('#inpt_anps_id').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Define name or ANPS ID...', 500);
+        if(this._$('#inpt_name').val()=='' && this._$('#inpt_anps_id').val()==''){
+            this.$Hmsg.showMsgFlash('Define name or ANPS ID...', 500);
             return;
         }
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // cover screen
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent()); // cover screen
 
         // add input to request url
-        if(this.element.find('#inpt_name').val()!=''){
-            let fld_name = this.element.find('#inpt_exact').is(':checked') ? 'name' : 'fuzzyname';
-            params[fld_name] = this.element.find('#inpt_name').val();
+        if(this._$('#inpt_name').val()!=''){
+            let fld_name = this._$('#inpt_exact').is(':checked') ? 'name' : 'fuzzyname';
+            params[fld_name] = this._$('#inpt_name').val();
         }
-        if(this.element.find('#inpt_anps_id').val()!=''){
-            params['anps_id'] = this.element.find('#inpt_anps_id').val();
+        if(this._$('#inpt_anps_id').val()!=''){
+            params['anps_id'] = this._$('#inpt_anps_id').val();
         }
-        if(this.element.find('#inpt_lga').val()!=''){
-            params['lga'] = this.element.find('#inpt_lga').val()
+        if(this._$('#inpt_lga').val()!=''){
+            params['lga'] = this._$('#inpt_lga').val()
         }
-        if(this.element.find('#inpt_state').val()!=''){
-            params['state'] = this.element.find('#inpt_state').val()
+        if(this._$('#inpt_state').val()!=''){
+            params['state'] = this._$('#inpt_state').val()
         }
 
         this._super(params);
@@ -299,13 +299,13 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
      */
     _onSearchResult: function(geojson_data){
 
-        if(!window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){ // Validate GeoJSON
+        if(!this.$H.isGeoJSON(geojson_data, true)){ // Validate GeoJSON
             this._super(false); // Show error/clear if not valid
             return;
         }
 
         let res_records = {}, res_orders = [];
-        const DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']; // Heurist ID for geospatial field type
+        const DT_GEO_OBJECT = this.HAPI.sysinfo['dbconst']['DT_GEO_OBJECT']; // Heurist ID for geospatial field type
 
         // Prepare fields for HRecordSet
         let fields = ['rec_ID','rec_RecTypeID']; // Base fields
@@ -338,9 +338,9 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
                 val = this.getValueByParts(fld_Name_parts, val);
 
                 // Special handling for Geo Objects: convert GeoJSON geometry to WKT
-                if(DT_GEO_OBJECT == this.options.mapping.fields[original_fld_Name] && !window.hWin.HEURIST4.util.isempty(val)){
+                if(DT_GEO_OBJECT == this.options.mapping.fields[original_fld_Name] && !this.$H.isempty(val)){
                     val = this.createGeoFeature(val); // val here is expected to be a GeoJSON geometry object
-                    hasGeo = !window.hWin.HEURIST4.util.isempty(val); // Update hasGeo based on WKT result
+                    hasGeo = !this.$H.isempty(val); // Update hasGeo based on WKT result
                 }
                 values.push(val);
             }

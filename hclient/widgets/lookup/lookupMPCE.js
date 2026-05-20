@@ -196,26 +196,26 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         /** Check if selected Work has: project keyword/s, parisian category, and a basis for classification **/
 
-        this.project_keywords = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Keywords]) ? record[this.id_map.DT_Keywords] : null; // Project Keywords
+        this.project_keywords = !this.$H.isempty(record[this.id_map.DT_Keywords]) ? record[this.id_map.DT_Keywords] : null; // Project Keywords
 
-        this.parisian_category = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Category]) ? record[this.id_map.DT_Category] : null; // Parisian Category
+        this.parisian_category = !this.$H.isempty(record[this.id_map.DT_Category]) ? record[this.id_map.DT_Category] : null; // Parisian Category
 
-        this.basis_for_classification = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Basis]) ? record[this.id_map.DT_Basis] : null; // Basis for Classification
+        this.basis_for_classification = !this.$H.isempty(record[this.id_map.DT_Basis]) ? record[this.id_map.DT_Basis] : null; // Basis for Classification
 
-        this.classification_notes = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Notes]) ? record[this.id_map.DT_Notes] : null; // Classification Notes
-        $('#notes_field').val(record[this.id_map.DT_Notes]);
+        this.classification_notes = !this.$H.isempty(record[this.id_map.DT_Notes]) ? record[this.id_map.DT_Notes] : null; // Classification Notes
+        this._$('#notes_field').val(record[this.id_map.DT_Notes]);
 
-        this.prev_works = !window.hWin.HEURIST4.util.isempty(localStorage.getItem("prev_classify")) 
-                            ? window.hWin.HEURIST4.util.isJSON(localStorage.getItem("prev_classify"))
+        this.prev_works = !this.$H.isempty(localStorage.getItem("prev_classify")) 
+                            ? this.$H.isJSON(localStorage.getItem("prev_classify"))
                             : null;
 
-        $('#title_field').text(record[1]); // Work Title
-        $('#work-code_field').text(record[this.id_map.DT_MPCEId]);   // Work MPCE_ID
+        this._$('#title_field').text(record[1]); // Work Title
+        this._$('#work-code_field').text(record[this.id_map.DT_MPCEId]);   // Work MPCE_ID
 
         // Retrieve all Parisian Keywords (Term ID = 6380)
         if(this.id_map.VI_Category > 0 && $Db.trm(this.id_map.VI_Category)){
 
-            window.hWin.HEURIST4.ui.createTermSelect( this.element.find('#category_field')[0], {
+            this.$Hui.createTermSelect( this._$('#category_field')[0], {
                     vocab_id: [this.id_map.VI_Category],    // Vocabulary ID/Term ID
                     defaultTermID: this.parisian_category,   //Default/Selected Term
                     topOptions: [{title:"Select a Parisian Classification...", key:''}],      //Top Options  [{key:0, title:'...select me...'},....]
@@ -223,20 +223,20 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 }
             );
         }else{
-            this.element.find('#category_field').append('<option>No categories</option>').hSelect();
+            this._$('#category_field').append('<option>No categories</option>').hSelect();
         }
 
         // Retrieve all Basis for Classification (Term ID = 6498)
         if(this.id_map.VI_Basis > 0 && $Db.trm(this.id_map.VI_Basis)){
 
-            window.hWin.HEURIST4.ui.createTermSelect( this.element.find('#basis_field')[0], {
+            this.$Hui.createTermSelect( this._$('#basis_field')[0], {
                     vocab_id: [this.id_map.VI_Basis],    // Vocabulary ID/Term ID
                     defaultTermID: this.basis_for_classification,   // Default/Selected Term
                     useHtmlSelect: false    // use native select of jquery select
                 }
             ); 
         }else{
-            this.element.find('#basis_field').append('<option>No basis</option>').hSelect();
+            this._$('#basis_field').append('<option>No basis</option>').hSelect();
         }
 
         this.getKeywords('assigned');
@@ -245,16 +245,16 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         this.element.parents('.ui-dialog').find('.btnDoAction').before('<span id="save-msg" style="display:none;font-size:1.2em;">Add or Uncheck Selections</span>');        
 
         // NEXT >> handler
-        this._on($('#assoc_next'), {
+        this._on(this._$('#assoc_next'), {
             click: function(){
-                $('#checkall-assoc').attr('checked', false);
+                that._$('#checkall-assoc').attr('checked', false);
     
                 that.updateAssocDisplay(false);
             }
         });
 
         // << BACK handler
-        this._on($('#assoc_prev'), {
+        this._on(this._$('#assoc_prev'), {
             click: function(){
 
                 let jump = that.assoc_endindex - that.assoc_startindex;
@@ -267,7 +267,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
                 that.assoc_startindex < 0 && that.assoc_endindex < 13 ? that.updateAssocDisplay(true) : that.updateAssocDisplay(false);
 
-                $('#checkall-assoc').attr('checked', false);            
+                that._$('#checkall-assoc').attr('checked', false);            
             }
         });
 
@@ -275,52 +275,52 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         // onClick Handlers
 
         // Assigning Keywords to Work
-        this._on(this.element.find('#btnLookup').button(),{
+        this._on(this._$('#btnLookup').button(),{
             click: this.keywordLookup
         });
 
-        this._on(this.element.find('#btnPrevAssign').button(),{
+        this._on(this._$('#btnPrevAssign').button(),{
             click: this.addPrevtoAssigned
         });
 
-        this._on(this.element.find('#btnAssocAssign').button(),{
+        this._on(this._$('#btnAssocAssign').button(),{
             click: this.addAssoctoAssigned
         });
 
-        this._on(this.element.find('#btnAssocRemove').button(),{
+        this._on(this._$('#btnAssocRemove').button(),{
             click: this.unselectAssoc
         });
 
         // External Searches for Work Title
-        this._on(this.element.find('#btnGoogle').button(),{
+        this._on(this._$('#btnGoogle').button(),{
             click: this.lookupGoogle
         });
-        this._on(this.element.find('#btnWorldCat').button(),{
+        this._on(this._$('#btnWorldCat').button(),{
             click: this.lookupWorldCat
         });
-        this._on(this.element.find('#btnHathiTrust').button(),{
+        this._on(this._$('#btnHathiTrust').button(),{
             click: this.lookupHathiTrust
         });
-        this._on(this.element.find('#btnKarlsruhePortal').button(),{
+        this._on(this._$('#btnKarlsruhePortal').button(),{
             click: this.lookupKarlsruhePortal
         });
 
         // Other
-        this._on(this.element.find('#btnEdition').button(),{
+        this._on(this._$('#btnEdition').button(),{
             click: this.lookupEditions
         });
 
-        this._on(this.element.find('#checkall-prev'),{
+        this._on(this._$('#checkall-prev'),{
             click: function(e){
                 let check_status = $(e.target).is(':checked');
-                that.checkAllOptions($('#prev_field')[0], check_status);
+                that.checkAllOptions(that._$('#prev_field')[0], check_status);
             }
         });
 
-        this._on(this.element.find('#checkall-assoc'),{
+        this._on(this._$('#checkall-assoc'),{
             click: function(e){
                 let check_status = $(e.target).is(':checked');
-                that.checkAllOptions($('#associated_field')[0], check_status, true);
+                that.checkAllOptions(that._$('#associated_field')[0], check_status, true);
             }
         });
 
@@ -335,8 +335,8 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 let width = that.element.parent().width();
                 let height = that.element.parent().height();
 
-                window.hWin.HAPI4.save_pref('pref_lookupMPCE_w', width);
-                window.hWin.HAPI4.save_pref('pref_lookupMPCE_h', height);
+                that.HAPI.save_pref('pref_lookupMPCE_w', width);
+                that.HAPI.save_pref('pref_lookupMPCE_h', height);
             });
         });
 
@@ -348,17 +348,17 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      */
     doAction: function(){
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // use this function to show "in progress" animation and cover-all screen for long operation
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent()); // use this function to show "in progress" animation and cover-all screen for long operation
 
         // assign values to be sent back to edit form - format is similar to this.options.edit_fields
         let res = {};
-        res[this.id_map.DT_Category] = $('#category_field').val();
-        res[this.id_map.DT_Basis] = $('#basis_field').val();
-        res[this.id_map.DT_Notes] = $('#notes_field').val();
-        res[this.id_map.DT_Keywords] = (this.project_keywords.length == 0) ? null : this.project_keywords;
+        res[this.id_map.DT_Category] = this._$('#category_field').val();
+        res[this.id_map.DT_Basis] = this._$('#basis_field').val();
+        res[this.id_map.DT_Notes] = this._$('#notes_field').val();
+        res[this.id_map.DT_Keywords] = this.project_keywords.length == 0 ? null : this.project_keywords;
 
-        let idxRecent = (this.prev_works == null) ? -1 : this.prev_works.findIndex(id => id == this.options.edit_fields.rec_ID[0]);
-        let hasKeywords = !window.hWin.HEURIST4.util.isempty(this.project_keywords);
+        let idxRecent = this.prev_works == null ? -1 : this.prev_works.findIndex(id => id == this.options.edit_fields.rec_ID[0]);
+        let hasKeywords = !this.$H.isempty(this.project_keywords);
 
         // Check if work can be added to list of recently viewed works
         if(idxRecent == -1 && hasKeywords){
@@ -406,18 +406,18 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
             // onselect Handler for pop-up
             onselect: function(event, data){
 
-                if(!window.hWin.HEURIST4.util.isRecordSet(data.selection)){
+                if(!that.$H.isRecordSet(data.selection)){
                     return;
                 }
 
                 let recordset = data.selection;
                 let record = recordset.getFirstRecord();
 
-                if(window.hWin.HEURIST4.util.isempty(record)){
+                if(that.$H.isempty(record)){
                     // something is wrong with the record
 
                     msgToConsole('MPCE lookup error: Selected record is invalid', record, 1);
-                    window.hWin.HEURIST4.msg.showMsgErr({
+                    that.$Hmsg.showMsgErr({
                         message: 'The selected keyword is invalid',
                         error_title: 'Invalid selection',
                         status: window.hWin.ResponseStatus.UNKNOWN_ERROR
@@ -430,12 +430,12 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 
                 let keyword_IDs = that.project_keywords;
 
-                if(!window.hWin.HEURIST4.util.isempty(keyword_IDs)){
+                if(!that.$H.isempty(keyword_IDs)){
 
                     let result = keyword_IDs.find(row => row == targetID);
                 
                     if(result != null){ // Check if Keyword is already a part of Work's Keyword Master List
-                        window.hWin.HEURIST4.msg.showMsgDlg('Project Keyword Already Allocated to Work', null, 'Keyword already assigned');
+                        that.$Hmsg.showMsgDlg('Project Keyword Already Allocated to Work', null, 'Keyword already assigned');
 
                         return;
                     }
@@ -454,7 +454,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
             }
         };
 
-        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+        this.$Hui.showEntityDialog('records', popup_options);
     },
 
     /**
@@ -462,18 +462,18 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      */
     addPrevtoAssigned: function(){
 
-        let list = $('#prev_field')[0];
+        let list = this._$('#prev_field')[0];
 
         let items = this.getAllChecked(list);
 
         if(items == null || items.length == 0){
-            window.hWin.HEURIST4.msg.showMsgDlg('There are No Recent Keywords Selected to Assign', null, 'No recent keywords');     
+            that.$Hmsg.showMsgDlg('There are No Recent Keywords Selected to Assign', null, 'No recent keywords');     
             return;
         }
 
         for(const id of items){
 
-            list = $('#prev_field');
+            list = this._$('#prev_field');
 
             let title = `Record ID - ${id}`;
             if(this.full_keywords_list[id] !== undefined){
@@ -494,7 +494,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      */
     addAssoctoAssigned: function(){
 
-        let list = $('#associated_field')[0];
+        let list = this._$('#associated_field')[0];
 
         let items = this.getAllChecked(list, true);
 
@@ -503,16 +503,16 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         }
 
         if(items == null || items.length == 0){
-            window.hWin.HEURIST4.msg.showMsgDlg('There are No Associated Keywords Selected to Assign', null, 'No associated keywords');     
+            that.$Hmsg.showMsgDlg('There are No Associated Keywords Selected to Assign', null, 'No associated keywords');     
             return;
         }
 
         for(const id of items){
 
-            list = $('#associated_field')[0];
+            list = this._$('#associated_field').first();
 
             // Remove from Associated Keyword Table
-            $(list).find(`input#${id}_a`).parent().remove();
+            list.find(`input#${id}_a`).parent().remove();
 
             let title = `Record ID - ${id}`;
             if(this.full_keywords_list[id] !== undefined){
@@ -547,14 +547,14 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         let query_request = {q: `t:${this.id_map.RT_Editions} linkedto:${this.options.edit_fields.rec_ID[0]}`, detail: 'detail', limit: 10};
 
-        window.hWin.HAPI4.RecordMgr.search(query_request,
+        this.HAPI.RecordMgr.search(query_request,
             function( response ){
 
                 if(response.status != window.hWin.ResponseStatus.OK){
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    that.$Hmsg.showMsgErr(response);
                     return;
                 }
-                if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+                if(that.$H.isempty(response.data)) { return; }
 
                 let recordset = new HRecordSet(response.data);
                 let records = recordset.getRecords();
@@ -595,14 +595,14 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         let query_request = {q: `t:${this.id_map.RT_Keyword}`, detail: 'detail'};
 
         // Perform Search
-        window.hWin.HAPI4.RecordMgr.search(query_request,
+        this.HAPI.RecordMgr.search(query_request,
             function( response ){
 
                 if(response.status != window.hWin.ResponseStatus.OK){
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    that.$Hmsg.showMsgErr(response);
                 }
 
-                if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+                if(that.$H.isempty(response.data)) { return; }
 
                 let recordset = new HRecordSet(response.data); // Retieve Search Results
 
@@ -614,7 +614,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                     return;
                 }
 
-                this.getKeywordsNextStep(next_step, extra_ids);
+                that.getKeywordsNextStep(next_step, extra_ids);
             }
         );
     },
@@ -631,7 +631,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         switch(step){
             case 'assigned': // add assigned keywords to html list
 
-                if(!window.hWin.HEURIST4.util.isempty(that.project_keywords)){
+                if(!that.$H.isempty(that.project_keywords)){
 
                     for(const id of that.project_keywords){
 
@@ -671,7 +671,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      * @returns {false}
      */
     lookupGoogle: function(){
-        let title = $($('#title_field')[0]).text();
+        let title = this._$('#title_field').first().text();
         let url = `https://books.google.com.au/?q=${title}`;
 
         window.open(url, '_blank');
@@ -685,7 +685,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      * @returns {false}
      */
     lookupWorldCat: function(){
-        let title = $($('#title_field')[0]).text();
+        let title = this._$('#title_field').first().text();
         let url = `https://www.worldcat.org/search?q=ti%3A${title}`;
 
         window.open(url, '_blank');
@@ -699,7 +699,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      * @returns {false}
      */
     lookupHathiTrust: function(){
-        let title = $($('#title_field')[0]).text();
+        let title = this._$('#title_field').first().text();
         let url = `https://catalog.hathitrust.org/Search/Advanced?adv=1&lookfor%5B%5D=${title}`;
 
         window.open(url, '_blank');
@@ -713,7 +713,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      * @returns {false}
      */
     lookupKarlsruhePortal: function(){
-        let title = $($('#title_field')[0]).text();
+        let title = this._$('#title_field').first().text();
         let url = `https://kvk.bibliothek.kit.edu/index.html?lang=en&digitalOnly=0&embedFulltitle=0&newTab=0&TI=${title}`;
 
         window.open(url, '_blank');
@@ -740,26 +740,26 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
             return;
         }
 
-        let list = $('#associated_field');
+        let list = this._$('#associated_field');
 
         this.assoc_search_id = id;
         this.assoc_keywords = [];
         this.assoc_selected = [];
 
-        $('#assoc_prev').hide();
+        this._$('#assoc_prev').hide();
        
-        $('#assoc_next').hide(); 
+        this._$('#assoc_next').hide(); 
 
         list.html('<div style="font-size:1.5em">Loading List...</div>');
 
         let query_request = {q: `t:${this.id_map.RT_Work} linkedto: ${id}`, detail: 'detail'};  // Retrieve all works that have the selected keyword
 
-        window.hWin.HAPI4.RecordMgr.search(query_request,
+        this.HAPI.RecordMgr.search(query_request,
             function(response){
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+                    if(that.$H.isempty(response.data)) { return; }
 
                     let recordset = new HRecordSet(response.data);
                     let records = recordset.getRecords();
@@ -789,7 +789,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                     // Add the complete list retrieved to the associated keyword
                     that.updateAssocList(ids);
                 } else {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    that.$Hmsg.showMsgErr(response);
                 }
             }
         );
@@ -836,15 +836,15 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      */
     updateAssocDisplay: function(move_to_start=true){
 
-        let list = $('#associated_field');
+        let list = this._$('#associated_field');
 
-        if(window.hWin.HEURIST4.util.isempty(this.assoc_keywords)){
+        if(this.$H.isempty(this.assoc_keywords)){
             return;
         }
 
         let keywords = this.assoc_keywords;
 
-        if(window.hWin.HEURIST4.util.isempty(this.project_keywords)){
+        if(this.$H.isempty(this.project_keywords)){
             return;
         }
 
@@ -855,9 +855,9 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         // Empty List, before use
         list.empty();
 
-        let name = $('#keyword_field').find(`li#${this.assoc_search_id}_m`).find('label').text();
-        $('#assoc_kywd').text(name);
-        $('#assoc_total').text(`(n=${this.assoc_work_count})`);
+        let name = this._$('#keyword_field').find(`li#${this.assoc_search_id}_m`).find('label').text();
+        this._$('#assoc_kywd').text(name);
+        this._$('#assoc_total').text(`(n=${this.assoc_work_count})`);
 
         // Now add items into the HTML list
         this.assoc_endindex = this.renderAssocKeywods(keywords);
@@ -865,21 +865,21 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         let jump = this.assoc_endindex - this.assoc_startindex;
 
         if(this.assoc_startindex-jump < 0 && this.assoc_endindex+13 > keywords.length && this.assoc_endindex <= keywords.length){
-            $('#assoc_prev').hide();
+            this._$('#assoc_prev').hide();
 
-            $('#assoc_next').hide();             
+            this._$('#assoc_next').hide();             
         }else if(this.assoc_startindex-jump < 0){ 
-            $('#assoc_next').show();
+            this._$('#assoc_next').show();
 
-            $('#assoc_prev').hide(); 
+            this._$('#assoc_prev').hide(); 
         }else if(this.assoc_endindex+jump > keywords.length && this.assoc_endindex == keywords.length){ 
-            $('#assoc_prev').show();
+            this._$('#assoc_prev').show();
 
-            $('#assoc_next').hide(); 
+            this._$('#assoc_next').hide(); 
         }else{
-            $('#assoc_prev').show();
+            this._$('#assoc_prev').show();
 
-            $('#assoc_next').show(); 
+            this._$('#assoc_next').show(); 
         }
 
         this.disableUpdateBtn();
@@ -894,7 +894,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      */
     renderAssocKeywods: function(keywords){
 
-        let list = $('#associated_field');
+        let list = this._$('#associated_field');
 
         let that = this;
 
@@ -987,9 +987,9 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         this.assoc_selected = []; // Empty complete selection
 
-        $('#checkall-assoc').attr('checked', false); // Remove any checked boxes in current view
+        this._$('#checkall-assoc').attr('checked', false); // Remove any checked boxes in current view
 
-        this.checkAllOptions($('#associated_field')[0], false); // Uncheck the 'Check all' option
+        this.checkAllOptions(this._$('#associated_field')[0], false); // Uncheck the 'Check all' option
     },
     
     /** Recent Keywords System **/
@@ -1030,7 +1030,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         }
 
         // Check if current work can be added to the list of previously (recent) works
-        if(this.prev_works.findIndex(id => id == this.options.edit_fields.rec_ID[0]) == -1 && !window.hWin.HEURIST4.util.isempty(this.project_keywords)){
+        if(this.prev_works.findIndex(id => id == this.options.edit_fields.rec_ID[0]) == -1 && !this.$H.isempty(this.project_keywords)){
             this.prev_works.unshift(this.options.edit_fields.rec_ID[0]);
         }
 
@@ -1057,11 +1057,11 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         let query_request = {q: `t:${this.id_map.RT_Work} ids:"${id}"`, detail: 'detail'}; // Retrieve the record for supplied work code
 
-        window.hWin.HAPI4.RecordMgr.search(query_request,
+        this.HAPI.RecordMgr.search(query_request,
             function( response ){
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+                    if(that.$H.isempty(response.data)) { return; }
 
                     let recordset = new HRecordSet(response.data);
                     let record = recordset.getFirstRecord();
@@ -1072,7 +1072,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                         that.getRecentKeywords(details[that.id_map.DT_Keywords], is_checked);
                     }
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    that.$Hmsg.showMsgErr(response);
                 }
             }
         );
@@ -1085,8 +1085,6 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      * @param {Boolean} is_checked - whether to set checked for new option
      */
     getRecentKeywords: function(keyword_IDs, is_checked=false){
-        
-        let that = this;
 
         if(this.full_keywords_list == null){
             this.getKeywords('recent', keyword_IDs);
@@ -1100,20 +1098,20 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 title = this.full_keywords_list[id];
             }
 
-            let found = $('#keyword_field').find(`li#${id}_m`); // Check if keyword is already assigned
+            let found = this._$('#keyword_field').find(`li#${id}_m`); // Check if keyword is already assigned
 
             if(found.length == 0){
 
-                found = $('#prev_field').find(`input#${id}_r`); // Check if keyword has been displayed as a recently used keyword
+                found = this._$('#prev_field').find(`input#${id}_r`); // Check if keyword has been displayed as a recently used keyword
 
                 if(found.length == 0){
 
-                    that.updateRecentKeywordDisplay(id, title); // Add new keyword to recently used keyword list
+                    this.updateRecentKeywordDisplay(id, title); // Add new keyword to recently used keyword list
 
                     this.prev_keywords[id] = title;
 
                     if(is_checked){
-                        $('#prev_field').find(`input#${id}_r`).prop('checked', true);
+                        this._$('#prev_field').find(`input#${id}_r`).prop('checked', true);
                     }
                 }
             }
@@ -1139,7 +1137,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         let that = this;
 
-        let list = $('#prev_field');
+        let list = this._$('#prev_field');
         let item = $('<li>');
         let html = '';
 
@@ -1152,7 +1150,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         item.html(html);
 
-        $(item).find(`#${id}`).on('click', function(e){ that.disableUpdateBtn(); });
+        $(item).find(`#${id}_r`).on('click', function(e){ that.disableUpdateBtn(); });
         $(item).find('.btn-info').on('click', function(e){ that.openRecordInTab(id); });
 
         list.append(item);
@@ -1184,7 +1182,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         let that = this;
 
-        let list = $('#keyword_field');
+        let list = this._$('#keyword_field');
 
         let item = $(`<li id="${id}_m">`);
 
@@ -1215,19 +1213,19 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
     addKeyword: function(id, title){
 
         /* Remove from Associated List */
-        if($('#associated_field').find(`input#${id}_a`).parent().length > 0){
-            $('#associated_field').find(`input#${id}_a`).parent().remove();
+        if(this._$('#associated_field').find(`input#${id}_a`).parent().length > 0){
+            this._$('#associated_field').find(`input#${id}_a`).parent().remove();
         }
         /* Remove from Recent List */
-        if($('#prev_field').find(`input#${id}_r`).parent().length > 0){
-            $('#prev_field').find(`input#${id}_r`).parent().remove();
+        if(this._$('#prev_field').find(`input#${id}_r`).parent().length > 0){
+            this._$('#prev_field').find(`input#${id}_r`).parent().remove();
         }
 
-        if($('#keyword_field').find(`li#${id}_m`).length == 0){
+        if(this._$('#keyword_field').find(`li#${id}_m`).length == 0){
 
             this.showKeyword(id, title); // Add to Table
 
-            if(window.hWin.HEURIST4.util.isempty(this.project_keywords)){
+            if(this.$H.isempty(this.project_keywords)){
                 this.project_keywords = [];
             }
 
@@ -1271,7 +1269,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         let title = 'List of Editions';
 
         for(const cur_edition of this.editions_info){
-            let rec_url = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?db=${window.hWin.HAPI4.database}&recID=${cur_edition[1]}`;
+            let rec_url = `${this.HAPI.baseURL}viewers/record/renderRecordData.php?db=${this.HAPI.database}&recID=${cur_edition[1]}`;
             editions = editions.concat(`<div style='font-size: 1.2em;'>${cur_edition[0]} - <a href='${rec_url}' target='_blank' rel='noopener'> view record </a></div>`, "<br><br>");
         }
 
@@ -1280,7 +1278,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
             title = 'No editions';
         }
 
-        window.hWin.HEURIST4.msg.showMsgDlg(editions, null, title, {default_palette_class: 'ui-heurist-explore'});
+        this.$Hmsg.showMsgDlg(editions, null, title, {default_palette_class: 'ui-heurist-explore'});
     },
 
     /** Other Function **/
@@ -1296,7 +1294,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         let checked_items = [];
 
-        let items = $(list).find('li');
+        let items = this._$(list).find('li');
 
         for(const item of items){
 
@@ -1315,13 +1313,13 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      */
     disableUpdateBtn: function(){
 
-        if($('.mpce').find('input:checked').not('.check-all').length > 0 || this.assoc_selected.length > 0){
-            $($('.mpce')[0].parentNode.parentNode).find('.btnDoAction').attr('disabled', true).css({'cursor': 'default', 'opacity': '0.5'});
-            $($('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'inline-block'});
+        if(this._$('.mpce').find('input:checked').not('.check-all').length > 0 || this.assoc_selected.length > 0){
+            $(this._$('.mpce')[0].parentNode.parentNode).find('.btnDoAction').attr('disabled', true).css({'cursor': 'default', 'opacity': '0.5'});
+            $(this._$('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'inline-block'});
         }
         else{
-            $($('.mpce')[0].parentNode.parentNode).find('.btnDoAction').attr('disabled', false).css({'cursor': 'default', 'opacity': '1'});
-            $($('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'none'});
+            $(this._$('.mpce')[0].parentNode.parentNode).find('.btnDoAction').attr('disabled', false).css({'cursor': 'default', 'opacity': '1'});
+            $(this._$('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'none'});
         }
     },
 
@@ -1334,7 +1332,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      */
     checkAllOptions: function(list, isChecked, isAssoc=false){
 
-        let items = $(list).find('li');
+        let items = this._$(list).find('li');
 
         for(const item of items){
 
@@ -1383,7 +1381,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      */
     openRecordInTab: function(id){
 
-        let rec_url = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?db=${window.hWin.HAPI4.database}&recID=${id}`;
+        let rec_url = `${this.HAPI.baseURL}viewers/record/renderRecordData.php?db=${this.HAPI.database}&recID=${id}`;
 
         window.open(rec_url, "_blank");
     },

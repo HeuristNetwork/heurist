@@ -116,7 +116,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     // invoked from _init after load entity config    
     //
     _initControls: function() {
-        
+
+        let fileTranslations = window.hWin.HAPI4.EntityMgr.getEntityData2('ulf_Translation');
+        if(this.options.select_mode === 'manager' && !fileTranslations){
+            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('recUploadedFiles', 'ulf', null, () => this._initControls);
+            return;
+        }
+
         if(this.options.edit_addrecordfirst){
             this._additionMode = this.options.additionMode?this.options.additionMode:'any'; 
             this.addEditRecord(-1);
@@ -1629,7 +1635,7 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
 
                 window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
 
-                window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+                window.hWin.HAPI4.RecordMgr.lookupService(request, (data) => {
 
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
 

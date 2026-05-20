@@ -104,9 +104,9 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
     _initControls: function(){
 
         // Extra field styling
-        this.element.find('#search_container > div > div > .header.recommended').css({'min-width':'65px', display: 'inline-block'});
+        this._$('#search_container > div > div > .header.recommended').css({'min-width':'65px', display: 'inline-block'});
 
-        this.element.find('#btnRdfSearch').hide();
+        this._$('#btnRdfSearch').hide();
 
         // Prepare result list options
         this.options.resultList = $.extend(this.options.resultList, {
@@ -208,7 +208,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
      * - Determines the `search_type` (e.g., 'mint', 'hoard', 'findspots') from the clicked button's value.
      * - If the main search input (`#inpt_any`) is empty, shows a flash message and returns.
      * - Sets `this.baseURL` to the appropriate Nomisma API endpoint based on `search_type`.
-     * - Calls `this._super({id: this.element.find('#inpt_any').val()})`. The parent `_doSearch`
+     * - Calls `this._super({id: this._$('#inpt_any').val()})`. The parent `_doSearch`
      *   (from `lookupBase`) will then construct the full URL using `this.baseURL` and the provided parameters.
      *
      * @memberof heurist.lookupNomisma
@@ -223,8 +223,8 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 
         let search_type = $(event.target).val(); // Get search type from button value (e.g., 'mint', 'hoard')
 
-        if(this.element.find('#inpt_any').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Enter value to search...', 500);
+        if(this._$('#inpt_any').val()==''){
+            this.$Hmsg.showMsgFlash('Enter value to search...', 500);
             return;
         }
 
@@ -242,7 +242,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
                 return;
         }
 
-        this._super({id: this.element.find('#inpt_any').val()});
+        this._super({id: this._$('#inpt_any').val()});
     },
     
     /**
@@ -275,13 +275,13 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
      */
     _onSearchResult: function(geojson_data){
 
-        if(!window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){ // Validate GeoJSON
+        if(!this.$H.isGeoJSON(geojson_data, true)){ // Validate GeoJSON
             this._super(false); // Show error/clear if not valid
             return;
         }
 
         let res_records = {}, res_orders = [];
-        const DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']; // Heurist ID for geospatial field type
+        const DT_GEO_OBJECT = this.HAPI.sysinfo['dbconst']['DT_GEO_OBJECT']; // Heurist ID for geospatial field type
 
         // Prepare fields for HRecordSet
         let fields = ['rec_ID','rec_RecTypeID']; // Base fields
@@ -311,9 +311,9 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
                 // Then extract potentially nested value
                 val = this.getValueByParts(fld_Names, val);
 
-                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Names] && !window.hWin.HEURIST4.util.isempty(val)){ // looking for geospatial values
+                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Names] && !this.$H.isempty(val)){ // looking for geospatial values
                     val = this.createGeoFeature(val);
-                    hasGeo = !window.hWin.HEURIST4.util.isempty(val);
+                    hasGeo = !this.$H.isempty(val);
                 } // else not looking for geospatial values
 
                 values.push(val);    

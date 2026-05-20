@@ -162,13 +162,13 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         let that = this;
 
         // Extra field styling
-        this.element.find('#frm-search .header').css({width: '125px', 'min-width': '125px', display: 'inline-block'});
+        this._$('#frm-search .header').css({width: '125px', 'min-width': '125px', display: 'inline-block'});
 
         this._sel_elements = {
-            server: this.element.find('#inpt_server'),
-            theso: this.element.find('#inpt_theso'),
-            lang: this.element.find('#inpt_lang'),
-            group: this.element.find('#inpt_group')
+            server: this._$('#inpt_server'),
+            theso: this._$('#inpt_theso'),
+            lang: this._$('#inpt_lang'),
+            group: this._$('#inpt_group')
         };
 
         // ----- SERVER SELECT -----
@@ -177,12 +177,12 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
             metadata: 'servers'
         };
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+        this.HAPI.RecordMgr.lookupService(request, function(response){
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack(that.element);
+            that.$Hmsg.sendCoverallToBack(that.element);
 
             if(response.status && response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
                 return;
             }
 
@@ -196,8 +196,8 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
 
                 that._collections[server] = {};
             }
-            window.hWin.HEURIST4.ui.fillSelector(that._sel_elements['server'][0], options);
-            window.hWin.HEURIST4.ui.initHSelect(that._sel_elements['server'], false, null, {
+            that.$Hui.fillSelector(that._sel_elements['server'][0], options);
+            that.$Hui.initHSelect(that._sel_elements['server'], false, null, {
                 onSelectMenu: () => { that._displayThesauruses(); }
             });
 
@@ -212,11 +212,11 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
             change: this._displayThesauruses
         });
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving servers...</span>');
+        this.$Hmsg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving servers...</span>');
 
         // ----- THESO SELECT -----
         this._on(this._sel_elements['theso'], {
-            change: function(){
+            change: () => {
                 this._refreshCollections = true;
                 this._displayCollections();
             }
@@ -224,31 +224,31 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
 
         // ----- GROUP SELECT -----
         this._on(this._sel_elements['group'], {
-            change: function(){
-                this.element.find('#btn_cnlGroups').show();
+            change: () => {
+                this._$('#btn_cnlGroups').show();
             }
         });
 
         // ----- LANGUAGE SELECT -----
-        window.hWin.HEURIST4.ui.createLanguageSelect(this._sel_elements['lang'], [{key: '', title: 'select a language...'}]);
+        this.$Hui.createLanguageSelect(this._sel_elements['lang'], [{key: '', title: 'select a language...'}]);
 
         // ----- REFRESH BUTTONS -----
-        this._on(this.element.find('#btn_refTheso').button({showLabel: false, icon: 'ui-icon-refresh'}), {
-            click: function(){
+        this._on(this._$('#btn_refTheso').button({showLabel: false, icon: 'ui-icon-refresh'}), {
+            click: () => {
                 this._updateThesauruses(true);
             }
         });
-        this._on(this.element.find('#btn_refGroups').button({showLabel: false, icon: 'ui-icon-refresh'}), {
-            click: function(){
+        this._on(this._$('#btn_refGroups').button({showLabel: false, icon: 'ui-icon-refresh'}), {
+            click: () => {
                 this._updateCollections(true);
             }
         });
 
         // ----- CANCEL BUTTON -----
-        this._on(this.element.find('#btn_cnlGroups').button({showLabel: false, icon: 'ui-icon-cancel'}).hide(), {
-            click: function(){
+        this._on(this._$('#btn_cnlGroups').button({showLabel: false, icon: 'ui-icon-cancel'}).hide(), {
+            click: () => {
                 this._sel_elements['group'].val([]);
-                this.element.find('#btn_cnlGroups').hide();
+                this._$('#btn_cnlGroups').hide();
             }
         })
 
@@ -260,7 +260,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      * This can be triggered on initial load or when the refresh button is clicked.
      *
      * - Retrieves the selected server ID from `this._sel_elements['server']`.
-     * - Makes a HAPI call to `lookup_external_service` with metadata `thesauruses`.
+     * - Makes a HAPI call to `lookupService` with metadata `thesauruses`.
      *   - `params.servers`: Set to the current server ID if `is_refresh` is true, otherwise null (to fetch all initially).
      *   - `params.refresh`: Set to 1 if `is_refresh` is true, otherwise 0.
      * - On success, calls `_updateThesaurusList` to process the response and then `_displayThesauruses` to update the UI.
@@ -288,13 +288,13 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
             }
         };
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+        this.HAPI.RecordMgr.lookupService(request, function(response){
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack(that.element);
+            that.$Hmsg.sendCoverallToBack(that.element);
 
             if(response.status && response.status != window.hWin.ResponseStatus.OK){
                 // display error and show the textbox instead
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
 
                 return;
             }
@@ -304,7 +304,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
             that._displayThesauruses();
         });
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving thesauruses...</span>');
+        this.$Hmsg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving thesauruses...</span>');
     },
 
     /**
@@ -386,12 +386,12 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         let server = this._sel_elements['server'].val();
         let options = this._thesauruses[server];
 
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(options)){
+        if(!this.$H.isArrayNotEmpty(options)){
             options = [{key: '', title: 'No thesauruses available'}];
         }
 
-        window.hWin.HEURIST4.ui.fillSelector(this._sel_elements['theso'][0], options);
-        window.hWin.HEURIST4.ui.initHSelect(this._sel_elements['theso'], true);
+        this.$Hui.fillSelector(this._sel_elements['theso'][0], options);
+        this.$Hui.initHSelect(this._sel_elements['theso'], true);
 
         this._sel_elements['theso'].trigger('change');
     },
@@ -401,7 +401,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      * This can be triggered on thesaurus change or when the refresh button for collections is clicked.
      *
      * - Retrieves selected server ID and thesaurus ID. If thesaurus ID is empty, returns.
-     * - Makes a HAPI call to `lookup_external_service` with metadata `collections`.
+     * - Makes a HAPI call to `lookupService` with metadata `collections`.
      *   - `params.server`: Selected server ID.
      *   - `params.thesaurus`: Selected thesaurus ID.
      *   - `params.refresh`: Set to 1 if `is_refresh` is true, otherwise 0.
@@ -425,7 +425,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         let ser_id = this._sel_elements['server'].val();
         let th_id = this._sel_elements['theso'].val();
 
-        if(window.hWin.HEURIST4.util.isempty(th_id)){
+        if(this.$H.isempty(th_id)){
             return;
         }
 
@@ -439,14 +439,14 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
             }
         };
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+        this.HAPI.RecordMgr.lookupService(request, function(response){
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack(that.element);
+            that.$Hmsg.sendCoverallToBack(that.element);
             that._refreshCollections = false;
 
             if(response.status && response.status != window.hWin.ResponseStatus.OK){
                 // display error and show the textbox instead
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
 
                 return;
             }
@@ -461,7 +461,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
             that._displayCollections();
         });
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving available collections...</span>');
+        this.$Hmsg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving available collections...</span>');
     },
 
     /**
@@ -495,7 +495,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         let theso = this._sel_elements['theso'].val();
         let options = this._collections[server][theso];
 
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(options)){
+        if(!this.$H.isArrayNotEmpty(options)){
 
             if(this._refreshCollections){ // update groups
                 this._updateCollections(true);
@@ -506,8 +506,8 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         }
         this._refreshCollections = false;
 
-        window.hWin.HEURIST4.ui.fillSelector(this._sel_elements['group'][0], options);
-        window.hWin.HEURIST4.ui.initHSelect(this._sel_elements['group'], true);
+        this.$Hui.fillSelector(this._sel_elements['group'][0], options);
+        this.$Hui.initHSelect(this._sel_elements['group'], true);
 
         let length = options.length > 0 ? options.length : 3;
         this._sel_elements['group'].attr('size', length);
@@ -531,6 +531,8 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      */
     _rendererResultList: function(recordset, record){
 
+        let that = this;
+
         /**
          * Inner helper function to format a field's value for display.
          * It HTML escapes the value and wraps it in a div with a specified width for truncation.
@@ -541,7 +543,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
          */
         function fld(fldname, width){
             let s = recordset.fld(record, fldname);
-            s = window.hWin.HEURIST4.util.htmlEscape(s || '');
+            s = that.$H.htmlEscape(s || '');
             let title = s;
 
             if(fldname == 'term_uri'){
@@ -584,7 +586,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      */
     doAction: function(){
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Preparing values for record editor...</span>');
+        this.$Hmsg.bringCoverallToFront(this.element, null, '<span style="color: white;">Preparing values for record editor...</span>');
 
         // get selected recordset
         let [recset, record] = this._getSelection(true);
@@ -600,8 +602,8 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         // Account for label translations
         let label_dty_ID = this.options.mapping.fields['term_label'];
         if(label_dty_ID > 0
-            && window.hWin.HEURIST4.util.isArrayNotEmpty(res[label_dty_ID])
-            && res[label_dty_ID].length == 2 && window.hWin.HEURIST4.util.isObject(res[label_dty_ID][1])){
+            && this.$H.isArrayNotEmpty(res[label_dty_ID])
+            && res[label_dty_ID].length == 2 && this.$H.isObject(res[label_dty_ID][1])){
 
                 res[label_dty_ID].push(...Object.values(res[label_dty_ID][1]));
                 res[label_dty_ID].splice(1, 1);
@@ -657,16 +659,16 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         let params = {};
         let th_id = this._sel_elements['theso'].val();
 
-        let search = this.element.find('#inpt_search').val();
-        let grouping = this.element.find('#inpt_group').val(); // This is a multi-select, returns array
+        let search = this._$('#inpt_search').val();
+        let grouping = this._$('#inpt_group').val(); // This is a multi-select, returns array
         let language = this._sel_elements['lang'].val();
 
-        if(window.hWin.HEURIST4.util.isempty(th_id)){
-            window.hWin.HEURIST4.msg.showMsgFlash('A thesaurus must be selected...', 2000);
+        if(this.$H.isempty(th_id)){
+            this.$Hmsg.showMsgFlash('A thesaurus must be selected...', 2000);
             return;
         }
-        if(window.hWin.HEURIST4.util.isempty(search)){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value in the search field...', 2000);
+        if(this.$H.isempty(search)){
+            this.$Hmsg.showMsgFlash('Please enter a value in the search field...', 2000);
             return;
         }
 
@@ -674,17 +676,17 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         this.baseURL += `concept/${th_id}/search?`;
         params['q'] = search;
 
-        if(!window.hWin.HEURIST4.util.isempty(language)){
-            language = window.hWin.HAPI4.sysinfo.common_languages[language]['a2']; // Get 2-char code
+        if(!this.$H.isempty(language)){
+            language = this.HAPI.sysinfo.common_languages[language]['a2']; // Get 2-char code
             params['lang'] = language;
         }
-        if(!window.hWin.HEURIST4.util.isempty(grouping) && Array.isArray(grouping) && !window.hWin.HEURIST4.util.isempty(grouping[0])){
+        if(!this.$H.isempty(grouping) && Array.isArray(grouping) && !this.$H.isempty(grouping[0])){
             params['group'] = grouping.join(','); // Join multiple group IDs
         }
 
         // Pass preferred language to proxy in case it's useful for XML parsing or content negotiation
         this._super(params, {
-            preferred_lang: window.hWin.HEURIST4.util.isempty(language) || language.length != 2 ? 'fr' : language
+            preferred_lang: this.$H.isempty(language) || language.length != 2 ? 'fr' : language
         });
     },
 
@@ -717,7 +719,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      */
     _onSearchResult: function(json_data){
 
-        json_data = window.hWin.HEURIST4.util.isJSON(json_data); // Ensure JS object/array
+        json_data = this.$H.isJSON(json_data); // Ensure JS object/array
 
         if(!json_data || !Array.isArray(json_data) || json_data.length === 0){
             return this._super(json_data && Array.isArray(json_data) && json_data.length === 0 ? null : false);

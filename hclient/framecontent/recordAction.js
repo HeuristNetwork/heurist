@@ -97,7 +97,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), null, 'Retrieving available licenses...');
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+        window.hWin.HAPI4.RecordMgr.lookupService(request, (data) => {
 
             window.hWin.HEURIST4.msg.sendCoverallToBack();
 
