@@ -563,13 +563,11 @@ if(!$system->hasAccess()){
                     text: 'Network'
                 }))
                 .append($('<span>', {
-                    class: 'show_network',
-                    class: 'fake_link',
+                    class: 'show_network fake_link',
                     style: 'padding-left: 2em; font-size: 12px;',
                     html: `<span class="ui-icon ui-icon-network"></span>View network (<span class="connectionsPlaceholder"></span> connections)`
                 }))
                 .insertBefore($group_container.find('.detailRow.fieldRow').first());
-
                 $network.find('.show_network').on('click', () => openNetworkGraph(recID));
             }
 
@@ -653,7 +651,6 @@ if(!$system->hasAccess()){
             }
 
             function openNetworkGraph(recID){
-
                 let $parentContainer = $(`div[data-recid="${recID}"]`);
                 let $networkElement = $parentContainer.find('.networkGraphViewer');
                 if($networkElement.length === 0){
