@@ -1201,6 +1201,11 @@ if(!$system->hasAccess()){
                     }
 
                 }
+                
+                if(isAdminInterface){
+                    $('#custom-report-link').show();
+                    $('#custom-report-link').on('click', () => openReportSelector());    
+                }                
 
             });
 
