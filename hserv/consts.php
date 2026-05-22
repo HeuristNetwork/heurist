@@ -314,7 +314,7 @@ $glb_lang_codes = null;
 // Default common languages for translation of database definitions (ISO 639-2 codes).
 // Value from $commonLanguagesForTranslation in configIni.php or defaults here.
 if(!isset($commonLanguagesForTranslation)){
-    $commonLanguagesForTranslation = ['ENG','FRE','CHI','SPA','ITA','ARA','GER','POR','LAT','GRE','GRC'];
+    $commonLanguagesForTranslation = ['ENG','FRE','CHI','SPA','ITA','ARA','GER','POR','LAT','GRE','GRC','IND'];
 }
 
 // Common languages for translation database definitions (ISO639-2 codes) 3 char in upper case
