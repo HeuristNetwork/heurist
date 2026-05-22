@@ -94,7 +94,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
     /**
      * Stores the list of available lookup service definitions.
-     * This is typically populated from `window.hWin.HAPI4.sysinfo['services_list']`
+     * This is typically populated from `this.HAPI.sysinfo['services_list']`
      * which itself is derived from a server-side JSON configuration file defining
      * available external services, their query parameters, expected fields, etc.
      * @memberof heurist.lookupConfig
@@ -107,9 +107,9 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
     /**
      * Initializes the widget.
      * - Sets up the `_urls` object with predefined URLs for various lookup services.
-     * - Retrieves the list of available services from `window.hWin.HAPI4.sysinfo['services_list']`.
+     * - Retrieves the list of available services from `this.HAPI.sysinfo['services_list']`.
      *   If no services are found, an error message is displayed.
-     * - Retrieves the current service configurations from `window.hWin.HAPI4.sysinfo['service_config']`
+     * - Retrieves the current service configurations from `this.HAPI.sysinfo['service_config']`
      *   (passed via `this.options.service_config` by `baseConfig`) and ensures it's a valid object.
      * - Calls the parent widget's `_init` method.
      *
@@ -164,9 +164,9 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             }
         };
         
-        this._available_services = window.hWin.HAPI4.sysinfo['services_list'];
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._available_services)){
-            window.hWin.HEURIST4.msg.showMsgErr({
+        this._available_services = this.HAPI.sysinfo['services_list'];
+        if(!this.$H.isArrayNotEmpty(this._available_services)){
+            this.$Hmsg.showMsgErr({
                 message: 'There are no available services, or the configuration file was not found or is broken',
                 error_title: 'No services',
                 status: window.hWin.ResponseStatus.ACTION_BLOCKED
@@ -174,7 +174,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             return;
         }
 
-        this.options.service_config = window.hWin.HEURIST4.util.isJSON(this.options.service_config);
+        this.options.service_config = this.$H.isJSON(this.options.service_config);
         if(!this.options.service_config){ // Invalid value / None
             this.options.service_config = {};    
         }
@@ -214,7 +214,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         //fill record type selector
         this.selectRecordType = this._$('#sel_rectype').css({'list-style-type': 'none'});
-        this.selectRecordType = window.hWin.HEURIST4.ui.createRectypeSelectNew(this.selectRecordType.get(0),
+        this.selectRecordType = this.$Hui.createRectypeSelectNew(this.selectRecordType.get(0),
             {topOptions:'select record type'});
 
         // on change handler
@@ -241,7 +241,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
                 if(Array.isArray(that.example_results[service])){
                     max = that.example_results[service].length - 1;
-                }else if(window.hWin.HEURIST4.util.isPlainObject(that.example_results[service])){
+                }else if(that.$H.isPlainObject(that.example_results[service])){
                     max = Object.keys(that.example_results[service]).length - 1;
                 }
 
@@ -260,14 +260,14 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         let req = {
             a: 'check_allow_estc',
-            db: window.hWin.HAPI4.database,
+            db: this.HAPI.database,
             ver: 'ESTC'
         };
-        window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
+        this.HAPI.SystemMgr.check_allow_estc(req, function(response){
             that._estc_response.ESTC = response;
         });
         req['ver'] = 'ESTC_works';
-        window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
+        this.HAPI.SystemMgr.check_allow_estc(req, function(response){
             that._estc_response.ESTC_works = response;
             that._estc_response.ESTC_editions = response;
         });
@@ -336,7 +336,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
      * record (sys_ID 1) via a HAPI `EntityMgr.doRequest` call.
      *
      * On successful save:
-     * - Updates the local copy in `window.hWin.HAPI4.sysinfo['service_config']`.
+     * - Updates the local copy in `this.HAPI.sysinfo['service_config']`.
      * - Resets modification flags (`_is_modified`, `_services_modified`).
      * - Disables the main save button for the configuration panel.
      * - Shows a success flash message.
@@ -362,23 +362,23 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         let request = {
             'a': 'save',
             'entity': 'sysIdentification',
-            'request_id': window.hWin.HEURIST4.util.random(),
+            'request_id': this.$H.random(),
             'isfull': 0,
             'fields': fields
         };
 
-        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+        this.HAPI.EntityMgr.doRequest(request, function(response){
 
             if(response.status == window.hWin.ResponseStatus.OK){
-                window.hWin.HAPI4.sysinfo['service_config'] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config); // update local copy
+                that.HAPI.sysinfo['service_config'] = that.$H.cloneJSON(that.options.service_config); // update local copy
 
                 that._is_modified = false;
                 that._services_modified = false;
 
-                window.hWin.HEURIST4.util.setDisabled(that.save_btn, !that._services_modified);
-                window.hWin.HEURIST4.msg.showMsgFlash('Saved lookup configurations...', 3000);
+                that.$H.setDisabled(that.save_btn, !that._services_modified);
+                that.$Hmsg.showMsgFlash('Saved lookup configurations...', 3000);
             }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
             }
         });
     },
@@ -880,7 +880,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         this.btnDiscard.show(); // Always show discard button when a config attempt is active
 
         // Enable/disable Apply button based on modification status
-        window.hWin.HEURIST4.util.setDisabled(this.btnApply, !this._is_modified);
+        this.$H.setDisabled(this.btnApply, !this._is_modified);
 
         if(this._is_modified){
             this.btnApply.addClass('ui-button-action'); // Highlight if modified
@@ -958,7 +958,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         if((service_name == 'ESTC_editions' || service_name == 'ESTC_works' || service_name == 'ESTC')
          && this._estc_response[service_name].status != window.hWin.ResponseStatus.OK){
 
-            window.hWin.HEURIST4.msg.showMsgErr(this._estc_response[service_name]);
+            this.$Hmsg.showMsgErr(this._estc_response[service_name]);
             return false;
         }
 
@@ -968,10 +968,10 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
             let lookup_url = this._urls[service_name].lookup;
             let lookup_label = this._urls[service_name].lookup;
-            this._off($('#a_lookup_url'), 'click');
+            this._off(this._$('#a_lookup_url'), 'click');
             if(service_name != 'geoName' && service_name != 'postalCodeSearch'){
 
-                this._on($('#a_lookup_url'), {
+                this._on(this._$('#a_lookup_url'), {
                     click: function(){
 
                         let url = this._urls[service_name].lookup;
@@ -987,9 +987,9 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 });
             }else{
 
-                this._on($('#a_lookup_url'), {
+                this._on(this._$('#a_lookup_url'), {
                     click: function(){
-                        window.hWin.HEURIST4.msg.showMsgErr({
+                        this.$Hmsg.showMsgErr({
                             message: 'Due to security reasons this url cannot be provided.',
                             error_title: 'Cannot provide URL',
                             status: window.hWin.ResponseStatus.ACTION_BLOCKED
@@ -1002,8 +1002,8 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 lookup_url = '#';
             }
 
-            $('#a_service_url').html(this._urls[service_name].service).attr('href', this._urls[service_name].service);
-            $('#a_lookup_url').html(lookup_label).attr('href', lookup_url);
+            this._$('#a_service_url').html(this._urls[service_name].service).attr('href', this._urls[service_name].service);
+            this._$('#a_lookup_url').html(lookup_label).attr('href', lookup_url);
 
             this._$('.service_urls').show();
         }else{
@@ -1023,7 +1023,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
      * - If example results for the `service_name` are not already cached in `this.example_results`:
      *   - Retrieves the test lookup URL from `this._urls`.
      *   - Handles special cases for service types (e.g., 'bnfLibrary' -> 'bnflibrary_bib', 'nomisma' triggers `_runTestNomisma`).
-     *   - Makes an API call via `HAPI4.RecordMgr.lookup_external_service` to fetch example data.
+     *   - Makes an API call via `HAPI4.RecordMgr.lookupService` to fetch example data.
      *   - Caches the response in `this.example_results[service_name]`.
      *   - Recursively calls `_displayTestResults` to render the fetched data.
      * - If data is cached or fetched:
@@ -1051,7 +1051,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         this._$('#example_records').hide();
 
-        if(handled_services.indexOf(service_name) == -1 || window.hWin.HEURIST4.util.isempty(this.selectRecordType.val())){
+        if(handled_services.indexOf(service_name) == -1 || this.$H.isempty(this.selectRecordType.val())){
             return;
         }
 
@@ -1089,7 +1089,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 serviceType: serviceType // requesting service, otherwise no
             };
 
-            window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+            this.HAPI.RecordMgr.lookupService(request, function(response){
 
                 if(response.status && response.status != window.hWin.ResponseStatus.OK){
                     return;
@@ -1143,19 +1143,19 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 let fld_parts = field.split('.');
                 value = data[fld_parts[0]];
 
-                if(window.hWin.HEURIST4.util.isempty(value)){
+                if(that.$H.isempty(value)){
                     return;
                 }
 
                 for(let i = 1; i < fld_parts.length; i++){
 
-                    if(window.hWin.HEURIST4.util.isempty(value[fld_parts[i]]) && !window.hWin.HEURIST4.util.isempty(value[0])){
+                    if(that.$H.isempty(value[fld_parts[i]]) && !that.$H.isempty(value[0])){
                         value = value[0];
                     }
 
                     value = value[fld_parts[i]];
 
-                    if(window.hWin.HEURIST4.util.isempty(value)){
+                    if(that.$H.isempty(value)){
                         break;
                     }
                 }
@@ -1245,7 +1245,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
                     value = {"type": "Feature", "geometry": value};
                     let wkt = stringifyMultiWKT(value);    
-                    if(window.hWin.HEURIST4.util.isempty(wkt)){
+                    if(that.$H.isempty(wkt)){
                         value = '';
                     }else{
                         let typeCode = 'm';
@@ -1264,14 +1264,14 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             }
 
             if($.isPlainObject(value)){
-                value = window.hWin.HEURIST4.util.htmlEscape(Object.values(value).join(' '));
+                value = that.$H.htmlEscape(Object.values(value).join(' '));
             }else if(Array.isArray(value) && value.length >= 1){
-                value = window.hWin.HEURIST4.util.htmlEscape(value.join('; '));
+                value = that.$H.htmlEscape(value.join('; '));
             }else{
-                value = window.hWin.HEURIST4.util.htmlEscape(value??'');
+                value = that.$H.htmlEscape(value??'');
             }
 
-            if(!window.hWin.HEURIST4.util.isempty(value)){
+            if(!that.$H.isempty(value)){
                 $cell.html(`<span style="display: inline-block;">&lArr;</span><span title="${value}" class="truncate">${value}</span>`);
             }
         });
@@ -1297,7 +1297,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
      * - If `type` is empty, defaults to 'getMints'.
      * - Validates `type` against `nomismaServices`.
      * - Constructs the API URL (e.g., `https://nomisma.org/apis/getMints?id=denarius`).
-     * - Calls `HAPI4.RecordMgr.lookup_external_service`.
+     * - Calls `HAPI4.RecordMgr.lookupService`.
      * - On response, if it's valid GeoJSON, extracts up to 5 features and adds them to `this.example_results['nomisma']`.
      * - Recursively calls itself for the next Nomisma service type ('getHoards' after 'getMints', etc.)
      *   until all types are fetched, then calls `_runTestNomisma('')` to trigger display.
@@ -1330,7 +1330,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         // Validate the service type
         if(nomismaServices.indexOf(type) == -1){
-            window.hWin.HEURIST4.msg.showMsgErr({
+            this.$Hmsg.showMsgErr({
                 message: `An invalid request was made in attempting to retrieve sample Nomisma records.<br>Attempting to retrieve "${type}"`,
                 error_title: 'Invalid Nomisma request',
                 status: window.hWin.ResponseStatus.ACTION_BLOCKED
@@ -1346,9 +1346,9 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         };
 
         // Make the API call via Heurist proxy
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+        this.HAPI.RecordMgr.lookupService(request, function(response){
 
-            if(window.hWin.HEURIST4.util.isGeoJSON(response, true)){ // Check if response is valid GeoJSON
+            if(that.$H.isGeoJSON(response, true)){ // Check if response is valid GeoJSON
                 const value = response.features.slice(0, 5); // Take up to 5 features
                 that.example_results[service_name].push(...value); // Add to cached results
             }
@@ -1414,9 +1414,9 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 let dty_ID; // Heurist Data Type ID to be selected
               
                 // Determine the currently selected dty_ID for this field
-                if(!window.hWin.HEURIST4.util.isempty(that._current_cfg)){
+                if(!that.$H.isempty(that._current_cfg)){
                     dty_ID = that._current_cfg.fields[field];
-                }else if(!window.hWin.HEURIST4.util.isempty(that.selectServiceType.val())){
+                }else if(!that.$H.isempty(that.selectServiceType.val())){
                     // Fallback to default from service definition if not in current config (e.g. new config)
                     for(let idx in that._available_services){
                         if(that._available_services[idx].service == that.selectServiceType.val()){ // Match with .service, not val()
@@ -1426,7 +1426,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 }
 
                 // Handle special dty_ID formats (e.g., for geo concepts with lat/long parts)
-                if (!window.hWin.HEURIST4.util.isempty(dty_ID) && dty_ID.indexOf('-') >= 0){ // concept id - default mapping
+                if (!that.$H.isempty(dty_ID) && dty_ID.indexOf('-') >= 0){ // concept id - default mapping
                     let extra = '_';
                     if(dty_ID.indexOf('_') > 0){ // e.g., "conceptID_lat"
                         let parts = dty_ID.split('_');
@@ -1434,13 +1434,13 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                         extra = parts[1]; // long | lat
                     }
                     dty_ID = $Db.getLocalID('dty', dty_ID); // Convert concept ID to local dty_ID
-                    if(!window.hWin.HEURIST4.util.isempty(dty_ID) && extra != '_'){
+                    if(!that.$H.isempty(dty_ID) && extra != '_'){
                         dty_ID += extra; // Re-append suffix if needed
                     }
                 }
                 
                 // Create/repopulate the dropdown with compatible fields from the selected record type
-                let sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
+                let sel = that.$Hui.createRectypeDetailSelect(ele, rty_ID, 
                     ['freetext','blocktext','enum','date','geo','float','year','integer','resource','file','relmarker'], // Allowed Heurist field types
                     '...', // Placeholder option
                     {show_latlong:true, show_dt_name:true, selectedValue:dty_ID} ); // Options
@@ -1498,12 +1498,12 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         let label = this._$('#inpt_label').val();
 
         // Validate that essential selections are made
-        let service_ready = rty_ID>0 && !window.hWin.HEURIST4.util.isempty(service_name);
-        if(window.hWin.HEURIST4.util.isempty(this._current_cfg)){
-            window.hWin.HEURIST4.msg.showMsgFlash('Select or define new service first');
+        let service_ready = rty_ID>0 && !this.$H.isempty(service_name);
+        if(this.$H.isempty(this._current_cfg)){
+            this.$Hmsg.showMsgFlash('Select or define new service first');
             return;
         }else if(!service_ready){
-            window.hWin.HEURIST4.msg.showMsgFlash('Select a service and a record type to map', 2000);
+            this.$Hmsg.showMsgFlash('Select a service and a record type to map', 2000);
             return;
         }
 
@@ -1521,19 +1521,19 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         // Validate that at least one field is mapped if there are mappable fields
         if(!is_field_mapped && tbl.find('select').length > 0){
-            window.hWin.HEURIST4.msg.showMsgFlash('Map at least one field listed', 3000);
+            this.$Hmsg.showMsgFlash('Map at least one field listed', 3000);
             return;
         }
 
         // Ensure the main service_config object is valid JSON or initialize it
-        this.options.service_config = window.hWin.HEURIST4.util.isJSON(this.options.service_config);
+        this.options.service_config = this.$H.isJSON(this.options.service_config);
         if(!this.options.service_config){
             this.options.service_config = {};    
         } 
 
         let t_name = `${service_name}_${rty_ID}`; // Unique key for this service instance
 
-        if(window.hWin.HEURIST4.util.isempty(label)){ // Default label if not provided
+        if(this.$H.isempty(label)){ // Default label if not provided
             label = service_name;
         }
 
@@ -1558,7 +1558,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         this._handleExtraSettings(true);
 
         this._services_modified = true; // Mark that overall configurations have changed
-        window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified); // Enable main save button
+        this.$H.setDisabled(this.save_btn, !this._services_modified); // Enable main save button
 
         this._reloadServiceList(); // Refresh the list of configured services
         this._updateStatus(); // Update UI states (e.g., disable Apply button until further changes)
@@ -1655,7 +1655,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         if(key.includes("_") === false){
 
             let new_key = this.options.service_config[key]['service_id'];
-            this.options.service_config[new_key] = window.hWin.HEURIST4.util.cloneJSON(this.options.service_config[key]);
+            this.options.service_config[new_key] = this.$H.cloneJSON(this.options.service_config[key]);
 
             delete this.options.service_config[key];
             key = new_key;

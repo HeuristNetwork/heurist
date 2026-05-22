@@ -37,8 +37,6 @@ Widget hierarchy:<br>
 | [Nakala Authors](lookupNakalaAuthor.js) | Search the authority records from Nakala's database | site: [nakala.fr](https://nakala.fr/) | Done |
 | [Opentheso](lookupOpentheso.js) | Query various servers that have a Opentheso service | sites: [pactols.frantiq.fr](https://pactols.frantiq.fr/index.xhtml) ; [opentheso.huma-num.fr](https://opentheso.huma-num.fr/index.xhtml) | Done |
 | [Wikidata](lookupWikidata_SPARQL.js) | Perform SPARQL requests on the Wikidata database | site: [wikidata.org](https://query.wikidata.org/) | Done |
-| Isadore | Request data from ISIDORE's database | site: [isidore.science](https://isidore.science/) |  |
-| MediHAL | Request data from MediHal's database | site: [hal.science](https://media.hal.science/) |  |
 
 ---
 
@@ -86,7 +84,7 @@ For **relationship markers (_relmarker_)**, the above term and record pointer fi
 
 ## **Additional Notes**
 
-Lookup Requests can be made to the global function window.hWin.HAPI4.RecordMgr.lookup_external_service, this expects two parameters:
+Lookup Requests can be made to the global function window.hWin.HAPI4.RecordMgr.lookupService, this expects two parameters:
 | Parameters | Data Type |   |
 | ---------- | --------- | - |
 | **request** | JSON object | Requires at least two keys; _service_ and _service\_type_ |
@@ -123,6 +121,17 @@ A list of the response status code can be found in the global JSON object window
 For displaying a list of selectable records, you can use Heurist's [Result List widget](../viewers/resultList.js).<br>
 However, this widget requires the incoming records to be setup as a [HRecordSet](../../core/recordset.js)<br><br>
 
-Updated: 20 June 2025
+There is also a set of short hand variables that can be used in place of the longer global object calls:
+| Short hand | Original |
+| -------- | -------------- |
+| this._$ | this.element.find |
+| this.$H | window.hWin.HEURIST4.util |
+| this.$Hmsg | window.hWin.HEURIST4.msg |
+| this.$Hui | window.hWin.HEURIST4.ui |
+| this.HAPI | window.hWin.HAPI4 |
+
+Bear in mind that '**this**' must refer to the context of the lookup widget itself.<br><br>
+
+Updated: 20 May 2026
 
 ---

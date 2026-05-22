@@ -62,8 +62,8 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
     _initControls: function(){
 
         // Extra field styling
-        this.element.find('#search_container > div > div > .header.recommended').css({width:'55px', 'min-width':'55px', display: 'inline-block'});
-        this.element.find('#btn_container').position({my: 'left bottom', at: 'right bottom', of: '#search_container'});
+        this._$('#search_container > div > div > .header.recommended').css({width:'55px', 'min-width':'55px', display: 'inline-block'});
+        this._$('#btn_container').position({my: 'left bottom', at: 'right bottom', of: '#search_container'});
 
         return this._super();
     },
@@ -84,6 +84,8 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
      */
     _rendererResultList: function(recordset, record){
 
+        let that = this;
+
         /**
          * Inner helper function to format a field's value for display.
          * - Handles empty values.
@@ -99,7 +101,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
         function fld(fldname, width){
             let s = recordset.fld(record, fldname);
 
-            if(window.hWin.HEURIST4.util.isempty(s) && s !== ''){
+            if(that.$H.isempty(s) && s !== ''){
                 s = '';
             }
 
@@ -113,10 +115,10 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
                 s = s.replace(/^, /,'').replace(/, $/,'').trim(); // Clean up if parts are missing
             }
 
-            s = window.hWin.HEURIST4.util.isObject(s) ? Object.values(s) : s;
+            s = that.$H.isObject(s) ? Object.values(s) : s;
             s = Array.isArray(s) ? s.join('; ') : s;
 
-            let title = window.hWin.HEURIST4.util.htmlEscape(s || '');
+            let title = that.$H.htmlEscape(s || '');
 
             if(fldname == 'orcid' && s && s.trim() !== ''){ // Special formatting for ORCID link
                 s = `<a href="${s}" target="_blank" rel="noopener"> view ORCID record </a>`;
@@ -159,7 +161,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
      * - Base URL: `https://api.nakala.fr/authors/search?q=`
      * - Appends the query term from `#inpt_any`.
      * - If no query term is provided, a message prompts the user.
-     * - Makes a HAPI call to `RecordMgr.lookup_external_service` with the constructed URL
+     * - Makes a HAPI call to `RecordMgr.lookupService` with the constructed URL
      *   and `serviceType: 'nakala_author'`.
      * - Calls `_onSearchResult` with the response.
      *
@@ -178,17 +180,17 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
         
         // Construct query portion of url
         // any field
-        if(this.element.find('#inpt_any').val()!=''){
-            sURL += encodeURIComponent(this.element.find('#inpt_any').val());
+        if(this._$('#inpt_any').val()!=''){
+            sURL += encodeURIComponent(this._$('#inpt_any').val());
         }
 
         // Check that something has been entered
-        if(this.element.find('#inpt_any').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a name in the search field...', 1000);
+        if(this._$('#inpt_any').val()==''){
+            this.$Hmsg.showMsgFlash('Please enter a name in the search field...', 1000);
             return;
         }
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // show loading cover
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent()); // show loading cover
 
         // for LookupController.php
         let request = {
@@ -197,14 +199,14 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
         };
 
         // calls /heurist/hserv/controller/LookupController.php
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+        this.HAPI.RecordMgr.lookupService(request, function(response){
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover
+            that.$Hmsg.sendCoverallToBack(); // hide loading cover
 
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            response = that.$H.isJSON(response);
 
             if(!Array.isArray(response) && response?.status != window.hWin.ResponseStatus.OK){ // Error return
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
                 return;
             }
 
@@ -239,7 +241,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
      */
     _onSearchResult: function(array_data){
 
-        let maxRecords = $('#rec_limit').val(); // Get max records from UI
+        let maxRecords = this._$('#rec_limit').val(); // Get max records from UI
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords; // Default to 20
 
         let is_array = Array.isArray(array_data);
@@ -272,7 +274,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
 
         // Warn if more results are available than shown
         if(array_data.length > maxRecords){
-            window.hWin.HEURIST4.msg.showMsgDlg(
+            this.$Hmsg.showMsgDlg(
                 `There are ${array_data.length} records satisfying these criteria, only the first ${maxRecords} are shown.<br>Please narrow your search.`
             );
             // Note: The current implementation shows all results received, this message might be slightly misleading

@@ -687,7 +687,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             //
             //
-            , lookup_external_service: function (request, callback) {
+            , lookupService: function (request, callback) {
                 // start search
                 _callserver('LookupController', request, callback);
             }

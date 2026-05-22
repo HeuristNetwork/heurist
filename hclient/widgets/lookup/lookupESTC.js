@@ -141,7 +141,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     _initControls: function(){
 
         let px = this._is_works ? 100 : 80; // Adjust styling based on work/edition mode
-        this.element.find('fieldset > div > .header').css({width: `${px}px`, 'min-width': `${px}px`});
+        this._$('fieldset > div > .header').css({width: `${px}px`, 'min-width': `${px}px`});
 
         this.options.resultList = $.extend(this.options.resultList, {
             empty_remark: '<div style="padding:1em 0 1em 0">Nothing found</div>'
@@ -183,7 +183,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      * from the ESTC Helsinki Bibliographic Metadata database.
      * This is typically called during `_initControls`.
      *
-     * It makes a HAPI call to `lookup_external_service` with parameters to fetch
+     * It makes a HAPI call to `lookupService` with parameters to fetch
      * terms that are children of term ID 5430 (assumed to be the parent term for book formats).
      * The retrieved terms (ID and Label) are then used to populate the dropdown.
      *
@@ -194,7 +194,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      */
     _populateBookFormats: function(){
 
-        if(this.element.find('#select_bf').length == 0){ // Check if the dropdown exists
+        if(this._$('#select_bf').length == 0){ // Check if the dropdown exists
             return;
         }
 
@@ -205,16 +205,16 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
             a: 'search',
             entity: 'defTerms',
             details: 'list',
-            request_id: window.hWin.HEURIST4.util.random(),
+            request_id: this.$H.random(),
             trm_ParentTermID: 5430
         };
 
-        let selBf = this.element.find('#select_bf').empty();
-        window.hWin.HEURIST4.ui.addoption(selBf[0], 0, 'select...'); //first option
+        let selBf = this._$('#select_bf').empty();
+        this.$Hui.addoption(selBf[0], 0, 'select...'); //first option
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (response) => {
+        this.HAPI.RecordMgr.lookupService(request, (response) => {
 
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            response = that.$H.isJSON(response);
 
             if(response.status != window.hWin.ResponseStatus.OK){
                 return;
@@ -222,7 +222,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
             let recordset = new HRecordSet(response.data);
             recordset.each2((trm_ID, term) => {
-                window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
+                that.$Hui.addoption(selBf[0], trm_ID, term['trm_Label']);
             });
         });
     },
@@ -233,7 +233,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      * loaded with only header/summary information. This is an optimization to avoid
      * fetching all details for all records in a large result set.
      *
-     * It makes a HAPI call to `lookup_external_service` targeting the
+     * It makes a HAPI call to `lookupService` targeting the
      * 'ESTC_Helsinki_Bibliographic_Metadata' database, requesting 'detail' for the given `sel_Rec_ID`.
      *
      * On successful response:
@@ -260,29 +260,29 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         let sel_Rec_ID = recset.fld(record, 'rec_ID'); 
         let query_request = { 
             serviceType: 'ESTC',
-            org_db: window.hWin.HAPI4.database,
+            org_db: this.HAPI.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
             q: `ids:${sel_Rec_ID}`, 
             detail: 'detail'
         };
         
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
+        this.HAPI.RecordMgr.lookupService(query_request, function(response){
             
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            that.$Hmsg.sendCoverallToBack();
             
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            response = that.$H.isJSON(response);
 
             if(response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
                 return;
             }
 
             let recordset = new HRecordSet(response.data);
             let record = recordset.getFirstRecord();
             if(!record?.d){
-                window.hWin.HEURIST4.msg.showMsgErr({
+                that.$Hmsg.showMsgErr({
                     message: 'We are having trouble performing your request on the ESTC server. '
                             +`Impossible obtain details for selected record ${sel_Rec_ID}`,
                     error_title: 'Issues with ESTC server',
@@ -305,7 +305,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      *
      * - Sets `this.mapping_defs['import_vocabularies']` based on whether vocabularies have been previously synced.
      * - Converts `rec_IDs` (can be an array or comma-separated string) to a comma-separated string.
-     * - Constructs a request object for `HAPI4.RecordMgr.lookup_external_service`:
+     * - Constructs a request object for `HAPI4.RecordMgr.lookupService`:
      *   - `serviceType: 'ESTC'`
      *   - `action: 'import_records'`
      *   - `source_db: 'ESTC_Helsinki_Bibliographic_Metadata'`
@@ -337,21 +337,21 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
             serviceType: 'ESTC',
             action: 'import_records',
             source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
-            org_db: window.hWin.HAPI4.database,
-            db: window.hWin.HAPI4.database,
+            org_db: this.HAPI.database,
+            db: this.HAPI.database,
             q: `ids:${rec_IDs}`,
             rules: '[{"query":"t:10 linkedfrom:30-15"},{"query":"t:12 linkedfrom:30-259"},{"query":"t:49 linkedfrom:30-284"}]',
             mapping: this.mapping_defs,
-            id: window.hWin.HEURIST4.util.random()
+            id: this.$H.random()
         };
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function( response ){
+        this.HAPI.RecordMgr.lookupService(request, function( response ){
 
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            response = that.$H.isJSON(response);
 
             if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.sendCoverallToBack();
+                that.$Hmsg.showMsgErr(response);
                 return;
             }
 
@@ -372,7 +372,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      * and that record has fields that point to other ESTC records.
      *
      * - If `rec_IDs` is empty, it proceeds directly to `_getTerms`.
-     * - Makes a HAPI call to `lookup_external_service` to get 'header' details for the given `rec_IDs`
+     * - Makes a HAPI call to `lookupService` to get 'header' details for the given `rec_IDs`
      *   from 'ESTC_Helsinki_Bibliographic_Metadata'.
      * - On success:
      *   - Iterates through the `dlg_response` (the object being prepared for the main form).
@@ -397,7 +397,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
         let that = this;
 
-        if(window.hWin.HEURIST4.util.isempty(rec_IDs)){
+        if(this.$H.isempty(rec_IDs)){
             this._getTerms(dlg_response, term_ID);
             return;
         }
@@ -406,21 +406,21 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
         let query_request = { 
             serviceType: 'ESTC',
-            org_db: window.hWin.HAPI4.database,
+            org_db: this.HAPI.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
             q: `ids:"${rec_IDs}"`, 
             detail: 'header' 
         };
         
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
+        this.HAPI.RecordMgr.lookupService(query_request, function(response){
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            that.$Hmsg.sendCoverallToBack();
+            response = that.$H.isJSON(response);
 
             if(response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
                 return;
             }
 
@@ -438,7 +438,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
             dlg_response['heurist_url'] = `https://heuristref.net/heurist/?db=ESTC_Helsinki_Bibliographic_Metadata&w=a&q=ids:${rec_IDs}`;
 
-            if(window.hWin.HEURIST4.util.isempty(term_ID)){
+            if(that.$H.isempty(term_ID)){
                 that.closingAction(dlg_response);
                 return;
             }
@@ -453,7 +453,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      * but for vocabulary terms.
      *
      * - If `term_ID` is empty, it calls `closingAction` to finalize.
-     * - Makes a HAPI call to `lookup_external_service` to get 'list' details (name, etc.)
+     * - Makes a HAPI call to `lookupService` to get 'list' details (name, etc.)
      *   for the given `term_ID`(s) from the 'defTerms' entity in 'ESTC_Helsinki_Bibliographic_Metadata'.
      * - On success:
      *   - Iterates through `dlg_response`.
@@ -474,7 +474,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
         let that = this;
 
-        if(window.hWin.HEURIST4.util.isempty(term_ID)){
+        if(this.$H.isempty(term_ID)){
             this.closingAction(dlg_response);
             return;
         }
@@ -485,19 +485,19 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
             a: 'search',
             entity: 'defTerms',
             details: 'list', //name
-            request_id: window.hWin.HEURIST4.util.random(),
+            request_id: this.$H.random(),
             trm_ID: term_ID
         };
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
         
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+        this.HAPI.RecordMgr.lookupService(request, function(response){
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            that.$Hmsg.sendCoverallToBack();
+            response = that.$H.isJSON(response);
 
             if(response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
                 return;
             }
 
@@ -585,13 +585,14 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      */
     _reportResults: function(rec_IDs, data){
 
+        let that = this;
         const cnt = data.count_imported;
         const cnt_ex = data.cnt_exist;
         const cnt_i = data.count_ignored;
         const ids = data.ids; //all
 
         let ids_ex = data.exists; //skipped
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids_ex)) ids_ex = [];
+        if(!this.$H.isArrayNotEmpty(ids_ex)) ids_ex = [];
 
         const imported_extra = cnt > 1 ? 's are' : ' is';
         const existed_extra = cnt_ex > 1 ? 's are' : ' is';
@@ -603,11 +604,11 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         rec_IDs = !Array.isArray(rec_IDs) ? rec_IDs.split(',') : rec_IDs;
         rec_IDs = rec_IDs.concat(ids_ex);
 
-        rec_IDs = rec_IDs.filter((rec_ID) => !window.hWin.HEURIST4.util.isempty(rec_ID) && rec_ID > 0);
+        rec_IDs = rec_IDs.filter((rec_ID) => !this.$H.isempty(rec_ID) && rec_ID > 0);
 
         let query_request = { 
             serviceType: 'ESTC',
-            org_db: window.hWin.HAPI4.database,
+            org_db: this.HAPI.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
             q: `ids:"${rec_IDs.join(',')}"`, 
             w: 'a',
@@ -615,10 +616,10 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         };
 
         //find record titles
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, (response) => {
+        this.HAPI.RecordMgr.lookupService(query_request, (response) => {
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            that.$Hmsg.sendCoverallToBack();
+            response = that.$H.isJSON(response);
 
             if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
                 return;
@@ -641,7 +642,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
             }
             sExisted = cnt_ex > 0 ? `${cnt_ex} record${existed_extra} already in database<br><ul>${sExisted}</ul>` : 'None';
 
-            window.hWin.HEURIST4.msg.showMsgDlg(`<p>Lookup has been completed.</p>${sImported}${sExisted}${sIgnored}`);
+            that.$Hmsg.showMsgDlg(`<p>Lookup has been completed.</p>${sImported}${sExisted}${sIgnored}`);
         });
     },
 
@@ -654,7 +655,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      *
      * - If the constructed query object has too few criteria (<= 2, specific to ESTC logic),
      *   a flash message prompts the user for more criteria.
-     * - A HAPI call (`HAPI4.RecordMgr.lookup_external_service`) is made with:
+     * - A HAPI call (`HAPI4.RecordMgr.lookupService`) is made with:
      *   - `serviceType: 'ESTC'`
      *   - `db: 'ESTC_Helsinki_Bibliographic_Metadata'`
      *   - `q: query` (the constructed query object)
@@ -678,7 +679,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         let query = {};
         for(const field in this.search_mapping){
 
-            let value_field = window.hWin.HEURIST4.util.cloneJSON(this.search_mapping[field]);
+            let value_field = this.$H.cloneJSON(this.search_mapping[field]);
             let actual_field = typeof value_field === 'string' ? value_field : Object.values(value_field)[1];
 
             let placeholder = actual_field.match(/__([a-zA-Z_]{7,14})__/);
@@ -687,8 +688,8 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
                 continue;
             }
 
-            let value = this.element.find(`#${placeholder[1]}`).val();
-            if(window.hWin.HEURIST4.util.isempty(value) || value == 0){
+            let value = this._$(`#${placeholder[1]}`).val();
+            if(this.$H.isempty(value) || value == 0){
                 continue;
             }
 
@@ -702,33 +703,33 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         }
 
         if(Object.keys(query).length <= 2){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);
+            this.$Hmsg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);
             return;
         }
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
 
         let query_request = { 
             serviceType: 'ESTC',
-            org_db: window.hWin.HAPI4.database,
+            org_db: this.HAPI.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
             q: query, 
             limit: 1000,
             detail: 'header' 
         };
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
+        this.HAPI.RecordMgr.lookupService(query_request, function(response){
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            that.$Hmsg.sendCoverallToBack();
+            response = that.$H.isJSON(response);
 
             if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
                 return;
             }
 
             if(response.data.count>response.data.reccount){
-                window.hWin.HEURIST4.msg.showMsgDlg(`Your request generated ${response.data.count} results. `
+                that.$Hmsg.showMsgDlg(`Your request generated ${response.data.count} results. `
                 + `Only first ${response.data.reccount} have been retrieved. `
                 + 'You may specify more restrictive criteria to narrow the result.');
                 response.data.count = response.data.reccount;
@@ -798,6 +799,6 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
         value = recordset.fld(record, field.index);
 
-        return !window.hWin.HEURIST4.util.isempty(value) ? value : '';
+        return !this.$H.isempty(value) ? value : '';
     }
 });

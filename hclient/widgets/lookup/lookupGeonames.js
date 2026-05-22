@@ -118,11 +118,11 @@ $.widget("heurist.lookupGeonames", $.heurist.lookupBase, {
     _initControls: function(){
 
         // Fill countries dropdown
-        let ele = this.element.find('#inpt_country');
+        let ele = this._$('#inpt_country');
         this._country_vocab_id = $Db.getLocalID('trm','2-509'); // Vocabulary for countries
 
         if(this._country_vocab_id > 0){
-            window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
+            this.$Hui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
         }
         // Adjust width of the country select dropdown if hSelect is used
         if(ele.hSelect('instance') != 'undefined'){ // Note: original code has 'undefined' as string
@@ -274,7 +274,7 @@ $.widget("heurist.lookupGeonames", $.heurist.lookupBase, {
 
         let fields = ['rec_ID', 'rec_RecTypeID']; // Base fields for HRecordSet
 
-        const DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        const DT_GEO_OBJECT = this.HAPI.sysinfo['dbconst']['DT_GEO_OBJECT'];
         if(!Object.hasOwn(this.options.mapping.fields, 'location')
         && (Object.hasOwn(this.options.mapping.fields, 'lng') || Object.hasOwn(this.options.mapping.fields, 'lat'))){
 
@@ -287,7 +287,7 @@ $.widget("heurist.lookupGeonames", $.heurist.lookupBase, {
 
         fields = fields.concat(map_flds);
 
-        if(!window.hWin.HEURIST4.util.isempty(link_field)){
+        if(!this.$H.isempty(link_field)){
             fields = fields.concat('geoname_link');
         }
 

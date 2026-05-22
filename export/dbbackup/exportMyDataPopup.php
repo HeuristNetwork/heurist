@@ -325,7 +325,7 @@ if ($mode > 1) {
                 window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), null, 'Retrieving Nakala licenses...'); // Show loading overlay
 
                 // API call to fetch Nakala licenses
-                window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+                window.hWin.HAPI4.RecordMgr.lookupService(request, (data) => {
 
                     window.hWin.HEURIST4.msg.sendCoverallToBack(); // Hide loading overlay
                     data = window.hWin.HEURIST4.util.isJSON(data); // Ensure data is JSON

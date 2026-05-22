@@ -417,9 +417,9 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             }
         }
         
-        let lookup_external_service = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
-        if(lookup_external_service){ // Valid value
-            fields['sys_ExternalReferenceLookups'] = JSON.stringify(lookup_external_service);
+        let lookupServices = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
+        if(lookupServices){ // Valid value
+            fields['sys_ExternalReferenceLookups'] = JSON.stringify(lookupServices);
         }else{ // Invalid value / None
             fields['sys_ExternalReferenceLookups'] = JSON.stringify({});
         }

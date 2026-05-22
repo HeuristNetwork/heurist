@@ -221,7 +221,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     _initControls: function(){
 
         // Init record list
-        this.recordList = this.element.find('#div_result');
+        this.recordList = this._$('#div_result');
         if(this.recordList.length > 0){
 
             let context = this;
@@ -253,12 +253,12 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         }
 
         // Init tabs
-        if(this.element.find('#tabs-cont').length > 0){
-            this.tabs_container = this.element.find('#tabs-cont').tabs();
+        if(this._$('#tabs-cont').length > 0){
+            this.tabs_container = this._$('#tabs-cont').tabs();
         }
 
         // Init search button(s)
-        this.search_buttons = this.element.find(this.search_button_selector);
+        this.search_buttons = this._$(this.search_button_selector);
         if(this.search_buttons.length > 0){
 
             // Action button styling
@@ -270,15 +270,15 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             });
 
             // Set search button status based on the existence of input
-            this._on(this.element.find('input, select, .search-input'), {
+            this._on(this._$('input, select, .search-input'), {
                 keyup: () => {
-                    let $inputs_with_value = this.element.find('input, select, .search-input').filter((idx, ele) => { 
+                    let $inputs_with_value = this._$('input, select, .search-input').filter((idx, ele) => { 
                         return !this.$H.isempty($(ele).val());
                     });
                     this.$H.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
                 },
                 change: () => {
-                    let $inputs_with_value = this.element.find('input, select, .search-input').filter((idx, ele) => { 
+                    let $inputs_with_value = this._$('input, select, .search-input').filter((idx, ele) => { 
                         return !this.$H.isempty($(ele).val());
                     });
                     this.$H.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
@@ -288,7 +288,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         }
 
         // Init save settings button
-        this.save_settings = this.element.find('#save-settings');
+        this.save_settings = this._$('#save-settings');
         if(this.save_settings.length > 0){
 
             this.save_settings.button();
@@ -301,7 +301,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         }
 
         // For capturing the 'Enter' key while typing
-        this._on(this.element.find('input.search_on_enter'), {
+        this._on(this._$('input.search_on_enter'), {
             keypress: this.startSearchOnEnterPress
         });
 
@@ -765,18 +765,18 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     _getRecDumpSetting: function(){
 
-        if(this.element.find('input[name="dump_record"]').length === 0){
+        if(this._$('input[name="dump_record"]').length === 0){
             return;
         }
 
-        const get_recdump = this.element.find('input[name="dump_record"]').is(':checked');
+        const get_recdump = this._$('input[name="dump_record"]').is(':checked');
         let recdump_fld = '';
         
         if(get_recdump){
 
-            recdump_fld = this.element.find('input[name="dump_field"]:checked').val();
+            recdump_fld = this._$('input[name="dump_field"]:checked').val();
             if(recdump_fld === 'dty_ID'){
-                recdump_fld = this.element.find('#rty_flds').val();
+                recdump_fld = this._$('#rty_flds').val();
             }
         }
 
@@ -1254,7 +1254,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * If `parameters` are empty or result in an empty query string, it shows an error and returns.
      *
      * The actual request to the external service is proxied through a Heurist PHP script
-     * (`/heurist/hserv/controller/LookupController.php`) via `this.HAPI.RecordMgr.lookup_external_service`.
+     * (`/heurist/hserv/controller/LookupController.php`) via `this.HAPI.RecordMgr.lookupService`.
      *
      * Before sending the request, it shows a loading coverall.
      * On receiving a response:
@@ -1268,7 +1268,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * @instance
      * @private
      * @param {Object} parameters - An object containing key-value pairs to be converted into URL query parameters for the external service.
-     * @param {Object} [request={}] - Additional parameters to be passed to the `lookup_external_service` HAPI call.
+     * @param {Object} [request={}] - Additional parameters to be passed to the `lookupService` HAPI call.
      *                                This can be used to customize the request to the Heurist proxy.
      *                                It's extended with `service` (the full external URL) and `serviceType` (`this.serviceName`).
      * @returns {void}
@@ -1310,7 +1310,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         this.$Hmsg.bringCoverallToFront(this.element);
 
         // calls /heurist/hserv/controller/LookupController.php
-        this.HAPI.RecordMgr.lookup_external_service(request, (response) => {
+        this.HAPI.RecordMgr.lookupService(request, (response) => {
 
             this.$Hmsg.sendCoverallToBack(); // hide loading cover
 
