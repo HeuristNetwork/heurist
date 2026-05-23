@@ -30,6 +30,14 @@ final class RequestRouter
     /** @var int|null */
     private static $mappingMTime = null;
 
+    /** @var array<string,array<int,array{pattern:string,value:string,regex:string|null}>> */
+    private static $urlSubstitutions = [];
+    /** @var array<string,int> */
+    private static $urlSubstitutionMTimes = [];
+
+    /** @var string|null */
+    private static $databaseFolder = null;
+
     // Adjust to add more versions
     private const ALLOWED_VERSIONS = ['heurist','h7-alpha','h7-ao','h7-bm','h7-hn'];
 
@@ -159,8 +167,24 @@ final class RequestRouter
         }
 
         // ---- 4) Own-domain website handling (must preserve host -> never redirect)
+        // Apply URL substitutions before entering the own-domain handler so
+        // idenk.net/About behaves the same as /IDENK/About.
         if ($mustPreserveHost) {
-            return self::routeOwnDomain($activeVersion, $mappedDb, $mappedWebsite, $segments);
+            $substitution = self::applyUrlSubstitution($mappedDb ?: '', $segments);
+            if ($substitution !== null) {
+                $query = array_merge($substitution['query'], $query);
+                if ($substitution['is_query']) {
+                    if (empty($query['db']) && !empty($mappedDb)) {
+                        $query['db'] = $mappedDb;
+                    } elseif (!empty($query['db'])) {
+                        $query['db'] = self::applyDbRef($mapping, (string)$query['db']);
+                    }
+                    return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", $query);
+                }
+                $segments = $substitution['segments'];
+            }
+
+            return self::routeOwnDomain($activeVersion, $mappedDb, $mappedWebsite, $segments, $query);
         }
 
         // ---- 5) Version root (/<version>)
@@ -207,9 +231,24 @@ final class RequestRouter
             return self::resultRedirect("/{$dbCandidate}/web/{$qs}", 302, []);
         }
 
+        // Apply URL substitutions to /<db>/<term-or-pattern>/... before action dispatch.
+        $substitution = self::applyUrlSubstitution($dbResolved, array_slice($segments, 1));
+        if ($substitution !== null) {
+            $query = array_merge($substitution['query'], $query);
+            if ($substitution['is_query']) {
+                if (empty($query['db'])) {
+                    $query['db'] = $dbResolved;
+                } else {
+                    $query['db'] = self::applyDbRef($mapping, (string)$query['db']);
+                }
+                return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", $query);
+            }
+            $segments = array_merge([$dbCandidate], $substitution['segments']);
+        }
+
         // /<db>/<action>/...
         $action = $segments[1] ?? null;
-        if ($action !== null && in_array($action, self::ALLOWED_ACTIONS, true)) {
+        if ($action !== null && (in_array($action, self::ALLOWED_ACTIONS, true) || self::isPositiveIntToken($action))) {
             $params = self::paramsFromPrettyRoute($dbResolved, $action, array_slice($segments, 2), $defaultWebsite);
             // Query wins over path-derived params
             $params = array_merge($params, $query);
@@ -387,7 +426,7 @@ final class RequestRouter
 
     // ----------------- Specific route handlers -----------------
 
-    private static function routeOwnDomain(string $version, ?string $db, $website, array $segments): array
+    private static function routeOwnDomain(string $version, ?string $db, $website, array $segments, array $query = []): array
     {
         if (!$db) return self::result404();
 
@@ -396,12 +435,11 @@ final class RequestRouter
         // Home: /
         if (empty($segments)) {
             $params['website'] = ($website !== null) ? $website : 0;
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
         }
 
         // /<websiteid>
         if (count($segments) === 1 && ctype_digit($segments[0])) {
-            
             $n = (int)$segments[0];
 
             if ($website !== null && $website !== 0) {
@@ -412,25 +450,25 @@ final class RequestRouter
                 // No fixed website mapping: /<websiteid>
                 $params['website'] = $n;
                 // pageid intentionally not set
-            }            
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+            }
+            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
         }
 
         // /<websiteid>/<pageid>
         if (count($segments) >= 2 && ctype_digit($segments[0]) && ctype_digit($segments[1])) {
             $params['website'] = (int)$segments[0];
             $params['pageid']  = (int)$segments[1];
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
         }
 
-        // Allow /web/... etc on own-domain too
+        // Allow /web/..., numeric shorthand, etc. on own-domain too.
         $action = $segments[0] ?? null;
-        if ($action !== null && in_array($action, self::ALLOWED_ACTIONS, true)) {
-            $params = self::paramsFromPrettyRoute($db, $action, array_slice($segments, 1), $website);
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+        if ($action !== null && (in_array($action, self::ALLOWED_ACTIONS, true) || self::isPositiveIntToken($action))) {
+            $params = self::paramsFromPrettyRoute($db, $action, array_slice($segments, 1), ($website !== null ? (int)$website : null));
+            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
         }
 
-        return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+        return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
     }
 
     /*
@@ -489,6 +527,14 @@ final class RequestRouter
     private static function paramsFromPrettyRoute(string $db, string $action, array $rest, ?int $defaultWebsite = null): array
     {
         $params = ['db' => $db];
+
+        // Shorthand: /<db>/<websiteId>/<pageId> is equivalent to
+        // /<db>/web/<websiteId>/<pageId>. This cannot be reached by the
+        // old action gate because a numeric segment is not in ALLOWED_ACTIONS.
+        if (self::isPositiveIntToken($action)) {
+            array_unshift($rest, $action);
+            $action = 'web';
+        }
 
         switch ($action) {
             case 'web':
@@ -618,11 +664,255 @@ final class RequestRouter
         return $res;
     }
     
+
+    private static function isPositiveIntToken($value): bool
+    {
+        return is_string($value) && ctype_digit($value) && (int)$value > 0;
+    }
+
+    /*
+    applyUrlSubstitution()
+    -> loadUrlSubstitutions()
+        -> urlSubstitutionPatternToRegex()
+    -> preg_match()
+    -> replaceUrlSubstitutionCaptures()
+    -> parseUrlSubstitutionReplacement()
+    */
+    private static function applyUrlSubstitution(string $db, array $segments): ?array
+    {
+        if ($db === '' || empty($segments)) {
+            return null;
+        }
+
+        $rules = self::loadUrlSubstitutions($db);
+        if (empty($rules)) {
+            return null;
+        }
+
+        $relativePath = implode('/', $segments);
+        foreach ($rules as $rule) {
+            $matches = [];
+            if ($rule['regex'] !== null) {
+                if (preg_match($rule['regex'], $relativePath, $matches) !== 1) {
+                    continue;
+                }
+            } else {
+                if ($relativePath !== $rule['pattern']) {
+                    continue;
+                }
+                $matches = [$relativePath];
+            }
+
+            $replacement = self::replaceUrlSubstitutionCaptures($rule['value'], $matches);
+            return self::parseUrlSubstitutionReplacement($replacement);
+        }
+
+        return null;
+    }
+
+    private static function loadUrlSubstitutions(string $db): array
+    {
+        $file = self::urlSubstitutionsFile($db);
+        if ($file === null || !is_file($file)) {
+            return [];
+        }
+
+        $mtime = @filemtime($file) ?: 0;
+        if (isset(self::$urlSubstitutions[$file], self::$urlSubstitutionMTimes[$file])
+            && self::$urlSubstitutionMTimes[$file] === $mtime) {
+            return self::$urlSubstitutions[$file];
+        }
+
+        $rules = [];
+        $lines = @file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || $line[0] === '#') {
+                continue;
+            }
+
+            $parts = preg_split('/\s+/', $line, 2);
+            if (!$parts || count($parts) < 2) {
+                continue;
+            }
+
+            $pattern = trim($parts[0]);
+            $value = trim($parts[1]);
+            if ($pattern === '' || $value === '') {
+                continue;
+            }
+
+            $rules[] = [
+                'pattern' => $pattern,
+                'value'   => $value,
+                'regex'   => self::urlSubstitutionPatternToRegex($pattern),
+            ];
+        }
+
+        self::$urlSubstitutions[$file] = $rules;
+        self::$urlSubstitutionMTimes[$file] = $mtime;
+        return $rules;
+    }
+
+    private static function urlSubstitutionsFile(string $db): ?string
+    {
+        $databaseFolder = self::databaseFolder($db);
+        if ($databaseFolder === null || $databaseFolder === '') {
+            return null;
+        }
+
+        return rtrim($databaseFolder, '/\\') . DIRECTORY_SEPARATOR . 'settings' . DIRECTORY_SEPARATOR . 'URLSubstitutions.txt';
+    }
+
+    private static function databaseFolder(string $db): ?string
+    {
+        $config = self::serverRoot() . "/HEURIST/heuristConfigIni.php";
+        if (!is_file($config)) {
+            $config = self::serverRoot() . "/heuristConfigIni.php";
+            if (!is_file($config)) {
+                return null;
+            }
+        }
+
+        // heuristConfigIni.php defines $defaultRootFileUploadPath
+        $defaultRootFileUploadPath = null;
+        require $config;
+
+        if (!is_string($defaultRootFileUploadPath) || $defaultRootFileUploadPath === '') {
+            return null;
+        }
+
+        return rtrim($defaultRootFileUploadPath, '/\\') . DIRECTORY_SEPARATOR . $db;
+    }
+
+    private static function urlSubstitutionPatternToRegex(string $pattern): ?string
+    {
+        $pattern = trim($pattern);
+        if ($pattern === '') {
+            return null;
+        }
+
+        // 1) If pattern is already a valid regex, use it as-is.
+        // Supported delimiters: ~ / # %
+        // Examples:
+        //   ~^INV-EN/([0-9]+)$~u
+        //   #^INV-EN/([0-9]+)$#u
+        $first = $pattern[0];
+        if (in_array($first, ['~', '/', '#', '%'], true)) {
+            $last = strrpos($pattern, $first);
+            if ($last !== false && $last > 0) {
+                $ok = @preg_match($pattern, '') !== false;
+                if ($ok) {
+                    return $pattern;
+                }
+            }
+        }
+
+        // 2) If there are no {...} tokens, this is an exact string rule.
+        if (strpos($pattern, '{') === false) {
+            return null;
+        }
+
+        // 3) Convert friendly pattern syntax to regex.
+        $regex = '';
+        $offset = 0;
+
+        if (preg_match_all('/\{([^}]+)\}/', $pattern, $tokens, PREG_OFFSET_CAPTURE)) {
+            foreach ($tokens[0] as $i => $token) {
+                $literal = substr($pattern, $offset, $token[1] - $offset);
+                $regex .= preg_quote($literal, '~');
+
+                $expr = trim($tokens[1][$i][0]);
+
+                switch ($expr) {
+                    case 'd+':
+                    case '\d+':
+                        $regex .= '([0-9]+)';
+                        break;
+
+                    case 'd*':
+                    case '\d*':
+                        $regex .= '([0-9]*)';
+                        break;
+
+                    case 'w+':
+                    case '\w+':
+                        $regex .= '([A-Za-z0-9_]+)';
+                        break;
+
+                    case 's+':
+                    case 'segment':
+                        $regex .= '([^/]+)';
+                        break;
+
+                    case 'any':
+                        $regex .= '(.+)';
+                        break;
+
+                    default:
+                        // Optional: allow simple raw fragments that don't contain braces.
+                        // For full regex power, use already-valid regex syntax above.
+                        if (strpos($expr, '{') !== false || strpos($expr, '}') !== false) {
+                            return null;
+                        }
+                        $regex .= '(' . $expr . ')';
+                        break;
+                }
+
+                $offset = $token[1] + strlen($token[0]);
+            }
+        }
+
+        $regex .= preg_quote(substr($pattern, $offset), '~');
+
+        return '~^' . $regex . '$~u';
+    }
+
+    private static function replaceUrlSubstitutionCaptures(string $value, array $matches): string
+    {
+        return preg_replace_callback('/\{(\d+)\}/', static function ($m) use ($matches) {
+            $idx = (int)$m[1];
+            return isset($matches[$idx]) ? (string)$matches[$idx] : $m[0];
+        }, $value);
+    }
+
+    private static function parseUrlSubstitutionReplacement(string $replacement): array
+    {
+        $replacement = trim($replacement);
+        $path = $replacement;
+        $query = [];
+        $isQuery = false;
+
+        if ($replacement !== '' && $replacement[0] === '?') {
+            $isQuery = true;
+            $path = '';
+            parse_str(substr($replacement, 1), $query);
+        } else {
+            $qpos = strpos($replacement, '?');
+            if ($qpos !== false) {
+                $path = substr($replacement, 0, $qpos);
+                parse_str(substr($replacement, $qpos + 1), $query);
+            }
+        }
+
+        return [
+            'is_query' => $isQuery,
+            'segments' => $path === '' ? [] : self::splitPath($path),
+            'query' => $query,
+        ];
+    }
+
     private static function defaultMappingFile(): string
     {
-        // This class lives under .../<version>/hserv/controller/
-        // and /HEURIST is one level above version directory.
-        return self::serverRoot() . "/HEURIST/domainWebsites.json";
+        // Prefer /HEURIST/domainWebsites.json, but support installations that
+        // keep it directly under DOCUMENT_ROOT as a reserved fallback.
+        $preferred = self::serverRoot() . "/HEURIST/domainWebsites.json";
+        if (is_file($preferred)) {
+            return $preferred;
+        }
+
+        $reserved = self::serverRoot() . "/domainWebsites.json";
+        return is_file($reserved) ? $reserved : $preferred;
     }
 
     private static function serverRoot(): string
