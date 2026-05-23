@@ -785,6 +785,54 @@ final class RequestRouter
         return rtrim($defaultRootFileUploadPath, '/\\') . DIRECTORY_SEPARATOR . $db;
     }
 
+    /**
+     * Converts a URL substitution pattern into a regular expression.
+     *
+     * Supported input formats:
+     *
+     * 1. Empty pattern
+     *    - Empty or whitespace-only strings return null.
+     *
+     * 2. Already-valid regular expression
+     *    - If the pattern starts with one of the supported delimiters:
+     *      "~", "/", "#", "%"
+     *    - And the pattern is a valid PHP regex, it is returned unchanged.
+     *
+     * 3. Simplified token pattern
+     *    - Literal text is escaped automatically.
+     *    - Tokens inside "{...}" are converted to capturing regex groups.
+     *    - The generated regex is anchored and returned as "~^...$~u".
+     *
+     * Supported simplified tokens:
+     *
+     * - "{d+}" or "{\d+}"      => "([0-9]+)"        One or more digits
+     * - "{d*}" or "{\d*}"      => "([0-9]*)"        Zero or more digits
+     * - "{w+}" or "{\w+}"      => "([A-Za-z0-9_]+)" One or more word characters
+     * - "{s+}" or "{segment}"  => "([^/]+)"         One URL/path segment
+     * - "{any}"                => "(.+)"            One or more of any character
+     *
+     * Custom tokens:
+     *
+     * - Unknown tokens are treated as raw regex fragments and wrapped in a
+     *   capturing group, for example "{[A-Z]+}" becomes "([A-Z]+)".
+     * - Custom tokens must not contain "{" or "}".
+     * - For advanced regex syntax, regex quantifiers, or nested braces, pass a
+     *   complete valid regex instead.
+     *
+     * Examples:
+     *
+     * - "orders/{d+}"     => "~^orders/([0-9]+)$~u"
+     * - "users/{w+}"      => "~^users/([A-Za-z0-9_]+)$~u"
+     * - "pages/{segment}" => "~^pages/([^/]+)$~u"
+     * - "files/{any}"     => "~^files/(.+)$~u"
+     * - "~^orders/([0-9]+)$~u" is returned unchanged.
+     *
+     * Returns null when:
+     *
+     * - The pattern is empty after trimming.
+     * - The pattern is not a valid regex and contains no "{...}" tokens.
+     * - A custom token contains braces.
+     */    
     private static function urlSubstitutionPatternToRegex(string $pattern): ?string
     {
         $pattern = trim($pattern);
