@@ -188,7 +188,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         let installDir = '';
 
         if(window.hWin.location.host.indexOf('.huma-num.fr')>0 && window.hWin.location.host!=='heurist.huma-num.fr'){
-            installDir = '/heurist/';
+            installDir = '/heurist/'; //own domain on huma-num
         }else{
             let script_name = window.hWin.location.pathname;
 
@@ -196,6 +196,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit)\/.*/)>=0){
                 installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit)\/.*/, '') + '/';
+            }else if(script_name.search(/\/([A-Za-z0-9_]+)\/\d+(\/\d+)?\/?$/)>=0){ // database/123/321  - website without web
+                installDir = '/'
             }else{
                 installDir = script_name.replace(/(((\?|admin|documentation|export|hapi|hclient|hserv|import|startup|redirects|viewers|help|ext|external|web|website)\/.*)|(index.*|test.php))/, "");
             }

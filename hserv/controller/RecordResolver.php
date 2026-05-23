@@ -78,7 +78,7 @@ final class RecordResolver
         }
         
         
-        $query = null; //$params['q'] ?? null;
+        $query = $params['q'] ?? null;
 
         // ---- Records
         $recToken = $params['recID'] ?? ($params['recid'] ?? ($params['id'] ?? null));

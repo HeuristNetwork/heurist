@@ -568,19 +568,19 @@ final class RequestRouter
                 break;
             case 'hml':
                 $params['fmt'] = 'hml';
-            case 'record':
-            case 'rec':
-                $params['fmt'] = $params['fmt'] ?? 'html';
-                if (isset($rest[0])) { $params['recid'] = $rest[0]; }
-                /*
                 if (isset($rest[0])){
-                    if(isPositiveInt($rest[0]) || isConceptCode($rest[0])){
+                    if(self::isPositiveIntToken($rest[0]) ){ //|| isConceptCode($rest[0])
                         $params['recid'] = $rest[0];    
                     }else{
                         $params['q'] = $rest[0];    
                     }
-                }*/
-                if (isset($rest[1]) && ctype_digit($rest[1])) $params['depth'] = (int)$rest[1];
+                }
+                if (isset($rest[1]) && self::isPositiveIntToken($rest[1])) {$params['depth'] = (int)$rest[1];}
+                break;
+            case 'record':
+            case 'rec':
+                $params['fmt'] = $params['fmt'] ?? 'html';
+                if (isset($rest[0])) { $params['recid'] = $rest[0]; }
                 break;
 
 
