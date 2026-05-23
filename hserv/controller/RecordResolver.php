@@ -77,9 +77,23 @@ final class RecordResolver
             }
         }
         
+        // Determine fmt/action
+        $fmt = $params['fmt'] ?? ($params['format'] ?? null);
+        $fmt = ($fmt === null || $fmt === '') ? null : strtolower((string)$fmt);
+        $action = !empty($params['action']) ? strtolower((string)$params['action']) : null;
+        if ($action === 'hml') {
+            $fmt = 'hml';
+        } elseif ($action === 'view') {
+            $fmt = 'html';
+        } elseif ($action === 'edit' || ($params['edit']??null) == 1) {
+            $fmt = 'edit';
+        }
         
-        $query = $params['q'] ?? null;
-
+        $query = null;
+        if($fmt==='hml'){
+            $query = $params['q'] ?? null;    
+        }
+        
         // ---- Records
         $recToken = $params['recID'] ?? ($params['recid'] ?? ($params['id'] ?? null));
         if (($recToken === null || $recToken === '') && ($query === null || $query === '')) {
@@ -89,18 +103,6 @@ final class RecordResolver
 
         $db = $params['db'] ?? null;
 
-        // Determine fmt/action
-        $fmt = $params['fmt'] ?? ($params['format'] ?? null);
-        $fmt = ($fmt === null || $fmt === '') ? null : strtolower((string)$fmt);
-
-        $action = !empty($params['action']) ? strtolower((string)$params['action']) : null;
-        if ($action === 'hml') {
-            $fmt = 'hml';
-        } elseif ($action === 'view') {
-            $fmt = 'html';
-        } elseif ($action === 'edit' || ($params['edit']??null) == 1) {
-            $fmt = 'edit';
-        }
 
         if ($fmt === null) {
             $fmt = 'hml';
