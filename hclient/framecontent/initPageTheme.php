@@ -495,7 +495,8 @@ span.fancytree-node:hover{
     background-color: <?php uout('explore_bg', '#305586');?> !important;
     color: white;
 }
-.ui-heurist-explore .ui-button-icon{
+.ui-dialog-titlebar .ui-button-icon,
+.ui-heurist-header .ui-button-icon{
     color: white;
 }
 .ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', CLR_EXPLORE_FADE_BG);?> !important;}
