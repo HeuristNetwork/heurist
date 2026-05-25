@@ -1,8 +1,8 @@
 <?php
 /**
-* updateAlphaCode.php 
+* updateAlphaBetaTestCode.php 
 *
-* Runs the alpha code-only update script from the Heurist reference server.
+* Runs the alpha/beta/test code-only update script from the Heurist reference server.
 * Access is already restricted by initPageMin.php via ADMIN_PWD_REQUIRED and MANAGER_REQUIRED.
 *
 * @project     Heurist academic knowledge management system
@@ -28,21 +28,24 @@ $heurist_base_dir = '/var/www/html/HEURIST';
 $status = null;
 $message = '';
 $last_output = '';
-$db = $_REQUEST['db'] ?? '';
+
+// defaults to alpha if unrecognised
+$code_channel = $_REQUEST['code'] ?? 'alpha'; 
+$code_channel = in_array($code_channel, ['alpha', 'test', 'beta'], true) ? $code_channel : 'alpha';
 $has_executed = ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_update']));
 
 function hsc($value){
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
-function get_alpha_codebase_from_version($version){
+function get_codebase_from_version($version,$code_channel){
     $version = trim((string)$version);
 
     if(!preg_match('/^(\d+)(?:\.|$)/', $version, $matches)){
         return null;
     }
 
-    return 'h'.$matches[1].'-alpha';
+    return 'h'.$matches[1].'-'.$code_channel;
 }
 
 function read_log_tail($file, $lines = 80){
@@ -78,22 +81,22 @@ if($is_heurist_ref){
     $message = 'This is meaningless, you are on HeuristRef.net';
 }
 
-$alpha_codebase = get_alpha_codebase_from_version($version ?? '');
+$codebase = get_codebase_from_version($version ?? '', $code_channel);
 
-$target_dir = $alpha_codebase !== null ? $heurist_base_dir.'/'.$alpha_codebase : '';
-$log_file = $alpha_codebase !== null ? $heurist_base_dir.'/'.$alpha_codebase.'_install.log' : $heurist_base_dir.'/alpha_install.log';
-$lock_file = $alpha_codebase !== null ? '/tmp/heurist_update_'.$alpha_codebase.'_code.lock' : '/tmp/heurist_update_alpha_code.lock';
+$target_dir = $codebase !== null ? $heurist_base_dir.'/'.$codebase : '';
+$log_file = $codebase !== null ? $heurist_base_dir.'/'.$codebase.'_install.log' : $heurist_base_dir.'/'.$code_channel.'_install.log';
+$lock_file = $codebase !== null ? '/tmp/heurist_update_'.$codebase.'_code.lock' : '/tmp/heurist_update_'.$code_channel.'_code.lock';
 
-if($alpha_codebase === null){
+if($codebase === null){
     $status = 'error';
-    $message = 'Unable to determine alpha codebase from current Heurist version: '.($version ?? '(not set)');
+    $message = 'Unable to determine the codebase from current Heurist version: '.($version ?? '(not set)');
 }
 
 if($has_executed && $status === null){
 
     if(!is_dir($target_dir)){
         $status = 'error';
-        $message = 'Target alpha folder does not exist: '.$target_dir.'. Update was not started.';
+        $message = 'Target folder does not exist: '.$target_dir.'. Update was not started.';
         $last_output = read_log_tail($log_file);
     }else{
 
@@ -104,7 +107,7 @@ if($has_executed && $status === null){
             $message = 'Unable to create/open lock file: '.$lock_file;
         }elseif(!flock($lock_handle, LOCK_EX | LOCK_NB)){
             $status = 'error';
-            $message = 'Another alpha code update appears to be running. Please wait for it to finish.';
+            $message = 'Another code update appears to be running. Please wait for it to finish.';
         }else{
 
             @set_time_limit(0);
@@ -115,25 +118,25 @@ if($has_executed && $status === null){
             if(is_file($log_file) && filesize($log_file) > 51200){
                 @file_put_contents(
                     $log_file,
-                    "================ updateAlphaCode.php log reset {$started}; previous size exceeded 50 KB ================\n",
+                    "================ updateAlphaBetaTestCode.php log reset {$started}; previous size exceeded 50 KB ================\n",
                     LOCK_EX
                 );
             }
                         
             @file_put_contents(
                 $log_file,
-                "\n\n================ updateAlphaCode.php started {$started} for {$alpha_codebase} ================\n",
+                "\n\n================ updateAlphaBetaTestCode.php started {$started} for {$codebase} ================\n",
                 FILE_APPEND | LOCK_EX
             );
 
             /*
-             * Keep the command fixed apart from the server-side alpha codebase derived from $version.
+             * Keep the command fixed apart from the server-side codebase derived from $version.
              * pipefail makes PHP receive a failure if either curl or the update script fails.
              * The braces ensure both curl and bash output are appended to the same log.
              */
             $inner_command = sprintf(
                 '{ curl -l https://heuristref.net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s %s dummy codeonly; } >> %s 2>&1',
-                escapeshellarg($alpha_codebase),
+                escapeshellarg($codebase),
                 escapeshellarg($log_file)
             );
 
@@ -145,16 +148,16 @@ if($has_executed && $status === null){
 
             @file_put_contents(
                 $log_file,
-                "================ updateAlphaCode.php finished {$finished}; exit code {$exit_code} ================\n",
+                "================ updateAlphaBetaTestCode.php finished {$finished}; exit code {$exit_code} ================\n",
                 FILE_APPEND | LOCK_EX
             );
 
             if($exit_code === 0){
                 $status = 'success';
-                $message = 'Alpha code update completed successfully for '.$alpha_codebase.'.';
+                $message = 'Code update completed successfully for '.$codebase.'.';
             }else{
                 $status = 'error';
-                $message = 'Alpha code update failed for '.$alpha_codebase.'. Exit code: '.$exit_code.'. Please check the log below.';
+                $message = 'Code update failed for '.$codebase.'. Exit code: '.$exit_code.'. Please check the log below.';
             }
 
             flock($lock_handle, LOCK_UN);
@@ -171,7 +174,7 @@ if($has_executed && $status === null){
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Update Alpha Code</title>
+    <title>Update Alpha, beta or test Code</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -241,10 +244,10 @@ if($has_executed && $status === null){
 <body>
 
 <div class="panel">
-    <h2>Update Alpha Code</h2>
+    <h2>Update Alpha, beta or test Code</h2>
 
     <p>
-        This operation updates the alpha code on this server by downloading and running the
+        This operation updates the alpha, beta or test code on this server by downloading and running the
         Heurist update script from the reference server. It performs a <strong>code-only</strong> update.
     </p>
 
@@ -252,8 +255,8 @@ if($has_executed && $status === null){
         <dt>Current version</dt>
         <dd><code><?php echo hsc($version ?? '(not set)'); ?></code></dd>
 
-        <dt>Alpha codebase</dt>
-        <dd><code><?php echo hsc($alpha_codebase ?? '(unable to determine)'); ?></code></dd>
+        <dt>Alpha/beta/test codebase</dt>
+        <dd><code><?php echo hsc($codebase ?? '(unable to determine)'); ?></code></dd>
 
         <dt>Target folder</dt>
         <dd><code><?php echo hsc($target_dir ?: '(unable to determine)'); ?></code></dd>
@@ -263,7 +266,7 @@ if($has_executed && $status === null){
     </dl>
 
     <p class="small">
-        Before starting, this page checks that the target alpha folder exists. The update can take some time.
+        Before starting, this page checks that the target folder exists. The update can take some time.
         Do not start it again while another update is running.
     </p>
 
@@ -273,7 +276,7 @@ if($has_executed && $status === null){
             <input type="hidden" name="db" value="<?php echo hsc($db); ?>">
             <input type="hidden" name="start_update" value="1">
             <button type="submit"
-                    <?php echo $alpha_codebase === null ? 'disabled' : ''; ?>
+                    <?php echo $codebase === null ? 'disabled' : ''; ?>
                     onclick="this.disabled=true; this.form.submit();">
                 Start update
             </button>
