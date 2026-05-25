@@ -5058,7 +5058,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             
             //extend separator help left padding
-            $(this.element).find('.separator-helper').css({'padding-left':'52px'});
+            $(this.element).find('.separator-helper:not(.explanation-separator-helper)').css({'padding-left':'52px'});
             
             //init back button - if there is opened rts editor
             let btn_close_editor = this.element.find('.btn-edit-rt-back');

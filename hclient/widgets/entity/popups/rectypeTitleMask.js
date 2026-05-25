@@ -153,8 +153,10 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                         window.hWin.HEURIST4.util.stripTags(recordset.fld(recs[rec_ID], 'rec_Title')));
                 }
 
+                window.hWin.HEURIST4.ui.initHSelect($(sel), false);
+                $(sel).hSelect('option', {searchable: true, searchType: 'std'});
+
                 sel.selectedIndex = 0;
-                
             }
         });
         
