@@ -836,9 +836,9 @@ function includeJQuery($useBootstrap=false){
 <?php
    }else{
 ?>
-        <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-a3b854721dc490b6b6e175c02a95736e1d5ec1919acf095de628518df0cd61543214985ce693f7b0507eac7509d35620" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.js"  crossorigin="anonymous"></script>
        
-        <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-ce910e981cbd86932636d9ddd4995e3e17e823a907aec7efd074d5443b7dc4c332efa13ec79fe3281f11aec3ca65b7df" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
         
         <script src="https://js-de.sentry-cdn.com/bd493ee1a58acc612b6cc71d055d8ff9.min.js" 
