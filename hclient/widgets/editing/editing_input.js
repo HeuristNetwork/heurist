@@ -914,7 +914,7 @@ $.widget( "heurist.editing_input", {
             this.input_cell.attr('title', 'This field has been marked as non-editable');
 
             if(this._isForRecords){
-                $('<span>', {text: 'Read-only field', style: 'color: limegreen; cursor: default; padding-left: 20px;'}).insertAfter(this.input_cell);
+                $('<span>', {text: '(read only)', style: 'color: limegreen;cursor: default;display: inline-block;padding-left: 0.5em;font-weight: normal;'}).appendTo(this.header);
             }
         }
     }, //end _create------------------------------------------------------------
@@ -6418,6 +6418,11 @@ $.widget( "heurist.editing_input", {
 
         if(this.detailType=="blocktext"){
             this.input_cell.css({'padding-top':'0.4em'});
+        }
+
+        if(window.hWin.HEURIST4.util.isempty(disp_value)){
+            disp_value = 'no value';
+            $inputdiv.css('color', 'lightgrey');
         }
 
         $inputdiv.html(disp_value);
