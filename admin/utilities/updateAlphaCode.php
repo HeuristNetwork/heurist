@@ -58,6 +58,26 @@ function read_log_tail($file, $lines = 80){
     return implode("\n", array_slice($data, -$lines));
 }
 
+function get_current_host(){
+    $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
+    $host = strtolower(trim($host));
+
+    // Strip port if present, for example heuristref.net:443
+    if(strpos($host, ':') !== false){
+        $host = preg_replace('/:\\d+$/', '', $host);
+    }
+
+    return $host;
+}
+
+$current_host = get_current_host();
+$is_heurist_ref = ($current_host === 'heuristref.net'); // || str_ends_with($current_host, 'heuristref.net')
+
+if($is_heurist_ref){
+    $status = 'error';
+    $message = 'This is meaningless, you are on HeuristRef.net';
+}
+
 $alpha_codebase = get_alpha_codebase_from_version($version ?? '');
 
 $target_dir = $alpha_codebase !== null ? $heurist_base_dir.'/'.$alpha_codebase : '';
@@ -247,7 +267,7 @@ if($has_executed && $status === null){
         Do not start it again while another update is running.
     </p>
 
-    <?php if(!$has_executed): ?>
+    <?php if(!$has_executed && !$is_heurist_ref): ?>
         <form method="post">
             <input type="hidden" name="pwd" value="<?php echo hsc($sysadmin_pwd); ?>">
             <input type="hidden" name="db" value="<?php echo hsc($db); ?>">
