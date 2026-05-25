@@ -167,7 +167,7 @@
 
                 //if (strcasecmp($lang,'ALL')===0 || in_array($lang, $commonLanguagesForTranslation)){
                 if($tag_to_remove == null){
-                    $val = substr($val_orig, $pos);
+                    $val = trim(substr($val_orig, $pos));
                 }else{
                     //remove first p or span
                     $val = trim(substr(strstr($val_orig, $tag_to_remove), strlen($tag_to_remove)));

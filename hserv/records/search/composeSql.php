@@ -3819,6 +3819,7 @@ QUERY;
                     $this->fulltext = false;
                 }
 
+                $valueWithLangPrefix = $this->value;
                 list($lang, $this->value) = extractLangPrefix($this->value);
 
                 if (strpos($this->value,"<>")>0) {
@@ -3894,6 +3895,11 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                     }
                     if($this->case_sensitive){
                             $eq = 'COLLATE utf8_bin '.$eq;
+                    }
+                    
+                    if($this->exact){
+                        //restore for exact search
+                        $this->value = $valueWithLangPrefix;
                     }
 
                     $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
