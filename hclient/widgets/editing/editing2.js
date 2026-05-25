@@ -268,7 +268,7 @@ function HEditing(_options) {
         
             let prev_children = null;
             let idx = 0;
-            const innerGroups = ['group', 'accordion_inner', 'expanded_inner', 'explanation'];
+            const innerGroups = ['group', 'accordion_inner', 'expanded_inner', 'explanation', 'explanation_break'];
             while(idx<fields.length){
 
                 if($.isPlainObject(fields[idx]) && fields[idx].groupType){ // this is a group
@@ -278,7 +278,7 @@ function HEditing(_options) {
                         prev_children.push(fields[idx]);    
                         fields.splice(idx, 1);
                         continue;
-                    }else if(fields[idx].groupType == 'group_break' || fields[idx].groupType == 'explanation_break'){
+                    }else if(fields[idx].groupType == 'group_break'){
                         prev_children = null;    
                     }else if (innerGroups.indexOf(fields[idx].groupType) !== -1){ // group inside
                         fields[idx].groupType = fields[idx].groupType.indexOf('_inner') > 0 ? fields[idx].groupType.replace('_inner', '') : `${fields[idx].groupType}_break`;
@@ -307,7 +307,8 @@ function HEditing(_options) {
                 
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
 
-                    const groupType = fields[idx].groupType;
+                    let groupType = fields[idx].groupType;
+                    groupType = groupType === 'explanation_break' ? 'explanation' : groupType;
 
                     if(fields[idx].groupHidden || fields[idx]['groupTitleVisible']===false){ //this group is hidden all fields goes to previous group
 
@@ -339,12 +340,12 @@ function HEditing(_options) {
                         let hele = $('<h4>')
                             .html(headerText)
                             .addClass(`separator ${groupType}-separator-header`)
-                            .css({'margin-bottom': '0px', 'padding-bottom': '5px'})
+                            .css({'margin-bottom': '0px', 'padding-bottom': groupType == 'explanation' ? '1em' : '5px'})
                             .appendTo(fieldContainer);
 
                         let div_prompt = $('<div>').html(headerHelpText)
                                .addClass(`heurist-helper1 separator-helper ${groupType}-separator-helper`)
-                               .css({'padding-left': '20px', 'padding-bottom': '5px'})
+                               .css({'padding-left': '20px', 'padding-bottom': groupType == 'explanation' ? '1em' : '5px'})
                                .appendTo(fieldContainer);
                         if(!is_header_visible){
                             hele.addClass('separator-hidden').hide();
@@ -508,10 +509,6 @@ function HEditing(_options) {
                             div_prompt
                                 .addClass(`separator-helper ${groupType}-separator-helper`)
                                 .css({'padding-left': '14px'});
-                        }
-
-                        if(groupType == 'explanation_break'){
-                            div_prompt.insertBefore(newFieldContainer);
                         }
 
                         if(!is_header_visible){

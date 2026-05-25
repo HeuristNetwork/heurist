@@ -369,6 +369,8 @@ input.text, select.text {
 .explanation_break-separator-header,
 .explanation_break-separator-helper{
     background-color: #E6E6E6;
+    color: black !important;
+    font-size: larger !important;
 }
 
 .smallbutton, .smallicon{
@@ -462,6 +464,10 @@ div.recordDiv.selected .selection_pointer{
 
 div.recordDiv.white-borderless{
     background: white;
+    border: none;
+}
+div.recordDiv.grey-borderless{
+    background: lightgrey;
     border: none;
 }
 .list div.recordDiv.densed{

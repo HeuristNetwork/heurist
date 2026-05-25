@@ -63,6 +63,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _calculated_usages: false, // has field usages been calculated (re-calculate on reload)
 
     create_sub_record: false, // is the new field for creating sub records (child record(s)) automatically
+
+    _closeDlgAfterSave: null, // dialog to close after successful save
     
     /**
      * @brief Initializes the manageDefRecStructure widget.
@@ -399,7 +401,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         treeData = [];
         
-        let available_outer_groups = ['tabs', 'tabs_new', 'group_break', 'explanation_break', 'accordion', 'expanded'];
+        let available_outer_groups = ['tabs', 'tabs_new', 'group_break', 'accordion', 'expanded'];
         let outer_group = {};
         let inner_group = {}; // simple dividers or accordions placed within tabs
 
@@ -461,18 +463,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     outer_group = $.extend({}, node);
                     outer_group['children'] = [];
                 }
-            }else if(sepType == 'explanation_break'){
-
-                if(!$.isEmptyObject(inner_group)){ // reset inner groups
-                    outer_group['children'].push(inner_group);
-                    inner_group = {};
-                }
-                if(!$.isEmptyObject(outer_group)){ // reset outer groups
-                    treeData.push(outer_group);
-                    outer_group = {};
-                }
-                treeData.push(node);
-
             }else{
                 if(!$.isEmptyObject(inner_group)){
                     inner_group['children'].push(node);
@@ -2629,6 +2619,9 @@ console.log('onEditFormChange @todo check buttons!!!');
             //after save on server - close edit form and refresh preview
             afterAction = function( recID ){
                 window.hWin.HAPI4.EntityMgr.refreshEntityData('rst', () => {
+                    if(that._closeDlgAfterSave && this._closeDlgAfterSave.dialog('instance') !== undefined){
+                        that._closeDlgAfterSave.dialog('close');
+                    }
                     that._stillNeedUpdateForRecID = 0;
                     that._afterSaveEventHandler( recID ); //to update definitions and tree
                     if(refresh_tree) { that._initTreeView(); } // refresh tree if separator type has been changed
@@ -3861,8 +3854,11 @@ console.log('onEditFormChange @todo check buttons!!!');
             </div>
         </div>
         <div>
-            <div class="required" style="margin-bottom: 7.5px;">Enter html formatted text here</div>
-            <textarea id="rst_DisplayHelpText" class="text ui-corner-all" style="border:none;" cols="100" rows="10"></textarea>
+            <div class="required" style="margin-bottom: 7.5px;">
+                Enter html formatted text here
+                <span style="display: inline-block;color: black;font-weight: normal;float: right;"><span id="explainCharCount">255</span> characters remaining</span>
+            </div>
+            <textarea id="rst_DisplayHelpText" class="text ui-corner-all" style="border:none;" cols="100" rows="10" maxlength="255"></textarea>
         </div>`;
 
         const btns = {};
@@ -3883,8 +3879,8 @@ console.log('onEditFormChange @todo check buttons!!!');
 
             this._skip_title_clear = true;
 
+            this._closeDlgAfterSave = $dlg;
             this.addNewSeparator(afterDTYID, 'explanation', true, {rst_DisplayName: rstName, rst_DisplayHelpText: rstHelp});
-            $dlg.dialog('close');
         };
 
         btns[window.hWin.HR('Cancel')] = () => {
@@ -3894,6 +3890,12 @@ console.log('onEditFormChange @todo check buttons!!!');
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Adding new explanation'}, {dialogId: 'new-explanation', default_palette_class: 'ui-heurist-design'});
 
         $dlg.parent().find('.ui-dialog-buttonpane button').first().addClass('ui-button-action');
+
+        let $textarea = $dlg.find('textarea');
+        let $charCounter = $dlg.find('#explainCharCount');
+        this._on($textarea, {
+            input: () => $charCounter.text(255 - $textarea.val().length)
+        });
     },
 
     _updateCalculatedField: function(cfn_ID){
