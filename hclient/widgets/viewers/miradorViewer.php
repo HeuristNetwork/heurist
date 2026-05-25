@@ -210,6 +210,20 @@ if($use_custom_mirador){
 <?php
 }
 ?>
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #demo {
+    width: 100%;
+    height: 100vh;
+  }
+</style>
 </head>
 <body>
 <div id="demo"></div>
