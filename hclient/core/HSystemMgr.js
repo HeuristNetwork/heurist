@@ -1502,13 +1502,15 @@ class HSystemMgr {
         }
 
         let scripts = [];
-        let editingBase = `${window.hWin.HAPI4.baseURL}hclient/widgets/editing/`;
-        let coreBase = `${window.hWin.HAPI4.baseURL}hclient/core/`;
-        let externalBase = `${window.hWin.HAPI4.baseURL}external/`;
+        const editingBase = `${window.hWin.HAPI4.baseURL}hclient/widgets/editing/`;
+        const coreBase = `${window.hWin.HAPI4.baseURL}hclient/core/`;
+        const externalBase = `${window.hWin.HAPI4.baseURL}external/`;
+        const widgetBase = `${window.hWin.HAPI4.baseURL}hclient/widgets/`;
 
         // External
         if(typeof $.blueimp?.fileupload === 'undefined'){ // File upload handler
             scripts.push(`${externalBase}jquery-file-upload/js/jquery.fileupload.js`);
+            scripts.push(`${externalBase}jquery-file-upload/js/jquery.iframe-transport.js`);
         }
         if(typeof parseWKT === 'undefined'){ // WKT parser
             scripts.push(`${externalBase}js/wellknown.js`);
@@ -1519,6 +1521,9 @@ class HSystemMgr {
         if(typeof $.evol?.colorpicker === 'undefined'){ // Colorpicker
             scripts.push(`${externalBase}jquery.widgets/evol.colorpicker.js`);
             $.getStyles(`${externalBase}jquery.widgets/evol.colorpicker.css`);
+        }
+        if(typeof $.moogle?.contextmenu === 'undefined'){ // Context Menu
+            scripts.push(`${externalBase}jquery.widgets/jquery.ui-contextmenu.js`);
         }
 
         // Core + Utils
@@ -1539,9 +1544,88 @@ class HSystemMgr {
         if(typeof openSearchMenu === 'undefined'){
             scripts.push(`${editingBase}editing_exts.js`);
         }
+        if(typeof EditorCodeMirror === 'undefined'){
+            scripts.push(`${editingBase}editorCodeMirror.js`);
+        }
+        
+
+        //widgets
+        if(typeof $.heurist?.manageEntity === 'undefined'){
+            scripts.push(`${widgetBase}entity/manageEntity.js`);
+        }
+        if(typeof $.heurist?.searchEntity === 'undefined'){
+            scripts.push(`${widgetBase}entity/searchEntity.js`);
+        }
+        if(typeof $.heurist?.configEntity === 'undefined'){
+            scripts.push(`${widgetBase}entity/configEntity.js`);
+        }
+        if(typeof $.heurist?.manageRecords === 'undefined'){
+            scripts.push(`${widgetBase}entity/manageRecords.js`);
+        }
+        if(typeof $.heurist?.searchRecords === 'undefined'){
+            scripts.push(`${widgetBase}entity/searchRecords.js`);
+        }
+        if(typeof $.heurist?.manageRecUploadedFiles === 'undefined'){
+            scripts.push(`${widgetBase}entity/manageRecUploadedFiles.js`);
+        }
+        if(typeof $.heurist?.searchRecUploadedFiles === 'undefined'){
+            scripts.push(`${widgetBase}entity/searchRecUploadedFiles.js`);
+        }
+        if(typeof $.heurist?.manageUsrTags === 'undefined'){
+            scripts.push(`${widgetBase}entity/manageUsrTags.js`);
+        }
+        if(typeof $.heurist?.searchUsrTags === 'undefined'){
+            scripts.push(`${widgetBase}entity/searchUsrTags.js`);
+        }
+        if(typeof $.heurist?.mediaViewer === 'undefined'){
+            scripts.push(`${widgetBase}viewers/mediaViewer.js`);
+        }
+        if(typeof $.heurist?.progressReport === 'undefined'){
+            scripts.push(`${widgetBase}admin/progressReport.js`);
+        }
+        if(typeof $.heurist?.importStructure === 'undefined'){
+            scripts.push(`${widgetBase}admin/importStructure.js`);
+        }
+        if(typeof $.heurist?.recordAction === 'undefined'){
+            scripts.push(`${widgetBase}record/recordAction.js`);
+        }
+        if(typeof $.heurist?.recordAccess === 'undefined'){
+            scripts.push(`${widgetBase}record/recordAccess.js`);
+        }
+        if(typeof HSvsEdit === 'undefined'){
+            scripts.push(`${widgetBase}search/svsEdit.js`);
+        }        
+        
+        if(!(
+        $.calendars && typeof $.calendars.instance === 'function' &&
+        $.calendars.calendars && $.calendars.calendars.gregorian
+        )){
+            
+            const calendarBase = `${window.hWin.HAPI4.baseURL}external/jquery.calendars-2.1.1/js/`;
+            
+            scripts.push(`${calendarBase}jquery.plugin.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.plus.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.picker.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.taiwan.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.thai.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.julian.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.persian.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.islamic.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.ummalqura.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.hebrew.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.ethiopian.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.coptic.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.nepali.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.mayan.min.js`);
+            scripts.push(`${coreBase}jquery.calendars.japanese.js`);
+            
+            $.getStyles(`${externalBase}jquery.calendars-2.1.1/css/jquery.calendars.picker.css`);
+        }
+        
 
         if(scripts.length > 0){
-            $.getMultiScripts(scripts)
+            $.getMultiScriptsSequental(scripts)
                 .then(() => callback(...callbackParams))
                 .catch((e) => window.hWin.HEURIST4.msg.showMsg_ScriptFail());
         }

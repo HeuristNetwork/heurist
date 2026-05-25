@@ -14,7 +14,7 @@
  * (versionCompare), array utilities (uniqueArray), date/time utilities (parseDates,
  * getTimeForLocalTimeZone), and clipboard operations (copyStringToClipboard).
  * It also extends String.prototype with `htmlEscape` and `capitalize`, `lpad`, and adds jQuery
- * extensions `$.getStyles`, `selectorExists`, `$.getMultiScripts2`, `$.getMultiScripts`.
+ * extensions `$.getStyles`, `selectorExists`, `$.getMultiScriptsSequental`, `$.getMultiScripts`.
  * A function `tinymceURLConverter` for TinyMCE is also included.
  * Some functions are noted with @todo for future refactoring.
  * @see editing_input.js
@@ -1434,7 +1434,7 @@ function selectorExists(selector) {
 }
 
 
-$.getMultiScripts2 = function(arr, path) {
+$.getMultiScriptsSequental = function(arr, path) {
     
     return new Promise(function(_resolve, _reject){
     

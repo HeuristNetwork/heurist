@@ -560,8 +560,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                                 'mode/smarty/smarty.js',
                                 'mode/smartymixed/smartymixed.js'
                 ];
-                
-                $.getMultiScripts2(scripts, path)
+                $.getStyles(`${path}lib/codemirror.css`);
+
+                $.getMultiScriptsSequental(scripts, path)
                 .then(function() {  //OK! widget script js has been loaded
                     that._initEditor( content );
                 }).catch(function(error) {

@@ -88,7 +88,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
      * @private
      */
     function _init(){
-
+        
         let buttons= [
             {text:window.hWin.HR('Cancel'), 
                 class:'btnCancel',

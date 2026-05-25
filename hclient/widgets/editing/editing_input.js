@@ -5442,7 +5442,7 @@ $.widget( "heurist.editing_input", {
 
             window.hWin.HEURIST4.util.isFunction($('body')['manageDefGroups']) || scripts.unshift('manageDefGroups.js');
 
-            $.getMultiScripts2(scripts, `${window.hWin.HAPI4.baseURL}hclient/widgets/entity/`).then(() => {
+            $.getMultiScriptsSequental(scripts, `${window.hWin.HAPI4.baseURL}hclient/widgets/entity/`).then(() => {
                 that._openManageTerms(vocab_id);
             }).catch(() => {
                 window.hWin.HEURIST4.msg.showMsgErr({

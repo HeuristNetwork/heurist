@@ -132,7 +132,7 @@ let TemporalPopup = (function () {
 	let _change_tab_only = false;
 
 	function _init () {
-
+        
 		if (location.search.length > 1) { // the calling app passed a parameter string - save it
 			that.originalInputString = decodeURIComponent (location.search.substring(1));
 		}
@@ -252,7 +252,7 @@ let TemporalPopup = (function () {
         	}
         });
 	};
-
+    
 	function _updateSimpleRange(is_selection=false){
 
 		let $range_cont = $('#fRange');
@@ -587,7 +587,7 @@ let TemporalPopup = (function () {
         let calendar_type = temporal.getStringForCode("CLD");
         calendar_type = !calendar_type ? 'gregorian' : calendar_type.toLowerCase();
 
-        fixCalendarPickerCMDs();
+//!!!        fixCalendarPickerCMDs();
 
         let type = temporal.getType();
         if (!type) {

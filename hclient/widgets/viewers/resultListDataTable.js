@@ -176,10 +176,14 @@ $.widget( "heurist.resultListDataTable", {
      * Triggers an initial search if `options.search_initial` is set.
      */
     _create: function() {
+        
+        if(typeof jQuery.fn.DataTable !== 'function'){
+            this._getDataTables();
+            return;    
+        }
 
         let that = this;
 
-       
         this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
         
         this.options.dataTableParams = window.hWin.HEURIST4.util.isJSON(this.options.dataTableParams);
@@ -295,6 +299,24 @@ that._dout('myOnShowEvent');
             window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
         }
     }, //end _create
+    
+    _getDataTables(){
+        let scripts = [ 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js',
+                        'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js',
+                        'https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.js'
+                        ];
+        $.getStyles('https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.css');
+        
+        let that = this;
+        // See getMultiScriptsSequental in utils.js
+        $.getMultiScriptsSequental(scripts)
+        .then(function() {  //OK! widget script js has been loaded
+            that._create();
+        }).catch(function() {
+            window.hWin.HEURIST4.msg.showMsg_ScriptFail(); // Show generic script failure message.
+        });
+    },
+    
 
     /**
      * @function _isSameRealm

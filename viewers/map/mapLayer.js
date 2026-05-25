@@ -337,7 +337,7 @@ function HMapLayer( _options ) {
                         'georaster-layer-for-leaflet.min.js'
                         ];
         let  that = this;
-        $.getMultiScripts2(scripts, path)
+        $.getMultiScriptsSequental(scripts, path)
         .then(function() {  //OK! js has been loaded
             _addImage();
         }).catch(function(error) {
