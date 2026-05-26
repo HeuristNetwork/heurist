@@ -184,61 +184,59 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     //
     // finds and assign  installDir   baseURL    baseURL_pro
     // 
-    function detectBaseURL(){
-        let installDir = '';
+    function detectBaseURL() {
+        let installDir = '/heurist/';
 
-        if(window.hWin.location.host.indexOf('.huma-num.fr')>0 && window.hWin.location.host!=='heurist.huma-num.fr'){
-            installDir = '/heurist/'; //own domain on huma-num
-        }else{
-            let script_name = window.hWin.location.pathname;
+        const loc = window.hWin.location;
+        const pathname = loc.pathname || '/';
 
-            if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/';
+        // Own-domain huma-num installs always map to production heurist
+        if (loc.host.indexOf('.huma-num.fr') > 0 && loc.host !== 'heurist.huma-num.fr') {
+            installDir = '/heurist/';
+        } else {
+            // Take only the first real path segment
+            // Examples:
+            //   /heurist/dbname/web/...       -> heurist
+            //   /h7-alpha/dbname/view/...     -> h7-alpha
+            //   /dbname/anything             -> dbname
+            //   /124/117                     -> 124
+            const firstSegment = pathname.split('/').filter(Boolean)[0] || '';
 
-            if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit)\/.*/)>=0){
-                installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit)\/.*/, '') + '/';
-            }else if(script_name.search(/\/([A-Za-z0-9_]+)\/\d+(\/\d+)?\/?$/)>=0){ // database/123/321  - website without web
-                installDir = '/'
-            }else{
-                installDir = script_name.replace(/(((\?|admin|documentation|export|hapi|hclient|hserv|import|startup|redirects|viewers|help|ext|external|web|website)\/.*)|(index.*|test.php))/, "");
+            // Only these first segments are valid install dirs.
+            // Everything else is considered a pretty URL where installDir is /heurist/
+            if (
+                firstSegment === 'heurist' ||
+                /^h7-[A-Za-z0-9_-]+$/.test(firstSegment)
+            ) {
+                installDir = '/' + firstSegment + '/';
             }
         }
 
-        // --- Normalize installDir for own-domain numeric routes (websiteId/pageId) ---
-        // Make sure installDir ends with "/"
-        if (installDir && !installDir.endsWith('/')) installDir += '/';
-
-        // If URL is like "/124/" or "/124/117" (own-domain website/page route),
-        // installDir must be the production folder, not the numeric path.
-        const pathOnly = window.hWin.location.pathname || '/';
-        if (/^\/\d+(\/\d+)?\/?$/.test(pathOnly)) {
-            installDir = '/heurist/';
-        }else if (/^\/h7-alpha\/\d+(\/\d+)?\/?$/.test(pathOnly)) {
-            installDir = '/h7-alpha/';
-        }
-                
-        
-        // critical: root pretty URLs on mapped domains must use production installDir
-        if (!installDir || installDir === '/') installDir = '/heurist/';
-        
         that.installDir = installDir;
-        if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
+
+        if (!_baseURL) {
+            _baseURL = loc.protocol + '//' + loc.host + installDir;
+        }
+
         that.baseURL = _baseURL;
 
-        //detect production version
+        // Detect production version.
+        // For dev/test installs such as /h7-alpha/, production is /heurist/.
         if (installDir && !installDir.endsWith('/heurist/')) {
-            //replace devlopment folder to production one (ie h6-ij to heurist)
-            installDir = installDir.split('/');
-            let i = installDir.length-1;
-            while(i>0 && installDir[i]=='') i--;
-            installDir[i] = 'heurist';
-            installDir = installDir.join('/');
-            
-            that.baseURL_pro = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
+            let prodInstallDir = installDir.split('/');
+            let i = prodInstallDir.length - 1;
+
+            while (i > 0 && prodInstallDir[i] === '') i--;
+
+            prodInstallDir[i] = 'heurist';
+            prodInstallDir = prodInstallDir.join('/');
+
+            that.baseURL_pro = loc.protocol + '//' + loc.host + prodInstallDir;
         } else {
             that.baseURL_pro = _baseURL;
-        } 
-        
-        //console.log(that.installDir, that.baseURL);               
+        }
+
+        // console.log(that.installDir, that.baseURL, that.baseURL_pro);
     }
     
     

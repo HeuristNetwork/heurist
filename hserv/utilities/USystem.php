@@ -182,85 +182,100 @@ class USystem {
     * if $heuristBaseURL is not defined in configuration detect installation folder and base url
     *
     */
-    private static function detectInstalltionDir(){
-        $installDir = '/heurist';
-        $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["SERVER_NAME"]!='heurist.huma-num.fr');
-        if(!$is_own_domain){
+    private static function detectInstalltionDir()
+    {
+        $installDir = '/heurist/';
+        $installDir_pro = '/heurist/';
 
-            $rewrite_actions = 'website|web|hml|tpl|view|edit|adm';//actions for redirection https://hist/heurist/[dbname]/web/
+        $serverName = $_SERVER['SERVER_NAME'] ?? '';
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 
-            if(@$_SERVER["SCRIPT_NAME"] &&
-            (substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web' || substr($_SERVER["SCRIPT_NAME"], -8 ) === '/website')){
-                $_SERVER["SCRIPT_NAME"] .= '/';//add last slash
+        $is_own_domain = (
+            strpos($serverName, '.huma-num.fr') > 0
+            && $serverName !== 'heurist.huma-num.fr'
+        );
+
+        if (!$is_own_domain) {
+
+            /*
+             * Detect installation folder from the first path segment only.
+             *
+             * Valid installation folders:
+             *   /heurist/
+             *   /h7-alpha/
+             *   /h7-test/
+             *   /h7-<anything made of letters, numbers, _, ->
+             *
+             * Anything else is treated as a pretty URL:
+             *   /dbname/anything
+             *   /123/117
+             *   /web/page
+             *   /documentation/...
+             *
+             * In these cases the real installation folder is /heurist/.
+             */
+            $path = parse_url($scriptName, PHP_URL_PATH) ?: '';
+            $path = trim($path, '/');
+
+            $segments = $path === '' ? array() : explode('/', $path);
+            $firstSegment = $segments[0] ?? '';
+
+            if (
+                $firstSegment === 'heurist'
+                || preg_match('/^h7-[A-Za-z0-9_-]+$/', $firstSegment)
+            ) {
+                $installDir = '/' . $firstSegment . '/';
             }
-
-            $regex_actions = "/\/([A-Za-z0-9_]+)\/($rewrite_actions)\/.*/";
-
-            $matches = array();
-            preg_match($regex_actions, @$_SERVER["SCRIPT_NAME"], $matches);
-            if($matches){
-                $installDir = preg_replace($regex_actions, '', @$_SERVER["SCRIPT_NAME"]);
-            }else{
-
-                // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
-                // removed root folders: pi|applications|common|search|records|
-                $topdirs = 'admin|documentation|export|hapi|hclient|hserv|import|startup|redirects|viewers|help|ext|external';
-
-                $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
-                if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
-                    $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]);// strip away everything past the last slash "/index.php" if it's there
-                }
-
-            }
-
         }
 
-        // this should be the path difference between document root $_SERVER["DOCUMENT_ROOT"] and heurist code root
-        if ($installDir == @$_SERVER["SCRIPT_NAME"]) {
-            $installDir = '/';
-            $installDir_pro = '/';
-        }else{
-            $installDir = $installDir.'/';
+        /*
+         * Production installation is always /heurist/.
+         * This is intentionally no longer calculated from $installDir.
+         */
+        $installDir_pro = '/heurist/';
 
-            $iDir = explode('/',$installDir);
-            $cntDir = count($iDir)-1;
-            for ($i=$cntDir; $i>=0; $i--){
-                if($iDir[$i]!='') {
-                    $iDir[$i] = 'heurist';
-                    break;
-                }
-            }
-            $installDir_pro = implode('/', $iDir);
-        }
+        // Validate detected installation folder.
+        if (!empty($_SERVER['DOCUMENT_ROOT'])) {
 
-        //validate
-        if(@$_SERVER["DOCUMENT_ROOT"]){
-            $codeFolders = array('heurist','h6-alpha','h7-alpha','h7-test');//need to cli and short url
+            $documentRoot = rtrim($_SERVER['DOCUMENT_ROOT'], '/');
+            $testFile = $documentRoot . $installDir . 'configIni.php';
 
-            $i = 0;
-            while ($i<=count($codeFolders)) {
-                $test_file = @$_SERVER["DOCUMENT_ROOT"].$installDir.'configIni.php';
-                if(file_exists($test_file)){
-                    if($installDir_pro!=$installDir){
-                        $test_file = @$_SERVER["DOCUMENT_ROOT"].$installDir_pro.'configIni.php';
-                        if(!file_exists($test_file)){
-                            $installDir_pro = $installDir;
-                        }
+            if (!file_exists($testFile)) {
+
+                /*
+                 * Fallback for unusual server mappings or CLI/short-url cases.
+                 * Keep this list small and explicit.
+                 */
+                $codeFolders = array(
+                    'heurist',
+                    'h7-alpha',
+                    'h7-test'
+                );
+
+                $found = false;
+
+                foreach ($codeFolders as $codeFolder) {
+                    $candidateInstallDir = '/' . $codeFolder . '/';
+                    $candidateFile = $documentRoot . $candidateInstallDir . 'configIni.php';
+
+                    if (file_exists($candidateFile)) {
+                        $installDir = $candidateInstallDir;
+                        $found = true;
+                        break;
                     }
-                    break;
                 }
-                if($i==count($codeFolders)){
-                    exit('Sorry, it is not possible to detect heurist installation folder. '
-                        .'Please ask system administrator to verify server configuration.');
+
+                if (!$found) {
+                    exit(
+                        'Sorry, it is not possible to detect heurist installation folder. '
+                        . 'Please ask system administrator to verify server configuration.'
+                    );
                 }
-                $installDir = '/'.$codeFolders[$i].'/';
-                $i++;
             }
         }
 
         return array($installDir, $installDir_pro);
     }
-
     /**
      * Checks if a specified amount of memory can be allocated within PHP's memory_limit.
      * Considers current memory usage and leaves a 10MB buffer.

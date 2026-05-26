@@ -570,9 +570,9 @@ final class RequestRouter
                 $params['fmt'] = 'hml';
                 if (isset($rest[0])){
                     if(self::isPositiveIntToken($rest[0]) ){ //|| isConceptCode($rest[0])
-                        $params['recid'] = $rest[0];    
+                        $params['recid'] = $rest[0];
                     }else{
-                        $params['q'] = $rest[0];    
+                        $params['q'] = $rest[0];
                     }
                 }
                 if (isset($rest[1]) && self::isPositiveIntToken($rest[1])) {$params['depth'] = (int)$rest[1];}
