@@ -538,7 +538,8 @@ function loadPageContent(pageid, eventdata){
                     //page is not loaded (previous page has been modified and not saved
                     return;
                 }
-
+                
+                
             }else{
                 window.hWin.HAPI4.layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );
             }
@@ -873,165 +874,7 @@ function afterPageLoad(document, pageid, eventdata){
     $('#main-content-container').scrollTop(0);// reset scroll
 
     // add current page as url parameter in browser url
-    if(!is_embed){
-
-        var spath = location.pathname;
-
-        while (spath.substring(0, 2) === '//') spath = spath.substring(1);
-
-        var surl;
-
-        if(spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/';//add last slash
-
-//!!!!! @TODO re-implement -----------------------------------------------------
-        
-        // Own-domain numeric pretty URLs:
-        //   "/"                (home)
-        //   "/<pageid>"        (page under fixed website)
-        //   "/<websiteid>/<pageid>" (site+page when website not fixed)
-        const isOwnDomainNumeric =
-            spath === '/' ||
-            /^\/\d+\/?$/.test(spath) ||
-            /^\/\d+\/\d+\/?$/.test(spath);
-            
-        // If this is an own-domain website (no db/web prefix), keep numeric pretty URLs
-        if (isOwnDomainNumeric && !/\/([A-Za-z0-9_-]+)\/(website|web)\//.test(spath)) {
-
-            // Always produce "/<website>/<pageid>" for own-domain numeric routes,
-            // except when current page is the home page, then "/<website>/".
-            //
-            // This avoids ambiguity: a single numeric segment "/<n>" can be interpreted as "website" by RequestRouter.
-            const pathIsTwoNums = /^\/\d+\/\d+\/?$/.test(spath);
-            const pathIsOneNum  = /^\/\d+\/?$/.test(spath);
-
-            // Determine website id to use:
-            //  - If current URL already contains website id (two-number form), preserve it.
-            //  - Else fallback to home_page_record_id as website id (your code uses it as website id in web-folder mode).
-            let webId = home_page_record_id;
-
-            if (pathIsTwoNums) {
-                const parts = spath.replace(/^\/|\/$/g,'').split('/');
-                if (parts[0] && /^\d+$/.test(parts[0])) webId = parseInt(parts[0], 10);
-            } else if (pathIsOneNum) {
-                // If URL is "/<n>" we cannot know if it was website or page.
-                // Treat it as website id (to match router) when forming canonical "/<website>/..."
-                const parts = spath.replace(/^\/|\/$/g,'').split('/');
-                if (parts[0] && /^\d+$/.test(parts[0])) webId = parseInt(parts[0], 10);
-            }
-
-            // Build canonical URL
-            if (pageid === home_page_record_id) {
-                surl = `/${webId}/`;
-            } else {
-                surl = `/${webId}/${pageid}`;
-            }
-
-            // add optional lang/q as query params
-            let operator = '/?';
-            if (eventdata?.event_type === window.hWin.HAPI4.Event.ON_REC_SEARCHSTART && eventdata?.q) {
-                surl += `${operator}q=${encodeURIComponent(eventdata.q)}`;
-                operator = '&';
-            }
-            if (current_language && current_language !== default_language) {
-                surl += `${operator}lang=${encodeURIComponent(current_language)}`;
-                operator = '&';
-            }
-
-        } else if(spath.search(/\/([A-Za-z0-9_-]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 || 
-                    (/^\/h7-[A-Za-z0-9_-]+\/\d+(\/\d+)?\/?$/.test(spath))){
-            //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
-
-            const org_spath = spath;
-
-            //remove after web
-            if(spath.indexOf('/website/')>=0){
-                spath = spath.substring(0,spath.indexOf('/website/')+9);
-            }else if(spath.indexOf('/web/')>=0){
-                spath = spath.substring(0,spath.indexOf('/web/')+5);
-            }else if(spath.indexOf('/h7-alpha/')>=0){
-                spath = spath.substring(0,spath.indexOf('/h7-alpha/')+10);
-            }else if(spath.indexOf('/h7-test/')>=0){
-                spath = spath.substring(0,spath.indexOf('/h7-test/')+9);
-            }
-            
-            surl = spath + home_page_record_id;
-            if(pageid!=home_page_record_id){
-                surl = surl + '/' + pageid;
-            }
-
-            let remaining_path = org_spath.replace(surl, '');
-            remaining_path = remaining_path.length > 0 ? remaining_path.split('/') : [];
-
-            const handle_query = eventdata?.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-                              && eventdata?.q;
-            const handle_recids = remaining_path.length > 0;
-
-            let operator = '/?';
-
-            if(handle_query){
-                surl += `${operator}q=${eventdata.q}`;
-                operator = '&';
-            }
-
-            if(handle_recids && false){
-                remaining_path = remaining_path.filter((rec_id) => !window.hWin.HEURIST4.util.isempty(rec_id) && rec_id > 0);
-                if(remaining_path.length>0){
-                    surl += `${operator}rec_id=${remaining_path.join(',')}`;
-                    operator = '&';
-                }
-            }
-
-            if(current_language && current_language!=default_language){
-                surl += `${operator}lang=${current_language}`;
-                operator = '&';
-            }
-            //surl += `${operator}edit=2`;
-
-//!!!!! @TODO re-implement END -------------------------------------------------
-            
-        }else{
-            //usual url parameters
-
-            var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
-
-            params['db'] = window.hWin.HAPI4.database;
-            params['website'] = home_page_record_id;
-            //remove deprecated parameter
-            params['id'] = '';
-            delete params['id'];
-            
-            if(current_language && current_language!=default_language){
-                params['lang'] = current_language;
-            }
-
-            /* IJ Oct 2021 - Hide page id in URL, and cause reloads to move back to website homepage */
-            if(pageid!=home_page_record_id){
-                params['pageid'] = pageid;
-            }
-
-            s = [];
-
-            $.each(Object.keys(params),function(i,key){
-                if(key){
-                    var v = encodeURIComponent(params[key]);
-                    if(v!='') v = '=' + v;
-                    if(key!='q'){
-                        s.push(key + v);
-                    }
-                }
-            });
-            if(eventdata &&
-                eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART &&
-                eventdata.q){
-                s.push('q=' + eventdata.q);
-            }
-            surl = spath + '?' + s.join('&');
-
-        }
-
-        window.history.pushState({}, "Title", surl);
-
-    }
+    updateBrowserAddressLine( pageid, eventdata );
 
     // add listeners for internal links and images
     initLinksAndImages();
@@ -1094,6 +937,203 @@ function afterPageLoad(document, pageid, eventdata){
     const web_page_id = home_page_record_id+(pageid!=home_page_record_id?('/'+pageid):'');
     window.hWin.HAPI4.SystemMgr.user_log('VisitPage', web_page_id);
 } //afterPageLoad
+
+//
+// add current page as url parameter in browser url
+//
+function updateBrowserAddressLine( pageid, eventdata ){
+    
+    
+    if (is_embed) {
+        return;
+    }
+
+    let spath = location.pathname || '/';
+
+    while (spath.substring(0, 2) === '//') {
+        spath = spath.substring(1);
+    }
+
+    const INSTALL_RE = /^(heurist|h7-[A-Za-z0-9_-]+)$/;
+    const WEB_RE = /^(web|website)$/;
+    const NUM_RE = /^\d+$/;
+    const ALIAS_RE = /^[A-Za-z0-9_-]+$/;
+
+    const trimSlashes = (s) => String(s || '').replace(/^\/+|\/+$/g, '');
+    const segments = trimSlashes(spath) === ''
+        ? []
+        : trimSlashes(spath).split('/');
+
+    const hasInstallSegment = segments.length > 0 && INSTALL_RE.test(segments[0]);
+
+    /*
+     * Rule 1:
+     * If path is only:
+     *   /heurist
+     *   /heurist/
+     *   /h7-alpha
+     *   /h7-alpha/
+     *
+     * then do not use pretty path, because there is no database/path context.
+     * Use URL parameters instead.
+     */
+    const isOnlyInstallSegment = hasInstallSegment && segments.length === 1;
+
+    /*
+     * Detect page alias.
+     *
+     * Database position:
+     *   /heurist/<database>/...
+     *   /h7-alpha/<database>/...
+     *   /<database>/...
+     *
+     * Therefore page alias position is:
+     *   /heurist/<database>/<alias>
+     *   /h7-alpha/<database>/<alias>
+     *   /<database>/<alias>
+     *
+     * Alias is not:
+     *   web
+     *   website
+     *   numeric
+     */
+    const dbIndex = hasInstallSegment ? 1 : 0;
+    const aliasIndex = dbIndex + 1;
+
+    const lastSegment = segments.length > 0 ? segments[segments.length - 1] : '';
+
+    const isPageAliasPath =
+        segments.length === aliasIndex + 1 &&
+        segments[dbIndex] &&
+        ALIAS_RE.test(lastSegment) &&
+        !WEB_RE.test(lastSegment) &&
+        !NUM_RE.test(lastSegment);
+
+    /*
+     * Rule 3:
+     * Page alias URLs are canonical/user-readable URLs.
+     * Do not add website/page ids and do not rewrite the browser address.
+     */
+    if (isPageAliasPath) {
+        return;
+    }
+
+    let surl = '';
+
+    function addCommonParams(params) {
+
+        params = params || {};
+
+        if (current_language && current_language !== default_language) {
+            params.lang = current_language;
+        }
+
+        if (
+            eventdata &&
+            eventdata.event_type === window.hWin.HAPI4.Event.ON_REC_SEARCHSTART &&
+            eventdata.q
+        ) {
+            params.q = eventdata.q;
+        }
+
+        return params;
+    }
+
+    function buildQueryString(params) {
+
+        const parts = [];
+
+        $.each(Object.keys(params), function (i, key) {
+            if (!key) return;
+
+            const value = params[key];
+
+            if (window.hWin.HEURIST4.util.isempty(value)) {
+                return;
+            }
+
+            parts.push(
+                encodeURIComponent(key) + '=' + encodeURIComponent(value)
+            );
+        });
+
+        return parts.length > 0 ? '?' + parts.join('&') : '';
+    }
+
+    if (isOnlyInstallSegment) {
+
+        /*
+         * Rule 1:
+         * Only install folder is present, so use URL parameters.
+         */
+        const params = window.hWin.HEURIST4.util.getUrlParams(location.href);
+
+        params.db = window.hWin.HAPI4.database;
+        params.website = home_page_record_id;
+
+        // remove deprecated parameter
+        delete params.id;
+
+        if (pageid !== home_page_record_id) {
+            params.pageid = pageid;
+        } else {
+            delete params.pageid;
+        }
+
+        addCommonParams(params);
+
+        surl = spath.replace(/\/+$/, '') + buildQueryString(params);
+
+    } else {
+
+        /*
+         * Rule 2:
+         * Use pretty path.
+         *
+         * Existing trailing numeric path:
+         *   /.../123
+         *   /.../123/456
+         *
+         * is replaced with:
+         *   /.../<website>
+         *   /.../<website>/<page>
+         *
+         * If there is no trailing numeric path, append it.
+         */
+        const newSegments = segments.slice();
+
+        // Remove trailing numeric website/page ids if they exist.
+        if (
+            newSegments.length >= 2 &&
+            NUM_RE.test(newSegments[newSegments.length - 2]) &&
+            NUM_RE.test(newSegments[newSegments.length - 1])
+        ) {
+            newSegments.splice(newSegments.length - 2, 2);
+        } else if (
+            newSegments.length >= 1 &&
+            NUM_RE.test(newSegments[newSegments.length - 1])
+        ) {
+            newSegments.splice(newSegments.length - 1, 1);
+        }
+
+        // Add current website id.
+        newSegments.push(String(home_page_record_id));
+
+        // Add page id only when it is not the website home page.
+        if (pageid !== home_page_record_id) {
+            newSegments.push(String(pageid));
+        }
+
+        surl = '/' + newSegments.join('/');
+
+        const params = addCommonParams({});
+        surl += buildQueryString(params);
+    }
+    
+    window.history.pushState({}, 'Title', surl);
+    
+}
+
 
 //
 // Adds listeners for all "a" elements with href="pageid" for inter page website links (converts links)
@@ -1596,6 +1636,7 @@ function _openCMSeditor(event){
                 container:'#main-content',
                 close: function(){
                     isCMS_active = false;
+                    $('#btnOpenCMSeditor').html('website editor');
             }});//see editCMS2.js
         }
 
