@@ -65,7 +65,7 @@ class USystem {
 
         $installDir = '';
         $installDir_pro = '';
-        $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao','h7-alpha-gpl');//need to cli and short url
+        $codeFolders = array('heurist','h6-alpha','h7-alpha','h7-test');//need to cli and short url
 
         if (php_sapi_name() == 'cli'){
 
@@ -235,7 +235,7 @@ class USystem {
 
         //validate
         if(@$_SERVER["DOCUMENT_ROOT"]){
-            $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao','h7-alpha-gpl');//need to cli and short url
+            $codeFolders = array('heurist','h6-alpha','h7-alpha','h7-test');//need to cli and short url
 
             $i = 0;
             while ($i<=count($codeFolders)) {

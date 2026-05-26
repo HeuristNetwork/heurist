@@ -39,7 +39,7 @@ final class RequestRouter
     private static $databaseFolder = null;
 
     // Adjust to add more versions
-    private const ALLOWED_VERSIONS = ['heurist','h7-alpha','h7-ao','h7-bm','h7-hn'];
+    private const ALLOWED_VERSIONS = ['heurist','h7-alpha','h7-ao','h7-bm','h7-hn','h7-test'];
 
     // Actions supported in pretty routes
     private const ALLOWED_ACTIONS = ['website','web','hml','tpl','view','edit','adm','rec','record','rty','dty','trm'];
@@ -124,7 +124,7 @@ final class RequestRouter
         
         // Reserved paths (either from options or mapping file)
         $reserved = $options['reserved_paths']
-            ?? ($mapping['reserved_paths'] ?? ['heurist','h7-alpha','h7-ao','h7-bm','startup','matomo','errors','db','api']);
+            ?? ($mapping['reserved_paths'] ?? ['heurist','h7-alpha','h7-test','h7-ao','h7-bm','startup','matomo','errors','db','api']);
 
         // NOTE: route() does not attempt to "serve" physical files; Apache should bypass router for -f/-d.
         // But even if it doesn't, we keep safe fallbacks.

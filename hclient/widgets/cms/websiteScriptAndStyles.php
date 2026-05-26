@@ -883,6 +883,8 @@ function afterPageLoad(document, pageid, eventdata){
 
         if(spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/';//add last slash
 
+//!!!!! @TODO re-implement -----------------------------------------------------
+        
         // Own-domain numeric pretty URLs:
         //   "/"                (home)
         //   "/<pageid>"        (page under fixed website)
@@ -936,7 +938,7 @@ function afterPageLoad(document, pageid, eventdata){
             }
 
         } else if(spath.search(/\/([A-Za-z0-9_-]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 || 
-                    (/^\/h7-alpha\/\d+(\/\d+)?\/?$/.test(spath))){
+                    (/^\/h7-[A-Za-z0-9_-]+\/\d+(\/\d+)?\/?$/.test(spath))){
             //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
 
             const org_spath = spath;
@@ -948,6 +950,8 @@ function afterPageLoad(document, pageid, eventdata){
                 spath = spath.substring(0,spath.indexOf('/web/')+5);
             }else if(spath.indexOf('/h7-alpha/')>=0){
                 spath = spath.substring(0,spath.indexOf('/h7-alpha/')+10);
+            }else if(spath.indexOf('/h7-test/')>=0){
+                spath = spath.substring(0,spath.indexOf('/h7-test/')+9);
             }
             
             surl = spath + home_page_record_id;
@@ -983,6 +987,8 @@ function afterPageLoad(document, pageid, eventdata){
             }
             //surl += `${operator}edit=2`;
 
+//!!!!! @TODO re-implement END -------------------------------------------------
+            
         }else{
             //usual url parameters
 
