@@ -512,9 +512,11 @@ function loadPageContent(pageid, eventdata){
         //after load event listener
         function __loadPageContent(){
 
+            current_page_id = pageid;
+            
             window.hWin.HEURIST4.msg.sendCoverallToBack();
             $('body').find('#main-content').css('min-height', '');// remove min height
-
+            
             if(!window.hWin.HAPI4.is_admin()){
                 isCMS_active = false;
             }
@@ -522,29 +524,12 @@ function loadPageContent(pageid, eventdata){
             $('#btnOpenCMSeditor').html(isCMS_active?'close editor':'website editor');
 
             if(isCMS_active){
-                if(!editCMS_instance2) {
-                    editCMS_instance2 = editCMS2(this.document);//editCMS_Init
-                }
-
-                if (! editCMS_instance2.startCMS({
-                                record_id:pageid,
-                                container:'#main-content',
-                                isCMS_NewWebsite: isCMS_NewWebsite,
-                                close: function(){
-                                    isCMS_active = false;
-                                    $('#btnOpenCMSeditor').html('website editor');
-                                }})) //see editCMS2.js
-                {
-                    //page is not loaded (previous page has been modified and not saved
-                    return;
-                }
-                
-                
+                isCMS_active = false;
+                _openCMSeditor();
             }else{
                 window.hWin.HAPI4.layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );
             }
 
-            current_page_id = pageid;
 
             var page_footer = page_target.find('#page-footer');
             if(page_footer.length>0){  //adjust page footer height
@@ -1612,7 +1597,7 @@ function _openCMSeditor(event){
     }
     
 
-    var btn = $(event.target);
+    var btn = $('#btnOpenCMSeditor'); //$(event.target);
 
     if(!window.hWin.HAPI4.has_access()){
         window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
@@ -1628,10 +1613,12 @@ function _openCMSeditor(event){
             $('#main-content').show();
 
             isCMS_active = true;
-            if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document);//editCMS_Init
+            if(!editCMS_instance2) {
+                editCMS_instance2 = editCMS2(this.document);//editCMS_Init    
+            }
+            
             editCMS_instance2.startCMS({
                 record_id: current_page_id,
-                //content: page_cache[current_page_id],  //html or json
                 isCMS_NewWebsite: isCMS_NewWebsite,
                 container:'#main-content',
                 close: function(){
