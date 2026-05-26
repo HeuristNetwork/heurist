@@ -1035,7 +1035,7 @@ function getWebImageCache($system, $fileinfo, $returnURL = true, $forceRefresh =
 
     $skip_file = isNotLocalFile(@$fileinfo['ulf_OrigFileName']);
 
-    if($skip_file || @$fileinfo['ulf_FileSizeKB'] < 500){ // skip
+    if($skip_file || @$fileinfo['ulf_FileSizeKB'] < 200){ // skip
         $system->addError(HEURIST_ACTION_BLOCKED, 'File skipped');
         return false;
     }
@@ -1071,7 +1071,7 @@ function getWebImageCache($system, $fileinfo, $returnURL = true, $forceRefresh =
     }
 
     if(!$fileExists){ // already exists
-        $res = UImage::createScaledImageFile($file_path, $file_path_cached, 800, 800, false, 'jpg');
+        $res = UImage::createScaledImageFile($file_path, $file_path_cached, 400, 400, false, 'jpg');
     }else{
         $res = true;
     }
