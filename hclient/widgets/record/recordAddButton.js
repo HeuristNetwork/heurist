@@ -65,7 +65,7 @@ $.widget( "heurist.recordAddButton",{
      */
     _init:function(){
 
-        if(!window.hWin.HAPI4.SystemMgr.verifyRecordEditorScripts(this._init)){ // ensure neceesary editing scripts are loaded
+        if(!window.hWin.HAPI4.SystemMgr.verifyRecordEditorScripts(()=>{this._init()})){ // ensure neceesary editing scripts are loaded
             return;
         }
 

@@ -31,6 +31,7 @@
 class HSystemMgr {
     /** @private */
   hapi4;
+  _verifyRecordEditorScriptsStart;
     
   /**
    * Creates an instance of HSystemMgr.
@@ -38,6 +39,7 @@ class HSystemMgr {
    */
   constructor(hapi4) {
     this.hapi4 = hapi4; 
+    this._verifyRecordEditorScriptsStart = false;
   }
   
   /**
@@ -1493,6 +1495,12 @@ class HSystemMgr {
      * @returns {boolean} whether the scripts are already loaded
      */
     verifyRecordEditorScripts(callback, callbackParams){
+        
+        if(this._verifyRecordEditorScriptsStart){
+            return true;
+        }
+        
+        this._verifyRecordEditorScriptsStart = true;
 
         if(typeof callback !== 'function'){
             callback = () => {};
@@ -1626,11 +1634,18 @@ class HSystemMgr {
 
         if(scripts.length > 0){
             $.getMultiScriptsSequental(scripts)
-                .then(() => callback(...callbackParams))
-                .catch((e) => window.hWin.HEURIST4.msg.showMsg_ScriptFail());
+                .then(() => {
+                    this._verifyRecordEditorScriptsStart = false;
+                    callback(...callbackParams);
+                })
+                .catch((e) => {
+                    this._verifyRecordEditorScriptsStart = false;
+                    console.error(e);                    
+                    window.hWin.HEURIST4.msg.showMsg_ScriptFail()   
+                });
         }
 
-        return scripts.length === 0;
+        return (scripts.length === 0);
     }
   
 }
