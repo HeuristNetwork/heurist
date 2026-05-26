@@ -572,7 +572,7 @@ final class RequestRouter
                     if(self::isPositiveIntToken($rest[0]) ){ //|| isConceptCode($rest[0])
                         $params['recid'] = $rest[0];
                     }else{
-                        $params['q'] = $rest[0];
+                        $params['q'] = rawurldecode($rest[0]);
                     }
                 }
                 if (isset($rest[1]) && self::isPositiveIntToken($rest[1])) {$params['depth'] = (int)$rest[1];}
@@ -607,7 +607,7 @@ final class RequestRouter
                     $params['template_id'] = (int)$first;
                 } else {
                     // /tpl/<templateName>/...
-                    $params['template'] = $first;
+                    $params['template'] = rawurldecode($first);
                 }
 
                 // Optional query segment(s)
@@ -620,7 +620,7 @@ final class RequestRouter
                     if (!empty($ids)) {
                         $params['q'] = 'ids:' . implode(',', $ids);
                     } else {
-                        $params['q'] = $rawQuery;
+                        $params['q'] = rawurldecode($rawQuery);
                     }
                 }
 
