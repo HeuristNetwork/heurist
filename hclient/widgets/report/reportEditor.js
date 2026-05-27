@@ -396,7 +396,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 
         let template_body = this.codeEditor.getValue();
 
-        const expectedLength = this.options.isCalcFieldTemplate ? 2 : 10;
+        const expectedLength = this.options.isCalcFieldTemplate ? 5 : 10;
         if(template_body?.length <= expectedLength){
             window.hWin.HEURIST4.msg.showMsgFlash('Nothing to execute. Define code');
             return;            
