@@ -38,9 +38,6 @@ final class RequestRouter
     /** @var string|null */
     private static $databaseFolder = null;
 
-    // Adjust to add more versions
-    private const ALLOWED_VERSIONS = ['heurist','h7-alpha','h7-ao','h7-bm','h7-hn','h7-test'];
-
     // Actions supported in pretty routes
     private const ALLOWED_ACTIONS = ['website','web','hml','tpl','view','edit','adm','rec','record','rty','dty','trm'];
 
@@ -83,13 +80,12 @@ final class RequestRouter
         $mappedWebsite = $hostMap['website'] ?? null;
         $mappedVersion = $hostMap['version'] ?? null;
 
-        // Detect version prefix
+        // Detect installation/version prefix
         $versionPrefix = null;
-        if (!empty($segments) && in_array($segments[0], self::ALLOWED_VERSIONS, true)) {
+        if (!empty($segments) && self::isHeuristCodeFolder($segments[0])) {
             $versionPrefix = array_shift($segments);
         }
         $activeVersion = $mappedVersion ?: ($versionPrefix ?: $defaultVersion);
-
         
         // Normalize "/index.php" (and optionally "/index.html") to "/"
         if (count($segments) === 1) {
@@ -123,8 +119,15 @@ final class RequestRouter
         }        
         
         // Reserved paths (either from options or mapping file)
-        $reserved = $options['reserved_paths']
-            ?? ($mapping['reserved_paths'] ?? ['heurist','h7-alpha','h7-test','h7-ao','h7-bm','startup','matomo','errors','db','api']);
+        $builtinReserved = ['startup', 'matomo', 'errors', 'db', 'api'];
+
+        $configReserved = $options['reserved_paths']
+            ?? ($mapping['reserved_paths'] ?? []);
+
+        $reserved = array_values(array_unique(array_merge(
+            $builtinReserved,
+            is_array($configReserved) ? $configReserved : []
+        )));
 
         // NOTE: route() does not attempt to "serve" physical files; Apache should bypass router for -f/-d.
         // But even if it doesn't, we keep safe fallbacks.
@@ -201,9 +204,9 @@ final class RequestRouter
         $dbCandidate = $segments[0];
 
         // Avoid treating reserved prefixes as db
-        if (in_array($dbCandidate, $reserved, true)) {
+        if (self::isHeuristCodeFolder($dbCandidate) || in_array($dbCandidate, $reserved, true)) {
             return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
-        }
+        }        
 
         if (!self::isValidDbToken($dbCandidate)) {
             return self::result404();
@@ -665,6 +668,12 @@ final class RequestRouter
     }
     
 
+    private static function isHeuristCodeFolder(string $folderName): bool
+    {
+        return $folderName === 'heurist'
+            || preg_match('/^h7-[A-Za-z0-9_-]+$/', $folderName) === 1;
+    }    
+    
     private static function isPositiveIntToken($value): bool
     {
         return is_string($value) && ctype_digit($value) && (int)$value > 0;

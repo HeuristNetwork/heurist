@@ -166,23 +166,28 @@ function replaceAbsPathinCMS($recID, $val){
 
     global $servers;
 
-
-
+    /*
+     * Optional historical prefixes before the actual Heurist code folder:
+     *   /HEURIST/heurist/
+     *   /html/heurist/
+     *   /heurist/
+     *
+     * Actual install folder:
+     *   heurist
+     *   h7-[A-Za-z0-9_-]+
+     */
     $paths0 = array('\/HEURIST', '\/html', '');
-    $paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta', 'h7', 'h7-alpha','h7-test');
+
+    $installFolderPattern = '(?:heurist|h[5-7](?:-[A-Za-z0-9_-]+)?|h[5-7])';
 
     $cnt = 0;
 
     foreach ($servers as $srv) {
         foreach ($paths0 as $path0) {
-            foreach ($paths as $path) {
-                $absPath = '/'.$srv.$path0.'\/'.$path.'\//i';
-
-                $cnt = $cnt + replaceAbsPath($s, $val);
-            }
+            $absPath = '/'.$srv.$path0.'\/'.$installFolderPattern.'\//i';
+            $cnt += replaceAbsPath($absPath, $val);
         }
     }
-
 
     //report if anything has been fixed
     if($cnt > 0){

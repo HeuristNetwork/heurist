@@ -65,7 +65,6 @@ class USystem {
 
         $installDir = '';
         $installDir_pro = '';
-        $codeFolders = array('heurist','h6-alpha','h7-alpha','h7-test');//need to cli and short url
 
         if (php_sapi_name() == 'cli'){
 
@@ -74,7 +73,7 @@ class USystem {
             }
 
             $k = strpos($serverName,":");
-            $host_params['domain'] = ($k>0)?substr($serverName,0,$k-1):$serverName;
+            $host_params['domain'] = ($k>0)?substr($serverName,0,$k):$serverName;
             $isSecure = true;
 
             if($argv==null || !is_array($argv)){
@@ -86,15 +85,25 @@ class USystem {
 
             $sDir = str_replace('\\','/',$sDir);
 
+            
             $iDir = explode('/', $sDir);
-            $cntDir = count($iDir)-1;
+            $cntDir = count($iDir) - 1;
             $path = [];
-            for ($i=$cntDir; $i>=0; $i--){
-                if(in_array($iDir[$i], $codeFolders)) {
-                    $installDir = '/'.$iDir[$i].'/';
+
+            for ($i = $cntDir; $i >= 0; $i--) {
+                $segment = $iDir[$i];
+                if(self::isHeuristCodeFolder($segment)){
+                    $installDir = '/' . $segment . '/';
                     $path = array_slice($iDir, 0, $i);
                     break;
                 }
+            }   
+            
+            if ($installDir === '') {
+                exit(
+                    'Sorry, it is not possible to detect heurist installation folder from CLI path: '
+                    . $sDir
+                );
             }
 
             $installDir_pro = '/heurist/';
@@ -194,6 +203,8 @@ class USystem {
             strpos($serverName, '.huma-num.fr') > 0
             && $serverName !== 'heurist.huma-num.fr'
         );
+        
+        $wasExplicitInstallDir = false;
 
         if (!$is_own_domain) {
 
@@ -220,11 +231,9 @@ class USystem {
             $segments = $path === '' ? array() : explode('/', $path);
             $firstSegment = $segments[0] ?? '';
 
-            if (
-                $firstSegment === 'heurist'
-                || preg_match('/^h7-[A-Za-z0-9_-]+$/', $firstSegment)
-            ) {
+            if (self::isHeuristCodeFolder($firstSegment)) {
                 $installDir = '/' . $firstSegment . '/';
+                $wasExplicitInstallDir = true;
             }
         }
 
@@ -240,28 +249,33 @@ class USystem {
             $documentRoot = rtrim($_SERVER['DOCUMENT_ROOT'], '/');
             $testFile = $documentRoot . $installDir . 'configIni.php';
 
-            if (!file_exists($testFile)) {
+            if (!is_file($testFile)) {
 
-                /*
-                 * Fallback for unusual server mappings or CLI/short-url cases.
-                 * Keep this list small and explicit.
-                 */
-                $codeFolders = array(
-                    'heurist',
-                    'h7-alpha',
-                    'h7-test'
-                );
+                if ($wasExplicitInstallDir) {
+                    exit(
+                        'Sorry, detected Heurist installation folder does not exist: '
+                        . htmlspecialchars($installDir)
+                    );
+                }
 
                 $found = false;
+                $entries = @scandir($documentRoot);
 
-                foreach ($codeFolders as $codeFolder) {
-                    $candidateInstallDir = '/' . $codeFolder . '/';
-                    $candidateFile = $documentRoot . $candidateInstallDir . 'configIni.php';
+                if (is_array($entries)) {
+                    foreach ($entries as $entry) {
 
-                    if (file_exists($candidateFile)) {
-                        $installDir = $candidateInstallDir;
-                        $found = true;
-                        break;
+                        if (!self::isHeuristCodeFolder($entry)) {
+                            continue;
+                        }
+
+                        $candidateInstallDir = '/' . $entry . '/';
+                        $candidateFile = $documentRoot . $candidateInstallDir . 'configIni.php';
+
+                        if (is_file($candidateFile)) {
+                            $installDir = $candidateInstallDir;
+                            $found = true;
+                            break;
+                        }
                     }
                 }
 
@@ -276,6 +290,13 @@ class USystem {
 
         return array($installDir, $installDir_pro);
     }
+    
+    private static function isHeuristCodeFolder(string $folderName): bool
+    {
+        return $folderName === 'heurist'
+            || preg_match('/^h7-[A-Za-z0-9_-]+$/', $folderName) === 1;
+    }  
+    
     /**
      * Checks if a specified amount of memory can be allocated within PHP's memory_limit.
      * Considers current memory usage and leaves a 10MB buffer.

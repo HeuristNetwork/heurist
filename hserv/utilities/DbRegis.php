@@ -109,7 +109,7 @@ class DbRegis {
         $reg_record = null;
 
         if($serverBaseUrl==null || $serverBaseUrl==''){
-            $serverBaseUrl = HEURIST_MAIN_SERVER.'/h7-alpha/'; //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
+            $serverBaseUrl = HEURIST_MAIN_SERVER.'/heurist/'; //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
         }else{
             $serverBaseUrl = rtrim($serverBaseUrl, '/').'/';
         }
@@ -858,7 +858,7 @@ class DbRegis {
             }else{
                 //request to server where database can reside
                 $server = self::normalizeServerUrl($resServer, true);
-                $server = str_replace('/heurist/','/h7-alpha/',$server); //TEMPORARY
+                //REMOVE THIS REMARK IF PRODUCTION VERSION FAR BEHIND $server = str_replace('/heurist/','/h7-alpha/',$server); 
                 $dburl = self::registrationRemoteCall(array('action'=>'url', 'dbID'=>$dbID), $server, 'registered_database_server_lookup');
             }
         }

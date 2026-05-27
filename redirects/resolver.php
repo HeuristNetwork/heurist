@@ -1,5 +1,6 @@
 <?php
 /**
+* LEGACY CODE
 * resolver.php - Universal Heurist URL resolver and redirector.
 * @fileOverview This script acts as a central resolver for various Heurist URLs, including PIDs (Persistent Identifiers),
 * database views, record views, edits, and exports. It interprets incoming URL patterns and redirects

@@ -21,7 +21,7 @@ if (!defined('PDIR')){
     $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     $reqPath = preg_replace('~/index\.php$~i', '/', $reqPath);
 
-    if (preg_match('~^/(heurist|h7-alpha|h7-[A-Za-z0-9_-]+)/startup/~', $reqPath, $m)) {
+    if (preg_match('~^/(heurist|h7-[A-Za-z0-9_-]+)/startup/~', $reqPath, $m)) {
         define('PDIR', '/' . $m[1] . '/');
     } else {
         define('PDIR', '/');
