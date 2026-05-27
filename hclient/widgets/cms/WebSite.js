@@ -127,9 +127,21 @@ class WebSite {
         }
         
         if(this.siteOptions.isFixedFooter){
+            //$('body').addClass('d-flex flex-column min-vh-100');
+            //$('#main-content').addClass('flex-grow-1');
             $('footer').addClass('fixed-bottom');
+            window.addEventListener('resize', this.resizeMain);
+            this.resizeMain();
         }
     }
+    
+    resizeMain() {
+      const header = document.getElementById('main-header');
+      const footer = document.getElementById('page-footer');
+      const main = document.getElementById('main-content');
+
+      main.style.height = `calc(100vh - ${header.offsetHeight}px - ${footer.offsetHeight}px)`;
+    }    
 
     /**
     * Loads given RT_CMS_MENU into container (by default main (v3) or #main-content (v2) )
