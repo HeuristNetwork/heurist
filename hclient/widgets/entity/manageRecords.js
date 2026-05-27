@@ -3753,463 +3753,468 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      */
     _saveEditAndClose: function( fields, afterAction ){
 
-            if(!(this._currentEditID>0)) return;
-            
-            if(window.hWin.HAPI4.is_callserver_in_progress()) {
-                //prevent repeatative call
-                return;   
+        if(!(this._currentEditID>0)) return;
+
+        if(window.hWin.HAPI4.is_callserver_in_progress()) {
+            //prevent repeatative call
+            return;   
+        }
+
+        if(this.options.rts_editor && this.options.rts_editor.manageDefRecStructure('checkIfEditing')){
+            window.hWin.HEURIST4.msg.showMsgFlash('You must save or discard your strucutral changes before saving the record', 2000);
+            return;
+        }
+
+        let that = this;                                    
+    
+        if(!fields){
+            try{
+                fields = this._getValidatedValues(); 
+            }catch{
+                fields = null;
             }
-        
-            let that = this;                                    
-        
-            if(!fields){
-                try{
-                    fields = this._getValidatedValues(); 
-                }catch{
-                    fields = null;
-                }
 
-                let hasCustomJsOrCss = false, hasScriptTag = false;
-                
-                let hasValue = false, hasDtlField = false;
-                let ambig_dates = [], invalid_entries = {};
+            let hasCustomJsOrCss = false, hasScriptTag = false;
+            
+            let hasValue = false, hasDtlField = false;
+            let ambig_dates = [], invalid_entries = {};
 
-                let rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
-                //verify max lengtn in 64kB per value
-                for (let dtyID in fields){
+            let rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
+            //verify max lengtn in 64kB per value
+            for (let dtyID in fields){
 
-                    let updated_values = false;
-                    if(parseInt(dtyID)>0){
+                let updated_values = false;
+                if(parseInt(dtyID)>0){
+                    
+                    let dty_ConceptCode = $Db.getConceptID('dty', dtyID);
+                    let dt = $Db.dty(dtyID, 'dty_Type');
+                    hasDtlField = true;
+                    if(dt=='geo' || dt=='file') continue;
+                    
+                    let values = fields[dtyID];
+
+                    if(window.hWin.HEURIST4.util.isempty(values)) continue;
+
+                    hasValue = true;
+                    if(!Array.isArray(values)) values = [values];
+
+                    // Split CMS MenuPage's Page content into several values
+                    if(rty_ConceptCode == '99-52' && dty_ConceptCode == '2-4'){
+
+                        let complete_value = values.join(''); //
+
+                        let len = window.hWin.HEURIST4.util.byteLength(complete_value);
+                        let len2 = complete_value.length;
+                        let lim = (len-len2<200)?64000:32768;
+
+                        if(len > lim){ // split into parts
+
+                            lim = lim - 1000; //reduce for a bit of room
+                            let parts_count = Math.ceil(len / lim);
+                            let start = 0;
+                            let new_values = []; //new Array(parts_count)
+
+                            for (let i = 0; i < parts_count; i ++){
+                                new_values.push(complete_value.substr(start, lim));
+                                start += lim;
+                            }
+
+                            values = new_values;
+                        }
+                    }
+
+                    for (let k=0; k<values.length; k++){
                         
-                        let dty_ConceptCode = $Db.getConceptID('dty', dtyID);
-                        let dt = $Db.dty(dtyID, 'dty_Type');
-                        hasDtlField = true;
-                        if(dt=='geo' || dt=='file') continue;
+                        let len = window.hWin.HEURIST4.util.byteLength(values[k]);
+                        let len2 = values[k].length;
+                        let lim = (len-len2<200)?64000:32768;
                         
-                        let values = fields[dtyID];
-
-                        if(window.hWin.HEURIST4.util.isempty(values)) continue;
-
-                        hasValue = true;
-                        if(!Array.isArray(values)) values = [values];
-
-                        // Split CMS MenuPage's Page content into several values
-                        if(rty_ConceptCode == '99-52' && dty_ConceptCode == '2-4'){
-
-                            let complete_value = values.join(''); //
-
-                            let len = window.hWin.HEURIST4.util.byteLength(complete_value);
-                            let len2 = complete_value.length;
-                            let lim = (len-len2<200)?64000:32768;
-
-                            if(len > lim){ // split into parts
-
-                                lim = lim - 1000; //reduce for a bit of room
-                                let parts_count = Math.ceil(len / lim);
-                                let start = 0;
-                                let new_values = []; //new Array(parts_count)
-
-                                for (let i = 0; i < parts_count; i ++){
-                                    new_values.push(complete_value.substr(start, lim));
-                                    start += lim;
-                                }
-
-                                values = new_values;
+                        if(len>lim){ //65535){  32768
+                            let sMsg = `The data in field ${$Db.rst(that._currentEditRecTypeID, dtyID, 'rst_DisplayName')}`
+                            +' exceeds the maximum size for a field of 64Kbytes.<br>' //lim2
+                            +'Note that this does not mean 64K characters, ' //lim2
+                            +'as Unicode uses multiple bytes per character.<br>'
+                            +'You can store more than 64Kbytes by making the field repeating and splitting the data into two or more values for this field.';
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: sMsg,
+                                error_title: 'Field value too large'
+                            });
+                            
+                            let inpt = this._editing.getFieldByName(dtyID);
+                            if(inpt){
+                                inpt.editing_input('showErrorMsg', sMsg);
+                                $(this.editForm.find('input.ui-state-error')[0]).trigger('focus');   
+                            }
+                            return;
+                            
+                        }
+                        if(dtyID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] && typeof values[k]==='string')
+                        {
+                            let sval = (values[k]).toLowerCase();
+                            if(sval.indexOf('<script')>=0 && sval.indexOf('</script>')>0){
+                                let inpt = this._editing.getFieldByName(dtyID);
+                                if(inpt) inpt.editing_input('showErrorMsg', '&lt;sctipt&gt; tag not allowed');  
+                                hasScriptTag = true;
                             }
                         }
+                        if(!hasCustomJsOrCss && typeof values[k]==='string' && rty_ConceptCode == '99-51' &&
+                                    (dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] ||
+                                    dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'] ||
+                                    dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])  ){
+                            hasCustomJsOrCss = true;         
+                        }
 
-                        for (let k=0; k<values.length; k++){
-                            
-                            let len = window.hWin.HEURIST4.util.byteLength(values[k]);
-                            let len2 = values[k].length;
-                            let lim = (len-len2<200)?64000:32768;
-                            
-                            if(len>lim){ //65535){  32768
-                                let sMsg = `The data in field ${$Db.rst(that._currentEditRecTypeID, dtyID, 'rst_DisplayName')}`
-                                +' exceeds the maximum size for a field of 64Kbytes.<br>' //lim2
-                                +'Note that this does not mean 64K characters, ' //lim2
-                                +'as Unicode uses multiple bytes per character.<br>'
-                                +'You can store more than 64Kbytes by making the field repeating and splitting the data into two or more values for this field.';
-                                window.hWin.HEURIST4.msg.showMsgErr({
-                                    message: sMsg,
-                                    error_title: 'Field value too large'
-                                });
-                                
-                                let inpt = this._editing.getFieldByName(dtyID);
-                                if(inpt){
-                                    inpt.editing_input('showErrorMsg', sMsg);
-                                    $(this.editForm.find('input.ui-state-error')[0]).trigger('focus');   
-                                }
-                                return;
-                                
-                            }
-                            if(dtyID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] && typeof values[k]==='string')
-                            {
-                                let sval = (values[k]).toLowerCase();
-                                if(sval.indexOf('<script')>=0 && sval.indexOf('</script>')>0){
-                                    let inpt = this._editing.getFieldByName(dtyID);
-                                    if(inpt) inpt.editing_input('showErrorMsg', '&lt;sctipt&gt; tag not allowed');  
-                                    hasScriptTag = true;
-                                }
-                            }
-                            if(!hasCustomJsOrCss && typeof values[k]==='string' && rty_ConceptCode == '99-51' &&
-                                     (dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] ||
-                                      dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'] ||
-                                      dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])  ){
-                                hasCustomJsOrCss = true;         
+                        if(fields['no_validation'] == 1){
+                            continue;
+                        }
+
+                        let entry_mask = $Db.rst(that._currentEditRecTypeID, dtyID, 'rst_EntryMask');
+
+                        if(dt == 'date'){
+
+                            if(Temporal.isValidFormat(values[k])){ // check if valid temporal string
+                                continue; // is valid, skip
                             }
 
-                            if(fields['no_validation'] == 1){
+                            const value_spaceless = values[k].replaceAll(/\s+/g, ''); // remove all whitespaces
+
+                            const approx_regex = /circa.?|ca.?|approx.?|~/; // circa 1995, ca. 1995, approx 1995, ~1995
+                            const has_range = /[à|.|to|\-|,]/; // range separators
+                            const range_regex = /\d+|[à|.|to|\-|,]+/g; // 1990-1995, 1990to1995, 1990..1995, 1990,1995 (spaces removed first)
+                            const has_named_month = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/ig; // e.g. 12Jan1995
+
+                            // Approximate date
+                            let matches = values[k].match(approx_regex);
+                            if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0){ // approx value, setup simple date with circa value
+
+                                let date_val = values[k].replace(approx_regex, '');
+
+                                try{
+
+                                    let t_date = new Temporal();
+                                    date_val = TDate.parse(date_val);
+
+                                    date_val = date_val.toString('yyyy-MM-dd');
+
+                                    t_date.setType('s');
+                                    t_date.addObjForString('DAT', date_val);
+                                    t_date.addObjForString("CIR", "1");
+                                    values[k] = t_date.toString();
+
+                                    updated_values = true;
+
+                                    continue; // done next value
+                                } catch(e) {
+                                    if(e.indexOf('ambiguous') >= 0){
+                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'approx'});
+                                        continue;
+                                    }
+                                }
+
                                 continue;
                             }
 
-                            let entry_mask = $Db.rst(that._currentEditRecTypeID, dtyID, 'rst_EntryMask');
+                            // Ranged dates
+                            matches = [...value_spaceless.matchAll(range_regex)];
+                            if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0 
+                                    && has_range.test(value_spaceless) && (value_spaceless.split('-')<3) ){
 
-                            if(dt == 'date'){
+                                let is_ambig = false;
 
-                                if(Temporal.isValidFormat(values[k])){ // check if valid temporal string
-                                    continue; // is valid, skip
+                                const sep_match_index = Math.floor(matches.length / 2);
+                                const sep = matches[sep_match_index][0];
+                                const sep_index = matches[sep_match_index]['index'];
+                                
+                                let TPQ = value_spaceless.slice(0, sep_index);
+                                let TAQ = value_spaceless.slice(sep_index + sep.length);
+
+                                if(TPQ.length >= 4 && TAQ.length >= 4 && has_range.test(sep)){ // quick conversion to range needs same length dates, and at least full years
+
+                                    try {
+                                        
+                                        let t_TPQ = TDate.parse(TPQ);
+                                        TPQ = t_TPQ.toString('yyyy-MM-dd');
+                                    } catch(e) {
+                                        if(e.indexOf('ambiguous') > 0){
+                                            is_ambig = true;
+                                        }
+                                    }
+
+                                    try {
+                                        
+                                        let t_TAQ = TDate.parse(TAQ);
+                                        TAQ = t_TAQ.toString('yyyy-MM-dd');
+                                    } catch(e) {
+                                        if(e.indexOf('ambiguous') >= 0){
+                                            is_ambig = true;
+                                        }
+                                    }
+
+                                    if(is_ambig){
+                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], value: {'TPQ': TPQ, 'TAQ': TAQ}, index: k, type: 'range'});
+                                        continue;
+                                    }
+
+                                    if(new Date(TPQ).getTime() >= new Date(TAQ).getTime()){
+                                        let temp = TPQ;
+                                        TPQ = TAQ;
+                                        TAQ = temp;
+                                    }                                
+
+                                    let temporal = new Temporal();
+                                    temporal.setType('p');
+                                    temporal.addObjForString("TPQ", TPQ); // Earliest value
+                                    temporal.addObjForString("TAQ", TAQ); // Latest value
+                                    temporal.addObjForString("COM", values[k]); // Insert original value as comment
+
+                                    let results = Temporal.checkValidity(temporal);
+                                    if(results[0]){ // is valid
+                                        values[k] = temporal.toString();
+                                        updated_values = true;
+                                    } // else, not handled
+
+                                    continue;
                                 }
+                            }
 
-                                const value_spaceless = values[k].replaceAll(/\s+/g, ''); // remove all whitespaces
+                            // Named month
+                            matches = [...values[k].matchAll(has_named_month)];
+                            if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length == 1){
 
-                                const approx_regex = /circa.?|ca.?|approx.?|~/; // circa 1995, ca. 1995, approx 1995, ~1995
-                                const has_range = /[à|.|to|\-|,]/; // range separators
-                                const range_regex = /\d+|[à|.|to|\-|,]+/g; // 1990-1995, 1990to1995, 1990..1995, 1990,1995 (spaces removed first)
-                                const has_named_month = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/ig; // e.g. 12Jan1995
+                                let month = matches[0][0];
+                                let month_index = matches[0]['index'];
+                                let date_val = values[k].slice(0, month_index) + ' ' + month + ' ' + values[k].slice(month_index+month.length);
 
-                                // Approximate date
-                                let matches = values[k].match(approx_regex);
-                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0){ // approx value, setup simple date with circa value
+                                try {
+                                    date_val = TDate.parse(date_val).toString('yyyy-MM-dd');
 
-                                    let date_val = values[k].replace(approx_regex, '');
+                                    if(date_val.length == 4){ // unknown
+                                        continue;
+                                    }
 
-                                    try{
+                                    values[k] = date_val;
+                                    updated_values = true;
+                                } catch(e) {
+                                    if(e.indexOf('ambiguous') > 0){
+                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'simple'});
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            // Date + time value - replace '-' between date and time with ' T '
+                            matches = [...values[k].matchAll(/-\s?\d{1,2}:/g)];
+                            if(matches.length == 1){
+
+                                let new_value = matches[0][0];
+                                new_value = 'T' + new_value.substring(1);
+                                values[k] = values[k].replace(matches[0][0], new_value);
+
+                                updated_values = true;
+                                continue;
+                            }
+
+                            // Check for simple ambiguity or carbon year
+                            let ttype = 'simple';
+                            try {
+
+                                let value = values[k];
+                                ttype = value.slice(-2).toLowerCase() == 'bp' ? 'carbon' : ttype;
+                                value = ttype == 'carbon' ? value.slice(0, -2) : value;
+
+                                let tDate = TDate.parse(value);
+                                let date_val = tDate.toString('yyyy-MM-dd');
+                                let format = tDate.getDateFormat();
+
+                                if(ttype == 'carbon'){
+
+                                    if(date_val.length == 4 && value.length <= 4){
 
                                         let t_date = new Temporal();
                                         date_val = TDate.parse(date_val);
 
                                         date_val = date_val.toString('yyyy-MM-dd');
 
-                                        t_date.setType('s');
-                                        t_date.addObjForString('DAT', date_val);
-                                        t_date.addObjForString("CIR", "1");
-                                        values[k] = t_date.toString();
+                                        t_date.setType('c');
+                                        t_date.addObjForString('BPD', date_val);
 
+                                        values[k] = t_date.toString(); // toJSON()
                                         updated_values = true;
+                                    }
+                                }else if((date_val.length == 4 && values[k].length <= 4) || date_val.length == values[k].length){
 
-                                        continue; // done next value
-                                    } catch(e) {
-                                        if(e.indexOf('ambiguous') >= 0){
-                                            ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'approx'});
-                                            continue;
-                                        }
+                                    if(format == 'dmy' && tDate.getDay() < 13 && tDate.getMonth() < 13){ // only uses 'mdy' when first number has to be month
+                                        throw 'ambiguous date';
                                     }
 
                                     continue;
                                 }
-
-                                // Ranged dates
-                                matches = [...value_spaceless.matchAll(range_regex)];
-                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0 
-                                        && has_range.test(value_spaceless) && (value_spaceless.split('-')<3) ){
-
-                                    let is_ambig = false;
-
-                                    const sep_match_index = Math.floor(matches.length / 2);
-                                    const sep = matches[sep_match_index][0];
-                                    const sep_index = matches[sep_match_index]['index'];
-                                    
-                                    let TPQ = value_spaceless.slice(0, sep_index);
-                                    let TAQ = value_spaceless.slice(sep_index + sep.length);
-
-                                    if(TPQ.length >= 4 && TAQ.length >= 4 && has_range.test(sep)){ // quick conversion to range needs same length dates, and at least full years
-
-                                        try {
-                                            
-                                            let t_TPQ = TDate.parse(TPQ);
-                                            TPQ = t_TPQ.toString('yyyy-MM-dd');
-                                        } catch(e) {
-                                            if(e.indexOf('ambiguous') > 0){
-                                                is_ambig = true;
-                                            }
-                                        }
-
-                                        try {
-                                            
-                                            let t_TAQ = TDate.parse(TAQ);
-                                            TAQ = t_TAQ.toString('yyyy-MM-dd');
-                                        } catch(e) {
-                                            if(e.indexOf('ambiguous') >= 0){
-                                                is_ambig = true;
-                                            }
-                                        }
-
-                                        if(is_ambig){
-                                            ambig_dates.push({dtyid: dtyID, org_value: values[k], value: {'TPQ': TPQ, 'TAQ': TAQ}, index: k, type: 'range'});
-                                            continue;
-                                        }
-
-                                        if(new Date(TPQ).getTime() >= new Date(TAQ).getTime()){
-                                            let temp = TPQ;
-                                            TPQ = TAQ;
-                                            TAQ = temp;
-                                        }                                
-
-                                        let temporal = new Temporal();
-                                        temporal.setType('p');
-                                        temporal.addObjForString("TPQ", TPQ); // Earliest value
-                                        temporal.addObjForString("TAQ", TAQ); // Latest value
-                                        temporal.addObjForString("COM", values[k]); // Insert original value as comment
-
-                                        let results = Temporal.checkValidity(temporal);
-                                        if(results[0]){ // is valid
-                                            values[k] = temporal.toString();
-                                            updated_values = true;
-                                        } // else, not handled
-
-                                        continue;
-                                    }
-                                }
-
-                                // Named month
-                                matches = [...values[k].matchAll(has_named_month)];
-                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length == 1){
-
-                                    let month = matches[0][0];
-                                    let month_index = matches[0]['index'];
-                                    let date_val = values[k].slice(0, month_index) + ' ' + month + ' ' + values[k].slice(month_index+month.length);
-
-                                    try {
-                                        date_val = TDate.parse(date_val).toString('yyyy-MM-dd');
-
-                                        if(date_val.length == 4){ // unknown
-                                            continue;
-                                        }
-
-                                        values[k] = date_val;
-                                        updated_values = true;
-                                    } catch(e) {
-                                        if(e.indexOf('ambiguous') > 0){
-                                            ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'simple'});
-                                            continue;
-                                        }
-                                    }
-                                }
-
-                                // Date + time value - replace '-' between date and time with ' T '
-                                matches = [...values[k].matchAll(/-\s?\d{1,2}:/g)];
-                                if(matches.length == 1){
-
-                                    let new_value = matches[0][0];
-                                    new_value = 'T' + new_value.substring(1);
-                                    values[k] = values[k].replace(matches[0][0], new_value);
-
-                                    updated_values = true;
+                            } catch(e) {
+                                if(e.indexOf('ambiguous') >= 0){
+                                    ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: ttype});
                                     continue;
-                                }
-
-                                // Check for simple ambiguity or carbon year
-                                let ttype = 'simple';
-                                try {
-
-                                    let value = values[k];
-                                    ttype = value.slice(-2).toLowerCase() == 'bp' ? 'carbon' : ttype;
-                                    value = ttype == 'carbon' ? value.slice(0, -2) : value;
-
-                                    let tDate = TDate.parse(value);
-                                    let date_val = tDate.toString('yyyy-MM-dd');
-                                    let format = tDate.getDateFormat();
-
-                                    if(ttype == 'carbon'){
-
-                                        if(date_val.length == 4 && value.length <= 4){
-
-                                            let t_date = new Temporal();
-                                            date_val = TDate.parse(date_val);
-
-                                            date_val = date_val.toString('yyyy-MM-dd');
-
-                                            t_date.setType('c');
-                                            t_date.addObjForString('BPD', date_val);
-
-                                            values[k] = t_date.toString(); // toJSON()
-                                            updated_values = true;
-                                        }
-                                    }else if((date_val.length == 4 && values[k].length <= 4) || date_val.length == values[k].length){
-
-                                        if(format == 'dmy' && tDate.getDay() < 13 && tDate.getMonth() < 13){ // only uses 'mdy' when first number has to be month
-                                            throw 'ambiguous date';
-                                        }
-
-                                        continue;
-                                    }
-                                } catch(e) {
-                                    if(e.indexOf('ambiguous') >= 0){
-                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: ttype});
-                                        continue;
-                                    }
-                                }
-                            }else if(entry_mask){
-
-                                let output = $Db.rst_RunEntryMask(entry_mask, values[k]); // don't update value here, this is handled in recordModify::updateMaskFields
-                                if(output.indexOf(values[k]) === -1){
-                                    if(!Object.hasOwn(invalid_entries, dtyID)){
-                                        invalid_entries[dtyID] = [];
-                                    }
-                                    invalid_entries[dtyID].push({value: values[k], index: k, error: output});
                                 }
                             }
-                        }
+                        }else if(entry_mask){
 
-                        // Update values
-                        if(updated_values){
-                            fields[dtyID] = values; // update field value
-
-                            let $ele = that._editing.getFieldByName(dtyID);
-                            if($ele && $ele.length > 0) $ele.editing_input('setValue', values); // update field element editing_inputs
+                            let output = $Db.rst_RunEntryMask(entry_mask, values[k]); // don't update value here, this is handled in recordModify::updateMaskFields
+                            if(output.indexOf(values[k]) === -1){
+                                if(!Object.hasOwn(invalid_entries, dtyID)){
+                                    invalid_entries[dtyID] = [];
+                                }
+                                invalid_entries[dtyID].push({value: values[k], index: k, error: output});
+                            }
                         }
                     }
-                }//for verify max size
-                
-                if(fields != null && !hasDtlField){
-                    window.hWin.HEURIST4.msg.showMsgFlash("There are no details to save", 1500);
-                    return;
-                }else if(fields != null && !hasValue){
-                    window.hWin.HEURIST4.msg.showMsgFlash("Please enter a value into any field to save the record", 1500);
-                    return;
-                }else if(fields != null && hasScriptTag){
-                    window.hWin.HEURIST4.msg.showMsgFlash("Some fields have &lt;sctipt&gt; tag. It is not allowed in database", 1500);
-                    return;
-                }else if(fields != null && ambig_dates.length > 0){
-                    that._handleAmbiguousDates(ambig_dates);
-                    return;
-                }else if(fields != null && Object.keys(invalid_entries).length > 0){
-                    that._handleInvalidEntry(invalid_entries);
-                    return;
-                }
-                
-                //show warning for disabled javascript
-                if(that._showCustomJsWarningOnce &&
-                    !window.hWin.HAPI4.sysinfo['custom_js_allowed'] && hasCustomJsOrCss)
-                {
-                    that._showCustomJsWarningOnce = false;
-                    window.hWin.HEURIST4.msg.showMsg(
-'<h4>Website programming blocked</h4>'
-+'<p>Heurist blocks user-supplied Javascript by default (and strips out most user-defined CSS other than simple font changes) for security reasons.</p>'
-+'<p>In order to have your Javascript (and CSS) recognised, please ask your server administrator to authorise this for your database by adding it to js_in_database_authorised.txt</p>');
-                }
-                
-                
-                //assign workflow stage field 2-9453
-                if(fields!=null && this._swf_rules.length>0){
-                    let swf_mode = this.element.find('.sel_workflow_stages').val();
-                    if(swf_mode=='on' || (swf_mode=='new' && this._isInsert)){
-                        
-                        this._showSwfPopup(fields, afterAction);
-                        return;
+
+                    // Update values
+                    if(updated_values){
+                        fields[dtyID] = values; // update field value
+
+                        let $ele = that._editing.getFieldByName(dtyID);
+                        if($ele && $ele.length > 0) $ele.editing_input('setValue', values); // update field element editing_inputs
                     }
-                } //END assign workflow stage field 2-9453
-                
-            }
+                }
+            }//for verify max size
             
-            if(fields==null) return; //validation failed
-
-            //assign new set of tags to record
-            if(Array.isArray(that._updated_tags_selection)){
-                let request2 = {};
-                request2['a']          = 'batch'; //batch action
-                request2['entity']     = 'usrTags';
-                request2['tagIDs']  = that._updated_tags_selection;
-                request2['recIDs']  = that._currentEditID;
-                request2['mode']    = 'replace';
-                that._updated_tags_selection = null;
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request2, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            that._saveEditAndClose( fields, afterAction );
-                        }
-                    });
+            if(fields != null && !hasDtlField){
+                window.hWin.HEURIST4.msg.showMsgFlash("There are no details to save", 1500);
+                return;
+            }else if(fields != null && !hasValue){
+                window.hWin.HEURIST4.msg.showMsgFlash("Please enter a value into any field to save the record", 1500);
+                return;
+            }else if(fields != null && hasScriptTag){
+                window.hWin.HEURIST4.msg.showMsgFlash("Some fields have &lt;sctipt&gt; tag. It is not allowed in database", 1500);
+                return;
+            }else if(fields != null && ambig_dates.length > 0){
+                that._handleAmbiguousDates(ambig_dates);
+                return;
+            }else if(fields != null && Object.keys(invalid_entries).length > 0){
+                that._handleInvalidEntry(invalid_entries);
                 return;
             }
             
-            let rec_URL = fields['rec_URL'],
-                rec_OwnerUGrpID = fields['rec_OwnerUGrpID'],
-                rec_NonOwnerVisibility = fields['rec_NonOwnerVisibility'],
-                rec_NonOwnerVisibilityGroups = fields['rec_NonOwnerVisibilityGroups'],
-                rec_ScratchPad = fields['rec_ScratchPad'];
-            // Unset header fields to avoid accidental overriding                
-            for (let key in fields){
-                if( (!(parseInt(key)>0)) && (key.indexOf('rec_')==0) )
-                {
-                    fields[key] = null;
-                    delete fields[key];
+            //show warning for disabled javascript
+            if(that._showCustomJsWarningOnce &&
+                !window.hWin.HAPI4.sysinfo['custom_js_allowed'] && hasCustomJsOrCss)
+            {
+                that._showCustomJsWarningOnce = false;
+                window.hWin.HEURIST4.msg.showMsg(
+'<h4>Website programming blocked</h4>'
++'<p>Heurist blocks user-supplied Javascript by default (and strips out most user-defined CSS other than simple font changes) for security reasons.</p>'
++'<p>In order to have your Javascript (and CSS) recognised, please ask your server administrator to authorise this for your database by adding it to js_in_database_authorised.txt</p>');
+            }
+            
+            
+            //assign workflow stage field 2-9453
+            if(fields!=null && this._swf_rules.length>0){
+                let swf_mode = this.element.find('.sel_workflow_stages').val();
+                if(swf_mode=='on' || (swf_mode=='new' && this._isInsert)){
+                    
+                    this._showSwfPopup(fields, afterAction);
+                    return;
                 }
-            }
+            } //END assign workflow stage field 2-9453
             
-            //
-            // get individual visibility setting per field 
-            // See rst_NonOwnerVisibility=pending and dtl_HideFromPublic=1
-            //
-            let fields_visibility = this._editing.getFieldsVisibility(); 
-
-            let request = {ID: this._currentEditID, 
-                           RecTypeID: this._currentEditRecTypeID, 
-                           URL: rec_URL,
-                           OwnerUGrpID: rec_OwnerUGrpID,
-                           NonOwnerVisibility: rec_NonOwnerVisibility,
-                           NonOwnerVisibilityGroups: rec_NonOwnerVisibilityGroups,
-                           ScratchPad: rec_ScratchPad,
-                           details: fields, //it will be encoded in encodeRequest
-                           details_visibility: fields_visibility}; //{dty_ID:[1,1,0,0,1],.....  } 
-
-            if(fields['no_validation']){
-                request['no_validation'] = 1;
-            }
-       
-            //keep current overflow position
-            this._keepYPos = this.editForm.scrollTop();
+        }
         
-            that.onEditFormChange(true); //forcefully hide all "save" buttons
+        if(fields==null) return; //validation failed
+
+        //assign new set of tags to record
+        if(Array.isArray(that._updated_tags_selection)){
+            let request2 = {};
+            request2['a']          = 'batch'; //batch action
+            request2['entity']     = 'usrTags';
+            request2['tagIDs']  = that._updated_tags_selection;
+            request2['recIDs']  = that._currentEditID;
+            request2['mode']    = 'replace';
+            that._updated_tags_selection = null;
             
-            let dlged = that._getEditDialog();
-            if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
-    
-            window.hWin.HAPI4.RecordMgr.saveRecord(request, 
+            window.hWin.HAPI4.EntityMgr.doRequest(request2, 
                 function(response){
-                    
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-                    
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
-                        that._editing.setModified(false); //reset modified flag after save
-                        
-                        const rec_Title = response.rec_Title;
-                        
-                        let saved_record = that._currentEditRecordset.getFirstRecord();
-                        that._currentEditRecordset.setFld(saved_record, 'rec_Title', rec_Title);
-                        const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
-                        if(DT_NAME>0 && fields && fields[DT_NAME]){
-                            that._currentEditRecordset.setFld(saved_record, DT_NAME, fields[DT_NAME]);    
-                        }
-
-                        //
-                        if(that.options.selectOnSave==true){
-                            that._additionWasPerformed = true;
-                        }
-
-                        window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been saved'));
-
-                        that._afterSaveHandler(response, afterAction);
-                        
-                    }else{
-                        that.onEditFormChange(); //restore save buttons visibility
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        that._saveEditAndClose( fields, afterAction );
                     }
+                });
+            return;
+        }
+        
+        let rec_URL = fields['rec_URL'],
+            rec_OwnerUGrpID = fields['rec_OwnerUGrpID'],
+            rec_NonOwnerVisibility = fields['rec_NonOwnerVisibility'],
+            rec_NonOwnerVisibilityGroups = fields['rec_NonOwnerVisibilityGroups'],
+            rec_ScratchPad = fields['rec_ScratchPad'];
+        // Unset header fields to avoid accidental overriding                
+        for (let key in fields){
+            if( (!(parseInt(key)>0)) && (key.indexOf('rec_')==0) )
+            {
+                fields[key] = null;
+                delete fields[key];
+            }
+        }
+        
+        //
+        // get individual visibility setting per field 
+        // See rst_NonOwnerVisibility=pending and dtl_HideFromPublic=1
+        //
+        let fields_visibility = this._editing.getFieldsVisibility(); 
+
+        let request = {ID: this._currentEditID, 
+                        RecTypeID: this._currentEditRecTypeID, 
+                        URL: rec_URL,
+                        OwnerUGrpID: rec_OwnerUGrpID,
+                        NonOwnerVisibility: rec_NonOwnerVisibility,
+                        NonOwnerVisibilityGroups: rec_NonOwnerVisibilityGroups,
+                        ScratchPad: rec_ScratchPad,
+                        details: fields, //it will be encoded in encodeRequest
+                        details_visibility: fields_visibility}; //{dty_ID:[1,1,0,0,1],.....  } 
+
+        if(fields['no_validation']){
+            request['no_validation'] = 1;
+        }
+    
+        //keep current overflow position
+        this._keepYPos = this.editForm.scrollTop();
+    
+        that.onEditFormChange(true); //forcefully hide all "save" buttons
+        
+        let dlged = that._getEditDialog();
+        if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
+
+        window.hWin.HAPI4.RecordMgr.saveRecord(request, 
+            function(response){
+                
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    that._editing.setModified(false); //reset modified flag after save
+                    
+                    const rec_Title = response.rec_Title;
+                    
+                    let saved_record = that._currentEditRecordset.getFirstRecord();
+                    that._currentEditRecordset.setFld(saved_record, 'rec_Title', rec_Title);
+                    const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+                    if(DT_NAME>0 && fields && fields[DT_NAME]){
+                        that._currentEditRecordset.setFld(saved_record, DT_NAME, fields[DT_NAME]);    
+                    }
+
+                    //
+                    if(that.options.selectOnSave==true){
+                        that._additionWasPerformed = true;
+                    }
+
+                    window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been saved'));
+
+                    that._afterSaveHandler(response, afterAction);
+                    
+                }else{
+                    that.onEditFormChange(); //restore save buttons visibility
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
-            );
+            }
+        );
     },
 
     _afterSaveHandler: function(response, afterAction){
@@ -7034,7 +7039,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
         }
 
-        this.editForm.animate({scrollTop: $ele.offset().top}, 1000); // scrollIntoView()
+        this.editForm.animate({scrollTop: $ele.position().top}, 1000);
 
         if(!isSeparator){
             $ele.editing_input('focus');

@@ -532,7 +532,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 if(data.node.key>0){
                     that.selectedRecords([data.node.key]);
                     if(!that._lockDefaultEdit){
-                    
+
                         if(that.options.external_preview){
                             that.options.external_preview.manageRecords('saveQuickWithoutValidation',
                                 function(){
@@ -1762,21 +1762,9 @@ console.log('onEditFormChange @todo check buttons!!!');
                         ele.tabs( 'option', 'active', tabIndex);
                     }
                 }
-                
+
                 //adjust preview editor position
-                let ele_ed = this.previewEditor.find('.editForm'); //editFormDialog
-                setTimeout(function(){
-                    ele_ed.scrollTop(0);
-                    let top = $(ed_cont).position().top - 60;
-                    
-                    let ele = that.editForm.parents('.ui-tabs');
-                    if(ele.length>0){
-                        top = top + $(ele).position().top;
-                    }
-                    ele_ed.scrollTop(top);
-                    
-                },200); //without timeout preview form scrolls to kept position
-                
+                this.previewEditor.manageRecords('focusField', this._currentEditID);
             }
             
             let v = that._editing.getValue('rst_CreateChildIfRecPtr');
@@ -1889,6 +1877,7 @@ console.log('onEditFormChange @todo check buttons!!!');
         // Always show help text
         this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3').show();
 
+        let top_div = $('<div style="width:100%;min-height:26px">').prependTo(this.editForm);
         let bottom_div = $('<div style="width:100%;min-height:26px">').appendTo(this.editForm);
         let $height_header = null;
         let $width_header = null;
@@ -2066,6 +2055,7 @@ console.log('onEditFormChange @todo check buttons!!!');
                 .css({'font-weight':'bold','float':'right',display:'none','margin-top':'2px','margin-right':'15px'})
                 .addClass('ui-button-action btnRecSaveAndClose_rts')
                 .appendTo(bottom_div);
+        btnSave.clone().appendTo(top_div);
             
         this._on( btnCancel,{click: function() { 
             that.previewEditor.find('div[data-dtid='+that._currentEditID+']')
@@ -2092,7 +2082,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             }
 		}});
                 
-		this._on( btnSave, {click: function() { 
+		this._on( this.editForm.find('.btnRecSaveAndClose_rts'), {click: function() { 
             that.previewEditor.find('div[data-dtid='+that._currentEditID+']')
                     .find('div.header').removeClass('ui-heurist-design-fade');
 
