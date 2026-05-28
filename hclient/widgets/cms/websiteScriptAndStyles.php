@@ -89,6 +89,15 @@ use hserv\utilities\USystem;
     var record_view_target = '<?php echo $record_view_target!=null?$record_view_target:'';?>';
 </script>
 
+
+<?php
+    if(file_exists(__DIR__.'/../../../hclient/bundles/heurist-core.bundle.min.js')){
+?>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/bundles/heurist-core.bundle.min.js"></script>
+<?php
+    }else{
+?>
+
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/baseAction.js"></script>
@@ -117,7 +126,9 @@ use hserv\utilities\USystem;
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/progressReport.js"></script>
-
+<?php
+    }
+?>
 
 <!-- All Heuritst widgets can be loaded dynamically - remove this remarks for debug only
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svsEdit.js"></script>
