@@ -86,6 +86,7 @@ if($useCache && !$forceCache){
     }
 }
 
+require_once dirname(__FILE__).'/RecordMediaRenderer.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/relationshipData.php';
@@ -262,6 +263,7 @@ if(!$system->hasAccess()){
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>external/jquery.fancybox/jquery.fancybox.css" />
 
         <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/widgets/viewers/mediaViewer.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>viewers/record/recordMediaViewer.js"></script>
 
         <script type="text/javascript">
 
@@ -277,36 +279,11 @@ if(!$system->hasAccess()){
                 window.hWin.HR = (res) => res; // to allow dialog creation
             }
 
-            var rec_Files = [];
-            var rec_Files_IIIF_and_3D = [];
-            var rec_Files_IIIF_and_3D_linked = [];
             var baseURL = '<?php echo HEURIST_BASE_URL;?>';
             var database = '<?php echo $system->dbname();?>';
             var hint_popup = null, $map_frame = null;
             var connectedRecsCount = 0;
             var language = '<?php echo $lang; ?>';
-
-            function zoomInOut(obj,thumb,url) {
-                var thumb = thumb;
-                var url = url;
-                var currentImg = obj;
-
-                if (currentImg.parentNode.className != "fullSize"){
-                    $(currentImg).hide();
-                    currentImg.src = url;
-                    currentImg.onload=function(){
-                        $(currentImg).fadeIn(500);
-                    }
-                    currentImg.parentNode.className = "fullSize";
-                    currentImg.parentNode.parentNode.style.width = '100%';
-
-                }else{
-                    currentImg.src = thumb;
-                    currentImg.parentNode.className = "thumb_image";
-                    currentImg.parentNode.parentNode.style.width = 'auto';
-                    //currentImg.parentNode.parentNode.style.float = 'right';
-                }
-            }
 
             //
             //
@@ -784,283 +761,6 @@ if(!$system->hasAccess()){
                 }
             }//end moveRelatedDetails
 
-            //
-            // Init thumbnails and assign mediaViewer
-            //
-            function showMediaViewer(){
-                //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif and 3dhop
-                if(rec_Files_IIIF_and_3D.length>0){
-
-                    if(window.hWin?.HAPI4){
-                        $('.thumbnail2.main-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D,
-                                showLink:true, database:database, baseURL:baseURL});
-                    }else{
-                        $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
-                            $('.thumbnail2.main-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D,
-                                showLink:true, database:database, baseURL:baseURL});
-                        });
-                    }
-                }
-                if(rec_Files_IIIF_and_3D_linked.length>0){
-
-                    if(window.hWin?.HAPI4){
-                        $('.thumbnail2.linked-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D_linked,
-                                showLink:true, database:database, baseURL:baseURL});
-                    }else{
-                        $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
-                            $('.thumbnail2.linked-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D_linked,
-                                showLink:true, database:database, baseURL:baseURL});
-                        });
-                    }
-                }
-            }
-
-            //
-            // Init fancybox for "full screen" links
-            //
-            function initMediaViewer(){
-
-                if(!$('.thumbnail').mediaViewer('instance')){
-                    $('.thumbnail').mediaViewer({selector:'.mediaViewer_link',
-                        rec_Files:rec_Files, showLink:false, database:database, baseURL:baseURL });
-
-                    //setTimeout(function(){$('.thumbnail').mediaViewer('show');},1000);
-                }
-                //init open in mirador links
-                function __openMiradorViewer(event){
-
-                    //verify annotation record type
-                    let evt = event;
-
-                    if(evt.already_checked!==true && window.hWin.HAPI4?.has_access()){
-                        window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
-                            'In order to add Annotation to image you have to import "Annotation" record type',
-                            function(){
-                                evt.already_checked = true;
-                                __openMiradorViewer(evt);
-                            });
-                        return;
-                    }
-
-                    var ele = $(event.target)
-
-                    if(!ele.attr('data-id')){
-                        ele = ele.parents('[data-id]');
-                    }
-                    var obf_recID = ele.attr('data-id');
-
-                    var url =  baseURL
-                    + 'hclient/widgets/viewers/miradorViewer.php?db='
-                    +  database
-                    + '&recID='<?php echo $bib['rec_ID'];?>
-                    + '&iiif_image=' + obf_recID;
-
-                    if(false && window.hWin && window.hWin.HEURIST4){
-                        //borderless:true,
-                        window.hWin.HEURIST4.msg.showDialog(url,
-                            {dialogid:'mirador-viewer',
-                                //resizable:false, draggable: false,
-                                //maximize:true,
-                                default_palette_class: 'ui-heurist-explore',
-                                width:'90%',height:'95%',
-                                allowfullscreen:true,'padding-content':'0px'});
-
-                        $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
-
-                        $dlg.parent().css('top','50px');
-                    }else{
-                        window.open(url, '_blank');
-                    }
-
-                    //data-id
-                };
-
-                function __openOpenSeadragonViewer(event){
-
-                    let ele = $(event.target);
-                    if(!ele.attr('data-id')){
-                        ele = ele.parents('[data-id]');
-                    }
-                    let ulf_recID = ele.attr('data-id');
-
-                    let url = `${baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${database}&recID=${ulf_recID}&lang=${language}`;
-
-                    window.open(url, '_blank');
-                };
-
-                $('.miradorViewer_link').on('click', __openMiradorViewer);
-                $('.openSeadragonViewer_link').on('click', __openOpenSeadragonViewer);
-
-                $('.popupMedia_link').on('click', (e) => {
-
-                    let $ele = $(e.target);
-
-                    let file_nonce = $ele.attr('data-id');
-                    let file = rec_Files.find((file) => file.id === file_nonce);
-                    let file_url = `${baseURL}?db=${database}&file=${file_nonce}`;
-
-                    let file_desc = $ele.closest('.download_link').find('span.media-desc').attr('title');
-                    file_desc = window.hWin.HEURIST4.util.isempty(file_desc) ? '' : file_desc;
-                    file_desc = file_desc.replace('"', '&quote;').replace("'", '&apos;');
-
-                    let msg = `<img src='${file_url}' alt='${file_desc}' style='height:99%;width:99%;object-fit:contain' />`;
-                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                        msg, null, {title: file.filename},
-                        {default_palette_class: 'ui-heurist-explore', resizable: true, width: 'auto', height: 'auto'}
-                    );
-                    $dlg.css('max-width', 'none');
-                });
-            }
-
-            /**
-             * Show/Hide media and linked media
-             *
-             * @param {boolean} [show_all=false] Force the display of all images
-             */
-            function displayImages(recID, show_all = false){
-
-                // 0 - show all (default), 1 - hide linked, 2 - hide all
-                let $parentContainer = $(`div[data-recid="${recID}"]`);
-                let hide_images = show_all || $parentContainer.find('.show-linked-media').length==0 || $parentContainer.find('.show-linked-media').is(':checked') ? 0 : 1;
-
-                $parentContainer.find('.media-content').show();
-                if(hide_images == 1){ // hide linked media
-                    let selector = $parentContainer.find('.media_container:not(.linked-media)').length == 0 ? '.linked-media:not(:first)' : '.linked-media';
-                    $parentContainer.find(selector).hide();
-                }else{
-                    $parentContainer.find('.linked-media').show();
-                }
-
-                sessionStorage.setItem('Heurist_RecView_LinkedMedia', hide_images);
-
-                if(show_all){ // set checkbox to checked
-                    $parentContainer.find('.show-linked-media').attr('checked', true);
-                }
-            }
-
-            function mediaTooltips(){
-
-                $('span.media-desc, span.media-right').on('mouseenter focusin', (event) => {
-
-                    let $ele = $(event.target);
-                    $ele.tooltip({
-                        content: function(){
-                            return $(this).attr('title');
-                        },
-                        open: function(event, ui){
-
-                            ui.tooltip.css({
-                                background: '#D4DBEA',
-                                "font-size": '1em',
-                                padding: '5px',
-                                width: '85%',
-                                cursor: 'default'
-                            });
-
-                            let $ele = $(this);
-                            let $tooltip = ui.tooltip;
-
-                            $tooltip.off('mouseenter mouseleave');
-
-                            $tooltip.on('mouseleave', function(){
-                                $ele.attr('data-tooltip', 0);
-                                setTimeout(function(){
-                                    if($ele.attr('data-tooltip') != 1 && $ele.tooltip('instance') !== undefined){
-                                        $ele.tooltip('close');
-                                    }
-                                }, 1000);
-                            }).on('mouseenter', function(){
-                                $ele.attr('data-tooltip', 1);
-                            });
-                        },
-                        position: {
-                            my: "left top+5",
-                            at: "left bottom",
-                            collision: "flipfit"
-                        }
-                    });
-                    $ele.tooltip('open');
-                }).on('mouseleave focusout', function(event){
-
-                    window.hWin.HEURIST4.util.stopEvent(event);
-                    event.stopImmediatePropagation();
-
-                    let $ele = $(event.target);
-
-                    let int_id = setInterval(function(){
-                        if($ele.attr('data-tooltip') != 1 && $ele.tooltip('instance') !== undefined){
-                            $ele.tooltip('destroy');
-                        }
-                        clearInterval(int_id);
-                    }, 1000);
-                });
-
-            }
-
-            // Toggle the visibility of hidden fields
-            function toggleHiddenFields(){
-
-                let show_hidden_fields = $('.toggleHidden').is(':checked') ? 1 : 0;
-
-                if(show_hidden_fields == 0){
-                    $('.hiddenField').hide();
-                }else{
-                    $('.hiddenField').show();
-                }
-
-                if($('.hiddenField').length == 0){ // remove hidden field toggler
-                    $('.toggleHidden').parents('.detailRow').remove();
-                }
-
-                let $group_container = $('div.div_public_data');
-
-                $.each($group_container.find('fieldset'), function(idx, fieldset){
-
-                    fieldset = $(fieldset);
-                    let $header = $group_container.find(`h4[data-order="${fieldset.attr('id')}"], h5[data-order="${fieldset.attr('id')}"]`);
-                    fieldset.show();
-                    $header.show();
-
-                    let $vis_rows = fieldset.find('div.detailRow').filter((idx, div) => { return $(div).css('display') != 'none';});
-                    if($vis_rows.length == 0){
-                        fieldset.hide();
-                        $header.hide();
-                    }
-
-                    let parent_id = fieldset.attr('data_parent');
-                    let $parent_ele = parent_id > 0 ? [] : $group_container.find(`h4[data-order="${parent_id}"]`);
-                    if($parent_ele.length > 0){
-                        if($parent_ele.find('h4, h5').is(':visible') || $parent_ele.is('h4:visible') || $parent_ele.is('h5:visible')){
-                            $group_container.find(`h4[data-order="${parent_id}"]`).show();
-                        }else{
-                            $group_container.find(`h4[data-order="${parent_id}"]`).hide();
-                        }
-                    }
-                });
-
-                window.hWin?.HAPI4?.save_pref('recordData_HiddenFields', show_hidden_fields);
-            }
-            function onWindowResize(){
-
-                const doc_width = $(document).width();
-                let $fld_names = $('.div_public_data .detailType');
-
-                if($fld_names.length == 0){
-                    return;
-                }
-
-                $fld_names.removeClass('row10 row15 row20');
-
-                if(doc_width >= 1400){
-                    $fld_names.addClass('row10');
-                }else if(doc_width >= 1000){
-                    $fld_names.addClass('row15');
-                }else if(doc_width >= 750){
-                    $fld_names.addClass('row20');
-                }
-            }
-
-
             function recviewer_showMap(event, rec_id){
 
                 if(!hint_popup){
@@ -1081,52 +781,6 @@ if(!$system->hasAccess()){
                 $map_frame.attr('src', URL);
             }
 
-            function initImageRefreshLink(){
-
-                let refreshing = false;
-
-                $('.refreshThumb_link').on('click', (event) => {
-
-                    if(refreshing){
-                        window.hWin.HEURIST4.msg.showMsgErr('A thumbnail is already being refreshed, please wait for it to complete before refreshing another thumbnail.');
-                        return;
-                    }
-                    refreshing = true;
-
-                    let ulf_ObfuscatedFileID = $(event.target).attr('data-id');
-                    let $thumb = $(event.target).parent().next().find('img');
-
-                    if(window.hWin.HEURIST4.util.isempty(ulf_ObfuscatedFileID) || $thumb.length === 0){
-                        return;
-                    }
-
-                    let refreshURL = `${baseURL}hserv/controller/fileDownload.php`;
-                    let request = {
-                        db: database,
-                        thumb: ulf_ObfuscatedFileID,
-                        refresh: 1
-                    };
-
-                    window.hWin.HEURIST4.msg.showMsgFlash('Refreshing thumbnail...', 2500);
-
-                    window.hWin.HEURIST4.util.sendRequest(refreshURL, request, null, (response) => {
-
-                        refreshing = false;
-
-                        if(response.message.startsWith('Error_')){
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                            return;
-                        }
-
-                        window.hWin.HEURIST4.msg.showMsgFlash('Thumbnail has been refreshed', 3000);
-
-                        let url = `${baseURL}?db=${database}&offer_download=1&thumb=${ulf_ObfuscatedFileID}&${window.hWin.HEURIST4.util.random()}`;
-                        $thumb.attr('src', url);
-
-                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, {type: 'ulf'}); // refresh thumbnails
-                    });
-                });
-            }
             
             function openReportSelector(){
             
@@ -1149,18 +803,8 @@ if(!$system->hasAccess()){
             $(document).ready(function() {
                 showHidePrivateInfo(null);
 
-                initMediaViewer();
-
-                showMediaViewer();//init thumbs for iiif
-
-                initImageRefreshLink();
-
-                // Set default setting for show linked media, stored within session
-                let def_ImageSettings = sessionStorage.getItem('Heurist_RecView_LinkedMedia');
-                //let param_ImageSetting = window.hWin.HEURIST4.util.getUrlParameter('hideImages', location.search);
-                def_ImageSettings = def_ImageSettings != 0 && def_ImageSettings != 1 ? 1 : def_ImageSettings;
-                if($('.show-linked-media').length > 0){
-                    $('.show-linked-media').prop('checked', def_ImageSettings == 0).trigger('change');
+                if(window.HeuristRecordMedia){
+                    window.HeuristRecordMedia.init({baseURL: baseURL, database: database, language: language});
                 }
 
                 mediaTooltips();
@@ -2343,213 +1987,17 @@ function print_public_details($bib) {
 
     print '<div class="div_public_data">';
 
-    //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif
-    if(!($is_map_popup || $without_header)){
-        print '<script>try{';
-        foreach ($thumbs as $thumb) {
-            if(strpos($thumb['orig_name'], ULF_IIIF)===0 || $thumb['mode_3d_viewer']!=''){
-
-                $to_array = 'rec_Files_IIIF_and_3D' . ($thumb['linked'] ? '_linked' : '');
-                print $to_array.'.push({rec_ID:'.$recordID
-                                            .', id:"'.htmlspecialchars($thumb['nonce'])
-                                            .'",mimeType:"'.htmlspecialchars($thumb['mimeType'])
-                                            .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
-                                            .'",filename:"'.htmlspecialchars($thumb['orig_name'])
-                                            .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-            }else{
-                print 'rec_Files.push({rec_ID:'.$recordID.', id:"'.htmlspecialchars($thumb['nonce']).'",mimeType:"'.htmlspecialchars($thumb['mimeType']).'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-            }
-        }
-        print '}catch(e){console.error("error fill rec_Files for record# '.$recordID.'")}</script>';
-    }           
-    print '<div class="thumbnail2 main-media" style="text-align:center"></div>';
-
-    $hasAudioVideo = '';
-    if($is_production){
-        print '<div class="thumbnail production">';
-    }else{
-        print '<div class="thumbnail">';
-    }
-        $has_thumbs = (!empty($thumbs));
-
-    $several_media = count($thumbs);
-    $added_linked_media_cont = false;
-
-    if($hide_images != 2){ // use/hide all thumbnails
-        foreach ($thumbs as $k => $thumb) {
-
-            if(strpos($thumb['orig_name'],ULF_IIIF)===0 || $thumb['mode_3d_viewer'] != '' ){
-
-                if($thumb['linked'] && !$added_linked_media_cont){
-                    print '<div class="thumbnail2 linked-media" style="text-align:center"></div>';
-                    $added_linked_media_cont = true;
-                }
-
-                continue;
-            }
-
-            $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);
-
-            $isImageOrPdf = (strpos($thumb['mimeType'],DIR_IMAGE)===0 || $thumb['mimeType']=='application/pdf');
-
-            if($thumb['player'] && !$is_map_popup && $isAudioVideo){
-                print '<div class="fullSize media-content" style="text-align:left;'
-                    .($is_production?'margin-left:100px':'')
-                    .($k>0?CSS_HIDDEN:'').'">';
-            }else{
-                print '<div class="thumb_image media-content media_container'. ($thumb['linked'] === true ? ' linked-media' : '') .'"  style="'.($isImageOrPdf?'':'cursor:default;')
-                    .($k>0?CSS_HIDDEN:'').'">';
-            }
-
-            $media_control_chkbx = '';
-            if($k == 0 && !$is_production && !$is_map_popup && $several_media>1){
-                $checked_status = $hide_images == 0 ? ' checked="checked"' : '';
-                $media_control_chkbx = " <label class='media-control'><input type='checkbox' class='show-linked-media' onchange='displayImages({$recordID}, false);' $checked_status> show all linked media</label>";
-
-                if($thumb['linked'] === true){
-                    print "<h5 style='margin-block:1.5em'>Linked Media Only: $media_control_chkbx</h5>";
-                    $media_control_chkbx = '';
-                }
-            }
-
-            $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0)
-                        ?$thumb['external_url']            //direct for https
-                        :(HEURIST_BASE_URL.'?db='.$system->dbname().'&file='.$thumb['nonce']);
-            $download_url = HEURIST_BASE_URL.'?db='.$system->dbname().'&debug=3&download=1&file='.$thumb['nonce'];
-
-            if(!$is_map_popup){
-                print '<div class="download_link">';
-
-                if($k==0 && $several_media>1){
-                    print '<a href="#" onclick="displayImages('. $recordID .', true);">'
-                    .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a>';
-                }
-                if(!empty($thumbs) && !$isAudioVideo){
-                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="mediaViewer_link">'
-                    .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a>';
-                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="popupMedia_link">'
-                    .'<span class="ui-icon ui-icon-popup" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;view in popup</a>';
-                }
-
-                if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
-                    ( strpos($thumb['mimeType'],'youtube')===false &&
-                    strpos($thumb['mimeType'],'vimeo')===false &&
-                    strpos($thumb['mimeType'],'soundcloud')===false)) )
-                {
-                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="miradorViewer_link">'
-                        .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
-                        .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
-                        .'"></span>&nbsp;Mirador</a>';
-                }
-
-                if(strpos($thumb['mimeType'], 'image/') === 0 || $thumb['orig_name'] == ULF_IIIF_IMAGE){
-
-                    print '<a href="#" data-id="'. $thumb['id'] .'" class="openSeadragonViewer_link">'
-                        .'<span class="ui-icon ui-icon-image" style="display: inline-block;"></span>&nbsp;OpenSeadragon</a>';
-                }
-
-                if(@$thumb['external_url']){
-                    print '<a href="' . htmlspecialchars($thumb['external_url'])
-                                    . '" class="external-link" target=_blank>open in new tab'
-                                    . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
-
-                    if($system->hasAccess()){
-                        print '<a href="#" data-id="'. htmlspecialchars($thumb['nonce']) .'" class="refreshThumb_link">'
-                            . '<span class="ui-icon ui-icon-refresh" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;refresh thumbnail</a>';
-                    }
-                }else{
-                    print '<a href="' . htmlspecialchars($download_url)
-                                    . '" class="image_tool" target="_surf">'
-                                    . '<span class="ui-icon ui-icon-download" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;'
-                                    . 'download' . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
-                }
-
-                $caption = !empty(@$thumb['caption']) ? linkifyValue($thumb['caption']) : '';
-                $description = !empty(@$thumb['description']) ? linkifyValue($thumb['description']) : '';
-                $rights = !empty(@$thumb['rights']) ? linkifyValue($thumb['rights']) : '';
-                $owner = !empty(@$thumb['owner']) ? linkifyValue($thumb['owner']) : '';
-
-                if(!empty($caption) || !empty($description)){
-
-                    $val = !empty($caption) ? $caption : '';
-                    $val = !empty($description) && !empty($val) ? $val . BR2 . $description : $val;
-                    $val = empty($val) ? $description : $val;
-
-                    print '<span class="media-desc" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                            . 'title="'.addslashes(htmlspecialchars($val)).'">'
-                            . 'description</span>';
-                }
-
-                if(!empty($rights) || !empty($owner)){
-
-                    $val = !empty($rights) ? $rights : '';
-                    $val = !empty($owner) && !empty($val) ? $val . BR2 . $owner : $val;
-                    $val = empty($val) ? $owner : $val;
-
-                    print '<span class="media-right" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                            . 'title="'.addslashes(htmlspecialchars($val)).'">'
-                            . 'rights</span>';
-                }
-
-                if($thumb['player'] && !$without_header){
-                    print '<a id="lnk'.htmlspecialchars($thumb['id'])
-                            .'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
-                            .htmlspecialchars($thumb['id']).', this.parentNode)">show thumbnail</a>';
-                }
-
-                print '</div><!-- CLOSE download_link -->';//CLOSE download_link
-            }
-
-            if($thumb['player'] && !$is_map_popup && $isAudioVideo){
-                print '<div class="fullSize media-content" style="text-align:left;'
-                    .($is_production?'margin-left:100px':'')
-                    .($k>0?CSS_HIDDEN:'').'">';
-            }else{
-                //'. ($thumb['linked'] == true ? ' linked-media' : '') .'
-                print '<div class="thumb_image media-content"  style="min-height:140px;'.($isImageOrPdf?'':'cursor:default;')
-                    .($k>0?CSS_HIDDEN:'').'">';
-            }
-
-            if($thumb['linked'] === true){
-                print "<h5 style='margin-block:0.5em;'>LINKED MEDIA</h5>";
-            }else{
-                print "<h5 style='margin-block:0.5em;'>MEDIA $media_control_chkbx</h5>";
-            }
-
-            if($thumb['player'] && ($noclutter || !$is_map_popup)){
-
-                if($isAudioVideo){
-                    //audio or video is maximized at once
-
-                    print '<div id="player'.htmlspecialchars($thumb['id']).'" style="min-height:100px;min-width:200px;text-align:left;">';
-
-                    print fileGetPlayerTag($system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']);//see recordFile.php
-
-                    //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null);
-                    print DIV_E;
-                }else{
-                    print '<img id="img'.htmlspecialchars($thumb['id']).'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
-                    if($isImageOrPdf && !$without_header){
-                        print ' onClick="window.hWin.HEURIST4.ui.showPlayer(this,this.parentNode,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')"';
-                    }
-                    print '><div id="player'.htmlspecialchars($thumb['id']).'" style="min-height:240px;min-width:320px;display:none;"></div>';
-                }
-            }else{  //for usual image
-                print '<img src="'.htmlspecialchars($thumb['thumb']).'" '
-                    .($is_map_popup || $without_header
-                        ?''
-                        :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
-            }
-            print DIV_E;
-            print '</div><!--CLOSE THUMB SECTION-->';
-            if(!$noclutter && $is_map_popup){
-                print '<br>';
-                break; //in map popup show the only thumbnail
-            }
-
-        }//for
-    }
-    print '</div><!--CLOSE ALL thumbnails-->';
+    $has_thumbs = !empty($thumbs) && $hide_images != 2;
+    print RecordMediaRenderer::render($system, [
+        'recordID' => $recordID,
+        'thumbs' => $thumbs,
+        'hideImages' => $hide_images,
+        'isProduction' => $is_production,
+        'isMapPopup' => $is_map_popup,
+        'withoutHeader' => $without_header,
+        'noclutter' => $noclutter,
+        'language' => $lang
+    ]);
 
 //<div class="div_public_data" style="float:left; echo (($has_thumbs)?'max-width:900px':'')">
 
