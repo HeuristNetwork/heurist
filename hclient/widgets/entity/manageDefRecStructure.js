@@ -1852,6 +1852,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             if(dt_type == 'separator'){
                 edit_ele.hide();
                 this._editing.getFieldByName('rst_NonOwnerVisibility').hide();
+                this._editing.getFieldByName('rst_MayModify').hide();
             }else{
                 let $hr = $('<hr>', {style: 'border-color: black; width: 95%;'});
                 $hr.clone().insertBefore(edit_ele);
@@ -1882,6 +1883,15 @@ console.log('onEditFormChange @todo check buttons!!!');
         let $height_header = null;
         let $width_header = null;
 
+        let $helpText = this._editing.getFieldByName('rst_DisplayHelpText');
+        let $helpCounter = $('<div>', {
+            style: 'padding: 0.2em 0px;',
+            html: `255 characters allowed, <span class="charCount">${$helpText.find('textarea').val().length}</span> used`
+        }).insertAfter($helpText.find('.input-div'));
+        this._on($helpText.find('textarea'), {
+            input: () => $helpCounter.find('.charCount').text($helpText.find('textarea').val().length)
+        });
+
         if(dt_type=='separator'){
             
             let sep_type = this._editing.getValue('rst_DefaultValue'); //take from db
@@ -1909,7 +1919,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             this._editing.getFieldByName('rst_DisplayName').find('.header > label').text(window.HR('Heading:'));
 
             // Change help text label
-            this._editing.getFieldByName('rst_DisplayHelpText').find('.header > label').text(window.HR('Description (optional):'));
+            $helpText.find('.header > label').text(window.HR('Description (optional):'));
 
         }else{
 

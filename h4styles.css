@@ -363,6 +363,7 @@ input.text, select.text {
 .explanation-separator-header,
 .explanation_break-separator-header{
     border-top: none !important;
+    text-transform: none !important;
 }
 .explanation-separator-header,
 .explanation-separator-helper,
