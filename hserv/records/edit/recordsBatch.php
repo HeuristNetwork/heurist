@@ -3447,6 +3447,29 @@ class RecordsBatch
             $mysqli->commit();
         }
         if($keep_autocommit===true) {$mysqli->autocommit(true);}
+        
+        //update titles for both source and target records
+        foreach ([0, 1] as $idx) {
+            $titleMask = null;
+            foreach($pairs as $row){
+                $recID = intval($row[$idx]);
+                if ($recID <= 0) {
+                    continue;
+                }
+                if(!$titleMask){
+                    
+                    $titleMask = mysql__select_value(
+                        $mysqli,
+                        'SELECT rty_TitleMask
+                           FROM Records
+                           JOIN defRecTypes ON rty_ID = rec_RecTypeID
+                          WHERE rec_ID = '.$recID
+                    );
+                    
+                }
+                recordUpdateTitle($system, $recID, $titleMask, null);
+            }    
+        }    
 
         return $res?$this->result_data:false;
     }
