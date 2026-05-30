@@ -4136,6 +4136,8 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
             value.length === 0 || this.openAllGroupings();
 
+            this._position();
+
             return;
         }
 
@@ -4260,6 +4262,8 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         }
 
         this._searchNoResults.css('display', showingOptions.length === 0 ? 'block' : 'none');
+
+        this._position();
 
         this._searchTimeout = setTimeout(() => {
             this.menu.find('.ui-menu-item-wrapper').css('cursor','default');
