@@ -775,6 +775,8 @@ final class RequestRouter
 
     private static function databaseFolder(string $db): ?string
     {
+        //global $defaultRootFileUploadPath;
+        
         $config = self::serverRoot() . "/HEURIST/heuristConfigIni.php";
         if (!is_file($config)) {
             $config = self::serverRoot() . "/heuristConfigIni.php";

@@ -222,7 +222,9 @@ to use token use curl parm -H
 */
 
 // detect database server from database parameter
-[$envVersion, $dbFromRequest] = detectServerAndDatabase( $params['db'] ?? $_REQUEST['db'] ?? $GLOBALS['HEURIST_ROUTE_PARAMS']['db'] ?? null);
+//[$envVersion, $dbFromRequest] = detectServerAndDatabase( $params['db'] ?? $_REQUEST['db'] ?? $GLOBALS['HEURIST_ROUTE_PARAMS']['db'] ?? null);
+$envVersion = null;
+$dbFromRequest = $params['db'] ?? $_REQUEST['db'] ?? $GLOBALS['HEURIST_ROUTE_PARAMS']['db'] ?? null;
 if(isset($params) && is_array($params)){
     $params['db'] = $dbFromRequest;
 }
@@ -230,8 +232,8 @@ $_REQUEST['db'] = $dbFromRequest;
 
 // parent directory configuration file is optional, hence include not required
 // heuristConfigIni.php in parent directory overrides empty values in current file
-if (is_file($parentIni)){
-    include_once $parentIni;
+if (is_file($parentIni) && file_exists($parentIni)){
+    include $parentIni; //include_once
 }
 
 $branchVersionFile = __DIR__ . '/configVersion.local.php';
@@ -247,6 +249,7 @@ define('HEURIST_IS_V8', version_compare($version, '8.0', '>='));
 * 
 * @param mixed $dbName
 */
+/*
 function detectServerAndDatabase( $dbName ){
     global $dbPrefix;
     
@@ -281,4 +284,5 @@ function detectServerAndDatabase( $dbName ){
     
     return [$envVersion, $dbName];
 }
+*/
 
