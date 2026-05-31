@@ -761,6 +761,69 @@ if(!$system->hasAccess()){
                 }
             }//end moveRelatedDetails
 
+            // Toggle the visibility of hidden fields
+            function toggleHiddenFields(){
+
+                let show_hidden_fields = $('.toggleHidden').is(':checked') ? 1 : 0;
+
+                if(show_hidden_fields == 0){
+                    $('.hiddenField').hide();
+                }else{
+                    $('.hiddenField').show();
+                }
+
+                if($('.hiddenField').length == 0){ // remove hidden field toggler
+                    $('.toggleHidden').parents('.detailRow').remove();
+                }
+
+                let $group_container = $('div.div_public_data');
+
+                $.each($group_container.find('fieldset'), function(idx, fieldset){
+
+                    fieldset = $(fieldset);
+                    let $header = $group_container.find(`h4[data-order="${fieldset.attr('id')}"], h5[data-order="${fieldset.attr('id')}"]`);
+                    fieldset.show();
+                    $header.show();
+
+                    let $vis_rows = fieldset.find('div.detailRow').filter((idx, div) => { return $(div).css('display') != 'none';});
+                    if($vis_rows.length == 0){
+                        fieldset.hide();
+                        $header.hide();
+                    }
+
+                    let parent_id = fieldset.attr('data_parent');
+                    let $parent_ele = parent_id > 0 ? [] : $group_container.find(`h4[data-order="${parent_id}"]`);
+                    if($parent_ele.length > 0){
+                        if($parent_ele.find('h4, h5').is(':visible') || $parent_ele.is('h4:visible') || $parent_ele.is('h5:visible')){
+                            $group_container.find(`h4[data-order="${parent_id}"]`).show();
+                        }else{
+                            $group_container.find(`h4[data-order="${parent_id}"]`).hide();
+                        }
+                    }
+                });
+
+                window.hWin?.HAPI4?.save_pref('recordData_HiddenFields', show_hidden_fields);
+            }
+            function onWindowResize(){
+
+                const doc_width = $(document).width();
+                let $fld_names = $('.div_public_data .detailType');
+
+                if($fld_names.length == 0){
+                    return;
+                }
+
+                $fld_names.removeClass('row10 row15 row20');
+
+                if(doc_width >= 1400){
+                    $fld_names.addClass('row10');
+                }else if(doc_width >= 1000){
+                    $fld_names.addClass('row15');
+                }else if(doc_width >= 750){
+                    $fld_names.addClass('row20');
+                }
+            }
+            
             function recviewer_showMap(event, rec_id){
 
                 if(!hint_popup){
@@ -807,7 +870,7 @@ if(!$system->hasAccess()){
                     window.HeuristRecordMedia.init({baseURL: baseURL, database: database, language: language});
                 }
 
-                mediaTooltips();
+                //mediaTooltips();
 
                 toggleHiddenFields();
 
