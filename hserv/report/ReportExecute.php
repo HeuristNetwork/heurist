@@ -444,13 +444,6 @@ class ReportExecute
         $templateFile = isset($this->params['template']) ? $this->params['template'] : null;
         $template_body = isset($this->params['template_body']) ? $this->params['template_body'] : null;
 
-        if ($templateFile) {
-            $content = $this->loadTemplateFile($templateFile);
-        } else {
-            $content = $template_body;
-        }
-
-
         if(!isset($this->params["output"]) && $this->publishmode != 2){
             $this->outputfile = null;
             if($this->publishmode==1 ){
@@ -462,6 +455,13 @@ class ReportExecute
             $this->outputfile = $this->prepareOutputFile();
         }
 
+        if ($templateFile) {
+            $content = $this->loadTemplateFile($templateFile);
+        } else {
+            $content = $template_body;
+        }
+
+        
         if($content!==false && ($content==null || strlen(trim($content))==0)){
             $this->outputError('Template content is empty');
             return false;

@@ -272,8 +272,11 @@ $.widget( "heurist.reportViewer", {
             case 'publish':
                 this.onTemplatePublish();
                 break;
+            case 'download':
+                this.onReportDownload();
+                break;
             case 'print':
-                this.onTemplatePrint();
+                this.onReportPrint();
                 break;
             case 'refresh':
                 this.onRefresh();
@@ -488,12 +491,31 @@ $.widget( "heurist.reportViewer", {
         window.hWin.HEURIST4.ui.showPublishDialog( params );
     },
 
+    onReportDownload: function() {
+        const template_file = $('#selTemplates').val();
+        if(window.hWin.HEURIST4.util.isempty(template_file)) return;
+        
+        
+        let format = this.detectFormatForOutput($('#rep_container_frame'));
+         
+        let request = window.hWin.HEURIST4.util.cloneJSON(this._currentQuery
+                    ?this._currentQuery :window.hWin.HEURIST4.current_query_request);
+        
+        const squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( request, true );
+        let url = window.hWin.HAPI4.baseURL + "?"+ 
+                        squery.replace('"','%22') + '&publish=2&template='+encodeURIComponent(template_file);
+        if(format){
+            url = url + '&mode=' + format;
+        }
+        window.open(url, '_blank');
+    },    
+    
     /**
      * @memberof heurist.reportViewer
      * @instance
      * @description Prints the content of the currently displayed report.
      */
-    onTemplatePrint: function() {
+    onReportPrint: function() {
         try{
             let oIframe = this._$("#ifrmPrint")[0];
             let iframe = this._$("#rep_container_frame")[0];
@@ -716,5 +738,172 @@ $.widget( "heurist.reportViewer", {
         };
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: `Renaming ${this._currentTemplate}`}, {default_palette_class: 'ui-heurist-design', dialogId: 'report-rename-template'});
-    }
+    },
+    
+   /**
+    * Detect rendered report output format in iframe.
+    *
+    * Returns:
+    *   'html' - rendered HTML report
+    *   'csv'  - comma/tab/semicolon delimited plain text report
+    *   'txt'  - other non-empty plain text report
+    *   null   - empty or inaccessible iframe
+    */
+   detectFormatForOutput: function($iframe) {
+
+       const doc = this.getIframeDocument($iframe);
+       if (!doc || !doc.body) return null;
+
+       const body = doc.body;
+
+       /*
+        * If iframe contains real report HTML elements, it is HTML.
+        * Ignore wrappers that browsers may create for plain text.
+        */
+       const meaningfulElements = Array.from(body.querySelectorAll('*')).filter(el => {
+           const tag = el.tagName.toLowerCase();
+           return !['html', 'head', 'body', 'pre'].includes(tag);
+       });
+
+       if (meaningfulElements.length > 0) {
+           return 'html';
+       }
+
+       const text = this.getIframePlainTextFromDocument(doc).trim();
+       if (!text) return null;
+
+       /*
+        * Plain text may contain escaped or raw HTML markup.
+        */
+       if (/^\s*<(?:!doctype\s+html|html|head|body|table|div|p|span|h[1-6]|ul|ol|section|article)\b/i.test(text)) {
+           return 'html';
+       }
+
+       if (this.isLikelyCSV(text)) {
+           return 'csv';
+       }
+
+       return 'txt';
+   },
+
+   /**
+    * Safely return iframe document.
+    */
+   getIframeDocument: function($iframe) {
+
+       const iframe = $iframe && $iframe.length ? $iframe[0] : null;
+       if (!iframe) return null;
+
+       try {
+           return iframe.contentDocument || iframe.contentWindow.document;
+       } catch (e) {
+           // Cross-origin iframe, cannot inspect
+           return null;
+       }
+   },
+
+   /**
+    * Extract plain text from iframe document while preserving visible line breaks.
+    *
+    * This is needed because browser-rendered text/plain is often wrapped in <pre>,
+    * while HTML-rendered text can use <br>, <div>, <p>, or table rows where
+    * textContent does not always preserve line boundaries as expected.
+    */
+   getIframePlainTextFromDocument: function(doc) {
+
+       if (!doc || !doc.body) return '';
+
+       const body = doc.body;
+
+       // Browser usually wraps text/plain iframe content in <pre>.
+       const pre = body.querySelector('pre');
+       if (pre) {
+           return pre.textContent || '';
+       }
+
+       let html = body.innerHTML || '';
+
+       if (html) {
+           html = html
+               .replace(/<br\s*\/?>/gi, '\n')
+               .replace(/<\/(?:p|div|tr|li|h[1-6])>/gi, '\n')
+               .replace(/<[^>]+>/g, '')
+               .replace(/&nbsp;/gi, ' ')
+               .replace(/&quot;/gi, '"')
+               .replace(/&#34;/gi, '"')
+               .replace(/&#x22;/gi, '"')
+               .replace(/&amp;/gi, '&')
+               .replace(/&lt;/gi, '<')
+               .replace(/&gt;/gi, '>');
+
+           return html;
+       }
+
+       return body.textContent || body.innerText || '';
+   },
+
+   /**
+    * Heuristic detection for CSV/TSV/semicolon-separated output.
+    *
+    * Valid examples:
+    *   ID,NAME
+    *   201,"3 pictures"
+    */
+   isLikelyCSV: function(text) {
+
+       const lines = String(text)
+           .replace(/\u00a0/g, ' ')
+           .split(/\r\n|\r|\n/)
+           .map(line => line.trim())
+           .filter(line => line !== '');
+
+       if (lines.length < 2) return false;
+
+       const delimiters = [',', '\t', ';'];
+
+       for (const delimiter of delimiters) {
+
+           const counts = lines.slice(0, 20).map(line => {
+               return this.countDelimitedFields(line, delimiter);
+           });
+
+           const usefulCounts = counts.filter(count => count > 1);
+           if (usefulCounts.length < 2) continue;
+
+           const first = usefulCounts[0];
+           const sameShape = usefulCounts.filter(count => count === first).length;
+
+           if (sameShape >= Math.max(2, Math.floor(usefulCounts.length * 0.7))) {
+               return true;
+           }
+       }
+
+       return false;
+   },
+
+   /**
+    * Count delimited fields while respecting quoted CSV values.
+    */
+   countDelimitedFields: function(line, delimiter) {
+
+       let count = 1;
+       let inQuotes = false;
+
+       for (let i = 0; i < line.length; i++) {
+           const ch = line[i];
+
+           if (ch === '"') {
+               if (inQuotes && line[i + 1] === '"') {
+                   i++; // escaped quote
+               } else {
+                   inQuotes = !inQuotes;
+               }
+           } else if (ch === delimiter && !inQuotes) {
+               count++;
+           }
+       }
+
+       return count;
+   },
+   
 });
