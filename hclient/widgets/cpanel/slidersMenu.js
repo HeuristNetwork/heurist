@@ -1346,7 +1346,6 @@ $.widget( "heurist.slidersMenu", {
                 container_width: 300,
                 filter_by_type: mode,
                 onClose: function(noptions) { 
-
                     if(noptions==null){
                         //forcefully close saved_filters panel
                         that._pinSvsList(true);
@@ -1376,7 +1375,7 @@ $.widget( "heurist.slidersMenu", {
                         
                         that._closeExploreMenuPopup();
                         that._collapseMainMenuPanel(true);
-                    }else{
+                    }else if(!that._isExplorePopupSticky()){
                         that._pinSvsList(true);
                         that._closeExploreMenuPopup();
                     } 
@@ -1461,6 +1460,7 @@ $.widget( "heurist.slidersMenu", {
             this.containers['explore'].css('left',608);
             this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-w').css( 'transform', '').addClass('ui-icon-pin-s');
             //this.menues['explore'].find('#search_filters_pin').addClass('ui-icon-pin-s');
+            this.menues_saved_filters_popup.show();
         }else{
             this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-s').addClass('ui-icon-pin-w').css( 'transform', 'rotate(180deg)');;
             //this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-s');
