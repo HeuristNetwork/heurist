@@ -66,7 +66,7 @@ final class RecordResolver
                     $qs = [$entity => $params[$entity]];
                     return ['url' => $remote . $sep . http_build_query($qs), 'status' => 302];
                 }else{
-                    if(!isPositiveInt($params[$entity])){
+                    if(!self::isPositiveInt($params[$entity])){
                         $error = array('status'=>HEURIST_INVALID_REQUEST, 'message'=>'Resource Id is not defined');
                         self::renderResolverError($error, $params);
                         return null;
@@ -134,7 +134,7 @@ final class RecordResolver
                 return null;
             }
 
-            if(!isPositiveInt($recid)){
+            if(!self::isPositiveInt($recid)){
                 $error = array('status'=>HEURIST_INVALID_REQUEST, 'message'=>'Record Id is not defined');
                 self::renderResolverError($error, $params);
                 return null;
@@ -339,4 +339,9 @@ final class RecordResolver
         }
         return array($url?:null, $recid, $error);
     }
+    
+    private static function isPositiveInt($val){
+        return isset($val) && (is_int($val) || ctype_digit((string)$val)) && (int)$val > 0;
+    }
+    
 }
