@@ -28,8 +28,9 @@ $heurist_base_dir = '/var/www/html/HEURIST';
 $status = null;
 $message = '';
 $last_output = '';
+$db = $_REQUEST['db'] ?? '';
 
-// defaults to alpha if unrecognised
+// defaults to alpha if missing or unrecognised
 $code_channel = $_REQUEST['code'] ?? 'alpha'; 
 $code_channel = in_array($code_channel, ['alpha', 'test', 'beta'], true) ? $code_channel : 'alpha';
 $has_executed = ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_update']));
