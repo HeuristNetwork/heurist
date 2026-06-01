@@ -110,8 +110,8 @@ if($fh_data==null || is_string($fh_data)){
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
 
         <style type="text/css">
-            .tbl-head > td {
-                padding-top: 10px;
+            .tbl-head > td:nth-child(1) {
+                font-size: 1.2em;
             }
 
             .ui-accordion-header.ui-state-active .ui-icon {
@@ -315,11 +315,14 @@ if($step=="1"){  // info about current status
             print TABLE_S.implode("",$mapping_errors).TABLE_E."<br>";
         }
         if(!empty($transfer_errors)){
+
+            $headings = "<tr class='tbl-head'><th colspan='3' style='text-align:left;font-size:1.3em;'>Record type</th><th colspan='4' style='text-align:left;font-size:1.3em;'>Fields required</th></tr>";
+
             print "<strong>Data not transfered</strong><br>";
             print "<em>The following fields in Zotero have been mapped into the Heurist database but will<br>"
             . "not be saved as the record type does not contain a field to hold them. If you feel that<br>"
             . "any of these fields are needed, you may add the indicated base field to the record type.</em><br><br>";
-            print TABLE_S.implode("", $transfer_errors).TABLE_E."<br>";
+            print TABLE_S.$headings.implode("", $transfer_errors).TABLE_E."<br>";
         }
         if(!empty($mapping_rt_errors2)){
             print "<p style='color:red'><br>No proper field mapping found for record types:";
@@ -331,13 +334,22 @@ if($step=="1"){  // info about current status
 
     if(!empty($successful_rows)){
 
+        $headings = <<<HEADING
+        <tr class='tbl-head'>
+            <th colspan='3' style='text-align:left;font-size:1.3em;'>Base field concept IDs<span style='padding-left:5.5em;'>map to --></span></th>
+            <th colspan='2' style='text-align:left;font-size:1.3em;'>local field name and code</th>
+        </tr>
+        HEADING;
+
         print "<div id='success-accordion'><h3><strong>Data mapped for transfer</strong></h3>";
-        print DIV_S.TABLE_S.implode("", $successful_rows).TABLE_E.DIV_E."</div><br><br>";
+        print DIV_S.TABLE_S.$headings.implode("", $successful_rows).TABLE_E.DIV_E."</div><br><br>";
 
         // Make this section an accordion (jQuery UI)
         print '<script> $("#success-accordion").accordion({collapsible: true, heightStyle: "content", active: false});';
         print '$("#success-accordion").find(".ui-accordion-content").css({background: "none", border: "none"});';
         print '$("#success-accordion").find(".ui-accordion-header").css({color: "black", "font-size": "larger", "padding-left": "0px"});';
+        print 'let $icon = $("<span>", {class: "ui-icon ui-icon-triangle-1-s", style: "float:right;"}); let $rows = $(".connectingField");';
+        print '$rows.each((idx, tr) => { tr = $(tr); let $prev = tr.parent().prev().find("td").first(); $prev.append($icon.clone()); })';
         print '</script>';
     }
 }
@@ -983,7 +995,7 @@ function printMappingReport_rt($arr, $rt_id){
 
     if($is_verbose){
 
-        $table_class = (is_object($arr) && $rt_id != null) ? 'tbl-head' : 'tbl-row';
+        $table_class = is_object($arr) && $rt_id != null ? 'tbl-head' : 'tbl-row';
 
         if(is_object($arr)){
             $zType = strval($arr['zType']);
@@ -998,12 +1010,20 @@ function printMappingReport_rt($arr, $rt_id){
             if($zType != '->'){
                 //-> will be covered during resource (record type) field handling
                 $rt_id = strval($code);
-                $mapping_errors[$zType] = "<tr class='".$table_class."'><td colspan='3'><strong>".$zType." (".$rt_id."):</strong></td><td colspan='4'>no field mappings available</td></tr>";
+                $mapping_errors[$zType] = "<tr class='{$table_class}'><td colspan='3'><strong>{$zType} ({$rt_id}):</strong></td><td colspan='4'>no field mappings available</td></tr>";
                 $warning_count ++;
             }
+        }elseif($zType === '->'){
+
+            $successful_rows[] = "<tr class='{$table_class}'><td colspan='2' class='connectingField'>&nbsp;</td><td><strong>{$code}</strong></td>"
+            ."<td><strong>&rArr;{$rectypes['names'][$rt_id]}</strong></td><td><strong>{$rt_id}</strong></td></tr>";
         }else{
-            $successful_rows[] = "<tr class='".$table_class."'><td colspan='2'><strong>".$zType."</strong></td><td><strong>".$code."</strong></td>"
-            ."<td><strong>&rArr;".$rectypes['names'][$rt_id]."</strong></td><td><strong>".$rt_id."</strong></td></tr>";
+
+            if(count($successful_rows) > 1){
+                $successful_rows[] = "<tr class='tbl-row'><td colspan='5' style='padding-top: 1em;'><hr></td></tr>";
+            }
+            $successful_rows[] = "<tr class='{$table_class}'><td colspan='2'><strong style='font-size: 1.3em;'>{$zType}</strong></td><td><strong>{$code}</strong></td>"
+            ."<td><strong>&rArr;{$rectypes['names'][$rt_id]}</strong></td><td><strong>{$rt_id}</strong></td></tr>";
         }
     }
 }
@@ -1080,7 +1100,7 @@ function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
             }
         }else{
             if(@$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id]){
-                $successful_rows[] = "<tr class='tbl-row'><td></td><td>".$label.TD.$code."</td><td>&rArr;".$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id][0].TD.$dt_id.TR_E;
+                $successful_rows[] = "<tr class='tbl-row'><td colspan='2'>".$label.TD.$code."</td><td>&rArr;".$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id][0].TD.$dt_id.TR_E;
             }else{ // NOT IN RECORD TYPE STRUCTURE
 
                 if($extra_info != null){
@@ -1122,13 +1142,13 @@ function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
 function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
 
     $arrdt = explode(".",$dt_code);
-    if(count($arrdt)>2){
-        $dt_code = array_shift($arrdt);// $arrdt[0];
-        $resource_rt_id = array_shift($arrdt);//$arrdt[1];//resource record type
-        $resource_dt_id = $arrdt[0];
-    }else{
+    if(count($arrdt) <= 2){
         return "Invalid resource mapping for id: ".$dt_code;
     }
+
+    $dt_code = array_shift($arrdt);// $arrdt[0];
+    $resource_rt_id = array_shift($arrdt);//$arrdt[1];//resource record type
+    $resource_dt_id = $arrdt[0];
 
     $dt_id = ConceptCode::getDetailTypeLocalID($dt_code);
 
