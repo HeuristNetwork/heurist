@@ -182,7 +182,7 @@ if($filename){ //download from scratch (for csv import)
         if($default_mode=='check') {$default_mode = 3;}
         elseif($default_mode==null) {$default_mode = 2;}
 
-
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
         if(file_exists($filename) && !is_dir($filename)){
             if($default_mode==3){ //check
 
@@ -197,7 +197,7 @@ if($filename){ //download from scratch (for csv import)
                     UImage::changeImageColor($filename, null, @$req_params['color'], @$req_params['circle'], @$req_params['bg']);
                 }else{
                     if($file_url!=null && isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles){
-                        $file_url .= (strpos($file_url, '?')>0 ? '&' : '?') . 'v=' . filemtime($filename);
+                        $file_url .= (strpos($file_url, '?') !== false ? '&' : '?') . 'v=' . filemtime($filename);
                         header('Location:'.$file_url);
                     }else{
                         _download_file($filename, $content_type);
@@ -229,7 +229,7 @@ if($filename){ //download from scratch (for csv import)
                 _download_file(dirname(__FILE__).'/../../hclient/assets/100x100click.png', $content_type);
             }else {
                 $content_type = 'image/gif';
-                if($viewmode = 'icon'){
+                if($viewmode == 'icon'){
                     _download_file(dirname(__FILE__).'/../../hclient/assets/16x16.gif', $content_type);
                 }else{
                     _download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', $content_type);
