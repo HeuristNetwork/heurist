@@ -3564,7 +3564,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             $(node.span).removeClass('ui-state-active');
         }else{
             $(node.span).addClass('ui-state-active');
-            this.element.parents('.editStructure').animate({scrollTop: $(node.span).offset().top}, 1);
+            setTimeout(() => this.element.parents('.editStructure').animate({scrollTop: $(node.span).offset().top}, 1), 2500);
         }
     },
 
