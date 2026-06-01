@@ -1,0 +1,314 @@
+
+Prompt sequence to ChatGPT5 on 8 April 2026, by Ian Johnson
+
+------------------------------------------------------------
+
+I wish to create a PHP script /var/www/html/HEURIST/admin/describe/harvest_concepts_to_semantic_refdb.php 
+The script will be called from the command line
+
+RESULTS DATABASE
+
+I have a list of 'concepts' - the definition of a record type (RTY), base field (FLD), record structure field (RST) or term (TRM) -
+which will be stored in a Heurist database hdb_Heurist_Concept_Definitions (referred to hereafter as the target datbase).
+
+The aim is to find where each concept was first defined and store the information relating to that original concept definition
+in the target database. Since the target databae has a standard Heurist structure, the concepts found in the databases on the server can be 
+copied more or less unchanged to the target database.
+
+
+----------------------
+LOOP THROUGH DATABASES
+
+I want to open each of the Heurist MySQL databases on the current server (identified by a name starting with the prefix hdb_ ) 
+apart of course from the target hdb_Heurist_Concept_Definitions, and then each of the databases on any referenced servers
+(which are accessed via an ssh connection and as local host on the referenced server). 
+
+The server referencing code will be defined in /var/www/html/HEURIST/admin/describe/harvest_concepts_source_dbs.txt
+and will look like this (for the curent server and one referenced server):
+
+# some explanation in comment lines starting with #, blank lines are ignored
+# assume file is correctly formatted, no error checking, as this will be set up only once
+
+# each server starts with externalServer indicating an IP address or server domain, if this is a blank value it means the current server
+# Server 1 (server on which this is running. dbhost blank indicates local host)
+    externalServer  = ''
+    dbPort = 3307
+    dbAdminUsername = 'heurist'
+    dbAdminPassword = '<password>'
+# Server 2 (a remote server containing Heurist databases)
+    externalServer  = "heurist.huma-num.fr' 
+    dbPort = 3307
+    dbAdminUsername = 'heurist'
+    dbAdminPassword = '<password>'
+
+----------------- 
+FOR EACH DATABASE
+
+If sysIdentification.sys_dbRegisteredID is null or 0 the database has not been registered and will therefore 
+contain no concept definitions used by other databases. It should therefore be skipped for further analysis.
+
+For each database with sys_dbRegisteredID set to a positive integer, the script should look at the following tables.
+See attached SQL file for the definition of these tables.
+
+    TABLE                FIELD NAME PREFIX 
+    defRecTypes           rty_
+    defDetailTypes        dty_
+    defRecStructure        rst_
+    defTerms            trm_
+
+(xxx_ is used to indicate one of the prefixes above)
+
+If xxx_OriginatingDBID is not null or zero, this is a derivative copy of the concept and the record is skipped. 
+
+If xxx_OriginatingDBID is null or 0 the concept has been defined in the current database and we wish to transfer it to the target database.
+
+    . Copy the record and insert as a record of the same type in the current database with the following changes: 
+        . The value of sysIdentification.sys_dbRegisteredID should be inserted in xxx_OriginatingDBID
+        . The value of xxx_ID should be copied to xxx_IDInOriginatingDB 
+        . Since xxx_ID is the primary key in the target table it will be allocated by incrementing the value in the target table.
+
+Generally the fields will correspond exactly, the only change being that some text fields may be longer in the target database. 
+The only expected mismatch will be some extra field(s) at the end of the target records, therefore it is sufficient to copy as-is 
+and only report if there is an error in writing the data.
+
+SPECIAL TREATMENT
+
+Term fields reference a vocabulary (which is just a root term with no parent) using the local ID of the vocabulary in the source database.
+The local iD of the vocabulary term is recorded in dty_JsonTermIDTree. Relationship markers also reference a vocabulary via this field.
+
+Record pointer and relationship marker fields reference one or more target record types as a comma-delimited list in the field dty_PtrTargetRectypeIDs. 
+These record types also use the local IDs of the soruce database.
+
+The vocabularies and record types will often be derivative concepts which should be found and imported from the database
+where they were originally defined, however there is no guarantee:
+    a. that they have already been found (the defining database may be accessed after the currnet database) 
+    b. that they will ever be found (the defining database may not be on this server or may no longer exist).
+    
+Given we have the local ID of each vocabulary or record type referenced we can go to that vocabulary or record type definition 
+and find out the originating database ID (which may be the current database) and the ID within the originating database.
+These should then be stored as TRMxxxx-yyyy in dty_JsonTermIDTree or RTYxxxx-yyyy in dty_PtrTargetRectypeIDs, 
+where xxxx is the originating database ID and yyyy is the ID in the originating database (the IDs need only show significant digits)
+
+We will then make a second script to search for the composite code stored and convert it to the appropriate local ID in the target database.
+This will also need to convert all the parent IDs for terms into the local IDs of the patent terms.
+The current script should not attempt to do this.
+Thought for 8s
+
+I’ve drafted the PHP script in the canvas.
+
+A few points before you use it:
+
+It follows the table structures you supplied in tables_for_harvesting_concepts.sql, including the origin fields and the special handling needed for dty_JsonTermIDTree and dty_PtrTargetRectypeIDs.
+
+Two things in your spec needed a practical interpretation:
+
+Your text says “copy the record … in the current database”, but from context this clearly means insert into the target database while preserving provenance in xxx_OriginatingDBID and xxx_IDInOriginatingDB.
+For dty_JsonTermIDTree, the script currently rewrites every standalone integer token to TRMdbid-id. That is a reasonable first pass if the field contains only term IDs / trees, but if you also store non-term numeric values there in some cases, the rewrite logic should be narrowed.
+
+The script currently does this:
+
+reads /var/www/html/HEURIST/admin/describe/harvest_concepts_source_dbs.txt
+connects to each configured server
+enumerates hdb_% databases
+skips hdb_Heurist_Concept_Definitions
+skips unregistered DBs where sys_dbRegisteredID is null/0
+harvests only concepts with xxx_OriginatingDBID null/0
+inserts into the target DB with a new local PK
+sets:
+xxx_OriginatingDBID = sys_dbRegisteredID
+xxx_IDInOriginatingDB = original local ID
+xxx_NameInOriginatingDB = current label/name where that field exists
+rewrites:
+term references as TRMxxxx-yyyy
+rectype references as RTYxxxx-yyyy
+
+The main gap is this:
+
+trm_ParentTermID and trm_InverseTermID are not yet converted to composite codes in the draft, because your note says the later script will convert parent IDs to target-local IDs, but it is a little ambiguous whether this first script should also encode parent/inverse references as TRMdb-id placeholders now. I think it probably should.
+
+My recommendation is to make one small but important revision before you deploy it:
+
+extend the term harvesting so that trm_ParentTermID and trm_InverseTermID are also rewritten from local IDs to TRMxxxx-yyyy placeholders in this first pass.
+
+That would make the whole harvested definition set internally consistent.
+
+I can make that revision directly and also tighten the config parser to tolerate the malformed example line:
+
+externalServer  = \"heurist.huma-num.fr'
+skips unregistered DBs where sys_dbRegisteredID is null/0
+harvests only concepts with xxx_OriginatingDBID null/0
+
+In fact, it should also harvest if the concept has xxx_OriginatingDBID non null/0 and equal to sys_dbRegisteredID
+
+it is a little ambiguous whether this first script should also encode parent/inverse references as TRMdb-id placeholders now. I think it probably should.
+
+Yes, it should
+
+Don't worry about the potential for malformed config lines, the file only has to be created once and even humans can get this right with a little effort ;-}
+
+Done.
+
+I updated the script so it now:
+
+harvests rows when xxx_OriginatingDBID is NULL/0
+also harvests rows when xxx_OriginatingDBID == sys_dbRegisteredID
+skips only rows whose xxx_OriginatingDBID is a different positive database ID
+
+And for terms it now also converts:
+
+trm_ParentTermID → TRMxxxx-yyyy
+trm_InverseTermID → TRMxxxx-yyyy
+
+I left the config parsing simple.
+
+I forgot to specify that the code should not add a concept which already exists within the target database to avoid duplication. This can be determined by looking at xxx_OriginatingDBID and xxx_IDInOriginatingDB
+
+Added.
+
+The script now checks the target table before inserting, using:
+
+xxx_OriginatingDBID
+xxx_IDInOriginatingDB
+
+If a matching row already exists in the target database, it skips insertion, so you do not get duplicates.
+
+It also now reports, per table:
+
+inserted
+skipped derivative
+skipped duplicate
+It would also be good if it also listed the databases (registered ID and name) as they are processed and the type (3 letter code), xxx_OriginatingDBID, xxx_IDInOriginatingDB and name, and appended this information into harvest_concepts_to_semantic_refdb.log in the same directory (create if it doesn't exist).
+
+Also, in order not to risk exposing access details in the source code tree,  move harvest_concepts_source_dbs.txt into /var/www/html/HEURIST (3 levels up the directory tree) and rename it to harvest_concepts_to_semantic_refdb.cfg 
+
+
+Done.
+
+I updated the script so it now:
+
+reads config from
+/var/www/html/HEURIST/harvest_concepts_to_semantic_refdb.cfg
+appends logging to
+/var/www/html/HEURIST/admin/describe/harvest_concepts_to_semantic_refdb.log
+creates the log file if it does not already exist
+logs each database as it is processed, including:
+database name
+registered ID
+logs each harvested concept with:
+source database name
+3-letter type code (RTY, DTY, RST, TRM)
+xxx_OriginatingDBID
+xxx_IDInOriginatingDB
+name/label, or for RST a compact identifying description
+
+One nuance: the concept line is logged just before the insert attempt, so duplicates will also appear in the detailed log even if later skipped. The per-table summary still distinguishes inserted / skipped derivative / skipped duplicate.
+
+If you want, I can make one further pass to label each concept line explicitly as INSERTED or DUPLICATE.
+
+with subsequent passes almost everything will be a duplicate so this makes a huge and not very useful log file. So can you wait and only write the log entry if the insert is not a duplicate.
+
+Also put a separator, the date and time of the run and the servers accessed at the top of each run added to the log file. 
+Harvest Concepts To Semantic Refdb
+· php
+<?php
+    logLine(sprintf(
+        '  %s | %s | OriginDBID=%s | IDInOriginatingDB=%s | %s',
+        $dbName,
+        $typeCode,
+        (string)($preparedRow[$originDbField] ?? ''),
+        (string)($preparedRow[$originIdField] ?? ''),
+        $name
+    ));
+}
+
+
+final class ConceptOriginResolver
+{
+    private PDO $pdo;
+    private array $termCache = [];
+    private array $rectypeCache = [];
+
+
+    public function __construct(PDO $pdo)
+    {
+        $this->pdo = $pdo;
+    }
+
+
+    public function resolveTerm(int $localTermId): array
+    {
+        if (!isset($this->termCache[$localTermId])) {
+            $stmt = $this->pdo->prepare(
+                'SELECT trm_OriginatingDBID, trm_IDInOriginatingDB FROM defTerms WHERE trm_ID = ?'
+            );
+            $stmt->execute([$localTermId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                throw new RuntimeException("Referenced term {$localTermId} not found in source database");
+            }
+
+
+            $originDb = (int)($row['trm_OriginatingDBID'] ?? 0);
+            $originId = (int)($row['trm_IDInOriginatingDB'] ?? 0);
+
+
+            if ($originDb > 0 && $originId > 0) {
+                $this->termCache[$localTermId] = ['dbid' => $originDb, 'id' => $originId];
+            } else {
+                $registeredId = getRegisteredDbId($this->pdo);
+                $this->termCache[$localTermId] = ['dbid' => $registeredId, 'id' => $localTermId];
+            }
+        }
+
+
+        return $this->termCache[$localTermId];
+    }
+
+
+    public function resolveRectype(int $localRectypeId): array
+    {
+        if (!isset($this->rectypeCache[$localRectypeId])) {
+            $stmt = $this->pdo->prepare(
+                'SELECT rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes WHERE rty_ID = ?'
+            );
+            $stmt->execute([$localRectypeId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                throw new RuntimeException("Referenced rectype {$localRectypeId} not found in source database");
+            }
+
+
+            $originDb = (int)($row['rty_OriginatingDBID'] ?? 0);
+            $originId = (int)($row['rty_IDInOriginatingDB'] ?? 0);
+
+
+            if ($originDb > 0 && $originId > 0) {
+                $this->rectypeCache[$localRectypeId] = ['dbid' => $originDb, 'id' => $originId];
+            } else {
+                $registeredId = getRegisteredDbId($this->pdo);
+                $this->rectypeCache[$localRectypeId] = ['dbid' => $registeredId, 'id' => $localRectypeId];
+            }
+        }
+
+
+        return $this->rectypeCache[$localRectypeId];
+    }
+}
+
+
+
+Done.
+
+It now:
+
+writes detailed concept lines to the log only when the row is actually inserted
+does not log duplicate concepts individually
+adds a run header at the top of each appended run with:
+a separator line
+run date/time
+the list of servers accessed
+a second separator line
+
+That should keep repeat-run logs much more manageable.
+
+1Password menu is available. Press down arrow to select.
