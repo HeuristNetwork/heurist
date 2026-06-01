@@ -197,7 +197,7 @@ if($filename){ //download from scratch (for csv import)
                     UImage::changeImageColor($filename, null, @$req_params['color'], @$req_params['circle'], @$req_params['bg']);
                 }else{
                     if($file_url!=null && isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles){
-                        $file_url .= (str_contains($file_url, '?') ? '&' : '?') . 'v=' . filemtime($filename);
+                        $file_url .= (strpos($file_url, '?')>0 ? '&' : '?') . 'v=' . filemtime($filename);
                         header('Location:'.$file_url);
                     }else{
                         _download_file($filename, $content_type);
