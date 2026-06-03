@@ -34,7 +34,7 @@ $system->defineConstants();
 
 define('H_ID','h-id');
 
-global $rectypes, $is_verbose, $report_log, $rep_errors_only, $dt_SourceRecordID;
+global $rectypes, $is_verbose, $report_log, $rep_errors_only, $dt_SourceRecordID, $dtDefines;
 global $alldettypes, $allterms, $fi_dettype, $fi_constraint, $fi_trmlabel;
 global $mapping_dt, $mapping_errors, $warning_count, $transfer_errors, $successful_rows;
 
@@ -121,8 +121,9 @@ if($fh_data==null || is_string($fh_data)){
 
         <script>
             function __showLoading(){
-                var ele = document.getElementById('divStart2');
-                ele.style.display = 'none';
+
+                $('.divStart').hide();
+
                 ele = document.getElementById('divLoading');
                 ele.style.display = 'block';
                 return true;
@@ -222,16 +223,19 @@ if(!$step){
 }
 
 $key = $lib_keys[$lib_key_idx];
+$syncID = intval(@$_REQUEST['sinceSync']);
 
 $vals = explode(",",$key);
 
+$user_Name = @$vals[0];
 $user_ID = @$vals[1];
 $group_ID = @$vals[2];
 $api_Key  = @$vals[3];
 
-if($user_ID!=null) {$user_ID = trim($user_ID);}
-if($group_ID!=null) {$group_ID = trim($group_ID);}
-if($api_Key!=null) {$api_Key = trim($api_Key);}
+if($user_Name != null) {$user_Name = trim($user_Name);}
+if($user_ID != null) {$user_ID = trim($user_ID);}
+if($group_ID != null) {$group_ID = trim($group_ID);}
+if($api_Key != null) {$api_Key = trim($api_Key);}
 
 $is_verbose = true;
 
@@ -373,68 +377,100 @@ if( ( is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
 $zotero = null;
 $zotero = new phpZotero($api_Key);
 
-print "<div><b>zotero has been initiated with api key [$api_Key]</b></div>";
+$previousSync = $system->settings->getDatabaseSetting('External IDs');
+$syncIndex = $user_Name ?? $lib_key_idx;
+$syncIndex = "ZoteroSync_{$syncIndex}";
+$previousSync = $previousSync && array_key_exists($syncIndex, $previousSync) ? $previousSync[$syncIndex] : ['id' => 0, 'date' => null];
+
+$lastSync = $previousSync['id'] > 0 ? "<br><br>Last Sync Version: <strong>{$previousSync['id']} ({$previousSync['date']})</strong>" : '';
+print "<div><b>zotero has been initiated with api key [$api_Key]</b>{$lastSync}</div>";
 print '<br><a href="#" onclick="open_sysIdentification()">Click here to modify properties which determine Zotero connection</a><br><br>';
-
-/* test connection
-$items = $zotero->getItemsTop($group_ID,
-array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ));
-$code = $zotero->getResponseStatus();
-print $code;
-
-//test new library
-$zotero = new \Zotero\Library('user', $user_ID, 'Library', $api_Key);
-$permissions = $zotero->getKeyPermissions('','');
-print json_encode($permissions, JSON_PRETTY_PRINT);
-
-$items = $zotero->fetchItemsTop(array(
-'format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'10', 'order'=>'dateModified', 'sort'=>'desc' ));
-//'limit'=>10, 'collectionKey'=>$collectionKey, 'order'=>'dateAdded', 'sort'=>'desc'));
-*/
 
 if($step=="1"){  //first step - info about current status
 
     // 1) verify connection to zotero (get total count of top-level items in zotero)
+    $items = false;
     if($group_ID){
-        $items = $zotero->getItemsTop($group_ID,
-            array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ), "groups");
+        $items = $zotero->getItemsTop($group_ID, ['format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc'], "groups");
     }else{
-        $items = $zotero->getItemsTop($user_ID,
-            array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'sort'=>'dateModified', 'direction'=>'desc' ));
+        $items = $zotero->getItemsTop($user_ID, ['format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'sort'=>'dateModified', 'direction'=>'desc']);
     }
 
     $code = $zotero->getResponseStatus();
 
-    if($code>499 ){
-        print "<div class='ui-state-error' style='padding:20px'>Zotero Server Side Error: returns response code: $code.<br><br>"
-        ."Please try this operation later.</div>";
-    }elseif($code>399){
-        $msg = "<div class='ui-state-error' style='padding:20px'>Error. Cannot connect to Zotero API: returns response code: $code.<br><br>";
-        if($code==400 || $code==401 || $code==403){
-            $msg = $msg."Please verify Zotero API key in Database > Properties - it may be incorrect or truncated.";
-        }elseif($code==404 ){
-            $msg = $msg."Please verify Zotero User and Group ID in Database > Properties - values may be incorrect.";
-        }elseif($code==407 ){
-            $msg = $msg."Proxy Authentication Required, please ask system administrator to set it";
+    if($code > 499){
+
+        print "<div class='ui-state-error' style='padding:20px'>Zotero Server Side Error: returns response code: {$code}.<br><br>Please try this operation later.</div>";
+
+    }elseif($code > 399){
+
+        $msg = "<div class='ui-state-error' style='padding:20px'>Error. Cannot connect to Zotero API: returns response code: {$code}.<br><br>";
+        if($code == 400 || $code == 401 || $code == 403){
+            $msg .= "Please verify Zotero API key in Database > Properties - it may be incorrect or truncated.";
+        }elseif($code == 404){
+            $msg .= "Please verify Zotero User and Group ID in Database > Properties - values may be incorrect.";
+        }elseif($code == 407){
+            $msg .= "Proxy Authentication Required, please ask system administrator to set it";
         }
+
         print $msg.DIV_E;
+
     }elseif(!$items){
-        print "<div class='ui-state-error' style='padding:20px'>Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
-        if($code==0){
+
+        print "<div class='ui-state-error' style='padding:20px'>Unrecognized Error: cannot connect to Zotero API: returns response code: {$code}</div>";
+        if($code == 0){
             print "<div class='ui-state-error' style='padding:20px'>Please ask your system administrator to check that the Heurist proxy settings are correctly set.</div>";
         }
-    }else{
 
+    }else{
 
         //Responses for multi-object read requests will include a custom HTTP header, Total-Results
         $totalitems = $zotero->getTotalCount();
 
-        print "<div>Count items in Zotero: $totalitems</div>";
-        if($totalitems>0){
-            print "<div id='divStart2'><br><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".$system->dbname().
-            "&lib_key=".$lib_key_idx."' onclick='__showLoading()'><button class='h3button'>Start</button></a></div><br><br>";
-            print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../hclient/assets/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
+        if($previousSync['id'] > 0){
+
+            $syncCount = false;
+            $latestSyncID = false;
+            if($group_ID){
+                [$syncCount, $latestSyncID] = getZoteroHeaders($api_Key, 'groups', $group_ID, $previousSync['id']);
+            }else{
+                [$syncCount, $latestSyncID] = getZoteroHeaders($api_Key, 'users', $user_ID, $previousSync['id']);
+            }
+
+            if($syncCount > 0){
+
+                print <<<HTML
+                <div class='divStart' style='margin-bottom: 2em;'>
+                    <span style="padding-right: 3em;">Newest version: <strong>{$latestSyncID}</strong></span>
+                    <span>New changes since last sync: <strong>{$syncCount}</strong></span><br><br>
+                    <a href='syncZotero.php?step=2&cnt={$syncCount}&db={$system->dbname()}&lib_key={$lib_key_idx}&sinceSync={$previousSync["id"]}' onclick='__showLoading()'><button class='h3button'>Sync to latest version</button></a>
+                </div><br>
+                HTML;
+            }else{
+
+                print <<<HTML
+                <div class='divStart' style='margin-bottom: 2em;'>
+                    <span style="font-weight: bold;">No new changes since last sync</span>
+                </div><br>
+                HTML;
+            }
         }
+
+        if($totalitems > 0){
+
+            print <<<HTML
+            <div class='divStart'>
+                Total items count in library: <strong>{$totalitems}</strong><br><br>
+                <a href='syncZotero.php?step=2&cnt={$totalitems}&db={$system->dbname()}&lib_key={$lib_key_idx}' onclick='__showLoading()'><button class='h3button'>Full re-sync</button></a>
+            </div><br><br>
+            HTML;
+            print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../hclient/assets/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
+        }else{
+
+            print "No items found within Library";
+        }
+
+        print "<br><br><br>";
     }
 }elseif($step=='2'){ //second step - sync
 
@@ -487,14 +523,25 @@ if($step=="1"){  //first step - info about current status
 
     print '<br>Starting Zotero Library Sync for '. intval($totalitems) .' records...<br>';
 
+    $searchOptions = [
+        'format' => 'atom',
+        'content' => 'json',
+        'order' => 'dateAdded',
+        'sort' => 'asc'
+    ];
+    if($syncID > 0){
+        $searchOptions['since'] = intval($syncID);
+    }
+
     while ($start<$totalitems){
 
+        $searchOptions['start'] = $start;
+        $searchOptions['limit'] = $fetch;
+
         if($group_ID){
-            $items = $zotero->getItemsTop($group_ID, array('format'=>'atom', 'content'=>'json', 'start'=>$start,
-                'limit'=>$fetch, 'order'=>'dateAdded', 'sort'=>'asc' ), "groups");
+            $items = $zotero->getItemsTop($group_ID, $searchOptions, "groups");
         }else{
-            $items = $zotero->getItemsTop($user_ID, array('format'=>'atom', 'content'=>'json', 'start'=>$start,
-                'limit'=>$fetch, 'order'=>'dateAdded', 'sort'=>'asc' ));
+            $items = $zotero->getItemsTop($user_ID, $searchOptions);
         }
 
         //fwrite($fd, $items);
@@ -842,8 +889,7 @@ if($step=="1"){  //first step - info about current status
             'Zotero Synchronisation has reported ' . $tot_erros . ' warnings',
             $err_msg);
 
-        print '<span><br>If you think the Zotero import needs updating or wish to provide additional information'
-              .'please create a ticket - link at top of page.</span>';
+        print '<span><br>If you think the Zotero import needs updating or wish to provide additional information please create a ticket - link at top of page.</span>';
 
         print '<script>window.hWin.HEURIST4.msg.showMsgDlg("Warning: '.$tot_erros
         .' warnings reported: Please check the warnings listed. '
@@ -898,13 +944,24 @@ if($step=="1"){  //first step - info about current status
 
     }
 
-    #if($ptr_cnt>0)
-    #print "<br><br>Total count of RESOLVED pointers:".$ptr_cnt;
+    $latestSyncID = false;
+    if($group_ID){
+        [, $latestSyncID] = getZoteroHeaders($api_Key, 'groups', $group_ID, $syncID);
+    }else{
+        [, $latestSyncID] = getZoteroHeaders($api_Key, 'users', $user_ID, $syncID);
+    }
 
-    // done - show report log
+    if($latestSyncID !== false){
 
-    #print "<br>Sync done";
+        $settings = [
+            $syncIndex => [
+                'id' => $latestSyncID,
+                'date' => date('Y-m-d H:i:s')
+            ]
+        ];
 
+        $system->settings->setDatabaseSetting('External IDs', $settings, 1);
+    }
 }
 
 /**
@@ -1071,6 +1128,7 @@ function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
             }
         }
 
+        $dt_str = '';
         if(is_array($extra_info)){
 
             if(is_empty($extra_info[0])){
@@ -1517,6 +1575,67 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 function is_empty($question){
     $ret = (!isset($question) || trim($question)==='');
     return $ret;
+}
+
+function getZoteroHeaders(string $apiKey, string $type, int $id, int $lastSync = 0){
+
+    $sortBy = $type === 'groups' ? 'sort=desc' : 'direction=desc';
+    $URL = "https://api.zotero.org/{$type}/{$id}/items/top?key={$apiKey}&format=atom&content=none&start=0&limit=1&order=dateModified&{$sortBy}";
+    if($lastSync > 0){
+        $URL .= "&since={$lastSync}";
+    }
+
+    $curlHandle = curl_init($URL);
+
+    $curlOptions = [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HEADER => true
+        //,CURLOPT_NOBODY => true doesn't return last modified header
+    ];
+
+    $useProxy = defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE && defined('HEURIST_HTTP_PROXY');
+    if($useProxy){
+        $curlOptions[CURLOPT_PROXY] = HEURIST_HTTP_PROXY;
+        if(defined('HEURIST_HTTP_PROXY_AUTH')){
+            $curlOptions[CURLOPT_PROXYUSERPWD] = HEURIST_HTTP_PROXY_AUTH;
+        }
+    }
+
+    curl_setopt_array($curlHandle, $curlOptions);
+
+    $results = curl_exec($curlHandle);
+    $error = curl_error($curlHandle);
+    //$httpStatus = intval(curl_getinfo($curlHandle, CURLINFO_HTTP_CODE));
+    if($error){
+        return [false, false];
+    }
+
+    $headerSize = curl_getinfo($curlHandle, CURLINFO_HEADER_SIZE);
+
+    $headers = substr($results, 0, $headerSize);
+    $newline = strpos($headers, "\r") !== false ? "\r\n" : "\n";
+    $headers = explode($newline, trim($headers));
+
+    $totalResults = null;
+    $syncID = null;
+
+    foreach($headers as $header){
+
+        $header = strtolower($header);
+        if(strpos($header, 'total-results') !== false){
+            $totalResults = preg_replace('/total\-results: ?/', '', $header);
+            $totalResults = intval($totalResults);
+        }elseif(strpos($header, 'last-modified-version') !== false){
+            $syncID = preg_replace('/last\-modified\-version: ?/', '', $header);
+            $syncID = intval($syncID);
+        }
+
+        if($totalResults !== null && $syncID !== null){
+            break;
+        }
+    }
+
+    return [$totalResults, $syncID];
 }
 
 ?>
