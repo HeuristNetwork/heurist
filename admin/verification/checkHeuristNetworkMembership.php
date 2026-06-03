@@ -63,12 +63,14 @@ function hn_session_start_if_needed(): void {
 function hn_set_last_membership_check(string $email, string $db, string $result): void {
     hn_session_start_if_needed();
     $_SESSION['hn_last_membership_check'] = ['email' => $email, 'db' => $db, 'result' => $result];
+    session_write_close();
 }
 
 /** Get last membership check from session or null */
 function hn_get_last_membership_check(): ?array {
     hn_session_start_if_needed();
     $v = $_SESSION['hn_last_membership_check'] ?? null;
+    session_write_close();
     return (is_array($v)) ? $v : null;
 }
 

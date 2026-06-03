@@ -43,6 +43,7 @@ if (@$_COOKIE['heurist-sessionid'] && session_status() !== PHP_SESSION_ACTIVE) {
 
 // note $collection is a reference - SW also we suppress warnings to let the system create the key
 $collection = &$_SESSION[$dbname_full]['record-collection'];
+session_write_close();
 
 /**
  * Checks if a string contains only digits.

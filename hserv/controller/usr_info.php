@@ -48,49 +48,51 @@
 
         if( $res>0 ){ //if logged id verify that session info (especially groups) is up to date
             //if exists file with userid it means need to reload system info
+            $reloadUserFromDb = $system->userSession()->needsRefresh();
+            
             $db_full_name = $system->dbnameFull();
-            $reload_user_from_db = (@$_SESSION[$db_full_name]['need_refresh']==1);
 
             $const_toinit = true;
-            if(!$reload_user_from_db){ //check for flag file to force update user (user rights can be changed by admin)
+            if(!$reloadUserFromDb){ //check for flag file to force update user (user rights can be changed by admin)
                 $const_toinit = false;
                 $system->initPathConstants($dbname);
                 $fname = HEURIST_FILESTORE_DIR.$res;
-                $reload_user_from_db = file_exists($fname);
+                $reloadUserFromDb = file_exists($fname);
             }
 
-            if($reload_user_from_db){
+            if($reloadUserFromDb){
                 $system->init($dbname, false, $const_toinit);//session and constant are defined already
                 $res = $system->getCurrentUserAndSysInfo();
             }else{
                 $res = true;
             }
 
-            if($res && !empty(@$req_params['permissions']) && !empty(@$_SESSION[$db_full_name]['ugr_Permissions'])){
+            if($res && !empty(@$req_params['permissions'])){
                 // Check if user has the required permission
+                $permissions = $system->userSession()->getPermissions();  
+                if(!empty($permissions)){
+                    $required = $req_params['permissions'];
+                    $error_msg = "";
 
-                $required = $req_params['permissions'];
-                $permissions = $_SESSION[$db_full_name]['ugr_Permissions'];
-                $error_msg = "";
+                    if(strpos($required, 'add') !== false && $permissions['add']){
+                        $error_msg = "create";
+                    }
+                    if(strpos($required, 'delete') !== false && $permissions['delete']){
+                        $error_msg = (!empty($error_msg) ? " or " : "") . "delete";
+                    }
 
-                if(strpos($required, 'add') !== false && $permissions['add']){
-                    $error_msg = "create";
-                }
-                if(strpos($required, 'delete') !== false && $permissions['delete']){
-                    $error_msg = (!empty($error_msg) ? " or " : "") . "delete";
-                }
-
-                $res = !empty($error_msg);
-                if(!$res){
-                    $error_msg = "Your account does not have permission to $error_msg records,<br>please contact the database owner for more details.";
-                    $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+                    $res = !empty($error_msg);
+                    if(!$res){
+                        $error_msg = "Your account does not have permission to $error_msg records,<br>please contact the database owner for more details.";
+                        $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+                    }
                 }
             }
         }else{
             //logged off
             $res = array("currentUser"=>array('ugr_ID'=>0,'ugr_FullName'=>'Guest'));
         }
-
+        $system->session()->close();
     }
     elseif($action=='usr_log'){
 
@@ -112,6 +114,7 @@
             user_setPreferences($system, $req_params);
             $res = true;
         }
+        $system->session()->close();
 
     } elseif($action == "logout"){ //save preferences into session
 
@@ -343,7 +346,7 @@
                 user_setPreferences($system, $req_params);
                 $res = true;
             }
-
+            $system->session()->close();
         }
         elseif ( $system->getUserId()<1 &&  !in_array($action,$quest_allowed)) {
 

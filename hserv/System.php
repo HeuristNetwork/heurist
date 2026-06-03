@@ -21,7 +21,10 @@ use hserv\structure\ConceptCode;
 use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
 use hserv\SystemSettings;
-
+use hserv\session\SessionStore;
+use hserv\session\CaptchaService;
+use hserv\session\UserSession;
+use hserv\auth\PasswordResetService;
 
 require_once dirname(__FILE__).'/structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/structure/import/dbsImport.php';
@@ -118,6 +121,10 @@ class System {
 
 
     */
+    private ?SessionStore $sessionStore = null;
+    private ?CaptchaService $captchaService = null;
+    private ?UserSession $userSessionService = null;
+    private ?PasswordResetService $passwordResetService = null;    
 
     /**
      * System constructor.
@@ -170,23 +177,26 @@ class System {
             $this->isInited = true; 
         }elseif(!$init_session_and_constants){
             $this->isInited = true;
-        }elseif($this->startMySession( $this->needFullSessionCheck )
-            && $this->initPathConstants()){
+        }elseif($this->startMySession( $this->needFullSessionCheck )){
+            
+            if($this->initPathConstants()){
 
-            if($this->needFullSessionCheck){
-                USystem::executeScriptOncePerDay($this);
+                if($this->needFullSessionCheck){
+                    USystem::executeScriptOncePerDay($this);
+                }
+
+                $this->loginVerify( false );//load user info from session on system init
+                if($this->getUserId()>0){
+                    //set current user for stored procedures (log purposes)
+                    $this->mysqli->query('set @logged_in_user_id = '.intval($this->getUserId()));
+                }
+
+                //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
+                $this->mysqli->query('SET GLOBAL sql_mode = \'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION\'');
+
+                $this->isInited = true;
             }
-
-            $this->loginVerify( false );//load user info from session on system init
-            if($this->getUserId()>0){
-                //set current user for stored procedures (log purposes)
-                $this->mysqli->query('set @logged_in_user_id = '.intval($this->getUserId()));
-            }
-
-            //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
-            $this->mysqli->query('SET GLOBAL sql_mode = \'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION\'');
-
-            $this->isInited = true;
+            $this->session()->close();
         }
 
         return $this->isInited;
@@ -207,6 +217,26 @@ class System {
 
     }
 
+    public function session(): SessionStore
+    {
+        return $this->sessionStore ??= new SessionStore();
+    }
+
+    public function captcha(): CaptchaService
+    {
+        return $this->captchaService ??= new CaptchaService($this->session(), $this);
+    }
+
+    public function userSession(): UserSession
+    {
+        return $this->userSessionService ??= new UserSession($this->session(), $this);
+    }    
+
+
+    public function passwordReset(): PasswordResetService
+    {
+        return $this->passwordResetService ??= new PasswordResetService($this);
+    }
 
     //------------------------- RT DT CONSTANTS --------------------
     /**
@@ -1670,10 +1700,14 @@ EXP;
      * @return int|false The user ID (ugr_ID) from the session if credentials are valid and session exists,
      *                   or false otherwise (e.g., if database name is invalid or no session for that DB).
      */
-    public function verifyCredentials($db){
+    public function verifyCredentials($db, $closeSession=false){
 
         if( $this->setDbnameFull($db) && $this->startMySession(false) ){ // false to skip full session check
-            return isset($_SESSION[$this->dbnameFull]['ugr_ID']) ? (int)$_SESSION[$this->dbnameFull]['ugr_ID'] : false;
+            $isOk = isset($_SESSION[$this->dbnameFull]['ugr_ID']) ? (int)$_SESSION[$this->dbnameFull]['ugr_ID'] : false;
+            if($closeSession){
+                $this->session()->close();
+            }
+            return $isOk;
         }else{
             return false;
         }
@@ -2079,7 +2113,7 @@ EXP;
         $this->currentUser = null;
         session_destroy();
 
-        session_write_close();
+        $this->session()->close();
         return true;
     }
 
@@ -2097,14 +2131,12 @@ EXP;
      */
     public function userGetPreference($property, $def=null){
 
-        $res = $_SESSION[$this->dbnameFull]["ugr_Preferences"][$property] ?? null;
+        $res = $this->userSession()->getPreference((string)$property, $def);
 
         // POSSIBLE redundancy: this duplicates same in hapi.js
         if('search_detail_limit' === $property){ // Strict comparison for property name
             if(!$res || $res < 500 ) {$res = 500;} // Strict comparison for numeric values
             elseif($res > 5000 ) {$res = 5000;} // Strict comparison for numeric values
-        }elseif($res === null && $def !== null){ // Strict comparison for null and ensure $def is actually provided
-            $res = $def;
         }
 
         return $res;

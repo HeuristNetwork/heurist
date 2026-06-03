@@ -439,7 +439,12 @@ if(@$_REQUEST['depth']=='all'){
 if (array_key_exists('q', $_REQUEST)) {
     if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
 
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            @session_start();
+        }
         $collection =  &$_SESSION[$system->dbnameFull()]['record-collection']; //dbnameFullWithHost()
+        session_write_close();
+
         if (!empty($collection)) {
             $_REQUEST['q'] = 'ids:' . join(',', prepareIds(array_keys($collection)));
         } else {

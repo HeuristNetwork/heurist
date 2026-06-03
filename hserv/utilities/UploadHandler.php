@@ -293,7 +293,7 @@ class UploadHandler
         }
 
         $system = new System();
-        $res = $system->verifyCredentials($heurist_db);
+        $res = $system->verifyCredentials($heurist_db, true);
         if(!($res>0)){
             //not logged in
             $this->header(HEADER_403);
