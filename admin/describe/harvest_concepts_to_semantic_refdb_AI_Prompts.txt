@@ -23,19 +23,23 @@ I want to open each of the Heurist MySQL databases on the current server (identi
 apart of course from the target hdb_Heurist_Concept_Definitions, and then each of the databases on any referenced servers
 (which are accessed via an ssh connection and as local host on the referenced server). 
 
-The server referencing code will be defined in /var/www/html/HEURIST/admin/describe/harvest_concepts_source_dbs.txt
-and will look like this (for the curent server and one referenced server):
+The server referencing code will be defined in a configuration file /var/www/html/HEURIST/harvest_concepts_to_semantic_refdb_cfg.php
+(was originally a cfg file, but I changed this to PHP as it is in a web accesible location)
+
+which might look like this (for the curent server and one referenced server):
 
 # some explanation in comment lines starting with #, blank lines are ignored
 # assume file is correctly formatted, no error checking, as this will be set up only once
 
 # each server starts with externalServer indicating an IP address or server domain, if this is a blank value it means the current server
+
 # Server 1 (server on which this is running. dbhost blank indicates local host)
     externalServer  = ''
     dbPort = 3307
     dbAdminUsername = 'heurist'
     dbAdminPassword = '<password>'
-# Server 2 (a remote server containing Heurist databases)
+
+    # Server 2 (a remote server containing Heurist databases)
     externalServer  = "heurist.huma-num.fr' 
     dbPort = 3307
     dbAdminUsername = 'heurist'
@@ -53,8 +57,8 @@ See attached SQL file for the definition of these tables.
     TABLE                FIELD NAME PREFIX 
     defRecTypes           rty_
     defDetailTypes        dty_
-    defRecStructure        rst_
-    defTerms            trm_
+    defRecStructure       rst_
+    defTerms              trm_
 
 (xxx_ is used to indicate one of the prefixes above)
 
@@ -92,7 +96,9 @@ where xxxx is the originating database ID and yyyy is the ID in the originating 
 We will then make a second script to search for the composite code stored and convert it to the appropriate local ID in the target database.
 This will also need to convert all the parent IDs for terms into the local IDs of the patent terms.
 The current script should not attempt to do this.
-Thought for 8s
+
+-------------------------------------------------------
+ChatGPT 5o. Thought for 8s
 
 I’ve drafted the PHP script in the canvas.
 
@@ -103,6 +109,7 @@ It follows the table structures you supplied in tables_for_harvesting_concepts.s
 Two things in your spec needed a practical interpretation:
 
 Your text says “copy the record … in the current database”, but from context this clearly means insert into the target database while preserving provenance in xxx_OriginatingDBID and xxx_IDInOriginatingDB.
+
 For dty_JsonTermIDTree, the script currently rewrites every standalone integer token to TRMdbid-id. That is a reasonable first pass if the field contains only term IDs / trees, but if you also store non-term numeric values there in some cases, the rewrite logic should be narrowed.
 
 The script currently does this:
@@ -310,5 +317,3 @@ the list of servers accessed
 a second separator line
 
 That should keep repeat-run logs much more manageable.
-
-1Password menu is available. Press down arrow to select.

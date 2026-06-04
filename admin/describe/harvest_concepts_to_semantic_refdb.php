@@ -1,6 +1,7 @@
-
-
 <?php
+
+declare(strict_types=1);
+
 /**
  * harvest_concepts_to_semantic_refdb.php
  *
@@ -13,7 +14,7 @@
  * This is intended for running only on HeuristRef.net with connections to other MySQL servers in the Heuriverse.
  * First time it may be run on Huma-Num server for speed, the nthe database and config file transferred to HeuristRef.net for subsequent updates
  * 
- * Configuration of server access in /var/www/html/HEURIST/harvest_concepts_to_semantic_refdb.cfg * 
+ * Configuration of server access in /var/www/html/HEURIST/harvest_concepts_to_semantic_refdb_cfg.php * 
  * A template for this file is included in the source code in the /admin/describe directory
  * 
  * Run from command line:
@@ -30,9 +31,7 @@
  *   local IDs in the target database. We only encode them as RTYxxxx-yyyy / TRMxxxx-yyyy.
  */
 
-declare(strict_types=1);
-
-const CONFIG_FILE = '/var/www/html/HEURIST/harvest_concepts_to_semantic_refdb.cfg';
+const CONFIG_FILE = '/var/www/html/HEURIST/harvest_concepts_to_semantic_refdb_cfg.php';
 const LOG_FILE    = __DIR__ . '/harvest_concepts_to_semantic_refdb.log';
 const TARGET_DB   = 'hdb_Heurist_Concept_Definitions';
 

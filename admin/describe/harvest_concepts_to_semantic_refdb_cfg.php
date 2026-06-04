@@ -1,6 +1,9 @@
+<?php
+
 # Configuration of Heurist servers to be scanned by harvest_concepts_to_semantic_refdb.php
 
 # PLACE THIS FILE IN /var/www/html/HEURIST and configure pserver access below
+# Since it contains passwords it must be inaccessible to browse 
 
 # There is no error checking on this file, as it will be set up only once
 
@@ -19,3 +22,4 @@
     dbAdminPassword = '<password to be defined>'
 
 # add more servers here following pattern above
+?>
