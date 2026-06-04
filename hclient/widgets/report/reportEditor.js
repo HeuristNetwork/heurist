@@ -368,6 +368,10 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             
             this._loadRecordTypeTreeView();
             this._loadTestRecords();
+        }else if(!window.hWin.HAPI4.sysinfo['custom_js_allowed']){
+           this._$('#jsDisabledWarning').show();
+           this._$('span.sys-email').text( window.hWin.HAPI4.sysinfo['sysadmin_email'] );
+           this._$('.editForm').css({top:'40px'});
         }
         
         if(this.options.isCalcFieldTemplate){ 
