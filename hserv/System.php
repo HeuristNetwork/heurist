@@ -1702,16 +1702,23 @@ EXP;
      */
     public function verifyCredentials($db, $closeSession=false){
 
-        if( $this->setDbnameFull($db) && $this->startMySession(false) ){ // false to skip full session check
-            $isOk = isset($_SESSION[$this->dbnameFull]['ugr_ID']) ? (int)$_SESSION[$this->dbnameFull]['ugr_ID'] : false;
-            if($closeSession){
-                $this->session()->close();
-            }
-            return $isOk;
-        }else{
+        if (!$this->setDbnameFull($db)) {
             return false;
         }
 
+        if (!$this->startMySession(false)) {
+            return false;
+        }
+
+        $userID = isset($_SESSION[$this->dbnameFull]['ugr_ID'])
+            ? (int)$_SESSION[$this->dbnameFull]['ugr_ID']
+            : false;
+
+        if ($closeSession) {
+            $this->session()->close();
+        }
+
+        return $userID;        
     }
 
 
@@ -2067,24 +2074,29 @@ EXP;
      *                             - 'remember': Session cookie with 30-day lifetime, sets 'keepalive' flag in session.
      * @return void
      */
-    private function doLoginSession($userID, $session_type){
-
-        $lifetime = 0; // Default: session cookie (expires when browser closes)
-        if($session_type === 'shared'){
-            $lifetime = time() + 24*60*60;     // 1 day
-        } elseif($session_type === 'remember') {
-            $lifetime = time() + 30*24*60*60;  // 30 days
-            $_SESSION[$this->dbnameFull]['keepalive'] = true; // Flag to refresh cookie on subsequent visits
+    private function doLoginSession($userID, $session_type)
+    {
+        if (!$this->startMySession(false)) {
+            return;
         }
 
-        USystem::sessionUpdateCookies($lifetime);
+        $lifetime = 0; // session cookie, expires when browser closes
+
+        if ($session_type === 'shared') {
+            $lifetime = time() + 24 * 60 * 60; // 1 day
+        } elseif ($session_type === 'remember') {
+            $lifetime = time() + 30 * 24 * 60 * 60; // 30 days
+            $_SESSION[$this->dbnameFull]['keepalive'] = true;
+        }
 
         $_SESSION[$this->dbnameFull]['ugr_ID'] = (int)$userID;
 
-        // Update last login time in the database
-        user_updateLoginTime($this->mysqli, $userID);
-    }
+        USystem::sessionUpdateCookies($lifetime);
 
+        user_updateLoginTime($this->mysqli, $userID);
+
+        $this->session()->close();
+    }
 
     /**
      * Logs out the current user.

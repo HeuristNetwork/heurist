@@ -40,6 +40,7 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     $captcha_code = substr(str_shuffle($captchanumber), 0, 4);// Getting first 6 word after shuffle.
 
     $_SESSION["captcha_code"] = $captcha_code;
+    
     $target_layer = imagecreatetruecolor(50,24);
     $captcha_background = imagecolorallocate($target_layer, 255, 160, 119);//#dbdfe6  219, 223, 230);
     imagefill($target_layer,0,0,$captcha_background);
@@ -47,6 +48,8 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     imagestring($target_layer, 5, 5, 5, $captcha_code, $captcha_text_color);
     header("Content-type: image/jpeg");
     imagejpeg($target_layer);
+    imagedestroy($target_layer);
+    session_write_close();    
 }else{  //TRIVIA CAPTCHA
     $planets = array('Sun','Jupiter','Saturn','Uranus','Neptune','Earth','Venus','Mars','Titan','Mercury','Moon','Europa','Triton','Pluto');
     $ran0 = random_int(0,13);
@@ -55,6 +58,7 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     // $captcha_code = strtolower($planets[$ran0]).($ran1+$ran2);
     $captcha_code = ($ran1+$ran2) + 1;
     $_SESSION["captcha_code"] = $captcha_code;
+
     // print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of $ran1 and $ran2";
     $value = $ran1." + ".$ran2." + 1 = ";
 
@@ -65,5 +69,6 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     }else{
         print $value;
     }
+    session_write_close();
 }
 ?>

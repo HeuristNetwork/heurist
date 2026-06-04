@@ -1457,7 +1457,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if ('search_detail_limit' == name) {
                     res = Math.min(Math.max(res2,500),5000);
                 } else if ('search_result_pagesize' == name) {
-                    res = Math.min(Math.max(res2,100),5000);
+                    res = Math.min(Math.max(res2,50),5000);
                 }
                 return res;
             }

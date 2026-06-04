@@ -1,9 +1,11 @@
 <?php
 namespace hserv\session;
 
+use hserv\utilities\USystem;
+
 final class SessionStore
 {
-    private bool $closeAfterWrite = true;
+    private const SESSION_NAME = 'heurist-sessionid';
 
     public function isActive(): bool
     {
@@ -20,7 +22,19 @@ final class SessionStore
             return false;
         }
 
-        return session_start();
+        if (session_name() !== self::SESSION_NAME) {
+            session_name(self::SESSION_NAME);
+        }
+
+        session_cache_limiter('none');
+
+        $ok = @session_start();
+
+        if ($ok && empty($_COOKIE[self::SESSION_NAME])) {
+            USystem::sessionUpdateCookies(0);
+        }
+
+        return $ok;
     }
 
     public function close(): void
@@ -127,5 +141,51 @@ final class SessionStore
         $this->close();
 
         return $result;
+    }
+
+    public function update(callable $callback): mixed
+    {
+        if (!$this->start()) {
+            return null;
+        }
+
+        $result = $callback($_SESSION);
+        $this->close();
+
+        return $result;
+    }
+
+    public function regenerateId(bool $deleteOldSession = true): bool
+    {
+        if (!$this->start()) {
+            return false;
+        }
+
+        return session_regenerate_id($deleteOldSession);
+    }
+
+    public function destroy(): void
+    {
+        if (!$this->start()) {
+            return;
+        }
+
+        $_SESSION = [];
+
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
+            );
+        }
+
+        session_destroy();
     }
 }
