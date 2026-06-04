@@ -232,10 +232,49 @@ $.widget( "heurist.reportViewer", {
      */
     _initToolbar: function() {
         let that = this;
+
         $.each(this._$('.toolbar > button'), (i, item)=>{
-            that._on($(item).button({showLabel:false, icon: "ui-icon-"+$(item).attr('data-icon')}),
+            const $button = $(item);
+
+            that._on($button.button({showLabel:false, icon: "ui-icon-"+$button.attr('data-icon')}),
                 {click: that._handleToolbarAction});
         });
+
+        const $downloadButton = this._$('button[data-action="download"]');
+        const $downloadMenu = this._$('#downloadFormatMenu').menu().hide();
+
+        this._on($downloadButton, {
+            click: function(event){
+                event.preventDefault();
+                event.stopPropagation();
+
+                $downloadMenu
+                    .toggle()
+                    .position({
+                        my: 'left top',
+                        at: 'left bottom',
+                        of: $downloadButton
+                    });
+            }
+        });
+
+        this._on($downloadMenu.find('li'), {
+            click: function(event){
+                event.preventDefault();
+                event.stopPropagation();
+
+                const format = $(event.currentTarget).attr('data-format');
+                $downloadMenu.hide();
+                that.onReportDownload(format);
+            }
+        });
+
+        this._on($(this.document), {
+            click: function(){
+                $downloadMenu.hide();
+            }
+        });
+
         this._$('button[data-action="import"]').find('span.ui-icon').css({'transform':'rotate(180deg)','margin-top':'-9px'});        
     },
     
@@ -273,7 +312,7 @@ $.widget( "heurist.reportViewer", {
                 this.onTemplatePublish();
                 break;
             case 'download':
-                this.onReportDownload();
+                // Handled by the download format dropdown in _initToolbar.
                 break;
             case 'print':
                 this.onReportPrint();
@@ -491,22 +530,21 @@ $.widget( "heurist.reportViewer", {
         window.hWin.HEURIST4.ui.showPublishDialog( params );
     },
 
-    onReportDownload: function() {
+    onReportDownload: function(format) {
         const template_file = $('#selTemplates').val();
         if(window.hWin.HEURIST4.util.isempty(template_file)) return;
-        
-        
-        let format = this.detectFormatForOutput($('#rep_container_frame'));
-         
+
+        if(!['html', 'txt', 'csv'].includes(format)){
+            format = 'html';
+        }
+
         let request = window.hWin.HEURIST4.util.cloneJSON(this._currentQuery
                     ?this._currentQuery :window.hWin.HEURIST4.current_query_request);
         
         const squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( request, true );
         let url = window.hWin.HAPI4.baseURL + "?"+ 
-                        squery.replace('"','%22') + '&publish=2&template='+encodeURIComponent(template_file);
-        if(format){
-            url = url + '&mode=' + format;
-        }
+                        squery.replace('"','%22') + '&publish=2&template='+encodeURIComponent(template_file)
+                        + '&mode=' + format;
         window.open(url, '_blank');
     },    
     

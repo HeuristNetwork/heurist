@@ -32,6 +32,11 @@
             <button data-action="export" data-icon="sign-out" title="Export a template in a format which can imported to another database">Export</button>
             <button data-action="publish" data-icon="globe-b" title="Obtain javascript to insert report in a web page, set publishing schedule">Publish</button>
             <button data-action="download" data-icon="download" title="Download this report">Download</button>
+            <ul id="downloadFormatMenu" style="display:none;position:absolute;z-index:9999;min-width:8em;">
+                <li data-format="html"><div>HTML</div></li>
+                <li data-format="txt"><div>TXT</div></li>
+                <li data-format="csv"><div>CSV</div></li>
+            </ul>
             <button data-action="print"  data-icon="print" title="">Print</button>
             <button data-action="refresh" data-icon="refresh" title="Refresh memory - updates lists, dropdowns and report output">Refresh</button>
         </div>
