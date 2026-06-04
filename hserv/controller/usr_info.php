@@ -44,7 +44,7 @@
 
     }elseif($action=='verify_credentials'){ //just check only if logged in (db connection not required)
 
-        $res = $system->verifyCredentials($dbname);
+        $res = $system->authSession()->verifyCredentials($dbname);
 
         if( $res>0 ){ //if logged id verify that session info (especially groups) is up to date
             //if exists file with userid it means need to reload system info
@@ -110,7 +110,7 @@
 
     } elseif (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
 
-        if($system->verifyCredentials($dbname)>0){
+        if($system->authSession()->verifyCredentials($dbname)>0){
             user_setPreferences($system, $req_params);
             $res = true;
         }
@@ -342,7 +342,7 @@
 
         }elseif($action == "save_prefs"){
 
-            if($system->verifyCredentials($dbname)>0){
+            if($system->authSession()->verifyCredentials($dbname)>0){
                 user_setPreferences($system, $req_params);
                 $res = true;
             }
