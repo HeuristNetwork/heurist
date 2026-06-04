@@ -4529,11 +4529,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     ?tabs[k]['values_error'].length:0;
                     if(cnt>0){                 
                         s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;">'
-                        +'Adds '+cnt+' new terms to this field</button>';
+                        +'Add '+cnt+' new terms to this field</button>';
                             //'"'+$Db.dty(dt_id, 'dty_Name')+'"</button>';
                         
                         s = s + '&nbsp;<button class="add_all_terms" style="padding: 4px 8px !important;display:none">'
-                                +'Adds new terms to all fields</button>';
+                                +'Add all new terms to all fields</button>';
                             
                         s += '<br><br>';     
                     }
@@ -4747,14 +4747,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     idx ++;
 
                     if(fields.length > idx){
-                        _importTerms_ParentID(fields[0][1], def_ParentTermID, _handle_callback);
+                        _importTerms_ParentID(fields[idx][1], def_ParentTermID, _handle_callback);
                         return;
                     }
 
                     has_peroids ? _importTerms_Separator(fields, $dlg, true) : _importTerms_Import(fields, '', $dlg, true);
                 };
 
-                _importTerms_ParentID(fields[0][1], null, _handle_callback);
+                _importTerms_ParentID(fields[idx][1], null, _handle_callback);
             });
         }
     } 
