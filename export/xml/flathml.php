@@ -438,6 +438,8 @@ if(@$_REQUEST['depth']=='all'){
 // handle special case for collection where ids are stored in the session.
 if (array_key_exists('q', $_REQUEST)) {
     if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
+        
+        //#todo collection will be stored in localStorage, so _COLLECTED_ will be dropped
 
         if (session_status() !== PHP_SESSION_ACTIVE) {
             @session_start();

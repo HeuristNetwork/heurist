@@ -854,7 +854,7 @@ class DbSysBugreport extends DbEntityBase
         // CAPTCHA validation relies on $_SESSION['captcha_code'] being set by the form generator.
         // ChatGPT:ToDo Consider rate-limiting / throttling in addition to CAPTCHA to reduce abuse.
         //1. verify captcha
-        if (!empty($record['Captcha'])) {
+        if (!empty($fields['captcha'])) {
 
             if (!$this->system->captcha()->consumeCaptcha($fields['captcha'] ?? null)) {
                 return false;

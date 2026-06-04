@@ -52,6 +52,7 @@ const HN_TIMEZONE     = 'Australia/Sydney';
 function hn_session_start_if_needed(): void {
     if (session_status() !== PHP_SESSION_ACTIVE) {
         if (PHP_SAPI !== 'cli' && headers_sent()) { return; } // avoid warnings in web if headers sent
+        session_name('heurist-sessionid');
         @session_start();
     }
 }

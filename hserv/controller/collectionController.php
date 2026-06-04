@@ -1,5 +1,7 @@
 <?php
 /**
+* DEPRECATED - to be changed to localStorage
+* 
 * collectionController.php - Controller to manage user's collection of record ids
 *
 * Manages user's collection of record ids stored in SESSION
@@ -43,7 +45,6 @@ if (@$_COOKIE['heurist-sessionid'] && session_status() !== PHP_SESSION_ACTIVE) {
 
 // note $collection is a reference - SW also we suppress warnings to let the system create the key
 $collection = &$_SESSION[$dbname_full]['record-collection'];
-session_write_close();
 
 /**
  * Checks if a string contains only digits.
@@ -72,6 +73,8 @@ if (array_key_exists('remove', $_REQUEST)) {
 if (array_key_exists('clear', $_REQUEST) || !$collection) {
     $collection = array();
 }
+$_SESSION[$dbname_full]['record-collection'] = $collection;
+session_write_close();
 
 $rv = array(
     'count' => count($collection)

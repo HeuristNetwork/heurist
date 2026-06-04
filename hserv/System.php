@@ -1333,7 +1333,7 @@ EXP;
             $dbowner = user_getDbOwner($this->mysqli);
 
             // Get list of recently logged-in databases (USystem::sessionRecentDatabases might be static or global)
-            $dbrecent = USystem::sessionRecentDatabases($this->currentUser);
+            $dbrecent = $this->userSession()->recentDatabases($this->currentUser);
             
             // is current user or database is member of association
             $associationMembershipStatus = USystem::checkAssociationMembership($this);

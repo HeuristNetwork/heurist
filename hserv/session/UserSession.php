@@ -161,5 +161,48 @@ final class UserSession
             $pins['last_block'] = $now;
         });
     }
+    
+    
+    public function recentDatabases(?array $currentUser): array
+    {
+        if (!$currentUser || empty($currentUser['ugr_ID'])) {
+            return [];
+        }
+
+        return $this->session->update(function (&$session) use ($currentUser) {
+            $dbrecent = [];
+
+            foreach ($session as $db => $dbSession) {
+                if (!is_array($dbSession)) {
+                    continue;
+                }
+
+                $userId = $dbSession['ugr_ID'] ?? null;
+                if ((int)$userId !== (int)$currentUser['ugr_ID']) {
+                    continue;
+                }
+
+                $dbname = $db;
+                if (strpos($db, HEURIST_DB_PREFIX) === 0) {
+                    $dbname = substr($db, strlen(HEURIST_DB_PREFIX));
+                }
+
+                $dbWithHost = $dbname;
+                if (isset($dbSession['dbHostName'])) {
+                    $dbWithHost = $dbSession['dbHostName'] . ': ' . $dbWithHost;
+                }
+                if (isset($dbSession['dbHostCode'])) {
+                    $dbname = $dbSession['dbHostCode'] . '-' . $dbname;
+                }
+
+                $dbrecent[] = [
+                    'key' => $dbname,
+                    'title' => $dbWithHost
+                ];
+            }
+
+            return $dbrecent;
+        }) ?? [];
+    }
 
 }
