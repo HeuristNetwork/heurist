@@ -1647,48 +1647,39 @@ EXP;
     *              false if session folder check fails or session cannot be started.
     *              Returns true if headers have already been sent (as session cannot be started then).
     */
-    private function startMySession($check_session_folder=true){
+    private function startMySession($check_session_folder = true): bool
+    {
         global $envVersion, $dbHostName;
 
-        if(headers_sent()) {
-            // Cannot start session if headers are already sent.
-            // Depending on strictness, this could be an error or simply proceed.
-            // It returns true, implying it's not a fatal error for this method's contract.
-            return true;
-        }
-
-        //verify that session folder is writable
-        if($this->needFullSessionCheck && $check_session_folder && !USystem::sessionCheckFolder()){
-            $this->addError(HEURIST_SYSTEM_FATAL, "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later.");
+        if ($this->needFullSessionCheck && $check_session_folder && !USystem::sessionCheckFolder()) {
+            $this->addError(
+                HEURIST_SYSTEM_FATAL,
+                "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later."
+            );
             return false;
         }
 
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-
-            session_name('heurist-sessionid');//set session name
-            session_cache_limiter('none');
-
-            @session_start();
+        if (!$this->session()->start()) {
+            return headers_sent();
         }
 
-        $result = false;
+        if ($this->dbnameFull) {
+            $keepAlive = $this->session()->updateDb($this->dbnameFull, function (&$dbSession) use ($envVersion, $dbHostName) {
+                if (isset($envVersion)) {
+                    $dbSession['dbHostCode'] = $envVersion;
+                    $dbSession['dbHostName'] = $dbHostName;
+                }
 
-        if (session_status() === PHP_SESSION_ACTIVE)
-        {
-            if(isset($envVersion)){
-                $_SESSION[$this->dbnameFull]['dbHostCode'] = $envVersion;    
-                $_SESSION[$this->dbnameFull]['dbHostName'] = $dbHostName;
+                return !empty($dbSession['keepalive']);
+            });
+
+            if ($keepAlive && !USystem::sessionUpdateCookies()) {
+                USanitize::errorLog('CANNOT UPDATE COOKIE ' . session_id() . '   ' . $this->dbnameFull);
             }
-            if (@$_SESSION[$this->dbnameFull]['keepalive'] && !USystem::sessionUpdateCookies())
-            {
-                USanitize::errorLog('CANNOT UPDATE COOKIE '.session_id().'   '.$this->dbnameFull);
-            }
-            $result = true;
         }
 
-        return $result;
+        return true;
     }
-
 
     /*
     /**
@@ -1700,25 +1691,19 @@ EXP;
      * @return int|false The user ID (ugr_ID) from the session if credentials are valid and session exists,
      *                   or false otherwise (e.g., if database name is invalid or no session for that DB).
      */
-    public function verifyCredentials($db, $closeSession=false){
-
+    public function verifyCredentials($db, $closeSession = true)
+    {
         if (!$this->setDbnameFull($db)) {
             return false;
         }
 
-        if (!$this->startMySession(false)) {
-            return false;
-        }
-
-        $userID = isset($_SESSION[$this->dbnameFull]['ugr_ID'])
-            ? (int)$_SESSION[$this->dbnameFull]['ugr_ID']
-            : false;
+        $userID = $this->session()->getDbValue($this->dbnameFull, 'ugr_ID', false);
 
         if ($closeSession) {
             $this->session()->close();
         }
 
-        return $userID;        
+        return $userID ? (int)$userID : false;
     }
 
 
@@ -2074,30 +2059,31 @@ EXP;
      *                             - 'remember': Session cookie with 30-day lifetime, sets 'keepalive' flag in session.
      * @return void
      */
-    private function doLoginSession($userID, $session_type)
+    private function doLoginSession($userID, $session_type): void
     {
-        if (!$this->startMySession(false)) {
-            return;
-        }
-
-        $lifetime = 0; // session cookie, expires when browser closes
+        $lifetime = 0;
 
         if ($session_type === 'shared') {
-            $lifetime = time() + 24 * 60 * 60; // 1 day
+            $lifetime = time() + 24 * 60 * 60;
         } elseif ($session_type === 'remember') {
-            $lifetime = time() + 30 * 24 * 60 * 60; // 30 days
-            $_SESSION[$this->dbnameFull]['keepalive'] = true;
+            $lifetime = time() + 30 * 24 * 60 * 60;
         }
 
-        $_SESSION[$this->dbnameFull]['ugr_ID'] = (int)$userID;
+        $this->session()->updateDb($this->dbnameFull, function (&$dbSession) use ($userID, $session_type) {
+            $dbSession['ugr_ID'] = (int)$userID;
+
+            if ($session_type === 'remember') {
+                $dbSession['keepalive'] = true;
+            } else {
+                unset($dbSession['keepalive']);
+            }
+        });
 
         USystem::sessionUpdateCookies($lifetime);
 
         user_updateLoginTime($this->mysqli, $userID);
-
-        $this->session()->close();
     }
-
+    
     /**
      * Logs out the current user.
      * Clears relevant session data for the current database, expires the session cookie,
@@ -2105,30 +2091,19 @@ EXP;
      *
      * @return true Always returns true.
      */
-    public function doLogout(){
+    public function doLogout()
+    {
+        if ($this->dbnameFull) {
+            $this->session()->update(function (&$session) {
+                unset($session[$this->dbnameFull]);
+            });
+        }
 
-        $this->startMySession(false); // Ensure session is started to modify it, false to skip folder check
-
-        unset($_SESSION[$this->dbnameFull]['ugr_ID']);
-        unset($_SESSION[$this->dbnameFull]['ugr_Name']);
-        unset($_SESSION[$this->dbnameFull]['ugr_FullName']);
-        if(@$_SESSION[$this->dbnameFull]['ugr_Groups']) {unset($_SESSION[$this->dbnameFull]['ugr_Groups']);}
-        if(@$_SESSION[$this->dbnameFull]['ugr_Permissions']) {unset($_SESSION[$this->dbnameFull]['ugr_Permissions']);}
-        if(@$_SESSION[$this->dbnameFull]['ugr_GuestUser']!=null) {unset($_SESSION[$this->dbnameFull]['ugr_GuestUser']);}
-
-        // clear
-        // even if user is logged to different databases he has the only session per browser
-        // it means logout exits all databases
-        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-
-        setcookie('heurist-sessionid', '', time() - 3600, '/', '', $is_https, true);//logout
         $this->currentUser = null;
-        session_destroy();
 
-        $this->session()->close();
         return true;
     }
-
+    
     /**
      * Retrieves a specific user preference value from the current user's session data.
      * For 'search_detail_limit', it applies min/max clamping (500-5000).
