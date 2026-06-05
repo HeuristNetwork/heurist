@@ -119,35 +119,39 @@
 
 <li>
     <a href="admin/verification/verifyConceptCodes3.php"
-        data-header="Administration &gt; Verify concept codes">
-        Missing concept codes in registered databases (error)
+        data-header="Administration &gt; Missing concept codes in registered databases"
+        title="Generate a server-wide report of registered Heurist databases containing record types, detail types or terms with missing concept-code metadata. The report highlights definitions where OriginatingDBID or IDInOriginatingDB values are empty, zero or null.">
+        Missing concept codes in registered databases
     </a>
 </li>
 
 <li>
     <a href="admin/verification/verifyConceptCodes2.php"
         target="_blank"
-        data-header="Administration &gt; Verify concept codes">
-        Missing values for IDinOriginatingDB where originatingDBID is set (error)
-    </a>
+        data-header="Administration &gt; Missing ID-in-originating-database values"
+        title="Generate a server-wide report of Heurist definitions where OriginatingDBID is set, but IDInOriginatingDB is missing, zero or invalid. This identifies inconsistent concept-code links to originating databases.">
+        Missing ID-in-originating-database values where OriginatingDBID is set
+    </a>    
 </li>
 
 <li>
     <a href="admin/verification/verifyConceptCodes.php"
         target="_blank"
-        data-header="Administration &gt; Verify concept codes"
-        title="Find duplications of concept codes in all databases">
-        Repetition of a concept code within a database (warning)
-    </a>
+        data-header="Administration &gt; Duplicate concept codes within databases"
+        title="Generate a server-wide report of duplicated concept codes within each Heurist database. The report identifies record types, detail types and terms that share the same OriginatingDBID and IDInOriginatingDB combination, which can make definition matching ambiguous.">
+        Duplicate concept codes within databases
+    </a>    
 </li>
 
 <li>
+    
     <a href="#" id="fieldUsage"
         target="_blank"
-        data-header="Administration &gt; Verify field usage across all databases"
-        title="Field usage in all databases">
-        Field usage in all databases
+        data-header="Administration &gt; Field usage by concept code"
+        title="Search all Heurist databases for use of a detail field identified by concept code. The report resolves the local field ID in each database and shows both record-structure usage and actual value occurrences.">
+        Field usage by concept code
     </a>
+    
 </li>
 
 <hr>
