@@ -1,6 +1,6 @@
 <?php
 /**
-* verifyFieldUsage.php - Checks for usage of given field by concept code within each database.
+* verifyFieldUsage.php - Checks for usage of given detail field (dty) by concept code within each database.
 *
 * @project     Heurist academic knowledge management system
 * @package Admin
@@ -12,12 +12,12 @@
 * @since       7
 */
 
-//define('ADMIN_PWD_REQUIRED', 1);
+define('ADMIN_PWD_REQUIRED', 1);
 define('PDIR', '../../'); // need for proper path to js and css
 
-require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+$conceptID = trim($_POST['code'] ?? '');
 
-$conceptID = $_GET['code'] ?? '2-72';
+require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 if (!preg_match('/^([1-9][0-9]*)-([1-9][0-9]*)$/', $conceptID, $matches)) {
     echo '<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">';
