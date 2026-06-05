@@ -96,17 +96,6 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
     _initControls: function(){
         this._$('fieldset > div > .header').css({width:'80px','min-width':'80px'});
 
-        this.$Hmsg.showMsgErr({
-            error_title: 'Warning: broken lookup',
-            message: 'Please beware that due to changes with the TLC map project this lookup is not currently 100% functional.<br><br>'
-                    +'The issue appears when attempting to search, if the results are too large the server will response with a "un-supported format" error.<br>'
-                    +'We recommend either:<br>'
-                    +'a) Searching directly on the projects website at <a href="https://ghap.tlcmap.org/" target="_blank" rel="noopener">https://ghap.tlcmap.org/</a><br>'
-                    +'b) Using one of the GeoNames lookup instead, or<br>'
-                    +'c) You can attempt to refine your search here <strong>NOT RECOMMENDED</strong><br><br>'
-                    +'We apologise for any inconvenience.'
-        });
-
         return this._super();
     },
 
@@ -127,6 +116,8 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
      */
     _rendererResultList: function(recordset, record){
 
+        let that = this;
+
         /**
          * Inner helper function to format a field's value for display.
          * - Handles nested 'properties.LGA' to extract `s.lga`.
@@ -141,10 +132,11 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
             let s = recordset.fld(record, fldname);
 
             if(fldname == 'properties.LGA' && s && typeof s === 'object' && s.lga !== undefined){
-                s = s.lga; 
+                s = s.lga;
             }
 
             s = s || ''; // Default to empty string
+            s = typeof s === 'object' ? '' : s;
             let title = typeof s === 'string' ? s : String(s); // Tooltip is the raw string value
 
             if(fldname == 'tlc_link'){
@@ -156,7 +148,7 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
         }
 
         // Construct the composite title string for the record display
-        const recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('tlc_link', 12); 
+        const recTitle = fld('properties.placename', 35) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('tlc_link', 12); 
         recordset.setFld(record, 'rec_Title', recTitle); // Set the formatted title
 
         return this._super(recordset, record); // Call parent's renderer
@@ -226,12 +218,15 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
         
         let params = { // Base parameters for TLCMap API
             format: 'json',
+            searchpublicdatasets: 'on',
+            searchausgaz: 'on',
+            searchncg: 'on',
             paging: 100
         };
 
         // get base url
         if(this.options.mapping.service=='tlcmap'){
-            this.baseURL = 'https://tlcmap.org/ghap/search?';
+            this.baseURL = 'https://tlcmap.org/?';
         }else if(this.options.mapping.service=='tlcmap_old'){
             this.baseURL = 'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?';  
         }else{
@@ -332,8 +327,6 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
                 let val = feature; // Start with the whole feature for extraction by parts
 
-                // Extract potentially nested value using helper
-                // Note: Original code had feature[fld_Name[0]] which might be incorrect if fld_Name itself is dot-separated.
                 // Assuming getValueByParts expects the full object and path array.
                 val = this.getValueByParts(fld_Name_parts, val);
 
@@ -362,6 +355,44 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
         let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
         this._super(res); // Pass to parent for display
+    },
+
+    /**
+     * Retrieves a value from a nested object structure using an array of keys (path parts).
+     * This function traverses the `value` object according to the sequence of keys in `fld_Names`.
+     * 
+     * Has addition handling for fields that may not always exist, e.g. properties.placename => properties.name
+     * 
+     * @memberof heurist.lookupTLC
+     * @instance
+     * @override
+     * @param {Array<string>} fld_Names - An array of strings representing the path (sequence of keys) to the desired value.
+     * @param {Object|Array<*>} value - The object or array from which to retrieve the nested value. 
+     * @returns {*} The retrieved nested value. If the path is invalid or any intermediate key
+     *              is not found, it returns the value at the point of failure (which might be `undefined`).
+     *              Returns `0` if 'count' is accessed on an invalid path. Returns the original `value` if it's initially empty.
+     */
+    getValueByParts: function(field_Names, value){
+
+        let results = this._super(field_Names, value);
+        const invalidFormat = this.$H.isempty(results) || typeof results !== 'string' && !field_Names.includes('geometry');
+
+        if(!invalidFormat){
+            return results;
+        }
+
+        if(field_Names.includes('placename')){
+            results = results.name;
+        }else if(field_Names.includes('description')){
+
+            results = (this.$H.isempty(results.category) ? '' : `${results.category}; `)
+                    + (this.$H.isempty(results.feature_term) ? '' : `${results.feature_term}; `)
+                    + (this.$H.isempty(results.group) ? '' : `${results.group}; `);
+        }else{
+            results = '';
+        }
+
+        return results;
     }
 });
 

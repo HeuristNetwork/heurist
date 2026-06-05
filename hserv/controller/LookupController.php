@@ -73,7 +73,7 @@ class LookupController{
 
     private array $serviceURLs = [
         'tlcmap' => [
-            'https://tlcmap.org/ghap/search?',
+            'https://tlcmap.org/?',
             'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
         ],
 
@@ -317,6 +317,11 @@ class LookupController{
             $newQuery['format'] = 'json';
         }elseif($lookupType == 'wikidata_SPARQL'){
             $this->lookupHeaders[] = 'Accept: application/sparql-results+json';
+        }elseif($lookupType == 'tlcmap'){
+            $newQuery['format'] = 'json';
+            $newQuery['searchpublicdatasets'] = 'on';
+            $newQuery['searchausgaz'] = 'on';
+            $newQuery['searchncg'] = 'on';
         }
 
         if(empty($newURL) || empty($newQuery) || !filter_var($newURL, FILTER_VALIDATE_URL)){
@@ -371,6 +376,7 @@ class LookupController{
             $http_code = $http_code[0];
             $heuristErrorType = HEURIST_ERROR;
 
+            $url = $this->lookupURL;
             if($this->lookupType === 'geonames'){
                 $url = preg_replace("/&?username=$accessToken_GeonamesAPI&?/", "", $this->lookupURL);
                 $_REQUEST['service'] = $url;
@@ -769,11 +775,11 @@ class LookupController{
         $dfHandled = [200, 210, 215, 216, 220, 240, 230, 250];
 
         // Move each result's details into seperate array
-        foreach ($records as $key => $details) {
+        foreach ($records as $details) {
 
             $formattedArray = [];
 
-            foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->controlfield as $key => $cf_ele) { // controlfield elements
+            foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->controlfield as $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
 
                 if($cf_tag == '001') { // BnF ID
@@ -786,14 +792,14 @@ class LookupController{
                 }
             }
 
-            foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->datafield as $key => $df_ele) { // datafield elements
+            foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->datafield as $df_ele) { // datafield elements
                 $df_tag = @$df_ele->attributes()['tag'];
 
                 if(!$df_tag || !in_array($df_tag, $dfHandled)){
                     continue;
                 }
 
-                foreach($df_ele->subfield as $sub_key => $sf_ele) {
+                foreach($df_ele->subfield as $sf_ele) {
 
                     $sf_code = @$sf_ele->attributes()['code'];
 
@@ -1381,12 +1387,12 @@ class LookupController{
     }
 
     /**
-     * Hardcoded Nakala metadata values for licences, data types, and property types
+     * Hardcoded Nakala metadata values for licenses, data types, and property types
      * The 'years' type is too be setup client side
      */
     private function setupNakalaMetadata() : void{
 
-        $licences = [
+        $licenses = [
             'CC-BY-4.0',
             'CC-BY-NC-SA-4.0',
             'CC-BY-NC-ND-4.0',
@@ -1799,7 +1805,7 @@ class LookupController{
 
         // years = range(1, date('Y'))
 
-        $this->lookupResponse = ['licenses' => $licences, 'types' => $dataTypes, 'fields' => $properties];
+        $this->lookupResponse = ['licenses' => $licenses, 'types' => $dataTypes, 'fields' => $properties];
     }
 
     /**
@@ -1998,7 +2004,7 @@ if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== fal
                 'mapping_defs' => @$this->request['mapping']
             ];
 
-            $res = \ImportHeurist::importRecords($scratchPath, $params2);
+            $res = \ImportHeurist::importRecords($scratchPath, $params);
             if(is_bool($res) && $res === false){
                 $response = $system->getError();
             }else{
