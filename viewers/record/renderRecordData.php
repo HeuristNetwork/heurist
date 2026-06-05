@@ -669,7 +669,7 @@ if(!$system->hasAccess()){
             //
             function moveRelatedDetails(recID, related_records){
 
-                var $rel_section = $(`div[recid="${recID}"] div.relatedSection`);
+                var $rel_section = $(`div[recid="${recID}"] div.relatedSection`); //target div
 
                 var $public_fields = $(`div[recid="${recID}"]  div.div_public_data`).find('fieldset[id], div[data-order]');
 
@@ -2230,6 +2230,7 @@ function print_relation_details($bib) {
         print '<div data-recdetails="'. $recordID .'"'. $style .'class="detailRowHeader relatedSection">Related';
     }
 
+    //relmarker fields for current record type
     $relfields_details = mysql__select_all($mysqli,
             'SELECT rst_DisplayName, rst_DisplayOrder, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree
              FROM defRecStructure
@@ -2237,7 +2238,7 @@ function print_relation_details($bib) {
              WHERE dty_Type = "relmarker" AND rst_RequirementType != "forbidden" AND rst_RecTypeID = '. $bib['rec_RecTypeID'] .'
              ORDER BY rst_DisplayOrder');
 
-    $move_details = array();
+    $move_details = array(); //array of related records without particular relmarker field
 
     $extra_styling = (!$is_map_popup) ? 'style="max-width: max-content;"' : '';
 
@@ -2264,9 +2265,9 @@ function print_relation_details($bib) {
 
                 for($i = 0; $i < count($relfields_details); $i++){
 
-                    $ptrtarget_ids = explode(',', $relfields_details[$i][2]);
-                    $fld_name = $relfields_details[$i][0];
-                    $vocab_id = $relfields_details[$i][3];
+                    $ptrtarget_ids = explode(',', $relfields_details[$i][2]); //dty_PtrTargetRectypeIDs
+                    $fld_name = $relfields_details[$i][0]; //rst_DisplayName
+                    $vocab_id = $relfields_details[$i][3]; //dty_JsonTermIDTree
 
                     $is_in_vocab = in_array($bd['RelTermID'], $defTerms->treeData($vocab_id, 3));
 

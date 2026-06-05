@@ -854,19 +854,12 @@ class DbSysBugreport extends DbEntityBase
         // CAPTCHA validation relies on $_SESSION['captcha_code'] being set by the form generator.
         // ChatGPT:ToDo Consider rate-limiting / throttling in addition to CAPTCHA to reduce abuse.
         //1. verify captcha
-        if (@$fields['captcha'] && @$_SESSION["captcha_code"]){
+        if (!empty($fields['captcha'])) {
 
-            $is_InValid = (@$_SESSION["captcha_code"] != @$fields['captcha']);
-
-            if (@$_SESSION["captcha_code"]){
-                unset($_SESSION["captcha_code"]);
-            }
-
-            if($is_InValid) {
-                $this->system->addError(HEURIST_ACTION_BLOCKED,
-                   'Are you a bot? Please enter the correct answer to the challenge question');
+            if (!$this->system->captcha()->consumeCaptcha($fields['captcha'] ?? null)) {
                 return false;
             }
+            
         }else {
             $this->system->addError(HEURIST_ACTION_BLOCKED,
                     'Captcha is not defined. Please provide correct value');

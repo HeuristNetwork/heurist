@@ -202,9 +202,7 @@ class ReportExecute
 
         $this->smartySessionId = DbUtils::prepareSessionId($params['session']?? null);
         // IMPORTANT: allow concurrent progress.php calls from same browser session
-        if (!empty($this->smartySessionId) && session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }               
+        $this->system->session()->close();
 
         $this->outputmode = isset($params['mode']) ? preg_replace('/[^a-z]/', "", $params["mode"]) : 'html';
         $allowed_exts = array('html','js','txt','text','csv','xml','json','css');

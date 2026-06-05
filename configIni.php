@@ -281,6 +281,7 @@ function detectServerAndDatabase( $dbName ){
         if(isset($_SESSION[$dbnameFull]['dbHostCode'])){
             $envVersion = $_SESSION[$dbnameFull]['dbHostCode'];
         }
+        session_write_close();
     }
     
     return [$envVersion, $dbName];

@@ -1,5 +1,7 @@
 <?php
 /**
+* DEPRECATED - to be changed to localStorage
+* 
 * collectionController.php - Controller to manage user's collection of record ids
 *
 * Manages user's collection of record ids stored in SESSION
@@ -71,6 +73,8 @@ if (array_key_exists('remove', $_REQUEST)) {
 if (array_key_exists('clear', $_REQUEST) || !$collection) {
     $collection = array();
 }
+$_SESSION[$dbname_full]['record-collection'] = $collection;
+session_write_close();
 
 $rv = array(
     'count' => count($collection)

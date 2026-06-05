@@ -53,15 +53,18 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
 
    $isNewUserRegistration = ($action == 'create' || $action == 'connectRemote') && !$system->hasAccess();
 
-   if(!($isNewUserRegistration || $system->hasAccess())){
+   if ($isNewUserRegistration && $action === 'create' && !$system->captcha()->consumeCaptcha($req_params['ugr_Captcha'] ?? null)) 
+   {
+        // return error before long-running operation
+        $response = $system->getError();
+        
+   }elseif(!($isNewUserRegistration || $system->hasAccess())){
         $response = $system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in');
         //@todo !!!!!  check for $passwordForDatabaseCreation
    }else{
        
         // IMPORTANT: allow concurrent progress.php calls from same browser session
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }       
+        $system->session()->close();
 
         $res = false;
 
@@ -104,42 +107,28 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
 
                     if($isNewUserRegistration)
                     {
-                        //check capture
-                        $captcha_code_ok = true;
-                        $captcha_code = @$req_params['ugr_Captcha'];
-                        if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != $captcha_code) {
-                            $system->addError(HEURIST_INVALID_REQUEST,
-                                'Are you a bot? Please enter the correct answer to the challenge question');
-                            $captcha_code_ok = false;
-                        }
-                        if (@$_SESSION["captcha_code"]){
-                            unset($_SESSION["captcha_code"]);
+                        unset($req_params['ugr_Captcha']);
+
+                        //get registration form fields
+                        $usr_owner = array();
+                        foreach($req_params as $name=>$val){
+                            if(strpos($name,'ugr_')===0){
+                                $usr_owner[$name] = $mysqli->real_escape_string($req_params[$name]);
+                            }
                         }
 
-                        if($captcha_code_ok){
-                            unset($req_params['ugr_Captcha']);
-
-                            //get registration form fields
-                            $usr_owner = array();
-                            foreach($req_params as $name=>$val){
-                                if(strpos($name,'ugr_')===0){
-                                    $usr_owner[$name] = $mysqli->real_escape_string($req_params[$name]);
-                                }
+                        //mandatory fields
+                        $fld_req = array('ugr_FirstName','ugr_LastName','ugr_eMail','ugr_Name','ugr_Password');
+                        foreach($fld_req as $name){
+                            if(@$usr_owner[$name]==null || $usr_owner[$name]==''){
+                                $system->addError(HEURIST_INVALID_REQUEST, 'Mandatory data for your registration profile '
+                                    .'(first and last name, email, password) are not completed. Please fill out registration form');
+                                $usr_owner = null;
+                                break;
                             }
-
-                            //mandatory fields
-                            $fld_req = array('ugr_FirstName','ugr_LastName','ugr_eMail','ugr_Name','ugr_Password');
-                            foreach($fld_req as $name){
-                                if(@$usr_owner[$name]==null || $usr_owner[$name]==''){
-                                    $system->addError(HEURIST_INVALID_REQUEST, 'Mandatory data for your registration profile '
-                                        .'(first and last name, email, password) are not completed. Please fill out registration form');
-                                    $usr_owner = null;
-                                    break;
-                                }
-                            }
-                            if($usr_owner!=null){
-                                $usr_owner['ugr_Password'] = hash_it( $usr_owner['ugr_Password'] );
-                            }
+                        }
+                        if($usr_owner!=null){
+                            $usr_owner['ugr_Password'] = hash_it( $usr_owner['ugr_Password'] );
                         }
 
                     }else{

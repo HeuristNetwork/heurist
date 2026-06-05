@@ -438,8 +438,15 @@ if(@$_REQUEST['depth']=='all'){
 // handle special case for collection where ids are stored in the session.
 if (array_key_exists('q', $_REQUEST)) {
     if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
+        
+        //#todo collection will be stored in localStorage, so _COLLECTED_ will be dropped
 
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            @session_start();
+        }
         $collection =  &$_SESSION[$system->dbnameFull()]['record-collection']; //dbnameFullWithHost()
+        session_write_close();
+
         if (!empty($collection)) {
             $_REQUEST['q'] = 'ids:' . join(',', prepareIds(array_keys($collection)));
         } else {

@@ -541,38 +541,7 @@ class USystem {
        
 
     //======================= session routines =================================
-    /**
-     * Returns an array of database names where the current user was recently logged in.
-     * Iterates through the $_SESSION global to find matching user IDs.
-     *
-     * @param array|null $currentUser An associative array representing the current user, must contain 'ugr_ID'.
-     * @return array An array of database names (without HEURIST_DB_PREFIX).
-     */
-    public static function sessionRecentDatabases($currentUser){
-        $dbrecent = array();
-        if($currentUser && @$currentUser['ugr_ID']>0){
-            foreach ($_SESSION as $db=>$session){
-
-                $user_id = @$_SESSION[$db]['ugr_ID'];
-                if($user_id == $currentUser['ugr_ID']){
-                    $dbname = $db;
-                    if(strpos($db, HEURIST_DB_PREFIX)===0){
-                        $dbname = substr($db,strlen(HEURIST_DB_PREFIX));
-                    }
-                    $dbWithHost = $dbname;
-                    if(isset($_SESSION[$db]['dbHostName'])){
-                        $dbWithHost = $_SESSION[$db]['dbHostName'].': '.$dbWithHost;                        
-                    }
-                    if(isset($_SESSION[$db]['dbHostCode'])){
-                        $dbname = $_SESSION[$db]['dbHostCode'].'-'.$dbname;
-                    }
-                    array_push($dbrecent, ['key'=>$dbname, 'title'=>$dbWithHost]);
-                }
-            }
-        }
-        return $dbrecent;
-    }
-    
+   
     /**
     * Requests heuristref.net membership for current user or server+database
     */

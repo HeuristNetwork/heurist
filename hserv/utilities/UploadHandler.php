@@ -293,7 +293,7 @@ class UploadHandler
         }
 
         $system = new System();
-        $res = $system->verifyCredentials($heurist_db);
+        $res = $system->authSession()->verifyCredentials($heurist_db);
         if(!($res>0)){
             //not logged in
             $this->header(HEADER_403);
@@ -374,7 +374,9 @@ class UploadHandler
 
     protected function getSessionId() {
         @session_start();
-        return session_id();
+        $id = session_id();
+        session_write_close();
+        return $id;
     }
 
     protected function get_user_path() {

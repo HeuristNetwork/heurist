@@ -130,7 +130,7 @@ use hserv\utilities\USystem;
     }
 ?>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
-
+    
 <!-- All Heuritst widgets can be loaded dynamically - remove this remarks for debug only
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svsEdit.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>

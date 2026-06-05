@@ -390,26 +390,22 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     global $block_swf_email, $useNewTemporalFormatInRecDetails;
 
     //check capture for newsletter subscription
-    if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
+    if (!empty($record['Captcha'])) {
+        $captchaOk = $system->captcha()->consumeCaptcha($record['Captcha']);
 
-        $is_InValid = (@$_SESSION["captcha_code"] != @$record['Captcha']);
+        unset($record['Captcha']);
 
-        if (@$_SESSION["captcha_code"]){
-            unset($_SESSION["captcha_code"]);
-        }
-        if(@$record['Captcha']){
-            unset($record['Captcha']);
+        if (!$captchaOk) {
+            return $system->getError();
         }
 
-        if($is_InValid) {
-            return $system->addError(HEURIST_ACTION_BLOCKED,
-                'Are you a bot? Please enter the correct answer to the challenge question');
-        }else{
-            if($system->getUserId()<1){ //if captcha is valid allow
-                $system->setCurrentUser(array('ugr_ID'=>5, 'ugr_FullName'=>'Guest'));
-            }
+        if ($system->getUserId() < 1) {
+            $system->setCurrentUser([
+                'ugr_ID' => 5,
+                'ugr_FullName' => 'Guest'
+            ]);
         }
-    }
+    }    
 
     // Check that the user is allowed to edit records
     $is_allowed = userCheckPermissions($system, 'edit');

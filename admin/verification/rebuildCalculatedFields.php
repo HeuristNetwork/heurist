@@ -49,9 +49,7 @@ if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
     {
         
         // IMPORTANT: allow concurrent progress.php calls from same browser session
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }               
+        $system->session()->close();
         
         $rty_IDs = null;
         if(@$_REQUEST['recTypeIDs']!=null){

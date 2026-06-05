@@ -21,7 +21,11 @@ use hserv\structure\ConceptCode;
 use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
 use hserv\SystemSettings;
-
+use hserv\session\SessionStore;
+use hserv\session\CaptchaService;
+use hserv\session\UserSession;
+use hserv\auth\PasswordResetService;
+use hserv\auth\AuthSessionService;
 
 require_once dirname(__FILE__).'/structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/structure/import/dbsImport.php';
@@ -104,20 +108,11 @@ class System {
      */
     public $settings;
 
-    /*
-
-    init
-    setDbnameFull
-    init_db_connection - connect to server and select database (move to db_utils?)
-    initPathConstants  - set path constants
-    loginVerify  - load user info from session or reloads from database
-
-    login
-    loginVerify
-
-
-
-    */
+    private ?SessionStore $sessionStore = null;
+    private ?CaptchaService $captchaService = null;
+    private ?UserSession $userSessionService = null;
+    private ?PasswordResetService $passwordResetService = null;
+    private ?AuthSessionService $authSessionService = null;    
 
     /**
      * System constructor.
@@ -170,23 +165,27 @@ class System {
             $this->isInited = true; 
         }elseif(!$init_session_and_constants){
             $this->isInited = true;
-        }elseif($this->startMySession( $this->needFullSessionCheck )
-            && $this->initPathConstants()){
+        }elseif( $this->authSession()->startMySession($this->needFullSessionCheck) ){
+            
+            if($this->initPathConstants()){
 
-            if($this->needFullSessionCheck){
-                USystem::executeScriptOncePerDay($this);
+                if($this->needFullSessionCheck){
+                    USystem::executeScriptOncePerDay($this);
+                }
+
+                //load user info from session on system init
+                $this->authSession()->loginVerify( false );
+                if($this->getUserId()>0){
+                    //set current user for stored procedures (log purposes)
+                    $this->mysqli->query('set @logged_in_user_id = '.intval($this->getUserId()));
+                }
+
+                //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
+                $this->mysqli->query('SET GLOBAL sql_mode = \'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION\'');
+
+                $this->isInited = true;
             }
-
-            $this->loginVerify( false );//load user info from session on system init
-            if($this->getUserId()>0){
-                //set current user for stored procedures (log purposes)
-                $this->mysqli->query('set @logged_in_user_id = '.intval($this->getUserId()));
-            }
-
-            //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
-            $this->mysqli->query('SET GLOBAL sql_mode = \'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION\'');
-
-            $this->isInited = true;
+            $this->session()->close();
         }
 
         return $this->isInited;
@@ -207,6 +206,31 @@ class System {
 
     }
 
+    public function session(): SessionStore
+    {
+        return $this->sessionStore ??= new SessionStore();
+    }
+
+    public function captcha(): CaptchaService
+    {
+        return $this->captchaService ??= new CaptchaService($this->session(), $this);
+    }
+
+    public function userSession(): UserSession
+    {
+        return $this->userSessionService ??= new UserSession($this->session(), $this);
+    }    
+
+
+    public function passwordReset(): PasswordResetService
+    {
+        return $this->passwordResetService ??= new PasswordResetService($this);
+    }
+
+    public function authSession(): AuthSessionService
+    {
+        return $this->authSessionService ??= new AuthSessionService($this);
+    }
 
     //------------------------- RT DT CONSTANTS --------------------
     /**
@@ -920,7 +944,6 @@ class System {
 
 
     /**
-    /**
      * Outputs a JSON error response and terminates the script execution.
      * Closes the database connection before exiting.
      *
@@ -1297,13 +1320,13 @@ EXP;
             }
 
             // Reload current user info from database
-            $this->loginVerify( true, $is_guest_allowed );
+            $this->authSession()->loginVerify( true, $is_guest_allowed );
 
             // Get database owner info
             $dbowner = user_getDbOwner($this->mysqli);
 
             // Get list of recently logged-in databases (USystem::sessionRecentDatabases might be static or global)
-            $dbrecent = USystem::sessionRecentDatabases($this->currentUser);
+            $dbrecent = $this->userSession()->recentDatabases($this->currentUser);
             
             // is current user or database is member of association
             $associationMembershipStatus = USystem::checkAssociationMembership($this);
@@ -1604,334 +1627,6 @@ EXP;
     }
 
     /**
-    * Starts or restores a PHP session for the Heurist application.
-    * It sets the session name to 'heurist-sessionid' and a cache limiter to 'none'.
-    * If `$check_session_folder` is true (and `$this->needFullSessionCheck` is true),
-    * it first verifies that the session save path is writable.
-    * If a session is active and `$_SESSION[$this->dbnameFull]['keepalive']` is set,
-    * it attempts to update session cookies.
-    *
-    * @param bool $check_session_folder Optional. If true, and `needFullSessionCheck` is also true,
-    *                                   the session folder's writability is checked. Defaults to true.
-    * @return bool True if a session was successfully started or already active,
-    *              false if session folder check fails or session cannot be started.
-    *              Returns true if headers have already been sent (as session cannot be started then).
-    */
-    private function startMySession($check_session_folder=true){
-        global $envVersion, $dbHostName;
-
-        if(headers_sent()) {
-            // Cannot start session if headers are already sent.
-            // Depending on strictness, this could be an error or simply proceed.
-            // It returns true, implying it's not a fatal error for this method's contract.
-            return true;
-        }
-
-        //verify that session folder is writable
-        if($this->needFullSessionCheck && $check_session_folder && !USystem::sessionCheckFolder()){
-            $this->addError(HEURIST_SYSTEM_FATAL, "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later.");
-            return false;
-        }
-
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-
-            session_name('heurist-sessionid');//set session name
-            session_cache_limiter('none');
-
-            @session_start();
-        }
-
-        $result = false;
-
-        if (session_status() === PHP_SESSION_ACTIVE)
-        {
-            if(isset($envVersion)){
-                $_SESSION[$this->dbnameFull]['dbHostCode'] = $envVersion;    
-                $_SESSION[$this->dbnameFull]['dbHostName'] = $dbHostName;
-            }
-            if (@$_SESSION[$this->dbnameFull]['keepalive'] && !USystem::sessionUpdateCookies())
-            {
-                USanitize::errorLog('CANNOT UPDATE COOKIE '.session_id().'   '.$this->dbnameFull);
-            }
-            $result = true;
-        }
-
-        return $result;
-    }
-
-
-    /*
-    /**
-     * Verifies if there's an active session for a given database and returns the user ID from that session.
-     * This method only checks session data and does not perform a full system or database initialization.
-     * It calls `startMySession(false)` which means it won't check session folder writability.
-     *
-     * @param string $db The name of the database (short or full) to check credentials for.
-     * @return int|false The user ID (ugr_ID) from the session if credentials are valid and session exists,
-     *                   or false otherwise (e.g., if database name is invalid or no session for that DB).
-     */
-    public function verifyCredentials($db){
-
-        if( $this->setDbnameFull($db) && $this->startMySession(false) ){ // false to skip full session check
-            return isset($_SESSION[$this->dbnameFull]['ugr_ID']) ? (int)$_SESSION[$this->dbnameFull]['ugr_ID'] : false;
-        }else{
-            return false;
-        }
-
-    }
-
-
-    /**
-     * Verifies the current user's login status and loads their information.
-     * This method is central to establishing the `$this->currentUser` property.
-     *
-     * Behavior depends on the `$user` parameter:
-     * - If `$user` is `true` (boolean): Reloads user information (ID, name, groups, permissions) directly from the database.
-     * - If `$user` is `false` (boolean): Attempts to load user information from the `$_SESSION`.
-     * - If `$user` is an array: It's assumed to be pre-fetched user data (e.g., after a successful login attempt).
-     *   The method then uses this data, sets `reload_user_from_db` to true to ensure session is updated consistently.
-     *
-     * Regardless of `$user`, `ugr_Preferences` are always reloaded from the database if the user ID is established
-     * and `reload_user_from_db` becomes true or was initially true.
-     *
-     * It also handles:
-     * - Checking for linked sessions if no direct session user ID is found.
-     * - Checking for a marker file (`HEURIST_FILESTORE_DIR . basename($userID)`) that indicates user info might have been updated externally,
-     *   triggering a reload from the database.
-     * - Setting guest user permissions if `$is_guest_allowed` is true and the user account is normally disabled.
-     *
-     * @param bool|array $user Determines how user data is loaded:
-     *                         `true` to force reload from DB,
-     *                         `false` to load from session,
-     *                         `array` of user data to use pre-fetched info.
-     * @param bool $is_guest_allowed Optional. If true and the user account is 'disabled',
-     *                                 treats the user as a guest by overriding the 'disabled' permission
-     *                                 and setting 'guest_user' permission. Defaults to false.
-     * @return bool True if a user is successfully logged in and verified, false otherwise.
-     */
-    private function loginVerify( $user, $is_guest_allowed=false ){
-
-        $reload_user_from_db = false;
-        $userID = null;
-
-        if( is_array($user) && isset($user['ugr_ID']) ){  // User info pre-fetched (e.g., from login attempt)
-            $reload_user_from_db = true; // Ensure session is updated with this fresh data
-            $userID = (int) $user['ugr_ID'];
-        } else {
-            $reload_user_from_db = ($user === true); // Boolean true forces reload
-            $userID = isset($_SESSION[$this->dbnameFull]['ugr_ID']) ? (int)$_SESSION[$this->dbnameFull]['ugr_ID'] : null;
-        }
-
-        if($userID === null){
-            // Attempt to login via linked session if no direct user ID in current session
-            $linkedUserID = $this->doLoginByLinkedSession();
-            if ($linkedUserID !== null) {
-                $userID = $linkedUserID;
-                $reload_user_from_db = true; // Data from linked session needs to populate current session/user object
-            }
-        }
-
-        if($userID === null || $userID <= 0){ // Ensure userID is valid
-            return false; // Not logged in
-        }
-
-        // Check for external update marker (e.g., user profile changed elsewhere)
-        // HEURIST_FILESTORE_DIR needs to be defined for this to work.
-        if (defined('HEURIST_FILESTORE_DIR')) {
-            $update_marker_fname = HEURIST_FILESTORE_DIR . basename((string)$userID);
-            if(file_exists($update_marker_fname)){
-                unlink($update_marker_fname);
-                // Mark for client-side refresh if not already forcing a DB reload
-                if($user !== true && !is_array($user)) { // only if not already a forced reload
-                     $_SESSION[$this->dbnameFull]['need_refresh'] = 1;
-                }
-                $reload_user_from_db = true;
-            }
-        } else {
-            // Log or handle error: HEURIST_FILESTORE_DIR is not defined, cannot check for external updates.
-            // This might be acceptable if this feature is not critical for all setups.
-        }
-
-
-        if($reload_user_from_db){
-            if(!$this->updateSessionForUser( $userID )){
-                $this->currentUser = null; // Clear currentUser if update fails
-                return false; // User not found or disabled, and not allowed as guest
-            }
-
-            // If guest allowed and user is disabled, override disabled status for this session
-            if($is_guest_allowed && isset($_SESSION[$this->dbnameFull]['ugr_Permissions']['disabled']) && $_SESSION[$this->dbnameFull]['ugr_Permissions']['disabled']){
-                $_SESSION[$this->dbnameFull]['ugr_Permissions']['disabled'] = false;
-                $_SESSION[$this->dbnameFull]['ugr_Permissions']['guest_user'] = true; // Mark as guest
-            }
-
-            // Always reload preferences from DB when user data is reloaded from DB
-            // Set a temporary currentUser with ID to ensure user_getPreferences has the correct context
-            $this->currentUser = ['ugr_ID' => $userID];
-            $_SESSION[$this->dbnameFull]['ugr_Preferences'] = user_getPreferences( $this );
-        }
-
-        // Populate $this->currentUser from session (which is now up-to-date if reloaded)
-        // Ensure all expected keys are present, defaulting to null or empty arrays if not.
-        $this->currentUser = [
-            'ugr_ID'          => $userID,
-            'ugr_Name'        => $_SESSION[$this->dbnameFull]['ugr_Name'] ?? null,
-            'ugr_FullName'    => $_SESSION[$this->dbnameFull]['ugr_FullName'] ?? null,
-            'ugr_eMail'       => $_SESSION[$this->dbnameFull]['ugr_eMail'] ?? null,
-            'ugr_Groups'      => $_SESSION[$this->dbnameFull]['ugr_Groups'] ?? [],
-            'ugr_Permissions' => $_SESSION[$this->dbnameFull]['ugr_Permissions'] ?? [],
-            'ugr_Preferences' => $_SESSION[$this->dbnameFull]['ugr_Preferences'] ?? []
-        ];
-
-        // Remove sensitive credentials for remote repositories from the currentUser object if they exist
-        if(isset($this->currentUser['ugr_Preferences']['externalRepositories'])){
-            // It's safer to unset than to set to null if other code might expect the key not to exist.
-            unset($this->currentUser['ugr_Preferences']['externalRepositories']);
-        }
-        
-        // Clear the 'need_refresh' flag after processing
-        if(isset($_SESSION[$this->dbnameFull]['need_refresh'])) {
-            unset($_SESSION[$this->dbnameFull]['need_refresh']);
-        }
-
-        return true; // User is considered logged in
-    }
-
-    /**
-     * Updates the current session with actual user information from the database.
-     * Fetches user details, groups, and permissions.
-     *
-     * @param int $userID The ID of the user to load into the session.
-     * @return bool True if the user was found and session updated, false if user not found.
-     */
-    public function updateSessionForUser( $userID ){
-
-        $user = user_getById($this->mysqli, $userID);
-
-        //user can be removed - check presence
-        if($user==null){
-            return false; //not logged in
-        }
-
-        $_SESSION[$this->dbnameFull]['ugr_ID'] = $userID;
-        $_SESSION[$this->dbnameFull]['ugr_Groups']   = user_getWorkgroups( $this->mysqli, $userID );
-        $_SESSION[$this->dbnameFull]['ugr_Name']     = $user['ugr_Name'];
-        $_SESSION[$this->dbnameFull]['ugr_eMail']    = $user['ugr_eMail'];
-        $_SESSION[$this->dbnameFull]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
-        $_SESSION[$this->dbnameFull]['ugr_Enabled']  = $user['ugr_Enabled'];
-
-        $is_disabled = $user['ugr_Enabled'] == 'n';
-        $_SESSION[$this->dbnameFull]['ugr_Permissions'] = array(
-            'disabled' => $is_disabled,
-            'add' => strpos($user['ugr_Enabled'], 'add') === false && !$is_disabled,
-            'delete' => strpos($user['ugr_Enabled'], 'del') === false && !$is_disabled);
-
-        return true;
-    }
-
-
-    /**
-    /**
-     * Attempts to log in a user by checking for an active session in a linked database.
-     * This allows for a form of single sign-on across mutually linked Heurist databases.
-     *
-     * The process:
-     * 1. Reads `sys_UGrpsDatabase` from the current database's `sysIdentification` table to find linked DBs.
-     * 2. For each linked DB, checks if a session exists for it (e.g., `$_SESSION[linked_db_full_name]['ugr_ID']`).
-     * 3. If a session exists in a linked DB:
-     *    a. Verifies that the linked DB also lists the current DB in its `sys_UGrpsDatabase` (mutual link).
-     *    b. Retrieves the user's email from the linked DB using the user ID from that session.
-     *    c. Searches for a user in the current database with that email.
-     *    d. If an active, non-disabled user is found in the current DB, a new session is established for them
-     *       in the current DB using `doLoginSession()` with 'public' type, and their user ID is returned.
-     *
-     * @return int|null The user ID in the current database if login via linked session was successful, otherwise null.
-     */
-    private function doLoginByLinkedSession(){
-        // 1. Find sys_UGrpsDatabase in this database
-        $linked_dbs_str = mysql__select_value($this->mysqli, 'select sys_UGrpsDatabase from sysIdentification');
-        if(empty($linked_dbs_str)) {
-            return null;
-        }
-
-        $linked_dbs_array = explode(',', $linked_dbs_str);
-
-        foreach ($linked_dbs_array as $ldb_short_name){
-            // Ensure full database name with prefix
-            $ldb_full_name = (strpos($ldb_short_name, HEURIST_DB_PREFIX) === 0)
-                ? $ldb_short_name
-                : HEURIST_DB_PREFIX . $ldb_short_name;
-
-            // 2. Check if session exists for the linked database
-            $userID_in_linkedDB = isset($_SESSION[$ldb_full_name]['ugr_ID']) ? (int)$_SESSION[$ldb_full_name]['ugr_ID'] : 0;
-
-            if( $userID_in_linkedDB > 0 ){
-                // 3. Find sys_UGrpsDatabase in the linked database to verify mutual link
-                $linked_dbs2_str = mysql__select_value($this->mysqli, 'select sys_UGrpsDatabase from `'. $this->mysqli->real_escape_string($ldb_full_name) .'`.sysIdentification');
-                if(empty($linked_dbs2_str)) {
-                    continue; // Not mutually linked or error
-                }
-
-                $linked_dbs2_array = explode(',', $linked_dbs2_str);
-                $is_mutually_linked = false;
-                foreach ($linked_dbs2_array as $ldb2_short_name){
-                    $ldb2_full_name = (strpos($ldb2_short_name, HEURIST_DB_PREFIX) === 0)
-                        ? $ldb2_short_name
-                        : HEURIST_DB_PREFIX . $ldb2_short_name;
-
-                    if( strcasecmp($this->dbnameFull, $ldb2_full_name) == 0 ){
-                        $is_mutually_linked = true;
-                        break;
-                    }
-                }
-
-                if (!$is_mutually_linked) {
-                    continue;
-                }
-
-                // 4. Find user email in the linked database
-                $userEmail_in_linkedDB = mysql__select_value($this->mysqli,
-                    'select ugr_eMail from `'. $this->mysqli->real_escape_string($ldb_full_name) .
-                    '`.sysUGrps where ugr_ID=' . $userID_in_linkedDB);
-
-                // 5. Find user by email in THIS database
-                if($userEmail_in_linkedDB){
-
-                    $user_in_current_db = user_getByField($this->getMysqli(), 'ugr_eMail', $userEmail_in_linkedDB); // user_getByField is global
-
-                    $this->currentUser = [
-                        'ugr_ID' => $user_in_current_db['ugr_ID'],
-                        'ugr_eMail' => $user_in_current_db['ugr_eMail']
-                    ];
-
-                    // Set DB connection to linked database
-                    $originalDB = $this->dbnameFull();
-                    $this->mysqli = mysql__usedatabase($this->mysqli, $ldb_full_name);
-                    $this->setDbnameFull($ldb_full_name);
-
-                    // Check membership for linked database
-                    $membership = USystem::checkAssociationMembership($this);
-                    if($membership === 'nonmember' && preg_match("/Heurist\.eu/i", HEURIST_BASE_URL) === 1){
-                        $this->addError(HEURIST_REQUEST_DENIED, 'Heurist.eu is for members of the Heurist Association only');
-                        $user_in_current_db = null;
-                    }
-
-                    // Reset DB connection to original database
-                    $this->mysqli = mysql__usedatabase($this->mysqli, $originalDB);
-                    $this->setDbnameFull($originalDB);
-
-                    if(null != $user_in_current_db && ($user_in_current_db['ugr_Type'] ?? '') =='user' && ($user_in_current_db['ugr_Enabled'] ?? 'n') !='n') {
-                        // 6. Success - establish new session in current DB
-                        $this->doLoginSession($user_in_current_db['ugr_ID'], 'public');
-                        return (int)$user_in_current_db['ugr_ID'];
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Attempts to log in a user with the provided username and password.
      * If successful, it establishes a session for the user and updates `$this->currentUser`.
      *
@@ -1955,71 +1650,9 @@ EXP;
      *                       typically for guest access scenarios. Defaults to false.
      * @return bool True if login is successful, false otherwise (errors will be set via `addError`).
      */
-    public function doLogin($username, $password, $session_type, $skip_pwd_check=false, $is_guest=false): bool{
-        global $passwordForDatabaseAccess, $flag_HNAssoc_Server;
-
-        if(empty($username) || (empty($password) && !$skip_pwd_check)){
-            $this->addError(HEURIST_INVALID_REQUEST, "Username / password not defined");
-            return false;
-        }
-
-        $user = null;
-
-        // Check for global database access password or if password check is explicitly skipped
-        if ($skip_pwd_check ||
-            (isset($passwordForDatabaseAccess) && strlen($passwordForDatabaseAccess) > 15 && $passwordForDatabaseAccess === $password)
-           ) {
-            $user_id_to_fetch = is_numeric($username) ? (int)$username : 2; // Default to user ID 2 (admin) if username not numeric for bypass
-            $user = user_getById($this->mysqli, $user_id_to_fetch); // user_getById is global
-            $skip_pwd_check = true; // Ensure password check is skipped if global password used
-        } else {
-            $user = user_getByField($this->mysqli, 'ugr_Name', $username); // user_getByField is global
-        }
-
-        if(!$user){
-            if(user_Count($this->mysqli)>0){
-                $this->addError(HEURIST_REQUEST_DENIED, 'The credentials supplied are not correct');
-            }else{
-                $this->addError(HEURIST_REQUEST_DENIED, 'Unable to read list of users - please report this problem');
-            }
-        } elseif (!$is_guest && ($user['ugr_Enabled'] ?? 'n') === 'n'){
-            $this->addError(HEURIST_REQUEST_DENIED,  'Your user profile is not active. Please contact database owner');
-        } elseif ($skip_pwd_check || passwordCheck($password, $user['ugr_Password'], $this->mysqli, $user['ugr_ID']) ) { // passwordCheck is global
-
-            $returnBool = true;
-            $membership = '';
-            $flag_HNAssoc_Server = $flag_HNAssoc_Server ?? false;
-            if(@$flag_HNAssoc_Server === true && !$skip_pwd_check){
-                // When flag_HNAssoc_Server is true, only allow association members to login
-                // on block, it will show the membership popup
-
-                $originalUser = $this->currentUser;
-                $this->currentUser = [
-                    'ugr_ID' => $user['ugr_ID'],
-                    'ugr_eMail' => $user['ugr_eMail']
-                ];
-                $membership = USystem::checkAssociationMembership($this);
-                $this->currentUser = $originalUser;
-            }
-
-            if($membership === 'nonmember'){
-                $this->addError(HEURIST_ACTION_BLOCKED, 'Association members only');
-                $returnBool = false;
-            }elseif($session_type=='none'){
-                $this->currentUser = $user;
-            }else{
-                $this->doLoginSession($user['ugr_ID'], $session_type);
-            }
-            // After doLoginSession, loginVerify(true) should be called to populate $this->currentUser and full session details
-            // However, the original flow might rely on getCurrentUserAndSysInfo to do this.
-            // For consistency, it's better if doLogin itself ensures currentUser is set or triggers it.
-            // $this->loginVerify($user); // Pass the fetched user array to loginVerify
-            return $returnBool;
-        } else {
-            $this->addError(HEURIST_REQUEST_DENIED,  'The credentials supplied are not correct');
-        }
-
-        return false;
+    public function doLogin($username, $password, $session_type, $skip_pwd_check=false, $is_guest=false): bool
+    {
+        return $this->authSession()->doLogin($username, $password, $session_type, $skip_pwd_check, $is_guest);
     }
 
     /**
@@ -2033,25 +1666,8 @@ EXP;
      *                             - 'remember': Session cookie with 30-day lifetime, sets 'keepalive' flag in session.
      * @return void
      */
-    private function doLoginSession($userID, $session_type){
 
-        $lifetime = 0; // Default: session cookie (expires when browser closes)
-        if($session_type === 'shared'){
-            $lifetime = time() + 24*60*60;     // 1 day
-        } elseif($session_type === 'remember') {
-            $lifetime = time() + 30*24*60*60;  // 30 days
-            $_SESSION[$this->dbnameFull]['keepalive'] = true; // Flag to refresh cookie on subsequent visits
-        }
-
-        USystem::sessionUpdateCookies($lifetime);
-
-        $_SESSION[$this->dbnameFull]['ugr_ID'] = (int)$userID;
-
-        // Update last login time in the database
-        user_updateLoginTime($this->mysqli, $userID);
-    }
-
-
+    
     /**
      * Logs out the current user.
      * Clears relevant session data for the current database, expires the session cookie,
@@ -2059,30 +1675,11 @@ EXP;
      *
      * @return true Always returns true.
      */
-    public function doLogout(){
-
-        $this->startMySession(false); // Ensure session is started to modify it, false to skip folder check
-
-        unset($_SESSION[$this->dbnameFull]['ugr_ID']);
-        unset($_SESSION[$this->dbnameFull]['ugr_Name']);
-        unset($_SESSION[$this->dbnameFull]['ugr_FullName']);
-        if(@$_SESSION[$this->dbnameFull]['ugr_Groups']) {unset($_SESSION[$this->dbnameFull]['ugr_Groups']);}
-        if(@$_SESSION[$this->dbnameFull]['ugr_Permissions']) {unset($_SESSION[$this->dbnameFull]['ugr_Permissions']);}
-        if(@$_SESSION[$this->dbnameFull]['ugr_GuestUser']!=null) {unset($_SESSION[$this->dbnameFull]['ugr_GuestUser']);}
-
-        // clear
-        // even if user is logged to different databases he has the only session per browser
-        // it means logout exits all databases
-        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-
-        setcookie('heurist-sessionid', '', time() - 3600, '/', '', $is_https, true);//logout
-        $this->currentUser = null;
-        session_destroy();
-
-        session_write_close();
-        return true;
+    public function doLogout()
+    {
+        return $this->authSession()->doLogout();
     }
-
+    
     /**
      * Retrieves a specific user preference value from the current user's session data.
      * For 'search_detail_limit', it applies min/max clamping (500-5000).
@@ -2097,14 +1694,12 @@ EXP;
      */
     public function userGetPreference($property, $def=null){
 
-        $res = $_SESSION[$this->dbnameFull]["ugr_Preferences"][$property] ?? null;
+        $res = $this->userSession()->getPreference((string)$property, $def);
 
         // POSSIBLE redundancy: this duplicates same in hapi.js
         if('search_detail_limit' === $property){ // Strict comparison for property name
             if(!$res || $res < 500 ) {$res = 500;} // Strict comparison for numeric values
             elseif($res > 5000 ) {$res = 5000;} // Strict comparison for numeric values
-        }elseif($res === null && $def !== null){ // Strict comparison for null and ensure $def is actually provided
-            $res = $def;
         }
 
         return $res;
@@ -2133,7 +1728,8 @@ EXP;
             // loginVerify(false) is appropriate here if currentUser might not be set yet
             // but we only need the ID. If currentUser is reliably set, getUserId() is enough.
             if ($this->currentUser === null) {
-                $this->loginVerify( false ); // Load from session if not already loaded
+                // Load from session if not already loaded
+                $this->authSession()->loginVerify( false );
             }
             $user_id = $this->getUserId();
         }

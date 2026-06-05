@@ -233,18 +233,8 @@
 
             }elseif(@$params['q']!=null){  //first request - save base filter
                 //remove all other "datatableXXX" keys from session
-                $dbname = $system->dbnameFull(); //dbnameFullWithHost
-                if(@$_SESSION[$dbname]['ugr_Preferences']!=null){
-                    $keys = array_keys($_SESSION[$dbname]['ugr_Preferences']);
-                    if(is_array($keys)){
-                        foreach ($keys as $key) {
-                            if(strpos($key,'datatable')===0){
-                                $_SESSION[$dbname]['ugr_Preferences'][$key] = null;
-                                unset($_SESSION[$dbname]['ugr_Preferences'][$key]);
-                            }
-                        }
-                    }
-                }
+                $system->userSession()->clearPreferencesByPrefix('datatable');
+                
                 //save int session and exit
                 user_setPreferences($system, array($dt_key=>$params['q']));
                 //returns OK
