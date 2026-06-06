@@ -183,7 +183,6 @@ $.widget( "heurist.slidersMenu", {
                     mouseleave: function(e){
                         if($(e.target).parent('#filter_by_groups').length==0){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                            
                             if (!this._isExplorePopupSticky()) { //close ephemeral popup on mouse exit
                             
                                 //this._resetCloseTimers();//reset
@@ -609,7 +608,7 @@ $.widget( "heurist.slidersMenu", {
     _isExplorerMenu_locked: function(){
         
         return (this._explorer_menu_locked
-                || this.element.find('.ui-selectmenu-open').length>0
+                //|| this.element.find('.ui-selectmenu-open').length>0
                 || $('.list_div').is(':visible')      //tag selector dropdown
                 || $('.ui-widget-overlay.ui-front').is(':visible')   //some modal dialog is open
                 );
@@ -1647,19 +1646,23 @@ $.widget( "heurist.slidersMenu", {
                     .appendTo( this.element );
 
                     
-            this._on(this.menues_explore_popup,{
-                mouseover: function(e){
-                    that._resetCloseTimers();
-                    //clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //prevent collapse of section menu popup
-                },
-                mouseleave: function(e){
-                    if(this._active_section=='explore' || this._active_section=='populate'){
-                        this._mouseout_SectionMenu(e);       
-                    }else{
-                        this._collapseMainMenuPanel()    
+            const bindExplorePopupHover = ($popup) => {
+                this._on($popup, {
+                    mouseenter: function(e){
+                        that._resetCloseTimers();
+                    },
+                    mouseleave: function(e){
+                        if(this._active_section === 'explore' || this._active_section === 'populate'){
+                            this._mouseout_SectionMenu(e);
+                        }else{
+                            this._collapseMainMenuPanel();
+                        }
                     }
-                }
-            });
+                });
+            };
+
+            bindExplorePopupHover(this.menues_explore_popup);
+            bindExplorePopupHover(this.menues_saved_filters_popup);            
             
             this.menues_explore_gap = $('<div>')
                     .css({'width':'4px', position:'absolute', opacity: '0.8', 'z-index':103, left:this._widthMenu+'px'}) //200
