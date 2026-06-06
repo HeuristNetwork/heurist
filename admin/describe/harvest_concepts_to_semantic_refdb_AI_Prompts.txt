@@ -12,7 +12,7 @@ I have a list of 'concepts' - the definition of a record type (RTY), base field 
 which will be stored in a Heurist database hdb_Heurist_Concept_Definitions (referred to hereafter as the target datbase).
 
 The aim is to find where each concept was first defined and store the information relating to that original concept definition
-in the target database. Since the target databae has a standard Heurist structure, the concepts found in the databases on the server can be 
+in the target database. Since the target database has a standard Heurist structure, the concepts found in the databases on the server can be 
 copied more or less unchanged to the target database.
 
 
@@ -64,7 +64,7 @@ See attached SQL file for the definition of these tables.
 
 If xxx_OriginatingDBID is not null or zero, this is a derivative copy of the concept and the record is skipped. 
 
-If xxx_OriginatingDBID is null or 0 the concept has been defined in the current database and we wish to transfer it to the target database.
+A!!! If xxx_OriginatingDBID = sys_dbRegisteredID the concept has been defined in the current database and we wish to transfer it to the target database.
 
     . Copy the record and insert as a record of the same type in the current database with the following changes: 
         . The value of sysIdentification.sys_dbRegisteredID should be inserted in xxx_OriginatingDBID
@@ -81,7 +81,7 @@ Term fields reference a vocabulary (which is just a root term with no parent) us
 The local iD of the vocabulary term is recorded in dty_JsonTermIDTree. Relationship markers also reference a vocabulary via this field.
 
 Record pointer and relationship marker fields reference one or more target record types as a comma-delimited list in the field dty_PtrTargetRectypeIDs. 
-These record types also use the local IDs of the soruce database.
+These record types also use the local IDs of the source database.
 
 The vocabularies and record types will often be derivative concepts which should be found and imported from the database
 where they were originally defined, however there is no guarantee:
@@ -119,7 +119,7 @@ connects to each configured server
 enumerates hdb_% databases
 skips hdb_Heurist_Concept_Definitions
 skips unregistered DBs where sys_dbRegisteredID is null/0
-harvests only concepts with xxx_OriginatingDBID null/0
+harvests only concepts with xxx_OriginatingDBID null/0   A!!! WRONG!!!! NEED xxx_OriginatingDBID==sys_dbRegisteredID ONLY
 inserts into the target DB with a new local PK
 sets:
 xxx_OriginatingDBID = sys_dbRegisteredID
@@ -317,3 +317,71 @@ the list of servers accessed
 a second separator line
 
 That should keep repeat-run logs much more manageable.
+
+
+NEW APPAROACH AND REQUEST 2026-06-06
+
+Instead of SSH and remote connection to targer servers and database we have to use api requests. 
+<server> is URL of source server: IE http://127.0.0.1/heurist/ or https://heurist.huma-num.fr/h7-alpha/
+
+<database name> - is name of database on remote/source server. For "dbs" requests it will be taken from configuration along with URL.
+For other requests it will be current db from the list of  registered databases.
+
+1) To get list of registered databases 
+<server>api/<database name>/dbs?details=raw&sys_dbRegisteredID=%3E0  - list of registered database on source server
+Response is:
+[{"sys_Database":"heurist_contacts","sys_dbRegisteredID":"1609","sys_dbName":"Heurist Projects and Contacts","sys_dbRights":"","sys_dbDescription":"A database of people and projects in the Heurist network."},{"sys_Database":"judaism_and_rome","sys_dbRegisteredID":"1683","sys_dbName":"Please enter a DB name ...","sys_dbRights":"Please define ownership and rights here ...","sys_dbDescription":"Judaism and Rome project directed by Katell Berthelot, originally developed in Drupal and converted to Heurist in 2022"},{"sys_Database":"libraries_readers_culture_18c_atlantic","sys_dbRegisteredID":"1323","sys_dbName":"Please enter a DB name ...","sys_dbRights":"Please define ownership and rights here ...","sys_dbDescription":"Libraries, Reading Communities and Cultural Formation in the Eighteenth-Century Atlantic"},{"sys_Database":"mpce_mapping_print_charting_enlightenment","sys_dbRegisteredID":"1318","sys_dbName":"Mapping Print, Charting Enlightenment","sys_dbRights":"Please define ownership and rights here ...","sys_dbDescription":"Bibliometric data on C18 French book trade"},{"sys_Database":"osmak_5","sys_dbRegisteredID":"1111","sys_dbName":"Please enter a DB name ...","sys_dbRights":"Please define ownership and rights here ...","sys_dbDescription":null},{"sys_Database":"wsu_china_australia_heritage_corridor","sys_dbRegisteredID":"1188","sys_dbName":"Please enter a DB name ...","sys_dbRights":"Please define ownership and rights here ...","sys_dbDescription":"A database of information about migration and connections between China and Australia, including interviews, heritage sites notably around Zhongshang, and flows of people and support between the two countries. Developed for a research project at the Institute for Culture and Society at Western Sydney University led by Denis Byrne and Ien Ang."}]
+
+2) To get count of entities to be imported:
+<server>api/<database name>/dty?details=id&dty_OriginatingDBID=<current sys_dbRegisteredID>&limit=2
+{"queryid":null,"offset":null,"count":"452","reccount":2,"records":[77,180]}
+
+Check "count" if it is positive we have records to be imported
+
+To get data use this URL:
+
+<server>api/<database name>/dty?details=raw&dty_OriginatingDBID=<current sys_dbRegisteredID>&offset=<N>
+
+It returns chunks by 100 records (param "limit" max 100). Use "count" from previous step and "offset" parameter to download the entire dataset. I can increase chunk size ("limit" max value) to desired value (1000, 5000?), if downloading by chunks is not good/reliable?
+
+
+Response is:
+[{"dty_ID":"1446","dty_Name":"Cause of death 2","dty_Documentation":"Please document the nature of this detail type (field)) ...","dty_Type":"enum","dty_HelpText":"The cause of death, if known\/applicable","dty_ExtendedDescription":"","dty_EntryMask":"","dty_Status":"open","dty_OriginatingDBID":"1177","dty_NameInOriginatingDB":"Cause of death 2","dty_IDInOriginatingDB":"244","dty_DetailTypeGroupID":"8","dty_OrderInGroup":"0","dty_JsonTermIDTree":"10008","dty_TermIDTreeNonSelectableIDs":"","dty_PtrTargetRectypeIDs":"","dty_FieldSetRectypeID":null,"dty_ShowInLists":"1","dty_NonOwnerVisibility":"viewable","dty_Modified":"2017-07-09 19:44:25","dty_LocallyModified":"0","dty_SemanticReferenceURL":null},{"dty_ID":"1447","dty_Name":"Other persons involved 2","dty_Documentation":"Please document the nature of this detail type (field)) ...","dty_Type":"relmarker","dty_HelpText":"Other people involved in an organisation or event","dty_ExtendedDescription":"","dty_EntryMask":"","dty_Status":"open","dty_OriginatingDBID":"1177","dty_NameInOriginatingDB":"Other persons involved 2","dty_IDInOriginatingDB":"246","dty_DetailTypeGroupID":"8","dty_OrderInGroup":"0","dty_JsonTermIDTree":"10249","dty_TermIDTreeNonSelectableIDs":"","dty_PtrTargetRectypeIDs":"10","dty_FieldSetRectypeID":null,"dty_ShowInLists":"1","dty_NonOwnerVisibility":"viewable","dty_Modified":"2017-07-09 19:44:25","dty_LocallyModified":"0","dty_SemanticReferenceURL":null},{"dty_ID":"1448","dty_Name":"Person that participate","dty_Documentation":"Please document the nature of this detail type (field)) ...","dty_Type":"relmarker","dty_HelpText":"People who participate in an organisation, event, ownership etc.","dty_ExtendedDescription":"","dty_EntryMask":"","dty_Status":"open","dty_OriginatingDBID":"1177","dty_NameInOriginatingDB":"Participant person(s) 2","dty_IDInOriginatingDB":"245","dty_DetailTypeGroupID":"8","dty_OrderInGroup":"0","dty_JsonTermIDTree":"10249","dty_TermIDTreeNonSelectableIDs":"","dty_PtrTargetRectypeIDs":"10","dty_FieldSetRectypeID":null,"dty_ShowInLists":"1","dty_NonOwnerVisibility":"viewable","dty_Modified":"2026-06-03 15:29:34","dty_LocallyModified":"1","dty_SemanticReferenceURL":""}]
+
+For other tables requests and response format is similar
+<server>api/<database name>/rty?details=id&rty_OriginatingDBID=<current sys_dbRegisteredID>&limit=2
+<server>api/<database name>/rst?details=id&rst_OriginatingDBID=<current sys_dbRegisteredID>&limit=2
+<server>api/<database name>/trm?details=id&trm_OriginatingDBID=<current sys_dbRegisteredID>&limit=2
+
+and 
+
+<server>api/<database name>/rty?details=raw&rty_OriginatingDBID=<current sys_dbRegisteredID>&offset=<N>
+<server>api/<database name>/rst?details=raw&rst_OriginatingDBID=<current sys_dbRegisteredID>&offset=<N>
+<server>api/<database name>/trm?details=raw&trm_OriginatingDBID=<current sys_dbRegisteredID>&offset=<N>
+
+
+IMPORTANT NOTES
+
+1) Need to harvest if the concept has xxx_OriginatingDBID equals to sys_dbRegisteredID
+2) null values may be returned as empty strings. Need to omit this fields from addition.
+3) Some fields refers to another records by local ids. Thus, script has to replace them to new local id values:
+in defDetailTypes: dty_PtrTargetRectypeIDs csv values refer to defRecTypes
+                   dty_JsonTermIDTree  refers to defTerms
+in defRecStructure: rst_RecTypeID, rst_CreateChildIfRecPtr refer to defRecTypes
+                    rst_DetailTypeID refers to defDetailTypes
+                    (not used)rst_PtrFilteredIDs csv values refer to defRecTypes
+                    (not used) rst_FilteredJsonTermIDTree
+                    rst_CalcFunctionID refer to defCalcFunctions - need to be implemented later!!!!
+                    
+in defTerms         trm_InverseTermID, trm_ParentTermID refer to defTerms itself. If not referred should be zero.
+
+4) 3 tables have column that specify a group. 
+
+defRecTypes.rty_RecTypeGroupID  refers to defRecTypeGroups
+defDetailTypes.dty_DetailTypeGroupID to defDetailTypeGroups
+defTerms.trm_VocabularyGroupID  to defVocabularyGroups
+
+Need to create (if not exists ) special groups with name equal to source database name and use group ids for these fields.
+
+
+Before coding, please provide your remarks/overview first 
