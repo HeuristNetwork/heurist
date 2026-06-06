@@ -98,7 +98,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }
         else if(this.options.actionName=='clone')
         {
-            this._checkNewDefinitions();
+            if(!window.hWin.HEURIST4.util.isPositiveInt(window.hWin.HAPI4.sysinfo.db_registeredid) && window.hWin.HAPI4.sysinfo.sysadmin_email !== window.hWin.HAPI4?.currentUser.ugr_eMail){
+                this._checkNewDefinitions();
+            }
 
             if(window.hWin.HAPI4.sysinfo.db_total_records<50000){
                 this._$('.large-db').hide();
@@ -359,7 +361,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         let request = {action: 'check_newdefs', db: window.hWin.HAPI4.database};
         window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
                 if (response.status == window.hWin.ResponseStatus.OK) {
-                    if(response.data!=''){ // Non-empty response.data indicates new definitions found
+                    if(response.data != ''){ // Non-empty response.data indicates new definitions found
                         that._$('#div_need_password').show(); // Show password input field
                         that._$('#new_defs_warning').text(response.data); // Display warning message
                     }
