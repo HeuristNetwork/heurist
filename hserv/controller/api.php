@@ -327,7 +327,6 @@ if (@$requestUri[3]=='iiif') {
     }
 
     if($requestUri[3]==='login'){
-
         if(!$system->doLogin(filter_var($req_params['fields']['login']??$req_params['login']??null, FILTER_SANITIZE_STRING),
                              $req_params['fields']['password']??$req_params['password']??null, 'shared'))
         {
