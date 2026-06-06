@@ -69,6 +69,7 @@ class DbDefDetailTypes extends DbEntityBase
         $this->searchMgr->addPredicate('dty_Status');
         $this->searchMgr->addPredicate('dty_Modified');
         $this->searchMgr->addPredicate('dty_DetailTypeGroupID');
+        $this->searchMgr->addPredicate('dty_OriginatingDBID');
 
         switch (@$this->data['details']){
             case 'id': $this->searchMgr->setSelFields('dty_ID'); break;
@@ -77,6 +78,10 @@ class DbDefDetailTypes extends DbEntityBase
                 break;
             case 'list':
                 $this->searchMgr->setSelFields('dty_ID,dty_Name,dty_ShowInLists,dty_HelpText,dty_Type,dty_Status,dty_DetailTypeGroupID');
+                break;
+            case 'raw':
+                //get all fields from database 
+                $this->searchMgr->setSelFields('*');
                 break;
             default:   // full
                 $this->searchMgr->setSelFields(implode(',', $this->fieldNames));

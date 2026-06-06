@@ -151,7 +151,9 @@ class DbDefTerms extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('trm_ParentTermID', true);
         if($pred!=null) {array_push($where, $pred);}
 
-
+        $pred = $this->searchMgr->getPredicate('trm_OriginatingDBID');
+        if($pred!=null) {array_push($where, $pred);}
+        
         $needCheck = false;
 
         //compose SELECT it depends on param 'details' ------------------------
@@ -169,6 +171,10 @@ class DbDefTerms extends DbEntityBase
             .'trm_Domain,IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
             .',trm_VocabularyGroupID,trm_OrderInBranch,trm_Code,trm_Status';
 
+        }elseif(@$this->data['details']=='raw'){
+            
+            $this->data['details'] = ['*'];
+            
         }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'trm_ID,trm_Label,trm_Description,trm_InverseTermID,'
@@ -195,16 +201,18 @@ class DbDefTerms extends DbEntityBase
             }
         }
 
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search('trm_ID', $this->data['details']);
-        if($idx>0){
-            unset($this->data['details'][$idx]);
-            $idx = false;
+        if($this->data['details'][0]!=='*'){
+            //ID field is mandatory and MUST be first in the list
+            $idx = array_search('trm_ID', $this->data['details']);
+            if($idx>0){
+                unset($this->data['details'][$idx]);
+                $idx = false;
+            }
+            if($idx===false){
+                array_unshift($this->data['details'], 'trm_ID');
+            }
+            $is_ids_only = (count($this->data['details'])==1);
         }
-        if($idx===false){
-            array_unshift($this->data['details'], 'trm_ID');
-        }
-        $is_ids_only = (count($this->data['details'])==1);
 
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM defTerms';

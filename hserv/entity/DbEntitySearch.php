@@ -319,20 +319,25 @@ class DbEntitySearch
      */
     public function composeAndExecute($orderBy, $sup_tables=null, $sup_where=null){
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
+        if($this->data['details']==='*'){
+            $this->data['details'] = ['*'];
+        }else{
+        
+            if(!is_array($this->data['details'])){ //specific list of fields
+                $this->data['details'] = explode(',', $this->data['details']);
+            }
 
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search($this->primaryField, $this->data['details']);
-        if($idx>0){ //remove from list if not on first place
-            unset($this->data['details'][$idx]);
-            $idx = false;
+            //ID field is mandatory and MUST be first in the list
+            $idx = array_search($this->primaryField, $this->data['details']);
+            if($idx>0){ //remove from list if not on first place
+                unset($this->data['details'][$idx]);
+                $idx = false;
+            }
+            if($idx===false){
+                array_unshift($this->data['details'], $this->primaryField); //insert first
+            }
+            $is_ids_only = (count($this->data['details'])==1);
         }
-        if($idx===false){
-            array_unshift($this->data['details'], $this->primaryField); //insert first
-        }
-        $is_ids_only = (count($this->data['details'])==1);
 
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])

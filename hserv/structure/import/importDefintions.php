@@ -223,6 +223,8 @@ class ImportDefinitions {
                     $this->mysqli->query("SET SESSION sql_mode=''");
                     mysql__foreign_check( $this->mysqli, true );
 
+                    error_log($error.' '.$merror);
+                    
                     //add error
                     $this->system->addError(HEURIST_DB_ERROR,  $error, $merror);
                     return false;

@@ -63,12 +63,65 @@ class DbSysDatabases extends DbEntityBase
         if(@$this->data['ugr_eMail']){
             $email_filter = $this->data['ugr_eMail'];
         }
+        $databases = mysql__getdatabases4($mysqli, false, $database_filter, $email_filter, 'user');
+        
+        
+        if(@$this->data['restapi']==1){
 
+            if(parent::search()===false){
+                return false;
+            }
+            $predReg = $this->searchMgr->getPredicate('sys_dbRegisteredID');
+
+            //ids (default) or raw 
+            $is_ids_only = (($this->data['details'] ?? 'id') === 'id');
+            if($is_ids_only){
+                //name only
+                $query = 'SELECT <DB> as sys_Database FROM ';
+            }else{
+                $query = 'SELECT <DB> as sys_Database, sys_dbRegisteredID,sys_dbName,sys_dbRights,sys_dbDescription FROM ';
+            }
+            
+            $response = array();
+
+            foreach($databases as $database){
+                if($is_ids_only && $predReg===null){
+                    $response[] = $database;
+                    continue;
+                }
+                
+                $q = str_replace('<DB>','"'.$database.'"',$query).' `'.HEURIST_DB_PREFIX.$database.'`.`sysIdentification`';
+                
+                if($predReg!==null){
+                    $q = $q.' WHERE '.$predReg;
+                }
+                
+                $rec = mysql__select_row_assoc( $mysqli, $q );
+                if($rec){
+                    if($is_ids_only){
+                        $response[] = $database;
+                    }else{
+                        $response[] = $rec;    
+                    }
+                    
+                }
+            }
+
+            if($is_ids_only){
+
+                $response = array(
+                    'count'=>count($response),
+                    'reccount'=>count($response),
+                    'records'=>$response);
+
+            }
+
+            return $response;     
+        }//restapi
+        
         $order = [];
         $records = [];
-
-        $databases = mysql__getdatabases4($mysqli, false, $database_filter, $email_filter, 'user');
-
+        
         foreach($databases as $database){
             $records[$database] = [$database];
             $order[] = $database;

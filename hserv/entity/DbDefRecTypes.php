@@ -88,6 +88,10 @@ class DbDefRecTypes extends DbEntityBase
         //find rectype belong to group
         $pred = $this->searchMgr->getPredicate('rty_RecTypeGroupID');
         if($pred!=null) {array_push($where, $pred);}
+        
+        $pred = $this->searchMgr->getPredicate('rty_OriginatingDBID');
+        if($pred!=null) {array_push($where, $pred);}
+        
 
         if(@$this->data['details']==null) {$this->data['details'] = 'full';}
 
@@ -110,6 +114,11 @@ class DbDefRecTypes extends DbEntityBase
             $this->data['details'] = 'rty_ID,rty_Name,rty_Description,rty_ShowInLists,rty_Status,rty_RecTypeGroupID';
             //$needCount = true;  //need count only for all groups
 
+        }elseif(@$this->data['details']=='raw'){
+            
+            $this->data['details'] = ['*'];
+            $needCheck = false;
+            
         }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'rty_ID,rty_Name,rty_OrderInGroup,rty_Description,rty_TitleMask,'
@@ -209,7 +218,7 @@ class DbDefRecTypes extends DbEntityBase
 
         }
 
-        $is_ids_only = (count($this->data['details'])==1);
+        $is_ids_only = (count($this->data['details'])==1 && $this->data['details'][0]!=='*');
 
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])

@@ -71,6 +71,7 @@ class DbDefRecStructure extends DbEntityBase
         $this->searchMgr->addPredicate('rst_RecTypeID');
         $this->searchMgr->addPredicate('rst_DetailTypeID');
         $this->searchMgr->addPredicate('rst_CalcFunctionID');
+        $this->searchMgr->addPredicate('rst_OriginatingDBID');
 
         switch (@$this->data['details']){
             case 'id': $this->searchMgr->setSelFields('rst_ID'); break;
@@ -90,6 +91,9 @@ class DbDefRecStructure extends DbEntityBase
                 break;
             case 'full':
                 $this->searchMgr->setSelFields(implode(',', $this->fieldNames));
+                break;
+            case 'raw':
+                $this->searchMgr->setSelFields('*');
                 break;
             case 'structure':
                 $is_structure = true;

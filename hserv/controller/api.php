@@ -118,6 +118,7 @@ $entities = array(
 'terms'=>'DefTerms',
 'reminders'=>'DbUsrReminders',
 
+'dbs'=>'SysDatabases',
 'users'=>'SysUsers',
 'groups'=>'SysGroups',
 'records'=>'Records', //only search allowed
@@ -258,8 +259,8 @@ if($method=='save' || $method=='add'){
     }*/
 }else{
 
-    if(@$req_params['limit']==null || $req_params['limit']>100 || $req_params['limit']<1){
-        $req_params['limit']=100;
+    if(@$req_params['limit']==null || $req_params['limit']>1000 || $req_params['limit']<1){
+        $req_params['limit']=1000;
     }
 
 }
