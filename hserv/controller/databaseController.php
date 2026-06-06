@@ -298,7 +298,7 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
 'To perform this action you must be logged in as Administrator of group \'Database Managers\' or as Database Owner');
                             }else{
                                 $allow_action = true;
-                                if($action=='clone' && !($sourceRegID>0)){
+                                if($action=='clone' && !$sourceRegID <= 0 && !$system->isSystemAdmin()){
                                     //check for new definitions - sysadmin protection
                                     $hasWarning = DbUtils::databaseCheckNewDefs();
                                     if($hasWarning!=false && $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
