@@ -1433,7 +1433,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 {
                     layout_language: 'en',
                     search_result_pagesize: 100,
-                    search_detail_limit: 500,
+                    search_detail_limit: 2000,
                     userCompetencyLevel: 2, //'beginner',
                     userFontSize: 12, //px
                     deriveMapLocation: true,

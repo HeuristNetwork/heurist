@@ -822,10 +822,10 @@ console.log(treedata);
                     original_heurist_query = recset.getRequest(); //keep for possible 'save as layer'
                     
                     if(recset.length()<2001){ //limit query by id otherwise use current query
+                        curr_request = original_heurist_query;
+                    }else{
                         let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
                         curr_request = { w:'all', q:'ids:'+recset.getIds(MAXITEMS).join(',') };
-                    }else{
-                        curr_request = original_heurist_query;
                     }            
                 
             }else if( window.hWin.HEURIST4.util.isObject(data)&& data['q']) {
