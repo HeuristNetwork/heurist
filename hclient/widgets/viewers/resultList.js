@@ -226,6 +226,8 @@ $.widget( "heurist.resultList", {
     observer: null,
     expObserver: null,
     _expandedHeightCache: {},
+
+    _showRecordOwner: false, // whether to show the record owner inline
     
     // the constructor
     _create: function() {
@@ -917,7 +919,7 @@ $.widget( "heurist.resultList", {
             }
         }
 
-        let showExportBackend = this.options.entityName=='records' && !this._is_publication; // show CSV export button on backend
+        let showExportBackend = this.options.entityName == 'records' && !this._is_publication; // show CSV export button on backend
         if(showExportBackend || this.options.show_export_button){ 
 
             let title = showExportBackend ? 'Export current results in CSV format' : 'Export current results';
@@ -1748,7 +1750,7 @@ $.widget( "heurist.resultList", {
             }else if(ugr_id== window.hWin.HAPI4.currentUser.ugr_ID){
                 return window.hWin.HAPI4.currentUser.ugr_FullName;
             }else if(window.hWin.HAPI4.sysinfo.db_usergroups[ugr_id]){
-                return window.hWin.HAPI4.sysinfo.db_usergroups[ugr_id];    
+                return window.hWin.HAPI4.sysinfo.db_usergroups[ugr_id];
             }else{
                 return 'user# '+ugr_id;
             }
@@ -1779,11 +1781,11 @@ $.widget( "heurist.resultList", {
             }
 
             let hint = __getOwnerName(owner_id)+', '+window.hWin.HR(visibility);
-            owner_id = owner_id == 0 ? '' : owner_id;
 
             // Displays owner group ID, green if hidden, gray if visible to others, red if public visibility
-            html_owner =  '<span class="rec_owner logged-in-only" style="width:20px;padding-top:2px;display:inline-block;color:'
-                     + clr + '" title="' + hint + '"><b>' + owner_id + '</b></span>';
+            html_owner = `<span class="rec_owner logged-in-only"
+                style="width:20px;padding-top:2px;display:inline-block;color:${window.hWin.HAPI4.has_access(owner_id) ? 'silver' : 'red'}" title="${hint}">
+                <b class="ownerName" data-owner="${owner_id}"></b></span>`;
 
             if(is_logged){ // hide eye if user not logged in
 
@@ -1798,7 +1800,7 @@ $.widget( "heurist.resultList", {
                     vis_title = window.hWin.HR('resultList_private_record');
                 }
 
-                html_owner += `<span title="${vis_title}" style="position:relative;left:-8px;" class="recvis-${visLabel}">${vis_icon}</span>`;
+                html_owner += `<span title="${vis_title}" style="position:relative;left:-8px;" class="recvis-${visLabel} rec_visibility">${vis_icon}</span>`;
             }
         }
         
@@ -1836,10 +1838,9 @@ $.widget( "heurist.resultList", {
         + html_thumb
         
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
-        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/> '
-        +     `<span class="logged-in-only ui-icon ui-icon-bookmark" style="color:${bkm_ID ? '#ff8844' : '#dddddd'};display:inline-block;"></span>`
         +     html_owner
+        +     `<span class="logged-in-only ui-icon ui-icon-bookmark" style="color:${bkm_ID ? '#ff8844' : '#dddddd'};display:inline-block;"></span>`
+        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/> '
         +     html_p_reminder
         + '</div>'
 
@@ -2387,10 +2388,7 @@ $.widget( "heurist.resultList", {
             //adjust selection in focus
             this.scrollToRecordDiv( selected_rec_ID, true );
         }
-        
 
-        
-        
         this.triggerSelection();
     },
     //_recordDivOnClick
@@ -2709,7 +2707,6 @@ $.widget( "heurist.resultList", {
     */
     getSelected: function( idsonly ){
 
-
         if(this.options.select_mode == 'select_multi'){
 
             if(this._currentMultiSelection==null){
@@ -2992,6 +2989,34 @@ $.widget( "heurist.resultList", {
                                .find('.ui-icon').css('color', '')
                 : $content_view.attr('title', 'This function is disabled for over 100 records as it is really only usable with a limited record count')
                                .find('.ui-icon').css('color', 'grey');
+        }
+
+        if(this.options.entityName == 'records' && this.div_toolbar.find('#toggleOwnerDisplay').length === 0 && this.options.recordDivClass !== 'public'){
+
+            let $ownership = $('<span>', {
+                style: 'float: left; padding: 6px 0 0 1.5em;',
+                class: 'fake_link',
+                id: 'toggleOwnerDisplay',
+                text: 'see owners'
+            }).appendTo( this.div_toolbar );
+
+            this._on($ownership, {
+                click: () => {
+
+                    if(this._showRecordOwner){
+                        $ownership.text('see owners');
+                        this._showRecordOwner = false;
+                        this.div_content.removeClass('show-record-owners');
+                        this.div_content.find('[data-owner]').hide();
+                    }else{
+                        $ownership.text('hide owners');
+                        this._showRecordOwner = true;
+                        this.div_content.addClass('show-record-owners');
+                        this._toggleOwnershipDisplay();
+                        this.div_content.find('[data-owner]').show();
+                    }
+                }
+            });
         }
     },
 
@@ -3369,7 +3394,7 @@ $.widget( "heurist.resultList", {
                             html  += rec_div;
                         }
                         rec_onpage.push(recID);
-                        
+
                     }else{
                         //record is not loaded yet
                         html  += this._renderRecord_html_stub( recID );    
@@ -3377,9 +3402,6 @@ $.widget( "heurist.resultList", {
                     }
                 }
                 this._count_of_divs++;
-                /*this._on( recdiv, {
-                click: this._recordDivOnClick
-                });*/
             }
         }
         
@@ -3495,7 +3517,6 @@ $.widget( "heurist.resultList", {
         if(this.options.view_mode == 'horizontal' || this.options.view_mode == 'vertical'){  //|| this.options.view_mode == 'icons_list'){
             html = '<div>'+html+'</div>';
         }
-        
 
         this.div_content[0].innerHTML += html;
 
@@ -3777,6 +3798,10 @@ $.widget( "heurist.resultList", {
             if(this._is_fancybox_active){
                 this.div_content.mediaViewer({selector:'.realThumb', search_initial:'ids:'+rec_onpage.join(',') });        
             }
+        }
+
+        if(this._showRecordOwner){ // display owners, if previously shown
+            this._toggleOwnershipDisplay();
         }
 
         // Replace default rectype thumbnail with linked media thumbnail
@@ -4818,6 +4843,106 @@ $.widget( "heurist.resultList", {
             },
             selectOnSave: manualTrigger
         });
+    },
+
+    _toggleOwnershipDisplay: function(){
+
+        const fullUserRetrieval = !window.hWin.HEURIST4.allUsersCache;
+
+        if(fullUserRetrieval || !window.hWin.HEURIST4.allUsersCache[0].username){
+
+            let request = {
+                a: 'search',
+                entity: 'sysUsers',
+                details: 'ugr_Name',
+                'sort:ugr_LastName': '1'
+            };
+
+            if(fullUserRetrieval){
+                window.hWin.HEURIST4.allUsersCache = [];
+                request['details'] = ['ugr_FirstName', 'ugr_LastName', 'ugr_Name'];
+            }
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
+                
+                if(response.status !== window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                let recordset = new HRecordSet(response.data);
+
+                if(recordset.count_total() === 0){
+                    window.hWin.HEURIST4.msg.showMsgErr('Unable to retrieve user details<br>Please submit a ticket (under the "Help" menu)');
+                    return;
+                }
+
+                if(fullUserRetrieval){
+
+                    recordset.each2((id,rec) => {
+                        let record = {id: id, name: `${rec['ugr_FirstName']} ${rec['ugr_LastName']}`, username: rec['ugr_Name']};
+                        window.hWin.HEURIST4.allUsersCache.push(record);
+                    });
+                }else{
+
+                    for(let user of window.hWin.HEURIST4.allUsersCache){
+
+                        const ugr_ID = user['id'];
+                        const record = recordset.getById(ugr_ID);
+
+                        user['username'] = recordset.fld(record, 'ugr_Name');
+                    }
+                }
+
+                this._toggleOwnershipDisplay();
+            });
+
+            return;
+        }
+
+        let assignOwnerLabel = (span) => {
+
+            if(!span){
+                return;
+            }
+
+            let owner = $(span).attr('data-owner');
+            let parent = span.parentElement;
+            let parentTitle = parent.title;
+
+            if(span.innerText !== ''){
+                return;
+            }
+
+            if(Object.hasOwn(window.hWin.HAPI4.sysinfo.db_usergroups, owner)){
+                $(span).text(window.hWin.HAPI4.sysinfo.db_usergroups[owner]);
+                return;
+            }
+
+            for(let user of window.hWin.HEURIST4.allUsersCache){
+
+                if(user['id'] == owner){
+
+                    let username = user['username'];
+                    username = username.indexOf('@') < username.indexOf('.') ? username.split('@')[0] : username.split('.')[0];
+
+                    $(span).text(username);
+
+                    if(parentTitle.indexOf('user# ') === 0){ // update parent title, which could have the user ID instead of the user's name
+                        parentTitle = parentTitle.split(',');
+                        parentTitle[0] = user['name'];
+                        parent.title = parentTitle.join(',');
+                    }
+
+                    return;
+                }
+            }
+        };
+
+        this.div_content.find('.ownerName').each((idx, span) => {
+            assignOwnerLabel(span);
+        });
+
     }
-    
+
 });
