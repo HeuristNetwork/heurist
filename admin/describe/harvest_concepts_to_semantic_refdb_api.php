@@ -321,6 +321,7 @@ function importConceptRows(
         }
 
         $prepared = prepareBaseRow($row, $spec, $origin, $set->registeredId);
+        $prepared = ensureUniqueConceptNameForInsert($repo, $summary, $set, $type, $spec, $origin, $prepared);
 
         if ($type === 'RTY') {
             $prepared['rty_RecTypeGroupID'] = $groupIds['rty'];
@@ -474,6 +475,113 @@ function prepareBaseRow(array $row, array $spec, array $origin, int $currentRegi
     }
 
     return $prepared;
+}
+
+function ensureUniqueConceptNameForInsert(
+    TargetRepository $repo,
+    Summary $summary,
+    SourceDataset $set,
+    string $type,
+    array $spec,
+    array $origin,
+    array $prepared
+): array {
+    if (!in_array($type, ['RTY', 'DTY'], true)) {
+        return $prepared;
+    }
+
+    $nameField = $spec['name_field'] ?? null;
+    if (!$nameField || !isset($prepared[$nameField])) {
+        return $prepared;
+    }
+
+    $baseName = trim((string)$prepared[$nameField]);
+    if ($baseName === '') {
+        return $prepared;
+    }
+
+    if (!$repo->columnValueExists($spec['table'], $nameField, $baseName)) {
+        return $prepared;
+    }
+
+    $maxLength = conceptNameMaxLength($type);
+    $suffix = sprintf(' [%s%d-%d]', $type, $origin['db'], $origin['id']);
+    $candidate = makeUniqueNameCandidate($repo, $spec['table'], $nameField, $baseName, $suffix, $maxLength);
+
+    $prepared[$nameField] = $candidate;
+    $summary->warnings++;
+    logWarning(sprintf(
+        '%s renamed %s duplicate name "%s" to "%s" for %s%d-%d',
+        $set->label(),
+        $type,
+        $baseName,
+        $candidate,
+        $type,
+        $origin['db'],
+        $origin['id']
+    ));
+
+    return $prepared;
+}
+
+function conceptNameMaxLength(string $type): int
+{
+    return $type === 'RTY' ? 63 : 255;
+}
+
+function makeUniqueNameCandidate(TargetRepository $repo, string $table, string $field, string $baseName, string $suffix, int $maxLength): string
+{
+    $candidate = truncateWithSuffix($baseName, $suffix, $maxLength);
+    if (!$repo->columnValueExists($table, $field, $candidate)) {
+        return $candidate;
+    }
+
+    for ($i = 2; $i <= 999; $i++) {
+        $numberedSuffix = preg_replace('/\]$/', " #{$i}]", $suffix) ?? ($suffix . " #{$i}");
+        $candidate = truncateWithSuffix($baseName, $numberedSuffix, $maxLength);
+        if (!$repo->columnValueExists($table, $field, $candidate)) {
+            return $candidate;
+        }
+    }
+
+    throw new RuntimeException("Unable to create unique {$table}.{$field} value for {$baseName}");
+}
+
+function truncateWithSuffix(string $baseName, string $suffix, int $maxLength): string
+{
+    $baseName = trim($baseName);
+    $suffix = trim($suffix);
+
+    if ($maxLength <= 0) {
+        return $baseName . ' ' . $suffix;
+    }
+
+    $suffixLength = strLengthUtf8($suffix);
+    if ($suffixLength >= $maxLength) {
+        return strSubstringUtf8($suffix, 0, $maxLength);
+    }
+
+    $available = $maxLength - $suffixLength;
+    $truncatedBase = rtrim(strSubstringUtf8($baseName, 0, $available));
+
+    if ($truncatedBase === '') {
+        return strSubstringUtf8($suffix, 0, $maxLength);
+    }
+
+    return $truncatedBase . $suffix;
+}
+
+function strLengthUtf8(string $value): int
+{
+    return function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
+}
+
+function strSubstringUtf8(string $value, int $start, ?int $length = null): string
+{
+    if (function_exists('mb_substr')) {
+        return $length === null ? mb_substr($value, $start, null, 'UTF-8') : mb_substr($value, $start, $length, 'UTF-8');
+    }
+    return $length === null ? substr($value, $start) : substr($value, $start, $length);
 }
 
 function sourceOrigin(array $row, array $spec, int $currentRegisteredId): ?array
@@ -851,7 +959,7 @@ final class ApiClient
             $url = $this->buildUrl($server, $dbName, $entity, $params);
             $json = $this->getJson($url, $server);
             $records = $this->extractRecords($json);
-            $reccount = $this->extractTotalCount($json);
+            $reccount = $this->extractReccount($json, count($records));
 
             foreach ($records as $record) {
                 if (is_array($record)) {
@@ -989,6 +1097,14 @@ final class ApiClient
         }
         $records = $this->extractRecords($json);
         return count($records);
+    }
+
+    private function extractReccount(array $json, int $fallback): int
+    {
+        if (array_key_exists('reccount', $json)) {
+            return (int)$json['reccount'];
+        }
+        return $fallback;
     }
 
 }
@@ -1290,6 +1406,21 @@ final class TargetRepository
         }
         $stmt->bindValue(':__pk', $pkValue, PDO::PARAM_INT);
         $stmt->execute();
+    }
+
+    public function columnValueExists(string $table, string $field, string $value): bool
+    {
+        $allowed = array_flip($this->columns[$table] ?? []);
+        if (!isset($allowed[$field])) {
+            throw new RuntimeException("Unknown column {$table}.{$field}");
+        }
+
+        $sql = "SELECT 1 FROM `{$table}` WHERE `{$field}` = :value LIMIT 1";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':value', $value, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchColumn() !== false;
     }
 
     private function ensureGroup(string $table, string $pk, string $nameField, string $name, array $extra): int
