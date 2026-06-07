@@ -129,6 +129,8 @@ function main(): void
             logError("Unable to authenticate/fetch registered databases from {$server}: " . $e->getMessage());
             continue;
         }
+        
+ //DEBUG ONE DB ONLY $databases = [['sys_Database'=>'osmak_1', 'sys_dbRegisteredID'=>1750, 'sys_dbName'=>'TEST!']];        
 
         foreach ($databases as $dbInfo) {
             $summary->databasesSeen++;
@@ -213,7 +215,7 @@ function isLocalSourceServer(string $server): bool
     $parts = parse_url(normaliseServerUrl($server));
     $host = strtolower((string)($parts['host'] ?? ''));
 
-    return in_array($host, ['localhost', '127.0.0.1', '::1'], true);
+    return in_array($host, ['localhost', '127.0.0.1', '::1', 'heuristref.net'], true);
 }
 
 function fetchSourceDataset(ApiClient $client, string $server, string $dbName, int $registeredId): SourceDataset
@@ -468,6 +470,7 @@ function importRecStructureRows(SourceDataset $set, TargetRepository $repo, Targ
         if ($existingCompositeId !== null) {
             $targetMap->put('RST', $origin['db'], $origin['id'], $existingCompositeId);
             $summary->reused[$spec['table']]++;
+/*            
             logWarning(sprintf(
                 '%s reusing existing RST composite RecType=%d DetailType=%d for RST%d-%d',
                 $set->label(),
@@ -477,6 +480,7 @@ function importRecStructureRows(SourceDataset $set, TargetRepository $repo, Targ
                 $origin['id']
             ));
             $summary->warnings++;
+*/            
             continue;
         }
 
@@ -797,6 +801,15 @@ function pdoParamType(mixed $value): int
     };
 }
 
+function isListArray(array $array): bool
+{
+    if ($array === []) {
+        return true;
+    }
+
+    return array_keys($array) === range(0, count($array) - 1);
+}
+
 function initialiseLogFile(): void
 {
     if (!file_exists(LOG_FILE)) {
@@ -1109,7 +1122,7 @@ final class ApiClient
             return $json['records'];
         }
         // Backward tolerance for bare raw arrays.
-        if (array_is_list($json)) {
+        if (isListArray($json)) { //since 8.1 array_is_list
             return $json;
         }
         return [];
@@ -1504,7 +1517,7 @@ final class TargetRepository
         // the registered DB ID. On repeat runs, return the same candidate so
         // ensureGroup() can reuse the existing row instead of creating #2/#3/etc.
         if ($candidate !== $baseName && $candidate !== trim($baseName . ' ' . trim($suffix))) {
-            logWarning("Shortened group name for {$table}.{$nameField}: {$baseName} -> {$candidate}");
+//            logWarning("Shortened group name for {$table}.{$nameField}: {$baseName} -> {$candidate}");
         }
 
         return $candidate;

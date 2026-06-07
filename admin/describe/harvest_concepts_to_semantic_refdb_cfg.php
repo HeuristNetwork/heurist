@@ -18,14 +18,22 @@ return [
      'sources' => [
          [
              'server' => 'http://127.0.0.1/heurist/',
-             'registryDatabase' => 'osmak_core',
+             'registryDatabase' => 'osmak_1',
+             'username' => '2',
+             'password' => $passwordForDatabaseAccess,
+         ]
+         /*,
+         [
+             'server' => 'https://heurist.huma-num.fr/h7-alpha/',
+             'registryDatabase' => 'osmak_3',
              'username' => '2',
              'password' => $passwordForDatabaseAccess,
          ],
-         /*
          [
-             'server' => 'https://heurist.huma-num.fr/h7-alpha/',
-             'registryDatabase' => 'osmak_1',
+             'server' => 'https://heuristau.net/h7-alpha/',
+             'registryDatabase' => 'osmak_3',
+             'username' => '2',
+             'password' => $passwordForDatabaseAccess,
          ],
          */
      ],
