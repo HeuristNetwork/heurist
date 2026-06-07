@@ -1271,11 +1271,11 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                     //ERROR
                     return array("error_title" => "Syntax error",
                                  "message" => "Unable to interpret '$inner_field_name' as a field<br><br>"
-                                            + "Fields must be enclosed in square brackets []. If the name appears<br>"
-                                            + "correct, please check for unwanted spaces, formatting or other characters.<br><br>"
-                                            + "If you have used the tree on the left to insert a field and it insert incorrect<br>"
-                                            + "text, please let us know with name of database, record type and field name,<br>"
-                                            + "as this should not happen.");
+                                            . "Fields must be enclosed in square brackets []. If the name appears<br>"
+                                            . "correct, please check for unwanted spaces, formatting or other characters.<br><br>"
+                                            . "If you have used the tree on the left to insert a field and it insert incorrect<br>"
+                                            . "text, please let us know with name of database, record type and field name,<br>"
+                                            . "as this should not happen.");
                 }
             }elseif($dt_type== 'resource'){
 

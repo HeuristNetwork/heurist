@@ -129,8 +129,6 @@ function main(): void
             logError("Unable to authenticate/fetch registered databases from {$server}: " . $e->getMessage());
             continue;
         }
-        
-        $databases = [['sys_Database'=>'osmak_5', 'sys_dbRegisteredID'=>1111, 'sys_dbName'=>'bla!']];
 
         foreach ($databases as $dbInfo) {
             $summary->databasesSeen++;
@@ -414,6 +412,14 @@ function updateTermReferences(SourceDataset $set, TargetRepository $repo, Target
         }
 
         $repo->updateByPk($spec['table'], $spec['pk'], $targetId, $updates);
+
+        // The harvester inserts terms in two phases: first with NULL parent,
+        // then updates trm_ParentTermID after all target-local term IDs are known.
+        // Some legacy triggers do not handle NULL -> parent transitions, so keep
+        // defTermsLinks in sync explicitly and idempotently.
+        $parentTargetId = isset($updates['trm_ParentTermID']) ? toInt($updates['trm_ParentTermID']) : 0;
+        $repo->replaceTermParentLink($targetId, $parentTargetId > 0 ? $parentTargetId : null);
+
         $summary->updated[$spec['table']]++;
     }
 }
@@ -453,6 +459,26 @@ function importRecStructureRows(SourceDataset $set, TargetRepository $repo, Targ
             throw new RuntimeException($set->label() . " cannot resolve rst_DetailTypeID {$localDty}");
         }
         $prepared['rst_DetailTypeID'] = $targetDty;
+
+        // The target schema has a unique composite key on rst_RecTypeID + rst_DetailTypeID.
+        // A structure row can therefore already exist even when the provenance pair
+        // rst_OriginatingDBID + rst_IDInOriginatingDB is different or missing.
+        // Reuse it instead of failing the whole source DB transaction.
+        $existingCompositeId = $repo->findExistingRecStructureId($targetRty, $targetDty);
+        if ($existingCompositeId !== null) {
+            $targetMap->put('RST', $origin['db'], $origin['id'], $existingCompositeId);
+            $summary->reused[$spec['table']]++;
+            logWarning(sprintf(
+                '%s reusing existing RST composite RecType=%d DetailType=%d for RST%d-%d',
+                $set->label(),
+                $targetRty,
+                $targetDty,
+                $origin['db'],
+                $origin['id']
+            ));
+            $summary->warnings++;
+            continue;
+        }
 
         // Not implemented in this phase.
         unset($prepared['rst_CalcFunctionID']);
@@ -1370,6 +1396,17 @@ final class TargetRepository
         return $value === false ? null : (int)$value;
     }
 
+    public function findExistingRecStructureId(int $recTypeId, int $detailTypeId): ?int
+    {
+        $sql = 'SELECT `rst_ID` FROM `defRecStructure` WHERE `rst_RecTypeID` = :rty AND `rst_DetailTypeID` = :dty LIMIT 1';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':rty', $recTypeId, PDO::PARAM_INT);
+        $stmt->bindValue(':dty', $detailTypeId, PDO::PARAM_INT);
+        $stmt->execute();
+        $value = $stmt->fetchColumn();
+        return $value === false ? null : (int)$value;
+    }
+
     public function insertRow(string $table, array $row): int
     {
         $filtered = $this->filterColumns($table, $row);
@@ -1430,28 +1467,47 @@ final class TargetRepository
         return $stmt->fetchColumn() !== false;
     }
 
+    public function replaceTermParentLink(int $termId, ?int $parentId): void
+    {
+        // Triggers may already have inserted the same parent link after
+        // trm_ParentTermID is updated. Keep this operation idempotent:
+        // remove stale links for this term, preserve/insert the desired one,
+        // and never fail on an existing composite key.
+        if ($parentId === null || $parentId <= 0) {
+            $delete = $this->pdo->prepare('DELETE FROM `defTermsLinks` WHERE `trl_TermID` = :termId');
+            $delete->bindValue(':termId', $termId, PDO::PARAM_INT);
+            $delete->execute();
+            return;
+        }
+
+        $delete = $this->pdo->prepare(
+            'DELETE FROM `defTermsLinks` WHERE `trl_TermID` = :termId AND `trl_ParentID` <> :parentId'
+        );
+        $delete->bindValue(':termId', $termId, PDO::PARAM_INT);
+        $delete->bindValue(':parentId', $parentId, PDO::PARAM_INT);
+        $delete->execute();
+
+        $insert = $this->pdo->prepare(
+            'INSERT IGNORE INTO `defTermsLinks` (`trl_ParentID`, `trl_TermID`) VALUES (:parentId, :termId)'
+        );
+        $insert->bindValue(':parentId', $parentId, PDO::PARAM_INT);
+        $insert->bindValue(':termId', $termId, PDO::PARAM_INT);
+        $insert->execute();
+    }
+
     private function makeUniqueBoundedGroupName(string $table, string $nameField, string $baseName, string $suffix, int $maxLength): string
     {
         $baseName = trim($baseName);
         $candidate = truncateWithSuffix($baseName, $suffix, $maxLength);
 
-        if (!$this->columnValueExists($table, $nameField, $candidate)) {
-            if ($candidate !== $baseName && $candidate !== trim($baseName . ' ' . trim($suffix))) {
-                logWarning("Shortened group name for {$table}.{$nameField}: {$baseName} -> {$candidate}");
-            }
-            return $candidate;
+        // This name is deterministic for the source DB because the suffix contains
+        // the registered DB ID. On repeat runs, return the same candidate so
+        // ensureGroup() can reuse the existing row instead of creating #2/#3/etc.
+        if ($candidate !== $baseName && $candidate !== trim($baseName . ' ' . trim($suffix))) {
+            logWarning("Shortened group name for {$table}.{$nameField}: {$baseName} -> {$candidate}");
         }
 
-        for ($i = 2; $i <= 999; $i++) {
-            $numberedSuffix = preg_replace('/\]$/', " #{$i}]", $suffix) ?? ($suffix . " #{$i}");
-            $candidate = truncateWithSuffix($baseName, $numberedSuffix, $maxLength);
-            if (!$this->columnValueExists($table, $nameField, $candidate)) {
-                logWarning("Disambiguated group name for {$table}.{$nameField}: {$baseName} -> {$candidate}");
-                return $candidate;
-            }
-        }
-
-        throw new RuntimeException("Unable to create unique group name for {$table}.{$nameField}: {$baseName}");
+        return $candidate;
     }
 
     private function ensureGroup(string $table, string $pk, string $nameField, string $name, array $extra): int
