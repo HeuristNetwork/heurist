@@ -1055,6 +1055,17 @@ div.div-result-list-content.icons_list{
     display: inline;
 }
 
+.list.show-record-owners div.recordDiv:not(.public) .recordTitle{
+    left: 16.5em !important;
+}
+.show-record-owners div.recordDiv:not(.public) .rec_owner{
+    width: 19ch !important;
+}
+.thumbs.show-record-owners div.recordDiv:not(.public) .rec_visibility{
+    top: -2px;
+    left: -1px !important;
+}
+
 .list .recordDiv .recTypeThumb {
     display: none;
 }
