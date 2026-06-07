@@ -39,13 +39,13 @@ final class UserSession
         return is_array($preferences) ? $preferences : [];
     }
 
-    public function getPreference(string $key, mixed $default = null)
+    public function getPreference(string $key, $default = null)
     {
         $preferences = $this->getPreferences();
         return $preferences[$key] ?? $default;
     }
 
-    public function setDbValue(string $key, mixed $value): bool
+    public function setDbValue(string $key, $value): bool
     {
         return $this->session->setDbValue($this->system->dbnameFull(), $key, $value);
     }
