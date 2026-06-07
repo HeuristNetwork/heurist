@@ -44,7 +44,7 @@ final class SessionStore
         }
     }
 
-    public function get(string $key, mixed $default = null): mixed
+    public function get(string $key, mixed $default = null)
     {
         if (!$this->start()) {
             return $default;
@@ -77,7 +77,7 @@ final class SessionStore
         return true;
     }
 
-    public function consume(string $key, mixed $default = null): mixed
+    public function consume(string $key, mixed $default = null)
     {
         if (!$this->start()) {
             return $default;
@@ -90,7 +90,7 @@ final class SessionStore
         return $value;
     }
 
-    public function getDbValue(string $dbnameFull, string $key, mixed $default = null): mixed
+    public function getDbValue(string $dbnameFull, string $key, mixed $default = null)
     {
         if (!$this->start()) {
             return $default;
@@ -127,7 +127,7 @@ final class SessionStore
         return true;
     }
 
-    public function updateDb(string $dbnameFull, callable $callback): mixed
+    public function updateDb(string $dbnameFull, callable $callback)
     {
         if (!$this->start()) {
             return null;
@@ -143,7 +143,7 @@ final class SessionStore
         return $result;
     }
 
-    public function update(callable $callback): mixed
+    public function update(callable $callback)
     {
         if (!$this->start()) {
             return null;

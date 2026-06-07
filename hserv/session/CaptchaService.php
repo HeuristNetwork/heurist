@@ -5,10 +5,14 @@ use hserv\System;
 
 final class CaptchaService
 {
-    public function __construct(
-        private SessionStore $session,
-        private System $system
-    ) {}
+    private SessionStore $session;
+    private System $system;
+
+    public function __construct(SessionStore $session, System $system)
+    {
+        $this->session = $session;
+        $this->system = $system;
+    }
 
     public function consumeCaptcha(
         ?string $provided,

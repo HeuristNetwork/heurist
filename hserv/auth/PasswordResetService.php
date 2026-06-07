@@ -11,14 +11,19 @@ final class PasswordResetService
     private const MAX_RESENDS = 5;
     private const MAX_BLOCKS = 3;
 
-    public function __construct(private System $system) {}
+    private System $system;
+
+    public function __construct(System $system)
+    {
+        $this->system = $system;
+    }
 
     /**
      * Handles password reset PIN creation, resend, and validation.
      * Keeps the legacy return contract used by user_HandleResetPin():
      * true for a validated PIN, string for resend/new-pin messages, false on error.
      */
-    public function handlePin(string $username, string|int $pin = '', string $captcha = ''): bool|string
+    public function handlePin(string $username, string|int $pin = '', string $captcha = '') //: bool|string
     {
         $mysqli = $this->system->getMysqli();
         $now = time();

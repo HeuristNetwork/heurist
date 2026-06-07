@@ -5,10 +5,14 @@ use hserv\System;
 
 final class UserSession
 {
-    public function __construct(
-        private SessionStore $session,
-        private System $system
-    ) {}
+    private SessionStore $session;
+    private System $system;
+
+    public function __construct(SessionStore $session, System $system)
+    {
+        $this->session = $session;
+        $this->system = $system;
+    }
 
     public function needsRefresh(): bool
     {
@@ -35,7 +39,7 @@ final class UserSession
         return is_array($preferences) ? $preferences : [];
     }
 
-    public function getPreference(string $key, mixed $default = null): mixed
+    public function getPreference(string $key, mixed $default = null)
     {
         $preferences = $this->getPreferences();
         return $preferences[$key] ?? $default;
@@ -100,7 +104,7 @@ final class UserSession
         return is_array($pins) ? $pins : [];
     }
 
-    public function updateResetPins(callable $callback): mixed
+    public function updateResetPins(callable $callback)
     {
         return $this->session->updateDb($this->system->dbnameFull(), function (&$dbSession) use ($callback) {
             if (!isset($dbSession['reset_pins']) || !is_array($dbSession['reset_pins'])) {

@@ -7,7 +7,10 @@ use hserv\utilities\USanitize;
 
 final class AuthSessionService
 {
-    public function __construct(private System $system) {}
+    private System $system;
+    public function __construct(System $system) {
+        $this->system = $system;
+    }
 
     /**
      * Starts/restores the Heurist PHP session and stores per-database host metadata.
