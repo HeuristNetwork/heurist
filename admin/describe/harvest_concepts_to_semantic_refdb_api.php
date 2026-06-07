@@ -129,6 +129,8 @@ function main(): void
             logError("Unable to authenticate/fetch registered databases from {$server}: " . $e->getMessage());
             continue;
         }
+        
+        $databases = [['sys_Database'=>'osmak_5', 'sys_dbRegisteredID'=>1111, 'sys_dbName'=>'bla!']];
 
         foreach ($databases as $dbInfo) {
             $summary->databasesSeen++;
@@ -279,7 +281,7 @@ function processSourceDatabase(SourceDataset $set, TargetRepository $repo, Summa
 {
     logLine("Importing {$set->dbName} in one transaction");
 
-    $groupIds = $repo->ensureGroupsForSourceDatabase($set->dbName);
+    $groupIds = $repo->ensureGroupsForSourceDatabase($set->dbName, $set->registeredId);
     $targetMap = new TargetIdMap($repo);
 
     // First insert/reuse all RTY/DTY/TRM rows needed either as harvest rows or dependencies.
@@ -334,7 +336,7 @@ function importConceptRows(
             $domain = normaliseTermDomain((string)($row['trm_Domain'] ?? 'enum'));
             $prepared['trm_VocabularyGroupID'] = $groupIds['trm'][$domain];
             if ($neutraliseReferences) {
-                $prepared['trm_ParentTermID'] = 0;
+                $prepared['trm_ParentTermID'] = null;
                 $prepared['trm_InverseTermID'] = null;
             }
         }
@@ -400,7 +402,7 @@ function updateTermReferences(SourceDataset $set, TargetRepository $repo, Target
         foreach (['trm_ParentTermID', 'trm_InverseTermID'] as $field) {
             $localRef = toInt($row[$field] ?? 0);
             if ($localRef <= 0) {
-                $updates[$field] = ($field === 'trm_ParentTermID') ? 0 : null;
+                $updates[$field] = null;
                 continue;
             }
             $refOrigin = $set->resolveSourceOrigin('TRM', $localRef);
@@ -1323,22 +1325,27 @@ final class TargetRepository
         }
     }
 
-    public function ensureGroupsForSourceDatabase(string $dbName): array
+    public function ensureGroupsForSourceDatabase(string $dbName, int $registeredId): array
     {
+        $rtyGroupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " [DB{$registeredId}]", 40);
+        $dtyGroupName = $this->makeUniqueBoundedGroupName('defDetailTypeGroups', 'dtg_Name', $dbName, " [DB{$registeredId}]", 63);
+        $enumGroupName = $this->makeUniqueBoundedGroupName('defVocabularyGroups', 'vcg_Name', $dbName, " [DB{$registeredId} enum]", 40);
+        $relationGroupName = $this->makeUniqueBoundedGroupName('defVocabularyGroups', 'vcg_Name', $dbName, " [DB{$registeredId} rel]", 40);
+
         return [
-            'rty' => $this->ensureGroup('defRecTypeGroups', 'rtg_ID', 'rtg_Name', $dbName, [
+            'rty' => $this->ensureGroup('defRecTypeGroups', 'rtg_ID', 'rtg_Name', $rtyGroupName, [
                 'rtg_Domain' => 'functionalgroup',
                 'rtg_Description' => "Harvested concepts from {$dbName}",
             ]),
-            'dty' => $this->ensureGroup('defDetailTypeGroups', 'dtg_ID', 'dtg_Name', $dbName, [
+            'dty' => $this->ensureGroup('defDetailTypeGroups', 'dtg_ID', 'dtg_Name', $dtyGroupName, [
                 'dtg_Description' => "Harvested concepts from {$dbName}",
             ]),
             'trm' => [
-                'enum' => $this->ensureGroup('defVocabularyGroups', 'vcg_ID', 'vcg_Name', "{$dbName} - enum", [
+                'enum' => $this->ensureGroup('defVocabularyGroups', 'vcg_ID', 'vcg_Name', $enumGroupName, [
                     'vcg_Domain' => 'enum',
                     'vcg_Description' => "Harvested enum vocabularies from {$dbName}",
                 ]),
-                'relation' => $this->ensureGroup('defVocabularyGroups', 'vcg_ID', 'vcg_Name', "{$dbName} - relation", [
+                'relation' => $this->ensureGroup('defVocabularyGroups', 'vcg_ID', 'vcg_Name', $relationGroupName, [
                     'vcg_Domain' => 'relation',
                     'vcg_Description' => "Harvested relation vocabularies from {$dbName}",
                 ]),
@@ -1421,6 +1428,30 @@ final class TargetRepository
         $stmt->execute();
 
         return $stmt->fetchColumn() !== false;
+    }
+
+    private function makeUniqueBoundedGroupName(string $table, string $nameField, string $baseName, string $suffix, int $maxLength): string
+    {
+        $baseName = trim($baseName);
+        $candidate = truncateWithSuffix($baseName, $suffix, $maxLength);
+
+        if (!$this->columnValueExists($table, $nameField, $candidate)) {
+            if ($candidate !== $baseName && $candidate !== trim($baseName . ' ' . trim($suffix))) {
+                logWarning("Shortened group name for {$table}.{$nameField}: {$baseName} -> {$candidate}");
+            }
+            return $candidate;
+        }
+
+        for ($i = 2; $i <= 999; $i++) {
+            $numberedSuffix = preg_replace('/\]$/', " #{$i}]", $suffix) ?? ($suffix . " #{$i}");
+            $candidate = truncateWithSuffix($baseName, $numberedSuffix, $maxLength);
+            if (!$this->columnValueExists($table, $nameField, $candidate)) {
+                logWarning("Disambiguated group name for {$table}.{$nameField}: {$baseName} -> {$candidate}");
+                return $candidate;
+            }
+        }
+
+        throw new RuntimeException("Unable to create unique group name for {$table}.{$nameField}: {$baseName}");
     }
 
     private function ensureGroup(string $table, string $pk, string $nameField, string $name, array $extra): int
