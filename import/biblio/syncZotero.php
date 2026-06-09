@@ -61,6 +61,7 @@ if($dt_SourceRecordID==0){ //this field is critical - need to download it from h
         exit;
     }
 
+    $dt_SourceRecordID = DT_ORIGINAL_RECORD_ID;
 }
 
 $HEURIST_ZOTEROSYNC = $system->settings->get('sys_SyncDefsWithDB');
@@ -426,6 +427,7 @@ if($step=="1"){  //first step - info about current status
 
         //Responses for multi-object read requests will include a custom HTTP header, Total-Results
         $totalitems = $zotero->getTotalCount();
+        $extraMessage = '';
 
         if($previousSync['id'] > 0){
 
@@ -442,17 +444,12 @@ if($step=="1"){  //first step - info about current status
                 print <<<HTML
                 <div class='divStart' style='margin-bottom: 2em;'>
                     <span style="padding-right: 3em;">Newest version: <strong>{$latestSyncID}</strong></span>
-                    <span>New changes since last sync: <strong>{$syncCount}</strong></span><br><br>
+                    <span>Changes since last sync: <strong>{$syncCount}</strong></span><br><br>
                     <a href='syncZotero.php?step=2&cnt={$syncCount}&db={$system->dbname()}&lib_key={$lib_key_idx}&sinceSync={$previousSync["id"]}' onclick='__showLoading()'><button class='h3button'>Sync to latest version</button></a>
                 </div><br>
                 HTML;
             }else{
-
-                print <<<HTML
-                <div class='divStart' style='margin-bottom: 2em;'>
-                    <span style="font-weight: bold;">No new changes since last sync</span>
-                </div><br>
-                HTML;
+                $extraMessage = '<span style="font-weight: bold; color: #5cb760;">No changes since last sync</span><br>';
             }
         }
 
@@ -460,8 +457,13 @@ if($step=="1"){  //first step - info about current status
 
             print <<<HTML
             <div class='divStart'>
-                Total items count in library: <strong>{$totalitems}</strong><br><br>
-                <a href='syncZotero.php?step=2&cnt={$totalitems}&db={$system->dbname()}&lib_key={$lib_key_idx}' onclick='__showLoading()'><button class='h3button'>Full re-sync</button></a>
+                Total items count in library: <strong>{$totalitems}</strong><br>
+                {$extraMessage}<br>
+                <a href='syncZotero.php?step=2&cnt={$totalitems}&db={$system->dbname()}&lib_key={$lib_key_idx}' onclick='__showLoading()'><button class='h3button'>Reload from Scratch</button></a><br>
+                <span style="color: red;padding-top: 0.5em;display: inline-block;">
+                    This will delete all records derived from Zotero and reload them.<br>
+                    Existing data for these records will be lost.
+                </span>
             </div><br><br>
             HTML;
             print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../hclient/assets/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
@@ -583,9 +585,10 @@ if($step=="1"){  //first step - info about current status
 
                 if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
 
-                    print "<br>Undefined record type : <b>".htmlspecialchars($itemtype.'</b> <i>'.$itemtitle.'</i>')."<br>";
+                    $itemtype = htmlspecialchars($itemtype);
+                    $itemtitle = htmlspecialchars($itemtitle);
 
-                    array_push($arr_ignored, $itemtype.':  '.$itemtitle);
+                    array_push($arr_ignored, "<br>Undefined record type : <strong>{$itemtype}</strong> <em>{$itemtitle}</em><br>");
                     if(!@$arr_ignored_by_type[$itemtype]) {$arr_ignored_by_type[$itemtype] = 0;}
                     $arr_ignored_by_type[$itemtype]++;
                     $cnt_ignored++;
@@ -602,7 +605,7 @@ if($step=="1"){  //first step - info about current status
                 $rec_URL = null;
 
                 // 3) try to search record in database by zotero id
-                $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d  ".
+                $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d ".
                 "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID="
                 .intval($dt_SourceRecordID)." and d.dtl_Value='"
                 .$mysqli->real_escape_string($zotero_itemid)."'";
@@ -835,13 +838,15 @@ if($step=="1"){  //first step - info about current status
         print TR_S.htmlspecialchars($rectypes['names'][$rty_ID])
         .'</td><td align="center">'.composeLinkForAllIds($cnt['added'])
         .'</td><td align="center">'.composeLinkForAllIds($cnt['updated']).TR_E;
-
-
     }
 
     print TABLE_E.'<div><br>Records added : '.composeLinkForAllIds($cnt_added).DIV_E;
 
     print '<div>Records updated : '.composeLinkForAllIds($cnt_updated).DIV_E;
+
+    if(!empty($arr_ignored)){
+        print '<div>'. implode('<br>', $arr_ignored) .'</div>';
+    }
 
     $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;
 
@@ -900,7 +905,6 @@ if($step=="1"){  //first step - info about current status
 
     if(!empty($unresolved_pointers)){
         print "<br>";
-
     }
 
     ob_flush();flush();
