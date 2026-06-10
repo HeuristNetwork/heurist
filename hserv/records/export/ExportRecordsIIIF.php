@@ -53,6 +53,9 @@ class ExportRecordsIIIF extends ExportRecords {
     /** @var string|null Current output URI, reused by v3 Manifest/Collection wrappers. */
     private $manifest_uri = null;
 
+    /** @var array Obfuscated file IDs for registered IIIF manifests found in v3 recordset export. */
+    private $v3_manifest_fileids = array();
+
     /**
      * Prepares for the export operation.
      *
@@ -153,6 +156,7 @@ IIIF;
     $this->cnt = 0;
     $this->v3_canvas_items = array();
     $this->v3_manifest_items = array();
+    $this->v3_manifest_fileids = array();
 }
 
 //
@@ -177,6 +181,10 @@ protected function _outputRecord($record){
             $this->v3_manifest_items[] = $manifestRef;
             $this->cnt++;
         }
+        $this->v3_manifest_fileids = array_merge(
+            $this->v3_manifest_fileids,
+            self::getIiifManifestFileIds($this->system, $record, $this->ulf_ObfuscatedFileID)
+        );
 
         $canvas = self::getIiifResource($this->system, $record, $this->iiif_version, $this->ulf_ObfuscatedFileID);
         if($canvas && $canvas!=''){
@@ -214,6 +222,14 @@ protected function _outputFooter(){
         fwrite($this->fd, ']}],"structures": []}');
     }else{
         $label = array('en' => array('Heurist IIIF manifest'));
+
+        if(count($this->v3_manifest_items) === 1 && empty($this->v3_canvas_items) && count($this->v3_manifest_fileids) === 1){
+            $manifest = self::getIiifManifestForFile($this->system, $this->v3_manifest_fileids[0]);
+            if($manifest){
+                fwrite($this->fd, $manifest);
+                return;
+            }
+        }
 
         if(!empty($this->v3_manifest_items)){
             $items = $this->v3_manifest_items;
@@ -309,7 +325,7 @@ private static function getIiifManifestReferences($system, $record, $ulf_Obfusca
             continue;
         }
         $fileid = $fileinfo['ulf_ObfuscatedFileID'];
-        $id = $fileinfo['ulf_ExternalFileReference'] ?: HEURIST_BASE_URL_PRO.'?db='.$system->dbname().'&file='.$fileid;
+        $id = HEURIST_BASE_URL_PRO.'api/'.$system->dbname().'/iiif/manifest/'.$fileid;
         $label = trim(strip_tags($fileinfo['ulf_Description'] ?? ''));
         if($label=='' && $record!=null){
             $label = trim(strip_tags($record['rec_Title'] ?? ''));
@@ -327,14 +343,12 @@ private static function getIiifManifestReferences($system, $record, $ulf_Obfusca
 }
 
 
+
 private static function getIiifApiRoot($system): string
 {
     return HEURIST_BASE_URL_PRO.'api/'.$system->dbname().'/iiif/';
 }
 
-/*
-  Gets allowed record types for Anootations
-*/
 private static function getAnnotationRectypeIds($system): array
 {
     $rty_ids = array();
@@ -349,9 +363,6 @@ private static function getAnnotationRectypeIds($system): array
     return $rty_ids;
 }
 
-/*
-    Gets fields that can be used as annoation Body
-*/
 private static function getAnnotationBodyDetailTypeIds($system): array
 {
     $dty_ids = array();
@@ -368,11 +379,6 @@ private static function getAnnotationBodyDetailTypeIds($system): array
     return $dty_ids;
 }
 
-/*
-    Given an uploaded file ID ulf_ID for a registered IIIF manifest/image, 
-    find whether the record that uses this uploaded file has linked Annotation records, 
-    where Annotation records point/link to that same parent record.
-*/
 private static function hasLinkedIiifAnnotations($system, int $ulf_ID): bool
 {
     $rty_ids = self::getAnnotationRectypeIds($system);
@@ -392,7 +398,6 @@ private static function hasLinkedIiifAnnotations($system, int $ulf_ID): bool
     return mysql__select_value($mysqli, $query) ? true : false;
 }
 
-//
 private static function getLinkedIiifAnnotationPage($system, string $ulf_ObfuscatedFileID)
 {
     $info = fileGetFullInfo($system, $ulf_ObfuscatedFileID);
@@ -421,6 +426,13 @@ private static function getLinkedIiifAnnotationPage($system, string $ulf_Obfusca
             $target_select = 'target.dtl_Value AS target_uri';
         }
 
+        $info_join = '';
+        $info_select = 'NULL AS annotation_info';
+        if($system->defineConstant('DT_ANNOTATION_INFO')){
+            $info_join = ' LEFT JOIN recDetails ainfo ON ainfo.dtl_RecID=anno.rec_ID AND ainfo.dtl_DetailTypeID='.DT_ANNOTATION_INFO;
+            $info_select = 'ainfo.dtl_Value AS annotation_info';
+        }
+
         $body_join = '';
         $body_select = 'NULL AS body_value';
         $body_dty_ids = self::getAnnotationBodyDetailTypeIds($system);
@@ -429,20 +441,44 @@ private static function getLinkedIiifAnnotationPage($system, string $ulf_Obfusca
             $body_select = 'MIN(body.dtl_Value) AS body_value';
         }
 
-        $query = 'SELECT anno.rec_ID, anno.rec_Title, '.$target_select.', '.$body_select
+        $query = 'SELECT anno.rec_ID, anno.rec_Title, '.$target_select.', '.$info_select.', '.$body_select
             .' FROM recDetails media '
             .' JOIN recLinks ON rl_TargetID=media.dtl_RecID '
             .' JOIN Records anno ON anno.rec_ID=rl_SourceID '
             .$target_join
+            .$info_join
             .$body_join
             .' WHERE media.dtl_UploadedFileID='.intval($ulf_ID)
             .' AND anno.rec_RecTypeID IN ('.implode(',', $rty_ids).') '
-            .' GROUP BY anno.rec_ID, anno.rec_Title, target_uri '
+            .' GROUP BY anno.rec_ID, anno.rec_Title, target_uri, annotation_info '
             .' ORDER BY anno.rec_ID';
 
         $res = $mysqli->query($query);
         if($res){
             while($row = $res->fetch_assoc()){
+                $annotation = null;
+                $annotation_info = trim((string)($row['annotation_info'] ?? ''));
+                if($annotation_info !== ''){
+                    $annotation = json_decode($annotation_info, true);
+                    if(json_last_error() !== JSON_ERROR_NONE || !is_array($annotation)){
+                        $annotation = null;
+                    }
+                }
+
+                if(is_array($annotation)){
+                    if(empty($annotation['id'])){
+                        $annotation['id'] = $page_uri.'/annotation/'.$row['rec_ID'];
+                    }
+                    if(empty($annotation['type'])){
+                        $annotation['type'] = 'Annotation';
+                    }
+                    if(empty($annotation['target'])){
+                        $annotation['target'] = $fallback_canvas_uri;
+                    }
+                    $items[] = $annotation;
+                    continue;
+                }
+
                 $target = trim((string)($row['target_uri'] ?? ''));
                 if($target === ''){
                     $target = $fallback_canvas_uri;
@@ -477,6 +513,152 @@ private static function getLinkedIiifAnnotationPage($system, string $ulf_Obfusca
         'type' => 'AnnotationPage',
         'items' => $items
     ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+}
+
+private static function getIiifManifestFileIds($system, $record, $ulf_ObfuscatedFileID=null): array
+{
+    $ids = array();
+    if($record==null){
+        $info = fileGetFullInfo($system, $ulf_ObfuscatedFileID);
+    }else{
+        $info = array();
+        foreach ($record['details'] as $dty_ID=>$field_details) {
+            foreach($field_details as $dtl_ID=>$file){
+                if(!@$file['file']){ continue; }
+                if($ulf_ObfuscatedFileID && $file['file']['ulf_ObfuscatedFileID']!=$ulf_ObfuscatedFileID){
+                    continue;
+                }
+                $info[] = $file['file'];
+            }
+        }
+    }
+
+    foreach($info as $fileinfo){
+        if(self::isIiifManifestFile($fileinfo) && !empty($fileinfo['ulf_ObfuscatedFileID'])){
+            $ids[] = $fileinfo['ulf_ObfuscatedFileID'];
+        }
+    }
+    return array_values(array_unique($ids));
+}
+
+/**
+ * Dispatches one IIIF Presentation API resource for /api/{db}/iiif/{resource}/{id}.
+ *
+ * @param \hserv\System $system Initialised Heurist system object
+ * @param string $resource Resource name: manifest, canvas, page, annotation, annotations
+ * @param string $ulf_ObfuscatedFileID Registered file obfuscated ID
+ * @return string|false JSON string or false on error
+ */
+public static function getIiifApiResource($system, string $resource, string $ulf_ObfuscatedFileID)
+{
+    $resource = strtolower(trim($resource));
+    if($resource === ''){
+        $resource = 'manifest';
+    }
+
+    if($resource === 'manifest'){
+        return self::getIiifManifestForFile($system, $ulf_ObfuscatedFileID);
+    }
+
+    if($resource === 'canvas' || $resource === 'page' || $resource === 'annotation' || $resource === 'annotations'){
+        return self::getIiifResource($system, null, 3, $ulf_ObfuscatedFileID, $resource);
+    }
+
+    $system->addError(HEURIST_INVALID_REQUEST, 'Unsupported IIIF resource: '.htmlspecialchars($resource));
+    return false;
+}
+
+/**
+ * Returns an actual IIIF Manifest for a registered Heurist file.
+ * Existing IIIF manifests are returned as-is; ordinary media and IIIF image info
+ * files are wrapped into a single-canvas IIIF Presentation 3 Manifest.
+ *
+ * @param \hserv\System $system Initialised Heurist system object
+ * @param string $ulf_ObfuscatedFileID Registered file obfuscated ID
+ * @return string|false JSON string or false on error
+ */
+public static function getIiifManifestForFile($system, string $ulf_ObfuscatedFileID)
+{
+    $info = fileGetFullInfo($system, $ulf_ObfuscatedFileID);
+    if(empty($info)){
+        $system->addError(HEURIST_NOT_FOUND, 'Resource with given id not found');
+        return false;
+    }
+
+    $fileinfo = $info[0];
+    if(self::isIiifManifestFile($fileinfo)){
+        return self::getRegisteredManifestJson($system, $fileinfo);
+    }
+
+    $canvas = self::getIiifResource($system, null, 3, $ulf_ObfuscatedFileID, 'canvas');
+    if(!$canvas){
+        return false;
+    }
+
+    $canvasObj = json_decode($canvas, true);
+    if(json_last_error() !== JSON_ERROR_NONE || !is_array($canvasObj)){
+        $system->addError(HEURIST_ERROR, 'Unable to build IIIF canvas for registered file');
+        return false;
+    }
+
+    $label = trim(strip_tags($fileinfo['ulf_Description'] ?? ''));
+    if($label === ''){
+        $label = trim(strip_tags($fileinfo['ulf_OrigFileName'] ?? ''));
+    }
+    if($label === ''){
+        $label = 'Heurist IIIF manifest';
+    }
+
+    $manifest = array(
+        '@context' => 'http://iiif.io/api/presentation/3/context.json',
+        'id' => HEURIST_BASE_URL_PRO.'api/'.$system->dbname().'/iiif/manifest/'.$ulf_ObfuscatedFileID,
+        'type' => 'Manifest',
+        'label' => array('en' => array($label)),
+        'items' => array($canvasObj)
+    );
+
+    return json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+}
+
+private static function getRegisteredManifestJson($system, array $fileinfo)
+{
+    $manifest = '';
+    if(!empty($fileinfo['ulf_ExternalFileReference'])){
+        $manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']);
+    }else{
+        $path = '';
+        if(!empty($fileinfo['ulf_FilePath']) && !empty($fileinfo['ulf_FileName'])){
+            $path = $fileinfo['ulf_FilePath'].$fileinfo['ulf_FileName'];
+            if(function_exists('resolveFilePath')){
+                $path = resolveFilePath($path);
+            }
+        }
+        if($path && file_exists($path)){
+            $manifest = file_get_contents($path);
+        }
+        if($manifest === ''){
+            $manifest = loadRemoteURLContent(HEURIST_BASE_URL_PRO.'?db='.$system->dbname().'&file='.$fileinfo['ulf_ObfuscatedFileID']);
+        }
+    }
+
+    if(!$manifest){
+        $system->addError(HEURIST_NOT_FOUND, 'Registered IIIF manifest content could not be loaded');
+        return false;
+    }
+
+    $json = json_decode($manifest, true);
+    if(json_last_error() !== JSON_ERROR_NONE || !is_array($json)){
+        $system->addError(HEURIST_INVALID_REQUEST, 'Registered IIIF manifest is not valid JSON');
+        return false;
+    }
+
+    $type = $json['type'] ?? $json['@type'] ?? '';
+    if($type !== 'Manifest' && $type !== 'sc:Manifest'){
+        $system->addError(HEURIST_INVALID_REQUEST, 'Registered IIIF resource is not a Manifest');
+        return false;
+    }
+
+    return json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 }
 
 public static function getIiifResource($system, $record, $iiif_version, $ulf_ObfuscatedFileID, $type_resource='Canvas'){
