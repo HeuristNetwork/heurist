@@ -553,10 +553,8 @@ function hexportMenu( container ) {
                 if(opts.save_as_file==='mirador'){
                     // create dynamic manifest with given set of media
                     script = 'hclient/widgets/viewers/miradorViewer.php';
-                }else{
-                    newURLParams.set('format', 'iiif');
                 }
-
+                newURLParams.set('format', 'iiif');
             }else{
                 newURLParams.set('format', opts.format);
 

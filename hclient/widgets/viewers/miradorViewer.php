@@ -78,7 +78,7 @@ require_once dirname(__FILE__).'/../../../autoload.php';
         if(!\hserv\utilities\USystem::getPreparedParameters($system, $preferredType, $params)){
             $params = $_REQUEST;
             if(!\hserv\utilities\USystem::getPreparedParameters($system, $fallbackType, $params)){
-                $system->errorExitApi();
+                $system->errorExitApi(null, null, false);
             }
         }
 
