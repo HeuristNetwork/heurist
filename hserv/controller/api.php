@@ -274,6 +274,7 @@ $resource = @$requestUri[3];
 $skip_auth_processing =
     ($resource === 'login') ||
     ($resource === 'logout') ||
+    ($resource === 'annotations' && $method === 'search') ||
     ($resource === 'iiif');
 
 // Routes that may be used anonymously, but should still use
