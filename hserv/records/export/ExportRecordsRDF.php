@@ -487,7 +487,10 @@ private function _setResourceProps($record, &$resource){
                     $value = $this->graph->resource($file_resource_uri);//create new or find resource
                     if($this->include_resource_file_info){
                         if(@$fileinfo['ulf_OrigFileName']){
+                            $preferredSource = $fileinfo['ulf_PreferredSource'] ?? '';
                             $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], ULF_REMOTE) === 0 || // skip if not local file
+                                         strpos((string)$preferredSource, 'iiif') === 0 ||
+                                         strpos((string)$preferredSource, 'tiled') === 0 ||
                                          strpos(@$fileinfo['ulf_OrigFileName'], ULF_IIIF) === 0 ||
                                          strpos(@$fileinfo['ulf_OrigFileName'], ULF_TILED_IMAGE) === 0;
                             if(!$skip_file){

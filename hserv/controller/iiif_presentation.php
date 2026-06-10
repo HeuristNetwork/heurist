@@ -52,6 +52,7 @@ require_once dirname(__FILE__).'/../../autoload.php';
 
     }
 
+    // $system, $record, $iiif_version, $ulf_ObfuscatedFileID, $type_resource='Canvas'
     $res = hserv\records\export\ExportRecordsIIIF::getIiifResource($system, null, 3, $params['id'], @$params['resource']);
 
     $system->dbclose();

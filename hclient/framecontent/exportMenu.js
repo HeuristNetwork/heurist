@@ -506,7 +506,7 @@ function hexportMenu( container ) {
                 let start = 0;
 
                 for (let i = 0; i < paramChunks; i++) {
-                    preparedSessionID = await _preSendParameters({ [key]: value.substring(start, start + parameterLimit) }, opts.format, !opts.save_as_file);
+                    preparedSessionID = await _preSendParameters({ [key]: value.substring(start, start + parameterLimit) }, opts.format, opts.save_as_file === 'mirador' || !opts.save_as_file);
                     start += parameterLimit;
                 }
 
@@ -521,7 +521,7 @@ function hexportMenu( container ) {
         }
 
         if(Object.keys(toStoreParams).length > 0){
-            preparedSessionID = await _preSendParameters(toStoreParams, opts.format, !opts.save_as_file);
+            preparedSessionID = await _preSendParameters(toStoreParams, opts.format, opts.save_as_file === 'mirador' || !opts.save_as_file);
         }
 
         // depth/linkmode (only when showOptionsDialog true in old logic)

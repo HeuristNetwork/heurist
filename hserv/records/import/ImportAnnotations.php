@@ -104,7 +104,8 @@ class ImportAnnotations{
     private function findRegisteredManifests(){
 
         $mysqli = $this->system->getMysqli();
-        $query = 'SELECT ulf_ID, ulf_ExternalFileReference FROM recUploadedFiles WHERE ulf_OrigFileName="'.ULF_IIIF.'"';
+        $query = 'SELECT ulf_ID, ulf_ExternalFileReference FROM recUploadedFiles '
+            .'WHERE ulf_PreferredSource="iiif" OR ulf_OrigFileName="'.ULF_IIIF.'"';
 
         if(!empty($this->ulfIDs)){
             $ids = prepareStrIds($this->ulfIDs);

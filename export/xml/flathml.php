@@ -1575,7 +1575,10 @@ function makeFileContentNode($file) {
     }
 
         $filename = resolveFilePath($file['fullPath']);
-        if ( !($file['ulf_OrigFileName'] == ULF_REMOTE || strpos($file['ulf_OrigFileName'],ULF_IIIF)===0 ) && file_exists($filename)) { //@todo check preferred source
+        if ( !($file['ulf_OrigFileName'] == ULF_REMOTE || 
+               strpos($file['ulf_OrigFileName'],ULF_IIIF)===0 ||
+               $file['ulf_PreferredSource']==='iiif') 
+            && file_exists($filename)) { //@todo check preferred source
 
             $src = $filename;
             $xml = simplexml_load_file( $filename );

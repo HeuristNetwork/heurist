@@ -334,7 +334,8 @@ class RecordMediaRenderer
 
     private function isIiifManifest(array $thumb): bool
     {
-        return defined('ULF_IIIF') && strpos((string)($thumb['orig_name'] ?? ''), ULF_IIIF) === 0;
+        return strpos((string)($thumb['sourceType'] ?? ''), 'iiif') === 0
+            || (defined('ULF_IIIF') && strpos((string)($thumb['orig_name'] ?? ''), ULF_IIIF) === 0);
     }
 
     private function is3d(array $thumb): bool
@@ -372,7 +373,9 @@ class RecordMediaRenderer
 
     private function canOpenInOpenSeadragon(array $thumb): bool
     {
-        return $this->isImage($thumb) || (defined('ULF_IIIF_IMAGE') && ($thumb['orig_name'] ?? '') === ULF_IIIF_IMAGE);
+        return $this->isImage($thumb)
+            || ($thumb['sourceType'] ?? '') === 'iiif_image'
+            || (defined('ULF_IIIF_IMAGE') && ($thumb['orig_name'] ?? '') === ULF_IIIF_IMAGE);
     }
 
     private function fileUrl(array $thumb): string

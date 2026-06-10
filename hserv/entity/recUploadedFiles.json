@@ -201,6 +201,13 @@
                     }
                 },
                 {
+                    "dtID": "ulf_PreferredSource",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
                     "dtID": "fxm_MimeType",
                     "dtFields":{
                         "rst_DisplayName": "Mimetype:",

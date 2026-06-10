@@ -306,8 +306,13 @@ if(!$skip_auth_processing){
 // ----------------------------------------------------
 
 if (@$requestUri[3]=='iiif') {
+    
+    // https://server/heurist/api/mydb/iiif/annotations/<ulf_obfuscated_id>
+    
+    // http://127.0.0.1/heurist/?db=osmak_annot&file=662a913ee25012ba445b5b96d6eea2f9537ca6a4
+    // http://127.0.0.1/heurist/api/osmak_annot/iiif/annotation/662a913ee25012ba445b5b96d6eea2f9537ca6a4
 
-    if($method=='search'){
+    if($method=='search'){ //GET method
         $req_params['resource'] = @$requestUri[4];
         $req_params['id'] = @$requestUri[5];
         $req_params['restapi'] = 1; //set http response code

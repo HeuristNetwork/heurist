@@ -5,7 +5,7 @@
 * It uses customized Mirador viewer (from external folder) with annotation and image tools
 * If it is missed, it uses latest mirador distribution from unpkg.com
 *
-* For annotations, heurist database must have reord type either RT_MAP_ANNOTATION or RT_ANNOTATION
+* For annotations, heurist database must have record type either RT_MAP_ANNOTATION or RT_ANNOTATION
 *
 * As a mirador viewer with annotation tool we use customized https://github.com/ProjectMirador/mirador-integration
 * Modified files are in mirador-integration-changes.zip in external5/mirador3 folder
@@ -48,9 +48,16 @@ $dbname = @$_REQUEST['db'];
 $rec_ID = intval(@$_REQUEST['recID']);
 $canvasUri = null;
 $baseUrl = null;
-//if database and record id are defined we take manifest url from database
+$system = null;
+$preparedParams = null;
 
-if(!preg_match('[\W]', $dbname) && $rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['iiif']==null){
+$validDatabaseName = !preg_match('[\W]', $dbname);
+$needsSystem = $validDatabaseName && (
+    array_key_exists('preparedID', $_REQUEST) ||
+    ($rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['iiif']==null)
+);
+
+if($needsSystem){
 
 require_once dirname(__FILE__).'/../../../autoload.php';
 
@@ -61,6 +68,29 @@ require_once dirname(__FILE__).'/../../../autoload.php';
     }
     //get baseURL
     $baseUrl = defined('HEURIST_SERVER_URL')?HEURIST_SERVER_URL:null;
+
+    if(array_key_exists('preparedID', $_REQUEST)){
+
+        $params = $_REQUEST;
+        $preferredType = array_key_exists('file', $params) ? 'export' : 'export-feed';
+        $fallbackType = $preferredType === 'export' ? 'export-feed' : 'export';
+
+        if(!\hserv\utilities\USystem::getPreparedParameters($system, $preferredType, $params)){
+            $params = $_REQUEST;
+            if(!\hserv\utilities\USystem::getPreparedParameters($system, $fallbackType, $params)){
+                $system->errorExitApi();
+            }
+        }
+
+        unset($params['preparedID'], $params['preparedMode'], $params['preparedType']);
+        $params['db'] = $dbname;
+        $_REQUEST = array_merge($_REQUEST, $params);
+        $preparedParams = $params;
+    }
+}
+//if database and record id are defined we take manifest url from database
+
+if($system!=null && $rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['iiif']==null){
 
     //detect is this mirador image or annotation
     if($system->defineConstant('RT_MAP_ANNOTATION')){
@@ -77,7 +107,8 @@ require_once dirname(__FILE__).'/../../../autoload.php';
                 .' FROM recLinks, recDetails, recUploadedFiles '
                 .' WHERE rl_SourceID='.$rec_ID
                 .' AND dtl_RecID=rl_TargetID '  //'AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
-                .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="'.ULF_IIIF.'"';
+                .' AND dtl_UploadedFileID=ulf_ID '
+                .' AND (ulf_PreferredSource="iiif" OR ulf_OrigFileName="'.ULF_IIIF.'")';
 
             $row = mysql__select_row($mysqli, $query);
 
@@ -114,7 +145,8 @@ require_once dirname(__FILE__).'/../../../autoload.php';
                 $query = 'SELECT ulf_ObfuscatedFileID '
                     .' FROM recDetails, recUploadedFiles '
                     .' WHERE dtl_RecID='.$rec_ID //'AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
-                    .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="'.ULF_IIIF.'"';
+                    .' AND dtl_UploadedFileID=ulf_ID '
+                .' AND (ulf_PreferredSource="iiif" OR ulf_OrigFileName="'.ULF_IIIF.'")';
 
                 $_REQUEST['iiif'] = mysql__select_value($mysqli, $query);
             }
@@ -159,7 +191,16 @@ if(@$_REQUEST['url']) { //direct url to manifest
         'db='.$_REQUEST['db']
             .'&file='.(@$_REQUEST['manifest']?$_REQUEST['manifest']:@$_REQUEST['iiif']),$url);
 }else{
-    if(!@$_REQUEST['q'] && @$_REQUEST['iiif_image']){ //file obfuscatin id
+    if(is_array($preparedParams)){
+        // record_output creates manifest dynamically. Rebuild the URL from restored
+        // prepared parameters so the IIIF manifest endpoint receives the original q/rules.
+        $preparedParams['format'] = 'iiif';
+        $preparedParams['db'] = $dbname;
+
+        $url = str_replace($_SERVER['QUERY_STRING'], http_build_query($preparedParams), $url);
+        $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hserv/controller/record_output.php', $url);
+
+    }elseif(!@$_REQUEST['q'] && @$_REQUEST['iiif_image']){ //file obfuscatin id
         //find record linked to this media
         $url = str_replace($_SERVER['QUERY_STRING'],
             'db='.$_REQUEST['db']
@@ -172,12 +213,14 @@ if(@$_REQUEST['url']) { //direct url to manifest
             exit('Need to define either query or file ID');
         }
     }else{
-        if(strpos('format=iiif',$url)===false){
+        if(strpos($url, 'format=iiif')===false){
                 $url = $url.'&format=iiif';
         }
     }
     //record_output creates manifest dynamically
-    $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hserv/controller/record_output.php', $url);
+    if(!is_array($preparedParams)){
+        $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hserv/controller/record_output.php', $url);
+    }
 }
 
 

@@ -1698,7 +1698,10 @@ Javascript wrap:<br>
 
             if($mode=="link") {
 
-                $sname = (!$originalFileName || $originalFileName==ULF_REMOTE || strpos($originalFileName,ULF_IIIF)===0)
+                $preferredSource = $fileinfo['ulf_PreferredSource'] ?? '';
+                $isIiif = strpos((string)$preferredSource, 'iiif') === 0
+                    || (defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF) === 0);
+                $sname = (!$originalFileName || $originalFileName==ULF_REMOTE || (defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF)===0))
                 ?$external_url:$originalFileName;
 
                 if(@$params['fancybox']){

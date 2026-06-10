@@ -1452,9 +1452,14 @@ class ReportRecord
 
         $link .= '<span style="padding-left: 16px;background-image: url('  //class="external-link" 
                 .HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif);vertical-align: bottom;"></span>';
-        if(strpos($originalFileName, ULF_IIIF)===0){
+        $preferredSource = $fileinfo['ulf_PreferredSource'] ?? '';
+        $isIiif = strpos((string)$preferredSource, 'iiif') === 0
+            || (defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF) === 0);
+        if($isIiif){
             $link .= '<img src="'.HEURIST_BASE_URL.'hclient/assets/iiif_logo.png" style="width:16px"/>';
-            $originalFileName = null;
+            if(defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF) === 0){
+                $originalFileName = null;
+            }
         }
 
         $link .= '<span>'.htmlspecialchars(($originalFileName && $originalFileName!=ULF_REMOTE)

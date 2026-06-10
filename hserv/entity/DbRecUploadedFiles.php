@@ -374,6 +374,82 @@ class DbRecUploadedFiles extends DbEntityBase
         return $ret;
     }
 
+
+    /**
+     * Returns true when the uploaded-file record is already classified as a special IIIF/tiled resource.
+     * `ulf_PreferredSource` is the primary classifier; `ulf_OrigFileName` markers are kept for backward compatibility.
+     */
+    private function isSpecialIiifOrTiledResource(array $record): bool
+    {
+        $source = (string)($record['ulf_PreferredSource'] ?? '');
+        $name = (string)($record['ulf_OrigFileName'] ?? '');
+
+        return strpos($source, 'iiif') === 0
+            || strpos($source, 'tiled') === 0
+            || (defined('ULF_IIIF') && strpos($name, ULF_IIIF) === 0)
+            || (defined('ULF_TILED_IMAGE') && strpos($name, ULF_TILED_IMAGE) === 0);
+    }
+
+    /**
+     * Detects IIIF Presentation manifests and IIIF Image API info.json resources.
+     * For local uploads, keeps ulf_OrigFileName unchanged and classifies by ulf_PreferredSource.
+     * For old external registration, still writes the historical ULF_IIIF / ULF_IIIF_IMAGE markers.
+     */
+    private function prepareIiifManifest(int $idx, string $jsonContent, ?string $sourceUrl = null, bool $keepOriginalName = false): bool
+    {
+        $iiif_manifest = json_decode($jsonContent, true);
+        if(!is_array($iiif_manifest)){
+            return false;
+        }
+
+        $isManifest = (@$iiif_manifest['@type'] == 'sc:Manifest' || @$iiif_manifest['type'] == 'Manifest');
+        $isImageInfo = !$isManifest
+            && @$iiif_manifest['@context']
+            && (@$iiif_manifest['@id'] || @$iiif_manifest['id'])
+            && ($sourceUrl == null || substr($sourceUrl, -9) == 'info.json');
+
+        if(!$isManifest && !$isImageInfo){
+            return false;
+        }
+
+        if($isManifest && !@$this->records[$idx]['ulf_Description'] && @$iiif_manifest['description']){
+            $desc = $iiif_manifest['description'];
+            if(is_array($desc)){
+                $first = array_shift($desc);
+                if(is_array($first)){
+                    $desc = $first['@value'] ?? ($first['value'] ?? null);
+                }else{
+                    $desc = $first;
+                }
+            }
+            if($desc){
+                $this->records[$idx]['ulf_Description'] = $desc;
+            }
+        }
+
+        if($sourceUrl){
+            $thumbUrl = UImage::getIiifThumbnail($sourceUrl, $iiif_manifest, null);
+            if($thumbUrl){
+                $this->records[$idx]['ulf_TempThumbUrl'] = $thumbUrl;
+            }
+        }
+
+        if($isManifest){
+            if(!$keepOriginalName){
+                $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF;
+            }
+            $this->records[$idx]['ulf_PreferredSource'] = 'iiif';
+        }else{
+            if(!$keepOriginalName){
+                $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF_IMAGE;
+            }
+            $this->records[$idx]['ulf_PreferredSource'] = 'iiif_image';
+        }
+
+        $this->records[$idx]['ulf_MimeExt'] = 'json';
+        return true;
+    }
+
     /**
      * Prepares `recUploadedFiles` records before saving.
      *
@@ -406,68 +482,16 @@ class DbRecUploadedFiles extends DbEntityBase
 
             if(@$record['ulf_ExternalFileReference']){
 
-                if(strpos(@$this->records[$idx]['ulf_OrigFileName'],ULF_TILED_IMAGE)!==0 &&
-                   strpos(@$this->records[$idx]['ulf_OrigFileName'],ULF_IIIF)!==0 &&
-                   strpos(@$this->records[$idx]['ulf_PreferredSource'],'iiif')!==0 &&
-                   strpos(@$this->records[$idx]['ulf_PreferredSource'],'tiled')!==0)
+                if(!$this->isSpecialIiifOrTiledResource($this->records[$idx]))
                 {
-
-                    /*(strpos($record['ulf_ExternalFileReference'], 'iiif')!==false
-                    || strpos($record['ulf_ExternalFileReference'], 'manifest.json')!==false
-                    || strpos($record['ulf_ExternalFileReference'], 'info.json')!==false) */
-                    //check iiif - either manifest of image
-                    if($mimeType=='json' || $mimeType==MIMETYPE_JSON|| $mimeType=='application/ld+json'){
-/*
-We can register either info.json (reference to local or remote IIIF server that describes particular IIIF image) or manifest.json (that describes set of media and their appearance).
-
-On registration if mime type is application/json we loads this file and check whether it is image info or manifest. For former case we store in ulf_OrigFileName “iiif_image”, for latter one “iiif”.
-
-When we open "iiif_image" in mirador viewer we generate manifest dynamically.
-@see miradorViewer.php
-*/
-
-
-                        //verify that url points to iiif manifest
-                        $iiif_manifest = loadRemoteURLContent($record['ulf_ExternalFileReference']);//check that json is iiif manifest
-                        $iiif_manifest = json_decode($iiif_manifest, true);
-                        if($iiif_manifest!==false && is_array($iiif_manifest))
-                        {
-                            if(@$iiif_manifest['@type']=='sc:Manifest' ||   //v2
-                                @$iiif_manifest['type']=='Manifest')        //v3
-                            {
-                                //take label, description, thumbnail
-                                //@$iiif_manifest['label'];
-
-                                if(!@$record['ulf_Description'] && @$iiif_manifest['description']){
-                                    $desc = $iiif_manifest['description'];
-                                    if(is_array($desc)){ //multilang desc
-                                        $desc = array_shift($desc);
-                                        $desc = @$desc['@value'];
-                                    }
-                                    if($desc){
-                                        $this->records[$idx]['ulf_Description'] = $desc;
-                                    }
-                                }
-                                
-                                $this->records[$idx]['ulf_TempThumbUrl'] = UImage::getIiifThumbnail($record['ulf_ExternalFileReference'], $iiif_manifest, null);
-                                $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF;
-                                $this->records[$idx]['ulf_PreferredSource'] = 'iiif';
+                    // Check IIIF Presentation manifest or Image API info.json for external JSON resources.
+                    if($mimeType=='json' || $mimeType==MIMETYPE_JSON || $mimeType=='application/ld+json'){
+                        $jsonContent = loadRemoteURLContent($record['ulf_ExternalFileReference']);
+                        if($jsonContent){
+                            if($this->prepareIiifManifest($idx, $jsonContent, $record['ulf_ExternalFileReference'], false)){
                                 $mimeType = 'json';
-                                $this->records[$idx]['ulf_MimeExt'] = 'json';
-
-                            }elseif(@$iiif_manifest['@context'] && (@$iiif_manifest['@id'] || @$iiif_manifest['id'])
-                                    && substr($record['ulf_ExternalFileReference'], 0, -9) == 'info.json' )
-                            {   //IIIF image
-
-                                $this->records[$idx]['ulf_TempThumbUrl'] = UImage::getIiifThumbnail($record['ulf_ExternalFileReference'], $iiif_manifest, null);
-                                $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF_IMAGE;
-                                $this->records[$idx]['ulf_PreferredSource'] = 'iiif_image';
-                                $mimeType = 'json';
-                                $this->records[$idx]['ulf_MimeExt'] = 'json';
                             }
-
                         }
-
                     }
 
                     if(!$this->records[$idx]['ulf_OrigFileName']){
@@ -485,6 +509,33 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $fields_for_reg = $this->getFileInfoForReg($record['ulf_FileUpload'], null);//thumbnail is created here
                     if(is_array($fields_for_reg)){
                         $this->records[$idx] = array_merge($this->records[$idx], $fields_for_reg);
+
+                        // Local JSON upload may itself be an IIIF manifest or info.json.
+                        // Keep the user's original filename; classify by ulf_PreferredSource.
+                        $localMimeType = strtolower((string)($this->records[$idx]['ulf_MimeExt'] ?? ''));
+                        if($localMimeType=='json' || $localMimeType==MIMETYPE_JSON || $localMimeType=='application/ld+json'){
+                            $tmpFile = $this->records[$idx]['ulf_TempFile'] ?? null;
+                            if($tmpFile && file_exists($tmpFile)){
+                                $jsonContent = file_get_contents($tmpFile);
+                                if($jsonContent && $this->prepareIiifManifest($idx, $jsonContent, $tmpFile, true)){
+                                    $mimeType = 'json';
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if(!$this->isSpecialIiifOrTiledResource($this->records[$idx])
+                    && @$this->records[$idx]['ulf_TempFile']){
+                    $localMimeType = strtolower((string)($this->records[$idx]['ulf_MimeExt'] ?? ''));
+                    if($localMimeType=='json' || $localMimeType==MIMETYPE_JSON || $localMimeType=='application/ld+json'){
+                        $tmpFile = $this->records[$idx]['ulf_TempFile'];
+                        if(file_exists($tmpFile)){
+                            $jsonContent = file_get_contents($tmpFile);
+                            if($jsonContent && $this->prepareIiifManifest($idx, $jsonContent, $tmpFile, true)){
+                                $mimeType = 'json';
+                            }
+                        }
                     }
                 }
             }
@@ -653,7 +704,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 }
             }
 
-            if( (strpos($record['ulf_OrigFileName'],ULF_IIIF)===0  || strpos($record['ulf_PreferredSource'],'iiif')===0)
+            if( (strpos((string)($record['ulf_PreferredSource'] ?? ''),'iiif')===0 || strpos((string)($record['ulf_OrigFileName'] ?? ''),ULF_IIIF)===0)
                 && @$record['ulf_TempThumbUrl']){
 
                     $thumb_name = $thumb_dir.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
@@ -662,7 +713,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         UImage::createScaledImageFile($temp_path, $thumb_name);//create thumbnail for iiif image
                         unlink($temp_path);
                     }
-            }elseif(@$this->records[$rec_idx]['ulf_TempFile']){ //if there is file to be copied
+            }
+            
+            if(@$this->records[$rec_idx]['ulf_TempFile']){ //if there is file to be copied
 
                 $ulf_ID = $this->records[$rec_idx]['ulf_ID'];
                 $ulf_ObfuscatedFileID = $this->records[$rec_idx]['ulf_ObfuscatedFileID'];
@@ -1840,7 +1893,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             // Check dup local file's size and checksum against each other
             $query = 'SELECT ulf_OrigFileName, count(*) AS cnt '
             . 'FROM recUploadedFiles '
-            . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "'.ULF_IIIF.'%"'. $where_ids . ' '
+            . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "'.ULF_IIIF.'%" AND COALESCE(ulf_PreferredSource,"") NOT LIKE "iiif%"'. $where_ids . ' '
             . 'GROUP BY ulf_OrigFileName HAVING cnt > 1';
             $local_dups = $mysqli->query($query);
             $cnt = 0;
@@ -2693,7 +2746,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
         $files = @$this->data['create_scaled_images'];
         $files = $files === true ? true : prepareIds($files);
-        $localOnly = 'ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName <> "_remote" AND ulf_OrigFileName NOT LIKE "' . ULF_IIIF . '%"';
+        $localOnly = 'ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName <> "_remote" AND ulf_OrigFileName NOT LIKE "' . ULF_IIIF . '%" AND COALESCE(ulf_PreferredSource,"") NOT LIKE "iiif%"';
 
         if($files === true){
             $files = mysql__select_assoc2($this->system->getMysqli(), "SELECT ulf_ID, ulf_ObfuscatedFileID FROM recUploadedFiles WHERE $localOnly");
@@ -2746,7 +2799,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $mysqli = $this->system->getMysqli();
         $files = @$this->data['bulk_upload_repository'];
         $files = prepareIds($files);
-        $localOnly = 'ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName <> "_remote" AND ulf_OrigFileName NOT LIKE "' . ULF_IIIF . '%"';
+        $localOnly = 'ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName <> "_remote" AND ulf_OrigFileName NOT LIKE "' . ULF_IIIF . '%" AND COALESCE(ulf_PreferredSource,"") NOT LIKE "iiif%"';
         $modDate = date(DATE_8601);
 
         $serviceID = @$this->data['nakalaID'];

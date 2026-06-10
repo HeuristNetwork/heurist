@@ -1932,9 +1932,13 @@ function print_public_details($bib) {
                         $bd['val'] = $bd['val'].htmlspecialchars($file_description).'<br>';
                     }*/
                     $bd['val'] .= '<span class="external-link" style="vertical-align: bottom;"></span>';
-                    if(strpos($originalFileName,ULF_IIIF)===0){
+                    $isIiif = strpos((string)$sourceType, 'iiif') === 0
+                        || (defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF) === 0);
+                    if($isIiif){
                         $bd['val'] = $bd['val'].'<img src="'.HEURIST_BASE_URL.'hclient/assets/iiif_logo.png" style="width:16px"/>';
-                        $originalFileName = null;
+                        if(defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF) === 0){
+                            $originalFileName = null; // hide only old artificial marker names
+                        }
                     }
 
 
