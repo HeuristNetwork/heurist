@@ -356,7 +356,7 @@ $.widget( "heurist.searchBuilderItem", {
                     if(this.options.enum_field!=null){
                         lbl_text = lbl_text + '.'+this.options.enum_field;
                     }
-                    
+
                     this.element
                         .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
                         .text(lbl_text);
@@ -372,11 +372,12 @@ $.widget( "heurist.searchBuilderItem", {
                 }
                 
             }else if(this.options.reverse_RtyID>0){
+
                 let lbl_text = '< '+$Db.rty(this.options.reverse_RtyID, 'rty_Name');
-                    this.element
-                        .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
-                        .text(lbl_text);
-                
+                this.element
+                    .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
+                    .text(lbl_text);
+
             }else{
                 this.label_token.text('broken!');
             }

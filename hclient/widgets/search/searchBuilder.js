@@ -1144,7 +1144,7 @@ $.widget( "heurist.searchBuilder", {
                     let rectypes = node.data.rt_ids;
 
                     let node_order = that.element.find('[name="tree_order"]:checked').val();
-                                                                            
+
                     let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
                     {
                         mode:5, rectypeids:rectypes, 
@@ -1152,9 +1152,17 @@ $.widget( "heurist.searchBuilder", {
                         parentcode: parentcode,
                         field_order:node_order//, enum_mode:'expanded' 
                     } );
-                                                                            
-                                                                            
-                    if(res.length>1){
+
+                    if(res.length > 1){
+
+                        res.unshift({
+                            code: `${parentcode}:any:exists`,
+                            key: `exists`,
+                            name: node.data.name,
+                            title: `${node.data.name} exists`,
+                            type: 'freetext'
+                        });
+
                         data.result = res;
                     }else{
                         data.result = res[0].children;

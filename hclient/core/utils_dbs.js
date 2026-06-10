@@ -1018,7 +1018,7 @@ window.hWin.HEURIST4.dbs = {
                                 $dt_title = ' <span style="font-style:italic">' + $dt_title + '</span>';
                             }
 
-                            $res = {};                            
+                            $res = {};
                             
                             if($pointerRecTypeId=="" || $rectype_ids.length==0){ //unconstrainded
                                                     //
@@ -2863,9 +2863,16 @@ window.hWin.HEURIST4.dbs = {
             
             if(rtid!=''){
                 if(rtid=='any'){
-                    harchy.push('');    
-                    if(top_rty_ID>0) rtid = top_rty_ID; // Use top_rty_ID for context if 'any'
-                    
+
+                    harchy.push('');
+                    if(dtid === 'exists'){
+                        rtid = window.hWin.HEURIST4.util.isempty(harchy[harchy.length - 2])
+                            ? 'Value exists'
+                            : `${harchy[harchy.length - 2].replace(/ > $/, '').replace(/^ \. /, '')} values`;
+                    }else if(top_rty_ID>0){
+                        rtid = top_rty_ID; // Use top_rty_ID for context if 'any'
+                    }
+
                 }else if($Db.rty(rtid)==null){
                     //record type was removed - remove facet
                     removeFacet = true;
@@ -2904,7 +2911,7 @@ window.hWin.HEURIST4.dbs = {
             }else if(dtid=='anyfield'){
                 rec_header = "Any field"; 
             }else if(dtid=='exists'){
-                rec_header = `${$Db.rty(rtid, 'rty_Name')} records`;
+                rec_header = !window.hWin.HEURIST4.util.isPositiveInt(rtid) ? rtid : `${$Db.rty(rtid, 'rty_Name')} records`;
             }
             
             if( rec_header ){ // If it's a recognized header field
