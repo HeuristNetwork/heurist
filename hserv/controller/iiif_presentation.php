@@ -7,8 +7,9 @@
 * 
 * parameters
 * db - The target Heurist database name.
-* resource - The name/type of the IIIF resource to generate (e.g., Canvas, AnnotationPage, Annotation, Image).
-* id - Unique identifier of the object, typically the obfuscated ID of a registered image file in Heurist.
+* resource - The name/type of the IIIF resource to generate (e.g., canvas, page, annotation, annotations, image).
+* id - Unique identifier of the object, typically the obfuscated ID of a registered image/manifest file in Heurist.
+*      For resource=annotations it returns the external AnnotationPage for annotations linked to this file's record.
 *
 * @project     Heurist academic knowledge management system
 * @package Controller
@@ -52,7 +53,6 @@ require_once dirname(__FILE__).'/../../autoload.php';
 
     }
 
-    // $system, $record, $iiif_version, $ulf_ObfuscatedFileID, $type_resource='Canvas'
     $res = hserv\records\export\ExportRecordsIIIF::getIiifResource($system, null, 3, $params['id'], @$params['resource']);
 
     $system->dbclose();

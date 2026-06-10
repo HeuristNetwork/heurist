@@ -326,7 +326,165 @@ private static function getIiifManifestReferences($system, $record, $ulf_Obfusca
     return $refs;
 }
 
+
+private static function getIiifApiRoot($system): string
+{
+    return HEURIST_BASE_URL_PRO.'api/'.$system->dbname().'/iiif/';
+}
+
+/*
+  Gets allowed record types for Anootations
+*/
+private static function getAnnotationRectypeIds($system): array
+{
+    $rty_ids = array();
+
+    if($system->defineConstant('RT_MAP_ANNOTATION')){
+        $rty_ids[] = RT_MAP_ANNOTATION;
+    }
+    if($system->defineConstant('RT_ANNOTATION') && !in_array(RT_ANNOTATION, $rty_ids)){
+        $rty_ids[] = RT_ANNOTATION;
+    }
+
+    return $rty_ids;
+}
+
+/*
+    Gets fields that can be used as annoation Body
+*/
+private static function getAnnotationBodyDetailTypeIds($system): array
+{
+    $dty_ids = array();
+
+    foreach(array('DT_SHORT_SUMMARY', 'DT_EXTENDED_DESCRIPTION', 'DT_DESCRIPTION', 'DT_NOTES') as $constant_name){
+        if($system->defineConstant($constant_name)){
+            $constant_value = constant($constant_name);
+            if($constant_value > 0 && !in_array($constant_value, $dty_ids)){
+                $dty_ids[] = $constant_value;
+            }
+        }
+    }
+
+    return $dty_ids;
+}
+
+/*
+    Given an uploaded file ID ulf_ID for a registered IIIF manifest/image, 
+    find whether the record that uses this uploaded file has linked Annotation records, 
+    where Annotation records point/link to that same parent record.
+*/
+private static function hasLinkedIiifAnnotations($system, int $ulf_ID): bool
+{
+    $rty_ids = self::getAnnotationRectypeIds($system);
+    if(empty($rty_ids) || $ulf_ID < 1){
+        return false;
+    }
+
+    $mysqli = $system->getMysqli();
+    $query = 'SELECT 1 '
+        .' FROM recDetails media, recLinks, Records anno '
+        .' WHERE media.dtl_UploadedFileID='.intval($ulf_ID)
+        .' AND rl_TargetID=media.dtl_RecID '
+        .' AND anno.rec_ID=rl_SourceID '
+        .' AND anno.rec_RecTypeID IN ('.implode(',', $rty_ids).') '
+        .' LIMIT 1';
+
+    return mysql__select_value($mysqli, $query) ? true : false;
+}
+
+//
+private static function getLinkedIiifAnnotationPage($system, string $ulf_ObfuscatedFileID)
+{
+    $info = fileGetFullInfo($system, $ulf_ObfuscatedFileID);
+    if(empty($info)){
+        $system->addError(HEURIST_NOT_FOUND, 'Resource with given id not found');
+        return false;
+    }
+
+    $fileinfo = $info[0];
+    $ulf_ID = intval($fileinfo['ulf_ID'] ?? 0);
+    $fileid = $fileinfo['ulf_ObfuscatedFileID'] ?? $ulf_ObfuscatedFileID;
+    $root_uri = self::getIiifApiRoot($system);
+    $page_uri = $root_uri.'annotations/'.$fileid;
+    $fallback_canvas_uri = $root_uri.'canvas/'.$fileid;
+
+    $items = array();
+    $rty_ids = self::getAnnotationRectypeIds($system);
+
+    if(!empty($rty_ids) && $ulf_ID > 0){
+        $mysqli = $system->getMysqli();
+
+        $target_join = '';
+        $target_select = 'NULL AS target_uri';
+        if($system->defineConstant('DT_URL')){
+            $target_join = ' LEFT JOIN recDetails target ON target.dtl_RecID=anno.rec_ID AND target.dtl_DetailTypeID='.DT_URL;
+            $target_select = 'target.dtl_Value AS target_uri';
+        }
+
+        $body_join = '';
+        $body_select = 'NULL AS body_value';
+        $body_dty_ids = self::getAnnotationBodyDetailTypeIds($system);
+        if(!empty($body_dty_ids)){
+            $body_join = ' LEFT JOIN recDetails body ON body.dtl_RecID=anno.rec_ID AND body.dtl_DetailTypeID IN ('.implode(',', $body_dty_ids).')';
+            $body_select = 'MIN(body.dtl_Value) AS body_value';
+        }
+
+        $query = 'SELECT anno.rec_ID, anno.rec_Title, '.$target_select.', '.$body_select
+            .' FROM recDetails media '
+            .' JOIN recLinks ON rl_TargetID=media.dtl_RecID '
+            .' JOIN Records anno ON anno.rec_ID=rl_SourceID '
+            .$target_join
+            .$body_join
+            .' WHERE media.dtl_UploadedFileID='.intval($ulf_ID)
+            .' AND anno.rec_RecTypeID IN ('.implode(',', $rty_ids).') '
+            .' GROUP BY anno.rec_ID, anno.rec_Title, target_uri '
+            .' ORDER BY anno.rec_ID';
+
+        $res = $mysqli->query($query);
+        if($res){
+            while($row = $res->fetch_assoc()){
+                $target = trim((string)($row['target_uri'] ?? ''));
+                if($target === ''){
+                    $target = $fallback_canvas_uri;
+                }
+
+                $body = trim(strip_tags((string)($row['body_value'] ?? '')));
+                if($body === ''){
+                    $body = trim(strip_tags((string)($row['rec_Title'] ?? '')));
+                }
+                if($body === ''){
+                    $body = 'Annotation '.$row['rec_ID'];
+                }
+
+                $items[] = array(
+                    'id' => $page_uri.'/annotation/'.$row['rec_ID'],
+                    'type' => 'Annotation',
+                    'motivation' => 'commenting',
+                    'body' => array(
+                        'type' => 'TextualBody',
+                        'value' => $body,
+                        'format' => 'text/plain'
+                    ),
+                    'target' => $target
+                );
+            }
+        }
+    }
+
+    return json_encode(array(
+        '@context' => 'http://iiif.io/api/presentation/3/context.json',
+        'id' => $page_uri,
+        'type' => 'AnnotationPage',
+        'items' => $items
+    ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+}
+
 public static function getIiifResource($system, $record, $iiif_version, $ulf_ObfuscatedFileID, $type_resource='Canvas'){
+
+    $type_resource = strtolower((string)$type_resource);
+    if($record==null && ($type_resource=='annotations' || $type_resource=='annotationpage')){
+        return self::getLinkedIiifAnnotationPage($system, (string)$ulf_ObfuscatedFileID);
+    }
 
     $mysqli = $system->getMysqli();
 
@@ -573,7 +731,17 @@ if($resource_id){ //this is iiif image
     $image_uri = $root_uri.DIR_IMAGE.$fileid.'/info.json';
 }
 
-
+$external_annotations = '';
+$external_annopage_uri = self::getIiifApiRoot($system).'annotations/'.$fileid;
+if(self::hasLinkedIiifAnnotations($system, intval($fileinfo['ulf_ID'] ?? 0))){
+    $external_annotations = ',
+      "annotations": [
+        {
+          "id": "'.$external_annopage_uri.'",
+          "type": "AnnotationPage"
+        }
+      ]';
+}
 
 $annotation = <<<ANNOTATION3
             {
@@ -626,7 +794,7 @@ $item = <<<CANVAS3
           "width": $tumbnail_width,
           "height": $tumbnail_height
         }
-      ]
+      ]$external_annotations
 
  }
 CANVAS3;
