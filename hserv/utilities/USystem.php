@@ -1101,7 +1101,10 @@ class USystem {
         $replace = $replace > 2 || $replace < 0 ? 0 : $replace;
 
         if(!defined('HEURIST_PREPARED_PARAMS_DIR')){
-            $system->getSysDir('prepared-parameters');
+            define('HEURIST_PREPARED_PARAMS_DIR', $system->getSysDir('prepared-parameters'));
+        }
+        if(!\defined('HEURIST_SCRATCH_DIR')){
+            define('HEURIST_SCRATCH_DIR', $dir = $system->getSysDir(DIR_SCRATCH));
         }
 
         $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";
@@ -1176,7 +1179,10 @@ class USystem {
         $deleteFile = true;
 
         if(!\defined('HEURIST_PREPARED_PARAMS_DIR')){
-            $system->getSysDir('prepared-parameters');
+            define('HEURIST_PREPARED_PARAMS_DIR', $system->getSysDir('prepared-parameters'));
+        }
+        if(!\defined('HEURIST_SCRATCH_DIR')){
+            define('HEURIST_SCRATCH_DIR', $dir = $system->getSysDir(DIR_SCRATCH));
         }
 
         $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";
