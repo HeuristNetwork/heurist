@@ -254,18 +254,29 @@ if($use_custom_mirador){
 }
 ?>
 <style>
-  html,
-  body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
 
-  #demo {
-    width: 100%;
-    height: 100vh;
-  }
+body {
+  position: relative;
+}
+
+#demo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+}
 </style>
 </head>
 <body>
@@ -292,34 +303,60 @@ if($use_custom_mirador){
 ?>
 <script src="dist/main.js"></script>
 <script type="text/javascript">
+    function renderMiradorWhenReady(config) {
+        const el = document.getElementById('demo');
 
-  var config = {
-    id: 'demo',
-    windows: [{
-      //canvasIndex: 2,
-      canvasId: '<?php echo htmlspecialchars($canvasUri);?>',  //'https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json',
-      imageToolsEnabled: true,
-      imageToolsOpen: false,
-      manifestId: window.manifestUrl,
-      sideBarOpen: true,
-      highlightAllAnnotations: true,
-      sideBarPanel: 'annotations', // Configure which sidebar is selected by default
-      //thumbnailNavigationPosition: "far-bottom"
-    }],
-    theme: {
-      palette: {
-        primary: {
-          main: '#1967d2',
+        function hasSize() {
+            return el && el.clientWidth > 50 && el.clientHeight > 50;
+        }
+
+        function render() {
+            if (typeof window.renderMirador === 'function') {
+                window.renderMirador(config);
+            }
+        }
+
+        if (hasSize()) {
+            render();
+        } else {
+            requestAnimationFrame(function retry() {
+                if (hasSize()) {
+                    render();
+                } else {
+                    requestAnimationFrame(retry);
+                }
+            });
+        }
+    }
+
+    var config = {
+        id: 'demo',
+        windows: [{
+            //canvasIndex: 2,
+            canvasId: '<?php echo htmlspecialchars($canvasUri);?>',  //'https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json',
+            imageToolsEnabled: true,
+            imageToolsOpen: false,
+            manifestId: window.manifestUrl,
+            sideBarOpen: true,
+            highlightAllAnnotations: true,
+            sideBarPanel: 'annotations', // Configure which sidebar is selected by default
+            //thumbnailNavigationPosition: "far-bottom"
+        }],
+        theme: {
+            palette: {
+                primary: {
+                    main: '#1967d2',
+                },
+            },
         },
-      },
-    },
-  };
+    };
 
-  if(window.hideThumbs !==true){
-    config['windows'][0]['thumbnailNavigationPosition'] = 'far-bottom';
-  }
+    if(window.hideThumbs !==true){
+        config['windows'][0]['thumbnailNavigationPosition'] = 'far-bottom';
+    }
 
-  var mirador = window.renderMirador(config);
+    renderMiradorWhenReady(config);
+
 </script>
 <?php
 }else{
