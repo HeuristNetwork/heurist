@@ -394,7 +394,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             });
             
             login_dialog = $dlg.dialog("open");
-            if(is_secondary_parent)$dlg.addClass('ui-dialog-heurist').css({'font-size':'0.8em'});
+
             $dlg.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
             login_dialog.dialog('option','close', function(){__onDialogClose($dlg)});

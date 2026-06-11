@@ -1765,23 +1765,109 @@ window.hWin.HEURIST4.ui = {
     //
     checkAndLogin: function(isforsed, callback){
 
-        if(!window.hWin.HAPI4.has_access()){
-            // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
-            if(typeof showLoginDialog !== 'undefined' && window.hWin.HEURIST4.util.isFunction(showLoginDialog)){  // already loaded in index.php
-                
-                showLoginDialog(isforsed, callback);
-            }else{
-                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profileLogin.js', function(){
-                    window.hWin.HEURIST4.ui.checkAndLogin(isforsed, callback);
-                }); 
-            }
-            return false;
-        }else{
+        return window.hWin.HEURIST4.ui.checkAndLoginInFrame(isforsed, callback);
+        
+/*        
+        if(window.hWin.HAPI4.has_access()){
             return true;
         }
-        
+        // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
+        if(typeof showLoginDialog !== 'undefined' && window.hWin.HEURIST4.util.isFunction(showLoginDialog)){  // already loaded in index.php
+            
+            showLoginDialog(isforsed, callback);
+        }else{
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profileLogin.js', function(){
+                window.hWin.HEURIST4.ui.checkAndLogin(isforsed, callback);
+            }); 
+        }
+        return false;
+*/        
     },
 
+    //
+    // show login popup dialog in an isolated iframe
+    // Use this from user/custom websites where the host CSS may distort profileLogin.html.
+    //
+    checkAndLoginInFrame: function(isforsed, callback){
+
+        if(window.hWin.HAPI4.has_access()){
+            return true;
+        }
+
+        const frameId = 'checkloginInFrame';
+        const overlayId = 'checkloginInFrameOverlay';
+
+        let $overlay = $('#' + overlayId);
+        if($overlay.length === 0){
+            $overlay = $('<div>', {id: overlayId})
+                .css({
+                    position: 'fixed',
+                    left: 0,
+                    top: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: 60000,
+                    background: 'rgba(0,0,0,0.35)'
+                })
+                .appendTo($('body'));
+        }
+
+        let $frame = $('#' + frameId);
+        if($frame.length === 0){
+            $frame = $('<iframe>', {
+                    title: 'login',
+                    id: frameId,
+                    name: frameId
+                })
+                .css({
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 0,
+                    background: 'transparent'
+                })
+                .appendTo($overlay);
+        }else if($frame.parent()[0] !== $overlay[0]){
+            $frame.appendTo($overlay);
+        }
+
+        const closeFrame = function(is_logged){
+            $('#' + frameId).attr('src', 'about:blank');
+            $('#' + overlayId).hide();
+        };
+
+        window.hWin.HEURIST4.ui.closeLoginFrame = closeFrame;
+
+        $overlay.show();
+
+        $frame.off('load.checklogin').on('load.checklogin', function(){
+            const frame = this;
+            try{
+                if(frame.contentWindow && typeof frame.contentWindow.assignLoginCallback === 'function'){
+                    frame.contentWindow.assignLoginCallback(callback, window.hWin, !!isforsed);
+                }else if(frame.contentWindow){
+                    // Fallback if the frame has loaded but scripts are not ready yet.
+                    frame.contentWindow.parentLoginCallback = callback;
+                    frame.contentWindow.parentLoginWindow = window.hWin;
+                    frame.contentWindow.isForcedLogin = isforsed ? 1 : 0;
+                }
+            }catch(e){
+                if(window.console) console.error(e);
+            }
+        });
+
+        const url = window.hWin.HAPI4.baseURL
+            + 'hclient/framecontent/initPageLogin.php?db='
+            + encodeURIComponent(window.hWin.HAPI4.database)
+            + '&isforced=' + (isforsed ? 1 : 0)
+            + '&t=' + window.hWin.HEURIST4.util.random();
+
+        $frame.attr('src', url);
+        return false;
+    },
+    
     //
     // important manageRecords.js and selectRecords.js must be loaded
     // 

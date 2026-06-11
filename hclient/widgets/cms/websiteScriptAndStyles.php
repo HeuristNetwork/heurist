@@ -1314,7 +1314,7 @@ function initLinksAndImages($container, search_data){
     let $btn_signin = $($container[0].querySelectorAll('#btn_signin:not(.cms-button)'));
     if($btn_signin.length>0){
         $btn_signin.on('click', () => {
-            window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+            window.hWin.HEURIST4.ui.checkAndLoginInFrame(true, () => {location.reload();});
         });
 
         $('#btn_signin.cms-button').hide();
@@ -1481,7 +1481,7 @@ $website_languages_options ->#main-languages-sel
     // Setup login button, if needed
     if($('#btn_signin').length>0){
         $('#btn_signin').on('click', () => {
-            window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+            window.hWin.HEURIST4.ui.checkAndLoginInFrame(true, () => {location.reload();});
         });
     }
 
@@ -1612,7 +1612,7 @@ function _openCMSeditor(event){
     var btn = $('#btnOpenCMSeditor'); //$(event.target);
 
     if(!window.hWin.HAPI4.has_access()){
-        window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+        window.hWin.HEURIST4.ui.checkAndLoginInFrame(true, () => {location.reload();});
     }else if(window.hWin.HAPI4.is_admin()){
 
         if(isCMS_active){
