@@ -72,7 +72,7 @@ foreach($ulfRecords as $ulfRec){
     $filename = !empty($ulfRec['ulf_ExternalFileReference']) ? $ulfRec['ulf_ExternalFileReference'] : $ulfRec['ulf_OrigFileName'];
     $files[] = [
         'type' => 'image',
-        'url' => HEURIST_BASE_URL . "?db={$database}&file={$ulfRec['ulf_ObfuscatedFileID']}",
+        'url' => HEURIST_BASE_URL . "?db={$database}&fullres=1&file={$ulfRec['ulf_ObfuscatedFileID']}",
         'buildPyramid' => false,
         'name' => $filename,
         'caption' => $caption,

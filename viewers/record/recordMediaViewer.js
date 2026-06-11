@@ -154,7 +154,7 @@
 
                 const fileNonce = $(event.currentTarget).attr('data-id');
                 const file = files.find((item) => item.id === fileNonce) || {};
-                const fileUrl = `${this.options.baseURL}?db=${this.options.database}&file=${fileNonce}`;
+                const fileUrl = `${this.options.baseURL}?db=${this.options.database}&fullres=1&file=${fileNonce}`;
 
                 if(window.hWin?.HEURIST4?.msg?.showMsgDlg){
                     let fileDesc = $(event.currentTarget).closest('.download_link').find('span.media-desc').attr('title') || '';

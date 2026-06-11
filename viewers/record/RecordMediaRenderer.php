@@ -383,7 +383,7 @@ class RecordMediaRenderer
         if (!empty($thumb['external_url']) && strpos($thumb['external_url'], 'http://') !== 0) {
             return (string)$thumb['external_url'];
         }
-        return HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.rawurlencode((string)($thumb['nonce'] ?? ''));
+        return HEURIST_BASE_URL.'?db='.$this->system->dbname().'&fullres=1&file='.rawurlencode((string)($thumb['nonce'] ?? ''));
     }
 
     private function downloadUrl(array $thumb): string

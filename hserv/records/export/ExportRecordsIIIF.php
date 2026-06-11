@@ -761,7 +761,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
             $resource_url = $external_url;  //external
         }else{
             //to itself
-            $resource_url = HEURIST_BASE_URL_PRO."?db=".$system->dbname()."&file=".$fileid;
+            $resource_url = HEURIST_BASE_URL_PRO."?db=".$system->dbname()."&fullres=1&file=".$fileid;
         }
 
         $height = 800;

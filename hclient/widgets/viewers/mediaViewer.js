@@ -848,9 +848,9 @@ _renderSlideshow: function(title){
                             
                         }else
                         if(mimeType.indexOf('image')===0){
-                            $alink.attr('data-href', external_url?external_url:fileURL+'&fancybox=1')
+                            $alink.attr('data-href', external_url?external_url:fileURL+'&fullres=1&fancybox=1')
                                   .attr('data-type', 'image')
-                                  .attr('data-src', external_url?external_url:fileURL+'&fancybox=1')
+                                  .attr('data-src', external_url?external_url:fileURL+'&fullres=1&fancybox=1')
                                   .attr('data-myfancybox','fb-images')
                                   .css('cursor','pointer')
                                   .attr('data-thumb', thumbURL);
