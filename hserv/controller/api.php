@@ -271,10 +271,15 @@ if($method=='save' || $method=='add'){
 $resource = @$requestUri[3];
 
 // Routes where auth processing is not needed here
+$is_public_annotation_read =
+    ($resource === 'annotations'
+        && $method === 'search'
+        && in_array(@$requestUri[4], array('pages', 'page', 'annotation'), true));
+
 $skip_auth_processing =
     ($resource === 'login') ||
     ($resource === 'logout') ||
-    ($resource === 'annotations' && $method === 'search') ||
+    $is_public_annotation_read ||
     ($resource === 'iiif');
 
 // Routes that may be used anonymously, but should still use
