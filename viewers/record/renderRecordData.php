@@ -527,7 +527,7 @@ if(!$system->hasAccess()){
 
             function addNetworkGraphLink(recID){
 
-                let $parentContainer = $(`div[data-recid="${recID}"]`);
+                let $parentContainer = $(`div[data-recdata="${recID}"]`);
                 let $group_container = $parentContainer.find('div.div_public_data');
 
                 if($parentContainer.find('.network-graph-area').length > 0 || <?php echo $noclutter || $is_map_popup ? 1 : 0; ?> === 1){ // already setup or skip for no clutter/map popup
@@ -545,6 +545,7 @@ if(!$system->hasAccess()){
                     html: `<span class="ui-icon ui-icon-network"></span>View network (<span class="connectionsPlaceholder"></span> connections)`
                 }))
                 .insertBefore($group_container.find('.detailRow.fieldRow').first());
+
                 $network.find('.show_network').on('click', () => openNetworkGraph(recID));
             }
 
@@ -553,7 +554,7 @@ if(!$system->hasAccess()){
             //
             function createRecordGroups(recID, groups){
 
-                var $group_container = $(`div[data-recid="${recID}"] div.div_public_data`);
+                var $group_container = $(`div[data-recdata="${recID}"] div.div_public_data`);
                 var $data = $group_container.find('div[data-order]');
 
                 var $g_ele = null, $g_header = null;
@@ -628,7 +629,8 @@ if(!$system->hasAccess()){
             }
 
             function openNetworkGraph(recID){
-                let $parentContainer = $(`div[data-recid="${recID}"]`);
+
+                let $parentContainer = $(`div[data-recdata="${recID}"]`);
                 let $networkElement = $parentContainer.find('.networkGraphViewer');
                 if($networkElement.length === 0){
                     $networkElement = $('<div>', {
@@ -669,11 +671,11 @@ if(!$system->hasAccess()){
             //
             function moveRelatedDetails(recID, related_records){
 
-                var $rel_section = $(`div[recid="${recID}"] div.relatedSection`); //target div
+                var $rel_section = $(`div[data-recdetails="${recID}"].relatedSection`); //target div
 
-                var $public_fields = $(`div[recid="${recID}"]  div.div_public_data`).find('fieldset[id], div[data-order]');
+                var $public_fields = $(`div[data-recdata="${recID}"]  div.div_public_data`).find('fieldset[id], div[data-order]');
 
-                if(related_records == null || $public_fields == null || $public_fields.length == 0){
+                if(related_records == null || $public_fields.length == 0){
                     return;
                 }
 
@@ -752,12 +754,18 @@ if(!$system->hasAccess()){
 
                     $rel_section.hide();
 
+                    let hasRelationShown = false;
                     $rel_section.find('div[data-id]').each((idx, element) => {
                         if($(element).css('display') !== 'none'){
                             $rel_section.show();
+                            hasRelationShown = true;
                             return false;
                         }
                     });
+
+                    if(!hasRelationShown){
+                        $rel_section.remove();
+                    }
                 }
             }//end moveRelatedDetails
 
@@ -844,7 +852,6 @@ if(!$system->hasAccess()){
                 $map_frame.attr('src', URL);
             }
 
-            
             function openReportSelector(){
             
                 let popup_dialog_options = {path: 'widgets/report/', 
@@ -895,12 +902,12 @@ if(!$system->hasAccess()){
                         $.each(connectedRecIDs, (recID, connectedRecs) => {
 
                             if(connectedRecs.length === 0){
-                                $(`div[data-recid="${recID}"] .network-graph-area`).hide();
+                                $(`div[data-recdata="${recID}"] .network-graph-area`).hide();
                                 return;
                             }
 
-                            $(`div[data-recid="${recID}"] .network-graph-area`).show();
-                            $(`div[data-recid="${recID}"] .connectionsPlaceholder`).text(connectedRecs.length);
+                            $(`div[data-recdata="${recID}"] .network-graph-area`).show();
+                            $(`div[data-recdata="${recID}"] .connectionsPlaceholder`).text(connectedRecs.length);
                         });
                     }
 
@@ -1139,44 +1146,44 @@ if($noclutter){
 $writeToCacheRes = 0; //0 - OK, 1 - not found, 2 - not public 
 $writeToCache = false;
 
+$bibInfo = [];
 if ($bkm_ID>0 || $rec_id>0) {
 
-        $bibInfo = [];
-        if ($bkm_ID>0) {
-            $bibInfo = mysql__select_row_assoc($system->getMysqli(),
-            'select * from usrBookmarks left join Records on bkm_recID=rec_ID '
-            .'left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='
-            .$bkm_ID.' and bkm_UGrpID='.$system->getUserId()
-            .' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
+    if ($bkm_ID>0) {
+        $bibInfo = mysql__select_row_assoc($system->getMysqli(),
+        'select * from usrBookmarks left join Records on bkm_recID=rec_ID '
+        .'left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='
+        .$bkm_ID.' and bkm_UGrpID='.$system->getUserId()
+        .' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
 
-            if($bibInfo===null){
-               print 'Bookmark Id '.$rec_id.' not found'; 
-               $writeToCacheRes = 1;
-            }
-            
-        } elseif($rec_id>0) {
-            $bibInfo = mysql__select_row_assoc($system->getMysqli(),
-            'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
-            .$rec_id.' and not rec_FlagTemporary');
-            
-            if($bibInfo===null){
-               print 'Record Id '.$rec_id.' not found'; 
-               $writeToCacheRes = 1;
-            }
+        if($bibInfo===null){
+            print 'Bookmark Id '.$rec_id.' not found'; 
+            $writeToCacheRes = 1;
         }
+        
+    } elseif($rec_id>0) {
+        $bibInfo = mysql__select_row_assoc($system->getMysqli(),
+        'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
+        .$rec_id.' and not rec_FlagTemporary');
+        
+        if($bibInfo===null){
+            print 'Record Id '.$rec_id.' not found'; 
+            $writeToCacheRes = 1;
+        }
+    }
 }else{
     print 'Resource (record or bookmark) Id not defined'; 
     $writeToCacheRes = 1;
 }
         
-if(is_array($bibInfo) && count($bibInfo)>0){
+if(is_array($bibInfo) && count($bibInfo) > 0){
         
             $writeToCache = $useCache && $bibInfo['rec_NonOwnerVisibility']==='public' && $forceCache;
             if($bibInfo['rec_NonOwnerVisibility']!=='public'){
                 $writeToCacheRes = 2;
             }
 
-            print '<div data-recid="'.intval($bibInfo['rec_ID']).'">';// style="font-size:0.8em"
+            print '<div data-recdata="'.intval($bibInfo['rec_ID']).'">';// style="font-size:0.8em"
             print_details($bibInfo);
             print DIV_E;
             
@@ -1197,7 +1204,7 @@ if(is_array($bibInfo) && count($bibInfo)>0){
                             .' where rec_ID='.$id.' and not rec_FlagTemporary');
 
                     if($id != $rec_id){  //print details for linked records - hidden
-                        print '<div data-recid="'.intval($id).'" style="display:none">';//font-size:0.8em;
+                        print '<div data-recdata="'.intval($id).'" style="display:none">';//font-size:0.8em;
                         $bibInfo['hideDetails'] = true;
                         print_details($bibInfo);
                         print DIV_E;
@@ -1210,7 +1217,7 @@ if(is_array($bibInfo) && count($bibInfo)>0){
                                 .strip_tags($rectypesStructure['names'][$bibInfo['rec_RecTypeID']])
                                 .'" src="'.ICON_PLACEHOLDER.'">'.DIV_E
                         .'<div style="display: table-cell;vertical-align:top;max-width:490px;cursor: pointer;" class="truncate"><a '
-.'oncontextmenu="return false;" onclick="$(\'div[data-recid],[data-extraid]\').hide();$(\'div[data-recid='.$id.'],[data-extraid='.$id.']\').show();'
+.'oncontextmenu="return false;" onclick="$(\'div[data-recdata],[data-recdetails]\').hide();$(\'div[data-recdata='.$id.'],[data-recdetails='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
 .USanitize::sanitizeString($bibInfo['rec_Title'],ALLOWED_TAGS).'</a></div></div>';//htmlspecialchars
@@ -1295,7 +1302,7 @@ exit(0);
 /***** END OF OUTPUT *****/
 
 // this functions outputs common info.
-function print_details($bib) {
+function print_details(array $bib) {
     global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system, $group_details, $show_private_details, $connectedRecIDs;
 
     print_header_line($bib);
@@ -1344,7 +1351,7 @@ function print_details($bib) {
 
 
 // this functions outputs the header line of icons and links for managing the record.
-function print_header_line($bib) {
+function print_header_line(array $bib) {
 
     global $is_map_popup, $without_header, $is_production, $system;
 
@@ -1406,7 +1413,7 @@ function print_header_line($bib) {
 //this  function displays private info if there is any.
 // ownereship, viewability, dates, tags, rate
 //
-function print_private_details($bib) {
+function print_private_details(array $bib) {
 
     global $system, $is_map_popup, $is_production, $show_hidden_fields, $show_private_details;
 
@@ -1496,9 +1503,9 @@ function print_private_details($bib) {
     </div>
     <?php
 
-    $add_date = DateTime::createFromFormat(DATE_8601, $bib['rec_Added']);//get form database in server time
-
     //zero date not allowed by default since MySQL 5.7 default date changed to 1000
+    $add_date = DateTime::createFromFormat(DATE_8601, $bib['rec_Added']);//get form database in server time
+    $add_date_local = '';
     if($add_date && $bib['rec_Added']!='0000-00-00 00:00:00' && $bib['rec_Added']!='1000-01-01 00:00:00') {
         $add_date = htmlspecialchars($add_date->setTimezone(new DateTimeZone('UTC'))->format(DATE_8601));//convert to UTC
         $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
@@ -1509,6 +1516,7 @@ function print_private_details($bib) {
     }
 
     $mod_date = DateTime::createFromFormat(DATE_8601, $bib['rec_Modified']);//get form database in server time
+    $mod_date_local = '';
     if($mod_date){
         $mod_date = htmlspecialchars($mod_date->setTimezone(new DateTimeZone('UTC'))->format(DATE_8601));//convert to UTC
         $mod_date_local = ' (<span id="lt1"></span><script type="text/javascript">printLTime("'.  //output in js in local time
@@ -1606,7 +1614,7 @@ function print_private_details($bib) {
 
 
 //this function outputs the personal information from the bookmark
-function print_personal_details($bkmk) {
+function print_personal_details(array $bkmk) {
     global $system;
 
     $bkm_ID = $bkmk['bkm_ID'];
@@ -1643,7 +1651,7 @@ function print_personal_details($bkmk) {
 //
 // prints recDetails
 //
-function print_public_details($bib) {
+function print_public_details(array $bib) {
 
     global $system, $defTerms, $is_map_popup, $noclutter, $without_header, $is_production, $primary_language,
         $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $connectedRecIDs, $group_details, $hide_images;
@@ -2196,7 +2204,7 @@ function print_other_tags($bib) {
 //
 //
 //
-function print_relation_details($bib) {
+function print_relation_details(array $bib) {
 
     global $system, $relRT,$relSrcDT,$relTrgDT,
         $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $useRelmarkerTitle,
@@ -2450,7 +2458,7 @@ function print_relation_details($bib) {
 }
 
 
-function print_linked_details_header($bib){
+function print_linked_details_header(array $bib){
 
     global $is_map_popup, $is_production, $system;
 
@@ -2482,7 +2490,7 @@ function print_linked_details_header($bib){
 //
 // print reverse link
 //
-function print_linked_details($bib, $link_cnt)
+function print_linked_details(array $bib, int $link_cnt)
 {
     global $system, $relRT, $ACCESS_CONDITION,
         $is_map_popup, $rectypesStructure, $already_linked_ids,$connectedRecIDs;
@@ -2537,7 +2545,7 @@ function print_linked_details($bib, $link_cnt)
 
 }
 
-function output_chunker($val, $return_lang = false) {
+function output_chunker(string $val, bool $return_lang = false) {
 
     list($lang, $val) = extractLangPrefix($val);// remove possible language prefix
     // chunk up the value so that it will be able to line-break if necessary
@@ -2549,7 +2557,7 @@ function output_chunker($val, $return_lang = false) {
 }
 
 //sort array by order_by_date for resource (record pointer) details
-function __sortResourcesByDate($a, $b)
+function __sortResourcesByDate(array $a, array $b)
 {
     if($a['rst_DisplayOrder'] == $b['rst_DisplayOrder']){
 
@@ -2571,7 +2579,7 @@ function __sortResourcesByDate($a, $b)
     return $ret;
 }
 
-function linkifyValue($value){
+function linkifyValue(string $value){
 
     $new_value = str_replace(array("\r\n", "\n\r", "\r", "\n"), '<br>', $value);// "%0A", "%0D"
 
@@ -2581,30 +2589,30 @@ function linkifyValue($value){
         return $new_value;
     }
 
-        foreach($url_matches[0] as $url){
-            if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
-                $url = explode('<br>', $url)[0];
-            }
-            if(strpos($new_value, 'href=\'' . $url)!==false || strpos($new_value, 'href="' . $url)!==false || strpos($new_value, 'href=`' . $url)!==false){ // check if already part of element
-                continue;
-            }
-            if(ctype_punct(mb_substr($url, -1)) && mb_substr($url, -1) != ')'){ // ensure last character isn't punctuation or a closing bracket
-                $url = mb_substr($url, 0, -1);
-            }
-
-            if(!isEmptyStr($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
-                $linked_url = '<a href='. $url .' target="_blank">'. $url .'</a>';
-                $new_value = str_replace($url, $linked_url, $new_value);
-            }
+    foreach($url_matches[0] as $url){
+        if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
+            $url = explode('<br>', $url)[0];
+        }
+        if(strpos($new_value, 'href=\'' . $url)!==false || strpos($new_value, 'href="' . $url)!==false || strpos($new_value, 'href=`' . $url)!==false){ // check if already part of element
+            continue;
+        }
+        if(ctype_punct(mb_substr($url, -1)) && mb_substr($url, -1) != ')'){ // ensure last character isn't punctuation or a closing bracket
+            $url = mb_substr($url, 0, -1);
         }
 
-        return $new_value;
+        if(!isEmptyStr($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
+            $linked_url = '<a href='. $url .' target="_blank">'. $url .'</a>';
+            $new_value = str_replace($url, $linked_url, $new_value);
+        }
+    }
+
+    return $new_value;
 }
 
 //
 //
 //
-function composeRecTypeIcon($rty_ID){
+function composeRecTypeIcon(int $rty_ID){
     global $rectypesStructure;
 
     $rty_Name = $rectypesStructure['names'][$rty_ID];
@@ -2616,7 +2624,7 @@ function composeRecTypeIcon($rty_ID){
 //
 //
 //
-function composeRecLink($rec_ID, $rec_Title){
+function composeRecLink(int $rec_ID, string $rec_Title){
     global $system;
 
     return '<a target="_popup" href="'.$system->recordLink($rec_ID)
