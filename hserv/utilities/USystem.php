@@ -889,10 +889,11 @@ class USystem {
         
         $membershipStatus = checkHeuristNetworkMembership($dbowner['ugr_eMail'], $currentUser['ugr_eMail'], $server, $database, $context??'');
         //$isMember = 'individual';
-        if(session_status() === PHP_SESSION_ACTIVE){
+        if(session_status() !== PHP_SESSION_ACTIVE){
+            ini_set('session.gc_maxlifetime', (string)(30 * 24 * 60 * 60));
             @session_start();
-            $_SESSION[$database]['isAssociationMember'] = $membershipStatus;
         }
+        $_SESSION[$database]['isAssociationMember'] = $membershipStatus;
         
         return $membershipStatus;
         

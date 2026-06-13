@@ -21,6 +21,9 @@ final class SessionStore
         if (headers_sent()) {
             return false;
         }
+        
+        
+        ini_set('session.gc_maxlifetime', (string)(30 * 24 * 60 * 60));
 
         if (session_name() !== self::SESSION_NAME) {
             session_name(self::SESSION_NAME);
