@@ -1347,9 +1347,9 @@ $.widget( "heurist.editing_input", {
             }else
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
-            && this.options.dtID > 0)
+            && this.options.dtID > 0 || this.options.dtID === 'bug_Description')
             {
-             
+
                 const isCMS_record = 
                         (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']);
@@ -1403,14 +1403,14 @@ $.widget( "heurist.editing_input", {
                         .css({cursor: 'pointer', 'margin-left': '10px'})
                         .appendTo($btn_edit_switcher);
 
-                    if(codeEditor){
+                    if(codeEditor && window.hWin.HEURIST4.util.isPositiveInt(this.options.dtID)){
                         $('<span>codeeditor</span>')
                             .attr('title', 'direct edit html in code editor')
                             .addClass('smallbutton')
                             .css({cursor: 'pointer', 'margin-left': '10px'})
                             .appendTo($btn_edit_switcher);
                     }
-                        
+
                     $('<span>table</span>')
                         .attr('title', 'treats the text as a table/spreadsheet and opens a lightweight spreadsheet editor')
                         .addClass('smallbutton')
