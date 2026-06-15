@@ -1149,14 +1149,10 @@ $.widget( "heurist.importStructure", {
                             
                             report += ('<p>'+response.report.broken_terms.length
                                 +' terms were not properly imported.'
-                                +' Error report has been sent to Heurist support.<ul>');
+                                +' Error report has been sent to Heurist support.<ul style="overflow-y: auto; max-height: 30em;">');
                             
                             for(let i=0; i<response.report.broken_terms.length; i++){
-                                report += ('<li>'+response.report.broken_terms[i][0]+'</li>');    
-                                if(i>10){
-                                    report += '...';
-                                    break;
-                                }
+                                report += `<li style="padding-bottom: 0.75em;"><strong>${response.report.broken_terms[i][0]}</strong><br>reason: ${response.report.broken_terms_reason[i]}</li>`;
                             }
                             
                             report += ('</ul></p>');

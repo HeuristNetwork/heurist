@@ -148,7 +148,7 @@ ini_set('max_execution_time', 0);
 
                 sendEmail(HEURIST_MAIL_TO_BUG, 'Import terms report', $sText);
 
-                $response['report']['broken_terms_reason'] = null;
+                //$response['report']['broken_terms_reason'] = null;
             }
             if(@$response['report'] && $response['report']['rectypes']){
 
