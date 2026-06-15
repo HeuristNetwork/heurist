@@ -591,9 +591,9 @@ class USystem {
                 'expires' => $lifetime,
                 'path' => '/',
                 'domain' => '',
-                'Secure' => $is_https,
-                'HttpOnly' => true,
-                'SameSite' => 'Strict' //'Lax'
+                'secure' => $is_https,
+                'httponly' => true,
+                'samesite' => 'Strict' //'Lax'
             ));
         }else{
             //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax")
