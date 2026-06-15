@@ -4107,27 +4107,28 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
      * @return {void}
      */
     function _showRecords2(mode, is_download){
-     
+
         let s = '';
         let container = $('#divPopupPreview');
-        let dlg_options = {};
+        let dlg_options = {
+            default_palette_class: 'ui-heurist-populate'
+        };
         let $dlg;
-        let offset = 0, limit=10, 
+        let offset = 0, limit = 1000,
             recCount = _getInsertUpdateCounts(currentSeqIndex),
             start_idx = 0;
-            
+
         if(recCount==null) return;
-        
+
         recCount = mode=='all'?imp_session['reccount']:recCount[mode=='insert'?3:1];
 
-        let id_field = null;         
-        
+        let id_field = null;
+
         let index_field_idx = _getFieldIndexForIdentifier(currentSeqIndex);
         if(index_field_idx>=0){
              id_field = 'field_'+index_field_idx;
         }
-     
-        
+
         let mapping_flds = null;
         if(currentStep!=3){  //import step
             mapping_flds = imp_session['sequence'][currentSeqIndex]['mapping_flds'];
@@ -4136,20 +4137,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             mapping_flds = imp_session['sequence'][currentSeqIndex]['mapping_keys'];
         }
         if(!mapping_flds) mapping_flds = {};
-        
+
         let header_flds = null;
-        
+
         if(is_download){
-            
+
             let k;
             header_flds = ['ID'];
             for(k=0; k<imp_session['columns'].length; k++){
                 header_flds.push(imp_session['columns'][k]);
             }
-                                                              
+
             let rts = Object.keys(imp_session['indexes']);
             for(k=0; k<rts.length; k++){
-                
+
                 let idx_id_fieldname = rts[k].substring(6); //'field_'
                 if(idx_id_fieldname>imp_session['columns'].length){
                     let rtyID = imp_session['indexes'][rts[k]];
@@ -4157,11 +4158,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     header_flds.push(sname);
                 }
             }
-            
+
         }else{
-        
+
             dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
-            
+
             s = ''
                 +'<div class="ent_wrapper"><div style="padding:8px 0 0 10px" class="ent_header">'
                 +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="first" class="ui-icon ui-icon-seek-first"/></a>'
@@ -4169,8 +4170,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 +'<div style="display: inline-block;vertical-align: super;">Range <span id="current_range"></span></div>'
                 +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>'
                 +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a></div>';
-            
-                
+
             s = s + '<div class="ent_content_full"><table class="tbmain" style="font-size:0.9em" width="100%"><thead><tr>'; 
 
             //HEADER - field names
@@ -4183,7 +4183,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }else{
                 start_idx = 1;
             }
-            
+
             if(fieldnames.length>0){
                 for(;i<fieldnames.length;i++){
                     let colname = imp_session['columns'][fieldnames[i]];
@@ -4192,7 +4192,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
                 }
             }else{  //all
-            
+
                 fieldnames = imp_session['columns'];
                 for(;i<fieldnames.length;i++){
                     let colname = fieldnames[i];
@@ -4202,124 +4202,121 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
             s = s + '</tr></thead><tbody></tbody></table></div></div>'
             +'<div class="loading semitransparent" style="display:none;width:100%;height:100%;poistion:absolute"></div>';
-            
+
             dlg_options['element'] = container.get(0);
             container.html(s);
-                
+
             $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
-            
+
             $.each($dlg.find('.navigation2'), function(idx, item){
                 $(item).on('click',  __loadRecordsFromImportTable );
             })
-        
+
         }
-        
+
         __loadRecordsFromImportTable();
-        
-        
+
         function __loadRecordsFromImportTable(event){
-        
+
             if(!imp_session) return;
-            
-            let currentTable = imp_session['import_table']; 
-        
+
+            let currentTable = imp_session['import_table'];
+
             if(currentTable && recCount>0){
-            
-                    let dest = 0;
-                    if(event){
-                        dest = $(event.target).attr('data-dest');  
-                    } 
-                    
-                    
-                    if(Number(dest)=='first'){
+
+                let dest = 0;
+                if(event){
+                    dest = $(event.target).attr('data-dest');
+                } 
+
+                if(Number(dest)=='first'){
+                    offset = 0;
+                }else if(dest=='last'){
+                    offset = Math.floor(recCount/limit) * limit;
+                }else{
+                    dest = Number(dest);
+                    if(isNaN(dest)){
                         offset = 0;
-                    }else if(dest=='last'){
-                        offset = Math.floor(recCount/limit) * limit;
                     }else{
-                        dest = Number(dest);
-                        if(isNaN(dest)){
-                            offset = 0;
-                        }else{
-                            offset = offset + dest*limit;
+                        offset = offset + dest*limit;
+                    }
+                }
+                if (offset>recCount){
+                    offset = Math.floor(recCount/limit) * limit;
+                }
+                if(offset<0){
+                    offset = 0;
+                }
+
+                let request = { 
+                    action: 'records',
+                    id_field: id_field,
+                    mapping: is_download ? null : mapping_flds,
+                    header_flds: header_flds,
+                    mode: mode,
+                    output: is_download ? 'csv' : 'json',
+                    offset: is_download ? 0 : offset,
+                    limit: is_download ? 0 : limit,
+                    table: currentTable,
+                    id: window.hWin.HEURIST4.util.random()
+                };
+
+                if(is_download){
+
+                    request['db'] = window.hWin.HAPI4.database;
+                    request['mapping'] = JSON.stringify(request['mapping']);
+                    request['header_flds'] = encodeURIComponent(JSON.stringify(request['header_flds']));
+
+                    let keys = Object.keys(request) 
+                    let params = [];
+                    for(let k=0;k<keys.length;k++){
+                        if(!window.hWin.HEURIST4.util.isempty(request[keys[k]])){
+                            params.push(keys[k]+'='+request[keys[k]]);
                         }
                     }
-                    if (offset>recCount){
-                        offset = Math.floor(recCount/limit) * limit;
-                    }                    
-                    if(offset<0){        
-                        offset = 0;
-                    }
+                    params = params.join('&');
+                    let url = window.hWin.HAPI4.baseURL + 'hserv/controller/importController.php?'+params;
 
-                    let request = { action: 'records',
-                                    id_field: id_field,
-                                    mapping: (is_download)?null:mapping_flds,
-                                    header_flds: header_flds,
-                                    mode: mode,
-                                    output: (is_download)?'csv':'json',
-                                    offset: is_download?0:offset,
-                                    limit: is_download?0:limit,
-                                    table:currentTable,
-                                    id: window.hWin.HEURIST4.util.random()
-                                       };
-                                       
-                    if(is_download){
+                    window.hWin.HEURIST4.util.downloadURL(url);
 
-                       request['db'] = window.hWin.HAPI4.database;
-                       request['mapping'] = JSON.stringify(request['mapping']);
-                       request['header_flds'] = encodeURIComponent(JSON.stringify(request['header_flds']));
-                        
-                       let keys = Object.keys(request) 
-                       let params = [];
-                       for(let k=0;k<keys.length;k++){
-                           if(!window.hWin.HEURIST4.util.isempty(request[keys[k]])){
-                                params.push(keys[k]+'='+request[keys[k]]);
-                           }
-                       }
-                       params = params.join('&');
-                       let url = window.hWin.HAPI4.baseURL + 'hserv/controller/importController.php?'+params;
-                        
-                       window.hWin.HEURIST4.util.downloadURL(url);
-                        
-                    }else{
-                    
-                        $dlg.find('.loading').show();
-                        $dlg.find('.ent_wrapper').hide();
-                        
-                        
-                        window.hWin.HAPI4.doImportAction(request, function( response ){
-                            
-                            $dlg.find('.loading').hide();
-                            $dlg.find('.ent_wrapper').show();
-                            
-                            if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                                    response = response.data;
-                                    
-                                    let table = $dlg.find('.tbmain > tbody');
-                                
-                                    let s = '';
-                                    $dlg.find("#current_range").html( (offset+1)+':'+(offset+limit) );
+                }else{
 
-                                    for(let i=0; i<response.length;i++){
-                                        let row = response[i];
-                                        if(start_idx>0) row.shift();
-                                        s = s+'<tr>';
-                                        s = s+'<td>'+ row.join('</td><td>') +'</td>';
-                                        s = s+'</tr>';
-                                    }
-                                    
-                                    table.html(s);
-                                
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                    $dlg.find('.loading').show();
+                    $dlg.find('.ent_wrapper').hide();
+
+                    window.hWin.HAPI4.doImportAction(request, function( response ){
+
+                        $dlg.find('.loading').hide();
+                        $dlg.find('.ent_wrapper').show();
+
+                        if(response.status == window.hWin.ResponseStatus.OK){
+
+                            response = response.data;
+
+                            let table = $dlg.find('.tbmain > tbody');
+
+                            let s = '';
+                            $dlg.find("#current_range").html( (offset+1)+':'+(offset+limit) );
+
+                            for(let i=0; i<response.length;i++){
+                                let row = response[i];
+                                if(start_idx>0) row.shift();
+                                s = s+'<tr>';
+                                s = s+'<td>'+ row.join('</td><td>') +'</td>';
+                                s = s+'</tr>';
                             }
 
-                        });        
-                    }
+                            table.html(s);
+
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+
+                    });
+                }
             }
         }
-        
-     
+
     }
     
     //
