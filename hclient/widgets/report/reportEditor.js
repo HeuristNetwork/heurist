@@ -808,10 +808,25 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         }
         
         if(!window.hWin.HEURIST4.util.isPositiveInt(rty_ID)){
+
             treedivPlaceholder.show();
             treedivContainer.hide();
+
+            if(!this.is_snippet_editor){
+                this._$('.require-rectype').hide();
+                this._$('.extra-spacing').show();
+                this._$('.rtt-tree, .rtt-tree-placeholder').css('top', '115px');
+            }
+
             return;
         }
+
+        if(!this.is_snippet_editor){
+            this._$('.require-rectype').show();
+            this._$('.extra-spacing').hide();
+            this._$('.rtt-tree, .rtt-tree-placeholder').css('top', '150px');
+        }
+
         treedivPlaceholder.hide();
         treedivContainer.show();
         treediv.empty();
