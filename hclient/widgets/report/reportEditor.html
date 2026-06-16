@@ -22,7 +22,9 @@
                     <span title="Close patterns panel" class="closeInsertForm ui-icon ui-icon-carat-2-w" 
                         style="height: 32px; width: 32px; position: absolute; top: 13px; right: 0px; font-size: 32px; cursor: pointer; z-index: 1000;"></span>            
 
-                    <div  class="hide-for-snippet">
+                    <div class="hide-for-snippet extra-spacing" style="height: 2.5em;"></div>
+
+                    <div style="display: none;" class="hide-for-snippet require-rectype">
                         <a href="../documentation/context_help/smarty_reports.html" class="heurist-helper3" style="float:left;padding:4px 10px"
                         onClick="window.hWin.HEURIST4.msg.showDialog( this.href );return false;"
                         title="Read full documentation on the Smarty templating language">
@@ -31,7 +33,7 @@
                         <div class="heurist-helper3" style="padding-left:10px"></div>
                     </div>
 
-                    <div style="padding:10px 0px;border-bottom:1px lightgray solid" class="hide-for-snippet">
+                    <div style="padding:10px 0px;border-bottom:2px black solid; display: none;" class="hide-for-snippet require-rectype">
                         <span style="font-weight:bold;width:auto;display:none">Select Pattern</span>
                         <select id="selInsertPattern" style="min-width:150px;max-width:90%">
                             <option value="1">Heading for record type</option>
@@ -53,24 +55,25 @@
                         <h3 style="padding-bottom:10px;margin:0px;font-weight:bold;">Add data</h3>
                         <span style="font-weight:bold;width:auto;display:none">Select Type</span>
                         <select id="rectype_selector" style="width:206px;max-width:180px"></select>
-                        <div style="width:100%;text-align:left;margin-top:10px;">
-                        <button id="btnInsertFields" style="display:none">
-                            Add selected fields
-                        </button>
-                        </div>
                     </div>
                     
                 </div>
 
-                <div style="background-color: #FFFFFF;top:180px" class="ent_content_full rtt-tree-placeholder">
+                <div style="background-color: #FFFFFF;top:115px" class="ent_content_full rtt-tree-placeholder">
                     <div style="margin: 30px auto;text-align:center">
                     <strong>Please select a record type above in order <br> to add fields to the report template</strong>
                     <br><br>
                     Position cursor in text <br> before inserting a pattern or adding fields
-                    </div>                    
-                </div>    
+                    </div>
+                </div>
                 
-                <div style="display:none;background-color: #FFFFFF;top:180px;" class="ent_content_full rtt-tree">
+                <div style="display:none;background-color: #FFFFFF;top:115px;" class="ent_content_full rtt-tree">
+                    <div style="width: 100%;text-align: right;margin: 7.5px 0;">
+                        <button id="btnInsertFields" style="display:none">
+                            <span style="padding-right: 2em;">Add selected fields</span>
+                            <span class="ui-icon ui-icon-arrowthick-1-e" style="transform: scaleX(3);padding-left: 1em;"></span>
+                        </button>
+                    </div>
                     <label for='order_alphabetic'>
                         <input type='radio' name='tree_order' id='order_alphabetic' style='vertical-align: middle;' value='1'/>&nbsp;Alphabetic
                     </label>
@@ -88,7 +91,7 @@
                     
                     <br>
                     <div id="field_treeview" style="padding-top:10px"></div>
-                </div>        
+                </div>
         </div>
     </div>
     <div class="ui-layout-center">  
