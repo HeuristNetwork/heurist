@@ -430,7 +430,7 @@ $rtDefines = array(
 
     // Spatial data
     'RT_PLACE' => array(3, 1009),
-    'RT_MAP_ANNOTATION' => array(2, 101),
+    'RT_MAP_ANNOTATION' => array(2, 109),
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3, 1020),
 
@@ -450,7 +450,11 @@ $rtDefines = array(
     'RT_CMS_HOME' => array(99, 51),
     'RT_CMS_MENU' => array(99, 52),
 
-    'RT_BUG_REPORT' => array(8, 23)
+    'RT_BUG_REPORT' => array(8, 23),
+    
+    'RT_IIIF_MANIFEST' => array(2, 110),
+    'RT_IIIF_CANVAS' => array(2, 111),
+    'RT_IIIF_ANNOTATION' => array(2, 101)
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -491,6 +495,14 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
     'DT_ANNOTATION_INFO' => array(2, 1098), //for iiif and map annotations
+    'DT_ANNOTATION_MOTIVATION' => array(2, 1150), //commenting, tagging, supplementing etc
+    'DT_ANNOTATION_MANIFEST' => array(2, 1151),
+    'DT_ANNOTATION_TARGET' => array(2, 1152),
+    'DT_ANNOTATION_STATE' => array(2, 1153),
+    'DT_ANNOTATION_SELECTOR_TYPE' => array(2, 1154),   
+    'DT_ANNOTATION_SELECTOR_VALUE' => array(2, 1155),
+    'DT_IIIF_MANIFEST_ID' => array(2, 1156),
+    'DT_IIIF_IMPORT_MODE' => array(2, 1157),
 
     //xslt not used
     'DT_FILTER_STRING' => array(2, 40),
@@ -578,7 +590,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_EXTFILES' => array(2, 939), //external links and scripts
     'DT_CMS_FOOTER' => array(2, 940),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
-    'DT_LANGUAGES' => array(2, 967),
+    'DT_LANGUAGE' => array(2, 967),
     'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only
     'DT_CMS_MENU_HOME' => array(2, 1149),  //show home entry in main menu 
     'DT_CMS_ACTION' => array(2, 1148),

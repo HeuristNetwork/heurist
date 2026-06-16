@@ -353,8 +353,8 @@ private static function getAnnotationRectypeIds($system): array
 {
     $rty_ids = array();
 
-    if($system->defineConstant('RT_MAP_ANNOTATION')){
-        $rty_ids[] = RT_MAP_ANNOTATION;
+    if($system->defineConstant('RT_IIIF_ANNOTATION')){
+        $rty_ids[] = RT_IIIF_ANNOTATION;
     }
     if($system->defineConstant('RT_ANNOTATION') && !in_array(RT_ANNOTATION, $rty_ids)){
         $rty_ids[] = RT_ANNOTATION;

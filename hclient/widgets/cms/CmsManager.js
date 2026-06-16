@@ -24,7 +24,7 @@
  * @property {number} DT_CMS_MENU Detail Type ID for CMS Menu field.
  * @property {number} DT_NAME Detail Type ID for Name.
  * @property {number} DT_CMS_HEADER Detail Type ID for CMS Header.
- * @property {number} DT_LANGUAGES Detail Type ID for Languages.
+ * @property {number} DT_LANGUAGE Detail Type ID for Languages.
  * @property {number} DT_CMS_PAGETYPE Detail Type ID for CMS Page Type.
  */
 class CmsManager {
@@ -38,7 +38,7 @@ class CmsManager {
     DT_CMS_MENU;
     DT_NAME;
     DT_CMS_HEADER;
-    DT_LANGUAGES;
+    DT_LANGUAGE;
     DT_CMS_PAGETYPE;
     
     /**
@@ -63,7 +63,7 @@ class CmsManager {
         this.DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'];
         this.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         this.DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'];
-        this.DT_LANGUAGES = window.hWin.HAPI4.sysinfo['dbconst']['DT_LANGUAGES'];
+        this.DT_LANGUAGE = window.hWin.HAPI4.sysinfo['dbconst']['DT_LANGUAGE'];
         this.DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
     }
 
@@ -144,7 +144,7 @@ class CmsManager {
 
         if (!(this.RT_CMS_HOME > 0 && this.RT_CMS_MENU > 0)) {
             missing = 'You will need record types 99-51 (Web home) and 99-52 (Web menu/content)';
-        } else if (!(this.DT_LANGUAGES > 0) || !$Db.rst(this.RT_CMS_HOME, this.DT_LANGUAGES)) {
+        } else if (!(this.DT_LANGUAGE > 0) || !$Db.rst(this.RT_CMS_HOME, this.DT_LANGUAGE)) {
             missing = 'You will need record types 99-51 (Web home) with field 2-967 (Languages)';
         }
 

@@ -44,7 +44,7 @@ class DbAnnotations extends DbEntityBase
         $this->system = $system;
         $this->data = $data;
 
-        $this->system->defineConstant('RT_MAP_ANNOTATION');
+        $this->system->defineConstant('RT_IIIF_ANNOTATION');
         $this->system->defineConstant('DT_NAME');
         $this->system->defineConstant('DT_URL');
         $this->system->defineConstant('DT_DATE');
@@ -259,7 +259,7 @@ class DbAnnotations extends DbEntityBase
     */
     private function checkRequiredDefintions(){
 
-        if(!defined('RT_MAP_ANNOTATION')){
+        if(!defined('RT_IIIF_ANNOTATION')){
             //import missed record type
             $importDef = new \DbsImport( $this->system );
             $isOK = $importDef->checkAndImportRty('2-101');
@@ -272,7 +272,7 @@ class DbAnnotations extends DbEntityBase
             }
 
             //redefine constants
-            $this->system->defineConstant('RT_MAP_ANNOTATION', true);
+            $this->system->defineConstant('RT_IIIF_ANNOTATION', true);
             $this->system->defineConstant('DT_ORIGINAL_RECORD_ID', true);
             $this->system->defineConstant('DT_ANNOTATION_INFO', true);
         }
@@ -402,7 +402,7 @@ class DbAnnotations extends DbEntityBase
             //record header
             $record = array();
             $record['ID'] = $recordId;
-            $record['RecTypeID'] = RT_MAP_ANNOTATION;
+            $record['RecTypeID'] = RT_IIIF_ANNOTATION;
             $record['no_validation'] = true;
             $record['details'] = $details;
 

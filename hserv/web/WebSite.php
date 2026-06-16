@@ -90,7 +90,7 @@ class WebSite
         $this->system->defineConstant('DT_CMS_FOOTER_FIXED');
 
         $this->system->defineConstant('TRM_NO');
-        $this->system->defineConstant('DT_LANGUAGES');
+        $this->system->defineConstant('DT_LANGUAGE');
         $this->system->defineConstant('DT_CMS_PAGETYPE');
         
         
@@ -696,8 +696,8 @@ class WebSite
     private function getLanguageSelector(){
         
         $res = '';
-        if(defined('DT_LANGUAGES')){
-            $website_languages = @$this->siteRecord['details'][DT_LANGUAGES];
+        if(defined('DT_LANGUAGE')){
+            $website_languages = @$this->siteRecord['details'][DT_LANGUAGE];
         
             if(!isEmptyArray($website_languages)){
                 //$website_languages = array_values($website_languages);

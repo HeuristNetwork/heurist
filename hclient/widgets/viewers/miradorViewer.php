@@ -5,7 +5,7 @@
 * It uses customized Mirador viewer (from external folder) with annotation and image tools
 * If it is missed, it uses latest mirador distribution from unpkg.com
 *
-* For annotations, heurist database must have record type either RT_MAP_ANNOTATION or RT_ANNOTATION
+* For annotations, heurist database must have record type either RT_IIIF_ANNOTATION or RT_ANNOTATION
 *
 * As a mirador viewer with annotation tool we use customized https://github.com/ProjectMirador/mirador-integration
 * Modified files are in mirador-integration-changes.zip in external5/mirador3 folder
@@ -93,14 +93,14 @@ require_once dirname(__FILE__).'/../../../autoload.php';
 if($system!=null && $rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['iiif']==null){
 
     //detect is this mirador image or annotation
-    if($system->defineConstant('RT_MAP_ANNOTATION')){
+    if($system->defineConstant('RT_IIIF_ANNOTATION')){
 
         $res = recordSearchByID($system, $rec_ID, false, 'rec_ID,rec_RecTypeID');
         $system->defineConstant('DT_URL');
         $mysqli = $system->getMysqli();
 
 
-        if($res['rec_RecTypeID']==RT_MAP_ANNOTATION){
+        if($res['rec_RecTypeID']==RT_IIIF_ANNOTATION){
             //find parent record with iiif image - it returns obfuscation id
 
             $query = 'SELECT dtl_RecID, ulf_ObfuscatedFileID '
@@ -129,7 +129,7 @@ if($system!=null && $rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['i
             //find CanvasURI linked annotation - to activate this page on mirador load
             $query = 'SELECT dtl_Value, count(*) as cnt FROM recDetails, recLinks, Records '
                 .' WHERE rl_TargetID='.$rec_ID
-                .' AND rec_ID=rl_SourceID AND rec_RecTypeID='.RT_MAP_ANNOTATION
+                .' AND rec_ID=rl_SourceID AND rec_RecTypeID='.RT_IIIF_ANNOTATION
                 .' AND dtl_RecID=rec_ID '
                 .' AND dtl_DetailTypeID='.DT_URL
                 .' GROUP BY dtl_Value ORDER BY cnt DESC';
