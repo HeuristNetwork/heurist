@@ -508,6 +508,8 @@ class DbRegis {
     */
     public static function getDatabaseUrlLocal($params){
         
+        if(!self::initialize()) {return false;} //can not connect to index database
+        
         $dbID = self::checkDbId($params);
         if(!$dbID){
             return false;

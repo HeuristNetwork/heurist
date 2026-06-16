@@ -61,19 +61,26 @@ final class RecordResolver
                     self::renderResolverError($error, $params);
                     return ['error' => $error, 'status' => (int)($error['http_status'] ?? 502)];
                 }
+                
                 if($remote){
                     $sep = (strpos($remote, '?') === false) ? '?' : '&';
-                    $qs = [$entity => $params[$entity]];
+
+                    // Important: concept code DBID-ID has already been resolved.
+                    // The target database expects the local entity ID, not the original concept code.
+                    $qs = [$entity => $recid];
+
                     return ['url' => $remote . $sep . http_build_query($qs), 'status' => 302];
-                }else{
-                    if(!self::isPositiveInt($params[$entity])){
+                }
+                
+                if(!self::isPositiveInt($params[$entity])){
                         $error = array('status'=>HEURIST_INVALID_REQUEST, 'message'=>'Resource Id is not defined');
                         self::renderResolverError($error, $params);
                         return null;
-                    }
-                    $qs = http_build_query(['db' => $params['db'] ?? null, $entity => $params[$entity]]);
-                    return ['url' => "/{$version}/hserv/structure/export/getDBStructureAsXML.php?{$qs}", 'status' => 302];
                 }
+                
+                $qs = http_build_query(['db' => $params['db'] ?? null, $entity => $params[$entity]]);
+                return ['url' => "/{$version}/hserv/structure/export/getDBStructureAsXML.php?{$qs}", 'status' => 302];
+                
             }
         }
         
@@ -308,40 +315,134 @@ final class RecordResolver
             return array(null, $recid, null);                
         }
         
-        $dbregis = dirname(__FILE__).'/../utilities/DbRegis.php';
-        /*
-        $autoload = dirname(__FILE__).'/../../autoload.php';
-        if (is_file($autoload)) {
-            require_once $autoload;
-        }*/
-
-        if (is_file($dbregis)) {
-            require_once $dbregis;
-        }
-        if (!class_exists('hserv\\utilities\\DbRegis')) {
-            return array(null, $recid, null);                
-        }
-        $error = null;
-        try {
-            $url = \hserv\utilities\DbRegis::registrationGet(['dbID' => $database_id]);
-            if(!$url){
-                $error = \hserv\utilities\DbRegis::getLastError();
-            }
-        } catch (\Throwable $e) {
-            $url = null;
-            $error = [
-                'status' => defined('HEURIST_SYSTEM_FATAL') ? HEURIST_SYSTEM_FATAL : 'error',
-                'message' => $e->getMessage(),
-                'sysmsg' => array(
-                    'code' => 'REMOTE_RESOLUTION_EXCEPTION',
-                    'stage' => 'remote_db_resolution')
-            ];
-        }
-        return array($url?:null, $recid, $error);
+        [$url, $error] = self::registrationRemoteCall($database_id);
+        return array($url ?: null, $recid, $error);
     }
     
     private static function isPositiveInt($val){
         return isset($val) && (is_int($val) || ctype_digit((string)$val)) && (int)$val > 0;
     }
+    
+    private static function registrationRemoteCall(int $database_id): array
+    {
+        if ($database_id <= 0) {
+            return [null, null];
+        }
+
+        $mainServer = self::heuristMainServer();
+        $indexBase  = rtrim($mainServer, '/') . '/heurist/';
+
+        // TODO: use the exact URL currently used by DbRegis::registrationGet().
+        // This is intentionally resolver-local and does not require System, MySQL or autoload.
+        $remoteUrl = $indexBase . 'hserv/controller/indexController.php?'
+            . http_build_query([
+                'dbID' => $database_id,
+                'action' => 'url'
+            ]);
+
+        [$raw, $curlError] = self::curlGet($remoteUrl, 15);
+
+        if ($raw === false) {
+            return [null, [
+                'status' => 'network',
+                'message' => 'Unable to resolve registered database ID ' . $database_id,
+                'sysmsg' => [
+                    'code' => 'REMOTE_REGISTRY_CURL_FAILED',
+                    'stage' => 'remote_db_resolution',
+                    'remote_url' => $remoteUrl,
+                    'curl_error' => $curlError
+                ],
+                'http_status' => 502
+            ]];
+        }
+
+        $raw = trim((string)$raw);
+
+        // If DbRegis endpoint returns plain URL.
+        if (filter_var($raw, FILTER_VALIDATE_URL)) {
+            return [$raw, null];
+        }
+
+        // If endpoint returns JSON.
+        $json = json_decode($raw, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
+            $url = $json['data'] ?? null;
+
+            if ($url && filter_var($url, FILTER_VALIDATE_URL)) {
+                return [$url, null];
+            }
+
+            $msg = $json['message'] ?? 'Registry response does not contain a valid URL';
+        } else {
+            $msg = 'Registry response is not a valid URL or JSON response';
+        }
+
+        return [null, [
+            'status' => 'notfound',
+            'message' => 'Registered database ID ' . $database_id . ' could not be resolved',
+            'sysmsg' => [
+                'code' => 'REMOTE_REGISTRY_BAD_RESPONSE',
+                'stage' => 'remote_db_resolution',
+                'remote_url' => $remoteUrl,
+                'response' => substr($raw, 0, 500),
+                'detail' => $msg
+            ],
+            'http_status' => 502
+        ]];
+    }
+
+    private static function curlGet(string $url, int $timeout = 15): array
+    {
+        if (!function_exists('curl_init')) {
+            return [false, 'Cannot initialise curl extension'];
+        }
+
+        $url = filter_var($url, FILTER_VALIDATE_URL);
+        if (!$url || !preg_match('~^https?://~i', $url)) {
+            return [false, 'Invalid URL'];
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Heurist RecordResolver');
+
+        $data = curl_exec($ch);
+        $err  = curl_error($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($data === false || $code < 200 || $code >= 300) {
+            return [false, $err ?: ('HTTP response code ' . $code)];
+        }
+
+        return [$data, null];
+    }
+
+    private static function heuristMainServer(): string
+    {
+        return 'https://heuristref.net';
+        /*
+        // Lightweight config read, no autoload, no consts.php.
+        $heuristReferenceServer = 'https://heuristref.net';
+        $heuristReferenceServerMirror = '';
+
+        $config = dirname(__FILE__) . '/../../configIni.php';
+        if (is_file($config)) {
+            // configIni.php may include parent heuristConfigIni.php and set mirror/reference values.
+            include $config;
+        }
+
+        if (!empty($heuristReferenceServerMirror)) {
+            return strtolower($heuristReferenceServerMirror);
+        }
+
+        return strtolower($heuristReferenceServer ?: 'https://heuristref.net');
+        */
+    }    
     
 }

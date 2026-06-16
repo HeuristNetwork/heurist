@@ -179,7 +179,11 @@ if( @$_REQUEST['isalive']==1){
     exit;
 
 }elseif ($r = RecordResolver::resolve($version, $_REQUEST)) {
-    header('Location: ' . $r['url'], true, (int)($r['status'] ?? 302));
+    if(isset($_REQUEST['debug'])){
+        echo $r['url'];    
+    }else{
+        header('Location: ' . $r['url'], true, (int)($r['status'] ?? 302));    
+    }
     exit;
 //  use FileResolver and remark array_key_exists('file',$_REQUEST)
 }elseif ($r = FileResolver::resolve($version, $_REQUEST)) {
