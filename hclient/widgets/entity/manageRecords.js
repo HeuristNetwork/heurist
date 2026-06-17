@@ -4920,7 +4920,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     background: 'none',
                     color: 'white'
                 }).on('click',(e) => {
-                    that._setDialogSize(true);
+                    this._setDialogSize(true);
                 });
 
                 dlg_header.find('.btn_Standard').button({label:window.hWin.HR('Standard')}).css({
@@ -4931,12 +4931,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     background: 'none',
                     color: 'white'
                 }).on('click',(e) => {
-                    that._setDialogSize(false);
+                    this._setDialogSize(false);
                 });
                 
             }
 
             $dlg.css('box-shadow', '2px 3px 10px #00000080');
+
+            window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE, () => this._setDialogSize(true));
         }
 
         //add record title at the top ======================
