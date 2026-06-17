@@ -1864,7 +1864,7 @@ function setupThematicSettings(){
         let node = data.nodes[i];
         const rtyID = Number.parseInt(node.rty_ID);
 
-        if(Object.hasOwn(thematicSettings['nodes'], rtyID)){
+        if(Object.hasOwn(thematicSettings['nodes'], rtyID) && nodeContainer.querySelector(`[data-nodeid="${rtyID}"]`)){
             setThematicSetting('nodes', rtyID);
             toggleDisplay('nodes', rtyID, null);
             continue;
@@ -1888,7 +1888,7 @@ function setupThematicSettings(){
 
         let div = document.createElement('div');
         div.style.setProperty('padding', '0em 0.3em 0.5em');
-        div.setAttribute('data-id', rtyID);
+        div.setAttribute('data-nodeid', rtyID);
         div.innerHTML = item;
 
         nodeContainer.appendChild(div);
@@ -1903,12 +1903,12 @@ function setupThematicSettings(){
     for(let i = 0; i < data.links.length; i++){
 
         let link = data.links[i].relation;
-        if(!link){
+        const trmID = Number.parseInt(link?.id);
+        if(!link || !window.hWin.HEURIST4.util.isPositiveInt(trmID)){
             continue;
         }
 
-        const trmID = Number.parseInt(link.id);
-        if(!window.hWin.HEURIST4.util.isPositiveInt(trmID) || Object.hasOwn(thematicSettings['edges'], trmID)){
+        if(Object.hasOwn(thematicSettings['edges'], trmID) && edgeContainer.querySelector(`[data-edgeid="${trmID}"]`)){
             setThematicSetting('edges', trmID);
             toggleDisplay('edges', trmID, null);
             continue;
@@ -1929,7 +1929,7 @@ function setupThematicSettings(){
 
         let div = document.createElement('div');
         div.style.setProperty('padding', '0em 0.3em 0.5em');
-        div.setAttribute('data-id', trmID);
+        div.setAttribute('data-edgeid', trmID);
         div.innerHTML = item;
 
         edgeContainer.appendChild(div);

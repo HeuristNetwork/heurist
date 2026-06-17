@@ -193,6 +193,7 @@ window.hWin.cfg_layouts = [
                     
                     {appid:'heurist_Graph',   options:{title:'Network Diagram',
                                      url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]',
+                                     egoGraph: true,
                                      'data-logaction':'open_Network'}},
  
                     {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', showProgress: false,
@@ -233,6 +234,7 @@ window.hWin.cfg_layouts = [
                         
                     {appid:'heurist_Graph',   options:{title:'Network',
                                      url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]',
+                                     egoGraph: true,
                                      'data-logaction':'open_Network'}},
  
                     {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
@@ -281,6 +283,7 @@ window.hWin.cfg_layouts = [
                         
                     {appid:'heurist_Graph', name:'Network', options:{title:'Network',
                                      url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]',
+                                     egoGraph: true,
                                      'data-logaction':'open_Network'}},
  
                     {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
