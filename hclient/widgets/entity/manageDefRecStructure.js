@@ -3024,7 +3024,7 @@ console.log('onEditFormChange @todo check buttons!!!');
         inpt.parent().addClass('selectmenu-parent');
 
         if(!window.hWin.HEURIST4.browseRecordMax){
-            window.hWin.HEURIST4.browseRecordMax = 1000;
+            window.hWin.HEURIST4.browseRecordMax = 5000;
         }
 
         $.each(inpt.find('option'), function(idx, ele){
