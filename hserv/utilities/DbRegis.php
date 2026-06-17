@@ -207,7 +207,7 @@ class DbRegis {
     /**
     * Returns last error raised by this class in a resolver-friendly shape.
     */
-    public static function getLastError()
+    private static function getLastError()
     {
         if(self::$lastError!=null){
             return self::$lastError;
@@ -278,7 +278,7 @@ class DbRegis {
         return $scheme.'://'.$host . ($withPortAndPath? $port.$path.'/' :'');
     }
 
-    public static function extractServerUrl($url){
+    private static function extractServerUrl($url){
         $url = trim((string)$url);
         if($url=='') {return '';}
 
@@ -366,7 +366,7 @@ class DbRegis {
         return true;
     }
 
-    public static function rebuildRegisteredDatabaseIndexFile($force=false){
+    private static function rebuildRegisteredDatabaseIndexFile($force=false){
 
         $filename = self::getLocalIndexFilePath();
         if(!$force && !self::isFileOutdated($filename, 24*3600)){
@@ -793,7 +793,11 @@ class DbRegis {
     /**
     * Get URL for registered database by its $dbID
     * 
-    * 1. Ar first it checks local cache file 
+    *  Actions:
+    *  1) checks local URL cache
+    *  2) checks _INDEX_OF_REGISTERED_DATABASES
+    *  3) central index lookup via action=info
+    *  4) target server local lookup via action=url   
     * 
     * @param mixed $server
     * @param mixed $dbID
@@ -828,10 +832,16 @@ class DbRegis {
         $dburl = false;
         $server = null;
         
-        if(@$params['action']!=='url'){
-            // returns url from central index database
-            // it can be incorrect - because db name is not reliable
-            // we have to extract server and check the presence ot this db on given server by id
+        if(@$params['action']!=='resolve_local'){
+            
+            // Ask the central Heurist Reference Index which server is registered
+            // for this database ID. The URL stored in the central index is used only
+            // to identify the likely server. It is not treated as the final database URL,
+            // because the database name or version path may have changed on that server.
+            //
+            // Once the server is known, ask that server to resolve the database ID
+            // locally via _INDEX_OF_REGISTERED_DATABASES. This gives the current
+            // canonical URL for the database on that server.
             $resServer = self::registrationGetFromCentralIndexDb($params);
             if($resServer){
                 $server = self::normalizeServerUrl($resServer);
@@ -861,7 +871,7 @@ class DbRegis {
                 //request to server where database can reside
                 $server = self::normalizeServerUrl($resServer, true);
                 //REMOVE THIS REMARK IF PRODUCTION VERSION FAR BEHIND $server = str_replace('/heurist/','/h7-alpha/',$server); 
-                $dburl = self::registrationRemoteCall(array('action'=>'url', 'dbID'=>$dbID), $server, 'registered_database_server_lookup');
+                $dburl = self::registrationRemoteCall(array('action'=>'resolve_local', 'dbID'=>$dbID), $server, 'registered_database_server_lookup');
             }
         }
         
@@ -873,16 +883,18 @@ class DbRegis {
         }
 
         return $dburl;
-    }        
+    }    
         
     /**
-     * Retrieves registration information for a database from the Heurist reference index.
-     * Handles remote calls if necessary.
+     * Looks up the server registered for a database ID in the central
+     * Heurist Reference Index.
      *
-     * @param array $params Parameters for fetching registration info. Expected key:
-     *                      'dbID' (int) - The ID of the database registration to retrieve.
-     *                      'action' (string, optional) - Set to 'info' for remote calls.
-     * @return string|false|array The database URL (string) on success, false on failure, or an array from remote call.
+     * This returns the registered server/base URL, not necessarily the final
+     * current database URL. The caller should subsequently ask that server
+     * to resolve the database ID locally.
+     *
+     * @param array $params Expected key: dbID.
+     * @return string|false Server/base URL on success, false on failure.
      */
     public static function registrationGetFromCentralIndexDb($params){
 
@@ -895,43 +907,43 @@ class DbRegis {
 
         
         if(self::$isOutSideRequest){ //request goes not from index server
-            $params['action'] = 'info';
+            $params['action'] = 'central_index_lookup';
             return self::registrationRemoteCall($params, null, 'central_index_lookup'); //send request to index server
         }
 
-            $database_url = null;
+        $database_url = null;
 
-            $sys = self::$system;
-            $mysqli = $sys->getMysqli();
+        $sys = self::$system;
+        $mysqli = $sys->getMysqli();
 
-            ConceptCode::setSystem($sys);
-            $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
+        ConceptCode::setSystem($sys);
+        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 
-            $rec = mysql__select_row_assoc($mysqli,
-                'select rec_Title, rec_URL from Records where rec_RecTypeID='
-                .$rty_ID_registered_database.' and rec_ID='  //1-22
-                .$dbID);
+        $rec = mysql__select_row_assoc($mysqli,
+            'select rec_Title, rec_URL from Records where rec_RecTypeID='
+            .$rty_ID_registered_database.' and rec_ID='  //1-22
+            .$dbID);
 
-            if ($rec!=null){
-                $database_url = @$rec['rec_URL'];
-                if(isEmptyStr($database_url)){
-                    self::addError(HEURIST_NOT_FOUND,
-                        'Database URL is not set in Heurist Reference Index database for database ID#'.$dbID);
-                    return false;
-                }
-                return $database_url;
-            }
-
-
-            $err = $mysqli->error;
-            if($err){
-                self::addError(HEURIST_DB_ERROR,
-                     'Heurist Reference Index database is not accessible at the moment. Please try later');
-            }else{
+        if ($rec!=null){
+            $database_url = @$rec['rec_URL'];
+            if(isEmptyStr($database_url)){
                 self::addError(HEURIST_NOT_FOUND,
-                     'Database with ID#'.$dbID.' is not found in Heurist Reference Index database');
+                    'Database URL is not set in Heurist Reference Index database for database ID#'.$dbID);
+                return false;
             }
-            return false;
+            return $database_url;
+        }
+
+
+        $err = $mysqli->error;
+        if($err){
+            self::addError(HEURIST_DB_ERROR,
+                 'Heurist Reference Index database is not accessible at the moment. Please try later');
+        }else{
+            self::addError(HEURIST_NOT_FOUND,
+                 'Database with ID#'.$dbID.' is not found in Heurist Reference Index database');
+        }
+        return false;
     }
 
 

@@ -315,7 +315,7 @@ final class RecordResolver
             return array(null, $recid, null);                
         }
         
-        [$url, $error] = self::registrationRemoteCall($database_id);
+        [$url, $error] = self::resolveRegisteredDatabaseUrl($database_id);
         return array($url ?: null, $recid, $error);
     }
     
@@ -323,22 +323,26 @@ final class RecordResolver
         return isset($val) && (is_int($val) || ctype_digit((string)$val)) && (int)$val > 0;
     }
     
-    private static function registrationRemoteCall(int $database_id): array
+    /**
+     * Resolve a registered database ID to the current database URL.
+     *
+     * RecordResolver cannot include DbRegis directly because DbRegis requires
+     * the full Heurist bootstrap. Instead, it calls indexController?action=resolve,
+     * which runs the normal DbRegis::registrationGet() workflow server-side.
+     */    
+    private static function resolveRegisteredDatabaseUrl(int $database_id): array
     {
         if ($database_id <= 0) {
             return [null, null];
         }
 
-        $mainServer = self::heuristMainServer();
-        $indexBase  = rtrim($mainServer, '/') . '/heurist/';
-
-        // TODO: use the exact URL currently used by DbRegis::registrationGet().
-        // This is intentionally resolver-local and does not require System, MySQL or autoload.
-        $remoteUrl = $indexBase . 'hserv/controller/indexController.php?'
+        $remoteUrl = self::currentHeuristBaseUrl()
+            . 'hserv/controller/indexController.php?'
             . http_build_query([
                 'dbID' => $database_id,
-                'action' => 'url'
+                'action' => 'resolve'
             ]);
+
 
         [$raw, $curlError] = self::curlGet($remoteUrl, 15);
 
@@ -423,26 +427,21 @@ final class RecordResolver
         return [$data, null];
     }
 
-    private static function heuristMainServer(): string
+    private static function currentHeuristBaseUrl(string $version = 'heurist'): string
     {
-        return 'https://heuristref.net';
-        /*
-        // Lightweight config read, no autoload, no consts.php.
-        $heuristReferenceServer = 'https://heuristref.net';
-        $heuristReferenceServerMirror = '';
+        $https = (
+            (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (($_SERVER['SERVER_PORT'] ?? null) == 443)
+            || strtolower((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https'
+        );
 
-        $config = dirname(__FILE__) . '/../../configIni.php';
-        if (is_file($config)) {
-            // configIni.php may include parent heuristConfigIni.php and set mirror/reference values.
-            include $config;
-        }
+        $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? 'localhost');
 
-        if (!empty($heuristReferenceServerMirror)) {
-            return strtolower($heuristReferenceServerMirror);
-        }
+        // Avoid localhost when SERVER_NAME is localhost but HTTP_HOST has the real vhost.
+        // HTTP_HOST is preferred because Apache virtual hosting depends on it.
+        $host = preg_replace('/[^A-Za-z0-9\.\-\:\[\]]/', '', $host);
 
-        return strtolower($heuristReferenceServer ?: 'https://heuristref.net');
-        */
-    }    
+        return ($https ? 'https://' : 'http://') . $host . '/' . trim($version, '/') . '/';
+    }
     
 }
