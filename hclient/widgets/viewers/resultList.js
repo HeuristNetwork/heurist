@@ -1566,7 +1566,7 @@ $.widget( "heurist.resultList", {
                                       rt = q[1];
                                   }
                             }
-                            if(rt>0 && $Db.rty(rt, 'rty_Name')){
+                            if(rt > 0 && $Db.rty(rt)){
                                 $('<span style="padding: 0 10px;font-weight:bold">('
                                         +$Db.rty(rt,'rty_Plural')+')</span>')
                                     .appendTo($emptyres.find('.not-found2'));
@@ -2991,9 +2991,10 @@ $.widget( "heurist.resultList", {
                                .find('.ui-icon').css('color', 'grey');
         }
 
-        if(this.options.entityName == 'records' && this.div_toolbar.find('#toggleOwnerDisplay').length === 0 && this.options.recordDivClass !== 'public'){
+        let $ownership = this.div_toolbar.find('#toggleOwnerDisplay');
+        if(this.options.entityName == 'records' && $ownership.length === 0 && this.options.recordDivClass !== 'public'){
 
-            let $ownership = $('<span>', {
+            $ownership = $('<span>', {
                 style: 'float: left; padding: 6px 0 0 1.5em;',
                 class: 'fake_link',
                 id: 'toggleOwnerDisplay',
@@ -3017,6 +3018,12 @@ $.widget( "heurist.resultList", {
                     }
                 }
             });
+        }
+
+        if(total_inquery > 0){
+            $ownership.show();
+        }else{
+            $ownership.hide();
         }
     },
 
