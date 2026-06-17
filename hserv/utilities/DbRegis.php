@@ -118,15 +118,17 @@ class DbRegis {
                 .'hserv/controller/indexController.php?'
                 .http_build_query($params);
 
-        $data = loadRemoteURLContentWithRange($remote_url, null, true);
-        
+        $data = loadRemoteURLContentWithRange($remote_url, null, true, 20);
+
         if (!isset($data) || $data==null) {
             global $glb_curl_error;
             $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'no error code provided (curl)';
 
+            $serverType = ($stage==='registered_database_server_lookup')?'database':'reference';
+            
             $error = self::makeError(
                 HEURIST_NETWORK_ERROR,
-                'Unable to connect Heurist reference server, possibly due to timeout or proxy setting',
+                'Unable to connect Heurist '.$serverType.' server, possibly due to timeout or proxy setting',
                 array(
                     'code' => 'REMOTE_CONNECT_FAILED',
                     'stage' => $stage ?: 'remote_registry_call',
@@ -207,7 +209,7 @@ class DbRegis {
     /**
     * Returns last error raised by this class in a resolver-friendly shape.
     */
-    private static function getLastError()
+    public static function getLastError()
     {
         if(self::$lastError!=null){
             return self::$lastError;
@@ -472,7 +474,7 @@ class DbRegis {
         if(!isset($rows[$dbID])){
             return null;
         }
-        if((time() - intval($rows[$dbID]['ts'])) > 3600){
+        if((time() - intval($rows[$dbID]['ts'])) > 600){ // 10 min
             unset($rows[$dbID]);
             self::writeUrlCacheFile($rows);
             return null;
@@ -484,7 +486,7 @@ class DbRegis {
         $rows = self::readUrlCacheFile();
         $now = time();
         foreach($rows as $id=>$row){
-            if(($now - intval($row['ts'])) > 3600){
+            if(($now - intval($row['ts'])) > 600){
                 unset($rows[$id]);
             }
         }
@@ -850,7 +852,12 @@ class DbRegis {
                 
                 $err = self::getLastError();
                 $errorStatus = $err['status'] ?? null;
-                $errorMsg = $err['message'] ?? 'Database server URL is not defined in central index database';
+                
+                if(is_array($err)){
+                    $errorMsg = self::formatErrorMessage($err);
+                }else{
+                    $errorMsg = 'Database server URL is not defined in central index database';    
+                }
                 
                 if($errorStatus===HEURIST_NOT_FOUND){
                     self::setCachedDatabaseUrl($dbID, 'failure:'.$errorMsg);
@@ -879,11 +886,47 @@ class DbRegis {
         if($dburl){
             self::setCachedDatabaseUrl($dbID, $dburl);
         }else{
-            self::setCachedDatabaseUrl($dbID, 'failure:'.self::$system->getErrorMsg());
+            $err = self::getLastError();
+            if(is_array($err)){
+                $errorMsg = self::formatErrorMessage($err);
+            }else{
+                $errorMsg = 'Database with ID#'.$dbID.' is not found';
+            }
+            self::setCachedDatabaseUrl($dbID, 'failure:'.$errorMsg);
         }
 
         return $dburl;
-    }    
+    } 
+    
+    private static function formatErrorMessage(array $error): string{
+
+        $message = '<h2>Request could not be resolved</h2>';
+        $sysmsg = isset($error['sysmsg']) && is_array($error['sysmsg']) ?$error['sysmsg'] :[];
+
+        if(!empty($error['message'])){
+            $message .= '<p>'.strip_tags($error['message'],['p','b','br','strong']).'</p>';
+        }
+
+        if(!empty($sysmsg['remote_url'])){
+            $message .= '<p><b>URL checked:</b> '
+                .htmlspecialchars($sysmsg['remote_url'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+
+        if(!empty($sysmsg['transport_error'])){
+            $message .= '<p><b>Transport Error:</b> '
+                .htmlspecialchars($sysmsg['transport_error'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+        
+        if(!empty($sysmsg['code'])){
+            $message .= '<p><b>Error code:</b> '
+                .htmlspecialchars($sysmsg['code'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+
+        return $message;
+    }     
         
     /**
      * Looks up the server registered for a database ID in the central

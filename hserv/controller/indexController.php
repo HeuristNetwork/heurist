@@ -25,6 +25,8 @@ require_once dirname(__FILE__).'/../../autoload.php';
     $req_params = USanitize::sanitizeInputArray();
 
     $res = false;
+    
+    $error = null;
 
     $action = @$req_params['action'];
 
@@ -93,7 +95,20 @@ require_once dirname(__FILE__).'/../../autoload.php';
             //
             // Returns the current database URL, for example:
             // https://example.org/heurist/?db=my_database
-            $res = DbRegis::registrationGet($req_params);
+            //$res = DbRegis::registrationGet($req_params);
+            
+            try {
+                $res = DbRegis::registrationGet($req_params);
+                if(!$res){
+                    $error = DbRegis::getLastError();
+                }
+            } catch (Throwable $e) {
+                $res = null;
+                $error = [
+                    'status' => HEURIST_SYSTEM_FATAL,
+                    'message' => $e->getMessage()
+                ];
+            }            
 
         }elseif($action=='resolve_local'){
             // Destination-server local lookup only.
@@ -125,7 +140,11 @@ require_once dirname(__FILE__).'/../../autoload.php';
     }
 
 if(is_bool($res) && $res==false){
-    $response = $system->getError();
+    if($error){
+        $response = $error;
+    }else{
+        $response = $system->getError();    
+    }
     if(!is_array($response)){
         $response = array('status'=>HEURIST_SYSTEM_FATAL, 'message'=>'Unknown registration error');
     }

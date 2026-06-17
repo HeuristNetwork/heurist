@@ -51,6 +51,15 @@ final class RecordResolver
      */
     public static function resolve(string $version, array $params, string $serverRoot=null): ?array
     {
+        
+        if(!defined('HEURIST_BASE_URL')){
+            define('HEURIST_BASE_URL', self::currentHeuristBaseUrl());
+        }
+        if(!defined('HEURIST_INVALID_REQUEST')){
+            define('HEURIST_INVALID_REQUEST', 'invalid');
+        }
+        
+        
         // ---- Definitions (structure export)
         foreach (['rty','dty','trm','rst'] as $entity) {
             if (!empty($params[$entity])) {
@@ -259,7 +268,7 @@ final class RecordResolver
         $sysmsg = isset($error['sysmsg']) && is_array($error['sysmsg']) ?$error['sysmsg'] :[];
 
         if(!empty($error['message'])){
-            $message .= '<p>'.htmlspecialchars($error['message'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</p>';
+            $message .= '<p>'.strip_tags($error['message'],['p','b','br','strong']).'</p>';
         }
 
         if(!empty($sysmsg['remote_url'])){
@@ -268,6 +277,12 @@ final class RecordResolver
                 .'</p>';
         }
 
+        if(!empty($sysmsg['transport_error'])){
+            $message .= '<p><b>Transport Error:</b> '
+                .htmlspecialchars($sysmsg['transport_error'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+        
         if(!empty($sysmsg['code'])){
             $message .= '<p><b>Error code:</b> '
                 .htmlspecialchars($sysmsg['code'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
@@ -336,7 +351,7 @@ final class RecordResolver
             return [null, null];
         }
 
-        $remoteUrl = self::currentHeuristBaseUrl()
+        $remoteUrl = HEURIST_BASE_URL //self::currentHeuristBaseUrl()
             . 'hserv/controller/indexController.php?'
             . http_build_query([
                 'dbID' => $database_id,
@@ -344,7 +359,7 @@ final class RecordResolver
             ]);
 
 
-        [$raw, $curlError] = self::curlGet($remoteUrl, 15);
+        [$raw, $curlError] = self::curlGet($remoteUrl, 25);
 
         if ($raw === false) {
             return [null, [
@@ -374,6 +389,8 @@ final class RecordResolver
 
             if ($url && filter_var($url, FILTER_VALIDATE_URL)) {
                 return [$url, null];
+            }else{
+                return [null, $json];
             }
 
             $msg = $json['message'] ?? 'Registry response does not contain a valid URL';
@@ -395,7 +412,7 @@ final class RecordResolver
         ]];
     }
 
-    private static function curlGet(string $url, int $timeout = 15): array
+    private static function curlGet(string $url, int $timeout = 25): array
     {
         if (!function_exists('curl_init')) {
             return [false, 'Cannot initialise curl extension'];
