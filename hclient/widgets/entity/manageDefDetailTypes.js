@@ -1878,7 +1878,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 pointer_mode_inpt.hSelect('destroy');
 
                                 if(!window.hWin.HEURIST4.browseRecordMax){
-                                    window.hWin.HEURIST4.browseRecordMax = 1000;
+                                    window.hWin.HEURIST4.browseRecordMax = 5000;
                                 }
 
                                 $.each(pointer_mode_inpt.find('option'), function(idx, ele){
