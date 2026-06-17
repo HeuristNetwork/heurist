@@ -2527,9 +2527,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             let $dlg = null;
 
             let sMsg = "Click Save changes to save changes and modify the record structure.<br>"
-                        +"Or click Drop changes to continue straight to modifing the record structure.<br><br>"
-                        +"If you are unable to save changes or drop changes, click Cancel and open<br>"
-                        +"structure modification in main menu Structure > Modify / Extend";
+                        +"Or click Drop changes to modify the record structure without saving edits.<br>";
 
             let btns = {};
             btns[window.hWin.HR('Save changes')] = function(){
