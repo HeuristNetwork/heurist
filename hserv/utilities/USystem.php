@@ -1217,6 +1217,9 @@ class USystem {
         foreach($storedParameters as $key => $value){
             if(\array_key_exists($key, $parameters)){
                 continue;
+            }elseif($key === 'ids' && \is_string($value) && strpos($value, '[') === 0 && substr($value, -1) === ']'){
+                $values = json_decode($value, true);
+                $value = json_last_error() === JSON_ERROR_NONE ? $values : $value;
             }
             $parameters[$key] = $value;
         }

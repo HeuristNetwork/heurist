@@ -978,8 +978,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             let pos_top = item.offsetTop;
             $ele.css({
                 'position': 'absolute',
-                'top': pos_top+'px',
-                'left': '20px'
+                'top': pos_top+'px'
             });
         }
     },
@@ -1028,8 +1027,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         let pos_top = item.offsetTop;
         fieldElement.css({
             'position': 'absolute',
-            'top': pos_top+'px',
-            'left': '20px'
+            'top': pos_top+'px'
         });
 
         this._on(fieldElement.find('.ui-icon'), {
