@@ -417,7 +417,7 @@ $.widget( "heurist.recordListExt", {
                         that.options.selection = sel;
                        
                     }
-             
+
                     let smarty_template = window.hWin.HAPI4.get_prefs_def('main_recview', 'default'); // default = standard record viewer
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(that.options.selection) && that.options['url'] 
                         && that.options['url'].indexOf('renderRecordData') != -1 && smarty_template != 'default'){
@@ -468,8 +468,6 @@ $.widget( "heurist.recordListExt", {
            
         });
 
-       
-
         this.element.on("myOnShowEvent", function(event){
             if( event.target.id == that.element.attr('id')){
                 that._refresh();
@@ -481,16 +479,19 @@ $.widget( "heurist.recordListExt", {
                 that.onLoadComplete();
             });
         }
-        
-        if(this.options.search_initial){
-            this.doSearch( this.options.search_initial );
-            this.options.search_initial = null;
-        }        
 
         this.placeholder_ele = $('<div>')
                 .css({'white-space': 'pre-wrap', 'padding-top': '20px'})
                 .prependTo(this.element)
-                .html(this.options.empty_remark);
+                .html(this.options.empty_remark)
+                .hide();
+
+        if(this.options.search_initial){
+            this.doSearch( this.options.search_initial );
+            this.options.search_initial = null;
+        }else{
+            this.placeholder_ele.show();
+        }
 
     }, //end _create
 
