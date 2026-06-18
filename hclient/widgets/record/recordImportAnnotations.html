@@ -1,39 +1,61 @@
 <!--
 /**
 * recordImportAnnotations.html - HTML structure for the recordImportAnnotations widget.
-*
-* @fileOverview This HTML file provides the layout for the recordImportAnnotations widget, used for importing annotations from IIIF manifests. It includes informational text, options for the import process, a button to initiate the import, and a structured area to display the import report. The logic is handled by recordImportAnnotations.js.
-*
-* @project     Heurist academic knowledge management system
-* @package  hclient\widgets\record
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @since       4.0
 */
 -->
-<div id="div_header" class="ent_wrapper" style="margin:10px 10px 0px 40px;font-size:0.95em">
+<div id="div_header" class="ent_wrapper" style="margin:10px 10px 0px 40px;font-size:0.95em;overflow:auto">
 
-    <h2>ADVANCED USERS</h2>
-    <p style="font-weight:bold;font-size:larger;padding:10 0">Create Annotation records from registred IIIF manifests</p>
-
-    <p>Note: Use with caution, this function can create a lot of extra records if there are many registred manifests</p>
-
-    <p>This function reads IIIF manifest and linked AnnotationList and then creates or updates Annotation records in Heurist database.
-        <br>
-        <ul>
-            <li>It overwrites any local changes in these records.</li>
-            <li>Annotation records are linked to parent manifest either via record link or file field (that refers to registered manifest)</li>
-            <li>It is possible to define internal Annotations via Mirador viewer. They are independent from imported ones and retain unchanged by this operation</li>
-        </ul>
+    <h2>Import IIIF annotations</h2>
+    <p style="font-weight:bold;font-size:larger;padding:10px 0">
+        Create IIIF Annotation records from a selected IIIF Manifest
     </p>
+
     <p>
-        <label><input type='checkbox' id="chb_create_thumbs"> Create thumbnails for annotation records (makes process slower)</label>
-        <br>
-        <label><input type='checkbox' checked id="chb_direct_link"> Link annotation record directly with registered manifest (otherwise via media record)</label>
+        This function imports annotations from one selected IIIF Manifest. The source Manifest is preserved;
+        imported annotations are stored as <b>IIIF Annotation</b> records and linked to a corresponding
+        <b>IIIF Manifest</b> record in Heurist.
     </p>
+
+    <p>
+        On re-import, annotations that have been modified in Heurist are preserved by default and reported
+        separately. Imported annotations that have not been locally modified may be updated from the source
+        annotation JSON.
+    </p>
+
+    <div style="margin:1em 0">
+        <div style="font-weight:bold;margin-bottom:0.35em">Manifest</div>
+        <div id="manifest_selector" style="max-width:300px;max-height:100px"></div>
+        <div style="font-size:0.9em;margin-top:0.4em">
+            Select an existing registered IIIF Manifest JSON file, or upload/register a new one.
+        </div>
+    </div>
+
+    <div style="margin:1em 0">
+        <div style="font-weight:bold;margin-bottom:0.35em">Import / management level</div>
+        <label>
+            <input type="radio" name="import_level" value="overlay" checked>
+            Annotation overlay only
+        </label>
+        <div style="margin-left:1.8em;font-size:0.9em">
+            The source Manifest remains externally owned. Heurist imports annotations and preserves original Canvas IDs.
+        </div>
+        <label style="display:block;margin-top:0.4em;color:#777">
+            <input type="radio" name="import_level" value="preserve_canvases" disabled>
+            Managed manifest, preserve external canvases (future)
+        </label>
+        <label style="display:block;margin-top:0.2em;color:#777">
+            <input type="radio" name="import_level" value="managed" disabled>
+            Fully managed manifest, create media/canvas records (future)
+        </label>
+    </div>
+
+    <div style="margin:1em 0">
+        <label>
+            <input type="checkbox" id="chb_create_thumbs">
+            Create thumbnails for annotation records (slower)
+        </label>
+    </div>
+
     <p>
         <button class="ui-button-action btnAction">Proceed</button>
     </p>
@@ -44,44 +66,15 @@
     <h3 style="margin:0">Report:</h3>
     <br>
     <div class="table">
-        <div class="t-row">
-            <div class="cell" style="width:200px">Total count of manifests:</div>
-            <div class="cell" id="total"></div>
-        </div>
-        <div class="t-row">
-            <div class="cell" style="width:200px">Processed manifests:</div>
-            <div class="cell" id="processed"></div>
-        </div>
-        <div class="t-row">
-            <div class="cell" style="width:200px">Missed of invaid:</div>
-            <div class="cell" id="missed"></div>
-        </div>
-        <div class="t-row">
-            <div class="cell" style="width:200px">Without annotations:</div>
-            <div class="cell" id="without_annotations"></div>
-        </div>
+        <div class="t-row"><div class="cell" style="width:220px">Manifest record:</div><div class="cell" id="manifest_record"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Total annotations found:</div><div class="cell" id="total_annotations"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Processed annotations:</div><div class="cell" id="processed"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Added:</div><div class="cell" id="added"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Updated:</div><div class="cell" id="updated"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Unchanged:</div><div class="cell" id="retained"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Preserved local edits:</div><div class="cell" id="preserved_local"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Without annotations:</div><div class="cell" id="without_annotations"></div></div>
         <div class="t-row" style="height:22px"></div>
-
-        <div class="t-row">
-            <div class="cell" style="width:200px">Annotations</div>
-        </div>
-        <div class="t-row">
-            <div class="cell" style="width:200px">Added:</div>
-            <div class="cell" id="added"></div>
-        </div>
-        <div class="t-row">
-            <div class="cell" style="width:200px">Updated:</div>
-            <div class="cell" id="updated"></div>
-        </div>
-        <div class="t-row">
-            <div class="cell" style="width:200px">Unchanged:</div>
-            <div class="cell" id="retained"></div>
-        </div>
-        <div class="t-row" style="height:22px"></div>
-
-        <div class="t-row">
-            <div class="cell" style="width:200px;vertical-align:top">Issues:</div>
-            <div class="cell" id="issues"></div>
-        </div>
-    </div>        
+        <div class="t-row"><div class="cell" style="width:220px;vertical-align:top">Issues:</div><div class="cell" id="issues"></div></div>
+    </div>
 </div>

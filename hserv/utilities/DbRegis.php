@@ -900,7 +900,7 @@ class DbRegis {
     
     private static function formatErrorMessage(array $error): string{
 
-        $message = '<h2>Request could not be resolved</h2>';
+        $message = ''; //'<h2>Request could not be resolved</h2>';
         $sysmsg = isset($error['sysmsg']) && is_array($error['sysmsg']) ?$error['sysmsg'] :[];
 
         if(!empty($error['message'])){

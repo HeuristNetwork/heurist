@@ -4396,6 +4396,9 @@ function updateMaskFields($type, $value, $length, $range){
     return [$value, $reason];
 }
 
+//
+// Checks language prefixes for text field for given record
+//
 function recordCheckLanguages($system, $recID, $recTypeID){
 
     global $glb_lang_codes;
@@ -4404,7 +4407,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
     $isAdmin = $system->isAdmin();
 
     $system->defineConstant('RT_CMS_HOME');
-    $system->defineConstant('DT_LANGUAGES');
+    $system->defineConstant('DT_LANGUAGE');
     $allowedLanguages = $system->settings->getDatabaseSetting('Languages');
 
     if(empty($allowedLanguages)){
@@ -4415,7 +4418,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
 
     $query = "SELECT rst_DetailTypeID FROM defRecStructure INNER JOIN defDetailTypes ON dty_ID = rst_DetailTypeID WHERE rst_RecTypeID = {$recTypeID} AND (dty_Type = 'freetext' OR dty_Type = 'blocktext')";
     $textFields = mysql__select_list2($mysqli, $query, 'intval');
-    $isCMSHome = defined('RT_CMS_HOME') && defined('DT_LANGUAGES') && $recTypeID == RT_CMS_HOME;
+    $isCMSHome = defined('RT_CMS_HOME') && defined('DT_LANGUAGE') && $recTypeID == RT_CMS_HOME;
 
     if(empty($textFields) && !$isCMSHome){
         return [];
@@ -4460,7 +4463,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
 
     if($isCMSHome){
 
-        $webLanguages = mysql__select_list2($mysqli, "SELECT dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = ". DT_LANGUAGES, 'intval');
+        $webLanguages = mysql__select_list2($mysqli, "SELECT dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = ". DT_LANGUAGE, 'intval');
         $languageCodes = getTermCodes($mysqli, $webLanguages);
         $languageLabels = getTermLabels($mysqli, $webLanguages);
 
