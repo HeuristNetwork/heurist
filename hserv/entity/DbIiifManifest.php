@@ -129,4 +129,110 @@ class DbIiifManifest extends DbRecordTypeEntity
         $recID = mysql__select_value($mysqli, $query);
         return $recID ? intval($recID) : 0;
     }
+
+    /**
+     * Return a v3 overlay Manifest for Mirador.
+     * Existing Canvas.annotations are replaced with Heurist AnnotationPage URLs
+     * to avoid showing source annotations and imported DB annotations twice.
+     */
+    public function getOverlayManifestJson(int $manifestRecID): ?array
+    {
+        if(!$this->ensureDefinitionsReady(false) || !$this->isManifestRecord($manifestRecID)){
+            return null;
+        }
+
+        $manifest = $this->loadSourceManifestForRecord($manifestRecID);
+        if(!is_array($manifest)){
+            return null;
+        }
+
+        // Phase 2 supports v3 overlay output only.
+        if(@$manifest['type']!='Manifest' || !is_array(@$manifest['items'])){
+            $this->system->addError(HEURIST_ACTION_BLOCKED,
+                'Only IIIF Presentation API v3 Manifest overlay output is supported');
+            return null;
+        }
+
+        foreach($manifest['items'] as $idx=>$canvas){
+            if(!is_array($canvas) || @$canvas['type']!='Canvas'){
+                continue;
+            }
+
+            $canvasId = @$canvas['id'];
+            if(!$canvasId){
+                continue;
+            }
+
+            // Replace source annotation pages with the Heurist DB page.
+            $manifest['items'][$idx]['annotations'] = array(
+                array(
+                    'id' => $this->annotationPageUrl($manifestRecID, $canvasId),
+                    'type' => 'AnnotationPage'
+                )
+            );
+        }
+
+        return $manifest;
+    }
+
+    private function isManifestRecord(int $manifestRecID): bool
+    {
+        if($manifestRecID<1 || !$this->recordTypeId()){
+            return false;
+        }
+
+        $recType = mysql__select_value($this->system->getMysqli(),
+            'SELECT rec_RecTypeID FROM Records WHERE rec_ID='.intval($manifestRecID));
+        return intval($recType)===$this->recordTypeId();
+    }
+
+    private function loadSourceManifestForRecord(int $manifestRecID): ?array
+    {
+        $details = $this->loadRecordDetails($manifestRecID);
+
+        $sourceUrl = $this->getFirstDetailValue($details, 'DT_URL');
+
+        if(!$sourceUrl){
+            $ulfID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
+            if($ulfID>0){
+                $row = mysql__select_row($this->system->getMysqli(),
+                    'SELECT ulf_ObfuscatedFileID, ulf_ExternalFileReference FROM recUploadedFiles WHERE ulf_ID='.$ulfID.' LIMIT 1');
+                if(is_array($row)){
+                    $sourceUrl = $row[1] ? $row[1]
+                        : HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$row[0];
+                }
+            }
+        }
+
+        if(!$sourceUrl){
+            $this->system->addError(HEURIST_NOT_FOUND,
+                'Cannot locate the source Manifest URL or registered file for IIIF Manifest record '.$manifestRecID);
+            return null;
+        }
+
+        $content = loadRemoteURLContent($sourceUrl);
+        if(!$content){
+            $this->system->addError(HEURIST_ACTION_BLOCKED,
+                'Source Manifest is not accessible: '.$sourceUrl);
+            return null;
+        }
+
+        $json = json_decode($content, true);
+        if(!is_array($json)){
+            $this->system->addError(HEURIST_ACTION_BLOCKED,
+                'Source Manifest is not valid JSON. '.json_last_error_msg());
+            return null;
+        }
+
+        return $json;
+    }
+
+    private function annotationPageUrl(int $manifestRecID, string $canvasId): string
+    {
+        return rtrim(HEURIST_BASE_URL, '/')
+            .'/api/'.$this->system->dbname()
+            .'/annotations/'.intval($manifestRecID)
+            .'/pages?uri='.rawurlencode($canvasId);
+    }
+
 }

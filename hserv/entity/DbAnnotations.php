@@ -79,7 +79,7 @@ class DbAnnotations extends DbRecordTypeEntity
         $sjson = array('id'=>"https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 'type' => 'AnnotationPage', 'items' => array());
 
         if(@$this->data['recID']!='pages'){
-            $item = $this->findItembyUUID(@$this->data['recID']);
+            $item = $this->findItembyUUID(@$this->data['recID'], intval(@$this->data['manifestRecID']));
             if($item!=null){
                 $anno = json_decode($item, true);
                 if($anno){
@@ -94,7 +94,7 @@ class DbAnnotations extends DbRecordTypeEntity
             $this->data['uri'] = @$params['uri'];
         }
 
-        $items = $this->findItemsByCanvas(@$this->data['uri']);
+        $items = $this->findItemsByCanvas(@$this->data['uri'], intval(@$this->data['manifestRecID']));
         if(isEmptyArray($items)){
             return $sjson;
         }
@@ -109,26 +109,40 @@ class DbAnnotations extends DbRecordTypeEntity
         return $sjson;
     }
 
-    private function findItemsByCanvas($canvasUri){
-        if($this->ensureDefinitionsReady(false)){
+    private function findItemsByCanvas($canvasUri, int $manifestRecID=0){
+        if($canvasUri && $this->ensureDefinitionsReady(false)){
             $mysqli = $this->system->getMysqli();
-            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2, Records r WHERE '
-                .'r.rec_ID=d1.dtl_RecID AND r.rec_ID=d2.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2, Records r ';
+            $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_ID=d2.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
                 .' AND d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.addslashes($canvasUri).'"'
                 .' AND d2.dtl_DetailTypeID='.DT_ANNOTATION_INFO;
-            return mysql__select_list2($mysqli, $query);
+
+            if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
+                $query .= ', recDetails dm ';
+                $where .= ' AND dm.dtl_RecID=r.rec_ID AND dm.dtl_DetailTypeID='.DT_ANNOTATION_MANIFEST
+                    .' AND dm.dtl_Value='.intval($manifestRecID);
+            }
+
+            return mysql__select_list2($mysqli, $query.SQL_WHERE.$where);
         }
         return array();
     }
 
-    private function findItembyUUID($uuid){
-        if($this->ensureDefinitionsReady(false)){
+    private function findItembyUUID($uuid, int $manifestRecID=0){
+        if($uuid && $this->ensureDefinitionsReady(false)){
             $mysqli = $this->system->getMysqli();
-            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2, Records r WHERE '
-                .'r.rec_ID=d1.dtl_RecID AND r.rec_ID=d2.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2, Records r ';
+            $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_ID=d2.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
                 .' AND d1.dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND d1.dtl_Value="'.addslashes($uuid).'"'
-                .' AND d2.dtl_DetailTypeID='.DT_ANNOTATION_INFO.' LIMIT 1';
-            return mysql__select_value($mysqli, $query);
+                .' AND d2.dtl_DetailTypeID='.DT_ANNOTATION_INFO;
+
+            if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
+                $query .= ', recDetails dm ';
+                $where .= ' AND dm.dtl_RecID=r.rec_ID AND dm.dtl_DetailTypeID='.DT_ANNOTATION_MANIFEST
+                    .' AND dm.dtl_Value='.intval($manifestRecID);
+            }
+
+            return mysql__select_value($mysqli, $query.SQL_WHERE.$where.' LIMIT 1');
         }
         return null;
     }
@@ -160,7 +174,7 @@ class DbAnnotations extends DbRecordTypeEntity
             if(!$this->_validatePermission()){
                 return false;
             }
-            $recordId = $this->findRecIDbyUUID($this->data['recID']);
+            $recordId = $this->findRecIDbyOriginalId($this->data['recID'], intval(@$this->data['manifestRecID']));
             if($recordId>0){
                 return recordDelete($this->system, $recordId);
             }
@@ -176,6 +190,7 @@ class DbAnnotations extends DbRecordTypeEntity
         $state = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
 
         $protectedStates = array_filter([
+            $this->getTermId('TRM_ANNOTATION_STATE_MIRADOR'),
             $this->getTermId('TRM_ANNOTATION_STATE_HEURIST'),
             $this->getTermId('TRM_ANNOTATION_STATE_MODIFIED'),
             $this->getTermId('TRM_ANNOTATION_STATE_OBSOLETE'),
@@ -217,7 +232,7 @@ class DbAnnotations extends DbRecordTypeEntity
         $recordId = $this->findRecIDbyOriginalId($parsed['id'], $manifestRecID);
         $details = $this->loadRecordDetails($recordId);
 
-        if($recordId>0 && $this->isProtectedFromReimport($details) && @$fields['preserveLocal']!==0){
+        if($recordId>0 && !empty($fields['preserveLocal']) && $this->isProtectedFromReimport($details)){
             return array('status'=>HEURIST_OK, 'data'=>$recordId, 'is_preserved_local'=>true);
         }
 
@@ -400,10 +415,7 @@ class DbAnnotations extends DbRecordTypeEntity
                 $target = reset($target);
             }
             $canvas = @$target['source'] ?: (@$target['id'] ?: $canvas);
-            $selector = @$target['selector'];
-            if(is_array($selector) && array_keys($selector)===range(0, count($selector)-1)){
-                $selector = reset($selector);
-            }
+            $selector = $this->choosePrimarySelector(@$target['selector']);
             if(is_array($selector)){
                 $selectorType = $this->stripPrefix((string)(@$selector['type'] ?: @$selector['@type']));
                 $selectorValue = @$selector['value'];
@@ -425,6 +437,49 @@ class DbAnnotations extends DbRecordTypeEntity
             'selector_value' => $selectorValue,
             'json' => json_encode($anno, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)
         );
+    }
+
+
+    private function choosePrimarySelector($selector)
+    {
+        if(!is_array($selector)){
+            return null;
+        }
+
+        if(array_keys($selector)===range(0, count($selector)-1)){
+            $fallback = null;
+            foreach($selector as $sel){
+                if(!is_array($sel)){
+                    continue;
+                }
+                $type = $this->stripPrefix((string)(@$sel['type'] ?: @$sel['@type']));
+                if($type==='SvgSelector'){
+                    return $sel;
+                }
+                if($type==='FragmentSelector' && $fallback===null){
+                    $fallback = $sel;
+                }elseif($fallback===null){
+                    $fallback = $sel;
+                }
+            }
+            return $fallback;
+        }
+
+        if(@$selector['type']=='Choice' || @$selector['@type']=='oa:Choice'){
+            if(is_array(@$selector['item'])){
+                $chosen = $this->choosePrimarySelector($selector['item']);
+                if($chosen){ return $chosen; }
+            }
+            if(is_array(@$selector['items'])){
+                $chosen = $this->choosePrimarySelector($selector['items']);
+                if($chosen){ return $chosen; }
+            }
+            if(is_array(@$selector['default'])){
+                return $selector['default'];
+            }
+        }
+
+        return $selector;
     }
 
     private function stripPrefix($value){

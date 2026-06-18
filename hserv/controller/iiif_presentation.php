@@ -52,7 +52,19 @@ require_once dirname(__FILE__).'/../../autoload.php';
         $params['resource'] = 'manifest';
     }
 
-    $res = hserv\records\export\ExportRecordsIIIF::getIiifApiResource($system, $params['resource'], $params['id']);
+    $res = null;
+
+    if($params['resource']=='manifest' && is_numeric($params['id'])){
+        $dbManifest = new hserv\entity\DbIiifManifest($system);
+        $manifest = $dbManifest->getOverlayManifestJson(intval($params['id']));
+        if(is_array($manifest)){
+            $res = json_encode($manifest, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+    if(!$res){
+        $res = hserv\records\export\ExportRecordsIIIF::getIiifApiResource($system, $params['resource'], $params['id']);
+    }
 
     $system->dbclose();
 

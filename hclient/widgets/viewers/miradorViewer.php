@@ -46,6 +46,7 @@ if q only defined all images linked to record(s) will be included
 
 $dbname = @$_REQUEST['db'];
 $rec_ID = intval(@$_REQUEST['recID']);
+$manifestRecID = 0;
 $canvasUri = null;
 $baseUrl = null;
 $system = null;
@@ -94,6 +95,7 @@ if($system!=null && $rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['i
 
     //detect is this mirador image or annotation
     if($system->defineConstant('RT_IIIF_ANNOTATION')){
+        $system->defineConstant('RT_IIIF_MANIFEST');
 
         $res = recordSearchByID($system, $rec_ID, false, 'rec_ID,rec_RecTypeID');
         $system->defineConstant('DT_URL');
@@ -123,6 +125,11 @@ if($system!=null && $rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['i
                 $_REQUEST['iiif'] = $row[1];
 
             }
+        }elseif(defined('RT_IIIF_MANIFEST') && $res['rec_RecTypeID']==RT_IIIF_MANIFEST){
+            // Open a registered IIIF Manifest record via the Heurist overlay Manifest API,
+            // so source annotations are replaced by annotation pages from this database.
+            $manifestRecID = $rec_ID;
+
         }elseif(defined('DT_URL')){
 
             //find linked annotations
@@ -180,7 +187,11 @@ if($baseUrl==null){
         $baseUrl = $baseUrl.'/';
     }
 
-if(@$_REQUEST['url']) { //direct url to manifest
+if($manifestRecID>0) {
+
+    $url = $baseUrl.'heurist/api/'.rawurlencode($dbname).'/iiif/manifest/'.$manifestRecID;
+
+}elseif(@$_REQUEST['url']) { //direct url to manifest
 
     $url = $_REQUEST['url'];
 
@@ -285,7 +296,7 @@ body {
 <?php
 if (!preg_match('[\W]', $dbname)){
 ?>
-    window.endpointURL = "<?php echo $baseUrl.'heurist/api/'.htmlspecialchars($dbname).'/annotations';?>";
+    window.endpointURL = "<?php echo $baseUrl.'heurist/api/'.htmlspecialchars($dbname).'/annotations'.($manifestRecID>0?'/'.$manifestRecID:'');?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
 <?php
 }

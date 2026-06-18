@@ -274,7 +274,11 @@ $resource = @$requestUri[3];
 $is_public_annotation_read =
     ($resource === 'annotations'
         && $method === 'search'
-        && in_array(@$requestUri[4], array('pages', 'page', 'annotation'), true));
+        && (
+            in_array(@$requestUri[4], array('pages', 'page', 'annotation'), true)
+            || (is_numeric(@$requestUri[4])
+                && in_array(@$requestUri[5], array('pages', 'page', 'annotation'), true))
+        ));
 
 $skip_auth_processing =
     ($resource === 'login') ||
@@ -360,7 +364,39 @@ else
     $req_params['a'] = $method;
     $req_params['restapi'] = 1; //set http response code
 
-    if(@$requestUri[4]!=null){
+    if(@$requestUri[3]=='annotations'){
+        // Supported annotation API paths:
+        //   /api/{db}/annotations/pages?uri={canvasUri}
+        //   /api/{db}/annotations/{annotationId}
+        //   /api/{db}/annotations/{manifestRecID}/pages?uri={canvasUri}
+        //   /api/{db}/annotations/{manifestRecID}/{annotationId}
+        if(isset($requestUri[5])){
+            $req_params['manifestRecID'] = intval($requestUri[4]);
+            $req_params['recID'] = $requestUri[5];
+        }elseif(isset($requestUri[4]) && is_numeric($requestUri[4])){
+            $req_params['manifestRecID'] = intval($requestUri[4]);
+        }elseif(isset($requestUri[4])){
+            $req_params['recID'] = $requestUri[4];
+        }
+
+        if(intval(@$req_params['manifestRecID'])>0){
+            if(!isset($req_params['fields']) || !is_array($req_params['fields'])){
+                $req_params['fields'] = array();
+            }
+            $req_params['fields']['manifestRecID'] = intval($req_params['manifestRecID']);
+        }
+
+        if($method=='add' || $method=='save'){
+            if(!isset($req_params['fields']) || !is_array($req_params['fields'])){
+                $req_params['fields'] = array();
+            }
+            // This API route is used by the Mirador annotation adapter.
+            // DbAnnotations decides the actual state from this source marker.
+            if(!isset($req_params['fields']['source'])){
+                $req_params['fields']['source'] = 'mirador';
+            }
+        }
+    }elseif(@$requestUri[4]!=null){
       $req_params['recID'] = $requestUri[4];
     }
 
