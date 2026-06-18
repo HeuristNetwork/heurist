@@ -175,6 +175,9 @@ $system->defineConstant('DT_WORKFLOW_STAGE');
 $system->defineConstant('RT_CMS_MENU');
 $system->defineConstant('RT_CMS_HOME');
 $system->defineConstant('RT_IIIF_MANIFEST');
+$system->defineConstant('RT_IIIF_ANNOTATION');
+$system->defineConstant('DT_ANNOTATION_MANIFEST');
+$system->defineConstant('DT_URL');
 $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 $system->defineConstant('DT_CMS_HEADER');
 $system->defineConstant('DT_CMS_FOOTER');
@@ -1726,7 +1729,8 @@ function print_public_details(array $bib) {
         if(dtl_Geo is not null, ST_asWKT(ST_Envelope(dtl_Geo)), null) as bd_geo_envelope,
         dtl_HideFromPublic,
         rst_NonOwnerVisibility,
-        rst_RequirementType
+        rst_RequirementType,
+        null as linked_RecTypeID
         from recDetails
         left join defDetailTypes on dty_ID = dtl_DetailTypeID
         left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
@@ -1766,6 +1770,22 @@ function print_public_details(array $bib) {
     $bds_temp = array();
     $thumbs = array();
 
+    // If this record is an IIIF annotation, keep its Canvas URI so linked
+    // Manifest media can open Mirador focused on the annotated canvas.
+    $annotationCanvasUri = '';
+    if(defined('RT_IIIF_ANNOTATION') && defined('DT_URL')
+        && intval(@$bib['rec_RecTypeID']) === intval(RT_IIIF_ANNOTATION)){
+
+        $annotationCanvasUri = mysql__select_value(
+            $mysqli,
+            'SELECT dtl_Value FROM recDetails WHERE dtl_RecID='.$recordID
+            .' AND dtl_DetailTypeID='.intval(DT_URL).' LIMIT 1'
+        );
+        if($annotationCanvasUri==null){
+            $annotationCanvasUri = '';
+        }
+    }
+
     $bds_res = $mysqli->query($query);//0.8 sec
 
     $translations = [];
@@ -1787,7 +1807,8 @@ function print_public_details(array $bib) {
                 .'d2.dtl_UploadedFileID, '
                 .'dt2.dty_Type, '
                 .'null as dtl_Geo, '
-                .'null as bd_geo_envelope '
+                .'null as bd_geo_envelope, '
+                .'rec_RecTypeID as linked_RecTypeID '
         .' from recDetails d1, defDetailTypes dt1, recDetails d2, defDetailTypes dt2, Records '
         .' where d1.dtl_RecID = '. $recordID .' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
         .' AND d2.dtl_RecID = d1.dtl_Value and d2.dtl_DetailTypeID = dt2.dty_ID and dt2.dty_Type = "file" '
@@ -1976,6 +1997,11 @@ function print_public_details(array $bib) {
                         && $isIiif
                         && $bd['dtl_RecID'] == $recordID;
 
+                    $isLinkedIiifManifestRecord = defined('RT_IIIF_MANIFEST')
+                        && intval(@$bd['dtl_RecID']) !== $recordID
+                        && intval(@$bd['linked_RecTypeID']) === intval(RT_IIIF_MANIFEST)
+                        && $isIiif;
+
                     if(!$skipMediaThumb){
                         array_push($thumbs, array(
                             'id' => $bd['dtl_UploadedFileID'],
@@ -1992,6 +2018,12 @@ function print_public_details(array $bib) {
                             'player' => $file_playerURL,
                             'nonce' => $file_nonce,
                             'linked' => ($bd['dtl_RecID'] != $recordID),
+                            'rec_ID' => intval($bd['dtl_RecID']),
+                            'linked_rec_id' => intval($bd['dtl_RecID']),
+                            'linked_rec_type_id' => intval(@$bd['linked_RecTypeID']),
+                            'iiif_manifest_record' => $isLinkedIiifManifestRecord,
+                            'manifest_rec_id' => $isLinkedIiifManifestRecord ? intval($bd['dtl_RecID']) : 0,
+                            'canvas_uri' => $isLinkedIiifManifestRecord ? $annotationCanvasUri : '',
                             'description' => $fileinfo['ulf_Description'],
                             'caption' => $fileinfo['ulf_Caption'],
                             'rights' => $fileinfo['ulf_Copyright'],

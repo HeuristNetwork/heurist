@@ -236,6 +236,10 @@ if($manifestRecID>0) {
 
 
 
+if(@$_REQUEST['canvasUri']){
+    $canvasUri = $_REQUEST['canvasUri'];
+}
+
 $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
 
 $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
