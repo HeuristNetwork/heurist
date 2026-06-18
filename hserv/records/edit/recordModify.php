@@ -34,6 +34,7 @@ use hserv\utilities\Temporal;
 use hserv\structure\ConceptCode;
 use hserv\report\ReportRecord;
 use hserv\records\export\ExportRecordsHTML;
+use hserv\entity\DbAnnotations;
 
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
@@ -938,6 +939,17 @@ function recordUpdate($system, $record){
 
         $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']); //for main record on save
     }
+    
+    // Normal Heurist record-editor saves of IIIF annotation records make Heurist fields authoritative.
+    // DbAnnotations::save() sets skip_iiif_annotation_state_update for import/Mirador API saves.
+    if(empty($record['skip_iiif_annotation_state_update'])
+        && $rectype>0
+        && $system->defineConstant('RT_IIIF_ANNOTATION')
+        && $rectype==RT_IIIF_ANNOTATION)
+    {
+        $dbAnno = new DbAnnotations($system);
+        $dbAnno->markSavedFromHeuristEditor(intval($recID));
+    }    
 
     return [
         'status' => HEURIST_OK,

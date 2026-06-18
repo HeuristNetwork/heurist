@@ -79,9 +79,9 @@ class DbAnnotations extends DbRecordTypeEntity
         $sjson = array('id'=>"https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 'type' => 'AnnotationPage', 'items' => array());
 
         if(@$this->data['recID']!='pages'){
-            $item = $this->findItembyUUID(@$this->data['recID'], intval(@$this->data['manifestRecID']));
-            if($item!=null){
-                $anno = json_decode($item, true);
+            $recordId = $this->findRecIDbyOriginalId(@$this->data['recID'], intval(@$this->data['manifestRecID']));
+            if($recordId>0){
+                $anno = $this->buildIiifAnnotationFromRecord($recordId);
                 if($anno){
                     $sjson['items'] = array($anno);
                 }
@@ -94,13 +94,13 @@ class DbAnnotations extends DbRecordTypeEntity
             $this->data['uri'] = @$params['uri'];
         }
 
-        $items = $this->findItemsByCanvas(@$this->data['uri'], intval(@$this->data['manifestRecID']));
-        if(isEmptyArray($items)){
+        $recordIds = $this->findItemsByCanvas(@$this->data['uri'], intval(@$this->data['manifestRecID']));
+        if(isEmptyArray($recordIds)){
             return $sjson;
         }
 
-        foreach($items as $item){
-            $anno = json_decode($item, true);
+        foreach($recordIds as $recordId){
+            $anno = $this->buildIiifAnnotationFromRecord(intval($recordId));
             if($anno && @$anno['type']=='Annotation'){
                 $sjson['items'][] = $anno;
             }
@@ -112,10 +112,9 @@ class DbAnnotations extends DbRecordTypeEntity
     private function findItemsByCanvas($canvasUri, int $manifestRecID=0){
         if($canvasUri && $this->ensureDefinitionsReady(false)){
             $mysqli = $this->system->getMysqli();
-            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2, Records r ';
-            $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_ID=d2.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
-                .' AND d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.addslashes($canvasUri).'"'
-                .' AND d2.dtl_DetailTypeID='.DT_ANNOTATION_INFO;
+            $query = 'SELECT DISTINCT r.rec_ID FROM recDetails d1, Records r ';
+            $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+                .' AND d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.addslashes($canvasUri).'"';
 
             if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
                 $query .= ', recDetails dm ';
@@ -123,7 +122,7 @@ class DbAnnotations extends DbRecordTypeEntity
                     .' AND dm.dtl_Value='.intval($manifestRecID);
             }
 
-            return mysql__select_list2($mysqli, $query.SQL_WHERE.$where);
+            return mysql__select_list2($mysqli, $query.SQL_WHERE.$where.' ORDER BY r.rec_ID');
         }
         return array();
     }
@@ -258,6 +257,9 @@ class DbAnnotations extends DbRecordTypeEntity
             'ID' => $recordId,
             'RecTypeID' => $this->recordTypeId(),
             'no_validation' => 'ignore_all',
+            // DbAnnotations handles state itself for import/Mirador saves.
+            // Prevent the generic recordSave() post-hook from marking this as a Heurist-editor edit.
+            'skip_iiif_annotation_state_update' => true,
             'details' => $details
         );
 
@@ -271,6 +273,273 @@ class DbAnnotations extends DbRecordTypeEntity
     public function saveImportedAnnotation($annotationContext, $createThumbnail=false){
         $this->setData(array('fields'=>$annotationContext));
         return $this->save($createThumbnail, 0);
+    }
+
+
+    /**
+     * Called after a normal Heurist record-editor save of an RT_IIIF_ANNOTATION record.
+     * This deliberately updates only DT_ANNOTATION_STATE directly in recDetails, avoiding
+     * a second recordSave() call and avoiding recursion through the generic save pipeline.
+     */
+    public function markSavedFromHeuristEditor(int $recID): bool
+    {
+        if($recID<1 || !$this->ensureDefinitionsReady(false)){
+            return false;
+        }
+
+        $details = $this->loadRecordDetails($recID);
+        $oldState = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
+
+        $imported = $this->getTermId('TRM_ANNOTATION_STATE_IMPORTED');
+        $mirador  = $this->getTermId('TRM_ANNOTATION_STATE_MIRADOR');
+        $heurist  = $this->getTermId('TRM_ANNOTATION_STATE_HEURIST');
+        $modified = $this->getTermId('TRM_ANNOTATION_STATE_MODIFIED');
+        $obsolete = $this->getTermId('TRM_ANNOTATION_STATE_OBSOLETE');
+        $removed  = $this->getTermId('TRM_ANNOTATION_STATE_REMOVED');
+
+        if($oldState === $obsolete || $oldState === $removed){
+            return true;
+        }
+
+        if($oldState === $imported || $oldState === $mirador || $oldState === $modified){
+            return $this->updateAnnotationStateDirect($recID, intval($modified));
+        }
+
+        if($oldState < 1){
+            return $this->updateAnnotationStateDirect($recID, intval($heurist));
+        }
+
+        return true;
+    }
+
+    /** Directly update/insert the single DT_ANNOTATION_STATE detail. */
+    public function updateAnnotationStateDirect(int $recID, int $stateTermID): bool
+    {
+        if($recID<1 || $stateTermID<1 || !$this->ensureDefinitionsReady(false)){
+            return false;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $dtID = intval(DT_ANNOTATION_STATE);
+        $recID = intval($recID);
+        $stateTermID = intval($stateTermID);
+
+        $dtlID = mysql__select_value($mysqli,
+            'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.$recID
+            .' AND dtl_DetailTypeID='.$dtID.' LIMIT 1');
+
+        if($dtlID>0){
+            $query = 'UPDATE recDetails SET dtl_Value='.$stateTermID.' WHERE dtl_ID='.intval($dtlID);
+        }else{
+            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
+                .$recID.','.$dtID.','.$stateTermID.')';
+        }
+
+        return $mysqli->query($query) !== false;
+    }
+
+    /** Build the IIIF/Web Annotation JSON used in AnnotationPage output. */
+    public function buildIiifAnnotationFromRecord(int $recID): ?array
+    {
+        if($recID<1 || !$this->ensureDefinitionsReady(false)){
+            return null;
+        }
+        return $this->buildIiifAnnotationFromDetails($recID, $this->loadRecordDetails($recID));
+    }
+
+    private function buildIiifAnnotationFromDetails(int $recID, array $details): ?array
+    {
+        $state = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
+
+        if($this->isOneOfStates($state, array('TRM_ANNOTATION_STATE_OBSOLETE', 'TRM_ANNOTATION_STATE_REMOVED'))){
+            return null;
+        }
+
+        $raw = $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO');
+        $anno = $raw ? json_decode($raw, true) : null;
+        if(!is_array($anno)){
+            $anno = $this->createAnnotationJsonFromFields($recID, $details);
+        }
+
+        if($this->isOneOfStates($state, array('TRM_ANNOTATION_STATE_HEURIST', 'TRM_ANNOTATION_STATE_MODIFIED'))){
+            $anno = $this->patchAnnotationJsonFromFields($anno, $recID, $details);
+        }
+
+        if(!@$anno['type']){
+            $anno['type'] = 'Annotation';
+        }
+        return $anno;
+    }
+
+    private function isOneOfStates(int $state, array $stateConstNames): bool
+    {
+        if($state<1){
+            return false;
+        }
+        foreach($stateConstNames as $constName){
+            $termId = $this->getTermId($constName);
+            if($termId && $state === intval($termId)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function createAnnotationJsonFromFields(int $recID, array $details): array
+    {
+        $canvas = $this->getFirstDetailValue($details, 'DT_URL');
+        $id = $this->getFirstDetailValue($details, 'DT_ORIGINAL_RECORD_ID');
+        if(!$id){
+            $id = HEURIST_BASE_URL.'api/'.$this->system->dbname().'/annotations/'.$recID;
+        }
+
+        $anno = array('id'=>$id, 'type'=>'Annotation');
+        $anno = $this->patchAnnotationJsonFromFields($anno, $recID, $details);
+        if($canvas && empty($anno['target'])){
+            $anno['target'] = array('source'=>$canvas);
+        }
+        return $anno;
+    }
+
+    private function patchAnnotationJsonFromFields(array $anno, int $recID, array $details): array
+    {
+        if(!@$anno['id']){
+            $anno['id'] = $this->getFirstDetailValue($details, 'DT_ORIGINAL_RECORD_ID')
+                ?: HEURIST_BASE_URL.'api/'.$this->system->dbname().'/annotations/'.$recID;
+        }
+        $anno['type'] = 'Annotation';
+
+        $bodyText = $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY');
+        if($bodyText!==null && $bodyText!==''){
+            $anno['body'] = $this->patchTextualBody(@$anno['body'], $bodyText, $this->getLanguageCode2FromDetails($details));
+        }
+
+        $motivation = $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_MOTIVATION'));
+        if($motivation){
+            $anno['motivation'] = $this->stripPrefix($motivation);
+        }
+
+        $canvas = $this->getFirstDetailValue($details, 'DT_URL');
+        if(empty($anno['target'])){
+            $target = array();
+            if($canvas){
+                $target['source'] = $canvas;
+            }
+            $selector = $this->buildSelectorFromFields($details);
+            if($selector){
+                $target['selector'] = $selector;
+            }
+            if(!empty($target)){
+                $anno['target'] = $target;
+            }
+        }elseif(is_array($anno['target'])){
+            if(array_keys($anno['target'])===range(0, count($anno['target'])-1)){
+                // Multiple targets: do not try to patch complex target arrays from simple fields.
+                return $anno;
+            }
+            if(empty($anno['target']['source']) && $canvas){
+                $anno['target']['source'] = $canvas;
+            }
+            if(empty($anno['target']['selector'])){
+                $selector = $this->buildSelectorFromFields($details);
+                if($selector){
+                    $anno['target']['selector'] = $selector;
+                }
+            }
+        }elseif(is_string($anno['target']) && strpos($anno['target'], '#')===false){
+            $selector = $this->buildSelectorFromFields($details);
+            if($selector){
+                $anno['target'] = array('source'=>$anno['target'], 'selector'=>$selector);
+            }
+        }
+
+        return $anno;
+    }
+
+    private function patchTextualBody($body, string $bodyText, ?string $lang2)
+    {
+        $newBody = array('type'=>'TextualBody', 'value'=>$bodyText, 'format'=>'text/html');
+        if($lang2){
+            $newBody['language'] = strtolower($lang2);
+        }
+
+        if(!is_array($body)){
+            return $newBody;
+        }
+
+        if(array_keys($body)===range(0, count($body)-1)){
+            foreach($body as $idx=>$b){
+                if(is_array($b) && (@$b['type']=='TextualBody' || array_key_exists('value', $b))){
+                    $body[$idx]['type'] = 'TextualBody';
+                    $body[$idx]['value'] = $bodyText;
+                    if(!@$body[$idx]['format']){
+                        $body[$idx]['format'] = 'text/html';
+                    }
+                    if($lang2){
+                        $body[$idx]['language'] = strtolower($lang2);
+                    }
+                    return $body;
+                }
+            }
+            array_unshift($body, $newBody);
+            return $body;
+        }
+
+        if(@$body['type']=='TextualBody' || array_key_exists('value', $body)){
+            $body['type'] = 'TextualBody';
+            $body['value'] = $bodyText;
+            if(!@$body['format']){
+                $body['format'] = 'text/html';
+            }
+            if($lang2){
+                $body['language'] = strtolower($lang2);
+            }
+            return $body;
+        }
+
+        return $newBody;
+    }
+
+    private function buildSelectorFromFields(array $details): ?array
+    {
+        $selectorValue = $this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_VALUE');
+        if($selectorValue===null || $selectorValue===''){
+            return null;
+        }
+
+        $selectorType = $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_TYPE'));
+        $selectorType = $selectorType ? $this->stripPrefix($selectorType) : 'FragmentSelector';
+
+        return array('type'=>$selectorType, 'value'=>$selectorValue);
+    }
+
+    private function getLanguageCode2FromDetails(array $details): ?string
+    {
+        $langTermId = intval($this->getFirstDetailValue($details, 'DT_LANGUAGE'));
+        if($langTermId<1){
+            return null;
+        }
+        $lang3 = $this->getTermCodeOrLabel($langTermId);
+        if(!$lang3){
+            return null;
+        }
+        $lang2 = getLangCode2($lang3);
+        return $lang2 ?: $lang3;
+    }
+
+    private function getTermCodeOrLabel($termId): ?string
+    {
+        $termId = intval($termId);
+        if($termId<1){
+            return null;
+        }
+        $mysqli = $this->system->getMysqli();
+        $row = mysql__select_row($mysqli,
+            'SELECT trm_Code, trm_Label FROM defTerms WHERE trm_ID='.$termId.' LIMIT 1');
+        if(is_array($row)){
+            return trim((string)($row[0] ?: $row[1]));
+        }
+        return null;
     }
     
     private function fillDetailsFromParsedAnnotation(&$details, $parsed, $manifestRecID=0, $manifestFileID=0){
