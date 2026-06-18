@@ -824,6 +824,18 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
     }
 
+    
+    // Normal Heurist record-editor saves of IIIF annotation records make Heurist fields authoritative.
+    // DbAnnotations::save() sets skip_iiif_annotation_state_update for import/Mirador API saves.
+    if(empty($record['skip_iiif_annotation_state_update'])
+        && $rectype>0
+        && $system->defineConstant('RT_IIIF_ANNOTATION')
+        && $rectype==RT_IIIF_ANNOTATION)
+    {
+        $dbAnno = new DbAnnotations($system);
+        $dbAnno->markSavedFromHeuristEditor(intval($recID));
+    }      
+    
     $rtn = [
         'status' => HEURIST_OK,
         'data' => intval($recID),
@@ -939,17 +951,6 @@ function recordUpdate($system, $record){
 
         $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']); //for main record on save
     }
-    
-    // Normal Heurist record-editor saves of IIIF annotation records make Heurist fields authoritative.
-    // DbAnnotations::save() sets skip_iiif_annotation_state_update for import/Mirador API saves.
-    if(empty($record['skip_iiif_annotation_state_update'])
-        && $rectype>0
-        && $system->defineConstant('RT_IIIF_ANNOTATION')
-        && $rectype==RT_IIIF_ANNOTATION)
-    {
-        $dbAnno = new DbAnnotations($system);
-        $dbAnno->markSavedFromHeuristEditor(intval($recID));
-    }    
 
     return [
         'status' => HEURIST_OK,

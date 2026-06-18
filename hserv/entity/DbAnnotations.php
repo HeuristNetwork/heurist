@@ -56,12 +56,12 @@ class DbAnnotations extends DbRecordTypeEntity
 
         // Entity-local term constants. Fill the empty placeholders when the concept codes are final.
         $this->requiredTermConstants = [
-            'TRM_ANNOTATION_STATE_IMPORTED' => '2-10430',
-            'TRM_ANNOTATION_STATE_MIRADOR'  => '2-10431',
-            'TRM_ANNOTATION_STATE_HEURIST'  => '2-10432',
-            'TRM_ANNOTATION_STATE_MODIFIED' => '2-10433',
-            'TRM_ANNOTATION_STATE_OBSOLETE' => '2-10434',
-            'TRM_ANNOTATION_STATE_REMOVED'  => '2-10435',
+            'TRM_ANNOTATION_STATE_IMPORTED' => '2-10426',
+            'TRM_ANNOTATION_STATE_MIRADOR'  => '2-10427',
+            'TRM_ANNOTATION_STATE_HEURIST'  => '2-10428',
+            'TRM_ANNOTATION_STATE_MODIFIED' => '2-10429',
+            'TRM_ANNOTATION_STATE_OBSOLETE' => '2-10430',
+            'TRM_ANNOTATION_STATE_REMOVED'  => '2-10431',
 
             'TRM_ANNOTATION_MOTIVATION_COMMENTING' => '2-10419',
             'TRM_SELECTOR_FRAGMENT' => '2-10433',
