@@ -10,6 +10,7 @@ use hserv\entity\DbRecordTypeEntity;
 use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
+require_once dirname(__FILE__).'/IiifAnnotationJson.php';
 
 /**
 * Class DbAnnotations
@@ -18,6 +19,17 @@ require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
 */
 class DbAnnotations extends DbRecordTypeEntity
 {
+    /** @var IiifAnnotationJson|null */
+    private $annotationJson = null;
+
+    private function annotationJson(): IiifAnnotationJson
+    {
+        if($this->annotationJson === null){
+            $this->annotationJson = new IiifAnnotationJson();
+        }
+        return $this->annotationJson;
+    }
+
     protected function initRecordTypeEntity(): void
     {
         $this->recordTypeConst = 'RT_IIIF_ANNOTATION';
@@ -214,8 +226,10 @@ class DbAnnotations extends DbRecordTypeEntity
             return false;
         }
 
-        $parsed = $this->parseIncomingAnnotation($fields);
+        $parsed = $this->annotationJson()->parseIncomingAnnotation($fields);
         if(!$parsed){
+            $this->system->addError(HEURIST_INVALID_REQUEST,
+                $this->annotationJson()->getLastError() ?: 'Unsupported annotation format');
             return false;
         }
 
@@ -349,168 +363,28 @@ class DbAnnotations extends DbRecordTypeEntity
 
     private function buildIiifAnnotationFromDetails(int $recID, array $details): ?array
     {
-        $state = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
-
-        if($this->isOneOfStates($state, array('TRM_ANNOTATION_STATE_OBSOLETE', 'TRM_ANNOTATION_STATE_REMOVED'))){
-            return null;
-        }
-
-        $raw = $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO');
-        $anno = $raw ? json_decode($raw, true) : null;
-        if(!is_array($anno)){
-            $anno = $this->createAnnotationJsonFromFields($recID, $details);
-        }
-
-        if($this->isOneOfStates($state, array('TRM_ANNOTATION_STATE_HEURIST', 'TRM_ANNOTATION_STATE_MODIFIED'))){
-            $anno = $this->patchAnnotationJsonFromFields($anno, $recID, $details);
-        }
-
-        if(!@$anno['type']){
-            $anno['type'] = 'Annotation';
-        }
-        return $anno;
+        return $this->annotationJson()->buildFromAnnotationData(
+            $this->annotationDataFromDetails($recID, $details)
+        );
     }
 
-    private function isOneOfStates(int $state, array $stateConstNames): bool
+    private function annotationDataFromDetails(int $recID, array $details): array
     {
-        if($state<1){
-            return false;
-        }
-        foreach($stateConstNames as $constName){
-            $termId = $this->getTermId($constName);
-            if($termId && $state === intval($termId)){
-                return true;
-            }
-        }
-        return false;
-    }
+        $stateCode = $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
 
-    private function createAnnotationJsonFromFields(int $recID, array $details): array
-    {
-        $canvas = $this->getFirstDetailValue($details, 'DT_URL');
-        $id = $this->getFirstDetailValue($details, 'DT_ORIGINAL_RECORD_ID');
-        if(!$id){
-            $id = HEURIST_BASE_URL.'api/'.$this->system->dbname().'/annotations/'.$recID;
-        }
-
-        $anno = array('id'=>$id, 'type'=>'Annotation');
-        $anno = $this->patchAnnotationJsonFromFields($anno, $recID, $details);
-        if($canvas && empty($anno['target'])){
-            $anno['target'] = array('source'=>$canvas);
-        }
-        return $anno;
-    }
-
-    private function patchAnnotationJsonFromFields(array $anno, int $recID, array $details): array
-    {
-        if(!@$anno['id']){
-            $anno['id'] = $this->getFirstDetailValue($details, 'DT_ORIGINAL_RECORD_ID')
-                ?: HEURIST_BASE_URL.'api/'.$this->system->dbname().'/annotations/'.$recID;
-        }
-        $anno['type'] = 'Annotation';
-
-        $bodyText = $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY');
-        if($bodyText!==null && $bodyText!==''){
-            $anno['body'] = $this->patchTextualBody(@$anno['body'], $bodyText, $this->getLanguageCode2FromDetails($details));
-        }
-
-        $motivation = $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_MOTIVATION'));
-        if($motivation){
-            $anno['motivation'] = $this->stripPrefix($motivation);
-        }
-
-        $canvas = $this->getFirstDetailValue($details, 'DT_URL');
-        if(empty($anno['target'])){
-            $target = array();
-            if($canvas){
-                $target['source'] = $canvas;
-            }
-            $selector = $this->buildSelectorFromFields($details);
-            if($selector){
-                $target['selector'] = $selector;
-            }
-            if(!empty($target)){
-                $anno['target'] = $target;
-            }
-        }elseif(is_array($anno['target'])){
-            if(array_keys($anno['target'])===range(0, count($anno['target'])-1)){
-                // Multiple targets: do not try to patch complex target arrays from simple fields.
-                return $anno;
-            }
-            if(empty($anno['target']['source']) && $canvas){
-                $anno['target']['source'] = $canvas;
-            }
-            if(empty($anno['target']['selector'])){
-                $selector = $this->buildSelectorFromFields($details);
-                if($selector){
-                    $anno['target']['selector'] = $selector;
-                }
-            }
-        }elseif(is_string($anno['target']) && strpos($anno['target'], '#')===false){
-            $selector = $this->buildSelectorFromFields($details);
-            if($selector){
-                $anno['target'] = array('source'=>$anno['target'], 'selector'=>$selector);
-            }
-        }
-
-        return $anno;
-    }
-
-    private function patchTextualBody($body, string $bodyText, ?string $lang2)
-    {
-        $newBody = array('type'=>'TextualBody', 'value'=>$bodyText, 'format'=>'text/html');
-        if($lang2){
-            $newBody['language'] = strtolower($lang2);
-        }
-
-        if(!is_array($body)){
-            return $newBody;
-        }
-
-        if(array_keys($body)===range(0, count($body)-1)){
-            foreach($body as $idx=>$b){
-                if(is_array($b) && (@$b['type']=='TextualBody' || array_key_exists('value', $b))){
-                    $body[$idx]['type'] = 'TextualBody';
-                    $body[$idx]['value'] = $bodyText;
-                    if(!@$body[$idx]['format']){
-                        $body[$idx]['format'] = 'text/html';
-                    }
-                    if($lang2){
-                        $body[$idx]['language'] = strtolower($lang2);
-                    }
-                    return $body;
-                }
-            }
-            array_unshift($body, $newBody);
-            return $body;
-        }
-
-        if(@$body['type']=='TextualBody' || array_key_exists('value', $body)){
-            $body['type'] = 'TextualBody';
-            $body['value'] = $bodyText;
-            if(!@$body['format']){
-                $body['format'] = 'text/html';
-            }
-            if($lang2){
-                $body['language'] = strtolower($lang2);
-            }
-            return $body;
-        }
-
-        return $newBody;
-    }
-
-    private function buildSelectorFromFields(array $details): ?array
-    {
-        $selectorValue = $this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_VALUE');
-        if($selectorValue===null || $selectorValue===''){
-            return null;
-        }
-
-        $selectorType = $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_TYPE'));
-        $selectorType = $selectorType ? $this->stripPrefix($selectorType) : 'FragmentSelector';
-
-        return array('type'=>$selectorType, 'value'=>$selectorValue);
+        return array(
+            'recID' => $recID,
+            'id' => $this->getFirstDetailValue($details, 'DT_ORIGINAL_RECORD_ID'),
+            'annotationApiUrl' => HEURIST_BASE_URL.'api/'.$this->system->dbname().'/annotations/'.$recID,
+            'rawJson' => $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO'),
+            'stateCode' => $stateCode ? strtolower($stateCode) : '',
+            'bodyText' => $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY'),
+            'motivation' => $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_MOTIVATION')),
+            'language2' => $this->getLanguageCode2FromDetails($details),
+            'canvas' => $this->getFirstDetailValue($details, 'DT_URL'),
+            'selectorType' => $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_TYPE')),
+            'selectorValue' => $this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_VALUE')
+        );
     }
 
     private function getLanguageCode2FromDetails(array $details): ?string
@@ -569,234 +443,6 @@ class DbAnnotations extends DbRecordTypeEntity
         */
 
         return $changed;
-    }
-
-    private function parseIncomingAnnotation($fields){
-        $anno = @$fields['annotation'];
-        if(!$anno){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Annotation data is not defined');
-            return false;
-        }
-
-        $state = @$fields['state'] ?: (@$fields['source']=='mirador' ? 'mirador' : 'imported');
-
-        if(is_array($anno) && @$anno['data']){
-            $decoded = json_decode($anno['data'], true);
-            if(!is_array($decoded)){
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'Annotation JSON is invalid: '.json_last_error_msg());
-                return false;
-            }
-            $id = @$anno['uuid'] ?: @$decoded['id'] ?: @$decoded['@id'];
-            $parsed = $this->parseWebAnnotationArray($decoded, $id, @$anno['canvas']);
-            $parsed['json'] = json_encode($decoded, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
-            $parsed['state'] = $state;
-            return $parsed;
-        }
-
-        if(!is_array($anno)){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Annotation data is not an array');
-            return false;
-        }
-
-        if($this->isOpenAnnotation($anno)){
-            $webAnno = $this->convertOpenAnnotationToWebAnnotation($anno, @$fields['canvasOriginalId']);
-            $parsed = $this->parseWebAnnotationArray($webAnno, @$webAnno['id'], @$fields['canvasOriginalId']);
-            $parsed['json'] = json_encode($webAnno, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
-            $parsed['state'] = $state;
-            return $parsed;
-        }
-
-        if(@$anno['type']=='Annotation'){
-            $parsed = $this->parseWebAnnotationArray($anno, @$anno['id'], @$fields['canvasOriginalId']);
-            $parsed['json'] = json_encode($anno, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
-            $parsed['state'] = $state;
-            return $parsed;
-        }
-
-        $this->system->addError(HEURIST_INVALID_REQUEST, 'Unsupported annotation format');
-        return false;
-    }
-    
-    private function parseLanguageFromBody($body): ?string
-    {
-        if(!is_array($body)){
-            return null;
-        }
-
-        if(isset($body['lang'])){
-            return is_array($body['lang']) ? reset($body['lang']) : $body['lang'];
-        }
-        
-        if(isset($body['language'])){
-            return is_array($body['language']) ? reset($body['language']) : $body['language'];
-        }
-
-        if(isset($body['languages'])){
-            return is_array($body['languages']) ? reset($body['languages']) : $body['languages'];
-        }
-
-        return null;
-    }
-    
-    private function parseWebAnnotationArray($anno, $fallbackId=null, $fallbackCanvas=null){
-        $bodyText = '';
-        $language = null;
-        $body = @$anno['body'];
-        $bodies = is_array($body) && array_keys($body)===range(0, count($body)-1) ? $body : array($body);
-        foreach($bodies as $b){
-            if(is_array($b)){
-                if((@$b['type']=='TextualBody' || @$b['value']) && @$b['value']!==null){
-                    $bodyText = $b['value'];
-                    //$language = @$b['language'] ?: (@$b['lang'] ?: (@$b['languages'] ?: $language));
-                    $lang = $this->parseLanguageFromBody($b);
-                    if($lang){
-                        $language = $lang;
-                    }                    
-                    
-                    break;
-                }
-            }elseif(is_string($b) && $b!==''){
-                $bodyText = $b;
-                break;
-            }
-        }
-
-        $motivation = @$anno['motivation'];
-        if(is_array($motivation)){
-            $motivation = reset($motivation);
-        }
-        $motivation = $this->stripPrefix((string)$motivation);
-
-        $target = @$anno['target'];
-        $canvas = $fallbackCanvas;
-        $selectorType = null;
-        $selectorValue = null;
-
-        if(is_string($target)){
-            $parts = explode('#', $target, 2);
-            $canvas = $parts[0];
-            if(@$parts[1]){
-                $selectorType = 'FragmentSelector';
-                $selectorValue = $parts[1];
-            }
-        }elseif(is_array($target)){
-            if(array_keys($target)===range(0, count($target)-1)){
-                $target = reset($target);
-            }
-            $canvas = @$target['source'] ?: (@$target['id'] ?: $canvas);
-            $selector = $this->choosePrimarySelector(@$target['selector']);
-            if(is_array($selector)){
-                $selectorType = $this->stripPrefix((string)(@$selector['type'] ?: @$selector['@type']));
-                $selectorValue = @$selector['value'];
-            }
-        }
-
-        $id = @$anno['id'] ?: (@$anno['@id'] ?: $fallbackId);
-        if(!$id){
-            $id = 'heurist-import-'.md5(($canvas ?: '').json_encode($anno));
-        }
-
-        return array(
-            'id' => $id,
-            'body_text' => $bodyText,
-            'motivation' => $motivation ?: 'commenting',
-            'language' => $language,
-            'canvas' => $canvas,
-            'selector_type' => $selectorType,
-            'selector_value' => $selectorValue,
-            'json' => json_encode($anno, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)
-        );
-    }
-
-
-    private function choosePrimarySelector($selector)
-    {
-        if(!is_array($selector)){
-            return null;
-        }
-
-        if(array_keys($selector)===range(0, count($selector)-1)){
-            $fallback = null;
-            foreach($selector as $sel){
-                if(!is_array($sel)){
-                    continue;
-                }
-                $type = $this->stripPrefix((string)(@$sel['type'] ?: @$sel['@type']));
-                if($type==='SvgSelector'){
-                    return $sel;
-                }
-                if($type==='FragmentSelector' && $fallback===null){
-                    $fallback = $sel;
-                }elseif($fallback===null){
-                    $fallback = $sel;
-                }
-            }
-            return $fallback;
-        }
-
-        if(@$selector['type']=='Choice' || @$selector['@type']=='oa:Choice'){
-            if(is_array(@$selector['item'])){
-                $chosen = $this->choosePrimarySelector($selector['item']);
-                if($chosen){ return $chosen; }
-            }
-            if(is_array(@$selector['items'])){
-                $chosen = $this->choosePrimarySelector($selector['items']);
-                if($chosen){ return $chosen; }
-            }
-            if(is_array(@$selector['default'])){
-                return $selector['default'];
-            }
-        }
-
-        return $selector;
-    }
-
-    private function stripPrefix($value){
-        $pos = strrpos($value, ':');
-        return $pos!==false ? substr($value, $pos+1) : $value;
-    }
-
-    private function isOpenAnnotation($anno){
-       return @$anno['@type']=='oa:Annotation' || @$anno['type']=='oa:Annotation';
-    }
-
-    private function convertOpenAnnotationToWebAnnotation($anno, $fallbackCanvas=null){
-        $id = @$anno['@id'] ?: @$anno['id'];
-        $motivation = @$anno['motivation'];
-        if(is_array($motivation)){
-            $motivation = reset($motivation);
-        }
-        $motivation = $this->stripPrefix((string)$motivation) ?: 'commenting';
-
-        $bodyText = '';
-        if(is_array(@$anno['resource'])){
-            $res = reset($anno['resource']);
-            $bodyText = @$res['chars'] ?: (@$res['full_text'] ?: '');
-        }
-
-        $canvas = $fallbackCanvas;
-        $selectors = array();
-        if(is_array(@$anno['on'])){
-            $target = reset($anno['on']);
-            $canvas = @$target['full'] ?: $canvas;
-            $sel = @$target['selector'];
-            if(is_array($sel)){
-                if(@$sel['default']['value']){
-                    $selectors[] = array('type'=>'FragmentSelector', 'value'=>$sel['default']['value']);
-                }
-                if(@$sel['item']['value']){
-                    $selectors[] = array('type'=>'SvgSelector', 'value'=>$sel['item']['value']);
-                }
-            }
-        }
-
-        return array(
-            'id' => $id ?: 'heurist-import-'.md5(($canvas ?: '').json_encode($anno)),
-            'type' => 'Annotation',
-            'motivation' => $motivation,
-            'body' => array('type'=>'TextualBody', 'value'=>$bodyText, 'format'=>'text/html'),
-            'target' => array('source'=>$canvas, 'selector'=>$selectors)
-        );
     }
 
     private function removeUriSchema($val){
