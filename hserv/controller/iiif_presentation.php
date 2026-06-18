@@ -56,7 +56,8 @@ require_once dirname(__FILE__).'/../../autoload.php';
 
     if($params['resource']=='manifest' && is_numeric($params['id'])){
         $dbManifest = new hserv\entity\DbIiifManifest($system);
-        $manifest = $dbManifest->getOverlayManifestJson(intval($params['id']));
+        $omitAnnotationPages = !empty($params['omit_annotation_pages']);
+        $manifest = $dbManifest->getOverlayManifestJson(intval($params['id']), $omitAnnotationPages);
         if(is_array($manifest)){
             $res = json_encode($manifest, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
         }

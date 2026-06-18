@@ -189,7 +189,7 @@ if($baseUrl==null){
 
 if($manifestRecID>0) {
 
-    $url = $baseUrl.'heurist/api/'.rawurlencode($dbname).'/iiif/manifest/'.$manifestRecID;
+    $url = $baseUrl.'heurist/api/'.rawurlencode($dbname).'/iiif/manifest/'.$manifestRecID.'?omit_annotation_pages=1';
 
 }elseif(@$_REQUEST['url']) { //direct url to manifest
 

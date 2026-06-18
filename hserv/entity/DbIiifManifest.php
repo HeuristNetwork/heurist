@@ -135,7 +135,7 @@ class DbIiifManifest extends DbRecordTypeEntity
      * Existing Canvas.annotations are replaced with Heurist AnnotationPage URLs
      * to avoid showing source annotations and imported DB annotations twice.
      */
-    public function getOverlayManifestJson(int $manifestRecID): ?array
+    public function getOverlayManifestJson(int $manifestRecID, bool $omitAnnotationPages=false): ?array
     {
         if(!$this->ensureDefinitionsReady(false) || !$this->isManifestRecord($manifestRecID)){
             return null;
@@ -163,13 +163,21 @@ class DbIiifManifest extends DbRecordTypeEntity
                 continue;
             }
 
-            // Replace source annotation pages with the Heurist DB page.
-            $manifest['items'][$idx]['annotations'] = array(
-                array(
-                    'id' => $this->annotationPageUrl($manifestRecID, $canvasId),
-                    'type' => 'AnnotationPage'
-                )
-            );
+            // Always remove source annotation pages to avoid duplicate imported/source annotations.
+            unset($manifest['items'][$idx]['annotations']);
+
+            // External IIIF consumers need standard Canvas.annotations[] links.
+            // The internal Heurist Mirador viewer uses window.endpointURL instead,
+            // so it requests omit_annotation_pages=1 to avoid loading the same DB
+            // annotations twice.
+            if(!$omitAnnotationPages){
+                $manifest['items'][$idx]['annotations'] = array(
+                    array(
+                        'id' => $this->annotationPageUrl($manifestRecID, $canvasId),
+                        'type' => 'AnnotationPage'
+                    )
+                );
+            }
         }
 
         return $manifest;
