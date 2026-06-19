@@ -112,13 +112,13 @@ class DbIiifCanvas extends DbRecordTypeEntity
         $this->setField($details, 'DT_ANNOTATION_STATE', $this->getTermId('TRM_ANNOTATION_STATE_IMPORTED'));
 
         if(isset($canvas['width'])){
-            $this->setField($details, $this->detailId('DT_WIDTH', '2-1013'), intval($canvas['width']));
+            $this->setField($details, $this->detailId('DT_WIDTH', '3-1040'), intval($canvas['width']));
         }
         if(isset($canvas['height'])){
-            $this->setField($details, $this->detailId('DT_HEIGHT', '2-1014'), intval($canvas['height']));
+            $this->setField($details, $this->detailId('DT_HEIGHT', '3-1041'), intval($canvas['height']));
         }
         if(isset($canvas['duration'])){
-            $this->setField($details, $this->detailId('DT_DURATION', '2-1133'), floatval($canvas['duration']));
+            $this->setField($details, $this->detailId('DT_DURATION', '2-66'), floatval($canvas['duration']));
         }
 
         $mediaUrl = $this->extractPrimaryPaintingBodyUrl($canvas);

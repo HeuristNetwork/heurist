@@ -123,6 +123,14 @@ class DbAnnotations extends DbRecordTypeEntity
 
     private function findItemsByCanvas($canvasUri, int $manifestRecID=0){
         if($canvasUri && $this->ensureDefinitionsReady(false)){
+            $managedCanvasRecID = $this->canvasRecIDFromApiUrl((string)$canvasUri);
+            if($managedCanvasRecID>0 && defined('DT_IIIF_CANVAS')){
+                $recordIds = $this->findItemsByManagedCanvas($managedCanvasRecID, $manifestRecID);
+                if(!isEmptyArray($recordIds)){
+                    return $recordIds;
+                }
+            }
+
             $mysqli = $this->system->getMysqli();
             $query = 'SELECT DISTINCT r.rec_ID FROM recDetails d1, Records r ';
             $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
@@ -137,6 +145,45 @@ class DbAnnotations extends DbRecordTypeEntity
             return mysql__select_list2($mysqli, $query.SQL_WHERE.$where.' ORDER BY r.rec_ID');
         }
         return array();
+    }
+
+    private function findItemsByManagedCanvas(int $canvasRecID, int $manifestRecID=0): array
+    {
+        if($canvasRecID<1 || !defined('DT_IIIF_CANVAS')){
+            return array();
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $query = 'SELECT DISTINCT r.rec_ID FROM recDetails dc, Records r ';
+        $where = 'r.rec_ID=dc.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+            .' AND dc.dtl_DetailTypeID='.DT_IIIF_CANVAS
+            .' AND dc.dtl_Value='.intval($canvasRecID);
+
+        if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
+            $query .= ', recDetails dm ';
+            $where .= ' AND dm.dtl_RecID=r.rec_ID AND dm.dtl_DetailTypeID='.DT_ANNOTATION_MANIFEST
+                .' AND dm.dtl_Value='.intval($manifestRecID);
+        }
+
+        return mysql__select_list2($mysqli, $query.SQL_WHERE.$where.' ORDER BY r.rec_ID') ?: array();
+    }
+
+    private function canvasRecIDFromApiUrl(string $canvasUri): int
+    {
+        if($canvasUri===''){
+            return 0;
+        }
+
+        $path = parse_url($canvasUri, PHP_URL_PATH);
+        if(!$path){
+            return 0;
+        }
+
+        if(preg_match('~/api/[^/]+/iiif/canvas/(\d+)$~', $path, $m)){
+            return intval($m[1]);
+        }
+
+        return 0;
     }
 
     private function findItembyUUID($uuid, int $manifestRecID=0){

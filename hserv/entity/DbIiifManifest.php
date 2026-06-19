@@ -4,6 +4,8 @@
 */
 namespace hserv\entity;
 
+use hserv\structure\ConceptCode;
+
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
 
 /**
@@ -22,6 +24,7 @@ class DbIiifManifest extends DbRecordTypeEntity
             'DT_NAME',
             'DT_EXTENDED_DESCRIPTION',
             'DT_FILE_RESOURCE',
+            'DT_COPYRIGHT',
             'DT_IIIF_ID',
             'DT_IIIF_IMPORT_MODE',
             'DT_IIIF_CANVAS'
@@ -30,7 +33,7 @@ class DbIiifManifest extends DbRecordTypeEntity
         // Fill these when the term concept codes are final.
         $this->requiredTermConstants = array(
             'TRM_IIIF_IMPORT_MODE_OVERLAY' => '2-10444',
-            'TRM_IIIF_IMPORT_MODE_MANAGED' => '2-10445'
+            'TRM_IIIF_IMPORT_MODE_MANAGED' => '2-10446'
         );
     }
 
@@ -69,6 +72,11 @@ class DbIiifManifest extends DbRecordTypeEntity
         }
         $this->setField($details, 'DT_EXTENDED_DESCRIPTION', $desc);
 
+        $copyright = $this->extractCopyrightText($manifest);
+        if($copyright){
+            $this->setField($details, 'DT_COPYRIGHT', $copyright);
+        }
+
         $res = $this->saveRecordDetails($recordId, $details, 0);
         if(!is_array($res) || @$res['status']!=HEURIST_OK || intval(@$res['data'])<1){
             if(is_array($res) && @$res['message']){
@@ -77,6 +85,21 @@ class DbIiifManifest extends DbRecordTypeEntity
             return 0;
         }
         return intval($res['data']);
+    }
+
+    private function extractCopyrightText(array $manifest): string
+    {
+        $rights = trim((string)($manifest['rights'] ?? ''));
+        $required = $manifest['requiredStatement'] ?? null;
+
+        if(is_array($required)){
+            $value = $this->normaliseLangValue($required['value'] ?? null);
+            if($value){
+                return $value;
+            }
+        }
+
+        return $rights;
     }
 
     private function resolveImportModeTerm(string $importMode): ?int
@@ -159,7 +182,21 @@ class DbIiifManifest extends DbRecordTypeEntity
             return null;
         }
 
-        $manifest = $this->loadSourceManifestForRecord($manifestRecID);
+        $manifestDetails = $this->loadRecordDetails($manifestRecID);
+
+        // Full-management mode is generated from Heurist records. The source
+        // Manifest is not reloaded here: Canvas ids, painting bodies, thumbnails
+        // and AnnotationPage links are all derived from RT_IIIF_CANVAS records.
+        if($this->isManagedManifestDetails($manifestDetails)){
+            return $this->buildManagedManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
+        }
+
+        return $this->buildOverlayManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
+    }
+
+    private function buildOverlayManifestJson(int $manifestRecID, array $manifestDetails, bool $omitAnnotationPages=false): ?array
+    {
+        $manifest = $this->loadSourceManifestForRecord($manifestRecID, $manifestDetails);
         if(!is_array($manifest)){
             return null;
         }
@@ -201,6 +238,274 @@ class DbIiifManifest extends DbRecordTypeEntity
         return $manifest;
     }
 
+    private function buildManagedManifestJson(int $manifestRecID, array $manifestDetails, bool $omitAnnotationPages=false): array
+    {
+        $title = $this->getFirstDetailValue($manifestDetails, 'DT_NAME') ?: ('Manifest '.$manifestRecID);
+
+        $manifest = array(
+            '@context' => 'http://iiif.io/api/presentation/3/context.json',
+            'id' => $this->manifestApiUrl($manifestRecID),
+            'type' => 'Manifest',
+            'label' => $this->toLanguageMap($title),
+            'items' => $this->buildManagedCanvasItems($manifestDetails, $manifestRecID, $omitAnnotationPages)
+        );
+
+        $summary = $this->getFirstDetailValue($manifestDetails, 'DT_EXTENDED_DESCRIPTION');
+        if(!$summary){
+            $summary = $this->getFirstDetailValue($manifestDetails, 'DT_SHORT_SUMMARY');
+        }
+        if($summary){
+            $manifest['summary'] = $this->toLanguageMap($summary);
+        }
+
+        $copyright = $this->getFirstDetailValue($manifestDetails, 'DT_COPYRIGHT');
+        if($copyright){
+            $manifest['requiredStatement'] = array(
+                'label' => $this->toLanguageMap('Copyright'),
+                'value' => $this->toLanguageMap($copyright)
+            );
+
+            if(preg_match('/^https?:\/\//i', trim((string)$copyright))){
+                $manifest['rights'] = trim((string)$copyright);
+            }
+        }
+
+        return $manifest;
+    }
+
+
+    private function isManagedManifestDetails(array $manifestDetails): bool
+    {
+        $canvasRefs = $this->getDetailValues($manifestDetails, 'DT_IIIF_CANVAS');
+        if(!empty($canvasRefs)){
+            return true;
+        }
+
+        $mode = intval($this->getFirstDetailValue($manifestDetails, 'DT_IIIF_IMPORT_MODE'));
+        $managed = $this->getTermId('TRM_IIIF_IMPORT_MODE_MANAGED') ?: $this->getTermId('managed');
+        return $mode>0 && $managed>0 && $mode===$managed;
+    }
+
+    private function buildManagedCanvasItems(array $manifestDetails, int $manifestRecID, bool $omitAnnotationPages=false): array
+    {
+        $canvasRecIDs = $this->getDetailValues($manifestDetails, 'DT_IIIF_CANVAS');
+        $items = array();
+
+        foreach($canvasRecIDs as $canvasRecID){
+            $canvas = $this->buildManagedCanvasItem(intval($canvasRecID), $manifestRecID, $omitAnnotationPages);
+            if($canvas){
+                $items[] = $canvas;
+            }
+        }
+
+        return $items;
+    }
+
+    private function buildManagedCanvasItem(int $canvasRecID, int $manifestRecID, bool $omitAnnotationPages=false): ?array
+    {
+        if($canvasRecID<1){
+            return null;
+        }
+
+        $details = $this->loadRecordDetails($canvasRecID);
+        if(empty($details)){
+            return null;
+        }
+
+        $canvasUrl = $this->canvasApiUrl($canvasRecID);
+        $canvas = array(
+            'id' => $canvasUrl,
+            'type' => 'Canvas',
+            'label' => $this->toLanguageMap($this->getFirstDetailValue($details, 'DT_NAME') ?: ('Canvas '.$canvasRecID))
+        );
+
+        $summary = $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY');
+        if($summary){
+            $canvas['summary'] = $this->toLanguageMap($summary);
+        }
+
+        $width = $this->getNumericDetailValueByConstOrCode($details, 'DT_WIDTH', '3-1040');
+        $height = $this->getNumericDetailValueByConstOrCode($details, 'DT_HEIGHT', '3-1041');
+        $duration = $this->getNumericDetailValueByConstOrCode($details, 'DT_DURATION', '2-66');
+
+        // In managed mode Canvas dimensions are authoritative database values.
+        // They must be present on both the Canvas item and the painting body so
+        // Mirador/OpenSeadragon can size the Canvas and the painted image consistently.
+        if($height !== null && $height > 0){ $canvas['height'] = intval($height); }
+        if($width !== null && $width > 0){ $canvas['width'] = intval($width); }
+        if($duration !== null && $duration > 0){ $canvas['duration'] = floatval($duration); }
+
+        $thumbID = intval($this->getFirstDetailValue($details, 'DT_THUMBNAIL'));
+        $thumb = $this->fileBodyFromUlfID($thumbID);
+        if($thumb){
+            $canvas['thumbnail'] = array($thumb);
+        }
+
+        $mediaID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
+        $body = $this->fileBodyFromUlfID($mediaID, $width, $height, $duration);
+        if($body){
+            $canvas['items'] = array(
+                array(
+                    'id' => $canvasUrl.'/painting-page',
+                    'type' => 'AnnotationPage',
+                    'items' => array(
+                        array(
+                            'id' => $canvasUrl.'/painting',
+                            'type' => 'Annotation',
+                            'motivation' => 'painting',
+                            'body' => $body,
+                            'target' => $canvasUrl
+                        )
+                    )
+                )
+            );
+        }else{
+            $canvas['items'] = array();
+        }
+
+        if(!$omitAnnotationPages){
+            $canvas['annotations'] = array(
+                array(
+                    'id' => $this->annotationPageUrl($manifestRecID, $canvasUrl),
+                    'type' => 'AnnotationPage'
+                )
+            );
+        }
+
+        return $canvas;
+    }
+
+    private function fileBodyFromUlfID(int $ulfID, $width=null, $height=null, $duration=null): ?array
+    {
+        if($ulfID<1){
+            return null;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $query = 'SELECT ulf_ObfuscatedFileID, ulf_ExternalFileReference, ulf_MimeExt, fxm_MimeType '
+            .'FROM recUploadedFiles LEFT JOIN defFileExtToMimetype ON fxm_Extension=ulf_MimeExt '
+            .'WHERE ulf_ID='.intval($ulfID).' LIMIT 1';
+        $row = mysql__select_row($mysqli, $query);
+        if(!is_array($row)){
+            return null;
+        }
+
+        $url = $row[1] ? $row[1] : HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$row[0];
+        $mimeType = $row[3] ?: $this->mimeTypeFromExtension((string)$row[2]);
+        $type = $this->iiifBodyTypeFromMime($mimeType);
+
+        $body = array(
+            'id' => $url,
+            'type' => $type,
+        );
+        if($mimeType){
+            $body['format'] = $mimeType;
+        }
+
+        // IIIF painting bodies should repeat the media dimensions. For images this
+        // is width/height; for AV resources duration may also be applicable.
+        if($height !== null && $height > 0 && in_array($type, array('Image', 'Video'), true)){
+            $body['height'] = intval($height);
+        }
+        if($width !== null && $width > 0 && in_array($type, array('Image', 'Video'), true)){
+            $body['width'] = intval($width);
+        }
+        if($duration !== null && $duration > 0 && in_array($type, array('Video', 'Sound'), true)){
+            $body['duration'] = floatval($duration);
+        }
+
+        return $body;
+    }
+
+    private function mimeTypeFromExtension(string $ext): ?string
+    {
+        $ext = strtolower(trim($ext));
+        if($ext===''){
+            return null;
+        }
+        if(strpos($ext, '/')!==false){
+            return $ext;
+        }
+        switch($ext){
+            case 'jpg':
+            case 'jpeg': return 'image/jpeg';
+            case 'png': return 'image/png';
+            case 'gif': return 'image/gif';
+            case 'webp': return 'image/webp';
+            case 'tif':
+            case 'tiff': return 'image/tiff';
+            case 'mp4': return 'video/mp4';
+            case 'mp3': return 'audio/mpeg';
+            case 'wav': return 'audio/wav';
+            default: return null;
+        }
+    }
+
+    private function iiifBodyTypeFromMime(?string $mimeType): string
+    {
+        $mimeType = strtolower((string)$mimeType);
+        if(strpos($mimeType, 'video/')===0){
+            return 'Video';
+        }
+        if(strpos($mimeType, 'audio/')===0){
+            return 'Sound';
+        }
+        return 'Image';
+    }
+
+    private function getFirstDetailValueByConstOrCode(array $details, string $constName, string $conceptCode)
+    {
+        $id = $this->constId($constName);
+        if(!$id){
+            $id = ConceptCode::getDetailTypeLocalID($conceptCode);
+        }
+        return $id ? ($details[intval($id)][0] ?? null) : null;
+    }
+
+    private function getNumericDetailValueByConstOrCode(array $details, string $constName, string $conceptCode): ?float
+    {
+        $value = $this->getFirstDetailValueByConstOrCode($details, $constName, $conceptCode);
+        if($value === null || $value === ''){
+            return null;
+        }
+        if(is_string($value)){
+            $value = trim($value);
+        }
+        return is_numeric($value) ? floatval($value) : null;
+    }
+
+    private function toLanguageMap($value): array
+    {
+        $value = trim((string)$value);
+        if($value===''){
+            $value = 'Untitled';
+        }
+
+        if(preg_match('/^([A-Z]{3}):(.*)$/', $value, $m)){
+            $lang = strtolower($m[1]);
+            $map = array('eng'=>'en', 'fre'=>'fr', 'fra'=>'fr', 'deu'=>'de', 'ger'=>'de', 'spa'=>'es', 'ita'=>'it');
+            $lang = $map[$lang] ?? substr($lang, 0, 2);
+            $text = trim($m[2]);
+            return array($lang => array($text!=='' ? $text : $value));
+        }
+
+        return array('none' => array($value));
+    }
+
+    private function manifestApiUrl(int $manifestRecID): string
+    {
+        return rtrim(HEURIST_BASE_URL, '/')
+            .'/api/'.$this->system->dbname()
+            .'/iiif/manifest/'.intval($manifestRecID);
+    }
+
+    private function canvasApiUrl(int $canvasRecID): string
+    {
+        return rtrim(HEURIST_BASE_URL, '/')
+            .'/api/'.$this->system->dbname()
+            .'/iiif/canvas/'.intval($canvasRecID);
+    }
+
     private function isManifestRecord(int $manifestRecID): bool
     {
         if($manifestRecID<1 || !$this->recordTypeId()){
@@ -212,12 +517,10 @@ class DbIiifManifest extends DbRecordTypeEntity
         return intval($recType)===$this->recordTypeId();
     }
 
-    private function loadSourceManifestForRecord(int $manifestRecID): ?array
+    private function loadSourceManifestForRecord(int $manifestRecID, array $manifestDetails): ?array
     {
-        $details = $this->loadRecordDetails($manifestRecID);
-
         $sourceUrl = null;
-        $ulfID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
+        $ulfID = intval($this->getFirstDetailValue($manifestDetails, 'DT_FILE_RESOURCE'));
         if($ulfID>0){
             $row = mysql__select_row($this->system->getMysqli(),
                 'SELECT ulf_ObfuscatedFileID, ulf_ExternalFileReference FROM recUploadedFiles WHERE ulf_ID='.$ulfID.' LIMIT 1');
