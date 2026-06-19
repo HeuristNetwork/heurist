@@ -6,6 +6,7 @@ namespace hserv\records\import;
 
 use hserv\entity\DbAnnotations;
 use hserv\entity\DbIiifManifest;
+use hserv\entity\DbIiifCanvas;
 use hserv\entity\DbRecUploadedFiles;
 
 require_once dirname(__FILE__).'/../edit/recordModify.php';
@@ -14,7 +15,7 @@ set_time_limit(0);
 
 /**
  * Imports IIIF annotations for one selected manifest file.
- * Phase 1 supports import_level=overlay only.
+ * Supports import_level=overlay and import_level=managed.
  */
 class ImportAnnotations{
 
@@ -47,9 +48,9 @@ class ImportAnnotations{
             return false;
         }
 
-        if($this->importLevel !== 'overlay'){
-            $this->system->addError(HEURIST_ACTION_BLOCKED,
-                'Only "Annotation overlay only" import mode is implemented in this phase');
+        if(!in_array($this->importLevel, array('overlay', 'managed'), true)){
+            $this->system->addError(HEURIST_INVALID_REQUEST,
+                'Unsupported IIIF import mode: '.$this->importLevel);
             return false;
         }
 
@@ -68,11 +69,25 @@ class ImportAnnotations{
             return false;
         }
 
+        $canvasImport = array('map'=>array(), 'ordered'=>array(), 'added'=>array(), 'updated'=>array(), 'retained'=>array(), 'preserved_local'=>array(), 'issues'=>array());
+        if($this->importLevel === 'managed'){
+            $canvasImport = $this->importCanvases($manifest, $manifestRecID);
+            if($canvasImport===false){
+                return false;
+            }
+        }
+
         $annotations = $this->extractAnnotations($manifest, $manifestFile['source_url']);
 
         $result = array(
             'manifest_rec_id' => $manifestRecID,
             'manifest_file_id' => intval($manifestFile['ulf_ID']),
+            'import_level' => $this->importLevel,
+            'total_canvases' => count($canvasImport['ordered']),
+            'canvases_added' => $canvasImport['added'],
+            'canvases_updated' => $canvasImport['updated'],
+            'canvases_retained' => $canvasImport['retained'],
+            'canvases_preserved_local' => $canvasImport['preserved_local'],
             'total_annotations' => count($annotations),
             'processed' => 0,
             'added' => array(),
@@ -80,7 +95,7 @@ class ImportAnnotations{
             'retained' => array(),
             'preserved_local' => array(),
             'without_annotations' => empty($annotations),
-            'issues' => array()
+            'issues' => $canvasImport['issues']
         );
 
         if(empty($annotations)){
@@ -99,6 +114,9 @@ class ImportAnnotations{
             $ctx['manifestUrl'] = $manifestFile['source_url'];
             $ctx['state'] = 'imported';
             $ctx['preserveLocal'] = 1;
+            if($this->importLevel === 'managed' && @$ctx['canvasOriginalId'] && isset($canvasImport['map'][$ctx['canvasOriginalId']])){
+                $ctx['canvasRecID'] = intval($canvasImport['map'][$ctx['canvasOriginalId']]);
+            }
 
             $res = $this->dbAnno->saveImportedAnnotation($ctx, $this->createThumbnail);
             $result['processed']++;
@@ -199,6 +217,81 @@ class ImportAnnotations{
     private function ensureManifestRecord($manifestFile, $manifest){
         $dbManifest = new DbIiifManifest($this->system);
         return $dbManifest->ensureFromManifestFile($manifestFile, $manifest, $this->importLevel);
+    }
+
+
+    private function importCanvases(array $manifest, int $manifestRecID)
+    {
+        $canvasList = $this->extractCanvases($manifest);
+        $out = array('map'=>array(), 'ordered'=>array(), 'added'=>array(), 'updated'=>array(), 'retained'=>array(), 'preserved_local'=>array(), 'issues'=>array());
+
+        if(empty($canvasList)){
+            return $out;
+        }
+
+        $dbCanvas = new DbIiifCanvas($this->system);
+        foreach($canvasList as $idx=>$canvas){
+            $canvasId = $this->getJsonId($canvas);
+            $key = $canvasId ?: ('canvas #'.($idx+1));
+            $res = $dbCanvas->ensureFromCanvas($canvas, true);
+            if($res===false){
+                $err = $this->system->getError();
+                $out['issues'][$key] = @$err['message'] ?: 'Unknown Canvas import error';
+                $this->system->clearError();
+                continue;
+            }
+
+            $recID = intval(@$res['recID']);
+            if($recID<1){
+                continue;
+            }
+            if($canvasId){
+                $out['map'][$canvasId] = $recID;
+            }
+            $out['ordered'][] = $recID;
+
+            if(@$res['is_new']){
+                $out['added'][] = $recID;
+            }elseif(@$res['is_preserved_local']){
+                $out['preserved_local'][] = $recID;
+            }elseif(@$res['is_retained']){
+                $out['retained'][] = $recID;
+            }else{
+                $out['updated'][] = $recID;
+            }
+        }
+
+        $dbManifest = new DbIiifManifest($this->system);
+        if(!$dbManifest->setCanvasRefs($manifestRecID, $out['ordered'])){
+            $err = $this->system->getError();
+            $out['issues']['manifest_canvases'] = @$err['message'] ?: 'Unable to update Manifest Canvas list';
+            $this->system->clearError();
+        }
+
+        return $out;
+    }
+
+    private function extractCanvases(array $json): array
+    {
+        if(@$json['type']=='Manifest'){
+            return array_values(array_filter((array)@$json['items'], function($item){
+                return is_array($item) && @$item['type']=='Canvas';
+            }));
+        }
+
+        if(@$json['@type']=='sc:Manifest'){
+            $out = array();
+            foreach((array)@$json['sequences'] as $seq){
+                foreach((array)@$seq['canvases'] as $canvas){
+                    if(is_array($canvas) && @$canvas['@type']=='sc:Canvas'){
+                        $out[] = $canvas;
+                    }
+                }
+            }
+            return $out;
+        }
+
+        return array();
     }
 
     private function isManifest($json){

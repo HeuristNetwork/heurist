@@ -18,11 +18,13 @@ class DbIiifManifest extends DbRecordTypeEntity
 
         $this->requiredConstants = array(
             'RT_IIIF_MANIFEST',
+            'RT_IIIF_CANVAS',
             'DT_NAME',
             'DT_EXTENDED_DESCRIPTION',
             'DT_FILE_RESOURCE',
             'DT_IIIF_ID',
-            'DT_IIIF_IMPORT_MODE'
+            'DT_IIIF_IMPORT_MODE',
+            'DT_IIIF_CANVAS'
         );
 
         // Fill these when the term concept codes are final.
@@ -119,6 +121,34 @@ class DbIiifManifest extends DbRecordTypeEntity
             .'AND r.rec_RecTypeID='.$rty.' AND ('.implode(' OR ', $conditions).') LIMIT 1';
         $recID = mysql__select_value($mysqli, $query);
         return $recID ? intval($recID) : 0;
+    }
+
+
+
+    /** Replace the ordered managed Canvas list for this Manifest. */
+    public function setCanvasRefs(int $manifestRecID, array $canvasRecIDs): bool
+    {
+        if($manifestRecID<1 || !$this->ensureDefinitionsReady(false) || !$this->isManifestRecord($manifestRecID)){
+            return false;
+        }
+
+        $canvasRecIDs = array_values(array_filter(array_map('intval', $canvasRecIDs), function($id){ return $id>0; }));
+        $details = $this->loadRecordDetails($manifestRecID);
+
+        if(!empty($canvasRecIDs)){
+            $this->setField($details, 'DT_IIIF_CANVAS', $canvasRecIDs);
+        }else{
+            $this->removeField($details, 'DT_IIIF_CANVAS');
+        }
+
+        $res = $this->saveRecordDetails($manifestRecID, $details, 0);
+        if(!is_array($res) || @$res['status']!=HEURIST_OK || intval(@$res['data'])<1){
+            if(is_array($res) && @$res['message']){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, $res['message']);
+            }
+            return false;
+        }
+        return true;
     }
 
     /**

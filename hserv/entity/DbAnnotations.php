@@ -235,6 +235,7 @@ class DbAnnotations extends DbRecordTypeEntity
 
         $manifestRecID = intval(@$fields['manifestRecID']);
         $manifestFileID = intval(@$fields['manifestFileID']);
+        $canvasRecID = intval(@$fields['canvasRecID']);
         $canvasUrl = @$fields['canvasOriginalId'] ?: @$fields['canvas'] ?: @$parsed['canvas'];
         $manifestUrl = @$fields['manifestUrl'];
 
@@ -250,7 +251,7 @@ class DbAnnotations extends DbRecordTypeEntity
         }
 
         $oldJson = $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO');
-        $changed = $this->fillDetailsFromParsedAnnotation($details, $parsed, $manifestRecID, $manifestFileID);
+        $changed = $this->fillDetailsFromParsedAnnotation($details, $parsed, $manifestRecID, $manifestFileID, $canvasRecID);
 
         if($ulf_ID>0){
             $changed = $this->appendUniqueField($details, 'DT_FILE_RESOURCE', $ulf_ID) || $changed;
@@ -438,7 +439,7 @@ class DbAnnotations extends DbRecordTypeEntity
         return null;
     }
     
-    private function fillDetailsFromParsedAnnotation(&$details, $parsed, $manifestRecID=0, $manifestFileID=0){
+    private function fillDetailsFromParsedAnnotation(&$details, $parsed, $manifestRecID=0, $manifestFileID=0, $canvasRecID=0){
         
         $changed = false;
         $text = trim(strip_tags((string)@$parsed['body_text']));
@@ -457,6 +458,10 @@ class DbAnnotations extends DbRecordTypeEntity
 
         if($manifestRecID>0){
             $changed = $this->appendUniqueField($details, 'DT_ANNOTATION_MANIFEST', $manifestRecID) || $changed;
+        }
+
+        if($canvasRecID>0){
+            $changed = $this->setField($details, 'DT_IIIF_CANVAS', intval($canvasRecID)) || $changed;
         }
         /*
         if($manifestFileID>0){
