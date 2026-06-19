@@ -74,7 +74,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
             return array('recID'=>$recordId, 'is_retained'=>true);
         }
 
-        $res = $this->saveRecordDetails($recordId, $details, 0);
+        $res = $this->saveCanvasRecordDetails($recordId, $details, 0);
         if(!is_array($res) || @$res['status']!=HEURIST_OK || intval(@$res['data'])<1){
             if(is_array($res) && @$res['message']){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, $res['message']);
@@ -257,6 +257,93 @@ class DbIiifCanvas extends DbRecordTypeEntity
     {
         $pos = strrpos($value, ':');
         return $pos!==false ? substr($value, $pos+1) : $value;
+    }
+
+
+    /** Save Canvas details during import without marking the record as a Heurist-editor edit. */
+    private function saveCanvasRecordDetails(int $recordId, array $details, int $updateMode=0)
+    {
+        $record = $this->makeRecord($details, $recordId);
+        $record['skip_iiif_canvas_state_update'] = true;
+        return recordSave($this->system, $record, false, true, $updateMode);
+    }
+
+    /**
+     * Called after a normal Heurist record-editor save of an RT_IIIF_CANVAS record.
+     * Updates only DT_ANNOTATION_STATE directly in recDetails to avoid a second recordSave().
+     * Until DT_ANNOTATION_STATE is renamed, Canvas records reuse the IIIF state vocabulary.
+     */
+    public function markSavedFromHeuristEditor(int $recID): bool
+    {
+        if($recID<1 || !$this->ensureDefinitionsReady(false)){
+            return false;
+        }
+
+        $details = $this->loadRecordDetails($recID);
+        $oldState = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
+
+        $imported = $this->getTermId('TRM_ANNOTATION_STATE_IMPORTED');
+        $mirador  = $this->getTermId('TRM_ANNOTATION_STATE_MIRADOR');
+        $heurist  = $this->getTermId('TRM_ANNOTATION_STATE_HEURIST');
+        $modified = $this->getTermId('TRM_ANNOTATION_STATE_MODIFIED');
+        $obsolete = $this->getTermId('TRM_ANNOTATION_STATE_OBSOLETE');
+        $removed  = $this->getTermId('TRM_ANNOTATION_STATE_REMOVED');
+
+        if($oldState === $obsolete || $oldState === $removed){
+            return true;
+        }
+
+        if($oldState === $imported || $oldState === $mirador || $oldState === $modified){
+            return $this->updateCanvasStateDirect($recID, intval($modified));
+        }
+
+        if($oldState < 1){
+            return $this->updateCanvasStateDirect($recID, intval($heurist), true);
+        }
+
+        return true;
+    }
+
+    /** Directly update/insert DT_ANNOTATION_STATE, and optionally assign DT_IIIF_ID for new Heurist-created Canvas records. */
+    public function updateCanvasStateDirect(int $recID, int $stateTermID, bool $assignId=false): bool
+    {
+        if($recID<1 || $stateTermID<1 || !$this->ensureDefinitionsReady(false)){
+            return false;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $recID = intval($recID);
+        $stateTermID = intval($stateTermID);
+        $stateDtID = intval(DT_ANNOTATION_STATE);
+
+        $dtlID = mysql__select_value($mysqli,
+            'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.$recID
+            .' AND dtl_DetailTypeID='.$stateDtID.' LIMIT 1');
+
+        if($dtlID>0){
+            $query = 'UPDATE recDetails SET dtl_Value='.$stateTermID.' WHERE dtl_ID='.intval($dtlID);
+        }else{
+            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
+                .$recID.','.$stateDtID.','.$stateTermID.')';
+        }
+
+        if($mysqli->query($query) === false){
+            return false;
+        }
+
+        if($assignId){
+            $existingId = $this->getFirstDetailValue($this->loadRecordDetails($recID), 'DT_IIIF_ID');
+            if(!$existingId){
+                $iiifId = $mysqli->real_escape_string(
+                    HEURIST_BASE_URL.'api/'.$this->system->dbname().'/iiif/canvas/'.$recID
+                );
+                $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
+                    .$recID.','.intval(DT_IIIF_ID).',"'.$iiifId.'")';
+                return $mysqli->query($query) !== false;
+            }
+        }
+
+        return true;
     }
 
     private function isProtectedFromReimport(array $details): bool

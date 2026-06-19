@@ -35,6 +35,7 @@ use hserv\structure\ConceptCode;
 use hserv\report\ReportRecord;
 use hserv\records\export\ExportRecordsHTML;
 use hserv\entity\DbAnnotations;
+use hserv\entity\DbIiifCanvas;
 
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
@@ -834,7 +835,18 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     {
         $dbAnno = new DbAnnotations($system);
         $dbAnno->markSavedFromHeuristEditor(intval($recID));
-    }      
+    }
+
+    // Normal Heurist record-editor saves of IIIF Canvas records make Heurist fields authoritative.
+    // DbIiifCanvas::ensureFromCanvas() sets skip_iiif_canvas_state_update for import saves.
+    if(empty($record['skip_iiif_canvas_state_update'])
+        && $rectype>0
+        && $system->defineConstant('RT_IIIF_CANVAS')
+        && $rectype==RT_IIIF_CANVAS)
+    {
+        $dbCanvas = new DbIiifCanvas($system);
+        $dbCanvas->markSavedFromHeuristEditor(intval($recID));
+    }
     
     $rtn = [
         'status' => HEURIST_OK,
