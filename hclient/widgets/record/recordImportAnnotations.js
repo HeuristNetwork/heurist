@@ -46,7 +46,7 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
                 dty_Type: 'file',
                 rst_MaxValues: 1,
                 rst_DisplayName: 'Manifest:',
-                rst_DisplayHelpText: 'Select or upload manifest to be imported',
+                rst_DisplayHelpText: 'Select an existing registered IIIF Manifest JSON file, or upload/register a new one.',
                 rst_FieldConfig: {entity:'records', accept:'.json', registerAtOnce:1},
                 dty_Role: 'virtual'
             },

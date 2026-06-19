@@ -282,6 +282,12 @@ class IiifAnnotationJson
             $anno = $this->patchAnnotationJsonFromData($anno, $data);
         }
 
+        // Managed manifests/canvases use the Heurist Canvas API URL as annotation target.
+        // Overlay output leaves the original Canvas id from DT_URL untouched.
+        if(!empty($data['managedCanvasUrl'])){
+            $anno = $this->forceTargetSource($anno, $data['managedCanvasUrl']);
+        }
+
         if(empty($anno['type'])){
             $anno['type'] = 'Annotation';
         }
@@ -351,6 +357,45 @@ class IiifAnnotationJson
             if($selector){
                 $anno['target'] = array('source'=>$anno['target'], 'selector'=>$selector);
             }
+        }
+
+        return $anno;
+    }
+
+    private function forceTargetSource(array $anno, string $canvasUrl): array
+    {
+        if($canvasUrl===''){
+            return $anno;
+        }
+
+        if(empty($anno['target'])){
+            $anno['target'] = array('source'=>$canvasUrl);
+            return $anno;
+        }
+
+        if(is_string($anno['target'])){
+            $parts = explode('#', $anno['target'], 2);
+            $anno['target'] = isset($parts[1]) && $parts[1]!==''
+                ? $canvasUrl.'#'.$parts[1]
+                : $canvasUrl;
+            return $anno;
+        }
+
+        if(is_array($anno['target'])){
+            if(array_keys($anno['target'])===range(0, count($anno['target'])-1)){
+                foreach($anno['target'] as $idx=>$target){
+                    if(is_array($target)){
+                        $anno['target'][$idx]['source'] = $canvasUrl;
+                    }elseif(is_string($target)){
+                        $parts = explode('#', $target, 2);
+                        $anno['target'][$idx] = isset($parts[1]) && $parts[1]!==''
+                            ? $canvasUrl.'#'.$parts[1]
+                            : $canvasUrl;
+                    }
+                }
+                return $anno;
+            }
+            $anno['target']['source'] = $canvasUrl;
         }
 
         return $anno;

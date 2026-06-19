@@ -21,8 +21,7 @@ class DbIiifManifest extends DbRecordTypeEntity
             'DT_NAME',
             'DT_EXTENDED_DESCRIPTION',
             'DT_FILE_RESOURCE',
-            'DT_URL',
-            'DT_IIIF_MANIFEST_ID',
+            'DT_IIIF_ID',
             'DT_IIIF_IMPORT_MODE'
         );
 
@@ -56,11 +55,7 @@ class DbIiifManifest extends DbRecordTypeEntity
         $this->setField($details, 'DT_NAME', $title);
         $this->setField($details, 'DT_FILE_RESOURCE', intval(@$manifestFile['ulf_ID']));
 
-        if(@$manifestFile['ulf_ExternalFileReference']){
-            $this->setField($details, 'DT_URL', $manifestFile['ulf_ExternalFileReference']);
-        }
-
-        $this->setField($details, 'DT_IIIF_MANIFEST_ID', $manifestId);
+        $this->setField($details, 'DT_IIIF_ID', $manifestId);
 
         $modeValue = $this->resolveImportModeTerm($importMode);
         if($modeValue){
@@ -112,12 +107,8 @@ class DbIiifManifest extends DbRecordTypeEntity
             $conditions[] = '(d.dtl_DetailTypeID='.DT_FILE_RESOURCE.' AND (d.dtl_UploadedFileID='.$ulfID.' OR d.dtl_Value="'.$ulfID.'"))';
         }
 
-        if(defined('DT_URL') && @$manifestFile['ulf_ExternalFileReference']){
-            $conditions[] = '(d.dtl_DetailTypeID='.DT_URL.' AND d.dtl_Value="'.addslashes($manifestFile['ulf_ExternalFileReference']).'")';
-        }
-
-        if(defined('DT_IIIF_MANIFEST_ID') && $manifestId){
-            $conditions[] = '(d.dtl_DetailTypeID='.DT_IIIF_MANIFEST_ID.' AND d.dtl_Value="'.addslashes($manifestId).'")';
+        if(defined('DT_IIIF_ID') && $manifestId){
+            $conditions[] = '(d.dtl_DetailTypeID='.DT_IIIF_ID.' AND d.dtl_Value="'.addslashes($manifestId).'")';
         }
 
         if(empty($conditions)){
@@ -198,23 +189,20 @@ class DbIiifManifest extends DbRecordTypeEntity
     {
         $details = $this->loadRecordDetails($manifestRecID);
 
-        $sourceUrl = $this->getFirstDetailValue($details, 'DT_URL');
-
-        if(!$sourceUrl){
-            $ulfID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
-            if($ulfID>0){
-                $row = mysql__select_row($this->system->getMysqli(),
-                    'SELECT ulf_ObfuscatedFileID, ulf_ExternalFileReference FROM recUploadedFiles WHERE ulf_ID='.$ulfID.' LIMIT 1');
-                if(is_array($row)){
-                    $sourceUrl = $row[1] ? $row[1]
-                        : HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$row[0];
-                }
+        $sourceUrl = null;
+        $ulfID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
+        if($ulfID>0){
+            $row = mysql__select_row($this->system->getMysqli(),
+                'SELECT ulf_ObfuscatedFileID, ulf_ExternalFileReference FROM recUploadedFiles WHERE ulf_ID='.$ulfID.' LIMIT 1');
+            if(is_array($row)){
+                $sourceUrl = $row[1] ? $row[1]
+                    : HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$row[0];
             }
         }
 
         if(!$sourceUrl){
             $this->system->addError(HEURIST_NOT_FOUND,
-                'Cannot locate the source Manifest URL or registered file for IIIF Manifest record '.$manifestRecID);
+                'Cannot locate the registered source Manifest file for IIIF Manifest record '.$manifestRecID);
             return null;
         }
 

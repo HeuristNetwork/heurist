@@ -493,17 +493,18 @@ $dtDefines = array('DT_NAME' => array(2, 1),
 
     'DT_SERVICE_URL' => array(2, 34),
     'DT_URL' => array(3, 1058),
+    'DT_COPYRIGHT' => array(2, 35),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
     'DT_ANNOTATION_INFO' => array(2, 1098), //for iiif and map annotations
     'DT_ANNOTATION_MOTIVATION' => array(2, 1150), //commenting, tagging, supplementing etc
     'DT_ANNOTATION_MANIFEST' => array(2, 1151),  //ref to parent manifest
-    'DT_ANNOTATION_TARGET' => array(2, 1152), //ref to canvas
+    'DT_IIIF_CANVAS' => array(2, 1152), //ref to canvas  former DT_ANNOTATION_TARGET
     'DT_ANNOTATION_STATE' => array(2, 1153),
     'DT_ANNOTATION_SELECTOR_TYPE' => array(2, 1154),   
     'DT_ANNOTATION_SELECTOR_VALUE' => array(2, 1155),
-    'DT_IIIF_MANIFEST_ID' => array(2, 1156),
+    'DT_IIIF_ID' => array(2, 1156),
     'DT_IIIF_IMPORT_MODE' => array(2, 1157),
 
     //xslt not used

@@ -42,10 +42,10 @@ class DbAnnotations extends DbRecordTypeEntity
             'DT_SHORT_SUMMARY',
             'DT_EXTENDED_DESCRIPTION',
             'DT_URL',
-            'DT_ORIGINAL_RECORD_ID',
+            'DT_IIIF_ID', 
             'DT_ANNOTATION_INFO',
             'DT_ANNOTATION_MANIFEST',
-            'DT_ANNOTATION_TARGET',
+            'DT_IIIF_CANVAS',
             'DT_ANNOTATION_STATE',
             'DT_ANNOTATION_MOTIVATION',
             'DT_ANNOTATION_SELECTOR_TYPE',
@@ -144,7 +144,7 @@ class DbAnnotations extends DbRecordTypeEntity
             $mysqli = $this->system->getMysqli();
             $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2, Records r ';
             $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_ID=d2.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
-                .' AND d1.dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND d1.dtl_Value="'.addslashes($uuid).'"'
+                .' AND d1.dtl_DetailTypeID='.DT_IIIF_ID .' AND d1.dtl_Value="'.addslashes($uuid).'"'
                 .' AND d2.dtl_DetailTypeID='.DT_ANNOTATION_INFO;
 
             if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
@@ -172,7 +172,7 @@ class DbAnnotations extends DbRecordTypeEntity
             $extra['DT_ANNOTATION_MANIFEST'] = intval($manifestRecID);
         }
 
-        $recordId = $this->findRecordByField('DT_ORIGINAL_RECORD_ID', $annotationId, $extra);
+        $recordId = $this->findRecordByField('DT_IIIF_ID', $annotationId, $extra);
         if(!$recordId && $manifestRecID>0){
             // fallback for annotations imported before the manifest link existed
             return $this->findRecIDbyOriginalId($annotationId, 0);
@@ -320,14 +320,14 @@ class DbAnnotations extends DbRecordTypeEntity
         }
 
         if($oldState < 1){
-            return $this->updateAnnotationStateDirect($recID, intval($heurist));
+            return $this->updateAnnotationStateDirect($recID, intval($heurist), true);
         }
 
         return true;
     }
 
-    /** Directly update/insert the single DT_ANNOTATION_STATE detail. */
-    public function updateAnnotationStateDirect(int $recID, int $stateTermID): bool
+    /** Directly update/insert DT_ANNOTATION_STATE, and optionally assign DT_IIIF_ID for new Heurist-created annotations. */
+    public function updateAnnotationStateDirect(int $recID, int $stateTermID, bool $assignId=false): bool
     {
         if($recID<1 || $stateTermID<1 || !$this->ensureDefinitionsReady(false)){
             return false;
@@ -349,7 +349,20 @@ class DbAnnotations extends DbRecordTypeEntity
                 .$recID.','.$dtID.','.$stateTermID.')';
         }
 
-        return $mysqli->query($query) !== false;
+        if($mysqli->query($query) === false){
+            return false;
+        }
+
+        if($assignId){
+            $iiifId = $mysqli->real_escape_string(
+                HEURIST_BASE_URL.'api/'.$this->system->dbname().'/annotations/'.$recID
+            );
+            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
+                .$recID.','.intval(DT_IIIF_ID).',"'.$iiifId.'")';
+            return $mysqli->query($query) !== false;
+        }
+
+        return true;
     }
 
     /** Build the IIIF/Web Annotation JSON used in AnnotationPage output. */
@@ -372,16 +385,25 @@ class DbAnnotations extends DbRecordTypeEntity
     {
         $stateCode = $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
 
+        $canvasRecID = intval($this->getFirstDetailValue($details, 'DT_IIIF_CANVAS'));
+        $managedCanvasUrl = $canvasRecID>0
+            ? HEURIST_BASE_URL.'api/'.$this->system->dbname().'/iiif/canvas/'.$canvasRecID
+            : null;
+
         return array(
             'recID' => $recID,
-            'id' => $this->getFirstDetailValue($details, 'DT_ORIGINAL_RECORD_ID'),
+            'id' => $this->getFirstDetailValue($details, 'DT_IIIF_ID'),
             'annotationApiUrl' => HEURIST_BASE_URL.'api/'.$this->system->dbname().'/annotations/'.$recID,
             'rawJson' => $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO'),
             'stateCode' => $stateCode ? strtolower($stateCode) : '',
             'bodyText' => $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY'),
             'motivation' => $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_MOTIVATION')),
             'language2' => $this->getLanguageCode2FromDetails($details),
-            'canvas' => $this->getFirstDetailValue($details, 'DT_URL'),
+            // Overlay mode uses the original Canvas id in DT_URL. Managed mode uses the linked RT_IIIF_CANVAS API URL.
+            'canvas' => $managedCanvasUrl ?: $this->getFirstDetailValue($details, 'DT_URL'),
+            'originalCanvas' => $this->getFirstDetailValue($details, 'DT_URL'),
+            'canvasRecordID' => $canvasRecID,
+            'managedCanvasUrl' => $managedCanvasUrl,
             'selectorType' => $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_TYPE')),
             'selectorValue' => $this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_VALUE')
         );
@@ -424,7 +446,7 @@ class DbAnnotations extends DbRecordTypeEntity
 
         $changed = $this->setField($details, 'DT_NAME', $title) || $changed;
         $changed = $this->setField($details, 'DT_SHORT_SUMMARY', @$parsed['body_text']) || $changed;
-        $changed = $this->setField($details, 'DT_ORIGINAL_RECORD_ID', @$parsed['id']) || $changed;
+        $changed = $this->setField($details, 'DT_IIIF_ID', @$parsed['id']) || $changed;
         $changed = $this->setField($details, 'DT_ANNOTATION_INFO', @$parsed['json']) || $changed;
         $changed = $this->setField($details, 'DT_URL', @$parsed['canvas']) || $changed;
         $changed = $this->setField($details, 'DT_ANNOTATION_MOTIVATION', $this->getTermId(@$parsed['motivation'], 'TRM_ANNOTATION_MOTIVATION_COMMENTING') ) || $changed;
