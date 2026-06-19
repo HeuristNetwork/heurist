@@ -7,13 +7,13 @@ namespace hserv\entity;
 use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
+require_once dirname(__FILE__).'/DbRecUploadedFiles.php';
 
 /**
  * Manages IIIF Canvas records stored as user records of RT_IIIF_CANVAS.
  *
- * The current managed-import phase imports Canvas identity/order/metadata and
- * links annotations to these Canvas records. Painting media registration is left
- * to the next phase.
+ * Imports Canvas identity/order/metadata and registers external painting/thumbnail
+ * resources as recUploadedFiles external resources where possible.
  */
 class DbIiifCanvas extends DbRecordTypeEntity
 {
@@ -121,9 +121,20 @@ class DbIiifCanvas extends DbRecordTypeEntity
             $this->setField($details, $this->detailId('DT_DURATION', '2-1133'), floatval($canvas['duration']));
         }
 
-        $thumb = $this->extractThumbnailFileId($canvas);
-        if($thumb>0){
-            $this->setField($details, 'DT_THUMBNAIL', $thumb);
+        $mediaUrl = $this->extractPrimaryPaintingBodyUrl($canvas);
+        if($mediaUrl){
+            $ulfID = $this->registerExternalUrl($mediaUrl);
+            if($ulfID>0){
+                $this->setField($details, 'DT_FILE_RESOURCE', intval($ulfID));
+            }
+        }
+
+        $thumbUrl = $this->extractThumbnailUrl($canvas);
+        if($thumbUrl){
+            $ulfID = $this->registerExternalUrl($thumbUrl);
+            if($ulfID>0){
+                $this->setField($details, 'DT_THUMBNAIL', intval($ulfID));
+            }
         }
     }
 
@@ -138,13 +149,114 @@ class DbIiifCanvas extends DbRecordTypeEntity
         return $id>0 ? intval($id) : null;
     }
 
-    /**
-     * Placeholder for future registered-file thumbnail reuse.
-     * Current imported manifests usually contain external thumbnail URLs, not local ulf_IDs.
-     */
-    private function extractThumbnailFileId(array $canvas): int
+    /** Register an external media/thumbnail URL once and return its ulf_ID. */
+    private function registerExternalUrl(?string $url): int
     {
-        return 0;
+        $url = trim((string)$url);
+        if($url==='' || !preg_match('/^https?:\/\//i', $url)){
+            return 0;
+        }
+
+        $fileEntity = new DbRecUploadedFiles($this->system);
+        $ulfID = $fileEntity->findRegistrationByUrl($url);
+        if($ulfID>0){
+            return intval($ulfID);
+        }
+
+        $ulfID = $fileEntity->registerURL($url);
+        return $ulfID>0 ? intval($ulfID) : 0;
+    }
+
+    /** Extract the primary painting body URL from a IIIF v3/v2 Canvas. */
+    private function extractPrimaryPaintingBodyUrl(array $canvas): ?string
+    {
+        // IIIF Presentation v3: Canvas.items[] -> AnnotationPage.items[] -> painting Annotation.body.id
+        foreach((array)@$canvas['items'] as $page){
+            if(!is_array($page)){
+                continue;
+            }
+            foreach((array)@$page['items'] as $anno){
+                if(!is_array($anno)){
+                    continue;
+                }
+                $motivation = @$anno['motivation'];
+                if(is_array($motivation)){
+                    $motivation = reset($motivation);
+                }
+                if($motivation && $this->stripIiifPrefix((string)$motivation)!=='painting'){
+                    continue;
+                }
+                $url = $this->extractBodyUrl(@$anno['body']);
+                if($url){
+                    return $url;
+                }
+            }
+        }
+
+        // IIIF Presentation v2: Canvas.images[] -> Annotation.resource.@id/id
+        foreach((array)@$canvas['images'] as $anno){
+            if(!is_array($anno)){
+                continue;
+            }
+            $url = $this->extractBodyUrl(@$anno['resource']);
+            if($url){
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /** Extract a Canvas thumbnail URL, when the Manifest has a dedicated thumbnail entry. */
+    private function extractThumbnailUrl(array $canvas): ?string
+    {
+        return $this->extractBodyUrl(@$canvas['thumbnail']);
+    }
+
+    /** Extract URL from IIIF body/thumbnail object, array, or string. */
+    private function extractBodyUrl($body): ?string
+    {
+        if(is_string($body)){
+            return preg_match('/^https?:\/\//i', $body) ? $body : null;
+        }
+
+        if(!is_array($body)){
+            return null;
+        }
+
+        if(array_keys($body)===range(0, count($body)-1)){
+            foreach($body as $item){
+                $url = $this->extractBodyUrl($item);
+                if($url){
+                    return $url;
+                }
+            }
+            return null;
+        }
+
+        foreach(array('id', '@id') as $key){
+            if(!empty($body[$key]) && is_string($body[$key]) && preg_match('/^https?:\/\//i', $body[$key])){
+                return $body[$key];
+            }
+        }
+
+        // Some IIIF Image API entries expose the service URL but not a direct body URL.
+        // Use the service id only as a fallback.
+        $service = @$body['service'];
+        if(is_array($service)){
+            $url = $this->extractBodyUrl($service);
+            if($url){
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    private function stripIiifPrefix(string $value): string
+    {
+        $pos = strrpos($value, ':');
+        return $pos!==false ? substr($value, $pos+1) : $value;
     }
 
     private function isProtectedFromReimport(array $details): bool

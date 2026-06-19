@@ -1011,8 +1011,7 @@ class DbRecUploadedFiles extends DbEntityBase
                         foreach ($urls as $idx => $url) {
 
                             if(strpos($url, 'http') === 0){
-                                $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference = "' . $mysqli->real_escape_string($url) . '"';
-                                $file_id = mysql__select_value($mysqli, $query);
+                                $file_id = $this->findRegistrationByUrl($url);
 
                                 if(!$file_id){ // new external file to save
                                     $file_id = $this->registerURL($url, false, 0, $fileParams);
@@ -1042,8 +1041,7 @@ class DbRecUploadedFiles extends DbEntityBase
                         }
                     }elseif(is_string($urls) && strpos($urls, 'http') === 0){
 
-                        $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference = "' . $mysqli->real_escape_string($urls) . '"';
-                        $file_id = mysql__select_value($mysqli, $query);
+                        $file_id = $this->findRegistrationByUrl($urls);
 
                         if(!$file_id){ // new external file to save
                             $file_id = $this->registerURL($urls, false, 0, $fileParams);
@@ -1652,6 +1650,26 @@ class DbRecUploadedFiles extends DbEntityBase
     }
 
     /**
+     * Find an existing external URL registration in recUploadedFiles.
+     *
+     * @param string $url External URL to search for.
+     * @return int Existing ulf_ID, or 0 if the URL is not registered.
+     */
+    public function findRegistrationByUrl($url): int
+    {
+        $url = trim((string)$url);
+        if($url===''){
+            return 0;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference = "'
+            . $mysqli->real_escape_string($url) . '" LIMIT 1';
+        $ulf_ID = mysql__select_value($mysqli, $query);
+        return $ulf_ID ? intval($ulf_ID) : 0;
+    }
+
+    /**
     * Register remote resource - used to fix flaw in database - detail type "file" has value but does not have registered
     * It may happen when user converts text field to "file"
     *
@@ -1667,6 +1685,21 @@ class DbRecUploadedFiles extends DbEntityBase
     public function registerURL($url, $tiledImageStack=false, $dtl_ID=0, $fields=null){
 
        $this->records = null; //reset
+
+       $ulf_ID = $this->findRegistrationByUrl($url);
+       if($ulf_ID>0){
+            if($dtl_ID>0){
+                $query2 = 'update recDetails set dtl_Value=null, `dtl_UploadedFileID`='.intval($ulf_ID)
+                    .' where dtl_ID='.intval($dtl_ID);
+                $this->system->getMysqli()->query($query2);
+
+                $fullInfo = fileGetFullInfo($this->system, $ulf_ID);
+                if(!isEmptyArray($fullInfo)){
+                    $ulf_ID = $fullInfo[0];
+                }
+            }
+            return $ulf_ID;
+       }
 
        if($fields==null) {$fields = array();}
        $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
