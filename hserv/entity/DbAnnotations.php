@@ -33,7 +33,7 @@ class DbAnnotations extends DbRecordTypeEntity
     protected function initRecordTypeEntity(): void
     {
         $this->recordTypeConst = 'RT_IIIF_ANNOTATION';
-        $this->recordTypeConceptCode = '2-101';
+        $this->recordTypeConceptCode = '2-109';
 
         $this->requiredConstants = array(
             'RT_IIIF_ANNOTATION',

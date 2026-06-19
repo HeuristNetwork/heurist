@@ -432,7 +432,7 @@ $rtDefines = array(
 
     // Spatial data
     'RT_PLACE' => array(3, 1009),
-    'RT_MAP_ANNOTATION' => array(2, 109),
+    'RT_MAP_ANNOTATION' => array(2, 101),
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3, 1020),
 
@@ -454,9 +454,9 @@ $rtDefines = array(
 
     'RT_BUG_REPORT' => array(8, 23),
     
+    'RT_IIIF_ANNOTATION' => array(2, 109),
     'RT_IIIF_MANIFEST' => array(2, 110),
-    'RT_IIIF_CANVAS' => array(2, 111),
-    'RT_IIIF_ANNOTATION' => array(2, 101)
+    'RT_IIIF_CANVAS' => array(2, 111)
 );
 
 /** DETAIL TYPE DEFINITIONS */

@@ -30,7 +30,6 @@ class DbIiifManifest extends DbRecordTypeEntity
         // Fill these when the term concept codes are final.
         $this->requiredTermConstants = array(
             'TRM_IIIF_IMPORT_MODE_OVERLAY' => '2-10444',
-            'TRM_IIIF_IMPORT_MODE_PRESERVE_CANVASES' => '2-10446',
             'TRM_IIIF_IMPORT_MODE_MANAGED' => '2-10445'
         );
     }
@@ -85,8 +84,6 @@ class DbIiifManifest extends DbRecordTypeEntity
         switch($importMode){
             case 'overlay':
                 return $this->getTermId('TRM_IIIF_IMPORT_MODE_OVERLAY') ?: $this->getTermId('overlay');
-            case 'preserve_canvases':
-                return $this->getTermId('TRM_IIIF_IMPORT_MODE_PRESERVE_CANVASES') ?: $this->getTermId('preserve_canvases');
             case 'managed':
                 return $this->getTermId('TRM_IIIF_IMPORT_MODE_MANAGED') ?: $this->getTermId('managed');
             default:

@@ -47,30 +47,30 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
         let missing = '';
 
         if (!(this.RT_IIIF_MANIFEST > 0 && this.RT_IIIF_CANVAS > 0 && this.RT_IIIF_ANNOTATION > 0)) {
-            missing = 'You will need record types 2-110 (IIIF Manifest), 2-111 (IIIF Canvas) and 2-101 (IIIF Annotation)';
+            missing = 'You will need record types 2-110 (IIIF Manifest), 2-111 (IIIF Canvas) and 2-109 (IIIF Annotation)';
         }else{
             let hDb = window.hWin.$Db || (typeof $Db !== 'undefined' ? $Db : null);
             if(hDb && $.isFunction(hDb.rst)){
                 if (!(this.DT_IIIF_ID > 0) || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_IIIF_ID)) {
-                    missing = 'You will need record type 2-101 (IIIF Annotation) with field DT_IIIF_ID (Original IIIF ID)';
+                    missing = 'You will need record type 2-109 (IIIF Annotation) with field DT_IIIF_ID (Original IIIF ID)';
                 } else if (!(this.DT_IIIF_CANVAS > 0)
                     || !hDb.rst(this.RT_IIIF_MANIFEST, this.DT_IIIF_CANVAS)
                     || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_IIIF_CANVAS)) {
-                    missing = 'You will need field DT_IIIF_CANVAS on record types 2-110 (IIIF Manifest) and 2-101 (IIIF Annotation)';
+                    missing = 'You will need field DT_IIIF_CANVAS on record types 2-110 (IIIF Manifest) and 2-109 (IIIF Annotation)';
                 } else if (!(this.DT_IIIF_IMPORT_MODE > 0) || !hDb.rst(this.RT_IIIF_MANIFEST, this.DT_IIIF_IMPORT_MODE)) {
                     missing = 'You will need record type 2-110 (IIIF Manifest) with field DT_IIIF_IMPORT_MODE (management mode)';
                 } else if (!(this.DT_ANNOTATION_STATE > 0)
                     || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_ANNOTATION_STATE)
                     || !hDb.rst(this.RT_IIIF_CANVAS, this.DT_ANNOTATION_STATE)) {
-                    missing = 'You will need field DT_ANNOTATION_STATE on record types 2-101 (IIIF Annotation) and 2-111 (IIIF Canvas)';
+                    missing = 'You will need field DT_ANNOTATION_STATE on record types 2-109 (IIIF Annotation) and 2-111 (IIIF Canvas)';
                 } else if (!(this.DT_ANNOTATION_INFO > 0) || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_ANNOTATION_INFO)) {
-                    missing = 'You will need record type 2-101 (IIIF Annotation) with field DT_ANNOTATION_INFO (IIIF Annotation JSON)';
+                    missing = 'You will need record type 2-109 (IIIF Annotation) with field DT_ANNOTATION_INFO (IIIF Annotation JSON)';
                 }
             }
         }
 
         if (missing !== '') {
-            window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
+            window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-109', 2,
                 missing + ' which are available as part of Heurist_Core_Definitions.',
                 callback,
                 true  // Force import
