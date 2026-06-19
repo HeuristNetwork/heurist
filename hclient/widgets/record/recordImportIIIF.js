@@ -1,15 +1,15 @@
 /**
-* @file recordImportAnnotations.js
-* @brief Import annotations from a selected IIIF manifest.
+* @file recordImportIIIF.js
+* @brief Import a selected IIIF Manifest into Heurist Manifest, Canvas and Annotation records.
 */
-$.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
+$.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
 
     options: {
-        height: 780,
-        width:  820,
+        height: 820,
+        width:  840,
         modal:  true,
-        title:  'Import IIIF annotations from Manifest',
-        htmlContent: 'recordImportAnnotations'
+        title:  'Import IIIF Manifest',
+        htmlContent: 'recordImportIIIF'
     },
 
     _init: function() {
@@ -24,8 +24,61 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
         this._on(this._$('.btnAction'), {click:this.doAction});
 
         this._initManifestSelector();
+        this.checkRequiredRecordTypes();
 
         return this._super();
+    },
+
+    checkRequiredRecordTypes: function(callback){
+
+        let dbconst = (window.hWin.HAPI4.sysinfo && window.hWin.HAPI4.sysinfo['dbconst'])
+                    ? window.hWin.HAPI4.sysinfo['dbconst'] : {};
+
+        this.RT_IIIF_MANIFEST = dbconst['RT_IIIF_MANIFEST'];
+        this.RT_IIIF_CANVAS = dbconst['RT_IIIF_CANVAS'];
+        this.RT_IIIF_ANNOTATION = dbconst['RT_IIIF_ANNOTATION'];
+
+        this.DT_IIIF_ID = dbconst['DT_IIIF_ID'];
+        this.DT_IIIF_CANVAS = dbconst['DT_IIIF_CANVAS'];
+        this.DT_IIIF_IMPORT_MODE = dbconst['DT_IIIF_IMPORT_MODE'];
+        this.DT_ANNOTATION_STATE = dbconst['DT_ANNOTATION_STATE'];
+        this.DT_ANNOTATION_INFO = dbconst['DT_ANNOTATION_INFO'];
+
+        let missing = '';
+
+        if (!(this.RT_IIIF_MANIFEST > 0 && this.RT_IIIF_CANVAS > 0 && this.RT_IIIF_ANNOTATION > 0)) {
+            missing = 'You will need record types 2-110 (IIIF Manifest), 2-111 (IIIF Canvas) and 2-101 (IIIF Annotation)';
+        }else{
+            let hDb = window.hWin.$Db || (typeof $Db !== 'undefined' ? $Db : null);
+            if(hDb && $.isFunction(hDb.rst)){
+                if (!(this.DT_IIIF_ID > 0) || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_IIIF_ID)) {
+                    missing = 'You will need record type 2-101 (IIIF Annotation) with field DT_IIIF_ID (Original IIIF ID)';
+                } else if (!(this.DT_IIIF_CANVAS > 0)
+                    || !hDb.rst(this.RT_IIIF_MANIFEST, this.DT_IIIF_CANVAS)
+                    || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_IIIF_CANVAS)) {
+                    missing = 'You will need field DT_IIIF_CANVAS on record types 2-110 (IIIF Manifest) and 2-101 (IIIF Annotation)';
+                } else if (!(this.DT_IIIF_IMPORT_MODE > 0) || !hDb.rst(this.RT_IIIF_MANIFEST, this.DT_IIIF_IMPORT_MODE)) {
+                    missing = 'You will need record type 2-110 (IIIF Manifest) with field DT_IIIF_IMPORT_MODE (management mode)';
+                } else if (!(this.DT_ANNOTATION_STATE > 0)
+                    || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_ANNOTATION_STATE)
+                    || !hDb.rst(this.RT_IIIF_CANVAS, this.DT_ANNOTATION_STATE)) {
+                    missing = 'You will need field DT_ANNOTATION_STATE on record types 2-101 (IIIF Annotation) and 2-111 (IIIF Canvas)';
+                } else if (!(this.DT_ANNOTATION_INFO > 0) || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_ANNOTATION_INFO)) {
+                    missing = 'You will need record type 2-101 (IIIF Annotation) with field DT_ANNOTATION_INFO (IIIF Annotation JSON)';
+                }
+            }
+        }
+
+        if (missing !== '') {
+            window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
+                missing + ' which are available as part of Heurist_Core_Definitions.',
+                callback,
+                true  // Force import
+            );
+            return false;
+        }
+
+        return true;
     },
 
     _initManifestSelector: function(){
@@ -45,7 +98,7 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
             dtFields:{
                 dty_Type: 'file',
                 rst_MaxValues: 1,
-                rst_DisplayName: 'Manifest:',
+                rst_DisplayName: 'IIIF Manifest:',
                 rst_DisplayHelpText: 'Select an existing registered IIIF Manifest JSON file, or upload/register a new one.',
                 rst_FieldConfig: {entity:'records', accept:'.json', registerAtOnce:1},
                 dty_Role: 'virtual'
@@ -129,6 +182,12 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
             this._$('#manifest_record').text('');
         }
 
+        this._$('#total_canvases').text(data.total_canvases || 0);
+        this._renderIdList(this._$('#canvases_added'), data.canvases_added);
+        this._renderIdList(this._$('#canvases_updated'), data.canvases_updated);
+        this._renderIdList(this._$('#canvases_retained'), data.canvases_retained);
+        this._renderIdList(this._$('#canvases_preserved_local'), data.canvases_preserved_local);
+
         this._$('#total_annotations').text(data.total_annotations || 0);
         this._$('#processed').text(data.processed || 0);
         this._$('#without_annotations').text(data.without_annotations ? 'yes' : 'no');
@@ -150,6 +209,10 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
     },
 
     doAction: function(){
+
+        if(!this.checkRequiredRecordTypes(this.doAction.bind(this))){
+            return;
+        }
 
         let manifestFileId = this._getSelectedManifestFileId();
         if(window.hWin.HEURIST4.util.isempty(manifestFileId)){
