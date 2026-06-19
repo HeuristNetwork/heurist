@@ -502,7 +502,9 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordFindDuplicates', popup_dialog_options);
                 break;
             case "menu-import-get-template":
+            case "menu-manage-structure-asxml":
                 popup_dialog_options['path'] = 'widgets/entity/popups/';
+                popup_dialog_options['format'] = actionid == 'menu-import-get-template' ? 'xml|json' : 'xml-structure';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTemplate', popup_dialog_options);
                 break;
             case "menu-structure-refresh":

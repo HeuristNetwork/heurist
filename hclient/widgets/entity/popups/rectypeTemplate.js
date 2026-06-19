@@ -37,7 +37,8 @@ $.widget( "heurist.rectypeTemplate", $.heurist.baseAction, {
         title:  'Download XML or JSON template',
         default_palette_class: 'ui-heurist-populate',
         path: 'widgets/entity/popups/', //location of this widget
-        actionName: 'rectypeTemplate'
+        actionName: 'rectypeTemplate',
+        format: 'xml|json'
     },
     
     //  
@@ -102,6 +103,15 @@ $.widget( "heurist.rectypeTemplate", $.heurist.baseAction, {
         }});
         
         this._$('input#rectypes-all').trigger('change');
+
+        if(this.options.format.includes('xml-structure')){
+            this._$('.format-selector').hide();
+            this._$('[id="structure-xml"]').prop('checked', true).trigger('change');
+            this._$('.sturcture-extra-details').show();
+        }else{
+            this._$('.format-selector').show();
+            this._$('.sturcture-extra-details').hide();
+        }
         
         return this._super();
     },
@@ -133,39 +143,58 @@ $.widget( "heurist.rectypeTemplate", $.heurist.baseAction, {
      */
     doAction: function(){
 
-            let template_type = this._$('input[name="template-type"]:checked').attr('id');
-            let rectype_ids = this._$('div#rectypes-list').attr('data-ids');
-            let is_all_rectypes = this._$('input#rectypes-all').is(':checked');
+        let template_type = this._$('input[name="template-type"]:checked').attr('id');
+        let rectype_ids = this._$('div#rectypes-list').attr('data-ids');
+        let is_all_rectypes = this._$('input#rectypes-all').is(':checked');
+        let include_connected_rty = this._$('input#include-connected-rty').is(':checked');
+        let include_terms = this._$('input#include-terms').is(':checked');
 
-            if(is_all_rectypes) { rectype_ids = 'y'; } // get all rectypes
+        if(is_all_rectypes) { rectype_ids = 'y'; } // get all rectypes
 
-            if(rectype_ids == null){
-                window.hWin.HEURIST4.msg.showMsgFlash('Please select some record types...', 2000);
-                return;
+        if(rectype_ids == null){
+            window.hWin.HEURIST4.msg.showMsgFlash('Please select some record types...', 2000);
+            return;
+        }
+
+        if(template_type == 'structure-xml'){
+
+            let URL = `${window.hWin.HAPI4.baseURL}hserv/structure/export/getDBStructureAsXML.php?db=${window.hWin.HAPI4.database}`;
+            if(!is_all_rectypes){
+
+                URL += `&rty=${rectype_ids}`;
+
+                if(include_connected_rty){
+                    URL += `&connected_rty=1`;
+                }
+                if(include_terms){
+                    URL += `&include_term=1`;
+                }
             }
 
-            if(template_type == 'template-xml'){
+            window.open(URL, '_blank');
 
-                window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
-                        +'export/xml/flathml.php?file=1&'
-                        +'rectype_templates='+ rectype_ids
-                        +'&db='+window.hWin.HAPI4.database);
-                        
-            }else if(template_type == 'template-json'){
+        }else if(template_type == 'template-xml'){
 
-                window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
-                    +'export/json/recordTemplate.php?'
-                    +'rectype_ids='+ rectype_ids
+            window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
+                    +'export/xml/flathml.php?file=1&'
+                    +'rectype_templates='+ rectype_ids
                     +'&db='+window.hWin.HAPI4.database);
-            }else{
-                window.hWin.HEURIST4.msg.showMsgFlash('Please select what type of template you want...', 2000);
-                return;
-            }
 
-            window.hWin.HEURIST4.msg.showMsgFlash('Downloading File...', 3000);
-            
-            this.closeDialog();
-    }
+        }else if(template_type == 'template-json'){
+
+            window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
+                +'export/json/recordTemplate.php?'
+                +'rectype_ids='+ rectype_ids
+                +'&db='+window.hWin.HAPI4.database);
+        }else{
+            window.hWin.HEURIST4.msg.showMsgFlash('Please select what type of template you want...', 2000);
+            return;
+        }
+
+        window.hWin.HEURIST4.msg.showMsgFlash('Downloading File...', 3000);
         
+        this.closeDialog();
+    }
+
 });
 

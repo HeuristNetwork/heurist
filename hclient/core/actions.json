@@ -601,11 +601,8 @@
     },
     {
         "id": "menu-manage-structure-asxml",
-        "href": "hserv/structure/export/getDBStructureAsXML.php",
-        "target": "_blank",
         "data": {
             "logaction": "st_ExportXML",
-            "user-experience-level": "1",
             "icon": "ui-icon-extlink"
         },
         "text": "Structure (XML)"
