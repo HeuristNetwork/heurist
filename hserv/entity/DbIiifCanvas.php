@@ -5,9 +5,11 @@
 namespace hserv\entity;
 
 use hserv\structure\ConceptCode;
+use hserv\utilities\IiifMediaHelper;
 
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
 require_once dirname(__FILE__).'/DbRecUploadedFiles.php';
+require_once dirname(__FILE__).'/../utilities/IiifMediaHelper.php';
 
 /**
  * Manages IIIF Canvas records stored as user records of RT_IIIF_CANVAS.
@@ -42,6 +44,18 @@ class DbIiifCanvas extends DbRecordTypeEntity
             'TRM_ANNOTATION_STATE_OBSOLETE' => '2-10430',
             'TRM_ANNOTATION_STATE_REMOVED'  => '2-10431'
         );
+    }
+
+    /** Quietly check only the constants needed for lookup/read helpers. */
+    private function lookupDefinitionsReady(array $requiredConstants): bool
+    {
+        $this->defineRequiredConstants(false);
+        foreach($requiredConstants as $name){
+            if(!defined($name) || intval(constant($name))<1){
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -98,7 +112,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
     /** Return canonical Heurist Canvas API URL for an RT_IIIF_CANVAS record. */
     public function canonicalCanvasUrlForCanvasRecord(int $canvasRecID): ?string
     {
-        if($canvasRecID<1 || !$this->ensureDefinitionsReady(false)){
+        if($canvasRecID<1 || !$this->lookupDefinitionsReady(array('RT_IIIF_CANVAS', 'DT_FILE_RESOURCE'))){
             return null;
         }
         $details = $this->loadRecordDetails($canvasRecID, array('DT_FILE_RESOURCE'));
@@ -141,7 +155,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
     public function canvasRecordsForCanonicalUrl(string $canvasUrl): array
     {
         $canvasUrl = trim($canvasUrl);
-        if($canvasUrl==='' || !$this->ensureDefinitionsReady(false) || !defined('DT_IIIF_ID')){
+        if($canvasUrl==='' || !$this->lookupDefinitionsReady(array('RT_IIIF_CANVAS', 'DT_IIIF_ID'))){
             return array();
         }
 
@@ -157,7 +171,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
     /** Find RT_IIIF_CANVAS records that use the given registered file. */
     public function canvasRecordsForFileID(int $ulfID): array
     {
-        if($ulfID<1 || !$this->ensureDefinitionsReady(false) || !defined('DT_FILE_RESOURCE')){
+        if($ulfID<1 || !$this->lookupDefinitionsReady(array('RT_IIIF_CANVAS', 'DT_FILE_RESOURCE'))){
             return array();
         }
         $mysqli = $this->system->getMysqli();
@@ -167,6 +181,52 @@ class DbIiifCanvas extends DbRecordTypeEntity
             .' AND (d.dtl_UploadedFileID='.intval($ulfID).' OR d.dtl_Value="'.intval($ulfID).'")'
             .' ORDER BY r.rec_ID';
         return mysql__select_list2($mysqli, $query) ?: array();
+    }
+
+
+    /** Return the first RT_IIIF_CANVAS record details that describe the given registered file. */
+    public function canvasMetadataForFileID(int $ulfID): ?array
+    {
+        $ids = $this->canvasRecordsForFileID($ulfID);
+        if(empty($ids)){
+            return null;
+        }
+
+        $recID = intval($ids[0]);
+        $details = $this->loadRecordDetails($recID, array(
+            'DT_NAME',
+            'DT_SHORT_SUMMARY',
+            'DT_FILE_RESOURCE',
+            'DT_THUMBNAIL',
+            'DT_IIIF_ID',
+            'DT_ORIGINAL_IIIF_ID',
+            $this->detailId('DT_WIDTH', '3-1040'),
+            $this->detailId('DT_HEIGHT', '3-1041'),
+            $this->detailId('DT_DURATION', '2-66')
+        ));
+
+        $thumbnailUlfID = intval($this->getFirstDetailValue($details, 'DT_THUMBNAIL'));
+        $thumbnailInfo = $thumbnailUlfID>0 ? IiifMediaHelper::registeredFileInfoForUlfID($this->system, $thumbnailUlfID) : null;
+
+        return array(
+            'recID' => $recID,
+            'label' => $this->getFirstDetailValue($details, 'DT_NAME'),
+            'summary' => $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY'),
+            'thumbnail_ulf_id' => $thumbnailUlfID,
+            'thumbnail_fileinfo' => $thumbnailInfo,
+            'canvas_url' => $this->canonicalCanvasUrlForFileID($ulfID),
+            'dimensions' => $this->dimensionValuesFromDetails($details)
+        );
+    }
+
+    /** Return width/height/duration values stored on an RT_IIIF_CANVAS record detail array. */
+    public function dimensionValuesFromDetails(array $details): array
+    {
+        return array(
+            'width' => $this->getNumericDetailValueByConstOrCode($details, 'DT_WIDTH', '3-1040'),
+            'height' => $this->getNumericDetailValueByConstOrCode($details, 'DT_HEIGHT', '3-1041'),
+            'duration' => $this->getNumericDetailValueByConstOrCode($details, 'DT_DURATION', '2-66')
+        );
     }
 
     /** Find a registered-file ulf_ID by its obfuscated file id. */

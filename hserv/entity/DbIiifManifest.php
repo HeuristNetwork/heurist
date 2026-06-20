@@ -5,9 +5,11 @@
 namespace hserv\entity;
 
 use hserv\structure\ConceptCode;
+use hserv\utilities\IiifMediaHelper;
 
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
 require_once dirname(__FILE__).'/DbIiifCanvas.php';
+require_once dirname(__FILE__).'/../utilities/IiifMediaHelper.php';
 
 /**
  * Manages IIIF Manifest records stored as user records of RT_IIIF_MANIFEST.
@@ -154,6 +156,8 @@ class DbIiifManifest extends DbRecordTypeEntity
         $recID = mysql__select_value($mysqli, $query);
         return $recID ? intval($recID) : 0;
     }
+
+
 
     /** Replace the ordered managed Canvas list for this Manifest. */
     public function setCanvasRefs(int $manifestRecID, array $canvasRecIDs): bool
@@ -337,13 +341,23 @@ class DbIiifManifest extends DbRecordTypeEntity
             $canvas['summary'] = $this->toLanguageMap($summary);
         }
 
-        $width = $this->getNumericDetailValueByConstOrCode($details, 'DT_WIDTH', '3-1040');
-        $height = $this->getNumericDetailValueByConstOrCode($details, 'DT_HEIGHT', '3-1041');
-        $duration = $this->getNumericDetailValueByConstOrCode($details, 'DT_DURATION', '2-66');
+        $mediaID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
+        $mediaInfo = $mediaID>0 ? IiifMediaHelper::registeredFileInfoForUlfID($this->system, $mediaID) : null;
+        $preferredDimensions = $this->dbCanvas()->dimensionValuesFromDetails($details);
+        $dimensions = $mediaInfo
+            ? IiifMediaHelper::resolveDimensionsForFileInfo(
+                $mediaInfo,
+                $preferredDimensions,
+                IiifMediaHelper::resourceUrlFromFileInfo($this->system, $mediaInfo),
+                array('width'=>1000, 'height'=>800)
+            )
+            : $preferredDimensions;
 
-        // In managed mode Canvas dimensions are authoritative database values.
-        // They must be present on both the Canvas item and the painting body so
-        // Mirador/OpenSeadragon can size the Canvas and the painted image consistently.
+        $width = $dimensions['width'];
+        $height = $dimensions['height'];
+        $duration = $dimensions['duration'];
+
+        // Canvas dimensions are resolved by the common IIIF media-dimension helper.
         if($height !== null && $height > 0){ $canvas['height'] = intval($height); }
         if($width !== null && $width > 0){ $canvas['width'] = intval($width); }
         if($duration !== null && $duration > 0){ $canvas['duration'] = floatval($duration); }
@@ -354,7 +368,6 @@ class DbIiifManifest extends DbRecordTypeEntity
             $canvas['thumbnail'] = array($thumb);
         }
 
-        $mediaID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
         $body = $this->fileBodyFromUlfID($mediaID, $width, $height, $duration);
         if($body){
             $canvas['items'] = array(
@@ -394,17 +407,13 @@ class DbIiifManifest extends DbRecordTypeEntity
             return null;
         }
 
-        $mysqli = $this->system->getMysqli();
-        $query = 'SELECT ulf_ObfuscatedFileID, ulf_ExternalFileReference, ulf_MimeExt, fxm_MimeType '
-            .'FROM recUploadedFiles LEFT JOIN defFileExtToMimetype ON fxm_Extension=ulf_MimeExt '
-            .'WHERE ulf_ID='.intval($ulfID).' LIMIT 1';
-        $row = mysql__select_row($mysqli, $query);
-        if(!is_array($row)){
+        $info = IiifMediaHelper::registeredFileInfoForUlfID($this->system, $ulfID);
+        if(!is_array($info)){
             return null;
         }
 
-        $url = $row[1] ? $row[1] : HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$row[0];
-        $mimeType = $row[3] ?: $this->mimeTypeFromExtension((string)$row[2]);
+        $url = IiifMediaHelper::resourceUrlFromFileInfo($this->system, $info, false, HEURIST_BASE_URL);
+        $mimeType = $info['fxm_MimeType'] ?: $this->mimeTypeFromExtension((string)$info['ulf_MimeExt']);
         $type = $this->iiifBodyTypeFromMime($mimeType);
 
         $body = array(
@@ -466,27 +475,6 @@ class DbIiifManifest extends DbRecordTypeEntity
         return 'Image';
     }
 
-    private function getFirstDetailValueByConstOrCode(array $details, string $constName, string $conceptCode)
-    {
-        $id = $this->constId($constName);
-        if(!$id){
-            $id = ConceptCode::getDetailTypeLocalID($conceptCode);
-        }
-        return $id ? ($details[intval($id)][0] ?? null) : null;
-    }
-
-    private function getNumericDetailValueByConstOrCode(array $details, string $constName, string $conceptCode): ?float
-    {
-        $value = $this->getFirstDetailValueByConstOrCode($details, $constName, $conceptCode);
-        if($value === null || $value === ''){
-            return null;
-        }
-        if(is_string($value)){
-            $value = trim($value);
-        }
-        return is_numeric($value) ? floatval($value) : null;
-    }
-
     private function toLanguageMap($value): array
     {
         $value = trim((string)$value);
@@ -514,25 +502,23 @@ class DbIiifManifest extends DbRecordTypeEntity
     
     private function canonicalCanvasUrl(int $canvasRecID, ?array $canvasDetails=null): ?string
     {
-        static $dbCanvas = null;
-
-        if($canvasRecID < 1){
-            return null;
-        }
-        
         if($canvasDetails!=null){
             $existing = $this->getFirstDetailValue($canvasDetails, 'DT_IIIF_ID');
             if($existing){
                 return (string)$existing;
             }        
-        }
+        }        
+        return $canvasRecID>0 ? $this->dbCanvas()->canonicalCanvasUrlForCanvasRecord($canvasRecID) : null;
+    }
 
+    private function dbCanvas(): DbIiifCanvas
+    {
+        static $dbCanvas = null;
         if($dbCanvas === null){
             $dbCanvas = new DbIiifCanvas($this->system);
         }
-
-        return $dbCanvas->canonicalCanvasUrlForCanvasRecord($canvasRecID);
-    }    
+        return $dbCanvas;
+    }
 
     private function isManifestRecord(int $manifestRecID): bool
     {

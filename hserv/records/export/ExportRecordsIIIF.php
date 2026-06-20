@@ -15,6 +15,11 @@
 */
 namespace hserv\records\export;
 use hserv\records\export\ExportRecords;
+use hserv\entity\DbIiifCanvas;
+use hserv\utilities\IiifMediaHelper;
+
+require_once dirname(__FILE__).'/../../entity/DbIiifCanvas.php';
+require_once dirname(__FILE__).'/../../utilities/IiifMediaHelper.php';
 
 /**
 * Class ExportRecordsIIIF
@@ -294,12 +299,6 @@ private static function isIiifManifestFile(array $fileinfo): bool
 {
     return ($fileinfo['ulf_PreferredSource'] ?? '') === 'iiif'
         || (defined('ULF_IIIF') && strpos((string)($fileinfo['ulf_OrigFileName'] ?? ''), ULF_IIIF) === 0);
-}
-
-private static function isIiifImageInfoFile(array $fileinfo): bool
-{
-    return ($fileinfo['ulf_PreferredSource'] ?? '') === 'iiif_image'
-        || (defined('ULF_IIIF_IMAGE') && ($fileinfo['ulf_OrigFileName'] ?? '') === ULF_IIIF_IMAGE);
 }
 
 private static function getIiifManifestReferences($system, $record, $ulf_ObfuscatedFileID=null): array
@@ -661,6 +660,35 @@ private static function getRegisteredManifestJson($system, array $fileinfo)
     return json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 }
 
+
+private static function iiifCanvasHelper($system): DbIiifCanvas
+{
+    static $helpers = array();
+    $key = method_exists($system, 'dbname') ? $system->dbname() : spl_object_hash($system);
+    if(!isset($helpers[$key])){
+        $helpers[$key] = new DbIiifCanvas($system);
+    }
+    return $helpers[$key];
+}
+
+private static function getCanvasMetadataForFile($system, array $fileinfo): ?array
+{
+    $ulfID = intval($fileinfo['ulf_ID'] ?? 0);
+    if($ulfID<1){
+        return null;
+    }
+    return self::iiifCanvasHelper($system)->canvasMetadataForFileID($ulfID);
+}
+
+private static function languageMapJson(string $value): string
+{
+    $value = trim(strip_tags($value));
+    if($value===''){
+        $value = 'Untitled';
+    }
+    return json_encode(array('none'=>array($value)), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+}
+
 public static function getIiifResource($system, $record, $iiif_version, $ulf_ObfuscatedFileID, $type_resource='Canvas'){
 
     $type_resource = strtolower((string)$type_resource);
@@ -747,7 +775,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
             if(strpos($mimeType,"soundcloud")>0) {continue;}
 
             $resource_type = 'Sound';
-        }elseif(strpos($mimeType, DIR_IMAGE)===0 || self::isIiifImageInfoFile($fileinfo)){
+        }elseif(strpos($mimeType, DIR_IMAGE)===0 || IiifMediaHelper::isIiifImageInfoFile($fileinfo)){
             $resource_type = 'Image';
         }
 
@@ -755,39 +783,53 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
             continue;
         }
 
+        $canvasMeta = self::getCanvasMetadataForFile($system, $fileinfo);
+        $canvas_label = trim((string)($canvasMeta['label'] ?? ''));
+        $canvas_label = $canvas_label!=='' ? htmlspecialchars(strip_tags($canvas_label)) : $label;
+        $canvas_label = preg_replace('/\r|\n/','\n',trim($canvas_label));
+        $canvas_summary = trim(strip_tags((string)($canvasMeta['summary'] ?? '')));
+        $summary_json = $canvas_summary!==''
+            ? ",\n      \"summary\": ".self::languageMapJson($canvas_summary)
+            : '';
+
         $fileid = $fileinfo['ulf_ObfuscatedFileID'];
-        $external_url = $fileinfo['ulf_ExternalFileReference'];
-        if($external_url && strpos($external_url,'http://')!==0){ //download non secure external resource via heurist
-            $resource_url = $external_url;  //external
-        }else{
-            //to itself
-            $resource_url = HEURIST_BASE_URL_PRO."?db=".$system->dbname()."&fullres=1&file=".$fileid;
-        }
+        $resource_url = IiifMediaHelper::resourceUrlFromFileInfo($system, $fileinfo, true, HEURIST_BASE_URL_PRO);
 
-        $height = 800;
-        $width = 1000;
-        if($resource_type=='Image' && $external_url==null && !self::isIiifImageInfoFile($fileinfo)){
-            $img_size = getimagesize($resource_url);  //it may delay the operation if there are many files $fcnt<5
-            if(is_array($img_size)){
-                $width = $img_size[0];
-                $height = $img_size[1];
+        $dimensions = IiifMediaHelper::resolveDimensionsForFileInfo(
+            $fileinfo,
+            is_array($canvasMeta) ? ($canvasMeta['dimensions'] ?? array()) : array(),
+            $resource_url,
+            array('width'=>1000, 'height'=>800)
+        );
+        $width = $dimensions['width'];
+        $height = $dimensions['height'];
+        $duration = $dimensions['duration'];
+
+        $thumbnail_format = 'image/png';
+        $thumbnailInfo = is_array($canvasMeta) && is_array($canvasMeta['thumbnail_fileinfo'] ?? null)
+            ? $canvasMeta['thumbnail_fileinfo']
+            : null;
+        if($thumbnailInfo){
+            $tumbnail_url = IiifMediaHelper::resourceUrlFromFileInfo($system, $thumbnailInfo, false, HEURIST_BASE_URL_PRO);
+            $thumbnail_format = $thumbnailInfo['fxm_MimeType'] ?: $thumbnail_format;
+        }else{
+            $tumbnail_url = null;
+        }
+        if(!$tumbnail_url){
+            $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
+            if(file_exists($thumbfile)){
+                $tumbnail_url = HEURIST_BASE_URL_PRO.'?db='.$system->dbname().'&thumb='.$fileid;
+            }else{
+                //if thumb not exists - rectype thumb (HEURIST_RTY_ICON)
+                $tumbnail_url = HEURIST_BASE_URL_PRO.'?db='.$system->dbname().'&version=thumb&icon='.$rectypeID;
             }
-        }
-
-
-        $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
-        if(file_exists($thumbfile)){
-            $tumbnail_url = HEURIST_BASE_URL_PRO.'?db='.$system->dbname().'&thumb='.$fileid;
-        }else{
-            //if thumb not exists - rectype thumb (HEURIST_RTY_ICON)
-            $tumbnail_url = HEURIST_BASE_URL_PRO.'?db='.$system->dbname().'&version=thumb&icon='.$rectypeID;
         }
 
         $service = '';
         $resource_id = '';
 
         //get iiif image parameters
-        if(self::isIiifImageInfoFile($fileinfo)){ //this is image info - it gets all required info from json
+        if(IiifMediaHelper::isIiifImageInfoFile($fileinfo)){ //this is image info - it gets all required info from json
 
                 $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']);//retrieve iiif image.info to be included into manifest
                 $iiif_manifest = json_decode($iiif_manifest, true);
@@ -845,6 +887,10 @@ SERVICE3;
                 }
         }
 
+        $canvasDimensions = is_array($canvasMeta) && is_array($canvasMeta['dimensions'] ?? null) ? $canvasMeta['dimensions'] : array();
+        if(!empty($canvasDimensions['width'])){ $width = $canvasDimensions['width']; }
+        if(!empty($canvasDimensions['height'])){ $height = $canvasDimensions['height']; }
+        if(!empty($canvasDimensions['duration'])){ $duration = $canvasDimensions['duration']; }
 
         $canvas_uri = self::genUUID();
 
@@ -857,7 +903,7 @@ $item = <<<CANVAS2
 {
         "@id": "http://$canvas_uri",
         "@type": "sc:Canvas",
-        "label": "$label",
+        "label": "$canvas_label",
         "height": $height,
         "width": $width,
         "thumbnail" : {
@@ -925,6 +971,15 @@ if(self::hasLinkedIiifAnnotations($system, intval($fileinfo['ulf_ID'] ?? 0))){
       ]';
 }
 
+$body_dimensions = '';
+if(in_array($resource_type, array('Image', 'Video'), true)){
+    if($height>0){ $body_dimensions .= ','."\n                \"height\": ".intval($height); }
+    if($width>0){ $body_dimensions .= ','."\n                \"width\": ".intval($width); }
+}
+if(in_array($resource_type, array('Video', 'Sound'), true) && $duration>0){
+    $body_dimensions .= ','."\n                \"duration\": ".floatval($duration);
+}
+
 $annotation = <<<ANNOTATION3
             {
               "id": "$annotation_uri",
@@ -934,7 +989,7 @@ $annotation = <<<ANNOTATION3
                 $service
                 "id": "$resource_url",
                 "type": "$resource_type",
-                "format": "$mimeType"
+                "format": "$mimeType"$body_dimensions
               },
               "target": "$canvas_uri"
             }
@@ -962,7 +1017,7 @@ $item = <<<CANVAS3
 {
       "id": "$canvas_uri",
       "type": "Canvas",
-      "label": "$label",
+      "label": "$canvas_label"$summary_json,
                 "height": $height,
                 "width": $width,
       "items": [
@@ -972,7 +1027,7 @@ $item = <<<CANVAS3
         {
           "id": "$tumbnail_url",
           "type": "Image",
-          "format": "image/png",
+          "format": "$thumbnail_format",
           "width": $tumbnail_width,
           "height": $tumbnail_height
         }
