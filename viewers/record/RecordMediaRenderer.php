@@ -217,7 +217,7 @@ class RecordMediaRenderer
             $html[] = '<a href="'.$this->h($miradorUrl).'" target="_blank" rel="noopener">open in new tab</a>';
             $html[] = '<a href="'.$this->h($miradorUrl).'" class="record-media-mirador">'.$this->miradorIcon().'&nbsp;Mirador</a>';
             $html[] = '<a href="'.$this->h($this->manifestUrl($thumb)).'" target="_blank" rel="noopener">'
-                .'<span class="external-link" style="display:inline-block;"></span>manifest URL</a>';
+                .'<span class="external-link" style="display:inline-block;" title="Manifest content></span>manifest</a>';
             $html[] = '</div><!-- CLOSE download_link -->';
             return implode('', $html);
         }

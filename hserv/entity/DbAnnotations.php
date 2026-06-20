@@ -11,6 +11,7 @@ use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
 require_once dirname(__FILE__).'/IiifAnnotationJson.php';
+require_once dirname(__FILE__).'/DbIiifCanvas.php';
 
 /**
 * Class DbAnnotations
@@ -43,6 +44,7 @@ class DbAnnotations extends DbRecordTypeEntity
             'DT_EXTENDED_DESCRIPTION',
             'DT_URL',
             'DT_IIIF_ID', 
+            'DT_ORIGINAL_IIIF_ID',
             'DT_ANNOTATION_INFO',
             'DT_ANNOTATION_MANIFEST',
             'DT_IIIF_CANVAS',
@@ -91,7 +93,7 @@ class DbAnnotations extends DbRecordTypeEntity
         $sjson = array('id'=>"https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 'type' => 'AnnotationPage', 'items' => array());
 
         if(@$this->data['recID']!='pages'){
-            $recordId = $this->findRecIDbyOriginalId(@$this->data['recID'], intval(@$this->data['manifestRecID']));
+            $recordId = $this->findRecIDbyIiifIdentifier(@$this->data['recID'], intval(@$this->data['manifestRecID']));
             if($recordId>0){
                 $anno = $this->buildIiifAnnotationFromRecord($recordId);
                 if($anno){
@@ -122,29 +124,49 @@ class DbAnnotations extends DbRecordTypeEntity
     }
 
     private function findItemsByCanvas($canvasUri, int $manifestRecID=0){
-        if($canvasUri && $this->ensureDefinitionsReady(false)){
-            $managedCanvasRecID = $this->canvasRecIDFromApiUrl((string)$canvasUri);
-            if($managedCanvasRecID>0 && defined('DT_IIIF_CANVAS')){
-                $recordIds = $this->findItemsByManagedCanvas($managedCanvasRecID, $manifestRecID);
-                if(!isEmptyArray($recordIds)){
-                    return $recordIds;
-                }
-            }
-
-            $mysqli = $this->system->getMysqli();
-            $query = 'SELECT DISTINCT r.rec_ID FROM recDetails d1, Records r ';
-            $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
-                .' AND d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.addslashes($canvasUri).'"';
-
-            if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
-                $query .= ', recDetails dm ';
-                $where .= ' AND dm.dtl_RecID=r.rec_ID AND dm.dtl_DetailTypeID='.DT_ANNOTATION_MANIFEST
-                    .' AND dm.dtl_Value='.intval($manifestRecID);
-            }
-
-            return mysql__select_list2($mysqli, $query.SQL_WHERE.$where.' ORDER BY r.rec_ID');
+        if(!$canvasUri || !$this->ensureDefinitionsReady(false)){
+            return array();
         }
-        return array();
+
+        $recordIds = array();
+
+        // 1. Overlay/original-target lookup. DT_URL stores the original target Canvas URL.
+        $ids = $this->findItemsByOriginalCanvasUrl((string)$canvasUri, $manifestRecID);
+        if(!isEmptyArray($ids)){
+            $recordIds = array_merge($recordIds, $ids);
+        }
+
+        // 2. Managed/canonical lookup. Canvas DT_IIIF_ID stores the Heurist Canvas API URL.
+        $dbCanvas = new DbIiifCanvas($this->system);
+        $canvasRecIDs = $dbCanvas->canvasRecordsForCanonicalUrl((string)$canvasUri);
+        foreach($canvasRecIDs as $canvasRecID){
+            $ids = $this->findItemsByManagedCanvas(intval($canvasRecID), $manifestRecID);
+            if(!isEmptyArray($ids)){
+                $recordIds = array_merge($recordIds, $ids);
+            }
+        }
+
+        return array_values(array_unique(array_map('intval', $recordIds)));
+    }
+
+    private function findItemsByOriginalCanvasUrl(string $canvasUri, int $manifestRecID=0): array
+    {
+        if($canvasUri==='' || !defined('DT_URL')){
+            return array();
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $query = 'SELECT DISTINCT r.rec_ID FROM recDetails d1, Records r ';
+        $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+            .' AND d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.addslashes($canvasUri).'"';
+
+        if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
+            $query .= ', recDetails dm ';
+            $where .= ' AND dm.dtl_RecID=r.rec_ID AND dm.dtl_DetailTypeID='.DT_ANNOTATION_MANIFEST
+                .' AND dm.dtl_Value='.intval($manifestRecID);
+        }
+
+        return mysql__select_list2($mysqli, $query.SQL_WHERE.$where.' ORDER BY r.rec_ID') ?: array();
     }
 
     private function findItemsByManagedCanvas(int $canvasRecID, int $manifestRecID=0): array
@@ -168,48 +190,23 @@ class DbAnnotations extends DbRecordTypeEntity
         return mysql__select_list2($mysqli, $query.SQL_WHERE.$where.' ORDER BY r.rec_ID') ?: array();
     }
 
-    private function canvasRecIDFromApiUrl(string $canvasUri): int
-    {
-        if($canvasUri===''){
-            return 0;
-        }
-
-        $path = parse_url($canvasUri, PHP_URL_PATH);
-        if(!$path){
-            return 0;
-        }
-
-        if(preg_match('~/api/[^/]+/iiif/canvas/(\d+)$~', $path, $m)){
-            return intval($m[1]);
-        }
-
-        return 0;
-    }
-
     private function findItembyUUID($uuid, int $manifestRecID=0){
-        if($uuid && $this->ensureDefinitionsReady(false)){
+        $recordId = $this->findRecIDbyIiifIdentifier($uuid, $manifestRecID);
+        if($recordId>0 && defined('DT_ANNOTATION_INFO')){
             $mysqli = $this->system->getMysqli();
-            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2, Records r ';
-            $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_ID=d2.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
-                .' AND d1.dtl_DetailTypeID='.DT_IIIF_ID .' AND d1.dtl_Value="'.addslashes($uuid).'"'
-                .' AND d2.dtl_DetailTypeID='.DT_ANNOTATION_INFO;
-
-            if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
-                $query .= ', recDetails dm ';
-                $where .= ' AND dm.dtl_RecID=r.rec_ID AND dm.dtl_DetailTypeID='.DT_ANNOTATION_MANIFEST
-                    .' AND dm.dtl_Value='.intval($manifestRecID);
-            }
-
-            return mysql__select_value($mysqli, $query.SQL_WHERE.$where.' LIMIT 1');
+            return mysql__select_value($mysqli,
+                'SELECT dtl_Value FROM recDetails WHERE dtl_RecID='.intval($recordId)
+                .' AND dtl_DetailTypeID='.intval(DT_ANNOTATION_INFO).' LIMIT 1');
         }
         return null;
     }
 
     private function findRecIDbyUUID($uuid){
-        return $this->findRecIDbyOriginalId($uuid, 0);
+        return $this->findRecIDbyIiifIdentifier($uuid, 0);
     }
 
-    private function findRecIDbyOriginalId($annotationId, $manifestRecID=0){
+    private function findRecIDbyIiifIdentifier($annotationId, $manifestRecID=0): int
+    {
         if(!$annotationId || !$this->ensureDefinitionsReady(false)){
             return 0;
         }
@@ -220,11 +217,31 @@ class DbAnnotations extends DbRecordTypeEntity
         }
 
         $recordId = $this->findRecordByField('DT_IIIF_ID', $annotationId, $extra);
+        if(!$recordId && defined('DT_ORIGINAL_IIIF_ID')){
+            $recordId = $this->findRecordByField('DT_ORIGINAL_IIIF_ID', $annotationId, $extra);
+        }
         if(!$recordId && $manifestRecID>0){
-            // fallback for annotations imported before the manifest link existed
+            return $this->findRecIDbyIiifIdentifier($annotationId, 0);
+        }
+        return intval($recordId);
+    }
+
+    private function findRecIDbyOriginalId($annotationId, $manifestRecID=0): int
+    {
+        if(!$annotationId || !$this->ensureDefinitionsReady(false) || !defined('DT_ORIGINAL_IIIF_ID')){
+            return 0;
+        }
+
+        $extra = array();
+        if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
+            $extra['DT_ANNOTATION_MANIFEST'] = intval($manifestRecID);
+        }
+
+        $recordId = $this->findRecordByField('DT_ORIGINAL_IIIF_ID', $annotationId, $extra);
+        if(!$recordId && $manifestRecID>0){
             return $this->findRecIDbyOriginalId($annotationId, 0);
         }
-        return $recordId;
+        return intval($recordId);
     }
 
     public function delete($disable_foreign_checks = false){
@@ -232,7 +249,7 @@ class DbAnnotations extends DbRecordTypeEntity
             if(!$this->_validatePermission()){
                 return false;
             }
-            $recordId = $this->findRecIDbyOriginalId($this->data['recID'], intval(@$this->data['manifestRecID']));
+            $recordId = $this->findRecIDbyIiifIdentifier($this->data['recID'], intval(@$this->data['manifestRecID']));
             if($recordId>0){
                 return recordDelete($this->system, $recordId);
             }
@@ -290,7 +307,7 @@ class DbAnnotations extends DbRecordTypeEntity
             $parsed['canvas'] = $canvasUrl;
         }
 
-        $recordId = $this->findRecIDbyOriginalId($parsed['id'], $manifestRecID);
+        $recordId = $this->findRecIDbyIiifIdentifier($parsed['id'], $manifestRecID);
         $details = $this->loadRecordDetails($recordId);
 
         if($recordId>0 && !empty($fields['preserveLocal']) && $this->isProtectedFromReimport($details)){
@@ -327,6 +344,8 @@ class DbAnnotations extends DbRecordTypeEntity
 
         $out = recordSave($this->system, $record, false, true, 0);
         if(is_array($out) && @$out['data']>0){
+            $savedId = intval($out['data']);
+            $this->updateSingleDetailDirect($savedId, intval(DT_IIIF_ID), $this->annotationApiUrl($savedId));
             $out['is_new'] = ($recordId == 0);
         }
         return $out;
@@ -375,42 +394,52 @@ class DbAnnotations extends DbRecordTypeEntity
     }
 
     /** Directly update/insert DT_ANNOTATION_STATE, and optionally assign DT_IIIF_ID for new Heurist-created annotations. */
-    public function updateAnnotationStateDirect(int $recID, int $stateTermID, bool $assignId=false): bool
+    private function updateAnnotationStateDirect(int $recID, int $stateTermID, bool $assignId=false): bool
     {
         if($recID<1 || $stateTermID<1 || !$this->ensureDefinitionsReady(false)){
             return false;
         }
 
-        $mysqli = $this->system->getMysqli();
-        $dtID = intval(DT_ANNOTATION_STATE);
-        $recID = intval($recID);
-        $stateTermID = intval($stateTermID);
-
-        $dtlID = mysql__select_value($mysqli,
-            'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.$recID
-            .' AND dtl_DetailTypeID='.$dtID.' LIMIT 1');
-
-        if($dtlID>0){
-            $query = 'UPDATE recDetails SET dtl_Value='.$stateTermID.' WHERE dtl_ID='.intval($dtlID);
-        }else{
-            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
-                .$recID.','.$dtID.','.$stateTermID.')';
-        }
-
-        if($mysqli->query($query) === false){
+        if(!$this->updateSingleDetailDirect($recID, intval(DT_ANNOTATION_STATE), intval($stateTermID))){
             return false;
         }
 
         if($assignId){
-            $iiifId = $mysqli->real_escape_string(
-                HEURIST_BASE_URL.'api/'.$this->system->dbname().'/annotations/'.$recID
-            );
-            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
-                .$recID.','.intval(DT_IIIF_ID).',"'.$iiifId.'")';
-            return $mysqli->query($query) !== false;
+            return $this->updateSingleDetailDirect($recID, intval(DT_IIIF_ID), $this->annotationApiUrl($recID));
         }
 
         return true;
+    }
+
+    private function updateSingleDetailDirect(int $recID, int $dtID, $value): bool
+    {
+        if($recID<1 || $dtID<1){
+            return false;
+        }
+        $mysqli = $this->system->getMysqli();
+        $valueSql = is_numeric($value)
+            ? (string)$value
+            : '"'.$mysqli->real_escape_string((string)$value).'"';
+
+        $dtlID = mysql__select_value($mysqli,
+            'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.intval($recID)
+            .' AND dtl_DetailTypeID='.intval($dtID).' LIMIT 1');
+
+        if($dtlID>0){
+            $query = 'UPDATE recDetails SET dtl_Value='.$valueSql.' WHERE dtl_ID='.intval($dtlID);
+        }else{
+            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
+                .intval($recID).','.intval($dtID).','.$valueSql.')';
+        }
+
+        return $mysqli->query($query) !== false;
+    }
+
+    private function annotationApiUrl(int $recID): string
+    {
+        return rtrim(HEURIST_BASE_URL, '/')
+            .'/api/'.$this->system->dbname()
+            .'/annotations/'.intval($recID);
     }
 
     /** Build the IIIF/Web Annotation JSON used in AnnotationPage output. */
@@ -434,14 +463,16 @@ class DbAnnotations extends DbRecordTypeEntity
         $stateCode = $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
 
         $canvasRecID = intval($this->getFirstDetailValue($details, 'DT_IIIF_CANVAS'));
-        $managedCanvasUrl = $canvasRecID>0
-            ? HEURIST_BASE_URL.'api/'.$this->system->dbname().'/iiif/canvas/'.$canvasRecID
-            : null;
+        $managedCanvasUrl = null;
+        if($canvasRecID>0){
+            $dbCanvas = new DbIiifCanvas($this->system);
+            $managedCanvasUrl = $dbCanvas->canonicalCanvasUrlForCanvasRecord($canvasRecID);
+        }
 
         return array(
             'recID' => $recID,
             'id' => $this->getFirstDetailValue($details, 'DT_IIIF_ID'),
-            'annotationApiUrl' => HEURIST_BASE_URL.'api/'.$this->system->dbname().'/annotations/'.$recID,
+            'annotationApiUrl' => $this->annotationApiUrl($recID),
             'rawJson' => $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO'),
             'stateCode' => $stateCode ? strtolower($stateCode) : '',
             'bodyText' => $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY'),
@@ -494,7 +525,7 @@ class DbAnnotations extends DbRecordTypeEntity
 
         $changed = $this->setField($details, 'DT_NAME', $title) || $changed;
         $changed = $this->setField($details, 'DT_SHORT_SUMMARY', @$parsed['body_text']) || $changed;
-        $changed = $this->setField($details, 'DT_IIIF_ID', @$parsed['id']) || $changed;
+        $changed = $this->setField($details, 'DT_ORIGINAL_IIIF_ID', @$parsed['id']) || $changed;
         $changed = $this->setField($details, 'DT_ANNOTATION_INFO', @$parsed['json']) || $changed;
         $changed = $this->setField($details, 'DT_URL', @$parsed['canvas']) || $changed;
         $changed = $this->setField($details, 'DT_ANNOTATION_MOTIVATION', $this->getTermId(@$parsed['motivation'], 'TRM_ANNOTATION_MOTIVATION_COMMENTING') ) || $changed;

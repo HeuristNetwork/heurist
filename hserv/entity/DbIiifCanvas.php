@@ -29,6 +29,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
             'DT_FILE_RESOURCE',
             'DT_THUMBNAIL',
             'DT_IIIF_ID',
+            'DT_ORIGINAL_IIIF_ID',
             'DT_ANNOTATION_STATE'
         );
 
@@ -46,6 +47,11 @@ class DbIiifCanvas extends DbRecordTypeEntity
     /**
      * Create or update one RT_IIIF_CANVAS record from a v2/v3 Canvas JSON object.
      *
+     * Canvas identity rules:
+     * - DT_IIIF_ID is always the canonical Heurist Canvas API URL based on DT_FILE_RESOURCE.
+     * - DT_ORIGINAL_IIIF_ID stores the source Canvas id from an imported Manifest.
+     * - matching during import is by DT_FILE_RESOURCE first, then DT_ORIGINAL_IIIF_ID.
+     *
      * Returns an array compatible with the annotation import reporting flags:
      *   recID, is_new, is_retained, is_preserved_local
      */
@@ -55,12 +61,15 @@ class DbIiifCanvas extends DbRecordTypeEntity
             return false;
         }
 
-        $canvasId = $this->getJsonId($canvas);
-        if(!$canvasId){
-            $canvasId = 'heurist-import-canvas-'.md5(json_encode($canvas));
+        $originalCanvasId = $this->getJsonId($canvas);
+        if(!$originalCanvasId){
+            $originalCanvasId = 'heurist-import-canvas-'.md5(json_encode($canvas));
         }
 
-        $recordId = $this->findCanvasRecord($canvasId);
+        $mediaUrl = $this->extractPrimaryPaintingBodyUrl($canvas);
+        $mediaUlfID = $mediaUrl ? $this->registerExternalUrl($mediaUrl) : 0;
+
+        $recordId = $this->findCanvasRecord($mediaUlfID, $originalCanvasId);
         $details = $recordId>0 ? $this->loadRecordDetails($recordId) : array();
 
         if($recordId>0 && $preserveLocal && $this->isProtectedFromReimport($details)){
@@ -68,7 +77,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
         }
 
         $oldDetails = $details;
-        $this->fillDetailsFromCanvas($details, $canvas, $canvasId);
+        $this->fillDetailsFromCanvas($details, $canvas, $originalCanvasId, $mediaUlfID);
 
         if($recordId>0 && $oldDetails == $details){
             return array('recID'=>$recordId, 'is_retained'=>true);
@@ -86,19 +95,131 @@ class DbIiifCanvas extends DbRecordTypeEntity
         return array('recID'=>$newId, 'is_new'=>($recordId==0));
     }
 
-    private function findCanvasRecord(string $canvasId): int
+    /** Return canonical Heurist Canvas API URL for an RT_IIIF_CANVAS record. */
+    public function canonicalCanvasUrlForCanvasRecord(int $canvasRecID): ?string
     {
-        if($canvasId==='' || !$this->ensureDefinitionsReady(false)){
-            return 0;
+        if($canvasRecID<1 || !$this->ensureDefinitionsReady(false)){
+            return null;
         }
-        return $this->findRecordByField('DT_IIIF_ID', $canvasId);
+        $details = $this->loadRecordDetails($canvasRecID);
+        $ulfID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
+        return $this->canonicalCanvasUrlForFileID($ulfID);
     }
 
-    private function fillDetailsFromCanvas(array &$details, array $canvas, string $canvasId): void
+    /** Return canonical Heurist Canvas API URL for a recUploadedFiles row. */
+    public function canonicalCanvasUrlForFileID(int $ulfID): ?string
+    {
+        if($ulfID<1){
+            return null;
+        }
+        $fileID = $this->obfuscatedFileIDForUlfID($ulfID);
+        return $fileID ? $this->canonicalCanvasUrlForObfuscatedID($fileID) : null;
+    }
+
+    /** Return canonical Heurist Canvas API URL for a file obfuscated id. */
+    public function canonicalCanvasUrlForObfuscatedID(string $fileID): string
+    {
+        return rtrim(HEURIST_BASE_URL, '/')
+            .'/api/'.$this->system->dbname()
+            .'/iiif/canvas/'.rawurlencode($fileID);
+    }
+
+    /** Extract the registered-file obfuscated id from a canonical Heurist Canvas API URL. */
+    public function fileObfuscatedIDFromCanonicalCanvasUrl(string $canvasUrl): ?string
+    {
+        $path = parse_url($canvasUrl, PHP_URL_PATH);
+        if(!$path){
+            return null;
+        }
+        if(preg_match('~/api/[^/]+/iiif/canvas/([^/?#]+)$~', $path, $m)){
+            return rawurldecode($m[1]);
+        }
+        return null;
+    }
+
+    /** Find RT_IIIF_CANVAS records by their canonical Heurist Canvas API URL stored in DT_IIIF_ID. */
+    public function canvasRecordsForCanonicalUrl(string $canvasUrl): array
+    {
+        $canvasUrl = trim($canvasUrl);
+        if($canvasUrl==='' || !$this->ensureDefinitionsReady(false) || !defined('DT_IIIF_ID')){
+            return array();
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $query = 'SELECT DISTINCT r.rec_ID FROM Records r, recDetails d '
+            .'WHERE r.rec_ID=d.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+            .' AND d.dtl_DetailTypeID='.intval(DT_IIIF_ID)
+            .' AND d.dtl_Value="'.$mysqli->real_escape_string($canvasUrl).'"'
+            .' ORDER BY r.rec_ID';
+        return mysql__select_list2($mysqli, $query) ?: array();
+    }
+
+    /** Find RT_IIIF_CANVAS records that use the given registered file. */
+    public function canvasRecordsForFileID(int $ulfID): array
+    {
+        if($ulfID<1 || !$this->ensureDefinitionsReady(false) || !defined('DT_FILE_RESOURCE')){
+            return array();
+        }
+        $mysqli = $this->system->getMysqli();
+        $query = 'SELECT DISTINCT r.rec_ID FROM Records r, recDetails d '
+            .'WHERE r.rec_ID=d.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+            .' AND d.dtl_DetailTypeID='.intval(DT_FILE_RESOURCE)
+            .' AND (d.dtl_UploadedFileID='.intval($ulfID).' OR d.dtl_Value="'.intval($ulfID).'")'
+            .' ORDER BY r.rec_ID';
+        return mysql__select_list2($mysqli, $query) ?: array();
+    }
+
+    /** Find a registered-file ulf_ID by its obfuscated file id. */
+    public function ulfIDFromObfuscatedID(string $fileID): int
+    {
+        $fileID = trim($fileID);
+        if($fileID===''){
+            return 0;
+        }
+        $mysqli = $this->system->getMysqli();
+        $ulfID = mysql__select_value($mysqli,
+            'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ObfuscatedFileID="'
+            .$mysqli->real_escape_string($fileID).'" LIMIT 1');
+        return $ulfID ? intval($ulfID) : 0;
+    }
+
+    private function obfuscatedFileIDForUlfID(int $ulfID): ?string
+    {
+        if($ulfID<1){
+            return null;
+        }
+        $mysqli = $this->system->getMysqli();
+        $fileID = mysql__select_value($mysqli,
+            'SELECT ulf_ObfuscatedFileID FROM recUploadedFiles WHERE ulf_ID='.intval($ulfID).' LIMIT 1');
+        return $fileID ? (string)$fileID : null;
+    }
+
+    private function findCanvasRecord(int $mediaUlfID=0, ?string $originalCanvasId=null): int
+    {
+        if(!$this->ensureDefinitionsReady(false)){
+            return 0;
+        }
+
+        if($mediaUlfID>0){
+            $ids = $this->canvasRecordsForFileID($mediaUlfID);
+            if(!empty($ids)){
+                return intval($ids[0]);
+            }
+        }
+
+        $originalCanvasId = trim((string)$originalCanvasId);
+        if($originalCanvasId!=='' && defined('DT_ORIGINAL_IIIF_ID')){
+            return $this->findRecordByField('DT_ORIGINAL_IIIF_ID', $originalCanvasId);
+        }
+
+        return 0;
+    }
+
+    private function fillDetailsFromCanvas(array &$details, array $canvas, string $originalCanvasId, int $mediaUlfID=0): void
     {
         $label = $this->normaliseLangValue(@$canvas['label']);
         if(!$label){
-            $label = basename(parse_url($canvasId, PHP_URL_PATH) ?: $canvasId);
+            $label = basename(parse_url($originalCanvasId, PHP_URL_PATH) ?: $originalCanvasId);
         }
 
         $summary = $this->normaliseLangValue(@$canvas['summary']);
@@ -108,7 +229,14 @@ class DbIiifCanvas extends DbRecordTypeEntity
 
         $this->setField($details, 'DT_NAME', $label);
         $this->setField($details, 'DT_SHORT_SUMMARY', $summary);
-        $this->setField($details, 'DT_IIIF_ID', $canvasId);
+        if($mediaUlfID>0){
+            $this->setField($details, 'DT_FILE_RESOURCE', intval($mediaUlfID));
+            $canonicalCanvasUrl = $this->canonicalCanvasUrlForFileID($mediaUlfID);
+            if($canonicalCanvasUrl){
+                $this->setField($details, 'DT_IIIF_ID', $canonicalCanvasUrl);
+            }
+        }
+        $this->setField($details, 'DT_ORIGINAL_IIIF_ID', $originalCanvasId);
         $this->setField($details, 'DT_ANNOTATION_STATE', $this->getTermId('TRM_ANNOTATION_STATE_IMPORTED'));
 
         if(isset($canvas['width'])){
@@ -121,14 +249,6 @@ class DbIiifCanvas extends DbRecordTypeEntity
             $this->setField($details, $this->detailId('DT_DURATION', '2-66'), floatval($canvas['duration']));
         }
 
-        $mediaUrl = $this->extractPrimaryPaintingBodyUrl($canvas);
-        if($mediaUrl){
-            $ulfID = $this->registerExternalUrl($mediaUrl);
-            if($ulfID>0){
-                $this->setField($details, 'DT_FILE_RESOURCE', intval($ulfID));
-            }
-        }
-
         $thumbUrl = $this->extractThumbnailUrl($canvas);
         if($thumbUrl){
             $ulfID = $this->registerExternalUrl($thumbUrl);
@@ -137,7 +257,6 @@ class DbIiifCanvas extends DbRecordTypeEntity
             }
         }
     }
-
 
     private function detailId(string $constName, string $conceptCode): ?int
     {
@@ -270,6 +389,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
 
     /**
      * Called after a normal Heurist record-editor save of an RT_IIIF_CANVAS record.
+     * Updates DT_IIIF_ID from DT_FILE_RESOURCE every time because Canvas identity is file-based.
      * Updates only DT_ANNOTATION_STATE directly in recDetails to avoid a second recordSave().
      * Until DT_ANNOTATION_STATE is renamed, Canvas records reuse the IIIF state vocabulary.
      */
@@ -278,8 +398,19 @@ class DbIiifCanvas extends DbRecordTypeEntity
         if($recID<1 || !$this->ensureDefinitionsReady(false)){
             return false;
         }
+        
+        $idOk = false;
 
         $details = $this->loadRecordDetails($recID);
+        
+        $ulfID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
+        $canonical = $this->canonicalCanvasUrlForFileID($ulfID);
+        if(!$canonical){
+            $idOk = $this->updateSingleDetailDirect($recID, intval(DT_IIIF_ID), $canonical);
+        }
+        
+        
+
         $oldState = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
 
         $imported = $this->getTermId('TRM_ANNOTATION_STATE_IMPORTED');
@@ -290,60 +421,43 @@ class DbIiifCanvas extends DbRecordTypeEntity
         $removed  = $this->getTermId('TRM_ANNOTATION_STATE_REMOVED');
 
         if($oldState === $obsolete || $oldState === $removed){
-            return true;
+            return $idOk;
         }
 
         if($oldState === $imported || $oldState === $mirador || $oldState === $modified){
-            return $this->updateCanvasStateDirect($recID, intval($modified));
+            return $this->updateSingleDetailDirect($recID, intval($modified)) && $idOk;
         }
 
         if($oldState < 1){
-            return $this->updateCanvasStateDirect($recID, intval($heurist), true);
+            return $this->updateSingleDetailDirect($recID, intval($heurist)) && $idOk;
         }
 
-        return true;
+        return $idOk;
     }
 
-    /** Directly update/insert DT_ANNOTATION_STATE, and optionally assign DT_IIIF_ID for new Heurist-created Canvas records. */
-    public function updateCanvasStateDirect(int $recID, int $stateTermID, bool $assignId=false): bool
+    private function updateSingleDetailDirect(int $recID, int $dtID, $value): bool
     {
-        if($recID<1 || $stateTermID<1 || !$this->ensureDefinitionsReady(false)){
+        if($recID<1 || $dtID<1){
             return false;
         }
-
         $mysqli = $this->system->getMysqli();
         $recID = intval($recID);
-        $stateTermID = intval($stateTermID);
-        $stateDtID = intval(DT_ANNOTATION_STATE);
+        $dtID = intval($dtID);
+        $valueSql = is_numeric($value)
+            ? (string)$value
+            : '"'.$mysqli->real_escape_string((string)$value).'"';
 
         $dtlID = mysql__select_value($mysqli,
             'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.$recID
-            .' AND dtl_DetailTypeID='.$stateDtID.' LIMIT 1');
+            .' AND dtl_DetailTypeID='.$dtID.' LIMIT 1');
 
         if($dtlID>0){
-            $query = 'UPDATE recDetails SET dtl_Value='.$stateTermID.' WHERE dtl_ID='.intval($dtlID);
+            $query = 'UPDATE recDetails SET dtl_Value='.$valueSql.' WHERE dtl_ID='.intval($dtlID);
         }else{
             $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
-                .$recID.','.$stateDtID.','.$stateTermID.')';
+                .$recID.','.$dtID.','.$valueSql.')';
         }
-
-        if($mysqli->query($query) === false){
-            return false;
-        }
-
-        if($assignId){
-            $existingId = $this->getFirstDetailValue($this->loadRecordDetails($recID), 'DT_IIIF_ID');
-            if(!$existingId){
-                $iiifId = $mysqli->real_escape_string(
-                    HEURIST_BASE_URL.'api/'.$this->system->dbname().'/iiif/canvas/'.$recID
-                );
-                $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
-                    .$recID.','.intval(DT_IIIF_ID).',"'.$iiifId.'")';
-                return $mysqli->query($query) !== false;
-            }
-        }
-
-        return true;
+        return $mysqli->query($query) !== false;
     }
 
     private function isProtectedFromReimport(array $details): bool

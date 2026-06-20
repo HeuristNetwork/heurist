@@ -7,6 +7,7 @@ namespace hserv\entity;
 use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
+require_once dirname(__FILE__).'/DbIiifCanvas.php';
 
 /**
  * Manages IIIF Manifest records stored as user records of RT_IIIF_MANIFEST.
@@ -26,6 +27,7 @@ class DbIiifManifest extends DbRecordTypeEntity
             'DT_FILE_RESOURCE',
             'DT_COPYRIGHT',
             'DT_IIIF_ID',
+            'DT_ORIGINAL_IIIF_ID',
             'DT_IIIF_IMPORT_MODE',
             'DT_IIIF_CANVAS'
         );
@@ -40,6 +42,9 @@ class DbIiifManifest extends DbRecordTypeEntity
     /**
      * Create or update a minimal RT_IIIF_MANIFEST record for a registered Manifest file.
      * $manifestFile is the resolved file array from ImportAnnotations.
+     *
+     * DT_IIIF_ID is the canonical Heurist Manifest API URL.
+     * DT_ORIGINAL_IIIF_ID stores the source Manifest id or source URL.
      */
     public function ensureFromManifestFile(array $manifestFile, array $manifest, string $importMode='overlay')
     {
@@ -47,8 +52,8 @@ class DbIiifManifest extends DbRecordTypeEntity
             return 0;
         }
 
-        $manifestId = $this->getJsonId($manifest);
-        $recordId = $this->findManifestRecord($manifestFile, $manifestId);
+        $sourceManifestId = $this->getJsonId($manifest) ?: (string)@$manifestFile['source_url'];
+        $recordId = $this->findManifestRecord($manifestFile, $sourceManifestId);
 
         $details = array();
         $title = $this->normaliseLangValue(@$manifest['label']);
@@ -58,8 +63,12 @@ class DbIiifManifest extends DbRecordTypeEntity
 
         $this->setField($details, 'DT_NAME', $title);
         $this->setField($details, 'DT_FILE_RESOURCE', intval(@$manifestFile['ulf_ID']));
-
-        $this->setField($details, 'DT_IIIF_ID', $manifestId);
+        if($sourceManifestId){
+            $this->setField($details, 'DT_ORIGINAL_IIIF_ID', $sourceManifestId);
+        }
+        if($recordId>0){
+            $this->setField($details, 'DT_IIIF_ID', $this->manifestApiUrl($recordId));
+        }
 
         $modeValue = $this->resolveImportModeTerm($importMode);
         if($modeValue){
@@ -84,7 +93,10 @@ class DbIiifManifest extends DbRecordTypeEntity
             }
             return 0;
         }
-        return intval($res['data']);
+
+        $manifestRecID = intval($res['data']);
+        $this->updateSingleDetailDirect($manifestRecID, intval(DT_IIIF_ID), $this->manifestApiUrl($manifestRecID));
+        return $manifestRecID;
     }
 
     private function extractCopyrightText(array $manifest): string
@@ -114,7 +126,7 @@ class DbIiifManifest extends DbRecordTypeEntity
         }
     }
 
-    private function findManifestRecord(array $manifestFile, ?string $manifestId): int
+    private function findManifestRecord(array $manifestFile, ?string $sourceManifestId): int
     {
         $mysqli = $this->system->getMysqli();
         $rty = $this->recordTypeId();
@@ -129,8 +141,8 @@ class DbIiifManifest extends DbRecordTypeEntity
             $conditions[] = '(d.dtl_DetailTypeID='.DT_FILE_RESOURCE.' AND (d.dtl_UploadedFileID='.$ulfID.' OR d.dtl_Value="'.$ulfID.'"))';
         }
 
-        if(defined('DT_IIIF_ID') && $manifestId){
-            $conditions[] = '(d.dtl_DetailTypeID='.DT_IIIF_ID.' AND d.dtl_Value="'.addslashes($manifestId).'")';
+        if(defined('DT_ORIGINAL_IIIF_ID') && $sourceManifestId){
+            $conditions[] = '(d.dtl_DetailTypeID='.DT_ORIGINAL_IIIF_ID.' AND d.dtl_Value="'.addslashes($sourceManifestId).'")';
         }
 
         if(empty($conditions)){
@@ -143,6 +155,26 @@ class DbIiifManifest extends DbRecordTypeEntity
         return $recID ? intval($recID) : 0;
     }
 
+    private function updateSingleDetailDirect(int $recID, int $dtID, $value): bool
+    {
+        if($recID<1 || $dtID<1){
+            return false;
+        }
+        $mysqli = $this->system->getMysqli();
+        $valueSql = is_numeric($value)
+            ? (string)$value
+            : '"'.$mysqli->real_escape_string((string)$value).'"';
+        $dtlID = mysql__select_value($mysqli,
+            'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.intval($recID)
+            .' AND dtl_DetailTypeID='.intval($dtID).' LIMIT 1');
+        if($dtlID>0){
+            $query = 'UPDATE recDetails SET dtl_Value='.$valueSql.' WHERE dtl_ID='.intval($dtlID);
+        }else{
+            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
+                .intval($recID).','.intval($dtID).','.$valueSql.')';
+        }
+        return $mysqli->query($query) !== false;
+    }
 
 
     /** Replace the ordered managed Canvas list for this Manifest. */
@@ -312,7 +344,10 @@ class DbIiifManifest extends DbRecordTypeEntity
             return null;
         }
 
-        $canvasUrl = $this->canvasApiUrl($canvasRecID);
+        $canvasUrl = $this->canonicalCanvasUrl($canvasRecID, $details);
+        if(!$canvasUrl){
+            return null;
+        }
         $canvas = array(
             'id' => $canvasUrl,
             'type' => 'Canvas',
@@ -498,13 +533,28 @@ class DbIiifManifest extends DbRecordTypeEntity
             .'/api/'.$this->system->dbname()
             .'/iiif/manifest/'.intval($manifestRecID);
     }
-
-    private function canvasApiUrl(int $canvasRecID): string
+    
+    private function canonicalCanvasUrl(int $canvasRecID, ?array $canvasDetails=null): ?string
     {
-        return rtrim(HEURIST_BASE_URL, '/')
-            .'/api/'.$this->system->dbname()
-            .'/iiif/canvas/'.intval($canvasRecID);
-    }
+        static $dbCanvas = null;
+
+        if($canvasRecID < 1){
+            return null;
+        }
+        
+        if($canvasDetails!=null){
+            $existing = $this->getFirstDetailValue($canvasDetails, 'DT_IIIF_ID');
+            if($existing){
+                return (string)$existing;
+            }        
+        }
+
+        if($dbCanvas === null){
+            $dbCanvas = new DbIiifCanvas($this->system);
+        }
+
+        return $dbCanvas->canonicalCanvasUrlForCanvasRecord($canvasRecID);
+    }    
 
     private function isManifestRecord(int $manifestRecID): bool
     {
