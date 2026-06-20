@@ -52,6 +52,14 @@ $baseUrl = null;
 $system = null;
 $preparedParams = null;
 
+// Annotation lookup scope for the internal Mirador viewer.
+// canvas   - show all annotations that target the same Canvas URL. This is the default.
+// manifest - show only annotations imported/created in the current Manifest context.
+$annotationScope = strtolower(trim((string)(@$_REQUEST['annotation_scope'] ?: @$_REQUEST['anno_scope'] ?: 'canvas')));
+if(!in_array($annotationScope, array('canvas', 'manifest'), true)){
+    $annotationScope = 'canvas';
+}
+
 $validDatabaseName = !preg_match('[\W]', $dbname);
 $needsSystem = $validDatabaseName && (
     array_key_exists('preparedID', $_REQUEST) ||
@@ -187,6 +195,14 @@ if($baseUrl==null){
         $baseUrl = $baseUrl.'/';
     }
 
+function appendQueryParam($url, $name, $value){
+    if($name==='' || strpos($url, $name.'=')!==false){
+        return $url;
+    }
+    $sep = (strpos($url, '?')===false) ? '?' : '&';
+    return $url.$sep.rawurlencode($name).'='.rawurlencode((string)$value);
+}
+
 if($manifestRecID>0) {
 
     $url = $baseUrl.'heurist/api/'.rawurlencode($dbname).'/iiif/manifest/'.$manifestRecID.'?omit_annotation_pages=1';
@@ -238,6 +254,10 @@ if($manifestRecID>0) {
 
 if(@$_REQUEST['canvasUri']){
     $canvasUri = $_REQUEST['canvasUri'];
+}
+
+if(strpos($url, 'hserv/controller/record_output.php')!==false){
+    $url = appendQueryParam($url, 'omit_annotation_pages', '1');
 }
 
 $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
@@ -300,8 +320,17 @@ body {
 <?php
 if (!preg_match('[\W]', $dbname)){
 ?>
-    //temporarely .($manifestRecID>0?'/'.$manifestRecID:'')
-    window.endpointURL = "<?php echo $baseUrl.'heurist/api/'.htmlspecialchars($dbname).'/annotations';?>";
+    // Annotation lookup scope:
+    //   canvas   -> /annotations, all DB annotations for the requested Canvas URL
+    //   manifest -> /annotations/{manifestRecID}, only annotations linked to this Manifest
+    window.annotationScope = "<?php echo htmlspecialchars($annotationScope);?>";
+    window.endpointURL = "<?php
+        $endpoint = $baseUrl.'heurist/api/'.htmlspecialchars($dbname).'/annotations';
+        if($annotationScope==='manifest' && $manifestRecID>0){
+            $endpoint .= '/'.intval($manifestRecID);
+        }
+        echo $endpoint;
+    ?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
 <?php
 }
