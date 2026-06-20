@@ -52,7 +52,8 @@ require_once dirname(__FILE__).'/../../autoload.php';
         $params['resource'] = 'manifest';
     }
 
-    $res = hserv\records\export\ExportRecordsIIIF::getIiifApiResource($system, $params['resource'], $params['id']);
+    $omitAnnotationPages = !empty($params['omit_annotation_pages']) && intval($params['omit_annotation_pages']) === 1;
+    $res = hserv\records\export\ExportRecordsIIIF::getIiifApiResource($system, $params['resource'], $params['id'], $omitAnnotationPages);
 
     $system->dbclose();
 

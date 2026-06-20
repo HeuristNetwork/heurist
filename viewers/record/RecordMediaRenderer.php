@@ -137,7 +137,7 @@ class RecordMediaRenderer
 
         $files = [];
         foreach ($thumbs as $thumb) {
-            if ($this->is3d($thumb) || $this->isIiifManifest($thumb) || $this->isAudioVideo($thumb)) {
+            if ($this->is3d($thumb) || $this->isIiifMedia($thumb) || $this->isAudioVideo($thumb)) {
                 continue;
             }
             $files[] = [
@@ -216,6 +216,8 @@ class RecordMediaRenderer
             $miradorUrl = $this->miradorUrl($thumb, false);
             $html[] = '<a href="'.$this->h($miradorUrl).'" target="_blank" rel="noopener">open in new tab</a>';
             $html[] = '<a href="'.$this->h($miradorUrl).'" class="record-media-mirador">'.$this->miradorIcon().'&nbsp;Mirador</a>';
+            $html[] = '<a href="'.$this->h($this->manifestUrl($thumb)).'" target="_blank" rel="noopener">'
+                .'<span class="external-link" style="display:inline-block;" title="Manifest content"></span>manifest</a>';
             $html[] = '</div><!-- CLOSE download_link -->';
             return implode('', $html);
         }
@@ -271,7 +273,8 @@ class RecordMediaRenderer
         if ($this->isIiifManifest($thumb)) {
             $onclick = ' onclick="window.HeuristRecordMedia.openMirador(\''.$this->js($this->miradorUrl($thumb, false)).'\')"';
             $imgStyle = ' style="cursor:pointer;"';
-            return '<img src="'.$this->h($thumb['thumb'] ?? '').'"'.$imgStyle.$onclick.'>';
+            $src = $thumb['thumb'] ?? HEURIST_BASE_URL.'hclient/assets/iiif_logo200.png';
+            return '<img src="'.$this->h($src).'"'.$imgStyle.$onclick.'>';
         }
 
         if ($this->is3d($thumb)) {
@@ -334,8 +337,25 @@ class RecordMediaRenderer
 
     private function isIiifManifest(array $thumb): bool
     {
-        return strpos((string)($thumb['sourceType'] ?? ''), 'iiif') === 0
-            || (defined('ULF_IIIF') && strpos((string)($thumb['orig_name'] ?? ''), ULF_IIIF) === 0);
+        if (!empty($thumb['iiif_manifest_record']) || !empty($thumb['iiif_annotation_record']) || !empty($thumb['manifest_rec_id'])) {
+            return true;
+        }
+
+        $sourceType = (string)($thumb['sourceType'] ?? '');
+        $origName = (string)($thumb['orig_name'] ?? '');
+
+        return in_array($sourceType, ['iiif', 'iiif_manifest'], true)
+            || (defined('ULF_IIIF') && strpos($origName, ULF_IIIF) === 0);
+    }
+
+    private function isIiifMedia(array $thumb): bool
+    {
+        $sourceType = (string)($thumb['sourceType'] ?? '');
+        $origName = (string)($thumb['orig_name'] ?? '');
+
+        return $this->isIiifManifest($thumb)
+            || strpos($sourceType, 'iiif') === 0
+            || (defined('ULF_IIIF_IMAGE') && $origName === ULF_IIIF_IMAGE);
     }
 
     private function is3d(array $thumb): bool
@@ -361,6 +381,12 @@ class RecordMediaRenderer
 
     private function canOpenInMirador(array $thumb): bool
     {
+        $sourceType = (string)($thumb['sourceType'] ?? '');
+        $origName = (string)($thumb['orig_name'] ?? '');
+        if ($sourceType === 'iiif_image' || (defined('ULF_IIIF_IMAGE') && $origName === ULF_IIIF_IMAGE)) {
+            return true;
+        }
+
         $mime = (string)($thumb['mimeType'] ?? '');
         if (strpos($mime, 'image/') === 0) {
             return true;
@@ -393,10 +419,36 @@ class RecordMediaRenderer
 
     private function miradorUrl(array $thumb, bool $asImage): string
     {
+        $recID = intval($thumb['manifest_rec_id'] ?? 0);
+        if($recID>0 || !empty($thumb['iiif_manifest_record']) || !empty($thumb['iiif_annotation_record'])){
+            $url = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.rawurlencode($this->system->dbname())
+                .'&recID='.rawurlencode((string)($recID>0 ? $recID : $this->recordID));
+            if(!empty($thumb['canvas_uri'])){
+                $url .= '&canvasUri='.rawurlencode((string)$thumb['canvas_uri']);
+            }
+            return $url;
+        }
+
         return HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.rawurlencode($this->system->dbname())
             .'&recID='.$this->recordID
             .($asImage ? '&iiif_image=' : '&iiif=')
             .rawurlencode((string)($thumb['nonce'] ?? ''));
+    }
+
+    private function manifestUrl(array $thumb): string
+    {
+        $manifestRecID = intval($thumb['manifest_rec_id'] ?? 0);
+        if($manifestRecID>0 || !empty($thumb['iiif_manifest_record']) || !empty($thumb['iiif_annotation_record'])){
+            return HEURIST_BASE_URL.'api/'.rawurlencode($this->system->dbname()).'/iiif/manifest/'
+                .rawurlencode((string)($manifestRecID>0 ? $manifestRecID : $this->recordID));
+        }
+
+        if(!empty($thumb['external_url'])){
+            return (string)$thumb['external_url'];
+        }
+
+        return HEURIST_BASE_URL.'?db='.rawurlencode($this->system->dbname())
+            .'&file='.rawurlencode((string)($thumb['nonce'] ?? ''));
     }
 
     private function openSeadragonUrl(array $thumb): string

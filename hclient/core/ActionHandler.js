@@ -490,7 +490,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordUploadedFilesIndex', popup_dialog_options);
                 break;
             case "menu-files-annotations":
-                window.hWin.HEURIST4.ui.showRecordActionDialog('recordImportAnnotations', popup_dialog_options);
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordImportIIIF', popup_dialog_options);
                 break;
             case "menu-records-archive": // not used
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');

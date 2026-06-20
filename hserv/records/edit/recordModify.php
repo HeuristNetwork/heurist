@@ -34,6 +34,8 @@ use hserv\utilities\Temporal;
 use hserv\structure\ConceptCode;
 use hserv\report\ReportRecord;
 use hserv\records\export\ExportRecordsHTML;
+use hserv\entity\DbAnnotations;
+use hserv\entity\DbIiifCanvas;
 
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
@@ -823,6 +825,29 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
     }
 
+    
+    // Normal Heurist record-editor saves of IIIF annotation records make Heurist fields authoritative.
+    // DbAnnotations::save() sets skip_iiif_annotation_state_update for import/Mirador API saves.
+    if(empty($record['skip_iiif_annotation_state_update'])
+        && $rectype>0
+        && $system->defineConstant('RT_IIIF_ANNOTATION')
+        && $rectype==RT_IIIF_ANNOTATION)
+    {
+        $dbAnno = new DbAnnotations($system);
+        $dbAnno->markSavedFromHeuristEditor(intval($recID));
+    }
+
+    // Normal Heurist record-editor saves of IIIF Canvas records make Heurist fields authoritative.
+    // DbIiifCanvas::ensureFromCanvas() sets skip_iiif_canvas_state_update for import saves.
+    if(empty($record['skip_iiif_canvas_state_update'])
+        && $rectype>0
+        && $system->defineConstant('RT_IIIF_CANVAS')
+        && $rectype==RT_IIIF_CANVAS)
+    {
+        $dbCanvas = new DbIiifCanvas($system);
+        $dbCanvas->markSavedFromHeuristEditor(intval($recID));
+    }
+    
     $rtn = [
         'status' => HEURIST_OK,
         'data' => intval($recID),
@@ -4396,6 +4421,9 @@ function updateMaskFields($type, $value, $length, $range){
     return [$value, $reason];
 }
 
+//
+// Checks language prefixes for text field for given record
+//
 function recordCheckLanguages($system, $recID, $recTypeID){
 
     global $glb_lang_codes;
@@ -4404,7 +4432,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
     $isAdmin = $system->isAdmin();
 
     $system->defineConstant('RT_CMS_HOME');
-    $system->defineConstant('DT_LANGUAGES');
+    $system->defineConstant('DT_LANGUAGE');
     $allowedLanguages = $system->settings->getDatabaseSetting('Languages');
 
     if(empty($allowedLanguages)){
@@ -4415,7 +4443,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
 
     $query = "SELECT rst_DetailTypeID FROM defRecStructure INNER JOIN defDetailTypes ON dty_ID = rst_DetailTypeID WHERE rst_RecTypeID = {$recTypeID} AND (dty_Type = 'freetext' OR dty_Type = 'blocktext')";
     $textFields = mysql__select_list2($mysqli, $query, 'intval');
-    $isCMSHome = defined('RT_CMS_HOME') && defined('DT_LANGUAGES') && $recTypeID == RT_CMS_HOME;
+    $isCMSHome = defined('RT_CMS_HOME') && defined('DT_LANGUAGE') && $recTypeID == RT_CMS_HOME;
 
     if(empty($textFields) && !$isCMSHome){
         return [];
@@ -4460,7 +4488,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
 
     if($isCMSHome){
 
-        $webLanguages = mysql__select_list2($mysqli, "SELECT dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = ". DT_LANGUAGES, 'intval');
+        $webLanguages = mysql__select_list2($mysqli, "SELECT dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = ". DT_LANGUAGE, 'intval');
         $languageCodes = getTermCodes($mysqli, $webLanguages);
         $languageLabels = getTermLabels($mysqli, $webLanguages);
 

@@ -2,108 +2,87 @@
 /**
 * DbAnnotations.php - Class DbAnnotations
 *
-* Manages IIIF annotations records.
-*
-* @project     Heurist academic knowledge management system
-* @package Entity 
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @since       6.0
+* Manages IIIF annotation records.
 */
 namespace hserv\entity;
 
-use hserv\entity\DbEntityBase;
-use hserv\entity\DbRecUploadedFiles;
+use hserv\entity\DbRecordTypeEntity;
 use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
+require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
+require_once dirname(__FILE__).'/IiifAnnotationJson.php';
+require_once dirname(__FILE__).'/DbIiifCanvas.php';
 
 /**
 * Class DbAnnotations
 *
-* Manages records with type IIIF annotations, providing functionality to search, create, update, and delete annotations. It interacts with Heurist record structures, linking annotations to uploaded files or existing records.
-* 
+* Manages IIIF Web Annotation records used by Mirador and the IIIF annotation import workflow.
 */
-class DbAnnotations extends DbEntityBase
+class DbAnnotations extends DbRecordTypeEntity
 {
-    private $dtyAnnotationInfo;
+    /** @var IiifAnnotationJson|null */
+    private $annotationJson = null;
 
-    /**
-     * Constructor for DbAnnotations.
-     *
-     * Initializes the system object, data, and defines necessary Heurist constants
-     * related to annotation record types and detail types.
-     *
-     * @param \hserv\System $system The main Heurist system object.
-     * @param array|null $data Optional data passed to the entity, typically request parameters.
-     */
-    public function __construct( $system, $data=null ) {
-        $this->system = $system;
-        $this->data = $data;
-
-        $this->system->defineConstant('RT_IIIF_ANNOTATION');
-        $this->system->defineConstant('DT_NAME');
-        $this->system->defineConstant('DT_URL');
-        $this->system->defineConstant('DT_DATE');
-        $this->system->defineConstant('DT_ORIGINAL_RECORD_ID');
-        $this->system->defineConstant('DT_ANNOTATION_INFO');
-        $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
-        $this->system->defineConstant('DT_MEDIA_RESOURCE');
-
-        $this->system->defineConstant('DT_SHORT_SUMMARY');
-        $this->system->defineConstant('DT_THUMBNAIL');
-        $this->system->defineConstant('DT_FILE_RESOURCE');
-
-
-        $this->dtyAnnotationInfo = (defined('DT_ANNOTATION_INFO'))
-                ? DT_ANNOTATION_INFO
-                : 0;
-
+    private function annotationJson(): IiifAnnotationJson
+    {
+        if($this->annotationJson === null){
+            $this->annotationJson = new IiifAnnotationJson();
+        }
+        return $this->annotationJson;
     }
 
-    /**
-     * Checks if the current entity instance is valid.
-     *
-     * This implementation always returns true.
-     *
-     * @return bool Always true.
-     */
-    public function isvalid(){
-        return true;
+    protected function initRecordTypeEntity(): void
+    {
+        $this->recordTypeConst = 'RT_IIIF_ANNOTATION';
+        $this->recordTypeConceptCode = '2-109';
+
+        $this->requiredConstants = array(
+            'RT_IIIF_ANNOTATION',
+            'RT_IIIF_MANIFEST',
+            'DT_NAME',
+            'DT_SHORT_SUMMARY',
+            'DT_EXTENDED_DESCRIPTION',
+            'DT_URL',
+            'DT_IIIF_ID', 
+            'DT_ORIGINAL_IIIF_ID',
+            'DT_ANNOTATION_INFO',
+            'DT_ANNOTATION_MANIFEST',
+            'DT_IIIF_CANVAS',
+            'DT_ANNOTATION_STATE',
+            'DT_ANNOTATION_MOTIVATION',
+            'DT_ANNOTATION_SELECTOR_TYPE',
+            'DT_ANNOTATION_SELECTOR_VALUE',
+            'DT_LANGUAGE',
+            'DT_THUMBNAIL'
+        );
+
+        // Entity-local term constants. Fill the empty placeholders when the concept codes are final.
+        $this->requiredTermConstants = [
+            'TRM_ANNOTATION_STATE_IMPORTED' => '2-10426',
+            'TRM_ANNOTATION_STATE_MIRADOR'  => '2-10427',
+            'TRM_ANNOTATION_STATE_HEURIST'  => '2-10428',
+            'TRM_ANNOTATION_STATE_MODIFIED' => '2-10429',
+            'TRM_ANNOTATION_STATE_OBSOLETE' => '2-10430',
+            'TRM_ANNOTATION_STATE_REMOVED'  => '2-10431',
+
+            'TRM_ANNOTATION_MOTIVATION_COMMENTING' => '2-10419',
+            'TRM_SELECTOR_FRAGMENT' => '2-10433',
+            'TRM_SELECTOR_SVG' => '2-10434',
+            
+            'TRM_VOCAB_LANGUAGE' => '2-496'
+        ];        
+        
     }
+    
+    
 
     /**
-     * Searches for IIIF annotations based on criteria provided in `$this->data`.
-     *
-     * This method overrides the base `search()` behavior to implement specific search logic
-     * for IIIF annotations. It does not use `DbEntitySearch` in the same way other entities might.
-     * The search behavior is determined by the `recID` and other parameters in `$this->data`:
-     *
-     * - If `$this->data['recID']` is 'edit':
-     *   It expects `$this->data['uuid']` to be set. It finds the Heurist record ID associated
-     *   with the annotation UUID and redirects the user to the record edit page.
-     *
-     * - If `$this->data['recID']` is a specific annotation UUID (and not 'pages' or 'edit'):
-     *   It fetches and returns the single annotation matching that UUID.
-     *
-     * - If `$this->data['recID']` is 'pages':
-     *   It expects `$this->data['uri']` (the canvas URI) to be set. It fetches all
-     *   Web Annotations associated with that canvas URI.
-     *
-     * The results are formatted as an IIIF AnnotationPage.
-     *
-     * @return array An associative array structured as an IIIF AnnotationPage.
-     *               The 'items' key will contain an array of found annotation objects (decoded from JSON).
-     *               In the 'edit' case, this method triggers an HTTP redirect and does not return directly.
-     */     
+     * Returns an IIIF AnnotationPage for Mirador.
+     */
     public function search(){
 
-        if($this->data['recID']=='edit'){
-
-            $recordId = $this->findRecIDbyUUID($this->data['uuid']);
+        if(@$this->data['recID']=='edit'){
+            $recordId = $this->findRecIDbyUUID(@$this->data['uuid']);
             if($recordId>0){
                 $redirect = HEURIST_BASE_URL.'/hclient/framecontent/recordEdit.php?db='.$this->system->dbname().'&fmt=edit&recID='.$recordId;
                 redirectURL($redirect);
@@ -111,17 +90,15 @@ class DbAnnotations extends DbEntityBase
             exit;
         }
 
+        $sjson = array('id'=>"https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 'type' => 'AnnotationPage', 'items' => array());
 
-        $sjson = array('id'=>"https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]",
-                        'type' => 'AnnotationPage');
-
-        $sjson['items'] = array();
-
-        //find all annotation for given uri
-        if($this->data['recID']!='pages'){
-            $item = $this->findItembyUUID($this->data['recID']);
-            if($item!=null){
-                $sjson['items'] = array(json_decode($item, true));
+        if(@$this->data['recID']!='pages'){
+            $recordId = $this->findRecIDbyIiifIdentifier(@$this->data['recID'], intval(@$this->data['manifestRecID']));
+            if($recordId>0){
+                $anno = $this->buildIiifAnnotationFromRecord($recordId);
+                if($anno){
+                    $sjson['items'] = array($anno);
+                }
             }
             return $sjson;
         }
@@ -130,15 +107,15 @@ class DbAnnotations extends DbEntityBase
             $params = USanitize::sanitizeInputArray();
             $this->data['uri'] = @$params['uri'];
         }
-        $uri = $this->data['uri'];
-        $items = $this->findItemsByCanvas($uri);
-        if(isEmptyArray($items)){
+
+        $recordIds = $this->findItemsByCanvas(@$this->data['uri'], intval(@$this->data['manifestRecID']));
+        if(isEmptyArray($recordIds)){
             return $sjson;
         }
 
-        foreach($items as $item){
-            $anno = json_decode($item, true);
-            if($anno && $anno['type']=='Annotation'){ //only WebAnnotations
+        foreach($recordIds as $recordId){
+            $anno = $this->buildIiifAnnotationFromRecord(intval($recordId));
+            if($anno && @$anno['type']=='Annotation'){
                 $sjson['items'][] = $anno;
             }
         }
@@ -146,471 +123,414 @@ class DbAnnotations extends DbEntityBase
         return $sjson;
     }
 
-    /**
-    * returns Annotation description by Canvas URI
-    */
-    private function findItemsByCanvas($canvasUri){
-        if($this->dtyAnnotationInfo>0 && defined('DT_URL')){
-            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
-            .'d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.$canvasUri.'"'
-            .' AND d1.dtl_RecID=d2.dtl_RecID'
-            .' AND d2.dtl_DetailTypeID='.$this->dtyAnnotationInfo;
-            return mysql__select_list2($this->system->getMysqli(), $query);
-        }else{
+    private function findItemsByCanvas($canvasUri, int $manifestRecID=0){
+        if(!$canvasUri || !$this->ensureDefinitionsReady(false)){
             return array();
         }
+
+        $recordIds = array();
+
+        // 1. Overlay/original-target lookup. DT_URL stores the original target Canvas URL.
+        $ids = $this->findItemsByOriginalCanvasUrl((string)$canvasUri, $manifestRecID);
+        if(!isEmptyArray($ids)){
+            $recordIds = array_merge($recordIds, $ids);
+        }
+
+        // 2. Managed/canonical lookup. Canvas DT_IIIF_ID stores the Heurist Canvas API URL.
+        $dbCanvas = new DbIiifCanvas($this->system);
+        $canvasRecIDs = $dbCanvas->canvasRecordsForCanonicalUrl((string)$canvasUri);
+        foreach($canvasRecIDs as $canvasRecID){
+            $ids = $this->findItemsByManagedCanvas(intval($canvasRecID), $manifestRecID);
+            if(!isEmptyArray($ids)){
+                $recordIds = array_merge($recordIds, $ids);
+            }
+        }
+
+        return array_values(array_unique(array_map('intval', $recordIds)));
     }
 
-    /**
-    * returns Annotation description by UUID
-    */
-    private function findItembyUUID($uuid){
-        if($this->dtyAnnotationInfo>0 && defined('DT_ORIGINAL_RECORD_ID')){
-            $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
-            .'d1.dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID .' AND d1.dtl_Value="'.$uuid.'"'
-            .' AND d1.dtl_RecID=d2.dtl_RecID'
-            .' AND d2.dtl_DetailTypeID='.$this->dtyAnnotationInfo;
-            return mysql__select_value($this->system->getMysqli(), $query);
-        }else{
+    private function findItemsByOriginalCanvasUrl(string $canvasUri, int $manifestRecID=0): array
+    {
+        if($canvasUri==='' || !defined('DT_URL')){
             return array();
         }
+
+        $mysqli = $this->system->getMysqli();
+        $query = 'SELECT DISTINCT r.rec_ID FROM recDetails d1, Records r ';
+        $where = 'r.rec_ID=d1.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+            .' AND d1.dtl_DetailTypeID='.DT_URL .' AND d1.dtl_Value="'.addslashes($canvasUri).'"';
+
+        if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
+            $query .= ', recDetails dm ';
+            $where .= ' AND dm.dtl_RecID=r.rec_ID AND dm.dtl_DetailTypeID='.DT_ANNOTATION_MANIFEST
+                .' AND dm.dtl_Value='.intval($manifestRecID);
+        }
+
+        return mysql__select_list2($mysqli, $query.SQL_WHERE.$where.' ORDER BY r.rec_ID') ?: array();
     }
 
-    /**
-    * returns Annotation heurist record ID by UUID
-    */
+    private function findItemsByManagedCanvas(int $canvasRecID, int $manifestRecID=0): array
+    {
+        if($canvasRecID<1 || !defined('DT_IIIF_CANVAS')){
+            return array();
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $query = 'SELECT DISTINCT r.rec_ID FROM recDetails dc, Records r ';
+        $where = 'r.rec_ID=dc.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+            .' AND dc.dtl_DetailTypeID='.DT_IIIF_CANVAS
+            .' AND dc.dtl_Value='.intval($canvasRecID);
+
+        if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
+            $query .= ', recDetails dm ';
+            $where .= ' AND dm.dtl_RecID=r.rec_ID AND dm.dtl_DetailTypeID='.DT_ANNOTATION_MANIFEST
+                .' AND dm.dtl_Value='.intval($manifestRecID);
+        }
+
+        return mysql__select_list2($mysqli, $query.SQL_WHERE.$where.' ORDER BY r.rec_ID') ?: array();
+    }
+
+    private function findItembyUUID($uuid, int $manifestRecID=0){
+        $recordId = $this->findRecIDbyIiifIdentifier($uuid, $manifestRecID);
+        if($recordId>0 && defined('DT_ANNOTATION_INFO')){
+            $mysqli = $this->system->getMysqli();
+            return mysql__select_value($mysqli,
+                'SELECT dtl_Value FROM recDetails WHERE dtl_RecID='.intval($recordId)
+                .' AND dtl_DetailTypeID='.intval(DT_ANNOTATION_INFO).' LIMIT 1');
+        }
+        return null;
+    }
+
     private function findRecIDbyUUID($uuid){
-        if(defined('DT_ORIGINAL_RECORD_ID')){
-            $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$uuid.'"';
-            $recordId = mysql__select_value($this->system->getMysqli(), $query);
-        }
-        if(!$recordId){
-            $recordId = 0;
-        }
-        return $recordId;
+        return $this->findRecIDbyIiifIdentifier($uuid, 0);
     }
 
-    /**
-     * Deletes an annotation.
-     *
-     * The annotation to be deleted is identified by its UUID, which is expected
-     * in `$this->data['recID']`. It validates user permissions before deletion.
-     *
-     * @param bool $disable_foreign_checks Unused in this implementation.
-     * @return array|false A result array from `recordDelete` on success, or false on failure.
-     */
+    private function findRecIDbyIiifIdentifier($annotationId, $manifestRecID=0): int
+    {
+        if(!$annotationId || !$this->ensureDefinitionsReady(false)){
+            return 0;
+        }
+
+        $extra = array();
+        if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
+            $extra['DT_ANNOTATION_MANIFEST'] = intval($manifestRecID);
+        }
+
+        $recordId = $this->findRecordByField('DT_IIIF_ID', $annotationId, $extra);
+        if(!$recordId && defined('DT_ORIGINAL_IIIF_ID')){
+            $recordId = $this->findRecordByField('DT_ORIGINAL_IIIF_ID', $annotationId, $extra);
+        }
+        if(!$recordId && $manifestRecID>0){
+            return $this->findRecIDbyIiifIdentifier($annotationId, 0);
+        }
+        return intval($recordId);
+    }
+
+    private function findRecIDbyOriginalId($annotationId, $manifestRecID=0): int
+    {
+        if(!$annotationId || !$this->ensureDefinitionsReady(false) || !defined('DT_ORIGINAL_IIIF_ID')){
+            return 0;
+        }
+
+        $extra = array();
+        if($manifestRecID>0 && defined('DT_ANNOTATION_MANIFEST')){
+            $extra['DT_ANNOTATION_MANIFEST'] = intval($manifestRecID);
+        }
+
+        $recordId = $this->findRecordByField('DT_ORIGINAL_IIIF_ID', $annotationId, $extra);
+        if(!$recordId && $manifestRecID>0){
+            return $this->findRecIDbyOriginalId($annotationId, 0);
+        }
+        return intval($recordId);
+    }
+
     public function delete($disable_foreign_checks = false){
-
-        if($this->data['recID']){  //annotation UUID
-
-            //validate permission for current user and set of records see $this->recordIDs
+        if(@$this->data['recID']){
             if(!$this->_validatePermission()){
                 return false;
             }
-
-            //remove annotation with given ID
-            $recordId = $this->findRecIDbyUUID($this->data['recID']);
+            $recordId = $this->findRecIDbyIiifIdentifier($this->data['recID'], intval(@$this->data['manifestRecID']));
             if($recordId>0){
                 return recordDelete($this->system, $recordId);
             }
-
             $this->system->addError(HEURIST_NOT_FOUND, 'Annotation record to be deleted not found');
-
         }else{
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid annotation identificator');
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid annotation identifier');
         }
-
         return false;
     }
 
-    /**
-    * 
-    */
-    private function assignField(&$details, $id, $value){
+    private function isProtectedFromReimport(array $details): bool
+    {
+        $state = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
 
-        //field id
-        if(intval($id)>0){
-            $id = intval($id);
-        }elseif(defined($id)){
-            $id = constant($id);
-        }
+        $protectedStates = array_filter([
+            $this->getTermId('TRM_ANNOTATION_STATE_MIRADOR'),
+            $this->getTermId('TRM_ANNOTATION_STATE_HEURIST'),
+            $this->getTermId('TRM_ANNOTATION_STATE_MODIFIED'),
+            $this->getTermId('TRM_ANNOTATION_STATE_OBSOLETE'),
+            $this->getTermId('TRM_ANNOTATION_STATE_REMOVED')
+        ]);
 
-        $was_changed = false;
-
-        if(intval($id)>0){
-            if(@$details[$id]){
-                //already exist
-                if(array_search($value, $details[$id])===false){
-                    $details[$id][] = $value;
-                    $was_changed = true;
-                }
-            }else{
-                //add new field
-                $details[$id] = array($value);
-                $was_changed = true;
-            }
-        }
-
-        return $was_changed;
+        return $state > 0 && in_array($state, $protectedStates, true);
     }
 
     /**
-    * 
-    */
-    private function checkRequiredDefintions(){
-
-        if(!defined('RT_IIIF_ANNOTATION')){
-            //import missed record type
-            $importDef = new \DbsImport( $this->system );
-            $isOK = $importDef->checkAndImportRty('2-101');
-
-            if(!$isOK){
-                $this->system->addError(HEURIST_ACTION_BLOCKED,
-                    'Can not add annotation. This database does not have "Map/Image Annotation" record type. '
-                    .'Import required record type');
-                return false;
-            }
-
-            //redefine constants
-            $this->system->defineConstant('RT_IIIF_ANNOTATION', true);
-            $this->system->defineConstant('DT_ORIGINAL_RECORD_ID', true);
-            $this->system->defineConstant('DT_ANNOTATION_INFO', true);
-        }
-
-        if( !defined('DT_ANNOTATION_INFO') || !defined('DT_ORIGINAL_RECORD_ID')){
-            $this->system->addError(HEURIST_ACTION_BLOCKED,
-                    'Can not add annotation. This database does not have "Annotation" (2-1098) or "Original ID" fields (2-36). '
-                    .'Import record type "Map/Image Annotation" to get this field');
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-    * See similar in importAction
-    * @todo - makes general function
-    */
-    private function findOriginalRecord($recordId, &$details){
-
-        if(!$recordId){
-            return;
-        }
-
-        $query = "SELECT dtl_Id, dtl_DetailTypeID, dtl_Value, ST_asWKT(dtl_Geo), dtl_UploadedFileID FROM recDetails WHERE dtl_RecID=$recordId ORDER BY dtl_DetailTypeID";
-        $dets = mysql__select_all($this->system->getMysqli(), $query);
-        if(!$dets){
-            return;
-        }
-
-        foreach ($dets as $row){
-            //uniuque dtl_ID $bd_id = $row[0];
-            $field_type = $row[1];
-            if($row[4]){ //dtl_UploadedFileID
-                $value = $row[4];
-            }elseif($row[3]){ //geo
-                $value = $row[2].' '.$row[3];
-            }else{
-                $value = $row[2];
-            }
-            $details[$field_type][] = $value; //"t:"
-        }
-
-    }
-
-    /**
-    * 
-    */
-    private function getAnnotationId($anno){
-
-        $anno_uid = $this->removeUriSchema($this->isOpenAnnotation($anno)?@$anno['@id']:@$anno['uuid']);
-        if(!$anno_uid){
-            $this->system->addError(HEURIST_ACTION_BLOCKED,
-                    'Can not add annotation. Anotation UUID is not found');
-            return false;
-        }
-        return $anno_uid;
-    }
-
-    /**
-     * Saves an annotation (creates or updates).
-     *
-     * Parses the annotation data (either Open Annotation or Web Annotation format),
-     * extracts relevant information, and saves it as a Heurist record.
-     * Optionally creates a thumbnail for the annotated region.
-     * Can link the annotation to an existing uploaded file (`$ulf_ID`) or a source record.
-     *
-     * @param bool $createThumbnail If true, attempts to generate a thumbnail for the annotation. Defaults to true.
-     * @param int $ulf_ID Optional ID of an `recUploadedFiles` record to link to this annotation. Defaults to 0.
-     * @return array|false An array containing the result of the save operation (including status and record ID),
-     *                     or false on failure. The result array may include 'is_new' or 'is_retained' flags.
+     * Saves an imported or Mirador-created IIIF annotation.
+     * Returns recordSave-like response with flags: is_new, is_retained, is_preserved_local.
      */
     public function save($createThumbnail=true, $ulf_ID=0){
-
-
-        $anno = $this->data['fields']['annotation'];
-        $anno_uid = $this->getAnnotationId($anno);
-
-        //validate permission for current user and set of records see $this->recordIDs
-        if(!($this->_validatePermission() &&
-             $this->checkRequiredDefintions() &&
-             $anno_uid
-           )){
+        if(!$this->_validatePermission() || !$this->ensureDefinitionsReady($this->system->isAdmin())){
             return false;
         }
-/*
-        annotation: {
-          canvas: this.canvasId,
-          data: JSON.stringify(annotation),
-          uuid: annotation.id,
-        },
-*/
-        $this->dtyAnnotationInfo = DT_ANNOTATION_INFO;
 
-        $recordId = 0;
-        $details = array();
-
-        if(!$this->is_addition){
-            //find record id by annotation UID
-            $recordId = $this->findRecIDbyUUID($anno_uid);
-            //already exists
-            $this->findOriginalRecord($recordId, $details);
-        }
-
-        $sourceRecordId = $this->data['fields']['sourceRecordId']??@$anno['sourceRecordId'];
-        $manifestUrl = $this->data['fields']['manifestUrl']??@$anno['manifestUrl'];
-
-        //get values from annotation and add/replace values in current record
-        $was_changed = $this->parseAnnotation($details, $anno, $createThumbnail, $sourceRecordId, $manifestUrl);
-        if(!$details[DT_NAME]){
-            $this->system->addError(HEURIST_ACTION_BLOCKED,
-                    'Can not add annotation. Anotation text is not found');
+        $fields = @$this->data['fields'];
+        if(!is_array($fields)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Annotation fields are not defined');
             return false;
         }
+
+        $parsed = $this->annotationJson()->parseIncomingAnnotation($fields);
+        if(!$parsed){
+            $this->system->addError(HEURIST_INVALID_REQUEST,
+                $this->annotationJson()->getLastError() ?: 'Unsupported annotation format');
+            return false;
+        }
+
+        $manifestRecID = intval(@$fields['manifestRecID']);
+        $manifestFileID = intval(@$fields['manifestFileID']);
+        $canvasRecID = intval(@$fields['canvasRecID']);
+        $canvasUrl = @$fields['canvasOriginalId'] ?: @$fields['canvas'] ?: @$parsed['canvas'];
+        $manifestUrl = @$fields['manifestUrl'];
+
+        if($canvasUrl){
+            $parsed['canvas'] = $canvasUrl;
+        }
+
+        $recordId = $this->findRecIDbyIiifIdentifier($parsed['id'], $manifestRecID);
+        $details = $this->loadRecordDetails($recordId);
+
+        if($recordId>0 && !empty($fields['preserveLocal']) && $this->isProtectedFromReimport($details)){
+            return array('status'=>HEURIST_OK, 'data'=>$recordId, 'is_preserved_local'=>true);
+        }
+
+        $oldJson = $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO');
+        $changed = $this->fillDetailsFromParsedAnnotation($details, $parsed, $manifestRecID, $manifestFileID, $canvasRecID);
 
         if($ulf_ID>0){
-            //link annotation record to registered manifest
-            $this->assignField($details, 'DT_FILE_RESOURCE', $ulf_ID);
-
-        }elseif($sourceRecordId>0 && $recordId!=$sourceRecordId){
-            //link referenced image record with annotation record
-            $this->assignField($details, 'DT_MEDIA_RESOURCE', $sourceRecordId);
+            $changed = $this->appendUniqueField($details, 'DT_FILE_RESOURCE', $ulf_ID) || $changed;
         }
 
-
-        if($was_changed){
-            //record header
-            $record = array();
-            $record['ID'] = $recordId;
-            $record['RecTypeID'] = RT_IIIF_ANNOTATION;
-            $record['no_validation'] = true;
-            $record['details'] = $details;
-
-            $out = recordSave($this->system, $record, false, true);
-            if(is_array($out) && $out['data']>0){
-                $out['is_new'] = $recordId == 0;
+        if($createThumbnail && defined('DT_THUMBNAIL') && @$parsed['selector_value'] && @$parsed['canvas']){
+            $thumb_id = $this->getAnnotationImage($manifestUrl, $parsed['id'], $parsed['selector_value'], $parsed['canvas']);
+            if($thumb_id>0){
+                $changed = $this->setField($details, 'DT_THUMBNAIL', $thumb_id) || $changed;
             }
-        }elseif($recordId>0){
-            $out = array('status'=>HEURIST_OK, 'data'=>$recordId, 'is_retained'=>true);
-        }else{
-            $this->system->addError(HEURIST_ACTION_BLOCKED,
-                    'Can not add annotation. Anotation data is not valid');
-            $out = false;
         }
 
+        if(!$changed && $recordId>0 && $oldJson === $parsed['json']){
+            return array('status'=>HEURIST_OK, 'data'=>$recordId, 'is_retained'=>true);
+        }
+
+        $record = array(
+            'ID' => $recordId,
+            'RecTypeID' => $this->recordTypeId(),
+            'no_validation' => 'ignore_all',
+            // DbAnnotations handles state itself for import/Mirador saves.
+            // Prevent the generic recordSave() post-hook from marking this as a Heurist-editor edit.
+            'skip_iiif_annotation_state_update' => true,
+            'details' => $details
+        );
+
+        $out = recordSave($this->system, $record, false, true, 0);
+        if(is_array($out) && @$out['data']>0){
+            $savedId = intval($out['data']);
+            $this->updateSingleDetailDirect($savedId, 'DT_IIIF_ID', $this->annotationApiUrl($savedId));
+            $out['is_new'] = ($recordId == 0);
+        }
         return $out;
     }
 
-    /**
-    * 
-    */
-    private function parseAnnotation(&$details, $anno, $createThumbnail, $sourceRecordId, $manifestUrl){
-
-        if($this->isOpenAnnotation($anno)){
-            //Open Annotation
-            $was_changed = $this->parseOpenAnnotation($details, $anno, $createThumbnail, $sourceRecordId, $manifestUrl);
-        }elseif(@$anno['data']){
-            //WebAnnotation
-            $was_changed = $this->parseWebAnnotation($details, $anno, $createThumbnail);
-        }
-        return $was_changed;
+    public function saveImportedAnnotation($annotationContext, $createThumbnail=false){
+        $this->setData(array('fields'=>$annotationContext));
+        return $this->save($createThumbnail, 0);
     }
 
 
-    /*
-            Web Annotation
-            Sample:
-
-            sourceRecordId:15
-            manifestUrl: http://127.0.0.1//heurist/?db=iiif_import&file=3c6a9074ce8037cb5ec4da4cc1a2d0a63deacb65
-            canvas: http://8f74dd58-ab81-4d0c-8003-28d1d008f3db
-            data:{
-                body:{type:"TextualBody",
-                      value:"text"},
-                id:"d6a3f2a3-c8bc-48ba-abbe-f6bfb4a6d30f",
-                motivation:"commenting",
-                target:{
-                    source:"http://8f74dd58-ab81-4d0c-8003-28d1d008f3db",
-                    selector:[
-                          {type:"FragmentSelector",
-                          value:"xywh=2791,79,307,326"},
-                          {type:"SvgSelector",
-                          value:"<svg xmlns='http://www.w3.org/2000/svg'><path xmlns=\\\"http://www.w3.org/2000/svg\\\" d=\\\"M2791.08071,405.81478v-326.10117h307.98444v326.10117z\\\" data-paper-data=\\\"{&quot;state&quot;:null}\\\" fill=\\\"none\\\" fill-rule=\\\"nonzero\\\" stroke=\\\"#00bfff\\\" stroke-width=\\\"1\\\" stroke-linecap=\\\"butt\\\" stroke-linejoin=\\\"miter\\\" stroke-miterlimit=\\\"10\\\" stroke-dasharray=\\\"\\\" stroke-dashoffset=\\\"0\\\" font-family=\\\"none\\\" font-weight=\\\"none\\\" font-size=\\\"none\\\" text-anchor=\\\"none\\\" style=\\\"mix-blend-mode: normal\\\"/></svg>"
-                          }]
-                    },
-                type: "Annotation"}
-            uuid: "d6a3f2a3-c8bc-48ba-abbe-f6bfb4a6d30f"
-    */
-    private function parseWebAnnotation(&$details, $anno, $createThumbnail){
-
-        //"body":{"type":"TextualBody","value":"<p>RR Station</p>"},
-        $anno_dec = json_decode($anno['data'], true);
-
-        if(! (is_array($anno_dec) && //invalid annotation data
-             $this->assignField($details, $this->dtyAnnotationInfo, $anno['data']))){//not changed
+    /**
+     * Called after a normal Heurist record-editor save of an RT_IIIF_ANNOTATION record.
+     * This deliberately updates only DT_ANNOTATION_STATE directly in recDetails, avoiding
+     * a second recordSave() call and avoiding recursion through the generic save pipeline.
+     */
+    public function markSavedFromHeuristEditor(int $recID): bool
+    {
+        if($recID<1 || !$this->ensureDefinitionsReady(false)){
             return false;
         }
 
-        if(@$anno_dec['body']['type']=='TextualBody'){
-            $this->assignField($details, 'DT_NAME', substr(strip_tags($anno_dec['body']['value']),0,50));
-            $this->assignField($details, 'DT_SHORT_SUMMARY', $anno_dec['body']['value']);
-        }
+        $details = $this->loadRecordDetails($recID, array('DT_ANNOTATION_STATE'));
+        $oldState = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
 
-        $this->assignField($details, 'DT_ORIGINAL_RECORD_ID', $anno['uuid']);
+        $imported = $this->getTermId('TRM_ANNOTATION_STATE_IMPORTED');
+        $mirador  = $this->getTermId('TRM_ANNOTATION_STATE_MIRADOR');
+        $heurist  = $this->getTermId('TRM_ANNOTATION_STATE_HEURIST');
+        $modified = $this->getTermId('TRM_ANNOTATION_STATE_MODIFIED');
+        $obsolete = $this->getTermId('TRM_ANNOTATION_STATE_OBSOLETE');
+        $removed  = $this->getTermId('TRM_ANNOTATION_STATE_REMOVED');
 
-        // "selector":[{"type":"FragmentSelector","value":"xywh=524,358,396,445"}
-        //canvas defined on addition only
-        if(@$anno['canvas']){
-            //url to page/canvas
-            $details[DT_URL][] = $anno['canvas'];
-
-        }elseif($this->is_addition && @$anno_dec['target']['source']){ //page is not changed on edit
-                $this->assignField($details, 'DT_URL', $anno_dec['target']['source']); //canvas url
-        }
-
-
-        //at the moment it creates thumbnail on addition only
-        // recreate thumbnail if annotated area is changed
-        if(!($createThumbnail && is_array(@$anno_dec['target']) && @$anno_dec['target']['selector'] && defined('DT_THUMBNAIL'))){
+        if($oldState === $obsolete || $oldState === $removed){
             return true;
         }
 
-        foreach ($anno_dec['target']['selector'] as $selector){
-            if(@$selector['type']=='FragmentSelector'){
-                $region = @$selector['value'];
+        if($oldState === $imported || $oldState === $mirador || $oldState === $modified){
+            return $this->updateAnnotationStateDirect($recID, intval($modified));
+        }
 
-                $thumb_id = $this->getAnnotationImage($anno['manifestUrl'], $anno['uuid'], $region, $anno['canvas']);
-                if($thumb_id>0){
-                    $this->assignField($details, 'DT_THUMBNAIL', $thumb_id);
-                }
-            }
+        if($oldState < 1){
+            return $this->updateAnnotationStateDirect($recID, intval($heurist), true);
         }
 
         return true;
     }
 
-    /**
-    * remove http:// schema
-    *
-    * @param mixed $val
-    */
-    private function removeUriSchema($val){
-        if($val && strpos($val, 'http://')!==false){
-            $val = substr($val, 7);
-        }
-        return $val;
-    }
-
-    /* Sample:
-            "resource": [
-                {
-                    "full_text": "Raoult, Henriette",
-                    "@type": "dctypes:Text",
-                    "format": "text/html",
-                    "chars": "<p>Raoult, Henriette</p>"
-                }
-            ],
-            "@type": "oa:Annotation",
-            "dcterms:creator": "Société <a href=\"https://teklia.com/fr/\" target=\"_blank\">TEKLIA</a> pour le projet <a href=\"https://www.collexpersee.eu/projet/pret19/\" target=\"_blank\">CollEx-Persée PRET19</a>",
-            "motivation": [
-                "oa:commenting"
-            ],
-            "dcterms:created": "2024-09-30T13:15:16",
-            "@id": "http://12b549a1-7dce-475f-8156-838bf83f4c5d",
-            "dcterms:modified": "2024-09-30T13:15:16",
-            "@context": "file:/usr/local/tomcat/webapps/ROOT/contexts/iiif-2.0.json",
-            "on": [
-                {
-                    "@type": "oa:SpecificResource",
-                    "selector": {
-                        "default": {
-                            "@type": "oa:FragmentSelector",
-                            "value": "xywh=252.0,2935.0,2599.0,1417.0"
-                        },
-                        "item": {
-                            "@type": "oa:SvgSelector",
-                            "value": "<svg xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" stroke-miterlimit=\"10\" fill=\"#66cc99\" stroke=\"#008000\" stroke-width=\"3.0\" fill-opacity=\"0\" opacity=\"1\" d=\"M 252.0,2935.0 L 252.0,4352.0 L 2851.0,4352.0 L 2851.0,2935.0 L 252.0,2935.0 z\" /></svg>"
-                        },
-                        "@type": "oa:Choice"
-                    },
-                    "full": "http://1b1dd10d-4bef-464e-b3c0-d30b90763b32"
-                }
-            ]
-    */
-
-    /**
-    * 
-    */
-    private function isOpenAnnotation($anno){
-       return @$anno['@type']=='oa:Annotation';
-    }
-
-    /**
-    * 
-    */
-    private function parseOpenAnnotation(&$details, $anno, $createThumbnail, $sourceRecordId, $manifestUrl){
-
-        $anno_uid = $this->removeUriSchema(@$anno['@id']);
-
-        if(! ($this->isOpenAnnotation($anno) &&
-              $anno_uid &&
-              $this->assignField($details, $this->dtyAnnotationInfo, json_encode($anno)))) //annotation is not changed
-        {
+    /** Directly update/insert DT_ANNOTATION_STATE, and optionally assign DT_IIIF_ID for new Heurist-created annotations. */
+    private function updateAnnotationStateDirect(int $recID, int $stateTermID, bool $assignId=false): bool
+    {
+        if($recID<1 || $stateTermID<1 || !$this->ensureDefinitionsReady(false)){
             return false;
         }
 
-        $value = $anno['resource'][0]['full_text'];
-        $this->assignField($details, 'DT_NAME', substr(strip_tags($value),0,50));
-        $value = $anno['resource'][0]['chars'];
-        $this->assignField($details, 'DT_SHORT_SUMMARY', $value);
-
-        $this->assignField($details, 'DT_ORIGINAL_RECORD_ID', $anno_uid);
-
-        if(@$anno['dcterms:modified']){
-            $this->assignField($details, 'DT_DATE', $anno['dcterms:modified']);
+        if(!$this->updateSingleDetailDirect($recID, 'DT_ANNOTATION_STATE', intval($stateTermID))){
+            return false;
         }
 
-        if(is_array(@$anno['on'])){
-
-            foreach($anno['on'] as $target){
-
-                $canvas_url = @$target['full'];
-                $this->assignField($details, 'DT_URL', $canvas_url); //canvas url
-
-                $fragment = @$target['selector']['default']['value'];
-
-                if($fragment && defined('DT_THUMBNAIL') && $createThumbnail)
-                {
-                        $thumb_id = $this->getAnnotationImage($manifestUrl, $anno_uid, $fragment, $canvas_url);
-                        if($thumb_id>0){
-                            $this->assignField($details, 'DT_THUMBNAIL', $thumb_id);
-                        }
-                }
-
-            }
+        if($assignId){
+            return $this->updateSingleDetailDirect($recID, 'DT_IIIF_ID', $this->annotationApiUrl($recID));
         }
 
         return true;
+    }
+
+    private function annotationApiUrl(int $recID): string
+    {
+        return rtrim(HEURIST_BASE_URL, '/')
+            .'/api/'.$this->system->dbname()
+            .'/annotations/'.intval($recID);
+    }
+
+    /** Build the IIIF/Web Annotation JSON used in AnnotationPage output. */
+    public function buildIiifAnnotationFromRecord(int $recID): ?array
+    {
+        if($recID<1 || !$this->ensureDefinitionsReady(false)){
+            return null;
+        }
+        return $this->buildIiifAnnotationFromDetails($recID, $this->loadRecordDetails($recID));
+    }
+
+    private function buildIiifAnnotationFromDetails(int $recID, array $details): ?array
+    {
+        return $this->annotationJson()->buildFromAnnotationData(
+            $this->annotationDataFromDetails($recID, $details)
+        );
+    }
+
+    private function annotationDataFromDetails(int $recID, array $details): array
+    {
+        $stateCode = $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
+
+        $canvasRecID = intval($this->getFirstDetailValue($details, 'DT_IIIF_CANVAS'));
+        $managedCanvasUrl = null;
+        if($canvasRecID>0){
+            $dbCanvas = new DbIiifCanvas($this->system);
+            $managedCanvasUrl = $dbCanvas->canonicalCanvasUrlForCanvasRecord($canvasRecID);
+        }
+
+        return array(
+            'recID' => $recID,
+            'id' => $this->getFirstDetailValue($details, 'DT_IIIF_ID'),
+            'annotationApiUrl' => $this->annotationApiUrl($recID),
+            'rawJson' => $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO'),
+            'stateCode' => $stateCode ? strtolower($stateCode) : '',
+            'bodyText' => $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY'),
+            'motivation' => $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_MOTIVATION')),
+            'language2' => $this->getLanguageCode2FromDetails($details),
+            // Overlay mode uses the original Canvas id in DT_URL. Managed mode uses the linked RT_IIIF_CANVAS API URL.
+            'canvas' => $managedCanvasUrl ?: $this->getFirstDetailValue($details, 'DT_URL'),
+            'originalCanvas' => $this->getFirstDetailValue($details, 'DT_URL'),
+            'canvasRecordID' => $canvasRecID,
+            'managedCanvasUrl' => $managedCanvasUrl,
+            'selectorType' => $this->getTermCodeOrLabel($this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_TYPE')),
+            'selectorValue' => $this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_VALUE')
+        );
+    }
+
+    private function getLanguageCode2FromDetails(array $details): ?string
+    {
+        $langTermId = intval($this->getFirstDetailValue($details, 'DT_LANGUAGE'));
+        if($langTermId<1){
+            return null;
+        }
+        $lang3 = $this->getTermCodeOrLabel($langTermId);
+        if(!$lang3){
+            return null;
+        }
+        $lang2 = getLangCode2($lang3);
+        return $lang2 ?: $lang3;
+    }
+
+    private function getTermCodeOrLabel($termId): ?string
+    {
+        $termId = intval($termId);
+        if($termId<1){
+            return null;
+        }
+        $mysqli = $this->system->getMysqli();
+        $row = mysql__select_row($mysqli,
+            'SELECT trm_Code, trm_Label FROM defTerms WHERE trm_ID='.$termId.' LIMIT 1');
+        if(is_array($row)){
+            return trim((string)($row[0] ?: $row[1]));
+        }
+        return null;
+    }
+    
+    private function fillDetailsFromParsedAnnotation(&$details, $parsed, $manifestRecID=0, $manifestFileID=0, $canvasRecID=0){
+        
+        $changed = false;
+        $text = trim(strip_tags((string)@$parsed['body_text']));
+        $title = $text ? substr($text, 0, 50) : substr((string)$parsed['id'], 0, 50);
+
+        $changed = $this->setField($details, 'DT_NAME', $title) || $changed;
+        $changed = $this->setField($details, 'DT_SHORT_SUMMARY', @$parsed['body_text']) || $changed;
+        $changed = $this->setField($details, 'DT_ORIGINAL_IIIF_ID', @$parsed['id']) || $changed;
+        $changed = $this->setField($details, 'DT_ANNOTATION_INFO', @$parsed['json']) || $changed;
+        $changed = $this->setField($details, 'DT_URL', @$parsed['canvas']) || $changed;
+        $changed = $this->setField($details, 'DT_ANNOTATION_MOTIVATION', $this->getTermId(@$parsed['motivation'], 'TRM_ANNOTATION_MOTIVATION_COMMENTING') ) || $changed;
+        $changed = $this->setField($details, 'DT_LANGUAGE', $this->getLanguageTermId(@$parsed['language'])) || $changed;
+        $changed = $this->setField($details, 'DT_ANNOTATION_SELECTOR_TYPE', $this->getTermId(@$parsed['selector_type'])) || $changed;
+        $changed = $this->setField($details, 'DT_ANNOTATION_SELECTOR_VALUE', @$parsed['selector_value']) || $changed;
+        $changed = $this->setField($details, 'DT_ANNOTATION_STATE', $this->getTermId(@$parsed['state'], 'TRM_ANNOTATION_STATE_IMPORTED')) || $changed;
+
+        if($manifestRecID>0){
+            $changed = $this->appendUniqueField($details, 'DT_ANNOTATION_MANIFEST', $manifestRecID) || $changed;
+        }
+
+        if($canvasRecID>0){
+            $changed = $this->setField($details, 'DT_IIIF_CANVAS', intval($canvasRecID)) || $changed;
+        }
+        /*
+        if($manifestFileID>0){
+            $changed = $this->appendUniqueField($details, 'DT_FILE_RESOURCE', $manifestFileID) || $changed;
+        }
+        */
+
+        return $changed;
+    }
+
+    private function removeUriSchema($val){
+        if($val && strpos($val, 'http://')===0){
+            $val = substr($val, 7);
+        }
+        return $val;
     }
 
     /**
