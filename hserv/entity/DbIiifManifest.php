@@ -220,14 +220,26 @@ class DbIiifManifest extends DbRecordTypeEntity
 
         $manifest = $this->loadSourceManifestForRecord($manifestRecID, $manifestDetails);
         if(!is_array($manifest)){
-            return null;
+            // Missing, unreadable or malformed source manifests should not produce
+            // an API error for Mirador. Return a valid empty v3 Manifest instead.
+            $this->system->clearError();
+            return $this->buildManagedManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
         }
 
-        // Phase 2 supports v3 overlay output only.
+        // Overlay output is only safe for IIIF Presentation API v3 manifests.
+        // Presentation v2 uses sequences/canvases/otherContent, so do not apply
+        // the v3 Canvas.annotations replacement logic to v2 source manifests.
+        // v2 should be imported in managed mode, then generated from Heurist
+        // RT_IIIF_CANVAS records. For legacy/bad overlay records, return an
+        // empty v3 Manifest rather than a blocked API response.
         if(@$manifest['type']!='Manifest' || !is_array(@$manifest['items'])){
+/*
             $this->system->addError(HEURIST_ACTION_BLOCKED,
                 'Only IIIF Presentation API v3 Manifest overlay output is supported');
             return null;
+*/
+            $this->system->clearError();
+            return $this->buildManagedManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
         }
 
         foreach($manifest['items'] as $idx=>$canvas){
