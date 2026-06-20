@@ -95,7 +95,7 @@ class DbIiifManifest extends DbRecordTypeEntity
         }
 
         $manifestRecID = intval($res['data']);
-        $this->updateSingleDetailDirect($manifestRecID, intval(DT_IIIF_ID), $this->manifestApiUrl($manifestRecID));
+        $this->updateSingleDetailDirect($manifestRecID, 'DT_IIIF_ID', $this->manifestApiUrl($manifestRecID));
         return $manifestRecID;
     }
 
@@ -154,28 +154,6 @@ class DbIiifManifest extends DbRecordTypeEntity
         $recID = mysql__select_value($mysqli, $query);
         return $recID ? intval($recID) : 0;
     }
-
-    private function updateSingleDetailDirect(int $recID, int $dtID, $value): bool
-    {
-        if($recID<1 || $dtID<1){
-            return false;
-        }
-        $mysqli = $this->system->getMysqli();
-        $valueSql = is_numeric($value)
-            ? (string)$value
-            : '"'.$mysqli->real_escape_string((string)$value).'"';
-        $dtlID = mysql__select_value($mysqli,
-            'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.intval($recID)
-            .' AND dtl_DetailTypeID='.intval($dtID).' LIMIT 1');
-        if($dtlID>0){
-            $query = 'UPDATE recDetails SET dtl_Value='.$valueSql.' WHERE dtl_ID='.intval($dtlID);
-        }else{
-            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
-                .intval($recID).','.intval($dtID).','.$valueSql.')';
-        }
-        return $mysqli->query($query) !== false;
-    }
-
 
     /** Replace the ordered managed Canvas list for this Manifest. */
     public function setCanvasRefs(int $manifestRecID, array $canvasRecIDs): bool

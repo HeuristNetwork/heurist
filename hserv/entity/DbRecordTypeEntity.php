@@ -198,16 +198,38 @@ abstract class DbRecordTypeEntity extends DbEntityBase
         return true;
     }
 
-    /** Load recDetails into recordSave-compatible detail array. */
-    protected function loadRecordDetails(int $recordId): array
+    /** Load recDetails into recordSave-compatible detail array.
+     *
+     * @param int $recordId Record ID.
+     * @param array|null $detailIds Optional list of DT_* constant names or numeric detail type IDs.
+     */
+    protected function loadRecordDetails(int $recordId, ?array $detailIds=null): array
     {
         $details = array();
         if($recordId<1){
             return $details;
         }
 
+        $where = 'dtl_RecID='.intval($recordId);
+
+        if($detailIds !== null){
+            $ids = array();
+            foreach($detailIds as $detailId){
+                $id = $this->constId($detailId);
+                if($id && !in_array($id, $ids, true)){
+                    $ids[] = intval($id);
+                }
+            }
+
+            if(empty($ids)){
+                return $details;
+            }
+
+            $where .= ' AND dtl_DetailTypeID IN ('.implode(',', $ids).')';
+        }
+
         $query = 'SELECT dtl_DetailTypeID, dtl_Value, ST_asWKT(dtl_Geo), dtl_UploadedFileID '
-            .'FROM recDetails WHERE dtl_RecID='.intval($recordId).' ORDER BY dtl_DetailTypeID, dtl_ID';
+            .'FROM recDetails WHERE '.$where.' ORDER BY dtl_DetailTypeID, dtl_ID';
         $dets = mysql__select_all($this->system->getMysqli(), $query);
         if(!$dets){
             return $details;
@@ -225,6 +247,35 @@ abstract class DbRecordTypeEntity extends DbEntityBase
             $details[$fieldType][] = $value;
         }
         return $details;
+    }
+
+    /** Directly update or insert a single recDetails value without invoking recordSave hooks. */
+    protected function updateSingleDetailDirect(int $recID, $detailId, $value): bool
+    {
+        $dtID = $this->constId($detailId);
+        if($recID<1 || !$dtID){
+            return false;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $recID = intval($recID);
+        $dtID = intval($dtID);
+        $valueSql = is_numeric($value)
+            ? (string)$value
+            : '"'.$mysqli->real_escape_string((string)$value).'"';
+
+        $dtlID = mysql__select_value($mysqli,
+            'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.$recID
+            .' AND dtl_DetailTypeID='.$dtID.' LIMIT 1');
+
+        if($dtlID>0){
+            $query = 'UPDATE recDetails SET dtl_Value='.$valueSql.' WHERE dtl_ID='.intval($dtlID);
+        }else{
+            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
+                .$recID.','.$dtID.','.$valueSql.')';
+        }
+
+        return $mysqli->query($query) !== false;
     }
 
     /** Replace all values for a field. */

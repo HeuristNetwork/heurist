@@ -101,7 +101,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
         if($canvasRecID<1 || !$this->ensureDefinitionsReady(false)){
             return null;
         }
-        $details = $this->loadRecordDetails($canvasRecID);
+        $details = $this->loadRecordDetails($canvasRecID, array('DT_FILE_RESOURCE'));
         $ulfID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
         return $this->canonicalCanvasUrlForFileID($ulfID);
     }
@@ -398,18 +398,14 @@ class DbIiifCanvas extends DbRecordTypeEntity
         if($recID<1 || !$this->ensureDefinitionsReady(false)){
             return false;
         }
-        
-        $idOk = false;
 
-        $details = $this->loadRecordDetails($recID);
-        
+        $details = $this->loadRecordDetails($recID, array('DT_FILE_RESOURCE', 'DT_ANNOTATION_STATE'));
+
         $ulfID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
         $canonical = $this->canonicalCanvasUrlForFileID($ulfID);
-        if(!$canonical){
-            $idOk = $this->updateSingleDetailDirect($recID, intval(DT_IIIF_ID), $canonical);
-        }
-        
-        
+        $idOk = $canonical
+            ? $this->updateSingleDetailDirect($recID, 'DT_IIIF_ID', $canonical)
+            : true;
 
         $oldState = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
 
@@ -425,39 +421,14 @@ class DbIiifCanvas extends DbRecordTypeEntity
         }
 
         if($oldState === $imported || $oldState === $mirador || $oldState === $modified){
-            return $this->updateSingleDetailDirect($recID, intval($modified)) && $idOk;
+            return $this->updateSingleDetailDirect($recID, 'DT_ANNOTATION_STATE', intval($modified)) && $idOk;
         }
 
         if($oldState < 1){
-            return $this->updateSingleDetailDirect($recID, intval($heurist)) && $idOk;
+            return $this->updateSingleDetailDirect($recID, 'DT_ANNOTATION_STATE', intval($heurist)) && $idOk;
         }
 
         return $idOk;
-    }
-
-    private function updateSingleDetailDirect(int $recID, int $dtID, $value): bool
-    {
-        if($recID<1 || $dtID<1){
-            return false;
-        }
-        $mysqli = $this->system->getMysqli();
-        $recID = intval($recID);
-        $dtID = intval($dtID);
-        $valueSql = is_numeric($value)
-            ? (string)$value
-            : '"'.$mysqli->real_escape_string((string)$value).'"';
-
-        $dtlID = mysql__select_value($mysqli,
-            'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.$recID
-            .' AND dtl_DetailTypeID='.$dtID.' LIMIT 1');
-
-        if($dtlID>0){
-            $query = 'UPDATE recDetails SET dtl_Value='.$valueSql.' WHERE dtl_ID='.intval($dtlID);
-        }else{
-            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
-                .$recID.','.$dtID.','.$valueSql.')';
-        }
-        return $mysqli->query($query) !== false;
     }
 
     private function isProtectedFromReimport(array $details): bool

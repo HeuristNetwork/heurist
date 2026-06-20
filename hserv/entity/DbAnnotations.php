@@ -345,7 +345,7 @@ class DbAnnotations extends DbRecordTypeEntity
         $out = recordSave($this->system, $record, false, true, 0);
         if(is_array($out) && @$out['data']>0){
             $savedId = intval($out['data']);
-            $this->updateSingleDetailDirect($savedId, intval(DT_IIIF_ID), $this->annotationApiUrl($savedId));
+            $this->updateSingleDetailDirect($savedId, 'DT_IIIF_ID', $this->annotationApiUrl($savedId));
             $out['is_new'] = ($recordId == 0);
         }
         return $out;
@@ -368,7 +368,7 @@ class DbAnnotations extends DbRecordTypeEntity
             return false;
         }
 
-        $details = $this->loadRecordDetails($recID);
+        $details = $this->loadRecordDetails($recID, array('DT_ANNOTATION_STATE'));
         $oldState = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
 
         $imported = $this->getTermId('TRM_ANNOTATION_STATE_IMPORTED');
@@ -400,39 +400,15 @@ class DbAnnotations extends DbRecordTypeEntity
             return false;
         }
 
-        if(!$this->updateSingleDetailDirect($recID, intval(DT_ANNOTATION_STATE), intval($stateTermID))){
+        if(!$this->updateSingleDetailDirect($recID, 'DT_ANNOTATION_STATE', intval($stateTermID))){
             return false;
         }
 
         if($assignId){
-            return $this->updateSingleDetailDirect($recID, intval(DT_IIIF_ID), $this->annotationApiUrl($recID));
+            return $this->updateSingleDetailDirect($recID, 'DT_IIIF_ID', $this->annotationApiUrl($recID));
         }
 
         return true;
-    }
-
-    private function updateSingleDetailDirect(int $recID, int $dtID, $value): bool
-    {
-        if($recID<1 || $dtID<1){
-            return false;
-        }
-        $mysqli = $this->system->getMysqli();
-        $valueSql = is_numeric($value)
-            ? (string)$value
-            : '"'.$mysqli->real_escape_string((string)$value).'"';
-
-        $dtlID = mysql__select_value($mysqli,
-            'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='.intval($recID)
-            .' AND dtl_DetailTypeID='.intval($dtID).' LIMIT 1');
-
-        if($dtlID>0){
-            $query = 'UPDATE recDetails SET dtl_Value='.$valueSql.' WHERE dtl_ID='.intval($dtlID);
-        }else{
-            $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES ('
-                .intval($recID).','.intval($dtID).','.$valueSql.')';
-        }
-
-        return $mysqli->query($query) !== false;
     }
 
     private function annotationApiUrl(int $recID): string
