@@ -210,6 +210,14 @@ class DbIiifManifest extends DbRecordTypeEntity
 
     private function buildOverlayManifestJson(int $manifestRecID, array $manifestDetails, bool $omitAnnotationPages=false): ?array
     {
+        // A valid RT_IIIF_MANIFEST record may be created before any source Manifest
+        // file or managed Canvas list is attached. Return a legal empty IIIF Manifest
+        // instead of letting the API turn this into a technical notfound response.
+        $sourceFileID = intval($this->getFirstDetailValue($manifestDetails, 'DT_FILE_RESOURCE'));
+        if($sourceFileID < 1){
+            return $this->buildManagedManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
+        }
+
         $manifest = $this->loadSourceManifestForRecord($manifestRecID, $manifestDetails);
         if(!is_array($manifest)){
             return null;
@@ -518,6 +526,11 @@ class DbIiifManifest extends DbRecordTypeEntity
             $dbCanvas = new DbIiifCanvas($this->system);
         }
         return $dbCanvas;
+    }
+
+    public function isIiifManifestRecord(int $manifestRecID): bool
+    {
+        return $this->ensureDefinitionsReady(false) && $this->isManifestRecord($manifestRecID);
     }
 
     private function isManifestRecord(int $manifestRecID): bool

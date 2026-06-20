@@ -16,6 +16,7 @@
 namespace hserv\records\export;
 use hserv\records\export\ExportRecords;
 use hserv\entity\DbIiifCanvas;
+use hserv\entity\DbIiifManifest;
 use hserv\utilities\IiifMediaHelper;
 
 require_once dirname(__FILE__).'/../../entity/DbIiifCanvas.php';
@@ -61,9 +62,6 @@ class ExportRecordsIIIF extends ExportRecords {
     /** @var array Obfuscated file IDs for registered IIIF manifests found in v3 recordset export. */
     private $v3_manifest_fileids = array();
 
-    /** @var bool Whether to omit Canvas.annotations[] links in generated v3 manifests. */
-    private $omit_annotation_pages = false;
-
     /**
      * Prepares for the export operation.
      *
@@ -81,7 +79,6 @@ protected function _outputPrepare($data, $params){
     $res = parent::_outputPrepare($data, $params);
     if($res){
         $this->iiif_version = (@$params['version']==2 || @$params['v']==2)?2:3;
-        $this->omit_annotation_pages = !empty($params['omit_annotation_pages']);
     }
     
     return $res;
@@ -195,13 +192,13 @@ protected function _outputRecord($record){
             self::getIiifManifestFileIds($this->system, $record, $this->ulf_ObfuscatedFileID)
         );
 
-        $canvas = self::getIiifResource($this->system, $record, $this->iiif_version, $this->ulf_ObfuscatedFileID, 'Canvas', $this->omit_annotation_pages);
+        $canvas = self::getIiifResource($this->system, $record, $this->iiif_version, $this->ulf_ObfuscatedFileID);
         if($canvas && $canvas!=''){
             $this->v3_canvas_items[] = $canvas;
             $this->cnt++;
         }
     }else{
-        $canvas = self::getIiifResource($this->system, $record, $this->iiif_version, $this->ulf_ObfuscatedFileID, 'Canvas', $this->omit_annotation_pages);
+        $canvas = self::getIiifResource($this->system, $record, $this->iiif_version, $this->ulf_ObfuscatedFileID);
         if($canvas && $canvas!=''){
             fwrite($this->fd, $this->comma.$canvas);
             $this->comma = ",
@@ -552,7 +549,7 @@ private static function getIiifManifestFileIds($system, $record, $ulf_Obfuscated
  * @param string $ulf_ObfuscatedFileID Registered file obfuscated ID
  * @return string|false JSON string or false on error
  */
-public static function getIiifApiResource($system, string $resource, string $ulf_ObfuscatedFileID)
+public static function getIiifApiResource($system, string $resource, string $ulf_ObfuscatedFileID, bool $omitAnnotationPages=false)
 {
     $resource = strtolower(trim($resource));
     if($resource === ''){
@@ -560,6 +557,19 @@ public static function getIiifApiResource($system, string $resource, string $ulf
     }
 
     if($resource === 'manifest'){
+        // Numeric manifest IDs are RT_IIIF_MANIFEST record IDs. They must be
+        // resolved through DbIiifManifest so an empty but valid Manifest record
+        // returns a legal IIIF Manifest with items: [] instead of an API error.
+        if(preg_match('/^[1-9][0-9]*$/', $ulf_ObfuscatedFileID)){
+            $dbManifest = new DbIiifManifest($system);
+            $manifestRecID = intval($ulf_ObfuscatedFileID);
+            if($dbManifest->isIiifManifestRecord($manifestRecID)){
+                $manifest = $dbManifest->getOverlayManifestJson($manifestRecID, $omitAnnotationPages);
+                return is_array($manifest)
+                    ? json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+                    : false;
+            }
+        }
         return self::getIiifManifestForFile($system, $ulf_ObfuscatedFileID);
     }
 
@@ -693,7 +703,7 @@ private static function languageMapJson(string $value): string
     return json_encode(array('none'=>array($value)), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 }
 
-public static function getIiifResource($system, $record, $iiif_version, $ulf_ObfuscatedFileID, $type_resource='Canvas', bool $omitAnnotationPages=false){
+public static function getIiifResource($system, $record, $iiif_version, $ulf_ObfuscatedFileID, $type_resource='Canvas'){
 
     $type_resource = strtolower((string)$type_resource);
     if($record==null && ($type_resource=='annotations' || $type_resource=='annotationpage')){
@@ -964,17 +974,15 @@ if($resource_id){ //this is iiif image
 }
 
 $external_annotations = '';
-if(!$omitAnnotationPages){
-    $external_annopage_uri = self::getIiifApiRoot($system).'annotations/'.$fileid;
-    if(self::hasLinkedIiifAnnotations($system, intval($fileinfo['ulf_ID'] ?? 0))){
-        $external_annotations = ',
+$external_annopage_uri = self::getIiifApiRoot($system).'annotations/'.$fileid;
+if(self::hasLinkedIiifAnnotations($system, intval($fileinfo['ulf_ID'] ?? 0))){
+    $external_annotations = ',
       "annotations": [
         {
           "id": "'.$external_annopage_uri.'",
           "type": "AnnotationPage"
         }
       ]';
-    }
 }
 
 $body_dimensions = '';

@@ -52,20 +52,8 @@ require_once dirname(__FILE__).'/../../autoload.php';
         $params['resource'] = 'manifest';
     }
 
-    $res = null;
-
-    if($params['resource']=='manifest' && is_numeric($params['id'])){
-        $dbManifest = new hserv\entity\DbIiifManifest($system);
-        $omitAnnotationPages = !empty($params['omit_annotation_pages']);
-        $manifest = $dbManifest->getOverlayManifestJson(intval($params['id']), $omitAnnotationPages);
-        if(is_array($manifest)){
-            $res = json_encode($manifest, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
-        }
-    }
-
-    if(!$res){
-        $res = hserv\records\export\ExportRecordsIIIF::getIiifApiResource($system, $params['resource'], $params['id']);
-    }
+    $omitAnnotationPages = !empty($params['omit_annotation_pages']) && intval($params['omit_annotation_pages']) === 1;
+    $res = hserv\records\export\ExportRecordsIIIF::getIiifApiResource($system, $params['resource'], $params['id'], $omitAnnotationPages);
 
     $system->dbclose();
 
