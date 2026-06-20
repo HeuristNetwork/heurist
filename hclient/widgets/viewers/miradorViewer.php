@@ -300,7 +300,8 @@ body {
 <?php
 if (!preg_match('[\W]', $dbname)){
 ?>
-    window.endpointURL = "<?php echo $baseUrl.'heurist/api/'.htmlspecialchars($dbname).'/annotations'.($manifestRecID>0?'/'.$manifestRecID:'');?>";
+    //temporarely .($manifestRecID>0?'/'.$manifestRecID:'')
+    window.endpointURL = "<?php echo $baseUrl.'heurist/api/'.htmlspecialchars($dbname).'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
 <?php
 }

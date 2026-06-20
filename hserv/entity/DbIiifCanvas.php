@@ -229,6 +229,27 @@ class DbIiifCanvas extends DbRecordTypeEntity
         );
     }
 
+    private function getNumericDetailValueByConstOrCode(array $details, string $constName, string $conceptCode): ?float
+    {
+        $dtID = $this->constId($constName);
+
+        if(!$dtID && $conceptCode !== ''){
+            $dtID = ConceptCode::getDetailTypeLocalID($conceptCode);
+        }
+
+        if(!$dtID || empty($details[$dtID])){
+            return null;
+        }
+
+        $value = $details[$dtID][0];
+
+        if($value === null || $value === '' || !is_numeric($value)){
+            return null;
+        }
+
+        return floatval($value);
+    }
+
     /** Find a registered-file ulf_ID by its obfuscated file id. */
     public function ulfIDFromObfuscatedID(string $fileID): int
     {

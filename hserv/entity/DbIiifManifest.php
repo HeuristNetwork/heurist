@@ -571,7 +571,7 @@ class DbIiifManifest extends DbRecordTypeEntity
     {
         return rtrim(HEURIST_BASE_URL, '/')
             .'/api/'.$this->system->dbname()
-            .'/annotations/'.intval($manifestRecID)
+            .'/annotations'  //Temorarely '/'.intval($manifestRecID)
             .'/pages?uri='.rawurlencode($canvasId);
     }
 
