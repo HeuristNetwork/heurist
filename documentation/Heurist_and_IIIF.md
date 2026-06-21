@@ -5,9 +5,10 @@ This guide describes the IIIF features provided by Heurist for creating, importi
 Heurist supports two main workflows:
 
 1. **Use Heurist as an annotation layer over existing IIIF Manifests.** The external provider keeps ownership of the source Manifest and Canvas identifiers. Heurist stores and publishes local annotations.
+   
 2. **Use Heurist to manage the Manifest.** Heurist stores Manifest, Canvas and Annotation records and generates a IIIF Presentation API v3 Manifest from those records.
 
-Heurist also provides dynamic IIIF export for ordinary record sets and registered media files.
+Heurist also provides a dynamic IIIF server for ordinary record sets and registered media files. as well as rendering of external IIIF files and manifests, ie. it can act as both client and server.
 
 ---
 
