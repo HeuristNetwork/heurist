@@ -57,9 +57,9 @@ class IiifMediaHelper
     public static function resolveDimensionsForFileInfo(array $fileinfo, array $preferredDimensions=array(), ?string $resourceUrl=null, array $defaults=array()): array
     {
         $out = array(
-            'width' => self::numericOrNull($defaults['width'] ?? null),
-            'height' => self::numericOrNull($defaults['height'] ?? null),
-            'duration' => self::numericOrNull($defaults['duration'] ?? null)
+            'width' => null,
+            'height' => null,
+            'duration' => null
         );
 
         foreach(array('width', 'height', 'duration') as $key){
@@ -99,6 +99,15 @@ class IiifMediaHelper
                 if(($out['height']===null || $out['height']<=0) && !empty($size[1])){
                     $out['height'] = floatval($size[1]);
                 }
+            }
+        }
+        
+        //last resort
+        foreach(array('width', 'height', 'duration') as $key){
+            if($out[$key]!==null) { continue; }
+            $value = self::numericOrNull($defaults[$key] ?? null);
+            if($value !== null && $value > 0){
+                $out[$key] = $value;
             }
         }
 
