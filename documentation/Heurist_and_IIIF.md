@@ -4,9 +4,9 @@ This guide describes the IIIF features provided by Heurist for creating, importi
 
 Heurist supports two main workflows:
 
-1. **Use Heurist as an annotation layer over existing IIIF Manifests.** The external provider keeps ownership of the source Manifest and Canvas identifiers. Heurist stores and publishes local annotations.
+1. **Use Heurist as an annotation layer over existing IIIF Manifests (Overlay mode).** The external provider keeps ownership of the source Manifest and Canvas identifiers. Heurist stores and publishes local annotations.
    
-2. **Use Heurist to manage the Manifest.** Heurist stores Manifest, Canvas and Annotation records and generates a IIIF Presentation API v3 Manifest from those records.
+2. **Use Heurist to manage the Manifest (Management mode).** Heurist stores Manifest, Canvas and Annotation records and generates a IIIF Presentation API v3 Manifest from those records.
 
 Heurist also provides a dynamic IIIF server for ordinary record sets and registered media files. as well as rendering of external IIIF files and manifests, ie. it can act as both client and server.
 
@@ -16,9 +16,14 @@ Heurist also provides a dynamic IIIF server for ordinary record sets and registe
 
 ### 1.1 Import the required definitions
 
-Before using the IIIF annotation and Manifest tools in an existing database, import the new definitions from the `Heurist_Core_Definitions` database.
+Before using the IIIF annotation and Manifest tools in an existing database, import the new definitions (from June 2026) from the `Heurist_Core_Definitions` database using **Design > Browse templates**. Heurist will prompt you to do this if you attempt to process Manifests without:
+
+![[Pasted image 20260621163412.png]]
 
 The new record types are in the **Documents** group. It is enough to select **IIIF Annotation**. The related record types **IIIF Manifest** and **IIIF Canvas** are downloaded alongside it.
+
+
+![[Pasted image 20260621153202.png]]
 
 The important record types are:
 
@@ -39,7 +44,7 @@ This field is not used by any current IIIF record type. Remove it before using t
 
 ### 1.3 Recommended checks before testing
 
-After importing definitions, check that the database contains the three IIIF record types above and that the import widget no longer reports missing required definitions.
+After importing definitions, check that the database contains the three IIIF record types above and that the browse templates function no longer shows and missing definitions in the Core definitions database.
 
 For testing, start with a small Manifest first. A large external Manifest may fail for reasons unrelated to Heurist logic, such as network timeouts, remote annotation-list delays, or unavailable image services.
 
@@ -52,10 +57,11 @@ For testing, start with a small Manifest first. A large external Manifest may fa
 A Manifest is the IIIF object that describes a digital object, such as a manuscript, book, image set or media collection. In Heurist, a Manifest may be:
 
 - a registered external Manifest file or URL;
-- a managed **IIIF Manifest** record;
+- an **IIIF Manifest** record;
+- an **IIIF Manifest** record managed by Heurist;
 - a dynamic Manifest generated from a record set or a single registered media file.
 
-Managed Heurist Manifest output is generated as **IIIF Presentation API v3**.
+Output from a Manifest managed by Heurist is generated as **IIIF Presentation API v3**.
 
 ### 2.2 Canvas
 
@@ -82,13 +88,15 @@ Annotations store:
 
 ## 3. Manual creation of a managed Manifest
 
-Manual creation is used when you want Heurist to own and generate the Manifest rather than only overlay annotations on an external Manifest.
+Fully managed Manifests are used when you want Heurist to own and generate the Manifest rather than only overlay annotations on an external Manifest.
+
+See the following section 4 for importation of fully managed Manifest.
 
 ### 3.1 Create the Manifest record
 
 Create a new **IIIF Manifest** record. Fill in Manifest-level metadata such as title, description and copyright/rights. These fields are used when Heurist generates the v3 Manifest output.
 
-A managed Manifest can be empty. An empty managed Manifest still returns valid IIIF Presentation API v3 JSON with `items: []`, so viewers should not show a technical error.
+A managed Manifest can be empty. An empty managed Manifest still returns valid IIIF Presentation API v3 JSON with `items: []`, so viewers should not normally show a technical error.
 
 ### 3.2 Add Canvases one by one
 
@@ -96,7 +104,7 @@ Create **IIIF Canvas** records and link them to the Manifest. Each Canvas may re
 
 - a locally uploaded registered file;
 - a registered external media URL;
-- an image served by a IIIF Image API;
+- an image served by an IIIF Image API;
 - other supported media such as audio or video where configured.
 
 The order of Canvas references on the Manifest record defines the order in the generated Manifest.
@@ -141,7 +149,15 @@ Until this is implemented, add Canvas records manually or import an existing Man
 
 ## 4. Import an existing IIIF Manifest
 
-Use **Import IIIF Manifest** to import a registered or uploaded IIIF Presentation Manifest. The import tool always creates or updates an **IIIF Manifest** record and imports available **IIIF Annotation** records. In full management mode it also imports **IIIF Canvas** records.
+Use **Import IIIF Manifest** to create a Managed Manifest from:
+
+ - an IIIF Presentation Manifest which is referenced externally by a File field;
+ - a JSon manifest which has been uploaded to Heurist as a File field. 
+ 
+ The import tool always creates or updates an **IIIF Manifest** record and imports available **IIIF Annotation** records. 
+
+???? HOW DO YOU SET FULL MANAGEMENT MODE ?????
+In full management mode, Import IIIF Manifest also imports **IIIF Canvas** records, in other words the image or other media is stored within Heurist rather than referenced externally. This should be used where the referenced resources are not on a stable long-term repository such as Gallica to ensure sustainability.
 
 ### 4.1 Annotation overlay mode
 

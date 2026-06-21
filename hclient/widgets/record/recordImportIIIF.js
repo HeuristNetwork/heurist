@@ -8,7 +8,7 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
         height: 820,
         width:  840,
         modal:  true,
-        title:  'Import IIIF Manifest',
+        title:  'Process IIIF Manifest',
         htmlContent: 'recordImportIIIF'
     },
 

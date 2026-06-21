@@ -5,22 +5,23 @@
 -->
 <div id="div_header" class="ent_wrapper" style="margin:10px 10px 0px 40px;font-size:0.95em;overflow:auto">
 
-    <h2>Import IIIF Manifest</h2>
-    <p style="font-weight:bold;font-size:larger;padding:10px 0">
-        Create Heurist records from a registered or uploaded IIIF Manifest
+    <h2>Process IIIF Manifest</h2>
+    <p style="font-weight:bold;font-size:larger">
+        Create Heurist records from an IIIF Manifest recorded as a File field (local or remote reference)
     </p>
 
     <p>
-        This function imports a selected IIIF Presentation Manifest and creates or updates corresponding
-        Heurist records. It always creates an <b>IIIF Manifest</b> record and imports available
-        <b>IIIF Annotation</b> records. In <b>Full manifest management</b> mode it also imports
-        <b>IIIF Canvas</b> records and links annotations to those managed canvases.
+        Process a selected IIIF Presentation Manifest (local file or external reference) and create or update corresponding Heurist records.
+        <br>An <b>IIIF Manifest</b> record is created and <b>IIIF Annotations</b> specified in the Manifest are imported as <b>Annotation records</b>. 
     </p>
+    <p>
+        In <b>Full manifest management</b> mode it also imports <b>IIIF Canvas</b> records, linking the annotations to those managed canvases.
+        <br>The images or other media referenced by those canvases may be external or stored in Heurist.
+    </p>
+  
 
     <p>
-        On re-import, records that have been modified in Heurist are preserved by default and reported
-        separately. Choose the import mode according to how much of the original IIIF resource Heurist
-        should own and manage.
+        On re-import, previously imported records that have been modified in Heurist are preserved and reported separately. 
     </p>
 
     <div style="margin:1em 0">
@@ -28,17 +29,18 @@
     </div>
 
     <div style="margin:1em 0">
-        <div style="font-weight:bold;margin-bottom:0.35em">Import / management level</div>
 
         <label>
-            <input type="radio" name="import_level" value="overlay" checked>
-            Annotation overlay
+            <br><input type="radio" name="import_level" value="overlay">
+            <b>Annotation of external manifest and media</b>
         </label>
         <div style="margin-left:1.8em;font-size:0.9em">
             <ul>
-                <li>Use this mode to annotate an existing IIIF Manifest without managing its Canvas structure in Heurist.</li>
-                <li><b>Only IIIF Presentation API v3 Manifests are supported in annotation overlay mode.</b> For v2 Manifests, use Full manifest management.</li>
-                <li>Ownership remains split: the source Manifest and its Canvas list remain owned by the external IIIF provider; Heurist owns the local Manifest record and imported or newly created Annotation records.</li>
+                <li>Annotates an existing IIIF Manifest without uploading its Canvas structure to Heurist.</li>
+                <li><b>Only IIIF Presentation API v3 Manifests are supported in annotation overlay mode.</b> 
+                <br>(v2 Manifests can only be handled through Full manifest management mode, below)</li>
+                <li>Ownership remains split: the source Manifest and its Canvas list remain on the external IIIF provider; 
+                <br>Heurist stores a local Manifest record and imported or newly created Annotation records.</li>
                 <li>The Canvas list and Canvas identifiers are preserved from the source Manifest.</li>
                 <li>Annotations are imported, stored and updated in Heurist, linked to the original Canvas URIs.</li>
                 <li>Manifest output can be generated with Heurist annotation pages overlaid on the original Canvases.</li>
@@ -46,16 +48,18 @@
         </div>
 
         <label style="display:block;margin-top:0.2em">
-            <input type="radio" name="import_level" value="managed">
-            Full manifest management
+            <input type="radio" name="import_level" value="managed" checked>
+            <b>Full manifest management</b>
         </label>
         <div style="margin-left:1.8em;font-size:0.9em">
             <ul>
-                <li>Use this mode when Heurist should manage the Manifest structure, not only its annotations.</li>
+                <li>Heurist stores and modifies the Manifest as well as the annotations. </li>
                 <li>Heurist creates or updates Manifest, Canvas and Annotation records from the source Manifest.</li>
-                <li>Ownership moves to Heurist for the generated Manifest output, Canvas order and Canvas-level metadata. Media files may still be external registered resources or local uploads.</li>
-                <li>Manifest-level metadata can be edited in Heurist, such as title, description, rights, provider and thumbnail.</li>
-                <li>Canvas list, order and Canvas-level metadata come from Heurist Canvas records.</li>
+                <li>Ownership moves to Heurist for the generated Manifest output, Canvas order and Canvas-level metadata.</li>
+                <li>Heurist becomes the sole reference for the Manifest and for the Annotations. The external manifest is deprecated.</li> 
+                <li>Media files may still be external registered resources or may be uploaded to the Heurist database.</li>
+                <li>Manifest-level metadata can be edited in Heurist (eg. title, description, rights, provider and thumbnail).</li>
+                <li>Canvas list, order and Canvas-level metadata come from the Heurist Canvas records.</li>
                 <li>Canvases may reference registered external media resources or uploaded files.</li>
                 <li>Annotations are linked to managed Canvas records and use generated Heurist Canvas URIs in IIIF output.</li>
             </ul>
@@ -65,7 +69,7 @@
     <div style="margin:1em 0">
         <label>
             <input type="checkbox" id="chb_create_thumbs">
-            Create thumbnails for annotation records (slower)
+            Create thumbnails for annotation records (recommended, but slower)
         </label>
     </div>
 
