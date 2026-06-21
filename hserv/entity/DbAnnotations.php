@@ -8,9 +8,10 @@ namespace hserv\entity;
 
 use hserv\entity\DbRecordTypeEntity;
 use hserv\utilities\USanitize;
+use hserv\iiif\IiifAnnotationJson;
 
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
-require_once dirname(__FILE__).'/IiifAnnotationJson.php';
+require_once dirname(__FILE__).'/../iiif/IiifAnnotationJson.php';
 require_once dirname(__FILE__).'/DbIiifCanvas.php';
 
 /**
@@ -432,6 +433,26 @@ class DbAnnotations extends DbRecordTypeEntity
         return $this->annotationJson()->buildFromAnnotationData(
             $this->annotationDataFromDetails($recID, $details)
         );
+    }
+    
+    public function getCanvasUrl(int $recID, ?array $details=null): string{
+        
+        if(!defined('DT_IIIF_CANVAS')){
+            $this->system->defineConstant('DT_IIIF_CANVAS');
+        }
+        
+        if($details==null){
+            $details = $this->loadRecordDetails($recID, array('DT_IIIF_CANVAS','DT_URL'));
+        }
+
+        $canvasRecID = intval($this->getFirstDetailValue($details, 'DT_IIIF_CANVAS'));
+        $managedCanvasUrl = null;
+        if($canvasRecID>0){
+            $dbCanvas = new DbIiifCanvas($this->system);
+            $managedCanvasUrl = $dbCanvas->canonicalCanvasUrlForCanvasRecord($canvasRecID);
+        }
+        
+        return $managedCanvasUrl ?: $this->getFirstDetailValue($details, 'DT_URL');
     }
 
     private function annotationDataFromDetails(int $recID, array $details): array

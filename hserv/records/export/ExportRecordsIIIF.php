@@ -17,10 +17,10 @@ namespace hserv\records\export;
 use hserv\records\export\ExportRecords;
 use hserv\entity\DbIiifCanvas;
 use hserv\entity\DbIiifManifest;
-use hserv\utilities\IiifMediaHelper;
+use hserv\iiif\IiifMediaHelper;
 
 require_once dirname(__FILE__).'/../../entity/DbIiifCanvas.php';
-require_once dirname(__FILE__).'/../../utilities/IiifMediaHelper.php';
+require_once dirname(__FILE__).'/../../iiif/IiifMediaHelper.php';
 
 /**
 * Class ExportRecordsIIIF
