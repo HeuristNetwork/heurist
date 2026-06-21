@@ -22,6 +22,9 @@ use hserv\iiif\IiifMediaHelper;
 use hserv\iiif\IiifManifestJson;
 use hserv\iiif\IiifPresentationService;
 
+require_once dirname(__FILE__).'/../../entity/DbIiifCanvas.php';
+require_once dirname(__FILE__).'/../../entity/DbIiifManifest.php';
+
 /**
 * Class ExportRecordsIIIF
 *
@@ -314,7 +317,7 @@ class ExportRecordsIIIF extends ExportRecords {
      *
      * @param \hserv\System $system Initialised Heurist system object
      * @param string $resource Resource name: manifest, canvas, page, annotation, annotations
-     * @param string $ulf_ObfuscatedFileID Registered file obfuscated ID, or Manifest record ID for resource=manifest
+     * @param string $ulf_ObfuscatedFileID Registered file obfuscated ID, or managed Manifest record ID for resource=manifest
      * @return string|false JSON string or false on error
      */
     public static function getIiifApiResource($system, string $resource, string $ulf_ObfuscatedFileID, bool $omitAnnotationPages=false)

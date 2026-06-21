@@ -134,8 +134,7 @@ if($system!=null && $rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['i
 
             }
         }elseif(defined('RT_IIIF_MANIFEST') && $res['rec_RecTypeID']==RT_IIIF_MANIFEST){
-            // Open a registered IIIF Manifest record via the Heurist overlay Manifest API,
-            // so source annotations are replaced by annotation pages from this database.
+            // Open a managed IIIF Manifest record through the Heurist IIIF API.
             $manifestRecID = $rec_ID;
 
         }elseif(defined('DT_URL')){

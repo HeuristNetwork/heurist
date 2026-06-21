@@ -54,7 +54,7 @@ A Manifest is the IIIF object that describes a digital object, such as a manuscr
 - a managed **IIIF Manifest** record;
 - a dynamic Manifest generated from a record set or a single registered media file.
 
-Managed Heurist Manifest output is generated as **IIIF Presentation API v3**.
+Managed Heurist Manifest output is generated as **IIIF Presentation API v3**. A registered IIIF Manifest file becomes managed only when an **IIIF Manifest** record references that file. If no such record exists, Heurist treats the registered Manifest file as an external/source Manifest and can use it as an annotation overlay target.
 
 ### 2.2 Canvas
 
@@ -140,7 +140,9 @@ Until this is implemented, add Canvas records manually or import an existing Man
 
 ## 4. Import an existing IIIF Manifest
 
-Use **Import IIIF Manifest** to import a registered or uploaded IIIF Presentation Manifest. The import tool always creates or updates an **IIIF Manifest** record and imports available **IIIF Annotation** records. In full management mode it also imports **IIIF Canvas** records.
+Use **Import IIIF Manifest** to import a registered or uploaded IIIF Presentation Manifest. The default mode is **Full manifest management**, which creates or updates an **IIIF Manifest** record, imports **IIIF Canvas** records and imports available **IIIF Annotation** records.
+
+**Annotation overlay** is different: it imports annotations only. It does not create an **IIIF Manifest** record. The registered Manifest file remains the source Manifest and Heurist stores local annotations against the original Canvas URIs.
 
 ### 4.1 Annotation overlay mode
 
@@ -150,13 +152,13 @@ In this mode:
 
 - only **IIIF Presentation API v3 Manifests** are supported;
 - the source Manifest and its Canvas list remain owned by the external provider;
-- Heurist creates or updates a local Manifest record for management and provenance;
+- Heurist does **not** create an **IIIF Manifest** record;
 - Canvas identifiers are preserved from the source Manifest;
 - annotations are imported into Heurist and linked to the original Canvas URIs;
-- Heurist can output a v3 overlay Manifest by replacing source `Canvas.annotations` with Heurist AnnotationPage links;
+- when `/api/{db}/iiif/manifest/{obfuscatedFileID}` is requested, Heurist can output a v3 overlay Manifest by replacing source `Canvas.annotations` with Heurist AnnotationPage links;
 - local Heurist annotations are preserved on re-import when they have been edited locally.
 
-Do not use this mode for IIIF Presentation API v2 Manifests. For v2 source Manifests, use full management mode.
+Do not use this mode for IIIF Presentation API v2 Manifests. For v2 source Manifests, use full management mode. If a managed **IIIF Manifest** record already references the selected registered Manifest file, annotation overlay mode is not available because the file is already under Heurist management.
 
 ### 4.2 Full manifest management mode
 
@@ -165,6 +167,7 @@ Use **Full manifest management** when Heurist should manage the Manifest structu
 In this mode:
 
 - Heurist creates or updates Manifest, Canvas and Annotation records;
+- the existence of the **IIIF Manifest** record is what marks the registered Manifest file as managed;
 - Heurist owns the generated Manifest output, Canvas order and Canvas metadata;
 - media may still be external registered resources or local uploads;
 - Manifest-level metadata can be edited in Heurist;
@@ -180,7 +183,7 @@ On re-import, Heurist attempts to update imported records while preserving local
 
 The import report includes:
 
-- Manifest record ID;
+- managed Manifest record ID, or `not created` for annotation overlay;
 - total Canvases found;
 - Canvas records added, updated, unchanged or preserved;
 - total annotations found;
@@ -217,6 +220,8 @@ Heurist provides a Mirador Viewer for:
 - a registered external Manifest file;
 - a single registered media file;
 - a dynamic Manifest generated from a query or selected record set.
+
+Registered Manifest files are opened through `/api/{db}/iiif/manifest/{obfuscatedFileID}`. If an **IIIF Manifest** record references the file, the API returns the managed Manifest generated from Heurist records. Otherwise it returns the source Manifest: v2 sources are returned as-is, while v3 sources can be returned with Heurist annotation-page links overlaid.
 
 The viewer supports two annotation lookup scopes:
 
@@ -287,9 +292,9 @@ If a v3 dynamic export contains both registered Manifests and ordinary media Can
 
 Useful for mixed search results where some records already contain IIIF Manifests and others contain image/audio/video files.
 
-### 7.7 IIIF v2 export compatibility
+### 7.7 IIIF v2 output policy
 
-Dynamic export can still generate IIIF Presentation API v2 output where requested, but the current Manifest management and overlay workflows are centred on v3 output. Use v3 for new work unless a legacy consumer specifically requires v2.
+Heurist no longer generates IIIF Presentation API v2 output. Dynamic export and managed Manifest output are v3-only. Heurist can still import v2 and hybrid v2 source Manifests in **Full manifest management** mode and then publish them as generated v3 Manifests.
 
 ---
 
@@ -301,9 +306,9 @@ Dynamic export can still generate IIIF Presentation API v2 output where requeste
 2. Open **Import IIIF Manifest**.
 3. Select **Annotation overlay**.
 4. Import annotations.
-5. Open the created Manifest record in Mirador.
+5. Open the registered Manifest file in Mirador. The viewer uses `/api/{db}/iiif/manifest/{obfuscatedFileID}` and the annotation endpoint.
 6. Add or edit annotations.
-7. Publish the Heurist overlay Manifest when external viewers need Heurist AnnotationPage links.
+7. Use the same API URL when external viewers need the v3 source Manifest with Heurist AnnotationPage links.
 
 ### 8.2 Import a v2 Manifest with many Canvases and annotations
 
@@ -338,7 +343,11 @@ Remove the obsolete duplicate field with local ID `1106` and concept code `2-109
 
 ### Overlay mode rejects a v2 Manifest
 
-This is expected. Annotation overlay mode is v3-only because it works by replacing or adding v3 `Canvas.annotations` AnnotationPage links. Import v2 Manifests in **Full manifest management** mode.
+This is expected. Annotation overlay mode is v3-only because it stores annotations against original v3 Canvas URIs and can publish v3 `Canvas.annotations` AnnotationPage links. Import v2 Manifests in **Full manifest management** mode.
+
+### Overlay mode is disabled for a selected registered Manifest file
+
+This means an **IIIF Manifest** record already references the selected registered Manifest file. That file is already managed by Heurist, so use **Full manifest management** mode.
 
 ### Mirador shows duplicate annotations
 
@@ -355,11 +364,11 @@ Try a small trimmed Manifest first. Failures may be caused by remote annotation-
 | Feature | Annotation overlay | Full manifest management |
 | --- | --- | --- |
 | Supported source Manifest version | v3 only | v2 and v3 |
-| Source Manifest ownership | External provider | Imported into Heurist management |
-| Generated Manifest output | Heurist overlay v3 output | Heurist managed v3 output |
+| Source Manifest ownership | External provider / registered file | Imported into Heurist management |
+| Generated Manifest output | Source v3 Manifest with Heurist AnnotationPage links when requested through the IIIF API | Heurist managed v3 output |
 | Canvas list ownership | External provider | Heurist |
 | Canvas identifiers | Original source Canvas URIs | Heurist Canvas API URLs |
 | Canvas records created | No | Yes |
 | Annotation records created | Yes | Yes |
-| Manifest metadata editable in Heurist | Local management/provenance record only | Yes, used in generated output |
-| Best use | Add Heurist annotations to an existing v3 Manifest | Build or take over a Manifest in Heurist |
+| Manifest metadata editable in Heurist | No managed Manifest record is created | Yes, used in generated output |
+| Best use | Add Heurist annotations to an existing v3 Manifest without creating a Manifest record | Build or take over a Manifest in Heurist |

@@ -15,7 +15,7 @@ require_once dirname(__FILE__).'/../entity/DbIiifManifest.php';
 
 /**
  * Coordinates IIIF Presentation resource output for registered files and
- * managed/overlay Manifest records.
+ * managed Manifest records and registered Manifest files.
  */
 class IiifPresentationService
 {
