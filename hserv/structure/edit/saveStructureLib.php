@@ -778,6 +778,7 @@ function _getInitRty($ri, $di, $dt, $dtid, $defvals){
     $arr_target[$ri['rst_RequirementType']] = $defvals[0];
     $arr_target[$ri['rst_NonOwnerVisibility']] = "viewable";
     $arr_target[$ri['rst_Status']] = "open";
+    $arr_target[$ri['rst_MayModify']] = "open";
 
     $arr_target[$ri['rst_OriginatingDBID']] = 2;
     $arr_target[$ri['rst_MaxValues']] = "1";
