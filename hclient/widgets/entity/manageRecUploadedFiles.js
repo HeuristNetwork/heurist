@@ -2112,7 +2112,8 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
 
                     $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, del_func, {title: 'Deleting files'}, {default_palette_class: 'ui-heurist-admin'});
 
-                    $dlg.parent().css('min-width', '250px');
+                    $dlg.css('max-height', 640);
+                    $dlg.parent().css({'min-width': '250px', 'max-height': '80%'});
                     $dlg.find('span.file-line').css({'display': 'inline-block', 'margin-bottom': '5px', 'text-decoration': 'underline', 'cursor': 'pointer'}).on('click', function(event){
                         const id = $(this).attr('data-fid');
 
