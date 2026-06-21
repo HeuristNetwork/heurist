@@ -1775,12 +1775,9 @@ function print_public_details(array $bib) {
     $annotationCanvasUri = '';
     if(defined('RT_IIIF_ANNOTATION') && defined('DT_URL')
         && intval(@$bib['rec_RecTypeID']) === intval(RT_IIIF_ANNOTATION)){
-
-        $annotationCanvasUri = mysql__select_value(
-            $mysqli,
-            'SELECT dtl_Value FROM recDetails WHERE dtl_RecID='.$recordID
-            .' AND dtl_DetailTypeID='.intval(DT_URL).' LIMIT 1'
-        );
+            
+        $annotationCanvasUri = (new \hserv\entity\DbAnnotations($system))->getCanvasUrl( intval($recordID) );
+      
         if($annotationCanvasUri==null){
             $annotationCanvasUri = '';
         }
