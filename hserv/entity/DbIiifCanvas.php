@@ -6,10 +6,12 @@ namespace hserv\entity;
 
 use hserv\structure\ConceptCode;
 use hserv\iiif\IiifMediaHelper;
+use hserv\iiif\IiifCanvasJson;
 
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
 require_once dirname(__FILE__).'/DbRecUploadedFiles.php';
 require_once dirname(__FILE__).'/../iiif/IiifMediaHelper.php';
+require_once dirname(__FILE__).'/../iiif/IiifCanvasJson.php';
 
 /**
  * Manages IIIF Canvas records stored as user records of RT_IIIF_CANVAS.
@@ -75,12 +77,12 @@ class DbIiifCanvas extends DbRecordTypeEntity
             return false;
         }
 
-        $originalCanvasId = $this->getJsonId($canvas);
+        $originalCanvasId = IiifCanvasJson::getJsonId($canvas);
         if(!$originalCanvasId){
             $originalCanvasId = 'heurist-import-canvas-'.md5(json_encode($canvas));
         }
 
-        $mediaUrl = $this->extractPrimaryPaintingBodyUrl($canvas);
+        $mediaUrl = IiifCanvasJson::extractPrimaryPaintingBodyUrl($canvas);
         $mediaUlfID = $mediaUrl ? $this->registerExternalUrl($mediaUrl) : 0;
 
         $recordId = $this->findCanvasRecord($mediaUlfID, $originalCanvasId);
@@ -219,6 +221,136 @@ class DbIiifCanvas extends DbRecordTypeEntity
         );
     }
 
+
+    /** Return a managed IIIF v3 Canvas JSON object for an RT_IIIF_CANVAS record. */
+    public function canvasJsonForCanvasRecord(int $canvasRecID, array $options=array()): ?array
+    {
+        if($canvasRecID<1){
+            return null;
+        }
+
+        $details = $this->loadRecordDetails($canvasRecID);
+        if(empty($details)){
+            return null;
+        }
+
+        $canvasUrl = $this->canvasUrlFromDetails($canvasRecID, $details);
+        if(!$canvasUrl){
+            return null;
+        }
+
+        $mediaID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
+        $mediaInfo = $mediaID>0 ? IiifMediaHelper::registeredFileInfoForUlfID($this->system, $mediaID) : null;
+        if(!is_array($mediaInfo)){
+            return IiifCanvasJson::composeCanvas(
+                $canvasUrl,
+                $this->toIiifLanguageMap($this->getDetailValues($details, 'DT_NAME'), 'Canvas '.$canvasRecID),
+                array(
+                    'summary' => $this->summaryLanguageMapFromCanvasDetails($details),
+                    'items' => array()
+                )
+            );
+        }
+
+        $thumbID = intval($this->getFirstDetailValue($details, 'DT_THUMBNAIL'));
+        $thumbInfo = $thumbID>0 ? IiifMediaHelper::registeredFileInfoForUlfID($this->system, $thumbID) : null;
+
+        $annotationPageUrl = null;
+        if(empty($options['omit_annotation_pages'])){
+            if(!empty($options['annotation_page_url'])){
+                $annotationPageUrl = (string)$options['annotation_page_url'];
+            }else{
+                $annotationPageUrl = $this->annotationPageUrl($canvasUrl, intval($options['manifest_rec_id'] ?? 0));
+            }
+        }
+
+        return IiifCanvasJson::composeCanvasFromFileInfo(
+            $this->system,
+            $mediaInfo,
+            $canvasUrl,
+            $this->toIiifLanguageMap($this->getDetailValues($details, 'DT_NAME'), 'Canvas '.$canvasRecID),
+            array(
+                'summary' => $this->summaryLanguageMapFromCanvasDetails($details),
+                'dimensions' => $this->dimensionValuesFromDetails($details),
+                'thumbnail_fileinfo' => is_array($thumbInfo) ? $thumbInfo : null,
+                'annotation_page_url' => $annotationPageUrl,
+                'base_url' => HEURIST_BASE_URL
+            )
+        );
+    }
+
+    /** Return a generated IIIF v3 Canvas JSON object for a registered file. */
+    public function canvasJsonForFileInfo(array $fileinfo, array $options=array()): ?array
+    {
+        $fileID = (string)($fileinfo['ulf_ObfuscatedFileID'] ?? '');
+        if($fileID===''){
+            return null;
+        }
+
+        $canvasMeta = $this->canvasMetadataForFileID(intval($fileinfo['ulf_ID'] ?? 0));
+        $label = $options['label'] ?? null;
+        if(!$label && is_array($canvasMeta) && trim((string)($canvasMeta['label'] ?? ''))!==''){
+            $label = $this->toIiifLanguageMap($canvasMeta['label'], 'Canvas');
+        }
+        if(!$label){
+            $label = trim(strip_tags((string)($fileinfo['ulf_Description'] ?? '')));
+        }
+        if(!$label){
+            $label = trim(strip_tags((string)($fileinfo['ulf_OrigFileName'] ?? '')));
+        }
+
+        $summary = null;
+        if(is_array($canvasMeta) && trim((string)($canvasMeta['summary'] ?? ''))!==''){
+            $summary = $this->toIiifLanguageMap($canvasMeta['summary']);
+        }
+
+        $thumbInfo = is_array($canvasMeta) && is_array($canvasMeta['thumbnail_fileinfo'] ?? null)
+            ? $canvasMeta['thumbnail_fileinfo']
+            : null;
+
+        $annotationPageUrl = null;
+        if(empty($options['omit_annotation_pages']) && !empty($options['include_annotation_pages'])){
+            $annotationPageUrl = $this->annotationPageUrl($this->canonicalCanvasUrlForObfuscatedID($fileID), intval($options['manifest_rec_id'] ?? 0));
+        }
+
+        return IiifCanvasJson::composeCanvasFromFileInfo(
+            $this->system,
+            $fileinfo,
+            $this->canonicalCanvasUrlForObfuscatedID($fileID),
+            $label,
+            array(
+                'summary' => $summary,
+                'dimensions' => is_array($canvasMeta) ? ($canvasMeta['dimensions'] ?? array()) : array(),
+                'thumbnail_fileinfo' => $thumbInfo,
+                'annotation_page_url' => $annotationPageUrl,
+                'base_url' => $options['base_url'] ?? HEURIST_BASE_URL_PRO,
+                'body_fullres' => !empty($options['body_fullres'])
+            )
+        );
+    }
+
+    private function summaryLanguageMapFromCanvasDetails(array $details): ?array
+    {
+        $summaryValues = $this->getDetailValues($details, 'DT_SHORT_SUMMARY');
+        return !empty($summaryValues) ? $this->toIiifLanguageMap($summaryValues) : null;
+    }
+
+    private function canvasUrlFromDetails(int $canvasRecID, ?array $canvasDetails=null): ?string
+    {
+        if($canvasDetails!=null){
+            $existing = $this->getFirstDetailValue($canvasDetails, 'DT_IIIF_ID');
+            if($existing){ return (string)$existing; }
+        }
+        return $canvasRecID>0 ? $this->canonicalCanvasUrlForCanvasRecord($canvasRecID) : null;
+    }
+
+    private function annotationPageUrl(string $canvasUrl, int $manifestRecID=0): string
+    {
+        $endpoint = rtrim(HEURIST_BASE_URL, '/').'/api/'.$this->system->dbname().'/annotations';
+        // Default to Canvas scope. Manifest scope can be enabled later by adding /{manifestRecID} here.
+        return $endpoint.'/pages?uri='.rawurlencode($canvasUrl);
+    }
+
     /** Return width/height/duration values stored on an RT_IIIF_CANVAS record detail array. */
     public function dimensionValuesFromDetails(array $details): array
     {
@@ -330,7 +462,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
             $this->setField($details, $this->detailId('DT_DURATION', '2-66'), floatval($canvas['duration']));
         }
 
-        $thumbUrl = $this->extractThumbnailUrl($canvas);
+        $thumbUrl = IiifCanvasJson::extractThumbnailUrl($canvas);
         if($thumbUrl){
             $ulfID = $this->registerExternalUrl($thumbUrl);
             if($ulfID>0){
@@ -367,97 +499,6 @@ class DbIiifCanvas extends DbRecordTypeEntity
         return $ulfID>0 ? intval($ulfID) : 0;
     }
 
-    /** Extract the primary painting body URL from a IIIF v3/v2 Canvas. */
-    private function extractPrimaryPaintingBodyUrl(array $canvas): ?string
-    {
-        // IIIF Presentation v3: Canvas.items[] -> AnnotationPage.items[] -> painting Annotation.body.id
-        foreach((array)@$canvas['items'] as $page){
-            if(!is_array($page)){
-                continue;
-            }
-            foreach((array)@$page['items'] as $anno){
-                if(!is_array($anno)){
-                    continue;
-                }
-                $motivation = @$anno['motivation'];
-                if(is_array($motivation)){
-                    $motivation = reset($motivation);
-                }
-                if($motivation && $this->stripIiifPrefix((string)$motivation)!=='painting'){
-                    continue;
-                }
-                $url = $this->extractBodyUrl(@$anno['body']);
-                if($url){
-                    return $url;
-                }
-            }
-        }
-
-        // IIIF Presentation v2: Canvas.images[] -> Annotation.resource.@id/id
-        foreach((array)@$canvas['images'] as $anno){
-            if(!is_array($anno)){
-                continue;
-            }
-            $url = $this->extractBodyUrl(@$anno['resource']);
-            if($url){
-                return $url;
-            }
-        }
-
-        return null;
-    }
-
-    /** Extract a Canvas thumbnail URL, when the Manifest has a dedicated thumbnail entry. */
-    private function extractThumbnailUrl(array $canvas): ?string
-    {
-        return $this->extractBodyUrl(@$canvas['thumbnail']);
-    }
-
-    /** Extract URL from IIIF body/thumbnail object, array, or string. */
-    private function extractBodyUrl($body): ?string
-    {
-        if(is_string($body)){
-            return preg_match('/^https?:\/\//i', $body) ? $body : null;
-        }
-
-        if(!is_array($body)){
-            return null;
-        }
-
-        if(array_keys($body)===range(0, count($body)-1)){
-            foreach($body as $item){
-                $url = $this->extractBodyUrl($item);
-                if($url){
-                    return $url;
-                }
-            }
-            return null;
-        }
-
-        foreach(array('id', '@id') as $key){
-            if(!empty($body[$key]) && is_string($body[$key]) && preg_match('/^https?:\/\//i', $body[$key])){
-                return $body[$key];
-            }
-        }
-
-        // Some IIIF Image API entries expose the service URL but not a direct body URL.
-        // Use the service id only as a fallback.
-        $service = @$body['service'];
-        if(is_array($service)){
-            $url = $this->extractBodyUrl($service);
-            if($url){
-                return $url;
-            }
-        }
-
-        return null;
-    }
-
-    private function stripIiifPrefix(string $value): string
-    {
-        $pos = strrpos($value, ':');
-        return $pos!==false ? substr($value, $pos+1) : $value;
-    }
 
 
     /** Save Canvas details during import without marking the record as a Heurist-editor edit. */

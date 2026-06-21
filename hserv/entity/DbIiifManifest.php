@@ -5,12 +5,10 @@
 namespace hserv\entity;
 
 use hserv\structure\ConceptCode;
-use hserv\iiif\IiifMediaHelper;
 use hserv\iiif\IiifManifestJson;
 
 require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
 require_once dirname(__FILE__).'/DbIiifCanvas.php';
-require_once dirname(__FILE__).'/../iiif/IiifMediaHelper.php';
 require_once dirname(__FILE__).'/../iiif/IiifManifestJson.php';
 
 /**
@@ -319,162 +317,10 @@ class DbIiifManifest extends DbRecordTypeEntity
 
     private function buildManagedCanvasItem(int $canvasRecID, int $manifestRecID, bool $omitAnnotationPages=false): ?array
     {
-        if($canvasRecID<1){
-            return null;
-        }
-
-        $details = $this->loadRecordDetails($canvasRecID);
-        if(empty($details)){
-            return null;
-        }
-
-        $canvasUrl = $this->canonicalCanvasUrl($canvasRecID, $details);
-        if(!$canvasUrl){
-            return null;
-        }
-        $canvas = array(
-            'id' => $canvasUrl,
-            'type' => 'Canvas',
-            'label' => $this->toIiifLanguageMap($this->getDetailValues($details, 'DT_NAME'), 'Canvas '.$canvasRecID)
-        );
-
-        $summaryValues = $this->getDetailValues($details, 'DT_SHORT_SUMMARY');
-        if(!empty($summaryValues)){
-            $canvas['summary'] = $this->toIiifLanguageMap($summaryValues);
-        }
-
-        $mediaID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
-        $mediaInfo = $mediaID>0 ? IiifMediaHelper::registeredFileInfoForUlfID($this->system, $mediaID) : null;
-        $preferredDimensions = $this->dbCanvas()->dimensionValuesFromDetails($details);
-        $dimensions = $mediaInfo
-            ? IiifMediaHelper::resolveDimensionsForFileInfo(
-                $mediaInfo,
-                $preferredDimensions,
-                IiifMediaHelper::resourceUrlFromFileInfo($this->system, $mediaInfo),
-                array('width'=>1000, 'height'=>800)
-            )
-            : $preferredDimensions;
-
-        $width = $dimensions['width'];
-        $height = $dimensions['height'];
-        $duration = $dimensions['duration'];
-
-        // Canvas dimensions are resolved by the common IIIF media-dimension helper.
-        if($height !== null && $height > 0){ $canvas['height'] = intval($height); }
-        if($width !== null && $width > 0){ $canvas['width'] = intval($width); }
-        if($duration !== null && $duration > 0){ $canvas['duration'] = floatval($duration); }
-
-        $thumbID = intval($this->getFirstDetailValue($details, 'DT_THUMBNAIL'));
-        $thumb = $this->fileBodyFromUlfID($thumbID);
-        if($thumb){
-            $canvas['thumbnail'] = array($thumb);
-        }
-
-        $body = $this->fileBodyFromUlfID($mediaID, $width, $height, $duration);
-        if($body){
-            $canvas['items'] = array(
-                array(
-                    'id' => $canvasUrl.'/painting-page',
-                    'type' => 'AnnotationPage',
-                    'items' => array(
-                        array(
-                            'id' => $canvasUrl.'/painting',
-                            'type' => 'Annotation',
-                            'motivation' => 'painting',
-                            'body' => $body,
-                            'target' => $canvasUrl
-                        )
-                    )
-                )
-            );
-        }else{
-            $canvas['items'] = array();
-        }
-
-        if(!$omitAnnotationPages){
-            $canvas['annotations'] = array(
-                array(
-                    'id' => $this->annotationPageUrl($manifestRecID, $canvasUrl),
-                    'type' => 'AnnotationPage'
-                )
-            );
-        }
-
-        return $canvas;
-    }
-
-    private function fileBodyFromUlfID(int $ulfID, $width=null, $height=null, $duration=null): ?array
-    {
-        if($ulfID<1){
-            return null;
-        }
-
-        $info = IiifMediaHelper::registeredFileInfoForUlfID($this->system, $ulfID);
-        if(!is_array($info)){
-            return null;
-        }
-
-        $url = IiifMediaHelper::resourceUrlFromFileInfo($this->system, $info, false, HEURIST_BASE_URL);
-        $mimeType = $info['fxm_MimeType'] ?: $this->mimeTypeFromExtension((string)$info['ulf_MimeExt']);
-        $type = $this->iiifBodyTypeFromMime($mimeType);
-
-        $body = array(
-            'id' => $url,
-            'type' => $type,
-        );
-        if($mimeType){
-            $body['format'] = $mimeType;
-        }
-
-        // IIIF painting bodies should repeat the media dimensions. For images this
-        // is width/height; for AV resources duration may also be applicable.
-        if($height !== null && $height > 0 && in_array($type, array('Image', 'Video'), true)){
-            $body['height'] = intval($height);
-        }
-        if($width !== null && $width > 0 && in_array($type, array('Image', 'Video'), true)){
-            $body['width'] = intval($width);
-        }
-        if($duration !== null && $duration > 0 && in_array($type, array('Video', 'Sound'), true)){
-            $body['duration'] = floatval($duration);
-        }
-
-        return $body;
-    }
-
-    private function mimeTypeFromExtension(string $ext): ?string
-    {
-        $ext = strtolower(trim($ext));
-        if($ext===''){
-            return null;
-        }
-        if(strpos($ext, '/')!==false){
-            return $ext;
-        }
-        switch($ext){
-            case 'jpg':
-            case 'jpeg': return 'image/jpeg';
-            case 'png': return 'image/png';
-            case 'gif': return 'image/gif';
-            case 'webp': return 'image/webp';
-            case 'tif':
-            case 'tiff': return 'image/tiff';
-            case 'mp4': return 'video/mp4';
-            case 'mp3': return 'audio/mpeg';
-            case 'wav': return 'audio/wav';
-            default: return null;
-        }
-    }
-
-    private function iiifBodyTypeFromMime(?string $mimeType): string
-    {
-        $mimeType = strtolower((string)$mimeType);
-        if(strpos($mimeType, 'video/')===0){
-            return 'Video';
-        }
-        if(strpos($mimeType, 'audio/')===0){
-            return 'Sound';
-        }
-        return 'Image';
+        return $this->dbCanvas()->canvasJsonForCanvasRecord($canvasRecID, array(
+            'manifest_rec_id' => $manifestRecID,
+            'omit_annotation_pages' => $omitAnnotationPages
+        ));
     }
 
     private function manifestApiUrl(int $manifestRecID): string
@@ -484,17 +330,6 @@ class DbIiifManifest extends DbRecordTypeEntity
             .'/iiif/manifest/'.intval($manifestRecID);
     }
     
-    private function canonicalCanvasUrl(int $canvasRecID, ?array $canvasDetails=null): ?string
-    {
-        if($canvasDetails!=null){
-            $existing = $this->getFirstDetailValue($canvasDetails, 'DT_IIIF_ID');
-            if($existing){
-                return (string)$existing;
-            }        
-        }        
-        return $canvasRecID>0 ? $this->dbCanvas()->canonicalCanvasUrlForCanvasRecord($canvasRecID) : null;
-    }
-
     private function dbCanvas(): DbIiifCanvas
     {
         static $dbCanvas = null;

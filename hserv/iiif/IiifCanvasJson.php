@@ -82,6 +82,175 @@ class IiifCanvasJson
         return 'Image';
     }
 
+
+    /** Extract the primary painting body URL from a IIIF v3/v2 Canvas. */
+    public static function extractPrimaryPaintingBodyUrl(array $canvas): ?string
+    {
+        // IIIF Presentation v3: Canvas.items[] -> AnnotationPage.items[] -> painting Annotation.body.id
+        foreach((array)@$canvas['items'] as $page){
+            if(!is_array($page)){ continue; }
+            foreach((array)@$page['items'] as $anno){
+                if(!is_array($anno)){ continue; }
+                $motivation = @$anno['motivation'];
+                if(is_array($motivation)){ $motivation = reset($motivation); }
+                if($motivation && self::stripIiifPrefix((string)$motivation)!=='painting'){
+                    continue;
+                }
+                $url = self::extractBodyUrl(@$anno['body']);
+                if($url){ return $url; }
+            }
+        }
+
+        // IIIF Presentation v2: Canvas.images[] -> Annotation.resource.@id/id
+        foreach((array)@$canvas['images'] as $anno){
+            if(!is_array($anno)){ continue; }
+            $url = self::extractBodyUrl(@$anno['resource']);
+            if($url){ return $url; }
+        }
+
+        return null;
+    }
+
+    /** Extract a Canvas thumbnail URL, when the Manifest has a dedicated thumbnail entry. */
+    public static function extractThumbnailUrl(array $canvas): ?string
+    {
+        return self::extractBodyUrl(@$canvas['thumbnail']);
+    }
+
+    /** Extract URL from IIIF body/thumbnail object, array, or string. */
+    public static function extractBodyUrl($body): ?string
+    {
+        if(is_string($body)){
+            return preg_match('/^https?:\/\//i', $body) ? $body : null;
+        }
+
+        if(!is_array($body)){
+            return null;
+        }
+
+        if(array_keys($body)===range(0, count($body)-1)){
+            foreach($body as $item){
+                $url = self::extractBodyUrl($item);
+                if($url){ return $url; }
+            }
+            return null;
+        }
+
+        foreach(array('id', '@id') as $key){
+            if(!empty($body[$key]) && is_string($body[$key]) && preg_match('/^https?:\/\//i', $body[$key])){
+                return $body[$key];
+            }
+        }
+
+        // Some IIIF Image API entries expose the service URL but not a direct body URL.
+        // Use the service id only as a fallback.
+        $service = @$body['service'];
+        if(is_array($service)){
+            $url = self::extractBodyUrl($service);
+            if($url){ return $url; }
+        }
+
+        return null;
+    }
+
+    /** Compose a IIIF v3 body object from a registered Heurist file info array. */
+    public static function bodyFromFileInfo($system, array $fileinfo, array $dimensions=array(), bool $fullres=false, ?string $baseUrl=null): ?array
+    {
+        if(empty($fileinfo['ulf_ObfuscatedFileID'])){
+            return null;
+        }
+
+        $url = IiifMediaHelper::resourceUrlFromFileInfo($system, $fileinfo, $fullres, $baseUrl);
+        $mimeType = $fileinfo['fxm_MimeType'] ?? null;
+        if(!$mimeType){
+            $mimeType = self::mimeTypeFromExtension((string)($fileinfo['ulf_MimeExt'] ?? ''));
+        }
+        $type = self::bodyTypeFromMime($mimeType);
+
+        $body = array(
+            'id' => $url,
+            'type' => $type
+        );
+        if($mimeType){
+            $body['format'] = $mimeType;
+        }
+
+        $height = $dimensions['height'] ?? null;
+        $width = $dimensions['width'] ?? null;
+        $duration = $dimensions['duration'] ?? null;
+
+        if($height !== null && $height > 0 && in_array($type, array('Image', 'Video'), true)){
+            $body['height'] = intval($height);
+        }
+        if($width !== null && $width > 0 && in_array($type, array('Image', 'Video'), true)){
+            $body['width'] = intval($width);
+        }
+        if($duration !== null && $duration > 0 && in_array($type, array('Video', 'Sound'), true)){
+            $body['duration'] = floatval($duration);
+        }
+
+        return $body;
+    }
+
+    /** Compose a complete managed/generated IIIF v3 Canvas from ready file metadata. */
+    public static function composeCanvasFromFileInfo($system, array $fileinfo, string $canvasUrl, $label, array $options=array()): ?array
+    {
+        $resourceUrl = IiifMediaHelper::resourceUrlFromFileInfo(
+            $system,
+            $fileinfo,
+            !empty($options['body_fullres']),
+            $options['base_url'] ?? null
+        );
+
+        $dimensions = IiifMediaHelper::resolveDimensionsForFileInfo(
+            $fileinfo,
+            is_array($options['dimensions'] ?? null) ? $options['dimensions'] : array(),
+            $resourceUrl,
+            is_array($options['default_dimensions'] ?? null) ? $options['default_dimensions'] : array('width'=>1000, 'height'=>800)
+        );
+
+        $body = self::bodyFromFileInfo($system, $fileinfo, $dimensions, !empty($options['body_fullres']), $options['base_url'] ?? null);
+        if(!$body){
+            return null;
+        }
+
+        $thumbnail = null;
+        if(is_array($options['thumbnail_fileinfo'] ?? null)){
+            $thumbnail = self::bodyFromFileInfo($system, $options['thumbnail_fileinfo'], array(), false, $options['base_url'] ?? null);
+        }
+        if(!$thumbnail && !empty($options['thumbnail_url'])){
+            $thumbnail = array(
+                'id' => (string)$options['thumbnail_url'],
+                'type' => 'Image',
+                'format' => $options['thumbnail_format'] ?? 'image/png'
+            );
+        }
+
+        $canvasOptions = array(
+            'summary' => $options['summary'] ?? null,
+            'height' => $dimensions['height'] ?? null,
+            'width' => $dimensions['width'] ?? null,
+            'duration' => $dimensions['duration'] ?? null,
+            'items' => array(self::composePaintingPage($canvasUrl, $body))
+        );
+
+        if($thumbnail){
+            $canvasOptions['thumbnail'] = array($thumbnail);
+        }
+
+        if(!empty($options['annotation_page_url'])){
+            $canvasOptions['annotations'] = array(self::annotationPageRef((string)$options['annotation_page_url']));
+        }
+
+        return self::composeCanvas($canvasUrl, $label, $canvasOptions);
+    }
+
+    private static function stripIiifPrefix(string $value): string
+    {
+        $pos = strrpos($value, ':');
+        return $pos!==false ? substr($value, $pos+1) : $value;
+    }
+
     public static function mimeTypeFromExtension(string $ext): ?string
     {
         $ext = strtolower(trim($ext));
