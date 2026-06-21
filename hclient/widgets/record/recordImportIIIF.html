@@ -30,23 +30,6 @@
 
     <div style="margin:1em 0">
 
-        <label>
-            <br><input type="radio" name="import_level" value="overlay">
-            <b>Annotation of external manifest and media</b>
-        </label>
-        <div style="margin-left:1.8em;font-size:0.9em">
-            <ul>
-                <li>Annotates an existing IIIF Manifest without uploading its Canvas structure to Heurist.</li>
-                <li><b>Only IIIF Presentation API v3 Manifests are supported in annotation overlay mode.</b> 
-                <br>(v2 Manifests can only be handled through Full manifest management mode, below)</li>
-                <li>Ownership remains split: the source Manifest and its Canvas list remain on the external IIIF provider; 
-                <br>Heurist stores a local Manifest record and imported or newly created Annotation records.</li>
-                <li>The Canvas list and Canvas identifiers are preserved from the source Manifest.</li>
-                <li>Annotations are imported, stored and updated in Heurist, linked to the original Canvas URIs.</li>
-                <li>Manifest output can be generated with Heurist annotation pages overlaid on the original Canvases.</li>
-            </ul>
-        </div>
-
         <label style="display:block;margin-top:0.2em">
             <input type="radio" name="import_level" value="managed" checked>
             <b>Full manifest management</b>
@@ -64,6 +47,26 @@
                 <li>Annotations are linked to managed Canvas records and use generated Heurist Canvas URIs in IIIF output.</li>
             </ul>
         </div>
+        
+        <label style="display:block;margin-top:0.2em">
+            <input type="radio" name="import_level" value="overlay">
+            <b>Annotation of external manifest and media</b>
+        </label>
+        <div style="margin-left:1.8em;font-size:0.9em">
+            <ul>
+                <li>Annotates an existing IIIF Manifest without uploading its Canvas structure to Heurist.</li>
+                <li>Only IIIF Presentation API v3 Manifests are supported in annotation overlay mode. 
+                <br>(v2 Manifests can only be handled through Full manifest management mode, below)</li>
+                <li>Ownership remains split: the source Manifest and its Canvas list remain on the external IIIF provider; 
+                <br>Heurist stores a local Manifest record and imported or newly created Annotation records.</li>
+                <li>The Canvas list and Canvas identifiers are preserved from the source Manifest.</li>
+                <li>Annotations are imported, stored and updated in Heurist, linked to the original Canvas URIs.</li>
+                <li>Manifest output can be generated with Heurist annotation pages overlaid on the original Canvases.</li>
+            </ul>
+        </div>
+
+  
+    
     </div>
 
     <div style="margin:1em 0">

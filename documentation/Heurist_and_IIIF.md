@@ -154,8 +154,7 @@ Use **Process IIIF Manifest** to create a Managed Manifest from:
  - an IIIF Presentation Manifest which is referenced externally by a File field;
  - a JSon manifest which has been uploaded to Heurist as a File field. 
 
-![[Pasted image 20260621175823.png]]
- 
+![[Pasted image 20260621180809.png]]
  The process tool always creates or updates an **IIIF Manifest** record and creates **IIIF Annotation** records from any Annotations referenced in the Manifest. 
 
 In full management mode, Process IIIF Manifest also creates **IIIF Canvas** records, in other words the Canvases are stored within Heurist rather than referenced externally (the image or other media can be stored in Heurist or referenced externally). Media should be stored in Heurist where the referenced resources are not on a stable long-term repository such as Gallica, to ensure sustainability.
