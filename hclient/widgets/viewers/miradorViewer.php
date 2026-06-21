@@ -211,12 +211,12 @@ if($manifestRecID>0) {
 
     $url = $_REQUEST['url'];
 
-}elseif(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){  //obfuscation id
-    //load manifest directly
-    $url = str_replace('hclient/widgets/viewers/miradorViewer.php','', $url);
-    $url = str_replace($_SERVER['QUERY_STRING'],
-        'db='.$_REQUEST['db']
-            .'&file='.(@$_REQUEST['manifest']?$_REQUEST['manifest']:@$_REQUEST['iiif']),$url);
+}elseif(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){  //obfuscation id for a registered IIIF Manifest file
+
+    $manifestFileID = @$_REQUEST['manifest'] ? $_REQUEST['manifest'] : $_REQUEST['iiif'];
+    $url = $baseUrl.'heurist/api/'.rawurlencode($dbname)
+        .'/iiif/manifest/'.rawurlencode((string)$manifestFileID)
+        .'?omit_annotation_pages=1';
 }else{
     if(is_array($preparedParams)){
         // record_output creates manifest dynamically. Rebuild the URL from restored
