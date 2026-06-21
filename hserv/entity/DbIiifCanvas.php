@@ -298,18 +298,18 @@ class DbIiifCanvas extends DbRecordTypeEntity
 
     private function fillDetailsFromCanvas(array &$details, array $canvas, string $originalCanvasId, int $mediaUlfID=0): void
     {
-        $label = $this->normaliseLangValue(@$canvas['label']);
-        if(!$label){
-            $label = basename(parse_url($originalCanvasId, PHP_URL_PATH) ?: $originalCanvasId);
+        $labelValues = $this->normaliseLangValues(@$canvas['label']);
+        if(empty($labelValues)){
+            $labelValues = array(basename(parse_url($originalCanvasId, PHP_URL_PATH) ?: $originalCanvasId));
         }
 
-        $summary = $this->normaliseLangValue(@$canvas['summary']);
-        if(!$summary){
-            $summary = $this->normaliseLangValue(@$canvas['description']);
+        $summaryValues = $this->normaliseLangValues(@$canvas['summary']);
+        if(empty($summaryValues)){
+            $summaryValues = $this->normaliseLangValues(@$canvas['description']);
         }
 
-        $this->setField($details, 'DT_NAME', $label);
-        $this->setField($details, 'DT_SHORT_SUMMARY', $summary);
+        $this->setField($details, 'DT_NAME', $labelValues);
+        $this->setField($details, 'DT_SHORT_SUMMARY', $summaryValues);
         if($mediaUlfID>0){
             $this->setField($details, 'DT_FILE_RESOURCE', intval($mediaUlfID));
             $canonicalCanvasUrl = $this->canonicalCanvasUrlForFileID($mediaUlfID);

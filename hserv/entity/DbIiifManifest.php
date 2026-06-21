@@ -58,12 +58,12 @@ class DbIiifManifest extends DbRecordTypeEntity
         $recordId = $this->findManifestRecord($manifestFile, $sourceManifestId);
 
         $details = array();
-        $title = $this->normaliseLangValue(@$manifest['label']);
-        if(!$title){
-            $title = basename((string)@$manifestFile['source_url']);
+        $titleValues = $this->normaliseLangValues(@$manifest['label']);
+        if(empty($titleValues)){
+            $titleValues = array(basename((string)@$manifestFile['source_url']));
         }
 
-        $this->setField($details, 'DT_NAME', $title);
+        $this->setField($details, 'DT_NAME', $titleValues);
         $this->setField($details, 'DT_FILE_RESOURCE', intval(@$manifestFile['ulf_ID']));
         if($sourceManifestId){
             $this->setField($details, 'DT_ORIGINAL_IIIF_ID', $sourceManifestId);
@@ -77,15 +77,15 @@ class DbIiifManifest extends DbRecordTypeEntity
             $this->setField($details, 'DT_IIIF_IMPORT_MODE', $modeValue);
         }
 
-        $desc = $this->normaliseLangValue(@$manifest['summary']);
-        if(!$desc){
-            $desc = $this->normaliseLangValue(@$manifest['description']);
+        $descValues = $this->normaliseLangValues(@$manifest['summary']);
+        if(empty($descValues)){
+            $descValues = $this->normaliseLangValues(@$manifest['description']);
         }
-        $this->setField($details, 'DT_EXTENDED_DESCRIPTION', $desc);
+        $this->setField($details, 'DT_EXTENDED_DESCRIPTION', $descValues);
 
-        $copyright = $this->extractCopyrightText($manifest);
-        if($copyright){
-            $this->setField($details, 'DT_COPYRIGHT', $copyright);
+        $copyrightValues = $this->extractCopyrightValues($manifest);
+        if(!empty($copyrightValues)){
+            $this->setField($details, 'DT_COPYRIGHT', $copyrightValues);
         }
 
         $res = $this->saveRecordDetails($recordId, $details, 0);
@@ -101,19 +101,28 @@ class DbIiifManifest extends DbRecordTypeEntity
         return $manifestRecID;
     }
 
-    private function extractCopyrightText(array $manifest): string
+    private function extractCopyrightValues(array $manifest): array
     {
-        $rights = trim((string)($manifest['rights'] ?? ''));
         $required = $manifest['requiredStatement'] ?? null;
-
         if(is_array($required)){
-            $value = $this->normaliseLangValue($required['value'] ?? null);
-            if($value){
-                return $value;
+            $values = $this->normaliseLangValues($required['value'] ?? null);
+            if(!empty($values)){
+                return $values;
             }
         }
 
-        return $rights;
+        // IIIF v2 commonly uses attribution/license rather than requiredStatement.
+        $values = $this->normaliseLangValues($manifest['attribution'] ?? null);
+        if(!empty($values)){
+            return $values;
+        }
+
+        $rights = trim((string)($manifest['rights'] ?? ''));
+        if($rights===''){
+            $rights = trim((string)($manifest['license'] ?? ''));
+        }
+
+        return $rights!=='' ? array($rights) : array();
     }
 
     private function resolveImportModeTerm(string $importMode): ?int
@@ -274,33 +283,34 @@ class DbIiifManifest extends DbRecordTypeEntity
 
     private function buildManagedManifestJson(int $manifestRecID, array $manifestDetails, bool $omitAnnotationPages=false): array
     {
-        $title = $this->getFirstDetailValue($manifestDetails, 'DT_NAME') ?: ('Manifest '.$manifestRecID);
+        $titleValues = $this->getDetailValues($manifestDetails, 'DT_NAME');
 
         $manifest = array(
             '@context' => 'http://iiif.io/api/presentation/3/context.json',
             'id' => $this->manifestApiUrl($manifestRecID),
             'type' => 'Manifest',
-            'label' => $this->toLanguageMap($title),
+            'label' => $this->toIiifLanguageMap($titleValues, 'Manifest '.$manifestRecID),
             'items' => $this->buildManagedCanvasItems($manifestDetails, $manifestRecID, $omitAnnotationPages)
         );
 
-        $summary = $this->getFirstDetailValue($manifestDetails, 'DT_EXTENDED_DESCRIPTION');
-        if(!$summary){
-            $summary = $this->getFirstDetailValue($manifestDetails, 'DT_SHORT_SUMMARY');
+        $summaryValues = $this->getDetailValues($manifestDetails, 'DT_EXTENDED_DESCRIPTION');
+        if(empty($summaryValues)){
+            $summaryValues = $this->getDetailValues($manifestDetails, 'DT_SHORT_SUMMARY');
         }
-        if($summary){
-            $manifest['summary'] = $this->toLanguageMap($summary);
+        if(!empty($summaryValues)){
+            $manifest['summary'] = $this->toIiifLanguageMap($summaryValues);
         }
 
-        $copyright = $this->getFirstDetailValue($manifestDetails, 'DT_COPYRIGHT');
-        if($copyright){
+        $copyrightValues = $this->getDetailValues($manifestDetails, 'DT_COPYRIGHT');
+        if(!empty($copyrightValues)){
             $manifest['requiredStatement'] = array(
-                'label' => $this->toLanguageMap('Copyright'),
-                'value' => $this->toLanguageMap($copyright)
+                'label' => $this->toIiifLanguageMap('Copyright'),
+                'value' => $this->toIiifLanguageMap($copyrightValues)
             );
 
-            if(preg_match('/^https?:\/\//i', trim((string)$copyright))){
-                $manifest['rights'] = trim((string)$copyright);
+            $copyright = trim((string)reset($copyrightValues));
+            if(preg_match('/^https?:\/\//i', $copyright)){
+                $manifest['rights'] = $copyright;
             }
         }
 
@@ -353,12 +363,12 @@ class DbIiifManifest extends DbRecordTypeEntity
         $canvas = array(
             'id' => $canvasUrl,
             'type' => 'Canvas',
-            'label' => $this->toLanguageMap($this->getFirstDetailValue($details, 'DT_NAME') ?: ('Canvas '.$canvasRecID))
+            'label' => $this->toIiifLanguageMap($this->getDetailValues($details, 'DT_NAME'), 'Canvas '.$canvasRecID)
         );
 
-        $summary = $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY');
-        if($summary){
-            $canvas['summary'] = $this->toLanguageMap($summary);
+        $summaryValues = $this->getDetailValues($details, 'DT_SHORT_SUMMARY');
+        if(!empty($summaryValues)){
+            $canvas['summary'] = $this->toIiifLanguageMap($summaryValues);
         }
 
         $mediaID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
@@ -493,24 +503,6 @@ class DbIiifManifest extends DbRecordTypeEntity
             return 'Sound';
         }
         return 'Image';
-    }
-
-    private function toLanguageMap($value): array
-    {
-        $value = trim((string)$value);
-        if($value===''){
-            $value = 'Untitled';
-        }
-
-        if(preg_match('/^([A-Z]{3}):(.*)$/', $value, $m)){
-            $lang = strtolower($m[1]);
-            $map = array('eng'=>'en', 'fre'=>'fr', 'fra'=>'fr', 'deu'=>'de', 'ger'=>'de', 'spa'=>'es', 'ita'=>'it');
-            $lang = $map[$lang] ?? substr($lang, 0, 2);
-            $text = trim($m[2]);
-            return array($lang => array($text!=='' ? $text : $value));
-        }
-
-        return array('none' => array($value));
     }
 
     private function manifestApiUrl(int $manifestRecID): string
