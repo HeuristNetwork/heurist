@@ -344,6 +344,47 @@ class DbIiifManifest extends DbRecordTypeEntity
         return $this->ensureDefinitionsReady(false) && $this->isManifestRecord($manifestRecID);
     }
 
+
+    /** Return true if a recUploadedFiles row represents a registered IIIF Manifest JSON file. */
+    public function isIiifManifestFile(array $fileinfo): bool
+    {
+        return ($fileinfo['ulf_PreferredSource'] ?? '') === 'iiif'
+            || (defined('ULF_IIIF') && strpos((string)($fileinfo['ulf_OrigFileName'] ?? ''), ULF_IIIF) === 0);
+    }
+
+    /** Return the public Heurist IIIF Manifest API URL for a registered Manifest file. */
+    public function manifestApiUrlForFile(string $fileObfuscatedID): string
+    {
+        return rtrim(HEURIST_BASE_URL_PRO, '/')
+            .'/api/'.$this->system->dbname()
+            .'/iiif/manifest/'.rawurlencode($fileObfuscatedID);
+    }
+
+    /** Return a v3 Manifest reference for a registered Manifest file, suitable for Collection.items. */
+    public function manifestReferenceForFile(array $fileinfo, ?array $record=null): ?array
+    {
+        if(!$this->isIiifManifestFile($fileinfo) || empty($fileinfo['ulf_ObfuscatedFileID'])){
+            return null;
+        }
+
+        $label = trim(strip_tags((string)($fileinfo['ulf_Description'] ?? '')));
+        if($label==='' && $record!==null){
+            $label = trim(strip_tags((string)($record['rec_Title'] ?? '')));
+        }
+        if($label===''){
+            $label = trim(strip_tags((string)($fileinfo['ulf_OrigFileName'] ?? '')));
+        }
+        if($label===''){
+            $label = 'IIIF Manifest';
+        }
+
+        return array(
+            'id' => $this->manifestApiUrlForFile((string)$fileinfo['ulf_ObfuscatedFileID']),
+            'type' => 'Manifest',
+            'label' => $this->toIiifLanguageMap(array($label), 'IIIF Manifest')
+        );
+    }
+
     private function isManifestRecord(int $manifestRecID): bool
     {
         if($manifestRecID<1 || !$this->recordTypeId()){
