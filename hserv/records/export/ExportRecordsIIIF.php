@@ -18,9 +18,11 @@ use hserv\records\export\ExportRecords;
 use hserv\entity\DbIiifCanvas;
 use hserv\entity\DbIiifManifest;
 use hserv\iiif\IiifMediaHelper;
+use hserv\iiif\IiifPresentationService;
 
 require_once dirname(__FILE__).'/../../entity/DbIiifCanvas.php';
 require_once dirname(__FILE__).'/../../iiif/IiifMediaHelper.php';
+require_once dirname(__FILE__).'/../../iiif/IiifPresentationService.php';
 
 /**
 * Class ExportRecordsIIIF
@@ -542,43 +544,22 @@ private static function getIiifManifestFileIds($system, $record, $ulf_Obfuscated
 }
 
 /**
- * Dispatches one IIIF Presentation API resource for /api/{db}/iiif/{resource}/{id}.
+ * Compatibility wrapper for /api/{db}/iiif/{resource}/{id}.
+ *
+ * The implementation now lives in IiifPresentationService so this exporter can
+ * be simplified to dynamic recordset export only in the following patches.
  *
  * @param \hserv\System $system Initialised Heurist system object
  * @param string $resource Resource name: manifest, canvas, page, annotation, annotations
- * @param string $ulf_ObfuscatedFileID Registered file obfuscated ID
+ * @param string $ulf_ObfuscatedFileID Registered file obfuscated ID, or Manifest record ID for resource=manifest
  * @return string|false JSON string or false on error
  */
 public static function getIiifApiResource($system, string $resource, string $ulf_ObfuscatedFileID, bool $omitAnnotationPages=false)
 {
-    $resource = strtolower(trim($resource));
-    if($resource === ''){
-        $resource = 'manifest';
-    }
-
-    if($resource === 'manifest'){
-        // Numeric manifest IDs are RT_IIIF_MANIFEST record IDs. They must be
-        // resolved through DbIiifManifest so an empty but valid Manifest record
-        // returns a legal IIIF Manifest with items: [] instead of an API error.
-        if(preg_match('/^[1-9][0-9]*$/', $ulf_ObfuscatedFileID)){
-            $dbManifest = new DbIiifManifest($system);
-            $manifestRecID = intval($ulf_ObfuscatedFileID);
-            if($dbManifest->isIiifManifestRecord($manifestRecID)){
-                $manifest = $dbManifest->getOverlayManifestJson($manifestRecID, $omitAnnotationPages);
-                return is_array($manifest)
-                    ? json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
-                    : false;
-            }
-        }
-        return self::getIiifManifestForFile($system, $ulf_ObfuscatedFileID);
-    }
-
-    if($resource === 'canvas' || $resource === 'page' || $resource === 'annotation' || $resource === 'annotations'){
-        return self::getIiifResource($system, null, 3, $ulf_ObfuscatedFileID, $resource);
-    }
-
-    $system->addError(HEURIST_INVALID_REQUEST, 'Unsupported IIIF resource: '.htmlspecialchars($resource));
-    return false;
+    $service = new IiifPresentationService($system);
+    return $service->getResourceJson($resource, $ulf_ObfuscatedFileID, array(
+        'omit_annotation_pages' => $omitAnnotationPages
+    ));
 }
 
 /**
