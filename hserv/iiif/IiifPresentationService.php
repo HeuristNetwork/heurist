@@ -10,11 +10,6 @@ namespace hserv\iiif;
 use hserv\entity\DbIiifCanvas;
 use hserv\entity\DbIiifManifest;
 
-require_once dirname(__FILE__).'/../entity/DbIiifCanvas.php';
-require_once dirname(__FILE__).'/../entity/DbIiifManifest.php';
-require_once dirname(__FILE__).'/IiifManifestJson.php';
-require_once dirname(__FILE__).'/IiifMediaHelper.php';
-
 /**
  * Coordinates IIIF Presentation resource output for registered files and
  * managed/overlay Manifest records.

@@ -6,10 +6,8 @@ namespace hserv\entity;
 
 use hserv\structure\ConceptCode;
 use hserv\iiif\IiifManifestJson;
-
-require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
-require_once dirname(__FILE__).'/DbIiifCanvas.php';
-require_once dirname(__FILE__).'/../iiif/IiifManifestJson.php';
+use hserv\entity\DbRecordTypeEntity;
+use hserv\entity\DbIiifCanvas;
 
 /**
  * Manages IIIF Manifest records stored as user records of RT_IIIF_MANIFEST.

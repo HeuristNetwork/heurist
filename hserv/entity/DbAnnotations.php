@@ -7,12 +7,10 @@
 namespace hserv\entity;
 
 use hserv\entity\DbRecordTypeEntity;
+use hserv\entity\DbRecordTypeEntity;
+use hserv\entity\DbIiifCanvas;
 use hserv\utilities\USanitize;
 use hserv\iiif\IiifAnnotationJson;
-
-require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
-require_once dirname(__FILE__).'/../iiif/IiifAnnotationJson.php';
-require_once dirname(__FILE__).'/DbIiifCanvas.php';
 
 /**
 * Class DbAnnotations

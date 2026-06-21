@@ -5,13 +5,11 @@
 namespace hserv\entity;
 
 use hserv\structure\ConceptCode;
+use hserv\entity\DbRecordTypeEntity;
+use hserv\entity\DbRecUploadedFiles;
 use hserv\iiif\IiifMediaHelper;
 use hserv\iiif\IiifCanvasJson;
 
-require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
-require_once dirname(__FILE__).'/DbRecUploadedFiles.php';
-require_once dirname(__FILE__).'/../iiif/IiifMediaHelper.php';
-require_once dirname(__FILE__).'/../iiif/IiifCanvasJson.php';
 
 /**
  * Manages IIIF Canvas records stored as user records of RT_IIIF_CANVAS.

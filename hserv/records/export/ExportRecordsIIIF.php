@@ -22,12 +22,6 @@ use hserv\iiif\IiifMediaHelper;
 use hserv\iiif\IiifManifestJson;
 use hserv\iiif\IiifPresentationService;
 
-require_once dirname(__FILE__).'/../../entity/DbIiifCanvas.php';
-require_once dirname(__FILE__).'/../../entity/DbIiifManifest.php';
-require_once dirname(__FILE__).'/../../iiif/IiifMediaHelper.php';
-require_once dirname(__FILE__).'/../../iiif/IiifManifestJson.php';
-require_once dirname(__FILE__).'/../../iiif/IiifPresentationService.php';
-
 /**
 * Class ExportRecordsIIIF
 *
