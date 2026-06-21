@@ -1898,7 +1898,7 @@ EXP;
             $is_NOT_allowed = false;
         } else {
             // Invalid password
-            $this->addError(HEURIST_ACTION_BLOCKED, 'Password is incorrect');
+            $this->addError(HEURIST_ACTION_BLOCKED, 'Invalid password. If this password is required to access a specific function, it is NOT your login password, it is a special password generally only available to the people who manage the server.');
         }
 
         return $is_NOT_allowed;
