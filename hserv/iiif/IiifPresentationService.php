@@ -10,6 +10,9 @@ namespace hserv\iiif;
 use hserv\entity\DbIiifCanvas;
 use hserv\entity\DbIiifManifest;
 
+require_once dirname(__FILE__).'/../entity/DbIiifCanvas.php';
+require_once dirname(__FILE__).'/../entity/DbIiifManifest.php';
+
 /**
  * Coordinates IIIF Presentation resource output for registered files and
  * managed/overlay Manifest records.
@@ -85,7 +88,7 @@ class IiifPresentationService
         if(preg_match('/^[1-9][0-9]*$/', $id)){
             $manifestRecID = intval($id);
             if($this->dbManifest()->isIiifManifestRecord($manifestRecID)){
-                $manifest = $this->dbManifest()->getOverlayManifestJson($manifestRecID, $omitAnnotationPages);
+                $manifest = $this->dbManifest()->getManifestRecordJson($manifestRecID, $omitAnnotationPages);
                 return is_array($manifest) ? $manifest : false;
             }
         }
@@ -96,7 +99,8 @@ class IiifPresentationService
         }
 
         if($this->isIiifManifestFile($fileinfo)){
-            return $this->registeredManifestJson($fileinfo);
+            $manifest = $this->dbManifest()->getManifestFileJson($fileinfo, $omitAnnotationPages);
+            return is_array($manifest) ? $manifest : false;
         }
 
         $canvas = $this->canvasFromFileInfo($fileinfo, array(
@@ -273,46 +277,6 @@ class IiifPresentationService
             ),
             'target' => $target
         );
-    }
-
-    private function registeredManifestJson(array $fileinfo)
-    {
-        $manifest = '';
-        if(!empty($fileinfo['ulf_ExternalFileReference'])){
-            $manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']);
-        }else{
-            $path = '';
-            if(!empty($fileinfo['ulf_FilePath']) && !empty($fileinfo['ulf_FileName'])){
-                $path = $fileinfo['ulf_FilePath'].$fileinfo['ulf_FileName'];
-                if(function_exists('resolveFilePath')){
-                    $path = resolveFilePath($path);
-                }
-            }
-            if($path && file_exists($path)){
-                $manifest = file_get_contents($path);
-            }
-            if($manifest===''){
-                $manifest = loadRemoteURLContent(HEURIST_BASE_URL_PRO.'?db='.$this->system->dbname().'&file='.$fileinfo['ulf_ObfuscatedFileID']);
-            }
-        }
-
-        if(!$manifest){
-            $this->system->addError(HEURIST_NOT_FOUND, 'Registered IIIF manifest content could not be loaded');
-            return false;
-        }
-
-        $json = json_decode($manifest, true);
-        if(json_last_error()!==JSON_ERROR_NONE || !is_array($json)){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Registered IIIF manifest is not valid JSON');
-            return false;
-        }
-
-        if(!IiifManifestJson::isManifest($json)){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Registered IIIF resource is not a Manifest');
-            return false;
-        }
-
-        return $json;
     }
 
     private function fileInfoForId(string $id)

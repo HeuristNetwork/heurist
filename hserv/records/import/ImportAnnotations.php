@@ -21,7 +21,7 @@ class ImportAnnotations{
 
     private $system;
     private $manifestFileId;
-    private $importLevel = 'overlay';
+    private $importLevel = 'managed';
     private $progressSessionId = 0;
     private $createThumbnail = false;
     private $dbAnno;
@@ -35,7 +35,7 @@ class ImportAnnotations{
             $this->manifestFileId = reset($this->manifestFileId);
         }
 
-        $this->importLevel = @$params['import_level'] ?: 'overlay';
+        $this->importLevel = @$params['import_level'] ?: 'managed';
         $this->progressSessionId = @$params['session'];
         $this->createThumbnail = @$params['create_thumb']==1;
     }
@@ -68,9 +68,22 @@ class ImportAnnotations{
             return false;
         }
 
-        $manifestRecID = $this->ensureManifestRecord($manifestFile, $manifest);
-        if(!$manifestRecID){
-            return false;
+        $manifestRecID = 0;
+        $dbManifest = new DbIiifManifest($this->system);
+        $existingManagedRecID = $dbManifest->findManifestRecordForFile($manifestFile);
+
+        if($this->importLevel === 'overlay'){
+            if($existingManagedRecID>0){
+                $this->system->addError(HEURIST_ACTION_BLOCKED,
+                    'This registered Manifest is already managed by Heurist Manifest record '
+                    .$existingManagedRecID.'. Annotation overlay mode is not available. Use Full manifest management instead.');
+                return false;
+            }
+        }else{
+            $manifestRecID = $this->ensureManifestRecord($manifestFile, $manifest);
+            if(!$manifestRecID){
+                return false;
+            }
         }
 
         $canvasImport = array('map'=>array(), 'ordered'=>array(), 'added'=>array(), 'updated'=>array(), 'retained'=>array(), 'preserved_local'=>array(), 'issues'=>array());
@@ -114,8 +127,6 @@ class ImportAnnotations{
 
         foreach($annotations as $idx=>$ctx){
             $ctx['manifestRecID'] = $manifestRecID;
-            $ctx['manifestFileID'] = intval($manifestFile['ulf_ID']);
-            $ctx['manifestUrl'] = $manifestFile['source_url'];
             $ctx['state'] = 'imported';
             $ctx['preserveLocal'] = 1;
             if($this->importLevel === 'managed' && @$ctx['canvasOriginalId'] && isset($canvasImport['map'][$ctx['canvasOriginalId']])){

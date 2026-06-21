@@ -6,8 +6,9 @@ namespace hserv\entity;
 
 use hserv\structure\ConceptCode;
 use hserv\iiif\IiifManifestJson;
-use hserv\entity\DbRecordTypeEntity;
-use hserv\entity\DbIiifCanvas;
+
+require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
+require_once dirname(__FILE__).'/DbIiifCanvas.php';
 
 /**
  * Manages IIIF Manifest records stored as user records of RT_IIIF_MANIFEST.
@@ -28,32 +29,27 @@ class DbIiifManifest extends DbRecordTypeEntity
             'DT_COPYRIGHT',
             'DT_IIIF_ID',
             'DT_ORIGINAL_IIIF_ID',
-            'DT_IIIF_IMPORT_MODE',
             'DT_IIIF_CANVAS'
         );
 
-        // Fill these when the term concept codes are final.
-        $this->requiredTermConstants = array(
-            'TRM_IIIF_IMPORT_MODE_OVERLAY' => '2-10444',
-            'TRM_IIIF_IMPORT_MODE_MANAGED' => '2-10446'
-        );
+        $this->requiredTermConstants = array();
     }
 
     /**
-     * Create or update a minimal RT_IIIF_MANIFEST record for a registered Manifest file.
+     * Create or update a managed RT_IIIF_MANIFEST record for a registered Manifest file.
      * $manifestFile is the resolved file array from ImportAnnotations.
      *
      * DT_IIIF_ID is the canonical Heurist Manifest API URL.
      * DT_ORIGINAL_IIIF_ID stores the source Manifest id or source URL.
      */
-    public function ensureFromManifestFile(array $manifestFile, array $manifest, string $importMode='overlay')
+    public function ensureFromManifestFile(array $manifestFile, array $manifest, string $importMode='managed')
     {
         if(!$this->ensureDefinitionsReady($this->system->isAdmin())){
             return 0;
         }
 
         $sourceManifestId = $this->getJsonId($manifest) ?: (string)@$manifestFile['source_url'];
-        $recordId = $this->findManifestRecord($manifestFile, $sourceManifestId);
+        $recordId = $this->findManifestRecordForFile($manifestFile);
 
         $details = array();
         $titleValues = $this->normaliseLangValues(@$manifest['label']);
@@ -70,10 +66,6 @@ class DbIiifManifest extends DbRecordTypeEntity
             $this->setField($details, 'DT_IIIF_ID', $this->manifestApiUrl($recordId));
         }
 
-        $modeValue = $this->resolveImportModeTerm($importMode);
-        if($modeValue){
-            $this->setField($details, 'DT_IIIF_IMPORT_MODE', $modeValue);
-        }
 
         $descValues = $this->normaliseLangValues(@$manifest['summary']);
         if(empty($descValues)){
@@ -123,43 +115,28 @@ class DbIiifManifest extends DbRecordTypeEntity
         return $rights!=='' ? array($rights) : array();
     }
 
-    private function resolveImportModeTerm(string $importMode): ?int
+    /** Return the managed RT_IIIF_MANIFEST record that references this registered Manifest file, if any. */
+    public function findManifestRecordForFile(array $manifestFile): int
     {
-        switch($importMode){
-            case 'overlay':
-                return $this->getTermId('TRM_IIIF_IMPORT_MODE_OVERLAY') ?: $this->getTermId('overlay');
-            case 'managed':
-                return $this->getTermId('TRM_IIIF_IMPORT_MODE_MANAGED') ?: $this->getTermId('managed');
-            default:
-                return $this->getTermId($importMode);
+        if(!$this->ensureDefinitionsReady(false) || !defined('DT_FILE_RESOURCE')){
+            return 0;
         }
-    }
 
-    private function findManifestRecord(array $manifestFile, ?string $sourceManifestId): int
-    {
+        $ulfID = intval(@$manifestFile['ulf_ID']);
+        if($ulfID<1){
+            return 0;
+        }
+
         $mysqli = $this->system->getMysqli();
         $rty = $this->recordTypeId();
         if(!$rty){
             return 0;
         }
 
-        $conditions = array();
-
-        if(defined('DT_FILE_RESOURCE') && intval(@$manifestFile['ulf_ID'])>0){
-            $ulfID = intval($manifestFile['ulf_ID']);
-            $conditions[] = '(d.dtl_DetailTypeID='.DT_FILE_RESOURCE.' AND (d.dtl_UploadedFileID='.$ulfID.' OR d.dtl_Value="'.$ulfID.'"))';
-        }
-
-        if(defined('DT_ORIGINAL_IIIF_ID') && $sourceManifestId){
-            $conditions[] = '(d.dtl_DetailTypeID='.DT_ORIGINAL_IIIF_ID.' AND d.dtl_Value="'.addslashes($sourceManifestId).'")';
-        }
-
-        if(empty($conditions)){
-            return 0;
-        }
-
         $query = 'SELECT r.rec_ID FROM Records r, recDetails d WHERE r.rec_ID=d.dtl_RecID '
-            .'AND r.rec_RecTypeID='.$rty.' AND ('.implode(' OR ', $conditions).') LIMIT 1';
+            .'AND r.rec_RecTypeID='.$rty
+            .' AND d.dtl_DetailTypeID='.DT_FILE_RESOURCE
+            .' AND (d.dtl_UploadedFileID='.$ulfID.' OR d.dtl_Value="'.$ulfID.'") LIMIT 1';
         $recID = mysql__select_value($mysqli, $query);
         return $recID ? intval($recID) : 0;
     }
@@ -192,67 +169,61 @@ class DbIiifManifest extends DbRecordTypeEntity
         return true;
     }
 
-    /**
-     * Return a v3 overlay Manifest for Mirador.
-     * Existing Canvas.annotations are replaced with Heurist AnnotationPage URLs
-     * to avoid showing source annotations and imported DB annotations twice.
-     */
-    public function getOverlayManifestJson(int $manifestRecID, bool $omitAnnotationPages=false): ?array
+    /** Return a managed v3 Manifest generated from an RT_IIIF_MANIFEST record. */
+    public function getManifestRecordJson(int $manifestRecID, bool $omitAnnotationPages=false): ?array
     {
         if(!$this->ensureDefinitionsReady(false) || !$this->isManifestRecord($manifestRecID)){
             return null;
         }
 
-        $manifestDetails = $this->loadRecordDetails($manifestRecID);
-
-        // Full-management mode is generated from Heurist records. The source
-        // Manifest is not reloaded here: Canvas ids, painting bodies, thumbnails
-        // and AnnotationPage links are all derived from RT_IIIF_CANVAS records.
-        if($this->isManagedManifestDetails($manifestDetails)){
-            return $this->buildManagedManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
-        }
-
-        return $this->buildOverlayManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
-    }
-
-    private function buildOverlayManifestJson(int $manifestRecID, array $manifestDetails, bool $omitAnnotationPages=false): ?array
-    {
-        // A valid RT_IIIF_MANIFEST record may be created before any source Manifest
-        // file or managed Canvas list is attached. Return a legal empty IIIF Manifest
-        // instead of letting the API turn this into a technical notfound response.
-        $sourceFileID = intval($this->getFirstDetailValue($manifestDetails, 'DT_FILE_RESOURCE'));
-        if($sourceFileID < 1){
-            return $this->buildManagedManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
-        }
-
-        $manifest = $this->loadSourceManifestForRecord($manifestRecID, $manifestDetails);
-        if(!is_array($manifest)){
-            // Missing, unreadable or malformed source manifests should not produce
-            // an API error for Mirador. Return a valid empty v3 Manifest instead.
-            $this->system->clearError();
-            return $this->buildManagedManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
-        }
-
-        // Overlay output is only safe for IIIF Presentation API v3 manifests.
-        // Presentation v2 uses sequences/canvases/otherContent, so do not apply
-        // the v3 Canvas.annotations replacement logic to v2 source manifests.
-        // v2 should be imported in managed mode, then generated from Heurist
-        // RT_IIIF_CANVAS records. For legacy/bad overlay records, return an
-        // empty v3 Manifest rather than a blocked API response.
-        $overlay = IiifManifestJson::transformOverlayV3Manifest(
-            $manifest,
-            function(string $canvasId) use ($manifestRecID): string {
-                return $this->annotationPageUrl($manifestRecID, $canvasId);
-            },
+        return $this->buildManagedManifestJson(
+            $manifestRecID,
+            $this->loadRecordDetails($manifestRecID),
             $omitAnnotationPages
         );
+    }
 
-        if(!is_array($overlay)){
-            $this->system->clearError();
-            return $this->buildManagedManifestJson($manifestRecID, $manifestDetails, $omitAnnotationPages);
+    /**
+     * Return Manifest JSON for a registered Manifest file.
+     *
+     * If an RT_IIIF_MANIFEST record references this file, the Manifest is managed
+     * and generated from Heurist records. Otherwise the registered source Manifest
+     * is returned directly for v2, or transformed as a v3 annotation overlay.
+     */
+    public function getManifestFileJson(array $fileinfo, bool $omitAnnotationPages=false): ?array
+    {
+        if(!$this->isIiifManifestFile($fileinfo)){
+            $this->system->addError(HEURIST_NOT_FOUND, 'Registered file is not an IIIF Manifest');
+            return null;
         }
 
-        return $overlay;
+        $managedRecID = $this->findManifestRecordForFile($fileinfo);
+        if($managedRecID>0){
+            return $this->getManifestRecordJson($managedRecID, $omitAnnotationPages);
+        }
+
+        $manifest = $this->loadSourceManifestForFile($fileinfo);
+        if(!is_array($manifest)){
+            return null;
+        }
+
+        if(IiifManifestJson::isV2Manifest($manifest)){
+            return $manifest;
+        }
+
+        if(IiifManifestJson::isV3Manifest($manifest)){
+            $overlay = IiifManifestJson::transformOverlayV3Manifest(
+                $manifest,
+                function(string $canvasId): string {
+                    return $this->annotationPageUrlForCanvas($canvasId);
+                },
+                $omitAnnotationPages
+            );
+            return is_array($overlay) ? $overlay : null;
+        }
+
+        $this->system->addError(HEURIST_INVALID_REQUEST, 'Registered IIIF resource is not a Manifest');
+        return null;
     }
 
     private function buildManagedManifestJson(int $manifestRecID, array $manifestDetails, bool $omitAnnotationPages=false): array
@@ -285,18 +256,6 @@ class DbIiifManifest extends DbRecordTypeEntity
         );
     }
 
-
-    private function isManagedManifestDetails(array $manifestDetails): bool
-    {
-        $canvasRefs = $this->getDetailValues($manifestDetails, 'DT_IIIF_CANVAS');
-        if(!empty($canvasRefs)){
-            return true;
-        }
-
-        $mode = intval($this->getFirstDetailValue($manifestDetails, 'DT_IIIF_IMPORT_MODE'));
-        $managed = $this->getTermId('TRM_IIIF_IMPORT_MODE_MANAGED') ?: $this->getTermId('managed');
-        return $mode>0 && $managed>0 && $mode===$managed;
-    }
 
     private function buildManagedCanvasItems(array $manifestDetails, int $manifestRecID, bool $omitAnnotationPages=false): array
     {
@@ -394,48 +353,59 @@ class DbIiifManifest extends DbRecordTypeEntity
         return intval($recType)===$this->recordTypeId();
     }
 
-    private function loadSourceManifestForRecord(int $manifestRecID, array $manifestDetails): ?array
+    private function loadSourceManifestForFile(array $fileinfo): ?array
     {
-        $sourceUrl = null;
-        $ulfID = intval($this->getFirstDetailValue($manifestDetails, 'DT_FILE_RESOURCE'));
-        if($ulfID>0){
-            $row = mysql__select_row($this->system->getMysqli(),
-                'SELECT ulf_ObfuscatedFileID, ulf_ExternalFileReference FROM recUploadedFiles WHERE ulf_ID='.$ulfID.' LIMIT 1');
-            if(is_array($row)){
-                $sourceUrl = $row[1] ? $row[1]
-                    : HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$row[0];
+        $content = '';
+        $sourceUrl = trim((string)($fileinfo['ulf_ExternalFileReference'] ?? ''));
+
+        if($sourceUrl !== ''){
+            $content = loadRemoteURLContent($sourceUrl);
+        }
+
+        if($content === ''){
+            $path = '';
+            if(!empty($fileinfo['ulf_FilePath']) && !empty($fileinfo['ulf_FileName'])){
+                $path = $fileinfo['ulf_FilePath'].$fileinfo['ulf_FileName'];
+                if(function_exists('resolveFilePath')){
+                    $path = resolveFilePath($path);
+                }
+            }
+
+            if($path && file_exists($path)){
+                $content = file_get_contents($path);
             }
         }
 
-        if(!$sourceUrl){
-            $this->system->addError(HEURIST_NOT_FOUND,
-                'Cannot locate the registered source Manifest file for IIIF Manifest record '.$manifestRecID);
-            return null;
+        if($content === '' && !empty($fileinfo['ulf_ObfuscatedFileID'])){
+            $sourceUrl = HEURIST_BASE_URL_PRO.'?db='.$this->system->dbname().'&file='.$fileinfo['ulf_ObfuscatedFileID'];
+            $content = loadRemoteURLContent($sourceUrl);
         }
 
-        $content = loadRemoteURLContent($sourceUrl);
-        if(!$content){
-            $this->system->addError(HEURIST_ACTION_BLOCKED,
-                'Source Manifest is not accessible: '.$sourceUrl);
+        if($content === ''){
+            $this->system->addError(HEURIST_NOT_FOUND, 'Registered IIIF Manifest content could not be loaded');
             return null;
         }
 
         $json = json_decode($content, true);
         if(!is_array($json)){
             $this->system->addError(HEURIST_ACTION_BLOCKED,
-                'Source Manifest is not valid JSON. '.json_last_error_msg());
+                'Registered IIIF Manifest is not valid JSON. '.json_last_error_msg());
+            return null;
+        }
+
+        if(!IiifManifestJson::isManifest($json)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Registered IIIF resource is not a Manifest');
             return null;
         }
 
         return $json;
     }
 
-    private function annotationPageUrl(int $manifestRecID, string $canvasId): string
+    private function annotationPageUrlForCanvas(string $canvasId): string
     {
         return rtrim(HEURIST_BASE_URL, '/')
             .'/api/'.$this->system->dbname()
-            .'/annotations'  //Temorarely '/'.intval($manifestRecID)
-            .'/pages?uri='.rawurlencode($canvasId);
+            .'/annotations/pages?uri='.rawurlencode($canvasId);
     }
 
 }
