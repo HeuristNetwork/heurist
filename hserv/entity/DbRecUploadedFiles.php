@@ -2341,6 +2341,7 @@ class DbRecUploadedFiles extends DbEntityBase
         }else{
             $ret = array();
         }
+        $seen = [];
 
         $where_clause = '';
         $mysqli = $this->system->getMysqli();
@@ -2364,6 +2365,11 @@ class DbRecUploadedFiles extends DbEntityBase
 
             if($return_mode=='rec_full'){
                 $ret = mysql__select_assoc($mysqli, $query, 0);
+                
+                foreach ($ret as $row) {
+                    $key = $row['recID'] . '-' . $row['targetID'];
+                    $seen[$key] = true;
+                }                
             }elseif($return_mode=='rec_cnt'){
                 $ret = intval(mysql__select_value($mysqli, $query));
             }else{
@@ -2402,7 +2408,16 @@ class DbRecUploadedFiles extends DbEntityBase
                     if($return_mode=='rec_full'){
                         $res = mysql__select_assoc($mysqli, $query, 0);
                         if(!empty($res)){
-                            $ret = array_merge($ret, $res);
+                            
+                            // Merge unique rows from $res into $ret
+                            foreach ($res as $row) {
+                                $key = $row['recID'] . '-' . $row['targetID'];
+
+                                if (!isset($seen[$key])) {
+                                    $ret[] = $row;
+                                    $seen[$key] = true;
+                                }
+                            }                            
                         }
                     }elseif($return_mode=='rec_ids'){
                         //record ids
