@@ -84,16 +84,20 @@ class IiifPresentationService
     {
         $omitAnnotationPages = !empty($options['omit_annotation_pages']);
 
-        // Numeric IDs are RT_IIIF_MANIFEST records.
+        // Numeric IDs are public RT_IIIF_MANIFEST record aliases only.
+        // Do not fall through to recUploadedFiles.ulf_ID; ulf_ID is internal.
         if(preg_match('/^[1-9][0-9]*$/', $id)){
             $manifestRecID = intval($id);
             if($this->dbManifest()->isIiifManifestRecord($manifestRecID)){
                 $manifest = $this->dbManifest()->getManifestRecordJson($manifestRecID, $omitAnnotationPages);
                 return is_array($manifest) ? $manifest : false;
             }
+
+            $this->system->addError(HEURIST_NOT_FOUND, 'Manifest record not found');
+            return false;
         }
 
-        $fileinfo = $this->fileInfoForId($id);
+        $fileinfo = $this->fileInfoForObfuscatedId($id);
         if(!$fileinfo){
             return false;
         }
@@ -120,7 +124,20 @@ class IiifPresentationService
 
     private function canvasResource(string $id, array $options=array())
     {
-        $fileinfo = $this->fileInfoForId($id);
+        // Numeric IDs are public RT_IIIF_CANVAS record aliases only.
+        // The returned Canvas JSON still uses the canonical file-obfuscated id.
+        // Do not fall through to recUploadedFiles.ulf_ID; ulf_ID is internal.
+        if(preg_match('/^[1-9][0-9]*$/', $id)){
+            $canvas = $this->dbCanvas()->canvasJsonForCanvasRecord(intval($id), $options);
+            if(is_array($canvas)){
+                return $canvas;
+            }
+
+            $this->system->addError(HEURIST_NOT_FOUND, 'Canvas record not found');
+            return false;
+        }
+
+        $fileinfo = $this->fileInfoForObfuscatedId($id);
         if(!$fileinfo){
             return false;
         }
@@ -169,7 +186,17 @@ class IiifPresentationService
 
     private function linkedAnnotationPageResource(string $id)
     {
-        $fileinfo = $this->fileInfoForId($id);
+        // IIIF Presentation linked AnnotationPage ids are based on registered-file
+        // obfuscated ids: /api/{db}/iiif/annotations/{ulf_ObfuscatedFileID}.
+        // Numeric recUploadedFiles.ulf_ID values are internal and are not public
+        // API identifiers. This does NOT apply to the Annotation REST API
+        // /api/{db}/annotations/{annotationRecID}, which is handled by DbAnnotations.
+        if(preg_match('/^[1-9][0-9]*$/', $id)){
+            $this->system->addError(HEURIST_NOT_FOUND, 'IIIF AnnotationPage resource not found');
+            return false;
+        }
+
+        $fileinfo = $this->fileInfoForObfuscatedId($id);
         if(!$fileinfo){
             return false;
         }
@@ -279,8 +306,14 @@ class IiifPresentationService
         );
     }
 
-    private function fileInfoForId(string $id)
+    private function fileInfoForObfuscatedId(string $id)
     {
+        $id = trim($id);
+        if($id==='' || preg_match('/^[1-9][0-9]*$/', $id)){
+            $this->system->addError(HEURIST_NOT_FOUND, 'Resource with given id not found');
+            return false;
+        }
+
         $info = fileGetFullInfo($this->system, $id);
         if(empty($info) || !is_array($info[0])){
             $this->system->addError(HEURIST_NOT_FOUND, 'Resource with given id not found');

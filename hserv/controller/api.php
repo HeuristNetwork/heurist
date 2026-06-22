@@ -331,10 +331,16 @@ if(!$skip_auth_processing){
 
 if (@$requestUri[3]=='iiif') {
     
-    // https://server/heurist/api/mydb/iiif/annotations/<ulf_obfuscated_id>
-    
-    // http://127.0.0.1/heurist/?db=osmak_annot&file=662a913ee25012ba445b5b96d6eea2f9537ca6a4
-    // http://127.0.0.1/heurist/api/osmak_annot/iiif/annotations/662a913ee25012ba445b5b96d6eea2f9537ca6a4
+    // IIIF Presentation API routes, for example:
+    //   /api/{db}/iiif/manifest/{manifestRecID}
+    //   /api/{db}/iiif/manifest/{ulf_ObfuscatedFileID}
+    //   /api/{db}/iiif/canvas/{ulf_ObfuscatedFileID}
+    //   /api/{db}/iiif/canvas/{canvasRecID}       // alias; output id is canonical
+    //   /api/{db}/iiif/annotations/{ulf_ObfuscatedFileID}
+    //
+    // Do not confuse /iiif/annotations/{fileObfuscatedId}, which is a linked
+    // IIIF AnnotationPage for a Canvas/file, with /annotations/{annotationRecID},
+    // which is the annotation-record REST API handled below by DbAnnotations.
 
     if($method=='search'){ //GET method
         $req_params['resource'] = @$requestUri[4];
