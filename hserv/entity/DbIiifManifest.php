@@ -263,21 +263,16 @@ class DbIiifManifest extends DbRecordTypeEntity
         $items = array();
 
         foreach($canvasRecIDs as $canvasRecID){
-            $canvas = $this->buildManagedCanvasItem(intval($canvasRecID), $manifestRecID, $omitAnnotationPages);
+            $canvas = $this->dbCanvas()->canvasJsonForCanvasRecord($canvasRecID, array(
+                'manifest_rec_id' => $manifestRecID,
+                'omit_annotation_pages' => $omitAnnotationPages
+            ));
             if($canvas){
                 $items[] = $canvas;
             }
         }
 
         return $items;
-    }
-
-    private function buildManagedCanvasItem(int $canvasRecID, int $manifestRecID, bool $omitAnnotationPages=false): ?array
-    {
-        return $this->dbCanvas()->canvasJsonForCanvasRecord($canvasRecID, array(
-            'manifest_rec_id' => $manifestRecID,
-            'omit_annotation_pages' => $omitAnnotationPages
-        ));
     }
 
     private function manifestApiUrl(int $manifestRecID): string

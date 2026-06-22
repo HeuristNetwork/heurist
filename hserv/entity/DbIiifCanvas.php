@@ -228,6 +228,10 @@ class DbIiifCanvas extends DbRecordTypeEntity
         if($canvasRecID<1){
             return null;
         }
+        
+        if(!$this->ensureDefinitionsReady(false)){
+            return false;
+        }
 
         $details = $this->loadRecordDetails($canvasRecID);
         if(empty($details)){
