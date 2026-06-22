@@ -155,7 +155,7 @@
 #menu-files-upload#Upload media files/images
 #menu-files-index#Index external transfers
 #menu-files-index-and-records#Create media records
-#menu-files-annotations#Import IIIF Manifest
+#menu-files-annotations#Process IIIF Manifest
 #menu-files-csv#Upload media from URLs
 #menu-files-upload-hint#Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files
 #menu-files-index-hint#Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)

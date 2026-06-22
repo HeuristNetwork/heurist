@@ -505,7 +505,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_ANNOTATION_SELECTOR_TYPE' => array(2, 1154),   
     'DT_ANNOTATION_SELECTOR_VALUE' => array(2, 1155),
     'DT_IIIF_ID' => array(2, 1156),
-    'DT_IIIF_IMPORT_MODE' => array(2, 1157),
     'DT_ORIGINAL_IIIF_ID' => array(2, 1158),
     
     'DT_HEIGHT' => array(3, 1041),

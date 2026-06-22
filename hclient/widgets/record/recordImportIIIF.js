@@ -1,6 +1,6 @@
 /**
 * @file recordImportIIIF.js
-* @brief Import a selected IIIF Manifest into Heurist Manifest, Canvas and Annotation records.
+* @brief Process a selected IIIF Manifest into Heurist Manifest, Canvas and/or Annotation records.
 */
 $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
 
@@ -8,7 +8,7 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
         height: 820,
         width:  840,
         modal:  true,
-        title:  'Import IIIF Manifest',
+        title:  'Process IIIF Manifest',
         htmlContent: 'recordImportIIIF'
     },
 
