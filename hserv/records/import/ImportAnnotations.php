@@ -21,7 +21,7 @@ class ImportAnnotations{
 
     private $system;
     private $manifestFileId;
-    private $importLevel = 'overlay';
+    private $importLevel = 'managed';
     private $progressSessionId = 0;
     private $createThumbnail = false;
     private $dbAnno;
@@ -35,7 +35,7 @@ class ImportAnnotations{
             $this->manifestFileId = reset($this->manifestFileId);
         }
 
-        $this->importLevel = @$params['import_level'] ?: 'overlay';
+        $this->importLevel = @$params['import_level'] ?: 'managed';
         $this->progressSessionId = @$params['session'];
         $this->createThumbnail = @$params['create_thumb']==1;
     }
@@ -68,9 +68,22 @@ class ImportAnnotations{
             return false;
         }
 
-        $manifestRecID = $this->ensureManifestRecord($manifestFile, $manifest);
-        if(!$manifestRecID){
-            return false;
+        $manifestRecID = 0;
+        $dbManifest = new DbIiifManifest($this->system);
+        $existingManagedRecID = $dbManifest->findManifestRecordForFile($manifestFile);
+
+        if($this->importLevel === 'overlay'){
+            if($existingManagedRecID>0){
+                $this->system->addError(HEURIST_ACTION_BLOCKED,
+                    'This registered Manifest is already managed by Heurist Manifest record '
+                    .$existingManagedRecID.'. Annotation overlay mode is not available. Use Full manifest management instead.');
+                return false;
+            }
+        }else{
+            $manifestRecID = $this->ensureManifestRecord($manifestFile, $manifest);
+            if(!$manifestRecID){
+                return false;
+            }
         }
 
         $canvasImport = array('map'=>array(), 'ordered'=>array(), 'added'=>array(), 'updated'=>array(), 'retained'=>array(), 'preserved_local'=>array(), 'issues'=>array());
@@ -114,8 +127,6 @@ class ImportAnnotations{
 
         foreach($annotations as $idx=>$ctx){
             $ctx['manifestRecID'] = $manifestRecID;
-            $ctx['manifestFileID'] = intval($manifestFile['ulf_ID']);
-            $ctx['manifestUrl'] = $manifestFile['source_url'];
             $ctx['state'] = 'imported';
             $ctx['preserveLocal'] = 1;
             if($this->importLevel === 'managed' && @$ctx['canvasOriginalId'] && isset($canvasImport['map'][$ctx['canvasOriginalId']])){
@@ -223,26 +234,6 @@ class ImportAnnotations{
         return $dbManifest->ensureFromManifestFile($manifestFile, $manifest, $this->importLevel);
     }
 
-
-    private function validateImportModeForManifest($json): bool
-    {
-        if($this->importLevel !== 'overlay'){
-            return true;
-        }
-
-        // Overlay output preserves source Canvas identifiers and emits a Heurist
-        // IIIF Presentation v3 overlay Manifest.  Presentation API v2 Manifests
-        // are therefore imported only in full-management mode.
-        if(@$json['@type']=='sc:Manifest'){
-            $this->system->addError(HEURIST_ACTION_BLOCKED,
-                'Annotation overlay mode is not available for IIIF Presentation API v2 manifests. Please import this Manifest in full management mode.');
-            return false;
-        }
-
-        return true;
-    }
-
-
     private function importCanvases(array $manifest, int $manifestRecID)
     {
         $canvasList = $this->extractCanvases($manifest);
@@ -319,6 +310,24 @@ class ImportAnnotations{
 
     private function isManifest($json){
         return @$json['type']=='Manifest' || @$json['@type']=='sc:Manifest';
+    }
+
+    private function validateImportModeForManifest($json): bool
+    {
+        if($this->importLevel !== 'overlay'){
+            return true;
+        }
+
+        // Overlay output preserves source Canvas identifiers and emits a Heurist
+        // IIIF Presentation v3 overlay Manifest.  Presentation API v2 Manifests
+        // are therefore imported only in full-management mode.
+        if(@$json['@type']=='sc:Manifest'){
+            $this->system->addError(HEURIST_ACTION_BLOCKED,
+                'Annotation overlay mode is not available for IIIF Presentation API v2 manifests. Please import this Manifest in full management mode.');
+            return false;
+        }
+
+        return true;
     }
 
     private function isAnnotationContainer($json){
@@ -515,32 +524,6 @@ class ImportAnnotations{
         if(is_array(@$anno['on'])){
             $target = reset($anno['on']);
             return @$target['full'];
-        }
-        return null;
-    }
-
-    private function normaliseLangValue($value){
-        if(!$value){
-            return null;
-        }
-        if(is_string($value)){
-            return $value;
-        }
-        if(is_array($value)){
-            if(isset($value['none']) && is_array($value['none'])){
-                return reset($value['none']);
-            }
-            if(isset($value['en']) && is_array($value['en'])){
-                return reset($value['en']);
-            }
-            if(isset($value['@value'])){
-                return $value['@value'];
-            }
-            if(isset($value['value'])){
-                return $value['value'];
-            }
-            $first = reset($value);
-            return $this->normaliseLangValue($first);
         }
         return null;
     }

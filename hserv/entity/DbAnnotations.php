@@ -7,11 +7,9 @@
 namespace hserv\entity;
 
 use hserv\entity\DbRecordTypeEntity;
+use hserv\entity\DbIiifCanvas;
 use hserv\utilities\USanitize;
-
-require_once dirname(__FILE__).'/DbRecordTypeEntity.php';
-require_once dirname(__FILE__).'/IiifAnnotationJson.php';
-require_once dirname(__FILE__).'/DbIiifCanvas.php';
+use hserv\iiif\IiifAnnotationJson;
 
 /**
 * Class DbAnnotations
@@ -77,7 +75,13 @@ class DbAnnotations extends DbRecordTypeEntity
     
 
     /**
-     * Returns an IIIF AnnotationPage for Mirador.
+     * Returns either a single IIIF Annotation or an AnnotationPage for Mirador.
+     *
+     * Supported REST paths are parsed in api.php:
+     *   /api/{db}/annotations/pages?uri={canvasUri}
+     *   /api/{db}/annotations/{manifestRecID}/pages?uri={canvasUri}
+     *   /api/{db}/annotations/{annotationId}
+     *   /api/{db}/annotations/{manifestRecID}/{annotationId}
      */
     public function search(){
 
@@ -90,18 +94,19 @@ class DbAnnotations extends DbRecordTypeEntity
             exit;
         }
 
-        $sjson = array('id'=>"https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 'type' => 'AnnotationPage', 'items' => array());
-
         if(@$this->data['recID']!='pages'){
-            $recordId = $this->findRecIDbyIiifIdentifier(@$this->data['recID'], intval(@$this->data['manifestRecID']));
+            $recordId = $this->findAnnotationRecordID(@$this->data['recID'], intval(@$this->data['manifestRecID']));
             if($recordId>0){
                 $anno = $this->buildIiifAnnotationFromRecord($recordId);
                 if($anno){
-                    $sjson['items'] = array($anno);
+                    return $anno;
                 }
             }
-            return $sjson;
+            $this->system->addError(HEURIST_NOT_FOUND, 'Annotation record not found');
+            return false;
         }
+
+        $sjson = array('id'=>"https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 'type' => 'AnnotationPage', 'items' => array());
 
         if(!@$this->data['uri']){
             $params = USanitize::sanitizeInputArray();
@@ -121,6 +126,45 @@ class DbAnnotations extends DbRecordTypeEntity
         }
 
         return $sjson;
+    }
+
+    private function findAnnotationRecordID($annotationId, int $manifestRecID=0): int
+    {
+        if(!$annotationId || !$this->ensureDefinitionsReady(false)){
+            return 0;
+        }
+
+        if(is_numeric($annotationId)){
+            $recordId = intval($annotationId);
+            if($recordId>0 && $this->isAnnotationRecord($recordId)
+                && $this->annotationMatchesManifest($recordId, $manifestRecID)){
+                return $recordId;
+            }
+        }
+
+        return $this->findRecIDbyIiifIdentifier($annotationId, $manifestRecID);
+    }
+
+    private function isAnnotationRecord(int $recordId): bool
+    {
+        if($recordId<1 || !$this->recordTypeId()){
+            return false;
+        }
+        $recTypeId = mysql__select_value($this->system->getMysqli(),
+            'SELECT rec_RecTypeID FROM Records WHERE rec_ID='.intval($recordId));
+        return intval($recTypeId)===$this->recordTypeId();
+    }
+
+    private function annotationMatchesManifest(int $recordId, int $manifestRecID=0): bool
+    {
+        if($manifestRecID<1 || !defined('DT_ANNOTATION_MANIFEST')){
+            return true;
+        }
+        $cnt = mysql__select_value($this->system->getMysqli(),
+            'SELECT COUNT(*) FROM recDetails WHERE dtl_RecID='.intval($recordId)
+            .' AND dtl_DetailTypeID='.intval(DT_ANNOTATION_MANIFEST)
+            .' AND dtl_Value='.intval($manifestRecID));
+        return intval($cnt)>0;
     }
 
     private function findItemsByCanvas($canvasUri, int $manifestRecID=0){
@@ -249,7 +293,7 @@ class DbAnnotations extends DbRecordTypeEntity
             if(!$this->_validatePermission()){
                 return false;
             }
-            $recordId = $this->findRecIDbyIiifIdentifier($this->data['recID'], intval(@$this->data['manifestRecID']));
+            $recordId = $this->findAnnotationRecordID($this->data['recID'], intval(@$this->data['manifestRecID']));
             if($recordId>0){
                 return recordDelete($this->system, $recordId);
             }

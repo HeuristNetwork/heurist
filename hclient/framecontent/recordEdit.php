@@ -327,7 +327,6 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                                 function( response ){
 
                                     if(response.status == window.hWin.ResponseStatus.OK){
-
                                         var recset = new HRecordSet(response.data);
                                         if(recset.length()>0){
                                             $container.manageRecords('updateRecordList', null, {recordset:recset});
