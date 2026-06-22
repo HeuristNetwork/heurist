@@ -618,6 +618,11 @@ abstract class DbRecordTypeEntity extends DbEntityBase
         if(function_exists('extractLangPrefix')){
             list($lang, $value) = extractLangPrefix($value);
             $value = trim((string)$value);
+        }elseif(preg_match('/^([A-Za-z]{2,3}|ALL)\s*:\s*(.*)$/u', $value, $matches)){
+            // Keep IIIF output independent of optional UI/helper includes.
+            // Stored Heurist multilingual values commonly use ENG:/FRE:/ALL:.
+            $lang = $matches[1];
+            $value = trim((string)$matches[2]);
         }
 
         if($value === ''){

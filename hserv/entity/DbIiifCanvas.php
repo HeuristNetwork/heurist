@@ -210,8 +210,10 @@ class DbIiifCanvas extends DbRecordTypeEntity
 
         return array(
             'recID' => $recID,
-            'label' => $this->getFirstDetailValue($details, 'DT_NAME'),
-            'summary' => $this->getFirstDetailValue($details, 'DT_SHORT_SUMMARY'),
+            // Preserve all repeated multilingual title/summary values.
+            // The IIIF output path converts these complete value lists to v3 language maps.
+            'label' => $this->getDetailValues($details, 'DT_NAME'),
+            'summary' => $this->getDetailValues($details, 'DT_SHORT_SUMMARY'),
             'thumbnail_ulf_id' => $thumbnailUlfID,
             'thumbnail_fileinfo' => $thumbnailInfo,
             'canvas_url' => $this->canonicalCanvasUrlForFileID($ulfID),
@@ -287,8 +289,11 @@ class DbIiifCanvas extends DbRecordTypeEntity
 
         $canvasMeta = $this->canvasMetadataForFileID(intval($fileinfo['ulf_ID'] ?? 0));
         $label = $options['label'] ?? null;
-        if(!$label && is_array($canvasMeta) && trim((string)($canvasMeta['label'] ?? ''))!==''){
-            $label = $this->toIiifLanguageMap($canvasMeta['label'], 'Canvas');
+        $metaLabelValues = is_array($canvasMeta) && is_array($canvasMeta['label'] ?? null)
+            ? $canvasMeta['label']
+            : array();
+        if(!$label && !empty($metaLabelValues)){
+            $label = $this->toIiifLanguageMap($metaLabelValues, 'Canvas');
         }
         if(!$label){
             $label = trim(strip_tags((string)($fileinfo['ulf_Description'] ?? '')));
@@ -298,8 +303,11 @@ class DbIiifCanvas extends DbRecordTypeEntity
         }
 
         $summary = null;
-        if(is_array($canvasMeta) && trim((string)($canvasMeta['summary'] ?? ''))!==''){
-            $summary = $this->toIiifLanguageMap($canvasMeta['summary']);
+        $metaSummaryValues = is_array($canvasMeta) && is_array($canvasMeta['summary'] ?? null)
+            ? $canvasMeta['summary']
+            : array();
+        if(!empty($metaSummaryValues)){
+            $summary = $this->toIiifLanguageMap($metaSummaryValues);
         }
 
         $thumbInfo = is_array($canvasMeta) && is_array($canvasMeta['thumbnail_fileinfo'] ?? null)
