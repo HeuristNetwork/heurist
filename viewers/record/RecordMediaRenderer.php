@@ -443,6 +443,14 @@ class RecordMediaRenderer
                 .rawurlencode((string)($manifestRecID>0 ? $manifestRecID : $this->recordID));
         }
 
+        // Registered IIIF Manifest files must go through the Heurist IIIF API.
+        // The API decides whether the file is already managed by an RT_IIIF_MANIFEST
+        // record, or should be served as overlay/pass-through source Manifest.
+        if($this->isIiifManifest($thumb) && !empty($thumb['nonce'])){
+            return HEURIST_BASE_URL.'api/'.rawurlencode($this->system->dbname()).'/iiif/manifest/'
+                .rawurlencode((string)$thumb['nonce']);
+        }
+
         if(!empty($thumb['external_url'])){
             return (string)$thumb['external_url'];
         }

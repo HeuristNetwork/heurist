@@ -505,223 +505,186 @@ abstract class DbRecordTypeEntity extends DbEntityBase
     }
 
     /**
-     * Convert a IIIF language-bearing value to one or more Heurist text values.
+     * Convert IIIF v3 language maps, IIIF v2 language objects, or plain strings
+     * into Heurist record-detail values.
      *
-     * Heurist stores language-qualified text as a simple prefix, for example:
-     *   FRE:Chat
-     * IIIF Presentation v3 stores the same value as a language map, for example:
-     *   {"fr":["Chat"]}
-     *
-     * This helper accepts v3 language maps, v2 @value/@language objects, plain
-     * strings and arrays of either form. Values with language code "none" are
-     * stored without a prefix. Unknown language codes are left unprefixed rather
-     * than blocked.
-     *
-     * @param mixed $value IIIF language map, v2 language object, string or list.
-     * @return array<int,string> Heurist-style text values.
+     * Examples:
+     *   {"fr":["Chat"]}             -> ["FRE:Chat"]
+     *   {"none":["Cat"]}           -> ["Cat"]
+     *   {"@value":"Chat","@language":"fr"} -> ["FRE:Chat"]
+     *   "Cat"                         -> ["Cat"]
      */
     protected function normaliseLangValues($value): array
     {
-        if($value===null || $value===''){
-            return array();
+        $out = array();
+
+        if($value === null || $value === ''){
+            return $out;
         }
 
         if(is_string($value) || is_numeric($value)){
             $text = trim((string)$value);
-            return $text!=='' ? array($text) : array();
+            return $text === '' ? array() : array($text);
         }
 
         if(!is_array($value)){
-            return array();
-        }
-
-        // IIIF v2 language value: {"@value":"Chat", "@language":"fr"}
-        // or similar shape: {"value":"Chat", "language":"fr"}.
-        if(isset($value['@value']) || isset($value['value'])){
-            $text = isset($value['@value']) ? $value['@value'] : $value['value'];
-            $lang = $value['@language'] ?? ($value['language'] ?? ($value['lang'] ?? null));
-            return $this->heuristLangTextValues($text, $lang);
-        }
-
-        // Sequential list of language objects/strings.
-        if(array_keys($value)===range(0, count($value)-1)){
-            $out = array();
-            foreach($value as $item){
-                foreach($this->normaliseLangValues($item) as $text){
-                    if($text!=='' && array_search($text, $out, true)===false){
-                        $out[] = $text;
-                    }
-                }
-            }
             return $out;
         }
 
-        // IIIF v3 language map: {"fr":["Chat"], "en":["Cat"]}.
-        $out = array();
-        foreach($value as $lang=>$texts){
-            if($texts===null || $texts===''){
-                continue;
+        // IIIF v2 language object, and similar compact objects.
+        if(isset($value['@value']) || isset($value['value'])){
+            $text = isset($value['@value']) ? $value['@value'] : $value['value'];
+            $lang = $value['@language'] ?? ($value['language'] ?? ($value['lang'] ?? null));
+            $normalised = $this->prefixLanguageValue($text, $lang);
+            return $normalised === null ? array() : array($normalised);
+        }
+
+        // List of strings/objects/maps: flatten recursively.
+        if($this->isListArray($value)){
+            foreach($value as $item){
+                $out = array_merge($out, $this->normaliseLangValues($item));
             }
-            $items = is_array($texts) ? $texts : array($texts);
-            foreach($items as $text){
-                foreach($this->heuristLangTextValues($text, (string)$lang) as $prefixed){
-                    if($prefixed!=='' && array_search($prefixed, $out, true)===false){
-                        $out[] = $prefixed;
-                    }
+            return $this->uniqueNonEmptyValues($out);
+        }
+
+        // IIIF v3 language map: language code => string/list of strings.
+        foreach($value as $lang=>$items){
+            $items = is_array($items) ? $items : array($items);
+            foreach($items as $item){
+                if(is_array($item)){
+                    $out = array_merge($out, $this->normaliseLangValues($item));
+                    continue;
+                }
+                $normalised = $this->prefixLanguageValue($item, (string)$lang);
+                if($normalised !== null){
+                    $out[] = $normalised;
                 }
             }
         }
-        return $out;
-    }
 
-    /** Backward-compatible single-value wrapper around normaliseLangValues(). */
-    protected function normaliseLangValue($value): ?string
-    {
-        $values = $this->normaliseLangValues($value);
-        return empty($values) ? null : $values[0];
-    }
-
-    /** Convert one or more raw text values to Heurist language-prefixed text. */
-    private function heuristLangTextValues($text, $lang=null): array
-    {
-        if($text===null || $text===''){
-            return array();
-        }
-
-        $items = is_array($text) ? $text : array($text);
-        $lang3 = $this->iiifLangToHeuristLang3($lang);
-        $out = array();
-
-        foreach($items as $item){
-            if($item===null || $item===''){
-                continue;
-            }
-            $item = trim((string)$item);
-            if($item===''){
-                continue;
-            }
-            $out[] = $lang3 ? ($lang3.':'.$item) : $item;
-        }
-        return $out;
-    }
-
-    /** Return uppercase ISO-639-2 language code for Heurist prefixes, or null. */
-    private function iiifLangToHeuristLang3($lang): ?string
-    {
-        $lang = trim((string)$lang);
-        if($lang==='' || strtolower($lang)==='none' || $lang==='@none' || $lang==='*'){
-            return null;
-        }
-
-        if(function_exists('getLangCode3')){
-            $code = getLangCode3($lang);
-            if($code){
-                return strtoupper($code);
-            }
-        }
-
-        // Small fallback table for common codes in case the language list is not
-        // available in a standalone script/test context.
-        $map = array(
-            'en'=>'ENG', 'eng'=>'ENG',
-            'fr'=>'FRE', 'fre'=>'FRE', 'fra'=>'FRE',
-            'de'=>'GER', 'ger'=>'GER', 'deu'=>'GER',
-            'es'=>'SPA', 'spa'=>'SPA',
-            'it'=>'ITA', 'ita'=>'ITA',
-            'la'=>'LAT', 'lat'=>'LAT'
-        );
-        $key = strtolower($lang);
-        return $map[$key] ?? null;
+        return $this->uniqueNonEmptyValues($out);
     }
 
     /**
-     * Convert Heurist text value(s) to a IIIF Presentation v3 language map.
-     *
-     * Examples:
-     *   FRE:Chat  => {"fr":["Chat"]}
-     *   Chat      => {"none":["Chat"]}
-     *
-     * @param mixed $value String or list of strings from recDetails.
-     * @param string $fallbackText Text used if value is empty.
+     * Convert Heurist multilingual record-detail values to an IIIF v3 language
+     * map.  Values with ENG:/FRE: prefixes become en/fr entries; unprefixed
+     * values become the IIIF "none" language bucket.
      */
-    protected function toIiifLanguageMap($value, string $fallbackText='Untitled'): array
+    protected function toIiifLanguageMap($values, string $fallback=''): array
     {
-        $values = is_array($value) ? $value : array($value);
         $map = array();
 
-        foreach($values as $raw){
-            if($raw===null || $raw===''){
-                continue;
-            }
-            $raw = trim((string)$raw);
-            if($raw===''){
+        // Accept scalar Heurist values, lists of Heurist values, and existing
+        // IIIF language maps.  Do not call isListArray() until we know the
+        // input is an array; PHP will otherwise raise a TypeError for strings.
+        if($values === null || $values === ''){
+            $values = array();
+        }elseif(!is_array($values)){
+            $values = array($values);
+        }elseif(!$this->isListArray($values)){
+            $values = $this->normaliseLangValues($values);
+        }
+
+        foreach($values as $value){
+            if($value === null || $value === ''){
                 continue;
             }
 
-            list($lang, $text) = $this->splitHeuristLangText($raw);
-            if($text===''){
+            if(is_array($value)){
+                foreach($this->normaliseLangValues($value) as $normalised){
+                    $this->appendToLanguageMap($map, $normalised);
+                }
                 continue;
             }
-            if(!isset($map[$lang])){
-                $map[$lang] = array();
-            }
-            if(array_search($text, $map[$lang], true)===false){
-                $map[$lang][] = $text;
-            }
+
+            $this->appendToLanguageMap($map, (string)$value);
         }
 
-        if(empty($map)){
-            $map['none'] = array($fallbackText);
+        if(empty($map) && $fallback !== ''){
+            $map['none'] = array($fallback);
         }
+
         return $map;
     }
 
-    /** Split Heurist prefix text into IIIF v3 language-map key and value. */
-    private function splitHeuristLangText(string $value): array
+    private function appendToLanguageMap(array &$map, string $value): void
     {
+        $value = trim($value);
+        if($value === ''){
+            return;
+        }
+
+        $lang = null;
         if(function_exists('extractLangPrefix')){
-            list($lang3, $text) = extractLangPrefix($value);
-            if($lang3){
-                return array($this->heuristLang3ToIiifLang($lang3), trim((string)$text));
+            list($lang, $value) = extractLangPrefix($value);
+            $value = trim((string)$value);
+        }elseif(preg_match('/^([A-Za-z]{2,3}|ALL)\s*:\s*(.*)$/u', $value, $matches)){
+            // Keep IIIF output independent of optional UI/helper includes.
+            // Stored Heurist multilingual values commonly use ENG:/FRE:/ALL:.
+            $lang = $matches[1];
+            $value = trim((string)$matches[2]);
+        }
+
+        if($value === ''){
+            return;
+        }
+
+        $bucket = 'none';
+        if($lang && strcasecmp($lang, 'ALL') !== 0 && function_exists('getLangCode2')){
+            $lang2 = getLangCode2($lang);
+            if($lang2){
+                $bucket = strtolower($lang2);
             }
         }
 
-        if(preg_match('/^([A-Za-z]{2,3}|\*):(.*)$/s', $value, $m)){
-            $lang = $m[1];
-            $text = trim($m[2]);
-            if($lang==='*'){
-                return array('none', $text);
-            }
-            return array($this->heuristLang3ToIiifLang($lang), $text);
+        if(!isset($map[$bucket])){
+            $map[$bucket] = array();
         }
-
-        return array('none', $value);
+        if(!in_array($value, $map[$bucket], true)){
+            $map[$bucket][] = $value;
+        }
     }
 
-    /** Return lowercase IIIF v3 language-map key for a Heurist language code. */
-    private function heuristLang3ToIiifLang(string $lang): string
+    private function prefixLanguageValue($text, $lang): ?string
     {
-        $lang = trim($lang);
-        if($lang==='' || strtoupper($lang)==='ALL'){
-            return 'none';
+        $text = trim((string)$text);
+        if($text === ''){
+            return null;
         }
 
-        if(function_exists('getLangCode2')){
-            $code = getLangCode2($lang);
-            if($code){
-                return strtolower($code);
+        $lang = is_string($lang) ? trim($lang) : '';
+        if($lang === '' || strcasecmp($lang, 'none') === 0 || strcasecmp($lang, '@none') === 0
+            || strcasecmp($lang, 'und') === 0 || strcasecmp($lang, 'null') === 0){
+            return $text;
+        }
+
+        $lang3 = function_exists('getLangCode3') ? getLangCode3($lang) : null;
+        return $lang3 ? strtoupper($lang3).':'.$text : $text;
+    }
+
+    private function isListArray(array $value): bool
+    {
+        $i = 0;
+        foreach(array_keys($value) as $key){
+            if($key !== $i++){
+                return false;
             }
         }
+        return true;
+    }
 
-        $map = array(
-            'ENG'=>'en',
-            'FRE'=>'fr', 'FRA'=>'fr',
-            'GER'=>'de', 'DEU'=>'de',
-            'SPA'=>'es',
-            'ITA'=>'it',
-            'LAT'=>'la'
-        );
-        $key = strtoupper($lang);
-        return $map[$key] ?? strtolower(substr($lang, 0, 2));
+    private function uniqueNonEmptyValues(array $values): array
+    {
+        $out = array();
+        foreach($values as $value){
+            if($value === null || $value === ''){
+                continue;
+            }
+            $value = trim((string)$value);
+            if($value !== '' && !in_array($value, $out, true)){
+                $out[] = $value;
+            }
+        }
+        return $out;
     }
 }

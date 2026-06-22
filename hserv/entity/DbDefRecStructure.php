@@ -191,6 +191,9 @@ class DbDefRecStructure extends DbEntityBase
             if(isEmptyStr(@$this->records[$idx]['rst_Status'])) {
                 $this->records[$idx]['rst_Status'] = 'open';
             }
+            if(isEmptyStr(@$this->records[$idx]['rst_MayModify'])) {
+                $this->records[$idx]['rst_MayModify'] = 'open';
+            }
 
             if($this->records[$idx]['rst_DefaultValue']=='tabs' && isEmptyStr(@$this->records[$idx]['rst_DisplayName'])){
                 $this->records[$idx]['rst_DisplayName'] = 'Divider '.$idx;

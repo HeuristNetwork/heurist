@@ -134,8 +134,7 @@ if($system!=null && $rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['i
 
             }
         }elseif(defined('RT_IIIF_MANIFEST') && $res['rec_RecTypeID']==RT_IIIF_MANIFEST){
-            // Open a registered IIIF Manifest record via the Heurist overlay Manifest API,
-            // so source annotations are replaced by annotation pages from this database.
+            // Open a managed IIIF Manifest record through the Heurist IIIF API.
             $manifestRecID = $rec_ID;
 
         }elseif(defined('DT_URL')){
@@ -211,12 +210,12 @@ if($manifestRecID>0) {
 
     $url = $_REQUEST['url'];
 
-}elseif(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){  //obfuscation id
-    //load manifest directly
-    $url = str_replace('hclient/widgets/viewers/miradorViewer.php','', $url);
-    $url = str_replace($_SERVER['QUERY_STRING'],
-        'db='.$_REQUEST['db']
-            .'&file='.(@$_REQUEST['manifest']?$_REQUEST['manifest']:@$_REQUEST['iiif']),$url);
+}elseif(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){  //obfuscation id for a registered IIIF Manifest file
+
+    $manifestFileID = @$_REQUEST['manifest'] ? $_REQUEST['manifest'] : $_REQUEST['iiif'];
+    $url = $baseUrl.'heurist/api/'.rawurlencode($dbname)
+        .'/iiif/manifest/'.rawurlencode((string)$manifestFileID)
+        .'?omit_annotation_pages=1';
 }else{
     if(is_array($preparedParams)){
         // record_output creates manifest dynamically. Rebuild the URL from restored

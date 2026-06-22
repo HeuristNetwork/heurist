@@ -1,6 +1,6 @@
 /**
 * @file recordImportIIIF.js
-* @brief Import a selected IIIF Manifest into Heurist Manifest, Canvas and Annotation records.
+* @brief Process a selected IIIF Manifest into Heurist Manifest, Canvas and/or Annotation records.
 */
 $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
 
@@ -40,7 +40,6 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
 
         this.DT_IIIF_ID = dbconst['DT_IIIF_ID'];
         this.DT_IIIF_CANVAS = dbconst['DT_IIIF_CANVAS'];
-        this.DT_IIIF_IMPORT_MODE = dbconst['DT_IIIF_IMPORT_MODE'];
         this.DT_ANNOTATION_STATE = dbconst['DT_ANNOTATION_STATE'];
         this.DT_ANNOTATION_INFO = dbconst['DT_ANNOTATION_INFO'];
 
@@ -57,8 +56,6 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
                     || !hDb.rst(this.RT_IIIF_MANIFEST, this.DT_IIIF_CANVAS)
                     || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_IIIF_CANVAS)) {
                     missing = 'You will need field DT_IIIF_CANVAS on record types 2-110 (IIIF Manifest) and 2-109 (IIIF Annotation)';
-                } else if (!(this.DT_IIIF_IMPORT_MODE > 0) || !hDb.rst(this.RT_IIIF_MANIFEST, this.DT_IIIF_IMPORT_MODE)) {
-                    missing = 'You will need record type 2-110 (IIIF Manifest) with field DT_IIIF_IMPORT_MODE (management mode)';
                 } else if (!(this.DT_ANNOTATION_STATE > 0)
                     || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_ANNOTATION_STATE)
                     || !hDb.rst(this.RT_IIIF_CANVAS, this.DT_ANNOTATION_STATE)) {
@@ -179,7 +176,7 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
         if(data.manifest_rec_id>0){
             this._$('#manifest_record').html(`<a href="${link+data.manifest_rec_id}" target="_blank">${data.manifest_rec_id}</a>`);
         }else{
-            this._$('#manifest_record').text('');
+            this._$('#manifest_record').text('not created (annotation overlay)');
         }
 
         this._$('#total_canvases').text(data.total_canvases || 0);
@@ -225,7 +222,7 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
             controller: 'ImportAnnotations',
             session: window.hWin.HEURIST4.msg.showProgress(),
             manifest_file_id: manifestFileId,
-            import_level: this._$('input[name="import_level"]:checked').val() || 'overlay',
+            import_level: this._$('input[name="import_level"]:checked').val() || 'managed',
             create_thumb: this._$('#chb_create_thumbs').is(':checked')?1:0
         };
 

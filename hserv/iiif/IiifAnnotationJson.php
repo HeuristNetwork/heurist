@@ -6,7 +6,7 @@
 * loads/saves recDetails and resolves Heurist terms; this class only parses incoming
 * annotation JSON and composes outgoing Web Annotation JSON from plain values.
 */
-namespace hserv\entity;
+namespace hserv\iiif;
 
 /**
  * Parser/composer for IIIF Presentation v3 / Web Annotation JSON used by Mirador

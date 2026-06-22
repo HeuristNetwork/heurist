@@ -4,11 +4,10 @@ This guide describes the IIIF features provided by Heurist for creating, importi
 
 Heurist supports two main workflows:
 
-1. **Use Heurist as an annotation layer over existing IIIF Manifests (Overlay mode).** The external provider keeps ownership of the source Manifest and Canvas identifiers. Heurist stores and publishes local annotations.
-   
-2. **Use Heurist to manage the Manifest (Management mode).** Heurist stores Manifest, Canvas and Annotation records and generates a IIIF Presentation API v3 Manifest from those records.
+1. **Use Heurist as an annotation layer over existing IIIF Manifests (annotation overlay mode).** The external provider keeps ownership of the source Manifest and Canvas identifiers. Heurist stores and publishes local annotations.
+2. **Use Heurist to manage the Manifest (full management mode).** Heurist stores Manifest, Canvas and Annotation records and generates a IIIF Presentation API v3 Manifest from those records.
 
-Heurist also provides a dynamic IIIF server for ordinary record sets and registered media files. as well as rendering of external IIIF files and manifests, ie. it can act as both client and server.
+Heurist also provides a dynamic IIIF server for ordinary record sets and registered media files, and can render external IIIF files and Manifests. In this sense it can act both as a IIIF client and as a IIIF server.
 
 ---
 
@@ -16,14 +15,13 @@ Heurist also provides a dynamic IIIF server for ordinary record sets and registe
 
 ### 1.1 Import the required definitions
 
-Before using the IIIF annotation and Manifest tools in an existing database, import the new definitions (from June 2026) from the `Heurist_Core_Definitions` database using **Design > Browse templates**. Heurist will prompt you to do this if you attempt to process Manifests without:
+Before using the IIIF annotation and Manifest tools in an existing database, import the new definitions from the `Heurist_Core_Definitions` database using **Design > Browse templates**. Heurist will prompt you to do this if you attempt to process Manifests without the required definitions.
 
-![[Pasted image 20260621163412.png]]
+![Browse templates prompt](Pasted%20image%2020260621163412.png)
 
 The new record types are in the **Documents** group. It is enough to select **IIIF Annotation**. The related record types **IIIF Manifest** and **IIIF Canvas** are downloaded alongside it.
 
-
-![[Pasted image 20260621153202.png]]
+![IIIF Annotation template selection](Pasted%20image%2020260621153202.png)
 
 The important record types are:
 
@@ -44,7 +42,7 @@ This field is not used by any current IIIF record type. Remove it before using t
 
 ### 1.3 Recommended checks before testing
 
-After importing definitions, check that the database contains the three IIIF record types above and that the browse templates function no longer shows and missing definitions in the Core definitions database.
+After importing definitions, check that the database contains the three IIIF record types above and that **Browse templates** no longer shows missing IIIF definitions in the Core definitions database.
 
 For testing, start with a small Manifest first. A large external Manifest may fail for reasons unrelated to Heurist logic, such as network timeouts, remote annotation-list delays, or unavailable image services.
 
@@ -57,21 +55,20 @@ For testing, start with a small Manifest first. A large external Manifest may fa
 A Manifest is the IIIF object that describes a digital object, such as a manuscript, book, image set or media collection. In Heurist, a Manifest may be:
 
 - a registered external Manifest file or URL;
-- an **IIIF Manifest** record;
-- an **IIIF Manifest** record managed by Heurist;
+- a managed **IIIF Manifest** record;
 - a dynamic Manifest generated from a record set or a single registered media file.
 
-Output from a Manifest managed by Heurist is generated as **IIIF Presentation API v3**.
+Managed Heurist Manifest output is generated as **IIIF Presentation API v3**. A registered IIIF Manifest file becomes managed only when an **IIIF Manifest** record references that file. If no such record exists, Heurist treats the registered Manifest file as an external/source Manifest and can use it as an annotation overlay target.
 
 ### 2.2 Canvas
 
 A Canvas represents one viewable unit in a Manifest, for example a page, image, video or audio item. In full management mode, Heurist stores each Canvas as an **IIIF Canvas** record. Each managed Canvas normally points to a registered file or registered external media URL.
 
-In annotation overlay mode, the Canvas records are not imported or managed by Heurist. Instead, annotations remain linked to the original Canvas URI from the source Manifest.
+In annotation overlay mode, Canvas records are not imported or managed by Heurist. Instead, annotations remain linked to the original Canvas URI from the source Manifest.
 
 ### 2.3 Annotation
 
-Annotations are stored as **IIIF Annotation** records. They may be created or edited in Mirador (mainly for the annotation area and initial text) or in the Heurist record editor (for any of the attributes attached to the annotation, which can be arbitrarily extended to allow searching and custm reporting within Heurist).
+Annotations are stored as **IIIF Annotation** records. They may be created or edited in Mirador, mainly for defining the annotation area and initial text, or in the Heurist record editor for annotation attributes, which can be extended to support searching and custom reporting within Heurist.
 
 Annotations store:
 
@@ -88,9 +85,7 @@ Annotations store:
 
 ## 3. Manual creation of a managed Manifest
 
-Fully managed Manifests are used when you want Heurist to own and generate the Manifest rather than only overlay annotations on an external Manifest.
-
-**See the following section 4 for processing of fully managed Manifests.**
+Manual creation is used when you want Heurist to own and generate the Manifest rather than only overlay annotations on an external Manifest.
 
 ### 3.1 Create the Manifest record
 
@@ -104,10 +99,10 @@ Create **IIIF Canvas** records and link them to the Manifest. Each Canvas may re
 
 - a locally uploaded registered file;
 - a registered external media URL;
-- an image served by an IIIF Image API;
+- an image served by a IIIF Image API;
 - other supported media such as audio or video where configured.
 
-The order of Canvas references on the Manifest record defines the order in the generated Manifest. The order can be changed within Heurist data entry by dragging the canvas references up and down.
+The order of Canvas references on the Manifest record defines the order in the generated Manifest. The order can be changed within Heurist data entry by dragging the Canvas references up and down.
 
 ### 3.3 Add or edit annotations in Mirador
 
@@ -143,35 +138,38 @@ For internal Mirador viewing, Heurist passes `omit_annotation_pages=1` to the ge
 
 A planned batch action will allow users to select one or several ordinary records that already have file fields and create Canvas records from those files. This is intended to make managed Manifest creation faster for large image sets.
 
-Until this is implemented, add Canvas records manually or process an existing Manifest in full management mode.
+Until this is implemented, add Canvas records manually or import/process an existing Manifest in full management mode.
 
 ---
 
-## 4. Process an existing IIIF Manifest
+## 4. Import or process an existing IIIF Manifest
 
-Use **Process IIIF Manifest** to create a Managed Manifest from:
+Use **Process IIIF Manifest** to work with a registered or uploaded IIIF Presentation Manifest. A Manifest can be registered as:
 
- - an IIIF Presentation Manifest which is referenced externally by a File field;
- - a JSon manifest which has been uploaded to Heurist as a File field. 
+- an external IIIF Presentation Manifest referenced by a File field;
+- a JSON Manifest uploaded to Heurist as a File field.
 
-![[Pasted image 20260621180809.png]]
- The process tool always creates or updates an **IIIF Manifest** record and creates **IIIF Annotation** records from any Annotations referenced in the Manifest. 
+![Process IIIF Manifest dialog](Pasted%20image%2020260621175823.png)
 
-In full management mode, Process IIIF Manifest also creates **IIIF Canvas** records, in other words the Canvases are stored within Heurist rather than referenced externally (the image or other media can be stored in Heurist or referenced externally). Media should be stored in Heurist where the referenced resources are not on a stable long-term repository such as Gallica, to ensure sustainability.
+The default mode is **Full manifest management**, which creates or updates an **IIIF Manifest** record, imports **IIIF Canvas** records and imports available **IIIF Annotation** records.
+
+**Annotation overlay** is different: it imports annotations only. It does not create an **IIIF Manifest** record. The registered Manifest file remains the source Manifest and Heurist stores local annotations against the original Canvas URIs.
 
 ### 4.1 Annotation overlay mode
 
-Use **Annotation overlay** when the external Manifest remains the authoritative source for Canvas structure. In this mode:
+Use **Annotation overlay** when the external Manifest remains the authoritative source for Canvas structure.
 
-- Only **IIIF Presentation API v3 Manifests** are supported;
-- The source Manifest and its Canvas list remain on the external provider;
-- Heurist creates or updates a local Manifest record for management and provenance;
+In this mode:
+
+- only **IIIF Presentation API v3 Manifests** are supported;
+- the source Manifest and its Canvas list remain owned by the external provider;
+- Heurist does **not** create an **IIIF Manifest** record;
 - Canvas identifiers are preserved from the source Manifest;
-- Annotations are imported into Heurist and linked to the original Canvas URIs;
-- Heurist can output a v3 overlay Manifest by replacing source `Canvas.annotations` with Heurist AnnotationPage links;
-- Local Heurist annotations are preserved on re-processing when they have been edited locally.
+- annotations are imported into Heurist and linked to the original Canvas URIs;
+- when `/api/{db}/iiif/manifest/{obfuscatedFileID}` is requested, Heurist can output a v3 overlay Manifest by replacing source `Canvas.annotations` with Heurist AnnotationPage links;
+- local Heurist annotations are preserved on re-import/re-processing when they have been edited locally.
 
-***Do not use this mode for IIIF Presentation API v2 Manifests***. For v2 source Manifests, use full management mode.
+Do not use this mode for IIIF Presentation API v2 Manifests. For v2 source Manifests, use full management mode. If a managed **IIIF Manifest** record already references the selected registered Manifest file, annotation overlay mode is not available because the file is already under Heurist management.
 
 ### 4.2 Full manifest management mode
 
@@ -180,31 +178,33 @@ Use **Full manifest management** when Heurist should manage the Manifest structu
 In this mode:
 
 - Heurist creates or updates Manifest, Canvas and Annotation records;
-- Heurist stores the Manifest, Canvas order and Canvas metadata;
-- Media may still be external registered resources or local uploads;
+- the existence of the **IIIF Manifest** record is what marks the registered Manifest file as managed;
+- Heurist owns the generated Manifest output, Canvas order and Canvas metadata;
+- media may still be external registered resources or local uploads;
+- media should be stored in Heurist where referenced resources are not held by a stable long-term repository or institutional service;
 - Manifest-level metadata can be edited in Heurist;
 - Canvas order comes from the Canvas references stored on the Manifest record;
-- Annotations are linked to managed Canvas records;
-- Generated IIIF output uses Heurist Canvas API URLs.
+- annotations are linked to managed Canvas records;
+- generated IIIF output uses Heurist Canvas API URLs.
 
-This is the preferred mode for IIIF v2 source Manifests, because the overlay workflow is v3-only, or wherever the source of the Manifests is not a long-term stable repository or institutional service.
+This is the preferred mode for IIIF v2 source Manifests, because the overlay workflow is v3-only.
 
-### 4.3 Re-processing behaviour
+### 4.3 Re-import / re-processing behaviour
 
-On re-processing, Heurist attempts to update processed records while preserving local work. Records that have been changed in Heurist or Mirador are preserved by default and reported separately as preserved local records.
+On re-import, Heurist attempts to update imported records while preserving local work. Records that have been changed in Heurist or Mirador are preserved by default and reported separately as preserved local records.
 
-The processing report includes:
+The report includes:
 
-- Manifest record ID;
-- Total Canvases found;
+- managed Manifest record ID, or `not created` for annotation overlay;
+- total Canvases found;
 - Canvas records added, updated, unchanged or preserved;
-- Total annotations found;
-- Annotation records added, updated, unchanged or preserved;
-- Issues encountered during processing.
+- total annotations found;
+- annotation records added, updated, unchanged or preserved;
+- issues encountered during import/processing.
 
 ### 4.4 Thumbnails
 
-The processing tool can create thumbnails for annotation records. This is useful for browsing annotations in Heurist, but it is slower because it may need to access remote images or render selected regions.
+The import tool can create thumbnails for annotation records. This is useful for browsing annotations in Heurist, but it is slower because it may need to access remote images or render selected regions.
 
 ---
 
@@ -220,7 +220,7 @@ Typical uses:
 
 - annotate a single image before adding it to a larger Manifest;
 - annotate a registered external IIIF image;
-- test annotation behaviour on one file before processing or building a large Manifest.
+- test annotation behaviour on one file before importing, processing or building a large Manifest.
 
 ---
 
@@ -232,6 +232,8 @@ Heurist provides a Mirador Viewer for:
 - a registered external Manifest file;
 - a single registered media file;
 - a dynamic Manifest generated from a query or selected record set.
+
+Registered Manifest files are opened through `/api/{db}/iiif/manifest/{obfuscatedFileID}`. If an **IIIF Manifest** record references the file, the API returns the managed Manifest generated from Heurist records. Otherwise it returns the source Manifest: v2 sources are returned as-is, while v3 sources can be returned with Heurist annotation-page links overlaid.
 
 The viewer supports two annotation lookup scopes:
 
@@ -294,7 +296,7 @@ Useful for:
 
 - publishing a set of related Manifests;
 - opening several Manifests together in Mirador;
-- grouping processed or external Manifests without merging their Canvas structures.
+- grouping imported, processed or external Manifests without merging their Canvas structures.
 
 ### 7.6 Mixed record set: registered Manifests and media files
 
@@ -302,9 +304,9 @@ If a v3 dynamic export contains both registered Manifests and ordinary media Can
 
 Useful for mixed search results where some records already contain IIIF Manifests and others contain image/audio/video files.
 
-### 7.7 IIIF v2 export compatibility
+### 7.7 IIIF v2 output policy
 
-Dynamic export can still generate IIIF Presentation API v2 output where requested, but the current Manifest management and overlay workflows are centred on v3 output. Use v3 for new work unless a legacy consumer specifically requires v2.
+Heurist no longer generates IIIF Presentation API v2 output. Dynamic export and managed Manifest output are v3-only. Heurist can still import v2 and hybrid v2 source Manifests in **Full manifest management** mode and then publish them as generated v3 Manifests.
 
 ---
 
@@ -315,18 +317,18 @@ Dynamic export can still generate IIIF Presentation API v2 output where requeste
 1. Register or upload the v3 Manifest JSON.
 2. Open **Process IIIF Manifest**.
 3. Select **Annotation overlay**.
-4. Process annotations.
-5. Open the created Manifest record in Mirador.
+4. Import/process annotations.
+5. Open the registered Manifest file in Mirador. The viewer uses `/api/{db}/iiif/manifest/{obfuscatedFileID}` and the annotation endpoint.
 6. Add or edit annotations.
-7. Publish the Heurist overlay Manifest when external viewers need Heurist AnnotationPage links.
+7. Use the same API URL when external viewers need the v3 source Manifest with Heurist AnnotationPage links.
 
-### 8.2 Process a v2 Manifest with many Canvases and annotations
+### 8.2 Import a v2 Manifest with many Canvases and annotations
 
 1. Register or upload the v2 Manifest JSON.
 2. Open **Process IIIF Manifest**.
 3. Select **Full manifest management**.
-4. Process Canvases and annotations.
-5. Inspect the processing report for failed remote annotation lists or unavailable image resources.
+4. Import/process Canvases and annotations.
+5. Inspect the report for failed remote annotation lists or unavailable image resources.
 6. Open the managed Manifest in Mirador.
 
 If the v2 Manifest is very large, test first with a trimmed Manifest containing a few Canvases.
@@ -343,9 +345,9 @@ If the v2 Manifest is very large, test first with a trimmed Manifest containing 
 
 ## 9. Troubleshooting
 
-### The process function says required definitions are missing
+### The import widget says required definitions are missing
 
-Import **IIIF Annotation** record type from `Heurist_Core_Definitions`. The related Manifest and Canvas record types should be imported with it.
+Import **IIIF Annotation** from `Heurist_Core_Definitions`. The related Manifest and Canvas record types should be imported with it.
 
 ### The database contains an old field named “IIIF Anotation 2”
 
@@ -353,13 +355,17 @@ Remove the obsolete duplicate field with local ID `1106` and concept code `2-109
 
 ### Overlay mode rejects a v2 Manifest
 
-This is expected. Annotation overlay mode is v3-only because it works by replacing or adding v3 `Canvas.annotations` AnnotationPage links. Import v2 Manifests in **Full manifest management** mode.
+This is expected. Annotation overlay mode is v3-only because it stores annotations against original v3 Canvas URIs and can publish v3 `Canvas.annotations` AnnotationPage links. Import v2 Manifests in **Full manifest management** mode.
+
+### Overlay mode is disabled for a selected registered Manifest file
+
+This means an **IIIF Manifest** record already references the selected registered Manifest file. That file is already managed by Heurist, so use **Full manifest management** mode.
 
 ### Mirador shows duplicate annotations
 
 Use the internal Heurist Mirador viewer, which passes `omit_annotation_pages=1` for generated Manifest URLs where required. This avoids loading the same annotations both from Manifest `Canvas.annotations` and from Mirador's annotation endpoint.
 
-### Processing fails on a very large Manifest
+### Import fails on a very large Manifest
 
 Try a small trimmed Manifest first. Failures may be caused by remote annotation-list access, timeouts, malformed source JSON, unavailable image services, or network interruptions.
 
@@ -370,11 +376,11 @@ Try a small trimmed Manifest first. Failures may be caused by remote annotation-
 | Feature | Annotation overlay | Full manifest management |
 | --- | --- | --- |
 | Supported source Manifest version | v3 only | v2 and v3 |
-| Source Manifest ownership | External provider | Imported into Heurist management |
-| Generated Manifest output | Heurist overlay v3 output | Heurist managed v3 output |
+| Source Manifest ownership | External provider / registered file | Imported into Heurist management |
+| Generated Manifest output | Source v3 Manifest with Heurist AnnotationPage links when requested through the IIIF API | Heurist managed v3 output |
 | Canvas list ownership | External provider | Heurist |
 | Canvas identifiers | Original source Canvas URIs | Heurist Canvas API URLs |
 | Canvas records created | No | Yes |
 | Annotation records created | Yes | Yes |
-| Manifest metadata editable in Heurist | Local management/provenance record only | Yes, used in generated output |
-| Best use | Add Heurist annotations to an existing v3 Manifest | Build or take over a Manifest in Heurist |
+| Manifest metadata editable in Heurist | No managed Manifest record is created | Yes, used in generated output |
+| Best use | Add Heurist annotations to an existing v3 Manifest without creating a Manifest record | Build or take over a Manifest in Heurist |
