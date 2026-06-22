@@ -504,30 +504,182 @@ abstract class DbRecordTypeEntity extends DbEntityBase
         return $json['id'] ?? ($json['@id'] ?? null);
     }
 
-    protected function normaliseLangValue($value): ?string
+    /**
+     * Convert IIIF v3 language maps, IIIF v2 language objects, or plain strings
+     * into Heurist record-detail values.
+     *
+     * Examples:
+     *   {"fr":["Chat"]}             -> ["FRE:Chat"]
+     *   {"none":["Cat"]}           -> ["Cat"]
+     *   {"@value":"Chat","@language":"fr"} -> ["FRE:Chat"]
+     *   "Cat"                         -> ["Cat"]
+     */
+    protected function normaliseLangValues($value): array
     {
-        if(!$value){
+        $out = array();
+
+        if($value === null || $value === ''){
+            return $out;
+        }
+
+        if(is_string($value) || is_numeric($value)){
+            $text = trim((string)$value);
+            return $text === '' ? array() : array($text);
+        }
+
+        if(!is_array($value)){
+            return $out;
+        }
+
+        // IIIF v2 language object, and similar compact objects.
+        if(isset($value['@value']) || isset($value['value'])){
+            $text = isset($value['@value']) ? $value['@value'] : $value['value'];
+            $lang = $value['@language'] ?? ($value['language'] ?? ($value['lang'] ?? null));
+            $normalised = $this->prefixLanguageValue($text, $lang);
+            return $normalised === null ? array() : array($normalised);
+        }
+
+        // List of strings/objects/maps: flatten recursively.
+        if($this->isListArray($value)){
+            foreach($value as $item){
+                $out = array_merge($out, $this->normaliseLangValues($item));
+            }
+            return $this->uniqueNonEmptyValues($out);
+        }
+
+        // IIIF v3 language map: language code => string/list of strings.
+        foreach($value as $lang=>$items){
+            $items = is_array($items) ? $items : array($items);
+            foreach($items as $item){
+                if(is_array($item)){
+                    $out = array_merge($out, $this->normaliseLangValues($item));
+                    continue;
+                }
+                $normalised = $this->prefixLanguageValue($item, (string)$lang);
+                if($normalised !== null){
+                    $out[] = $normalised;
+                }
+            }
+        }
+
+        return $this->uniqueNonEmptyValues($out);
+    }
+
+    /**
+     * Convert Heurist multilingual record-detail values to an IIIF v3 language
+     * map.  Values with ENG:/FRE: prefixes become en/fr entries; unprefixed
+     * values become the IIIF "none" language bucket.
+     */
+    protected function toIiifLanguageMap($values, string $fallback=''): array
+    {
+        $map = array();
+
+        // Accept scalar Heurist values, lists of Heurist values, and existing
+        // IIIF language maps.  Do not call isListArray() until we know the
+        // input is an array; PHP will otherwise raise a TypeError for strings.
+        if($values === null || $values === ''){
+            $values = array();
+        }elseif(!is_array($values)){
+            $values = array($values);
+        }elseif(!$this->isListArray($values)){
+            $values = $this->normaliseLangValues($values);
+        }
+
+        foreach($values as $value){
+            if($value === null || $value === ''){
+                continue;
+            }
+
+            if(is_array($value)){
+                foreach($this->normaliseLangValues($value) as $normalised){
+                    $this->appendToLanguageMap($map, $normalised);
+                }
+                continue;
+            }
+
+            $this->appendToLanguageMap($map, (string)$value);
+        }
+
+        if(empty($map) && $fallback !== ''){
+            $map['none'] = array($fallback);
+        }
+
+        return $map;
+    }
+
+    private function appendToLanguageMap(array &$map, string $value): void
+    {
+        $value = trim($value);
+        if($value === ''){
+            return;
+        }
+
+        $lang = null;
+        if(function_exists('extractLangPrefix')){
+            list($lang, $value) = extractLangPrefix($value);
+            $value = trim((string)$value);
+        }
+
+        if($value === ''){
+            return;
+        }
+
+        $bucket = 'none';
+        if($lang && strcasecmp($lang, 'ALL') !== 0 && function_exists('getLangCode2')){
+            $lang2 = getLangCode2($lang);
+            if($lang2){
+                $bucket = strtolower($lang2);
+            }
+        }
+
+        if(!isset($map[$bucket])){
+            $map[$bucket] = array();
+        }
+        if(!in_array($value, $map[$bucket], true)){
+            $map[$bucket][] = $value;
+        }
+    }
+
+    private function prefixLanguageValue($text, $lang): ?string
+    {
+        $text = trim((string)$text);
+        if($text === ''){
             return null;
         }
-        if(is_string($value)){
-            return $value;
+
+        $lang = is_string($lang) ? trim($lang) : '';
+        if($lang === '' || strcasecmp($lang, 'none') === 0 || strcasecmp($lang, '@none') === 0
+            || strcasecmp($lang, 'und') === 0 || strcasecmp($lang, 'null') === 0){
+            return $text;
         }
-        if(is_array($value)){
-            if(isset($value['none']) && is_array($value['none'])){
-                return reset($value['none']);
+
+        $lang3 = function_exists('getLangCode3') ? getLangCode3($lang) : null;
+        return $lang3 ? strtoupper($lang3).':'.$text : $text;
+    }
+
+    private function isListArray(array $value): bool
+    {
+        $i = 0;
+        foreach(array_keys($value) as $key){
+            if($key !== $i++){
+                return false;
             }
-            if(isset($value['en']) && is_array($value['en'])){
-                return reset($value['en']);
-            }
-            if(isset($value['@value'])){
-                return $value['@value'];
-            }
-            if(isset($value['value'])){
-                return $value['value'];
-            }
-            $first = reset($value);
-            return $this->normaliseLangValue($first);
         }
-        return null;
+        return true;
+    }
+
+    private function uniqueNonEmptyValues(array $values): array
+    {
+        $out = array();
+        foreach($values as $value){
+            if($value === null || $value === ''){
+                continue;
+            }
+            $value = trim((string)$value);
+            if($value !== '' && !in_array($value, $out, true)){
+                $out[] = $value;
+            }
+        }
+        return $out;
     }
 }

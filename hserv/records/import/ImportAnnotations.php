@@ -507,32 +507,6 @@ class ImportAnnotations{
         return null;
     }
 
-    private function normaliseLangValue($value){
-        if(!$value){
-            return null;
-        }
-        if(is_string($value)){
-            return $value;
-        }
-        if(is_array($value)){
-            if(isset($value['none']) && is_array($value['none'])){
-                return reset($value['none']);
-            }
-            if(isset($value['en']) && is_array($value['en'])){
-                return reset($value['en']);
-            }
-            if(isset($value['@value'])){
-                return $value['@value'];
-            }
-            if(isset($value['value'])){
-                return $value['value'];
-            }
-            $first = reset($value);
-            return $this->normaliseLangValue($first);
-        }
-        return null;
-    }
-
     private function progressSession($result){
         if($this->progressSessionId && @$result['processed'] % 5 == 0){
             $current_val = mysql__update_progress(null, $this->progressSessionId, true, $result['processed'].','.$result['total_annotations']);
