@@ -275,9 +275,23 @@ $is_public_annotation_read =
     ($resource === 'annotations'
         && $method === 'search'
         && (
-            in_array(@$requestUri[4], array('pages', 'page', 'annotation'), true)
-            || (is_numeric(@$requestUri[4])
-                && in_array(@$requestUri[5], array('pages', 'page', 'annotation'), true))
+            // Canvas AnnotationPage, used by Mirador:
+            //   /api/{db}/annotations/pages?uri={canvasUri}
+            in_array(@$requestUri[4], array('pages', 'page'), true)
+
+            // Single annotation record:
+            //   /api/{db}/annotations/{annotationId}
+            || (isset($requestUri[4]) && is_numeric($requestUri[4]) && !isset($requestUri[5]))
+
+            // Manifest-scoped Canvas AnnotationPage:
+            //   /api/{db}/annotations/{manifestRecID}/pages?uri={canvasUri}
+            || (isset($requestUri[4]) && is_numeric($requestUri[4])
+                && in_array(@$requestUri[5], array('pages', 'page'), true))
+
+            // Manifest-scoped single annotation:
+            //   /api/{db}/annotations/{manifestRecID}/{annotationId}
+            || (isset($requestUri[4]) && is_numeric($requestUri[4])
+                && isset($requestUri[5]) && is_numeric($requestUri[5]))
         ));
 
 $skip_auth_processing =
@@ -373,9 +387,11 @@ else
         if(isset($requestUri[5])){
             $req_params['manifestRecID'] = intval($requestUri[4]);
             $req_params['recID'] = $requestUri[5];
-        }elseif(isset($requestUri[4]) && is_numeric($requestUri[4])){
-            $req_params['manifestRecID'] = intval($requestUri[4]);
         }elseif(isset($requestUri[4])){
+            // A single path segment after /annotations is the annotation id,
+            // not a Manifest id. Manifest-scoped routes always have two
+            // segments: /annotations/{manifestRecID}/pages or
+            // /annotations/{manifestRecID}/{annotationId}.
             $req_params['recID'] = $requestUri[4];
         }
 
