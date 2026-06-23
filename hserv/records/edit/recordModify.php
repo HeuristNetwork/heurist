@@ -2370,7 +2370,9 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                         }
                         $stmt->close();
 
-                        $updates[] = $recID;
+                        if(!in_array($recID, $updates)){
+                            $updates[] = $recID;
+                        }
                         $updated_count++;
                     }else{
                         $cleared[] = $recID;
