@@ -213,6 +213,9 @@ $.widget( "heurist.slidersMenu", {
                 //forcefully hide coverAll on click
                 that._on(that.coverAll, {
                     click: function(){
+                            if(that._isClickOnlyExplorePopupVisible()){
+                                return;
+                            }
                             that._closeExploreMenuPopup();
                             that._collapseMainMenuPanel(true);
                     }
@@ -418,13 +421,75 @@ $.widget( "heurist.slidersMenu", {
     },
 
     /**
+     * @function _isClickOnlyExplorePopup
+     * @description Returns true for Explore actions that are dialogs rather than hover popups.
+     * These actions are opened only by explicit click and are closed only by their own
+     * close/apply/cancel controls.
+     * @param {string} action_name - The Explore action popup name.
+     * @returns {boolean}
+     * @private
+     */
+    _isClickOnlyExplorePopup: function(action_name){
+        return (action_name=='searchBuilder' || action_name=='svsAdd' || action_name=='svsAddFaceted');
+    },
+
+    /**
+     * @function _isClickOnlyExplorePopupVisible
+     * @description Returns true while a click-only dialog popup is visibly open.
+     * @returns {boolean}
+     * @private
+     */
+    _isClickOnlyExplorePopupVisible: function(){
+
+        if(!this._isClickOnlyExplorePopup(this._current_explore_action)){
+            return false;
+        }
+
+        if(this._current_explore_action=='searchBuilder'){
+            return this.menues_explore_popup
+                    && this.menues_explore_popup.is(':visible')
+                    && this.menues_explore_popup.find('#searchBuilder:visible').length>0;
+        }
+
+        if(this._current_explore_action=='svsAddFaceted'){
+            let faceted_search_wiz = $('#heurist-search-faceted-dialog');
+            return faceted_search_wiz.length>0 && faceted_search_wiz.is(':visible');
+        }
+
+        if(this._current_explore_action=='svsAdd'){
+            return $('.save-filter-dialog:visible').length>0;
+        }
+
+        return false;
+    },
+
+    /**
+     * @function _resetClickOnlyExplorePopupState
+     * @description Clears transient state for click-only dialog popups without disturbing
+     * pinned saved filters.
+     * @private
+     */
+    _resetClickOnlyExplorePopupState: function(){
+
+        if(this._isClickOnlyExplorePopup(this._current_explore_action)){
+            this._current_explore_action = null;
+        }
+        if(this._isClickOnlyExplorePopup(this._fixed_explore_action)){
+            this._explore_popup_fixed = false;
+            this._fixed_explore_action = null;
+        }
+        this._explorer_menu_locked = false;
+        this._delayOnCollapse_ExploreMenu = 600;
+    },
+
+    /**
      * @function _isExplorePopupSticky
      * @description Returns true when the current Explore popup should not close on hover/mouseleave.
      * @returns {boolean}
      * @private
      */
     _isExplorePopupSticky: function(){
-        return (this._explore_popup_fixed || this._svsListPinned);
+        return (this._explore_popup_fixed || this._svsListPinned || this._isClickOnlyExplorePopupVisible());
     },
 
     /**
@@ -799,13 +864,26 @@ $.widget( "heurist.slidersMenu", {
             return;
         }
 
+        if(this._isClickOnlyExplorePopup(hasAction) && e.type !== 'click'){
+            if(this._current_explore_action && !this._isExplorePopupSticky()){
+                this._closeExploreMenuPopup();
+            }
+            return;
+        }
+
         if(this._isExplorePopupSticky() && e.type !== 'click'){
             return;
         }
 
         if(e.type === 'click'){
             this._closeCurrentExplorePopupBeforeSwitch(hasAction);
-            this._fixExplorePopup(hasAction);
+            if(this._isClickOnlyExplorePopup(hasAction)){
+                this._explore_popup_fixed = false;
+                this._fixed_explore_action = null;
+                this._resetCloseTimers();
+            }else{
+                this._fixExplorePopup(hasAction);
+            }
         }else if(!this._isFixableExplorePopup(hasAction)){
             this._explore_popup_fixed = false;
             this._fixed_explore_action = null;
@@ -931,12 +1009,16 @@ $.widget( "heurist.slidersMenu", {
             let { explore_top, explore_left, explore_height, explore_width } = that._getMenuPosition(menu_item, action_name, position);
             if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
-                that.addSavedSearch( 'saved', false, explore_left ); //, explore_top
+                that._current_explore_action = action_name;
+                that._resetCloseTimers();
+                that.addSavedSearch( 'saved', false, explore_left, explore_top );
                 return;
             }
             else if(action_name=='svsAddFaceted'){
                 that._closeExploreMenuPopup();
-                that.addSavedSearch( 'faceted', false, explore_left );
+                that._current_explore_action = action_name;
+                that._resetCloseTimers();
+                that.addSavedSearch( 'faceted', false, explore_left, explore_top );
                 return;
             }
 
@@ -950,7 +1032,7 @@ $.widget( "heurist.slidersMenu", {
                 top: explore_top,
                 height: explore_height,
                 width: expandRecordAddSetting?'500px':explore_width,
-                'z-index': (action_name=='search_filters')?10:103,
+                'z-index': that._isClickOnlyExplorePopup(action_name) ? 105 : ((action_name=='search_filters')?10:103),
                 overflow: action_name === 'searchBuilder' ? 'hidden' : 'hidden auto',
             });
             
@@ -1002,10 +1084,10 @@ $.widget( "heurist.slidersMenu", {
         let explore_top = 2;
         let explore_height = 'auto';
         let explore_width = '300px';
-        
+
         if(position){
             explore_top = position.top;
-            explore_height = position.left;
+            explore_left = position.left;
             return { explore_top, explore_left, explore_height, explore_width };
         }
         
@@ -1034,6 +1116,15 @@ $.widget( "heurist.slidersMenu", {
                 explore_top = this.element.innerHeight() - explore_height;
             }
             */
+        }
+
+        if(this._isClickOnlyExplorePopup(action_name)){
+            // Dialog-style popups cover/overlap the slider menu itself,
+            // rather than opening to the right of it.  Use the actual
+            // menu position instead of hard-coded 0, because this widget
+            // may be embedded with a non-zero left offset.
+            explore_left = this._left_position; //this.divMainMenu.position()?.left || 0;
+            explore_top = 40;
         }
         
         explore_top = Math.max(0, explore_top);
@@ -1729,7 +1820,7 @@ $.widget( "heurist.slidersMenu", {
                         }
                 }
             });
-            this._on(this.menues['explore'].find('li[data-action-popup="searchByEntity"], li[data-action-popup="search_filters"], li[data-action-popup="search_rules"]'), {
+            this._on(this.menues['explore'].find('li[data-action-popup="searchByEntity"], li[data-action-popup="search_filters"], li[data-action-popup="search_rules"], li[data-action-popup="searchBuilder"], li[data-action-popup="svsAdd"], li[data-action-popup="svsAddFaceted"]'), {
                 click: this._mousein_ExploreMenu
             });
             this._on(this.menues['explore'].find('li[data-action-popup="recordAddSettings"]'), {
@@ -2078,7 +2169,7 @@ $.widget( "heurist.slidersMenu", {
             this.edit_svs_dialog = new HSvsEdit();    
         }
         
-        if( !window.hWin.HEURIST4.util.isPositiveInt(left_position) ){
+        if( left_position!==0 && !window.hWin.HEURIST4.util.isPositiveInt(left_position) ){
             left_position = ((that.divMainMenu.width()>this._left_position)?this._widthMenu:this._left_position) + 4; 
             if(this._active_section=='explore'){
                 left_position = this._left_position + 211;
@@ -2118,7 +2209,8 @@ $.widget( "heurist.slidersMenu", {
             true, //is_h6style                                                                                                         
             function(is_locked, is_mouseleave){  //menu_locked
                 if(is_locked=='close'){
-                    that.coverAll.hide();                 
+                    that.coverAll.hide();
+                    that._resetClickOnlyExplorePopupState();
                     
                 }else if(is_mouseleave){
                     that._resetCloseTimers();

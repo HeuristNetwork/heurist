@@ -463,8 +463,8 @@ $.widget( "heurist.search", {
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
                 if(widget){
                     let ele = this.btn_faceted_wiz;
-                    widget.slidersMenu('show_ExploreMenu', null, 'svsAddFaceted', 
-                        {top:ele.offset().top , left:ele.offset().left });
+                    widget.slidersMenu('show_ExploreMenu', null, 'svsAddFaceted'); 
+                        //{top:ele.offset().top , left:ele.offset().left });
                 }            
             }});
 
@@ -481,8 +481,8 @@ $.widget( "heurist.search", {
                 if(widget){
                     let ele = this.btn_saved_filters;
 
-                    widget.slidersMenu('show_ExploreMenu', null, 'svsAdd', 
-                        {top:ele.offset().top , left:ele.offset().left-300 });
+                    widget.slidersMenu('show_ExploreMenu', null, 'svsAdd');
+                        //{top:ele.offset().top , left:ele.offset().left-300 });
                 }            
             }});
 
