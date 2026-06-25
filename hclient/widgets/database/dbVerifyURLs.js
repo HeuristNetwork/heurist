@@ -35,8 +35,9 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
         actionName: "verifyurls"
     },
 
-
     prevSessionExists: false,
+    autoContinueProcess: false,
+    autoContinueInterval: null,
 
     /**
      * @function _initControls
@@ -49,7 +50,77 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
     _initControls:function(){
         // Backward compatibility: old dialogs may still instantiate with actionName="verifyurls"
         this._checkPreviousSession();
+        this._setupAutoStartControls();
         return this._super();
+    },
+
+    /**
+     * @function _setupAutoStartControls
+     * @description Checks with the server if a previous URL verification session exists for the current database.
+     * Updates the UI to show options for continuing, restarting, or viewing previous results based on the server response.
+     * If a session is currently in progress, it will resume showing progress for that session.
+     * @memberof Widgets.Admin.dbVerifyURLs
+     * @private
+     */
+    _setupAutoStartControls: function(){
+
+        let $checkbox = this._$('#midProcessAutoContinue');
+
+        this._on($checkbox, {
+            change: () => {
+                this.autoContinueProcess = $checkbox.prop('checked');
+                if(this.autoContinueProcess){
+                    this._startAutoStartInterval();
+                }else{
+                    clearInterval(this.autoContinueInterval);
+                    this.autoContinueInterval = null;
+                }
+            }
+        });
+    },
+
+    /**
+     * @function _startAutoStartInterval
+     * @description Starts the interval countdown to automatically starting the next set of record checks.
+     * The countdown lasts 5 seconds starting when the previous set finishes
+     * @memberof Widgets.Admin.dbVerifyURLs
+     * @private
+     */
+    _startAutoStartInterval: function(){
+
+        if(!this.autoContinueProcess){
+            this._$('#autoContinueMsg').hide();
+            return;
+        }
+
+        // Start interval
+        let count = 5;
+        this.autoContinueInterval = setInterval(() => {
+
+            count--;
+
+            if(count === 0 || !this.autoContinueInterval){
+
+                this._$('#autoContinueCountdown').text(5);
+
+                if(this.autoContinueInterval !== null){
+
+                    clearInterval(this.autoContinueInterval);
+                    this.autoContinueInterval = null;
+
+                    this._$('#autoContinueCountdown').text('Stopped');
+
+                    this.doAction();
+                }
+
+                return;
+            }
+
+            this._$('#autoContinueCountdown').text(count);
+        }, 1000);
+        
+        this._$('#autoContinueCountdown').text(count);
+        this._$('#autoContinueMsg').show();
     },
 
     /**
@@ -89,6 +160,13 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
                         if(response.data.total_bad==0){ btnCSV.hide(); }
                         else{ btnCSV.show(); }
 
+                        let formats = response.data.formats;
+                        if(!window.hWin.HEURIST4.util.isempty(formats)){
+                            that._$('#checkRecHeaders').prop('checked', formats == 'all' || Array.isArray(formats) && formats.includes('recheaders'));
+                            that._$('#checkTextFields').prop('checked', formats == 'all' || Array.isArray(formats) && formats.includes('textfields'));
+                            that._$('#checkExternalFiles').prop('checked', formats == 'all' || Array.isArray(formats) && formats.includes('externalfiles'));
+                        }
+
                         that.prevSessionExists = true;
                     }else{ // No previous session data found
                         that._$('#prevSessionExist').hide();
@@ -125,10 +203,38 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
      * @memberof Widgets.Admin.dbVerifyURLs
      */
     doAction: function(){
+
         let limit = this._$('#selCheckURLsLimit').val();
+
+        let format = [];
+        if(this._$('#checkRecHeaders').is(':checked')){
+            this._$('#report_record').show();
+            format.push('recheaders');
+        }else{
+            this._$('#report_record').hide();
+        }
+        if(this._$('#checkTextFields').is(':checked')){
+            this._$('#report_text').show();
+            format.push('textfields');
+        }else{
+            this._$('#report_text').hide();
+        }
+        if(this._$('#checkExternalFiles').is(':checked')){
+            this._$('#report_file').show();
+            format.push('externalfiles');
+        }else{
+            this._$('#report_file').hide();
+        }
+
+        format = format.length > 0 && format.length != 3 ? format : 'all';
+
+        this.autoContinueProcess = this._$('#optAutoStart').prop('checked');
+        this._$('#midProcessAutoContinue').prop('checked', this.autoContinueProcess);
+
         // Mode: 0 = Continue, 1 = Recheck bad URLs then continue, 2 = Start from scratch
         const mode = this.prevSessionExists ? this._$('input[name="mode"]:checked').val() : 2;
-        let request = {limit: limit, verbose:0, mode:mode};
+
+        let request = {limit: limit, verbose: 0, mode: mode, format: format};
         this._sendRequest(request);
     },
 
@@ -179,6 +285,7 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
      * @param {string|object} termination_message - Message or error object if the process was terminated or encountered an issue.
      */
     _afterActionEventHandler: function( response_data, termination_message ){
+
         this._$('.ent_wrapper').hide();
         let div_res = this._$("#div_result").show(); // Show the results display area
 
@@ -217,9 +324,14 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
             if(response_data.total_bad==0){ this._$('#all_urls_ok').show(); }
             else { this._$('#all_urls_ok').hide(); }
             this._$('button.ui-button-action').hide(); // Hide "Start/Continue" button
+
+            this._$('#autoContinueDetails').hide();
         }else{
             this._$('#all_urls_verified').hide();
             this._$('button.ui-button-action').show(); // Show "Start/Continue" button
+
+            this._$('#autoContinueDetails').show();
+            this._startAutoStartInterval();
         }
 
         if(response_data.total_bad==0){
@@ -236,7 +348,8 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
         if(this.prevSessionExists){
             this._$('input[name="mode"][value="0"]').prop('checked', true);
         }
-if(termination_message){
+
+        if(termination_message){
             let message_text = window.hWin.HEURIST4.util.isObject(termination_message)
                         ? termination_message.message
                         : termination_message;
