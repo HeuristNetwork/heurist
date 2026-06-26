@@ -68,7 +68,7 @@ $needsSystem = $validDatabaseName && (
 
 if($needsSystem){
 
-require_once dirname(__FILE__).'/../../../autoload.php';
+    require_once dirname(__FILE__).'/../../../autoload.php';
 
     $system = new hserv\System();
     if( ! $system->init($_REQUEST['db'], true, false) ){
@@ -76,7 +76,7 @@ require_once dirname(__FILE__).'/../../../autoload.php';
         $system->errorExitApi();//exit from script
     }
     //get baseURL
-    $baseUrl = defined('HEURIST_SERVER_URL')?HEURIST_SERVER_URL:null;
+    $baseUrl = defined('HEURIST_BASE_URL')?HEURIST_BASE_URL:null;  //HEURIST_SERVER_URL
 
     if(array_key_exists('preparedID', $_REQUEST)){
 
@@ -173,26 +173,14 @@ if($system!=null && $rec_ID>0 && @$_REQUEST['iiif_image']==null && @$_REQUEST['i
 
 if($baseUrl==null){
 
-    $https = (isset($_SERVER['HTTPS']) &&
-                ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||
-                isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
-                $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https');
-
     $baseUrl = ($https ? 'https://' : 'http://').
         (!empty($_SERVER['REMOTE_USER']) ? $_SERVER['REMOTE_USER'].'@' : '').
         (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ($_SERVER['SERVER_NAME'].
         ($https && $_SERVER['SERVER_PORT'] === 443 ||
         $_SERVER['SERVER_PORT'] === 80 ? '' : ':'.$_SERVER['SERVER_PORT'])));
 
+    $baseUrl = $baseUrl.'/h7-alpha/';
 }
-    if(!(substr($baseUrl,-1)=='/' || substr($_SERVER['REQUEST_URI'],0,1)=='/')){
-        $baseUrl = $baseUrl.'/';
-    }
-    $url = $baseUrl . $_SERVER['REQUEST_URI'];
-    
-    if(substr($baseUrl,-1)!='/'){
-        $baseUrl = $baseUrl.'/';
-    }
 
 function appendQueryParam($url, $name, $value){
     if($name==='' || strpos($url, $name.'=')!==false){
@@ -204,7 +192,7 @@ function appendQueryParam($url, $name, $value){
 
 if($manifestRecID>0) {
 
-    $url = $baseUrl.'heurist/api/'.rawurlencode($dbname).'/iiif/manifest/'.$manifestRecID.'?omit_annotation_pages=1';
+    $url = $baseUrl.'api/'.rawurlencode($dbname).'/iiif/manifest/'.$manifestRecID.'?omit_annotation_pages=1';
 
 }elseif(@$_REQUEST['url']) { //direct url to manifest
 
@@ -213,7 +201,7 @@ if($manifestRecID>0) {
 }elseif(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){  //obfuscation id for a registered IIIF Manifest file
 
     $manifestFileID = @$_REQUEST['manifest'] ? $_REQUEST['manifest'] : $_REQUEST['iiif'];
-    $url = $baseUrl.'heurist/api/'.rawurlencode($dbname)
+    $url = $baseUrl.'api/'.rawurlencode($dbname)
         .'/iiif/manifest/'.rawurlencode((string)$manifestFileID)
         .'?omit_annotation_pages=1';
 }else{
@@ -324,7 +312,7 @@ if (!preg_match('[\W]', $dbname)){
     //   manifest -> /annotations/{manifestRecID}, only annotations linked to this Manifest
     window.annotationScope = "<?php echo htmlspecialchars($annotationScope);?>";
     window.endpointURL = "<?php
-        $endpoint = $baseUrl.'heurist/api/'.htmlspecialchars($dbname).'/annotations';
+        $endpoint = $baseUrl.'api/'.htmlspecialchars($dbname).'/annotations';
         if($annotationScope==='manifest' && $manifestRecID>0){
             $endpoint .= '/'.intval($manifestRecID);
         }
