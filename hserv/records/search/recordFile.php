@@ -1432,9 +1432,15 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
                 $img = UImage::createFromString('tiled images stack');//from string
                 
-            }else if($file['ulf_MimeExt']=='json' &&  strpos($file['ulf_OrigFileName'],ULF_IIIF)===0){
+            }else if( ($file['ulf_MimeExt']=='json' &&  strpos($file['ulf_OrigFileName'],ULF_IIIF)===0) 
+                    || (strpos($file['ulf_ExternalFileReference'], '/iiif/')>00 && 
+                        strpos($file['ulf_ExternalFileReference'], '/0/default.jpg')>0) ){
                 
-                $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);
+                if(strpos($file['ulf_OrigFileName'],ULF_IIIF)===0){
+                    $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);
+                }else{
+                    $thumbUrl = UImage::getIiifThumbnailFromUrl($file['ulf_ExternalFileReference'], $thumbnail_file);
+                }
                 
                 if($is_download){
                     if(file_exists($thumbnail_file)){
