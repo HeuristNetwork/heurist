@@ -283,40 +283,45 @@
 
 <div id="insert-popup2" style="display:none;overflow:hidden;">
 
-    <h3 id="fieldName" style="margin-top:0px"></h3>
-
-    <label for="insWrap">
-        <input type="checkbox" id="insWrap" style="vertical-align: middle;" />&nbsp;
-        Add wrapper e.g. &lt;img&gt; tags
-    </label><br>
+    <div id="fieldName" style="margin-top:0px"></div>
 
     <label for="insIfNull">
-        <input type="checkbox" id="insIfNull" style="vertical-align: middle;" />&nbsp;
+        <input type="checkbox" id="insIfNull" style="vertical-align: middle;"/>&nbsp;
         Test if value exists (if...)
     </label><br>
 
+    <label for="insLineBreak">
+        <input type="checkbox" id="insLineBreak" style="vertical-align: middle;" checked/>&nbsp;
+        Include line break
+    </label><br>
+    
+    <label for="insCaption">
+        <input type="checkbox" id="insCaption" style="vertical-align: middle;" checked/>&nbsp;
+        Precede with field name
+    </label><br>
+<!--
     <label for="insRepeat">
         <input type="checkbox" id="insRepeat" style="vertical-align: middle;" />&nbsp;
         Multiple values loop (repeat...)
     </label><br>
-
-    <label for="insCaption">
-        <input type="checkbox" id="insCaption" style="vertical-align: middle;" />&nbsp;
-        Precede with field name
-    </label><br>
-
+-->
     <label for="insRemark">
         <input type="checkbox" id="insRemark" style="vertical-align: middle;" />&nbsp;
-        Add field name as comment
+        Field name as comment
     </label><br>
 
+    <label for="insWrap">
+        <input type="checkbox" id="insWrap" style="vertical-align: middle;" />&nbsp;
+        Wrapper e.g. &lt;img&gt; tags <span style="font-size:0.8em">(always applied to media)</span>
+    </label><br>
+
+    
+    
     <hr>
-    <div style="padding:10px 0 0 30px">
-    <label for="insAll">
-        <input type="checkbox" id="insAll" style="vertical-align: middle;" />&nbsp;
-        Apply setting above to all fields<br>
+    <div style="padding:3px 0 0 3px">
+    <label for="insAll" style='font-size:0.9em'>
+        Insert all applies these settings to the remaining fields but does not change those already inserted<br>
     </label>
-    <span style="font-size:smaller;padding-left:25px">(Does not affect fields already added)</span>
     </div>
 
 </div>
