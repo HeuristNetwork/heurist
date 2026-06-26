@@ -609,7 +609,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
     <div id="heurist-about" style="width:300px;display:none;">
         <div class='logo'></div>
         <h4>Heurist Academic Knowledge Management System</h4>
-        <p style="margin-top:1em;">version <?=HEURIST_VERSION?></p>
+        <p style="margin-top:1em;">version <?=HEURIST_VERSION?> (2026-06-26 12:20)</p>
         <p style="margin-top: 1em;">Copyright (C) 2005-2023 University of Sydney, (C) 2024 - <a href="https://HeuristNetwork.org" style="outline:none;" target="_blank" rel="noopener">Heurist Network Association</a></p>
     </div>
 

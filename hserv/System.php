@@ -542,6 +542,8 @@ class System {
 
                 if (!isset($dtyIDs[$row['dbID']])) {
                     $dtyIDs[$row['dbID']] = array();
+                }elseif(isset($dtyIDs[$row['dbID']][$row['id']])){
+                    continue; //avoid duplication
                 }
                 $dtyIDs[$row['dbID']][$row['id']] = $row['localID'];
             }
