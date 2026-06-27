@@ -19,15 +19,14 @@ declare(strict_types=1);
  *         'dbHost' => '127.0.0.1',
  *         'dbPort' => 3306,
  *         'dbAdminUsername' => 'heurist',
- *         'dbAdminPassword' => '<password>',
- *         // 'database' => 'hdb_Heurist_Concept_Definitions', // optional
+ *         'dbAdminPassword' => '<password>'
  *     ],
  *     'sources' => [
  *         [
  *             'server' => 'http://127.0.0.1/heurist/',
- *             'registryDatabase' => 'Heurist_Concept_Definitions',
- *   'username' => '<api-login>',
- *   'password' => '<api-password>',
+ *             'registryDatabase' => 'osmak_1', // any database on source server used as API entry point
+ *             'username' => '2',
+ *             'password' => $passwordForDatabaseAccess
  *   // optional:
  *   // 'jwt' => '<already-issued-token>',
  *   
@@ -112,6 +111,7 @@ function main(): void
     $summary = new Summary();
     logRunHeader($cfg['sources']);
 
+    // loop for servers
     foreach ($cfg['sources'] as $sourceCfg) {
         
         $summary->servers++;
@@ -121,6 +121,7 @@ function main(): void
         logLine(str_repeat('=', 90));
         logLine("SOURCE SERVER: {$server} registry DB {$registryDb}");
 
+        //retrieve all databases from given server
         try {
             $client->authenticateSource($sourceCfg);
             $databases = $client->fetchRegisteredDatabases($server, $registryDb);
@@ -132,6 +133,7 @@ function main(): void
         
  //DEBUG ONE DB ONLY $databases = [['sys_Database'=>'osmak_1', 'sys_dbRegisteredID'=>1750, 'sys_dbName'=>'TEST!']];        
 
+        // loop for databases, use rregistered sys_dbRegisteredID>0 only
         foreach ($databases as $dbInfo) {
             $summary->databasesSeen++;
             $dbName = (string)($dbInfo['sys_Database'] ?? '');
@@ -218,6 +220,9 @@ function isLocalSourceServer(string $server): bool
     return in_array($host, ['localhost', '127.0.0.1', '::1', 'heuristref.net'], true);
 }
 
+//
+// loads definitions for given database
+//
 function fetchSourceDataset(ApiClient $client, string $server, string $dbName, int $registeredId): SourceDataset
 {
     $set = new SourceDataset($server, $dbName, $registeredId);
@@ -254,6 +259,9 @@ function fetchSourceDataset(ApiClient $client, string $server, string $dbName, i
     return $set;
 }
 
+//
+// etch referenced RTY/DTY/TRM rows.
+//
 function fetchMissingReferencedRows(ApiClient $client, SourceDataset $set, string $type): void
 {
     $spec = ENTITY_SPECS[$type];
@@ -277,6 +285,9 @@ function fetchMissingReferencedRows(ApiClient $client, SourceDataset $set, strin
     }
 }
 
+//
+// process definitions to target database
+//
 function processSourceDatabase(SourceDataset $set, TargetRepository $repo, Summary $summary): void
 {
     logLine("Importing {$set->dbName} in one transaction");
@@ -297,6 +308,9 @@ function processSourceDatabase(SourceDataset $set, TargetRepository $repo, Summa
     importRecStructureRows($set, $repo, $targetMap, $summary);
 }
 
+//
+// insert/reuse all RTY/DTY/TRM rows needed either as harvest rows or dependencies.
+//
 function importConceptRows(
     SourceDataset $set,
     TargetRepository $repo,

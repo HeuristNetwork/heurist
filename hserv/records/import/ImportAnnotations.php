@@ -24,6 +24,7 @@ class ImportAnnotations{
     private $importLevel = 'managed';
     private $progressSessionId = 0;
     private $createThumbnail = false;
+    private $createAnotations = true;
     private $dbAnno;
 
     public function __construct( $system, $params = null ) {
@@ -38,6 +39,7 @@ class ImportAnnotations{
         $this->importLevel = @$params['import_level'] ?: 'managed';
         $this->progressSessionId = @$params['session'];
         $this->createThumbnail = @$params['create_thumb']==1;
+        $this->createAnotations = fasle;//($this->importLevel==='managed' && @$params['create_annot']==1);
     }
 
     public function execute(){

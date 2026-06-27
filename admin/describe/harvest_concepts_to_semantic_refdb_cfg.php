@@ -18,7 +18,7 @@ return [
      'sources' => [
          [
              'server' => 'http://127.0.0.1/heurist/',
-             'registryDatabase' => 'osmak_1',
+             'registryDatabase' => 'osmak_1',  // API entry point
              'username' => '2',
              'password' => $passwordForDatabaseAccess,
          ]
