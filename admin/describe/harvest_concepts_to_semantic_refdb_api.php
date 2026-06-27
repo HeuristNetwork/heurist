@@ -92,8 +92,8 @@ main();
 function main(): void
 {
     if (PHP_SAPI !== 'cli') {
-        fwrite(STDERR, "This script must be run from the command line.\n");
-        exit(1);
+        //write_err("This script must be run from the command line.\n");
+        //exit(1);
     }
 
     initialiseLogFile();
@@ -153,6 +153,11 @@ function main(): void
             if (isLocalSourceServer($server) && isTargetDatabaseName($dbName)) {
                 $summary->databasesSkippedTarget++;
                 logLine("Skipping local target database {$dbName}");
+                continue;
+            }            
+            
+            if(strcasecmp($dbName, 'Heurist_Job_Tracker')!==0){
+                $summary->databasesSkippedUnregistered++;
                 continue;
             }            
 
@@ -329,6 +334,10 @@ function importConceptRows(
             logWarning($set->label() . " skipping {$type} row with no usable origin");
             $summary->warnings++;
             continue;
+        }
+        
+        if($origin['db']==8 && $origin['id']==53){
+            error_log('!!!!');
         }
 
         $existingId = $repo->findExistingTargetId($spec, $origin['db'], $origin['id']);
@@ -897,28 +906,28 @@ function logRunHeader(array $sources): void
     $lines[] = str_repeat('-', 90);
 
     $block = implode(PHP_EOL, $lines) . PHP_EOL;
-    fwrite(STDOUT, $block);
+    write_out($block);
     file_put_contents(LOG_FILE, $block, FILE_APPEND);
 }
 
 function logLine(string $message): void
 {
     $line = '[' . date('Y-m-d H:i:s') . '] ' . $message . PHP_EOL;
-    fwrite(STDOUT, $line);
+    write_out($line);
     file_put_contents(LOG_FILE, $line, FILE_APPEND);
 }
 
 function logWarning(string $message): void
 {
     $line = '[' . date('Y-m-d H:i:s') . '] WARNING: ' . $message . PHP_EOL;
-    fwrite(STDERR, $line);
+    write_err($line);
     file_put_contents(LOG_FILE, $line, FILE_APPEND);
 }
 
 function logError(string $message): void
 {
     $line = '[' . date('Y-m-d H:i:s') . '] ERROR: ' . $message . PHP_EOL;
-    fwrite(STDERR, $line);
+    write_err($line);
     file_put_contents(LOG_FILE, $line, FILE_APPEND);
 }
 
@@ -1689,5 +1698,24 @@ final class TargetRepository
             $cols[] = $row['Field'];
         }
         return $cols;
+    }
+}
+
+function write_out(string $message): void
+{
+    if (PHP_SAPI === 'cli') {
+        fwrite(STDOUT, $message);
+    } else {
+        echo htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'<br>';
+    }
+}
+
+function write_err(string $message): void
+{
+    if (PHP_SAPI === 'cli') {
+        fwrite(STDERR, $message);
+    } else {
+        echo 'ERROR: '.htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'<br>';
+        error_log($message);
     }
 }
