@@ -498,16 +498,25 @@ function updateTermReferences(SourceDataset $set, TargetRepository $repo, Target
             'trm_InverseTermID',
         ]);
 
-        $hasChanged = false;
+        $changedUpdates = [];
         foreach ($updates as $field => $value) {
             if (normaliseDbNullableInt($current[$field] ?? null) !== normaliseDbNullableInt($value)) {
-                $hasChanged = true;
-                break;
+                $changedUpdates[$field] = $value;
             }
         }
 
-        if ($hasChanged) {
-            $repo->updateByPk($spec['table'], $spec['pk'], $targetId, $updates);
+        if ($changedUpdates) {
+            // If the parent value changes, clear existing term links before the
+            // defTerms UPDATE fires legacy triggers. Otherwise a trigger that
+            // inserts into defTermsLinks can fail on trl_CompositeKey before
+            // replaceTermParentLink() has a chance to use INSERT IGNORE.
+            if (array_key_exists('trm_ParentTermID', $changedUpdates)) {
+                $repo->clearTermParentLinks($targetId);
+            }
+
+            // Update only changed columns. In particular, do not include
+            // trm_ParentTermID when only trm_InverseTermID changed.
+            $repo->updateByPk($spec['table'], $spec['pk'], $targetId, $changedUpdates);
             $summary->updated[$spec['table']]++;
         }
 
@@ -1647,6 +1656,13 @@ final class TargetRepository
         $stmt->execute();
 
         return $stmt->fetchColumn() !== false;
+    }
+
+    public function clearTermParentLinks(int $termId): void
+    {
+        $delete = $this->pdo->prepare('DELETE FROM `defTermsLinks` WHERE `trl_TermID` = :termId');
+        $delete->bindValue(':termId', $termId, PDO::PARAM_INT);
+        $delete->execute();
     }
 
     public function replaceTermParentLink(int $termId, ?int $parentId): void
