@@ -40,7 +40,7 @@ declare(strict_types=1);
  */
 const CONFIG_FILE = __DIR__ . '/harvest_concepts_to_semantic_refdb_cfg.php';
 const LOG_FILE    = __DIR__ . '/harvest_concepts_to_semantic_refdb.log';
-const TARGET_DB   = 'hdb_osmak_core2'; //'hdb_Heurist_Concept_Definitions';
+const TARGET_DB   = 'hdb_osmak_core'; //'hdb_Heurist_Concept_Definitions';
 const API_LIMIT   = 1000;
 const HTTP_TIMEOUT_SECONDS = 120;
 
@@ -92,8 +92,8 @@ main();
 function main(): void
 {
     if (PHP_SAPI !== 'cli') {
-        //write_err("This script must be run from the command line.\n");
-        //exit(1);
+        write_err("This script must be run from the command line.\n");
+        exit(1);
     }
 
     initialiseLogFile();
@@ -156,10 +156,12 @@ function main(): void
                 continue;
             }            
             
+            /* DEBUG
             if(strcasecmp($dbName, 'Heurist_Job_Tracker')!==0){
                 $summary->databasesSkippedUnregistered++;
                 continue;
-            }            
+            }
+            */            
 
             logLine(str_repeat('-', 90));
             logLine("Fetching {$dbName} (Registered ID {$registeredId})" . ($dbTitle !== '' ? " - {$dbTitle}" : ''));
