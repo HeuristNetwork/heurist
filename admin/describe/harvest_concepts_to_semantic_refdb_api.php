@@ -292,7 +292,9 @@ function processSourceDatabase(SourceDataset $set, TargetRepository $repo, Summa
 {
     logLine("Importing {$set->dbName} in one transaction");
 
-    $groupIds = $repo->ensureGroupsForSourceDatabase($set->dbName, $set->registeredId);
+    // Groups are created lazily only when a new RTY/DTY/TRM row is actually inserted.
+    // This avoids hundreds of empty source groups on repeat runs or databases with no new definitions.
+    $groupIds = [];
     $targetMap = new TargetIdMap($repo);
 
     // First insert/reuse all RTY/DTY/TRM rows needed either as harvest rows or dependencies.
@@ -317,7 +319,7 @@ function importConceptRows(
     TargetIdMap $targetMap,
     Summary $summary,
     string $type,
-    array $groupIds,
+    array &$groupIds,
     bool $neutraliseReferences = false
 ): void {
     $spec = ENTITY_SPECS[$type];
@@ -340,15 +342,15 @@ function importConceptRows(
         $prepared = ensureUniqueConceptNameForInsert($repo, $summary, $set, $type, $spec, $origin, $prepared);
 
         if ($type === 'RTY') {
-            $prepared['rty_RecTypeGroupID'] = $groupIds['rty'];
+            $prepared['rty_RecTypeGroupID'] = getLazySourceGroupId($repo, $groupIds, $set, 'rty');
         } elseif ($type === 'DTY') {
-            $prepared['dty_DetailTypeGroupID'] = $groupIds['dty'];
+            $prepared['dty_DetailTypeGroupID'] = getLazySourceGroupId($repo, $groupIds, $set, 'dty');
             if ($neutraliseReferences) {
                 unset($prepared['dty_JsonTermIDTree'], $prepared['dty_PtrTargetRectypeIDs']);
             }
         } elseif ($type === 'TRM') {
             $domain = normaliseTermDomain((string)($row['trm_Domain'] ?? 'enum'));
-            $prepared['trm_VocabularyGroupID'] = $groupIds['trm'][$domain];
+            $prepared['trm_VocabularyGroupID'] = getLazySourceGroupId($repo, $groupIds, $set, 'trm', $domain);
             if ($neutraliseReferences) {
                 $prepared['trm_ParentTermID'] = null;
                 $prepared['trm_InverseTermID'] = null;
@@ -360,6 +362,33 @@ function importConceptRows(
         $summary->inserted[$spec['table']]++;
         logConceptAction($set->dbName, $type, $spec, $prepared, 'INSERTED');
     }
+}
+
+function getLazySourceGroupId(TargetRepository $repo, array &$groupIds, SourceDataset $set, string $kind, ?string $domain = null): int
+{
+    if ($kind === 'rty') {
+        if (!isset($groupIds['rty'])) {
+            $groupIds['rty'] = $repo->ensureRecTypeGroupForSourceDatabase($set->dbName, $set->registeredId);
+        }
+        return $groupIds['rty'];
+    }
+
+    if ($kind === 'dty') {
+        if (!isset($groupIds['dty'])) {
+            $groupIds['dty'] = $repo->ensureDetailTypeGroupForSourceDatabase($set->dbName, $set->registeredId);
+        }
+        return $groupIds['dty'];
+    }
+
+    if ($kind === 'trm') {
+        $domain = normaliseTermDomain((string)($domain ?? 'enum'));
+        if (!isset($groupIds['trm'][$domain])) {
+            $groupIds['trm'][$domain] = $repo->ensureVocabularyGroupForSourceDatabase($set->dbName, $set->registeredId, $domain);
+        }
+        return $groupIds['trm'][$domain];
+    }
+
+    throw new RuntimeException("Unknown source group kind: {$kind}");
 }
 
 function updateDetailTypeReferences(SourceDataset $set, TargetRepository $repo, TargetIdMap $targetMap, Summary $summary): void
@@ -427,16 +456,32 @@ function updateTermReferences(SourceDataset $set, TargetRepository $repo, Target
             $updates[$field] = $mapped;
         }
 
-        $repo->updateByPk($spec['table'], $spec['pk'], $targetId, $updates);
+        $current = $repo->getColumnsByPk($spec['table'], $spec['pk'], $targetId, [
+            'trm_ParentTermID',
+            'trm_InverseTermID',
+        ]);
+
+        $hasChanged = false;
+        foreach ($updates as $field => $value) {
+            if (normaliseDbNullableInt($current[$field] ?? null) !== normaliseDbNullableInt($value)) {
+                $hasChanged = true;
+                break;
+            }
+        }
+
+        if ($hasChanged) {
+            $repo->updateByPk($spec['table'], $spec['pk'], $targetId, $updates);
+            $summary->updated[$spec['table']]++;
+        }
 
         // The harvester inserts terms in two phases: first with NULL parent,
         // then updates trm_ParentTermID after all target-local term IDs are known.
         // Some legacy triggers do not handle NULL -> parent transitions, so keep
-        // defTermsLinks in sync explicitly and idempotently.
+        // defTermsLinks in sync explicitly and idempotently. This is done even
+        // when defTerms itself did not change, to repair missing/stale links on
+        // repeat runs without firing term UPDATE triggers unnecessarily.
         $parentTargetId = isset($updates['trm_ParentTermID']) ? toInt($updates['trm_ParentTermID']) : 0;
         $repo->replaceTermParentLink($targetId, $parentTargetId > 0 ? $parentTargetId : null);
-
-        $summary->updated[$spec['table']]++;
     }
 }
 
@@ -798,6 +843,15 @@ function cleanNullable(mixed $value): ?string
     }
     $str = trim((string)$value);
     return $str === '' ? null : $str;
+}
+
+function normaliseDbNullableInt(mixed $value): ?int
+{
+    if ($value === null || $value === '') {
+        return null;
+    }
+    $intValue = (int)$value;
+    return $intValue > 0 ? $intValue : null;
 }
 
 function normaliseTermDomain(string $domain): string
@@ -1378,6 +1432,36 @@ final class TargetRepository
         }
     }
 
+    public function ensureRecTypeGroupForSourceDatabase(string $dbName, int $registeredId): int
+    {
+        $groupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " [DB{$registeredId}]", 40);
+        return $this->ensureGroup('defRecTypeGroups', 'rtg_ID', 'rtg_Name', $groupName, [
+            'rtg_Domain' => 'functionalgroup',
+            'rtg_Description' => "Harvested concepts from {$dbName}",
+        ]);
+    }
+
+    public function ensureDetailTypeGroupForSourceDatabase(string $dbName, int $registeredId): int
+    {
+        $groupName = $this->makeUniqueBoundedGroupName('defDetailTypeGroups', 'dtg_Name', $dbName, " [DB{$registeredId}]", 63);
+        return $this->ensureGroup('defDetailTypeGroups', 'dtg_ID', 'dtg_Name', $groupName, [
+            'dtg_Description' => "Harvested concepts from {$dbName}",
+        ]);
+    }
+
+    public function ensureVocabularyGroupForSourceDatabase(string $dbName, int $registeredId, string $domain): int
+    {
+        $domain = normaliseTermDomain($domain);
+        $suffix = $domain === 'relation' ? " [DB{$registeredId} rel]" : " [DB{$registeredId} enum]";
+        $groupName = $this->makeUniqueBoundedGroupName('defVocabularyGroups', 'vcg_Name', $dbName, $suffix, 40);
+        return $this->ensureGroup('defVocabularyGroups', 'vcg_ID', 'vcg_Name', $groupName, [
+            'vcg_Domain' => $domain,
+            'vcg_Description' => $domain === 'relation'
+                ? "Harvested relation vocabularies from {$dbName}"
+                : "Harvested enum vocabularies from {$dbName}",
+        ]);
+    }
+
     public function ensureGroupsForSourceDatabase(string $dbName, int $registeredId): array
     {
         $rtyGroupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " [DB{$registeredId}]", 40);
@@ -1477,6 +1561,40 @@ final class TargetRepository
         }
         $stmt->bindValue(':__pk', $pkValue, PDO::PARAM_INT);
         $stmt->execute();
+    }
+
+    public function getColumnsByPk(string $table, string $pk, int $pkValue, array $fields): array
+    {
+        $allowed = array_flip($this->columns[$table] ?? []);
+        if (!isset($allowed[$pk])) {
+            throw new RuntimeException("Unknown primary key column {$table}.{$pk}");
+        }
+
+        $columns = [];
+        foreach ($fields as $field) {
+            if (!is_string($field) || !isset($allowed[$field])) {
+                throw new RuntimeException("Unknown column {$table}.{$field}");
+            }
+            $columns[] = $field;
+        }
+
+        if (!$columns) {
+            return [];
+        }
+
+        $sql = sprintf(
+            'SELECT %s FROM `%s` WHERE `%s` = :__pk LIMIT 1',
+            implode(', ', array_map(fn(string $field): string => "`{$field}`", $columns)),
+            $table,
+            $pk
+        );
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':__pk', $pkValue, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($row) ? $row : [];
     }
 
     public function columnValueExists(string $table, string $field, string $value): bool
