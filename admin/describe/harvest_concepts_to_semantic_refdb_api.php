@@ -40,7 +40,7 @@ declare(strict_types=1);
  */
 const CONFIG_FILE = __DIR__ . '/harvest_concepts_to_semantic_refdb_cfg.php';
 const LOG_FILE    = __DIR__ . '/harvest_concepts_to_semantic_refdb.log';
-const TARGET_DB   = 'hdb_osmak_core'; //'hdb_Heurist_Concept_Definitions';
+const TARGET_DB   = 'hdb_osmak_core2'; //'hdb_Heurist_Concept_Definitions';
 const API_LIMIT   = 1000;
 const HTTP_TIMEOUT_SECONDS = 120;
 
@@ -232,28 +232,56 @@ function fetchSourceDataset(ApiClient $client, string $server, string $dbName, i
 {
     $set = new SourceDataset($server, $dbName, $registeredId);
 
-    // 1. Fetch rows actually meant to be harvested from this database.
-    foreach (ENTITY_SPECS as $type => $spec) {
+    // 1. Fetch RTY/DTY/TRM actually defined by this database.
+    foreach (['RTY', 'DTY', 'TRM'] as $type) {
+        $spec = ENTITY_SPECS[$type];
         $originField = $spec['origin_db'];
-        $rows = $client->fetchRows($server, $dbName, $spec['api'], [$originField => (string)$registeredId], 0);
+
+        $rows = $client->fetchRows($server, $dbName, $spec['api'], [
+            $originField => (string)$registeredId,
+        ], 0);
+
         foreach ($rows as $row) {
             $set->addHarvestRow($type, $row);
         }
+
         logLine("  {$type}: fetched " . count($rows) . ' harvest rows');
     }
 
-    // 2. Collect direct references from harvest rows.
+    // 2. Fetch RST by harvested RTY IDs, not by rst_OriginatingDBID.
+    $rtyIds = [];
+    foreach ($set->getHarvestRows('RTY') as $rtyRow) {
+        $id = toInt($rtyRow['rty_ID'] ?? 0);
+        if ($id > 0) {
+            $rtyIds[] = $id;
+        }
+    }
+
+    $rstCount = 0;
+    foreach (array_chunk(array_values(array_unique($rtyIds)), API_LIMIT) as $chunk) {
+        $rows = $client->fetchRows($server, $dbName, 'rst', [
+            'rst_RecTypeID' => implode(',', $chunk),
+        ], 0);
+
+        foreach ($rows as $row) {
+            $set->addHarvestRow('RST', $row);
+            $rstCount++;
+        }
+    }
+
+    logLine("  RST: fetched {$rstCount} harvest rows by harvested RTY IDs");
+
+    // 3. Collect dependencies only from relevant RST/DTY/TRM.
     $collector = new ReferenceCollector($set);
     $collector->collectFromHarvestRows();
 
-    // 3. Fetch referenced RTY/DTY rows. Referenced DTY rows may themselves
-    // contain vocabulary/target-rectype references, so collect those after fetch.
     fetchMissingReferencedRows($client, $set, 'RTY');
     fetchMissingReferencedRows($client, $set, 'DTY');
+
     $collector->collectFromAllRows('DTY');
+
     fetchMissingReferencedRows($client, $set, 'RTY');
 
-    // 4. Fetch referenced terms, expanding parent/inverse chain until stable.
     do {
         $before = count($set->getNeededIds('TRM'));
         fetchMissingReferencedRows($client, $set, 'TRM');
