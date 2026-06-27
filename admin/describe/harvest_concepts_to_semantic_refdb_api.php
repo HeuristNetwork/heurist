@@ -16,10 +16,11 @@ declare(strict_types=1);
  *
  * return [
  *     'target' => [
+ *         'database' => 'hdb_Heurist_Concept_Definitions',
  *         'dbHost' => '127.0.0.1',
  *         'dbPort' => 3306,
- *         'dbAdminUsername' => 'heurist',
- *         'dbAdminPassword' => '<password>'
+ *         // dbAdminUsername/dbAdminPassword are optional; loadConfig()
+ *         // falls back to ../../../heuristConfigIni.php when omitted.
  *     ],
  *     'sources' => [
  *         [
@@ -40,7 +41,6 @@ declare(strict_types=1);
  */
 const CONFIG_FILE = __DIR__ . '/harvest_concepts_to_semantic_refdb_cfg.php';
 const LOG_FILE    = __DIR__ . '/harvest_concepts_to_semantic_refdb.log';
-const TARGET_DB   = 'hdb_osmak_core'; //'hdb_Heurist_Concept_Definitions';
 const API_LIMIT   = 1000;
 const HTTP_TIMEOUT_SECONDS = 120;
 
@@ -100,6 +100,7 @@ function main(): void
 
     try {
         $cfg = loadConfig(CONFIG_FILE);
+        $targetDbName = (string)$cfg['target']['database'];
         $targetPdo = connectTarget($cfg['target']);
         $targetRepo = new TargetRepository($targetPdo);
         $client = new ApiClient();
@@ -150,7 +151,7 @@ function main(): void
                 continue;
             }
             
-            if (isLocalSourceServer($server) && isTargetDatabaseName($dbName)) {
+            if (isLocalSourceServer($server) && isTargetDatabaseName($dbName, $targetDbName)) {
                 $summary->databasesSkippedTarget++;
                 logLine("Skipping local target database {$dbName}");
                 continue;
@@ -210,10 +211,15 @@ function main(): void
     logLine('Errors: ' . $summary->errors);
 }
 
-function isTargetDatabaseName(string $dbName): bool
+function isTargetDatabaseName(string $dbName, string $targetDbName): bool
 {
-    $targetWithPrefix = TARGET_DB;
-    $targetWithoutPrefix = preg_replace('/^hdb_/i', '', TARGET_DB) ?? TARGET_DB;
+    $targetDbName = trim($targetDbName);
+    if ($targetDbName === '') {
+        return false;
+    }
+
+    $targetWithPrefix = $targetDbName;
+    $targetWithoutPrefix = preg_replace('/^hdb_/i', '', $targetDbName) ?? $targetDbName;
 
     return strcasecmp($dbName, $targetWithPrefix) === 0
         || strcasecmp($dbName, $targetWithoutPrefix) === 0;
@@ -788,11 +794,32 @@ function rewriteIntegerTokens(string $value, callable $mapper): string
     }, $value) ?? $value;
 }
 
+function loadHeuristCredentialDefaults(): array
+{
+    $parentIni = __DIR__ . "/../../../heuristConfigIni.php";
+    if (!is_file($parentIni)) {
+        return [];
+    }
+
+    include $parentIni;
+
+    $defaults = [];
+    foreach (['dbAdminUsername', 'dbAdminPassword', 'passwordForDatabaseAccess'] as $name) {
+        if (isset(${$name}) && ${$name} !== '') {
+            $defaults[$name] = (string)${$name};
+        }
+    }
+
+    return $defaults;
+}
+
 function loadConfig(string $path): array
 {
     if (!is_file($path)) {
         throw new RuntimeException("Config file not found: {$path}");
     }
+
+    $credentialDefaults = loadHeuristCredentialDefaults();
 
     $cfg = include $path;
     if (!is_array($cfg)) {
@@ -809,6 +836,25 @@ function loadConfig(string $path): array
         throw new RuntimeException("Config is missing sources array");
     }
 
+    $targetDatabase = trim((string)($target['database'] ?? ''));
+    if ($targetDatabase === '') {
+        throw new RuntimeException("Config target.database is required");
+    }
+
+    $target['database'] = $targetDatabase;
+    $target['dbAdminUsername'] = (string)(
+        $target['dbAdminUsername']
+        ?? $target['user']
+        ?? $credentialDefaults['dbAdminUsername']
+        ?? ''
+    );
+    $target['dbAdminPassword'] = (string)(
+        $target['dbAdminPassword']
+        ?? $target['password']
+        ?? $credentialDefaults['dbAdminPassword']
+        ?? ''
+    );
+
     $normalisedSources = [];
     foreach ($sources as $source) {
         if (!is_array($source)) {
@@ -819,12 +865,32 @@ function loadConfig(string $path): array
         if ($server === '' || $registryDb === '') {
             throw new RuntimeException('Each source requires server and registryDatabase');
         }
+
         $normalised = [
             'server' => normaliseServerUrl($server),
             'registryDatabase' => normaliseDbNameForApi($registryDb),
         ];
 
-        foreach (['login', 'username', 'password', 'jwt', 'token', 'accessToken', 'authEndpoint'] as $key) {
+        $sourceUsername = (string)($source['username'] ?? $source['login'] ?? '');
+        $sourcePassword = (string)($source['password'] ?? '');
+
+        if ($sourceUsername === '' && $sourcePassword === '') {
+            // If source credentials are omitted completely, use the standard
+            // database-access user and password from heuristConfigIni.php.
+            $sourceUsername = '2';
+            $sourcePassword = (string)($credentialDefaults['passwordForDatabaseAccess'] ?? '');
+        } elseif ($sourcePassword === '' && $sourceUsername !== '') {
+            $sourcePassword = (string)($credentialDefaults['passwordForDatabaseAccess'] ?? '');
+        }
+
+        if ($sourceUsername !== '') {
+            $normalised['username'] = $sourceUsername;
+        }
+        if ($sourcePassword !== '') {
+            $normalised['password'] = $sourcePassword;
+        }
+
+        foreach (['jwt', 'token', 'accessToken', 'authEndpoint'] as $key) {
             if (array_key_exists($key, $source) && $source[$key] !== null && $source[$key] !== '') {
                 $normalised[$key] = (string)$source[$key];
             }
@@ -832,8 +898,6 @@ function loadConfig(string $path): array
 
         $normalisedSources[] = $normalised;
     }
-
-    $target['database'] = (string)($target['database'] ?? TARGET_DB);
 
     return [
         'target' => $target,
@@ -847,8 +911,11 @@ function connectTarget(array $cfg): PDO
     $port = (int)($cfg['dbPort'] ?? $cfg['port'] ?? 3306);
     $user = (string)($cfg['dbAdminUsername'] ?? $cfg['user'] ?? '');
     $pass = (string)($cfg['dbAdminPassword'] ?? $cfg['password'] ?? '');
-    $dbName = (string)($cfg['database'] ?? TARGET_DB);
+    $dbName = trim((string)($cfg['database'] ?? ''));
 
+    if ($dbName === '') {
+        throw new RuntimeException('Target database is required');
+    }
     if ($user === '') {
         throw new RuntimeException('Target dbAdminUsername/user is required');
     }
