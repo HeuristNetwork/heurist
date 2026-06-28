@@ -889,11 +889,18 @@ EXP;
 
         $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.$system->dbnameEnv();
         
+        /* PRE 2026-06-28 
         if(($iiif_type==ULF_IIIF_IMAGE || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
             && @$params['var'][0]['rec_ID']>0){
             $miradorViewer = $miradorViewer.'&q=ids:'.intval($params['var'][0]['rec_ID']);
         }else{
             $miradorViewer = $miradorViewer.'&'.substr($iiif_type,1).'='.$fileid;
+        }
+        */
+        if(@$params['var'][0]['rec_ID']>0){
+            $miradorViewer = $miradorViewer.'&id='.intval($params['var'][0]['rec_ID']);
+        }else{
+            $miradorViewer = $miradorViewer.'&id='.$fileid;
         }
 
         $result = "<iframe $size $style src=\"$miradorViewer\" frameborder=\"0\"></iframe>";

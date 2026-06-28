@@ -216,8 +216,11 @@ class RecordMediaRenderer
             $miradorUrl = $this->miradorUrl($thumb, false);
             $html[] = '<a href="'.$this->h($miradorUrl).'" target="_blank" rel="noopener">open in new tab</a>';
             $html[] = '<a href="'.$this->h($miradorUrl).'" class="record-media-mirador">'.$this->miradorIcon().'&nbsp;Mirador</a>';
-            $html[] = '<a href="'.$this->h($this->manifestUrl($thumb)).'" target="_blank" rel="noopener">'
-                .'<span class="external-link" style="display:inline-block;" title="Manifest content"></span>manifest</a>';
+            $manifestUrl = $this->manifestUrl($thumb);
+            if($manifestUrl!==''){
+                $html[] = '<a href="'.$this->h($manifestUrl).'" target="_blank" rel="noopener">'
+                    .'<span class="external-link" style="display:inline-block;" title="Manifest content"></span>manifest</a>';
+            }
             $html[] = '</div><!-- CLOSE download_link -->';
             return implode('', $html);
         }
@@ -345,7 +348,7 @@ class RecordMediaRenderer
         $origName = (string)($thumb['orig_name'] ?? '');
 
         return in_array($sourceType, ['iiif', 'iiif_manifest'], true)
-            || (defined('ULF_IIIF') && strpos($origName, ULF_IIIF) === 0);
+            || (defined('ULF_IIIF') && $origName===ULF_IIIF);
     }
 
     private function isIiifMedia(array $thumb): bool
@@ -419,44 +422,89 @@ class RecordMediaRenderer
 
     private function miradorUrl(array $thumb, bool $asImage): string
     {
-        $recID = intval($thumb['manifest_rec_id'] ?? 0);
-        if($recID>0 || !empty($thumb['iiif_manifest_record']) || !empty($thumb['iiif_annotation_record'])){
-            $url = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.rawurlencode($this->system->dbname())
-                .'&recID='.rawurlencode((string)($recID>0 ? $recID : $this->recordID));
-            if(!empty($thumb['canvas_uri'])){
-                $url .= '&canvasUri='.rawurlencode((string)$thumb['canvas_uri']);
+        $base = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.rawurlencode($this->system->dbname());
+
+        if(!$asImage){
+
+            $manifestRecID = intval($thumb['manifest_rec_id'] ?? 0);
+
+            if(!empty($thumb['iiif_annotation_record']) && $manifestRecID<1){
+                // Annotation record without a managed/linked RT_IIIF_MANIFEST record.
+                //
+                // Do not open /api/{db}/iiif/manifest/{annotationRecID}; an
+                // annotation record is not a Manifest, and exporting it through
+                // record_output.php produces an empty Manifest.
+                //
+                // Instead open miradorViewer.php with id={annotationRecID}. The
+                // viewer keeps special annotation-record resolution: it resolves
+                // the parent overlay/Manifest context and uses canvasUri to select
+                // the Canvas targeted by DT_URL.
+                return $this->appendCanvasUri($base.'&id='.rawurlencode((string)$this->recordID), $thumb);
             }
-            return $url;
+
+            // Managed Manifest record or registered Manifest file.
+            //
+            // manifest={recID} opens a fully managed RT_IIIF_MANIFEST through the
+            // IIIF API. manifest={fileObfuscatedID} opens the registered Manifest
+            // file through the IIIF API; for v3 files without RT_IIIF_MANIFEST this
+            // is the Heurist annotation-overlay Manifest.
+            $manifestID = $manifestRecID>0 ? (string)$manifestRecID : (string)($thumb['nonce'] ?? '');
+            return $this->appendCanvasUri($base.'&manifest='.rawurlencode($manifestID), $thumb);
         }
 
-        return HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.rawurlencode($this->system->dbname())
-            .'&recID='.$this->recordID
-            .($asImage ? '&iiif_image=' : '&iiif=')
-            .rawurlencode((string)($thumb['nonce'] ?? ''));
+        // Ordinary image/audio/video/IIIF image file.
+        //
+        // Public miradorViewer.php no longer accepts iiif_image. Use id={file
+        // obfuscated ID}; the viewer translates non-numeric id into the internal
+        // record_output.php iiif_image parameter for dynamic Manifest generation.
+        return $base.'&id='.rawurlencode((string)($thumb['nonce'] ?? ''));
     }
 
     private function manifestUrl(array $thumb): string
     {
         $manifestRecID = intval($thumb['manifest_rec_id'] ?? 0);
-        if($manifestRecID>0 || !empty($thumb['iiif_manifest_record']) || !empty($thumb['iiif_annotation_record'])){
-            return HEURIST_BASE_URL.'api/'.rawurlencode($this->system->dbname()).'/iiif/manifest/'
-                .rawurlencode((string)($manifestRecID>0 ? $manifestRecID : $this->recordID));
+        $apiRoot = HEURIST_BASE_URL.'api/'.rawurlencode($this->system->dbname()).'/iiif/manifest/';
+
+        if($manifestRecID>0){
+            // Explicit managed Manifest record known from the renderer.
+            return $apiRoot.rawurlencode((string)$manifestRecID);
+        }
+
+        if(!empty($thumb['iiif_manifest_record'])){
+            // Current record is RT_IIIF_MANIFEST, but the thumbnail did not carry
+            // manifest_rec_id. The current record id is therefore the Manifest id.
+            return $apiRoot.rawurlencode((string)$this->recordID);
+        }
+
+        if(!empty($thumb['iiif_annotation_record'])){
+            // Annotation records are not Manifests. If the renderer has not supplied
+            // manifest_rec_id above, there is no safe Manifest-content URL to expose
+            // here. Mirador opening is still handled by miradorUrl() via id={recordID}.
+            return '';
         }
 
         // Registered IIIF Manifest files must go through the Heurist IIIF API.
         // The API decides whether the file is already managed by an RT_IIIF_MANIFEST
-        // record, or should be served as overlay/pass-through source Manifest.
+        // record, or should be served as v3 overlay / v2 pass-through source Manifest.
         if($this->isIiifManifest($thumb) && !empty($thumb['nonce'])){
-            return HEURIST_BASE_URL.'api/'.rawurlencode($this->system->dbname()).'/iiif/manifest/'
-                .rawurlencode((string)$thumb['nonce']);
+            return $apiRoot.rawurlencode((string)$thumb['nonce']);
         }
 
+        // Raw/original file content fallback.
         if(!empty($thumb['external_url'])){
             return (string)$thumb['external_url'];
         }
 
         return HEURIST_BASE_URL.'?db='.rawurlencode($this->system->dbname())
             .'&file='.rawurlencode((string)($thumb['nonce'] ?? ''));
+    }
+
+    private function appendCanvasUri(string $url, array $thumb): string
+    {
+        if(!empty($thumb['canvas_uri'])){
+            $url .= '&canvasUri='.rawurlencode((string)$thumb['canvas_uri']);
+        }
+        return $url;
     }
 
     private function openSeadragonUrl(array $thumb): string

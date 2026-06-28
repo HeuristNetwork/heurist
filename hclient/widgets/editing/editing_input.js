@@ -3472,8 +3472,8 @@ $.widget( "heurist.editing_input", {
                         let url =  window.hWin.HAPI4.baseURL
                         + 'hclient/widgets/viewers/miradorViewer.php?db=' 
                         +  window.hWin.HAPI4.database
-                        + '&recID=' + that.options.recID
-                        + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
+                        + '&' + (is_manifest?('manifest='+that.options.recID):('id='+obf_recID));
+                        //PRE 2026-06-28 + '&recID=' + that.options.recID + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
 
                         const show_mirador_in_popup = true;
                         if(show_mirador_in_popup){

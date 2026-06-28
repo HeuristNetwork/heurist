@@ -341,7 +341,7 @@ class DbAnnotations extends DbRecordTypeEntity
             return false;
         }
 
-        $manifestRecID = intval(@$fields['manifestRecID']);
+        $manifestRecID = intval($fields['manifestRecID'] ?? $fields['annotation']['sourceRecordId'] ?? 0);
         $manifestFileID = intval(@$fields['manifestFileID']);
         $canvasRecID = intval(@$fields['canvasRecID']);
         $canvasUrl = @$fields['canvasOriginalId'] ?: @$fields['canvas'] ?: @$parsed['canvas'];
@@ -349,6 +349,15 @@ class DbAnnotations extends DbRecordTypeEntity
 
         if($canvasUrl){
             $parsed['canvas'] = $canvasUrl;
+            
+            if($manifestRecID>0 && $canvasRecID===0){
+                $dbCanvas = new DbIiifCanvas($this->system);
+                $canvasRecIDs = $dbCanvas->canvasRecordsForCanonicalUrl((string)$canvasUrl);
+                if(count($canvasRecIDs)>0){
+                    $canvasRecID = $canvasRecIDs[0];
+                }
+            }
+            
         }
 
         $recordId = $this->findRecIDbyIiifIdentifier($parsed['id'], $manifestRecID);

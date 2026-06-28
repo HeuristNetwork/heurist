@@ -552,11 +552,13 @@ _renderSlideshow: function(title){
                             external_url =  this.options.baseURL 
                                      + 'hclient/widgets/viewers/miradorViewer.php?db='
                                      +  this.options.database
-                                     + '&'+file.filename.substring(1)+'='+file.obf_recID;  //either iiif or iiif_image
-                                     
+                                     + '&id='+'='+file.obf_recID;  //file.filename.substring(1) either iiif or iiif_image
+                            
+                            /*         
                             if(file.rec_ID>0){
                                 external_url =  external_url + '&recID='+file.rec_ID;    
                             }
+                            */
                         }                
                        
                         $('<a href="'+external_url+'" target="_blank">'
@@ -719,7 +721,8 @@ _renderSlideshow: function(title){
                     
                         if(filename && filename.indexOf('_iiif') === 0){ //manifest
 
-                            let param = 'manifest';
+                            let param = 'id='+obf_recID;
+                            /* PRE 2026-06-28 
                             if(filename == '_iiif_image'){
                                 
                                 if(rec_ID>0){
@@ -734,6 +737,7 @@ _renderSlideshow: function(title){
                                 //param = 'manifest='+obf_recID;    
                                 param = 'iiif='+obf_recID;    
                             }
+                            */
                             
                             
                             $alink
@@ -749,7 +753,7 @@ _renderSlideshow: function(title){
                                      + '&' + param;
                                      
                             if(rec_ID>0){
-                                external_url =  external_url + '&recID='+rec_ID;    
+                                // PRE 2026-06-28  external_url =  external_url + '&recID='+rec_ID;    
                             }
                                      
                             function __openMiradorViewer(e){
@@ -780,7 +784,7 @@ _renderSlideshow: function(title){
                                 + '&' + param;
 
                                 if(rec_ID>0){
-                                    url =  url + '&recID='+rec_ID;    
+                                    // PRE 2026-06-28 url =  url + '&recID='+rec_ID;    
                                 }
 
                                 if(window.hWin && window.hWin.HEURIST4){

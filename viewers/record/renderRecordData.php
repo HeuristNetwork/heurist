@@ -1661,9 +1661,13 @@ function recviewer_is_iiif_file($sourceType, $originalFileName): bool {
     $sourceType = (string)$sourceType;
     $originalFileName = (string)$originalFileName;
 
+    return $sourceType==='iiif' || (defined('ULF_IIIF') && $originalFileName===ULF_IIIF);
+    
+    /*
     return strpos($sourceType, 'iiif') === 0
         || (defined('ULF_IIIF') && strpos($originalFileName, ULF_IIIF) === 0)
         || (defined('ULF_IIIF_IMAGE') && $originalFileName === ULF_IIIF_IMAGE);
+    */
 }
 
 //

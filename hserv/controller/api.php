@@ -391,7 +391,9 @@ else
         //   /api/{db}/annotations/{manifestRecID}/pages?uri={canvasUri}
         //   /api/{db}/annotations/{manifestRecID}/{annotationId}
         if(isset($requestUri[5])){
-            $req_params['manifestRecID'] = intval($requestUri[4]);
+            if($method!=='search'){ //temporary remarked - to show all annotations per canvas
+                $req_params['manifestRecID'] = intval($requestUri[4]);    
+            }
             $req_params['recID'] = $requestUri[5];
         }elseif(isset($requestUri[4])){
             // A single path segment after /annotations is the annotation id,
