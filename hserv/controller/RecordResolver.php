@@ -444,7 +444,7 @@ final class RecordResolver
         return [$data, null];
     }
 
-    private static function currentHeuristBaseUrl(string $version = 'heurist'): string
+    private static function currentHeuristBaseUrl(string $defVersion = 'heurist'): string
     {
         $https = (
             (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -457,6 +457,16 @@ final class RecordResolver
         // Avoid localhost when SERVER_NAME is localhost but HTTP_HOST has the real vhost.
         // HTTP_HOST is preferred because Apache virtual hosting depends on it.
         $host = preg_replace('/[^A-Za-z0-9\.\-\:\[\]]/', '', $host);
+        
+        
+        $path = realpath(dirname(__FILE__).'/../../');
+        $path = trim(str_replace('\\', '/', $path),'/');
+        $parts = explode('/', $path);
+        $version = end($parts) ?? '';
+        if(!($version === 'heurist'
+                || preg_match('/^h7-[A-Za-z0-9_-]+$/', $version) === 1)){
+            $version = 'h7-alpha'; //$defVersion
+        }
 
         return ($https ? 'https://' : 'http://') . $host . '/' . trim($version, '/') . '/';
     }
