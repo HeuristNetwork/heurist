@@ -307,7 +307,7 @@
 #menu-files-index#Indexer les médias
 #menu-files-upload-hint#Téléchargement de plusieurs fichiers et/ou de fichiers volumineux dans l'espace de stockage ou les répertoires d'images, suppression et renommage des fichiers téléchargés
 #menu-files-index-hint#Indexe les fichiers médias sur le server et crée des enregistrements spécifiques pour chacin (reads and creates FieldHelper manifests)
-#Upload media from URLs#Télecharger depuis URLs
+#Upload files from URLs#Télecharger depuis URLs
 #Website#Site web
 #menu-cms-create#Créer
 #menu-cms-edit#Éditer

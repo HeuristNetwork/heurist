@@ -736,7 +736,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         showclear_button: true,
                         dtFields:{
                             dty_Type:"resource", rst_MaxValues:0, rst_MinValues:1,
-                            rst_DisplayName: 'Select media records:', rst_DisplayHelpText:'',
+                            rst_DisplayName: 'Select Digital Media records:', rst_DisplayHelpText:'',
                             rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_MEDIA_RECORD']],
                             rst_FieldConfig: {entity:'records', csv:false}
                         },
