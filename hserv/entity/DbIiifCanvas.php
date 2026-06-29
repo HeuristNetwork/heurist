@@ -29,6 +29,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
             'DT_NAME',
             'DT_SHORT_SUMMARY',
             'DT_FILE_RESOURCE',
+            'DT_IIIF_IMAGE_SERVICE',
             'DT_THUMBNAIL',
             'DT_IIIF_ID',
             'DT_ORIGINAL_IIIF_ID',
