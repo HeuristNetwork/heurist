@@ -391,6 +391,98 @@ class DbRecUploadedFiles extends DbEntityBase
     }
 
     /**
+     * Return true when JSON looks like a IIIF Image API info.json response.
+     * This intentionally requires dimensions and Image API evidence to avoid classifying
+     * arbitrary JSON-LD documents as IIIF images.
+     */
+    private function isIiifImageInfoJson(array $json): bool
+    {
+        if(!@$json['@context'] || !(@$json['@id'] || @$json['id'])){
+            return false;
+        }
+        if(empty($json['width']) || empty($json['height'])){
+            return false;
+        }
+
+        $context = $json['@context'];
+        $contextText = is_array($context) ? json_encode($context) : (string)$context;
+        $type = (string)($json['type'] ?? ($json['@type'] ?? ''));
+        $profile = $json['profile'] ?? null;
+        $profileText = is_array($profile) ? json_encode($profile) : (string)$profile;
+
+        return strpos($contextText, 'iiif.io/api/image') !== false
+            || stripos($type, 'ImageService') !== false
+            || strpos($profileText, 'iiif.io/api/image') !== false
+            || preg_match('/\blevel[012]\b/', $profileText);
+    }
+
+    /** Return service base URL from Image API info JSON, falling back to the source info.json URL. */
+    private function iiifImageServiceBaseUrl(array $json, ?string $sourceUrl=null): ?string
+    {
+        $id = $json['id'] ?? ($json['@id'] ?? null);
+        if(!is_string($id) || trim($id)===''){
+            $id = is_string($sourceUrl) ? $sourceUrl : '';
+        }
+        $id = trim($id);
+        if($id===''){
+            return null;
+        }
+        return preg_replace('~/info\.json$~', '', rtrim($id, '/'));
+    }
+
+    /** Canonical URL to store for an IIIF Image API resource. */
+    private function canonicalIiifImageInfoUrl(array $json, ?string $sourceUrl=null): ?string
+    {
+        $base = $this->iiifImageServiceBaseUrl($json, $sourceUrl);
+        return $base ? $base.'/info.json' : null;
+    }
+
+    /** Candidate info.json URL for a possible IIIF Image API service base URL. */
+    private function candidateIiifImageInfoUrl(string $url): ?string
+    {
+        $url = trim($url);
+        if($url==='' || !preg_match('/^https?:\/\//i', $url)){
+            return null;
+        }
+        if(substr($url, -9)==='info.json'){
+            return $url;
+        }
+
+        $path = (string)parse_url($url, PHP_URL_PATH);
+        if(preg_match('~/full/[^/]+/[^/]+/[^/]+$~', $path)){
+            return null; // already an Image API image request, not a service base
+        }
+        if(preg_match('/\.(jpe?g|png|gif|webp|tiff?|jp2|pdf|zip|xml|json)$/i', $path)){
+            return null;
+        }
+
+        return rtrim($url, '/').'/info.json';
+    }
+
+    /**
+     * Try to resolve a user-supplied URL to a canonical IIIF Image API info.json URL.
+     * Returns null when the URL is not an Image API service/info.json resource.
+     */
+    private function resolveCanonicalIiifImageInfoUrl(string $url): ?string
+    {
+        $infoUrl = $this->candidateIiifImageInfoUrl($url);
+        if(!$infoUrl){
+            return null;
+        }
+
+        $jsonContent = loadRemoteURLContent($infoUrl);
+        if(!$jsonContent){
+            return null;
+        }
+        $json = json_decode($jsonContent, true);
+        if(!is_array($json) || !$this->isIiifImageInfoJson($json)){
+            return null;
+        }
+
+        return $this->canonicalIiifImageInfoUrl($json, $infoUrl);
+    }
+
+    /**
      * Detects IIIF Presentation manifests and IIIF Image API info.json resources.
      * For local uploads, keeps ulf_OrigFileName unchanged and classifies by ulf_PreferredSource.
      * For old external registration, still writes the historical ULF_IIIF / ULF_IIIF_IMAGE markers.
@@ -403,10 +495,7 @@ class DbRecUploadedFiles extends DbEntityBase
         }
 
         $isManifest = (@$iiif_manifest['@type'] == 'sc:Manifest' || @$iiif_manifest['type'] == 'Manifest');
-        $isImageInfo = !$isManifest
-            && @$iiif_manifest['@context']
-            && (@$iiif_manifest['@id'] || @$iiif_manifest['id'])
-            && ($sourceUrl == null || substr($sourceUrl, -9) == 'info.json');
+        $isImageInfo = !$isManifest && $this->isIiifImageInfoJson($iiif_manifest);
 
         if(!$isManifest && !$isImageInfo){
             return false;
@@ -424,6 +513,14 @@ class DbRecUploadedFiles extends DbEntityBase
             }
             if($desc){
                 $this->records[$idx]['ulf_Description'] = $desc;
+            }
+        }
+
+        if($isImageInfo){
+            $canonicalInfoUrl = $this->canonicalIiifImageInfoUrl($iiif_manifest, $sourceUrl);
+            if($canonicalInfoUrl && preg_match('/^https?:\/\//i', $canonicalInfoUrl)){
+                $this->records[$idx]['ulf_ExternalFileReference'] = $canonicalInfoUrl;
+                $sourceUrl = $canonicalInfoUrl;
             }
         }
 
@@ -489,6 +586,18 @@ class DbRecUploadedFiles extends DbEntityBase
                         $jsonContent = loadRemoteURLContent($record['ulf_ExternalFileReference']);
                         if($jsonContent){
                             if($this->prepareIiifManifest($idx, $jsonContent, $record['ulf_ExternalFileReference'], false)){
+                                $mimeType = 'json';
+                            }
+                        }
+                    }
+
+                    // Also support registering a bare IIIF Image API service base URL.
+                    // If {base}/info.json is valid, store the canonical info.json URL.
+                    if(!@$this->records[$idx]['ulf_PreferredSource'] || $this->records[$idx]['ulf_PreferredSource']=='external'){
+                        $infoUrl = $this->candidateIiifImageInfoUrl((string)$record['ulf_ExternalFileReference']);
+                        if($infoUrl && $infoUrl !== $record['ulf_ExternalFileReference']){
+                            $jsonContent = loadRemoteURLContent($infoUrl);
+                            if($jsonContent && $this->prepareIiifManifest($idx, $jsonContent, $infoUrl, false)){
                                 $mimeType = 'json';
                             }
                         }
@@ -1685,6 +1794,13 @@ class DbRecUploadedFiles extends DbEntityBase
     public function registerURL($url, $tiledImageStack=false, $dtl_ID=0, $fields=null){
 
        $this->records = null; //reset
+
+       if(!$tiledImageStack){
+            $canonicalIiifInfoUrl = $this->resolveCanonicalIiifImageInfoUrl((string)$url);
+            if($canonicalIiifInfoUrl){
+                $url = $canonicalIiifInfoUrl;
+            }
+       }
 
        $ulf_ID = $this->findRegistrationByUrl($url);
        if($ulf_ID>0){
