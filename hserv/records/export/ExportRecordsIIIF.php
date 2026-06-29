@@ -132,7 +132,7 @@ class ExportRecordsIIIF extends ExportRecords {
     protected function _outputRecord($record){
 
         foreach($this->fileInfosForRecord($record) as $fileinfo){
-            if($this->dbManifest()->isIiifManifestFile($fileinfo)){
+            if($this->isRegisteredIiifManifestFile($fileinfo)){
                 $manifestRef = $this->dbManifest()->manifestReferenceForFile($fileinfo, $record);
                 if($manifestRef){
                     $this->v3_manifest_items[] = $manifestRef;
@@ -277,6 +277,22 @@ class ExportRecordsIIIF extends ExportRecords {
             return strpos($mimeType, 'soundcloud')===false;
         }
         return strpos($mimeType, 'image/')===0 || IiifMediaHelper::isIiifImageInfoFile($fileinfo);
+    }
+
+    /** Return true only for registered IIIF Presentation manifests, not IIIF Image API info.json resources. */
+    private function isRegisteredIiifManifestFile(array $fileinfo): bool
+    {
+        $source = (string)($fileinfo['ulf_PreferredSource'] ?? '');
+        if($source === 'iiif_image'){
+            return false;
+        }
+        if($source === 'iiif'){
+            return true;
+        }
+        return defined('ULF_IIIF')
+            && strpos((string)($fileinfo['ulf_OrigFileName'] ?? ''), ULF_IIIF) === 0
+            && (!defined('ULF_IIIF_IMAGE')
+                || strpos((string)($fileinfo['ulf_OrigFileName'] ?? ''), ULF_IIIF_IMAGE) !== 0);
     }
 
     private static function getAnnotationRectypeIds($system): array

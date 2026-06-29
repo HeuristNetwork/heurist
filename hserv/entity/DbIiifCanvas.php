@@ -29,10 +29,10 @@ class DbIiifCanvas extends DbRecordTypeEntity
             'DT_NAME',
             'DT_SHORT_SUMMARY',
             'DT_FILE_RESOURCE',
-            'DT_IIIF_IMAGE_SERVICE',
             'DT_THUMBNAIL',
             'DT_IIIF_ID',
             'DT_ORIGINAL_IIIF_ID',
+            'DT_IIIF_IMAGE_SERVICE',
             'DT_ANNOTATION_STATE'
         );
 
@@ -81,7 +81,11 @@ class DbIiifCanvas extends DbRecordTypeEntity
             $originalCanvasId = 'heurist-import-canvas-'.md5(json_encode($canvas));
         }
 
-        $mediaUrl = IiifCanvasJson::extractPrimaryPaintingBodyUrl($canvas);
+        $paintingInfo = IiifCanvasJson::extractPrimaryPaintingBodyInfo($canvas);
+        // Prefer registering the canonical IIIF Image API info.json when the painting body has a service.
+        // This lets DT_FILE_RESOURCE point at a reusable Heurist iiif_image media resource.
+        // Fall back to the original painted body URL for ordinary images or incomplete services.
+        $mediaUrl = $paintingInfo['service_info_url'] ?? ($paintingInfo['body_url'] ?? null);
         $mediaUlfID = $mediaUrl ? $this->registerExternalUrl($mediaUrl) : 0;
 
         $recordId = $this->findCanvasRecord($mediaUlfID, $originalCanvasId);
@@ -92,7 +96,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
         }
 
         $oldDetails = $details;
-        $this->fillDetailsFromCanvas($details, $canvas, $originalCanvasId, $mediaUlfID);
+        $this->fillDetailsFromCanvas($details, $canvas, $originalCanvasId, $mediaUlfID, $paintingInfo);
 
         if($recordId>0 && $oldDetails == $details){
             return array('recID'=>$recordId, 'is_retained'=>true);
@@ -202,6 +206,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
             'DT_THUMBNAIL',
             'DT_IIIF_ID',
             'DT_ORIGINAL_IIIF_ID',
+            'DT_IIIF_IMAGE_SERVICE',
             $this->detailId('DT_WIDTH', '3-1040'),
             $this->detailId('DT_HEIGHT', '3-1041'),
             $this->detailId('DT_DURATION', '2-66')
@@ -219,7 +224,8 @@ class DbIiifCanvas extends DbRecordTypeEntity
             'thumbnail_ulf_id' => $thumbnailUlfID,
             'thumbnail_fileinfo' => $thumbnailInfo,
             'canvas_url' => $this->canonicalCanvasUrlForFileID($ulfID),
-            'dimensions' => $this->dimensionValuesFromDetails($details)
+            'dimensions' => $this->dimensionValuesFromDetails($details),
+            'image_service' => $this->imageServiceFromDetails($details)
         );
     }
 
@@ -281,6 +287,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
                 'summary' => $this->summaryLanguageMapFromCanvasDetails($details),
                 'dimensions' => $this->dimensionValuesFromDetails($details),
                 'thumbnail_fileinfo' => is_array($thumbInfo) ? $thumbInfo : null,
+                'image_service' => $this->imageServiceFromDetails($details),
                 'annotation_page_url' => $annotationPageUrl,
                 'base_url' => $baseUrl
             )
@@ -336,11 +343,25 @@ class DbIiifCanvas extends DbRecordTypeEntity
                 'summary' => $summary,
                 'dimensions' => is_array($canvasMeta) ? ($canvasMeta['dimensions'] ?? array()) : array(),
                 'thumbnail_fileinfo' => $thumbInfo,
+                'image_service' => is_array($canvasMeta) ? ($canvasMeta['image_service'] ?? null) : null,
                 'annotation_page_url' => $annotationPageUrl,
                 'base_url' => $options['base_url'] ?? HEURIST_BASE_URL_PRO,
                 'body_fullres' => !empty($options['body_fullres'])
             )
         );
+    }
+
+    private function imageServiceFromDetails(array $details): ?array
+    {
+        $value = $this->getFirstDetailValue($details, 'DT_IIIF_IMAGE_SERVICE');
+        if(!$value){
+            return null;
+        }
+        if(is_array($value)){
+            return IiifCanvasJson::normalizeImageService($value);
+        }
+        $decoded = json_decode((string)$value, true);
+        return is_array($decoded) ? IiifCanvasJson::normalizeImageService($decoded) : null;
     }
 
     private function summaryLanguageMapFromCanvasDetails(array $details): ?array
@@ -443,7 +464,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
         return 0;
     }
 
-    private function fillDetailsFromCanvas(array &$details, array $canvas, string $originalCanvasId, int $mediaUlfID=0): void
+    private function fillDetailsFromCanvas(array &$details, array $canvas, string $originalCanvasId, int $mediaUlfID=0, ?array $paintingInfo=null): void
     {
         $labelValues = $this->normaliseLangValues(@$canvas['label']);
         if(empty($labelValues)){
@@ -465,6 +486,19 @@ class DbIiifCanvas extends DbRecordTypeEntity
             }
         }
         $this->setField($details, 'DT_ORIGINAL_IIIF_ID', $originalCanvasId);
+
+        $paintingInfo = is_array($paintingInfo) ? $paintingInfo : IiifCanvasJson::extractPrimaryPaintingBodyInfo($canvas);
+        $imageService = is_array($paintingInfo['service'] ?? null)
+            ? IiifCanvasJson::normalizeImageService($paintingInfo['service'])
+            : null;
+        if(is_array($imageService) && !empty($imageService['id'])){
+            $this->setField(
+                $details,
+                'DT_IIIF_IMAGE_SERVICE',
+                json_encode($imageService, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            );
+        }
+
         $this->setField($details, 'DT_ANNOTATION_STATE', $this->getTermId('TRM_ANNOTATION_STATE_IMPORTED'));
 
         if(isset($canvas['width'])){
