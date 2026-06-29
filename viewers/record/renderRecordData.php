@@ -1956,6 +1956,7 @@ function print_public_details(array $bib) {
                 $fileinfo = null;
 
                 //|| ($hide_images == 1 && $bd['dtl_RecID'] != $recordID)){ // skip linked media
+                //DISABLED $hide_images =  2;
                 if($hide_images == 2){ // skip all images
                     continue;
                 }
@@ -2595,13 +2596,45 @@ function print_linked_details(array $bib, int $link_cnt)
     global $system, $relRT, $ACCESS_CONDITION,
         $is_map_popup, $rectypesStructure, $already_linked_ids,$connectedRecIDs;
 
+    $mysqli = $system->getMysqli();
     $recordID = intval($bib['rec_ID']);
+        
+    $isIiifManifest = defined('RT_IIIF_MANIFEST')
+            && intval(@$bib['rec_RecTypeID']) === intval(RT_IIIF_MANIFEST);
+            
+    $skipAnnotationBacklinks = $isIiifManifest && defined('RT_IIIF_ANNOTATION');
+    
+    if($skipAnnotationBacklinks){
+        $annotationCount = mysql__select_value(
+            $mysqli,
+            'SELECT COUNT(*) FROM recLinks, Records '
+            .'WHERE rl_TargetID = '.$recordID
+            .' AND rl_RelationID IS NULL'
+            .' AND rl_SourceID = rec_ID'
+            .' AND rec_RecTypeID = '.intval(RT_IIIF_ANNOTATION)
+            .SQL_AND.$ACCESS_CONDITION
+        );
+
+        if($annotationCount > 0){
+            print_linked_details_header($bib);
+            print '<div class="detailRow fieldRow">';
+            print '<div class="detailType">Annotations</div>';
+            print '<div class="detail">'
+                .intval($annotationCount)
+                .' annotation records link to this manifest. '
+                .'<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname()
+                .'&w=all&q=linkedto:'.$recordID.'%20t:'.RT_IIIF_ANNOTATION
+                .'" onclick="top.location.href=this.href; return false;">Show as search results</a>';
+            print '</div></div>';
+            print DIV_E;
+        }
+        return $annotationCount;
+    }        
+        
     $ignored_ids = '';
     if(!empty($already_linked_ids[$recordID])){
         $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids[$recordID]).')';
     }
-
-    $mysqli = $system->getMysqli();
 
     $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
                 .'where rl_TargetID = '.$recordID
@@ -2635,7 +2668,7 @@ function print_linked_details(array $bib, int $link_cnt)
         print DIV_E;
 
         $already_linked_ids[$recordID][] = $row['rec_ID'];
-        if(!in_array($row['rec_ID'], $connectedRecIDs[$recordID])){
+        if(count($connectedRecIDs[$recordID]) < 1000 && !in_array($row['rec_ID'], $connectedRecIDs[$recordID])){
             $connectedRecIDs[$recordID][] = $row['rec_ID'];
         }
     }
