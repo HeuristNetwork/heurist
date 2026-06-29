@@ -50,7 +50,9 @@ class DbSysBugreport extends DbEntityBase
 
     /** @var string Email template for ticket/bug report notifications. Placeholders like __LINK__, __DESC__ are replaced. */
     private $reportEmail = <<<EMAIL
-    Your ticket has been added to, or updated in, the Heurist Job tracker database. 
+    Your ticket has been recorded in the Heurist Job tracker database. 
+    <br>Your feedback is very much appreciated, it helps us improve Heurist for everyone. 
+    <br>We review tickets rapidly, and fix issues as quickly as ressources permit.
     <br>
     <hr>
     <b>__TITLE__</b>
