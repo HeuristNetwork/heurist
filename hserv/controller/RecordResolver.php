@@ -42,6 +42,8 @@ namespace hserv\controller;
  */
 final class RecordResolver
 {
+    private static string $version;
+    
     /**
      * @param string $version  Version folder, e.g. "heurist" or "h7-alpha".
      * @param array  $params   Merged request params (query wins).
@@ -52,13 +54,11 @@ final class RecordResolver
     public static function resolve(string $version, array $params, string $serverRoot=null): ?array
     {
         
-        if(!defined('HEURIST_BASE_URL')){
-            define('HEURIST_BASE_URL', self::currentHeuristBaseUrl());
-        }
+        self:$version = $version;
+        
         if(!defined('HEURIST_INVALID_REQUEST')){
             define('HEURIST_INVALID_REQUEST', 'invalid');
         }
-        
         
         // ---- Definitions (structure export)
         foreach (['rty','dty','trm','rst'] as $entity) {
@@ -242,6 +242,10 @@ final class RecordResolver
             if(!empty($sysmsg['remote_url'])) $xml->addChild('remote_url', htmlspecialchars((string)$sysmsg['remote_url'], ENT_XML1));
             echo $xml->asXML();
         }else{
+
+            if(!defined('HEURIST_BASE_URL')){
+                define('HEURIST_BASE_URL', self::currentHeuristBaseUrl());
+            }
             
             header('Content-Type: text/html; charset=utf-8');
 
@@ -351,7 +355,7 @@ final class RecordResolver
             return [null, null];
         }
 
-        $remoteUrl = HEURIST_BASE_URL //self::currentHeuristBaseUrl()
+        $remoteUrl = self::currentHeuristBaseUrl()
             . 'hserv/controller/indexController.php?'
             . http_build_query([
                 'dbID' => $database_id,
@@ -444,7 +448,7 @@ final class RecordResolver
         return [$data, null];
     }
 
-    private static function currentHeuristBaseUrl(string $defVersion = 'heurist'): string
+    private static function currentHeuristBaseUrl(): string
     {
         $https = (
             (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -458,17 +462,18 @@ final class RecordResolver
         // HTTP_HOST is preferred because Apache virtual hosting depends on it.
         $host = preg_replace('/[^A-Za-z0-9\.\-\:\[\]]/', '', $host);
         
-        
+        /*        
         $path = realpath(dirname(__FILE__).'/../../');
         $path = trim(str_replace('\\', '/', $path),'/');
         $parts = explode('/', $path);
         $version = end($parts) ?? '';
         if(!($version === 'heurist'
                 || preg_match('/^h7-[A-Za-z0-9_-]+$/', $version) === 1)){
-            $version = 'h7-alpha'; //$defVersion
+            $version = 'h7-alpha';
         }
+        */
 
-        return ($https ? 'https://' : 'http://') . $host . '/' . trim($version, '/') . '/';
+        return ($https ? 'https://' : 'http://') . $host . '/' . trim(self::$version, '/') . '/';
     }
     
 }

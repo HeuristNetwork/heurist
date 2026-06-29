@@ -196,19 +196,27 @@ class USystem {
         $installDir = '/heurist/';
         $installDir_pro = '/heurist/';
 
-        $serverName = $_SERVER['SERVER_NAME'] ?? '';
-        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $wasExplicitInstallDir = false;
 
+        $path = realpath(dirname(__FILE__).'/../../');
+        $path = trim(str_replace('\\', '/', $path),'/');
+        $parts = explode('/', $path);
+        $version = end($parts) ?? '';
+        if(self::isHeuristCodeFolder($version)){
+           $installDir = '/'.$version.'/';
+           $wasExplicitInstallDir = true;
+        }
+        
+        
+        /*
+        $serverName = $_SERVER['SERVER_NAME'] ?? '';
         $is_own_domain = (
             strpos($serverName, '.huma-num.fr') > 0
             && $serverName !== 'heurist.huma-num.fr'
         );
         
-        $wasExplicitInstallDir = false;
-
         if (!$is_own_domain) {
 
-            /*
              * Detect installation folder from the first path segment only.
              *
              * Valid installation folders:
@@ -224,7 +232,7 @@ class USystem {
              *   /documentation/...
              *
              * In these cases the real installation folder is /heurist/.
-             */
+            $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
             $path = parse_url($scriptName, PHP_URL_PATH) ?: '';
             $path = trim($path, '/');
 
@@ -236,13 +244,13 @@ class USystem {
                 $wasExplicitInstallDir = true;
             }
         }
-
+        */
+        
         /*
          * Production installation is always /heurist/.
          * This is intentionally no longer calculated from $installDir.
          */
-        $installDir_pro = '/heurist/';
-
+        
         // Validate detected installation folder.
         if (!empty($_SERVER['DOCUMENT_ROOT'])) {
 
