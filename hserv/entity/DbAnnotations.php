@@ -466,7 +466,8 @@ class DbAnnotations extends DbRecordTypeEntity
 
     private function annotationApiUrl(int $recID): string
     {
-        return rtrim(HEURIST_BASE_URL, '/')
+        $baseUrl = rtrim(defined('HEURIST_BASE_URL_PRO') ? HEURIST_BASE_URL_PRO : HEURIST_BASE_URL, '/');
+        return $baseUrl
             .'/api/'.$this->system->dbname()
             .'/annotations/'.intval($recID);
     }

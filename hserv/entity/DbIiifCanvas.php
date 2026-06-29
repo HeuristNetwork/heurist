@@ -133,7 +133,8 @@ class DbIiifCanvas extends DbRecordTypeEntity
     /** Return canonical Heurist Canvas API URL for a file obfuscated id. */
     public function canonicalCanvasUrlForObfuscatedID(string $fileID): string
     {
-        return rtrim(HEURIST_BASE_URL, '/')
+        $baseUrl = rtrim(defined('HEURIST_BASE_URL_PRO') ? HEURIST_BASE_URL_PRO : HEURIST_BASE_URL, '/');
+        return $baseUrl
             .'/api/'.$this->system->dbname()
             .'/iiif/canvas/'.rawurlencode($fileID);
     }
@@ -267,6 +268,8 @@ class DbIiifCanvas extends DbRecordTypeEntity
                 $annotationPageUrl = $this->annotationPageUrl($canvasUrl, intval($options['manifest_rec_id'] ?? 0));
             }
         }
+        
+        $baseUrl = rtrim(defined('HEURIST_BASE_URL_PRO') ? HEURIST_BASE_URL_PRO : HEURIST_BASE_URL, '/');
 
         return IiifCanvasJson::composeCanvasFromFileInfo(
             $this->system,
@@ -278,7 +281,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
                 'dimensions' => $this->dimensionValuesFromDetails($details),
                 'thumbnail_fileinfo' => is_array($thumbInfo) ? $thumbInfo : null,
                 'annotation_page_url' => $annotationPageUrl,
-                'base_url' => HEURIST_BASE_URL
+                'base_url' => $baseUrl
             )
         );
     }
@@ -356,7 +359,8 @@ class DbIiifCanvas extends DbRecordTypeEntity
 
     private function annotationPageUrl(string $canvasUrl, int $manifestRecID=0): string
     {
-        $endpoint = rtrim(HEURIST_BASE_URL, '/').'/api/'.$this->system->dbname().'/annotations';
+        $baseUrl = rtrim(defined('HEURIST_BASE_URL_PRO') ? HEURIST_BASE_URL_PRO : HEURIST_BASE_URL, '/');
+        $endpoint = $baseUrl.'/api/'.$this->system->dbname().'/annotations';
         // Default to Canvas scope. Manifest scope can be enabled later by adding /{manifestRecID} here.
         return $endpoint.'/pages?uri='.rawurlencode($canvasUrl);
     }

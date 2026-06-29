@@ -277,7 +277,8 @@ class DbIiifManifest extends DbRecordTypeEntity
 
     private function manifestApiUrl(int $manifestRecID): string
     {
-        return rtrim(HEURIST_BASE_URL, '/')
+        $baseUrl = rtrim(defined('HEURIST_BASE_URL_PRO') ? HEURIST_BASE_URL_PRO : HEURIST_BASE_URL, '/');
+        return $baseUrl
             .'/api/'.$this->system->dbname()
             .'/iiif/manifest/'.intval($manifestRecID);
     }
@@ -398,7 +399,8 @@ class DbIiifManifest extends DbRecordTypeEntity
 
     private function annotationPageUrlForCanvas(string $canvasId): string
     {
-        return rtrim(HEURIST_BASE_URL, '/')
+        $baseUrl = rtrim(defined('HEURIST_BASE_URL_PRO') ? HEURIST_BASE_URL_PRO : HEURIST_BASE_URL, '/');
+        return $baseUrl
             .'/api/'.$this->system->dbname()
             .'/annotations/pages?uri='.rawurlencode($canvasId);
     }
