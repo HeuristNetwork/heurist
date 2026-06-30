@@ -1397,7 +1397,27 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             if($mimeExt=='application/pdf' || $mimeExt=='pdf'){
                 UImage::getPdfThumbnail($filename, $thumbnail_file);
                 
+            }else if(($file['ulf_PreferredSource'] ?? '')==='iiif'){ //locally uploaded manifest json
+
+                $jsonContent = file_get_contents($filename);
+                $jsonContent = json_decode($jsonContent, true);
+                if($jsonContent){
+                    UImage::getIiifThumbnail(null, $jsonContent, $thumbnail_file);                
+                }
+            
+                if($is_download){
+                    if(file_exists($thumbnail_file)){
+                        header('Content-type: image/png');
+                        echo file_get_contents($thumbnail_file);
+                    }else{
+                        redirectURL($placeholder);
+                    }
+                }
+                return;            
+            
             }else{
+                
+
 
                 //get real image type from exif
                 $mimeExt = UImage::getImageType($filename);
@@ -1439,14 +1459,15 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
                 $img = UImage::createFromString('tiled images stack');//from string
                 
-            }else if($file['ulf_PreferredSource']=='iiif_image' ||  strpos($file['ulf_OrigFileName'],ULF_IIIF)===0 
-                    || (strpos($file['ulf_ExternalFileReference'], '/iiif/')>0 && 
-                        strpos($file['ulf_ExternalFileReference'], '/0/default.jpg')>0) ){
+            }else if( strpos((string)($file['ulf_PreferredSource'] ?? ''),'iiif')===0 || 
+                      strpos((string)($file['ulf_OrigFileName'] ?? ''),ULF_IIIF)===0  ||
+                      (strpos($file['ulf_ExternalFileReference'], '/iiif/')>0 && 
+                       strpos($file['ulf_ExternalFileReference'], '/0/default.jpg')>0) ){
                 
                 if($file['ulf_MimeExt']!=='json'){
                     $thumbUrl = UImage::getIiifThumbnailFromUrl($file['ulf_ExternalFileReference'], $thumbnail_file);    
                 }else{
-                    $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);    
+                    $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);
                 }
                 
                 if($is_download){

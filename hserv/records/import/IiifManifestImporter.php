@@ -25,8 +25,7 @@ class IiifManifestImporter{
     private $manifestFileId;
     private $importLevel = 'managed';
     private $progressSessionId = 0;
-    private $createThumbnail = false;
-    private $createAnotations = true;
+
     private $dbAnno;
 
     public function __construct( $system, $params = null ) {
@@ -40,8 +39,6 @@ class IiifManifestImporter{
 
         $this->importLevel = @$params['import_level'] ?: 'managed';
         $this->progressSessionId = @$params['session'];
-        $this->createThumbnail = @$params['create_thumb']==1;
-        $this->createAnotations = false;//($this->importLevel==='managed' && @$params['create_annot']==1);
     }
 
     public function execute(){
@@ -144,7 +141,7 @@ class IiifManifestImporter{
                 $ctx['canvasRecID'] = intval($canvasImport['map'][$ctx['canvasOriginalId']]);
             }
 
-            $res = $writer->save($ctx, $this->createThumbnail);
+            $res = $writer->save($ctx, false);
             $result['processed']++;
 
             if($res===false){

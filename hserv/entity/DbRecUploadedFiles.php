@@ -524,12 +524,14 @@ class DbRecUploadedFiles extends DbEntityBase
             }
         }
 
+        /* Do not create thumbnails on registration. Thumbnails are always created lazily via fileDownload
         if($sourceUrl){
             $thumbUrl = UImage::getIiifThumbnail($sourceUrl, $iiif_manifest, null);
             if($thumbUrl){
                 $this->records[$idx]['ulf_TempThumbUrl'] = $thumbUrl;
             }
         }
+        */
 
         if($isManifest){
             if(!$keepOriginalName){
@@ -813,7 +815,9 @@ class DbRecUploadedFiles extends DbEntityBase
                 }
             }
 
-            if( (strpos((string)($record['ulf_PreferredSource'] ?? ''),'iiif')===0 || strpos((string)($record['ulf_OrigFileName'] ?? ''),ULF_IIIF)===0)
+            /* Do not create thumbnails on registration. Thumbnails are always created lazily via fileDownload
+            if( (strpos((string)($record['ulf_PreferredSource'] ?? ''),'iiif')===0 || 
+                 strpos((string)($record['ulf_OrigFileName'] ?? ''),ULF_IIIF)===0)
                 && @$record['ulf_TempThumbUrl']){
 
                     $thumb_name = $thumb_dir.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
@@ -822,7 +826,7 @@ class DbRecUploadedFiles extends DbEntityBase
                         UImage::createScaledImageFile($temp_path, $thumb_name);//create thumbnail for iiif image
                         unlink($temp_path);
                     }
-            }
+            }*/
             
             if(@$this->records[$rec_idx]['ulf_TempFile']){ //if there is file to be copied
 

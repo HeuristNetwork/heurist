@@ -29,7 +29,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
             'DT_NAME',
             'DT_SHORT_SUMMARY',
             'DT_FILE_RESOURCE',
-            'DT_THUMBNAIL',
+            'DT_THUMBNAIL',  //REDUNDANT
             'DT_IIIF_ID',
             'DT_ORIGINAL_IIIF_ID',
             'DT_IIIF_IMAGE_SERVICE',
@@ -101,7 +101,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
         if($recordId>0 && $oldDetails == $details){
             return array('recID'=>$recordId, 'is_retained'=>true);
         }
-
+        
         $res = $this->saveCanvasRecordDetails($recordId, $details, 0);
         if(!is_array($res) || @$res['status']!=HEURIST_OK || intval(@$res['data'])<1){
             if(is_array($res) && @$res['message']){
@@ -539,11 +539,6 @@ class DbIiifCanvas extends DbRecordTypeEntity
         }
 
         $fileEntity = new DbRecUploadedFiles($this->system);
-        $ulfID = $fileEntity->findRegistrationByUrl($url);
-        if($ulfID>0){
-            return intval($ulfID);
-        }
-
         $ulfID = $fileEntity->registerURL($url);
         return $ulfID>0 ? intval($ulfID) : 0;
     }
