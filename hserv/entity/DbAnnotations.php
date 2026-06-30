@@ -429,7 +429,7 @@ class DbAnnotations extends DbRecordTypeEntity
             return false;
         }
 
-                $parsed = $this->annotationJson()->parseIncomingAnnotation($fields);
+        $parsed = $this->annotationJson()->parseIncomingAnnotation($fields);
         if(!$parsed){
             $this->system->addError(HEURIST_INVALID_REQUEST,
                 $this->annotationJson()->getLastError() ?: 'Unsupported annotation format');
@@ -458,13 +458,14 @@ class DbAnnotations extends DbRecordTypeEntity
         
         $recordId = $this->findRecIDbyIiifIdentifier($parsed['id'], $manifestRecID);
         $details = $recordId>0 ? $this->loadRecordDetails($recordId) : array();
+        $isMiradorUpdate = ($recordId > 0 && strtolower((string)($fields['source'] ?? '')) === 'mirador');
 
         if($recordId>0 && !empty($fields['preserveLocal']) && $this->isProtectedFromReimport($details)){
             return array('response'=>array('status'=>HEURIST_OK, 'data'=>$recordId, 'is_preserved_local'=>true));
         }
 
         $oldJson = $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO');
-        $changed = $this->fillDetailsFromParsedAnnotation($details, $parsed, $manifestRecID, $manifestFileID, $canvasRecID);
+        $changed = $this->fillDetailsFromParsedAnnotation($details, $parsed, $manifestRecID, $manifestFileID, $canvasRecID, $isMiradorUpdate);
 
         if($ulf_ID>0){
             $changed = $this->appendUniqueField($details, 'DT_FILE_RESOURCE', $ulf_ID) || $changed;
@@ -662,26 +663,46 @@ class DbAnnotations extends DbRecordTypeEntity
         return $this->getTermId($selectorType);
     }
     
-    private function fillDetailsFromParsedAnnotation(&$details, $parsed, $manifestRecID=0, $manifestFileID=0, $canvasRecID=0){
+    private function fillDetailsFromParsedAnnotation(&$details, $parsed, $manifestRecID=0, $manifestFileID=0, $canvasRecID=0, bool $preserveMissingSelector=false){
         
         $changed = false;
         $text = trim(strip_tags((string)@$parsed['body_text']));
         $title = $text ? substr($text, 0, 50) : substr((string)$parsed['id'], 0, 50);
+
+        $termIds = $this->annotationTermIds();
+        $motivationId = $this->getTermId(@$parsed['motivation']) ?: ($termIds['motivation_commenting'] ?? null);
+        $stateId = $this->getTermId(@$parsed['state']) ?: ($termIds['state_imported'] ?? null);
+        $selectorTypeId = $this->annotationSelectorTermId(@$parsed['selector_type'], $termIds);
+        $selectorValue = @$parsed['selector_value'];
+
+        // Current Mirador annotation editor may omit target.selector when only
+        // annotation text was edited. Treat an omitted selector from Mirador as
+        // "area unchanged", not as "delete annotation area".
+        if($preserveMissingSelector && !$selectorTypeId && ($selectorValue===null || $selectorValue==='')){
+            $oldSelectorTypeId = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_TYPE'));
+            $oldSelectorValue = $this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_VALUE');
+            if($oldSelectorTypeId>0 && $oldSelectorValue!==null && $oldSelectorValue!==''){
+                $selectorTypeId = $oldSelectorTypeId;
+                $selectorValue = $oldSelectorValue;
+                $selectorType = $this->getTermCodeOrLabel($oldSelectorTypeId) ?: 'FragmentSelector';
+                $parsed['json'] = $this->annotationJson()->forceTargetSelectorJson(
+                    (string)@$parsed['json'],
+                    $selectorType,
+                    (string)$oldSelectorValue
+                );
+            }
+        }
 
         $changed = $this->setField($details, 'DT_NAME', $title) || $changed;
         $changed = $this->setField($details, 'DT_SHORT_SUMMARY', @$parsed['body_text']) || $changed;
         $changed = $this->setField($details, 'DT_ORIGINAL_IIIF_ID', @$parsed['id']) || $changed;
         $changed = $this->setField($details, 'DT_ANNOTATION_INFO', @$parsed['json']) || $changed;
         $changed = $this->setField($details, 'DT_URL', @$parsed['canvas']) || $changed;
-        $termIds = $this->annotationTermIds();
-        $motivationId = $this->getTermId(@$parsed['motivation']) ?: ($termIds['motivation_commenting'] ?? null);
-        $stateId = $this->getTermId(@$parsed['state']) ?: ($termIds['state_imported'] ?? null);
-        $selectorTypeId = $this->annotationSelectorTermId(@$parsed['selector_type'], $termIds);
 
         $changed = $this->setField($details, 'DT_ANNOTATION_MOTIVATION', $motivationId) || $changed;
         $changed = $this->setField($details, 'DT_LANGUAGE', $this->getLanguageTermId(@$parsed['language'])) || $changed;
         $changed = $this->setField($details, 'DT_ANNOTATION_SELECTOR_TYPE', $selectorTypeId) || $changed;
-        $changed = $this->setField($details, 'DT_ANNOTATION_SELECTOR_VALUE', @$parsed['selector_value']) || $changed;
+        $changed = $this->setField($details, 'DT_ANNOTATION_SELECTOR_VALUE', $selectorValue) || $changed;
         $changed = $this->setField($details, 'DT_ANNOTATION_STATE', $stateId) || $changed;
 
         if($manifestRecID>0){

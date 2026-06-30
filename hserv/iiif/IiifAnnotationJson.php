@@ -400,6 +400,67 @@ class IiifAnnotationJson
         return $anno;
     }
 
+
+    /**
+     * Ensure a Web Annotation JSON string contains the supplied target selector.
+     * Used for Mirador text-only updates where the editor omits selector even
+     * though the annotation area was not changed.
+     */
+    public function forceTargetSelectorJson(string $json, ?string $selectorType, ?string $selectorValue): string
+    {
+        if($selectorValue===null || $selectorValue===''){
+            return $json;
+        }
+
+        $anno = json_decode($json, true);
+        if(!is_array($anno)){
+            return $json;
+        }
+
+        $selectorType = $selectorType ? $this->stripPrefix($selectorType) : 'FragmentSelector';
+        if($selectorType==='fragment'){
+            $selectorType = 'FragmentSelector';
+        }elseif($selectorType==='svg'){
+            $selectorType = 'SvgSelector';
+        }
+
+        $selector = array('type'=>$selectorType, 'value'=>$selectorValue);
+        $anno = $this->forceTargetSelector($anno, $selector);
+        $encoded = json_encode($anno, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+        return is_string($encoded) ? $encoded : $json;
+    }
+
+    private function forceTargetSelector(array $anno, array $selector): array
+    {
+        if(empty($anno['target'])){
+            $anno['target'] = array('selector'=>$selector);
+            return $anno;
+        }
+
+        if(is_string($anno['target'])){
+            $parts = explode('#', $anno['target'], 2);
+            $anno['target'] = array('source'=>$parts[0], 'selector'=>$selector);
+            return $anno;
+        }
+
+        if(is_array($anno['target'])){
+            if(array_keys($anno['target'])===range(0, count($anno['target'])-1)){
+                foreach($anno['target'] as $idx=>$target){
+                    if(is_array($target)){
+                        $anno['target'][$idx]['selector'] = $selector;
+                    }elseif(is_string($target)){
+                        $parts = explode('#', $target, 2);
+                        $anno['target'][$idx] = array('source'=>$parts[0], 'selector'=>$selector);
+                    }
+                }
+                return $anno;
+            }
+            $anno['target']['selector'] = $selector;
+        }
+
+        return $anno;
+    }
+
     private function forceTargetSource(array $anno, string $canvasUrl): array
     {
         if($canvasUrl===''){
