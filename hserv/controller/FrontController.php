@@ -16,7 +16,7 @@
 namespace hserv\controller;
 
 use hserv\controller\ReportController;
-use hserv\records\import\ImportAnnotations;
+use hserv\records\import\IiifManifestImporter;
 use hserv\System;
 use hserv\utilities\USanitize;
 use hserv\structure\ConceptCode;
@@ -133,7 +133,7 @@ class FrontController
             
         }elseif(@$this->req_params['controller'] == 'ImportAnnotations'){
             
-            $controller = new ImportAnnotations($this->system, $this->req_params);
+            $controller = new IiifManifestImporter($this->system, $this->req_params);
             $result = $controller->execute();
             
             if (is_bool($result) && $result == false) {

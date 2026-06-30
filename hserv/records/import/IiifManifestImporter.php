@@ -1,6 +1,6 @@
 <?php
 /**
-* ImportAnnotations.php - Import IIIF annotations from a selected Manifest.
+* IiifManifestImporter.php - Import a registered IIIF Manifest into managed Heurist records.
 */
 namespace hserv\records\import;
 
@@ -8,8 +8,10 @@ use hserv\entity\DbAnnotations;
 use hserv\entity\DbIiifManifest;
 use hserv\entity\DbIiifCanvas;
 use hserv\entity\DbRecUploadedFiles;
+use hserv\records\import\IiifAnnotationImportWriter;
 
 require_once dirname(__FILE__).'/../edit/recordModify.php';
+require_once dirname(__FILE__).'/IiifAnnotationImportWriter.php';
 
 set_time_limit(0);
 
@@ -17,7 +19,7 @@ set_time_limit(0);
  * Imports IIIF annotations for one selected manifest file.
  * Supports import_level=overlay and import_level=managed.
  */
-class ImportAnnotations{
+class IiifManifestImporter{
 
     private $system;
     private $manifestFileId;
@@ -126,6 +128,13 @@ class ImportAnnotations{
         }
 
         $this->dbAnno = new DbAnnotations($this->system);
+        $writer = new IiifAnnotationImportWriter($this->system, $this->dbAnno);
+        if(!$writer->begin()){
+            return false;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $keep_autocommit = mysql__begin_transaction($mysqli);
 
         foreach($annotations as $idx=>$ctx){
             $ctx['manifestRecID'] = $manifestRecID;
@@ -135,7 +144,7 @@ class ImportAnnotations{
                 $ctx['canvasRecID'] = intval($canvasImport['map'][$ctx['canvasOriginalId']]);
             }
 
-            $res = $this->dbAnno->saveImportedAnnotation($ctx, $this->createThumbnail);
+            $res = $writer->save($ctx, $this->createThumbnail);
             $result['processed']++;
 
             if($res===false){
@@ -159,10 +168,17 @@ class ImportAnnotations{
                 }
             }
 
-            if($this->progressSession($result)){
+            if($this->progressSession($result,'total_annotations')){
+                $mysqli->rollback();
+                if($keep_autocommit===true) { $mysqli->autocommit(true); }
+                $writer->end();
                 return false;
             }
         }
+
+        $mysqli->commit();
+        if($keep_autocommit===true) { $mysqli->autocommit(true); }
+        $writer->end();
 
         if($this->progressSessionId){
             mysql__update_progress(null, $this->progressSessionId, false, 'REMOVE');
@@ -246,6 +262,16 @@ class ImportAnnotations{
         }
 
         $dbCanvas = new DbIiifCanvas($this->system);
+        $totalCanvases = count($canvasList);
+        $progress = array(
+            'processed' => 0,
+            'total_canvases' => $totalCanvases
+        );
+
+        if($this->progressSessionId){
+            mysql__update_progress(null, $this->progressSessionId, true, '0,'.$totalCanvases);
+        }
+
         foreach($canvasList as $idx=>$canvas){
             $canvasId = $this->getJsonId($canvas);
             $key = $canvasId ?: ('canvas #'.($idx+1));
@@ -258,22 +284,26 @@ class ImportAnnotations{
             }
 
             $recID = intval(@$res['recID']);
-            if($recID<1){
-                continue;
-            }
-            if($canvasId){
-                $out['map'][$canvasId] = $recID;
-            }
-            $out['ordered'][] = $recID;
+            if($recID>=1){
+                if($canvasId){
+                    $out['map'][$canvasId] = $recID;
+                }
+                $out['ordered'][] = $recID;
 
-            if(@$res['is_new']){
-                $out['added'][] = $recID;
-            }elseif(@$res['is_preserved_local']){
-                $out['preserved_local'][] = $recID;
-            }elseif(@$res['is_retained']){
-                $out['retained'][] = $recID;
-            }else{
-                $out['updated'][] = $recID;
+                if(@$res['is_new']){
+                    $out['added'][] = $recID;
+                }elseif(@$res['is_preserved_local']){
+                    $out['preserved_local'][] = $recID;
+                }elseif(@$res['is_retained']){
+                    $out['retained'][] = $recID;
+                }else{
+                    $out['updated'][] = $recID;
+                }
+            }
+
+            $progress['processed'] = $idx + 1;
+            if($this->progressSession($progress, 'total_canvases', 1)){
+                return false;
             }
         }
 
@@ -530,9 +560,9 @@ class ImportAnnotations{
         return null;
     }
 
-    private function progressSession($result){
-        if($this->progressSessionId && @$result['processed'] % 5 == 0){
-            $current_val = mysql__update_progress(null, $this->progressSessionId, true, $result['processed'].','.$result['total_annotations']);
+    private function progressSession($result, $totalId, $step=10){
+        if($this->progressSessionId && @$result['processed'] % $step == 0){
+            $current_val = mysql__update_progress(null, $this->progressSessionId, true, $result['processed'].','.$result[$totalId]);
             if($current_val && $current_val=='terminate'){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'Operation is terminated by user');
                 return true;

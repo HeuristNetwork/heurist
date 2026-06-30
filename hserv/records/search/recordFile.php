@@ -1439,14 +1439,14 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
                 $img = UImage::createFromString('tiled images stack');//from string
                 
-            }else if( ($file['ulf_MimeExt']=='json' &&  strpos($file['ulf_OrigFileName'],ULF_IIIF)===0) 
-                    || (strpos($file['ulf_ExternalFileReference'], '/iiif/')>00 && 
+            }else if($file['ulf_PreferredSource']=='iiif_image' ||  strpos($file['ulf_OrigFileName'],ULF_IIIF)===0 
+                    || (strpos($file['ulf_ExternalFileReference'], '/iiif/')>0 && 
                         strpos($file['ulf_ExternalFileReference'], '/0/default.jpg')>0) ){
                 
-                if(strpos($file['ulf_OrigFileName'],ULF_IIIF)===0){
-                    $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);
+                if($file['ulf_MimeExt']!=='json'){
+                    $thumbUrl = UImage::getIiifThumbnailFromUrl($file['ulf_ExternalFileReference'], $thumbnail_file);    
                 }else{
-                    $thumbUrl = UImage::getIiifThumbnailFromUrl($file['ulf_ExternalFileReference'], $thumbnail_file);
+                    $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);    
                 }
                 
                 if($is_download){

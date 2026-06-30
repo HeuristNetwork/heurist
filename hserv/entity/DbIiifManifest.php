@@ -37,7 +37,7 @@ class DbIiifManifest extends DbRecordTypeEntity
 
     /**
      * Create or update a managed RT_IIIF_MANIFEST record for a registered Manifest file.
-     * $manifestFile is the resolved file array from ImportAnnotations.
+     * $manifestFile is the resolved file array from IiifManifestImporter.
      *
      * DT_IIIF_ID is the canonical Heurist Manifest API URL.
      * DT_ORIGINAL_IIIF_ID stores the source Manifest id or source URL.

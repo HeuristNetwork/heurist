@@ -891,9 +891,7 @@ class UImage {
 
     public static function getIiifThumbnailFromUrl( $iiif_url, $thumbnail_file ){
 
-        $thumbUrl = UImage::composeThumbnailIIIF($iiif_url,
-                        @$iiif_manifest['width'],
-                        @$iiif_manifest['height']);
+        $thumbUrl = UImage::composeThumbnailIIIF($iiif_url,0,0);
 
         if($thumbUrl && $thumbnail_file){
             $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");

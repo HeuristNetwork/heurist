@@ -10,6 +10,9 @@ use hserv\entity\DbRecordTypeEntity;
 use hserv\entity\DbIiifCanvas;
 use hserv\utilities\USanitize;
 use hserv\iiif\IiifAnnotationJson;
+use hserv\records\import\IiifAnnotationImportWriter;
+
+require_once dirname(__FILE__).'/../records/import/IiifAnnotationImportWriter.php';
 
 /**
 * Class DbAnnotations
@@ -322,13 +325,54 @@ class DbAnnotations extends DbRecordTypeEntity
     /**
      * Saves an imported or Mirador-created IIIF annotation.
      * Returns recordSave-like response with flags: is_new, is_retained, is_preserved_local.
+     *
+     * Normal single saves still use the import writer for persistence, but without a
+     * long-lived import session. Bulk imports should use IiifAnnotationImportWriter
+     * directly so statements are prepared once and reused.
      */
     public function save($createThumbnail=true, $ulf_ID=0){
-        if(!$this->_validatePermission() || !$this->ensureDefinitionsReady($this->system->isAdmin())){
+        if(!$this->ensureImportReady()){ 
             return false;
         }
 
         $fields = @$this->data['fields'];
+        $prepared = $this->prepareImportedAnnotation($fields, $createThumbnail, intval($ulf_ID), false);
+        if($prepared===false){
+            return false;
+        }
+        if(!empty($prepared['response'])){
+            return $prepared['response'];
+        }
+
+        $writer = new IiifAnnotationImportWriter($this->system, $this);
+        if(!$writer->begin(false)){
+            return false;
+        }
+        $res = $writer->savePreparedAnnotation($prepared);
+        $writer->end();
+        return $res;
+    }
+
+    /** Check permission and IIIF annotation definitions. Called once by bulk import writer. */
+    public function ensureImportReady(): bool
+    {
+        return $this->_validatePermission() && $this->ensureDefinitionsReady($this->system->isAdmin());
+    }
+
+    /** Return the local RT_IIIF_ANNOTATION id for import writer. */
+    public function annotationRecordTypeId(): int
+    {
+        return intval($this->recordTypeId());
+    }
+
+    /**
+     * Parse an incoming IIIF/Web Annotation and map it to Heurist annotation details.
+     * This method does no database writes. The import writer owns direct SQL persistence.
+     *
+     * @return array|false Either ['record_id'=>int, 'details'=>array] or ['response'=>array]
+     */
+    public function prepareImportedAnnotation($fields, bool $createThumbnail=false, int $ulf_ID=0, bool $skipCanvasLookup=false)
+    {
         if(!is_array($fields)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Annotation fields are not defined');
             return false;
@@ -349,22 +393,23 @@ class DbAnnotations extends DbRecordTypeEntity
 
         if($canvasUrl){
             $parsed['canvas'] = $canvasUrl;
-            
-            if($manifestRecID>0 && $canvasRecID===0){
+
+            // During managed import IiifManifestImporter resolves canvasOriginalId
+            // through the canvas import map and passes fields['canvasRecID'].
+            if(!$skipCanvasLookup && $manifestRecID>0 && $canvasRecID===0){
                 $dbCanvas = new DbIiifCanvas($this->system);
                 $canvasRecIDs = $dbCanvas->canvasRecordsForCanonicalUrl((string)$canvasUrl);
                 if(count($canvasRecIDs)>0){
-                    $canvasRecID = $canvasRecIDs[0];
+                    $canvasRecID = intval($canvasRecIDs[0]);
                 }
             }
-            
         }
 
         $recordId = $this->findRecIDbyIiifIdentifier($parsed['id'], $manifestRecID);
-        $details = $this->loadRecordDetails($recordId);
+        $details = $recordId>0 ? $this->loadRecordDetails($recordId) : array();
 
         if($recordId>0 && !empty($fields['preserveLocal']) && $this->isProtectedFromReimport($details)){
-            return array('status'=>HEURIST_OK, 'data'=>$recordId, 'is_preserved_local'=>true);
+            return array('response'=>array('status'=>HEURIST_OK, 'data'=>$recordId, 'is_preserved_local'=>true));
         }
 
         $oldJson = $this->getFirstDetailValue($details, 'DT_ANNOTATION_INFO');
@@ -382,33 +427,14 @@ class DbAnnotations extends DbRecordTypeEntity
         }
 
         if(!$changed && $recordId>0 && $oldJson === $parsed['json']){
-            return array('status'=>HEURIST_OK, 'data'=>$recordId, 'is_retained'=>true);
+            return array('response'=>array('status'=>HEURIST_OK, 'data'=>$recordId, 'is_retained'=>true));
         }
 
-        $record = array(
-            'ID' => $recordId,
-            'RecTypeID' => $this->recordTypeId(),
-            'no_validation' => 'ignore_all',
-            // DbAnnotations handles state itself for import/Mirador saves.
-            // Prevent the generic recordSave() post-hook from marking this as a Heurist-editor edit.
-            'skip_iiif_annotation_state_update' => true,
+        return array(
+            'record_id' => intval($recordId),
             'details' => $details
         );
-
-        $out = recordSave($this->system, $record, false, true, 0);
-        if(is_array($out) && @$out['data']>0){
-            $savedId = intval($out['data']);
-            $this->updateSingleDetailDirect($savedId, 'DT_IIIF_ID', $this->annotationApiUrl($savedId));
-            $out['is_new'] = ($recordId == 0);
-        }
-        return $out;
     }
-
-    public function saveImportedAnnotation($annotationContext, $createThumbnail=false){
-        $this->setData(array('fields'=>$annotationContext));
-        return $this->save($createThumbnail, 0);
-    }
-
 
     /**
      * Called after a normal Heurist record-editor save of an RT_IIIF_ANNOTATION record.
