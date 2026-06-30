@@ -291,7 +291,45 @@ class IiifAnnotationJson
         if(empty($anno['type'])){
             $anno['type'] = 'Annotation';
         }
+
+        // Mirador's annotation plugin treats plain UUID ids more reliably than
+        // canonical HTTP ids or source ids containing fragments/encoded URLs.
+        // Keep the canonical Heurist/source ids in recDetails; expose a stable,
+        // recID-derived UUID only in the viewer JSON.
+        $anno['id'] = $this->annotationUuidFromData($data);
+        
         return $anno;
+    }
+
+    /**
+     * Return a stable UUID for Mirador's client-side annotation identity.
+     *
+     * For persisted Heurist annotations, encode rec_ID into the final 48 bits so
+     * the id is deterministic and potentially reversible by server-side adapter
+     * code if needed. For non-persisted data, fall back to a deterministic UUID
+     * generated from the canonical/source annotation identifier.
+     */
+    private function annotationUuidFromData(array $data): string
+    {
+        $recID = intval($data['recID'] ?? 0);
+        if($recID > 0){
+            $hex = substr(str_pad(dechex($recID), 12, '0', STR_PAD_LEFT), -12);
+            return '00000000-0000-4000-8000-'.$hex;
+        }
+
+        $seed = (string)($data['annotationApiUrl'] ?? ($data['id'] ?? json_encode($data)));
+        return $this->uuidFromString($seed);
+    }
+
+    /** Generate a deterministic UUID-shaped id from an arbitrary string. */
+    private function uuidFromString(string $seed): string
+    {
+        $hex = sha1($seed);
+        return substr($hex, 0, 8).'-'
+            .substr($hex, 8, 4).'-'
+            .'5'.substr($hex, 13, 3).'-'
+            .dechex((hexdec($hex[16]) & 0x3) | 0x8).substr($hex, 17, 3).'-'
+            .substr($hex, 20, 12);
     }
 
     private function createAnnotationJsonFromData(array $data): array
