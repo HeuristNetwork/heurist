@@ -86,7 +86,7 @@ class DbIiifCanvas extends DbRecordTypeEntity
         // This lets DT_FILE_RESOURCE point at a reusable Heurist iiif_image media resource.
         // Fall back to the original painted body URL for ordinary images or incomplete services.
         $mediaUrl = $paintingInfo['service_info_url'] ?? ($paintingInfo['body_url'] ?? null);
-        $mediaUlfID = $mediaUrl ? $this->registerExternalUrl($mediaUrl) : 0;
+        $mediaUlfID = $mediaUrl ? $this->registerExternalUrl($mediaUrl, $paintingInfo) : 0;
 
         $recordId = $this->findCanvasRecord($mediaUlfID, $originalCanvasId);
         $details = $recordId>0 ? $this->loadRecordDetails($recordId) : array();
@@ -531,15 +531,30 @@ class DbIiifCanvas extends DbRecordTypeEntity
     }
 
     /** Register an external media/thumbnail URL once and return its ulf_ID. */
-    private function registerExternalUrl(?string $url): int
+    private function registerExternalUrl(?string $url, ?array $paintingInfo=null): int
     {
         $url = trim((string)$url);
         if($url==='' || !preg_match('/^https?:\/\//i', $url)){
             return 0;
         }
 
+        $fields = null;
+        if(is_array($paintingInfo)
+            && !empty($paintingInfo['service_info_url'])
+            && $url === $paintingInfo['service_info_url'])
+        {
+            // During Canvas import the source Manifest already tells us this is a
+            // IIIF Image API info.json. Avoid DbRecUploadedFiles probing the remote
+            // info.json again for type detection; it is very expensive for large manifests.
+            $fields = array(
+                'ulf_PreferredSource' => 'iiif_image',
+                'ulf_OrigFileName' => ULF_IIIF_IMAGE,
+                'ulf_MimeExt' => 'json'
+            );
+        }
+
         $fileEntity = new DbRecUploadedFiles($this->system);
-        $ulfID = $fileEntity->registerURL($url);
+        $ulfID = $fileEntity->registerURL($url, false, 0, $fields);
         return $ulfID>0 ? intval($ulfID) : 0;
     }
 

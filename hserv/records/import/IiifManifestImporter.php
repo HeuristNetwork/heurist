@@ -95,6 +95,11 @@ class IiifManifestImporter{
             }
         }
 
+        if($this->progressSessionId){
+            mysql__update_progress(null, $this->progressSessionId, true, 'Extract Annotations');
+        }
+        
+        
         $annotations = $this->extractAnnotations($manifest, $manifestFile['source_url']);
 
         $result = array(

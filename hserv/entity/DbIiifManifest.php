@@ -150,22 +150,38 @@ class DbIiifManifest extends DbRecordTypeEntity
             return false;
         }
 
+        $manifestRecID = intval($manifestRecID);
+        $dtyID = intval(DT_IIIF_CANVAS);
         $canvasRecIDs = array_values(array_filter(array_map('intval', $canvasRecIDs), function($id){ return $id>0; }));
-        $details = $this->loadRecordDetails($manifestRecID);
+
+        $mysqli = $this->system->getMysqli();
+
+        if(!$mysqli->query('DELETE FROM recDetails WHERE dtl_RecID='.$manifestRecID.' AND dtl_DetailTypeID='.$dtyID)){
+            return $this->system->addError(HEURIST_DB_ERROR, 'Cannot delete old Manifest Canvas references', $mysqli->error) ? false : false;
+        }
 
         if(!empty($canvasRecIDs)){
-            $this->setField($details, 'DT_IIIF_CANVAS', $canvasRecIDs);
-        }else{
-            $this->removeField($details, 'DT_IIIF_CANVAS');
+            $values = array();
+            foreach($canvasRecIDs as $canvasRecID){
+                // DT_IIIF_CANVAS is a resource pointer: the target record ID is stored in dtl_Value.
+                // Values are integers, so no string escaping is required here.
+                $values[] = '('.$manifestRecID.','.$dtyID.',"'.intval($canvasRecID).'",1)';
+            }
+
+            $query = 'INSERT INTO recDetails '
+                .'(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) VALUES '
+                .implode(',', $values);
+
+            if(!$mysqli->query($query)){
+                return $this->system->addError(HEURIST_DB_ERROR, 'Cannot insert Manifest Canvas references', $mysqli->error) ? false : false;
+            }
         }
 
-        $res = $this->saveRecordDetails($manifestRecID, $details, 0);
-        if(!is_array($res) || @$res['status']!=HEURIST_OK || intval(@$res['data'])<1){
-            if(is_array($res) && @$res['message']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, $res['message']);
-            }
-            return false;
+        $modified = $mysqli->real_escape_string(date(DATE_8601));
+        if(!$mysqli->query('UPDATE Records SET rec_Modified="'.$modified.'" WHERE rec_ID='.$manifestRecID)){
+            return $this->system->addError(HEURIST_DB_ERROR, 'Cannot update Manifest modified date', $mysqli->error) ? false : false;
         }
+
         return true;
     }
 

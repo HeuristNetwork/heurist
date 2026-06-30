@@ -39,15 +39,6 @@ class IiifAnnotationImportWriter
     /** @var \mysqli_stmt|null */
     private $deleteDetailsStmt = null;
 
-    /** @var \mysqli_stmt|null */
-    private $insertDetailValueStmt = null;
-
-    /** @var \mysqli_stmt|null */
-    private $insertDetailFileStmt = null;
-
-    /** @var \mysqli_stmt|null */
-    private $deleteOneDetailStmt = null;
-
     public function __construct($system, DbAnnotations $dbAnno)
     {
         $this->system = $system;
@@ -83,10 +74,7 @@ class IiifAnnotationImportWriter
         foreach(array(
             'insertRecordStmt',
             'updateRecordStmt',
-            'deleteDetailsStmt',
-            'insertDetailValueStmt',
-            'insertDetailFileStmt',
-            'deleteOneDetailStmt'
+            'deleteDetailsStmt'
         ) as $prop){
             if($this->$prop){
                 $this->$prop->close();
@@ -183,11 +171,9 @@ class IiifAnnotationImportWriter
             }
         }
 
-        if(!$this->insertDetails($recordId, $details)){
-            return false;
-        }
+        $this->setIiifIdDetail($recordId, $details);
 
-        if(!$this->assignIiifId($recordId)){
+        if(!$this->insertDetailsRaw($recordId, $details)){
             return false;
         }
 
@@ -230,40 +216,35 @@ class IiifAnnotationImportWriter
             return false;
         }
 
-        $this->insertDetailValueStmt = $mysqli->prepare(
-            'INSERT INTO recDetails '
-            .'(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID) '
-            .'VALUES (?, ?, ?, 1, NULL)'
-        );
-        if(!$this->insertDetailValueStmt){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot prepare annotation detail insert', $mysqli->error);
-            return false;
-        }
-
-        $this->insertDetailFileStmt = $mysqli->prepare(
-            'INSERT INTO recDetails '
-            .'(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID) '
-            .'VALUES (?, ?, NULL, 1, ?)'
-        );
-        if(!$this->insertDetailFileStmt){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot prepare annotation file detail insert', $mysqli->error);
-            return false;
-        }
-
-        $this->deleteOneDetailStmt = $mysqli->prepare(
-            'DELETE FROM recDetails WHERE dtl_RecID=? AND dtl_DetailTypeID=?'
-        );
-        if(!$this->deleteOneDetailStmt){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot prepare annotation detail replacement', $mysqli->error);
-            return false;
-        }
-
         return true;
     }
 
-    private function insertDetails(int $recordId, array $details): bool
+    /** Add canonical Heurist Annotation API URL before inserting details. */
+    private function setIiifIdDetail(int $recordId, array &$details): void
     {
+        if($recordId < 1 || !defined('DT_IIIF_ID')){
+            return;
+        }
+        $details[intval(DT_IIIF_ID)] = array($this->annotationApiUrl($recordId));
+    }
+
+    /**
+     * Insert all details for one annotation with a single multi-row INSERT.
+     *
+     * This is import-only. Integer ids are cast before interpolation; text values
+     * are escaped with mysqli::real_escape_string(). File fields use
+     * dtl_UploadedFileID and non-file fields use dtl_Value.
+     */
+    private function insertDetailsRaw(int $recordId, array $details): bool
+    {
+        $recordId = intval($recordId);
+        if($recordId < 1){
+            return false;
+        }
+
+        $mysqli = $this->system->getMysqli();
         $types = $this->detailTypes();
+        $rows = array();
 
         foreach($details as $dtyID => $values){
             $dtyID = intval($dtyID);
@@ -288,46 +269,37 @@ class IiifAnnotationImportWriter
                     if($uploadedFileId < 1){
                         continue;
                     }
-                    $this->insertDetailFileStmt->bind_param('iii', $recordId, $dtyID, $uploadedFileId);
-                    if(!$this->insertDetailFileStmt->execute()){
-                        $this->system->addError(HEURIST_DB_ERROR, 'Cannot insert annotation file detail', $this->insertDetailFileStmt->error ?: $this->system->getMysqli()->error);
-                        return false;
-                    }
+                    $rows[] = '('
+                        .$recordId.','
+                        .$dtyID.','
+                        .'NULL,1,'
+                        .$uploadedFileId
+                        .')';
                 }else{
                     $dtlValue = trim((string)$value);
                     if($dtlValue === ''){
                         continue;
                     }
-                    $this->insertDetailValueStmt->bind_param('iis', $recordId, $dtyID, $dtlValue);
-                    if(!$this->insertDetailValueStmt->execute()){
-                        $this->system->addError(HEURIST_DB_ERROR, 'Cannot insert annotation detail', $this->insertDetailValueStmt->error ?: $this->system->getMysqli()->error);
-                        return false;
-                    }
+                    $rows[] = '('
+                        .$recordId.','
+                        .$dtyID.','
+                        .'"'.$mysqli->real_escape_string($dtlValue).'",'
+                        .'1,NULL'
+                        .')';
                 }
             }
         }
 
-        return true;
-    }
-
-    /** Replace DT_IIIF_ID with canonical Heurist Annotation API URL after rec_ID exists. */
-    private function assignIiifId(int $recordId): bool
-    {
-        if($recordId < 1 || !defined('DT_IIIF_ID')){
+        if(empty($rows)){
             return true;
         }
 
-        $dtyID = intval(DT_IIIF_ID);
-        $this->deleteOneDetailStmt->bind_param('ii', $recordId, $dtyID);
-        if(!$this->deleteOneDetailStmt->execute()){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot replace annotation IIIF id', $this->deleteOneDetailStmt->error ?: $this->system->getMysqli()->error);
-            return false;
-        }
+        $query = 'INSERT INTO recDetails '
+            .'(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID) VALUES '
+            .implode(',', $rows);
 
-        $iiifId = $this->annotationApiUrl($recordId);
-        $this->insertDetailValueStmt->bind_param('iis', $recordId, $dtyID, $iiifId);
-        if(!$this->insertDetailValueStmt->execute()){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot insert annotation IIIF id', $this->insertDetailValueStmt->error ?: $this->system->getMysqli()->error);
+        if(!$mysqli->query($query)){
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot insert annotation details', $mysqli->error);
             return false;
         }
 

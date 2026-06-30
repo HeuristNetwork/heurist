@@ -1799,7 +1799,10 @@ class DbRecUploadedFiles extends DbEntityBase
 
        $this->records = null; //reset
 
-       if(!$tiledImageStack){
+       $knownIiifImageInfo = is_array($fields ?? null)
+           && (($fields['ulf_PreferredSource'] ?? '') === 'iiif_image');
+
+       if(!$tiledImageStack && !$knownIiifImageInfo){
             $canonicalIiifInfoUrl = $this->resolveCanonicalIiifImageInfoUrl((string)$url);
             if($canonicalIiifInfoUrl){
                 $url = $canonicalIiifInfoUrl;
@@ -1822,8 +1825,12 @@ class DbRecUploadedFiles extends DbEntityBase
        }
 
        if($fields==null) {$fields = array();}
-       $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
-       $fields['ulf_OrigFileName']    = $tiledImageStack?ULF_TILED_IMAGE.'@':ULF_REMOTE;//or _iiif
+       if(!array_key_exists('ulf_PreferredSource', $fields) || $fields['ulf_PreferredSource']===''){
+            $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
+       }
+       if(!array_key_exists('ulf_OrigFileName', $fields) || $fields['ulf_OrigFileName']===''){
+            $fields['ulf_OrigFileName'] = $tiledImageStack?ULF_TILED_IMAGE.'@':ULF_REMOTE;//or _iiif
+       }
        $fields['ulf_ExternalFileReference'] = $url;
 
         if(!@$fields['ulf_MimeExt']){
