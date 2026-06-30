@@ -462,10 +462,9 @@ class DbSysBugreport extends DbEntityBase
                 }
 
                 // Compose HTML email by replacing placeholders in the $reportEmail template.
-                // TODO: rationalise: the same code is repeated lower down using $truncateDesc
                 $truncatedDesc = mb_substr($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 250) . '...';
                 $res = str_replace(['__LINK__', '__TITLE__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
-                    [$report_link, $report_title, $truncatedDesc, $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
+                    [$report_link, $record['bug_Title'], $truncatedDesc, $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
                     $this->reportEmail);
 
             }elseif(\is_array($res)){
@@ -621,13 +620,13 @@ class DbSysBugreport extends DbEntityBase
         // Post-save: force AddedBy (extern) and Owner group to a known admin group (hardcoded as 2).
         mysql__insertupdate($mysqli, 'Records', 'rec', ['rec_ID' => $res, 'rec_AddedByUGrpID' => $uid, 'rec_OwnerUGrpID' => self::DB_ADMIN_ID]);
 
-        $title = $record['details'][self::DTY_FIELD_MAPPING['bug_Title']];
-        recordUpdateTitle($report_system, $res, $record['RecTypeID'], "Heurist ticket: {$title}");
+        $bugTitle = $record['details'][self::DTY_FIELD_MAPPING['bug_Title']];
+        recordUpdateTitle($report_system, $res, $record['RecTypeID'], "Heurist ticket: {$bugTitle}");
 
         // If we have a reporter email (detail 956), send confirmation email (To: reporter, BCC: tracker admins).
         if(!empty($record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Email']])){
 
-            $title = "H#$res: {$title}";
+            $title = "H#$res: {$bugTitle}";
 
             $report_link = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$res";
             $report_edit = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$res";
@@ -644,10 +643,9 @@ class DbSysBugreport extends DbEntityBase
                 $memberString = '';
             }
 
-            // ToDo: rationalise. the same code is repeated earlier in this file using $truncatedDesc
             $truncateDesc = mb_substr($record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 250) . '...';
             $msg = str_replace(['__LINK__', '__TITLE__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
-             [$report_link, $report_title, $truncateDesc, $user_name, $user_email, $db_link, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
+             [$report_link, $bugTitle, $truncateDesc, $user_name, $user_email, $db_link, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
               $this->reportEmail);
 
             $user_query = "SELECT ugr_eMail FROM sysUsrGrpLinks LEFT JOIN sysUGrps ON ugr_ID = ugl_UserID WHERE ugl_GroupID = 1 AND ugl_Role='admin'";
