@@ -28,6 +28,7 @@ use hserv\session\CaptchaService;
 use hserv\session\UserSession;
 use hserv\auth\PasswordResetService;
 use hserv\auth\AuthSessionService;
+use hserv\utilities\FairScore;
 
 require_once dirname(__FILE__) . '/structure/dbsUsersGroups.php';
 require_once dirname(__FILE__) . '/structure/import/dbsImport.php';
@@ -556,6 +557,8 @@ class System
 
                 if (!isset($dtyIDs[$row['dbID']])) {
                     $dtyIDs[$row['dbID']] = [];
+                } elseif (isset($dtyIDs[$row['dbID']][$row['id']])) {
+                    continue; //avoid duplication
                 }
                 $dtyIDs[$row['dbID']][$row['id']] = $row['localID'];
             }
@@ -628,6 +631,33 @@ class System
 
         }
     }
+
+    /**
+     * Returns a small summary of this database's FAIR score, for display in the client top bar
+     * and the periodic FAIRness popup. Reads the FAIRscore.txt file (written nightly by
+     * admin/describe/assessFAIR.php) if available; falls back to FairScore::DEFAULT_SCORE
+     * (the baseline credit Heurist itself provides) if it hasn't been calculated yet.
+     *
+     * Also reports whether registration metadata (DBMetadata.xml, synced nightly from the
+     * Heurist Reference Index by admin/utilities/downloadDBMetadata.php) is available locally.
+     *
+     * @return array{TOTAL: float, F: float, A: float, I: float, R: float, has_synced_metadata: bool}
+     */
+    private function getFairScoreSummary()
+    {
+
+        try {
+            $filestore_dir = $this->getFileStoreRootFolder() . $this->dbname() . '/';
+        } catch (\Throwable $e) {
+            return FairScore::DEFAULT_SCORE;
+        }
+
+        $score = FairScore::readScore($filestore_dir);
+        $score['has_synced_metadata'] = file_exists($filestore_dir . 'settings/DBMetadata.xml');
+
+        return $score;
+    }
+
 
     /**
     *  Returns three values array for each system folder
@@ -1433,6 +1463,7 @@ EXP;
                     'pwd_ServerFunctions' => (strlen($passwordForServerFunctions ?? '') > 6),
                     'api_Translator' => (!empty($accessToken_DeepLAPI)),
                     'use_redirect' => $useRewriteRulesForRecordLink,
+                    'fair_score' => $this->getFairScoreSummary(),
                 ],
             ];
 
@@ -1961,7 +1992,7 @@ EXP;
             $is_NOT_allowed = false;
         } else {
             // Invalid password
-            $this->addError(HEURIST_ACTION_BLOCKED, 'Password is incorrect');
+            $this->addError(HEURIST_ACTION_BLOCKED, 'Invalid password. If this password is required to access a specific function, it is NOT your login password, it is a special password generally only available to the people who manage the server.');
         }
 
         return $is_NOT_allowed;

@@ -132,8 +132,13 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
                 if(!window.hWin.HEURIST4.util.isempty(response)){
                     let record = response.getFirstRecord();
-                    that._$('.dbDescription').text(record[17]); // Assuming field 17 is description
-                    that._$('#dbTitle').val(record[17]).trigger('keyup');
+                    let description = response.fld(record, 'sys_dbDescription');
+                    // cache Display name and Rights statement - sent alongside the long
+                    // description when registering, see Ian's metadata field mapping
+                    that._sysDbDisplayName = response.fld(record, 'sys_dbName');
+                    that._sysDbRights = response.fld(record, 'sys_dbRights');
+                    that._$('.dbDescription').text(description);
+                    that._$('#dbTitle').val(description).trigger('keyup');
                 }});
 
             if(window.hWin.HAPI4.sysinfo['db_registeredid']>0){
@@ -295,6 +300,12 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             }
            request = {dbReg: window.hWin.HAPI4.database,
                       dbTitle: description,
+                      // Heurist_Reference_Index field mapping (per Ian Johnson's metadata strategy):
+                      //  Display name (Design > Properties)           -> Database title (concept 2-1)
+                      //  Database rights statement (Design > Properties) -> concept 2-311
+                      //  This long description (>=40 chars, above)    -> concept 2-12
+                      dbDisplayName: this._sysDbDisplayName || '',
+                      dbRights: this._sysDbRights || '',
                       dbVer: window.hWin.HAPI4.sysinfo['db_version'],
                       serverURL: this._$('#serverURL').val() };
            if(window.hWin.HAPI4.user_id()!=2){ // Not superadmin

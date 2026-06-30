@@ -37,6 +37,18 @@
 -- until the software is updated to expect them
 
 
+-- Source version: 1.3.0
+-- Target version: 1.4.0
+-- Safety rating: SAFE
+-- Description: Add sysIdentification.sys_dbDOI - database-level DOI, used by the FAIR score
+--              Findability calculation (assessFAIR.php) to award a bonus when the database owner
+--              has obtained a persistent identifier for the database as a whole.
+
+    ALTER TABLE sysIdentification
+    ADD sys_dbDOI varchar(250) default NULL
+    COMMENT 'Persistent identifier (DOI) obtained for this database as a whole, if any. Used in FAIR score Findability calculation';
+
+
 -- Source version: 1.3.0 
 -- Target version: 1.4.0
 -- Safety rating: SAFE
