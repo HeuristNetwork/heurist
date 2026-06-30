@@ -222,8 +222,7 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
             controller: 'ImportAnnotations',
             session: window.hWin.HEURIST4.msg.showProgress(),
             manifest_file_id: manifestFileId,
-            import_level: this._$('input[name="import_level"]:checked').val() || 'managed',
-            create_thumb: this._$('#chb_create_thumbs').is(':checked')?1:0
+            import_level: this._$('input[name="import_level"]:checked').val() || 'managed'
         };
 
         let url = window.hWin.HAPI4.baseURL;
