@@ -24,6 +24,9 @@ class DbAnnotations extends DbRecordTypeEntity
     /** @var IiifAnnotationJson|null */
     private $annotationJson = null;
 
+    /** @var array|null Cached fixed annotation term IDs used by the import hot path. */
+    private $annotationTermIds = null;
+
     private function annotationJson(): IiifAnnotationJson
     {
         if($this->annotationJson === null){
@@ -310,16 +313,34 @@ class DbAnnotations extends DbRecordTypeEntity
     private function isProtectedFromReimport(array $details): bool
     {
         $state = intval($this->getFirstDetailValue($details, 'DT_ANNOTATION_STATE'));
-
-        $protectedStates = array_filter([
-            $this->getTermId('TRM_ANNOTATION_STATE_MIRADOR'),
-            $this->getTermId('TRM_ANNOTATION_STATE_HEURIST'),
-            $this->getTermId('TRM_ANNOTATION_STATE_MODIFIED'),
-            $this->getTermId('TRM_ANNOTATION_STATE_OBSOLETE'),
-            $this->getTermId('TRM_ANNOTATION_STATE_REMOVED')
-        ]);
+        $termIds = $this->annotationTermIds();
+        $protectedStates = $termIds['protected_states'] ?? array();
 
         return $state > 0 && in_array($state, $protectedStates, true);
+    }
+
+    /** Resolve and cache fixed annotation term IDs once per entity instance. */
+    private function annotationTermIds(): array
+    {
+        if(is_array($this->annotationTermIds)){
+            return $this->annotationTermIds;
+        }
+
+        $this->annotationTermIds = array(
+            'state_imported' => $this->getTermId('TRM_ANNOTATION_STATE_IMPORTED'),
+            'motivation_commenting' => $this->getTermId('TRM_ANNOTATION_MOTIVATION_COMMENTING'),
+            'selector_fragment' => $this->getTermId('TRM_SELECTOR_FRAGMENT'),
+            'selector_svg' => $this->getTermId('TRM_SELECTOR_SVG'),
+            'protected_states' => array_values(array_filter(array(
+                $this->getTermId('TRM_ANNOTATION_STATE_MIRADOR'),
+                $this->getTermId('TRM_ANNOTATION_STATE_HEURIST'),
+                $this->getTermId('TRM_ANNOTATION_STATE_MODIFIED'),
+                $this->getTermId('TRM_ANNOTATION_STATE_OBSOLETE'),
+                $this->getTermId('TRM_ANNOTATION_STATE_REMOVED')
+            )))
+        );
+
+        return $this->annotationTermIds;
     }
 
     /**
@@ -404,7 +425,7 @@ class DbAnnotations extends DbRecordTypeEntity
                 }
             }
         }
-
+        
         $recordId = $this->findRecIDbyIiifIdentifier($parsed['id'], $manifestRecID);
         $details = $recordId>0 ? $this->loadRecordDetails($recordId) : array();
 
@@ -593,6 +614,24 @@ class DbAnnotations extends DbRecordTypeEntity
         return null;
     }
     
+    private function annotationSelectorTermId($selectorType, array $termIds): ?int
+    {
+        $selectorType = trim((string)$selectorType);
+        if($selectorType===''){
+            return null;
+        }
+
+        $key = strtolower($selectorType);
+        if($key==='fragmentselector' || $key==='fragment'){
+            return $termIds['selector_fragment'] ?? null;
+        }
+        if($key==='svgselector' || $key==='svg'){
+            return $termIds['selector_svg'] ?? null;
+        }
+
+        return $this->getTermId($selectorType);
+    }
+    
     private function fillDetailsFromParsedAnnotation(&$details, $parsed, $manifestRecID=0, $manifestFileID=0, $canvasRecID=0){
         
         $changed = false;
@@ -604,11 +643,16 @@ class DbAnnotations extends DbRecordTypeEntity
         $changed = $this->setField($details, 'DT_ORIGINAL_IIIF_ID', @$parsed['id']) || $changed;
         $changed = $this->setField($details, 'DT_ANNOTATION_INFO', @$parsed['json']) || $changed;
         $changed = $this->setField($details, 'DT_URL', @$parsed['canvas']) || $changed;
-        $changed = $this->setField($details, 'DT_ANNOTATION_MOTIVATION', $this->getTermId(@$parsed['motivation'], 'TRM_ANNOTATION_MOTIVATION_COMMENTING') ) || $changed;
+        $termIds = $this->annotationTermIds();
+        $motivationId = $this->getTermId(@$parsed['motivation']) ?: ($termIds['motivation_commenting'] ?? null);
+        $stateId = $this->getTermId(@$parsed['state']) ?: ($termIds['state_imported'] ?? null);
+        $selectorTypeId = $this->annotationSelectorTermId(@$parsed['selector_type'], $termIds);
+
+        $changed = $this->setField($details, 'DT_ANNOTATION_MOTIVATION', $motivationId) || $changed;
         $changed = $this->setField($details, 'DT_LANGUAGE', $this->getLanguageTermId(@$parsed['language'])) || $changed;
-        $changed = $this->setField($details, 'DT_ANNOTATION_SELECTOR_TYPE', $this->getTermId(@$parsed['selector_type'])) || $changed;
+        $changed = $this->setField($details, 'DT_ANNOTATION_SELECTOR_TYPE', $selectorTypeId) || $changed;
         $changed = $this->setField($details, 'DT_ANNOTATION_SELECTOR_VALUE', @$parsed['selector_value']) || $changed;
-        $changed = $this->setField($details, 'DT_ANNOTATION_STATE', $this->getTermId(@$parsed['state'], 'TRM_ANNOTATION_STATE_IMPORTED')) || $changed;
+        $changed = $this->setField($details, 'DT_ANNOTATION_STATE', $stateId) || $changed;
 
         if($manifestRecID>0){
             $changed = $this->appendUniqueField($details, 'DT_ANNOTATION_MANIFEST', $manifestRecID) || $changed;

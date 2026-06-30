@@ -36,6 +36,15 @@ abstract class DbRecordTypeEntity extends DbEntityBase
 
     /** @var \DbsTerms|null cached terms helper for optional label lookup. */
     private static $terms = null;
+
+    /** @var array Request-local cache for term resolution by numeric id, constant, concept code or label. */
+    private static $termIdCache = array();
+
+    /** @var array Request-local cache for exact term-label lookup. */
+    private static $termLabelCache = array();
+
+    /** @var array Request-local cache for vocabulary term-code lookup. */
+    private static $termCodeCache = array();
     
     protected $definitionsChecked = false;
     protected $definitionsReady = false;
@@ -357,21 +366,29 @@ abstract class DbRecordTypeEntity extends DbEntityBase
             return intval($value);
         }
 
+        $cacheKey = is_string($value)
+            ? 'v:'.mb_strtolower(trim($value)).'|f:'.($fallback===null ? '' : (string)$fallback)
+            : 'v:'.md5(json_encode($value)).'|f:'.($fallback===null ? '' : (string)$fallback);
+        if(array_key_exists($cacheKey, self::$termIdCache)){
+            return self::$termIdCache[$cacheKey];
+        }
+
+        $id = null;
         if(is_string($value) && defined($value)){
-            return intval(constant($value));
+            $id = intval(constant($value));
+        }elseif(is_string($value) && preg_match('/^[1-9][0-9]*-[1-9][0-9]*$/', $value)){
+            $termId = ConceptCode::getTermLocalID($value);
+            $id = $termId ? intval($termId) : null;
+        }else{
+            $id = $this->getTermIdByLabel((string)$value);
         }
 
-        if(is_string($value) && preg_match('/^[1-9][0-9]*-[1-9][0-9]*$/', $value)){
-            $id = ConceptCode::getTermLocalID($value);
-            return $id ? intval($id) : ($fallback ? $this->getTermId($fallback) : null);
+        if(!$id && $fallback){
+            $id = $this->getTermId($fallback);
         }
 
-        $id = $this->getTermIdByLabel((string)$value);
-        if($id){
-            return $id;
-        }
-
-        return $fallback ? $this->getTermId($fallback) : null;
+        self::$termIdCache[$cacheKey] = $id ? intval($id) : null;
+        return self::$termIdCache[$cacheKey];
     }
 
     /** Optional label lookup for legacy/imported literal values. */
@@ -382,13 +399,20 @@ abstract class DbRecordTypeEntity extends DbEntityBase
             return null;
         }
 
+        $cacheKey = mb_strtolower($label);
+        if(array_key_exists($cacheKey, self::$termLabelCache)){
+            return self::$termLabelCache[$cacheKey];
+        }
+
         if(!self::$terms && function_exists('dbs_GetTerms') && class_exists('DbsTerms')){
             self::$terms = new \DbsTerms($this->system, dbs_GetTerms($this->system));
         }
         if(self::$terms){
             $id = self::$terms->getTermByLabel('enum', $label);
-            return $id ? intval($id) : null;
+            self::$termLabelCache[$cacheKey] = $id ? intval($id) : null;
+            return self::$termLabelCache[$cacheKey];
         }
+        self::$termLabelCache[$cacheKey] = null;
         return null;
     }
 
@@ -403,16 +427,23 @@ abstract class DbRecordTypeEntity extends DbEntityBase
             return null;
         }
 
+        $cacheKey = intval($vocabId).':'.mb_strtolower(trim($termCode));
+        if(array_key_exists($cacheKey, self::$termCodeCache)){
+            return self::$termCodeCache[$cacheKey];
+        }
+
         if(!self::$terms && function_exists('dbs_GetTerms') && class_exists('DbsTerms')){
             self::$terms = new \DbsTerms($this->system, dbs_GetTerms($this->system));
         }
 
         if(!self::$terms){
+            self::$termCodeCache[$cacheKey] = null;
             return null;
         }
 
         $id = self::$terms->getTermByCode($vocabId, $termCode);
-        return $id ? intval($id) : null;
+        self::$termCodeCache[$cacheKey] = $id ? intval($id) : null;
+        return self::$termCodeCache[$cacheKey];
     } 
     
     protected function getLanguageTermId($lang): ?int
