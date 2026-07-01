@@ -788,8 +788,8 @@ $.widget( "heurist.navigation", {
             if (this.divMainMenuToggle) {
                 this.divMainMenuToggle.attr('aria-expanded', 'false');
             }
-        }        
-        
+        }
+
         const record = this.menuData.getRecord(data.page_id);
         const DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
               DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
@@ -813,9 +813,15 @@ $.widget( "heurist.navigation", {
 
             window.open(this.menu_item_urls[data.page_id], '_blank', 'noopener');
             return;
-        }else if(!is_selectable && $target.parent().find('ul').length != 0){ // stop click if a submenu exists
+        }else if(!is_selectable && $target.parent().find('ul').length > 0){ // stop click if a submenu exists
+
+            // Prevent menu from closing
+            let $item = $target.hasClass('ui-menu-item') ? $target : $target.closest('.ui-menu-item');
+            $item.trigger('mouseenter');
+
             return;
         }
+
         if(!data.hasContent && !window.hWin.HEURIST4.util.isFunction(this.options.onmenuselect)){
             //no action if content is not defined
 
