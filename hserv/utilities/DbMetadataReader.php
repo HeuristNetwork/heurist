@@ -1,5 +1,4 @@
 <?php
-
 /**
 * DbMetadataReader.php - Class DbMetadataReader
 *
@@ -14,11 +13,10 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @since       7
 */
-
 namespace hserv\utilities;
 
-class DbMetadataReader
-{
+class DbMetadataReader {
+
     private function __construct() {}
 
     /**
@@ -26,7 +24,7 @@ class DbMetadataReader
      * used in the <detail conceptID="..."> tags of the flathml export. See DbRegis::registrationAdd()
      * for where these are written when a database is first registered.
      */
-    public const KNOWN_FIELDS = [
+    const KNOWN_FIELDS = [
         '2-1'   => 'Display name',
         '2-12'  => 'Description',
         '2-311' => 'Rights statement',
@@ -38,9 +36,8 @@ class DbMetadataReader
      * @param string $filestore_dir
      * @return string
      */
-    public static function getMetadataFilePath($filestore_dir)
-    {
-        return rtrim($filestore_dir, '/') . '/settings/DBMetadata.xml';
+    public static function getMetadataFilePath($filestore_dir){
+        return rtrim($filestore_dir, '/').'/settings/DBMetadata.xml';
     }
 
     /**
@@ -50,14 +47,13 @@ class DbMetadataReader
      * @param string $filestore_dir The database's filestore root directory.
      * @return array{exists: bool, modified: ?string, fields: array<int, array{label:string, value:string}>}
      */
-    public static function read($filestore_dir)
-    {
+    public static function read($filestore_dir){
 
         $fname = self::getMetadataFilePath($filestore_dir);
 
         $result = ['exists' => false, 'modified' => null, 'fields' => []];
 
-        if (!file_exists($fname) || !is_readable($fname)) {
+        if(!file_exists($fname) || !is_readable($fname)){
             return $result;
         }
 
@@ -68,7 +64,7 @@ class DbMetadataReader
         $xml = simplexml_load_file($fname);
         libxml_clear_errors();
 
-        if ($xml === false) {
+        if($xml === false){
             return $result; // exists, but unreadable/corrupt - caller should fall back gracefully
         }
 
@@ -77,25 +73,25 @@ class DbMetadataReader
         $details = $xml->xpath('//detail');
 
         $fields = [];
-        if (is_array($details)) {
-            foreach ($details as $detail) {
+        if(is_array($details)){
+            foreach($details as $detail){
                 $attrs = $detail->attributes();
-                $conceptID = (string) ($attrs['conceptID'] ?? '');
+                $conceptID = (string)($attrs['conceptID'] ?? '');
 
-                if ($conceptID === '' || !array_key_exists($conceptID, self::KNOWN_FIELDS)) {
+                if($conceptID === '' || !array_key_exists($conceptID, self::KNOWN_FIELDS)){
                     continue;
                 }
 
-                $value = trim((string) $detail);
-                if ($value === '') {
+                $value = trim((string)$detail);
+                if($value === ''){
                     continue;
                 }
 
                 // keep the first occurrence only (registration record holds a single value per field)
-                if (!isset($fields[$conceptID])) {
+                if(!isset($fields[$conceptID])){
                     $fields[$conceptID] = [
                         'label' => self::KNOWN_FIELDS[$conceptID],
-                        'value' => $value,
+                        'value' => $value
                     ];
                 }
             }
@@ -103,8 +99,8 @@ class DbMetadataReader
 
         // present in a stable, sensible order regardless of XML order
         $ordered = [];
-        foreach (self::KNOWN_FIELDS as $conceptID => $label) {
-            if (isset($fields[$conceptID])) {
+        foreach(self::KNOWN_FIELDS as $conceptID => $label){
+            if(isset($fields[$conceptID])){
                 $ordered[] = $fields[$conceptID];
             }
         }

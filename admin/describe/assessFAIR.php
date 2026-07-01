@@ -1,5 +1,4 @@
 <?php
-
 /**
 * assessFAIR.php - Calculates and persists an approximate FAIR score for Heurist databases
 *
@@ -38,7 +37,7 @@ if (@$argv) {
 
     $is_shell = true;
 
-    $ARGV = [];
+    $ARGV = array();
     for ($i = 0; $i < count($argv); ++$i) {
         if ($argv[$i][0] === '-') {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
@@ -87,7 +86,7 @@ if (!defined('HEURIST_FILESTORE_ROOT')) {
     define('HEURIST_FILESTORE_ROOT', $upload_root);
 }
 
-$databases = $single_db ? [$single_db] : mysql__getdatabases4($mysqli, false);
+$databases = $single_db ? array($single_db) : mysql__getdatabases4($mysqli, false);
 
 if (!is_array($databases)) {
     exit("Unable to retrieve list of databases on this server\n");

@@ -1,5 +1,4 @@
 <?php
-
 /**
 * downloadDBMetadata.php - Nightly synchronisation of database metadata from the Heurist Reference Index
 *
@@ -43,7 +42,7 @@ if (@$argv) {
 
     // handle command-line queries
     // e.g.  php -f downloadDBMetadata.php -- -db mydatabase
-    $ARGV = [];
+    $ARGV = array();
     for ($i = 0; $i < count($argv); ++$i) {
         if ($argv[$i][0] === '-') {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
@@ -95,7 +94,7 @@ if (!defined('HEURIST_FILESTORE_ROOT')) {
     define('HEURIST_FILESTORE_ROOT', $upload_root);
 }
 
-$databases = $single_db ? [$single_db] : mysql__getdatabases4($mysqli, false);
+$databases = $single_db ? array($single_db) : mysql__getdatabases4($mysqli, false);
 
 if (!is_array($databases)) {
     exit("Unable to retrieve list of databases on this server\n");
@@ -121,7 +120,7 @@ foreach ($databases as $db_name) {
 
     $regID = mysql__select_value(
         $mysqli,
-        'SELECT sys_dbRegisteredID FROM `' . $database_name_full . '`.sysIdentification LIMIT 1',
+        'SELECT sys_dbRegisteredID FROM `' . $database_name_full . '`.sysIdentification LIMIT 1'
     );
 
     if (!isPositiveInt($regID)) {
