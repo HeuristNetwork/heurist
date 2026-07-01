@@ -332,7 +332,7 @@ _prepareFile: function(file){
         ? externalUrl.replace(/\/info\.json(?:[?#].*)?$/, '').replace(/\/$/, '')
         : '';
     file.iiifImageFullURL = file.iiifImageServiceURL ? `${file.iiifImageServiceURL}/full/full/0/default.jpg` : '';
-    file.iiifImagePreviewURL = file.iiifImageServiceURL ? `${file.iiifImageServiceURL}/full/!600,600/0/default.jpg` : '';
+    file.iiifImagePreviewURL = file.iiifImageServiceURL ? `${file.iiifImageServiceURL}/full/!400,400/0/default.jpg` : '';
     file.isImage = file.isIiifImage || file.mimeType === 'image' || file.mimeType.indexOf('image') === 0;
     
     let randomNumber = window.hWin.HEURIST4.util.random();
@@ -581,20 +581,20 @@ _renderSlideshow: function(title){
                     let external_url = this._htmlUnescape(file.external);
                     
                     if(file.isIiifManifest || file.isIiifImage){
-                        external_url = this._miradorUrlForFile(file);
+                        let mirador_url = this._miradorUrlForFile(file);
 
-                        $('<a href="'+external_url+'" target="_blank">'
+                        $('<a href="'+mirador_url+'" target="_blank">'
                     +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
                     +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
                     +'"></span>&nbsp;open in Mirador</a>')
                         .appendTo(this.mediacontent);
-                       
-                       /* 
-                       $('<a>', {href:external_url, target:'_blank'})
-                                .text('OPEN IN NEW TAB')
+
+                        if(file.isIiifImage){
+                            $('<a>', {href:file.fileURL, target:'_blank'})
+                                .text('OPEN IMAGE')
                                 .addClass('external-link')
                                 .appendTo(this.mediacontent);
-                       */
+                        }
                     }else if(external_url || file.filename === '_remote'){
                         $('<a>', {href:(external_url || file.fileURL), target:'_blank'})
                                 .text('OPEN IN NEW TAB')
@@ -744,17 +744,16 @@ _renderSlideshow: function(title){
 
                         let thumbURL = file.thumbURL;
                     
-                        if(file.isIiifManifest || file.isIiifImage){
+                        if(file.isIiifManifest){
 
                             let miradorUrl = that._miradorUrlForFile(file);
                             
                             $alink
                                 .css('cursor','pointer')
-                                .attr('data-id', obf_recID)                            
+                                .attr('data-id', obf_recID)
                                 .attr('data-iiif-url', miradorUrl);
                             
-                        
-                            //for link below thumb                        
+                            //for link below thumb
                             external_url = miradorUrl;
                                      
                             function __openMiradorViewer(e){
@@ -843,9 +842,13 @@ _renderSlideshow: function(title){
                             
                         }else
                         if(file.isImage){
-                            $alink.attr('data-href', external_url?external_url:fileURL+'&fullres=1&fancybox=1')
+                            let imageURL = file.isIiifImage
+                                ? fileURL
+                                : (external_url ? external_url : fileURL+'&fullres=1&fancybox=1');
+
+                            $alink.attr('data-href', imageURL)
                                   .attr('data-type', 'image')
-                                  .attr('data-src', external_url?external_url:fileURL+'&fullres=1&fancybox=1')
+                                  .attr('data-src', imageURL)
                                   .attr('data-myfancybox','fb-images')
                                   .css('cursor','pointer')
                                   .attr('data-thumb', thumbURL);
