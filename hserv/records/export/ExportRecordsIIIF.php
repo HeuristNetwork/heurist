@@ -56,6 +56,9 @@ class ExportRecordsIIIF extends ExportRecords {
     /** @var string|null Current output URI, reused by v3 Manifest/Collection wrappers. */
     private $manifest_uri = null;
 
+    /** @var array Record IDs that contributed media Canvases to the generated Manifest. */
+    private $v3_canvas_record_ids = array();
+
     /** @var array Obfuscated file IDs for registered IIIF manifests found in v3 recordset export. */
     private $v3_manifest_fileids = array();
 
@@ -119,6 +122,7 @@ class ExportRecordsIIIF extends ExportRecords {
         $this->manifest_uri = HEURIST_SERVER_URL.$_SERVER['REQUEST_URI'];
         $this->cnt = 0;
         $this->v3_canvas_items = array();
+        $this->v3_canvas_record_ids = array();
         $this->v3_manifest_items = array();
         $this->v3_manifest_fileids = array();
     }
@@ -158,6 +162,10 @@ class ExportRecordsIIIF extends ExportRecords {
             ));
             if($canvas){
                 $this->v3_canvas_items[] = $canvas;
+                $recID = intval($record['rec_ID'] ?? 0);
+                if($recID > 0){
+                    $this->v3_canvas_record_ids[] = $recID;
+                }
                 $this->cnt++;
             }
         }
@@ -174,6 +182,7 @@ class ExportRecordsIIIF extends ExportRecords {
 
         $label = array('en' => array('Heurist IIIF manifest'));
         $this->v3_manifest_fileids = array_values(array_unique($this->v3_manifest_fileids));
+        $this->v3_canvas_record_ids = array_values(array_unique(array_map('intval', $this->v3_canvas_record_ids)));
 
         if(count($this->v3_manifest_items) === 1 && empty($this->v3_canvas_items) && count($this->v3_manifest_fileids) === 1){
             // Preserve existing behaviour: a recordset containing exactly one registered
@@ -187,14 +196,19 @@ class ExportRecordsIIIF extends ExportRecords {
             }
         }
 
+        $generatedManifestUri = $this->generatedMediaManifestUri();
+
         if(!empty($this->v3_manifest_items)){
             $items = $this->v3_manifest_items;
 
             if(!empty($this->v3_canvas_items)){
-                $items[] = IiifManifestJson::composeManifest(
-                    $this->manifest_uri.'#generated-media-manifest',
-                    $label,
-                    $this->v3_canvas_items
+                // Mirador does not currently understand an embedded generated Manifest
+                // inside a Collection.  Publish only a Manifest reference whose id can
+                // be dereferenced to obtain the generated media Manifest.
+                $items[] = array(
+                    'id' => $generatedManifestUri,
+                    'type' => 'Manifest',
+                    'label' => $label
                 );
             }
 
@@ -205,13 +219,45 @@ class ExportRecordsIIIF extends ExportRecords {
             );
         }else{
             $resource = IiifManifestJson::composeManifest(
-                $this->manifest_uri,
+                $generatedManifestUri,
                 $label,
                 $this->v3_canvas_items
             );
         }
 
         fwrite($this->fd, json_encode($resource, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * Return the dereferenceable URI for the generated media Manifest.
+     *
+     * Prepared export parameters are temporary session state and should not be used
+     * as the Manifest identity.  The generated Manifest identity is instead based
+     * on the concrete record IDs that supplied supported DT_FILE_RESOURCE media.
+     */
+    private function generatedMediaManifestUri(): string
+    {
+        if(empty($this->v3_canvas_record_ids)){
+            return $this->manifest_uri.'#generated-media-manifest';
+        }
+
+        $recordIds = implode(',', $this->v3_canvas_record_ids);
+        $basePath = strtok((string)($_SERVER['REQUEST_URI'] ?? ''), '?');
+        if($basePath === false || $basePath === ''){
+            $basePath = '/heurist/hserv/controller/record_output.php';
+        }
+
+        $query = http_build_query(array(
+            'depth' => 'all',
+            'format' => 'iiif',
+            'q' => 'ids:'.$recordIds,
+            'db' => $this->system->dbname()
+        ), '', '&', PHP_QUERY_RFC3986);
+
+        // Keep the Heurist query expression readable in IIIF ids.
+        $query = str_replace(array('%3A', '%2C'), array(':', ','), $query);
+
+        return HEURIST_SERVER_URL.$basePath.'?'.$query.'#generated-media-manifest';
     }
 
     private function dbCanvas(): DbIiifCanvas
