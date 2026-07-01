@@ -3087,8 +3087,7 @@ $.widget( "heurist.editing_input", {
                 // urls for downloading and loading the thumbnail
                 let dwnld_link = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&debug=1&download=1&file=${f_nonce}`;
                 let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}&mode=tag&origin=recview`;
-
-                let $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
+                                let $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
                 
                 $input.css({'padding-left': '30px', 'padding-right': '30px', cursor:'hand'});
                 //folder icon in the begining of field
@@ -3190,7 +3189,8 @@ $.widget( "heurist.editing_input", {
                                         ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
                                         ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
                                         ulf_Caption: recordset.fld(record,'ulf_Caption'),
-                                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView')
+                                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
+                                        ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
                                     };
 
                                     that.newvalues[$input.attr('id')] = newvalue;
@@ -3269,6 +3269,7 @@ $.widget( "heurist.editing_input", {
                             f_nonce = n_nonce;
                             dwnld_link = n_dwnld_link;
                             url = n_url;
+                            that._applyIiifImagePreviewControls($input, val);
 
                             if(!n_id || n_id < 1){
                                 $edit_metadata.hide();
@@ -3360,6 +3361,7 @@ $.widget( "heurist.editing_input", {
 
                             let $controls = $input_img.parent().find('div.preview_controls'); // Find the download anchors
 
+                            that._applyIiifImagePreviewControls($input, that.newvalues[$input.attr('id')]);
                             $controls.show();
 
                             if($controls.find(`a#dwn${dtyID}_undefined`)){  // Need to ensure the links are setup
@@ -3368,9 +3370,12 @@ $.widget( "heurist.editing_input", {
 
                             $input_img.css('cursor', 'zoom-in');
 
-                            window.hWin.HAPI4.save_pref('imageRecordEditor', 1);
                         }
                         else if(isClicked === 1){
+
+                            if(that._isIiifImageFileValue(that.newvalues[$input.attr('id')])){
+                                return;
+                            }
 
                             // Enlarge Image, display player
                             if($input_img.hasClass('thumb_image') && (elem.tagName !== 'IMG' || elem.classList.contains('image_input'))){
@@ -3514,8 +3519,11 @@ $.widget( "heurist.editing_input", {
                         }
 
                         let fileID = ele.attr('data-id');
+                        let currentValue = that.newvalues[$input.attr('id')];
+                        let imageUrl = that._isIiifImageFileValue(currentValue) ? that._iiifImageRasterUrlFromValue(currentValue, 'full') : '';
 
-                        let url = `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${window.hWin.HAPI4.database}&recID=${fileID}`;
+                        let url = `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${window.hWin.HAPI4.database}`
+                            + (imageUrl ? `&image=${encodeURIComponent(imageUrl)}` : `&recID=${fileID}`);
 
                         window.hWin.HEURIST4.msg.showDialog(url, {
                             dialogid: 'openseadragon-viewer', default_palette_class: 'ui-heurist-explore',
@@ -3524,18 +3532,9 @@ $.widget( "heurist.editing_input", {
                     }
                 });
 
-                // Check User Preferences, displays thumbnail inline by default if set
-                if(window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0) != 0 && value.ulf_ID){
-
-                    $input_img.show();
-                    $img_controls.show();
-
-                    $input_img.css('cursor', 'zoom-in');
-
-                    $input.off("mouseout");
-
-                    isClicked = 1;
-                }
+                // Thumbnail preview is initially closed for all media.
+                // It opens on mouseover only, becomes fixed on thumbnail click,
+                // and closes again via the close link.
 
                 const isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
                     && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
@@ -3563,7 +3562,8 @@ $.widget( "heurist.editing_input", {
                                 ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
                                 ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
                                 ulf_Caption: recordset.fld(record,'ulf_Caption'),
-                                ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView')
+                                ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
+                                ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
                             };
 
                             that.newvalues[$input.attr('id')] = newvalue;
@@ -5077,6 +5077,45 @@ $.widget( "heurist.editing_input", {
         
     },
 
+    _isIiifImageFileValue: function(fileValue, checkImageData){
+        if(!fileValue && !checkImageData){
+            return false;
+        }
+        return fileValue?.ulf_PreferredSource === 'iiif_image'
+            || fileValue?.ulf_OrigFileName === '_iiif_image'
+            || checkImageData?.original_name === '_iiif_image'
+            || (typeof fileValue?.ulf_ExternalFileReference === 'string'
+                && fileValue.ulf_ExternalFileReference.match(/\/info\.json(?:[?#].*)?$/));
+    },
+
+    _iiifImageServiceUrlFromValue: function(fileValue){
+        if(!fileValue || typeof fileValue.ulf_ExternalFileReference !== 'string'){
+            return '';
+        }
+        return fileValue.ulf_ExternalFileReference.replace(/\/info\.json(?:[?#].*)?$/, '').replace(/\/$/, '');
+    },
+
+    _iiifImageRasterUrlFromValue: function(fileValue, size){
+        let serviceUrl = this._iiifImageServiceUrlFromValue(fileValue);
+        return serviceUrl ? `${serviceUrl}/full/${size}/0/default.jpg` : '';
+    },
+
+    _applyIiifImagePreviewControls: function(ele, fileValue, checkImageData){
+        let isIiifImage = this._isIiifImageFileValue(fileValue, checkImageData);
+        let $preview = ele.parent().find('.image_input').first();
+        let $controls = ele.parent().find('div.preview_controls');
+
+        $controls.find('.mode_switcher').toggle(!isIiifImage);
+        $controls.find('.image_tool').toggle(!isIiifImage);
+        $controls.find('.popup_viewer').toggle(!isIiifImage);
+
+        if(isIiifImage){
+            $preview.removeClass('thumb_image').css('cursor', 'pointer');
+        }else{
+            $preview.addClass('thumb_image');
+        }
+    },
+
     //
     // assign title of resource record or file name or related entity
     //
@@ -5151,15 +5190,17 @@ $.widget( "heurist.editing_input", {
                             ele.attr('data-mimetype', response.data.mimetype);
                             
                             const isMiradorManifest = response.data.original_name=='_iiif';
+                            const isIiifImage = that._isIiifImageFileValue(value, response.data);
                             
                             if ((response.data.mimetype && response.data.mimetype.indexOf('image/')===0)
-                                || isMiradorManifest)
+                                || isMiradorManifest || isIiifImage)
                             {
                                 ele.parent().find('.image_input > img').attr('src',
-                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&offer_download=1&thumb='+
                                         value.ulf_ObfuscatedFileID);
+                                that._applyIiifImagePreviewControls(ele, value, response.data);
                                         
-                                if((response.data.width > 0 && response.data.height > 0) || isMiradorManifest) {
+                                if((response.data.width > 0 && response.data.height > 0) || isMiradorManifest || isIiifImage) {
 
                                     ele.parent().find('.smallText').text('Click image to freeze in place').css({
                                         "font-size": "smaller", 
@@ -5192,14 +5233,15 @@ $.widget( "heurist.editing_input", {
                             
                             let mirador_link = ele.parent().find('.miradorViewer_link');
                             let mimetype = response.data.mimetype;
-                            if(response.data.original_name.indexOf('_iiif')===0){
+                            if(response.data.original_name.indexOf('_iiif')===0 || isIiifImage){
 
                                 if(isMiradorManifest){
                                     mirador_link.attr('data-manifest', '1');
+                                }else{
+                                    mirador_link.removeAttr('data-manifest');
                                 }
 
                                 mirador_link.show();
-                                ele.parent().find('div.preview_controls').show();                                
                             }else
                             if(mimetype.indexOf('image/')===0 || (
                                     (mimetype.indexOf('video/')===0 || mimetype.indexOf('audio/')===0) &&
@@ -5207,14 +5249,13 @@ $.widget( "heurist.editing_input", {
                                    mimetype.indexOf('vimeo')<0 && 
                                    mimetype.indexOf('soundcloud')<0)) ){
                                    
-                                mirador_link.show();
-                                ele.parent().find('div.preview_controls').show();                                
+                                mirador_link.show();                                
                             }else{
                                 mirador_link.hide();
                             }
 
                             let openseadragon_link = ele.parent().find('.openseadragon_link');
-                            if(mimetype.indexOf('image/') === 0 || response.data.original_name.indexOf('_iiif_image') === 0){
+                            if(mimetype.indexOf('image/') === 0 || isIiifImage){
                                 openseadragon_link.show();
                             }else{
                                 openseadragon_link.hide();
@@ -5252,7 +5293,8 @@ $.widget( "heurist.editing_input", {
                                         ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
                                         ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
                                         ulf_Caption: recordset.fld(record,'ulf_Caption'),
-                                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView')
+                                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
+                                        ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
                                     };
 
                                     that.newvalues[ele.attr('id')] = newvalue;
