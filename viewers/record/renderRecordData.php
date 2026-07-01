@@ -990,7 +990,7 @@ if(!empty($import_webfonts)){
         }
 
         div.thumbnail img {
-            width: 80px;
+            width: 200px;
             border: 2px solid #FFF;
             -moz-box-shadow: 0 2px 4px #BBB;
             -webkit-box-shadow: 0 2px 4px #bbb;
@@ -1670,6 +1670,25 @@ function recviewer_is_iiif_file($sourceType, $originalFileName): bool {
     */
 }
 
+function recviewer_is_iiif_image_file($sourceType, $originalFileName): bool {
+    $sourceType = (string)$sourceType;
+    $originalFileName = (string)$originalFileName;
+
+    return $sourceType==='iiif_image'
+        || (defined('ULF_IIIF_IMAGE') && $originalFileName===ULF_IIIF_IMAGE);
+}
+
+function recviewer_iiif_image_default_jpg_url($infoUrl, int $maxSize=400): string {
+    $infoUrl = rtrim(trim((string)$infoUrl), '/');
+    if($infoUrl===''){
+        return '';
+    }
+
+    $serviceId = preg_replace('~/info\.json(?:\?.*)?$~', '', $infoUrl);
+    $size = $maxSize > 0 ? '!'.$maxSize.','.$maxSize : 'full';
+    return rtrim((string)$serviceId, '/').'/full/'.$size.'/0/default.jpg';
+}
+
 //
 // Fake media entry for RT_IIIF_MANIFEST records. It lets the record viewer show
 // a single Mirador/IIIF entry even when the record has no visible file thumbnail,
@@ -1988,8 +2007,14 @@ function print_public_details(array $bib) {
                     $file_URL   = HEURIST_BASE_URL.'?db='.$system->dbname()."&file=$file_nonce"; //download
 
                     $isIiif = recviewer_is_iiif_file($sourceType, $originalFileName);
+                    $isIiifImage = recviewer_is_iiif_image_file($sourceType, $originalFileName);
                     if($isIiif){
                         $file_thumbURL = HEURIST_BASE_URL.'hclient/assets/iiif_logo200.png';
+                    }elseif($isIiifImage && $external_url){
+                        // IIIF Image API file records store the service info.json URL.
+                        // In the record view, display/open a raster derivative instead
+                        // of the JSON service document.
+                        $file_thumbURL = recviewer_iiif_image_default_jpg_url($external_url, 400);
                     }
 
                     // RT_IIIF_MANIFEST records get one synthetic media entry for the record itself.

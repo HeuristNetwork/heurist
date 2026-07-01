@@ -137,15 +137,19 @@ class RecordMediaRenderer
 
         $files = [];
         foreach ($thumbs as $thumb) {
-            if ($this->is3d($thumb) || $this->isIiifMedia($thumb) || $this->isAudioVideo($thumb)) {
+            // IIIF Presentation Manifests are opened through Mirador/IIIF links and
+            // should not be passed to the generic media viewer.  IIIF Image API
+            // resources, however, are image-like: pass a raster default.jpg URL
+            // rather than the info.json service document.
+            if ($this->is3d($thumb) || $this->isIiifManifest($thumb) || $this->isAudioVideo($thumb)) {
                 continue;
             }
             $files[] = [
                 'rec_ID' => $this->recordID,
                 'id' => (string)($thumb['nonce'] ?? ''),
-                'mimeType' => (string)($thumb['mimeType'] ?? ''),
+                'mimeType' => $this->isIiifImage($thumb) ? 'image/jpeg' : (string)($thumb['mimeType'] ?? ''),
                 'filename' => (string)($thumb['orig_name'] ?? ''),
-                'external' => (string)($thumb['external_url'] ?? ''),
+                'external' => $this->mediaViewerUrl($thumb),
             ];
         }
 
@@ -162,7 +166,8 @@ class RecordMediaRenderer
         $isLinked = !empty($thumb['linked']);
         $isAudioVideo = $this->isAudioVideo($thumb);
         $isImage = $this->isImage($thumb);
-        $isImageOrPdf = $isImage || $this->isPdf($thumb);
+        $isIiifImage = $this->isIiifImage($thumb);
+        $isImageOrPdf = $isImage || $isIiifImage || $this->isPdf($thumb);
         $hideLinked = $isLinked && $this->hideImages === 1 && $hasMain;
         $style = [];
 
@@ -235,10 +240,12 @@ class RecordMediaRenderer
             return implode('', $html);
         }
 
-        if (!$this->isAudioVideo($thumb)) {
-            $html[] = '<a href="#" data-id="'.$this->h($thumb['nonce'] ?? '').'" class="mediaViewer_link">'
+        if (!$this->isAudioVideo($thumb) && !$this->isIiifImage($thumb)) {
+            $viewerUrl = $this->mediaViewerUrl($thumb);
+            $dataUrl = $viewerUrl !== '' ? ' data-url="'.$this->h($viewerUrl).'"' : '';
+            $html[] = '<a href="#" data-id="'.$this->h($thumb['nonce'] ?? '').'"'.$dataUrl.' class="mediaViewer_link">'
                 .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align:middle;"></span>&nbsp;full screen</a>';
-            $html[] = '<a href="#" data-id="'.$this->h($thumb['nonce'] ?? '').'" class="popupMedia_link">'
+            $html[] = '<a href="#" data-id="'.$this->h($thumb['nonce'] ?? '').'"'.$dataUrl.' class="popupMedia_link">'
                 .'<span class="ui-icon ui-icon-popup" style="font-size:1.2em;display:inline-block;vertical-align:middle;"></span>&nbsp;view in popup</a>';
         }
 
@@ -253,7 +260,7 @@ class RecordMediaRenderer
         }
 
         if (!empty($thumb['external_url'])) {
-            $html[] = '<a href="'.$this->h($thumb['external_url']).'" class="external-link" target="_blank" rel="noopener">open in new tab'.(!empty($thumb['linked']) ? '<br>(linked media)' : '').'</a>';
+            $html[] = '<a href="'.$this->h($this->openInNewTabUrl($thumb)).'" class="external-link" target="_blank" rel="noopener">open in new tab'.(!empty($thumb['linked']) ? '<br>(linked media)' : '').'</a>';
             if ($this->system->hasAccess()) {
                 $html[] = '<a href="#" data-id="'.$this->h($thumb['nonce'] ?? '').'" class="refreshThumb_link">'
                     .'<span class="ui-icon ui-icon-refresh" style="font-size:1.2em;display:inline-block;vertical-align:middle;"></span>&nbsp;refresh thumbnail</a>';
@@ -286,6 +293,18 @@ class RecordMediaRenderer
             return '<img src="'.$this->h($thumb['thumb'] ?? '').'"'.$imgStyle.$onclick.'>';
         }
 
+        if ($this->isIiifImage($thumb)) {
+            // IIIF Image API records have info.json as the stored external URL and
+            // may also carry a generated player URL.  Do not route thumbnail clicks
+            // through showPlayer/fileDownload; the zoom toggle needs a real raster
+            // image URL (default.jpg).
+            $thumbUrl = $this->thumbnailUrl($thumb);
+            if(!$this->isMapPopup && !$this->withoutHeader){
+                $onclick = ' onclick="window.HeuristRecordMedia.zoomInOut(this,\''.$this->js($thumbUrl).'\',\''.$this->js($this->fileUrl($thumb)).'\')"';
+            }
+            return '<img src="'.$this->h($thumbUrl).'"'.$onclick.'>';
+        }
+
         if (!empty($thumb['player']) && !$this->isMapPopup && $isAudioVideo && ($this->noclutter || !$this->isMapPopup)) {
             return '<div id="player'.$this->h($thumb['id'] ?? '').'" style="min-height:100px;min-width:200px;text-align:left;">'
                 .fileGetPlayerTag($this->system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url'])
@@ -301,12 +320,32 @@ class RecordMediaRenderer
                 .'<div id="player'.$this->h($thumb['id'] ?? '').'" style="min-height:240px;min-width:320px;display:none;"></div>';
         }
 
-        if ($isImage && !$this->isMapPopup && !$this->withoutHeader) {
-            $onclick = ' onclick="window.HeuristRecordMedia.zoomInOut(this,\''.$this->js($thumb['thumb'] ?? '').'\',\''.$this->js($this->fileUrl($thumb)).'\')"';
+        $thumbUrl = $this->thumbnailUrl($thumb);
+        if (($isImage || $this->isIiifImage($thumb)) && !$this->isMapPopup && !$this->withoutHeader) {
+            $onclick = ' onclick="window.HeuristRecordMedia.zoomInOut(this,\''.$this->js($thumbUrl).'\',\''.$this->js($this->fileUrl($thumb)).'\')"';
         }
 
-        return '<img src="'.$this->h($thumb['thumb'] ?? '').'"'.$onclick.'>';
+        return '<img src="'.$this->h($thumbUrl).'"'.$onclick.'>';
     }
+
+    private function thumbnailUrl(array $thumb): string
+    {
+        if ($this->isIiifImage($thumb)) {
+            return $this->iiifImageThumbnailUrl($thumb);
+        }
+        return (string)($thumb['thumb'] ?? '');
+    }
+
+    private function iiifImageThumbnailUrl(array $thumb): string
+    {
+        $fileid = (string)($thumb['nonce'] ?? '');
+        if($fileid !== ''){
+            return HEURIST_BASE_URL.'?db='.$this->system->dbname()
+                .'&offer_download=1&thumb='.rawurlencode($fileid);
+        }
+        return (string)($thumb['thumb'] ?? '');
+    }
+
     
     private function renderMetaLinks(array $thumb): string
     {
@@ -351,6 +390,15 @@ class RecordMediaRenderer
             || (defined('ULF_IIIF') && $origName===ULF_IIIF);
     }
 
+    private function isIiifImage(array $thumb): bool
+    {
+        $sourceType = (string)($thumb['sourceType'] ?? '');
+        $origName = (string)($thumb['orig_name'] ?? '');
+
+        return $sourceType === 'iiif_image'
+            || (defined('ULF_IIIF_IMAGE') && $origName === ULF_IIIF_IMAGE);
+    }
+
     private function isIiifMedia(array $thumb): bool
     {
         $sourceType = (string)($thumb['sourceType'] ?? '');
@@ -384,9 +432,7 @@ class RecordMediaRenderer
 
     private function canOpenInMirador(array $thumb): bool
     {
-        $sourceType = (string)($thumb['sourceType'] ?? '');
-        $origName = (string)($thumb['orig_name'] ?? '');
-        if ($sourceType === 'iiif_image' || (defined('ULF_IIIF_IMAGE') && $origName === ULF_IIIF_IMAGE)) {
+        if ($this->isIiifImage($thumb)) {
             return true;
         }
 
@@ -402,17 +448,53 @@ class RecordMediaRenderer
 
     private function canOpenInOpenSeadragon(array $thumb): bool
     {
-        return $this->isImage($thumb)
-            || ($thumb['sourceType'] ?? '') === 'iiif_image'
-            || (defined('ULF_IIIF_IMAGE') && ($thumb['orig_name'] ?? '') === ULF_IIIF_IMAGE);
+        return $this->isImage($thumb) || $this->isIiifImage($thumb);
     }
 
     private function fileUrl(array $thumb): string
     {
+        if ($this->isIiifImage($thumb)) {
+            return $this->iiifImageDefaultJpgUrl($thumb, 400);
+        }
         if (!empty($thumb['external_url']) && strpos($thumb['external_url'], 'http://') !== 0) {
             return (string)$thumb['external_url'];
         }
         return HEURIST_BASE_URL.'?db='.$this->system->dbname().'&fullres=1&file='.rawurlencode((string)($thumb['nonce'] ?? ''));
+    }
+
+    private function mediaViewerUrl(array $thumb): string
+    {
+        if ($this->isIiifImage($thumb)) {
+            return $this->iiifImageDefaultJpgUrl($thumb, 400);
+        }
+        return (string)($thumb['external_url'] ?? '');
+    }
+
+    private function openInNewTabUrl(array $thumb): string
+    {
+        if ($this->isIiifImage($thumb)) {
+            return $this->iiifImageDefaultJpgUrl($thumb, 400);
+        }
+        return (string)($thumb['external_url'] ?? '');
+    }
+
+    private function iiifImageDefaultJpgUrl(array $thumb, ?int $maxSize=400): string
+    {
+        $url = trim((string)($thumb['external_url'] ?? ''));
+        if($url === ''){
+            return HEURIST_BASE_URL.'?db='.$this->system->dbname().'&fullres=1&file='.rawurlencode((string)($thumb['nonce'] ?? ''));
+        }
+
+        $serviceId = $this->iiifImageServiceIdFromUrl($url);
+        $size = $maxSize && $maxSize > 0 ? '!'.intval($maxSize).','.intval($maxSize) : 'full';
+        return $serviceId.'/full/'.$size.'/0/default.jpg';
+    }
+
+    private function iiifImageServiceIdFromUrl(string $url): string
+    {
+        $url = rtrim(trim($url), '/');
+        $url = preg_replace('~/info\.json(?:\?.*)?$~', '', $url);
+        return rtrim((string)$url, '/');
     }
 
     private function downloadUrl(array $thumb): string
@@ -509,10 +591,18 @@ class RecordMediaRenderer
 
     private function openSeadragonUrl(array $thumb): string
     {
-        $fileID = $thumb['id'] ?? $thumb['nonce'] ?? '';
-        return HEURIST_BASE_URL.'hclient/widgets/viewers/openSeadragonViewer.php?db='.rawurlencode($this->system->dbname())
-            .'&recID='.rawurlencode((string)$fileID)
+        $url = HEURIST_BASE_URL.'hclient/widgets/viewers/openSeadragonViewer.php?db='.rawurlencode($this->system->dbname())
             .'&lang='.rawurlencode($this->language);
+
+        if($this->isIiifImage($thumb)){
+            // For IIIF Image API resources, pass a rendered default.jpg URL, not
+            // the info.json URL stored as ulf_ExternalFileReference.  Use full
+            // size here; ordinary record-view links use the bounded 400px URL.
+            return $url.'&image='.rawurlencode($this->iiifImageDefaultJpgUrl($thumb, null));
+        }
+
+        $fileID = $thumb['id'] ?? $thumb['nonce'] ?? '';
+        return $url.'&recID='.rawurlencode((string)$fileID);
     }
 
     private function viewer3dUrl(array $thumb): string
