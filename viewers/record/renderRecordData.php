@@ -1678,7 +1678,7 @@ function recviewer_is_iiif_image_file($sourceType, $originalFileName): bool {
         || (defined('ULF_IIIF_IMAGE') && $originalFileName===ULF_IIIF_IMAGE);
 }
 
-function recviewer_iiif_image_default_jpg_url($infoUrl, int $maxSize=400): string {
+function recviewer_iiif_image_default_jpg_url($infoUrl, int $maxSize=600): string {
     $infoUrl = rtrim(trim((string)$infoUrl), '/');
     if($infoUrl===''){
         return '';
@@ -2014,7 +2014,7 @@ function print_public_details(array $bib) {
                         // IIIF Image API file records store the service info.json URL.
                         // In the record view, display/open a raster derivative instead
                         // of the JSON service document.
-                        $file_thumbURL = recviewer_iiif_image_default_jpg_url($external_url, 400);
+                        $file_thumbURL = recviewer_iiif_image_default_jpg_url($external_url, 600);
                     }
 
                     // RT_IIIF_MANIFEST records get one synthetic media entry for the record itself.

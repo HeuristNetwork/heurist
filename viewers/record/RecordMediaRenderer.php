@@ -454,7 +454,7 @@ class RecordMediaRenderer
     private function fileUrl(array $thumb): string
     {
         if ($this->isIiifImage($thumb)) {
-            return $this->iiifImageDefaultJpgUrl($thumb, 400);
+            return $this->iiifImageDefaultJpgUrl($thumb, 600);
         }
         if (!empty($thumb['external_url']) && strpos($thumb['external_url'], 'http://') !== 0) {
             return (string)$thumb['external_url'];
@@ -465,7 +465,7 @@ class RecordMediaRenderer
     private function mediaViewerUrl(array $thumb): string
     {
         if ($this->isIiifImage($thumb)) {
-            return $this->iiifImageDefaultJpgUrl($thumb, 400);
+            return $this->iiifImageDefaultJpgUrl($thumb, 600);
         }
         return (string)($thumb['external_url'] ?? '');
     }
@@ -473,12 +473,12 @@ class RecordMediaRenderer
     private function openInNewTabUrl(array $thumb): string
     {
         if ($this->isIiifImage($thumb)) {
-            return $this->iiifImageDefaultJpgUrl($thumb, 400);
+            return $this->iiifImageDefaultJpgUrl($thumb, 600);
         }
         return (string)($thumb['external_url'] ?? '');
     }
 
-    private function iiifImageDefaultJpgUrl(array $thumb, ?int $maxSize=400): string
+    private function iiifImageDefaultJpgUrl(array $thumb, ?int $maxSize=600): string
     {
         $url = trim((string)($thumb['external_url'] ?? ''));
         if($url === ''){
@@ -597,7 +597,7 @@ class RecordMediaRenderer
         if($this->isIiifImage($thumb)){
             // For IIIF Image API resources, pass a rendered default.jpg URL, not
             // the info.json URL stored as ulf_ExternalFileReference.  Use full
-            // size here; ordinary record-view links use the bounded 400px URL.
+            // size here; ordinary record-view links use the bounded 600px URL.
             return $url.'&image='.rawurlencode($this->iiifImageDefaultJpgUrl($thumb, null));
         }
 
