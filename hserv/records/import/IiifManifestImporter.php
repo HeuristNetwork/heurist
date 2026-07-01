@@ -304,7 +304,7 @@ class IiifManifestImporter{
             }
 
             $progress['processed'] = $idx + 1;
-            if($this->progressSession($progress, 'total_canvases', 1)){
+            if($this->progressSession($progress, 'total_canvases', 10)){
                 return false;
             }
         }
@@ -562,7 +562,7 @@ class IiifManifestImporter{
         return null;
     }
 
-    private function progressSession($result, $totalId, $step=10){
+    private function progressSession($result, $totalId, $step=100){
         if($this->progressSessionId && @$result['processed'] % $step == 0){
             $current_val = mysql__update_progress(null, $this->progressSessionId, true, $result['processed'].','.$result[$totalId]);
             if($current_val && $current_val=='terminate'){

@@ -221,10 +221,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             if(this.options.auxilary=='vocabulary'){
                 //vocabulary groups
 
-                this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':248});
+                this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':318});
 
                 this.vocabulary_groups = $('<div>').addClass('ui-dialog-heurist')
-                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:240, overflow: 'hidden'})
+                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:310, overflow: 'hidden'})
                 .uniqueId()
                 .appendTo(this.element);
 
@@ -365,10 +365,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //add vocab group and vocabs panels
                 this.element.addClass('ui-suppress-border-and-shadow');
 
-                this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':544}); //
+                this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':644}); //
 
                 this.vocabularies_div = $('<div>').addClass('ui-dialog-heurist')
-                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:536, overflow: 'hidden'}) //280
+                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:636, overflow: 'hidden'}) //280
                 .uniqueId()
                 .appendTo(this.element);
 

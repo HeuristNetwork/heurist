@@ -244,8 +244,8 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
             html = html + '<div style="display:table-cell;vertical-align: middle;"><span class="ui-icon ui-icon-trash"></span></div>';
         }
 
-        let maxWidth = this._entityPrefix === 'vcg' ? '24ch' : '35ch';
-        maxWidth = this._entityPrefix === 'dtg' ? '21ch' : maxWidth;
+        let maxWidth = this._entityPrefix === 'vcg' ? '232px' : '35ch'; //'24ch'
+        maxWidth = this._entityPrefix === 'dtg' ? '232px' : maxWidth; //'21ch'
         let recNameEscaped = window.hWin.HEURIST4.util.htmlEscape(recName);
         html += `<div class="item truncate" style="font-weight:bold;display:table-cell;max-width:${maxWidth};padding:6px;" title="${recNameEscaped}">${recNameEscaped}</div>`;
 
