@@ -765,11 +765,13 @@ class UImage {
         //https://fragmentarium.ms/metadata/iiif/F-hsd6/manifest.json  or info.json
         //https://purl.stanford.edu/sn904cj3429/iiif/manifest
         //https://fragmentarium.ms:443/loris/F-hsd6/fol_2r.jp2/full/full/0/default.jpg
+        
+        //https://ids.lib.harvard.edu/ids/iiif/10908787/full/400,/0/default.jpg
 
-        if(strpos($image_url,'/full/full/')>0){
-            $thumb_url = str_replace('/full/full/', '/full/'.$new_x.','.$new_y.'/', $image_url);
+        if(preg_match('~/full/(full|max)/~', $image_url)){
+            $thumb_url = preg_replace('~/full/(full|max)/~', '/full/'.$new_x.','.$new_y.'/', $image_url, 1);
         }else{
-            $thumb_url = $image_url.'/full/'.$new_x.','.$new_y.'/0/default.jpg';
+            $thumb_url = rtrim($image_url, '/').'/full/'.$new_x.','.$new_y.'/0/default.jpg';
         }
 
         return $thumb_url;
@@ -847,16 +849,29 @@ class UImage {
                     }
                 }
 
-            }elseif(@$iiif_manifest['@context'] && (@$iiif_manifest['@id'] || @$iiif_manifest['id'])
-            && substr($iiif_url, 0, -9) == 'info.json' )
-            {   //IIIF image
+            }elseif(@$iiif_manifest['@context']
+                && (@$iiif_manifest['@id'] || @$iiif_manifest['id'])
+                && @$iiif_manifest['width']
+                && @$iiif_manifest['height'])
+            {   // IIIF Image API info.json
 
-                //create url for thumbnail
-                //remove info.json
-                $thumb_url = substr($iiif_url, 0, -9).'full/full/0/default.jpg';
-                $thumbUrl = UImage::composeThumbnailIIIF($thumb_url,
-                    @$iiif_manifest['width'],
-                    @$iiif_manifest['height']);
+                $serviceId = $iiif_manifest['id'] ?? ($iiif_manifest['@id'] ?? '');
+                if(!$serviceId && is_string($iiif_url)){
+                    $serviceId = preg_replace('~/info\.json$~', '', rtrim($iiif_url, '/'));
+                }
+                $serviceId = preg_replace('~/info\.json$~', '', rtrim((string)$serviceId, '/'));
+
+                if($serviceId){
+                    $contextText = is_array($iiif_manifest['@context'])
+                        ? json_encode($iiif_manifest['@context'])
+                        : (string)$iiif_manifest['@context'];
+                    $fullSize = strpos($contextText, '/api/image/3/') !== false ? 'max' : 'full';
+
+                    $thumb_url = $serviceId.'/full/'.$fullSize.'/0/default.jpg';
+                    $thumbUrl = UImage::composeThumbnailIIIF($thumb_url,
+                        @$iiif_manifest['width'],
+                        @$iiif_manifest['height']);
+                }
             }
 
         }
@@ -874,6 +889,21 @@ class UImage {
         
     }
 
+    public static function getIiifThumbnailFromUrl( $iiif_url, $thumbnail_file ){
+
+        $thumbUrl = UImage::composeThumbnailIIIF($iiif_url,0,0);
+
+        if($thumbUrl && $thumbnail_file){
+            $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
+            if(saveURLasFile($thumbUrl, $temp_path)){ //save to temp in scratch folder
+                UImage::createScaledImageFile($temp_path, $thumbnail_file);//create thumbnail for iiif image
+                unlink($temp_path);
+            }
+        }
+
+        return $thumbUrl;
+    }
+    
     /**
      * Creates a thumbnail image from the first page of a PDF file.
      * Uses ImageMagick's `convert` command if Imagick extension is not loaded, otherwise uses Imagick.

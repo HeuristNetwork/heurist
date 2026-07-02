@@ -490,7 +490,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordUploadedFilesIndex', popup_dialog_options);
                 break;
             case "menu-files-annotations":
-                window.hWin.HEURIST4.ui.showRecordActionDialog('recordImportAnnotations', popup_dialog_options);
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordImportIIIF', popup_dialog_options);
                 break;
             case "menu-records-archive": // not used
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
@@ -502,7 +502,9 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordFindDuplicates', popup_dialog_options);
                 break;
             case "menu-import-get-template":
+            case "menu-manage-structure-asxml":
                 popup_dialog_options['path'] = 'widgets/entity/popups/';
+                popup_dialog_options['format'] = actionid == 'menu-import-get-template' ? 'xml|json' : 'xml-structure';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTemplate', popup_dialog_options);
                 break;
             case "menu-structure-refresh":
@@ -622,7 +624,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
                     open: function( event, ui ) {
                         let $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
-                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']);
+                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']+' (2026-07-01 19:00)');
                         
                         if(window.hWin.HAPI4.sysinfo.host_logo){
                             $('<div style="height:40px;padding-left:4px;float:right"><a href="'

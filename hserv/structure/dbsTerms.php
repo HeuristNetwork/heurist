@@ -337,6 +337,10 @@ class DbsTerms
      * @return int|null The ID of the found term, or null if no term matches the label within the vocabulary.
      */
     public function getTermByLabel($vocab_id, $label){
+        
+        if(!isset($label) || $label===null || $label===''){
+            return null;
+        }
 
         $all_terms = $this->treeData($vocab_id, 3);
 
@@ -352,6 +356,30 @@ class DbsTerms
         }
         return null;
     }
+    
+    //
+    //
+    //
+    public function getTermByCode($vocab_id, $termCode)
+    {
+        if(!isset($termCode) || $termCode===null || $termCode===''){
+            return null;
+        }
+
+        $all_terms = $this->treeData($vocab_id, 3);
+
+        $termCode = trim(mb_strtolower($termCode));
+
+        foreach($all_terms as $trm_id){
+
+            $termCode2 = mb_strtolower($this->getTermCode($trm_id));
+
+            if($termCode==$termCode2){
+                return $trm_id;
+            }
+        }
+        return null;
+    }    
 
     //
     /**

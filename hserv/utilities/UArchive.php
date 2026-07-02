@@ -17,7 +17,7 @@ namespace hserv\utilities;
 use hserv\utilities\USanitize;
 
 define('MAX_FILES', 10000);
-define('MAX_SIZE', 1073741824);// 1 GB
+define('MAX_SIZE', 2147483648);// 1 GB = 1073741824, Ian doubled size 29/6/26
 define('MAX_RATIO', 90);
 define('READ_LENGTH', 1024);
 define('WRITE_LENGTH', 4096);//16384
@@ -276,7 +276,7 @@ class UArchive {
                             fclose($fp);
                             fclose($ofp);
                             @unlink($destination_file);
-                            throw new \Exception('Maximum allowed extraction size achieved ('.MAX_SIZE.')');
+                            throw new \Exception('Extraction size limit reached ('.MAX_SIZE.' bytes). Please ask system administrator to increase limit in UArchive.php.');
                         }
 
                         if ($stats['comp_size'] > 0 && $stats['comp_size'] > READ_LENGTH) {

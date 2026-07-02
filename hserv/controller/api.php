@@ -274,7 +274,25 @@ $resource = @$requestUri[3];
 $is_public_annotation_read =
     ($resource === 'annotations'
         && $method === 'search'
-        && in_array(@$requestUri[4], array('pages', 'page', 'annotation'), true));
+        && (
+            // Canvas AnnotationPage, used by Mirador:
+            //   /api/{db}/annotations/pages?uri={canvasUri}
+            in_array(@$requestUri[4], array('pages', 'page'), true)
+
+            // Single annotation record:
+            //   /api/{db}/annotations/{annotationId}
+            || (isset($requestUri[4]) && is_numeric($requestUri[4]) && !isset($requestUri[5]))
+
+            // Manifest-scoped Canvas AnnotationPage:
+            //   /api/{db}/annotations/{manifestRecID}/pages?uri={canvasUri}
+            || (isset($requestUri[4]) && is_numeric($requestUri[4])
+                && in_array(@$requestUri[5], array('pages', 'page'), true))
+
+            // Manifest-scoped single annotation:
+            //   /api/{db}/annotations/{manifestRecID}/{annotationId}
+            || (isset($requestUri[4]) && is_numeric($requestUri[4])
+                && isset($requestUri[5]) && is_numeric($requestUri[5]))
+        ));
 
 $skip_auth_processing =
     ($resource === 'login') ||
@@ -313,10 +331,16 @@ if(!$skip_auth_processing){
 
 if (@$requestUri[3]=='iiif') {
     
-    // https://server/heurist/api/mydb/iiif/annotations/<ulf_obfuscated_id>
-    
-    // http://127.0.0.1/heurist/?db=osmak_annot&file=662a913ee25012ba445b5b96d6eea2f9537ca6a4
-    // http://127.0.0.1/heurist/api/osmak_annot/iiif/annotations/662a913ee25012ba445b5b96d6eea2f9537ca6a4
+    // IIIF Presentation API routes, for example:
+    //   /api/{db}/iiif/manifest/{manifestRecID}
+    //   /api/{db}/iiif/manifest/{ulf_ObfuscatedFileID}
+    //   /api/{db}/iiif/canvas/{ulf_ObfuscatedFileID}
+    //   /api/{db}/iiif/canvas/{canvasRecID}       // alias; output id is canonical
+    //   /api/{db}/iiif/annotations/{ulf_ObfuscatedFileID}
+    //
+    // Do not confuse /iiif/annotations/{fileObfuscatedId}, which is a linked
+    // IIIF AnnotationPage for a Canvas/file, with /annotations/{annotationRecID},
+    // which is the annotation-record REST API handled below by DbAnnotations.
 
     if($method=='search'){ //GET method
         $req_params['resource'] = @$requestUri[4];
@@ -360,7 +384,43 @@ else
     $req_params['a'] = $method;
     $req_params['restapi'] = 1; //set http response code
 
-    if(@$requestUri[4]!=null){
+    if(@$requestUri[3]=='annotations'){
+        // Supported annotation API paths:
+        //   /api/{db}/annotations/pages?uri={canvasUri}
+        //   /api/{db}/annotations/{annotationId}
+        //   /api/{db}/annotations/{manifestRecID}/pages?uri={canvasUri}
+        //   /api/{db}/annotations/{manifestRecID}/{annotationId}
+        if(isset($requestUri[5])){
+            if($method!=='search'){ //temporary remarked - to show all annotations per canvas
+                $req_params['manifestRecID'] = intval($requestUri[4]);    
+            }
+            $req_params['recID'] = $requestUri[5];
+        }elseif(isset($requestUri[4])){
+            // A single path segment after /annotations is the annotation id,
+            // not a Manifest id. Manifest-scoped routes always have two
+            // segments: /annotations/{manifestRecID}/pages or
+            // /annotations/{manifestRecID}/{annotationId}.
+            $req_params['recID'] = $requestUri[4];
+        }
+
+        if(intval(@$req_params['manifestRecID'])>0){
+            if(!isset($req_params['fields']) || !is_array($req_params['fields'])){
+                $req_params['fields'] = array();
+            }
+            $req_params['fields']['manifestRecID'] = intval($req_params['manifestRecID']);
+        }
+
+        if($method=='add' || $method=='save'){
+            if(!isset($req_params['fields']) || !is_array($req_params['fields'])){
+                $req_params['fields'] = array();
+            }
+            // This API route is used by the Mirador annotation adapter.
+            // DbAnnotations decides the actual state from this source marker.
+            if(!isset($req_params['fields']['source'])){
+                $req_params['fields']['source'] = 'mirador';
+            }
+        }
+    }elseif(@$requestUri[4]!=null){
       $req_params['recID'] = $requestUri[4];
     }
 

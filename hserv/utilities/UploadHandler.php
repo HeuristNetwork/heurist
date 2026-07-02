@@ -750,8 +750,10 @@ class UploadHandler
                 preg_match('/^image\/(gif|jpe?g|png)/', $type, $matches)) {
             $name .= '.'.$matches[1];
         }
-        if ($this->options['correct_image_extensions'] &&
-                function_exists('exif_imagetype')) {
+        if ($file_path && 
+            $this->options['correct_image_extensions'] &&
+            function_exists('exif_imagetype')) 
+        {
             switch(@exif_imagetype($file_path)){
                 case IMAGETYPE_JPEG:
                     $extensions = array('jpg', 'jfif', 'jpeg', 'jpe');

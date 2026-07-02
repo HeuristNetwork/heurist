@@ -23,7 +23,13 @@ final class PasswordResetService
      * Keeps the legacy return contract used by user_HandleResetPin():
      * true for a validated PIN, string for resend/new-pin messages, false on error.
      */
-    public function handlePin(string $username, string|int $pin = '', string $captcha = '') //: bool|string
+    /**
+     * @param string $username
+     * @param string|int $pin
+     * @param string $captcha
+     * @return bool|string
+     */
+    public function handlePin(string $username, $pin = '', string $captcha = '')
     {
         $mysqli = $this->system->getMysqli();
         $now = time();

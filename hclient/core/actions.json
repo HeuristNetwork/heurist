@@ -549,7 +549,7 @@
     },
     {
         "id": "menu-profile-files",
-        "text": "Manage files",
+        "text": "Manage files / Images",
         
         "data": {
             "entity": "recUploadedFiles",
@@ -601,11 +601,8 @@
     },
     {
         "id": "menu-manage-structure-asxml",
-        "href": "hserv/structure/export/getDBStructureAsXML.php",
-        "target": "_blank",
         "data": {
             "logaction": "st_ExportXML",
-            "user-experience-level": "1",
             "icon": "ui-icon-extlink"
         },
         "text": "Structure (XML)"
@@ -793,24 +790,24 @@
     {
       "href": "import/utilities/manageFilesUpload.php",
       "id": "menu-files-upload",
-      "text": "Upload media files/images",
+      "text": "Upload files from local",
       "data": {
         "user_admin_status": "1",
         "size": "medium",
         "class": "upload_files",
-        "header": "Populate > Upload media files/images",
+        "header": "Populate > Upload files from local",
         "icon": "ui-icon-upload",
         "container": "populate"
       }
     },
     {
       "id": "menu-files-index",
-      "text": "Index external transfers",
+      "text": "Register external transfers",
       "data": {
         "logaction": "imp_IndexFiles",
         "user_admin_status": "1",
         "size": "medium",
-        "header": "Import > Index uploaded files / external transfers",
+        "header": "Import > Register uploaded files / external transfers",
         "icon": "ui-icon-list",
         "container": "populate"
       }
@@ -818,12 +815,12 @@
     {
       "href": "import/fieldhelper/synchroniseWithFieldHelper.php",
       "id": "menu-files-index-and-records",
-      "text": "Create media records",
+      "text": "Create records from files",
       "data": {
         "logaction": "imp_MediaRecords",
         "user_admin_status": "1",
         "size": "medium",
-        "header": "Import > Create media records",
+        "header": "Import > Create records from files",
         "icon": "ui-icon-image",
         "container": "populate"
       }

@@ -391,6 +391,98 @@ class DbRecUploadedFiles extends DbEntityBase
     }
 
     /**
+     * Return true when JSON looks like a IIIF Image API info.json response.
+     * This intentionally requires dimensions and Image API evidence to avoid classifying
+     * arbitrary JSON-LD documents as IIIF images.
+     */
+    private function isIiifImageInfoJson(array $json): bool
+    {
+        if(!@$json['@context'] || !(@$json['@id'] || @$json['id'])){
+            return false;
+        }
+        if(empty($json['width']) || empty($json['height'])){
+            return false;
+        }
+
+        $context = $json['@context'];
+        $contextText = is_array($context) ? json_encode($context) : (string)$context;
+        $type = (string)($json['type'] ?? ($json['@type'] ?? ''));
+        $profile = $json['profile'] ?? null;
+        $profileText = is_array($profile) ? json_encode($profile) : (string)$profile;
+
+        return strpos($contextText, 'iiif.io/api/image') !== false
+            || stripos($type, 'ImageService') !== false
+            || strpos($profileText, 'iiif.io/api/image') !== false
+            || preg_match('/\blevel[012]\b/', $profileText);
+    }
+
+    /** Return service base URL from Image API info JSON, falling back to the source info.json URL. */
+    private function iiifImageServiceBaseUrl(array $json, ?string $sourceUrl=null): ?string
+    {
+        $id = $json['id'] ?? ($json['@id'] ?? null);
+        if(!is_string($id) || trim($id)===''){
+            $id = is_string($sourceUrl) ? $sourceUrl : '';
+        }
+        $id = trim($id);
+        if($id===''){
+            return null;
+        }
+        return preg_replace('~/info\.json$~', '', rtrim($id, '/'));
+    }
+
+    /** Canonical URL to store for an IIIF Image API resource. */
+    private function canonicalIiifImageInfoUrl(array $json, ?string $sourceUrl=null): ?string
+    {
+        $base = $this->iiifImageServiceBaseUrl($json, $sourceUrl);
+        return $base ? $base.'/info.json' : null;
+    }
+
+    /** Candidate info.json URL for a possible IIIF Image API service base URL. */
+    private function candidateIiifImageInfoUrl(string $url): ?string
+    {
+        $url = trim($url);
+        if($url==='' || !preg_match('/^https?:\/\//i', $url)){
+            return null;
+        }
+        if(substr($url, -9)==='info.json'){
+            return $url;
+        }
+
+        $path = (string)parse_url($url, PHP_URL_PATH);
+        if(preg_match('~/full/[^/]+/[^/]+/[^/]+$~', $path)){
+            return null; // already an Image API image request, not a service base
+        }
+        if(preg_match('/\.(jpe?g|png|gif|webp|tiff?|jp2|pdf|zip|xml|json)$/i', $path)){
+            return null;
+        }
+
+        return rtrim($url, '/').'/info.json';
+    }
+
+    /**
+     * Try to resolve a user-supplied URL to a canonical IIIF Image API info.json URL.
+     * Returns null when the URL is not an Image API service/info.json resource.
+     */
+    private function resolveCanonicalIiifImageInfoUrl(string $url): ?string
+    {
+        $infoUrl = $this->candidateIiifImageInfoUrl($url);
+        if(!$infoUrl){
+            return null;
+        }
+
+        $jsonContent = loadRemoteURLContent($infoUrl);
+        if(!$jsonContent){
+            return null;
+        }
+        $json = json_decode($jsonContent, true);
+        if(!is_array($json) || !$this->isIiifImageInfoJson($json)){
+            return null;
+        }
+
+        return $this->canonicalIiifImageInfoUrl($json, $infoUrl);
+    }
+
+    /**
      * Detects IIIF Presentation manifests and IIIF Image API info.json resources.
      * For local uploads, keeps ulf_OrigFileName unchanged and classifies by ulf_PreferredSource.
      * For old external registration, still writes the historical ULF_IIIF / ULF_IIIF_IMAGE markers.
@@ -403,10 +495,7 @@ class DbRecUploadedFiles extends DbEntityBase
         }
 
         $isManifest = (@$iiif_manifest['@type'] == 'sc:Manifest' || @$iiif_manifest['type'] == 'Manifest');
-        $isImageInfo = !$isManifest
-            && @$iiif_manifest['@context']
-            && (@$iiif_manifest['@id'] || @$iiif_manifest['id'])
-            && ($sourceUrl == null || substr($sourceUrl, -9) == 'info.json');
+        $isImageInfo = !$isManifest && $this->isIiifImageInfoJson($iiif_manifest);
 
         if(!$isManifest && !$isImageInfo){
             return false;
@@ -427,12 +516,22 @@ class DbRecUploadedFiles extends DbEntityBase
             }
         }
 
+        if($isImageInfo){
+            $canonicalInfoUrl = $this->canonicalIiifImageInfoUrl($iiif_manifest, $sourceUrl);
+            if($canonicalInfoUrl && preg_match('/^https?:\/\//i', $canonicalInfoUrl)){
+                $this->records[$idx]['ulf_ExternalFileReference'] = $canonicalInfoUrl;
+                $sourceUrl = $canonicalInfoUrl;
+            }
+        }
+
+        /* Do not create thumbnails on registration. Thumbnails are always created lazily via fileDownload
         if($sourceUrl){
             $thumbUrl = UImage::getIiifThumbnail($sourceUrl, $iiif_manifest, null);
             if($thumbUrl){
                 $this->records[$idx]['ulf_TempThumbUrl'] = $thumbUrl;
             }
         }
+        */
 
         if($isManifest){
             if(!$keepOriginalName){
@@ -489,6 +588,18 @@ class DbRecUploadedFiles extends DbEntityBase
                         $jsonContent = loadRemoteURLContent($record['ulf_ExternalFileReference']);
                         if($jsonContent){
                             if($this->prepareIiifManifest($idx, $jsonContent, $record['ulf_ExternalFileReference'], false)){
+                                $mimeType = 'json';
+                            }
+                        }
+                    }
+
+                    // Also support registering a bare IIIF Image API service base URL.
+                    // If {base}/info.json is valid, store the canonical info.json URL.
+                    if(!@$this->records[$idx]['ulf_PreferredSource'] || $this->records[$idx]['ulf_PreferredSource']=='external'){
+                        $infoUrl = $this->candidateIiifImageInfoUrl((string)$record['ulf_ExternalFileReference']);
+                        if($infoUrl && $infoUrl !== $record['ulf_ExternalFileReference']){
+                            $jsonContent = loadRemoteURLContent($infoUrl);
+                            if($jsonContent && $this->prepareIiifManifest($idx, $jsonContent, $infoUrl, false)){
                                 $mimeType = 'json';
                             }
                         }
@@ -704,7 +815,9 @@ class DbRecUploadedFiles extends DbEntityBase
                 }
             }
 
-            if( (strpos((string)($record['ulf_PreferredSource'] ?? ''),'iiif')===0 || strpos((string)($record['ulf_OrigFileName'] ?? ''),ULF_IIIF)===0)
+            /* Do not create thumbnails on registration. Thumbnails are always created lazily via fileDownload
+            if( (strpos((string)($record['ulf_PreferredSource'] ?? ''),'iiif')===0 || 
+                 strpos((string)($record['ulf_OrigFileName'] ?? ''),ULF_IIIF)===0)
                 && @$record['ulf_TempThumbUrl']){
 
                     $thumb_name = $thumb_dir.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
@@ -713,7 +826,7 @@ class DbRecUploadedFiles extends DbEntityBase
                         UImage::createScaledImageFile($temp_path, $thumb_name);//create thumbnail for iiif image
                         unlink($temp_path);
                     }
-            }
+            }*/
             
             if(@$this->records[$rec_idx]['ulf_TempFile']){ //if there is file to be copied
 
@@ -1011,8 +1124,7 @@ class DbRecUploadedFiles extends DbEntityBase
                         foreach ($urls as $idx => $url) {
 
                             if(strpos($url, 'http') === 0){
-                                $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference = "' . $mysqli->real_escape_string($url) . '"';
-                                $file_id = mysql__select_value($mysqli, $query);
+                                $file_id = $this->findRegistrationByUrl($url);
 
                                 if(!$file_id){ // new external file to save
                                     $file_id = $this->registerURL($url, false, 0, $fileParams);
@@ -1042,8 +1154,7 @@ class DbRecUploadedFiles extends DbEntityBase
                         }
                     }elseif(is_string($urls) && strpos($urls, 'http') === 0){
 
-                        $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference = "' . $mysqli->real_escape_string($urls) . '"';
-                        $file_id = mysql__select_value($mysqli, $query);
+                        $file_id = $this->findRegistrationByUrl($urls);
 
                         if(!$file_id){ // new external file to save
                             $file_id = $this->registerURL($urls, false, 0, $fileParams);
@@ -1652,6 +1763,26 @@ class DbRecUploadedFiles extends DbEntityBase
     }
 
     /**
+     * Find an existing external URL registration in recUploadedFiles.
+     *
+     * @param string $url External URL to search for.
+     * @return int Existing ulf_ID, or 0 if the URL is not registered.
+     */
+    public function findRegistrationByUrl($url): int
+    {
+        $url = trim((string)$url);
+        if($url===''){
+            return 0;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference = "'
+            . $mysqli->real_escape_string($url) . '" LIMIT 1';
+        $ulf_ID = mysql__select_value($mysqli, $query);
+        return $ulf_ID ? intval($ulf_ID) : 0;
+    }
+
+    /**
     * Register remote resource - used to fix flaw in database - detail type "file" has value but does not have registered
     * It may happen when user converts text field to "file"
     *
@@ -1668,9 +1799,38 @@ class DbRecUploadedFiles extends DbEntityBase
 
        $this->records = null; //reset
 
+       $knownIiifImageInfo = is_array($fields ?? null)
+           && (($fields['ulf_PreferredSource'] ?? '') === 'iiif_image');
+
+       if(!$tiledImageStack && !$knownIiifImageInfo){
+            $canonicalIiifInfoUrl = $this->resolveCanonicalIiifImageInfoUrl((string)$url);
+            if($canonicalIiifInfoUrl){
+                $url = $canonicalIiifInfoUrl;
+            }
+       }
+
+       $ulf_ID = $this->findRegistrationByUrl($url);
+       if($ulf_ID>0){
+            if($dtl_ID>0){
+                $query2 = 'update recDetails set dtl_Value=null, `dtl_UploadedFileID`='.intval($ulf_ID)
+                    .' where dtl_ID='.intval($dtl_ID);
+                $this->system->getMysqli()->query($query2);
+
+                $fullInfo = fileGetFullInfo($this->system, $ulf_ID);
+                if(!isEmptyArray($fullInfo)){
+                    $ulf_ID = $fullInfo[0];
+                }
+            }
+            return $ulf_ID;
+       }
+
        if($fields==null) {$fields = array();}
-       $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
-       $fields['ulf_OrigFileName']    = $tiledImageStack?ULF_TILED_IMAGE.'@':ULF_REMOTE;//or _iiif
+       if(!array_key_exists('ulf_PreferredSource', $fields) || $fields['ulf_PreferredSource']===''){
+            $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
+       }
+       if(!array_key_exists('ulf_OrigFileName', $fields) || $fields['ulf_OrigFileName']===''){
+            $fields['ulf_OrigFileName'] = $tiledImageStack?ULF_TILED_IMAGE.'@':ULF_REMOTE;//or _iiif
+       }
        $fields['ulf_ExternalFileReference'] = $url;
 
         if(!@$fields['ulf_MimeExt']){
@@ -2308,6 +2468,7 @@ class DbRecUploadedFiles extends DbEntityBase
         }else{
             $ret = array();
         }
+        $seen = [];
 
         $where_clause = '';
         $mysqli = $this->system->getMysqli();
@@ -2331,6 +2492,11 @@ class DbRecUploadedFiles extends DbEntityBase
 
             if($return_mode=='rec_full'){
                 $ret = mysql__select_assoc($mysqli, $query, 0);
+                
+                foreach ($ret as $row) {
+                    $key = $row['recID'] . '-' . $row['targetID'];
+                    $seen[$key] = true;
+                }                
             }elseif($return_mode=='rec_cnt'){
                 $ret = intval(mysql__select_value($mysqli, $query));
             }else{
@@ -2369,7 +2535,16 @@ class DbRecUploadedFiles extends DbEntityBase
                     if($return_mode=='rec_full'){
                         $res = mysql__select_assoc($mysqli, $query, 0);
                         if(!empty($res)){
-                            $ret = array_merge($ret, $res);
+                            
+                            // Merge unique rows from $res into $ret
+                            foreach ($res as $row) {
+                                $key = $row['recID'] . '-' . $row['targetID'];
+
+                                if (!isset($seen[$key])) {
+                                    $ret[] = $row;
+                                    $seen[$key] = true;
+                                }
+                            }                            
                         }
                     }elseif($return_mode=='rec_ids'){
                         //record ids

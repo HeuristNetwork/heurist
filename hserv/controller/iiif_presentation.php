@@ -2,7 +2,7 @@
 /**
 * iiif_presentation.php - Handler to produce IIIF presentation for registered Heurist file
 * 
-* It uses ExportRecordsIIIF to produce json output as a representations of iiif objects in Presentation API v3 
+* It uses IiifPresentationService to produce JSON output as IIIF Presentation API v3 resources 
 * .(see https://iiif.io/api/presentation/3.0/)
 * 
 * parameters
@@ -52,7 +52,11 @@ require_once dirname(__FILE__).'/../../autoload.php';
         $params['resource'] = 'manifest';
     }
 
-    $res = hserv\records\export\ExportRecordsIIIF::getIiifApiResource($system, $params['resource'], $params['id']);
+    $omitAnnotationPages = !empty($params['omit_annotation_pages']) && intval($params['omit_annotation_pages']) === 1;
+    $service = new hserv\iiif\IiifPresentationService($system);
+    $res = $service->getResourceJson($params['resource'], $params['id'], array(
+        'omit_annotation_pages' => $omitAnnotationPages
+    ));
 
     $system->dbclose();
 

@@ -174,6 +174,10 @@ $system->defineConstant('DT_WORKFLOW_STAGE');
 
 $system->defineConstant('RT_CMS_MENU');
 $system->defineConstant('RT_CMS_HOME');
+$system->defineConstant('RT_IIIF_MANIFEST');
+$system->defineConstant('RT_IIIF_ANNOTATION');
+$system->defineConstant('DT_ANNOTATION_MANIFEST');
+$system->defineConstant('DT_URL');
 $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 $system->defineConstant('DT_CMS_HEADER');
 $system->defineConstant('DT_CMS_FOOTER');
@@ -986,7 +990,7 @@ if(!empty($import_webfonts)){
         }
 
         div.thumbnail img {
-            width: 80px;
+            width: 200px;
             border: 2px solid #FFF;
             -moz-box-shadow: 0 2px 4px #BBB;
             -webkit-box-shadow: 0 2px 4px #bbb;
@@ -1649,6 +1653,81 @@ function print_personal_details(array $bkmk) {
 }
 
 //
+// Returns true when a registered file represents an IIIF manifest/IIIF resource.
+// Used by the record media section to avoid displaying a raw JSON placeholder
+// for RT_IIIF_MANIFEST records and to use the IIIF logo thumbnail consistently.
+//
+function recviewer_is_iiif_file($sourceType, $originalFileName): bool {
+    $sourceType = (string)$sourceType;
+    $originalFileName = (string)$originalFileName;
+
+    return $sourceType==='iiif' || (defined('ULF_IIIF') && $originalFileName===ULF_IIIF);
+    
+    /*
+    return strpos($sourceType, 'iiif') === 0
+        || (defined('ULF_IIIF') && strpos($originalFileName, ULF_IIIF) === 0)
+        || (defined('ULF_IIIF_IMAGE') && $originalFileName === ULF_IIIF_IMAGE);
+    */
+}
+
+function recviewer_is_iiif_image_file($sourceType, $originalFileName): bool {
+    $sourceType = (string)$sourceType;
+    $originalFileName = (string)$originalFileName;
+
+    return $sourceType==='iiif_image'
+        || (defined('ULF_IIIF_IMAGE') && $originalFileName===ULF_IIIF_IMAGE);
+}
+
+function recviewer_iiif_image_default_jpg_url($infoUrl, int $maxSize=600): string {
+    $infoUrl = rtrim(trim((string)$infoUrl), '/');
+    if($infoUrl===''){
+        return '';
+    }
+
+    $serviceId = preg_replace('~/info\.json(?:\?.*)?$~', '', $infoUrl);
+    $size = $maxSize > 0 ? '!'.$maxSize.','.$maxSize : 'full';
+    return rtrim((string)$serviceId, '/').'/full/'.$size.'/0/default.jpg';
+}
+
+//
+// Fake media entry for RT_IIIF_MANIFEST records. It lets the record viewer show
+// a single Mirador/IIIF entry even when the record has no visible file thumbnail,
+// and avoids showing the original manifest JSON file as a separate media item.
+//
+function recviewer_add_iiif_manifest_thumb(array &$thumbs, array $bib): void {
+    if(!defined('RT_IIIF_MANIFEST') || intval(@$bib['rec_RecTypeID']) !== intval(RT_IIIF_MANIFEST)){
+        return;
+    }
+
+    foreach($thumbs as $thumb){
+        if(!empty($thumb['iiif_manifest_record']) && intval(@$thumb['manifest_rec_id']) === intval($bib['rec_ID'])){
+            return;
+        }
+    }
+
+    array_unshift($thumbs, array(
+        'id' => 0,
+        'external_url' => '',
+        'params' => null,
+        'orig_name' => 'IIIF Manifest',
+        'sourceType' => 'iiif_manifest_record',
+        'mimeType' => 'application/json',
+        'file_size' => 0,
+        'mode_3d_viewer' => null,
+        'thumb' => HEURIST_BASE_URL.'hclient/assets/iiif_logo200.png',
+        'player' => null,
+        'nonce' => '',
+        'linked' => false,
+        'description' => '',
+        'caption' => @$bib['rec_Title'] ?: 'IIIF Manifest',
+        'rights' => '',
+        'owner' => '',
+        'iiif_manifest_record' => true,
+        'manifest_rec_id' => intval($bib['rec_ID'])
+    ));
+}
+
+//
 // prints recDetails
 //
 function print_public_details(array $bib) {
@@ -1673,7 +1752,8 @@ function print_public_details(array $bib) {
         if(dtl_Geo is not null, ST_asWKT(ST_Envelope(dtl_Geo)), null) as bd_geo_envelope,
         dtl_HideFromPublic,
         rst_NonOwnerVisibility,
-        rst_RequirementType
+        rst_RequirementType,
+        null as linked_RecTypeID
         from recDetails
         left join defDetailTypes on dty_ID = dtl_DetailTypeID
         left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
@@ -1713,6 +1793,19 @@ function print_public_details(array $bib) {
     $bds_temp = array();
     $thumbs = array();
 
+    // If this record is an IIIF annotation, keep its Canvas URI so linked
+    // Manifest media can open Mirador focused on the annotated canvas.
+    $annotationCanvasUri = '';
+    if(defined('RT_IIIF_ANNOTATION') && defined('DT_URL')
+        && intval(@$bib['rec_RecTypeID']) === intval(RT_IIIF_ANNOTATION)){
+            
+        $annotationCanvasUri = (new \hserv\entity\DbAnnotations($system))->getCanvasUrl( intval($recordID) );
+      
+        if($annotationCanvasUri==null){
+            $annotationCanvasUri = '';
+        }
+    }
+
     $bds_res = $mysqli->query($query);//0.8 sec
 
     $translations = [];
@@ -1734,7 +1827,8 @@ function print_public_details(array $bib) {
                 .'d2.dtl_UploadedFileID, '
                 .'dt2.dty_Type, '
                 .'null as dtl_Geo, '
-                .'null as bd_geo_envelope '
+                .'null as bd_geo_envelope, '
+                .'rec_RecTypeID as linked_RecTypeID '
         .' from recDetails d1, defDetailTypes dt1, recDetails d2, defDetailTypes dt2, Records '
         .' where d1.dtl_RecID = '. $recordID .' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
         .' AND d2.dtl_RecID = d1.dtl_Value and d2.dtl_DetailTypeID = dt2.dty_ID and dt2.dty_Type = "file" '
@@ -1881,6 +1975,7 @@ function print_public_details(array $bib) {
                 $fileinfo = null;
 
                 //|| ($hide_images == 1 && $bd['dtl_RecID'] != $recordID)){ // skip linked media
+                //DISABLED $hide_images =  2;
                 if($hide_images == 2){ // skip all images
                     continue;
                 }
@@ -1911,26 +2006,57 @@ function print_public_details(array $bib) {
                     $file_thumbURL  = HEURIST_BASE_URL.'?db='.$system->dbname().'&offer_download=1&thumb='.$file_nonce;
                     $file_URL   = HEURIST_BASE_URL.'?db='.$system->dbname()."&file=$file_nonce"; //download
 
-                    array_push($thumbs, array(
-                        'id' => $bd['dtl_UploadedFileID'],
-                        //'url' => $file_URL, //download
-                        'external_url' => $external_url,      //external url
-                        //'mediaType'=>$filedata['mediaType'],
-                        'params'=>null,
-                        'orig_name'=>$originalFileName,
-                        'sourceType'=>$sourceType,
-                        'mimeType'=>$mimeType,
-                        'file_size'=>$fileSize,
-                        'mode_3d_viewer' => detect3D_byExt($file_Ext),
-                        'thumb' => $file_thumbURL,
-                        'player' => $file_playerURL,
-                        'nonce' => $file_nonce,
-                        'linked' => ($bd['dtl_RecID'] != $recordID),
-                        'description' => $fileinfo['ulf_Description'],
-                        'caption' => $fileinfo['ulf_Caption'],
-                        'rights' => $fileinfo['ulf_Copyright'],
-                        'owner' => $fileinfo['ulf_Copyowner']
-                    ));
+                    $isIiif = recviewer_is_iiif_file($sourceType, $originalFileName);
+                    $isIiifImage = recviewer_is_iiif_image_file($sourceType, $originalFileName);
+                    if($isIiif){
+                        $file_thumbURL = HEURIST_BASE_URL.'hclient/assets/iiif_logo200.png';
+                    }elseif($isIiifImage && $external_url){
+                        // IIIF Image API file records store the service info.json URL.
+                        // In the record view, display/open a raster derivative instead
+                        // of the JSON service document.
+                        $file_thumbURL = recviewer_iiif_image_default_jpg_url($external_url, 600);
+                    }
+
+                    // RT_IIIF_MANIFEST records get one synthetic media entry for the record itself.
+                    // Do not also show the source manifest JSON file as a separate media thumbnail.
+                    $skipMediaThumb = defined('RT_IIIF_MANIFEST')
+                        && intval($bib['rec_RecTypeID']) === intval(RT_IIIF_MANIFEST)
+                        && $isIiif
+                        && $bd['dtl_RecID'] == $recordID;
+
+                    $isLinkedIiifManifestRecord = defined('RT_IIIF_MANIFEST')
+                        && intval(@$bd['dtl_RecID']) !== $recordID
+                        && intval(@$bd['linked_RecTypeID']) === intval(RT_IIIF_MANIFEST)
+                        && $isIiif;
+
+                    if(!$skipMediaThumb){
+                        array_push($thumbs, array(
+                            'id' => $bd['dtl_UploadedFileID'],
+                            //'url' => $file_URL, //download
+                            'external_url' => $external_url,      //external url
+                            //'mediaType'=>$filedata['mediaType'],
+                            'params'=>null,
+                            'orig_name'=>$originalFileName,
+                            'sourceType'=>$sourceType,
+                            'mimeType'=>$mimeType,
+                            'file_size'=>$fileSize,
+                            'mode_3d_viewer' => detect3D_byExt($file_Ext),
+                            'thumb' => $file_thumbURL,
+                            'player' => $file_playerURL,
+                            'nonce' => $file_nonce,
+                            'linked' => ($bd['dtl_RecID'] != $recordID),
+                            'rec_ID' => intval($bd['dtl_RecID']),
+                            'linked_rec_id' => intval($bd['dtl_RecID']),
+                            'linked_rec_type_id' => intval(@$bd['linked_RecTypeID']),
+                            'iiif_manifest_record' => $isLinkedIiifManifestRecord,
+                            'manifest_rec_id' => $isLinkedIiifManifestRecord ? intval($bd['dtl_RecID']) : 0,
+                            'canvas_uri' => $isLinkedIiifManifestRecord ? $annotationCanvasUri : '',
+                            'description' => $fileinfo['ulf_Description'],
+                            'caption' => $fileinfo['ulf_Caption'],
+                            'rights' => $fileinfo['ulf_Copyright'],
+                            'owner' => $fileinfo['ulf_Copyowner']
+                        ));
+                    }
 
 
                     $bd['val'] = '<a target="_surf" href="'.htmlspecialchars($external_url?$external_url:$file_URL).'">';
@@ -1940,8 +2066,6 @@ function print_public_details(array $bib) {
                         $bd['val'] = $bd['val'].htmlspecialchars($file_description).'<br>';
                     }*/
                     $bd['val'] .= '<span class="external-link" style="vertical-align: bottom;"></span>';
-                    $isIiif = strpos((string)$sourceType, 'iiif') === 0
-                        || (defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF) === 0);
                     if($isIiif){
                         $bd['val'] = $bd['val'].'<img src="'.HEURIST_BASE_URL.'hclient/assets/iiif_logo.png" style="width:16px"/>';
                         if(defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF) === 0){
@@ -2061,6 +2185,8 @@ function print_public_details(array $bib) {
     }
 
     print '<div class="div_public_data">';
+
+    recviewer_add_iiif_manifest_thumb($thumbs, $bib);
 
     $has_thumbs = !empty($thumbs) && $hide_images != 2;
     print RecordMediaRenderer::render($system, [
@@ -2495,13 +2621,45 @@ function print_linked_details(array $bib, int $link_cnt)
     global $system, $relRT, $ACCESS_CONDITION,
         $is_map_popup, $rectypesStructure, $already_linked_ids,$connectedRecIDs;
 
+    $mysqli = $system->getMysqli();
     $recordID = intval($bib['rec_ID']);
+        
+    $isIiifManifest = defined('RT_IIIF_MANIFEST')
+            && intval(@$bib['rec_RecTypeID']) === intval(RT_IIIF_MANIFEST);
+            
+    $skipAnnotationBacklinks = $isIiifManifest && defined('RT_IIIF_ANNOTATION');
+    
+    if($skipAnnotationBacklinks){
+        $annotationCount = mysql__select_value(
+            $mysqli,
+            'SELECT COUNT(*) FROM recLinks, Records '
+            .'WHERE rl_TargetID = '.$recordID
+            .' AND rl_RelationID IS NULL'
+            .' AND rl_SourceID = rec_ID'
+            .' AND rec_RecTypeID = '.intval(RT_IIIF_ANNOTATION)
+            .SQL_AND.$ACCESS_CONDITION
+        );
+
+        if($annotationCount > 0){
+            print_linked_details_header($bib);
+            print '<div class="detailRow fieldRow">';
+            print '<div class="detailType">Annotations</div>';
+            print '<div class="detail">'
+                .intval($annotationCount)
+                .' annotation records link to this manifest. '
+                .'<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname()
+                .'&w=all&q=linkedto:'.$recordID.'%20t:'.RT_IIIF_ANNOTATION
+                .'" onclick="top.location.href=this.href; return false;">Show as search results</a>';
+            print '</div></div>';
+            print DIV_E;
+        }
+        return $annotationCount;
+    }        
+        
     $ignored_ids = '';
     if(!empty($already_linked_ids[$recordID])){
         $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids[$recordID]).')';
     }
-
-    $mysqli = $system->getMysqli();
 
     $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
                 .'where rl_TargetID = '.$recordID
@@ -2535,7 +2693,7 @@ function print_linked_details(array $bib, int $link_cnt)
         print DIV_E;
 
         $already_linked_ids[$recordID][] = $row['rec_ID'];
-        if(!in_array($row['rec_ID'], $connectedRecIDs[$recordID])){
+        if(count($connectedRecIDs[$recordID]) < 1000 && !in_array($row['rec_ID'], $connectedRecIDs[$recordID])){
             $connectedRecIDs[$recordID][] = $row['rec_ID'];
         }
     }

@@ -384,7 +384,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                     exit;
                     
                 }else{
-                    $res = $checker->checkURLs(@$req_params['verbose']==1, false, @$req_params['limit'], @$req_params['mode'], $session_id);
+                    $res = $checker->checkURLs(@$req_params['verbose']==1, false, @$req_params['limit'], @$req_params['mode'], $session_id, @$req_params['format'] ?? 'all');
                 }
                 
             }

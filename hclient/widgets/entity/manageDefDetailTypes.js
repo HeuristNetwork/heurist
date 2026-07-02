@@ -118,10 +118,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             //add fields group editor
             this.element.addClass('ui-suppress-border-and-shadow');
             
-            this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',228);
+            this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',308);
             
             this.fieldtype_groups = $('<div data-container="ABBBBBB">').addClass('ui-dialog-heurist')
-                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:220, overflow: 'hidden'})
+                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:300, overflow: 'hidden'})
                 .appendTo(this.element);
                 
                 

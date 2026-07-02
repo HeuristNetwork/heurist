@@ -62,7 +62,7 @@ $.widget( "heurist.app_storymap", {
      * @property {boolean} [options.init_completed=false] - Internal flag, set to true when widget initialization is fully complete.
      * @property {?function} options.onClearStory - Callback function executed when the story is cleared.
      * @property {string} [options.storyPlaceholder='Please select a story in the list'] - Placeholder text when no story is selected.
-     * @property {string} [options.elementsPlaceholder='<br><br>There are no story elements to display for the selected item'] - Placeholder when a story has no elements.
+     * @property {string} [options.elementsPlaceholder='<br><br>There are no elements to display for the selected item'] - Placeholder when a story has no elements.
      * @property {string} [options.elementsPlaceholderSub='<i>Story elements may exist but not be publicly visible</i>'] - Sub-text for empty elements placeholder.
      * @property {boolean} [options.show_print_button=false] - If true, shows a button to print the story map.
      * @property {string} [options.language='def'] - Language for UI elements ('def' for default).
@@ -118,8 +118,8 @@ $.widget( "heurist.app_storymap", {
         onClearStory: null,
 
         storyPlaceholder: 'Please select a story in the list',
-        elementsPlaceholder: '<br><br>There are no story elements to display for the selected item',
-        elementsPlaceholderSub: '<i>Story elements may exist but not be publicly visible</i>',
+        elementsPlaceholder: '<br><br>There are no elements to display for the selected item',
+        elementsPlaceholderSub: '<i>Elements may exist but not be publicly visible</i>',
 
         show_print_button: false,
         
@@ -230,7 +230,7 @@ $.widget( "heurist.app_storymap", {
         }
 
         if(this.options.elementsPlaceholder == 'def'){
-            this.options.elementsPlaceholder = '<br><br>There are no story elements to display for the selected item';
+            this.options.elementsPlaceholder = '<br><br>There are no elements to display for the selected item';
         }
         
         this._isRelative = this.element.css('position')=='relative';
@@ -333,8 +333,8 @@ $.widget( "heurist.app_storymap", {
                                     return rep;
                                 },
                                 "empty_remark": 
-                                '<h3 class="not-found" style="color:teal;">'
-                                    +  this.options.elementsPlaceholder + '</h3>'
+                                '<p class="not-found" style="color:teal;">'
+                                    +  this.options.elementsPlaceholder + '</p>'
                                     +  this.options.elementsPlaceholderSub,
                                 "onScroll": function(event){ that._onScroll(event, that) },
                                 "expandDetailsWithoutWarning": true,
@@ -356,7 +356,7 @@ $.widget( "heurist.app_storymap", {
         let placeholder = !window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && this.options.storyPlaceholder != 'def' ? 
                             this.options.storyPlaceholder : '';
         placeholder = this.options.storyPlaceholder == 'def' || this.options.placeholder_option == 'def'
-            ? '<br><h3 class="not-found" style="color:teal;display:inline-block">Please select a story in the list</h3>' : placeholder;
+            ? '<br><p class="not-found" style="color:teal;display:inline-block">Please select a story in the list</p>' : placeholder;
         
         this._initial_div_message = 
         $(`<div class="ent_wrapper" style="padding: 1em;background: white; overflow-y:auto">${placeholder}</div>`)
@@ -683,7 +683,7 @@ $.widget( "heurist.app_storymap", {
                     }else if(!usePlaceholder && (useBlank || that.options.elementsPlaceholder != 'def')){
                         placeholder = that.options.elementsPlaceholder;
                     }else{
-                        placeholder = `<br><h3 class="not-found" style="color:teal;display:inline-block">${placeholder}</h3>`;
+                        placeholder = `<br><p class="not-found" style="color:teal;display:inline-block">${placeholder}</p>`;
                     }
 
                     if(that._initial_div_message.html() != placeholder){
@@ -1273,8 +1273,8 @@ $.widget( "heurist.app_storymap", {
             //clear 
            
             this.pnlOverview.html(
-            '<h3 class="not-found" style="color:teal;">'
-            +  this.options.elementsPlaceholder + '</h3>'
+            '<p class="not-found" style="color:teal;">'
+            +  this.options.elementsPlaceholder + '</p>'
             +  this.options.elementsPlaceholderSub);
         }
         

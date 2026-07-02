@@ -889,11 +889,18 @@ EXP;
 
         $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.$system->dbnameEnv();
         
+        /* PRE 2026-06-28 
         if(($iiif_type==ULF_IIIF_IMAGE || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
             && @$params['var'][0]['rec_ID']>0){
             $miradorViewer = $miradorViewer.'&q=ids:'.intval($params['var'][0]['rec_ID']);
         }else{
             $miradorViewer = $miradorViewer.'&'.substr($iiif_type,1).'='.$fileid;
+        }
+        */
+        if(@$params['var'][0]['rec_ID']>0){
+            $miradorViewer = $miradorViewer.'&id='.intval($params['var'][0]['rec_ID']);
+        }else{
+            $miradorViewer = $miradorViewer.'&id='.$fileid;
         }
 
         $result = "<iframe $size $style src=\"$miradorViewer\" frameborder=\"0\"></iframe>";
@@ -1390,7 +1397,27 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             if($mimeExt=='application/pdf' || $mimeExt=='pdf'){
                 UImage::getPdfThumbnail($filename, $thumbnail_file);
                 
+            }else if(($file['ulf_PreferredSource'] ?? '')==='iiif'){ //locally uploaded manifest json
+
+                $jsonContent = file_get_contents($filename);
+                $jsonContent = json_decode($jsonContent, true);
+                if($jsonContent){
+                    UImage::getIiifThumbnail(null, $jsonContent, $thumbnail_file);                
+                }
+            
+                if($is_download){
+                    if(file_exists($thumbnail_file)){
+                        header('Content-type: image/png');
+                        echo file_get_contents($thumbnail_file);
+                    }else{
+                        redirectURL($placeholder);
+                    }
+                }
+                return;            
+            
             }else{
+                
+
 
                 //get real image type from exif
                 $mimeExt = UImage::getImageType($filename);
@@ -1432,9 +1459,16 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
                 $img = UImage::createFromString('tiled images stack');//from string
                 
-            }else if($file['ulf_MimeExt']=='json' &&  strpos($file['ulf_OrigFileName'],ULF_IIIF)===0){
+            }else if( strpos((string)($file['ulf_PreferredSource'] ?? ''),'iiif')===0 || 
+                      strpos((string)($file['ulf_OrigFileName'] ?? ''),ULF_IIIF)===0  ||
+                      (strpos($file['ulf_ExternalFileReference'], '/iiif/')>0 && 
+                       strpos($file['ulf_ExternalFileReference'], '/0/default.jpg')>0) ){
                 
-                $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);
+                if($file['ulf_MimeExt']!=='json'){
+                    $thumbUrl = UImage::getIiifThumbnailFromUrl($file['ulf_ExternalFileReference'], $thumbnail_file);    
+                }else{
+                    $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);
+                }
                 
                 if($is_download){
                     if(file_exists($thumbnail_file)){

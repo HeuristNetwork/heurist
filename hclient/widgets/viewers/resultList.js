@@ -1783,7 +1783,7 @@ $.widget( "heurist.resultList", {
             let hint = __getOwnerName(owner_id)+', '+window.hWin.HR(visibility);
 
             // Displays owner group ID, green if hidden, gray if visible to others, red if public visibility
-            html_owner = `<span class="rec_owner logged-in-only"
+            html_owner = `<span class="rec_owner"
                 style="width:20px;padding-top:2px;display:inline-block;color:${window.hWin.HAPI4.has_access(owner_id) ? 'silver' : 'red'}" title="${hint}">
                 <b class="ownerName" data-owner="${owner_id}"></b></span>`;
 
@@ -4856,7 +4856,7 @@ $.widget( "heurist.resultList", {
 
         const fullUserRetrieval = !window.hWin.HEURIST4.allUsersCache;
 
-        if(fullUserRetrieval || !window.hWin.HEURIST4.allUsersCache[0].username){
+        if(window.hWin.HAPI4.has_access() && (fullUserRetrieval || !window.hWin.HEURIST4.allUsersCache[0].username)){
 
             let request = {
                 a: 'search',
@@ -4923,6 +4923,9 @@ $.widget( "heurist.resultList", {
 
             if(Object.hasOwn(window.hWin.HAPI4.sysinfo.db_usergroups, owner)){
                 $(span).text(window.hWin.HAPI4.sysinfo.db_usergroups[owner]);
+                return;
+            }else if(!window.hWin.HAPI4.has_access()){
+                $(span).text(`User #${owner}`);
                 return;
             }
 

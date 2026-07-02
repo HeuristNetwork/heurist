@@ -938,6 +938,7 @@ $idx_terms_tree     = $def_rts2['rst_FilteredJsonTermIDTree'];//value is the sam
 $idx_terms_disabled = $def_rts2['dty_TermIDTreeNonSelectableIDs'];
 $idx_constraints    = $def_rts2['rst_PtrFilteredIDs'];
 $idx_defaultvalue   = $def_rts2['rst_DefaultValue'];
+$idx_maymodify      = $def_rts2['rst_MayModify'];
 
 $idx_name = $def_rts2['rst_DisplayName'];
 $idx_desc = $def_rts2['rst_DisplayHelpText'];
@@ -978,6 +979,9 @@ foreach ($this->imp_recordtypes as $rtyID){
                 $fields[$trg_dty_id][$idx_desc] = $def_field[$idx_desc];
                 $fields[$trg_dty_id][$idx_desc2] = $def_field[$idx_desc2];
                 $fields[$trg_dty_id][$idx_ref] = $def_field[$idx_ref]==null?'':$def_field[$idx_ref];
+                if($idx_maymodify>0){
+                    $fields[$trg_dty_id][$idx_maymodify] = @$def_field[$idx_maymodify]==null?'':$def_field[$idx_maymodify];
+                }
             }
 
             $cfn_ID = $def_field[$idx_calcfield];

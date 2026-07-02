@@ -52,14 +52,14 @@
                     </div>
                     
                     <div style="padding:10px 0px;border-bottom:1px lightgray solid">
-                        <h3 style="padding-bottom:10px;margin:0px;font-weight:bold;">Add data</h3>
+                        <h3 style="padding-bottom:10px;margin:0px;font-weight:bold;font-size:1.4em">Add Fields</h3>
                         <span style="font-weight:bold;width:auto;display:none">Select Type</span>
                         <select id="rectype_selector" style="width:206px;max-width:180px"></select>
                     </div>
                     
                 </div>
 
-                <div style="background-color: #FFFFFF;top:115px" class="ent_content_full rtt-tree-placeholder">
+                <div style="background-color: #FFFFFF;top:115px;" class="ent_content_full rtt-tree-placeholder">
                     <div style="margin: 30px auto;text-align:center">
                     <strong>Please select a record type above in order <br> to add fields to the report template</strong>
                     <br><br>
@@ -67,11 +67,11 @@
                     </div>
                 </div>
                 
-                <div style="display:none;background-color: #FFFFFF;top:115px;" class="ent_content_full rtt-tree">
+                <div style="display:none;background-color: #FFFFFF;top:115px;overflow-x:hidden;" class="ent_content_full rtt-tree">
                     <div style="width: 100%;text-align: right;margin: 7.5px 0;">
                         <button id="btnInsertFields" style="display:none">
                             <span style="padding-right: 2em;">Add selected fields</span>
-                            <span class="ui-icon ui-icon-arrowthick-1-e" style="transform: scaleX(3);padding-left: 1em;"></span>
+                            <span class="ui-icon ui-icon-arrowthick-1-e" style="transform: scaleX(3);"></span>
                         </button>
                     </div>
                     <label for='order_alphabetic'>
@@ -90,7 +90,7 @@
                     </label>
                     
                     <br>
-                    <div id="field_treeview" style="padding-top:10px"></div>
+                    <div id="field_treeview" style="top:100px;overflow-y:auto;overflow-x:hidden" class="ent_content_full"></div>
                 </div>
         </div>
     </div>
@@ -283,40 +283,45 @@
 
 <div id="insert-popup2" style="display:none;overflow:hidden;">
 
-    <h3 id="fieldName" style="margin-top:0px"></h3>
-
-    <label for="insWrap">
-        <input type="checkbox" id="insWrap" style="vertical-align: middle;" />&nbsp;
-        Add wrapper e.g. &lt;img&gt; tags
-    </label><br>
+    <div id="fieldName" style="margin-top:0px"></div>
 
     <label for="insIfNull">
-        <input type="checkbox" id="insIfNull" style="vertical-align: middle;" />&nbsp;
+        <input type="checkbox" id="insIfNull" style="vertical-align: middle;"/>&nbsp;
         Test if value exists (if...)
     </label><br>
 
+    <label for="insLineBreak">
+        <input type="checkbox" id="insLineBreak" style="vertical-align: middle;" checked/>&nbsp;
+        Include line break
+    </label><br>
+    
+    <label for="insCaption">
+        <input type="checkbox" id="insCaption" style="vertical-align: middle;" checked/>&nbsp;
+        Precede with field name
+    </label><br>
+<!--
     <label for="insRepeat">
         <input type="checkbox" id="insRepeat" style="vertical-align: middle;" />&nbsp;
         Multiple values loop (repeat...)
     </label><br>
-
-    <label for="insCaption">
-        <input type="checkbox" id="insCaption" style="vertical-align: middle;" />&nbsp;
-        Precede with field name
-    </label><br>
-
+-->
     <label for="insRemark">
         <input type="checkbox" id="insRemark" style="vertical-align: middle;" />&nbsp;
-        Add field name as comment
+        Field name as comment
     </label><br>
 
+    <label for="insWrap">
+        <input type="checkbox" id="insWrap" style="vertical-align: middle;" />&nbsp;
+        Wrapper e.g. &lt;img&gt; tags <span style="font-size:0.8em">(always applied to media)</span>
+    </label><br>
+
+    
+    
     <hr>
-    <div style="padding:10px 0 0 30px">
-    <label for="insAll">
-        <input type="checkbox" id="insAll" style="vertical-align: middle;" />&nbsp;
-        Apply setting above to all fields<br>
+    <div style="padding:3px 0 0 3px">
+    <label for="insAll" style='font-size:0.9em'>
+        Insert all applies these settings to the remaining fields but does not change those already inserted<br>
     </label>
-    <span style="font-size:smaller;padding-left:25px">(Does not affect fields already added)</span>
     </div>
 
 </div>

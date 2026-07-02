@@ -101,7 +101,9 @@ if(!defined('HEURIST_DIR'))  {
 }
 
 /** @const string Base URL for general Heurist application access (e.g., "https://myheurist.net/heurist/"). */
-define('HEURIST_BASE_URL', $host_params['baseURL'] );
+if(!defined('HEURIST_BASE_URL')){
+    define('HEURIST_BASE_URL', $host_params['baseURL'] );
+}
 /** @const string Base URL for production Heurist access, often shorter (e.g., "https://myheurist.net/heurist/"). */
 define('HEURIST_BASE_URL_PRO', $host_params['baseURL_pro'] );
 
@@ -157,7 +159,7 @@ define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION);
 /** @const string API Status: Request successful (HTTP 200). */
 define("HEURIST_OK", "ok");
 /** @const string API Status: Invalid request (HTTP 400). */
-define("HEURIST_INVALID_REQUEST", "invalid");
+if(!defined('HEURIST_INVALID_REQUEST')){ define("HEURIST_INVALID_REQUEST", "invalid"); }
 /** @const string API Status: Resource not found (HTTP 404). */
 define("HEURIST_NOT_FOUND", "notfound");
 /** @const string API Status: Request denied (insufficient rights, etc.) (HTTP 403). */
@@ -430,7 +432,7 @@ $rtDefines = array(
 
     // Spatial data
     'RT_PLACE' => array(3, 1009),
-    'RT_MAP_ANNOTATION' => array(2, 109),
+    'RT_MAP_ANNOTATION' => array(2, 101),
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3, 1020),
 
@@ -452,9 +454,9 @@ $rtDefines = array(
 
     'RT_BUG_REPORT' => array(8, 23),
     
+    'RT_IIIF_ANNOTATION' => array(2, 109),
     'RT_IIIF_MANIFEST' => array(2, 110),
-    'RT_IIIF_CANVAS' => array(2, 111),
-    'RT_IIIF_ANNOTATION' => array(2, 101)
+    'RT_IIIF_CANVAS' => array(2, 111)
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -491,18 +493,24 @@ $dtDefines = array('DT_NAME' => array(2, 1),
 
     'DT_SERVICE_URL' => array(2, 34),
     'DT_URL' => array(3, 1058),
+    'DT_COPYRIGHT' => array(2, 35),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
     'DT_ANNOTATION_INFO' => array(2, 1098), //for iiif and map annotations
     'DT_ANNOTATION_MOTIVATION' => array(2, 1150), //commenting, tagging, supplementing etc
-    'DT_ANNOTATION_MANIFEST' => array(2, 1151),
-    'DT_ANNOTATION_TARGET' => array(2, 1152),
+    'DT_ANNOTATION_MANIFEST' => array(2, 1151),  //ref to parent manifest
+    'DT_IIIF_CANVAS' => array(2, 1152), //ref to canvas  former DT_ANNOTATION_TARGET
     'DT_ANNOTATION_STATE' => array(2, 1153),
     'DT_ANNOTATION_SELECTOR_TYPE' => array(2, 1154),   
     'DT_ANNOTATION_SELECTOR_VALUE' => array(2, 1155),
-    'DT_IIIF_MANIFEST_ID' => array(2, 1156),
-    'DT_IIIF_IMPORT_MODE' => array(2, 1157),
+    'DT_IIIF_ID' => array(2, 1156),
+    'DT_ORIGINAL_IIIF_ID' => array(2, 1158),
+    'DT_IIIF_IMAGE_SERVICE' => array(2, 1159), //iiif image service from manifest - specific for particular canvas
+    
+    'DT_HEIGHT' => array(3, 1041),
+    'DT_WIDTH' => array(3, 1040),
+    'DT_DURATION' => array(2, 66),
 
     //xslt not used
     'DT_FILTER_STRING' => array(2, 40),

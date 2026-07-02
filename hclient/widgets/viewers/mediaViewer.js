@@ -302,8 +302,7 @@ _startSlideshow: function(){
 _prepareFile: function(file){
     
     if($.isPlainObject(file)){
-        //rec_ID = file.rec_ID;
-        file.obf_recID = file.id ?? file.obf_recID ?? '';
+        file.obf_recID = file.id ?? file.obf_recID ?? file.ulf_ObfuscatedFileID ?? '';
     }else{
         file = {obf_recID: file[0], mimeType: file[1]};
     }
@@ -312,18 +311,55 @@ _prepareFile: function(file){
         return file;
     }
     
-    file.mimeType = file.mimeType??'';
+    file.mimeType = file.mimeType ?? file.ulf_MimeExt ?? '';
     file.title = (this.options.slideshowCaptions || !file.title  ? file.caption : file.title) || '';
-    file.filename = file.filename ?? '';
-    file.external = file.external ?? '';
+    file.filename = file.filename ?? file.ulf_OrigFileName ?? '';
+    file.external = file.external ?? file.ulf_ExternalFileReference ?? '';
     file.mode_3d_viewer = file.mode_3d_viewer ?? '';
+
+    const preferredSource = file.preferredSource ?? file.ulf_PreferredSource ?? file.sourceType ?? '';
+    const externalUrl = this._htmlUnescape(file.external) || '';
+
+    file.isIiifImage = preferredSource === 'iiif_image'
+        || file.filename === '_iiif_image'
+        || /\/info\.json(?:[?#].*)?$/.test(externalUrl);
+
+    file.isIiifManifest = !file.isIiifImage && (preferredSource === 'iiif'
+        || preferredSource === 'iiif_manifest'
+        || file.filename === '_iiif');
+
+    file.iiifImageServiceURL = file.isIiifImage
+        ? externalUrl.replace(/\/info\.json(?:[?#].*)?$/, '').replace(/\/$/, '')
+        : '';
+    file.iiifImageFullURL = file.iiifImageServiceURL ? `${file.iiifImageServiceURL}/full/full/0/default.jpg` : '';
+    file.iiifImagePreviewURL = file.iiifImageServiceURL ? `${file.iiifImageServiceURL}/full/!400,400/0/default.jpg` : '';
+    file.isImage = file.isIiifImage || file.mimeType === 'image' || file.mimeType.indexOf('image') === 0;
     
     let randomNumber = window.hWin.HEURIST4.util.random();
 
-    file.fileURL = `${this.options.baseURL}?db=${this.options.database}&file=${file.obf_recID}&t=${randomNumber}`;
+    file.fileURL = file.isIiifImage && file.iiifImagePreviewURL
+        ? file.iiifImagePreviewURL
+        : `${this.options.baseURL}?db=${this.options.database}&file=${file.obf_recID}&t=${randomNumber}`;
     file.thumbURL = `${this.options.baseURL}?db=${this.options.database}&thumb=${file.obf_recID}&t=${randomNumber}`;
     
     return file;    
+},
+
+_miradorUrlForFile: function(file){
+    let param = '';
+
+    if(file.rec_ID > 0){
+        // miradorViewer.php can open a dynamic Manifest for both IIIF image and
+        // registered Manifest records by record ID.
+        param = 'id=' + encodeURIComponent(file.rec_ID);
+    }else if(file.isIiifManifest){
+        param = 'manifest=' + encodeURIComponent(file.obf_recID);
+    }else{
+        param = 'id=' + encodeURIComponent(file.obf_recID);
+    }
+
+    return this.options.baseURL + 'hclient/widgets/viewers/miradorViewer.php?db='
+        + encodeURIComponent(this.options.database) + '&' + param;
 },
 
 _getSlideshowImageCss: function(){
@@ -440,7 +476,7 @@ _renderSlideshow: function(title){
         
         file = this._prepareFile(file);
 
-        let isImage = (file.mimeType === 'image' || file.mimeType.indexOf('image')===0);
+        let isImage = file.isImage;
 
         // choose src by rules:
         // - images: full or thumb depending on slideshowFull
@@ -524,7 +560,7 @@ _renderSlideshow: function(title){
         
             for (let i=0; i<files.length; i++)
             { 
-                    let file = this._prepareFile(this.options.rec_Files[idx]);
+                    let file = this._prepareFile(this.options.rec_Files[i]);
                     if(!file || !file.thumbURL) continue;
 
                     let filetitle = file.title || title || '';
@@ -532,7 +568,7 @@ _renderSlideshow: function(title){
                     //thumbnail preview
                     let $alink = $('<a>')
                             .attr('data-id', file.obf_recID)
-                            .arrt('data-caption', filetitle)
+                            .attr('data-caption', filetitle)
                             .appendTo($("<div>").css({cursor:'pointer',height:'auto','display':'inline-block'})
                             .appendTo(this.mediacontent));
                         
@@ -544,33 +580,26 @@ _renderSlideshow: function(title){
                     $('<br>').appendTo(this.mediacontent);
                     let external_url = this._htmlUnescape(file.external);
                     
-                    if(external_url || file.filename === '_iiif' || file.filename === '_remote')  //@todo check preferred source
-                    {
-                        if(!external_url) external_url = file.fileURL; 
-                               
-                        if(file.filename && file.filename.indexOf('_iiif')>=0){
-                            external_url =  this.options.baseURL 
-                                     + 'hclient/widgets/viewers/miradorViewer.php?db='
-                                     +  this.options.database
-                                     + '&'+file.filename.substring(1)+'='+file.obf_recID;  //either iiif or iiif_image
-                                     
-                            if(file.rec_ID>0){
-                                external_url =  external_url + '&recID='+file.rec_ID;    
-                            }
-                        }                
-                       
-                        $('<a href="'+external_url+'" target="_blank">'
+                    if(file.isIiifManifest || file.isIiifImage){
+                        let mirador_url = this._miradorUrlForFile(file);
+
+                        $('<a href="'+mirador_url+'" target="_blank">'
                     +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
                     +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
                     +'"></span>&nbsp;open in Mirador</a>')
                         .appendTo(this.mediacontent);
-                       
-                       /* 
-                       $('<a>', {href:external_url, target:'_blank'})
+
+                        if(file.isIiifImage){
+                            $('<a>', {href:file.fileURL, target:'_blank'})
+                                .text('OPEN IMAGE')
+                                .addClass('external-link')
+                                .appendTo(this.mediacontent);
+                        }
+                    }else if(external_url || file.filename === '_remote'){
+                        $('<a>', {href:(external_url || file.fileURL), target:'_blank'})
                                 .text('OPEN IN NEW TAB')
                                 .addClass('external-link')
                                 .appendTo(this.mediacontent);
-                       */
                     }else{
                         $('<a>', {href:(file.fileURL+'&download=1'), target:'_surf'}) 
                                 .text('DOWNLOAD')
@@ -627,7 +656,7 @@ _renderSlideshow: function(title){
             file = that._prepareFile(file);
             
             let src = file.thumbURL;
-            if (!src && file.mimeType && file.mimeType.indexOf('image') === 0) {
+            if (!src && file.isImage) {
                 src = file.fileURL;
             }
             if (!src) return; // skip if nothing usable
@@ -635,7 +664,7 @@ _renderSlideshow: function(title){
             const li = $('<li>')
                 .attr({
                     'data-index': idx,
-                    'data-id': file.rec_ID, 
+                    'data-id': file.rec_ID || file.obf_recID, 
                     'tabindex': 0
                 })
                 .addClass('fancybox-thumbs-loading')
@@ -698,11 +727,11 @@ _renderSlideshow: function(title){
             for (let i=0; i<files.length; i++)
             { 
 
-                    let file = that._prepareFile(files[idx]);
-                    if(recid==file.rec_ID || recid==file.id){ 
+                    let file = that._prepareFile(files[i]);
+                    if(recid==file.rec_ID || recid==file.id || recid==file.obf_recID){ 
                         //found
                         let rec_ID = file.rec_ID,
-                        obf_recID = file.id,
+                        obf_recID = file.obf_recID,
                         mimeType = file.mimeType ?? '',
                         filename = file.filename, //to detect _iiif or _tiled
                         filetitle = file.title,
@@ -711,54 +740,29 @@ _renderSlideshow: function(title){
                     
                         if(!mimeType) mimeType = '';
 
-                        let fileURL = that.options.baseURL+'?db=' + that.options.database //+ (needplayer?'&player=1':'')
-                                     + '&file='+obf_recID;
+                        let fileURL = file.fileURL;
 
-                        let thumbURL =  that.options.baseURL+'?db=' +  that.options.database 
-                                     + '&thumb='+obf_recID
+                        let thumbURL = file.thumbURL;
                     
-                        if(filename && filename.indexOf('_iiif') === 0){ //manifest
+                        if(file.isIiifManifest){
 
-                            let param = 'manifest';
-                            if(filename == '_iiif_image'){
-                                
-                                if(rec_ID>0){
-                                    //param = 'q'; //it adds format=iiif in miradorViewer.php
-                                   
-                                    //$alink.attr('data-id', obf_recID);  
-                                    param = 'q=ids:'+rec_ID;
-                                }else{
-                                    param = 'iiif_image='+obf_recID;
-                                } 
-                            }else{
-                                //param = 'manifest='+obf_recID;    
-                                param = 'iiif='+obf_recID;    
-                            }
-                            
+                            let miradorUrl = that._miradorUrlForFile(file);
                             
                             $alink
                                 .css('cursor','pointer')
-                                .attr('data-id', obf_recID)                            
-                                .attr('data-iiif', param);
+                                .attr('data-id', obf_recID)
+                                .attr('data-iiif-url', miradorUrl);
                             
-                        
-                            //for link below thumb                        
-                            external_url =  that.options.baseURL 
-                                     + 'hclient/widgets/viewers/miradorViewer.php?db='
-                                     +  that.options.database
-                                     + '&' + param;
-                                     
-                            if(rec_ID>0){
-                                external_url =  external_url + '&recID='+rec_ID;    
-                            }
+                            //for link below thumb
+                            external_url = miradorUrl;
                                      
                             function __openMiradorViewer(e){
 
                                 let evt = e;
 
                                 if(evt.already_checked!==true && window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.has_access()){
-                                    window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
-                                        'In order to add Annotation to image you have to import "Annotation" record type',
+                                    window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-109', 2,
+                                        'In order to add Annotation to image you have to import "IIIF Annotation" record type',
                                         function(isCancel){
                                             if(isCancel) return;
                                             evt.already_checked = true;
@@ -768,20 +772,10 @@ _renderSlideshow: function(title){
                                 }
 
                                 let ele = $(e.target)
-                                if(!ele.attr('data-iiif')){
-                                    ele = ele.parents('[data-iiif]');
+                                if(!ele.attr('data-iiif-url')){
+                                    ele = ele.parents('[data-iiif-url]');
                                 }
-                                let param  = ele.attr('data-iiif');
-                                let obf_recID = ele.attr('data-id');
-
-                                let url =  that.options.baseURL 
-                                + 'hclient/widgets/viewers/miradorViewer.php?db='
-                                +  that.options.database
-                                + '&' + param;
-
-                                if(rec_ID>0){
-                                    url =  url + '&recID='+rec_ID;    
-                                }
+                                let url = ele.attr('data-iiif-url');
 
                                 if(window.hWin && window.hWin.HEURIST4){
                                     //borderless:true, 
@@ -847,10 +841,14 @@ _renderSlideshow: function(title){
                             
                             
                         }else
-                        if(mimeType.indexOf('image')===0){
-                            $alink.attr('data-href', external_url?external_url:fileURL+'&fullres=1&fancybox=1')
+                        if(file.isImage){
+                            let imageURL = file.isIiifImage
+                                ? fileURL
+                                : (external_url ? external_url : fileURL+'&fullres=1&fancybox=1');
+
+                            $alink.attr('data-href', imageURL)
                                   .attr('data-type', 'image')
-                                  .attr('data-src', external_url?external_url:fileURL+'&fullres=1&fancybox=1')
+                                  .attr('data-src', imageURL)
                                   .attr('data-myfancybox','fb-images')
                                   .css('cursor','pointer')
                                   .attr('data-thumb', thumbURL);

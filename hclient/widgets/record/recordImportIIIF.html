@@ -1,0 +1,95 @@
+<!--
+/**
+* recordImportIIIF.html - HTML structure for the recordImportIIIF widget.
+*/
+-->
+<div id="div_header" class="ent_wrapper" style="margin:10px 10px 0px 40px;font-size:0.95em;overflow:auto">
+
+    <h2>Process IIIF Manifest</h2>
+    <p style="font-weight:bold;font-size:larger;padding:10px 0">
+        Create Heurist records from an IIIF Manifest recorded as a File field, either uploaded locally or registered as a remote reference
+    </p>
+
+    <p>
+        Process a selected IIIF Presentation Manifest and create or update corresponding Heurist records.
+        In <b>Full manifest management</b> mode, Heurist creates or updates an <b>IIIF Manifest</b> record,
+        imports <b>IIIF Canvas</b> records, and imports available <b>IIIF Annotation</b> records.
+        In <b>Annotation overlay</b> mode, Heurist imports annotations only and does not create a Heurist Manifest record.
+    </p>
+
+    <p>
+        On re-import, records that have been modified in Heurist or Mirador are preserved by default and reported
+        separately. Choose the processing mode according to how much of the original IIIF resource Heurist
+        should own and manage.
+    </p>
+
+    <div style="margin:1em 0">
+        <div id="manifest_selector"></div>
+    </div>
+
+    <div style="margin:1em 0">
+        <div style="font-weight:bold;margin-bottom:0.35em">Processing / management level</div>
+
+        <label style="display:block;margin-top:0.2em">
+            <input type="radio" name="import_level" value="managed" checked>
+            <b>Full manifest management</b>
+        </label>
+        <div style="margin-left:1.8em;font-size:0.9em">
+            <ul>
+                <li>Use this mode when Heurist should manage the Manifest structure, not only its annotations.</li>
+                <li>Heurist creates or updates Manifest, Canvas and Annotation records from the source Manifest.</li>
+                <li>Ownership moves to Heurist for the generated Manifest output, Canvas order and Canvas-level metadata.</li>
+                <li>The registered Manifest file becomes managed because an IIIF Manifest record references it; the generated Heurist Manifest becomes the preferred Manifest output.</li>
+                <li>Media files may still be external registered resources or may be uploaded to the Heurist database.</li>
+                <li>Manifest-level metadata can be edited in Heurist, such as title, description, rights, provider and thumbnail.</li>
+                <li>Canvas list, order and Canvas-level metadata come from Heurist Canvas records.</li>
+                <li>Canvases may reference registered external media resources or uploaded files.</li>
+                <li>Annotations are linked to managed Canvas records and use generated Heurist Canvas URIs in IIIF output.</li>
+            </ul>
+        </div>
+        
+        <label>
+            <input type="radio" name="import_level" value="overlay">
+            <b>Annotation overlay for external Manifest and media</b>
+        </label>
+        <div style="margin-left:1.8em;font-size:0.9em">
+            <ul>
+                <li>Use this mode to annotate an existing IIIF Manifest without importing its Canvas structure into Heurist.</li>
+                <li><b>Only IIIF Presentation API v3 Manifests are supported in annotation overlay mode.</b> For v2 Manifests, use Full manifest management.</li>
+                <li>Ownership remains split: the source Manifest and its Canvas list remain on the external IIIF provider or registered source file; Heurist owns only the imported or newly created Annotation records.</li>
+                <li>The Canvas list and Canvas identifiers are preserved from the source Manifest.</li>
+                <li>Annotations are imported, stored and updated in Heurist, linked to the original Canvas URIs.</li>
+                <li>No Heurist Manifest record is created. If a managed Manifest record already exists for this registered Manifest file, overlay mode is not available.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <p>
+        <button class="ui-button-action btnAction">Proceed</button>
+    </p>
+
+</div>
+
+<div id="div_result" class="ent_wrapper" style="padding:40px;margin-top:75px;overflow:auto; display: none;">
+    <h3 style="margin:0">Report:</h3>
+    <br>
+    <div class="table">
+        <div class="t-row"><div class="cell" style="width:220px">Managed Manifest record ID:</div><div class="cell" id="manifest_record"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Total canvases found:</div><div class="cell" id="total_canvases"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Canvas records added:</div><div class="cell" id="canvases_added"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Canvas records updated:</div><div class="cell" id="canvases_updated"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Canvas records unchanged:</div><div class="cell" id="canvases_retained"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Canvas records preserved:</div><div class="cell" id="canvases_preserved_local"></div></div>
+        <div class="t-row" style="height:12px"></div>
+        <div class="t-row"><div class="cell" style="width:220px">Total annotations found:</div><div class="cell" id="total_annotations"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Processed annotations:</div><div class="cell" id="processed"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Annotation records added:</div><div class="cell" id="added"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Annotation records updated:</div><div class="cell" id="updated"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Annotation records unchanged:</div><div class="cell" id="retained"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Annotation records preserved:</div><div class="cell" id="preserved_local"></div></div>
+        <div class="t-row"><div class="cell" style="width:220px">Without annotations:</div><div class="cell" id="without_annotations"></div></div>
+        <div class="t-row" style="height:22px"></div>
+        <div class="t-row"><div class="cell" style="width:220px;vertical-align:top">Issues:</div><div class="cell" id="issues"></div></div>
+    </div>
+</div>

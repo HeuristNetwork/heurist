@@ -81,8 +81,8 @@
                 if(window.hWin?.HAPI4?.has_access && window.hWin.HAPI4.has_access()){
                     const evt = event;
                     if(evt.already_checked !== true && window.hWin.HAPI4.SystemMgr?.checkPresenceOfRectype){
-                        window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
-                            'In order to add Annotation to image you have to import "Annotation" record type',
+                        window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-109', 2,
+                            'In order to add Annotation to image you have to import "IIIF Annotation" record type',
                             function(){
                                 evt.already_checked = true;
                                 api.openMirador(url);

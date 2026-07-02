@@ -23,26 +23,13 @@ $requestParameters = USanitize::sanitizeInputArray();
 
 $database = array_key_exists('db', $requestParameters) ? $requestParameters['db'] : null;
 $ulfID = array_key_exists('recID', $requestParameters) ? $requestParameters['recID'] : null;
-if(!$database || !$ulfID){
+$imageURL = array_key_exists('image', $requestParameters) ? trim((string)$requestParameters['image']) : '';
+if(!$database || (!$ulfID && $imageURL === '')){
     exit;
 }
 
 $language = array_key_exists('lang', $requestParameters) ? $requestParameters['lang'] : 'FRE';
 $language = getLangCode3($language);
-
-$ulfQuery = '';
-$ulfIDs = prepareIds($ulfID);
-if(isPositiveInt($ulfID)){
-    $ulfQuery = "ulf_ID = {$ulfID}";
-}elseif(preg_match('/^[a-z0-9]+$/', $ulfID)){
-    $ulfQuery = "ulf_ObfuscatedFileID = {$ulfID}";
-}elseif(!empty($ulfIDs)){
-    $ulfQuery = "ulf_ID IN (". implode(',', $ulfIDs) .")";
-}
-
-if($ulfQuery === ''){
-    exit;
-}
 
 $system = new hserv\System();
 if(!$system->init($database, true, false)){
@@ -51,10 +38,41 @@ if(!$system->init($database, true, false)){
 
 $mysqli = $system->getMysqli();
 
-$ulfRecords = mysql__select_assoc($mysqli, "SELECT * FROM recUploadedFiles WHERE {$ulfQuery}", 0);
-
 $files = [];
-foreach($ulfRecords as $ulfRec){
+if($imageURL !== ''){
+    if(!preg_match('~^https?://~i', $imageURL)){
+        exit;
+    }
+
+    $files[] = [
+        'type' => 'image',
+        'url' => $imageURL,
+        'buildPyramid' => false,
+        'name' => basename(parse_url($imageURL, PHP_URL_PATH) ?: $imageURL),
+        'caption' => '',
+        'desc' => '',
+        'copyright' => '',
+        'owner' => '',
+        'isManifest' => false
+    ];
+}else{
+    $ulfQuery = '';
+    $ulfIDs = prepareIds($ulfID);
+    if(isPositiveInt($ulfID)){
+        $ulfQuery = "ulf_ID = {$ulfID}";
+    }elseif(preg_match('/^[a-z0-9]+$/', $ulfID)){
+        $ulfQuery = "ulf_ObfuscatedFileID = '{$mysqli->real_escape_string($ulfID)}'";
+    }elseif(!empty($ulfIDs)){
+        $ulfQuery = "ulf_ID IN (". implode(',', $ulfIDs) .")";
+    }
+
+    if($ulfQuery === ''){
+        exit;
+    }
+
+    $ulfRecords = mysql__select_assoc($mysqli, "SELECT * FROM recUploadedFiles WHERE {$ulfQuery}", 0);
+
+    foreach($ulfRecords as $ulfRec){
 
     $fileID = $ulfRec['ulf_ID'];
 
@@ -70,17 +88,18 @@ foreach($ulfRecords as $ulfRec){
     }
 
     $filename = !empty($ulfRec['ulf_ExternalFileReference']) ? $ulfRec['ulf_ExternalFileReference'] : $ulfRec['ulf_OrigFileName'];
-    $files[] = [
-        'type' => 'image',
-        'url' => HEURIST_BASE_URL . "?db={$database}&fullres=1&file={$ulfRec['ulf_ObfuscatedFileID']}",
-        'buildPyramid' => false,
-        'name' => $filename,
-        'caption' => $caption,
-        'desc' => $description,
-        'copyright' => $ulfRec['ulf_Copyright'],
-        'owner' => $ulfRec['ulf_Copyowner'],
-        'isManifest' => $ulfRec['ulf_OrigFileName'] == '_iiif'
-    ];
+        $files[] = [
+            'type' => 'image',
+            'url' => HEURIST_BASE_URL . "?db={$database}&fullres=1&file={$ulfRec['ulf_ObfuscatedFileID']}",
+            'buildPyramid' => false,
+            'name' => $filename,
+            'caption' => $caption,
+            'desc' => $description,
+            'copyright' => $ulfRec['ulf_Copyright'],
+            'owner' => $ulfRec['ulf_Copyowner'],
+            'isManifest' => $ulfRec['ulf_OrigFileName'] == '_iiif'
+        ];
+    }
 }
 ?>
 

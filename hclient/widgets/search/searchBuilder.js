@@ -888,8 +888,13 @@ $.widget( "heurist.searchBuilder", {
             }});
 
             $(this.document).on('keyup', (event) => {
-                if(this.element.is(':visible') && event.key === 'Enter'){
+                if(!this.element.is(':visible')){
+                    return;
+                }
+                if(event.key === 'Enter'){
                     this._doSearch();
+                }else if(event.key === 'Escape'){
+                    this.closeDialog();
                 }
             });
             

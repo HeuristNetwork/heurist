@@ -16,18 +16,18 @@ declare(strict_types=1);
  *
  * return [
  *     'target' => [
+ *         'database' => 'hdb_Heurist_Concept_Definitions',
  *         'dbHost' => '127.0.0.1',
  *         'dbPort' => 3306,
- *         'dbAdminUsername' => 'heurist',
- *         'dbAdminPassword' => '<password>',
- *         // 'database' => 'hdb_Heurist_Concept_Definitions', // optional
+ *         // dbAdminUsername/dbAdminPassword are optional; loadConfig()
+ *         // falls back to ../../../heuristConfigIni.php when omitted.
  *     ],
  *     'sources' => [
  *         [
  *             'server' => 'http://127.0.0.1/heurist/',
- *             'registryDatabase' => 'Heurist_Concept_Definitions',
- *   'username' => '<api-login>',
- *   'password' => '<api-password>',
+ *             'registryDatabase' => 'osmak_1', // any database on source server used as API entry point
+ *             'username' => '2',
+ *             'password' => $passwordForDatabaseAccess
  *   // optional:
  *   // 'jwt' => '<already-issued-token>',
  *   
@@ -41,7 +41,6 @@ declare(strict_types=1);
  */
 const CONFIG_FILE = __DIR__ . '/harvest_concepts_to_semantic_refdb_cfg.php';
 const LOG_FILE    = __DIR__ . '/harvest_concepts_to_semantic_refdb.log';
-const TARGET_DB   = 'hdb_osmak_core'; //'hdb_Heurist_Concept_Definitions';
 const API_LIMIT   = 1000;
 const HTTP_TIMEOUT_SECONDS = 120;
 
@@ -93,7 +92,7 @@ main();
 function main(): void
 {
     if (PHP_SAPI !== 'cli') {
-        fwrite(STDERR, "This script must be run from the command line.\n");
+        write_err("This script must be run from the command line.\n");
         exit(1);
     }
 
@@ -101,6 +100,7 @@ function main(): void
 
     try {
         $cfg = loadConfig(CONFIG_FILE);
+        $targetDbName = (string)$cfg['target']['database'];
         $targetPdo = connectTarget($cfg['target']);
         $targetRepo = new TargetRepository($targetPdo);
         $client = new ApiClient();
@@ -112,6 +112,7 @@ function main(): void
     $summary = new Summary();
     logRunHeader($cfg['sources']);
 
+    // loop for servers
     foreach ($cfg['sources'] as $sourceCfg) {
         
         $summary->servers++;
@@ -121,6 +122,7 @@ function main(): void
         logLine(str_repeat('=', 90));
         logLine("SOURCE SERVER: {$server} registry DB {$registryDb}");
 
+        //retrieve all databases from given server
         try {
             $client->authenticateSource($sourceCfg);
             $databases = $client->fetchRegisteredDatabases($server, $registryDb);
@@ -132,6 +134,7 @@ function main(): void
         
  //DEBUG ONE DB ONLY $databases = [['sys_Database'=>'osmak_1', 'sys_dbRegisteredID'=>1750, 'sys_dbName'=>'TEST!']];        
 
+        // loop for databases, use rregistered sys_dbRegisteredID>0 only
         foreach ($databases as $dbInfo) {
             $summary->databasesSeen++;
             $dbName = (string)($dbInfo['sys_Database'] ?? '');
@@ -148,11 +151,18 @@ function main(): void
                 continue;
             }
             
-            if (isLocalSourceServer($server) && isTargetDatabaseName($dbName)) {
+            if (isLocalSourceServer($server) && isTargetDatabaseName($dbName, $targetDbName)) {
                 $summary->databasesSkippedTarget++;
                 logLine("Skipping local target database {$dbName}");
                 continue;
             }            
+            
+            /* DEBUG
+            if(strcasecmp($dbName, 'Heurist_Job_Tracker')!==0){
+                $summary->databasesSkippedUnregistered++;
+                continue;
+            }
+            */            
 
             logLine(str_repeat('-', 90));
             logLine("Fetching {$dbName} (Registered ID {$registeredId})" . ($dbTitle !== '' ? " - {$dbTitle}" : ''));
@@ -201,10 +211,15 @@ function main(): void
     logLine('Errors: ' . $summary->errors);
 }
 
-function isTargetDatabaseName(string $dbName): bool
+function isTargetDatabaseName(string $dbName, string $targetDbName): bool
 {
-    $targetWithPrefix = TARGET_DB;
-    $targetWithoutPrefix = preg_replace('/^hdb_/i', '', TARGET_DB) ?? TARGET_DB;
+    $targetDbName = trim($targetDbName);
+    if ($targetDbName === '') {
+        return false;
+    }
+
+    $targetWithPrefix = $targetDbName;
+    $targetWithoutPrefix = preg_replace('/^hdb_/i', '', $targetDbName) ?? $targetDbName;
 
     return strcasecmp($dbName, $targetWithPrefix) === 0
         || strcasecmp($dbName, $targetWithoutPrefix) === 0;
@@ -218,32 +233,63 @@ function isLocalSourceServer(string $server): bool
     return in_array($host, ['localhost', '127.0.0.1', '::1', 'heuristref.net'], true);
 }
 
+//
+// loads definitions for given database
+//
 function fetchSourceDataset(ApiClient $client, string $server, string $dbName, int $registeredId): SourceDataset
 {
     $set = new SourceDataset($server, $dbName, $registeredId);
 
-    // 1. Fetch rows actually meant to be harvested from this database.
-    foreach (ENTITY_SPECS as $type => $spec) {
+    // 1. Fetch RTY/DTY/TRM actually defined by this database.
+    foreach (['RTY', 'DTY', 'TRM'] as $type) {
+        $spec = ENTITY_SPECS[$type];
         $originField = $spec['origin_db'];
-        $rows = $client->fetchRows($server, $dbName, $spec['api'], [$originField => (string)$registeredId], 0);
+
+        $rows = $client->fetchRows($server, $dbName, $spec['api'], [
+            $originField => (string)$registeredId,
+        ], 0);
+
         foreach ($rows as $row) {
             $set->addHarvestRow($type, $row);
         }
+
         logLine("  {$type}: fetched " . count($rows) . ' harvest rows');
     }
 
-    // 2. Collect direct references from harvest rows.
+    // 2. Fetch RST by harvested RTY IDs, not by rst_OriginatingDBID.
+    $rtyIds = [];
+    foreach ($set->getHarvestRows('RTY') as $rtyRow) {
+        $id = toInt($rtyRow['rty_ID'] ?? 0);
+        if ($id > 0) {
+            $rtyIds[] = $id;
+        }
+    }
+
+    $rstCount = 0;
+    foreach (array_chunk(array_values(array_unique($rtyIds)), API_LIMIT) as $chunk) {
+        $rows = $client->fetchRows($server, $dbName, 'rst', [
+            'rst_RecTypeID' => implode(',', $chunk),
+        ], 0);
+
+        foreach ($rows as $row) {
+            $set->addHarvestRow('RST', $row);
+            $rstCount++;
+        }
+    }
+
+    logLine("  RST: fetched {$rstCount} harvest rows by harvested RTY IDs");
+
+    // 3. Collect dependencies only from relevant RST/DTY/TRM.
     $collector = new ReferenceCollector($set);
     $collector->collectFromHarvestRows();
 
-    // 3. Fetch referenced RTY/DTY rows. Referenced DTY rows may themselves
-    // contain vocabulary/target-rectype references, so collect those after fetch.
     fetchMissingReferencedRows($client, $set, 'RTY');
     fetchMissingReferencedRows($client, $set, 'DTY');
+
     $collector->collectFromAllRows('DTY');
+
     fetchMissingReferencedRows($client, $set, 'RTY');
 
-    // 4. Fetch referenced terms, expanding parent/inverse chain until stable.
     do {
         $before = count($set->getNeededIds('TRM'));
         fetchMissingReferencedRows($client, $set, 'TRM');
@@ -254,6 +300,9 @@ function fetchSourceDataset(ApiClient $client, string $server, string $dbName, i
     return $set;
 }
 
+//
+// etch referenced RTY/DTY/TRM rows.
+//
 function fetchMissingReferencedRows(ApiClient $client, SourceDataset $set, string $type): void
 {
     $spec = ENTITY_SPECS[$type];
@@ -277,11 +326,16 @@ function fetchMissingReferencedRows(ApiClient $client, SourceDataset $set, strin
     }
 }
 
+//
+// process definitions to target database
+//
 function processSourceDatabase(SourceDataset $set, TargetRepository $repo, Summary $summary): void
 {
     logLine("Importing {$set->dbName} in one transaction");
 
-    $groupIds = $repo->ensureGroupsForSourceDatabase($set->dbName, $set->registeredId);
+    // Groups are created lazily only when a new RTY/DTY/TRM row is actually inserted.
+    // This avoids hundreds of empty source groups on repeat runs or databases with no new definitions.
+    $groupIds = [];
     $targetMap = new TargetIdMap($repo);
 
     // First insert/reuse all RTY/DTY/TRM rows needed either as harvest rows or dependencies.
@@ -297,13 +351,16 @@ function processSourceDatabase(SourceDataset $set, TargetRepository $repo, Summa
     importRecStructureRows($set, $repo, $targetMap, $summary);
 }
 
+//
+// insert/reuse all RTY/DTY/TRM rows needed either as harvest rows or dependencies.
+//
 function importConceptRows(
     SourceDataset $set,
     TargetRepository $repo,
     TargetIdMap $targetMap,
     Summary $summary,
     string $type,
-    array $groupIds,
+    array &$groupIds,
     bool $neutraliseReferences = false
 ): void {
     $spec = ENTITY_SPECS[$type];
@@ -313,6 +370,10 @@ function importConceptRows(
             logWarning($set->label() . " skipping {$type} row with no usable origin");
             $summary->warnings++;
             continue;
+        }
+        
+        if($origin['db']==8 && $origin['id']==53){
+            error_log('!!!!');
         }
 
         $existingId = $repo->findExistingTargetId($spec, $origin['db'], $origin['id']);
@@ -326,15 +387,15 @@ function importConceptRows(
         $prepared = ensureUniqueConceptNameForInsert($repo, $summary, $set, $type, $spec, $origin, $prepared);
 
         if ($type === 'RTY') {
-            $prepared['rty_RecTypeGroupID'] = $groupIds['rty'];
+            $prepared['rty_RecTypeGroupID'] = getLazySourceGroupId($repo, $groupIds, $set, 'rty');
         } elseif ($type === 'DTY') {
-            $prepared['dty_DetailTypeGroupID'] = $groupIds['dty'];
+            $prepared['dty_DetailTypeGroupID'] = getLazySourceGroupId($repo, $groupIds, $set, 'dty');
             if ($neutraliseReferences) {
                 unset($prepared['dty_JsonTermIDTree'], $prepared['dty_PtrTargetRectypeIDs']);
             }
         } elseif ($type === 'TRM') {
             $domain = normaliseTermDomain((string)($row['trm_Domain'] ?? 'enum'));
-            $prepared['trm_VocabularyGroupID'] = $groupIds['trm'][$domain];
+            $prepared['trm_VocabularyGroupID'] = getLazySourceGroupId($repo, $groupIds, $set, 'trm', $domain);
             if ($neutraliseReferences) {
                 $prepared['trm_ParentTermID'] = null;
                 $prepared['trm_InverseTermID'] = null;
@@ -346,6 +407,33 @@ function importConceptRows(
         $summary->inserted[$spec['table']]++;
         logConceptAction($set->dbName, $type, $spec, $prepared, 'INSERTED');
     }
+}
+
+function getLazySourceGroupId(TargetRepository $repo, array &$groupIds, SourceDataset $set, string $kind, ?string $domain = null): int
+{
+    if ($kind === 'rty') {
+        if (!isset($groupIds['rty'])) {
+            $groupIds['rty'] = $repo->ensureRecTypeGroupForSourceDatabase($set->dbName, $set->registeredId);
+        }
+        return $groupIds['rty'];
+    }
+
+    if ($kind === 'dty') {
+        if (!isset($groupIds['dty'])) {
+            $groupIds['dty'] = $repo->ensureDetailTypeGroupForSourceDatabase($set->dbName, $set->registeredId);
+        }
+        return $groupIds['dty'];
+    }
+
+    if ($kind === 'trm') {
+        $domain = normaliseTermDomain((string)($domain ?? 'enum'));
+        if (!isset($groupIds['trm'][$domain])) {
+            $groupIds['trm'][$domain] = $repo->ensureVocabularyGroupForSourceDatabase($set->dbName, $set->registeredId, $domain);
+        }
+        return $groupIds['trm'][$domain];
+    }
+
+    throw new RuntimeException("Unknown source group kind: {$kind}");
 }
 
 function updateDetailTypeReferences(SourceDataset $set, TargetRepository $repo, TargetIdMap $targetMap, Summary $summary): void
@@ -413,16 +501,41 @@ function updateTermReferences(SourceDataset $set, TargetRepository $repo, Target
             $updates[$field] = $mapped;
         }
 
-        $repo->updateByPk($spec['table'], $spec['pk'], $targetId, $updates);
+        $current = $repo->getColumnsByPk($spec['table'], $spec['pk'], $targetId, [
+            'trm_ParentTermID',
+            'trm_InverseTermID',
+        ]);
+
+        $changedUpdates = [];
+        foreach ($updates as $field => $value) {
+            if (normaliseDbNullableInt($current[$field] ?? null) !== normaliseDbNullableInt($value)) {
+                $changedUpdates[$field] = $value;
+            }
+        }
+
+        if ($changedUpdates) {
+            // If the parent value changes, clear existing term links before the
+            // defTerms UPDATE fires legacy triggers. Otherwise a trigger that
+            // inserts into defTermsLinks can fail on trl_CompositeKey before
+            // replaceTermParentLink() has a chance to use INSERT IGNORE.
+            if (array_key_exists('trm_ParentTermID', $changedUpdates)) {
+                $repo->clearTermParentLinks($targetId);
+            }
+
+            // Update only changed columns. In particular, do not include
+            // trm_ParentTermID when only trm_InverseTermID changed.
+            $repo->updateByPk($spec['table'], $spec['pk'], $targetId, $changedUpdates);
+            $summary->updated[$spec['table']]++;
+        }
 
         // The harvester inserts terms in two phases: first with NULL parent,
         // then updates trm_ParentTermID after all target-local term IDs are known.
         // Some legacy triggers do not handle NULL -> parent transitions, so keep
-        // defTermsLinks in sync explicitly and idempotently.
+        // defTermsLinks in sync explicitly and idempotently. This is done even
+        // when defTerms itself did not change, to repair missing/stale links on
+        // repeat runs without firing term UPDATE triggers unnecessarily.
         $parentTargetId = isset($updates['trm_ParentTermID']) ? toInt($updates['trm_ParentTermID']) : 0;
         $repo->replaceTermParentLink($targetId, $parentTargetId > 0 ? $parentTargetId : null);
-
-        $summary->updated[$spec['table']]++;
     }
 }
 
@@ -681,11 +794,32 @@ function rewriteIntegerTokens(string $value, callable $mapper): string
     }, $value) ?? $value;
 }
 
+function loadHeuristCredentialDefaults(): array
+{
+    $parentIni = __DIR__ . "/../../../heuristConfigIni.php";
+    if (!is_file($parentIni)) {
+        return [];
+    }
+
+    include $parentIni;
+
+    $defaults = [];
+    foreach (['dbAdminUsername', 'dbAdminPassword', 'passwordForDatabaseAccess'] as $name) {
+        if (isset(${$name}) && ${$name} !== '') {
+            $defaults[$name] = (string)${$name};
+        }
+    }
+
+    return $defaults;
+}
+
 function loadConfig(string $path): array
 {
     if (!is_file($path)) {
         throw new RuntimeException("Config file not found: {$path}");
     }
+
+    $credentialDefaults = loadHeuristCredentialDefaults();
 
     $cfg = include $path;
     if (!is_array($cfg)) {
@@ -702,6 +836,25 @@ function loadConfig(string $path): array
         throw new RuntimeException("Config is missing sources array");
     }
 
+    $targetDatabase = trim((string)($target['database'] ?? ''));
+    if ($targetDatabase === '') {
+        throw new RuntimeException("Config target.database is required");
+    }
+
+    $target['database'] = $targetDatabase;
+    $target['dbAdminUsername'] = (string)(
+        $target['dbAdminUsername']
+        ?? $target['user']
+        ?? $credentialDefaults['dbAdminUsername']
+        ?? ''
+    );
+    $target['dbAdminPassword'] = (string)(
+        $target['dbAdminPassword']
+        ?? $target['password']
+        ?? $credentialDefaults['dbAdminPassword']
+        ?? ''
+    );
+
     $normalisedSources = [];
     foreach ($sources as $source) {
         if (!is_array($source)) {
@@ -712,12 +865,32 @@ function loadConfig(string $path): array
         if ($server === '' || $registryDb === '') {
             throw new RuntimeException('Each source requires server and registryDatabase');
         }
+
         $normalised = [
             'server' => normaliseServerUrl($server),
             'registryDatabase' => normaliseDbNameForApi($registryDb),
         ];
 
-        foreach (['login', 'username', 'password', 'jwt', 'token', 'accessToken', 'authEndpoint'] as $key) {
+        $sourceUsername = (string)($source['username'] ?? $source['login'] ?? '');
+        $sourcePassword = (string)($source['password'] ?? '');
+
+        if ($sourceUsername === '' && $sourcePassword === '') {
+            // If source credentials are omitted completely, use the standard
+            // database-access user and password from heuristConfigIni.php.
+            $sourceUsername = '2';
+            $sourcePassword = (string)($credentialDefaults['passwordForDatabaseAccess'] ?? '');
+        } elseif ($sourcePassword === '' && $sourceUsername !== '') {
+            $sourcePassword = (string)($credentialDefaults['passwordForDatabaseAccess'] ?? '');
+        }
+
+        if ($sourceUsername !== '') {
+            $normalised['username'] = $sourceUsername;
+        }
+        if ($sourcePassword !== '') {
+            $normalised['password'] = $sourcePassword;
+        }
+
+        foreach (['jwt', 'token', 'accessToken', 'authEndpoint'] as $key) {
             if (array_key_exists($key, $source) && $source[$key] !== null && $source[$key] !== '') {
                 $normalised[$key] = (string)$source[$key];
             }
@@ -725,8 +898,6 @@ function loadConfig(string $path): array
 
         $normalisedSources[] = $normalised;
     }
-
-    $target['database'] = (string)($target['database'] ?? TARGET_DB);
 
     return [
         'target' => $target,
@@ -740,8 +911,11 @@ function connectTarget(array $cfg): PDO
     $port = (int)($cfg['dbPort'] ?? $cfg['port'] ?? 3306);
     $user = (string)($cfg['dbAdminUsername'] ?? $cfg['user'] ?? '');
     $pass = (string)($cfg['dbAdminPassword'] ?? $cfg['password'] ?? '');
-    $dbName = (string)($cfg['database'] ?? TARGET_DB);
+    $dbName = trim((string)($cfg['database'] ?? ''));
 
+    if ($dbName === '') {
+        throw new RuntimeException('Target database is required');
+    }
     if ($user === '') {
         throw new RuntimeException('Target dbAdminUsername/user is required');
     }
@@ -784,6 +958,15 @@ function cleanNullable(mixed $value): ?string
     }
     $str = trim((string)$value);
     return $str === '' ? null : $str;
+}
+
+function normaliseDbNullableInt(mixed $value): ?int
+{
+    if ($value === null || $value === '') {
+        return null;
+    }
+    $intValue = (int)$value;
+    return $intValue > 0 ? $intValue : null;
 }
 
 function normaliseTermDomain(string $domain): string
@@ -829,28 +1012,28 @@ function logRunHeader(array $sources): void
     $lines[] = str_repeat('-', 90);
 
     $block = implode(PHP_EOL, $lines) . PHP_EOL;
-    fwrite(STDOUT, $block);
+    write_out($block);
     file_put_contents(LOG_FILE, $block, FILE_APPEND);
 }
 
 function logLine(string $message): void
 {
     $line = '[' . date('Y-m-d H:i:s') . '] ' . $message . PHP_EOL;
-    fwrite(STDOUT, $line);
+    write_out($line);
     file_put_contents(LOG_FILE, $line, FILE_APPEND);
 }
 
 function logWarning(string $message): void
 {
     $line = '[' . date('Y-m-d H:i:s') . '] WARNING: ' . $message . PHP_EOL;
-    fwrite(STDERR, $line);
+    write_err($line);
     file_put_contents(LOG_FILE, $line, FILE_APPEND);
 }
 
 function logError(string $message): void
 {
     $line = '[' . date('Y-m-d H:i:s') . '] ERROR: ' . $message . PHP_EOL;
-    fwrite(STDERR, $line);
+    write_err($line);
     file_put_contents(LOG_FILE, $line, FILE_APPEND);
 }
 
@@ -1364,6 +1547,36 @@ final class TargetRepository
         }
     }
 
+    public function ensureRecTypeGroupForSourceDatabase(string $dbName, int $registeredId): int
+    {
+        $groupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " [DB{$registeredId}]", 40);
+        return $this->ensureGroup('defRecTypeGroups', 'rtg_ID', 'rtg_Name', $groupName, [
+            'rtg_Domain' => 'functionalgroup',
+            'rtg_Description' => "Harvested concepts from {$dbName}",
+        ]);
+    }
+
+    public function ensureDetailTypeGroupForSourceDatabase(string $dbName, int $registeredId): int
+    {
+        $groupName = $this->makeUniqueBoundedGroupName('defDetailTypeGroups', 'dtg_Name', $dbName, " [DB{$registeredId}]", 63);
+        return $this->ensureGroup('defDetailTypeGroups', 'dtg_ID', 'dtg_Name', $groupName, [
+            'dtg_Description' => "Harvested concepts from {$dbName}",
+        ]);
+    }
+
+    public function ensureVocabularyGroupForSourceDatabase(string $dbName, int $registeredId, string $domain): int
+    {
+        $domain = normaliseTermDomain($domain);
+        $suffix = $domain === 'relation' ? " [DB{$registeredId} rel]" : " [DB{$registeredId} enum]";
+        $groupName = $this->makeUniqueBoundedGroupName('defVocabularyGroups', 'vcg_Name', $dbName, $suffix, 40);
+        return $this->ensureGroup('defVocabularyGroups', 'vcg_ID', 'vcg_Name', $groupName, [
+            'vcg_Domain' => $domain,
+            'vcg_Description' => $domain === 'relation'
+                ? "Harvested relation vocabularies from {$dbName}"
+                : "Harvested enum vocabularies from {$dbName}",
+        ]);
+    }
+
     public function ensureGroupsForSourceDatabase(string $dbName, int $registeredId): array
     {
         $rtyGroupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " [DB{$registeredId}]", 40);
@@ -1465,6 +1678,40 @@ final class TargetRepository
         $stmt->execute();
     }
 
+    public function getColumnsByPk(string $table, string $pk, int $pkValue, array $fields): array
+    {
+        $allowed = array_flip($this->columns[$table] ?? []);
+        if (!isset($allowed[$pk])) {
+            throw new RuntimeException("Unknown primary key column {$table}.{$pk}");
+        }
+
+        $columns = [];
+        foreach ($fields as $field) {
+            if (!is_string($field) || !isset($allowed[$field])) {
+                throw new RuntimeException("Unknown column {$table}.{$field}");
+            }
+            $columns[] = $field;
+        }
+
+        if (!$columns) {
+            return [];
+        }
+
+        $sql = sprintf(
+            'SELECT %s FROM `%s` WHERE `%s` = :__pk LIMIT 1',
+            implode(', ', array_map(fn(string $field): string => "`{$field}`", $columns)),
+            $table,
+            $pk
+        );
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':__pk', $pkValue, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($row) ? $row : [];
+    }
+
     public function columnValueExists(string $table, string $field, string $value): bool
     {
         $allowed = array_flip($this->columns[$table] ?? []);
@@ -1478,6 +1725,13 @@ final class TargetRepository
         $stmt->execute();
 
         return $stmt->fetchColumn() !== false;
+    }
+
+    public function clearTermParentLinks(int $termId): void
+    {
+        $delete = $this->pdo->prepare('DELETE FROM `defTermsLinks` WHERE `trl_TermID` = :termId');
+        $delete->bindValue(':termId', $termId, PDO::PARAM_INT);
+        $delete->execute();
     }
 
     public function replaceTermParentLink(int $termId, ?int $parentId): void
@@ -1557,5 +1811,24 @@ final class TargetRepository
             $cols[] = $row['Field'];
         }
         return $cols;
+    }
+}
+
+function write_out(string $message): void
+{
+    if (PHP_SAPI === 'cli') {
+        fwrite(STDOUT, $message);
+    } else {
+        echo htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'<br>';
+    }
+}
+
+function write_err(string $message): void
+{
+    if (PHP_SAPI === 'cli') {
+        fwrite(STDERR, $message);
+    } else {
+        echo 'ERROR: '.htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'<br>';
+        error_log($message);
     }
 }

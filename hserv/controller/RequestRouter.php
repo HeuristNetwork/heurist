@@ -101,7 +101,7 @@ final class RequestRouter
         if ($hostMap === null && empty($segments) && empty($query['db'])) {
             $welcome = self::serverRoot() . "/index.html";
             if (is_file($welcome)) {
-                return self::resultInternal($welcome, []);
+                return self::resultInternal($activeVersion, [], $welcome);
             }
             // fallback: go to startup
             return self::resultRedirect("/{$activeVersion}/startup/", 302, []);
@@ -114,8 +114,7 @@ final class RequestRouter
             $dbResolved = self::applyDbRef($mapping, (string)$query['db']);
             $query['db'] = $dbResolved;
 
-            $script = self::serverRoot() . "/{$activeVersion}/index.php";
-            return self::resultInternal($script, $query);
+            return self::resultInternal($activeVersion, $query);
         }        
         
         // Reserved paths (either from options or mapping file)
@@ -145,7 +144,7 @@ final class RequestRouter
         // IMPORTANT: API must be executed as an entry script (do not go via index.php)
         if (self::isApiRoute($segments)) {
             $script = self::serverRoot() . "/{$activeVersion}/hserv/controller/api.php";
-            return self::resultInternal($script, $query);
+            return self::resultInternal($activeVersion, $query, $script);
         }
 
         // ---- 3) /db/* pretty namespace (record/def/file)
@@ -165,8 +164,7 @@ final class RequestRouter
             // Query wins over path-derived params
             $params = array_merge($params, $query);
 
-            $script = self::serverRoot() . "/{$activeVersion}/index.php";
-            return self::resultInternal($script, $params);
+            return self::resultInternal($activeVersion, $params);
         }
 
         // ---- 4) Own-domain website handling (must preserve host -> never redirect)
@@ -182,7 +180,7 @@ final class RequestRouter
                     } elseif (!empty($query['db'])) {
                         $query['db'] = self::applyDbRef($mapping, (string)$query['db']);
                     }
-                    return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", $query);
+                    return self::resultInternal($activeVersion, $query);
                 }
                 $segments = $substitution['segments'];
             }
@@ -192,12 +190,12 @@ final class RequestRouter
 
         // ---- 5) Version root (/<version>)
         if ($versionPrefix !== null && empty($segments)) {
-            return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
+            return self::resultInternal($activeVersion, []);
         }
 
         // ---- 6) Empty path (rare if root is rewritten): fall into app
         if (empty($segments)) {
-            return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
+            return self::resultInternal($activeVersion, []);
         }
 
         // ---- 7) Versionless /<db> and /<db>/<action>/...
@@ -205,7 +203,7 @@ final class RequestRouter
 
         // Avoid treating reserved prefixes as db
         if (self::isHeuristCodeFolder($dbCandidate) || in_array($dbCandidate, $reserved, true)) {
-            return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
+            return self::resultInternal($activeVersion, []);
         }        
 
         if (!self::isValidDbToken($dbCandidate)) {
@@ -222,7 +220,7 @@ final class RequestRouter
             // For unmapped hosts, canonicalize to a pretty /web/ URL.
             if ($mustPreserveHost) {
                 $params = ['db' => $dbResolved, 'website' => (int)($mappedWebsite ?? 0)];
-                return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", array_merge($params, $query));
+                return self::resultInternal($activeVersion, array_merge($params, $query));
             }
 
             $q  = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_QUERY);
@@ -244,7 +242,7 @@ final class RequestRouter
                 } else {
                     $query['db'] = self::applyDbRef($mapping, (string)$query['db']);
                 }
-                return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", $query);
+                return self::resultInternal($activeVersion, $query);
             }
             $segments = array_merge([$dbCandidate], $substitution['segments']);
         }
@@ -255,13 +253,13 @@ final class RequestRouter
             $params = self::paramsFromPrettyRoute($dbResolved, $action, array_slice($segments, 2), $defaultWebsite);
             // Query wins over path-derived params
             $params = array_merge($params, $query);
-            return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", $params);
+            return self::resultInternal($activeVersion, $params);
         }
 
         // If it looks like /<db>/<something> and <something> is not a known action, treat as 404.
         return self::result404();
         // Fallback: let app decide (db browser / 404 / etc.)
-        //return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
+        //return self::resultInternal($activeVersion, []);
         
     }
 
@@ -394,14 +392,19 @@ final class RequestRouter
     
     // ----------------- Route builders -----------------
 
-    private static function resultInternal(string $script, array $params): array
+    private static function resultInternal(string $activeVersion, array $params, string $script=''): array
     {
+        if($script===''){
+            $script = self::serverRoot() . "/{$activeVersion}/index.php";
+        }
+        
         return [
             'mode'     => 'INTERNAL',
             'status'   => 200,
             'script'   => $script,
             'location' => null,
             'params'   => $params,
+            'version'  => $activeVersion
         ];
     }
 
@@ -438,7 +441,7 @@ final class RequestRouter
         // Home: /
         if (empty($segments)) {
             $params['website'] = ($website !== null) ? $website : 0;
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
+            return self::resultInternal($version, array_merge($params, $query));
         }
 
         // /<websiteid>
@@ -454,24 +457,24 @@ final class RequestRouter
                 $params['website'] = $n;
                 // pageid intentionally not set
             }
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
+            return self::resultInternal($version, array_merge($params, $query));
         }
 
         // /<websiteid>/<pageid>
         if (count($segments) >= 2 && ctype_digit($segments[0]) && ctype_digit($segments[1])) {
             $params['website'] = (int)$segments[0];
             $params['pageid']  = (int)$segments[1];
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
+            return self::resultInternal($version, array_merge($params, $query));
         }
 
         // Allow /web/..., numeric shorthand, etc. on own-domain too.
         $action = $segments[0] ?? null;
         if ($action !== null && (in_array($action, self::ALLOWED_ACTIONS, true) || self::isPositiveIntToken($action))) {
             $params = self::paramsFromPrettyRoute($db, $action, array_slice($segments, 1), ($website !== null ? (int)$website : null));
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
+            return self::resultInternal($version, array_merge($params, $query));
         }
 
-        return self::resultInternal(self::serverRoot() . "/{$version}/index.php", array_merge($params, $query));
+        return self::resultInternal($version, array_merge($params, $query));
     }
 
     /*

@@ -267,7 +267,7 @@
 #menu-files-upload#Загрузить медиа файлы
 #menu-files-index#Проиндексировать
 #menu-files-upload-hint#Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files
-#menu-files-index-hint#Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)
+#menu-files-index-hint#Register files on the server and create Digital Media records for them (reads and creates FieldHelper manifests)
 #Website#Веб сайт
 #menu-cms-create#Создать
 #menu-cms-edit#Править

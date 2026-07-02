@@ -67,7 +67,7 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         }
 
         if(this.options.isFrontUI){
-            this.recordList.css('top','80px');  
+            this.recordList.css('top', '80px');  
         }else{
             this.recordList.css('top',0);  
         }        
@@ -107,7 +107,7 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
      * is dragged and dropped onto a group in the list.
      */
     _addOnDrop: function(type_ID, group_ID){
-        //to be implemented in descendant 
+        //to be implemented in descendant
     },
     
     /**
@@ -163,6 +163,12 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
             }
         });
 
+        this._on(this.recordList, {
+            'resultlistonpagerender': () => {
+                that._onPageRender();
+            }
+        })
+
         if(this.options.isFrontUI){
             //specify add new/save order buttons above record list
             let btn_array = [
@@ -179,7 +185,9 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
             this._toolbar = this.searchForm;
             this.searchForm.css({'padding-top': '8px'}).empty();
             $(`<h4>${that._title}</h4>`).css({'margin':5}).appendTo(this.searchForm);
-            $('<span>', {text: window.hWin.HR('Drag frequently used groups to the top'), style: 'color: darkgreen'}).appendTo(this.searchForm);
+            if(this._entityPrefix !== 'rtg'){
+                $('<span>', {text: window.hWin.HR('Drag frequently used groups to the top'), style: 'color: darkgreen'}).appendTo(this.searchForm);
+            }
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
 
@@ -235,10 +243,11 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         if(recName=='Trash'){
             html = html + '<div style="display:table-cell;vertical-align: middle;"><span class="ui-icon ui-icon-trash"></span></div>';
         }
-        
-        html = html + 
-            '<div class="item truncate" style="font-weight:bold;display:table-cell;width:150;max-width:150;padding:6px;">'
-            +window.hWin.HEURIST4.util.htmlEscape(recName)+'</div>';
+
+        let maxWidth = this._entityPrefix === 'vcg' ? '232px' : '35ch'; //'24ch'
+        maxWidth = this._entityPrefix === 'dtg' ? '232px' : maxWidth; //'21ch'
+        let recNameEscaped = window.hWin.HEURIST4.util.htmlEscape(recName);
+        html += `<div class="item truncate" style="font-weight:bold;display:table-cell;max-width:${maxWidth};padding:6px;" title="${recNameEscaped}">${recNameEscaped}</div>`;
 
         if(recName!='Trash'){        
             if(this.options.edit_mode=='popup'){
@@ -360,6 +369,10 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
             }
             
         }
+    },
+
+    _onPageRender: function(){
+        //to be implemented in descendant
     }
-  
+
 });

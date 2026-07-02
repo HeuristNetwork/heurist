@@ -67,8 +67,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         },
         heurist_StoryMap: {
             placeholder_def: 'Please select a story in the list',
-            elementsPlaceholder_def: 'There are no story elements to display for the selected item',
-            elementsPlaceholderSub_def: 'Story elements may exist but not be publicly visible'
+            elementsPlaceholder_def: 'There are no elements to display for the selected item',
+            elementsPlaceholderSub_def: 'Elements may exist but not be publicly visible'
         },
         heurist_Graph: {
             placeholder_def: 'recvis_placeholder',
@@ -736,7 +736,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         showclear_button: true,
                         dtFields:{
                             dty_Type:"resource", rst_MaxValues:0, rst_MinValues:1,
-                            rst_DisplayName: 'Select media records:', rst_DisplayHelpText:'',
+                            rst_DisplayName: 'Select Digital Media records:', rst_DisplayHelpText:'',
                             rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_MEDIA_RECORD']],
                             rst_FieldConfig: {entity:'records', csv:false}
                         },
@@ -1211,7 +1211,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 if(!opts['reportElementMapMode']) opts['reportElementMapMode'] = 'linked';
 
                 
-                if(!opts['elementsPlaceholder']) opts['elementsPlaceholder'] = '<br><br>There are no story elements to display for the selected item';
+                if(!opts['elementsPlaceholder']) opts['elementsPlaceholder'] = '<br><br>There are no elements to display for the selected item';
                 if(!opts['elementsPlaceholderSub']) opts['elementsPlaceholderSub'] = '<i>Story elements may exist but not be publicly visible</i>';
 
                 $dlg.find('input[name="elementsPlaceholder"]').val(opts['elementsPlaceholder']);
