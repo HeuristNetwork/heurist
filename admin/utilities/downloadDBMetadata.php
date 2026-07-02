@@ -1,4 +1,5 @@
 <?php
+
 /**
 * downloadDBMetadata.php - Nightly synchronisation of database metadata from the Heurist Reference Index
 *
@@ -32,38 +33,8 @@
 
 global $arg_no_action;
 
-$is_shell = false;
-$single_db = null;
-$eol = "\n";
-
-if (@$argv) {
-
-    $is_shell = true;
-
-    // handle command-line queries
-    // e.g.  php -f downloadDBMetadata.php -- -db mydatabase
-    $ARGV = array();
-    for ($i = 0; $i < count($argv); ++$i) {
-        if ($argv[$i][0] === '-') {
-            if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
-                $ARGV[$argv[$i]] = $argv[$i + 1];
-                ++$i;
-            } else {
-                $ARGV[$argv[$i]] = true;
-            }
-        } else {
-            array_push($ARGV, $argv[$i]);
-        }
-    }
-
-    if (@$ARGV['-db']) {
-        $single_db = $ARGV['-db'];
-    }
-} else {
-    $eol = '<br>';
-}
-
 use hserv\utilities\USanitize;
+use hserv\utilities\UAdminScript;
 
 require_once dirname(__FILE__) . '/../../autoload.php';
 
@@ -71,30 +42,23 @@ require_once dirname(__FILE__) . '/../../autoload.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UFile.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UMail.php';
 
+$args = UAdminScript::parseArgs(@$argv);
+$is_shell = $args['is_shell'];
+$single_db = $args['single_db'];
+$eol = $args['eol'];
+
 $system = new hserv\System();
 
-if (!$is_shell) {
-    // web invocation must be password protected like other server-function scripts
-    $sysadmin_pwd = USanitize::getAdminPwd();
-    if (!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)) {
-        include_once dirname(__FILE__) . '/../../hclient/framecontent/infoPage.php';
-        exit;
-    }
-    header('Content-type: text/html; charset=utf-8');
-}
+UAdminScript::requireWebPasswordIfNeeded($system, $is_shell, @$passwordForServerFunctions);
 
 if (!$system->init(null, false, false)) {
     exit("Cannot establish connection to sql server\n");
 }
 
 $mysqli = $system->getMysqli();
+$upload_root = UAdminScript::initFilestoreRoot($system);
 
-$upload_root = $system->getFileStoreRootFolder();
-if (!defined('HEURIST_FILESTORE_ROOT')) {
-    define('HEURIST_FILESTORE_ROOT', $upload_root);
-}
-
-$databases = $single_db ? array($single_db) : mysql__getdatabases4($mysqli, false);
+$databases = UAdminScript::getDatabaseList($mysqli, $single_db);
 
 if (!is_array($databases)) {
     exit("Unable to retrieve list of databases on this server\n");
@@ -110,17 +74,15 @@ print "Heurist database metadata synchronisation - " . date(DATE_8601) . $eol . 
 
 foreach ($databases as $db_name) {
 
-    $short_name = basename($db_name); // sanitize - no path components allowed
-
-    list($database_name_full, $short_name) = mysql__get_names($short_name);
-
-    if (mysql__check_dbname($short_name) !== null) {
-        continue; //not a valid heurist database name
+    $resolved = UAdminScript::resolveDbName($db_name);
+    if ($resolved === null) {
+        continue;
     }
+    list($database_name_full, $short_name) = $resolved;
 
     $regID = mysql__select_value(
         $mysqli,
-        'SELECT sys_dbRegisteredID FROM `' . $database_name_full . '`.sysIdentification LIMIT 1'
+        'SELECT sys_dbRegisteredID FROM `' . $database_name_full . '`.sysIdentification LIMIT 1',
     );
 
     if (!isPositiveInt($regID)) {
