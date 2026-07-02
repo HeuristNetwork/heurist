@@ -120,7 +120,7 @@ class UAdminScript
 
     /**
     * Sanitise/validate a raw database name taken from the database list and split it into
-    * its full and short forms. Callers should `continue` their loop when this returns null.
+    * its full and short forms.
     *
     * @param string $db_name
     * @return array{0: string, 1: string}|null  array($database_name_full, $short_name), or null if invalid
@@ -135,5 +135,77 @@ class UAdminScript
         }
 
         return [$database_name_full, $short_name];
+    }
+
+    /**
+    * Full bootstrap for a nightly/admin script: parse CLI args, enforce the web password
+    * gate, connect to the SQL server, work out the filestore root and the list of databases
+    * to process. This is everything both assessFAIR.php and downloadDBMetadata.php used to
+    * duplicate line-for-line before their per-database logic began.
+    *
+    * Exits the script directly (with a message) if the SQL connection or database list
+    * cannot be obtained, same as the two calling scripts always did.
+    *
+    * @param array|null $argv
+    * @param string|null $passwordForServerFunctions
+    * @return array{system: \hserv\System, mysqli: \mysqli, upload_root: string,
+    *               databases: array, eol: string, is_shell: bool}
+    */
+    public static function bootstrap($argv, $passwordForServerFunctions)
+    {
+        $args = self::parseArgs($argv);
+        $is_shell = $args['is_shell'];
+        $single_db = $args['single_db'];
+        $eol = $args['eol'];
+
+        $system = new \hserv\System();
+
+        self::requireWebPasswordIfNeeded($system, $is_shell, $passwordForServerFunctions);
+
+        if (!$system->init(null, false, false)) {
+            exit("Cannot establish connection to sql server\n");
+        }
+
+        $mysqli = $system->getMysqli();
+        $upload_root = self::initFilestoreRoot($system);
+
+        $databases = self::getDatabaseList($mysqli, $single_db);
+
+        if (!is_array($databases)) {
+            exit("Unable to retrieve list of databases on this server\n");
+        }
+
+        set_time_limit(0);
+
+        return [
+            'system' => $system,
+            'mysqli' => $mysqli,
+            'upload_root' => $upload_root,
+            'databases' => $databases,
+            'eol' => $eol,
+            'is_shell' => $is_shell,
+        ];
+    }
+
+    /**
+    * Iterate over a raw database list, skipping invalid names, and invoke a callback with
+    * the resolved ($database_name_full, $short_name) pair for each valid database. Factors
+    * out the resolveDbName()+continue pattern that was repeated at the top of every script's
+    * foreach loop.
+    *
+    * @param array $databases        raw database list, as returned by getDatabaseList()
+    * @param callable $callback      function(string $database_name_full, string $short_name): void
+    * @return void
+    */
+    public static function eachValidDatabase($databases, callable $callback)
+    {
+        foreach ($databases as $db_name) {
+            $resolved = self::resolveDbName($db_name);
+            if ($resolved === null) {
+                continue;
+            }
+            list($database_name_full, $short_name) = $resolved;
+            $callback($database_name_full, $short_name);
+        }
     }
 }

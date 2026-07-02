@@ -42,29 +42,10 @@ require_once dirname(__FILE__) . '/../../autoload.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UFile.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UMail.php';
 
-$args = UAdminScript::parseArgs(@$argv);
-$is_shell = $args['is_shell'];
-$single_db = $args['single_db'];
-$eol = $args['eol'];
-
-$system = new hserv\System();
-
-UAdminScript::requireWebPasswordIfNeeded($system, $is_shell, @$passwordForServerFunctions);
-
-if (!$system->init(null, false, false)) {
-    exit("Cannot establish connection to sql server\n");
-}
-
-$mysqli = $system->getMysqli();
-$upload_root = UAdminScript::initFilestoreRoot($system);
-
-$databases = UAdminScript::getDatabaseList($mysqli, $single_db);
-
-if (!is_array($databases)) {
-    exit("Unable to retrieve list of databases on this server\n");
-}
-
-set_time_limit(0);
+$ctx = UAdminScript::bootstrap(@$argv, @$passwordForServerFunctions);
+$mysqli = $ctx['mysqli'];
+$upload_root = $ctx['upload_root'];
+$eol = $ctx['eol'];
 
 $cnt_updated = 0;
 $cnt_skipped = 0;
@@ -72,13 +53,7 @@ $cnt_errors  = 0;
 
 print "Heurist database metadata synchronisation - " . date(DATE_8601) . $eol . $eol;
 
-foreach ($databases as $db_name) {
-
-    $resolved = UAdminScript::resolveDbName($db_name);
-    if ($resolved === null) {
-        continue;
-    }
-    list($database_name_full, $short_name) = $resolved;
+UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full, $short_name) use ($mysqli, $upload_root, $eol, &$cnt_updated, &$cnt_skipped, &$cnt_errors) {
 
     $regID = mysql__select_value(
         $mysqli,
@@ -88,7 +63,7 @@ foreach ($databases as $db_name) {
     if (!isPositiveInt($regID)) {
         // database is not registered with the Heurist Reference Index - nothing to do
         $cnt_skipped++;
-        continue;
+        return;
     }
 
     print "Database '$short_name' is registered (ID #$regID)$eol";
@@ -111,7 +86,7 @@ foreach ($databases as $db_name) {
         print "  ERROR: download failed - " . ($glb_curl_error ?: 'no data returned') . $eol;
         sendEmailToAdmin('Heurist metadata sync failed for ' . $short_name, $err_msg, false);
         $cnt_errors++;
-        continue;
+        return;
     }
 
     // validate the downloaded content is well-formed XML before overwriting anything
@@ -136,7 +111,7 @@ foreach ($databases as $db_name) {
         print "  ERROR: downloaded content is not valid XML$eol";
         sendEmailToAdmin('Heurist metadata sync: invalid XML for ' . $short_name, $err_msg, false);
         $cnt_errors++;
-        continue;
+        return;
     }
 
     // settings subdirectory of this database's filestore directory
@@ -150,7 +125,7 @@ foreach ($databases as $db_name) {
         print "  ERROR: cannot access settings folder $settings_dir$eol";
         sendEmailToAdmin('Heurist metadata sync: filestore error for ' . $short_name, $err_msg, false);
         $cnt_errors++;
-        continue;
+        return;
     }
 
     $target_file = $settings_dir . 'DBMetadata.xml';
@@ -166,6 +141,6 @@ foreach ($databases as $db_name) {
         sendEmailToAdmin('Heurist metadata sync: write failure for ' . $short_name, $err_msg, false);
         $cnt_errors++;
     }
-}
+});
 
 print $eol . "Finished. Updated: $cnt_updated   Not registered (skipped): $cnt_skipped   Errors: $cnt_errors" . $eol;

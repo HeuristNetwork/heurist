@@ -37,46 +37,21 @@ use hserv\utilities\FairScore;
 require_once dirname(__FILE__) . '/../../autoload.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UFile.php';
 
-$args = UAdminScript::parseArgs(@$argv);
-$is_shell = $args['is_shell'];
-$single_db = $args['single_db'];
-$eol = $args['eol'];
-
-$system = new hserv\System();
-
-UAdminScript::requireWebPasswordIfNeeded($system, $is_shell, @$passwordForServerFunctions);
-
-if (!$system->init(null, false, false)) {
-    exit("Cannot establish connection to sql server\n");
-}
-
-$mysqli = $system->getMysqli();
-$upload_root = UAdminScript::initFilestoreRoot($system);
-
-$databases = UAdminScript::getDatabaseList($mysqli, $single_db);
-
-if (!is_array($databases)) {
-    exit("Unable to retrieve list of databases on this server\n");
-}
-
-set_time_limit(0);
+$ctx = UAdminScript::bootstrap(@$argv, @$passwordForServerFunctions);
+$mysqli = $ctx['mysqli'];
+$upload_root = $ctx['upload_root'];
+$eol = $ctx['eol'];
 
 $cnt_done = 0;
 $cnt_errors = 0;
 
 print "Heurist FAIR score assessment - " . date(DATE_8601) . $eol . $eol;
 
-foreach ($databases as $db_name) {
-
-    $resolved = UAdminScript::resolveDbName($db_name);
-    if ($resolved === null) {
-        continue;
-    }
-    list($database_name_full, $short_name) = $resolved;
+UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full, $short_name) use ($mysqli, $upload_root, $eol, &$cnt_done, &$cnt_errors) {
 
     if (!hasTable($mysqli, 'sysIdentification', $database_name_full) || !hasTable($mysqli, 'Records', $database_name_full)) {
         // not a valid/complete Heurist database (e.g. mid-creation or broken) - skip silently
-        continue;
+        return;
     }
 
     try {
@@ -84,7 +59,7 @@ foreach ($databases as $db_name) {
     } catch (\Throwable $e) {
         print "Database '$short_name': ERROR calculating score - " . $e->getMessage() . $eol;
         $cnt_errors++;
-        continue;
+        return;
     }
 
     $filestore_dir = rtrim($upload_root, '/') . '/' . $short_name . '/';
@@ -97,6 +72,6 @@ foreach ($databases as $db_name) {
         print "Database '$short_name': ERROR writing FAIRscore.txt to $filestore_dir" . "settings/" . $eol;
         $cnt_errors++;
     }
-}
+});
 
 print $eol . "Finished. Scored: $cnt_done   Errors: $cnt_errors" . $eol;
