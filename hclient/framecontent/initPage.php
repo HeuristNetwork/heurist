@@ -51,8 +51,6 @@ if (@$_REQUEST['db']) {
 
 if (!$isSystemInited) {
 
-    error_log("System init failed for db=" . @$_REQUEST['db'] . " error=" . print_r($system->getError(), true));
-
     $treatWronDatabase = ERROR_REDIR;
 
     if (defined('IS_INDEX_PAGE')) {
