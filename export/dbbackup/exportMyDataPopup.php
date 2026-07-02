@@ -58,7 +58,7 @@ define('MANAGER_REQUIRED', 1);
  * Relative path to the parent directory, used for JS/CSS links.
  * @var string
  */
-define('PDIR','../../');
+define('PDIR', '../../');
 
 set_time_limit(0); // No time limit for this potentially long-running script.
 
@@ -69,31 +69,31 @@ use hserv\utilities\UArchive;
 use hserv\utilities\DbExportTSV;
 
 // Initialize the page (minimal version for popups)
-require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once dirname(__FILE__) . '/../../hclient/framecontent/initPageMin.php';
 // For downloadFile function and other utilities
-require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
+require_once dirname(__FILE__) . '/../../hserv/records/search/recordFile.php';
 
 // Define paths for various backup folders
 /**
  * Path to the main temporary backup folder for the current database.
  * @var string
  */
-define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname());
+define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR . DIR_BACKUP . $system->dbname());
 /**
  * Path to the temporary folder for storing a standalone SQL backup.
  * @var string
  */
-define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_sql');
+define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR . DIR_BACKUP . $system->dbname() . '_sql');
 /**
  * Path to the temporary folder for storing a standalone HML backup.
  * @var string
  */
-define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_hml');
+define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR . DIR_BACKUP . $system->dbname() . '_hml');
 /**
  * Path to the temporary folder for storing a standalone TSV backup.
  * @var string
  */
-define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_tsv');
+define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR . DIR_BACKUP . $system->dbname() . '_tsv');
 
 // --- Main script logic: Handle request parameters ---
 $mode = @$_REQUEST['mode']; // Current operation mode
@@ -113,17 +113,17 @@ if ($mode > 1) {
         $format = 'tar.bz2'; // TAR files are compressed with bzip2
     }
 
-    if ($mode == '2' && file_exists(FOLDER_BACKUP.'.'.$format)) { // Download entire archived folder
-        downloadFile($mime, FOLDER_BACKUP.'.'.$format); // downloadFile is from recordFile.php
-    } elseif ($mode == '3' && file_exists(FOLDER_SQL_BACKUP.'.'.$format)) {  // Download archived SQL dump
-        downloadFile($mime, FOLDER_SQL_BACKUP.'.'.$format);
-    } elseif ($mode == '5' && file_exists(FOLDER_HML_BACKUP.'.'.$format)) {  // Download archived HML file
-        downloadFile($mime, FOLDER_HML_BACKUP.'.'.$format);
+    if ($mode == '2' && file_exists(FOLDER_BACKUP . '.' . $format)) { // Download entire archived folder
+        downloadFile($mime, FOLDER_BACKUP . '.' . $format); // downloadFile is from recordFile.php
+    } elseif ($mode == '3' && file_exists(FOLDER_SQL_BACKUP . '.' . $format)) {  // Download archived SQL dump
+        downloadFile($mime, FOLDER_SQL_BACKUP . '.' . $format);
+    } elseif ($mode == '5' && file_exists(FOLDER_HML_BACKUP . '.' . $format)) {  // Download archived HML file
+        downloadFile($mime, FOLDER_HML_BACKUP . '.' . $format);
     } elseif ($mode == '6' && folderExists(FOLDER_TSV_BACKUP, false)) {  // Download archived TSV subdirectory
         // REMARK: Assumes FOLDER_TSV_BACKUP gets zipped/tarred with its name + .$format
-        downloadFile($mime, FOLDER_TSV_BACKUP.'.'.$format);
+        downloadFile($mime, FOLDER_TSV_BACKUP . '.' . $format);
     } elseif ($mode == '4') {  // Cleanup backup folder (called on exit/cancel)
-        folderDelete2(HEURIST_FILESTORE_DIR.DIR_BACKUP, false); // false = do not delete parent folder itself
+        folderDelete2(HEURIST_FILESTORE_DIR . DIR_BACKUP, false); // false = do not delete parent folder itself
     }
     exit; // Terminate script after download or cleanup
 }
@@ -145,7 +145,7 @@ if ($mode > 1) {
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; // Common CSS for Heurist pages ?>
+        <?php include_once dirname(__FILE__) . '/../../hclient/framecontent/initPageCss.php'; // Common CSS for Heurist pages?>
 
         <script type=text/javascript>
             /**
@@ -173,7 +173,7 @@ if ($mode > 1) {
                     if (is_repository) {
                         // Repository operations require HAPI4; redirect to info page if not available.
                         $('body').children().hide();
-                        window.location = '<?php echo PDIR.'hclient/framecontent/infoPage.php?error='.rawurlencode('It is possible to perform this operation from Heurist admin interface only');?>';
+                        window.location = '<?php echo PDIR . 'hclient/framecontent/infoPage.php?error=' . rawurlencode('It is possible to perform this operation from Heurist admin interface only');?>';
                     }
                 } else if (is_repository) {
                     // If in repository mode and HAPI4 is available, initialize the repository selector.
@@ -187,7 +187,7 @@ if ($mode > 1) {
              */
             function closeArchiveWindow() {
                 // Perform AJAX request to cleanup backup folder (mode=4)
-                <?php print '$.ajax("'.HEURIST_BASE_URL.'/export/dbbackup/exportMyDataPopup.php?mode=4&db='.$system->dbname().'");';?>
+                <?php print '$.ajax("' . HEURIST_BASE_URL . '/export/dbbackup/exportMyDataPopup.php?mode=4&db=' . $system->dbname() . '");';?>
                 window.close(); // Close the popup window
             }
 
@@ -410,26 +410,26 @@ if ($mode > 1) {
         // $please_advise is defined but not consistently used. It could be appended to error messages.
         $please_advise = "<br>Please consult with your system administrator for a resolution.";
 
-        $DB_LICENSE = '';
-        $DB_DESCRIPTION = mysql__select_value($system->getMysqli(), "SELECT sys_dbDescription FROM sysIdentification WHERE sys_ID = 1");
-        $DB_LOCATION = '';
-        $DB_KEYWORDS = '';
-        $DB_COLLECTION = '';
+$DB_LICENSE = '';
+$DB_DESCRIPTION = mysql__select_value($system->getMysqli(), "SELECT sys_dbDescription FROM sysIdentification WHERE sys_ID = 1");
+$DB_LOCATION = '';
+$DB_KEYWORDS = '';
+$DB_COLLECTION = '';
 
-        // Load previous settings
-        $lastDetails = $system->settings->getDatabaseSetting('External IDs');
-        if($lastDetails && array_key_exists('data', $lastDetails)){
+// Load previous settings
+$lastDetails = $system->settings->getDatabaseSetting('External IDs');
+if ($lastDetails && array_key_exists('data', $lastDetails)) {
 
-            $DB_LICENSE = $lastDetails['data']['license'];
-            $DB_DESCRIPTION = $lastDetails['data']['desc'];
-            $DB_LOCATION = $lastDetails['data']['location'];
-            $DB_KEYWORDS = $lastDetails['data']['keywords'];
-            $DB_COLLECTION = $lastDetails['data']['collection'];
-        }
+    $DB_LICENSE = $lastDetails['data']['license'];
+    $DB_DESCRIPTION = $lastDetails['data']['desc'];
+    $DB_LOCATION = $lastDetails['data']['location'];
+    $DB_KEYWORDS = $lastDetails['data']['keywords'];
+    $DB_COLLECTION = $lastDetails['data']['collection'];
+}
 
-        // --- Display initial form if $mode is not set (i.e., initial page load) ---
-        if (!$mode) {
-            ?>
+// --- Display initial form if $mode is not set (i.e., initial page load) ---
+if (!$mode) {
+    ?>
             <!-- Initial form for selecting export options -->
             <h3 class="ui-heurist-title">This function is available to database adminstrators only (therefore you are a database administrator!)</h3>
             <p>The data will be exported as a fully self-documenting HML (Heurist XML) file, as a complete MySQL SQL data dump,
@@ -585,311 +585,337 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             </form>
             <?php
         // --- Process export request (mode=1) ---
-        } else {
-            $operation_in_progress = 'It appears that backup operation has been started already. Please try this function later';
+} else {
+    $operation_in_progress = 'It appears that backup operation has been started already. Please try this function later';
 
-            // Check for existing backup operation lock
-            if (!isActionInProgress('exportDB', 2, $system->dbname())) { // 2 minutes lock
-                report_message($operation_in_progress, false); // False = not an error, just info
-            } else {
-                echo_flush2("<br>Beginning archive process<br>"); // Send progress to client
+    // Check for existing backup operation lock
+    if (!isActionInProgress('exportDB', 2, $system->dbname())) { // 2 minutes lock
+        report_message($operation_in_progress, false); // False = not an error, just info
+    } else {
+        echo_flush2("<br>Beginning archive process<br>"); // Send progress to client
+    }
+
+    // Determine if separate archives for SQL, HML, TSV should be created
+    $separate_sql_zip = !$is_repository;
+    $separate_hml_zip = !$is_repository && @$_REQUEST['include_hml'] == '1';
+    $separate_tsv_zip = !$is_repository && @$_REQUEST['include_tsv'] == '1';
+
+    // --- Prepare backup folders ---
+    if (file_exists(FOLDER_BACKUP)) { // Main backup folder
+        echo_flush2("<br>Clear folder " . FOLDER_BACKUP . "<br>");
+        $res = folderDelete2(FOLDER_BACKUP, true); // true = recursive delete
+        if (!$res) {
+            report_message($operation_in_progress, false);
+        } // Show in-progress if delete fails
+    }
+    if (!folderCreate(FOLDER_BACKUP, true)) {
+        report_message('Failed to create folder ' . FOLDER_BACKUP . '<br> in which to create the backup. Please consult your sysadmin.', true);
+    }
+
+    if (file_exists(FOLDER_SQL_BACKUP)) { // SQL-only backup folder
+        $res = folderDelete2(FOLDER_SQL_BACKUP, true);
+        if (!$res) {
+            report_message($operation_in_progress, false);
+        }
+    }
+    if ($separate_sql_zip && !folderCreate(FOLDER_SQL_BACKUP, true)) {
+        $separate_sql_zip = false; // Disable option if folder creation fails
+    }
+
+    if ($separate_hml_zip && !folderCreate(FOLDER_HML_BACKUP, true)) { // HML-only backup folder
+        $separate_hml_zip = false;
+    }
+    if ($separate_tsv_zip && !folderCreate(FOLDER_TSV_BACKUP, true)) { // TSV-only backup folder
+        $separate_tsv_zip = false;
+    }
+    // Folder for TSV output within the main backup package
+    if (@$_REQUEST['include_tsv'] == 1 && !folderCreate(FOLDER_BACKUP . '/tsv-output/records', true)) {
+        $_REQUEST['include_tsv'] = 0; // Disable TSV if subfolder creation fails
+        echo_flush2("Failed to create sub directory for TSV output within backup directory<br>");
+    }
+
+    // Validate repository if specified
+    $repo = !empty(@$_REQUEST['repository']) ? htmlspecialchars($_REQUEST['repository']) : null;
+    if ($is_repository && (!$repo || $repo != 'Nakala')) { // Currently only Nakala seems fully supported
+        // CONTACT_HEURIST_TEAM constant is defined in const.php
+        report_message('The repository ' . $repo . ' is not supported please ' . (defined('CONTACT_HEURIST_TEAM') ? CONTACT_HEURIST_TEAM : 'contact the support team'), true, false);
+    }
+
+    // --- Collect files and folders to include in the archive ---
+    $folders_to_copy = [];
+    $copy_uploaded_files = (@$_REQUEST['includeresources'] == '1');
+
+    if (@$_REQUEST['include_docs'] == '1') { // Include system documentation folders
+        $folders_to_copy = folderSubs(
+            HEURIST_FILESTORE_DIR,
+            ['backup', 'scratch', 'generated-reports', 'file_uploads', 'filethumbs',
+                'tileserver', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons',
+                'term-images', 'webimagecache', 'blurredimagescache'],
+        ); // Exclude these
+        echo_flush2("<br><br>Exporting system folders<br>");
+    }
+
+    // Include custom user media folders if defined in settings
+    $user_media_folders_str = $system->settings->get('sys_MediaFolders');
+    if (!empty($user_media_folders_str)) {
+        $user_media_folders = explode(';', $user_media_folders_str);
+        foreach ($user_media_folders as $dir) {
+            $dir = basename(trim($dir));
+            if (empty($dir) || $dir == 'backup') {
+                continue;
             }
 
-            // Determine if separate archives for SQL, HML, TSV should be created
-            $separate_sql_zip = !$is_repository;
-            $separate_hml_zip = !$is_repository && @$_REQUEST['include_hml'] == '1';
-            $separate_tsv_zip = !$is_repository && @$_REQUEST['include_tsv'] == '1';
-
-            // --- Prepare backup folders ---
-            if (file_exists(FOLDER_BACKUP)) { // Main backup folder
-                echo_flush2("<br>Clear folder ".FOLDER_BACKUP."<br>");
-                $res = folderDelete2(FOLDER_BACKUP, true); // true = recursive delete
-                if (!$res) { report_message($operation_in_progress, false); } // Show in-progress if delete fails
-            }
-            if (!folderCreate(FOLDER_BACKUP, true)) {
-                report_message('Failed to create folder '.FOLDER_BACKUP.'<br> in which to create the backup. Please consult your sysadmin.', true);
+            $path = HEURIST_FILESTORE_DIR . $dir;
+            if (!file_exists($path)) {
+                continue;
             }
 
-            if (file_exists(FOLDER_SQL_BACKUP)) { // SQL-only backup folder
-                $res = folderDelete2(FOLDER_SQL_BACKUP, true);
-                if (!$res) { report_message($operation_in_progress, false); }
+            $path_with_slash = rtrim($path, '/') . '/';
+            if ($copy_uploaded_files) {
+                folderRecurseCopy($path_with_slash, FOLDER_BACKUP . '/' . $dir);
             }
-            if ($separate_sql_zip && !folderCreate(FOLDER_SQL_BACKUP, true)) {
-                $separate_sql_zip = false; // Disable option if folder creation fails
+            // Exclude from $folders_to_copy if already handled
+            $key = array_search($path_with_slash, $folders_to_copy);
+            if ($key !== false) {
+                unset($folders_to_copy[$key]);
             }
+        }
+    }
 
-            if ($separate_hml_zip && !folderCreate(FOLDER_HML_BACKUP, true)) { // HML-only backup folder
-                $separate_hml_zip = false;
+
+    if ($copy_uploaded_files) { // Include standard uploaded files and thumbs
+        if (defined('HEURIST_FILES_DIR')) {
+            $folders_to_copy[] = HEURIST_FILES_DIR;
+        }
+        if (defined('HEURIST_THUMB_DIR')) {
+            $folders_to_copy[] = HEURIST_THUMB_DIR;
+        }
+        $copy_files_in_root = true; // Copy files from the root of HEURIST_FILESTORE_DIR
+    } else {
+        $copy_files_in_root = false;
+    }
+
+    if (@$_REQUEST['include_tilestacks'] == '1' && defined('HEURIST_TILESTACKS_DIR')) {
+        $folders_to_copy[] = HEURIST_TILESTACKS_DIR;
+    }
+
+    // Perform recursive copy of selected folders
+    if (@$_REQUEST['include_docs'] == '1' || $copy_uploaded_files) {
+        folderRecurseCopy(HEURIST_FILESTORE_DIR, FOLDER_BACKUP, $folders_to_copy, $copy_files_in_root);
+    }
+
+    if (@$_REQUEST['include_docs'] == '1') { // Include Heurist application documentation
+        echo_flush2('Copy documentation/context_help folder<br>');
+        folderRecurseCopy(HEURIST_DIR . 'documentation/context_help/', FOLDER_BACKUP . '/documentation/context_help/');
+    }
+
+    // Remove database definition cache files from backup
+    fileDelete(FOLDER_BACKUP . '/entity/db.json'); // Old name
+    fileDelete(FOLDER_BACKUP . '/entity/dbdef_cache.json');
+
+    // --- HML Export ---
+    if (@$_REQUEST['include_hml'] == '1') {
+        echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
+
+        // Set parameters for flathml.php script
+        if (@$_REQUEST['allrecs'] != "1") { // Export records owned by current user
+            $userid = $system->getUserId();
+            $q_param = "owner:$userid";
+            $_REQUEST['depth'] = '5';
+        } else { // Export all records
+            $q_param = "sortby:-m"; // Sort by modification date descending
+            $_REQUEST['depth'] = '0'; // Full depth
+            $_REQUEST['linkmode'] = 'none';
+        }
+        $_REQUEST['w'] = 'all';    // All record types
+        $_REQUEST['a'] = '1';      // Include annotations
+        $_REQUEST['q'] = $q_param; // Query
+        $_REQUEST['rev'] = 'no';   // Do not include reverse pointers
+        $_REQUEST['filename'] = '1'; // Save to file (flathml.php handles actual saving to FOLDER_BACKUP)
+
+        $to_include = dirname(__FILE__) . '/../../export/xml/flathml.php';
+        if (is_file($to_include)) {
+            include_once $to_include; // Execute HML export script
+        }
+
+        // If separate HML zip is requested, copy the generated XML file
+        $hmlFile = FOLDER_BACKUP . "/{$system->dbname()}.xml";
+        $hmlFileBackup = HEURIST_FILESTORE_DIR . DIR_BACKUP . "/{$system->dbname()}.xml";
+        $zipHMLFile = FOLDER_HML_BACKUP . "/{$system->dbname()}.xml";
+        if (!$separate_hml_zip) {
+            file_exists($hmlFile) || fileCopy($hmlFileBackup, $hmlFile);
+        } elseif (file_exists($hmlFile)) {
+            $separate_hml_zip = fileCopy($hmlFile, $zipHMLFile);
+        } elseif (file_exists($hmlFileBackup)) {
+            fileCopy($hmlFileBackup, $hmlFile);
+            $separate_hml_zip = fileCopy($hmlFileBackup, $zipHMLFile);
+        }
+        if (file_exists($hmlFileBackup)) {
+            unlink($hmlFileBackup);
+        }
+    }
+
+    // --- TSV Export ---
+    if (@$_REQUEST['include_tsv'] == '1') {
+        echo_flush2("Exporting database records as TSV<br>(may take several minutes for large databases)<br>");
+        $dbExportTSV = new DbExportTSV($system);
+        // This should generate files in FOLDER_BACKUP . '/tsv-output/'
+        $warns = $dbExportTSV->output();
+        if (!empty($warns)) {
+            echo_flush2(implode('<br>', $warns));
+        }
+
+        // If separate TSV zip, copy the generated TSV files
+        $separate_tsv_zip = $separate_tsv_zip && folderSize2(FOLDER_BACKUP . "/tsv-output") > 0;
+        if ($separate_tsv_zip) {
+            $separate_tsv_zip = folderRecurseCopy(FOLDER_BACKUP . '/tsv-output', FOLDER_TSV_BACKUP);
+        }
+    }
+
+    // --- Export Database Structure Definitions ---
+    echo_flush2("Exporting database definitions as readable text<br>");
+    $url_txt = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=" . $system->dbname() . "&pretty=1";
+    saveURLasFile($url_txt, FOLDER_BACKUP . "/Database_Structure.txt");
+
+    echo_flush2("Exporting database definitions as XML<br>");
+    $url_xml = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=" . $system->dbname();
+    saveURLasFile($url_xml, FOLDER_BACKUP . "/Database_Structure.xml");
+
+    // --- SQL Dump ---
+    if ($system->isAdmin()) { // Only admins can perform full SQL dump
+        echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
+        $database_dumpfile = FOLDER_BACKUP . "/" . $system->dbname() . "_MySQL_Database_Dump.sql";
+        $dump_options = ['skip-triggers' => true,
+            'single-transaction' => true,
+            'quick' => true,
+            'add-drop-trigger' => false, 'no-create-db' => true, 'add-drop-table' => true];
+
+        $res_dump = DbUtils::databaseDump($system->dbnameFull(), $database_dumpfile, $dump_options, false);
+
+        if (!$res_dump) {
+
+            print defined('DIV_E') ? DIV_E : '</div>';
+            report_message("Sorry, unable to generate MySQL database dump. " . $system->getErrorMsg() . '  ' . $please_advise, true, true);
+        }
+
+        if ($separate_sql_zip) { // Copy SQL dump for separate archive
+            $separate_sql_zip = fileCopy($database_dumpfile, FOLDER_SQL_BACKUP . "/" . $system->dbname() . "_MySQL_Database_Dump.sql");
+        }
+    }
+
+    // Remove old style SQL dump file if it exists
+    if (file_exists(FOLDER_BACKUP . '/' . $system->dbnameFull() . '.sql')) {
+        unlink(FOLDER_BACKUP . '/' . $system->dbnameFull() . '.sql');
+    }
+
+    // --- Create Archives (ZIP/TAR.BZ2) ---
+    echo_flush2('<br>Zipping files<br>');
+    $destination = FOLDER_BACKUP . '.' . $format; // Path for the main archive
+    if (file_exists($destination)) {
+        unlink($destination);
+    }
+    // Ensure old tar.bz2 is removed if format changed to zip for the same base name
+    if ($format == 'zip' && file_exists(FOLDER_BACKUP . '.tar.bz2')) {
+        unlink(FOLDER_BACKUP . '.tar.bz2');
+    }
+    if ($format == 'tar' && file_exists(FOLDER_BACKUP . '.zip')) {
+        unlink(FOLDER_BACKUP . '.zip');
+    }
+
+
+    if ($format == 'zip') {
+        $res_archive = UArchive::zip(FOLDER_BACKUP, null, $destination, true); // true = delete original folder after zipping
+    } else { // tar.bz2
+        $res_archive = UArchive::createBz2(FOLDER_BACKUP, null, $destination, true);
+    }
+
+    if ($res_archive === true) { // Main archive creation successful
+        $res_sql_archive = false;
+        if ($separate_sql_zip) { // Create separate SQL archive
+            $destination_sql = FOLDER_SQL_BACKUP . '.' . $format;
+            if (file_exists($destination_sql)) {
+                unlink($destination_sql);
             }
-            if ($separate_tsv_zip && !folderCreate(FOLDER_TSV_BACKUP, true)) { // TSV-only backup folder
-                $separate_tsv_zip = false;
-            }
-            // Folder for TSV output within the main backup package
-            if (@$_REQUEST['include_tsv'] == 1 && !folderCreate(FOLDER_BACKUP . '/tsv-output/records', true)) {
-                $_REQUEST['include_tsv'] = 0; // Disable TSV if subfolder creation fails
-                echo_flush2("Failed to create sub directory for TSV output within backup directory<br>");
-            }
-
-            // Validate repository if specified
-            $repo = !empty(@$_REQUEST['repository']) ? htmlspecialchars($_REQUEST['repository']) : null;
-            if ($is_repository && (!$repo || $repo != 'Nakala')) { // Currently only Nakala seems fully supported
-                // CONTACT_HEURIST_TEAM constant is defined in const.php
-                report_message('The repository ' . $repo . ' is not supported please ' . (defined('CONTACT_HEURIST_TEAM') ? CONTACT_HEURIST_TEAM : 'contact the support team'), true, false);
-            }
-
-            // --- Collect files and folders to include in the archive ---
-            $folders_to_copy = [];
-            $copy_uploaded_files = (@$_REQUEST['includeresources'] == '1');
-
-            if (@$_REQUEST['include_docs'] == '1') { // Include system documentation folders
-                $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR,
-                    array('backup', 'scratch', 'generated-reports', 'file_uploads', 'filethumbs',
-                          'tileserver', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons',
-                          'term-images', 'webimagecache', 'blurredimagescache')); // Exclude these
-                echo_flush2("<br><br>Exporting system folders<br>");
-            }
-            
-            // Include custom user media folders if defined in settings
-            $user_media_folders_str = $system->settings->get('sys_MediaFolders');
-            if (!empty($user_media_folders_str)) {
-                $user_media_folders = explode(';', $user_media_folders_str);
-                foreach ($user_media_folders as $dir) {
-                    $dir = basename(trim($dir));
-                    if (empty($dir) || $dir == 'backup') continue;
-
-                    $path = HEURIST_FILESTORE_DIR . $dir;
-                    if (!file_exists($path)) continue;
-
-                    $path_with_slash = rtrim($path, '/') . '/';
-                    if ($copy_uploaded_files) {
-                       folderRecurseCopy($path_with_slash, FOLDER_BACKUP.'/'.$dir);
-                    }
-                    // Exclude from $folders_to_copy if already handled
-                    $key = array_search($path_with_slash, $folders_to_copy);
-                    if ($key !== false) {
-                       unset($folders_to_copy[$key]);
-                    }
-                }
-            }
-
-
-            if ($copy_uploaded_files) { // Include standard uploaded files and thumbs
-                if (defined('HEURIST_FILES_DIR')) $folders_to_copy[] = HEURIST_FILES_DIR;
-                if (defined('HEURIST_THUMB_DIR')) $folders_to_copy[] = HEURIST_THUMB_DIR;
-                $copy_files_in_root = true; // Copy files from the root of HEURIST_FILESTORE_DIR
-            } else {
-                $copy_files_in_root = false;
-            }
-
-            if (@$_REQUEST['include_tilestacks'] == '1' && defined('HEURIST_TILESTACKS_DIR')) {
-                $folders_to_copy[] = HEURIST_TILESTACKS_DIR;
-            }
-
-            // Perform recursive copy of selected folders
-            if (@$_REQUEST['include_docs'] == '1' || $copy_uploaded_files) {
-                folderRecurseCopy(HEURIST_FILESTORE_DIR, FOLDER_BACKUP, $folders_to_copy, $copy_files_in_root);
-            }
-
-            if (@$_REQUEST['include_docs'] == '1') { // Include Heurist application documentation
-                echo_flush2('Copy documentation/context_help folder<br>');
-                folderRecurseCopy(HEURIST_DIR.'documentation/context_help/', FOLDER_BACKUP.'/documentation/context_help/');
-            }
-
-            // Remove database definition cache files from backup
-            fileDelete(FOLDER_BACKUP.'/entity/db.json'); // Old name
-            fileDelete(FOLDER_BACKUP.'/entity/dbdef_cache.json');
-
-            // --- HML Export ---
-            if (@$_REQUEST['include_hml'] == '1') {
-                echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
-
-                // Set parameters for flathml.php script
-                if (@$_REQUEST['allrecs'] != "1") { // Export records owned by current user
-                    $userid = $system->getUserId();
-                    $q_param = "owner:$userid";
-                    $_REQUEST['depth'] = '5';
-                } else { // Export all records
-                    $q_param = "sortby:-m"; // Sort by modification date descending
-                    $_REQUEST['depth'] = '0'; // Full depth
-                    $_REQUEST['linkmode'] = 'none';
-                }
-                $_REQUEST['w'] = 'all';    // All record types
-                $_REQUEST['a'] = '1';      // Include annotations
-                $_REQUEST['q'] = $q_param; // Query
-                $_REQUEST['rev'] = 'no';   // Do not include reverse pointers
-                $_REQUEST['filename'] = '1'; // Save to file (flathml.php handles actual saving to FOLDER_BACKUP)
-
-                $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
-                if (is_file($to_include)) {
-                    include_once $to_include; // Execute HML export script
-                }
-
-                // If separate HML zip is requested, copy the generated XML file
-                $hmlFile = FOLDER_BACKUP."/{$system->dbname()}.xml";
-                $hmlFileBackup = HEURIST_FILESTORE_DIR.DIR_BACKUP."/{$system->dbname()}.xml";
-                $zipHMLFile = FOLDER_HML_BACKUP."/{$system->dbname()}.xml";
-                if(!$separate_hml_zip){
-                    file_exists($hmlFile) || fileCopy($hmlFileBackup, $hmlFile);
-                }elseif(file_exists($hmlFile)){
-                    $separate_hml_zip = fileCopy($hmlFile, $zipHMLFile);
-                }elseif(file_exists($hmlFileBackup)){
-                    fileCopy($hmlFileBackup, $hmlFile);
-                    $separate_hml_zip = fileCopy($hmlFileBackup, $zipHMLFile);
-                }
-                if(file_exists($hmlFileBackup)){
-                    unlink($hmlFileBackup);
-                }
-            }
-
-            // --- TSV Export ---
-            if (@$_REQUEST['include_tsv'] == '1') {
-                echo_flush2("Exporting database records as TSV<br>(may take several minutes for large databases)<br>");
-                $dbExportTSV = new DbExportTSV($system);
-                // This should generate files in FOLDER_BACKUP . '/tsv-output/'
-                $warns = $dbExportTSV->output(); 
-                if (!empty($warns)) {
-                    echo_flush2(implode('<br>', $warns));
-                }
-
-                // If separate TSV zip, copy the generated TSV files
-                $separate_tsv_zip = $separate_tsv_zip && folderSize2(FOLDER_BACKUP . "/tsv-output") > 0;
-                if ($separate_tsv_zip) {
-                    $separate_tsv_zip = folderRecurseCopy(FOLDER_BACKUP . '/tsv-output', FOLDER_TSV_BACKUP);
-                }
-            }
-
-            // --- Export Database Structure Definitions ---
-            echo_flush2("Exporting database definitions as readable text<br>");
-            $url_txt = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".$system->dbname()."&pretty=1";
-            saveURLasFile($url_txt, FOLDER_BACKUP."/Database_Structure.txt");
-
-            echo_flush2("Exporting database definitions as XML<br>");
-            $url_xml = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".$system->dbname();
-           saveURLasFile($url_xml, FOLDER_BACKUP."/Database_Structure.xml");
-
-            // --- SQL Dump ---
-            if ($system->isAdmin()) { // Only admins can perform full SQL dump
-                echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
-                $database_dumpfile = FOLDER_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql";
-                $dump_options = array('skip-triggers' => true,
-                                      'single-transaction' => true,
-                                      'quick' =>true,
-                                      'add-drop-trigger' => false, 'no-create-db' =>true, 'add-drop-table'=>true);
-
-                $res_dump = DbUtils::databaseDump($system->dbnameFull(), $database_dumpfile, $dump_options, false);
-
-                if (!$res_dump) {
-                    
-                    print defined('DIV_E')?DIV_E:'</div>';
-                    report_message("Sorry, unable to generate MySQL database dump. ".$system->getErrorMsg().'  '.$please_advise, true, true);
-                }
-
-                if ($separate_sql_zip) { // Copy SQL dump for separate archive
-                    $separate_sql_zip = fileCopy($database_dumpfile, FOLDER_SQL_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql");
-                }
-            }
-
-           // Remove old style SQL dump file if it exists
-            if (file_exists(FOLDER_BACKUP.'/'.$system->dbnameFull().'.sql')) {
-                unlink(FOLDER_BACKUP.'/'.$system->dbnameFull().'.sql');
-            }
-
-            // --- Create Archives (ZIP/TAR.BZ2) ---
-            echo_flush2('<br>Zipping files<br>');
-            $destination = FOLDER_BACKUP.'.'.$format; // Path for the main archive
-            if (file_exists($destination)) unlink($destination);
-            // Ensure old tar.bz2 is removed if format changed to zip for the same base name
-            if ($format == 'zip' && file_exists(FOLDER_BACKUP.'.tar.bz2')) unlink(FOLDER_BACKUP.'.tar.bz2');
-            if ($format == 'tar' && file_exists(FOLDER_BACKUP.'.zip')) unlink(FOLDER_BACKUP.'.zip');
-
-
             if ($format == 'zip') {
-                $res_archive = UArchive::zip(FOLDER_BACKUP, null, $destination, true); // true = delete original folder after zipping
-            } else { // tar.bz2
-                $res_archive = UArchive::createBz2(FOLDER_BACKUP, null, $destination, true);
+                $res_sql_archive = UArchive::zip(FOLDER_SQL_BACKUP, null, $destination_sql, true);
+            } else {
+                $res_sql_archive = UArchive::createBz2(FOLDER_SQL_BACKUP, null, $destination_sql, true);
             }
+        }
 
-            if ($res_archive === true) { // Main archive creation successful
-                $res_sql_archive = false;
-                if ($separate_sql_zip) { // Create separate SQL archive
-                    $destination_sql = FOLDER_SQL_BACKUP.'.'.$format;
-                    if (file_exists($destination_sql)) unlink($destination_sql);
-                    if ($format == 'zip') {
-                        $res_sql_archive = UArchive::zip(FOLDER_SQL_BACKUP, null, $destination_sql, true);
-                    } else {
-                        $res_sql_archive = UArchive::createBz2(FOLDER_SQL_BACKUP, null, $destination_sql, true);
-                    }
-                }
+        $res_hml_archive = false;
+        if ($separate_hml_zip) { // Create separate HML archive
+            $destination_hml = FOLDER_HML_BACKUP . '.' . $format;
+            if (file_exists($destination_hml)) {
+                unlink($destination_hml);
+            }
+            if ($format == 'zip') {
+                $res_hml_archive = UArchive::zip(FOLDER_HML_BACKUP, null, $destination_hml, true);
+            } else {
+                $res_hml_archive = UArchive::createBz2(FOLDER_HML_BACKUP, null, $destination_hml, true);
+            }
+        }
 
-                $res_hml_archive = false;
-                if ($separate_hml_zip) { // Create separate HML archive
-                    $destination_hml = FOLDER_HML_BACKUP.'.'.$format;
-                    if (file_exists($destination_hml)) unlink($destination_hml);
-                    if ($format == 'zip') {
-                        $res_hml_archive = UArchive::zip(FOLDER_HML_BACKUP, null, $destination_hml, true);
-                    } else {
-                        $res_hml_archive = UArchive::createBz2(FOLDER_HML_BACKUP, null, $destination_hml, true);
-                    }
-                }
+        $res_tsv_archive = false;
+        if ($separate_tsv_zip) { // Create separate TSV archive
+            $destination_tsv = FOLDER_TSV_BACKUP . '.' . $format;
+            if (file_exists($destination_tsv)) {
+                unlink($destination_tsv);
+            }
+            if ($format == 'zip') {
+                $res_tsv_archive = UArchive::zip(FOLDER_TSV_BACKUP, null, $destination_tsv, true);
+            } else {
+                $res_tsv_archive = UArchive::createBz2(FOLDER_TSV_BACKUP, null, $destination_tsv, true);
+            }
+        }
 
-                $res_tsv_archive = false;
-                if ($separate_tsv_zip) { // Create separate TSV archive
-                    $destination_tsv = FOLDER_TSV_BACKUP.'.'.$format;
-                    if (file_exists($destination_tsv)) unlink($destination_tsv);
-                    if ($format == 'zip') {
-                        $res_tsv_archive = UArchive::zip(FOLDER_TSV_BACKUP, null, $destination_tsv, true);
-                    } else {
-                        $res_tsv_archive = UArchive::createBz2(FOLDER_TSV_BACKUP, null, $destination_tsv, true);
-                    }
-                }
-
-                // --- Display Download Links or Upload to Repository ---
-                if (!$is_repository) { // Provide download links
-                    $param_format = ($format == 'tar' || $format == 'tar.bz2') ? '&is_tar=1' : '&is_zip=1'; // Keep original tar/zip param for download URL
-                    $display_format = ($format == 'tar' || $format == 'tar.bz2') ? 'tar.bz2' : 'zip';
-    ?>
+        // --- Display Download Links or Upload to Repository ---
+        if (!$is_repository) { // Provide download links
+            $param_format = ($format == 'tar' || $format == 'tar.bz2') ? '&is_tar=1' : '&is_zip=1'; // Keep original tar/zip param for download URL
+            $display_format = ($format == 'tar' || $format == 'tar.bz2') ? 'tar.bz2' : 'zip';
+            ?>
     <!-- Download links section -->
     <p>Your data has been successfully backed up as zip file(s) indicated above</p>
     <br><br><div class='lbl_form'></div> <!-- Label placeholder? -->
-        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>.<?php echo $display_format; ?>?mode=2&db=<?php echo $system->dbname().$param_format;?>"
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>.<?php echo $display_format; ?>?mode=2&db=<?php echo $system->dbname() . $param_format;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download your data as a <?php echo $display_format;?> archive</a>
 
     <?php
-    if ($separate_sql_zip) {
-        if ($res_sql_archive === true) { ?>
+            if ($separate_sql_zip) {
+                if ($res_sql_archive === true) { ?>
         <br><br>
-        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_sql.<?php echo $display_format; ?>?mode=3&db=<?php echo $system->dbname().$param_format;?>"
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_sql.<?php echo $display_format; ?>?mode=3&db=<?php echo $system->dbname() . $param_format;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the SQL <?php echo $display_format;?> file only</a>
         <span class="heurist-helper1">(for db transfer on tiered servers)</span>
     <?php } else { ?>
         <br><br>
         <div class="errorMsg">Failed to create standalone SQL dump. <?php echo htmlspecialchars(is_string($res_sql_archive) ? $res_sql_archive : '');?></div>
     <?php
-        }
     }
-    if ($separate_hml_zip) {
-        if ($res_hml_archive === true) { ?>
+            }
+            if ($separate_hml_zip) {
+                if ($res_hml_archive === true) { ?>
         <br><br>
-        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_hml.<?php echo $display_format; ?>?mode=5&db=<?php echo $system->dbname().$param_format;?>"
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_hml.<?php echo $display_format; ?>?mode=5&db=<?php echo $system->dbname() . $param_format;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the HML <?php echo $display_format;?> file only</a>
     <?php } else { ?>
         <br><br>
         <div class="errorMsg">Failed to create / set up a standalone HML file. <?php echo htmlspecialchars(is_string($res_hml_archive) ? $res_hml_archive : '');?></div>
     <?php
-        }
     }
-    if ($separate_tsv_zip) {
-        if ($res_tsv_archive === true) { ?>
+            }
+            if ($separate_tsv_zip) {
+                if ($res_tsv_archive === true) { ?>
         <br><br>
-        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_tsv.<?php echo $display_format; ?>?mode=6&db=<?php echo $system->dbname().$param_format;?>"
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_tsv.<?php echo $display_format; ?>?mode=6&db=<?php echo $system->dbname() . $param_format;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the TSV <?php echo $display_format;?> folder only</a>
     <?php } else { ?>
         <br><br>
         <div class="errorMsg">Failed to create / set up a standalone TSV folder. <?php echo htmlspecialchars(is_string($res_tsv_archive) ? $res_tsv_archive : '');?></div>
     <?php
-        }
     }
-    ?>
+            }
+            ?>
     <p class="heurist-helper1">
     Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo defined('HEURIST_MAIL_TO_ADMIN') ? HEURIST_MAIL_TO_ADMIN : 'your admin'; ?>) to send it to you via a large file transfer service.
     </p>
@@ -897,160 +923,160 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
     <input type="button" id="btnClose_2" class="ui-button-action" value="Close" onClick="closeArchiveWindow();" style="margin-top: 10px;">
 
     <?php
-                } elseif ($is_repository) { // Upload to repository
-                    $repo_account = htmlspecialchars($_REQUEST['repo_account']);
-                    $display_format = ($format == 'tar' || $format == 'tar.bz2') ? 'tar.bz2' : 'zip';
+        } elseif ($is_repository) { // Upload to repository
+            $repo_account = htmlspecialchars($_REQUEST['repo_account']);
+            $display_format = ($format == 'tar' || $format == 'tar.bz2') ? 'tar.bz2' : 'zip';
 
-                    $repo_details_all = user_getRepositoryCredentials2($system, $repo_account);
-                    $repo_details = $repo_details_all[$repo_account] ?? null;
+            $repo_details_all = user_getRepositoryCredentials2($system, $repo_account);
+            $repo_details = $repo_details_all[$repo_account] ?? null;
 
-                    echo_flush2('<hr><br>Uploading archive to ' . htmlspecialchars($repo) . '...');
+            echo_flush2('<hr><br>Uploading archive to ' . htmlspecialchars($repo) . '...');
 
-                    if ($repo_details === null || empty($repo_details['params']['writeApiKey'])) {
-                        $msg = $repo_details === null ?
-                                'Credentials for specified repository and user/group not found.' : 'Write Credentials for specified repository and user/group not defined.';
-                        $msg .= ' Please check the credentials within Design > External repositories.';
-                        report_message($msg, true, true);
-                    } elseif ($repo == 'Nakala') { // Nakala specific upload logic
+            if ($repo_details === null || empty($repo_details['params']['writeApiKey'])) {
+                $msg = $repo_details === null
+                        ? 'Credentials for specified repository and user/group not found.' : 'Write Credentials for specified repository and user/group not defined.';
+                $msg .= ' Please check the credentials within Design > External repositories.';
+                report_message($msg, true, true);
+            } elseif ($repo == 'Nakala') { // Nakala specific upload logic
 
-                        $date = date('Y-m-d');
-                        $params = [];
-                        $data = [];
+                $date = date('Y-m-d');
+                $params = [];
+                $data = [];
 
-                        $params['file'] = [
-                            'path' => FOLDER_BACKUP . '.' . $display_format, // Path to the generated archive
-                            'type' => $mime,
-                            'name' => "{$system->dbname()}.{$display_format}"
+                $params['file'] = [
+                    'path' => FOLDER_BACKUP . '.' . $display_format, // Path to the generated archive
+                    'type' => $mime,
+                    'name' => "{$system->dbname()}.{$display_format}",
+                ];
+
+                // Metadata for Nakala
+                $params['meta']['title'] = [
+                    'value' => "Heurist database {$system->dbname()} : archive copy {$date}", 'lang' => null,
+                    'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => NAKALA_REPO . 'terms#title',
+                ];
+                $usr = $system->getCurrentUser();
+                $usrID = !empty($usr['ugr_ID']) ? $usr['ugr_ID'] : '';
+                if (is_array($usr) && !empty($usr['ugr_FullName'])) {
+                    $params['meta']['creator'] = [
+                        'value' => $usr['ugr_FullName'], 'lang' => null,
+                        'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => 'http://purl.org/dc/terms/creator',
+                    ];
+
+                    $usrID = "{$usr['ugr_FullName']} [#{$usrID}]";
+                }
+
+                $params['meta']['created'] = [
+                    'value' => $date, 'lang' => null,
+                    'typeUri' => null, 'propertyUri' => NAKALA_REPO . 'terms#created',
+                ];
+
+                $params['meta']['type'] = [ // Default type: Dataset
+                    'value' => 'http://purl.org/coar/resource_type/c_ddb1', 'lang' => null,
+                    'typeUri' => PURL_TERM_URI, 'propertyUri' => NAKALA_REPO . 'terms#type',
+                ];
+
+                if (array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])) {
+                    $params['meta']['license'] = [
+                        'value' => $_REQUEST['license'], 'lang' => null,
+                        'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => NAKALA_REPO . 'terms#license',
+                    ];
+                    $data['license'] = $_REQUEST['license'];
+                }
+                if (array_key_exists('desc', $_REQUEST) && !empty($_REQUEST['desc'])) {
+                    $params['meta']['description'] = [
+                        'value' => htmlspecialchars($_REQUEST['desc']),
+                        'lang' => null,
+                        'typeUri' => W3_XML_SCHEMA_STRING,
+                        'propertyUri' => 'http://purl.org/dc/terms/description',
+                    ];
+                    $data['desc'] = $_REQUEST['desc'];
+                }
+                if (array_key_exists('location', $_REQUEST) && !empty($_REQUEST['location'])) {
+
+                    $location = htmlspecialchars($_REQUEST['location']);
+                    $typeURI = filter_var($location, FILTER_VALIDATE_URL) ? PURL_TERM_URI : W3_XML_SCHEMA_STRING;
+
+                    $params['meta']['location'] = [
+                        'value' => $location,
+                        'lang' => null,
+                        'typeUri' => $typeURI,
+                        'propertyUri' => 'http://purl.org/dc/terms/spatial',
+                    ];
+
+                    $data['location'] = $_REQUEST['location'];
+                }
+                if (array_key_exists('keywords', $_REQUEST) && !empty($_REQUEST['keywords'])) {
+
+                    $keywords = htmlspecialchars($_REQUEST['keywords']);
+                    $keywords = array_filter(preg_split('/\r\n|\r|\n/', $keywords));
+                    $data['keywords'] = $_REQUEST['keywords'];
+
+                    foreach ($keywords as $keyword) {
+
+                        $keyword = trim($keyword);
+                        if (empty($keyword)) {
+                            continue;
+                        }
+
+                        $params['meta'][] = [
+                            'value' => $keyword,
+                            'lang' => null,
+                            'typeUri' => W3_XML_SCHEMA_STRING,
+                            'propertyUri' => 'http://purl.org/dc/terms/subject',
                         ];
-
-                        // Metadata for Nakala
-                        $params['meta']['title'] = [
-                            'value' => "Heurist database {$system->dbname()} : archive copy {$date}", 'lang' => null,
-                            'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => NAKALA_REPO.'terms#title'
-                        ];
-                        $usr = $system->getCurrentUser();
-                        $usrID = !empty($usr['ugr_ID']) ? $usr['ugr_ID'] : '';
-                        if (is_array($usr) && !empty($usr['ugr_FullName'])) {
-                            $params['meta']['creator'] = [
-                                'value' => $usr['ugr_FullName'], 'lang' => null,
-                                'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => 'http://purl.org/dc/terms/creator'
-                            ];
-
-                            $usrID = "{$usr['ugr_FullName']} [#{$usrID}]";
-                        }
-
-                        $params['meta']['created'] = [
-                            'value' => $date, 'lang' => null,
-                            'typeUri' => null, 'propertyUri' => NAKALA_REPO.'terms#created'
-                        ];
-
-                        $params['meta']['type'] = [ // Default type: Dataset
-                            'value' => 'http://purl.org/coar/resource_type/c_ddb1', 'lang' => null,
-                            'typeUri' => PURL_TERM_URI, 'propertyUri' => NAKALA_REPO.'terms#type'
-                        ];
-
-                        if (array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])) {
-                            $params['meta']['license'] = [
-                                'value' => $_REQUEST['license'], 'lang' => null,
-                                'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => NAKALA_REPO.'terms#license'
-                            ];
-                            $data['license'] = $_REQUEST['license'];
-                        }
-                        if(array_key_exists('desc', $_REQUEST) && !empty($_REQUEST['desc'])){
-                            $params['meta']['description'] = [
-                                'value' => htmlspecialchars($_REQUEST['desc']),
-                                'lang' => null,
-                                'typeUri' => W3_XML_SCHEMA_STRING,
-                                'propertyUri' => 'http://purl.org/dc/terms/description'
-                            ];
-                            $data['desc'] = $_REQUEST['desc'];
-                        }
-                        if(array_key_exists('location', $_REQUEST) && !empty($_REQUEST['location'])){
-
-                            $location = htmlspecialchars($_REQUEST['location']);
-                            $typeURI = filter_var($location, FILTER_VALIDATE_URL) ? PURL_TERM_URI : W3_XML_SCHEMA_STRING;
-
-                            $params['meta']['location'] = [
-                                'value' => $location,
-                                'lang' => null,
-                                'typeUri' => $typeURI,
-                                'propertyUri' => 'http://purl.org/dc/terms/spatial'
-                            ];
-
-                            $data['location'] = $_REQUEST['location'];
-                        }
-                        if(array_key_exists('keywords', $_REQUEST) && !empty($_REQUEST['keywords'])){
-
-                            $keywords = htmlspecialchars($_REQUEST['keywords']);
-                            $keywords = array_filter(preg_split('/\r\n|\r|\n/', $keywords));
-                            $data['keywords'] = $_REQUEST['keywords'];
-
-                            foreach($keywords as $keyword){
-
-                                $keyword = trim($keyword);
-                                if(empty($keyword)){
-                                    continue;
-                                }
-
-                                $params['meta'][] = [
-                                    'value' => $keyword,
-                                    'lang' => null,
-                                    'typeUri' => W3_XML_SCHEMA_STRING,
-                                    'propertyUri' => 'http://purl.org/dc/terms/subject'
-                                ];
-                            }
-                        }
-                        if(array_key_exists('collection', $_REQUEST) && !empty($_REQUEST['collection'])){
-                            $params['meta']['collection'] = [
-                                'value' => htmlspecialchars($_REQUEST['collection']),
-                                'lang' => null,
-                                'typeUri' => W3_XML_SCHEMA_STRING,
-                                'propertyUri' => 'http://purl.org/dc/terms/isPartOf'
-                            ];
-                            $data['collection'] = $_REQUEST['collection'];
-                        }
-
-                        $params['apiKey'] = $repo_details['params']['writeApiKey'];
-
-                        $params['status'] = 'pending'; // Keep new record private initially
-                        $params['returnType'] = 'editor+id'; // Return link to the editor interface
-
-                        $rtn_upload = uploadFileToNakala($system, $params);
-
-                        if ($rtn_upload === false) {
-                            $rtn_msg = $system->getErrorMsg();
-                            echo_flush2('failed<br>');
-                        } else {
-
-                            $nakalaID = htmlspecialchars($rtn_upload['id']);
-                            $nakalaURL = $rtn_upload['link'];
-
-                            $rtn_msg = htmlspecialchars($nakalaURL);
-                            $rtn_msg = "The uploaded archive is at <a href='{$rtn_msg}' target='_blank'>{$rtn_msg}&nbsp;<span class='ui-icon ui-icon-extlink'></span></a>";
-
-                            $system->settings->setDatabaseSetting('External IDs', ['NakalaDBBackup' => [
-                                'ID' => $nakalaID,
-                                'Name' => 'Nakal - Database Archive',
-                                'URL' => $nakalaURL,
-                                'Date' => $date,
-                                'Note' => "Nakala DOI for Database Archive backup.\nHeurist User: {$usrID}\nNakala Account: {$repo_account}",
-                                'Data' => $data
-                            ]], 1);
-
-                            echo_flush2('finished<br>');
-
-                        }
-                        echo_flush2('<br>'. $rtn_msg .'<br>');
-                    } else { // Other repositories not supported for direct upload
-                        report_message('The repository ' . htmlspecialchars($repo) . ' is not supported for direct upload by this script. Please ' . (defined('CONTACT_HEURIST_TEAM') ? CONTACT_HEURIST_TEAM : 'contact the support team'), true, true);
                     }
                 }
-                report_message('', false, true); // Final message, performs cleanup
-            } else { // Main archive creation failed
-                report_message(htmlspecialchars(is_string($res_archive) ? $res_archive : 'Archive creation failed.') .'<br>Try different archive format otherwise please consult system adminstrator', true, true);
+                if (array_key_exists('collection', $_REQUEST) && !empty($_REQUEST['collection'])) {
+                    $params['meta']['collection'] = [
+                        'value' => htmlspecialchars($_REQUEST['collection']),
+                        'lang' => null,
+                        'typeUri' => W3_XML_SCHEMA_STRING,
+                        'propertyUri' => 'http://purl.org/dc/terms/isPartOf',
+                    ];
+                    $data['collection'] = $_REQUEST['collection'];
+                }
+
+                $params['apiKey'] = $repo_details['params']['writeApiKey'];
+
+                $params['status'] = 'pending'; // Keep new record private initially
+                $params['returnType'] = 'editor+id'; // Return link to the editor interface
+
+                $rtn_upload = uploadFileToNakala($system, $params);
+
+                if ($rtn_upload === false) {
+                    $rtn_msg = $system->getErrorMsg();
+                    echo_flush2('failed<br>');
+                } else {
+
+                    $nakalaID = htmlspecialchars($rtn_upload['id']);
+                    $nakalaURL = $rtn_upload['link'];
+
+                    $rtn_msg = htmlspecialchars($nakalaURL);
+                    $rtn_msg = "The uploaded archive is at <a href='{$rtn_msg}' target='_blank'>{$rtn_msg}&nbsp;<span class='ui-icon ui-icon-extlink'></span></a>";
+
+                    $system->settings->setDatabaseSetting('External IDs', ['NakalaDBBackup' => [
+                        'ID' => $nakalaID,
+                        'Name' => 'Nakal - Database Archive',
+                        'URL' => $nakalaURL,
+                        'Date' => $date,
+                        'Note' => "Nakala DOI for Database Archive backup.\nHeurist User: {$usrID}\nNakala Account: {$repo_account}",
+                        'Data' => $data,
+                    ]], 1);
+
+                    echo_flush2('finished<br>');
+
+                }
+                echo_flush2('<br>' . $rtn_msg . '<br>');
+            } else { // Other repositories not supported for direct upload
+                report_message('The repository ' . htmlspecialchars($repo) . ' is not supported for direct upload by this script. Please ' . (defined('CONTACT_HEURIST_TEAM') ? CONTACT_HEURIST_TEAM : 'contact the support team'), true, true);
             }
         }
-        ?>
+        report_message('', false, true); // Final message, performs cleanup
+    } else { // Main archive creation failed
+        report_message(htmlspecialchars(is_string($res_archive) ? $res_archive : 'Archive creation failed.') . '<br>Try different archive format otherwise please consult system adminstrator', true, true);
+    }
+}
+?>
     </body>
 </html>
 
@@ -1071,38 +1097,46 @@ function report_message($message, $is_error = true, $need_cleanup = false)
     if ($need_cleanup) {
         if (array_key_exists('repository', $_REQUEST)) {
             // Cleanup entire backup super-directory after successful repository upload
-            folderDelete2(HEURIST_FILESTORE_DIR.DIR_BACKUP, false);
+            folderDelete2(HEURIST_FILESTORE_DIR . DIR_BACKUP, false);
         } else {
             // Cleanup temporary folders for individual downloads
             // REMARK: Main FOLDER_BACKUP is deleted by UArchive::zip/createBz2 if successful and last param is true.
             // These lines ensure specific SQL/HML/TSV folders are removed if they were created for separate zips.
-            if (defined('FOLDER_BACKUP')) folderDelete2(FOLDER_BACKUP, true);
-            if (defined('FOLDER_SQL_BACKUP')) folderDelete2(FOLDER_SQL_BACKUP, true);
-            if (defined('FOLDER_HML_BACKUP')) folderDelete2(FOLDER_HML_BACKUP, true);
-            if (defined('FOLDER_TSV_BACKUP')) folderDelete2(FOLDER_TSV_BACKUP, true);
+            if (defined('FOLDER_BACKUP')) {
+                folderDelete2(FOLDER_BACKUP, true);
+            }
+            if (defined('FOLDER_SQL_BACKUP')) {
+                folderDelete2(FOLDER_SQL_BACKUP, true);
+            }
+            if (defined('FOLDER_HML_BACKUP')) {
+                folderDelete2(FOLDER_HML_BACKUP, true);
+            }
+            if (defined('FOLDER_TSV_BACKUP')) {
+                folderDelete2(FOLDER_TSV_BACKUP, true);
+            }
         }
         // Release the action lock
         isActionInProgress('exportDB', -1, $system->dbname());
     }
 
     if ($message) { // Display message if provided
-?>
+        ?>
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">
-            <div class="<?php echo $is_error ? 'ui-state-error' : 'ui-state-highlight'; // Use highlight for info ?>"
+            <div class="<?php echo $is_error ? 'ui-state-error' : 'ui-state-highlight'; // Use highlight for info?>"
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                 <span class="ui-icon <?php echo $is_error ? 'ui-icon-alert' : 'ui-icon-info';?>"
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
-                <?php echo $message; // Message is already expected to be HTML or escaped ?>
+                <?php echo $message; // Message is already expected to be HTML or escaped?>
             </div>
         </div>
 <?php
     }
-?>
+    ?>
         <!-- Ensure loading overlay is hidden -->
         <script>if(window.hWin?.HEURIST4?.msg){ window.hWin.HEURIST4.msg.sendCoverallToBack(true);}</script>
     </body>
 </html>
 <?php
-    exit; // Ensure script terminates after reporting message
+        exit; // Ensure script terminates after reporting message
 }
 ?>

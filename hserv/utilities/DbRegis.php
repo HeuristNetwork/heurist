@@ -777,8 +777,19 @@ class DbRegis {
 
         ConceptCode::setSystem($sys);
 
-        if($dbTitle){
+        $dbDisplayName = @$params['dbDisplayName'];
+        $dbRights = @$params['dbRights'];
+
+        if($dbDisplayName){
+           self::recordUpdateField($sys, $dbID, '2-1', $dbDisplayName);
+        }elseif($dbTitle){
            self::recordUpdateField($sys, $dbID, '2-1', $dbTitle);
+        }
+        if($dbTitle){
+           self::recordUpdateField($sys, $dbID, '2-12', $dbTitle);
+        }
+        if($dbRights){
+           self::recordUpdateField($sys, $dbID, '2-311', $dbRights);
         }
         if($dbName){
            self::recordUpdateField($sys, $dbID, '1176-469', $dbName);
@@ -1042,6 +1053,8 @@ class DbRegis {
         $dbName = @$params['dbReg'];
         $dbTitle = @$params['dbTitle'];//DT_NAME
         $dbVersion = @$params['dbVer'];
+        $dbDisplayName = @$params['dbDisplayName'];
+        $dbRights = @$params['dbRights'];
 
         $usrEmail = @$params['usrEmail'];
         $usrPassword = @$params['usrPassword'];//hashed
@@ -1161,8 +1174,22 @@ class DbRegis {
             $mysqli->query('set @logged_in_user_id = '.$sys->getUserId());
 
             if($dbID>0){
-                if($dbTitle){
+                // Heurist_Reference_Index field mapping (Ian Johnson's metadata strategy, June 2026):
+                //  Display name (sysIdentification.sys_dbName)        -> Database title, concept 2-1
+                //  Database rights statement (sys_dbRights)           -> concept 2-311
+                //  Long description entered on Design > Register      -> concept 2-12
+                //    (>=40 chars, prefilled from sys_dbDescription but editable at registration time)
+                if($dbDisplayName){
+                    self::recordUpdateField($sys, $dbID, '2-1', $dbDisplayName, false);
+                }elseif($dbTitle){
+                    // fallback if no Display Name has been set in Design > Properties
                     self::recordUpdateField($sys, $dbID, '2-1', $dbTitle, false);
+                }
+                if($dbTitle){
+                    self::recordUpdateField($sys, $dbID, '2-12', $dbTitle, false);
+                }
+                if($dbRights){
+                    self::recordUpdateField($sys, $dbID, '2-311', $dbRights, false);
                 }
                 if($dbName){
                     self::recordUpdateField($sys, $dbID, '1176-469', $dbName, false);

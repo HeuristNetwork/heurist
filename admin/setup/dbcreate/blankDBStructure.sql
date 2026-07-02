@@ -684,6 +684,7 @@ CREATE TABLE sysIdentification (
   sys_dbOwner varchar(250) default NULL COMMENT 'Information on the owner of the database, may be a URL reference',
   sys_dbRights varchar(1000) NOT NULL default 'Please define ownership and rights here ...' COMMENT 'A statement of ownership and copyright for this database and content',
   sys_dbDescription varchar(1000) default NULL COMMENT 'A longer description of the content of this database',
+  sys_dbDOI varchar(250) default NULL COMMENT 'Persistent identifier (DOI) obtained for this database as a whole, if any. Used in FAIR score Findability calculation',
   sys_SyncDefsWithDB varchar(1000) default NULL COMMENT 'One or more Zotero library name,userID,groupID,key combinations separated by pipe symbols, for synchronisation of Zotero libraries',
   sys_AutoIncludeFieldSetIDs varchar(63) default '0' COMMENT 'CSV list of fieldsets which are included in all rectypes',
   sys_RestrictAccessToOwnerGroup tinyint unsigned NOT NULL default '0' COMMENT 'If set, database may only be accessed by members of owners group',
