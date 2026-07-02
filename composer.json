@@ -6,7 +6,8 @@
           "smarty/smarty": "~5.4.1",
  	      "gasparesganga/php-shapefile": "*",
  	      "ezyang/htmlpurifier": "*",
-          "easyrdf/easyrdf": "*"
+          "easyrdf/easyrdf": "*",
+            "ifsnop/mysqldump-php": "^2.12"
       },
       "config": {
             "allow-plugins": {

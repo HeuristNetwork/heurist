@@ -16,8 +16,9 @@ $allowedDomains = [
     'heuristau.net',
     'heurist.huma-num.fr',
     'heurist.eu',
-    'heuristeu.net'
-    //,'127.0.0.1'
+    'heuristeu.net',
+    '127.0.0.1',
+    'localhost',
 ];
 
 // If db not specified then redirect
