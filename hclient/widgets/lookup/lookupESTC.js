@@ -436,7 +436,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
                 }
             });
 
-            dlg_response['heurist_url'] = `https://heuristref.net/heurist/?db=ESTC_Helsinki_Bibliographic_Metadata&w=a&q=ids:${rec_IDs}`;
+            dlg_response['heurist_url'] = `https://heuristAU.net/heurist/?db=ESTC_Helsinki_Bibliographic_Metadata&w=a&q=ids:${rec_IDs}`;
 
             if(that.$H.isempty(term_ID)){
                 that.closingAction(dlg_response);
