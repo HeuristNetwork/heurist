@@ -2,13 +2,12 @@
 /**
 * miradorViewer.php - Initialises and handles the Heurist Mirador viewer.
 *
-* It uses the customised Mirador viewer from external/mirador3 when available.
-* If the customised viewer is missing, it falls back to the latest Mirador
-* distribution from unpkg.com.
+* It uses the Mirador v4 + MAE bundle from external/mirador4 when available.
+* If the v4 bundle is missing, it can fall back to the older customised
+* external/mirador3 viewer, and finally to the public Mirador distribution.
 *
-* For annotations, the Heurist database must define either RT_IIIF_ANNOTATION
-* or RT_ANNOTATION. The viewer exposes endpointURL, manifestUrl and
-* sourceRecordId to the Mirador integration code.
+* For annotations, the Heurist database must define RT_IIIF_ANNOTATION.
+* The viewer creates window.heuristMiradorConfig for the Mirador v4 bundle.
 *
 * Allowed public request parameters
 * ---------------------------------
@@ -96,6 +95,7 @@ $dbname = @$_REQUEST['db'];
 $idParam = trim((string)($_REQUEST['id'] ?? ''));
 $manifestParam = trim((string)($_REQUEST['manifest'] ?? ''));
 $directManifestUrl = trim((string)($_REQUEST['url'] ?? ''));
+$readonly = filter_var($_REQUEST['readonly'] ?? $_REQUEST['ro'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
 $manifestRecID = 0;        // Known only for managed Manifest record context.
 $sourceRecordId = 0;       // Passed to the annotation client as window.sourceRecordId.
@@ -270,6 +270,47 @@ function buildRecordOutputIiifUrl($baseUrl, $params){
     return $baseUrl.'hserv/controller/record_output.php?'.http_build_query($params);
 }
 
+function findMirador4DistAsset($distPath, $extension){
+    //$assetsDir = rtrim($distPath, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'assets';
+    //if(!is_dir($assetsDir)){
+    //    return null;
+    //}
+    
+    if(!is_dir($distPath)){
+        return null;    
+    }
+
+    $files = glob($distPath.DIRECTORY_SEPARATOR.'*.'.$extension);
+    if(!is_array($files) || count($files)===0){
+        return null;
+    }
+
+    usort($files, function($a, $b){
+        $aBase = basename($a);
+        $bBase = basename($b);
+        $aIsIndex = strpos($aBase, 'index') === 0 ? 0 : 1;
+        $bIsIndex = strpos($bBase, 'index') === 0 ? 0 : 1;
+        if($aIsIndex !== $bIsIndex){
+            return $aIsIndex <=> $bIsIndex;
+        }
+        return strcmp($aBase, $bBase);
+    });
+
+    return basename($files[0]); // 'assets/'.
+}
+
+function jsonForScript($value){
+    return json_encode(
+        $value,
+        JSON_UNESCAPED_SLASHES
+        | JSON_UNESCAPED_UNICODE
+        | JSON_HEX_TAG
+        | JSON_HEX_AMP
+        | JSON_HEX_APOS
+        | JSON_HEX_QUOT
+    );
+}
+
 if($directManifestUrl !== ''){
 
     // Direct manifest URL case:
@@ -369,7 +410,14 @@ if(strpos($url, 'hserv/controller/record_output.php')!==false){
 
 $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
 
-$use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
+$mirador4DistPath = dirname(__FILE__).'/../../../external/mirador4/dist';
+$mirador4DistUrl = '../../../external/mirador4/dist/';
+$mirador4JsAsset = findMirador4DistAsset($mirador4DistPath, 'js');
+$mirador4CssAsset = findMirador4DistAsset($mirador4DistPath, 'css');
+$use_mirador4_bundle = $mirador4JsAsset !== null;
+
+$use_custom_mirador3 = !$use_mirador4_bundle
+    && file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -385,7 +433,11 @@ $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3
 <meta name="keywords" content="">
 <title>Heurist Mirador Viewer</title>
 <?php
-if($use_custom_mirador){
+if($use_mirador4_bundle){
+    if($mirador4CssAsset !== null){
+        print '<link rel="stylesheet" href="'.$mirador4DistUrl.htmlspecialchars($mirador4CssAsset).'">'."\n";
+    }
+}elseif($use_custom_mirador3){
     print '<base href="../../../external/mirador3/"/>';
 }else{
 ?>
@@ -425,29 +477,50 @@ body {
 <div id="demo"></div>
 <script>
 <?php
+$annotationEndpoint = null;
 if (!preg_match('[\W]', $dbname)){
+    $annotationEndpoint = $baseUrl.'api/'.$dbname.'/annotations';
 ?>
-    // Annotation lookup scope:
-    //   canvas   -> /annotations, all DB annotations for the requested Canvas URL
-    //   manifest -> /annotations/{manifestRecID}, only annotations linked to this Manifest
-    window.annotationScope = "<?php echo htmlspecialchars($annotationScope);?>";
-    window.endpointURL = "<?php
-        $endpoint = $baseUrl.'api/'.htmlspecialchars($dbname).'/annotations';
-        if($manifestRecID>0){  //$annotationScope==='manifest' && 
-            $endpoint .= '/'.intval($manifestRecID);
-        }
-        echo $endpoint;
-    ?>";
-    window.manifestUrl = "<?php echo $manifest_url;?>";
+    window.annotationScope = <?php echo jsonForScript($annotationScope);?>;
+    window.endpointURL = <?php echo jsonForScript($annotationEndpoint);?>;
+    window.manifestUrl = <?php echo jsonForScript(str_replace('&amp;', '&', $manifest_url));?>;
+    window.heuristMiradorConfig = {
+        id: 'demo',
+        manifestUrl: window.manifestUrl,
+
+        db: <?php echo jsonForScript($dbname);?>,
+        recID: <?php echo intval($manifestRecID ?: $sourceRecordId);?>,
+        q: <?php echo jsonForScript((string)($_REQUEST['q'] ?? ''));?>,
+        iiifImage: <?php echo jsonForScript((string)($resolvedIiifImageID ?? (!$idIsRecordID ? $idParam : '')));?>,
+
+        endpointUrl: window.endpointURL,
+        annotationServerUrl: window.endpointURL,
+        annotationMode: 'heurist',
+
+        readonly: <?php echo $readonly ? 'true' : 'false';?>,
+        userLabel: 'Heurist user',
+
+        canvasId: <?php echo jsonForScript((string)($canvasUri ?? ''));?>,
+        sourceRecordId: <?php echo intval($sourceRecordId);?>,
+        hideThumbs: <?php echo $hideThumbs?'true':'false';?>,
+        annotationScope: window.annotationScope,
+
+        rewriteLocalIiifUrls: false,
+        heuristCanonicalBaseUrl: null
+    };
 <?php
 }
 ?>
     window.hideThumbs = <?php echo $hideThumbs?'true':'false';?>;
-    window.sourceRecordId = <?php echo intval($sourceRecordId);?>;//source media/manifest record for annotation tools
+    window.sourceRecordId = <?php echo intval($sourceRecordId);?>;
     window.runManually = true;
 </script>
 <?php
-if($use_custom_mirador){
+if($use_mirador4_bundle){
+?>
+<script type="module" src="<?php echo $mirador4DistUrl.htmlspecialchars($mirador4JsAsset);?>"></script>
+<?php
+}elseif($use_custom_mirador3){
       if($canvasUri==null){
           $canvasUri = '';
       }
@@ -484,15 +557,13 @@ if($use_custom_mirador){
     var config = {
         id: 'demo',
         windows: [{
-            //canvasIndex: 2,
-            canvasId: '<?php echo htmlspecialchars($canvasUri);?>',  //'https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json',
+            canvasId: '<?php echo htmlspecialchars($canvasUri);?>',
             imageToolsEnabled: true,
             imageToolsOpen: false,
             manifestId: window.manifestUrl,
             sideBarOpen: true,
             highlightAllAnnotations: true,
-            sideBarPanel: 'annotations', // Configure which sidebar is selected by default
-            //thumbnailNavigationPosition: "far-bottom"
+            sideBarPanel: 'annotations'
         }],
         theme: {
             palette: {
@@ -520,7 +591,7 @@ var mirador = Mirador.viewer({
     {
       "id": "uniqueid",
       //"canvasIndex": "1",
-      "loadedManifest": "<?php echo $manifest_url;?>"
+      "manifestId": "<?php echo $manifest_url;?>"
       <?php echo $hideThumbs?'':',"thumbnailNavigationPosition": "far-bottom"';?>
     }
   ]
@@ -530,5 +601,5 @@ var mirador = Mirador.viewer({
 <?php
 }
 ?>
-</body>.
+</body>
 </html>
