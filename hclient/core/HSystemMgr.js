@@ -1010,6 +1010,27 @@ class HSystemMgr {
   }
 
   /**
+  * Update the user's blocked notification list.
+  *
+  * @param {Object} [request={a: 'set_user_notification_settings', blocking: []}] - Request object.
+  * @param {function(Object): void} callback - Callback to handle server response.
+  *        Response `data` will be true on success.
+  * @returns {void}
+  */
+  block_user_notifications(request, callback){
+      if(!request || !request.blocking){
+          if(typeof callback === 'function'){
+            callback({status: window.hWin.ResponseStatus.INVALID_REQUEST, message: 'Blocking list is missing'});
+          }
+          return false;
+      }
+      if(!request.a){
+          request.a = 'set_user_notification_settings';
+      }
+      window.hWin.HAPI4.callserver('usr_info', request, callback);
+  }
+
+  /**
   * Retrieves custom formats for the TinyMCE rich text editor, configured for the Heurist instance.
   *
   * @param {Object} [request={a: 'get_tinymce_formats'}] - Request object.

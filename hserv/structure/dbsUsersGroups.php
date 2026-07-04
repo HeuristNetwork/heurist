@@ -1082,7 +1082,21 @@
 
         $mysqli = $system->getMysqli();
         $today = strtotime('now');
-        $usr_id = intval($system->getUserId());
+
+        $usrID = intval($system->getUserId());
+        $svsUGrpIDCondition = '';
+        $grpIDs = [];
+        if(!$system->isDbOwner() && !$system->isAdmin()){
+
+            $grpIDs = prepareIds($system->getUserGroupIds());
+            if(!in_array(0, $grpIDs)){
+                $grpIDs[] = 0;
+            }
+            $completeUGrpIDs = array_merge([$usrID], $grpIDs);
+            $completeUGrpIDs = implode(',', $completeUGrpIDs);
+
+            $svsUGrpIDCondition = " AND svs_UGrpID IN ({$completeUGrpIDs})";
+        }
 
         // LOAD USER SETTINGS
         $user_settings = $system->settings->getDatabaseSetting('Notifications');
@@ -1122,26 +1136,44 @@
             }
         }
 
+        // @todo consider moving $notifications and $conditions somewhere more noticeable/managable
         // Handled system notifications
         $notifications = [
             'bug_report' => [
-                'message' => '#bug-reporter',
-                'links' => [
-                    'span#open-bug-reporter' => [
-                        'widget' => 'actionHandler',
+                'title' => 'notifyTitle_Ticket', // localisation ID
+                'message' => 'notify_Ticket', // localisation ID
+                'links' => [ // click handlers
+                    'span.open-bug-reporter' => [ // selector => [action => menu|entity, id => menu id|entity name]
+                        'action' => 'menu',
                         'id' => 'menu-help-bugreport'
                     ]
                 ]
             ]
+            /*,'db_metadata' => [
+                'title' => 'notifyTitle_DBMeta',
+                'message' => 'notify_DBMeta',
+                'links' => [
+                    'span.open-sys-as-popup' => [
+                        'action' => 'entity', // entity popup
+                        'id' => 'sysIdentification'
+                    ],
+                    'span.open-sys-menu' => [
+                        'action' => 'menu', // menu item, switches to menu container than opens option
+                        'id' => 'menu-database-properties'
+                    ]
+                ]
+            ]*/
         ];
         $conditions = [
-            'bug_report' => [
+            'bug_report' => [ // show ticket reporter once a month
                 'period' => '+1 month'
             ],
-            'cms_websites' => [
+            'cms_websites' => [ // check for a website or webpage
+                'db_admin' => true,
+                'period' => '+3 month',
                 'query' => [
                     'query' => <<<QUERY
-                    SELECT IF(COUNT(rec_ID) = 0, true, false)
+                    SELECT IF(COUNT(rec_ID) = 0, 1, 0)
                     FROM Records
                     WHERE rec_RecTypeID IN (
                         SELECT rty_ID
@@ -1151,11 +1183,35 @@
                     QUERY
                 ]
             ],
-            'db_description' => [
+            'db_metadata' => [ // check whether the database name, description and rights have been provided
+                'db_admin' => true,
+                'period' => '+1 month',
                 'query' => [
                     'query' => <<<QUERY
-                    SELECT IF(LENGTH(sys_dbDescription) = 0, true, false)
+                    SELECT LENGTH(sys_dbName) = 0 OR LENGTH(sys_dbDescription) = 0 OR LENGTH(sys_dbRights) = 0
                     FROM sysIdentification
+                    QUERY
+                ]
+            ],
+            'svs_filter' => [ // check if user has a saved simple search/filter
+                'period' => '+1 month',
+                'query' => [
+                    'query' => <<<QUERY
+                    SELECT 1
+                    FROM usrSavedSearches
+                    WHERE svs_Query LIKE '%"q":%' AND svs_Query NOT LIKE '%"facets":%'{$svsUGrpIDCondition}
+                    LIMIT 1
+                    QUERY
+                ]
+            ],
+            'svs_facet' => [ // check if user has a saved facet search
+                'period' => '+1 month',
+                'query' => [
+                    'query' => <<<QUERY
+                    SELECT 1
+                    FROM usrSavedSearches
+                    WHERE svs_Query LIKE '%"facets":%'{$svsUGrpIDCondition}
+                    LIMIT 1
                     QUERY
                 ]
             ]
@@ -1163,18 +1219,18 @@
 
         if(empty($user_settings)){
             $user_settings = [
-                $usr_id => []
+                $usrID => []
             ];
-        }elseif(!array_key_exists($usr_id, $user_settings)){
-            $user_settings[$usr_id] = [];
+        }elseif(!array_key_exists($usrID, $user_settings)){
+            $user_settings[$usrID] = [];
         }
 
         $messages = [];
 
-        if(empty($user_settings[$usr_id])){
+        if(empty($user_settings[$usrID])){
 
-            $user_settings[$usr_id] = array_fill_keys(array_keys($notifications), $today);
-            $user_settings[$usr_id]['last_login'] = $today;
+            $user_settings[$usrID] = array_fill_keys(array_keys($notifications), $today);
+            $user_settings[$usrID]['last_login'] = $today;
 
             $system->settings->setDatabaseSetting('Notifications', $user_settings, 0);
 
@@ -1182,22 +1238,22 @@
         }
 
         // check user has logged in within the last three days
-        if(!array_key_exists('last_login', $user_settings[$usr_id])
-        || strtotime('+3 days', $user_settings[$usr_id]['last_login']) <= $today){
+        if(!array_key_exists('last_login', $user_settings[$usrID])
+        || strtotime('+3 days', $user_settings[$usrID]['last_login']) <= $today){
 
-            $user_settings[$usr_id]['last_login'] = $today;
+            $user_settings[$usrID]['last_login'] = $today;
             $system->settings->setDatabaseSetting('Notifications', $user_settings, 0);
 
             return $messages;
         }
 
-        $blocked = array_key_exists('block', $user_settings[$usr_id]) ? $user_settings[$usr_id]['block'] : '';
+        $blocked = array_key_exists('block', $user_settings[$usrID]) ? $user_settings[$usrID]['block'] : '';
         $blocked = explode(',', $blocked);
 
-        $checkLastNotify = function(&$usrSettings, $type) use ($today, $usr_id, $blocked){
+        $checkLastNotify = function(&$usrSettings, $type) use ($today, $usrID, $blocked){
 
-            if(!array_key_exists($type, $usrSettings[$usr_id])){
-                $usrSettings[$usr_id][$type] = $today;
+            if(!array_key_exists($type, $usrSettings[$usrID])){
+                $usrSettings[$usrID][$type] = $today;
                 return true;
             }elseif(in_array($type, $blocked)){
                 return true;
@@ -1206,7 +1262,7 @@
             return false;
         };
 
-        $checkConditions = function($conditions, $usrLastCheck) use ($mysqli, $today){
+        $checkConditions = function($conditions, $usrLastCheck) use ($system, $mysqli, $today){
 
             $notify = false;
 
@@ -1215,21 +1271,28 @@
                 switch($conditional_type){
 
                     case 'period':
-
                         $notify = strtotime($condition, intval($usrLastCheck)) <= $today;
-
                         break;
 
                     case 'query':
-
                         $value = mysql__select_value($mysqli, $condition['query']);
-
                         $notify = $value === 1;
+                        break;
 
+                    case 'admin':
+                        $notify = $system->isAdmin();
+                        break;
+
+                    case 'owner':
+                        $notify = $system->isDbOwner();
                         break;
 
                     default:
                         break;
+                }
+
+                if($notify === false){
+                    break;
                 }
             }
 
@@ -1244,18 +1307,19 @@
 
             $notify_conds = $conditions[$type];
 
-            if($checkConditions($notify_conds, $user_settings[$usr_id][$type])){
+            if($checkConditions($notify_conds, $user_settings[$usrID][$type])){
 
-                $user_settings[$usr_id][$type] = $today;
+                $user_settings[$usrID][$type] = $today;
 
                 $messages[$type] = [
+                    'title' => $details['title'],
                     'message' => $details['message'],
                     'links' => $details['links']
                 ];
             }
         }
 
-        $user_settings[$usr_id]['last_login'] = $today;
+        $user_settings[$usrID]['last_login'] = $today;
 
         $system->settings->setDatabaseSetting('Notifications', $user_settings, 0);
 
