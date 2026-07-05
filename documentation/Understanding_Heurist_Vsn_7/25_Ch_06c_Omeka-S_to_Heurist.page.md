@@ -1,14 +1,14 @@
 # Ch 06c: Omeka-S to Heurist
 
-\[commentaire\]
-
 Omeka S is a configurable database (there is an older version Omeka Classic). It is much more complex to set up and much more limited, although it does have some functions in the semantic web area which we don't yet address and extensive tech documentation, having been defined from scratch after a decade of Omeka Classic, and is therefore easier for programmers to extend with add-on modules. There is also an Omeka (either version) to Datacrate conversion and Heurist to Datacrate conversion developed in Python by Peter Sefton at UTS - you can find Datacrate on github - which might form the basis for an alternative pathway.
+
+Please note that the migration from Omeka S to Heurist was developed before 2020 and may not operate 'out of the box'/
 
 **Converting from Omeka S to Heurist**
 
 The following table shows the correspondences between structures defined in Omeka S and structures defined in Heurist:
 
-<table id="bkmrk-omeka-s-heurist-reso"><colgroup><col></col><col></col></colgroup><tbody><tr><th>**Omeka S**</th><th>**Heurist**</th></tr><tr><td>Resource\_class
+<table id="bkmrk-omeka-sheuristresour"><colgroup><col></col><col></col></colgroup><tbody><tr><th>**Omeka S**</th><th>**Heurist**</th></tr><tr><td>Resource\_class
 
 </td><td>defRecTypes
 

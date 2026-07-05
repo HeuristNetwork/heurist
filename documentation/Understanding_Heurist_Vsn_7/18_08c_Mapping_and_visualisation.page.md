@@ -6,90 +6,54 @@ Summary automatically generated on 11/25/2025 using the gpt-oss:120b model from 
 
 ### 1️⃣ Spatio‑temporal **Map** tab
 
-<table id="bkmrk-step-action-1-click-"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Step
-
-</th><th>Action
+<table id="bkmrk-action1click%C2%A0%5Bexplor"><colgroup><col></col><col style="width: 721px;"></col></colgroup><tbody><tr style="height: 10px;"><th></th><th>Action
 
 </th></tr><tr><td>**1**
 
-</td><td>Click
-
-**\[Explorer\]**
+</td><td>Click **\[Explore\]**
 
 .
 
 </td></tr><tr><td>**2**
 
-</td><td>Run a search
-
-**or**
-
- use a
-
-**\[Saved Filter\]**
-
- to retrieve the records you want to map.
+</td><td>Run a search **or** use a **\[Saved Filter\]** to retrieve the records you want to map.
 
 </td></tr><tr><td>**3**
 
-</td><td>Select a
-
-**record**
-
- (any record that contains the required fields).
+</td><td>Select a **record** (any record that contains the required fields).
 
 </td></tr><tr><td>**4**
 
-</td><td>Click
-
-**\[Map\]**
-
-.
+</td><td>Click<span style="color: rgb(132, 63, 161);"> </span>**\[Map\]**
 
 </td></tr></tbody></table>
 
-> **Result:** The interface splits into two synchronized panels – a **map** (top) and a **timeline** (bottom).
+> ```
+> 
+> ```
+
+Result: The interface splits into two synchronized panels – a map (top) and a timeline (bottom).
 
 #### 1.1 Prerequisites for a spatio‑temporal view
 
-- **At least one spatial field** (coordinates, GeoJSON, etc.).
+- **At least one spatial field** (coordinates, WKT, GeoJSON, etc.).
 - **At least one temporal field** (date, date‑range, etc.).
 
-If one of these is missing the map/timeline will stay empty.
+If one of these is missing either the map or the timeline will not be populated.
 
 #### 1.2 Map panel
 
-<table id="bkmrk-tool-description-leg"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Tool
+<table id="bkmrk-tooldescriptionlegen"><colgroup><col style="width: 158px;"></col><col style="width: 583px;"></col></colgroup><tbody><tr><th>Tool
 
 </th><th>Description
 
 </th></tr><tr><td>**Legend**
 
-</td><td>•
+</td><td>• **Result sets** – show/hide points belonging to the current result set.
 
-**Result sets**
+• **Map Documents** – (see *Publish* section).
 
- – show/hide points belonging to the current result set.
-
-•
-
-**Map Documents**
-
- – (see
-
-*Publish*
-
- section).
-
-•
-
-**Base map**
-
- – choose background (e.g.,
-
-*OpenStreetMap*
-
-).
+• **Base map** – choose background (e.g., *OpenStreetMap*).
 
 </td></tr><tr><td>**Zoom/Dezoom**
 
@@ -117,17 +81,9 @@ If one of these is missing the map/timeline will stay empty.
 
 </td></tr><tr><td>**\[Publish map\]**
 
-</td><td>Generates an
+</td><td>Generates an **iframe** snippet to embed the map on another page, optionally with controls (legend, bookmark, geocoder, selector, print).
 
-**iframe**
-
- snippet to embed the map on another page, optionally with controls (legend, bookmark, geocoder, selector, print).
-
-• You can also export the map as
-
-**KML**
-
- for Google Earth.
+• You can also export the map as **KML** for Google Earth.
 
 </td></tr><tr><td>**Clusterisation**
 
@@ -137,23 +93,15 @@ If one of these is missing the map/timeline will stay empty.
 
 #### 1.3 Publishing a map (iframe)
 
-<table id="bkmrk-setting-what-it-does"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Setting
+<table id="bkmrk-settingwhat-it-doesi"><colgroup><col style="width: 195px;"></col><col style="width: 545px;"></col></colgroup><tbody><tr><th>Setting
 
 </th><th>What it does
 
-</th></tr><tr><td>**Include**
-
- –
-
-*current query*
+</th></tr><tr><td>**Include** – *current query*
 
 </td><td>The iframe displays the map built from the query you just ran.
 
-</td></tr><tr><td>**Include**
-
- –
-
-*opened map documents*
+</td></tr><tr><td>**Include** – *opened map documents*
 
 </td><td>(still under documentation – shows any additional map layers you have opened).
 
@@ -167,23 +115,7 @@ If one of these is missing the map/timeline will stay empty.
 
 </td></tr><tr><td>**Other settings**
 
-</td><td>*Use current basemap*
-
-,
-
-*Allow modify symbology*
-
-,
-
-*Show map*
-
-,
-
-*Show timeline*
-
-,
-
-*Marker clusters*
+</td><td>*Use current basemap*, *Allow modify symbology*, *Show map*, *Show timeline*, *Marker clusters*
 
 .
 
@@ -191,23 +123,11 @@ If one of these is missing the map/timeline will stay empty.
 
 </td><td>You can pick a custom HTML template for the pop‑ups (create a new template in the
 
-**Templates**
-
- section of Heurist).
+**Templates** section of Heurist).
 
 </td></tr><tr><td>**Copy code**
 
-</td><td>Two formats are offered:
-
-**embed**
-
- (standard
-
-`<span class="editor-theme-code"><iframe …></span>`
-
- ) and
-
-**web‑safe**
+</td><td>Two formats are offered: **embed** (standard `<span class="editor-theme-code"><iframe …></span>` ) and **web‑safe**
 
  (escaped for direct insertion in CMSs).
 
@@ -231,49 +151,25 @@ If one of these is missing the map/timeline will stay empty.
 
 ### 2️⃣ **Network** tab
 
-<table id="bkmrk-step-action-1-click--1"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Step
+<table id="bkmrk-stepaction1click%C2%A0%5Bex"><colgroup><col style="width: 62px;"></col><col style="width: 680px;"></col></colgroup><tbody><tr style="height: 10px;"><th>Step
 
 </th><th>Action
 
 </th></tr><tr><td>**1**
 
-</td><td>Click
-
-**\[Explorer\]**
-
-.
+</td><td>Click **\[Explorer\]**.
 
 </td></tr><tr><td>**2**
 
-</td><td>Run a search
-
-**or**
-
- use a
-
-**\[Saved Filter\]**
-
- to collect the records you want in the network.
+</td><td>Run a search **or** use a **\[Saved Filter\]** to collect the records you want in the network.
 
 </td></tr><tr><td>**3**
 
-</td><td>Select a
-
-**record**
-
- that will be the entry point of the network.
+</td><td>Select a **record**<span style="color: rgb(132, 63, 161);"> </span>that will be the entry point of the network.
 
 </td></tr><tr><td>**4**
 
-</td><td>Click
-
-**\[Map\]**
-
- (the same button as for the spatio‑temporal view; the
-
-**Network**
-
- view appears).
+</td><td>Click **\[Map\]** (the same button as for the spatio‑temporal view; the **Network** view appears).
 
 </td></tr></tbody></table>
 
@@ -290,97 +186,33 @@ If one of these is missing the map/timeline will stay empty.
 
 </th></tr><tr><td>**Node Control**
 
-</td><td>•
+</td><td>• **Select mode** – click‑drag a single node or draw a selection rectangle (right‑click + drag).
 
-**Select mode**
-
- – click‑drag a single node or draw a selection rectangle (right‑click + drag).
-
-•
-
-**Gravity**
-
- – toggle node‑to‑node attraction; turn
-
-**on**
-
- to let the layout settle, then
-
-**off**
+• **Gravity** – toggle node‑to‑node attraction; turn **on** to let the layout settle, then **off**
 
  for a static view.
 
 </td></tr><tr><td>**Link Control**
 
-</td><td>•
+</td><td>• **Links** – show/hide empty links and *expanded* links (links that open to show nested relationships).
 
-**Links**
+• **Node Size Formula** – choose linear or logarithmic scaling of node size.
 
- – show/hide empty links and
-
-*expanded*
-
- links (links that open to show nested relationships).
-
-•
-
-**Node Size Formula**
-
- – choose linear or logarithmic scaling of node size.
-
-•
-
-**Fixed**
-
- – set a fixed link thickness.
+• **Fixed** – set a fixed link thickness.
 
 </td></tr><tr><td>**Graph Control**
 
-</td><td>•
+</td><td>• **Refresh Data** – re‑load the graph if new records were added.
 
-**Refresh Data**
+• **Open/Close Fullscreen** – toggle full‑screen mode.
 
- – re‑load the graph if new records were added.
+• **View Mode** – *Icon view*, *Basic info box*, *Full info box with link view*.
 
-•
+• **Set Zoom** – manual zoom slider.
 
-**Open/Close Fullscreen**
+• **Export** – download the graph as
 
- – toggle full‑screen mode.
-
-•
-
-**View Mode**
-
- –
-
-*Icon view*
-
-,
-
-*Basic info box*
-
-,
-
-*Full info box with link view*
-
-.
-
-•
-
-**Set Zoom**
-
- – manual zoom slider.
-
-•
-
-**Export**
-
- – download the graph as
-
-**GEXF**
-
- (Gephi format).
+**GEXF** (Gephi format).
 
 </td></tr></tbody></table>
 
@@ -394,49 +226,27 @@ If one of these is missing the map/timeline will stay empty.
 
 ### 3️⃣ **Cross‑tabular (Pivot) View**
 
-<table id="bkmrk-step-action-1-click--2"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Step
+<table id="bkmrk-stepaction1click%C2%A0%5Bex-1"><colgroup><col></col><col style="width: 700px;"></col></colgroup><tbody><tr><th>Step
 
 </th><th>Action
 
 </th></tr><tr><td>**1**
 
-</td><td>Click
-
-**\[Explorer\]**
-
-.
+</td><td>Click **\[Explorer\]**<span style="color: rgb(132, 63, 161);">.</span>
 
 </td></tr><tr><td>**2**
 
-</td><td>Run a search
-
-**or**
-
- use a
-
-**\[Saved Filter\]**
+</td><td>Run a search **or** use a **\[Saved Filter\]**
 
 .
 
-</td></tr><tr><td>**3**
+</td></tr><tr style="height: 10px;"><td>**3**
 
-</td><td>Select a
-
-**record**
-
- (any type).
+</td><td>Select a **record**<span style="color: rgb(132, 63, 161);"> </span>(any type).
 
 </td></tr><tr><td>**4**
 
-</td><td>Click
-
-**\[Cross‑tables\]**
-
- (also called
-
-*Tableaux croisés*
-
-).
+</td><td>Click **\[Cross‑tabs\]** (also called *Tableaux croisés*).
 
 </td></tr></tbody></table>
 
@@ -461,7 +271,7 @@ All changes are reflected instantly in the table.
 
 #### 3.3 Table options
 
-<table id="bkmrk-option-what-it-does-"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Option
+<table id="bkmrk-optionwhat-it-does%5Bs"><colgroup><col></col><col style="width: 563px;"></col></colgroup><tbody><tr><th>Option
 
 </th><th>What it does
 
@@ -469,27 +279,15 @@ All changes are reflected instantly in the table.
 
 </td><td>Store the current table configuration for later reuse.
 
-</td></tr><tr><td>**Show**
-
- –
-
-*Values*
+</td></tr><tr><td>**Show** – *Values*
 
 </td><td>Show raw counts.
 
-</td></tr><tr><td>**Show**
-
- –
-
-*Totals*
+</td></tr><tr><td>**Show** – *Totals*
 
 </td><td>Show row/column totals.
 
-</td></tr><tr><td>**Show**
-
- –
-
-*Row % / Column %*
+</td></tr><tr><td>**Show** – *Row % / Column %*
 
 </td><td>Show percentages per row or column.
 
@@ -497,13 +295,7 @@ All changes are reflected instantly in the table.
 
 </td><td>Switch between sum, average, etc.
 
-</td></tr><tr><td>**Hide / Show**
-
- –
-
-*null values*
-
-,
+</td></tr><tr><td>**Hide / Show** – *null values*,
 
 *empty rows/columns*
 
@@ -516,13 +308,11 @@ All changes are reflected instantly in the table.
 - **Export** – click the **Export** button (top‑right) to download **CSV** or **PDF**.
 - **Chart (pie)** – when only **one** variable is selected, a **pie chart** button becomes active; it displays the distribution of that variable.
 
-> **🚨 Warning:** At least **one** variable must be selected before any result (table or chart) appears.
+<p class="callout warning">At least **one** variable must be selected before any result (table or chart) appears.</p>
 
----
+#### 📊 Quick‑reference of Heurist visualisation tabs
 
-## 📊 Quick‑reference of Heurist visualisation tabs
-
-<table id="bkmrk-need-map%E2%80%AF%2B%E2%80%AFtimeline-"><colgroup><col></col><col></col><col></col><col></col></colgroup><tbody><tr><th>Need
+<table id="bkmrk-needmap%E2%80%AF%2B%E2%80%AFtimelinene"><colgroup><col></col><col style="width: 238px;"></col><col style="width: 140px;"></col><col style="width: 105px;"></col></colgroup><tbody><tr><th>Need
 
 </th><th>Map + Timeline
 
@@ -544,15 +334,7 @@ All changes are reflected instantly in the table.
 
 </td></tr><tr><td>**Quick export (CSV / PDF)**
 
-</td><td>✅ (via
-
-*Publish*
-
- or
-
-*Download timeline*
-
-)
+</td><td>✅ (via *Publish* or *Download timeline*)
 
 </td><td>✅ (GEXF)
 
@@ -578,7 +360,7 @@ All changes are reflected instantly in the table.
 
 ---
 
-### 🔖 Key take‑aways
+#### 🔖 Key take‑aways
 
 - **Map + Timeline** requires **both** a spatial **and** a temporal field; otherwise the view stays empty.
 - Use the **Publish** button to generate an embeddable iframe; you can customise which controls appear and even export a KML for Google Earth.

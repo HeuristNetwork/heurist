@@ -6,119 +6,135 @@
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-fud0m8yr.png)
 
-- **Safeguard Archive package**<span style="color: rgb(0, 0, 0);"> - a fully internally documented archive package of all the data in the database</span>
+- **Safeguard file - download**<span style="color: rgb(0, 0, 0);"> - a fully internally documented archive package of all the data in the database</span>
+- **Safeguard file - to repository**<span style="color: rgb(0, 0, 0);"> - as above, but uploads the file to a chosen repository (2026 - only Nakala)</span>
 - **Website &gt; Create**<span style="color: rgb(0, 0, 0);"> - sets up a new CMS website. A database can have multiple websites for different audiences </span>
-
-<span style="color: rgb(0, 0, 0);">Note : You can also access the website record in the Explore Menu, just like any other record. To find the website record, type 'website' in the searchbox, or filter by Entities in the Explore Tray, and choose 'CMS\_Home' as the Record Type. Any websites you have created will appear as records in the Results Pane.</span>
-
 - **Website &gt; Edit**<span style="color: rgb(0, 0, 0);"> - edit an existing CMS website stored in the database </span>
-- **Website &gt;View** <span style="color: rgb(0, 0, 0);">- view an existing CMS website in a separate window - use to check results and to obtain the URL </span>
+- **Website &gt;View** <span style="color: rgb(0, 0, 0);">- view an existing CMS website in a separate window - use to check results and to obtain the URL </span>  
+      
+    <span style="color: rgb(0, 0, 0);">Note : You can also access the website record in the Explore Menu, just like any other record. To find the website record, type 'website' in the searchbox, or filter by Entities in the Explore Tray, and choose 'CMS\_Home' as the Record Type. Any websites you have created will appear as records in the Results Pane.</span>
 - **Standalone web page**<span style="color: rgb(0, 0, 0);"> - create or edit a CMS-generated web page for embedding in a third-party website </span>
+- **Statistics**<span style="color: rgb(0, 0, 0);"> - displays access statistics usign the eidely used Matomo Open Source web tracklign system</span>
 
-2. # <span style="color: rgb(0, 0, 0);">The CMS : creating a website</span>
-3. 1. ## **Why use the Heurist CMS?**
+### <span style="color: rgb(0, 0, 0);">The CMS : creating a website</span>
+
+#### **Why use the Heurist CMS?**
 
 <span style="color: rgb(0, 0, 0);">Heurist provides a powerful CMS capability tightly integrated with the database. There are several advantages to this approach:</span>
 
 - **Functionality:**<span style="color: rgb(0, 0, 0);"> Database search and visualisation widgets can be embedded directly in web pages and have full access to the content of the database, including saved searches;</span>
-- **Sustainability:**<span style="color: rgb(0, 0, 0);"> The CMS pages are stored as standard record types in the database. That means that there is no need to have a separate server and cross-server integration (high sustainability risks); as long as the database is accessible through Heurist, the CMS will remain operational, potentially long after the completion of the project which built it, and at practically no cost.</span>
+- **Sustainability:**<span style="color: rgb(0, 0, 0);"> The CMS pages are stored as standard record types in the database. That means that there is no need to have a separate server and cross-server integration (high sustainability risks); as long as the database is accessible through Heurist, the CMS will remain operational, potentially long after the completion of the project which built it, and at practically no cost.</span>  
+      
+    
+    - - <span style="color: rgb(0, 0, 0);">Stability</span>
+        - <span style="color: rgb(0, 0, 0);">Flexibility</span>
+        - <span style="color: rgb(0, 0, 0);">Multiple websites from one database</span>
+        - <span style="color: rgb(0, 0, 0);">Embedded in the database and thus saved as an integral part of the database</span>
+        - <span style="color: rgb(0, 0, 0);">No dependency on connections between servers, avoids multiple points of failure</span>
+        - <span style="color: rgb(0, 0, 0);">Backed up in archive track package and in normal backups</span>
+        - <span style="color: rgb(0, 0, 0);">Has access to the most functions directly available as widgets ( reuses the widgets of the main interface)</span>
+        - <span style="color: rgb(0, 0, 0);">Has direct access to data in the database and respects permissions and visibility down to the individual value level</span>
+        - <span style="color: rgb(0, 0, 0);">Flexible configuration of widgets using parameters which can be set via forms in the interface</span>
+        - <span style="color: rgb(0, 0, 0);">Widgets provide powerful functions without any programming - mapping, facet searches etc</span>
+        - <span style="color: rgb(0, 0, 0);">All images or files in the database are accessible for embedding without creating special web image directories (eg. WordPress) and are resampled automatically for web resolution allowing high resolution images to be stored in the database without bogging down the website &lt;check this has been enabled&gt;</span>
+        - <span style="color: rgb(0, 0, 0);">Allows embedding of remote images and streaming EG or videos and sound audio</span>
+        - <span style="color: rgb(0, 0, 0);">Instant editing of text elements in the website and change of parameters including styling of widgets and other components</span>
+        - <span style="color: rgb(0, 0, 0);">Creates embeddable pages independent of the Heurist menu structure as well as complete websites with a couple of clicks</span>
+        - <span style="color: rgb(0, 0, 0);">Easy linking of pages and records within text, generation of bread crumbs and page headings</span>
+        - <span style="color: rgb(0, 0, 0);">Hierarchical menus and the possibility of multiple menus</span>
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-wnw8hpti.png)
+#### <span style="color: rgb(0, 0, 0);">Configuring website layout </span>
 
-<span style="color: rgb(0, 0, 0);">Heurist Version 4 showing the functionality of different prts of the Explore page</span>
-
-- <span style="color: rgb(0, 0, 0);">Stability</span>
-- <span style="color: rgb(0, 0, 0);">Flexibility</span>
-- <span style="color: rgb(0, 0, 0);">Multiple websites from one database</span>
-- <span style="color: rgb(0, 0, 0);">Embedded in the database and thus saved as an integral part of the database</span>
-- <span style="color: rgb(0, 0, 0);">No dependency on connections between servers, avoids multiple points of failure</span>
-- <span style="color: rgb(0, 0, 0);">Backed up in archive track package and in normal backups</span>
-- <span style="color: rgb(0, 0, 0);">Has access to the most functions directly available as widgets ( reuses the widgets of the main interface)</span>
-- <span style="color: rgb(0, 0, 0);">Has direct access to data in the database and respects permissions and visibility down to the individual value level</span>
-- <span style="color: rgb(0, 0, 0);">Flexible configuration of widgets using parameters which can be set via forms in the interface</span>
-- <span style="color: rgb(0, 0, 0);">Widgets provide powerful functions without any programming - mapping, facet searches etc</span>
-- <span style="color: rgb(0, 0, 0);">All images or files in the database are accessible for embedding without creating special web image directories (eg. WordPress) and are resampled automatically for web resolution allowing high resolution images to be stored in the database without bogging down the website &lt;check this has been enabled&gt;</span>
-- <span style="color: rgb(0, 0, 0);">Allows embedding of remote images and streaming EG or videos and sound audio</span>
-- <span style="color: rgb(0, 0, 0);">Instant editing of text elements in the website and change of parameters including styling of widgets and other components</span>
-- <span style="color: rgb(0, 0, 0);">Creates embeddable pages independent of the Heurist menu structure as well as complete websites with a couple of clicks</span>
-- <span style="color: rgb(0, 0, 0);">Easy linking of pages and records within text, generation of bread crumbs and page headings</span>
-- <span style="color: rgb(0, 0, 0);">Hierarchical menus and the possibility of multiple menus</span>
-
-2. ## <span style="color: rgb(0, 0, 0);"> Configuring website layout </span>
-
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-6vkawfxu.png)
-
+<span style="color: rgb(0, 0, 0);">The initial web page may look somewhat different depending on what template has been set as the default. </span>  
 <span style="color: rgb(0, 0, 0);">The default website is created with a set of commonly used menu entries and web pages with dummy content.</span>
 
-<span style="color: rgb(0, 0, 0);">The website editor can be display clicking on the link on the top left of the screen (“website editor”):</span>
+Note: If you are not logged in you will first need to login with the <u>login</u> link at top right of the screen, or in the backend interface.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-palnyouo.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/GiTimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/GiTimage.png)
 
-<span style="color: rgb(0, 0, 0);">There you can switch between the</span>
+<span style="color: rgb(0, 0, 0);">The website editor can be displayed by clicking on the </span><u><span style="color: rgb(0, 0, 0);">website editor </span></u><span style="color: rgb(0, 0, 0);">link on the top left of the screen</span>
 
-- <span style="color: rgb(0, 0, 0);"> the Website Layout / Properties button above the tabs to change the title, logo, background and some other settings of the website as a whole</span>
-- <span style="color: rgb(0, 0, 0);">the Site tab (to add new menu entries, to delete the menu entries you don't need or to rename them and the Page ),</span>
-- <span style="color: rgb(0, 0, 0);"> the Page tab (to edit the current page structure and modify the component styles and widget properties), the </span>
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/12timage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/12timage.png)
 
-<span style="color: rgb(0, 0, 0);">The website Layout/Properties button open up a form where you must complete or change to modify the settings of your website (title, logo, menu entries...).</span>
+<span style="color: rgb(0, 0, 0);">At the top of the screen you have some general controls:</span>
 
-<span style="color: rgb(0, 0, 0);">The “Advanced” tab allows you to provide some custom CSS and/or Javascript : see below.</span>
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/AY6image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/AY6image.png)
 
-<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 0);">For CMS it takes DT\_THUMBNAIL (2-39) as favicon.</span>
+<span style="color: rgb(0, 0, 0);">The </span>**&lt;&lt; chevrons**<span style="color: rgb(0, 0, 0);"> can be used to temporarily close up the website editor panel, without exiting the website editor. This may be useful to have extra screen space when editing text blocks on the page (which open in a WYSIWYG editor when yu click on them).</span>
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-drwmgjus.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/uqsimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/uqsimage.png)
 
-3. ## <span style="color: rgb(0, 0, 0);">Creating and editing components in a page</span>
+<span style="color: rgb(0, 0, 0);">The website URL is the recommended compact URL for the website. Click on it to copy it to your clipboard.</span>
 
-<span style="color: rgb(0, 0, 0);">The element you are currently working on is highlighted by an animated blue border. If you change the element in any way, the changes are immediately visible in the preview. You can therefore use Heurist’s web editor to experiment and learn by doing. You don’t need to know very much in advance about what these different settings do—just change them, and see the effect. You can actually learn a lot about web development just by playing with Heurist’s website builder. Anything you learn about your Heurist site will automatically apply to basically any website on the internet.</span>
+##### <span style="color: rgb(0, 0, 0);">The </span>**Website Layout / Properties button**<span style="color: rgb(0, 0, 0);"> </span>
+
+<span style="color: rgb(0, 0, 0);">Changes the title, logo, background, languages and other settings of the website as a whole</span>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/QTpimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/QTpimage.png)
+
+Opens a standard record edit form for the CMS\_Home record which defines the website:
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/lCOimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/lCOimage.png)
+
+<span style="color: rgb(0, 0, 0);">The “Advanced” tab allows you to provide some custom CSS and/or Javascript : see below.</span>  
+<span style="color: rgb(0, 0, 0);">DT\_THUMBNAIL (base field 2-39) is used as favicon for the website.</span>
+
+##### <span style="color: rgb(0, 0, 0);">The </span>**Site tab**<span style="color: rgb(0, 0, 0);"> (menu management)</span>
+
+<span style="color: rgb(0, 0, 0);">Allows you to add, reorder, rename and delete menu entries</span>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/fBwimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/fBwimage.png)
+
+##### <span style="color: rgb(0, 0, 0);">The </span>**Page tab**<span style="color: rgb(0, 0, 0);"> (widgets)</span>
+
+<span style="color: rgb(0, 0, 0);">Edits the currently selected page structure and modify the component styles and widget properties.</span>  
+<span style="color: rgb(0, 0, 0);">The widgets making up the page are shown on the left.</span>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/4jiimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/4jiimage.png)
+
+#### <span style="color: rgb(0, 0, 0);">Creating and editing components in a page</span>
+
+<span style="color: rgb(0, 0, 0);">The element you are currently working on is highlighted by an animated blue border. If you change the element in any way, the changes are immediately visible in the preview. You can therefore use Heurist’s web editor to experiment and learn by doing. </span>
+
+<span style="color: rgb(0, 0, 0);">You don’t need to know very much in advance about what these different settings do — just change them, and see the effect. You can actually learn a lot about web development just by playing with Heurist’s website builder. Anything you learn about your Heurist site will apply to most website development.</span>
 
 <span style="color: rgb(0, 0, 0);">Advanced users can apply custom CSS classes to the element, or write inline CSS as they desire (see below).</span>
 
-<span style="color: rgb(0, 0, 0);"> After inserting the component, you can edit its content in the usual way. You could also add further elements to change the component. </span>
+<span style="color: rgb(0, 0, 0);">After inserting the component, you can edit its content in the usual way. You can also add further elements to change the component. </span>
 
-### <span style="color: rgb(0, 0, 0);">Using widgets</span>
+#### <span style="color: rgb(0, 0, 0);">Using widgets</span>
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-oiibs4ht.png)
+<span style="color: rgb(0, 0, 0);">If you insert a widget you will first see a list of possible widgets.</span>
 
-*See chapter 8*
+![embedded-image-oiibs4ht.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/NV0embedded-image-oiibs4ht.png)
 
 #### **What is a widget?**
 
 <span style="color: rgb(0, 0, 0);">To add interactive content to your Heurist site, you need to use Heurist </span>**widgets**<span style="color: rgb(0, 0, 0);">. A widget is an interactive component which either retrieves or displays information about records in your database. The Map and Timeline widget, for example, plots records on a map and displays them in chronological order on a timeline below. The Saved Filters widget allows you to embed filters that you have defined in the Explore menu on a webpage, enabling visitors to your site to search the database.</span>
 
-<span style="color: rgb(0, 0, 0);">Many of the widgets replicate tools that you are already familiar with from the Explore Menu. However, when you embed a widget on a Heurist site, you will have more ability to customise its look and behaviour, so you can control the user's experience.</span>
+<span style="color: rgb(0, 0, 0);">Many of the widgets replicate tools that you are already familiar with from the Explore Menu (you are in fact using the same widgets that we use to build the backend interface). However, when you embed a widget on a Heurist site, you will have more ability to customise its look and behaviour, so you can control the user's experience.</span>
 
 <span style="color: rgb(0, 0, 0);">The available widgets are:</span>
 
-<span style="color: rgb(0, 0, 0);">Filter: This widget gives visitors access to the standard Heurist search bar, such as you see at the top of the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
-
-<span style="color: rgb(0, 0, 0);">Saved Filters: This widget allows you to embed Saved Filters on a Heurist webpage. In most cases, we recommend that you use </span>[<span style="color: rgb(0, 0, 255);">Faceted Searches</span>](https://heuristref.net/h6-alpha/viewers/smarty/546)<span style="color: rgb(0, 0, 0);"> with this widget, as they provide the best user experience.</span>
-
-<span style="color: rgb(0, 0, 0);">Standard Filter Result: This widget displays records in a similar manner to the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
-
-<span style="color: rgb(0, 0, 0);">Custom Report: This widget displays information using a Custom Report that you have built in the Explore Menu. Custom Reports can also be embedded within other widgets, for instance to configure the popups on the Map and Timeline, or to provide a different view of records in the Standard Filter Result.</span>
-
-<span style="color: rgb(0, 0, 0);">Table Format: This widget displays records in a tabular format, the same as the List View in the Explore Menu</span>
-
-<span style="color: rgb(0, 0, 0);">Map and Timeline: This widget plots records on a map with embedded timeline, just like the Map View in the Explore Menu. You can utilise Map Documents defined in your Heurist database to provide additional advanced functionality.</span>
-
-<span style="color: rgb(0, 0, 0);">Story Map: This widget plots a set of records on the map as a connected series, with an accompanying 'slideshow' of information about each record. This is ideal for 10-20 records.</span>
-
-<span style="color: rgb(0, 0, 0);">Network Graph: This widget displays records as nodes in a network, much like the Network View in the Explore Menu.</span>
-
-<span style="color: rgb(0, 0, 0);">Menu: This widget allows you to add a navigation menu to your site, like the one that is automatically generated in your website header.</span>
-
-<span style="color: rgb(0, 0, 0);">Add Record: This widget allows you to add an 'Add Record' button to your page. Visitors can click the button to open the standard data entry form for a given record type.</span>
-
-<span style="color: rgb(0, 0, 0);">Email Us Form: This widget allows you to add a contact form to your page, so that visitors can email you without you revealing your email address publicly on the internet.</span>
+- <span style="color: rgb(0, 0, 0);">Filter: This widget gives visitors access to the standard Heurist search bar, such as you see at the top of the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
+- <span style="color: rgb(0, 0, 0);">Saved Filters: This widget allows you to embed Saved Filters on a Heurist webpage. In most cases, we recommend that you use </span>[<span style="color: rgb(0, 0, 255);">Faceted Searches</span>](https://heuristref.net/h6-alpha/viewers/smarty/546)<span style="color: rgb(0, 0, 0);"> with this widget, as they provide the best user experience.</span>
+- <span style="color: rgb(0, 0, 0);">Standard Filter Result: This widget displays records in a similar manner to the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
+- <span style="color: rgb(0, 0, 0);">Custom Report: This widget displays information using a Custom Report that you have built in the Explore Menu. Custom Reports can also be embedded within other widgets, for instance to configure the popups on the Map and Timeline, or to provide a different view of records in the Standard Filter Result.</span>
+- <span style="color: rgb(0, 0, 0);">Table Format: This widget displays records in a tabular format, the same as the List View in the Explore Menu</span>
+- <span style="color: rgb(0, 0, 0);">Map and Timeline: This widget plots records on a map with embedded timeline, just like the Map View in the Explore Menu. You can utilise Map Documents defined in your Heurist database to provide additional advanced functionality.</span>
+- <span style="color: rgb(0, 0, 0);">Story Map: This widget plots a set of records on the map as a connected series, with an accompanying 'slideshow' of information about each record. This is ideal for 10-20 records.</span>
+- <span style="color: rgb(0, 0, 0);">Network Graph: This widget displays records as nodes in a network, much like the Network View in the Explore Menu.</span>
+- <span style="color: rgb(0, 0, 0);">Menu: This widget allows you to add a navigation menu to your site, like the one that is automatically generated in your website header.</span>
+- <span style="color: rgb(0, 0, 0);">Add Record: This widget allows you to add an 'Add Record' button to your page. Visitors can click the button to open the standard data entry form for a given record type.</span>
+- <span style="color: rgb(0, 0, 0);">Email Us Form: This widget allows you to add a contact form to your page, so that visitors can email you without you revealing your email address publicly on the internet.</span>
 
 #### **How do I configure a widget?**
 
-<span style="color: rgb(0, 0, 0);">Once you have inserted a widget into a page, it will appear in the treeview to the left. If you click on it, this will bring up the </span>**style** <span style="color: rgb(0, 0, 0);">tool for the widget. At the top of the style tool you will see</span>
+<span style="color: rgb(0, 0, 0);">Once you have inserted a widget into a page, it will appear in the treeview to the left. If you click on it, this will open all the settings for the widget, where you can alter its functionality. Note that there are several tabs with different fucntions - nasic setup, onscreen controls, image handling, messages (when data is missing etc.) and Connect (which sets connections between </span>
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-ivr1a0bc.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/sUnimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/sUnimage.png)
 
-<span style="color: rgb(0, 0, 0);">This button will take you to the settings for the widget, where you can alter its functionality. See the specific page for each widget for information on the specific settings.</span>
+<span style="color: rgb(0, 0, 0);">See the specific page for each widget for information on the specific settings.</span>
 
 #### **How do I format a widget?**
 
@@ -126,15 +142,15 @@
 
 #### **How do widgets talk to each other?**
 
-<span style="color: rgb(0, 0, 0);">You are very likely to add more that one widget to a webpage. When you do, you will probably want them to interact. For example, you might use the Saved Filters Widget to allow visitors to search the database, the Standard Filter Result to list the results of a search, and the Network Graph to display the results visually. Heurist links all widgets together so that they interact correctly. You do not need to configure anything for this to happen—it is automatic.</span>
+<span style="color: rgb(0, 0, 0);">You are very likely to add more that one widget to a webpage. When you do, you will probably want them to interact. For example, you might use the Saved Filters Widget to allow visitors to search the database, the Standard Filter Result to list the results of a search, and the Network Graph to display the results visually. When widgets are inserted into a page Heurist links the widgets together so that they interact correctly. You do not need to configure anything for this to happen—it is automatic.</span>
 
-<span style="color: rgb(0, 0, 0);">More advanced users might wish to know how this works. Behind the scenes, Heurist divides the page into one or more </span>**search realms**<span style="color: rgb(0, 0, 0);">. All the widgets in a given search realm share data with one another. By default, the entire page is a single search realm, so that all widgets on the page will search, filter or display the same set of records at any given time. But it is also possible to divide a page into multiple search realms if required.</span>
+<span style="color: rgb(0, 0, 0);">More advanced users might wish to know how this works. Behind the scenes, Heurist divides the page into one or more </span>**search realms**<span style="color: rgb(0, 0, 0);">. All the widgets in a given search realm share data with one another. By default, the entire page is a single search realm, so that all widgets on the page will search, filter or display the same set of records at any given time. But it is also possible to divide a page into multiple search realms if required. It is even possible to have search realms which run across pages.</span>
 
 <span style="color: rgb(0, 0, 0);">When you configure a widget, you have the option to specify which search realm it belongs to. You simply tell Heurist what search realms you would like to exist, and it will take care of creating and utilising them. If your 'Saved Filters' and 'Network Graph' are both in a search realm called 'Bob', then they will be linked. If you instead write 'Jane' in the search realm box for both widgets, then they will be linked together in a search realm called 'Jane'.</span>
 
 ### <span style="color: rgb(0, 0, 0);">Types of widgets</span>
 
-####  **Filter**
+#### <span style="color: rgb(0, 0, 0);">Filter</span>
 
 <span style="color: rgb(0, 0, 0);">The </span>*Filter* <span style="color: rgb(0, 0, 0);">widget create a search box (as in the Explore menu) which can be used :</span>
 
@@ -144,29 +160,13 @@
 
 <span style="color: rgb(0, 0, 0);">This widget has to be completed with the</span> *Standard filter results*<span style="color: rgb(0, 0, 0);"> widget.</span>
 
-##### **Filters Tab \[to be described\]**
-
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-h34yb5yg.png)
-
-##### **Connect Tab**
-
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-euwmvpd4.png)
-
-**Search group:**<span style="color: rgb(0, 0, 0);"> Name the search realm that the widget belongs to. </span>*By default, all widgets belong to 'search\_group\_1*<span style="color: rgb(0, 0, 0);">'. </span>*If you choose to use this feature, do ensure that you type the names of each different search realm **exactly**. Any typo will prevent the feature from working.*
-
-**Info directs to**<span style="color: rgb(0, 0, 0);"> </span>**page**<span style="color: rgb(0, 0, 0);">: Use this feature if you wish to direct visitors to a different page on the site when they select a record on the map.</span>
-
-**Unique widget id:**<span style="color: rgb(0, 0, 0);"> A name for the map widget on this page. This feature is only useful if you are using custom Javascript or CSS in your website.</span>
-
-#### **Saved filters**
+##### <span style="color: rgb(0, 0, 0);">Filters Tab</span>
 
 <span style="color: rgb(0, 0, 0);">The </span>*Saved filters*<span style="color: rgb(0, 0, 0);"> allows you to display a selection of filters previously created and saved using the </span>*Facets Builder*<span style="color: rgb(0, 0, 0);"> function described in chapter 7 (</span>*Explore* <span style="color: rgb(0, 0, 0);">menu), to enable your visitors to search your database by facet. This widget has to be completed with the</span> *Standard filter results*<span style="color: rgb(0, 0, 0);"> widget.</span>
 
-##### **Saved filters Tab \[to be described\]**
+##### ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-qh4yaug0.png)
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-qh4yaug0.png)
-
-##### **Connect Tab**
+##### <span style="color: rgb(0, 0, 0);">Connect Tab</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-chgshzrc.png)
 
@@ -176,110 +176,99 @@
 
 **Unique widget id:**<span style="color: rgb(0, 0, 0);"> A name for the map widget on this page. This feature is only useful if you are using custom Javascript or CSS in your website.</span>
 
-#### **Standard filter results**
+#### <span style="color: rgb(0, 0, 0);">Standard filter results</span>
 
-<span style="color: rgb(0, 0, 0);">This widget allows you to display </span><span style="color: rgb(51, 51, 51);">a </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">Filtered Results</span> <span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">pane, displaying the records in your current 'result set'. The current 'result set' is the set of records retrieved by the filter you have most recently applied.</span><span style="color: rgb(51, 51, 51);"> (see chapter 7).</span>
+<span style="color: rgb(0, 0, 0);">This widget allows you to display </span><span style="color: rgb(51, 51, 51);">a </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">Filtered Results</span> <span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">pane, displaying the records in your current 'result set'. </span>  
+<span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">The current 'result set' is the set of records retrieved by the filter you have most recently applied.</span><span style="color: rgb(51, 51, 51);"> (see chapter 7).</span>
 
-##### **Setup Tab \[to be described\]**
+##### <span style="color: rgb(51, 51, 51);">Setup Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-guxuke1i.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/BHrimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/BHrimage.png)
 
-##### **Controls tab \[to be described\]**
+##### <span style="color: rgb(51, 51, 51);">Controls tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-nyyywx0j.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/UXWimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/UXWimage.png)
 
-##### **Images/blog tab \[to be described\]**
+##### <span style="color: rgb(0, 0, 0);">Images/blog tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-aat8yhom.png)
 
-##### **Messages Tab \[to be described\]**
+##### <span style="color: rgb(0, 0, 0);">Messages Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-takbb7dy.png)
+##### [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/YRSimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/YRSimage.png)
 
-- <span style="color: rgb(0, 0, 0);">Accepts fairly basic html such as &lt;b&gt; &lt;i&gt; &lt;u&gt; &amp;nbsp;</span>  
-      
-    <span style="color: rgb(0, 0, 0);">Can also use simple styles:</span>  
-      
-    <span style="color: rgb(0, 0, 0);">&lt;p style="text-align:center;width:98%;border:2px solid green"&gt;</span>  
-    <span style="color: rgb(0, 0, 0);">Please make a selection on the left&lt;/p&gt;</span>
+<span style="color: rgb(0, 0, 0);">The messages accept fairly basic html such as &lt;b&gt; &lt;i&gt; &lt;u&gt; &amp;nbsp;</span>  
+<span style="color: rgb(0, 0, 0);">They can also use simple styles such as:</span>
 
-##### **Connect Tab \[to be described\]**
+<span style="color: rgb(0, 0, 0);">&lt;p style="text-align:center;width:98%;border:2px solid green"&gt;</span>  
+<span style="color: rgb(0, 0, 0);">Please make a selection on the left&lt;/p&gt;</span>
+
+<p class="callout info">We recommend spacing the messages down from the top and in from the left using simple inline CSS for a more attractive appearance. They should only be left in teh default position when space is at a premium.</p>
+
+##### <span style="color: rgb(0, 0, 0);">Connect Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-3uvvp1ma.png)
 
-#### **Custom report**
+#### <span style="color: rgb(0, 0, 0);">Custom report</span>
 
 <span style="color: rgb(0, 0, 0);">The </span>*Custom Report*<span style="color: rgb(0, 0, 0);"> widget lets you display the record selected in the results list in the form of a a custom template that allows you to display the results of a search in the desired format (see chapter 8a : the custom report template must first be built using the editor available in the Record view pane, via the “Report” tab.)</span>
 
-##### **Setup Tab \[to be described\]**
+##### <span style="color: rgb(51, 51, 51);">Setup Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-jy6lpvbd.png)
 
-##### **Tools Tab \[to be described\]**
+##### <span style="color: rgb(0, 0, 0);">Tools Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-rwjpby66.png)
 
-##### **Messages Tab \[to be described\]**
+##### <span style="color: rgb(0, 0, 0);">Messages Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-pyrkiesd.png)
 
-##### **Connect Tab \[to be described\]**
+##### <span style="color: rgb(0, 0, 0);">Connect Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-xabexfya.png)
 
-#### **Table format**
+#### <span style="color: rgb(0, 0, 0);">Table format</span>
 
 <span style="color: rgb(0, 0, 0);">The </span>*Table format* <span style="color: rgb(0, 0, 0);">widget lets you display the results of a query in a table format.</span>
 
-##### **The Table Tab \[to be described\]**
+##### <span style="color: rgb(0, 0, 0);">The Table Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-fhblavzk.png)
 
-##### **Messages Tab \[to be described\]**
+##### <span style="color: rgb(0, 0, 0);">Messages Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-e4fbxiia.png)
 
-##### **Connect Tab \[to be described\]**
+##### <span style="color: rgb(0, 0, 0);">Connect Tab </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 0);">\[to be described\]</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-lb7gkrwl.png)
 
-#### **Map and Timeline**
+#### <span style="color: rgb(0, 0, 0);">Map and Timeline</span>
 
-<span style="color: rgb(0, 0, 0);">Note: these functions are now included in the lefthand panel and the description, although broadly accurate, does not cover all functions and will require some revision</span><span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 0);"> </span>*\[Note : the “Map” widget now includes several tabs: I've reordered the current description to reflect this new layout, but it still needs to be completed\]*
-
-<span style="color: rgb(0, 0, 0);">Many options for controlling the appearance and functionality of the map exist :</span>
+There are many options for controlling the appearance and functionality of the map widget.
 
 <span style="color: rgb(0, 0, 0);"> </span>![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-rz6ed98v.png)
 
-##### **Controls Tab**
+##### <span style="color: rgb(0, 0, 0);">Controls Tab</span>
 
 *General behaviours:*
 
-<u><span style="color: rgb(0, 0, 0);">Show timeline</span></u><span style="color: rgb(0, 0, 0);">: Choose whether to include the timeline at the bottom of the map</span>
+- - <u><span style="color: rgb(0, 0, 0);">Show timeline</span></u><span style="color: rgb(0, 0, 0);">: Choose whether to include the timeline at the bottom of the map</span>
+    - <u><span style="color: rgb(0, 0, 0);">Markerclusters:</span></u><span style="color: rgb(0, 0, 0);"> Choose whether records clump together when the map is zoomed out (recommended)</span>
+    - <u><span style="color: rgb(0, 0, 0);">Show rollover:</span></u><span style="color: rgb(0, 0, 0);"> Should tooltips appear when users hover over buttons on the map?</span>
+    - <u><span style="color: rgb(0, 0, 0);">Allow modify symbology:</span></u><span style="color: rgb(0, 0, 0);"> Enable custom symbology (only relevant if using a Map Document)</span>
+    - *Controls to*<span style="color: rgb(0, 0, 0);"> </span>*show*<span style="color: rgb(0, 0, 0);">:</span>
+    - <u><span style="color: rgb(0, 0, 0);">Legend</span></u><span style="color: rgb(0, 0, 0);">: Allow visitors to change the base map, and turn on or off any result sets or map documents currently affecting the map. The legend appears in the top right corner of the map. Other controls appear down the left hand side.</span>
+    - <u><span style="color: rgb(0, 0, 0);">Bookmark:</span></u><span style="color: rgb(0, 0, 0);"> Allow visitors to drop pins on the map</span>
+    - <u><span style="color: rgb(0, 0, 0);">Geocoder:</span></u><span style="color: rgb(0, 0, 0);"> Allow visitors to search for places on the map</span>
+    - <u><span style="color: rgb(0, 0, 0);">Print</span></u><span style="color: rgb(0, 0, 0);">: Allow visitors to print an image of the map</span>
+    - *Visible in Legend:* <span style="color: rgb(0, 0, 0);">If you have enabled the legend under </span>*Controls to Show*<span style="color: rgb(0, 0, 0);">, then you can choose which controls are available in the legend here.</span>
+    - *Expand at start*
+    - *Zoom limits:*<span style="color: rgb(0, 0, 0);"> Prevent users from zooming too far in or out on the map.</span>
 
-<u><span style="color: rgb(0, 0, 0);">Markerclusters:</span></u><span style="color: rgb(0, 0, 0);"> Choose whether records clump together when the map is zoomed out (recommended)</span>
-
-<u><span style="color: rgb(0, 0, 0);">Show rollover:</span></u><span style="color: rgb(0, 0, 0);"> Should tooltips appear when users hover over buttons on the map?</span>
-
-<u><span style="color: rgb(0, 0, 0);">Allow modify symbology:</span></u><span style="color: rgb(0, 0, 0);"> Enable custom symbology (only relevant if using a Map Document)</span>
-
-*Controls to*<span style="color: rgb(0, 0, 0);"> </span>*show*<span style="color: rgb(0, 0, 0);">:</span>
-
-<u><span style="color: rgb(0, 0, 0);">Legend</span></u><span style="color: rgb(0, 0, 0);">: Allow visitors to change the base map, and turn on or off any result sets or map documents currently affecting the map. The legend appears in the top right corner of the map. Other controls appear down the left hand side.</span>
-
-<u><span style="color: rgb(0, 0, 0);">Bookmark:</span></u><span style="color: rgb(0, 0, 0);"> Allow visitors to drop pins on the map</span>
-
-<u><span style="color: rgb(0, 0, 0);">Geocoder:</span></u><span style="color: rgb(0, 0, 0);"> Allow visitors to search for places on the map</span>
-
-<u><span style="color: rgb(0, 0, 0);">Print</span></u><span style="color: rgb(0, 0, 0);">: Allow visitors to print an image of the map</span>
-
-*Visible in Legend:* <span style="color: rgb(0, 0, 0);">If you have enabled the legend under </span>*Controls to Show*<span style="color: rgb(0, 0, 0);">, then you can choose which controls are available in the legend here.</span>
-
-*Expand at start*
-
-*Zoom limits:*<span style="color: rgb(0, 0, 0);"> Prevent users from zooming too far in or out on the map.</span>
-
-##### **Layers Tab**
+##### <span style="color: rgb(0, 0, 0);">Layers Tab</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-sum9yy8t.png)
 
@@ -287,7 +276,7 @@
 
 **Superimpose map document:**<span style="color: rgb(0, 0, 0);"> Select a Map Document from the database to govern the appearance of the map.</span>
 
-##### **Infobox Tab**
+##### <span style="color: rgb(0, 0, 0);">Infobox Tab</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-idpamr04.png)
 
@@ -295,7 +284,11 @@
 
 **Map info popup format:**<span style="color: rgb(0, 0, 0);"> If you don't wish to use the default format, you can define an alternative format using Heurist's </span>[<span style="color: rgb(0, 0, 255);">Custom Report builder</span>](https://heuristref.net/h6-alpha/Heurist_Help_System/view/588)<span style="color: rgb(0, 0, 0);">. If you do this, you will probably wish to change the </span>**Map popup size**<span style="color: rgb(0, 0, 0);"> using.</span>
 
-##### **Connect Tab**
+##### <span style="color: rgb(0, 0, 0);">Cluster tab</span>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/JfTimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/JfTimage.png)
+
+##### <span style="color: rgb(0, 0, 0);">Connect Tab</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-e88xrome.png)
 
@@ -307,29 +300,29 @@
 
 **Unique widget id:**<span style="color: rgb(0, 0, 0);"> A name for the map widget on this page. This feature is only useful if you are using custom Javascript or CSS in your website.</span>
 
-#### **Story Map \[TO DO\]**
+#### <span style="color: rgb(0, 0, 0);">Story Map \[TO DO\]</span>
 
-#### **Network Graph \[TO DO\]**
+#### <span style="color: rgb(0, 0, 0);">Network Graph \[TO DO\]</span>
 
-#### **Menu \[TO DO\]**
+#### <span style="color: rgb(0, 0, 0);">Menu \[TO DO\]</span>
 
-#### **Add record**
+#### <span style="color: rgb(0, 0, 0);">Add record</span>
 
-<span style="color: rgb(0, 0, 0);">This widget display a button to add contributions to the database : it open a form to fill in, in the same way than in the populate menu.</span>
+<span style="color: rgb(0, 0, 0);">This widget display a button to add contributions to the database : it open a form to fill in, in the same way as in the populate menu.</span>
 
-<span style="color: rgb(0, 0, 0);">The administrator has to define to Record Type in which the data will be create :</span>
+<span style="color: rgb(0, 0, 0);">The administrator has to define the Record Type in which the data will be created :</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-kthfsdwn.png)
 
-#### **Email Us Form \[id 751\]**
+#### <span style="color: rgb(0, 0, 0);">Email Us Form</span>
 
-<span style="color: rgb(0, 0, 0);">The "email us form" widget allows you to add a contact form to your page, so that visitors can email you without you revealing your email address publicly on the internet.</span>
+<span style="color: rgb(0, 0, 0);">The "email us form" widget allows you to add a contact form to your page, so that visitors can email you without you revealing your email address publicly on the internet. The form will send emails to the owner of the database.</span>
 
-<span style="color: rgb(0, 0, 0);">The form will send emails either to the owner of the database </span><span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 0);">\[or to an email address specified in the website home record e-mail field 2-23. </span><span style="color: rgb(0, 0, 0);"> Note : le champ n’existe pas dans le RT CMS-Home. J’ai essayé de l’ajouter, avec une autre adresse mail mais il est considéré comme un champ non standard et le mail envoyé par le formulaire de contact continue d’arriver sur l’adresse admin.\] </span>
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/uwIimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/uwIimage.png)
 
-# <span style="color: rgb(255, 0, 0); background-color: rgb(182, 215, 168);">====13/05/2025 - reprendre ici=====</span>
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/m4Dimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/m4Dimage.png)
 
-### *??? webpage: **Create XML Record** id 522*<span style="color: rgb(0, 0, 0);"> </span><span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 0);">\[non vérifié\]</span>
+#### <span style="color: rgb(255, 0, 0); background-color: rgb(182, 215, 168);">====13/05/2025 - reprendre ici=====</span>
 
 ### **2.2.4. Using CSS (=== Styling**<span style="color: rgb(0, 0, 0);">)</span>
 
@@ -395,12 +388,6 @@
 
 #### **How do I assign a class or id to an element on my Heurist website?**
 
-<span style="color: rgb(0, 0, 0);">We make this easy for you in our website builder. </span>
-
-<span style="color: rgb(0, 0, 0);"> </span>
-
-<span style="color: rgb(0, 0, 0);"> </span>
-
 **Assign classes**
 
 <span style="color: rgb(0, 0, 0);">To assign one or more classes to an element on a Heurist page, click on the element in the treeview and open the 'Classes' section. You can add as many classes as you like, seperated by spaces.</span>
@@ -443,11 +430,11 @@
 
 **heurist-searchFaceted-header**<span style="color: rgb(0, 0, 0);">. define it in custom css. This is the header which appears above the facet searches</span>
 
-### **Where do I put my CSS?**
+#### <span style="color: rgb(0, 0, 0);">Where do I put my CSS?</span>
 
 <span style="color: rgb(0, 0, 0);">As mentioned above, there are five main ways you can incorporate CSS into your website.</span>
 
-####  **As a global stylesheet in the website record**
+##### <span style="color: rgb(0, 0, 0);">As a global stylesheet in the website record</span>
 
 <span style="color: rgb(0, 0, 0);">The best place to put your CSS is in the database record for your website. Any CSS that you place here will be loaded when visitors first visit your site, and will be applied to every page of your website. This allows you to create a consistent look and feel for the entire website, with a coherent colour scheme, fonts, and layout.</span>
 
@@ -459,9 +446,7 @@
 
 <span style="color: rgb(0, 0, 0);"> </span>![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-uuvz6nni.png)
 
-<span style="color: rgb(0, 0, 0);"> </span>
-
-#### **As a page stylesheet in a webpage record**
+##### <span style="color: rgb(0, 0, 0);"> </span>**As a page stylesheet in a webpage record**
 
 <span style="color: rgb(0, 0, 0);">You can also create page-specific CSS. This is a good idea when one particular page of your site has a special layout or functionality. That particular page may need a special set of CSS classes, and may have many special elements with particular ids.</span>
 
@@ -473,23 +458,17 @@
 
 <span style="color: rgb(0, 0, 0);"> </span>![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-ujzvupas.png)
 
-<span style="color: rgb(0, 0, 0);"> </span>
-
-#### **Add CSS to a Custom Report**
+##### <span style="color: rgb(0, 0, 0);"> Add CSS to a Custom Report</span>
 
 <span style="color: rgb(0, 0, 0);">If you wish to style a Custom Report, then you can add CSS at the top of the report, as described in the Custom Report </span>[<span style="color: rgb(0, 0, 255);">Advanced Usage</span>](https://heuristref.net/h6-alpha/?db=Heurist_Help_System&website&id=39&pageid=737)<span style="color: rgb(0, 0, 0);"> page.</span>
 
-<span style="color: rgb(0, 0, 0);"> </span>
-
-#### **Add CSS to a particular element**
+##### <span style="color: rgb(0, 0, 0);">Add CSS to a particular element</span>
 
 <span style="color: rgb(0, 0, 0);">Your final option for writing your own CSS is to use '</span>[<span style="color: rgb(0, 0, 255);">inline styles</span>](https://www.w3schools.com/CSS/css_howto.asp)<span style="color: rgb(0, 0, 0);">'. There are two ways to do this. As depicted above, when you edit an element of a webpage in the Treeview, you can find a box for 'CSS' in the 'Edit Source' section. Any CSS you insert here will be applied to that element of the page. If you wish to provide inline CSS for elements within the page element (e.g. paragraphs in a textbox), then you can click 'Edit HTML Source', and type the inline styles into the screen.</span>
 
 <span style="color: rgb(0, 0, 0);">Generally we do not advise this use of CSS. It should only be used when you encounter problems with </span>[<span style="color: rgb(0, 0, 255);">specificity</span>](https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity)<span style="color: rgb(0, 0, 0);">, and cannot override a global style any other way.</span>
 
-<span style="color: rgb(0, 0, 0);"> </span>
-
-#### **External CSS/JS**
+##### <span style="color: rgb(0, 0, 0);"> External CSS/JS</span>
 
 <span style="color: rgb(0, 0, 0);">You can also import CSS from an external source, using the 'External Scripts and Styles' field in either the Website record or the record for a particular Webpage. The most likely use case is if you wish to use </span>[<span style="color: rgb(0, 0, 255);">Bootstrap </span>](https://getbootstrap.com/)<span style="color: rgb(0, 0, 0);">in your website. If you wish to use this feature, you should certainly get in touch with the Heurist team for more detailed advice.</span>
 
@@ -507,11 +486,11 @@
 
 <span style="color: rgb(0, 0, 0);"> === A REPRENDRE A PARTIR D’ICI !===</span>
 
-**Changing header styles**
+##### <span style="color: rgb(0, 0, 0);">Changing header styles</span>
 
 <span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 0);">&lt;to be written, please contact Heurist team for instructions / assistance</span><span style="color: rgb(0, 0, 0);">&gt;</span>
 
-**Loading record view or custom format in a panel**
+##### <span style="color: rgb(0, 0, 0);">Loading record view or custom format in a panel</span>
 
 <span style="color: rgb(0, 0, 0);">The aim is to carry out a search, click on a record in the results panel, and display the data for the selected record in a separate panel. This is achieved in two steps:</span>
 
@@ -524,18 +503,17 @@
 
 **Link/button to pop up edit form**
 
-<span style="color: rgb(0, 0, 0);">To popup a new record form in a large window rather than a new tab (note that this also makes the record owned by the current user)</span>  
+<span style="color: rgb(0, 0, 0);">To popup a new record form in a large window rather than a new tab (note that this also makes the record owned by the current user)</span>
+
 <span style="color: rgb(0, 0, 0);"> &lt;a href="#" onclick="{window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new\_record\_params:{rt:54,ro:'current\_user',rv:'public'}}); return false;}" </span>
 
 **Running Javascript**
 
-<span style="color: rgb(0, 0, 0);">To avoid the risks of out-of-control websites, this requires authorisation by the system adminstrator.</span>
+<span style="color: rgb(0, 0, 0);">To avoid the risks of out-of-control websites, this requires authorisation by the system adminstrator. Contact the system adminstrator / Heurist team to have your website added.</span>
 
 **Editing pages in standard edit form**
 
 <span style="color: rgb(0, 0, 0);">Although it is possible to edit the content of a web page directly in the standard Heurist record edit form, we recommend editing it within the CMS editor, as this provides additional capabilites including the insertion of images and database widgets (filters, visualisations and layouts). </span>
-
-<span style="color: rgb(0, 0, 0);"> </span>
 
 <span style="color: rgb(0, 0, 0);"> </span>![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-0dykzve3.png)
 
@@ -547,62 +525,49 @@
 
 <span style="color: rgb(34, 34, 34);">This issue can be resolved by setting custom styles for desired elements. I've added the following styles for your page:</span>
 
-<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">.heurist-widget{</span>
+<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">.heurist-widget{</span>  
+<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> font-size:18px !important;</span>  
+<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> }</span>  
+<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">.recordTitle{</span>  
+<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> font-size:20px !important;</span>  
+<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> }</span>
 
-<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">font-size:18px !important;</span>
+All font-size are relative to body font size
 
-<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">}</span>
+Font-size is being taken from CSS for custom report widget
 
-<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">.recordTitle{</span>
-
-<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">font-size:20px !important;</span>
-
-<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">}</span>
-
-1. <span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);">All font-size are relative to body font size now (jan 2025)</span>
-
-1. <span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);">Font-size is being taken from CSS for custom report widget</span>
-
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-0bevsylb.png)<span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);"> </span>  
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-tfwm9oeg.png)<span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);"> </span>
+![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-0bevsylb.png)<span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);"> </span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-4naydyxr.png)<span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);">20px </span>![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-rplovyvp.png)<span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);">10px</span>
 
-1. <span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);">If it is not defined it takes font-size from user preferences</span>
-2. <span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);">If both values above not defined it takes body.popup.font-size from h4styles.css 11px</span>
+If it is not defined it takes font-size from user preferences
 
-#### **Examples of how to lay out a web page using DIVs**
+If both values above not defined it takes body.popup.font-size from h4styles.css 11px
 
-### <span style="color: rgb(0, 0, 0);">Heurist blog page (with widgets removed)</span>
+##### <span style="color: rgb(0, 0, 0);">Examples of how to lay out a web page using DIVs</span>
+
+##### <span style="color: rgb(0, 0, 0);">Heurist blog page (with widgets removed)</span>
 
 <span style="color: rgb(0, 0, 0);">Defines lefthand panel for saved filters or search widget and rfull height righthand panel for blog entries (a resutkls list in full content mode)</span>
 
-<span style="color: rgb(0, 0, 0);">&lt;div style="</span>**position:absolute;left:5px;width:315px;height:100%**<span style="color: rgb(0, 0, 0);">"&gt;</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;p style="padding:0 5px;"&gt;&lt;/p&gt;</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;div … style="</span>**position: absolute;top:70px; bottom:5px; width: 315px;**<span style="color: rgb(0, 0, 0);">"… &gt; &lt;/div&gt;</span>
-
+<span style="color: rgb(0, 0, 0);">&lt;div style="</span>**position:absolute;left:5px;width:315px;height:100%**<span style="color: rgb(0, 0, 0);">"&gt;</span>  
+<span style="color: rgb(0, 0, 0);">&lt;p style="padding:0 5px;"&gt;&lt;/p&gt;</span>  
+<span style="color: rgb(0, 0, 0);">&lt;div … style="</span>**position: absolute;top:70px; bottom:5px; width: 315px;**<span style="color: rgb(0, 0, 0);">"… &gt; &lt;/div&gt;</span>  
+<span style="color: rgb(0, 0, 0);">&lt;/div&gt;</span>  
+<span style="color: rgb(0, 0, 0);">&lt;div … style="</span>**position: absolute; border: none; left:322; right:0;top:0;bottom:5px**<span style="color: rgb(0, 0, 0);">"… &gt;</span>  
 <span style="color: rgb(0, 0, 0);">&lt;/div&gt;</span>
 
-<span style="color: rgb(0, 0, 0);">&lt;div … style="</span>**position: absolute; border: none; left:322; right:0;top:0;bottom:5px**<span style="color: rgb(0, 0, 0);">"… &gt;</span>
+#### <span style="color: rgb(0, 0, 0);">Cardinal view layout</span>
 
+<span style="color: rgb(0, 0, 0);">&lt;div id="cardinal1" style="background: white; position: relative; border: 1px solid gray; height: 100%; width: 100%;"&gt;</span>  
+<span style="color: rgb(0, 0, 0);"> &lt;div id="westpane"&gt;WEST&lt;/div&gt;</span>  
+<span style="color: rgb(0, 0, 0);"> &lt;div id="centerpane"&gt;CENTER&lt;/div&gt;</span>  
+<span style="color: rgb(0, 0, 0);"> &lt;div id="eastpane"&gt;EAST&lt;/div&gt;</span>  
 <span style="color: rgb(0, 0, 0);">&lt;/div&gt;</span>
 
-### <span style="color: rgb(0, 0, 0);">Cardinal view layout</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;div id="cardinal1" style="background: white; position: relative; border: 1px solid gray; height: 100%; width: 100%;"&gt;</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;div id="westpane"&gt;WEST&lt;/div&gt;</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;div id="centerpane"&gt;CENTER&lt;/div&gt;</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;div id="eastpane"&gt;EAST&lt;/div&gt;</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;/div&gt;</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;div id="mywidget\_2203" class="mceNonEditable" data-heurist-app-id="heurist\_Cardinals"&gt;{"container":"cardinal1", "tabs":{"west":{"id":"westpane","size":"300","minSize":"150"},"center":{"id":"centerpane"},"east":{"id":"eastpane","initClosed":true}}}</span>
-
+<span style="color: rgb(0, 0, 0);">&lt;div id="mywidget\_2203" class="mceNonEditable" data-heurist-app-id="heurist\_Cardinals"&gt;</span>  
+<span style="color: rgb(0, 0, 0);"> {"container":"cardinal1", "tabs": {"west":{"id":"westpane","size":"300","minSize":"150"},"center":{"id":"centerpane"},"east": </span>  
+<span style="color: rgb(0, 0, 0);"> {"id":"eastpane","initClosed":true}}}</span>  
 <span style="color: rgb(0, 0, 0);">&lt;/div&gt;</span>
 
 #### **Strategy**
@@ -614,9 +579,7 @@
 
 <span style="color: rgb(0, 0, 0);">&lt;div id="mywidget\_6801" class="mceNonEditable" style="width:100;heigth:100;border: 1px solid gray;" data-heurist-app-id="heurist\_Cardinals"&gt;{"container":"cont","tabs":{"west":{"id":"west","initClosed":true},"center":{"id":"center"},"east":{"id":"east","size":300,"minSize":200}}}&lt;/div&gt;</span>
 
-<span style="color: rgb(0, 0, 0);">Parameters for each panel can be found here</span>
-
-[<span style="color: rgb(17, 85, 204); background-color: rgb(255, 255, 0);">http://layout.jquery-dev.com/documentation.cfm#List\_of\_Options</span>](http://layout.jquery-dev.com/documentation.cfm#List_of_Options)<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 0);"> \[BROKEN LINK\]</span>
+Parameters for each panel can be found here https://plugins.jquery.com/layout/
 
 <span style="color: rgb(0, 0, 0);">Most important are: size, minSize, maxSize, resizable, closable, initClosed</span>
 
@@ -632,7 +595,11 @@
 - <span style="color: rgb(0, 0, 0);">There is global variable datatable\_custom\_render</span>
 - <span style="color: rgb(0, 0, 0);">In custom js filed assign render function to this variable</span>
 
-<span style="color: rgb(0, 0, 0);">datatable\_custom\_render = function(data, type) { if (type === 'display') { return '&lt;span style="color: red; font-style: italic;"&gt;'+ data + '&lt;/span&gt;'; } return data; };</span>
+<span style="color: rgb(0, 0, 0);">datatable\_custom\_render = function(data, type) </span>  
+<span style="color: rgb(0, 0, 0);"> { if (type === 'display') </span>  
+<span style="color: rgb(0, 0, 0);"> { return '&lt;span style="color: red; font-style: italic;"&gt;'+ data + '&lt;/span&gt;'; } </span>  
+<span style="color: rgb(0, 0, 0);"> return data; </span>  
+<span style="color: rgb(0, 0, 0);"> };</span>
 
 - <span style="color: rgb(0, 0, 0);">In widget properties assign this variable for desired column</span>
 
@@ -656,7 +623,7 @@
 
 #### <span style="color: rgb(0, 0, 0);">==== à relire ====</span>
 
-<span style="color: rgb(0, 0, 0);"> Treeview Navigation widget</span>
+##### <span style="color: rgb(0, 0, 0);"> Treeview Navigation widget</span>
 
 <span style="color: rgb(0, 0, 0);">This is an extension of the Navigation widget. Now it has 3 modes: horizontal, vertical and treeview. It loads a page depending on “target” field</span>
 
@@ -712,23 +679,17 @@
 
 - <span style="color: rgb(0, 0, 0);">Header and menu colour colour. Top level menu takes color from #main-header</span>
 
-<span style="color: rgb(0, 0, 0);">\#main-header{</span>
-
-<span style="color: rgb(0, 0, 0);"> background:rgb(112,146,190);</span>
-
+<span style="color: rgb(0, 0, 0);">\#main-header{</span>  
+<span style="color: rgb(0, 0, 0);"> background:rgb(112,146,190);</span>  
 <span style="color: rgb(0, 0, 0);">}</span>
 
 - <span style="color: rgb(0, 0, 0);">Getting a logo on the top right of a generated web page using CSS:</span>
 
-<span style="color: rgb(0, 0, 0);">\#main-logo-alt {float:right; display:block !important; min-height: 73px; min-width: 130px;</span>
-
-<span style="color: rgb(0, 0, 0);"> background:url('./?db=johns\_hamburg&amp;file=0b7475713789fb09e30334c7ae8e094b32e6bd71');</span>
-
+<span style="color: rgb(0, 0, 0);">\#main-logo-alt {float:right; display:block !important; min-height: 73px; min-width: 130px;</span>  
+<span style="color: rgb(0, 0, 0);"> background:url('./?db=johns\_hamburg&amp;file=0b7475713789fb09e30334c7ae8e094b32e6bd71');</span>  
 <span style="color: rgb(0, 0, 0);"> margin: 7px 4px 0 0; background-size: contain; }</span>
 
-<span style="color: rgb(0, 0, 0);"> </span>
-
-- <span style="color: rgb(0, 0, 0);">Default layout for Heurist CMS web site consists of 3 divs with absolute positions</span>
+- <span style="color: rgb(0, 0, 0);"> Default layout for Heurist CMS web site consists of 3 divs with absolute positions</span>
 
 <span style="color: rgb(0, 0, 0);">main\_header.ent\_wrapper</span>  
 <span style="color: rgb(0, 0, 0);">main\_header.ent\_header #main\_header</span>  
@@ -758,9 +719,7 @@
 
 <span style="color: rgb(0, 0, 0);">Background image for #main\_header is defined in field "Banner image" (99-51.99-951).</span>
 
-<span style="color: rgb(0, 0, 0);"> </span>
-
-<span style="color: rgb(0, 0, 0);">CONTENT:</span>
+<span style="color: rgb(0, 0, 0);"> CONTENT:</span>
 
 <span style="color: rgb(0, 0, 0);">\#main-content-container.ent\_content\_full cosist of one element #main-content</span>
 
@@ -779,11 +738,9 @@
 <span style="color: rgb(0, 0, 0);">Content of website can be defined as custom smarty template in field 99-51.2-922.</span>  
 <span style="color: rgb(0, 0, 0);">In this case designer has to define at least one element with id #main-content.</span>  
 <span style="color: rgb(0, 0, 0);">Element with this name will be used as layout container for widget initialization.</span>  
-<span style="color: rgb(0, 0, 0);">All other elements (#main-xxx) are optional.</span>
+<span style="color: rgb(0, 0, 0);">All other elements (#main-xxx) are optional. </span>
 
-<span style="color: rgb(0, 0, 0);"> </span>
-
-<span style="color: rgb(0, 0, 0);">INITIALIZATION workflow:</span>
+##### INITIALIZATION workflow:
 
 <span style="color: rgb(0, 0, 0);">On server side:</span>
 
@@ -799,9 +756,7 @@
       
     <span style="color: rgb(0, 0, 0);">After widgets initialization it loads javascript (field 2-927) and incapsulate this code into afterPageLoad function. The purpose of this script is additional configuration of widgets on page (that can not be set via cms editor) - mainly addition of event listeners.</span>
 
-- <span style="color: rgb(0, 0, 0);">Will need an explanation of how to set styles of target element - please could you give me a couple of examples here that I can expand upon:</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;to do&gt;</span>
+<span style="color: rgb(0, 0, 0);">ToDo: This will need an explanation of how to set styles of target element - please could you give me a couple of examples here that I can expand upon:</span>
 
 <span style="color: rgb(0, 0, 0);">For popup use can specify jquery dialog options: </span>
 
@@ -829,20 +784,18 @@
 
 # <span style="color: rgb(0, 0, 0);">=== à relire (fin)===</span>
 
-#####   
+  
 <span style="color: rgb(0, 0, 0);">For detailed instructions and tips on configuring a website, please refer to the top level </span>**CMS websites**<span style="color: rgb(0, 0, 0);"> menu entry.</span>
 
-##### <span style="color: rgb(0, 0, 0);">Heurist is tailored to publish data in the form of a website, using its core functions to present and organise data for the public.</span>
+<span style="color: rgb(0, 0, 0);">Heurist is tailored to publish data in the form of a website, using its core functions to present and organise data for the public.</span>
 
-##### <span style="color: rgb(0, 0, 0);">The website editor screen consists of a </span>**Website editor** <span style="color: rgb(0, 0, 0);">panel on the left, and the current page being edited (</span>**"This page"**<span style="color: rgb(0, 0, 0);">) on the right.</span>
+<span style="color: rgb(0, 0, 0);">The website editor screen consists of a </span>**Website editor** <span style="color: rgb(0, 0, 0);">panel on the left, and the current page being edited (</span>**"This page"**<span style="color: rgb(0, 0, 0);">) on the right.</span>
 
 ##### **Editing this page**
 
 ##### <span style="color: rgb(0, 0, 0);">Applying CSS</span>
 
 <span style="color: rgb(0, 0, 0);">The website can be styled through CSS files which may be stored in Heurist uploaded files, accessed through records containing uploaded files &lt;check&gt;, placed within custom reports or entered in the custom CSS fields of the website definition record (CMS\_Home)</span>
-
-<span style="color: rgb(0, 0, 0);">&lt;where to put CSS ? &gt;</span>
 
 <table id="bkmrk-page-itemcss-selecto" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-collapse: collapse;"><colgroup><col style="width: 206px;"></col><col style="width: 683px;"></col></colgroup><tbody><tr style="height: 0pt;"><td style="border-width: 1pt; border-style: solid; border-color: rgb(0, 0, 0); vertical-align: top; padding: 5pt; overflow: hidden; overflow-wrap: break-word;"><span style="color: rgb(0, 0, 0);">Page Item</span>
 
@@ -930,36 +883,28 @@
 
 </td></tr></tbody></table>
 
-### **Location of CSS files**
+#### <span style="color: rgb(102, 102, 102);">Location of CSS files</span>
 
-### **Making custom header scroll with the page**
+<span style="color: rgb(0, 0, 0);">&lt;where to put CSS ? &gt;</span>
+
+#### <span style="color: rgb(102, 102, 102);">Making custom header scroll with the page</span>
 
 - <span style="color: rgb(0, 0, 255);">I’ve added this CSS for this site to make the (custom) header scroll with the rest of the page. </span>  
     <span style="color: rgb(152, 0, 0);">Ian: it resulted in a large gap between the header and the content, to be investigated</span>
 
-**div.heurist-website{**
+div.heurist-website{  
+ overflow-x: hidden;  
+ overflow-y: auto;  
+}  
+\#main-content-container{  
+ position:relative !important;  
+ top:0px !important;  
+}  
+\#main-header{  
+ position: relative !important;  
+}
 
- **overflow-x: hidden;**
-
- **overflow-y: auto;**
-
-**}**
-
-**\#main-content-container{**
-
- **position:relative !important;**
-
- **top:0px !important;**
-
-**}**
-
-**\#main-header{**
-
- **position: relative !important;**
-
-**}**
-
-### **Positioning elements**
+#### <span style="color: rgb(102, 102, 102);">Positioning elements</span>
 
 <span style="color: rgb(0, 0, 0);">The main thing I can recall that was useful was to divide the site mentally into two kinds of page: “static” pages with project information, team members etc, and “dynamic” pages with facetted searches or other exploratory tools. The CMS generally speaking is set up to make the dynamic pages work without much trouble. It was funnily enough the “static” pages that required more fiddling, so they would scroll correctly and fill the screen properly.</span>
 
@@ -969,18 +914,27 @@
 
 <span style="color: rgb(0, 0, 0);"> Another point was – I often found it difficult to position elements, because they had the wrong “position” attribute in the CSS. Basically there is a tricky set of rules about how ‘static’, ‘relative’ and ‘absolute’-positioned elements interact with each other. From memory, there were too many elements with position:absolute in the CMS template, and as a result I would often find it impossible to make parts of the page behave properly. You would set something as having “height:100%” in the web editor, and it would have no effect because it was a child of an absolutely positioned element, for example. As much as possible, absolute and relative positioning should be eliminated from the public websites, if you would like the editing panel to do what it is supposed to. The most common workaround was for people to give a fixed size in pixels to elements on the screen (e.g. width:500px). This has the obvious downside that the element will no longer scale with different devices.</span>
 
-### Responsive design
+#### Responsive design
 
-### Javascript
+####   
 
-### Domains and Redirects, Apache
 
-### Custom reports
+#### Javascript
+
+####   
+
+
+#### Domains and Redirects, Apache
+
+####   
+
+
+#### Custom reports
 
 - I want to use the title (or the family name) of the Person who was interviewed to insert in the Interview extract (Extract is child of interview is child of person). Interview has a pointer to Person that has a title (Family Name = field #1), so you first need to load the person record, then you can access the family name or other fields in Person.
 
- {$person=$heurist-&gt;getRecord($f247.f15)} {\* Person \*}  
- {$person.f1} {\*Family name \*}
+{$person=$heurist-&gt;getRecord($f247.f15)} {\* Person \*}  
+{$person.f1} {\*Family name \*}
 
 - How do you retrieve fields from the relationship record (as well as the related record). getRelatedRecords returns an array of related records with additional header fields: recRelationType\*, recRelationNotes, recRelationStartDate, recRelationEndDate.
 
@@ -990,21 +944,14 @@ Source de l'Information: {$src\_info.recTitle}
 
 **Getting info from relationship records**
 
-<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> {\* Get infromation from the relationship record \*}</span>
-
-<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> {$rel\_record = $heurist-&gt;getRecord($Relationship.recRelationID)}</span>
-
-<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> {$src\_info = $heurist-&gt;getRecord($rel\_record.f1160)}</span>
-
-<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> Source de l'Information: {$src\_info.recTitle}</span>
-
-<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> Start Date: {$rel\_record.f10}</span>
-
+<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> {\* Get infromation from the relationship record \*}</span>  
+<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> {$rel\_record = $heurist-&gt;getRecord($Relationship.recRelationID)}</span>  
+<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> {$src\_info = $heurist-&gt;getRecord($rel\_record.f1160)}</span>  
+<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> Source de l'Information: {$src\_info.recTitle}</span>  
+<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> Start Date: {$rel\_record.f10}</span>  
 <span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> End Date: {$rel\_record.f11}</span>
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-sznseod2.png)
-
-<span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">I have put in rubbish dates 1111 and 9999</span>
 
 #### Embedding IIIF in reports
 
@@ -1053,8 +1000,6 @@ In order to be opened, the http response header should be
 
 #### <span style="color: rgb(0, 0, 0);">Links and listeners </span>
 
-*Formerly: Web page id 738*
-
 <span style="color: rgb(0, 0, 0);">You can add link via “Insert Link” and specify page record id as URL. Or https://heurist…./h6-ao/588</span>
 
 <span style="color: rgb(0, 0, 0);">Or directly in code &lt;a href=”588”&gt;Project Aims&lt;/a&gt;</span>
@@ -1070,20 +1015,19 @@ In order to be opened, the http response header should be
 
 #### Client side functions
 
- *Formerly: Web page id 691*
-
 <span style="color: rgb(0, 0, 0);">A client-side function to get the databaseID: </span>
 
-- <span style="color: rgb(0, 0, 0);">window.hWin.HAPI4.sysinfo.db\_registeredid</span>
+<span style="color: rgb(0, 0, 0);">window.hWin.HAPI4.sysinfo.db\_registeredid</span>
 
 <span style="color: rgb(0, 0, 0);">Besides there are helpers to convert concept codes back and forth to/from local ids</span>
 
-- <span style="color: rgb(0, 0, 0);">$Db.getConceptID and $Db.getLocalID (hclient/core/utils\_dbs.js)</span>
+<span style="color: rgb(0, 0, 0);">$Db.getConceptID and $Db.getLocalID (hclient/core/utils\_dbs.js)</span>
 
 <span style="color: rgb(0, 0, 0);">There are two parameters: \[rty | dty | trm\] and \[ID\]</span>
 
-- <span style="color: rgb(0, 0, 0);">$Db.getConceptID('rty', 10) returns 2-10 concept code for Person record type </span>
-- <span style="color: rgb(0, 0, 0);">$Db. getLocalID ('rty', '2-10') returns 2 local id for Person record type </span>
+<span style="color: rgb(0, 0, 0);">$Db.getConceptID('rty', 10) returns 2-10 concept code for Person record type </span>
+
+<span style="color: rgb(0, 0, 0);">$Db. getLocalID ('rty', '2-10') returns 2 local id for Person record type </span>
 
 #### <span style="color: rgb(0, 0, 0);">Multilingual websites</span>
 
@@ -1114,7 +1058,7 @@ In order to be opened, the http response header should be
 5. <span style="background-color: rgb(255, 255, 255);">More human friendly/readable format - can be edited directly</span>
 6. <span style="background-color: rgb(255, 255, 255);">Ability translate entire page</span>
 
-<span style="background-color: rgb(255, 255, 255);">Web publication:</span>
+##### <span style="background-color: rgb(255, 255, 255);">Web publication:</span>
 
 1. <span style="background-color: rgb(255, 255, 255);">While editing, Cms content can be accessed as usual via url \[server\]/heurist?db=\[db-name\]&amp;website=\[rec-id\]&amp;page=\[rec-id\]</span>
 2. <span style="background-color: rgb(255, 255, 255);">Published website: \[server\]/\[db-name\]/web/\[rec-id\]/\[pagename\].html</span>
@@ -1123,7 +1067,7 @@ In order to be opened, the http response header should be
 
 <span style="background-color: rgb(255, 255, 255);">On publishing, heurist generates html pages in generated-website folder. These html are crawler enabled (have full page header, can be loaded independently)</span>
 
-<span style="background-color: rgb(255, 255, 255);">Smarty reports… </span>
+##### <span style="background-color: rgb(255, 255, 255);">Smarty reports… </span>
 
 <span style="background-color: rgb(255, 255, 255);">Cms localization:</span>
 
@@ -1165,8 +1109,7 @@ In order to be opened, the http response header should be
 <span style="color: rgb(0, 0, 0);"> {"title": "Beleg Glosse", "format": "BelegGlosse"}</span>  
 <span style="color: rgb(0, 0, 0);"> \],</span>  
 <span style="color: rgb(0, 0, 0);"> "block\_formats": \[</span>  
-<span style="color: rgb(0, 0, 0);"> \]</span>
-
+<span style="color: rgb(0, 0, 0);"> \]</span>  
 <span style="color: rgb(0, 0, 0);"> }</span>
 
 #### Debugging browser behaviour

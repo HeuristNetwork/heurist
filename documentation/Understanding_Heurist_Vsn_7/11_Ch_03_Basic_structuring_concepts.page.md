@@ -1,6 +1,6 @@
 # Ch 03: Basic structuring concepts
 
-:::info Documentation régigée le 07/11/2025 par Barbara Bonazzi mise à jour le 03/03/2026 par Barbara Bonazzi :::
+Documentation rédigée le 07/11/2025 par Barbara Bonazzi, mise à jour le 03/03/2026 par Barbara Bonazzi
 
 ## 1. Structuring your Database
 
@@ -8,7 +8,13 @@ The **Design** menu serves to configure the structure of the database to accept 
 
 New databases are pre-populated with a range of useful **record** (*entity*) **types**, **fields** and **vocabularies** which shortcuts basic setup.
 
-The existing **entity types** can be modified to fit your needs, including adding, deleting or modifying fields. You can add entirely new **record types**, or import suitable record types from any database that has been registered with the Heurist service. The menu also includes functions to register your database so others can borrow your structure (not data), change some basic settings and personal preferences and configure a toolbar of shortcuts. Functions for modifying the structure of the database and various settings.
+The existing **entity types** can be modified to fit your needs, including adding, deleting or modifying fields.
+
+You can add entirely new **record types**, or import suitable record types from any database that has been registered with the Heurist service.
+
+The menu also includes functions to register your database so others can borrow your structure (not data), change some basic settings and personal preferences and configure a toolbar of shortcuts.
+
+Functions for modifying the structure of the database and various settings.
 
 **Modify**
 
@@ -36,13 +42,24 @@ The existing **entity types** can be modified to fit your needs, including addin
 
 ### 1.1. Record types
 
-**Record** (*entity*) **types** are the core of designing an effective database. Each new database comes pre-populated with a lot of record types which crop up in most databases, eg. Person, and record types which need to be structured in a particular way for specific functions, eg. map documents, layers and data sources. Record types are divided into groups to reduce mental overload, and the groups can be reordered by dragging. Record types you use all the time should be dragged over into a group near the top so that they appear at the top of dropdown lists. You can create new groups to organise your concepts. You do not need to get rid of record types you don't require, just drag them over into a group towards the end of the list.
+**Record** (*entity*) **types** are the core of designing an effective database. Each new database comes pre-populated with a lot of record types which crop up in most databases, eg. Person, and record types which need to be structured in a particular way for specific functions, eg. map documents, layers and data sources.
+
+- Record types are divided into groups to reduce mental overload, and the groups can be reordered by dragging.
+- Record types you use all the time should be dragged over into a group near the top so that they appear at the top of dropdown lists.
+- You can create new groups to organise your concepts.
+- You do not need to get rid of record types you don't require, just drag them over into a group towards the end of the list.
 
 Before creating a brand new record type, look to see if you can find something suitable using Browse Templates or consider if you can re-use an existing one already defined in your database. However, don't change the general intent of an existing record. For instance, don't change a Media item record into a Document, even if most of your media items represent documents or a Person into an Animal, even though they may have a name, date of birth, sex etc.
 
 ### 1.2. Vocabularies
 
-**Vocabularies** organise a set of terms which can be used in the dropdown list for one or many term list fields. Vocabularies can contain links to terms in other vocabularies to allow the construction of new vocabularies without repeating terms - for example, a vocabulary containing a few countries being studied from the full set of world countries which are pre-configured as a vocabulary in all new databases. Vocabularies can contain hierarchies of terms allowing broader/narrower definition of categories. Like record types, vocabularies are organised into groups, which can be reordered, and vocabularies can be moved into a different group by drag and drop. Terms can also be moved between vocabularies with drag and drop, or can be nested below other terms or merged with other terms (in which case all records using the term will be re-assigned to the term with which it has been combined).
+**Vocabularies** organise a set of terms which can be used in the dropdown list for one or many term list fields. Vocabularies can contain links to terms in other vocabularies to allow the construction of new vocabularies without repeating terms - for example, a vocabulary containing a few countries being studied from the full set of world countries which are pre-configured as a vocabulary in all new databases.
+
+Vocabularies can contain hierarchies of terms allowing broader/narrower definition of categories.
+
+Like record types, vocabularies are organised into groups, which can be reordered, and vocabularies can be moved into a different group by drag and drop.
+
+Terms can also be moved between vocabularies with drag and drop, or can be nested below other terms or merged with other terms (in which case all records using the term will be re-assigned to the term with which it has been combined).
 
 Terms are defined by six fields:
 
@@ -51,14 +68,19 @@ Terms are defined by six fields:
 - a standard code (for example Munsell Colour code, international country codes);
 - a semantic URI (for use in linked data);
 - a status (of the term within the database, generally this should be left as Open\*);
-- an image (allowing illustration of the terms for use by people less familiar with their meaning). :::info
-- ***Open***\_ indicates that the record type can be modified or deleted.
-- ***Approved***\_ indicates a record type which has been carefully developed for general use.
-- ***Reserved-Locked***\_ indicates a record type which is required by the system and cannot be deleted (this value cannot be selected by users other than the Heurist team). :::
+- an image (allowing illustration of the terms for use by people less familiar with their meaning).
+- Status (this field is little used except for lockign some pre-defined terms required by the system) 
+    - ***Open***\_ indicates that the record type can be modified or deleted.
+    - ***Approved***\_ indicates a record type which has been carefully developed for general use.
+    - ***Reserved-Locked***\_ indicates a record type which is required by the system and cannot be deleted (this value cannot be selected by users other than the Heurist team).
 
 ### 1.3. Base fields
 
-**Base fields** are fields which can be reused in many different record types. They are available when adding fields to a record type; the base field type, name, help text, vocabulary and target record types (where applicable) are automatically applied to the field in the record type, but name, help text, requirement and repeatability may be overidden with customised versions for the specific record type. A new base field is created automatically if one creates a field from scratch rather than using an existing base field. One will not normally need to edit base fields directly, but this menu item allows direct access when required, for example if one wishes to change the default name or description.
+**Base fields** are fields which can be reused in many different record types. They are available when adding fields to a record type; the base field type, name, help text, vocabulary and target record types (where applicable) are automatically applied to the field in the record type, but name, help text, requirement and repeatability may be overidden with customised versions for the specific record type.
+
+A new base field is created automatically if one creates a field from scratch rather than using an existing base field.
+
+One will not normally need to edit base fields directly, but this menu item allows direct access when required, for example if one wishes to change the default name or description.
 
 ### 1.4. Browse templates
 
@@ -68,13 +90,19 @@ The function browses and selects a registered database, opens up a list of any r
 
 ### 1.5. Visualise
 
-The relationships between record (*entity*) types in the database can be visualised in the form of a spider diagram. The diagram also shows the number of records for each **node** (size of circular shaded area around node) and the number of **connections** (thickness of connecting lines). The connections include **record pointer fields** and **relationship markers**, but not free-floating relationships created by creating Relationship records directly (the creation of Relationship records directly is not recommended). As a diagram of all record types would be far too complex, the record types to be represented are selected from a dropdown list. Gravity can be switched on to create a self-organising diagram, then switched off to allow dragging of nodes to clarify the diagram. Links can also be built between record types by dragging the link icon.
+The relationships between record (*entity*) types in the database can be visualised in the form of a spider diagram. The diagram also shows the number of records for each **node** (size of circular shaded area around node) and the number of **connections** (thickness of connecting lines). The connections include **record pointer fields** and **relationship markers**, but not free-floating relationships created by creating Relationship records directly (the creation of Relationship records directly is not recommended).
+
+As a diagram of all record types would be far too complex, the record types to be represented are selected from a dropdown list. Gravity can be switched on to create a self-organising diagram, then switched off to allow dragging of nodes to clarify the diagram. Links can also be built between record types by dragging the link icon.
 
 ### 1.6. My Preferences
 
-Personal preferences for this database can be set in the **Preferences dialogue**. These include startup search, number of records to display per page, the use of clustering on maps and complexity of the map controls. Personal preferences are specific to each database. The Preferences dialogue also provides a bookmarklet which can be dragged to the browser toolbar and used to grab infromation from a web page and create a web bookmark record in the database. At this time the information which can be grabbed from secure https pages is limited to URL and title, but highlighted text will also be grabbed from non-secure http pages.
+Personal preferences for this database can be set in the **Preferences dialogue**. These include startup search, number of records to display per page, the use of clustering on maps and complexity of the map controls. Personal preferences are specific to each database.
 
-### 1.7. Properties @todo-link to chapter 10 Admin &gt; Properties
+The Preferences dialogue also provides a bookmarklet which can be dragged to the browser toolbar and used to grab infromation from a web page and create a web bookmark record in the database. The information which can be grabbed from secure https pages is limited to URL and title, but highlighted text will also be grabbed from non-secure http pages.
+
+### 1.7. Properties 
+
+@todo-link to chapter 10 Admin &gt; Properties
 
 General behavioural parameters of the database can be set through the Properties function. This allows metadata for the database including a description, rights and a representative icon to display in lists, configuration of connections to Zotero libraries, Nakala and mail servers, configuration of lookups to external reference sources, file types to be indexed and specific behaviours relating to place records, user registration and others.
 
@@ -84,15 +112,25 @@ When a record changes its workflow stage, the defined rules are applied. This ru
 
 ### 1.9. External lookup
 
-Connect with services enabling the lookup of external resources (gazeeter, thesaurus, library catalogue...) from within a data entry form and insert of one or more fields derived from the external resource into the data. They can also be used to provide specialised processing such as predictive setting of keywords based on frequency of usage and matching with external resources. Some services are already defined (AGHP, BnF Library, ESTC, GeoNames, LRC18C, MPCE, Nakala, Nomisma, and Opentheso). It is also possible to import new services using the template and guidelines provided in the source code. If likely to be of general use, please contribute them to the GitHub repository.
+Connect with services enabling the lookup of external resources (gazeeter, thesaurus, library catalogue...) from within a data entry form and insert of one or more fields derived from the external resource into the data. They can also be used to provide specialised processing such as predictive setting of keywords based on frequency of usage and matching with external resources.
+
+Some services are already defined (AGHP, BnF Library, ESTC, GeoNames, LRC18C, MPCE, Nakala, Nomisma, and Opentheso). It is also possible to import new services using the template and guidelines provided in the source code. If your developments are likely to be of use to other people, please contribute them to the GitHub repository.
 
 ### 1.10. External repositories
 
-Store and retrieve external resources such as images, documents, video on/from the already defined external repositories. The currently available repositories are DSpace, Flikr, Isidore, MediHAL, Nakala and Zenodo. It is also possible to define who can access these resources, e.g. logged-in user, current user or database managers. :::warning
+Store and retrieve external resources such as images, documents, video on/from the already defined external repositories.
 
-### 1.11. Register @todo-link
+Planned repositories include DSpace, Flikr, Isidore, MediHAL, Nakala and Zenodo, although only Nakala has been fully developed as of 2026 (contact the Heurist team if you require another repository) . It is also possible to define who can access these resources, e.g. logged-in user, current user or database managers.
 
-Register the database with the central Heurist index database. This has several functions: it allows elements of the structure of the database to be imported into a new database promoting re-use and standardisation; it allows XML files exported from any registered database to be imported into any other database by reference to the structure of the source database. Last but not least, it attributes a unique ID to the database and thence a unique ID (known as a 'concept code') to every record type, field, vocabulary and term which has been defined within the database. This is particularly useful in defining special behaviours which can operate across databases, in linking data across databases, and in providing a PID redirection system which can reference any element of any database. :::
+### 1.11. Register 
+
+@todo-link
+
+Register the database with the central Heurist index database. This has several functions:
+
+- it allows elements of the structure of the database to be imported into a new database promoting re-use and standardisation;
+- it allows XML files exported from any registered database to be imported into any other database by reference to the structure of the source database.
+- Last but not least, it attributes a unique ID to the database and thence a unique ID (known as a 'concept code') to every record type, field, vocabulary and term which has been defined within the database. This is particularly useful in defining special behaviours which can operate across databases, in linking data across databases, and in providing a PID redirection system which can reference any element of any database.
 
 ### 1.12. Shortcuts bar
 
@@ -126,9 +164,7 @@ You can also add new record types in a group and move records types between grou
 
 They can be deleted, only if they are empty. You can also drag record types into the Trash group at the bottom if you don’t want to see them. They do not affect performance and can be recovered later by dragging them back out of trash.
 
-:::info **IMPORTANT TIP**
-
-Always organise the record types you use frequently into the first couple of groups of record types. In this way they will appear at the top of any dropdown lists which saves hunting for them further down. A small investment in well-organised groups will make it much easier to pick from lists or find record types when you need to make changes. The same applies to fields and vocabularies. :::
+<p class="callout info">**IMPORTANT TIP** Always organise the record types you use frequently into the first couple of groups of record types. In this way they will appear at the top of any dropdown lists which saves hunting for them further down. A small investment in well-organised groups will make it much easier to pick from lists or find record types when you need to make changes. The same applies to fields and vocabularies.</p>
 
 ![](https://heurist-doc.huma-num.fr/uploads/59164b67-9362-4f90-a16c-41dfc28389fe.png)
 
@@ -147,11 +183,21 @@ The columns in the image above are generally self-explanatory.
 
 ### 2.3. Define new record types
 
-Before defining a new record type definition, check whether a similar record type already exists in the database structure, which can be reused or tailored. We strongly recommend using an existing record type where one exists which is broadly what you need, for example such standard types as Person, Organisation, Place, Media, Structure, Site, Document etc., as well as the existing Bibliographic types which are required for synchronisation with Zotero. he use of existing record types will save you an awful lot of time and are some guarantee of a coherent structure. Also consider whether a record structure can be imported from another database located through the Heurist Master Index using the **Browse templates** function @todo-link. The reuse of database types can save time and add to the overall consistency of databases.
+Before defining a new record type definition, check whether a similar record type already exists in the database structure, which can be reused or tailored. We strongly recommend using an existing record type where one exists which is broadly what you need, for example such standard types as Person, Organisation, Place, Media, Structure, Site, Document etc., as well as the existing Bibliographic types which are required for synchronisation with Zotero.
+
+<p class="callout info">The use of existing record types will save you an awful lot of time and are some guarantee of a coherent structure. </p>
+
+<p class="callout danger">It is important NOT to radically deform the meaning of existing record types, fields and terms. Adding, removing or renamign fields to adapt them to a specific need is OK. But completely changing the sense of a record type, eg. changing a Person record into an Animal record, or a Place into a Building, is coutnerproductuve - it is better to make a new record type if there is not an obvious existing type. </p>
+
+Also consider whether a record structure can be imported from another database located through the Heurist Master Index using the **Browse templates** function @todo-link. The reuse of database types can save time and add to the overall consistency of databases.
 
 ## 3. Add record types
 
-You may add new record types as required. Some databases will require very few new types, others will require many new types, but always re-use existing types that more or less fit your needs (with some changes to the list of fields recorded). :::info **Tip:** if you need to create several similar record types, we recommend creating one type with all required fields then using the Duplicate function (**Dup** column) to create copies which can be renamed and adapted. Don’t change an existing record type into something completely different, e.g. changing a Document into a Museum or a Place into an Event, as this will make your database incompatible with other databases which have retained the original meaning, and some record types, e.g. Place and Event, have special behaviours associated with them (display on maps or timelines for example). :::
+You may add new record types as required. Some databases will require very few new types, others will require many new types, but always re-use existing types that more or less fit your needs (with some changes to the list of fields recorded).
+
+<p class="callout info"> **Tip:** if you need to create several similar record types, we recommend creating one type with all required fields then using the Duplicate function (**Dup** column) to create copies which can be renamed and adapted. </p>
+
+<p class="callout danger">Don’t change an existing record type into something completely different, e.g. changing a Document into a Museum or a Place into an Event, as this will make your database incompatible with other databases which have retained the original meaning, and some record types, e.g. Place and Event, have special behaviours associated with them (display on maps or timelines for example).</p>
 
 Select the group in which you would like the record type created and click the **Add** button:
 
@@ -174,10 +220,11 @@ After choosing an icon, you can fill in the basic attributes of the new record t
 - **Semantic reference URI** for the entity concept is optional but highly recommended if you plan to export Linked Open Data. Multiple URIs may be separated by semi-colons.
 - **Show Record URL** checkbox is used to display a special URL field at the top of the record editing form. This URL is attached to the record in result list displays allowing Heurist to be used as a bookmarking tool. In general we recommend not checking this box unless each record will have a specific canonical URL associated with it. Other URLs can be recorded in standard single-line text fields, which will be recognised as a hyperlink if they start with http://, https://,
 - The **thumbnail** and **icon** can be chosen from the library, but if uploaded from another source should generally be of the order of 16x16 and 75x75 pixels. They will rescaled to these sizes. The icons are used in result lists, at the top of the data entry form and record view panel, as the default icon on maps, and anywhere else the record type needs to be quickly visually identified.
-- **Additional information** is a normally-closed section of the form which shows which group the record type will be assigned to, its status (generally this should be left as Open\*), whether the record type should appear in lists and dropdowns (the Show checkbox on the record types browser), whether the description of the record type should be shown on the data entry form when help is switched on and the number of records of that type. :::warning
-- ***Open***\_ indicates that the record type can be modified or deleted.
-- ***Approved***\_ indicates a record type which has been carefully developed for general use.
-- ***Reserved-Locked***\_ indicates a record type which is required by the system and cannot be deleted (this value cannot be selected by users other than the Heurist team) :::
+- **Additional information** is a normally-closed section of the form which shows which group the record type will be assigned to, its status (generally this should be left as Open\*), whether the record type should appear in lists and dropdowns (the Show checkbox on the record types browser), whether the description of the record type should be shown on the data entry form when help is switched on and the number of records of that type.
+- **Status**
+    - ***Open***\_ indicates that the record type can be modified or deleted.
+    - ***Approved***\_ indicates a record type which has been carefully developed for general use.
+    - ***Reserved-Locked***\_ indicates a record type which is required by the system and cannot be deleted (this value cannot be selected by users other than the Heurist team)
 
 ### 3.1. Defining fields
 
@@ -209,7 +256,9 @@ The allocation of headings, fields, labelling and behaviours within each record 
 
 ### 3.3. Browsing templates
 
-Heurist has a powerful mechanism for finding and importing database structure (entity/record types, fields and vocabularies/terms) from another database, which is covered in detail in a separate section **Browsing templates** @todo-link. This is very useful where either the Heurist team has set up a template for a particular type of use (which we may have borrowed, with acknowledgement, from a Heurist user) or where colleagues have developed a useful database structure you would like to re-use, or use as a basis for developing your own. This re-use of structure can be an enormous time-saver and also encourages data compatibility and \_de facto \_standards.
+Heurist has a powerful mechanism for finding and importing database structure (entity/record types, fields and vocabularies/terms) from another database, which is covered in detail in a separate section **Browsing templates** @todo-link.
+
+This is very useful where either the Heurist team has set up a template for a particular type of use (which we may have borrowed, with acknowledgement, from a Heurist user) or where colleagues have developed a useful database structure you would like to re-use, or use as a basis for developing your own. This re-use of structure can be an enormous time-saver and also encourages data compatibility and \_de facto \_standards.
 
 ### 3.4. Change Record Type
 
@@ -235,13 +284,19 @@ The access permissions to all the data entry of a specific record type can be ch
 
 ![](https://heurist-doc.huma-num.fr/uploads/394314c8-8b14-44c5-8a97-ba2daba09eee.png)
 
-By default, records in a new database will be visible only to logged in users. **Settings / Permission settings** brings up a dialogue allowing you to control the type and permission settings for future additions (cf. tab that explain database management permission explicated @todo-link chapter 2 / chapter 10.) This can be used not only to determine the future record type and permissions which will be created when you click on **New**, but also provides a URL which can be bookmarked or added to a web page to create new records with those permissions. The use of a tag or tags can be used to flag new records added, for example, by guests, that can be retrieved for editorial vetting. Other values can also be set with suitable parameters in the URL.
+By default, records in a new database will be visible only to logged in users. **Settings / Permission settings** brings up a dialogue allowing you to control the type and permission settings for future additions (cf. tab that explain database management permission explicated @todo-link chapter 2 / chapter 10.)
+
+This can be used not only to determine the future record type and permissions which will be created when you click on **New**, but also provides a URL which can be bookmarked or added to a web page to create new records with those permissions. The use of a tag or tags can be used to flag new records added, for example, by guests, that can be retrieved for editorial vetting. Other values can also be set with suitable parameters in the URL.
 
 ![](https://heurist-doc.huma-num.fr/uploads/0f022757-5aa4-4a11-89ca-de86eb26f017.png)
 
 ## 4. Heurist Identifiers (H-IDs)
 
-Heurist attributes a **new sequential identifier** (known as an H-ID) to every record in the database when it is created, regardless of type, and these identifiers never change and are never re-used Unlike conventional relational databases, the sequential numbering of records is across the whole database and not across individual tables. This may encourage users to create additional sequential identifiers in specific tables using the field increment function, but we strongly discourage this. H-IDs are unique identifiers which can drill down to a specific record anywhere in the Heurist domain of registered databases. Their invariant nature is ideal for sustainable identification of items. Once something is recorded as H-ID 3456 it will always remain 3456. In fact, if you accidentally record something twice (or more) and later merge the records, the identifier of the merged records will point to the remaining record, so any of the H-IDs used will reference the actual record for the item. Note that a field *Original ID* is defined in all new databases. We encourage the use of this field (which may be renamed) to record the identifier or identifier history of any records imported from another system.
+Heurist attributes a **new sequential identifier** (known as an H-ID) to every record in the database when it is created, regardless of type, and these identifiers never change and are never re-used Unlike conventional relational databases, the sequential numbering of records is across the whole database and not across individual tables. This may encourage users to create additional sequential identifiers in specific tables using the field increment function, but we strongly discourage this. H-IDs are unique identifiers which can drill down to a specific record anywhere in the Heurist domain of registered databases.
+
+Their invariant nature is ideal for sustainable identification of items. Once something is recorded as H-ID 3456 it will always remain 3456. In fact, if you accidentally record something twice (or more) and later merge the records, the identifier of the merged records will point to the remaining record, so any of the H-IDs used will reference the actual record for the item.
+
+Note that a field *Original ID* is defined in all new databases. We encourage the use of this field (which may be renamed) to record the identifier or identifier history of any records imported from another system. This field may be marked as non-visible in the Base fields definition on older databases; if you can't find it, go to Design &gt; Base fields, click on the *Show all* checkbox (top right), scroll down to *Original ID* and check the *Show* checkbox.
 
 ### 4.1. Registering a database
 
@@ -255,7 +310,13 @@ In the Database Registration Screen enter a description of this database (for pu
 
 ### 4.2. Heurist Master Index
 
-This is a publicly accessible list of Heurist databases, which makes all Heurist core databases, curated database templates and all registered end-user generated databases available for reference. Only the database structure is available by default; data is only accessible where individually authorised within the database (there is no central control of this). Curated templates are well-developed schemas developed by the Heurist team or members of the Heurist community. Optionally registering your database with the Heurist Index provides a number of advantages:
+This is a publicly accessible list of Heurist databases, which makes all Heurist core databases, curated database templates and all registered end-user generated databases available for reference.
+
+Only the database structure is available by default; data is only accessible where individually authorised within the database (there is no central control of this).
+
+Curated templates are well-developed schemas developed by the Heurist team or members of the Heurist community.
+
+Optionally registering your database with the Heurist Index provides a number of advantages:
 
 - Gives access to certain advanced features; if you have not registered and select such a feature, you will be notified to register first.
 - Gives your database a globally unique code, named **ConceptID** @todo-link . The code is the next available sequence number in the Heurist index, which is unique and permanently identifies that database, even if it no longer exists.
@@ -272,11 +333,19 @@ Please fill in as much detail as possible to help people find your dataset/colle
 
 ## 5. IDs and Concept IDs
 
-In **Design &gt; Record types**, you will find frames of your records types and in these frame, two identifiers associated to the record types (respectively in the columns **ID** and **ConceptID**). The **ID** column of the record type frame shows the **internal ID** of the record type in this database. The **ConceptID** column shows a very important piece of information – the unique **ID** assigned to every record type defined **within the entire Heurist system** when the database had been registered.
+In **Design &gt; Record types**, you will find frames of your records types and in these frame, two identifiers associated to the record types (respectively in the columns **ID** and **ConceptID**).
+
+The **ID** column of the record type frame shows the **internal ID** of the record type in this database.
+
+The **ConceptID** column shows a very important piece of information – the unique **ID** assigned to every record type defined **within the entire Heurist system** when the database had been registered.
 
 The **Concept ID** is made up of:
 
 - A 4 digit number which uniquely identifies the database and is assigned when a database is registered with the Heurist master index, running at HeuristRef.net. The value 0000 indicates that this database has not yet been registered, Values below 100 indicate databases created or curated by the Heurist team.
 - A second number of up to 4 digits which is the internal code of the record type in the database in which the record type was defined.
 
-When a database is registered, the **Concept ID** migrates from 0000-xxx to nnnn-xxx where nnnn is the **registration ID of the database**. When the record type is later imported into another database it retains this concept ID so that it can be automatically aligned with the same record type in other databases. This also allows Heurist to carry out specific actions based on known concept IDs or to import a copy of a needed record type for a specific function. :::info **NOTE**: the same system of Concept IDs applies to every base field, every vocabulary and every term within the Heurist domain. :::
+When a database is registered, the **Concept ID** migrates from 0000-xxx to nnnn-xxx where nnnn is the **registration ID of the database**. When the record type is later imported into another database it retains this concept ID so that it can be automatically aligned with the same record type in other databases.
+
+This also allows Heurist to carry out specific actions based on known concept IDs or to import a copy of a needed record type for a specific function.
+
+<p class="callout info">**NOTE**: the same system of Concept IDs applies to every base field, every vocabulary and every term within the Heurist domain, as well as to every record and every value (for registered databases). One can locate the definition or record/value wherever they are through a PID (Permanent Identifier) which is recognised by any correctly installed Heurist server.</p>

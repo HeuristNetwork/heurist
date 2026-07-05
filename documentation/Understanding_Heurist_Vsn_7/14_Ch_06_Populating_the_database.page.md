@@ -6,7 +6,7 @@
 
 The \[Populate\] menu gets data into the database. You can create individual records via a form, upload data files such as a CSV file from a spreadsheet or an XML file from another database, synchronise with the Zotero bibliographic system, or upload and index media such as a collection of images.
 
-![](https://heurist-doc.huma-num.fr/uploads/d8f8123b-af3d-40b3-87b3-8edac2dcdab5.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/LDyimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/LDyimage.png)
 
 ### 1.2 Populate menu functions
 
@@ -25,7 +25,7 @@ Functions for adding and importing data.
 - [**Index external transfers**](#43-Index-external-files) -- scans media folders and add missed to Media Files, indexing uploaded files or external transfers
 - [**Create media records**](#44-Create-media-records) -- creates, updates and reads XML manifest files in the folders ; creates Digital Media records for all files uploaded to the database
 - [**IIIF Images**](#45-IIIF-Images) -- upload IIIf images or manifests
-- [**Import Annotations**](#46-Import-Annotations) -- creates or updates Annotation records in Heurist database
+- Process IIIF manifests -- reads an uploaded IIIF JSon manifest and creates Canvas and Annotation records
 
 ## 2 Manual input
 
@@ -37,13 +37,13 @@ Clicking \[New\] button directly creates a record of the default type. A popup a
 
 Below \[New\], hovering over \[Settings\] opens the slide tray showing the available record types in the database. To create a new record of a particular type, simply click on that record type.
 
-:::info Inside the record editing window, fields in bold red type are mandatory fields, which must be filled in order for the new record to be saved. There are range of options for editing both the record and also change the structure of the record (**Modify Structure** in the top left corner). It is not recommended to modify the structure of records unless you are an experienced user and have a good reason for doing so. In the bottom banner, there are several options for saving the current new record and then taking other actions:
+<p class="callout info">Inside the record editing window, fields in bold red type are mandatory fields, which must be filled in order for the new record to be saved. There are range of options for editing both the record and also change the structure of the record (**Modify Structure** in the top left corner). It is not recommended to modify the structure of records unless you are an experienced user and have a good reason for doing so. In the bottom banner, there are several options for saving the current new record and then taking other actions:</p>
 
-- duplicating the record (Dupe),
-- creating a fresh new record (New),
-- save the current record but remain editing it (Save),
-- save the current record and close it (Save + Close),
-- and close the current record without saving it (Drop Changes). :::
+- - - duplicating the record (Dupe),
+        - creating a fresh new record (New),
+        - save the current record but remain editing it (Save),
+        - save the current record and close it (Save + Close),
+        - and close the current record without saving it (Drop Changes).
 
 ### 2.2 Permission settings
 
@@ -126,13 +126,11 @@ The import process handles the following types of scenarios:
 - **Normalisation**. In order to normalise the data (e.g. to extract a list of persons (entities) as records and then point to these person records rather than including names repetitively in the main data records), start by importing only those fields relating to the entities to be normalised. After import, the data will be redisplayed with the ID numbers for the extracted records, which can be used as a pointer field in the subsequent import of the remaining columns of data. You needn't assign all the columns as unassigned columns will be ignored. Duplicated records will be treated as you specified.
 - **Disambiguation**. When importing, Heurist tries to identify similar records which already exist in the database (a process known as disambiguation) and gives you the option of bookmarking one of these rather than making a new record.
 
-:::info
-
 #### 3.1.4 Before You Begin
 
-At a minimum, you must have a suitable record type structure defined in the database and a corresponding CSV/TSV file holding the entries you wish to transform into records.
+<p class="callout info">At a minimum, you must have a suitable record type structure defined in the database (it is possible to add addiitonal fields durign the import, but you at least need th record types and their connections) and a corresponding CSV/TSV file holding the entries you wish to transform into records. </p>
 
-Importing can be a complex business. It is important to clean up the data as much as possible in advance. The following provides some tips on how to prepare your data:
+<p class="callout info">Importing can be a complex business. It is important to clean up the data as much as possible in advance. The following provides some tips on how to prepare your data:</p>
 
 - We recommend breaking very large files into manageable blocks of about two thousand lines.
 - Only one record type can be imported at each step of the process.
@@ -143,7 +141,7 @@ Importing can be a complex business. It is important to clean up the data as muc
 - We strongly suggest editing the structure of the database to add any fields and terms that you will require for the import, before attempting to load the data. If you start trying to load data without the appropriate fields in place you will find it frustrating having to exit the process repeatedly to add fields.
 - If you have missing data for **Required fields**, you may find it convenient to set those fields to **Optional** before importing, then set them back to **Required**, then use **Database &gt; Structure &gt; Verify** to get a list of the records which need correcting. Alternatively, you can add some dummy value to the data, such as 'Missing', and search for this value after import.
 - The import process can be repeated on the file to extract multiple entities from different columns and replace them with record IDs which can be used in a subsequent insertion or update of records.
-- Please visit the page on [Importing delimited text files](http://heuristnetwork.org/importing-data/) on the Heurist network site for tips on successful import.==\[comment\]== :::
+- Please visit the page on [Importing delimited text files](http://heuristnetwork.org/importing-data/) on the Heurist network site for tips on successful import. &lt;ce renvoi ne devrait plus être nécessaire par la suite&gt;
 
 #### 3.1.5 Delimited Text Importer Wizard
 
@@ -153,9 +151,9 @@ The Import Wizard takes you through a number of screens and steps to assist you 
 
 These options are:
 
-- **Select uploaded file**. If you are importing a file you have imported before, select it from the dropdown. To clear this list, click \[Clear All files\].
-- **Upload File**. If you are importing a new file, select it using the \[Upload File\] button.
-- **Paste Data**. If you wish to use copied delimited text, paste it in the box below and click \[Upload Data\].
+- **Select uploaded file**. If you are importing a file you have imported before, select it from the dropdown. To clear this list, click <span style="color: rgb(132, 63, 161);">\[Clear All files\]</span>.
+- **Upload File**. If you are importing a new file, select it using the <span style="color: rgb(132, 63, 161);">\[Upload File\]</span> button.
+- **Paste Data**. If you wish to use copied delimited text, paste it in the box below and click <span style="color: rgb(132, 63, 161);">\[Upload Data\]</span>.
 
 ##### Set Import Parameters
 
@@ -168,13 +166,13 @@ For CSV files, before carrying out the import, you can set the import parameters
 - **Multi-value separator**. Select the appropriate multi-value separator: (e.g. | ; : /).
 - **Date Format**. Select the appropriate date format: European (dd/mm/yyyy or US (mm/dd/yyyy). Other date formats are possible and will be handled in the following wizard dialog.)
 
-Click \[Analyse Data\] again to parse the expected results. This checks that the structure of your data matches what the Import Wizard expects. The header of the upload CSV (the first line of your data determines the expected field count) is checked against your import parameters, column names are extracted and encoding verified. The Import Wizard then attempts to convert the file based on your settings and displays the result (the expected input as rows (records) and columns (fields)).
+Click <span style="color: rgb(132, 63, 161);">\[Analyse Data\]</span> again to parse the expected results. This checks that the structure of your data matches what the Import Wizard expects. The header of the upload CSV (the first line of your data determines the expected field count) is checked against your import parameters, column names are extracted and encoding verified. The Import Wizard then attempts to convert the file based on your settings and displays the result (the expected input as rows (records) and columns (fields)).
 
-Review the result and any error messages and update the source data if required. If you don't have Heurist Record ID (H-ID) value in your file, click on \[Continue\], else, specify the record that must be used to match the H-ID with already existing data.
+Review the result and any error messages and update the source data if required. If you don't have Heurist Record ID (H-ID) value in your file, click on <span style="color: rgb(132, 63, 161);">\[Continue\]</span>, else, specify the record that must be used to match the H-ID with already existing data.
 
 :::info In this section you can also select any input column that contain dates (dd-mm-yyyy, mm-dd-yyyy or Iso standard) -- this allows the data to be parsed to extract consistency formatted date fields. :::
 
-Once it's done click on \[Continue\].
+Once it's done click on <span style="color: rgb(132, 63, 161);">\[Continue\]</span>.
 
 ##### Select Primary Record Type and Dependencies
 
@@ -196,18 +194,18 @@ In the first step of the matching process you can choose what to match or to ski
 
 - **Match on CSV Columns**. To match import rows against existing records,select at least one Matching key column (later you can select for mapping) and ensure all selected key columns are allocated to a field. You can check (and scroll through) a sample of the field data to be mapped in the Values column. A new identification field will be created.
 
-![](https://heurist-doc.huma-num.fr/uploads/dbedbcb6-e2e9-450c-a6da-db700cc8690b.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/dmqimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/dmqimage.png)
 
-:::info Matching sets this ID field for existing records and allows the creation of new records for unmatched rows. :::
+<p class="callout info">Matching sets this ID field for existing records and allows the creation of new records for unmatched rows.</p>
 
 - **Use Heurist ID column**. (Only usable if H-ID column exists both in the CSV file and in the records to update inside heurist). In this case, the identification H-ID field (which is a field managed by the system) will be used.
 - **Skip Matching** (all new records). Skips the matching step (in this case only new records are created, one per input row).
 
-:::info Select the \[Match on Columns\] / Skip Matching button\] (depending on the three previous cases). Matches are shown. :::
+<p class="callout info">Select the <span style="color: rgb(132, 63, 161);">\[Match on Columns\]</span> / <span style="color: rgb(132, 63, 161);">Skip Matching button</span>\] (depending on the three previous cases). Matches are shown.</p>
 
 ##### Step 2. Fields to Import
 
-:::warning If all existing rows already match existing records (e.g. you may have already carried out the import successfully), then you can select the displayed Skip Update button to cancel the import. :::
+<p class="callout warning">If all existing rows already match existing records (e.g. you may have already carried out the import successfully), then you can select the displayed Skip Update button to cancel the import.</p>
 
 The **Import Summary** box shows a mapping summary:
 
@@ -219,16 +217,16 @@ The following options are for matched or new rows:
 - **Show**. This displays the records on screen (click the Close (x) button).
 - **Download**. This downloads the records to a CSV text file.
 
-:::info The three matching, importing and inserting steps can work as an iterative operation if the spreadsheet data you are importing is a complex one. Therefore the import workflow allows you to progressively import columns which identify subsidiary entities (other Record Types linked through Record Pointers to the main record type you want to update or need to create data into) such as Place, Organisation, Collection, Series, Person, etc. The first step is to match identifying key fields and create new records from unmatched rows. The process starts with record pointers first and once all subsidiary entities have been matched and imported, you can import the primary entity type selected in the previous import phase. :::
+<p class="callout info">The three matching, importing and inserting steps can work as an iterative operation if the spreadsheet data you are importing is a complex one. Therefore the import workflow allows you to progressively import columns which identify subsidiary entities (other Record Types linked through Record Pointers to the main record type you want to update or need to create data into) such as Place, Organisation, Collection, Series, Person, etc. The first step is to match identifying key fields and create new records from unmatched rows. The process starts with record pointers first and once all subsidiary entities have been matched and imported, you can import the primary entity type selected in the previous import phase.</p>
 
-- Record IDs for the imported columns are added as column 1. Copy and save these data immediately if there are additional fields to import, to allow use of the record IDs as record pointers. Warning: you will lose the record IDs as soon as you start over, so save the data below to a file first.==\[comment\]==
+- Record IDs for the imported columns are added as column 1. Copy and save these data immediately if there are additional fields to import, to allow use of the record IDs as record pointers. Warning: you will lose the record IDs as soon as you start over, so save the data below to a file first. &lt;!--TODO Vincent: je ne comprends pas bien ce que cette partie signifie --&gt;
 - If the displayed results are not what you expected, then go through the steps again (go back a step or click \[Back to Start\] if you wish to start again; all of your settings will be lost) and make any adjustments (including adjustments to the CSV or TSV file and/or **Record Type**).
 
 Complete the **Column to Field Mapping**. Since new records are to be created, make sure you select all relevant columns; all **Required fields** must be mapped to a dedicated CSV column in order to proceed further. Click \[Prepare\] when ready (importing does not happen yet).
 
 ![](https://heurist-doc.huma-num.fr/uploads/f855c85b-e26d-486d-8cec-4755062dd1e5.png)
 
-:::info A message will appear if you haven't selected any fields other than the ones which are used to match records, so those are the only fields which will be set, and the result may be incomplete records. Click Proceed if you wish to continue, otherwise Cancel and review your settings. :::
+<p class="callout info">A message will appear if you haven't selected any fields other than the ones which are used to match records, so those are the only fields which will be set, and the result may be incomplete records. Click Proceed if you wish to continue, otherwise Cancel and review your settings. </p>
 
 ##### Step 3. Insert/Update
 
@@ -242,7 +240,7 @@ Select an option on how you wish to treat data that already exists in a field:
 
 If you are happy to proceed with the import, click \[Start Inset/Update\]. You will be notified of the updates:
 
-Click \[OK\] and close the window to exit the Import wizard. Review the imported records.
+Click <span style="color: rgb(132, 63, 161);">\[OK\]</span> and close the window to exit the Import wizard. Review the imported records.
 
 ![](https://heurist-doc.huma-num.fr/uploads/f32ecabf-3b46-44be-b5e7-114f3a05b318.png)
 
@@ -259,13 +257,17 @@ Heurist provides the following functions and capabilities for importing bibliogr
 
 To use the **Bibliography Sync function**, you first need to define a connection to a Zotero Library in `<span class="editor-theme-code">Design/properties/Synchronisation and Indexing</span>`. If this has not yet been done, in your database, you will be prompted to edit the settings that establishing such a Zotero connection. The relevant field is Zotero web library key(s) and IDs for synchronisation.
 
-:::warning It should be noted that not all the zotero fields are synchronised with heurist bibliography record types. Moreover the synchronisation process will create automaticaly new records for Persons (author), organizations (Publisher), Places (publication location) and of course book references and so on. The Synchronisation is a one way process from a given Zotero collection to a Heurist database. :::
+<p class="callout warning">It should be noted that not all the zotero fields are synchronised with heurist bibliography record types. Moreover the synchronisation process will create automaticaly new records for Persons (author), organizations (Publisher), Places (publication location) and of course book references and so on. The Synchronisation is a one way process from a given Zotero collection to a Heurist database.</p>
 
 ### 3.3 Heurist XML / JSON
 
 #### 3.3.1 Summary
 
-**Heurist XML / JSON** allows data to be imported from an XML or JSON format that is specially tailored for compatibility with Heurist. When preparing data in this format, it is strongly recommended to first download the XML template. This is an XML document, following a Heurist-XML(HML) schema, that presents the core definitions of records that are necessary for proper functioning of your database. Following this template, you can design an XML document that can be easily read by Heurist. Once an HML or JSon-format is ready, select the file to upload from your desktop. Doing this takes you to a screen where the data is parsed and check. This screen enumerates the records to be imported and asks for final confirmation before the data is imported to create new records. Click **\[Import Records\]** to start the import. :::info Contrary to the CSV/TSV import which allows a very refined way of updating or creating given field values with the use of [matching and preparing steps](#Import-Records-from-CSVTSV), the XML/JSON import is a one time operation that import a whole set of contents in one go. :::
+**Heurist XML / JSON** allows data to be imported from an XML or JSON format that is specially tailored for compatibility with Heurist. When preparing data in this format, it is strongly recommended to first download the XML template. This is an XML document, following a Heurist-XML(HML) schema, that presents the core definitions of records that are necessary for proper functioning of your database. Following this template, you can design an XML document that can be easily read by Heurist. Once an HML or JSon-format is ready, select the file to upload from your desktop. Doing this takes you to a screen where the data is parsed and check. This screen enumerates the records to be imported and asks for final confirmation before the data is imported to create new records.
+
+Click **\[Import Records\]** to start the import.
+
+<p class="callout info">Contrary to the CSV/TSV import which allows a very refined way of updating or creating given field values with the use of [matching and preparing steps](#Import-Records-from-CSVTSV), the XML/JSON import is a one time operation that imports a whole set of contents in one go. If the data is correctly formatted, as when exported from one Heurist database, it is a very fast and accurate way of importing data into another Heurist database (it can even download structure to accomodate the data provided the source database is a Registered database).</p>
 
 #### 3.3.2 Import XML/JSON
 
@@ -306,7 +308,7 @@ To reference an existing record in the target database, the record number must b
 
 This behaviour is quite intentional precisely to avoid making false connections (record IDs are database specific and cannot be known in advance unless re-exported and re imported, which is rendered unnecessary by our approach).
 
-:::info Note that inside the XML template, RECORD\_REFERENCE may be replaced with a numeric or alphanumeric reference to another record, indicated by the &lt;ID&gt; tag. Note that this reference will be replaced with an automatically generated numeric Heurist record ID (H-ID), which will be different from the reference supplied. The reference supplied will be recorded in a field Original ID.
+<p class="callout info">Note that inside the XML template, RECORD\_REFERENCE may be replaced with a numeric or alphanumeric reference to another record, indicated by the &lt;ID&gt; tag. Note that this reference will be replaced with an automatically generated numeric Heurist record ID (H-ID), which will be different from the reference supplied. The reference supplied will be recorded in a field Original ID.</p>
 
 If you wish to specify existing Heurist records in the target database as the target (value) of a Record Pointer field, specify their Heurist record ID (H-ID) in the form H-ID-nnnn, where nnnn is the H-ID of the target record in the target database. Specifying non-existent record IDs will throw an error. The record type of target records are not checked on import; pointers to records of the\* wrong type can be found later with **\[Admin &gt; Verify integrity\]**.
 
@@ -334,32 +336,32 @@ Heurist will recognise the KML format and process the file, and prompt you for a
 2. Click **\[Continue\]**. A summary of records to be imported is shown. When ready, click **\[Continue\]**. Heurist will recognise the KML format and process the file, and prompt you for a record type.
 3. Select the record type and click Continue.
 
-:::info All records created by a single KML import have the same record type. :::
+<p class="callout info">All records created by a single KML import have the same record type</p>
 
-## 4 Media Files - images, videos, audio and other files
+### 4 Media Files - images, videos, audio and other files
 
-### 4.1 Upload media files / images
+#### 4.1 Upload media files / images
 
 **Upload media files/images** function, is designed for use by **Database Managers** only. It allows you to upload media files/images directly onto the Heurist server for use with a particular database. There are a range of allowable file formats/extension that can be uploaded in bulk in this way. As a Database Manager, you can select a media/upload folder in the relevant directory on the Heurist server. After selecting the target folder within this directory, Add Files from the desktop to upload. Once selected, click **Start uploads** to begin the process of copying these media files onto the Heurist server. Once completed, close the pane by clicking **Finished**.
 
-### 4.2 Upload media from URL
+#### 4.2 Upload media from URL
 
-**Upload media from URLs** function, is designed for use by **Databse Managers** only, uploads a set of files specified by URLs, directly in the database. You can paste URLs and optional description in the area, CSV format is recommended. After pasting URLs or uploading CSV file, the URLs are checked and if the media files are supported, uploaded to the Heurist database. After uploading, assign each file to a record type and link it to the appropriate database entry by selecting file assignment.
+**Upload media from URLs** function, is designed for use by **Datab**a**se Managers** only, uploads a set of files specified by URLs, directly in the database. You can paste URLs and optional description in the area, CSV format is recommended. After pasting URLs or uploading CSV file, the URLs are checked and if the media files are supported, uploaded to the Heurist database. After uploading, assign each file to a record type and link it to the appropriate database entry by selecting file assignment.
 
 ![](https://heurist-doc.huma-num.fr/uploads/8c8126c5-6d6c-4029-969f-0bc6a8178d3e.png)
 
-### 4.3 Index external files
+#### 4.3 Index external files
 
 **Index external files** function, which is reserved for **advanced users** only, scans media folders and add missed to Media Files. Files have to be uploaded through Populate either using :
 
 - Function **Upload media files/images**
 - or by direct sftp access to the file\_uploads directory (or sub-directories) on the server for larger files. Make sure the format of the extensions is supported by Heurist. Then, select the folders to scan. Click on **\[Proceed\]**.
 
-### 4.4 Create media records
+#### 4.4 Create media records
 
 **Create media records** function, is designed for **Database Managers** only, and is reserved for **advanced users**. It creates, updates and reads XML manifest files in the folders listed in *Design &gt; Properties* and creates Digital Media records for all files uploaded to the database. Before, make sure to upload files through Populate (**Upload media files/images**). And make sure that the format of the extensions to scan is supported by Heurist. Click on "Continue" to synchronize the files.
 
-### 4.5 IIIF Images
+#### 4.5 IIIF Images
 
 IIF (International Image Interoperability Format) provides a standard for image interchange widely used by museums, art galleries and others in the GLAM sector.
 
@@ -370,19 +372,23 @@ To enter an IIIF image, you need a **File or Media URL** field, when editing a s
 
 Heurist will recognise these specific IIIF file and display them by using the embedded IIIF [Mirador Viewer](https://projectmirador.org/).
 
-### 4.6 Import Annotations
+#### 4.6 Process IIIF Manifests
 
-**Import Annotations** function, is reserved for **advanced users** only. It reads IIIF manifest and linked AnnotationList, and then creates or updates Annotation records in Heurist database.
+**Process IIIF Manifests** function, is reserved for **advanced users.**  It reads IIIF manifests and incluiding Annoftations, and creates or updates Annotation records in the Heurist database.
 
-## 5 Annexes
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/Dglimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/Dglimage.png)
 
-### 5.1 CSV Import Tips and Notes
+TODO: need more comprehensive documentaiton
+
+### 5 Annexes
+
+#### 5.1 CSV Import Tips and Notes
 
 #### 5.1.1 Importing child records
 
 Let's assume we have a Person **Record Type** with **Child records** linked fields such as Birth, Death, Life Event, Address association, etc. To import Address Association - which associates a Person with a Place for a particular date, date range or list of years - you must import Places to create Place **H-IDs**. But you must also import Persons to create Person **H-IDs**.
 
-:::warning This may be tricky because the child pointer to these records may be a required field. But it needs to be done first in order to be able to create the child records. :::
+<p class="callout warning">This may be tricky because the child pointer to these records may be a required field. But it needs to be done first in order to be able to create the child records.</p>
 
 #### 5.1.2 Beware matching a repeating value...
 
@@ -396,11 +402,15 @@ What you want is TWO records, each with 10 years listed in a repeating YEAR fiel
 
 After defining all the fields for the **Child Record type**, you need a CSV file which either references the **H-ID** of the parent records, or a unique field or combination of fields in the parent records. In our case the *Finds* were imported from an **Access** database and the *Find ID* in the source database is included as *Artefact ID*. This allows it to be matched with *Finds.Artefact ID (Access DB)* in Heurist to obtain the parent **Record Pointer**.
 
-The attributes to be imported into the child record will also be defined in the file. For categorised fields (a controlled list), we will use Heurist's Term List field type which may be represented in teh incoming data either as the labels or as the codes (foreign keys) used to reference the lookup tables in the source. ==\[comment\]== To illustrate, let's define a test field *Pottery type* field with values "One", "Two" and "Three", which have numerical code 1, 2 and 3 respectively:
+The attributes to be imported into the child record will also be defined in the file. For categorised fields (a controlled list), we will use Heurist's Term List field type which may be represented in teh incoming data either as the labels or as the codes (foreign keys) used to reference the lookup tables in the source.
+
+@TODO : check images on the previous paragrap in sharedocs document
+
+ To illustrate, let's define a test field *Pottery type* field with values "One", "Two" and "Three", which have numerical code 1, 2 and 3 respectively:
 
 Here is the very simple test file imported by way of illustration.
 
-:::warning Note that we use the code rather than the label (where exporting data from another software you may get either out of an SQL query depending on the way it is structured. In MSAccess, for example, some fields get joined with their lookup tables automatically and give you the label. Other softwares just give you the actual Foreign Key value in the field) :::
+<p class="callout warning">Note that we use the code rather than the label (where exporting data from another software you may get either out of an SQL query depending on the way it is structured. In MSAccess, for example, some fields get joined with their lookup tables automatically and give you the label. Other softwares just give you the actual Foreign Key value in the field)</p>
 
 ```
 Artefact ID, Pottery type
@@ -441,13 +451,13 @@ Dupont, Bernadette, is wife of, Dupond, Jean,,\
 etc.
 ```
 
-:::info The direction in which the relationship is defined does not matter provided the right term is used. Relationship type can either be directional, as in the case of isChildOf and isParentOf, or non-directional eg. isRelatedTo :::
+<p class="callout info">The direction in which the relationship is defined does not matter provided the right term is used. Relationship type can either be directional, as in the case of isChildOf and isParentOf, or non-directional eg. isRelatedTo</p>
 
 Use **\[Import &gt; Delimited (CSV/TSV)\]**:
 
 Identify the target record type as Relationship record.
 
-:::warning Relationship records might be marked as a hidden record type, in which case they will not show up in the options. Go to Design &gt; Record types and set them as visible. :::
+<p class="callout warning">Relationship records might be marked as a hidden record type, in which case they will not show up in the options. Go to Design &gt; Record types and set them as visible.</p>
 
 Match on the two source columns (*Source Name* and *Source First Name* in this case, or other columns that will identify the source record, for example the ID or title etc.), then a match on the two target columns. This will create appropriate Heurist ID columns (if the Heurist IDs are already in the file these can be selected).
 
@@ -472,11 +482,11 @@ If you put a **Relationship Marker** in the source type records, and another in 
 
 This table shows how the data is mapped into Heurist; it lists the KML tags that Heurist recognises as record details, and the bibliographic data fields that they are imported to.
 
-:::info Contact Heurist Association for the full list of KML Field Definitions for the XML file to determine how the data is mapped into Heurist. :::
+<p class="callout info">Contact the Heurist Network Association for the full list of KML Field Definitions for the XML file to determine how the data is mapped into Heurist.</p>
 
 Heurist attempts to import each &lt;Placemark&gt; as a separate record.
 
-<table id="bkmrk-kml-tag-heurist-deta"><colgroup><col></col><col></col></colgroup><tbody><tr><th>KML tag
+<table id="bkmrk-kml-tagheurist-detai"><colgroup><col style="width: 223px;"></col><col style="width: 347px;"></col></colgroup><tbody><tr><th>KML tag
 
 </th><th>Heurist detail field
 

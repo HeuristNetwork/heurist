@@ -1,14 +1,14 @@
 # Ch 01: Overview
 
-*Commenced: 12 Jan 2024* Documentation régigée le 07/11/2025 par Barbara Bonazzi mise à jour le 03/03/2026 par Barbara Bonazzi relu le 09/03/2025 par Maxine
+*Commenced: 12 Jan 2024* Documentation rédigée le 07/11/2025 par Barbara Bonazzi mise à jour le 03/03/2026 par Barbara Bonazzi relu le 09/03/2025 par Maxine
 
-Main authors: Ian Johnson, Maël Le Noc (2023 - 2025), Michael Falk (2021-2022), Vincent Sheehan (2016-2020)
+Original authors: Ian Johnson, Maël Le Noc (2023 - 2025), Michael Falk (2021-2022), Vincent Sheehan (2016-2020)
 
 Assisted by: Pierre-Yves Saunier
 
 ## 1. What is Heurist ?
 
-Heurist website : https://heurist.huma-num.fr/heurist/startup/
+Heurist website : [https://heurist.huma-num.fr/heurist/startup/](https://heurist.huma-num.fr/heurist/startup/)
 
 Specific reasons for using Heurist:
 
@@ -24,7 +24,7 @@ Specific reasons for using Heurist:
 - Designed for low cost centralized maintenance shared by many projects
 - Humanities-knowledgeable core team and community of users
 
-*\*No one system can do everything. Heurist is a generic system designed around the needs of a broad cohort of Humanities projects needing rich interlinked data and metadata databases. It cannot be expected to provide all the domain-specific features of tools such as text analysis, on-site archaeological recording or spatial analysis, but it may still provide a means of collecting and managing data which is later fed into specific analysis tools such as R, QGis, Gephi, TAPOR etc.\**
+*\* No one system can do everything. Heurist is a generic system designed around the needs of a broad cohort of Humanities projects needing rich interlinked data and metadata databases. It cannot be expected to provide all the domain-specific features of tools such as text analysis, on-site archaeological recording or spatial analysis, but it may still provide a means of collecting and managing data which is later fed into specific analysis tools such as R, QGis, Gephi, TAPOR etc. \**
 
 ## 2. Learning Resources
 
@@ -56,7 +56,7 @@ Annotated examples of Heurist-generated websites are on the [Featured Projects p
 
 ![](https://heurist-doc.huma-num.fr/uploads/342c0e73-8734-4c5f-a38d-8a897213437a.png)
 
-Additional projects can be accessed through the [Projects Search page](https://heuristnetwork.org/projects-search/) (not currently available at 8 Jan 2024 @TODO)
+Additional projects can be accessed through the [Projects Search page](https://heuristref.net/Heurist_Contacts/web/5417/10669) (Exemplar Projects)
 
 ### 2.5 **FAQ**
 

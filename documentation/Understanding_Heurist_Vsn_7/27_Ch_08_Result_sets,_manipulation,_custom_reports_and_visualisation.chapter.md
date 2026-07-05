@@ -14,15 +14,11 @@ A **Custom Report** is a template that structures your database records into var
 
 <p class="callout info">The development of custom reports can be quite a slow process, so it is best to plan well what reports you need and apply good naming conventions. Some level of simple HTML will be required, and knowledge of CSS will allow for much greater control of the output. PHP and JS functions can also be included (optional). :::</p>
 
-**Custom Reports** are useful when you need to extract and format specific data for further analysis or publication. They are particualrly useful in setting up web pages (see chapter 9).
+**Custom Reports** are useful when you need to extract and format specific data for further analysis or publication. They are particualrly useful in formatting data to appear in web pages (see chapter 9). They can also be used to download formatted information or set up feeds of data for other purposes.
 
-For example, if you want to work only with female individuals stored in your database, you can:
+They are also useful for displaying a single record in Record View, a popup on the map, or wherever data needs to be displayed in response to selection of one or more records.
 
-1. Search or create a **Saved Filter** that selects all female persons.
-2. Build your **Custom Report** based on this selection.
-3. Export your data in the desired format for your analysis.
-
-<p class="callout info">Tip : Before creating your Custom Report, define clearly what kind of analysis you plan to do. Your analytical goal will determine both the data you select and the export format you choose. :::</p>
+<p class="callout info">Tip : Before creating your Custom Report, define clearly what sort of display you plan to do. Your formatting goal will determine both the data you select and the way you format the output.</p>
 
 Reports are built using **Smarty**, a templating language that combines standard **HTML** with **Smarty tags** to dynamically insert data from Heurist.
 
@@ -30,25 +26,21 @@ Reports are built using **Smarty**, a templating language that combines standard
 
 ### How to start :
 
-:::warning Explore → Filter → Report → Custom Report :::
+In the Explore menu ① you can also focus on a specific record type <span style="color: rgb(132, 63, 161);">(Explore &gt; Entities)</span> and select the record type from the list ②
 
-To begin, click on \[Explore\]. ①
+You may wish to perform a more flexible, either by entering it in the Filter field ③ or using the Filter builder just below it, or use a <span style="color: rgb(132, 63, 161);">\[Saved Filter\]</span> from the Filters ection ② that returns the records you want to include in your report.
 
-Perform a search or use a \[Saved Filter\] that returns the records you want to include in your report. ①
+The selected records will appear in the middle section of your screen. ④
 
-You can also focus on a specific record type by clicking on \[Entities\] and selecting My Record Types, either by Favorites or by Usage. ②
+To work with Custom Reports, click on the <span style="color: rgb(132, 63, 161);">\[Report\]</span> tab ⑤
 
-The selected data will appear in the middle section of your screen. ③
-
-To work with Custom Reports, click on \[Report\] at the top left of your screen. ④
-
-The Custom Report template for your filtered data will appear below the \[Report\] button. ⑤
+The Custom Report template for your filtered data will appear below the <span style="color: rgb(132, 63, 161);">\[Report\]</span> button.
 
 ![](https://heurist-doc.huma-num.fr/uploads/d72124d4-bb65-4cec-93fc-6f660b22ac00.png)
 
 ### The Toolbar
 
-In the upper part of the **Custom Report** view, you’ll see a toolbar:
+In the upper part of the **Custom Report** tab, you’ll see a toolbar:
 
 ![](https://heurist-doc.huma-num.fr/uploads/d8e86cb5-488d-40bd-911c-baa19ccafca1.png)
 
@@ -56,35 +48,41 @@ In the upper part of the **Custom Report** view, you’ll see a toolbar:
 
 ![](https://heurist-doc.huma-num.fr/uploads/79c1beb9-c035-44aa-81d6-6e206f432aa7.png)
 
-Click \[Edit\] to open the template editor and start writing your **Custom Report** with **Smarty**. The editor is split into three panels:
+Click<span style="color: rgb(132, 63, 161);"> \[Edit\] </span>to open the template editor and start writing your **Custom Report** with **Smarty**. The editor is split into three panels:
 
-- Right – Actions pane ① : insert fields, loops, and conditions via dropdown helpers ②, and browse record types ③ to quickly add the correct field ④
-- Middle – Editor pane ⑤ : write and edit your HTML + Smarty template here.
-    - In the editor, you’ll see the default starter message/template:
+- **Actions pane** ① :   
+      
+    Insert fields, loops, and conditions via dropdown helpers ②, and browse record types ③ to quickly add the correct field ④
+- **Editor pane** ⑤ : write and edit your HTML + Smarty template here.  
+    In the editor, you’ll see the default starter message/template (note that this template may chage through time as we improve on it, but it will contain a basic loop for records and some instructions to get started).
     
-    ```
-    {* This is a simple Smarty report template which you can edit into something more sophisticated.
-       It should give basic output for any database, as it uses the standard record types which are part of all databases.
-       Enter html for web pages or other text format. Use tree on right to insert fields, loops and tests.
-       Use this format to include comments in your file, use <!-- --> for output of html comments.
-       Smarty help describes many functions you can apply, loop counting/summing, custom functions etc.*}
-    ```
-
-*Below, we will go deeper into Smarty syntax — see X. Smarty Syntax in Heurist.*
-
-- Left – Preview pane ⑨ : shows the output when you click \[Test\] ⑧ . You can choose to truncate the preview to *n* records ⑥ and select how to handle debug messages, warnings, and errors ⑦.
+    *{\* This is a simple Smarty report template which you can edit into something more sophisticated.*  
+     *It should give basic output for any database, as it uses the standard record types which are part of all databases.*  
+     *Enter html for web pages or other text format. Use tree on right to insert fields, loops and tests.*  
+     *Use this format to include comments in your file, use &lt;!-- --&gt; for output of html comments.*  
+     *Smarty help describes many functions you can apply, loop counting/summing, custom functions etc. \*}*
+    
+      
+    Below, we will go deeper into Smarty syntax — see X. Smarty Syntax in Heurist.
+- **Preview pane** ⑨ : shows the output when you click <span style="color: rgb(132, 63, 161);">\[Test\]</span> ⑧ .   
+      
+    You can choose to truncate the preview to *n* records ⑥ and select how to handle debug messages, warnings, and errors ⑦.
 
 ![](https://heurist-doc.huma-num.fr/uploads/8d546035-c69d-49a6-9162-866b14eb7905.png):::info Tips :
 
-- Click \[Test\] to preview ! Nothing is saved when testing.
-- Use \[Save\] (or \[Save As\]) to store your template and keep versions.
-- Use Ctrl+Z / Cmd+Z to undo recent edits. :::
+<p class="callout info">Click <span style="color: rgb(132, 63, 161);">\[Test\]</span> to preview ! Nothing is saved when testing.  
+Use <span style="color: rgb(132, 63, 161);">\[Save\]</span> (or <span style="color: rgb(132, 63, 161);">\[Save As\]</span>) to store your template and keep versions.  
+Use <span style="color: rgb(132, 63, 161);">Ctrl+Z</span> / <span style="color: rgb(132, 63, 161);">Cmd+Z</span> to undo recent edits. You can undo a lot of edits by repeating this.</p>
+
+<p class="callout info">We strongly recommend making only one or two changes at a time and clickign Test to see the results. If somethign doesn't work, you can immediately undo it and try an alternative.   
+  
+Don't get tempted to write a lot of code and then test it because then you will have trouble finding the problem.</p>
 
 #### Create a new template
 
 ![](https://heurist-doc.huma-num.fr/uploads/b15e250f-4f31-448a-8dca-bb4bfe84c27e.png)
 
-The \[Create a new templat\] works similarly to the \[Edit\] tool. It opens the same editor interface where you can create a new Custom Report template from scratch.
+\[<span style="color: rgb(132, 63, 161);">Create a new template\]</span> works similarly to the <span style="color: rgb(132, 63, 161);">\[Edit\]</span> tool. It opens the same editor interface where you can create a new Custom Report template from scratch.
 
 Use it when you want to **start a fresh layout** instead of editing an existing one.
 
@@ -94,7 +92,7 @@ Use it when you want to **start a fresh layout** instead of editing an existing 
 
 ![](https://heurist-doc.huma-num.fr/uploads/908eefb4-58d6-49be-ab40-6528f7ef25c9.png)
 
-The \[Deleat\] tool allows you to **delete** the currently selected template.
+The \[<span style="color: rgb(132, 63, 161);">Delete\]</span> tool allows you to **delete** the currently selected template.
 
 When clicked, a **warning message** will pop up asking for confirmation.
 
@@ -102,7 +100,7 @@ When clicked, a **warning message** will pop up asking for confirmation.
 
 It will display the name of your template ① like *name\_file\_.tpl* . As here for exemple "Basic (inital record types).tpl"
 
-Click \[Proceed\] to confirm deletion, or \[Cancel\] to abort the action.
+Click <span style="color: rgb(132, 63, 161);">\[Proceed\]</span> to confirm deletion, or<span style="color: rgb(132, 63, 161);"> \[Cancel\] </span>to abort the action.
 
 #### Import and Export Templates
 
@@ -110,38 +108,51 @@ Click \[Proceed\] to confirm deletion, or \[Cancel\] to abort the action.
 
 The Import ← and Export → tools allow you to share and reuse Custom Report templates.
 
-- Import lets you upload an existing template file (.tpl) from your computer into Heurist.
-- Export lets you download your customized template as a .tpl file, so you can back it up or share it with others.
+For this we have developed a 'global template' format (,gpl) which uses Heurist's unique Concept IDs so that the template can be usd by any database that includes those concepts (definitions of record types, fields and terms). Template files stored in the Heurist database are the same as global files except that they use local codes rather than the unique global concept IDs.
 
-\[🔧COME BACK TO EXPLAIN PERMISSIONS SETTINGS\]![](https://heurist-doc.huma-num.fr/uploads/b1b32ab7-095e-4126-9757-34cd73600510.png)\[🔧COME BACK TO EXPLAIN PERMISSIONS SETTINGS\]
+<p class="callout info">Templates can only be exported from a registered database to ensure that there are Concept IDs for any definitions used in the template. If the database is not registered you will see the following message.</p>
 
-#### Obtain JavaScript to embed a report, and set a publishing schedule
+![](https://heurist-doc.huma-num.fr/uploads/b1b32ab7-095e-4126-9757-34cd73600510.png)
+
+Import lets you upload an existing global template file (.gpl) and convert it to a local template file (.tpl)
+
+Export lets you download your customized template as a .gpl file, so you can back it up or share it with others.
+
+##### Obtain JavaScript to embed a report, and set a publishing schedule
 
 ![](https://heurist-doc.huma-num.fr/uploads/46ab971b-127c-4fd7-aef9-e97e59e5a277.png)
 
-The \[Publish\] option lets : (a) embed a Custom Report in an external website (e.g., WordPress) (b) schedule periodic regeneration with caching for faster load times on large/complex reports.
+The \[Publish\] option lets you :
+
+- embed a Custom Report in an external website in another CMS
+- schedule periodic regeneration with caching for faster load times on large/complex reports.
 
 ##### How to publish (embed)
 
-##### Set up a scheduled (cached) report
+##### Setting up a scheduled (cached) report
 
 ###### Pros/cons of scheduling
 
-:::success Much faster for large tables, complex calculations, or media-heavy pages. ::: :::danger Content is a snapshot at the last generation time (not strictly real-time). :::
+<p class="callout success">Much faster for large tables, complex calculations, or media-heavy pages. </p>
+
+<p class="callout warning">Content is a snapshot at the last generation time (not strictly real-time), so frequency of update needs to be approriately set</p>
+
+#### Download
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/CMoimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/CMoimage.png)
+
+This allows the download of a plain text file without html formatting (assumng you did nopt use html tags in the report format)
 
 #### Print
 
 ![](https://heurist-doc.huma-num.fr/uploads/836bb8bc-875d-4e85-8e79-79efd7bd114a.png)
 
-Finally, something super easy and super useful for good documentation and data archiving!
+The \[Print\] buttom simply generates a PDF of the output from your current **Custom Report** template. It’s a quick and convenient way to export information in an easy readable and shareable format.
 
-The \[Print\] buttom simply generates a PDF of the output from your current **Custom Report** template. It’s a quick and convenient way to export information in a easy readable, shareable, and archivable format.
-
-:::info Tip: Don’t hesitate to use this feature to:
-
-- Enrich your Data Management Plan (DMP),
-- Keep track of specific datasets, or
-- Share information with colleagues who may not be comfortable navigating Heurist or other “sophisticated” data formats. :::
+<p class="callout info">Tip: Don’t hesitate to use this feature to:  
+ Enrich your Data Management Plan (DMP),  
+ Keep track of specific datasets, or  
+ Share information with colleagues who may not be comfortable navigating Heurist or other “sophisticated” data formats. :::</p>
 
 #### Refresh
 
@@ -2348,90 +2359,54 @@ Summary automatically generated on 11/25/2025 using the gpt-oss:120b model from 
 
 ### 1️⃣ Spatio‑temporal **Map** tab
 
-<table id="bkmrk-step-action-1-click-"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Step
-
-</th><th>Action
+<table id="bkmrk-action1click%C2%A0%5Bexplor"><colgroup><col></col><col style="width: 721px;"></col></colgroup><tbody><tr style="height: 10px;"><th></th><th>Action
 
 </th></tr><tr><td>**1**
 
-</td><td>Click
-
-**\[Explorer\]**
+</td><td>Click **\[Explore\]**
 
 .
 
 </td></tr><tr><td>**2**
 
-</td><td>Run a search
-
-**or**
-
- use a
-
-**\[Saved Filter\]**
-
- to retrieve the records you want to map.
+</td><td>Run a search **or** use a **\[Saved Filter\]** to retrieve the records you want to map.
 
 </td></tr><tr><td>**3**
 
-</td><td>Select a
-
-**record**
-
- (any record that contains the required fields).
+</td><td>Select a **record** (any record that contains the required fields).
 
 </td></tr><tr><td>**4**
 
-</td><td>Click
-
-**\[Map\]**
-
-.
+</td><td>Click<span style="color: rgb(132, 63, 161);"> </span>**\[Map\]**
 
 </td></tr></tbody></table>
 
-> **Result:** The interface splits into two synchronized panels – a **map** (top) and a **timeline** (bottom).
+> ```
+> 
+> ```
+
+Result: The interface splits into two synchronized panels – a map (top) and a timeline (bottom).
 
 #### 1.1 Prerequisites for a spatio‑temporal view
 
-- **At least one spatial field** (coordinates, GeoJSON, etc.).
+- **At least one spatial field** (coordinates, WKT, GeoJSON, etc.).
 - **At least one temporal field** (date, date‑range, etc.).
 
-If one of these is missing the map/timeline will stay empty.
+If one of these is missing either the map or the timeline will not be populated.
 
 #### 1.2 Map panel
 
-<table id="bkmrk-tool-description-leg"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Tool
+<table id="bkmrk-tooldescriptionlegen"><colgroup><col style="width: 158px;"></col><col style="width: 583px;"></col></colgroup><tbody><tr><th>Tool
 
 </th><th>Description
 
 </th></tr><tr><td>**Legend**
 
-</td><td>•
+</td><td>• **Result sets** – show/hide points belonging to the current result set.
 
-**Result sets**
+• **Map Documents** – (see *Publish* section).
 
- – show/hide points belonging to the current result set.
-
-•
-
-**Map Documents**
-
- – (see
-
-*Publish*
-
- section).
-
-•
-
-**Base map**
-
- – choose background (e.g.,
-
-*OpenStreetMap*
-
-).
+• **Base map** – choose background (e.g., *OpenStreetMap*).
 
 </td></tr><tr><td>**Zoom/Dezoom**
 
@@ -2459,17 +2434,9 @@ If one of these is missing the map/timeline will stay empty.
 
 </td></tr><tr><td>**\[Publish map\]**
 
-</td><td>Generates an
+</td><td>Generates an **iframe** snippet to embed the map on another page, optionally with controls (legend, bookmark, geocoder, selector, print).
 
-**iframe**
-
- snippet to embed the map on another page, optionally with controls (legend, bookmark, geocoder, selector, print).
-
-• You can also export the map as
-
-**KML**
-
- for Google Earth.
+• You can also export the map as **KML** for Google Earth.
 
 </td></tr><tr><td>**Clusterisation**
 
@@ -2479,23 +2446,15 @@ If one of these is missing the map/timeline will stay empty.
 
 #### 1.3 Publishing a map (iframe)
 
-<table id="bkmrk-setting-what-it-does"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Setting
+<table id="bkmrk-settingwhat-it-doesi"><colgroup><col style="width: 195px;"></col><col style="width: 545px;"></col></colgroup><tbody><tr><th>Setting
 
 </th><th>What it does
 
-</th></tr><tr><td>**Include**
-
- –
-
-*current query*
+</th></tr><tr><td>**Include** – *current query*
 
 </td><td>The iframe displays the map built from the query you just ran.
 
-</td></tr><tr><td>**Include**
-
- –
-
-*opened map documents*
+</td></tr><tr><td>**Include** – *opened map documents*
 
 </td><td>(still under documentation – shows any additional map layers you have opened).
 
@@ -2509,23 +2468,7 @@ If one of these is missing the map/timeline will stay empty.
 
 </td></tr><tr><td>**Other settings**
 
-</td><td>*Use current basemap*
-
-,
-
-*Allow modify symbology*
-
-,
-
-*Show map*
-
-,
-
-*Show timeline*
-
-,
-
-*Marker clusters*
+</td><td>*Use current basemap*, *Allow modify symbology*, *Show map*, *Show timeline*, *Marker clusters*
 
 .
 
@@ -2533,23 +2476,11 @@ If one of these is missing the map/timeline will stay empty.
 
 </td><td>You can pick a custom HTML template for the pop‑ups (create a new template in the
 
-**Templates**
-
- section of Heurist).
+**Templates** section of Heurist).
 
 </td></tr><tr><td>**Copy code**
 
-</td><td>Two formats are offered:
-
-**embed**
-
- (standard
-
-`<span class="editor-theme-code"><iframe …></span>`
-
- ) and
-
-**web‑safe**
+</td><td>Two formats are offered: **embed** (standard `<span class="editor-theme-code"><iframe …></span>` ) and **web‑safe**
 
  (escaped for direct insertion in CMSs).
 
@@ -2573,49 +2504,25 @@ If one of these is missing the map/timeline will stay empty.
 
 ### 2️⃣ **Network** tab
 
-<table id="bkmrk-step-action-1-click--1"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Step
+<table id="bkmrk-stepaction1click%C2%A0%5Bex"><colgroup><col style="width: 62px;"></col><col style="width: 680px;"></col></colgroup><tbody><tr style="height: 10px;"><th>Step
 
 </th><th>Action
 
 </th></tr><tr><td>**1**
 
-</td><td>Click
-
-**\[Explorer\]**
-
-.
+</td><td>Click **\[Explorer\]**.
 
 </td></tr><tr><td>**2**
 
-</td><td>Run a search
-
-**or**
-
- use a
-
-**\[Saved Filter\]**
-
- to collect the records you want in the network.
+</td><td>Run a search **or** use a **\[Saved Filter\]** to collect the records you want in the network.
 
 </td></tr><tr><td>**3**
 
-</td><td>Select a
-
-**record**
-
- that will be the entry point of the network.
+</td><td>Select a **record**<span style="color: rgb(132, 63, 161);"> </span>that will be the entry point of the network.
 
 </td></tr><tr><td>**4**
 
-</td><td>Click
-
-**\[Map\]**
-
- (the same button as for the spatio‑temporal view; the
-
-**Network**
-
- view appears).
+</td><td>Click **\[Map\]** (the same button as for the spatio‑temporal view; the **Network** view appears).
 
 </td></tr></tbody></table>
 
@@ -2632,97 +2539,33 @@ If one of these is missing the map/timeline will stay empty.
 
 </th></tr><tr><td>**Node Control**
 
-</td><td>•
+</td><td>• **Select mode** – click‑drag a single node or draw a selection rectangle (right‑click + drag).
 
-**Select mode**
-
- – click‑drag a single node or draw a selection rectangle (right‑click + drag).
-
-•
-
-**Gravity**
-
- – toggle node‑to‑node attraction; turn
-
-**on**
-
- to let the layout settle, then
-
-**off**
+• **Gravity** – toggle node‑to‑node attraction; turn **on** to let the layout settle, then **off**
 
  for a static view.
 
 </td></tr><tr><td>**Link Control**
 
-</td><td>•
+</td><td>• **Links** – show/hide empty links and *expanded* links (links that open to show nested relationships).
 
-**Links**
+• **Node Size Formula** – choose linear or logarithmic scaling of node size.
 
- – show/hide empty links and
-
-*expanded*
-
- links (links that open to show nested relationships).
-
-•
-
-**Node Size Formula**
-
- – choose linear or logarithmic scaling of node size.
-
-•
-
-**Fixed**
-
- – set a fixed link thickness.
+• **Fixed** – set a fixed link thickness.
 
 </td></tr><tr><td>**Graph Control**
 
-</td><td>•
+</td><td>• **Refresh Data** – re‑load the graph if new records were added.
 
-**Refresh Data**
+• **Open/Close Fullscreen** – toggle full‑screen mode.
 
- – re‑load the graph if new records were added.
+• **View Mode** – *Icon view*, *Basic info box*, *Full info box with link view*.
 
-•
+• **Set Zoom** – manual zoom slider.
 
-**Open/Close Fullscreen**
+• **Export** – download the graph as
 
- – toggle full‑screen mode.
-
-•
-
-**View Mode**
-
- –
-
-*Icon view*
-
-,
-
-*Basic info box*
-
-,
-
-*Full info box with link view*
-
-.
-
-•
-
-**Set Zoom**
-
- – manual zoom slider.
-
-•
-
-**Export**
-
- – download the graph as
-
-**GEXF**
-
- (Gephi format).
+**GEXF** (Gephi format).
 
 </td></tr></tbody></table>
 
@@ -2736,49 +2579,27 @@ If one of these is missing the map/timeline will stay empty.
 
 ### 3️⃣ **Cross‑tabular (Pivot) View**
 
-<table id="bkmrk-step-action-1-click--2"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Step
+<table id="bkmrk-stepaction1click%C2%A0%5Bex-1"><colgroup><col></col><col style="width: 700px;"></col></colgroup><tbody><tr><th>Step
 
 </th><th>Action
 
 </th></tr><tr><td>**1**
 
-</td><td>Click
-
-**\[Explorer\]**
-
-.
+</td><td>Click **\[Explorer\]**<span style="color: rgb(132, 63, 161);">.</span>
 
 </td></tr><tr><td>**2**
 
-</td><td>Run a search
-
-**or**
-
- use a
-
-**\[Saved Filter\]**
+</td><td>Run a search **or** use a **\[Saved Filter\]**
 
 .
 
-</td></tr><tr><td>**3**
+</td></tr><tr style="height: 10px;"><td>**3**
 
-</td><td>Select a
-
-**record**
-
- (any type).
+</td><td>Select a **record**<span style="color: rgb(132, 63, 161);"> </span>(any type).
 
 </td></tr><tr><td>**4**
 
-</td><td>Click
-
-**\[Cross‑tables\]**
-
- (also called
-
-*Tableaux croisés*
-
-).
+</td><td>Click **\[Cross‑tabs\]** (also called *Tableaux croisés*).
 
 </td></tr></tbody></table>
 
@@ -2803,7 +2624,7 @@ All changes are reflected instantly in the table.
 
 #### 3.3 Table options
 
-<table id="bkmrk-option-what-it-does-"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Option
+<table id="bkmrk-optionwhat-it-does%5Bs"><colgroup><col></col><col style="width: 563px;"></col></colgroup><tbody><tr><th>Option
 
 </th><th>What it does
 
@@ -2811,27 +2632,15 @@ All changes are reflected instantly in the table.
 
 </td><td>Store the current table configuration for later reuse.
 
-</td></tr><tr><td>**Show**
-
- –
-
-*Values*
+</td></tr><tr><td>**Show** – *Values*
 
 </td><td>Show raw counts.
 
-</td></tr><tr><td>**Show**
-
- –
-
-*Totals*
+</td></tr><tr><td>**Show** – *Totals*
 
 </td><td>Show row/column totals.
 
-</td></tr><tr><td>**Show**
-
- –
-
-*Row % / Column %*
+</td></tr><tr><td>**Show** – *Row % / Column %*
 
 </td><td>Show percentages per row or column.
 
@@ -2839,13 +2648,7 @@ All changes are reflected instantly in the table.
 
 </td><td>Switch between sum, average, etc.
 
-</td></tr><tr><td>**Hide / Show**
-
- –
-
-*null values*
-
-,
+</td></tr><tr><td>**Hide / Show** – *null values*,
 
 *empty rows/columns*
 
@@ -2858,13 +2661,11 @@ All changes are reflected instantly in the table.
 - **Export** – click the **Export** button (top‑right) to download **CSV** or **PDF**.
 - **Chart (pie)** – when only **one** variable is selected, a **pie chart** button becomes active; it displays the distribution of that variable.
 
-> **🚨 Warning:** At least **one** variable must be selected before any result (table or chart) appears.
+<p class="callout warning">At least **one** variable must be selected before any result (table or chart) appears.</p>
 
----
+#### 📊 Quick‑reference of Heurist visualisation tabs
 
-## 📊 Quick‑reference of Heurist visualisation tabs
-
-<table id="bkmrk-need-map%E2%80%AF%2B%E2%80%AFtimeline-"><colgroup><col></col><col></col><col></col><col></col></colgroup><tbody><tr><th>Need
+<table id="bkmrk-needmap%E2%80%AF%2B%E2%80%AFtimelinene"><colgroup><col></col><col style="width: 238px;"></col><col style="width: 140px;"></col><col style="width: 105px;"></col></colgroup><tbody><tr><th>Need
 
 </th><th>Map + Timeline
 
@@ -2886,15 +2687,7 @@ All changes are reflected instantly in the table.
 
 </td></tr><tr><td>**Quick export (CSV / PDF)**
 
-</td><td>✅ (via
-
-*Publish*
-
- or
-
-*Download timeline*
-
-)
+</td><td>✅ (via *Publish* or *Download timeline*)
 
 </td><td>✅ (GEXF)
 
@@ -2920,7 +2713,7 @@ All changes are reflected instantly in the table.
 
 ---
 
-### 🔖 Key take‑aways
+#### 🔖 Key take‑aways
 
 - **Map + Timeline** requires **both** a spatial **and** a temporal field; otherwise the view stays empty.
 - Use the **Publish** button to generate an embeddable iframe; you can customise which controls appear and even export a KML for Google Earth.

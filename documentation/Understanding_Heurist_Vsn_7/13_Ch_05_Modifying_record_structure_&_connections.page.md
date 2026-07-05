@@ -1,27 +1,43 @@
 # Ch 05: Modifying record structure & connections
 
-:::info Documentation régigée le xxx par Guillaume Porte :::
+Documentation rédigée le xxx par Guillaume Porte
 
 One of the most powerful features of Heurist is the ability to modify record structures at any time without rebuilding the database or reprogramming the interface, and to do this while you are in the middle of data entry. This is the key to the iterative nature of structure development in Heurist.
 
 To open the structure modifying interface :
 
-- **Either :** Design → Record Types → \[click on the pen next to the Record Type name\] → \[bottom of the pop up window\] Edit fields![](https://heurist-doc.huma-num.fr/uploads/e889bbc7-1173-4d96-8704-94836a9d9670.jpg)
-- **Or :** \[double click on one record of the selected Record Type\] → \[top left of the pop up window\] Modify structure![](https://heurist-doc.huma-num.fr/uploads/e5e17e5b-ef6a-449a-86ee-d419f673d79a.png)
+- **Either :** Design → Record Types → \[click on the pen next to the Record Type name\] → \[bottom of the pop up window\] Edit fields
 
-:::warning Shifting to Modify structure mode will save the record data without checking it for validity. It can be useful to temporarily save a record but can may lead to data integrity issues. :::
+![](https://heurist-doc.huma-num.fr/uploads/e889bbc7-1173-4d96-8704-94836a9d9670.jpg)
 
-This will open this window :
+**Or :** Create a new record or open an existing record of the appropriate type for editing   
+ and click Modify structure (at the top of the form).   
+ **We recommend using this method to dynamically change structure as you start to develop your data**
+
+![](https://heurist-doc.huma-num.fr/uploads/e5e17e5b-ef6a-449a-86ee-d419f673d79a.png)
+
+Note: Shifting to Modify structure mode will save the record data without checking it for validity. It can be useful to temporarily save a record but you should use Admin &gt; Test integrity to check for any records which have been incompletely described. Incomplete records do not cause Heurist any problem, it is just that data which should be there is missing so counts, record titles or formatted output could be affected.
+
+Modify Structure will open the data entry/strcuture modification window :
+
+<p class="callout info">You can continue to edit the data while you are in structure modification mode - it is a useful way to test that the structue you are creating coresponds with your real needs.</p>
 
 ![](https://heurist-doc.huma-num.fr/uploads/456d4a51-3fc6-4361-ac01-73a6a20b2461.png)
 
-## **Navigation tree**
+The example above shows a complex form with 12 tabs and nearly 150 fields, before cleanup, imported from a legacy database. The navigation tree is synched to the fields so that one can navigate in either the form or the tree, and move or delete fields from the tree. The form on the right is updated immediately. The tree also shows details of the field on hover.
 
-### Options
+The navigation tree is particularly useful for cleanup of legacy data (or for self-criticism!) as it shows how many times each field has been used in records of the current type. This allows one to spot unused or nearly unused fields. The icons following the count (tick and slash) then lead to a search for all the records with the field and without the field respectively, allowing immediate verification and correction.
 
-The navigation tree on the left allows to :
+### **Navigation panel**
 
-- **Export fields as CSV** : gives a list of fields with their parameters and usage count
+Clicking on Modify structure opens a navigation panel on the left, which we describe in detail below.
+
+##### **Options (above the tree)**
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/jg8image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/jg8image.png)
+
+- **&lt;&lt; chevrons** - clicking on the chevrons will shrink the navigation panel, but you are still in Modify Structure mode. The chevrons will reverse to **&gt;&gt;** which allows you to reopen the panel
+- **Export fields as CSV** : gives a list of fields with their parameters and usage count. Note also that there is a **Template download** link towards the right of the data entery form which downloads a CSV file which can be opened in a spreadsheet to use as a base for data collection.
 
 ```
 "Field name","Field type","Multivalue","Requirement","Usage count"
@@ -32,106 +48,83 @@ The navigation tree on the left allows to :
 etc...
 ```
 
-- **Update Counts** : update usage count in the list above
-- Check, reorganize, edit and delete fields
+- **Update Counts** : update usage counts shown to the right of each field - blank means the field is never used
 
-### Fields and tabs list
+##### **Tree view of Fields and Tabs** 
 
-![](https://heurist-doc.huma-num.fr/uploads/dd541d99-cf40-41c6-808c-77507e3f7dd4.jpg)
+The tree view is a powerful way of reorganising the order of fields, including moving several fields at once by dragging the tab or heading which contains them.
 
-- For each field is displayed :
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/HxYimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/HxYimage.png)
+
+- Each field in the tree shows:
     - the field name
-    - the number of times that this field is used in this record type
-    - a tick icon to search all records using that field
-    - a slash icon to search all records not using that field
-- Fields and tabs can be reorganized by drag and drop
-- On hover, a **delete** option apperas allowing to delete the field **\[see below\]**
+    - the number of times that this field is used in this record type (multiple values are counted, it is not just the number of records which use the field)
+    - the tick icon opens a search on all records using that field
+    - the cross-out icon opens a search on all records <u>not</u> using that field
+    - On hover, you see the internal code and concept code and the description of the field
 
-## Edit a field
-
-\[TODO\]
-
-## Delete a field
-
-On hover, a **delete** option apperas allowing to delete the field.
-
-![](https://heurist-doc.huma-num.fr/uploads/557f66c7-1a02-4938-8e5c-60acc536478d.jpg)
-
-A pop up asks for deletetion option
-
-![](https://heurist-doc.huma-num.fr/uploads/3d759d39-1db5-4c65-8f6b-dff197ac4d82.jpg)
-
-- if you do not select the option "Permanently delete the data", the field content will remain into the record under a tab named "Non-standard fields for this record type"
-
-:::info In this case, it will be possible to recover you field and its content later
-
-**\[TODO\]** :::
-
-- if you select the option "Permanently delete the data", the field will be deleted from this Record Type and all associated values cleared
-
-:::info In thid case, if this field is no longer used in any Record Type, you will be asked to deleted it completely or if you wish to keep it
-
-![](https://heurist-doc.huma-num.fr/uploads/5f9bd1b4-f69f-44df-9452-25c27495ec21.jpg):::
-
-This example shows a complex form with 12 tabs and nearly 150 fields, before cleanup, imported from a legacy database. The navigation tree is synched to the fields so that one can navigate in either the form or the tree, and move or delete fields from the tree. The form on the right is updated immediately. The tree also shows details of the field as a rollover.
-
-The navigation tree is particularly useful for cleanup of legacy data (or for self-criticism!) as it shows how many times each field has been used in records of the current type. This allows one to spot unused or nearly unused fields. The icons following the count (tick and slash) then lead to a search for all the records with the field and without the field respectively, allowing immediate verification and correction.
-
-You can refresh the counts if they are not showing (they are not calculated automatically if there are a very large number of records, &gt; 100,000 in a single type) by clicking on the word Count.
-
-The **Export fields as CSV button** export a list of the fields in the current record type, including field type and count of usage, as a CSV file which can be loaded into a spreadsheet. For example:
-
-```
-"Field name","Field type",Multivalue,Requirement,"Usage count"
-"Medieval Person H-ID",Built-in,Multivalue,Required,N=273
-"Medieval Person","Text (single line)",Single,Required,N=273
-Gender,"Terms list",Single,Optional,N=246
-role,"Terms list",Multivalue,Optional,N=263
-"Start date","Date / temporal",Single,Optional,N=198
-"End date","Date / temporal",Single,Optional,N=240
-etc…
-```
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/k4Ximage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/k4Ximage.png)
 
 Note that all fields, including hidden fields, appear when in Modify Structure mode, since otherwise there would be no way of resetting their status or deleting them.
 
-### Deleting a field
+You can refresh the counts if they are not showing (they are not calculated automatically if there are a very large number of records, &gt; 100,000 in a single type) by clicking on the word Count.
 
-Click on the red DELETE button which appears on rollover of a field in the navigation tree.
+##### **Deletion of fields**
 
-Note that deleting a field does not in itself delete the data associated with a field. To delete the data as well, you will need to check the box on the popup warning. If this box is not checked, the existing data will appear at the bottom of your form in a section “Non-standard data for this record type” and can be recovered by clicking on the upwards arrow next to a value (which will reinstate the field for all records of that type) and then renaming the field (which will be identified by its base field name).
+A **Delete** button also appears on rollover allowing deletion of the field and (optionally) the data attached to it:
 
-![](https://heurist-doc.huma-num.fr/uploads/88839d8d-4989-4d2f-9b3c-e84d4d8bae3f.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/HBeimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/HBeimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/ppdimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/ppdimage.png)
+
+<span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">Note that deleting a field does not in itself delete the data associated with a field. To delete the data as well, you will need to check the box on the popup warning. If this box is not checked, the existing data will appear at the bottom of your form in a section “Non-standard data for this record type” . </span>This can also be useful for copying data into the fields which remain before deleting the values individually. If the data is really not required check the box to permanenly delete the data for that field.
+
+<span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">Deleted fields which still have data can be recovered by clicking on the upwards arrow next to a value (which will reinstate the field for all records of that type) and then renaming the field (which will be identified by its base field name and description;</span> the revised name and description assigned to it for the particular record type are no longer available, so for example "Title of painting" might be reinserted as "Name or title")<span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">.</span>
+
+If there is no data anywhere in the database which uses the base field on which this field is based, you will be asked whether you want to delete the base field completely. It is a good idea to keep standard base fields which were part of the initial set up of the database, as they may come in handy later and they promote standards across many databases, and to get rid of base fields you have added to the database (generally through adding a field to a record type, which creates a base field at the same time) if you no longer need them.
+
+![](https://heurist-doc.huma-num.fr/uploads/5f9bd1b4-f69f-44df-9452-25c27495ec21.jpg)
 
 You can delete an individual value from a field by clicking the X icon which appears at the end of the field when your mouse pointer is over the field. This will not delete the values from any other record.
 
 ![](https://heurist-doc.huma-num.fr/uploads/c2be788a-daa4-4127-b94e-36a933ea0d12.png)
 
-## Field settings icon
+##### **Edit a field**
 
-The gearwheel icon left of each field displays a small dropdown on rollover:![](https://heurist-doc.huma-num.fr/uploads/2ca703d0-34e3-4ebe-96db-fca0f19b7983.png)
+\[TODO\]
 
-The bottom section allows rapid adjustment of cardinality (requirement and repeatability) and of field width. By default new fields are set to Recommended.
+### Field settings icon
 
-Fields can also be marked as Hidden. In that case neither the field nor its value (if any) is shown in any mode except structure modification. Hidden fields are particularly useful, and were originally developed, to allow a template to contain many fields for different uses so that they are available to be unhidden as required, rather than presenting the user with a plethora of fields which is highly confusing/off-putting, that they then need to delete (and in the process lose, requiring more thought than simply exposing an existing field).
+The gearwheel icon left of each field displays a small dropdown on rollover:
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/Cpuimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/Cpuimage.png)
+
+The bottom section allows rapid adjustment of cardinality (requirement and repeatability) and of field width.   
+By default new fields are set to Recommended.
+
+Fields can also be marked as **Hidden**. In that case neither the field nor its value (if any) is shown in any mode <u>except</u> structure modification. Hidden fields are particularly useful, and were originally developed, to allow a template to contain many fields for different uses so that they are available to be unhidden as required, rather than presenting the user with a plethora of fields which is highly confusing/off-putting, that they then need to delete (and in the process lose, requiring more thought than simply exposing an existing field).
 
 The other entries in the menu are discussed in the following pages.
 
-- **Insert field** and **Insert tab/divider** allow insertion of new fields and new structural and layout elements such as tabs and dividers within tabs (these are shown as expansible sections in the navigation tree and may be dragged to move blocks of fields associated with them).
-- **Edit field** gives access to all the settings associated with an existing field – its name, help, width and height, cardinality, target record types etc.
-- **Insert sub-record** allows a set of fields to be designated as a sub-record, transferred to a new record type, linked to the current record type by a child record pointer field, and then all the data is transferred and the record pointers updated.
+- **Edit definiton** gives access to all the settings associated with an existing field – its name, help, width and height, cardinality, target record types etc.
+- **+ field** allows insertion of new fields
+- **+ connection**  is a shortcut method for inserting the connection field types (record pointers and relationship markers). It exists to encourage users to think about, and use, these very useful functions
+- **+ tab or heading** allows insertion of new structural and layout elements such as tabs and dividers within tabs (these are shown as expansible sections in the navigation tree and may be dragged to move blocks of fields associated with them).
+- **+ explanatory text** allows insertion of a block of text which will show up <span style="background-color: rgb(206, 212, 217);">on a grey background</span> in the data entry form. It can be used to provide instructions or make notes on record structure changes which are needed (it will appear on every record). It has a title, which appears even if help is off, and a body which appears only if help is on
+- **+ sub-record** allows a set of fields to be designated as a sub-record, transferred to a new record type, linked to the current record type by a child record pointer field, and then all the data is transferred and the record pointers updated.
 
-## **Field types**
+### **Field types**
 
 //TODO
 
 - **Text field**
-    - //use only for names etc
-    - handlin URLs
+    - use only for names etc which can be represented by a single line text
+    - handling URLs
 - **Memo fields**
-    - text vs wysiwyg
-    - processing URLs
+    - text vs wysiwyg vs code
+    - processing URLs within text
     - inserting media
-    - linking to other record
+    - linking to other records simply by H-ID
 - **Terms**
     - Vocabularies - see more detailed discussion of vocabularies later??
     - Adding terms
@@ -162,19 +155,19 @@ The other entries in the menu are discussed in the following pages.
 - Relationship markers
     - //TODO
 
-## Insert field
+#### Insert field
 
 We strongly recommend adding a record of each type and adding fields using Modify structure from within the data entry mode, because this allows you to test how it works as you go along. This is much more effective than creating a set of fields or a form in the abstract and then finding that it is unusable in practical terms.
 
-### Choosing existing base field(s)
+#### Choosing existing base field(s)
 
 The top half of the form allows one to browse for existing base fields and insert them into the current record type definition/form via the **Choose base fields** button. The text on this part of the form gives some guidelines: explains the process:
 
 > \_Rather than defining every field from scratch, you can pick some frequently used pre-defined fields from the existing Base fields. The base fields chosen should have a similar sense of meaning, e.g. use Start date for Birth date, Creator for Author, Short \_\_description for Abstract, Extended description for Notes. You can rename the fields to what you actually want once selected - the new name applies to the current record type only (the base field retains its name).
 
-> Do not completely redefine a base field f\_\_or a different purpose than it appears to be intended for, for instance redefining Family name as Street, Length as Count, or Format as Condition. Significant change to the meaning of a field may later lead to confusion.\_
+> Do not completely redefine a base field f\_or a different purpose than it appears to be intended for, for instance redefining Family name as Street, Length as Count, or Format as Condition. Significant change to the meaning of a field may later lead to confusion and reduce the degree of interoperability between databases.
 
-> *Fields which use the same base field will reference the same vocabulary (for term-list dropdowns and relationship type) or the same target record types (for record pointers and relationships) - you cannot change the vocabulary or target record types for on\_\_e without changing it for all the others.*
+> *Fields which use the same base field will reference the same vocabulary (for term-list dropdowns and relationship type) or the same target record types (for record pointers and relationships) - you cannot change the vocabulary or target record types for on\_e without changing it for all the others.*
 
 ![](https://heurist-doc.huma-num.fr/uploads/c64e1804-b057-4847-986b-ba4a83b17705.png)
 
@@ -182,7 +175,7 @@ The top half of the form allows one to browse for existing base fields and inser
 
 > Only Base fields not already used by the record type will be shown – a Base field can only occur once in each record type (although it may contain multiple/repeating values).
 
-### **Creating a new field from scratch**
+#### Creating a new field from scratch
 
 If none of the Base fields seem to correspond with your need, fill in the details for the new field you wish to create in the lower part of the form:
 
@@ -192,9 +185,9 @@ The Field name will show a list of possible matches against existing Base fields
 
 The result will be a new field for your record type. However, at the same time, Heurist creates a new Base field with the same name, description, data type, vocabulary and/or target record types. This Base field can then be re-used as a field in any other record type; its name and description will default to the Base field name and description, but these can be edited separately for each record type.
 
-Normally you will cclick the simple \*\*Create new field \*\*button. However, if you click the **Create and customise new field button** it will create the field and immediately go into field structure edit mode to adjust details such as cardinality, width and height, default values and incrementing, and field visibility. This may also be useful if you want to use a very generic name to ensure a generic name for the Base field, and then change it to specific version for the current record type.
+Normally you will click the simple \*\*Create new field \*\*button. However, if you click the **Create and customise new field button** it will create the field and immediately go into field structure edit mode to adjust details such as cardinality, width and height, default values and incrementing, and field visibility. This may also be useful if you want to use a very generic name to ensure a generic name for the Base field, and then change it to specific version for the current record type.
 
-## **Insert tab / divider**
+#### Insert tab / divider
 
 Tabs and other dividers (formerly known as separators) can be used to make your forms much more usable. You will first be asked what sort of separator is required, and after initial creation you will be able to enter the name and description (which will show as the text below the name if Help is on).
 
@@ -212,7 +205,11 @@ The edit field form opens up within the data edit form and gives access to all t
 
 Some settings (the field type, the vocabulary used, the target record type(s)) are functions of the Base field used by the local field type for this record type and are thus shared with all record types which use this base field. They may only be edited through the Base field editor).
 
-![](https://heurist-doc.huma-num.fr/uploads/4b2be062-42be-4199-b85b-06e7fbef3510.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/5jwimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/5jwimage.png)
+
+The **Additional** section of the field structure edit form allows for an extended description of the field simply for documentation purposes (it does not appear anywhere in the interface, but is included in XML and archive output). It also allows the Heurist team to block certain fields from modification through the Status dropdown.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/60Kimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/60Kimage.png)
 
 For multi-line (memo) text fields this form also allows setting the height of the field – the default is 3 lines.
 
@@ -222,13 +219,7 @@ For simple text and numeric fields one can alternatively define an **increment**
 
 ![](https://heurist-doc.huma-num.fr/uploads/a21af128-cf39-4871-a108-907fc7209c4f.png)
 
-Note that as of Jan 2024 Heurist does not have an indexing function suitable to avoid duplication of values, although this is on our development roadmap. However we have (surprisingly) had very little call for such a function in the 20 years that we have been working on Heurist.
-
-#### **Edit field structure - Additional**
-
-The **Additional** section of the field structure edit form allows for an extended description of the field simply for documentation purposes (it does not appear anywhere in the interface, but is included in XML and archive output) and the attachment of semantic URI(s) to this specific use of the field. It also allows the Heurist team to block certain fields from modification through the Status dropdown.
-
-![](https://heurist-doc.huma-num.fr/uploads/57782219-d592-489a-8533-adfecce20afd.png)
+Note that Heurist does not have an indexing function suitable to avoid duplication of values, although this is on our development roadmap 2027 ... Surprisingly we have had very little call for such a function in the 20 years that we have been working on Heurist, in part because we have a very flexible duplicate detector (Admin &gt; Duplicates) which is often more useful for Humanities data which includes variants and uncertainties. It uses fuzzy criteria to detect duplicates and merge records (including retaining all connections and redirecting merged record identifiers to the result of the merge).
 
 The most interesting part of the form are the two options allowing control over visibility and modification at the field level:
 
@@ -248,7 +239,7 @@ Clicking the eye hides the value from the public as indicated by the greyed fiel
 
 ![](https://heurist-doc.huma-num.fr/uploads/d3c09394-7726-4fe5-9885-a66b58feb575.png)
 
-**Visible to anyone + hide from public checkbox**: the same functionality as the above but displays an explicit checkbox under the field and the eye icon at the end of the field is always visible. Clicking on either the checkbox or the eye will hide the value from the public.
+- **Visible to anyone + hide from public checkbox**: the same functionality as the above but displays an explicit checkbox under the field and the eye icon at the end of the field is always visible. Clicking on either the checkbox or the eye will hide the value from the public.
 
 This is intended to make the user think about whether the field should be made immediately available to the public eg. where further editorial work or vetting is likely to be required.
 
@@ -265,15 +256,13 @@ The **May modify** dropdown allows for locking a field so that it cannot be edit
 
 An intermediate value **Edit discouraged** is provided which allows the value in the field to be modified but pops up a warning message that this is discouraged. This may be useful where the value does not normally require modification but may occasionally require correction. It also avoids accidental inadvertent modification of the fields without the user being aware of it.
 
-![](https://heurist-doc.huma-num.fr/uploads/267fcf42-c517-45e9-a72c-226396ae70cd.png)
-
 #### **Computed fields**
 
 Heurist provides an ability to compute field values in a variety of ways, enabling users to integrate statistical analysis into the process of data entry, or the generation of websites. The calculation can be based solely on fields within the record (e.g. combining the length and breadth of a painting to calculate its area) or can combine information from linked records (e.g. counting all the children of a particular Person).
 
 There is no special field type for compute fields; any text, date, or numeric field can be used as a computed field; Heurist will perform a calculation based on data in the database and store the result in the field.
 
-Click on **Formula:**![](https://heurist-doc.huma-num.fr/uploads/b9050ac5-de1a-4105-a2bd-42181f753529.png)**select** to bring up a form to specify the computation:
+Click on **Formula:** ![](https://heurist-doc.huma-num.fr/uploads/b9050ac5-de1a-4105-a2bd-42181f753529.png)**select** to bring up a form to specify the computation:
 
 Either select a compute formula from the list or click on the ADD NEW CALCULATION button which will lead to the calculation construction form, where one can develop the code using [SMARTY syntax](https://docs.heuristref.net/https:/www.smarty.net/docs/en/language.basic.syntax.tpl/) in the same way it is used for custom reports.
 
@@ -285,35 +274,39 @@ To use data from the current record, you can use the pre-existing variable **$r*
 
 For date, numeric and textual data, you should ensure that there are no html tags in the output. For a memo text field, you can output html elements as you would for a custom report.
 
-Computed field examples
+##### Computed field examples
 
 Examples of simple requests:
 
-> Area calculation: {$r.f1014 \* $r.f1013}
+Area calculation: {$r.f1014 \* $r.f1013}
 
-> My full name: {$r.f18} {$r.f1}
+My full name: {$r.f18} {$r.f1}
 
-> *In neither of these cases is the output wrapped in html tags such as &lt;p&gt; or &lt;div&gt;*
+*In neither of these cases is the output wrapped in html tags such as &lt;p&gt; or &lt;div&gt;*
 
 Examples of aggregation requests: count of linked life events
 
-> {$heurist-&gt;getRecordsAggr(array('id','count'), '{"t":"48","linkedto":"\[ID\]"}', $r) }
+{$heurist-&gt;getRecordsAggr(array('id','count'), '{"t":"48","linkedto":"\[ID\]"}', $r) }
 
 average height of persons linked to given record $r
 
-> {$heurist-&gt;getRecordsAggr(array(1014,'avg'), '{"t":"10","linkedto":"\[ID\]"}', $r) }
+{$heurist-&gt;getRecordsAggr(array(1014,'avg'), '{"t":"10","linkedto":"\[ID\]"}', $r) }
 
 It is possible to execute several aggregation requests per call. The first parameter of *getRecordsAggr* is an array of pairs using either sum, count or average: field id: sum | count | avg
 
 It is also possible to perform defined query and work with the result set as usual in smarty:
 
-> {$records = $heurist-&gt;getRecords('{"t":"48"}')} {foreach $records as $r} {\* Start records loop, do not remove \*} {$rec = $heurist-&gt;getRecord($r)} {$rec.recTitle} {/foreach}
+{$records = $heurist-&gt;getRecords('{"t":"48"}')}   
+{foreach $records as $r} {\* Start records loop, do not remove \*}   
+ {$rec = $heurist-&gt;getRecord($r)}   
+ {$rec.recTitle}   
+{/foreach}
 
 An optional second parameter for $heurist-&gt;getRecords can be the record ID
 
-> $heurist-&gt;getRecords('{"t":"12","linkedto":"\[ID\]"}', $r)
+$heurist-&gt;getRecords('{"t":"12","linkedto":"\[ID\]"}', $r)
 
-#### **Hints and examples of good structure**
+#### Hints and examples of good structure
 
 **Proposal** @todo: need examples @todo: Keep fields separate EG family and given names
 
@@ -341,7 +334,9 @@ An optional second parameter for $heurist-&gt;getRecords can be the record ID
 
 **Document your database**
 
-Don’t cop out on writing proper help texts and descriptions of record types, fields and terms, even if you are the only person using the database. A few extra minutes spent writing an explanation of the content of each field will ensure that the database is still interpretable way into the future, by you or by others if deposited in an archive (your descriptions automatically become part of the archive package). Do it as you are setting up the database, because you will never come back to do it later …
+<p class="callout info">Don’t cop out on writing proper help texts and descriptions of record types, fields and terms, even if you are the only person using the database. </p>
+
+A few extra minutes spent writing an explanation of the content of each field will ensure that the database is still interpretable way into the future, by you or by others if deposited in an archive (your descriptions automatically become part of the archive package). Do it as you are setting up the database, because you will never come back to do it later …
 
 #### **Download Structure**
 
@@ -381,21 +376,31 @@ The following options are available:
 - Edit Terms Tree. Use this to edit the base vocabulary. (See Terms.)
 - Add Vocabulary. Use this to create a new vocabulary. (See Terms.) The new term is appended to the end of the term list (this also updates the base vocabulary).
 
-**The Manage Terms Screen** You manage the vocabularies that underlie term lists via the Manage Terms screen. Here you can edit the standard vocabularies, or create new vocabularies and terms. Click a vocabulary to show its available terms. **Terms Pane**
+##### **The Manage Terms Screen** 
 
-Actions for a vocabulary or term are available in the title bar of this pane: -![](https://heurist-doc.huma-num.fr/uploads/a49b3844-7447-4033-9d69-4d70efc94793.png)Add a term -![](https://heurist-doc.huma-num.fr/uploads/2ab3c0cf-5df8-4553-8bd5-8f07609752b2.png)Import terms -![](https://heurist-doc.huma-num.fr/uploads/f4c849bf-81c3-4e8d-a513-ccbe2004012a.png)Export terms -![](https://heurist-doc.huma-num.fr/uploads/6b476a80-a94c-4e0c-8aa4-f5d5d38f074c.png)Find terms in all vocabulary groups
+You manage the vocabularies that underlie term lists via the Manage Terms screen. Here you can edit the standard vocabularies, or create new vocabularies and terms. Click a vocabulary to show its available terms. **Terms Pane**
 
-**Editing a vocabulary or term**
+Actions for a vocabulary or term are available in the title bar of this pane:
+
+![](https://heurist-doc.huma-num.fr/uploads/a49b3844-7447-4033-9d69-4d70efc94793.png) Add a term
+
+![](https://heurist-doc.huma-num.fr/uploads/2ab3c0cf-5df8-4553-8bd5-8f07609752b2.png) Import terms
+
+![](https://heurist-doc.huma-num.fr/uploads/f4c849bf-81c3-4e8d-a513-ccbe2004012a.png) Export terms
+
+![](https://heurist-doc.huma-num.fr/uploads/6b476a80-a94c-4e0c-8aa4-f5d5d38f074c.png) Find terms in all vocabulary groups
+
+##### **Editing a vocabulary or term**
 
 Select the vocabulary or term from the vocabulary hierarchy and edit its properties as appropriate.
 
 ![](https://heurist-doc.huma-num.fr/uploads/0cbb09d3-a50e-4e31-a973-06f2c20cecf3.png)
 
-**Finding a term**
+##### **Finding a term**
 
 Before adding a new vocabulary or child term to the vocabulary hierarchy, check if it already exists, by entering all or part of its name into the Find field to show all matching terms. If it does exist, it will appear in the box. You can click on the entry to highlight the term.
 
-**Creating a new, top-level vocabulary**
+##### **Creating a new, top-level vocabulary**
 
 If the new term does not already exist (see above), complete its properties as follows and click Add Vocabulary:
 
@@ -411,14 +416,17 @@ Image. You can use this field to attach an image (ideally 400x400 pixels) to a t
 
 Status. You can set the status for any term (e.g. setting the Status to Approved prevents any additional changes to a term).
 
-The term (vocabulary) is added (alphabetically) to the vocabulary hierarchy
+The term (vocabulary) is added (alphabetically) to the vocabulary hierarchy.
 
 **Adding a child (root) term**
 
 Check if the term you wish to add already exists (see above).
 
-Select or hover over the vocabulary (or term if you are creating a hierarchy of vocabularies) you wish to add to and click Add Child (or click the Add Child button in the Properties dialog). The new term is temporally added to the hierarchy with the default name 'new term'. Change the default name 'new term' to the name of the term you are adding and complete the other properties as appropriate (see above). Click Save Term. New terms are added alphabetically but can be repositioned.
+Select or hover over the vocabulary (or term if you are creating a hierarchy of vocabularies) you wish to add to and click **Add Child** (or click the **Add Child button** in the Properties dialog).
 
+The new term is temporarily added to the hierarchy with the default name 'new term'.   
+Change the default name 'new term' to the name of the term you are adding and complete the other properties as appropriate (see above).   
+Click **Save Term**. New terms are added alphabetically but can be repositioned.  
 Repeat this process for each new term you wish to add (ensure you select the correct vocabulary).
 
 Note. Adding a term to a vocabulary does not add them to the individual term lists for different fields, since these are individually selected from the complete vocabulary. You need to update the lists for each field to which these terms should be added.
@@ -429,29 +437,37 @@ To reposition a term/vocabulary, go to the **Terms pane**, then simply drag and 
 
 ![](https://heurist-doc.huma-num.fr/uploads/0d59140c-dfa2-4baa-9018-698e65bc5037.png)
 
-```
-To merge a vocabulary into another (i.e. combine their child terms), go to the **Vocabularies pane** drag and drop it onto the vocabulary you wish to keep:
-```
+To merge a vocabulary into another (i.e. combine their child terms), go to the \*\*Vocabularies pane\*\* drag and drop it onto the vocabulary you wish to keep:
 
 ![](https://heurist-doc.huma-num.fr/uploads/d542751e-bd69-4d60-85de-90727cdfacfc.png)
 
-To delete a term (or vocabulary), select it and click Delete. Important. If you delete a vocabulary, all of its child vocabularies and terms are also deleted, and cannot be restored.
+To delete a term (or vocabulary), select it and click **Delete**.
 
-**Importing/Exporting a Vocabulary**
+<p class="callout warning">Important. If you delete a vocabulary, all of its child vocabularies and terms are also deleted, and cannot be restored.   
+However it is not possible to delete any vocabulary or term which has been used in a record in the database.</p>
 
-**Import**
+#### **Importing/Exporting a Vocabulary**
+
+##### **Import**
 
 ![](https://heurist-doc.huma-num.fr/uploads/dbcdf329-7f15-4903-961b-0d54755632ad.png)
 
-To import a vocabulary, select the vocabulary (or child term) and click![](https://heurist-doc.huma-num.fr/uploads/bb487d09-f3b8-41ec-9a85-8d9216980c36.png) Import.
+To import a vocabulary, select the vocabulary (or child term) and click the Import button ![](https://heurist-doc.huma-num.fr/uploads/bb487d09-f3b8-41ec-9a85-8d9216980c36.png)
 
-In Step 1, prepare data for import as a comma or tab-separated file. Paste the data or upload an existing CSV file (e.g. a previously exported vocabulary). In Step 2, define the parse parameters. Click Analyse, and preview the data to be imported in the lower pane. In Step 3, map columns to term field. When ready to import, click Import.
+Step 1, prepare data for import as a comma or tab-separated file.   
+ Paste the data or upload an existing CSV file (e.g. a previously exported vocabulary).
 
-**Export**
+Step 2, define the parse parameters. Click **Analyse**, and preview the data to be imported in the lower pane.
 
-To export a vocabulary, select it and click ![](https://heurist-doc.huma-num.fr/uploads/768ebe8d-5264-4f34-9a04-17412887cafd.png)Export. The vocabulary is exported as a CVS file.
+Step 3, map columns to term field. When ready to import, click **Import**.
 
-**Accessing the ‘Vocabularies’ menu**
+##### **Export**
+
+To export a vocabulary, select it and click the Export button ![](https://heurist-doc.huma-num.fr/uploads/768ebe8d-5264-4f34-9a04-17412887cafd.png) The vocabulary is exported as a CSV file.
+
+#### **TUTORIAL**
+
+#### **Accessing the ‘Vocabularies’ menu**
 
 The aim of this tutorial is to modify the structure of the database so that we can record, for example, the ideological affiliations of each world leader in the database. To do this, we need to create a Vocabulary of different political ideologies that our world leaders might espouse.
 
@@ -459,99 +475,84 @@ You can view, add and edit all the Vocabularies in your database by accessing th
 
 ![](https://heurist-doc.huma-num.fr/uploads/2bd4b961-1fb1-49e6-ac33-fcac29102bc0.png)
 
-**Adding Terms to a Vocabulary**
+##### **Adding Terms to a Vocabulary**
 
 Once you have created a new vocabulary, you can select it in the Vocabularies menu, and then start adding terms to it. Add some terms such as ‘Communism’ or ‘Neoliberalism’ to your new ‘Political Ideologies vocab’:
 
 ![](https://heurist-doc.huma-num.fr/uploads/a8243355-caef-4bc5-aefc-acb6ff00e739.png)
 
-**Creating a relationship Vocabulary**
+##### **Creating a relationship Vocabulary**
 
 Relationships are defined by Vocabularies. To create a Vocabulary for a relationship, the process is exactly the same as for creating a basic Vocabulary. However, you must ensure to tick the box ‘Use for relations’ when you create your new vocabulary. Add a new relationship vocab called ‘Poltical Offices’:
 
 ![](https://heurist-doc.huma-num.fr/uploads/40ae4349-ad5e-4067-92c7-e79f20f797fd.png)
 
-And you should also use a different naming convention. It is best to use verb phrases such as ‘is Prime Minister of’ for relationships, rather than simple nouns such as ‘Prime Minister’ (e.g. ‘Angela Merkel’ → ‘is Kanzler of’ → Germany). Add a few terms to your Political Offices vocabulary such as ‘is Prime Minister of’ and ‘is Dictator of’:![](https://heurist-doc.huma-num.fr/uploads/177f3d28-4445-4093-b630-6cfaea0fd241.png)
+And you should also use a different naming convention. It is best to use verb phrases such as ‘is Prime Minister of’ for relationships, rather than simple nouns such as ‘Prime Minister’ (e.g. ‘Angela Merkel’ → ‘is Kanzler of’ → Germany). Add a few terms to your Political Offices vocabulary such as ‘is Prime Minister of’ and ‘is Dictator of’:
 
-### **Importing terms**
-
-When you are working on a vocabulary, you can import à list of terms from by uploading (importer) a csv file (UTF-8, separated by commas).
-
-![](https://heurist-doc.huma-num.fr/uploads/c75df2b9-63fe-4aba-b4a6-0beabcaa02f7.png)
-
-Upload the file and the terms will be displayed in the text box. Then press ‘analyse’ to check which terms will be imported. Select the Term(Label) -&gt; ‘column 0’ menu and press import.
-
-![](https://heurist-doc.huma-num.fr/uploads/315aa2b0-1d60-414c-bda8-3fc1be7e5859.png)
-
-The terms will be added to the vocabulary and thus relationships can be created if necessary.
+![](https://heurist-doc.huma-num.fr/uploads/177f3d28-4445-4093-b630-6cfaea0fd241.png)
 
 ![](https://heurist-doc.huma-num.fr/uploads/beb01a3a-4b15-4463-923f-482cda2ac7ee.png)
 
-```
-Question : est-ce qu’on peut importer un thésaurus ou un vocabulaire controlé existant (ex. Opentheso) ? À priori OUI à partir du moment où l’export peut se faire en csv ou SKOS (?) -> lien vers opentheso Lookup
-```
+##### Hierarchical terms
 
-### **Hierarchical terms**
+**Question : est-ce qu’on peut importer un thésaurus ou un vocabulaire controlé existant (ex. Opentheso) ?**
 
-Reordering terms in the vocabulary tree
+À priori OUI à partir du moment où l’export peut se faire en csv ou SKOS (?) -&gt; @todo lien vers opentheso Lookup
 
-Vocabulary terms can be reordered by drag under the main terms, thus recreating a tree structure.
+Heurist recognises a period-separated term suh as Stone.Igneous.Granite and Stone.Sedimentary.Limestone as creating a three level hierarchy (one can also specify that the periods can be treated as just periods within the labels).
+
+Vocabulary terms can be structured as a hierarchy by dragging under any other term, thus creating a tree structure.
 
 ![](https://heurist-doc.huma-num.fr/uploads/d9c2d64f-2460-442e-aea2-84c79d3cf7d4.png)
 
-![](https://heurist-doc.huma-num.fr/uploads/f4440a81-5200-45c4-a41f-15c7dc8ee3e9.png)
+A simple example of such a structure (trees are not limited to two levels):
 
-<table id="bkmrk-the-terms-can-be-reo"><colgroup><col></col><col></col></colgroup><tbody><tr><td>The terms can be reordened, overcomign the limitation of alphabetic ordering, by adding à sequelntial number:
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/jHIimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/jHIimage.png)
 
-</td><td>![](https://heurist-doc.huma-num.fr/uploads/f71ba065-970e-4982-8c4a-d56236371a5b.png)
+Clicking on **merge into target term** allows terms to be combined when dragged onto anotehr term - any term which is merged with another will be replaced in any records that use it with the result of the merge. A verification popup is displayed before any merge as the result is irreversible.
 
-</td></tr></tbody></table>
+##### Reordering terms in the vocabulary tree
 
-### **Effects on search**
+The ![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/OWcimage.png) icon which appears on hover over a term will pop up a window which allows terms in that branch of the vocabulary to be reordered by drag and drop
 
-Controlled tree vocabularies will be useful for drop down choices to be as precise as possible.
+##### **Effects on search**
+
+Controlled tree vocabularies are useful for drop down choices as they allow search on a general term (eg. all Bénédictins) or on a more specific term (eg. Ordre de Fontevraud)
 
 ![](https://heurist-doc.huma-num.fr/uploads/7df88071-d048-4613-be89-a2c05318a1ae.png)
 
 ### **\###To be continued !!! 04/03/2025**
 
-### **Importing hierarchical terms with full stops**
+###   
 
-### **Combine terms**
 
 ### **Editing terms**
 
-### **Term descriptors: standard value, label, semantic you are i, image**
+##### **Term descriptors:** 
+
+**standard value, label, semantic you are i, image**
 
 ### **flag terms**
 
-### **Reorder terms**
+##### **Setting Inverse Terms**
 
-*webpage:* **Grab-bag of tips** *id 710* \*\*Sorting dropdowns OUTDATED
+By default, terms are 'non-directional'; that is, the same relationship term is used whichever the direction of the relationship (e.g. Painting &gt; Linked to &lt; Artist). However, if the relationship term does have an inverse that needs to be described (e.g. Versions &gt; IsEditionOf has the inverse Versions &gt; HasEdition), you can add it. Note. An inverse term must already exist in the Vocabulary tree list; if not, create it first.
 
-\*\*Use 01,02 etc. at start of terms or field names etc. to obtain specific order in lists (sorting eg. in dropdowns is alphabetic within each level of the list). Use ~ to force an entry to the end of the lists ( ~ sorts after all numbers and upper and lower case letters).
+##### **Link terms**
 
-### **Merge and move terms**
+#### **change field type**
 
-### **Import hierarchical terms with dot notation**
+#### **CSV export and import to modify field content**
 
-### **Setting Inverse Terms**
+#### **Record ownership**
 
-![img_045.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_045.png)By default, terms are 'non-directional'; that is, the same relationship term is used whichever the direction of the relationship (e.g. Painting &gt; Linked to &lt; Artist). However, if the relationship term does have an inverse that needs to be described (e.g. Versions &gt; IsEditionOf has the inverse Versions &gt; HasEdition), you can add it. Note. An inverse term must already exist in the Vocabulary tree list; if not, create it first.
+#### **Add record URL with tags and field values and ownership**
 
-### **Link terms**
+#### **Sustainability - no plugins**
 
-## **change field type**
+@todo This does not belong here
 
-### **CSV export and import to modify field content**
-
-### **Record ownership**
-
-### **Add record URL with tags and field values and ownership**
-
-### \*\*Sustainability - no plugins. \*\*
-
-Many systems provide basic functionality in the core product and depend on plugins for for quite common functions such as field formatting for data entry or export of common file types. This is a recipe for disaster, for example Drupal has more than 40,000 modules many of which only apply to specific versions, have not been completed to usable condition or no longer work. *webpage:* **Browse Templates** *id 627*
+Many systems provide basic functionality in the core product and depend on plugins for for quite common functions such as field formatting for data entry or export of common file types. This is a recipe for disaster, for example Drupal has more than 40,000 modules many of which only apply to specific versions, have not been completed to usable condition or no longer work.
 
 # === Define Connections ===
 
@@ -588,29 +589,66 @@ Below, we explain the theory behind pointers and relationships. Which should you
 - Sub-record creation function
 - Use with caution, non-reversible
 
-**Record pointers**
-
 ##### **Record Pointers**
 
-The simplest way to connect two records to one another is using a Record Pointer field. In most cases, a record pointer will be sufficient. For example, if you wish to record that a particular Building is situated in a particular Place, it would usually be sufficient to have a field called 'location' in the Building record which simply points to the 'Place' where it is located. However, Heurist provides many additional ways of linking records to one another, when the simple Record Pointer solution is inconvenient. A record pointer is a field within a record that defines or references a one-way link to one or more specific record types. You define pointers between data when you create the database structure. The type of a pointer can be constrained so you can only select a record of a particular type (or types). Similar to term lists, pointers allow a field to be populated from a controlled list, but in this case the list is all records in the database of a particular type, or types. This effectively ‘embeds’ all the information from the chosen record in your current record (but it is only stored once, however often it is ‘embedded’). Typically, record pointers are used when there is a specific known relationship. For example, to identify people (authors, owners, actors, ..), multimedia items (pdf, images, video), events, places, organisations etc. with specific relationships to a record. Record pointers can define relationships between heterogeneous records (e.g. event with person, building with date etc.). For example, imagine a record about a chapter in an edited book. It has one or more authors and it belongs to a book. But it may share the author(s) with many other books, book chapters, articles and so forth, and the book with a dozen or so other chapters, each with different authors. Rather than entering the author(s) as text fields and repeating this information for every chapter in the book, you can create records for each of these Author entities and link them into the record for the chapter. You can then use the Author(s) field (which in this cases is a repeatable field) to select exciting authors in the database, or if they do not already exist, create them. In the same way you can create book records, series records, publisher records and so forth, and simply point to these records instead of re-entering the data. Using pointers saves typing, reduces data entry errors, and ensures a continuous connection between records that share the same source material (e.g. authors, books, publishers etc.). \*\* \*\*
+The simplest way to connect two records to one another is using a Record Pointer field. In most cases, a record pointer will be sufficient. For example, if you wish to record that a particular Building is situated in a particular Place, it would usually be sufficient to have a field called 'location' in the Building record which simply points to the 'Place' where it is located. However, Heurist provides many additional ways of linking records to one another, when the simple Record Pointer solution is inconvenient.
+
+A record pointer is a field within a record that defines or references a one-way link to one or more specific record types. You define pointers between data when you create the database structure. The type of a pointer can be constrained so you can only select a record of a particular type (or types).
+
+Similar to term lists, pointers allow a field to be populated from a controlled list, but in this case the list is all records in the database of a particular type, or types. This effectively ‘embeds’ all the information from the chosen record in your current record (but it is only stored once, however often it is ‘embedded’).
+
+Typically, record pointers are used when there is a specific known relationship. For example, to identify people (authors, owners, actors, ..), multimedia items (pdf, images, video), events, places, organisations etc. with specific relationships to a record. Record pointers can define relationships between heterogeneous records (e.g. event with person, building with date etc.).
+
+For example, imagine a record about a chapter in an edited book. It has one or more authors and it belongs to a book. But it may share the author(s) with many other books, book chapters, articles and so forth, and the book with a dozen or so other chapters, each with different authors. Rather than entering the author(s) as text fields and repeating this information for every chapter in the book, you can create records for each of these Author entities and link them into the record for the chapter. You can then use the Author(s) field (which in this cases is a repeatable field) to select exciting authors in the database, or if they do not already exist, create them. In the same way you can create book records, series records, publisher records and so forth, and simply point to these records instead of re-entering the data.
+
+Using pointers saves typing, reduces data entry errors, and ensures a continuous connection between records that share the same source material (e.g. authors, books, publishers etc.).
 
 ##### **Use record pointer and relationship marker fields**
 
-Record pointers are the workhorse for quickly and easily building simple relationships between records. Use a record pointer field to establish a hierarchical relationship through a pointer to a parent record (e.g. a chapter belonging to a book or a photograph belonging to a collection) or to indicate records with a specific role in relation to the entity being described (e.g. the author of a book, the producer of a film, the venue where a play is performed, a birth or commemoration event, a qualification). Relationship markers are similar to pointers but carry additional information; minimally, a relationship type, but also commonly a date range over which the relationship is applicable. Relationships are useful where there are lots of potential types of relationship (e.g. roles that people may play in relation to a theatre production), as an alternative to defining a separate pointer field for each role. They are also useful where the relationship has a limited duration (e.g. relationships of employment, patronage, residence or exhibition/loan). As a general rule, use a pointer field, constrained to a specific record type (e.g. place, person, series, component), where you will record a single value (e.g. parent) or a small number of values (e.g. authors) which have an unequivocal relationship with the entity being described and where multiple pointers are all equivalent (although they may be ordered—authors being a good example). Use a relationship marker field where you do not know a priori which relationships will be present and/or there are numerous possible relationship types, or the relationships have a temporal range, or the relationships are subject to interpretation and you need to provide supporting information through notes or references.
+Record pointers are the workhorse for quickly and easily building simple relationships between records. Use a record pointer field to establish a hierarchical relationship through a pointer to a parent record (e.g. a chapter belonging to a book or a photograph belonging to a collection) or to indicate records with a specific role in relation to the entity being described (e.g. the author of a book, the producer of a film, the venue where a play is performed, a birth or commemoration event, a qualification).
 
-![img_046.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_046.png)
+Relationship markers are similar to pointers but carry additional information; minimally, a relationship type, but also commonly a date range over which the relationship is applicable. Relationships are useful where there are lots of potential types of relationship (e.g. roles that people may play in relation to a theatre production), as an alternative to defining a separate pointer field for each role.
 
-## **Relationship markers**
+They are also useful where the relationship has a limited duration (e.g. relationships of employment, patronage, residence or exhibition/loan).
 
-Relationship marker fields provide a built-in method for connecting entities with typed relationships and dating. This is very useful for things like relationships between people eg. family or associates, or between people and groups eg. organisations, associations. It is valuable because Heurist can automatically 'reflect' the relationship so that a relationship marker placed in both records will show the relationship from the perspective of the record where it is located. So if A is shown as Master Of B in A's record, B will be shown as Student of A in B's record (see example of Briuno of Cologner and Willigis, Archbishop of Mainz below). Relationship records can include start and end date of the relationship as well as other attributes such as notes and bibliographic references, and the user can add additional attributes if they wish, as with any other record type.![img_047.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_047.png)However, although relationship markers can define the set of relationships which are allowed and the types of entity which are to be related - so we can have family connections of people and stratigraphic relations of archaeological contexts in the same database - relationship records are limited by the fact that there is only one type of Relationship record. So, if one adds additional attributes they will be added to all Relationships. This may not make a lot of sense if one starts to add, for instance, fields for stratigraphic drawings, photos and field notes describing the stratigraphic relationships, which will then appear for family relationships; although its is perfectly OK just to ignore them, it's inelegant. This is where intermediate records connecting entities come in to play. They take on much the same role as relationship records, but each type of relationship will have its own record type with the attributes specific to that relationship. However it may be worth creating an intermediate record even if there is only one type of relationship in order not to overload relationship records with additional fields and with a view to adding other intermediate record types in future. **Relationship markers** A relationship marker is a record that defines a two-way link between two records that you wish to connect. Relationship markers allow connections to be established between any two types of entity, but also allow the type of connection to be recorded via a separate relationship record. What the relationship marker does is build in the relationship to the databases structure and prompts the user as they build their database. It provides structure as to what relationships the user can build. \*\*Note. \*\*Relationship pointers differ from relationship markers in that they create a direct one-to-one link between records, without an intermediate relationship record, which in some instances may be the preferable solution. (See ‘When to use a pointer and when a relationship?’ below). The relationship marker is implemented as a separate record that links two records together, regardless of type. All relationship details are stored in the relationship record itself, which has two fields that point to the source record and the target record of the relationship. The relationship marker field is embedded directly in the data entry form – it does not actually contain any data itself, instead it acts as a marker (or prompt) to the user to create a new relationship record (‘show this type of relationship at this point in the form’). Relationship markers may be further constrained to specific record types and a limited set of relationship types appropriate to that point in the form; the constraints restrict the term list (of relationships available) and the target record types. Relationship markers are useful in recording connections that are less standardised. For instance, have lots of different options (such as stratigraphic relationships or family relationships by birth) or have a time-limited component (such as museum loans or personal relationships by marriage or association) or otherwise require additional information (such as assignments of connections which require interpretation and explanation). A good example of a relationship is that between a brother and sister. You can use a relatinship to represent Jack being Jill's brother, as in the diagram. In this case, there are three entities at play: Person(Jack) + Relationship(Siblinghood) + Person(Jill). In this case, Heurist automatically deals with Jack and Jill's genders, and implies that Jill is Jack's sister as soon as you enter that Jack is Jill's brother.
+As a general rule, use a pointer field, constrained to a specific record type (e.g. place, person, series, component), where you will record a single value (e.g. parent) or a small number of values (e.g. authors) which have an unequivocal relationship with the entity being described and where multiple pointers are all equivalent (although they may be ordered—authors being a good example).
 
-![img_048.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_048.png)
+Use a relationship marker field where you do not know a priori which relationships will be present and/or there are numerous possible relationship types, or the relationships have a temporal range, or the relationships are subject to interpretation and you need to provide supporting information through notes or references.
 
-## \*\*Child Record Pointers \*\*
+##### **Relationship markers**
 
-A somewhat similar usage is to break down sets of attributes which apply to components of an entity or only appy to particular subtypes of an entity. For example: Components: individual scenes (components) of a painting or decoration panel might be recorded as sub-records, and they might have further sub-records describing individual figures or motifs. An architectural structure might similarly be broken down into components, some of which may be repeated eg. rooms, doorways, while others may only occur once eg. roof, with each of these component types having its own distinct set of attributes. Subtypes: A stone artefact might have general attributes such as type of material, weight, dimensions, measurements and artefact class eg. ground axe, core, scraper etc., and then for each of these classes a sub-record, of which only one will be present, describing the more specific attributes relating to that class of object. In the Intermediate records section, we used the example of a database about plays and the theatres where they were performed. In that example, we suggested that you might create a 'Production' record type to link plays to theatres. Now each 'Production' would usually, by definition, be a 'Production' of only one particular play – this would be a good use case for a Child Record Pointer. By making the 'Production' a child record of the 'Play' record type, you ensure that each Production is linked to a play and to only one play. This also makes it easier to read your database, as the 'Productions' will be neatly listed in the data entry form for each Play, and the Play for each Production will appear prominently at the top of the data entry form for each Production. In all of these examples, the sub-records are records in their own right, and can be seen as such in the database, but they 'belong to' a specific parent record. This is implemented by making the pointer from the parent record to the component or subtype record a child record pointer (the lefthand image shows only the most relevant fields from the record pointer field modification form, the righthand image shows how the child record indicates its parent):![img_049.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_049.png)![img_050.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_050.png)
+Relationship marker fields provide a built-in method for connecting entities with typed relationships and dating. This is very useful for things like relationships between people eg. family or associates, or between people and groups eg. organisations, associations. It is valuable because Heurist can automatically 'reflect' the relationship so that a relationship marker placed in both records will show the relationship from the perspective of the record where it is located. So if A is shown as Master Of B in A's record, B will be shown as Student of A in B's record (see example of Briuno of Cologner and Willigis, Archbishop of Mainz below).
 
-### **Sub records and child records / Intermediate records**
+Relationship records can include start and end date of the relationship as well as other attributes such as notes and bibliographic references, and the user can add additional attributes if they wish, as with any other record type
+
+However, although relationship markers can define the set of relationships which are allowed and the types of entity which are to be related - so we can have family connections of people and stratigraphic relations of archaeological contexts in the same database - relationship records are limited by the fact that there is only one type of Relationship record. So, if one adds additional attributes they will be added to all Relationships.
+
+This may not make a lot of sense if one starts to add, for instance, fields for stratigraphic drawings, photos and field notes describing the stratigraphic relationships, which will then appear for family relationships; although its is perfectly OK just to ignore them, it's inelegant. This is where intermediate records connecting entities come in to play. They take on much the same role as relationship records, but each type of relationship will have its own record type with the attributes specific to that relationship.
+
+However it may be worth creating an intermediate record even if there is only one type of relationship in order not to overload relationship records with additional fields and with a view to adding other intermediate record types in future.
+
+**Relationship markers** A relationship marker is a record that defines a two-way link between two records that you wish to connect. Relationship markers allow connections to be established between any two types of entity, but also allow the type of connection to be recorded via a separate relationship record. What the relationship marker does is build in the relationship to the databases structure and prompts the user as they build their database. It provides structure as to what relationships the user can build.
+
+\*\*Note. \*\*Relationship pointers differ from relationship markers in that they create a direct one-to-one link between records, without an intermediate relationship record, which in some instances may be the preferable solution.
+
+(See ‘When to use a pointer and when a relationship?’ below).
+
+The relationship marker is implemented as a separate record that links two records together, regardless of type. All relationship details are stored in the relationship record itself, which has two fields that point to the source record and the target record of the relationship. The relationship marker field is embedded directly in the data entry form – it does not actually contain any data itself, instead it acts as a marker (or prompt) to the user to create a new relationship record (‘show this type of relationship at this point in the form’).
+
+Relationship markers may be further constrained to specific record types and a limited set of relationship types appropriate to that point in the form; the constraints restrict the term list (of relationships available) and the target record types. Relationship markers are useful in recording connections that are less standardised. For instance, have lots of different options (such as stratigraphic relationships or family relationships by birth) or have a time-limited component (such as museum loans or personal relationships by marriage or association) or otherwise require additional information (such as assignments of connections which require interpretation and explanation).
+
+A good example of a relationship is that between a brother and sister. You can use a relatinship to represent Jack being Jill's brother, as in the diagram. In this case, there are three entities at play: Person(Jack) + Relationship(Siblinghood) + Person(Jill). In this case, Heurist automatically deals with Jack and Jill's genders, and implies that Jill is Jack's sister as soon as you enter that Jack is Jill's brother.
+
+#### Child Record Pointers
+
+A somewhat similar usage is to break down sets of attributes which apply to components of an entity or only appy to particular subtypes of an entity. For example:
+
+- Components: individual scenes (components) of a painting or decoration panel might be recorded as sub-records, and they might have further sub-records describing individual figures or motifs.
+- An architectural structure might similarly be broken down into components, some of which may be repeated eg. rooms, doorways, while others may only occur once eg. roof, with each of these component types having its own distinct set of attributes.
+- Subtypes: A stone artefact might have general attributes such as type of material, weight, dimensions, measurements and artefact class eg. ground axe, core, scraper etc., and then for each of these classes a sub-record, of which only one will be present, describing the more specific attributes relating to that class of object.
+- In the Intermediate records section, we used the example of a database about plays and the theatres where they were performed. In that example, we suggested that you might create a 'Production' record type to link plays to theatres. Now each 'Production' would usually, by definition, be a 'Production' of only one particular play – this would be a good use case for a Child Record Pointer. By making the 'Production' a child record of the 'Play' record type, you ensure that each Production is linked to a play and to only one play. This also makes it easier to read your database, as the 'Productions' will be neatly listed in the data entry form for each Play, and the Play for each Production will appear prominently at the top of the data entry form for each Production. In all of these examples, the sub-records are records in their own right, and can be seen as such in the database, but they 'belong to' a specific parent record. This is implemented by making the pointer from the parent record to the component or subtype record a child record pointer (the lefthand image shows only the most relevant fields from the record pointer field modification form, the righthand image shows how the child record indicates its parent):
+
+#### **Sub records and child records / Intermediate records**
 
 Relationship markers are ideal when you wish to record many different types of relatively simple relationships between different records. For example, Relationship Markers are ideally for recording family relationships – there are many different types of family relationship, but from a data perspective most family relationships are quite simple (some simply *is* someone else's mother). However, if you want to record a more complex interconnection between two records, then you may need an intermediate record type. For example, imagine that you wish to record where a particular play was performed. You have a number of plays in your database, and a number of theatres. Now a play is not simply performed in a theatre – each production potentially has a different cast and crew, runs for a different number of weeks, uses a particular text or version of the play and so on. So instead of creating a Record Pointer or Relationship Marker that directly connects a play to all the theatres where it was performed, you may wish to create an intermediate record type, such as 'Production', which sits in between plays and theatres. The 'Production' would record which play was produced and in which theatre(s). You could also record any other information you liked about each Production, such as the cast and crew, acting style, budget and so on. Sometimes you may need to create a number of intermediate record types to link two records together. Thinking about linking records in this way can be a good way of building the structure of your database.
 
@@ -618,9 +656,7 @@ Relationship markers are ideal when you wish to record many different types of r
 
 #### **Move fields into sub-records**
 
-This is a new function (late 2023) which has not yet been fully tested. We recommend, therefore, making a backup copy of the database with Admin &gt; Clone before running it (and perhaps trying it on a clone before running it on your production database).
-
-@todo: I have no idea where this is triggered from!!!
+This is a complex funciton. We recommend, therefore, making a backup copy of the database with Admin &gt; Clone before running it (and perhaps trying it on a clone before running it on your production database).
 
 #### **Using data in intermediate and sub-records/child records**
 
@@ -645,13 +681,17 @@ However, if there is a long list and/or time limits eg. in family relationships,
 
 # Constructed titles
 
-&lt;so underused …&gt; show lots of tips and tricks of how to use them, notably when dealing with hierarchical entities Title masks allow you to define composite titles that can be constructed dynamically from field values. The constructed title is generated on-the-fly when the record is created or modified. For information see the section on Constructed Titles @todo link. **Constructed title aka Record title or RecTitle**
+&lt;so underused …&gt; show lots of tips and tricks of how to use them, notably when dealing with hierarchical entities Title masks allow you to define composite titles that can be constructed dynamically from field values. The constructed title is generated on-the-fly when the record is created or modified. For information see the section on Constructed Titles
+
+@todo link.
+
+**Constructed title aka Record title or RecTitle**
 
 One of the most powerful features of Heurist is hidden-in-plain-sight. It is the title used to represent records in the results list, but it is actually far more than this. The Constructed Title is a title constructed from one or more fields in the record.
 
 To set the constructed title for a record type, edit any record of that type (or simply add a new blank record) and click on the *Title mask* button at the top of the edit form, which will bring up a dialogue allowing you to select the fields which you want to use to construct the title for every record of that type.![img_051.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_051.png)\*\*HTML tags in Constructed Titles
 
-\*\*You can add simple html tags in the constructed title eg. **for bold or** [**link**](https://docs.heuristref.net/something.net/path/%5BImage%20Name%5D) **to put link to open an image referenced in the record purely by its name. Please remember to close tags. Bold, italic, underline, strong, emphasis and superscript are allowed, Others are stripped out automatically. If you need others, contact the Heurist team. Note. To verify title masks, see Masks provide the ability to build a composite title based on information taken from other fields in the record, on the fly. The title mask is a string into which field values are inserted to create an extended title for the record. The constructed value is used as the extended title displayed in search results and other lists. Fields in the record are indicated by square brackets. The element names in square brackets should match field names for this record type. For example, a Person record might have the fields: Given Name(s), Family Name, Title. In this case you could create the following title mask: \[Family Name\], \[Given Name(s)\] (\[Title\] A person whose Family Name = 'Smith', Given Name(s) = 'John', Title = 'Dr' will be rendered in the Title field as: Smith, John (Dr) Other people will be rendered appropriately. Fields in records that are referenced by the record through pointers can also be used. For example: \[personpointer\].\[Last name\] This pulls out a person's name from a person record pointed to by the current record. Additional text or punctuation can also be included. For example: \[Title\], pp. \[Start\_Page\]-\[End\_Page\] This renders the Title field and Start and End Page fields as, for example: Alice in Wonderland, pp. 37-39 To insert a literal square-bracket, use two consecutive square-brackets (\[\[ or \]\]). Fields in records referenced by the record through pointers can also be used: \[personpointer\].\[Last name\] This gets a person's name from a Person record pointed to by the current record. To create a title mask**
+\*\*You can add simple html tags in the constructed title eg. **for bold or** [**link**](https://docs.heuristref.net/something.net/path/%5BImage%20Name%5D) to put link to open an image referenced in the record purely by its name. Please remember to close tags. Bold, italic, underline, strong, emphasis and superscript are allowed, Others are stripped out automatically. If you need others, contact the Heurist team. Note. To verify title masks, see Masks provide the ability to build a composite title based on information taken from other fields in the record, on the fly. The title mask is a string into which field values are inserted to create an extended title for the record. The constructed value is used as the extended title displayed in search results and other lists. Fields in the record are indicated by square brackets. The element names in square brackets should match field names for this record type. For example, a Person record might have the fields: Given Name(s), Family Name, Title. In this case you could create the following title mask: \[Family Name\], \[Given Name(s)\] (\[Title\] A person whose Family Name = 'Smith', Given Name(s) = 'John', Title = 'Dr' will be rendered in the Title field as: Smith, John (Dr) Other people will be rendered appropriately. Fields in records that are referenced by the record through pointers can also be used. For example: \[personpointer\].\[Last name\] This pulls out a person's name from a person record pointed to by the current record. Additional text or punctuation can also be included. For example: \[Title\], pp. \[Start\_Page\]-\[End\_Page\] This renders the Title field and Start and End Page fields as, for example: Alice in Wonderland, pp. 37-39 To insert a literal square-bracket, use two consecutive square-brackets (\[\[ or \]\]). Fields in records referenced by the record through pointers can also be used: \[personpointer\].\[Last name\] This gets a person's name from a Person record pointed to by the current record. To create a title mask
 
 - Once you have saved your record type, select the Edit Mask button. Note. To later edit the Record Type page, navigate to the Record Type page (go to Database | Manage Structure, select the relevant group and click the Edit icon for the record type.) The Record Type Title Mask Edit dialog displays:![img_052.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_052.png)Note. You can enter a mask directly into the field if you wish, or build the mask as follows.
 - Position the cursor in the Build Mask field.

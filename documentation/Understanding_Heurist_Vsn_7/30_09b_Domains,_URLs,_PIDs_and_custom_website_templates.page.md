@@ -1,4 +1,4 @@
-# 09b: Domains, URLs and custom website templates
+# 09b: Domains, URLs, PIDs and custom website templates
 
 ### **Integrating a website or individual pages**  
 **with your existing domain**

@@ -1,6 +1,6 @@
 # Ch 02: Getting started with Heurist
 
-Documentation rédigée le 07/11/2025 par Barbara Bonazzi mise à jour le 03/03/2026 par Barbara Bonazzi relecture le 26/03/2026 par Bruno Morandière
+Documentation rédigée le 07/11/2025 par Barbara Bonazzi, mise à jour le 03/03/2026 par Barbara Bonazzi, relecture le 26/03/2026 par Bruno Morandière
 
 ## 1. Steps to using Heurist
 
@@ -18,7 +18,9 @@ New users should click on the **Register** button and fill in the registration f
 
 ![](https://heurist-doc.huma-num.fr/uploads/1190bca6-70e3-48ed-8c86-d6cfb560f8e7.png)
 
-**Note 1**: Server administrators may require registration to be approved by them, in which case they receive an email requiring them to approve your registration and there may be a delay. Otherwise it is immediate. **Note 2**: Registration is specific to a server; you will need separate registrations if you have databases on more than one server. Although your credentials (user name and password) are generally copied to each new database, the databases are independent, so you can edit them and have different credentials for different databases.
+**Note 1**: Server administrators may require registration to be approved by them, in which case they receive an email requiring them to approve your registration and there may be a delay. Otherwise it is immediate.
+
+**Note 2**: Registration is specific to a server; you will need separate registrations if you have databases on more than one server. Although your credentials (user name and password) are generally copied to each new database, the databases are independent, so you can edit them and have different credentials for different databases.
 
 ### 1.2 Create database
 
@@ -40,7 +42,9 @@ If you already have a Heurist database, you can create a new database with **Adm
 
 ![](https://heurist-doc.huma-num.fr/uploads/3003081f-f20d-415e-8531-a9cbcc62b20d.png)
 
-For the naming conventions, see above. When you click “Create Database”, you will be the owner of the new database (user # 2) and the administrator of the Database Owners group (Group # 1), with all rights on the database and content, even if you were not the owner of the database you are using to do this. Your login will be the same as on that database.
+For the naming conventions, see above.
+
+When you click “Create Database”, you will be the owner of the new database (user # 2) and the administrator of the Database Owners group (Group # 1), with all rights on the database and content, even if you were not the owner of the database you are using to do this. Your login will be the same as on that database.
 
 #### 1.2.4 Enter the database
 
@@ -56,14 +60,25 @@ We suggest bookmarking the database so you can open it again easily (otherwise y
 
 ## 2. Heurist database: structure and interface
 
-When you first open your database, you will see the **Database Overview**  
-(it wil not of course include your logo and description of the database - we encourage you to enter these later so that your database is well documented)
+When you first open your database, you will see the **Database Overview** (it will not of course include your logo and description of the database - we encourage you to enter these later so that your database is well documented).
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/y12image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/y12image.png)
 
 It can be closed by selecting any of the menu options and reopened via Explore &gt; Overview.
 
+<span style="color: rgb(0, 0, 0);">----------------------</span>
+
+<span style="color: rgb(0, 0, 0);">Heurist Version 4 (from ~2016) Explore page showing the functionality of different parts of the page</span>  
+<span style="color: rgb(0, 0, 0);">Although outdated, this is still a useful summary of functions</span>  
+<span style="color: rgb(0, 0, 0);">@todo: redo this diagram with Vsn 6 interface</span>
+
+[![embedded-image-WNW8hPti.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/embedded-image-wnw8hpti.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/embedded-image-wnw8hpti.png)
+
 ### 2.1 Predefined Structures (Record types)
 
-All new databases contain by default predefined structures so that you can enjoy an initial fully-functional and significantly useful database in minutes (rather than days to months). We will show how this works later. Nearly all the pre-defined structures can be freely modified at any time. You can remove things you don't want, add new elements and change existing ones, directly while editing the data. Heurist is immensely flexible and "iterative" - you don't have to take all the decisions at the start, database structure can grow organically as you start to understand your data or publication needs, or extend your project.
+All new databases contain by default predefined structures so that you can enjoy an initial fully-functional and significantly useful database in minutes (rather than days to months). We will show how this works later.
+
+Nearly all the pre-defined structures can be freely modified at any time. You can remove things you don't want, add new elements and change existing ones, directly while editing the data. Heurist is immensely flexible and "iterative" - you don't have to take all the decisions at the start, database structure can grow organically as you start to understand your data or publication needs, or extend your project.
 
 The elements defined include:
 
@@ -80,7 +95,9 @@ To see the existing structures, click on the **Design** menu (purple), then **Re
 
 ### 2.2 Tip: Multiple tabs
 
-It's perfectly OK to open more than one tab on the same database, or more than one database in different tabs. This can be particularly useful when one wants to carry out modifications while doing searches in another window or to lookup information in another database. It's also useful for modifying a website design while fixing errors spotted in the database. Note however that there is no automatic update of database structure between separate tabs, so it may be necessary to reload one or other of the tabs if structural modifications have been made eg. adding new fields or terms.
+It's perfectly OK to open more than one tab on the same database, or more than one database in different tabs. This can be particularly useful when one wants to carry out modifications while doing searches in another window or to lookup information in another database. It's also useful for modifying a website design while fixing errors spotted in the database.
+
+Note however that there is no automatic update of database structure between separate tabs, so it may be necessary to reload one or other of the tabs if structural modifications have been made eg. adding new fields or terms.
 
 ## 3. Main Menus overview
 
@@ -90,7 +107,7 @@ The principal features of Heurist are accessed through a standard menu/sub-menu 
 
 ### 3.1 Design
 
-Use this to manage your database, including access to Standard Administration tools (depending on your access privileges), such as creating databases, managing users and groups, etc. @todo link to documentation for **Design**
+Use this to manage your database, including access to Standard Administration tools (depending on your access privileges), such as creating databases, managing users and groups, etc. @todo link to documentation for **Design.**
 
  ![](https://heurist-doc.huma-num.fr/uploads/bf6d9716-514b-4379-befb-ed035b1026cd.png)
 
@@ -100,7 +117,9 @@ The **Explore** menu is in many ways the most important and most complex, since 
 
 ![](https://heurist-doc.huma-num.fr/uploads/1a819ed2-4b07-4dfc-adb9-2ab1dee68e98.png)
 
-Explore: Use these tools to create queries, filters, and faceted searches, to gain the most out of your data. @todo link to documentation for **Explore**
+Explore: Use these tools to create queries, filters, and faceted searches, to gain the most out of your data.
+
+@todo link to documentation for **Explore**
 
 ### 3.3 Populate
 
@@ -128,15 +147,23 @@ The **Admin** &gt; **Database** menu offers a first set of advanced functionalit
 - Delete the current database (be careful, the deletion is irrevocable!)
 - Restore
 
-@todo link to 10. Admin. The **Admin &gt; Manage users** menu provides functionalities to organise the collaborative work (see § Collaborative work (Workgroups, Users, roles and permissions below)
+@todo link to 10. Admin.
+
+The **Admin &gt; Manage users** menu provides functionalities to organise the collaborative work - see § Collaborative work (Workgroups, Users, roles and permissions below)
 
 ## 4. Collaborative work
 
 ### 4.1 Workgroups and Users
 
-Heurist databases provide support for group work and collaborative projects. There can be several users, organised in different workgroups. Each record is owned by one or several workgroup(s), or by one or several individual user(s), and only these groups and individuals can edit the data within the record. Heurist's security model for database access allows you to manage groups and users and their access permissions in a controlled and centralised manner. Workgroups can be added, edited and deleted (except workgroup 1 = Database Managers). Two types of access roles “administrator” or “member” are available in each workgroup. New users can also be added or imported from other existing databases. Database structure can only be modified by administrators in the Database Managers workgroup, although other users can add terms to term fields (dropdowns) during data entry. The following table describes each group and the permissions for each role by group.
+Heurist databases provide support for group work and collaborative projects. There can be several users, organised in different workgroups. Each record is owned by one or several workgroup(s), or by one or several individual user(s), and only these groups and individuals can edit the data within the record.
 
-<table id="bkmrk-role-%2F-group-group-0" style="width: 100%;"><colgroup><col style="width: 14.2917%;"></col><col style="width: 33.5033%;"></col><col style="width: 29.2014%;"></col><col style="width: 23.1228%;"></col></colgroup><tbody><tr><th style="width: 14.2917%;">Role / Group
+Heurist's security model for database access allows you to manage groups and users and their access permissions in a controlled and centralised manner.
+
+Workgroups can be added, edited and deleted (except workgroup 1 = Database Managers). Two types of access roles “administrator” or “member” are available in each workgroup. New users can also be added or imported from other existing databases.
+
+Database structure can only be modified by administrators in the Database Managers workgroup, although other users can add terms to term fields (dropdowns) during data entry. The following table describes each group and the permissions for each role by group.
+
+<table id="bkmrk-role-%2F-groupgroup-0%3A" style="width: 100%;"><colgroup><col style="width: 14.2917%;"></col><col style="width: 33.5033%;"></col><col style="width: 29.2014%;"></col><col style="width: 23.1228%;"></col></colgroup><tbody><tr><th style="width: 14.2917%;">Role / Group
 
 </th><th style="width: 33.5033%;">Group 0: All Users
 
@@ -251,7 +278,9 @@ You can set the Ownership and visibility of a record individually. The default i
 - Pending: This provides the same viewability as Viewable above, but 'flags' that the record is not available for Public viewing. For instance, if you area making edits to a record and haven't reviewed these yet.
 - Public: The record (other than fields marked 'Restricted') can be published for Public (external to Heurist) viewing.
 
-Any records you want others to see can be made Viewable. They will not be editable by anyone who is not part of the Owner group. The default access of all new records can be set in the Database properties : Menu **Design &gt; Properties**, section **Behaviour**.
+Any records you want others to see can be made Viewable. They will not be editable by anyone who is not part of the Owner group.
+
+The default access of all new records can be set in the Database properties : Menu **Design &gt; Properties**, section **Behaviour**.
 
 ![](https://heurist-doc.huma-num.fr/uploads/e51fddf3-8beb-46f2-b3c1-322e89fee8e7.png)
 
@@ -274,51 +303,62 @@ you may wish to skip this section and return to it later</p>
 
 ![](https://heurist-doc.huma-num.fr/uploads/b08d1691-acf5-4eee-88c5-096a745f698a.png)
 
-**Design &gt; Properties** (or the EDIT METADATA button above) takes you to the **Database Properties** form. **Basic description** The basic information section describes the database, owner and access right
+**Design &gt; Properties** (or the EDIT METADATA button above) takes you to the **Database Properties** form.
+
+**Basic description** The basic information section describes the database, owner and access right
 
 ![](https://heurist-doc.huma-num.fr/uploads/c1f54ea5-1664-43c3-80be-8cbdcc6f3be1.png)
 
-**Additional settings** “**Synchronisation and indexing**”, “**Behaviour**”, and “**Incoming / Outgoing email**” on this form allow the setting of a range of behaviours which apply to all users. [Chapter. 3 Basic structuring concepts](https://heurist-doc.huma-num.fr/N6H9zJN0TM6Lg3gVMS7A9A#Chapter-3--Basic-structuring-concepts) Two concepts should be mentioned here:
+##### **Additional settings** 
+
+“**Synchronisation and indexing**”, “**Behaviour**”, and “**Incoming / Outgoing email**” on this form allow the setting of a range of behaviours which apply to all users.
+
+ [Chapter. 3 Basic structuring concepts](https://heurist-doc.huma-num.fr/N6H9zJN0TM6Lg3gVMS7A9A#Chapter-3--Basic-structuring-concepts) Two concepts should be mentioned here:
 
 - Access
 - Default Access
 
-:::warning
-
-### TO BE CONTINUED
-
-This determines whether anyone outside your workgroup can see records by default when imported. This can be:
-
-- Hidden. Not viewable.
-- Viewable. Viewable.
-- Pending. Viewable only if Status is 'Pending'.
-- Public. Viewable only if Status is 'Public'. :::
+<p class="callout warning">TO BE CONTINUED  
+This determines whether anyone outside your workgroup can see records by default when imported. This can be:  
+Hidden. Not viewable.  
+Viewable. Viewable.  
+Pending. Viewable only if Status is 'Pending'.  
+Public. Viewable only if Status is 'Public'. :::</p>
 
 ### 5.2 User preferences
 
 #### 5.2.1 **Design &gt; My preferences**
 
-This function allows one to set up a range of settings which apply to your use of Heurist; they do not affect other users. \*@todo: verify the veracity of the following tip:
+This function allows one to set up a range of settings which apply to your use of Heurist; they do not affect other users.
+
+\*@todo: verify the veracity of the following tip:
 
 <p class="callout warning">As user preferences are stored in your session variables on your web browser, it is important to check the “Keep me logged in for a month” (which is extended each time you log in from the same computer within one month) so that they are remembered. </p>
 
  ![](https://heurist-doc.huma-num.fr/uploads/6481e3ba-301b-435b-9b58-f3318c84b31e.png)
 
-Most of these settings are fairly self-explanatory, but we will thus explain some of the more obscure settings. @todo: NEED TO rewrite these
+Most of these settings are fairly self-explanatory, but we will thus explain some of the more obscure settings.
+
+@todo: NEED TO rewrite these
 
 **Bookmarklet**
 
-:::danger Function deprecated :::
+This function still exists but we do not recommend using it as it does not pick up highlighted text on https pages.
 
-- You can drag this to your browser toolbar.  
-    This setting lets you capture information in any web page displayed in the browser (including a bookmarks file and search list, such as Google) and analyse it for bibliographic information.
+- You can drag the bookmarklet to your browser toolbar.
+- It lets you capture the information you highlight in any web page displayed in the browser   
+    (including a bookmarks file and search list, such as Google) and analyse it for bibliographic information.
+
+**Mapping**
 
 **Filter**
 
 - Heurist filter string to execute when loading the search page.   
     Add any filter expression to execute when you navigate to the Home Page (you can run a search and copy the syntax here if you wish). The default is to show all records edited within the last week. For example, to show all 'favourite' (or 'favorite') tagged records, use the following syntax: Tag:favourite,favorite
 - Include current filter in URL for page.   
-    Adds the current search string to the end of the database URL in the browser. For example: :::warning ***le lien ne marche pas*** http://heurist.sydney.edu.au/h4-ij/?db=Heurist\_Shakespeare\_Exemplar&amp;w=a&amp;q=t:34 ::: :::info **Limits**... These settings determine how many records are shown when you run a search, test a report and when you view maps (smaller limits will load quicker). These do not affect published report output. ::: **Edit**
+    Adds the current search string to the end of the database URL in the browser.
+- Limits  
+    These settings determine how many records are shown when you run a search, test a report and when you view maps (smaller limits will load quicker). These do not affect published report output.
 - Prompt for tags when saving records.   
     Select if you wish to be prompted to add one or more tags to a record when you exit the record and no tags have been set. We recommend that this be selected.
 - Default to recent records search when editing pointer fields.   
@@ -326,7 +366,7 @@ Most of these settings are fairly self-explanatory, but we will thus explain som
 - Check for similar records on creation.   
     Scans your current records for any that are similar to the one you are creating and presents these with a dialog. You can choose one of the presented records or continue to create a new one.
 
-**Appearance**
+**Other**
 
 - User interface style / level of user.   
     Determines the level of help and functionality that is provided based on your expertise.
@@ -342,13 +382,6 @@ Most of these settings are fairly self-explanatory, but we will thus explain som
     Select to show your private bookmarks in the Saved Filters Pane.
 - Map Marker Clusters.  
     Where you have a lot of records appearing on a map/location, this option lets you show them as clusters (with record count) instead. Settings are: Grid pixels - the higher the number the greater the separation between clusters. Min count - the minimum number of record needed at a location to form a cluster. For example:
-
-**Access**
-
-- My Workgroups.   
-    View and (if Administrator/Owner) edit groups that you are a member of.
-- Manage Users. Manage all users.
-- Import User. Import a user's details from another database.
 
 ### 5.3 Visualise database structure
 
@@ -372,7 +405,7 @@ When you open a Heurist database, you are taken by default to the Explore menu. 
 
 #### 5.3.1 The Explore Overview Screen\*\*
 
-When you log in to a Heurist database, you are taken to the Explore menu and presented with the overview screen. To edit the database title, description and other information, click ‘edit metadata’. :::info *NB: If you have followed the previous tutorials, you will see that the database now has more data in it. If you would like a copy of this populated database for your own learning, email us* :::
+When you log in to a Heurist database, you are taken to the Explore menu and presented with the overview screen. To edit the database title, description and other information, click ‘edit metadata’.
 
 ![](https://heurist-doc.huma-num.fr/uploads/5a3261d1-af04-45e1-8b4d-913f83685eb4.png)
 
@@ -397,8 +430,6 @@ To view all the records in your database in one long list, click ‘All records'
 To see all the records of a particular type, hover over ‘Entities’. This will bring up a list of all the record types currently used by your database (e.g. Place, Person). Click on the record type you are interested in to see all the records of that type.
 
 ![](https://heurist-doc.huma-num.fr/uploads/8f7b62fe-bafa-48ef-b536-fd63f7b790eb.png)
-
-<p class="callout warning">ATTENTION je ne trouve pas *webpage:* **Grab-bag of tips** *id 710* :::</p>
 
 #### 5.4.4 Finding records quickly
 
@@ -462,7 +493,9 @@ To replace a tag, click the replace option for that tag, select an alternative t
 
 To delete a single tag, click the Delete icon for the tag.
 
-To delete multiple tags: select the checkbox for each tag you wish to delete and click Delete Selected Tags. :::warning Remember to click Save Edits when complete :::
+To delete multiple tags: select the checkbox for each tag you wish to delete and click Delete Selected Tags.
+
+<p class="callout warning">Remember to click Save Edits when complete </p>
 
 - **Manage reminders**: The Manage Reminders option lets you view, edit and remove any reminders you have set via the **Reminders section** in the righthand panel of the data entry form.
 
@@ -470,7 +503,9 @@ To remove a reminder, click the Delete icon next to it.
 
 To edit a reminder, click on the reminder record title.
 
-This opens the Reminder form, where you can change the reminder details. :::warning Remember to click Save Edits when complete :::
+This opens the Reminder form, where you can change the reminder details.
+
+<p class="callout warning">Remember to click Save Edits when complete </p>
 
 - **My user info**: displays your user profile for editing, described in detail under **Manage Users** @todo:link
 - **Workgroups**: displays the workgroups editing form (for workgroups of which you are an administrator), described in detail under **Manage Workgroups** @todo:link
@@ -478,15 +513,19 @@ This opens the Reminder form, where you can change the reminder details. :::warn
 - **Import user**: allows database administrators to browse to another database and add user profiles from that database to the current database.
 - **Log out**: logs you out of the database and changes to Log in, allowing someone else to log in on this browser.
 
-### 5.7 Bugs, suggestions, and feature requests
+### 5.7 Ticket system
 
 Heurist is the product of working with a very large number of projects over a period of two decades. We greatly value feedback about possible improvements, bug reports or just things which annoy you. Please do not hesitate to send us bug reports and feature requests.
 
-**Help &gt; Bug report / feature request** allows users to report bugs or issues encountered when using Heurist, or send comments, feature requests and enhancements to the Heurist development team (general queries can be sent to the team via the page on [Heurist Network Association](https://heuristref.net/Heurist_Contacts/web/5417/10746)). There is also a link to report bugs or requests a the top of the data entry form.
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/w7Bimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/w7Bimage.png)
+
+**Help &gt; Ticket (bug report / feature request)** allows users to report bugs or issues encountered when using Heurist, or send comments, feature requests and enhancements to the Heurist development team (general queries can be sent to the team via the page on [Heurist Network Association](https://heuristref.net/Heurist_Contacts/web/5417/10746)). There is also a link to report bugs or requests a the top of the data entry form.
 
 ![](https://heurist-doc.huma-num.fr/uploads/97340514-3e92-4fd0-b5dd-95e2f0da2189.png)
 
 Please provide a screenshot as this is very helpful in understanding the source of bugs. The function automatically reports the server and database in use, the web browser version and your email address.
+
+<p class="callout info">You can insert screenshots from the clipboard while editing the text fields with Ctrl-V or Cmd-V (you do not need to click on the image box). To insert a second screenshot, click on the + sign to get a second image box before inserting</p>
 
 ## 6. Modelling your Data
 
@@ -540,40 +579,50 @@ Start by identifying all the **entities** which make up your domain: people, org
 
 Pay particular attention to defining component parts or variants which may need a specific set of descriptors (attributes) such as instances of education or service (described by institution, degree, unit, rank, dates etc.) or variant attributes for different types of structure, object or event. These will typically be modelled using a **child record pointer** @todo:link.
 
-**Entities** First we make a list of the entities we are likely to need :::info *Note that Heurist typically refers to these as Record types for historical reasons - when first designed we thought that this term was more familiar to researchers used to MS Access and other databases than the term Entities*. ::: This takes a few minutes, we can add more later if needed.
+**Entities** First we make a list of the entities we are likely to need
 
-- Ships
-- Ports / places
-    - start,
-    - port-of-call,
-    - end (per voyage)
-- Voyages
-- People
-- Organisations
-- Roles of people
-    - captain,
-    - purser,
-    - engineer,
-    - navigator,
-    - crewman,
-    - pilot,
-    - passenger
-- Roles of organisations
-    - owner,
-    - insurer,
-    - charterer,
-    - shipper,
-    - receiver
-- Units of cargo
-- Illnesses (events of illness applying to an individual)
-- Outbreaks (events of the same illness applying to many individuals on a voyage)
-- Epidemics (events of an illness at large in a broader community)
+<p class="callout info">*Note that Heurist typically refers to these as Record types for historical reasons - when first designed we thought that this term was more familiar to researchers used to MS Access and other databases than the term Entities*. </p>
+
+For example you migth make a list like this:
+
+- - Ships
+    - Ports / places
+        - end (per voyage)
+        - start,
+        - port-of-call,
+    - Voyages
+    - People
+    - Organisations
+    - Roles of people
+        - passenger
+        - crewman,
+        - engineer,
+        - captain,
+        - purser,
+        - navigator,
+        - pilot,
+    - Roles of organisations
+        - receiver
+        - charterer,
+        - owner,
+        - insurer,
+        - shipper,
+    - Units of cargo
+    - Illnesses (events of illness applying to an individual)
+    - Outbreaks (events of the same illness applying to many individuals on a voyage)
+    - Epidemics (events of an illness at large in a broader community)
+
+This will take a few minutes, but it is time worth spending. We can add more later if needed.
 
 #### 6.1.2 **Define the** ***connections*** **that you expect to see between entities**
 
 Heurist makes it very easy to define connections between entities through simple connection fields (Record pointers and Relationship markers) in the data entry forms.
 
-**Connections** Then we can think about how these connect :::info Note that there may be 'edge-cases which are not covered, such as change of ship within one voyage, but one should never make a 'perfect' model; some 'reasonable case' assumptions should be applied which are acceptable because there is noise in the data in any case. :::
+**Connections**
+
+Then we can think about how these connect
+
+<p class="callout info">Note that there may be 'edge-cases which are not covered, such as change of ship within one voyage, but one should never make a 'perfect' model; some 'reasonable case' assumptions should be applied which are acceptable because there is noise in the data in any case.</p>
 
 - A voyage is connected to a specific ship
 - Voyages are connected from a start port to an end port with a series of intermediate ports
@@ -586,40 +635,46 @@ Heurist makes it very easy to define connections between entities through simple
 
 Heurist provides all the normal field types plus some less common ones, such as fuzzy dates, geographic objects, file/image fields (local, remote, media streams and IIIF) and the previously mentioned connection fields.
 
-**Attributes** Finally we can consider the basic attributes of these entities (the may be others which apply to specific projects and can be added later):
+**Attributes**
 
-- Ships have
-    - name,
-    - type,
-    - tonnage, etc.
-- Voyages have
-    - start date
-    - end date,
-    - possibly a name.
-- Ports have
-    - name
-    - location
-- People have
-    - name,
-    - gender,
-    - profession etc.
-    - Some may vary across time/voyage/segement.
-- Illnesses have
-    - name,
-    - start and end date,
-    - outcome and other possible information eg. treatments
-- Outbreaks have
-    - name of illness,
-    - start and end dates,
-    - other info such as notes.
+Finally we can consider the basic attributes of these entities (the may be others which apply to specific projects and can be added later):
+
+- - Ships have
+        - tonnage, etc.
+        - name,
+        - type,
+    - Voyages have
+        - possibly a name.
+        - start date
+        - end date,
+    - Ports have
+        - location
+        - name
+    - People have
+        - Some may vary across time/voyage/segement.
+        - gender,
+        - name,
+        - profession etc.
+    - Illnesses have
+        - outcome and other possible information eg. treatments
+        - name,
+        - start and end date,
+    - Outbreaks have
+        - other info such as notes.
+        - name of illness,
+        - start and end dates,
 
 We can now start creating our database with no further work. It is probably a good idea to draw up a simple entity-relation diagram such as the one below, but it is not even necessary. Once the database has been created you can get Heurist to show an entity=relationship diagram with Design &gt; Record types &gt; Visualise.
 
-:::info :::
+@todo: Insert the voyaging entity-relationship type
 
 ### 6.2 General pointers for good database design
 
-We recommend re-using generic (base) field types (e.g. Name/Title, Primary/preferred image, Short Summary, Start date, end date etc.) and to reuse the same base field type for similar purposes in different record types. This reduces complexity since you are using one field definition for several record types in place of one for each. It also promotes equivalence between similar fields in different record types. For example, the title of a book, a chapter, a journal article or a painting, the name of a building, a historical site, a person or an organisation, can all use the same field definition and are generally used as a main component of the record’s **constructed title** @todo link. Similarly, primary image, short textual summaries, geographic locations, attached files, URLs and dates typically use the same field definition for which special handling has been developed (e.g. the display of primary images in record views, dates in timelines, geographic locations on maps). Even if you do need to create a new field definition, try as far as possible to reuse this between record types, for the same reasons as above.
+We recommend re-using generic (base) field types (e.g. Name/Title, Primary/preferred image, Short Summary, Start date, end date etc.) and to reuse the same base field type for similar purposes in different record types. This reduces complexity since you are using one field definition for several record types in place of one for each. It also promotes equivalence between similar fields in different record types.
+
+For example, the title of a book, a chapter, a journal article or a painting, the name of a building, a historical site, a person or an organisation, can all use the same field definition and are generally used as a main component of the record’s **constructed title** @todo link.
+
+Similarly, primary image, short textual summaries, geographic locations, attached files, URLs and dates typically use the same field definition for which special handling has been developed (e.g. the display of primary images in record views, dates in timelines, geographic locations on maps). Even if you do need to create a new field definition, try as far as possible to reuse this between record types, for the same reasons as above.
 
 #### 6.2.1 Iterative design
 

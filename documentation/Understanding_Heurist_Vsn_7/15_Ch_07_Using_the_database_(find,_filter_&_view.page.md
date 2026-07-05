@@ -1,4 +1,4 @@
-# Ch 07: Using the database - find, filter and view
+# Ch 07: Using the database (find, filter & view
 
 **\[Explore\]** is the workhorse function that allows you to make use of the data recorded in a database. The core function of Explore is filtering the database to isolate a subset of the database to which some sort of listing, analysis, visualisation or export will be applied (filter also acts as a simple search to locate information to look through eg. a reference, web bookmark or images). This workflow, from filter through results list or subset to reading, visualization, analysis and output, is represented in the left-to-right flow across the Explore screen :
 
@@ -17,63 +17,95 @@ Here you can find pre-programmed filters for viewing particular records in the d
 #### 1.1.1 Recent | All by date:
 
 **\[Recent\]**: View the most recently added or modified records, with the most recent at the top. This is useful for fetching the records you are currently working on.  
+  
 **\[All by date\]**: View all the records in the database. This is useful for browsing small databases.
 
 #### 1.1.2.Entities
 
-:::info **\[Entities\]**: Filter the database by record type. ::: Displays records sorted by entity type (favourites or ordered by most used). For example, you might wish to see all the Persons in the database, all the Places, all the Books or all the Events.
+\[**Entities\]**: Filter the database by record type.
+
+Displays records sorted by entity type (favourites or ordered by most used). For example, you might wish to see all the Persons in the database, all the Places, all the Books or all the Events.
 
 #### 1.1.3. Saved filters
 
-:::info **\[Saved Filters\]** give an access to filters or faceted searches you have created yourself and previously recorded for re-use (frequently used or used in website publication). ::: Heurist allows the saving of filter criteria which become entries in a tree of saved filters, accessible through **\[Saved filters and Rules\]** menu entries, and in a dropdown below the **\[Filter\]** button.  
-Saved filters can be simply a predefined filter which generates a given subset of the database for a specific purpose (eg. sets of things you need regularly, perhaps sorted in a specific order, or a list to be displayed in a website), or they can be facet filters which provide a guided pathway allowing interactive exploration of the database through the display of subsets with frequency of occurrence according to the selections made. Saved filters (simple or facet) and rules can also be created directly from the list of saved filters by clicking on the rollover icon or right-clicking on the list. The dropdown menu also allows the creation of folders within the list, editing and deletion, and other functions. Filters can be moved by drag and drop. Note also that saved filters and rules are organized by workgroup, to allow database managers to create different sets of filters for different groups of users – for example the filters needed by volunteer data collectors or filters to be displayed on a CMS website (a Website Filters workgroup is defined by default for this purpose).
+**\[Saved Filters\]** give an access to filters or faceted searches you have created yourself and previously recorded for re-use (frequently used or used in website publication).
+
+Heurist allows the saving of filter criteria which become entries in a tree of saved filters, accessible through **\[Saved filters and Rules\]** menu entries, and in a dropdown below the **\[Filter\]** button.
+
+Saved filters can be simply a predefined filter which generates a given subset of the database for a specific purpose (eg. sets of things you need regularly, perhaps sorted in a specific order, or a list to be displayed in a website), or they can be facet filters which provide a guided pathway allowing interactive exploration of the database through the display of subsets with frequency of occurrence according to the selections made.
+
+Saved filters (simple or facet) and rules can also be created directly from the list of saved filters by clicking on the rollover icon or right-clicking on the list. The dropdown menu also allows the creation of folders within the list, editing and deletion, and other functions. Filters can be moved by drag and drop.
+
+Note also that saved filters and rules are organized by workgroup, to allow database managers to create different sets of filters for different groups of users – for example the filters needed by volunteer data collectors or filters to be displayed on a CMS website (a Website Filters workgroup is defined by default for this purpose).
 
 ### 1.2. Build
 
 #### 1.2.1. Filter builder
 
-:::info **\[Filter builder\]** Open a wizard which can be used to create a custom filter, which selects records from the database that meet certain criteria. ::: For example, you may wish to see all living Persons in the database, or all the Places that lie within a particular region.  
+**\[Filter builder\]** Open a wizard which can be used to create a custom filter, which selects records from the database that meet certain criteria.
+
+For example, you may wish to see all living Persons in the database, or all the Places that lie within a particular region.  
 The Filter builder provides an easy way of building queries of moderate complexity, hiding the complexity of writing filter strings. Simple searches, such as a partial string match on title, can be entered directly in the filter fields or constructed with the Filter Builder.
 
 #### 1.2.2.Facets builder
 
-:::info **\[Facets builder\]** Open a wizard to build sophisticated multi-level facet filters and rulesets. ::: This wizard configure a faceted search, in other words an interactive filter (which will be familiar from online shopping sites). For example, you may wish to search for People by surname, while also having a time-slider to filter by birthday at the same time. Using the facets builder, you can decide which aspects of a record you would like to use for filtering (e.g. surname), and decide what kind filtering interface you would like to use (e.g. a searchbox or dropdown).  
+**\[Facets builder\]** Open a wizard to build sophisticated multi-level facet filters and rulesets.
+
+This wizard configure a faceted search, in other words an interactive filter (which will be familiar from online shopping sites). For example, you may wish to search for People by surname, while also having a time-slider to filter by birthday at the same time. Using the facets builder, you can decide which aspects of a record you would like to use for filtering (e.g. surname), and decide what kind filtering interface you would like to use (e.g. a searchbox or dropdown).
+
 The Heurist system for building facet filters is not restricted to building facets on the attributes (fields) of a single selected entity type. It can drill down into the connections between entity types to allow selection on the attributes of related records at several levels removed. The choices are made from a treeview of attributes which can be expanded to view the attributes of connected entity types.  
-The facet builder can also apply rules to traverse the network of connections to find entities which are connected to the results of a facet filter. Rulesets can be created and used independently.  
-These queries allow a range of sophisticated instant analyses, without programming, along the lines of “select all the organisations which have published books written by female authors who have degrees from a University located in London”. Facet filters can be embedded into websites generated by the Heurist CMS.
+The facet builder can also apply rules to traverse the network of connections to find entities which are connected to the results of a facet filter. Rulesets can be created and used independently.
+
+These queries allow a range of sophisticated instant analyses, without programming, along the lines of “select all the organisations which have published books written by female authors who have degrees from a University located in London”.
+
+ Facet filters can be embedded into websites generated by the Heurist CMS.
 
 #### 1.2.3. Save filter for re-use
 
-:::info This tool saves the current filter (simple or faceted) into the tree of saved filters for reuse. ::: Heurist allows the saving of filter criteria which become entries in a tree of saved filters, accessible through **\[Saved Filters\]** and Rules menu entries (cf., and in a dropdown below the Filter button.) :::info **Use of workgroups** Saved filters and rules are organized by workgroup, to allow database managers to create different sets of filters for different groups of users – for example the filters needed by volunteer data collectors or filters to be displayed on a CMS website (a Website Filters workgroup is defined by default for this purpose). :::
+This tool saves the current filter (simple or faceted) into the tree of saved filters for reuse.
+
+Heurist allows the saving of filter criteria which become entries in a tree of saved filters, accessible through **\[Saved Filters\]** and Rules menu entries (cf., and in a dropdown below the Filter button.)
+
+**Use of workgroups** Saved filters and rules are organized by workgroup, to allow database managers to create different sets of filters for different groups of users – for example the filters needed by volunteer data collectors or filters to be displayed on a CMS website (a Website Filters workgroup is defined by default for this purpose). :::
 
 ### 1.3. Advanced
 
 #### 1.3.1. Rules
 
-:::info **Rules** are expanding search results to connected entities. In other words they allow you to select interrelated sets of records of different types from the database. ::: For example, when searching for people in the database, you may wish to display the record for a Person's spouse or place of residence as well as the record for the Person themself. To do this, you would create a ruleset which defines exactly which related records to retrieve when you search for people. These rulesets can be used in conjunction with custom filters or faceted searches.
+**Rules** are expanding search results to connected entities. In other words they allow you to select interrelated sets of records of different types from the database.
+
+For example, when searching for people in the database, you may wish to display the record for a Person's spouse or place of residence as well as the record for the Person themself. To do this, you would create a ruleset which defines exactly which related records to retrieve when you search for people. These rulesets can be used in conjunction with custom filters or faceted searches.
 
 #### 1.3.2. Set as subset
 
-:::info **Set as subset** saves the current set of records as a subset, which can then be filtered or manipulated further. ::: This menu item restricts further filtering to the current result set. This can be useful to isolate a specific set of records for further filtering, visualisation or analysis eg. all the records from a specific collection or all the works by a specific set of authors. Once set, the subset can be cancelled with the undo icon which appears at the end of the menu item.
+:**Set as subset** saves the current set of records as a subset, which can then be filtered or manipulated further.
+
+This menu item restricts further filtering to the current result set. This can be useful to isolate a specific set of records for further filtering, visualisation or analysis eg. all the records from a specific collection or all the works by a specific set of authors. Once set, the subset can be cancelled with the undo icon which appears at the end of the menu item.
 
 ## 2. Build and save a simple search or filter
 
-### 2.1. The searchbox
+### 2.1. The search box
 
-![](https://heurist-doc.huma-num.fr/uploads/eca1ef4f-63da-4ecf-a103-03a403c48c1d.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/kkOimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/kkOimage.png)
 
-At the top of the Filtered Results pane in the Explore Menu, there is a searchbox : you can use it to do simple searches of the database, but it also drives Heurist's advanced filtering features.  
-If you are an advanced user, you can learn to use Heurist JSON Query Language, and design powerful, customisable queries quickly and precisely.  Directly search for records using a **range of modifiers: tag: , type: , url: , notes: , owner: , user: , field:** and **all:**. For example, to search for tagged records in the database, enter either tag : string or tag = string in the Filter box. For example, tag : Database (any tag including the string ‘Database’) or tag = Database (matches Database but not ‘Databases’ or ‘Database Management’). Tags are not case sensitive (i.e. 'database' = 'Database').
+At the top of the Filtered Results pane in the Explore Menu, there is a searchbox : you can use it to do simple searches of the database, but it also drives Heurist's advanced filtering features.
+
+If you are an advanced user, you can learn to use Heurist JSON Query Language, and design powerful, customisable queries quickly and precisely (although it is much easier with teh Fitler Builder).
+
+Directly search for records using a **range of modifiers: tag: , type: , url: , notes: , owner: , user: , field:** and **all:**.
+
+For example, to search for tagged records in the database, enter either tag : string or tag = string in the Filter box. For example, tag : Database (any tag including the string ‘Database’) or tag = Database (matches Database but not ‘Databases’ or ‘Database Management’). Tags are not case sensitive (i.e. 'database' = 'Database').
 
 - If search terms include a **space**, enclose them in single or double quotes (e.g. tag : ’Database Management’ ).
 - To find **exact matches**, use the = operator (e.g. title = xxx ). You can also use the greater than (&gt;) and lesser than (&lt;) operators if you are filtering by a numerical or date field (e.g. year &lt; 2007 would find records from before 2007).
 - To find records that include **either of two search terms**, use an uppercase OR (e.g. timemap OR “time map”).
 - To find records with **geographic objects** that contain a given point, use latitude and longitude (e.g. latitude : 10 longitude : 100 ).
-- To **exclude records** according to a particular value, use a minus sign (e.g. -maps , -tag : timelines ). `@todo link to JSON query part below.`
+- To **exclude records** according to a particular value, use a minus sign (e.g. -maps , -tag : timelines ).   
+    `@todo link to JSON query part below.`
 
 ### 2.2. The filter builder
 
-The easiest way to create a custom filter is to use the **\[Filter builder\]**. You can also access this tool by hovering over ‘Filter builder’ in the left-hand column. All filters fetch a certain kind of record from the database. In the example, we want to retrieve data about world leaders who are still in office. In this database, a person’s term of office is represented as a ‘Relationship Record’ connecting the person to the country they rule. Therefore this filter should retrieve ‘Relationship Records’.
+The easiest way to create a custom filter is to use the **\[Filter builder\]**. You can also access this tool by hovering over ‘Filter builder’ in the left-hand column. In the example, we want to retrieve data about world leaders who are still in office. In this database, a person’s term of office is represented as a ‘Relationship Record’ connecting the person to the country they rule. Therefore this filter should retrieve ‘Relationship Records’.
 
 ![](https://heurist-doc.huma-num.fr/uploads/b6bd2fe4-e232-4b2a-bd2e-d33c5ccdca2a.png)
 
@@ -92,10 +124,10 @@ The filter builder allows to request in several linked record types : the dropdo
 
 ![](https://heurist-doc.huma-num.fr/uploads/55f53c01-aaec-4030-a968-f6f2e4808e7c.PNG)
 
-:::info **Tips for building your search filter**
+**Tips for building your search filter**
 
 - For complex filters, create smaller elements of the filter, and then combine these to build the full filter.
-- Using codes (Record ID) in the filter rather than names not only keeps your filters compact, but also ensures that when the filters are saved the codes are invariant, whereas names can be freely changed and it can be a complex task to track these changes and edit all the saved filters. :::
+- Using codes (Record ID) in the filter rather than names not only keeps your filters compact, but also ensures that when the filters are saved the codes are invariant, whereas names can be freely changed and it can be a complex task to track these changes and edit all the saved filters.
 
 ### 2.4. Saved filters
 
@@ -115,11 +147,17 @@ You can access saved filters by hovering over **\[Saved Filters\]** to the left 
 
 ## 3. Build a facet search
 
-Facet searches are a powerful way of drilling down into a database, particularly if they are combined with Rules (there is a rule builder built into the facet search editor) which can pull in related information (such as, for example, spatial information for mapping when the search is based on records which are linked to places but do not themselves contain spatial information). Facet searches allow single and multi selection, alpha versus order by count, effect on speed and optimization of searches with large databases. You can access the facet builder by hovering over **\[Facet Builder\]** at left menu or right clicking on the saved search tree and add Facet search on the bottom of the submenu.
+Facet searches are a powerful way of drilling down into a database, particularly if they are combined with Rules (there is a rule builder built into the facet search editor) which can pull in related information (such as, for example, spatial information for mapping when the search is based on records which are linked to places but do not themselves contain spatial information). Facet searches allow single and multi selection, alpha versus order by count, effect on speed and optimization of searches with large databases.
+
+You can access the facet builder by hovering over **\[Facet Builder\]** at left menu or right clicking on the saved search tree and add Facet search on the bottom of the submenu.
 
 ### 3.1. What is a faceted search?
 
-Faceted searches are interactive tools for searching a database. They are everywhere on the internet. You have probably used one today! Faceted searches allow users of websites like Goodreads, Amazon, the British Library or Google to filter search results according to criteria such as Price, Copyright Status, Rating or Department. Whenever you are allowed to fine-tune search results according to certain criteria, you are using a faceted search. Heurist allows you to create your own customised faceted searches specifically designed for your database and your users. To create a new faceted search interface for your database, you can use the facets builder from the Explore Tray.
+Faceted searches are interactive tools for searching a database. They are everywhere on the internet. You have probably used one today! Faceted searches allow users of websites like Goodreads, Amazon, the British Library or Google to filter search results according to criteria such as Price, Copyright Status, Rating or Department. Whenever you are allowed to fine-tune search results according to certain criteria, you are using a faceted search.
+
+Heurist allows you to create your own customised faceted searches specifically designed for your database and your users.
+
+To create a new faceted search interface for your database, you can use the facets builder from the Explore Tray.
 
 ### 3.2. When should I use one?
 
@@ -135,13 +173,16 @@ In either case, the process of building a faceted search is the same. You build 
 #### 3.3.1. First step : general settings
 
 1. Click on the **\[Facet builder\]** item of the left menu : this open a pop-up window in which you can configure the facets.
-2. Here let's assume that we are in a bibliographical database and that you want to search volumes or periodicals recorded in a Record Type named "Manifestation (édition)". Configure your faceted search : \***\[Search for (entity type)\]** : choose the main Record type in which the faceted search will be performed \***\[Faceted search name\]** : the name under which the facet will appear in the **saved filters** tree once you have saved it. \***\[Save in work group\]** : the folder in which you want to save those facets in **saved filters**. \***\[Display full sets of records\]** : useful for a website but note that ticking this box may slow down the process if the database is large.
+2. Here let's assume that we are in a bibliographical database and that you want to search volumes or periodicals recorded in a Record Type named "Manifestation (édition)". Configure your faceted search :   
+    \***\[Search for (entity type)\]** : choose the main Record type in which the faceted search will be performed   
+    \***\[Faceted search name\]** : the name under which the facet will appear in the **saved filters** tree once you have saved it.   
+    \***\[Save in work group\]** : the folder in which you want to save those facets in **saved filters**.   
+    \***\[Display full sets of records\]** : useful for a website but note that ticking this box may slow down the process if the database is large.
 
 ![](https://heurist-doc.huma-num.fr/uploads/a3689eb2-693e-4c74-a9e7-a083e1a75398.png)
 
-:::info Keep in mind that the record type you choose as input is always the one you will get as output, unless you use the rulesets function (see below).
-
-However, the faceted search allows you to choose your criteria of search from other record types linked to or from this original record type. :::
+<p class="callout info">Keep in mind that the record type you choose as input is always the one you will get as output, unless you use the rulesets function (see below).  
+However, the faceted search allows you to choose your criteria of search from other record types linked to or from this original record type.</p>
 
 3. Configure the optional features : you can choose 
     - the order in which your results should appear (choose the field of the record type you wish to use to sort the results : by date, by title, etc.)
@@ -173,11 +214,15 @@ The following interface allows you to choose how each facet is displayed :
 
 ![](https://heurist-doc.huma-num.fr/uploads/0b0c34d3-29e1-4a8c-82d5-4df19c7557ca.png)
 
-The interface provide other options :
+The interface provides other options :
 
 ![](https://heurist-doc.huma-num.fr/uploads/b4f39c49-bb0b-4055-ba0f-a3bbef9df643.png)
 
-\***\[Show entity hierarchy above facet label\]** : to be avoided for public websites, but very useful for personal research \***\[Accordion view/ Show accordion view\]** : allows the user to fold/unfold the facets when there are many of them \***\[Limit list initially to\]** : allows you to choose how many responses you want to display when you select the \[wrap\] and \[list\] options \***\[Rollover\]** : can be used to write a help text for users \***\[Group/Order by counts\]** : to choose the order of the results' display.
+- **\[Show entity hierarchy above facet label\]** : to be avoided for public websites, but very useful for personal research
+- \***\[Accordion view/ Show accordion view\]** : allows the user to fold/unfold the facets when there are many of them
+- \***\[Limit list initially to\]** : allows you to choose how many responses you want to display when you select the \[wrap\] and \[list\] options
+- \***\[Rollover\]** : can be used to write a help text for users
+- \***\[Group/Order by counts\]** : to choose the order of the results' display.
 
 Once the facets are configured, they can be saved. You can re-open it by clicking on it in the saved filters menu, and use it for your own searches and/or to display it on a website.
 
@@ -194,12 +239,23 @@ This menu provides an access to selection features which apply to the results di
 - **\[Tag\]** : adding tags to specific records of the database allows users to find it quickly when using a filter is not relevant. Tags can be named and assigned to specific workgroups, or to be user-specific. Once the choosen tags are assigned, you can find it again using a filter (choose for example \[any record type\], then in \[Metadata\] : \[Tags (terms)\])
 - **\[Rate\]** : can be used to assigned ratings to recordings. Note that you can only do this after assigning a **bookmark** to the record.
 - **\[Bookmark\]/\[Unbookmark\]**
-- **\[Merge\]**: this function allows to merge two or more records. First select the records, then choose **\[Merge\]**. ![](https://heurist-doc.huma-num.fr/uploads/6d08aa48-c8b7-4bb1-bfe6-555a8d418f8e.jpeg) Choose the master record (the one to be kept), then **\[Merge duplicates\]**. ![](https://heurist-doc.huma-num.fr/uploads/513d5337-2cdf-4d9b-b919-943e61ead566.jpeg) Choose the fields to be kept in the final merged record, then **\[commit changes\]**. Note that the references (i.e. linked records) will be all retained.
+- **\[Merge\]**: this function allows to merge two or more records. First select the records, then choose **\[Merge\]**.
+
+![](https://heurist-doc.huma-num.fr/uploads/6d08aa48-c8b7-4bb1-bfe6-555a8d418f8e.jpeg)
+
+Choose the master record (the one to be kept), then **\[Merge duplicates\]**.
+
+![](https://heurist-doc.huma-num.fr/uploads/513d5337-2cdf-4d9b-b919-943e61ead566.jpeg)
+
+Choose the fields to be kept in the final merged record, then **\[commit changes\]**. Note that the references (i.e. linked records) will be all retained.
+
 - **\[Delete\]** : delete the selected records from the database.
 
 ### 4.2. **\[Collect\]**
 
-This range of functions allows to make by hand personal collections of data : select the records you want to add to a collection, then use **\[add\]** (to add it to a collection) and **\[save as...\]** to save your selection as a filter. You can also **\[remove\]** records from a collection, **\[clear all\]**, display the collection in a new tab and/or as a search result.
+This range of functions allows to make by hand personal collections of data : select the records you want to add to a collection, then use **\[add\]** (to add it to a collection) and **\[save as...\]** to save your selection as a filter.
+
+You can also **\[remove\]** records from a collection, **\[clear all\]**, display the collection in a new tab and/or as a search result.
 
 ### 4.3. **\[Recode\]**
 
@@ -240,7 +296,9 @@ In this section of the menu you will find tools which allow you :
 
 ### 5.1. Why RuleSets?
 
-In a database, important information is often distributed between many different records. For example, imagine you want to know what country a person was born in. In your Heurist database, there may be a 'Person' record for the person, which is linked to a 'Place' record which describes the place they were born. To know what country the person was born in, you would need to locate the 'Place' record for their place of birth, and then see what country that Place is in. In the example below, the Person record for William Shakespeare refers to the Place record for Stratford to describe his Place of Birth: If you are just looking at one record, you can simply click on the record pointer in the Explore Menu to be taken to the linked record – so really there is no need for any additional tools.
+In a database, important information is often distributed between many different records. For example, imagine you want to know what country a person was born in. In your Heurist database, there may be a 'Person' record for the person, which is linked to a 'Place' record which describes the place they were born. To know what country the person was born in, you would need to locate the 'Place' record for their place of birth, and then see what country that Place is in. In the example below, the Person record for William Shakespeare refers to the Place record for Stratford to describe his Place of Birth:
+
+If you are just looking at one record, you can simply click on the record pointer in the Explore Menu to be taken to the linked record – so really there is no need for any additional tools.
 
 ![](https://heurist-doc.huma-num.fr/uploads/44db4f64-916a-474c-b901-1c271ff8ff21.png)
 
@@ -262,14 +320,22 @@ To create a RuleSet, hover over **\[Rules\]** in the **\[Advanced\]** section of
 
 ![](https://heurist-doc.huma-num.fr/uploads/5298048d-9a8e-437c-b85a-d75f18f97ac0.jpeg)
 
-In the image above, the Ruleset looks at all the Persons in the current results set, and finds the Places where they died. It then finds any Life Events associated with those Places. Thus, if you filter the dataset to find some interesting people, you could answer the question: What Life Events are recorded for these Persons' places of death? As an added element, the Places can be filtered when the RuleSet is applied. To add a filter, either type the filter directly into the box using Heurist's query language, or click the pencil icon to use the Filter Builder. In the screenshot, Places are filtered so that only Islands will be considered. Thus the question becomes more specific: What Life Events are recorded for the Islands on which these Persons died? If you click **\[Add new Rule\]**, then you can include a second, separate set of steps to fetch related records. For example, if you wanted to see the Places of Birth as well as the Places of Death for the Persons in the result set, then you would need to add a new rule to the RuleSet.
+In the image above, the Ruleset looks at all the Persons in the current results set, and finds the Places where they died. It then finds any Life Events associated with those Places. Thus, if you filter the dataset to find some interesting people, you could answer the question: What Life Events are recorded for these Persons' places of death?
+
+As an added element, the Places can be filtered when the RuleSet is applied. To add a filter, either type the filter directly into the box using Heurist's query language, or click the pencil icon to use the Filter Builder. In the screenshot, Places are filtered so that only Islands will be considered. Thus the question becomes more specific: What Life Events are recorded for the Islands on which these Persons died?
+
+If you click **\[Add new Rule\]**, then you can include a second, separate set of steps to fetch related records. For example, if you wanted to see the Places of Birth as well as the Places of Death for the Persons in the result set, then you would need to add a new rule to the RuleSet.
 
 #### 5.2.2. Integrating RuleSets with other tools
 
-Once you have saved a RuleSet, you can integrate it with other tools in Heurist. For example, if you have defined a faceted search that queries the Borrowing Records in a Library database, you could then apply a RuleSet to replace all the Borrowing Records in the results with the Persons who actually borrowed the books. The main places you can apply a RuleSet are :
+Once you have saved a RuleSet, you can integrate it with other tools in Heurist. For example, if you have defined a faceted search that queries the Borrowing Records in a Library database, you could then apply a RuleSet to replace all the Borrowing Records in the results with the Persons who actually borrowed the books.
+
+The main places you can apply a RuleSet are :
 
 - To the results of a Faceted Search
 - To the results of a filter created using Heurist's Filter Builder
+
+But more generally you can apply a ruleset to any set of results and if it is appropriate it will expand the set of results folowing the rules defined.
 
 ## 6. Advanced Users: Introduction to JSON Queries
 
@@ -278,14 +344,19 @@ A Json query is an array of objects (predicates). Note that this JSon format is 
 Each predicate is a pair: {“keyword”:”value”}:
 
 - A keyword stands for record header field, detail or link predicate.
-- The value depends on the keyword. It may be literal, csv. It may be preceded by a compare operator or contain a range or % operator. **example :**`{"q":"sortby:-m after:"1 week ago""}`
-- For link predicate, the value is a sub query (another set of predicates). **example :**`{"q":"sortby:-m after:"1 week ago"","rules":[{"query":"t:12 relatedfrom:14-4533 ","codes":"14","99","4533","12","",4],"levels":[]}]}`
+- The value depends on the keyword. It may be literal, csv. It may be preceded by a compare operator or contain a range or % operator.   
+    **example :**`{"q":"sortby:-m after:"1 week ago""}`
+- For link predicate, the value is a sub query (another set of predicates).   
+    **example :**`{"q":"sortby:-m after:"1 week ago"","rules":[{"query":"t:12 relatedfrom:14-4533 ","codes":"14","99","4533","12","",4],"levels":[]}]}`
 
 Heurist queries, in both JSon and simple filter forms, can be used in several contexts. The table below outlines the various contexts in which queries can be used, and explains the considations that must be taken into account in each context. In some contexts, the query must be placed within another JSon object whose name is "q:" and whose value is the desired query; this is called the "q:" parameter.
 
-<table id="bkmrk-context-json-or-simp"><thead><tr><th>Context</th><th>JSon or Simple Filter</th><th>"q:" parameter</th><th>Example</th></tr></thead><tbody><tr><td>Main page search box</td><td>BOTH</td><td>No</td><td>sortby:-m after:"1 week ago"</td></tr><tr><td>CSV output query</td><td>Simple ONLY</td><td>No</td><td>f:149:34</td></tr><tr><td>Mappable query</td><td>JSon ALWAYS permitted.Simple Filter permitted ONLY IF no rules are applied to the query</td><td>Yes</td><td>{"q":"sortby:-m after:"1 week ago"","rules":\[{"query":"t:12 relatedfrom:14-4533 ","codes":\["14","99","4533","12","",4\],"levels":\[\]}\]}</td></tr><tr><td>Facet search pre-query</td><td>BOTH</td><td>No</td><td>{"f:10":"1914-12-31T23:59:59.999Z&lt;&gt;1931-01-01"}</td></tr><tr><td>Expansion rules</td><td>JSon ONLY</td><td>No</td><td>\[{"query":"t:12 linkedfrom:16-90 ","codes":\["16","90","","12","",2\],"levels":\[\]}\]</td></tr></tbody></table>
+<table id="bkmrk-context-json-or-simp" style="width: 101.905%;"><thead><tr><th style="width: 10.8412%;">Context</th><th style="width: 25.4946%;">JSon or Simple Filter</th><th style="width: 10.364%;">"q:" parameter</th><th style="width: 53.3724%;">Example</th></tr></thead><tbody><tr><td style="width: 10.8412%;">Main page search box</td><td style="width: 25.4946%;">BOTH</td><td style="width: 10.364%;">No</td><td style="width: 53.3724%;">sortby:-m after:"1 week ago"</td></tr><tr><td style="width: 10.8412%;">CSV output query</td><td style="width: 25.4946%;">Simple ONLY</td><td style="width: 10.364%;">No</td><td style="width: 53.3724%;">f:149:34</td></tr><tr><td style="width: 10.8412%;">Mappable query</td><td style="width: 25.4946%;">JSon ALWAYS permitted.Simple Filter permitted ONLY IF no rules are applied to the query</td><td style="width: 10.364%;">Yes</td><td style="width: 53.3724%;">{"q":"sortby:-m after:"1 week ago"","rules":\[{"query":"t:12 relatedfrom:14-4533 ","codes":"14","99","4533","12","",4\],"levels":\[\]}\]}</td></tr><tr><td style="width: 10.8412%;">Facet search pre-query</td><td style="width: 25.4946%;">BOTH</td><td style="width: 10.364%;">No</td><td style="width: 53.3724%;">{"f:10":"1914-12-31T23:59:59.999Z&lt;&gt;1931-01-01"}</td></tr><tr><td style="width: 10.8412%;">Expansion rules</td><td style="width: 25.4946%;">JSon ONLY</td><td style="width: 10.364%;">No</td><td style="width: 53.3724%;">\[{"query":"t:12 linkedfrom:16-90 ","codes":\["16","90","","12","",2\],"levels":\[\]}\]</td></tr></tbody></table>
 
-**Specifying database for mappable query data sources** The user can specify db parameter in query field of “Mappable query datasource so that it can be rendered from any database. For example: `{"q":"t:12 f:26:108","db":"osmak_38"}`
+**Specifying database for mappable query data sources**
+
+The user can specify db parameter in query field of “Mappable query datasource so that it can be rendered from any database.   
+For example: `{"q":"t:12 f:26:108","db":"osmak_38"}`
 
 ### 6.1. Syntax
 
@@ -317,7 +388,7 @@ To include multiple query terms using the JSON syntax, you need to enclose your 
 
 The following table gives the names and values that constitute basic queries, with an explanation of their meaning and use, as well as examples in both simple filter format and formal JSon format. A result set from a simple filter search is automatically sorted, while a result set from a JSon search is unsorted by default.
 
-<table id="bkmrk-name-%28meaning%29-value"><thead><tr><th>Name (Meaning)</th><th>Value</th><th>Result</th><th>Simple filter (sorted by default)</th><th>JSon syntax (unsorted by default)</th></tr></thead><tbody><tr><td>t (record type)</td><td>number OR string</td><td>Returns all records of type value. If value is a number, it refers to the index of that record type, and if value is a string, it refers to the name of that record type</td><td>`t:1` returns all Relationship Records;`t:Person` returns all Person Records</td><td>`{"t":"1"}` returns all Relationship Records;`{"t":"Person"}` returns all Person Records</td></tr><tr><td>f:#, field:# (field type)</td><td>string</td><td>Returns all records whose field with index # contains value. Hot tip: The field number is optional. If you wish to search all the fields associated with the records, then you can simply use "f".</td><td>`f:1:a` returns all Records whose field #1 (Title) contains "a".`f:a` returns all Records which have an "a" in any field</td><td>`{"f:1":"a"}`returns all Records whose field #1 (Title) contains "a";`{"f":"a"}`returns all Records which have an "a" in any field.</td></tr><tr><td>ids (record ID)</td><td>number</td><td>Returns all records with record IDs value.</td><td>Separate multiple IDs with commas:`ids:51,52,53`returns Records #51, #52, #53, #54 in the database</td><td>`{"ids":"51,52,53,54"}` returns Records #51, #52, #53, #54 in the database</td></tr><tr><td>linkedto(linked records)</td><td>number</td><td>Returns all records that point to the record with ID value.</td><td>`linkedto:123` returns all records that point to Record #123</td><td>`{"linkedto":"123"}` returns all records that point to Record #123</td></tr><tr><td>linkedfrom (linking records)</td><td>number</td><td>Returns all records that the record with ID value points to.</td><td>`linkedfrom:123` returns all records that Record #123 points to</td><td>`{"linkedfrom":"123"}`returns all records that Record #123 points to</td></tr><tr><td>related (related records)</td><td>number</td><td>Returns all records that have a relationship to the record with ID value.</td><td>`relatedto:123` returns all records related to Record #123</td><td>`{"relatedto":"123"}` returns all records related to Record #123</td></tr></tbody></table>
+<table id="bkmrk-name-%28meaning%29-value" style="width: 100%;"><thead><tr><th style="width: 11.7942%;">Name (Meaning)</th><th style="width: 8.93399%;">Value</th><th style="width: 30.0227%;">Result</th><th style="width: 23.4693%;">Simple filter (sorted by default)</th><th style="width: 25.7329%;">JSon syntax (unsorted by default)</th></tr></thead><tbody><tr><td style="width: 11.7942%;">t (record type)</td><td style="width: 8.93399%;">number OR string</td><td style="width: 30.0227%;">Returns all records of type value. If value is a number, it refers to the index of that record type, and if value is a string, it refers to the name of that record type</td><td style="width: 23.4693%;">`t:1` returns all Relationship Records;`t:Person` returns all Person Records</td><td style="width: 25.7329%;">`{"t":"1"}` returns all Relationship Records;`{"t":"Person"}` returns all Person Records</td></tr><tr><td style="width: 11.7942%;">f:#, field:# (field type)</td><td style="width: 8.93399%;">string</td><td style="width: 30.0227%;">Returns all records whose field with index # contains value. Hot tip: The field number is optional. If you wish to search all the fields associated with the records, then you can simply use "f".</td><td style="width: 23.4693%;">`f:1:a` returns all Records whose field #1 (Title) contains "a".`f:a` returns all Records which have an "a" in any field</td><td style="width: 25.7329%;">`{"f:1":"a"}`returns all Records whose field #1 (Title) contains "a";`{"f":"a"}`returns all Records which have an "a" in any field.</td></tr><tr><td style="width: 11.7942%;">ids (record ID)</td><td style="width: 8.93399%;">number</td><td style="width: 30.0227%;">Returns all records with record IDs value.</td><td style="width: 23.4693%;">Separate multiple IDs with commas:`ids:51,52,53`returns Records #51, #52, #53, #54 in the database</td><td style="width: 25.7329%;">`{"ids":"51,52,53,54"}` returns Records #51, #52, #53, #54 in the database</td></tr><tr><td style="width: 11.7942%;">linkedto(linked records)</td><td style="width: 8.93399%;">number</td><td style="width: 30.0227%;">Returns all records that point to the record with ID value.</td><td style="width: 23.4693%;">`linkedto:123` returns all records that point to Record #123</td><td style="width: 25.7329%;">`{"linkedto":"123"}` returns all records that point to Record #123</td></tr><tr><td style="width: 11.7942%;">linkedfrom (linking records)</td><td style="width: 8.93399%;">number</td><td style="width: 30.0227%;">Returns all records that the record with ID value points to.</td><td style="width: 23.4693%;">`linkedfrom:123` returns all records that Record #123 points to</td><td style="width: 25.7329%;">`{"linkedfrom":"123"}`returns all records that Record #123 points to</td></tr><tr><td style="width: 11.7942%;">related (related records)</td><td style="width: 8.93399%;">number</td><td style="width: 30.0227%;">Returns all records that have a relationship to the record with ID value.</td><td style="width: 23.4693%;">`relatedto:123` returns all records related to Record #123</td><td style="width: 25.7329%;">`{"relatedto":"123"}` returns all records related to Record #123</td></tr></tbody></table>
 
 ##### Extending queries
 
@@ -343,7 +414,8 @@ The following queries target special attributes of records such as **Ownership, 
 
 These can be combined: `{"owner":3,"access":"viewable"}`
 
-In order to query multiple types of record whose visibility is not public, use the following query in simple filter syntax : `visibility:-public (t:24 or t:11 or t:25 or t:27 or t:28 or t:29 or t:44)`
+In order to query multiple types of record whose visibility is not public, use the following query in simple filter syntax :   
+`visibility:-public (t:24 or t:11 or t:25 or t:27 or t:28 or t:29 or t:44)`
 
 or the equivalent query in JSon syntax: `{"access":"-public","t":"24,11,25,27,28,29,44"}`
 
@@ -396,11 +468,11 @@ It is also possible to nest logical conjunctions. For example: `{"not":{"any":[{
 - **relatedto** Find records that relates to records from subquery. Relation type (:x) is optional
 - **relatedfrom** Find records that relates FROM records from subquery Relation type (:x) is optional 
     - **Example:** `[{"t":"10"},{"relatedfrom:1103":[{"t":"102"},{"f:1":"BAVIERE"}]},{"sortby":"t"}]`
-- **links** ==to verify==
+- **links** @todo ==to verify==
 
 ##### Bookmarks, Tags
 
-- ==**user, usr,bookmarked by user**==
+- **user, usr,bookmarked by user**
 - **tag, keyword, kwd**
     - **Example :** `[{"kwd":"à corriger"},{"sortby":"t"}]`
 
@@ -414,8 +486,10 @@ It is also possible to nest logical conjunctions. For example: `{"not":{"any":[{
 
 `"X<>Y"` : turns into BETWEEN X AND Y `"-X"` : NOT ( ) `"=X"` : suppress LIKE operator for freetext field type `"<X”`, `">X”` : applicable for numeric and date values only
 
-## A vérifier/recontextualiser 
+## A vérifier/recontextualiser
 
-==notes, n Synonym for f:\[DT\_SHORT\_SUMMARY\]  Where DT\_SHORT\_SUMMARY is replaced with local code of concept 2-3 todo ==
+@todo
 
-==&lt;???Facet search pre-query YES?? what format?? this one works and is clearly different from the mappable query format. Are we simply talking about the presence or absence of "q:" ? Have facet search pre-query ignore "q" and "rules" section if present No {"f:10":"1914-12-31T23:59:59.999Z&lt;&gt;1931-01-01"} Expansion rules YES Generated by expansion rule wizard This is a part of the full mappable query JSon opject No \[{"query":"t:12 linkedfrom:16-90 ","codes":\["16","90","","12","",2\],"levels":\[\]}\]==
+notes, n Synonym for f:\[DT\_SHORT\_SUMMARY\]  Where DT\_SHORT\_SUMMARY is replaced with local code of concept 2-3 todo
+
+&lt;???Facet search pre-query YES?? what format?? this one works and is clearly different from the mappable query format. Are we simply talking about the presence or absence of "q:" ? Have facet search pre-query ignore "q" and "rules" section if present No {"f:10":"1914-12-31T23:59:59.999Z&lt;&gt;1931-01-01"} Expansion rules YES Generated by expansion rule wizard This is a part of the full mappable query JSon opject No \[{"query":"t:12 linkedfrom:16-90 ","codes":\["16","90","","12","",2\],"levels":\[\]}\]
