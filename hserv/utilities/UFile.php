@@ -1,7 +1,8 @@
 <?php
+
 /**
 * UFile.php - Utility functions for file and folder manipulation in Heurist
-* 
+*
 * This file provides a collection of global functions for tasks such as:
 * - Checking existence, creating, and deleting folders (folderExists, folderCreate, folderDelete, folderDelete2, folderCreate2).
 * - Managing folder content and structure (folderAddIndexHTML, allowWebAccessForForlder, folderContent, folderSize, folderSize2, folderFirstFile, folderGetSubFolders, folderTree, folderRecurseCopy, folderSubs).
@@ -30,884 +31,908 @@
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 
-    $glb_curl_code = null;
-    $glb_curl_error = '';
+$glb_curl_code = null;
+$glb_curl_error = '';
 
 
-    /**
-     * Checks if a folder exists and optionally if it's writable.
-     * Also handles cases where a file with the same name as the folder exists.
-     *
-     * @param string $folder The path to the folder.
-     * @param bool $testWrite If true, also checks if the folder is writable.
-     * @return int 1 if folder exists (and is writable if $testWrite is true),
-     *             -1 if path does not exist (or a conflicting file was deleted),
-     *             -2 if folder exists but is not writable (and $testWrite is true),
-     *             -3 if a file with the same name exists but cannot be deleted.
-     */
-    function folderExists($folder, $testWrite){
+/**
+ * Checks if a folder exists and optionally if it's writable.
+ * Also handles cases where a file with the same name as the folder exists.
+ *
+ * @param string $folder The path to the folder.
+ * @param bool $testWrite If true, also checks if the folder is writable.
+ * @return int 1 if folder exists (and is writable if $testWrite is true),
+ *             -1 if path does not exist (or a conflicting file was deleted),
+ *             -2 if folder exists but is not writable (and $testWrite is true),
+ *             -3 if a file with the same name exists but cannot be deleted.
+ */
+function folderExists($folder, $testWrite)
+{
 
-        if(file_exists($folder)){
+    if (file_exists($folder)) {
 
-            if(is_dir($folder)){
+        if (is_dir($folder)) {
 
-                if ($testWrite && !is_writable($folder)) {
-                    //echo ("<h3>Warning:</h3> Folder $folder already exists and it is not writeable. Check permissions! ($msg)<br>");
-                    return -2;
-                }
-            }else{
-                if(!unlink($folder)){
-                    //echo ("<h3>Warning:</h3> Unable to remove file $folder. We need to create a folder with this name ($msg)<br>");
-                    return -3;
-                }
-                return -1;
+            if ($testWrite && !is_writable($folder)) {
+                //echo ("<h3>Warning:</h3> Folder $folder already exists and it is not writeable. Check permissions! ($msg)<br>");
+                return -2;
             }
-
-            return 1;
-
-        }else{
+        } else {
+            if (!unlink($folder)) {
+                //echo ("<h3>Warning:</h3> Unable to remove file $folder. We need to create a folder with this name ($msg)<br>");
+                return -3;
+            }
             return -1;
         }
 
+        return 1;
+
+    } else {
+        return -1;
     }
 
-    /**
-     * Provides a verbose error message based on the result of folderExists.
-     *
-     * @param string $folder The path to the folder.
-     * @param bool $testWrite If true, write permissions were tested.
-     * @param string $folderName A descriptive name for the folder (used in error messages).
-     * @return string|true True if folder exists and meets conditions, otherwise an error message string.
-     */
-    function folderExistsVerbose($folder, $testWrite, $folderName){
+}
 
-        $res = folderExists($folder, $testWrite);
-        if($res<0){
-            $s='';
-            if($res==-1){
-                $s = 'Cant find folder "'.$folderName.'" in database directory';
-            }elseif($res==-2){
-                $s = 'Folder "'.$folderName.'" in database directory is not writeable';
-            }elseif($res==-3){
-                $s = 'Cant create folder "'.$folderName.'" in database directory. It is not possible to delete file with the same name';
-            }
+/**
+ * Provides a verbose error message based on the result of folderExists.
+ *
+ * @param string $folder The path to the folder.
+ * @param bool $testWrite If true, write permissions were tested.
+ * @param string $folderName A descriptive name for the folder (used in error messages).
+ * @return string|true True if folder exists and meets conditions, otherwise an error message string.
+ */
+function folderExistsVerbose($folder, $testWrite, $folderName)
+{
 
-            return $s;
+    $res = folderExists($folder, $testWrite);
+    if ($res < 0) {
+        $s = '';
+        if ($res == -1) {
+            $s = 'Cant find folder "' . $folderName . '" in database directory';
+        } elseif ($res == -2) {
+            $s = 'Folder "' . $folderName . '" in database directory is not writeable';
+        } elseif ($res == -3) {
+            $s = 'Cant create folder "' . $folderName . '" in database directory. It is not possible to delete file with the same name';
         }
 
-        return true;
+        return $s;
     }
 
+    return true;
+}
 
-    /**
-     * Creates a folder if it doesn't exist.
-     * Relies on folderExists to check status before creation.
-     *
-     * @param string $folder The path to the folder to create.
-     * @param bool $testWrite If true, checks if the parent directory (or existing folder) is writable.
-     * @return bool True if the folder exists or was successfully created, false on failure to create.
-     */
-    function folderCreate($folder, $testWrite){
 
-        // -1  not exists
-        // -2  not writable
-        // -3  file with the same name cannot be deleted
-        $res = folderExists($folder, $testWrite);
+/**
+ * Creates a folder if it doesn't exist.
+ * Relies on folderExists to check status before creation.
+ *
+ * @param string $folder The path to the folder to create.
+ * @param bool $testWrite If true, checks if the parent directory (or existing folder) is writable.
+ * @return bool True if the folder exists or was successfully created, false on failure to create.
+ */
+function folderCreate($folder, $testWrite)
+{
 
-        if($res == -1){
-            if (!mkdir($folder, 0775, true)) {
-                //echo ("<h3>Warning:</h3> Unable to create folder $folder ($msg)<br>");
-                return false;
-            }
+    // -1  not exists
+    // -2  not writable
+    // -3  file with the same name cannot be deleted
+    $res = folderExists($folder, $testWrite);
+
+    if ($res == -1) {
+        if (!mkdir($folder, 0775, true)) {
+            //echo ("<h3>Warning:</h3> Unable to create folder $folder ($msg)<br>");
+            return false;
         }
-
-        return true;
     }
 
+    return true;
+}
 
-    /**
-     * Creates a folder, checks write permissions, adds an index.html file to prevent browsing,
-     * and optionally adds an .htaccess file to allow web access.
-     *
-     * @param string $folder The path to the folder to create.
-     * @param string $message A descriptive message used in error reporting if folder creation fails (related to the purpose of the folder).
-     * @param bool $allowWebAccess Optional. If true, attempts to copy an .htaccess file to allow web access. Defaults to false.
-     * @return string An error message string if folder creation or setup fails, otherwise an empty string.
-     */
-    function folderCreate2($folder, $message, $allowWebAccess=false){
 
-        $swarn = '';
+/**
+ * Creates a folder, checks write permissions, adds an index.html file to prevent browsing,
+ * and optionally adds an .htaccess file to allow web access.
+ *
+ * @param string $folder The path to the folder to create.
+ * @param string $message A descriptive message used in error reporting if folder creation fails (related to the purpose of the folder).
+ * @param bool $allowWebAccess Optional. If true, attempts to copy an .htaccess file to allow web access. Defaults to false.
+ * @return string An error message string if folder creation or setup fails, otherwise an empty string.
+ */
+function folderCreate2($folder, $message, $allowWebAccess = false)
+{
 
-        $check = folderExists($folder, true);
+    $swarn = '';
 
-        if($check==-2){
-            $swarn = 'Cannot access folder (it, or a subdirectory, is not writeable) '. $folder .'  '.$message.'<br>';
+    $check = folderExists($folder, true);
 
-        }elseif($check==-1){
-            if (!mkdir($folder, 0777, true)) {
-                $swarn = 'Unable to create folder '. $folder .'  '.$message.'<br>';
-            }else{
-                $check=1;
+    if ($check == -2) {
+        $swarn = 'Cannot access folder (it, or a subdirectory, is not writeable) ' . $folder . '  ' . $message . '<br>';
+
+    } elseif ($check == -1) {
+        if (!mkdir($folder, 0777, true)) {
+            $swarn = 'Unable to create folder ' . $folder . '  ' . $message . '<br>';
+        } else {
+            $check = 1;
+        }
+    }
+
+    if ($check > 0) {
+
+        folderAddIndexHTML($folder);
+
+        if ($allowWebAccess) {
+            //copy htaccess
+            $res = allowWebAccessForForlder($folder);
+            if (!$res) {
+                $swarn = "Cannot copy htaccess file for folder $folder<br>";
             }
         }
+    }
+    return $swarn;
+}
 
-        if ($check>0){
+/**
+ * Adds an index.html file to the specified folder to prevent directory browsing.
+ * The file contains a simple "Sorry, this folder cannot be browsed" message.
+ *
+ * @param string $folder The path to the folder.
+ * @return void
+ */
+function folderAddIndexHTML($folder)
+{
 
-            folderAddIndexHTML( $folder );
+    $filename = $folder . "/index.html";
+    if (!file_exists($filename)) {
+        $file = fopen($filename, 'x');
+        if ($file) { // returns false if file exists - don't overwrite
+            fwrite($file, "Sorry, this folder cannot be browsed");
+            fclose($file);
+        }
+    }
+}
 
-            if($allowWebAccess){
-                //copy htaccess
-                $res = allowWebAccessForForlder( $folder );
-                if(!$res){
-                    $swarn = "Cannot copy htaccess file for folder $folder<br>";
+
+/**
+ * Allows web access to a folder by copying a pre-configured .htaccess file into it.
+ * This .htaccess typically allows direct access to files but not directory listing.
+ *
+ * @param string $folder The path to the folder.
+ * @return bool True if the .htaccess file was copied successfully or already exists, false on failure to copy.
+ */
+function allowWebAccessForForlder($folder)
+{
+    $res = true;
+    $folder = USanitize::sanitizePath($folder);
+    if (file_exists($folder) && is_dir($folder) && !file_exists($folder . '.htaccess')) {
+        $res = copy(HEURIST_DIR . 'admin/setup/.htaccess_via_url', $folder . '.htaccess');
+    }
+    return $res;
+}
+
+/**
+ * Recursively deletes a folder and its contents.
+ *
+ * @param string $dir The path to the directory to delete.
+ * @param bool $rmdir Optional. If true (default), removes the directory itself after deleting its contents.
+ * @param bool $verbos Optional. If true, returns an array of messages about deleted files/folders. Defaults to false.
+ * @return array|null If $verbos is true, an array of messages. Otherwise, null.
+ */
+function folderDelete($dir, $rmdir = true, $verbos = false)
+{
+
+    $msgs = [];
+
+    if (is_dir($dir)) {
+        $objects = scandir($dir);
+        foreach ($objects as $object) {
+            if ($object != '.' && $object != '..') {
+                if (filetype($dir . '/' . $object) == 'dir') {
+
+                    $rtn = folderDelete($dir . '/' . $object, true, $verbos);//delete files
+
+                    $msgs[] = "Deleting sub directory $object";
+                    if ($verbos && !empty($rtn)) { // merge messages
+                        $msgs = array_merge($msgs, $rtn);
+                    }
+                } else {
+                    $msgs[] = "Deleted file $object, size: " . filesize("$dir/$object");
+                    unlink($dir . '/' . $object);
                 }
             }
         }
-        return $swarn;
+        reset($objects);
+        if ($rmdir) {
+            rmdir($dir);//delete folder itself
+        }
     }
 
-    /**
-     * Adds an index.html file to the specified folder to prevent directory browsing.
-     * The file contains a simple "Sorry, this folder cannot be browsed" message.
-     *
-     * @param string $folder The path to the folder.
-     * @return void
-     */
-    function folderAddIndexHTML($folder) {
+    return $verbos ? $msgs : null;
+}
 
-        $filename = $folder."/index.html";
-        if(!file_exists($filename)){
-            $file = fopen($filename,'x');
-            if ($file) { // returns false if file exists - don't overwrite
-                fwrite($file,"Sorry, this folder cannot be browsed");
-                fclose($file);
+/**
+ * Removes a folder and all its contents using RecursiveIteratorIterator.
+ *
+ * @param string $dir The path to the directory to delete.
+ * @param bool $rmdir If true, removes the directory itself after deleting its contents.
+ * @return bool True if the operation was successful or the directory didn't exist, false if rmdir failed.
+ */
+function folderDelete2(string $dir, bool $rmdir = true): bool
+{
+    if (!is_dir($dir)) {
+        return true; // nothing to do
+    }
+
+    try {
+        $it = new \RecursiveDirectoryIterator(
+            $dir,
+            \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_FILEINFO,
+        );
+        $files = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
+
+        foreach ($files as $file) {
+            // Delete links and regular files without resolving outside the tree
+            if ($file->isLink() || $file->isFile()) {
+                if (!@unlink($file->getPathname())) {
+                    return false;
+                }
+                continue;
+            }
+            if ($file->isDir()) {
+                if (!@rmdir($file->getPathname())) {
+                    return false;
+                }
             }
         }
+    } catch (\Throwable $e) {
+        return false; // unreadable path or iterator error
     }
 
+    return $rmdir ? @rmdir($dir) : true;
+}
 
-    /**
-     * Allows web access to a folder by copying a pre-configured .htaccess file into it.
-     * This .htaccess typically allows direct access to files but not directory listing.
-     *
-     * @param string $folder The path to the folder.
-     * @return bool True if the .htaccess file was copied successfully or already exists, false on failure to copy.
-     */
-    function allowWebAccessForForlder($folder){
-        $res = true;
-        $folder = USanitize::sanitizePath($folder);
-        if(file_exists($folder) && is_dir($folder) && !file_exists($folder.'.htaccess')){
-            $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'.htaccess');
+
+/**
+ * Gets a list of files in specified directories, optionally filtered by extensions.
+ * Formats the output similarly to a Heurist search result list.
+ * Used for tasks like finding entity configuration files or browsing icon libraries.
+ *
+ * @param string|array $dirs A single directory path or an array of directory paths to scan.
+ * @param string|array|null $exts Optional. A single file extension or an array of extensions to filter by (e.g., 'cfg', ['jpg', 'png']).
+ *                                If null, all files are included.
+ * @param bool $include_dates Optional. If true, attempts to parse dates from filenames (e.g., "file.sql.bz2.YYYY-MM-DD")
+ *                            and adjust the extension accordingly. Defaults to false.
+ * @return array An array structured like a Heurist search result, containing file details.
+ *               Keys: 'pageno', 'offset', 'count', 'reccount', 'fields', 'records', 'order', 'entityName'.
+ * @todo Implement $is_reqursive parameter for recursive scanning.
+ */
+function folderContent($dirs, $exts = null, $include_dates = false)
+{
+
+    $records = [];
+    $order = [];
+    $fields = ['file_id', 'file_name', 'file_dir', 'file_url', 'file_size'];
+    $idx = 1;
+    if (!is_array($dirs)) {
+        $dirs = [$dirs];
+    }
+    if ($exts != null && !is_array($exts)) {
+        $exts = [$exts];
+    }
+
+    foreach ($dirs as $dir) {
+
+        $dir = USanitize::sanitizePath($dir);
+        if (substr($dir, -1, 1) != '/') {
+            $dir .= '/';
         }
-        return $res;
-    }
 
-    /**
-     * Recursively deletes a folder and its contents.
-     *
-     * @param string $dir The path to the directory to delete.
-     * @param bool $rmdir Optional. If true (default), removes the directory itself after deleting its contents.
-     * @param bool $verbos Optional. If true, returns an array of messages about deleted files/folders. Defaults to false.
-     * @return array|null If $verbos is true, an array of messages. Otherwise, null.
-     */
-    function folderDelete($dir, $rmdir=true, $verbos = false) {
 
-        $msgs = [];
+        if (!defined('HEURIST_FILESTORE_ROOT') || strpos($dir, HEURIST_FILESTORE_ROOT) !== false) {
+            //in database filestore
+            $folder = $dir;
+            $url = null;
+        } elseif (strpos($dir, '/srv/BACKUP') === 0) {  //in /srv/BACKUP
+            $folder = $dir;
+            $url = null;
+        } else {
+            //relative to heurist folder
+            $folder =  HEURIST_DIR . $dir;
+            $url = HEURIST_BASE_URL . $dir;
+        }
 
-        if (is_dir($dir)) {
-            $objects = scandir($dir);
-            foreach ($objects as $object) {
-                if ($object != '.' && $object != '..') {
-                    if (filetype($dir.'/'.$object) == 'dir') {
+        if (!(file_exists($folder) && is_dir($folder))) {
+            continue;
+        }
 
-                        $rtn = folderDelete($dir.'/'.$object, true, $verbos);//delete files
 
-                        $msgs[] = "Deleting sub directory $object";
-                        if($verbos && !empty($rtn)){ // merge messages
-                            $msgs = array_merge($msgs, $rtn);
-                        }
-                    } else {
-                        $msgs[] = "Deleted file $object, size: " . filesize("$dir/$object");
-                        unlink($dir.'/'.$object);
+        $files = scandir($folder);
+        foreach ($files as $filename) {
+
+            $fullPath = "{$folder}{$filename}";
+            $path_parts = pathinfo($filename);
+            if (in_array('folders', $exts) && is_dir($fullPath) && $filename != '.' && $filename != '..') {
+
+                $fsize = folderSize($fullPath);
+
+                $records[$idx] = [$idx, $filename, $folder, $url, $fsize];
+                $order[] = $idx;
+                $idx++;
+
+            } elseif (array_key_exists('extension', $path_parts)) {
+
+                $ext = strtolower($path_parts['extension']);
+                if ($include_dates && (strlen($ext) == 10) && (DateTime::createFromFormat('Y-m-d', $ext) !== false)) {
+                    $fname = substr($filename, 0, -11);
+                    $path_parts = pathinfo($fname);
+                    if (array_key_exists('extension', $path_parts)) {
+                        $ext = strtolower($path_parts['extension']);
                     }
                 }
-            }
-            reset($objects);
-            if($rmdir){
-                rmdir($dir);//delete folder itself
-            }
-        }
 
-        return $verbos ? $msgs : null;
-    }
-
-    /**
-     * Removes a folder and all its contents using RecursiveIteratorIterator.
-     *
-     * @param string $dir The path to the directory to delete.
-     * @param bool $rmdir If true, removes the directory itself after deleting its contents.
-     * @return bool True if the operation was successful or the directory didn't exist, false if rmdir failed.
-     */
-    function folderDelete2(string $dir, bool $rmdir = true): bool
-    {
-        if (!is_dir($dir)) {
-            return true; // nothing to do
-        }
-
-        try {
-            $it = new \RecursiveDirectoryIterator(
-                $dir,
-                \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_FILEINFO
-            );
-            $files = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
-
-            foreach ($files as $file) {
-                // Delete links and regular files without resolving outside the tree
-                if ($file->isLink() || $file->isFile()) {
-                    if (!@unlink($file->getPathname())) {
-                        return false;
-                    }
-                    continue;
-                }
-                if ($file->isDir()) {
-                    if (!@rmdir($file->getPathname())) {
-                        return false;
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            return false; // unreadable path or iterator error
-        }
-
-        return $rmdir ? @rmdir($dir) : true;
-    }
-
-
-    /**
-     * Gets a list of files in specified directories, optionally filtered by extensions.
-     * Formats the output similarly to a Heurist search result list.
-     * Used for tasks like finding entity configuration files or browsing icon libraries.
-     *
-     * @param string|array $dirs A single directory path or an array of directory paths to scan.
-     * @param string|array|null $exts Optional. A single file extension or an array of extensions to filter by (e.g., 'cfg', ['jpg', 'png']).
-     *                                If null, all files are included.
-     * @param bool $include_dates Optional. If true, attempts to parse dates from filenames (e.g., "file.sql.bz2.YYYY-MM-DD")
-     *                            and adjust the extension accordingly. Defaults to false.
-     * @return array An array structured like a Heurist search result, containing file details.
-     *               Keys: 'pageno', 'offset', 'count', 'reccount', 'fields', 'records', 'order', 'entityName'.
-     * @todo Implement $is_reqursive parameter for recursive scanning.
-     */
-    function folderContent($dirs, $exts=null, $include_dates=false) {
-
-        $records = array();
-        $order = array();
-        $fields = array('file_id', 'file_name', 'file_dir', 'file_url', 'file_size');
-        $idx = 1;
-        if(!is_array($dirs)) {$dirs = array($dirs);}
-        if($exts!=null && !is_array($exts)) {$exts = array($exts);}
-
-        foreach ($dirs as $dir) {
-
-            $dir = USanitize::sanitizePath($dir);
-            if( substr($dir, -1, 1) != '/' )  {
-                $dir .= '/';
-            }
-
-
-            if (!defined('HEURIST_FILESTORE_ROOT') || strpos($dir, HEURIST_FILESTORE_ROOT)!==false) {
-                //in database filestore
-                $folder = $dir;
-                $url = null;
-            }elseif(strpos($dir, '/srv/BACKUP')===0){  //in /srv/BACKUP
-                $folder = $dir;
-                $url = null;
-            }else{
-                //relative to heurist folder
-                $folder =  HEURIST_DIR.$dir;
-                $url = HEURIST_BASE_URL.$dir;
-            }
-
-            if (!(file_exists($folder) && is_dir($folder))) {continue;}
-
-
-            $files = scandir($folder);
-            foreach ($files as $filename) {
-
-                $fullPath = "{$folder}{$filename}";
-                $path_parts = pathinfo($filename);
-                if(in_array('folders', $exts) && is_dir($fullPath) && $filename != '.' && $filename != '..'){
-
-                    $fsize = folderSize($fullPath);
+                if (file_exists($fullPath) && ($exts == null || in_array($ext, $exts))) {
+                    $fsize = (is_file($fullPath)) ? filesize($fullPath) : 0;
 
                     $records[$idx] = [$idx, $filename, $folder, $url, $fsize];
                     $order[] = $idx;
                     $idx++;
+                }
+            }
+        }//for
+    }
 
-                }elseif(array_key_exists('extension', $path_parts)){
 
-                    $ext = strtolower($path_parts['extension']);
-                    if($include_dates && (strlen($ext)==10) && (DateTime::createFromFormat('Y-m-d', $ext) !== false)){
-                        $fname = substr($filename, 0, -11);
-                        $path_parts = pathinfo($fname);
-                        if(array_key_exists('extension', $path_parts)){
-                            $ext = strtolower($path_parts['extension']);
+    $response = [
+        'pageno' => 0,  //page number to sync
+        'offset' => 0,
+        'count' => count($records),
+        'reccount' => count($records),
+        'fields' => $fields,
+        'records' => $records,
+        'order' => $order,
+        'entityName' => 'files'];
+
+    return $response;
+
+}
+
+/**
+ * Calculates the total size of all files within a directory (recursively).
+ * This is an alternative implementation of folderSize.
+ *
+ * @param string $dir The path to the directory.
+ * @return int The total size of files in the directory in bytes. Returns 0 if the directory is not valid.
+ */
+function folderSize2($dir)
+{
+
+    $size = 0;
+
+    $dir = realpath($dir);
+
+    if ($dir !== false && file_exists($dir) && is_dir($dir) === true) {
+
+        $arr = glob(rtrim($dir, '/') . '/*', GLOB_NOSORT);
+        foreach ($arr as $each) {
+            $size += is_file($each) ? filesize($each) : folderSize($each);
+        }
+
+    }
+
+    return $size;
+}
+
+/**
+ * Calculates the total size of a directory or a file.
+ * For directories, it attempts to use system commands (`du`) for efficiency on non-Windows systems,
+ * or COM objects on Windows. Falls back to recursive PHP iteration if system calls fail.
+ *
+ * @param string $dir The path to the directory or file.
+ * @return int The total size in bytes.
+ */
+function folderSize($dir)
+{
+    $dir = rtrim(str_replace('\\', '/', $dir), '/');
+
+    if (file_exists($dir) && (is_dir($dir) === true)) {
+
+        $totalSize = 0;
+
+        $dir = USanitize::sanitizePath($dir);
+
+        $dir = realpath($dir);
+
+        if ($dir !== false) {
+
+            $os        = strtoupper(substr(PHP_OS, 0, 3));
+            // If on a Unix Host (Linux, Mac OS)
+            if ($os !== 'WIN') {
+                $cmd = escapeshellcmd('/usr/bin/du -sb ' . $dir);
+                $io = popen($cmd, 'r');
+                if ($io !== false) {
+                    $totalSize = intval(fgets($io, 80));
+                    pclose($io);
+                    return $totalSize;
+                }
+            }
+            // If on a Windows Host (WIN32, WINNT, Windows)
+            if ($os === 'WIN' && extension_loaded('com_dotnet')) {
+                $obj = new \COM('scripting.filesystemobject');
+                if (is_object($obj)) {
+                    $ref       = $obj->getfolder($dir);
+                    $totalSize = $ref->size;
+                    $obj       = null;
+                    return $totalSize;
+                }
+            }
+            // If System calls did't work, use slower PHP
+            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS));
+            foreach ($files as $file) {
+
+                if (!$file->isDir()) {
+                    $totalSize += $file->getSize();
+                }
+            }
+        }
+        return $totalSize;
+    } elseif (is_file($dir) === true) {
+        return filesize($dir);
+    }
+}
+
+/**
+ * Finds the first file in a directory, optionally matching a specific extension and recursing into subdirectories.
+ *
+ * @param string $dir The path to the directory to search.
+ * @param string|null $ext Optional. The file extension to filter by (e.g., 'jpg'). If null, the first file found is returned.
+ * @param bool $recursion Optional. If true (default), searches recursively into subdirectories.
+ * @return string|null The full path to the first matching file found, or null if no file is found or directory is invalid.
+ */
+function folderFirstFile($dir, $ext = null, $recursion = true)
+{
+
+    $dir = realpath($dir);
+
+    if ($dir !== false) {
+
+        $dirs = scandir($dir);
+        foreach ($dirs as $node) {
+            if (($node == '.') || ($node == '..')) {
+                continue;
+            }
+            $file = $dir . '/' . $node;
+            if (is_dir($file)) {
+                if ($recursion) {
+                    return folderFirstFile($file, $ext, $recursion);
+                }
+            } else {
+                if ($ext != null) {
+                    $path_parts = pathinfo($file);
+                    if (array_key_exists('extension', $path_parts)) {
+                        $fext = strtolower($path_parts['extension']);
+                        if ($ext == $fext) {
+                            return $file;
                         }
                     }
-
-                    if(file_exists($fullPath) && ($exts==null || in_array($ext, $exts)))
-                    {
-                        $fsize = (is_file($fullPath))?filesize($fullPath):0;
-
-                        $records[$idx] = array($idx, $filename, $folder, $url, $fsize);
-                        $order[] = $idx;
-                        $idx++;
-                    }
-                }
-            }//for
-        }
-
-
-        $response = array(
-                            'pageno'=>0,  //page number to sync
-                            'offset'=>0,
-                            'count'=>count($records),
-                            'reccount'=>count($records),
-                            'fields'=>$fields,
-                            'records'=>$records,
-                            'order'=>$order,
-                            'entityName'=>'files');
-
-        return $response;
-
-    }
-
-    /**
-     * Calculates the total size of all files within a directory (recursively).
-     * This is an alternative implementation of folderSize.
-     *
-     * @param string $dir The path to the directory.
-     * @return int The total size of files in the directory in bytes. Returns 0 if the directory is not valid.
-     */
-    function folderSize2($dir){
-
-        $size = 0;
-
-        $dir = realpath($dir);
-
-        if($dir!==false && file_exists($dir) && is_dir($dir)===true){
-
-            $arr = glob(rtrim($dir, '/').'/*', GLOB_NOSORT);
-            foreach ($arr as $each) {
-                $size += is_file($each) ? filesize($each) : folderSize($each);
-            }
-
-        }
-
-        return $size;
-    }
-
-    /**
-     * Calculates the total size of a directory or a file.
-     * For directories, it attempts to use system commands (`du`) for efficiency on non-Windows systems,
-     * or COM objects on Windows. Falls back to recursive PHP iteration if system calls fail.
-     *
-     * @param string $dir The path to the directory or file.
-     * @return int The total size in bytes.
-     */
-    function folderSize($dir)
-    {
-        $dir = rtrim(str_replace('\\', '/', $dir), '/');
-
-        if (file_exists($dir) && (is_dir($dir) === true)) {
-
-            $totalSize = 0;
-
-            $dir = USanitize::sanitizePath($dir);
-
-            $dir = realpath($dir);
-
-            if($dir!==false){
-
-                $os        = strtoupper(substr(PHP_OS, 0, 3));
-                // If on a Unix Host (Linux, Mac OS)
-                if ($os !== 'WIN') {
-                    $cmd = escapeshellcmd('/usr/bin/du -sb ' . $dir);
-                    $io = popen($cmd, 'r');
-                    if ($io !==false) {
-                        $totalSize = intval(fgets($io, 80));
-                        pclose($io);
-                        return $totalSize;
-                    }
-                }
-                // If on a Windows Host (WIN32, WINNT, Windows)
-                if ($os === 'WIN' && extension_loaded('com_dotnet')) {
-                    $obj = new \COM('scripting.filesystemobject');
-                    if (is_object($obj)) {
-                        $ref       = $obj->getfolder($dir);
-                        $totalSize = $ref->size;
-                        $obj       = null;
-                        return $totalSize;
-                    }
-                }
-                // If System calls did't work, use slower PHP
-                $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS));
-                foreach ($files as $file) {
-
-                    if(!$file->isDir()){
-                        $totalSize += $file->getSize();
-                    }
-                }
-            }
-            return $totalSize;
-        } elseif (is_file($dir) === true) {
-            return filesize($dir);
-        }
-    }
-
-    /**
-     * Finds the first file in a directory, optionally matching a specific extension and recursing into subdirectories.
-     *
-     * @param string $dir The path to the directory to search.
-     * @param string|null $ext Optional. The file extension to filter by (e.g., 'jpg'). If null, the first file found is returned.
-     * @param bool $recursion Optional. If true (default), searches recursively into subdirectories.
-     * @return string|null The full path to the first matching file found, or null if no file is found or directory is invalid.
-     */
-    function folderFirstFile($dir, $ext=null, $recursion=true){
-
-        $dir = realpath($dir);
-
-        if($dir!==false){
-
-            $dirs = scandir($dir);
-            foreach ($dirs as $node) {
-                if (($node == '.' ) || ($node == '..' )) {
-                    continue;
-                }
-                $file = $dir.'/'.$node;
-                if(is_dir($file)){
-                    if($recursion){
-                        return folderFirstFile($file, $ext, $recursion);
-                    }
-                }else{
-                    if($ext!=null)
-                    {
-                        $path_parts = pathinfo($file);
-                        if(array_key_exists('extension', $path_parts))
-                        {
-                            $fext = strtolower($path_parts['extension']);
-                            if($ext==$fext){
-                                return $file;
-                            }
-                        }
-                    }else{
-                        return $file;
-                    }
+                } else {
+                    return $file;
                 }
             }
         }
-
-        return null;
     }
 
-    /**
-     * Returns an array of subfolder names within a given directory.
-     *
-     * @param string $dir The path to the directory to scan.
-     * @return array An array of subfolder names. Returns an empty array if the directory is invalid or has no subfolders.
-     */
-    function folderGetSubFolders($dir){
-        $dir = realpath($dir);
+    return null;
+}
 
-        $res = array();
+/**
+ * Returns an array of subfolder names within a given directory.
+ *
+ * @param string $dir The path to the directory to scan.
+ * @return array An array of subfolder names. Returns an empty array if the directory is invalid or has no subfolders.
+ */
+function folderGetSubFolders($dir)
+{
+    $dir = realpath($dir);
 
-        if($dir!==false){
+    $res = [];
 
-            $dirs = scandir($dir);
-            foreach ($dirs as $node) {
-                if (($node == '.' ) || ($node == '..' )) {
-                    continue;
-                }
-                $file = $dir.'/'.$node;
-                if(is_dir($file)){
-                    $res[] = $node;
-                }
+    if ($dir !== false) {
+
+        $dirs = scandir($dir);
+        foreach ($dirs as $node) {
+            if (($node == '.') || ($node == '..')) {
+                continue;
+            }
+            $file = $dir . '/' . $node;
+            if (is_dir($file)) {
+                $res[] = $node;
             }
         }
-
-        return $res;
     }
 
-    /**
-     * Creates a tree-structured array of directories and files from a given root folder.
-     *
-     * @param string|null $dir The root directory path. Defaults to HEURIST_FILESTORE_DIR if null. Can also be a DirectoryIterator object.
-     * @param array $params An associative array of parameters:
-     *                      'withFiles' (bool): False to exclude files, true to include. Default false.
-     *                      'regex' (string): A regex to filter file names. Default empty (no filter).
-     *                      'ignoreEmtpty' (bool): True to not include empty folders in the tree. Default false.
-     *                      'systemFolders' (array|null): An array keyed by folder names to mark them as system folders.
-     *                      'format' (string): If 'fancy', formats output for FancyTree with 'key', 'title', 'folder', 'issystem', 'children', 'files_count'.
-     *                                       Otherwise, returns a nested associative array structure.
-     * @return array The tree structure. If 'format' is 'fancy', returns `['children' => ..., 'count' => ...]`.
-     *               Otherwise, returns a nested array where keys are folder names and values are their subtrees or arrays of file names.
-     */
-    function folderTree($dir, $params)
-    {
-        if($dir==null){
-            $dir = HEURIST_FILESTORE_DIR;
-        }
+    return $res;
+}
 
-        if (!$dir instanceof DirectoryIterator) {
-            $dir = new DirectoryIterator((string)$dir);
-        }
-        $dirs  = array();
-        $files = array();
-        $file_count = 0;
+/**
+ * Creates a tree-structured array of directories and files from a given root folder.
+ *
+ * @param string|null $dir The root directory path. Defaults to HEURIST_FILESTORE_DIR if null. Can also be a DirectoryIterator object.
+ * @param array $params An associative array of parameters:
+ *                      'withFiles' (bool): False to exclude files, true to include. Default false.
+ *                      'regex' (string): A regex to filter file names. Default empty (no filter).
+ *                      'ignoreEmtpty' (bool): True to not include empty folders in the tree. Default false.
+ *                      'systemFolders' (array|null): An array keyed by folder names to mark them as system folders.
+ *                      'format' (string): If 'fancy', formats output for FancyTree with 'key', 'title', 'folder', 'issystem', 'children', 'files_count'.
+ *                                       Otherwise, returns a nested associative array structure.
+ * @return array The tree structure. If 'format' is 'fancy', returns `['children' => ..., 'count' => ...]`.
+ *               Otherwise, returns a nested array where keys are folder names and values are their subtrees or arrays of file names.
+ */
+function folderTree($dir, $params)
+{
+    if ($dir == null) {
+        $dir = HEURIST_FILESTORE_DIR;
+    }
 
-        $withFiles = (@$params['withFiles']==true);
-        $regex = @$params['regex'];
-        $ignoreEmpty = (@$params['ignoreEmtpty']==true);
-        $systemFolders = @$params['systemFolders'];
-        $isFancy = (@$params['format']=='fancy');
-        if(is_array($params)) {$params['systemFolders'] = null;} //use on first level only
-        if($regex==null) {$regex = '';}
+    if (!$dir instanceof DirectoryIterator) {
+        $dir = new DirectoryIterator((string) $dir);
+    }
+    $dirs  = [];
+    $files = [];
+    $file_count = 0;
 
-        $fancytree = array();
+    $withFiles = (@$params['withFiles'] == true);
+    $regex = @$params['regex'];
+    $ignoreEmpty = (@$params['ignoreEmtpty'] == true);
+    $systemFolders = @$params['systemFolders'];
+    $isFancy = (@$params['format'] == 'fancy');
+    if (is_array($params)) {
+        $params['systemFolders'] = null;
+    } //use on first level only
+    if ($regex == null) {
+        $regex = '';
+    }
 
-        foreach ($dir as $node) {
-            if ($node->isDir() && !$node->isDot()) {
+    $fancytree = [];
 
-                $folder_name = $node->getFilename();
-                $is_system = (@$systemFolders[$folder_name]!=null);
-                //(@$params['is_system']==true) ||
-                //$params['is_system'] = $is_system;
+    foreach ($dir as $node) {
+        if ($node->isDir() && !$node->isDot()) {
 
-                $tree = folderTree($node->getPathname(), $params);
-                if (!$ignoreEmpty || count($tree)) {
+            $folder_name = $node->getFilename();
+            $is_system = (@$systemFolders[$folder_name] != null);
+            //(@$params['is_system']==true) ||
+            //$params['is_system'] = $is_system;
 
-                    if($isFancy){
-                        $arr = array( 'key'=>$folder_name, 'title'=>$folder_name,
-                            'folder'=>true, 'issystem'=>$is_system,
-                            'children'=>$tree['children'], 'files_count'=>$tree['count'] );
+            $tree = folderTree($node->getPathname(), $params);
+            if (!$ignoreEmpty || count($tree)) {
 
-                       if($is_system){
-                           $arr['unselectable'] = true;
-                           $arr['unselectableStatus'] = false;
-                       }
+                if ($isFancy) {
+                    $arr = [ 'key' => $folder_name, 'title' => $folder_name,
+                        'folder' => true, 'issystem' => $is_system,
+                        'children' => $tree['children'], 'files_count' => $tree['count'] ];
 
-                       $fancytree[] = $arr;
-
-                    }else{
-                        $dirs[$folder_name] = $tree;
+                    if ($is_system) {
+                        $arr['unselectable'] = true;
+                        $arr['unselectableStatus'] = false;
                     }
-                }
 
-            } elseif($node->isFile()) {
-                if($withFiles){
-                    $name = $node->getFilename();
-                    if ('' == $regex || preg_match($regex, $name)) { //file filter
-                        $files[] = $name;
-                        $fancytree[] = array( 'key'=>$name, 'title'=>$name);
-                    }
+                    $fancytree[] = $arr;
+
+                } else {
+                    $dirs[$folder_name] = $tree;
                 }
-                $file_count++;
             }
-        }
 
-        if($isFancy){
-            usort($fancytree, "__cmpTitleInTree");
-            return array('children'=>$fancytree, 'count'=>$file_count);
-        }else{
-            asort($dirs);
-            sort($files);
-            return array_merge($dirs, $files);
+        } elseif ($node->isFile()) {
+            if ($withFiles) {
+                $name = $node->getFilename();
+                if ('' == $regex || preg_match($regex, $name)) { //file filter
+                    $files[] = $name;
+                    $fancytree[] = [ 'key' => $name, 'title' => $name];
+                }
+            }
+            $file_count++;
         }
     }
 
-
-    function __cmpTitleInTree($a, $b)
-    {
-        if ($a['title'] == $b['title']) {
-            return 0;
-        }
-        $ret = ( strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
-        return $ret;
-    }
-
-    /**
-     * Converts a nested array structure (as returned by folderTree without 'fancy' format)
-     * into a format suitable for the FancyTree jQuery plugin.
-     * NOTE: This function is marked as NOT USED in the original source code comments.
-     *
-     * @param array $data The nested array data representing the folder structure.
-     * @param int $lvl Current recursion level (internal use).
-     * @param array|null $sysfolders Optional. Array to mark system folders.
-     * @return array An array formatted for FancyTree.
-     */
-    function folderTreeToFancyTree($data, $lvl=0, $sysfolders=null){
-        //for fancytree
-        $fancytree = array();
-        foreach($data as $folder => $children){
-
-            $item = array( 'key'=>$folder, 'title'=>$folder,
-                        'folder'=>($folder>=0), 'issystem'=>(@$sysfolders[$folder]!=null) );
-
-            if(!isEmptyArray($children)){
-                $item['children'] = folderTreeToFancyTree($children, $lvl+1);
-            }
-            $fancytree[] = $item;
-        }
+    if ($isFancy) {
         usort($fancytree, "__cmpTitleInTree");
-        return $fancytree;
-
+        return ['children' => $fancytree, 'count' => $file_count];
+    } else {
+        asort($dirs);
+        sort($files);
+        return array_merge($dirs, $files);
     }
+}
 
 
-
-    /**
-     * Checks file existence, readability, and opens it for binary reading.
-     *
-     * @param string $file The path to the file.
-     * @return resource|int Returns a file handle resource on success.
-     *                      Returns -1 if the file does not exist or is not a file.
-     *                      Returns -2 if the file is not readable.
-     *                      Returns -3 if fopen fails.
-     */
-    function fileOpen($file)
-    {
-        if (!(file_exists($file) && is_file($file))) {
-            return -1;
-        }
-        if (!is_readable($file)) {
-            return -2;
-        }
-        $handle = fopen($file, 'rb');
-        if (!$handle) {
-            return -3;
-        }
-        return $handle;
+function __cmpTitleInTree($a, $b)
+{
+    if ($a['title'] == $b['title']) {
+        return 0;
     }
+    $ret = (strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
+    return $ret;
+}
 
-    /**
-     * Copies a file from source to destination.
-     * Creates the destination directory if it doesn't exist.
-     *
-     * @param string $s1 Source file path.
-     * @param string $s2 Destination file path.
-     * @return bool True on successful copy, false otherwise.
-     */
-    function fileCopy($s1, $s2) {
-        $path = pathinfo($s2);
+/**
+ * Converts a nested array structure (as returned by folderTree without 'fancy' format)
+ * into a format suitable for the FancyTree jQuery plugin.
+ * NOTE: This function is marked as NOT USED in the original source code comments.
+ *
+ * @param array $data The nested array data representing the folder structure.
+ * @param int $lvl Current recursion level (internal use).
+ * @param array|null $sysfolders Optional. Array to mark system folders.
+ * @return array An array formatted for FancyTree.
+ */
+function folderTreeToFancyTree($data, $lvl = 0, $sysfolders = null)
+{
+    //for fancytree
+    $fancytree = [];
+    foreach ($data as $folder => $children) {
 
-        if(folderCreate($path['dirname'], true)){
-            if (!copy($s1,$s2)) {
-                // "copy failed";
-                return false;
+        $item = [ 'key' => $folder, 'title' => $folder,
+            'folder' => ($folder >= 0), 'issystem' => (@$sysfolders[$folder] != null) ];
+
+        if (!isEmptyArray($children)) {
+            $item['children'] = folderTreeToFancyTree($children, $lvl + 1);
+        }
+        $fancytree[] = $item;
+    }
+    usort($fancytree, "__cmpTitleInTree");
+    return $fancytree;
+
+}
+
+
+
+/**
+ * Checks file existence, readability, and opens it for binary reading.
+ *
+ * @param string $file The path to the file.
+ * @return resource|int Returns a file handle resource on success.
+ *                      Returns -1 if the file does not exist or is not a file.
+ *                      Returns -2 if the file is not readable.
+ *                      Returns -3 if fopen fails.
+ */
+function fileOpen($file)
+{
+    if (!(file_exists($file) && is_file($file))) {
+        return -1;
+    }
+    if (!is_readable($file)) {
+        return -2;
+    }
+    $handle = fopen($file, 'rb');
+    if (!$handle) {
+        return -3;
+    }
+    return $handle;
+}
+
+/**
+ * Copies a file from source to destination.
+ * Creates the destination directory if it doesn't exist.
+ *
+ * @param string $s1 Source file path.
+ * @param string $s2 Destination file path.
+ * @return bool True on successful copy, false otherwise.
+ */
+function fileCopy($s1, $s2)
+{
+    $path = pathinfo($s2);
+
+    if (folderCreate($path['dirname'], true)) {
+        if (!copy($s1, $s2)) {
+            // "copy failed";
+            return false;
+        }
+    } else {
+        //can't create folder or it is not writeable
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Deletes a file if it exists.
+ *
+ * @param string $filename The path to the file to delete.
+ * @return void
+ */
+function fileDelete($filename)
+{
+    if (!empty($filename) && file_exists($filename)) {
+        unlink($filename);
+    }
+}
+
+/**
+ * Saves raw data to a file. If the file exists, it's deleted first.
+ * Used for saving system version or temporary remote content.
+ *
+ * @param string $rawdata The data to save.
+ * @param string $filename The path to the file.
+ * @return int|false The number of bytes written to the file on success, or 0 if $rawdata is empty or $filename is not a string.
+ */
+function fileSave($rawdata, $filename)
+{
+    if (!empty($rawdata) && is_string($filename)) {
+        fileDelete($filename);
+        $fp = fopen($filename, 'x');
+        fwrite($fp, $rawdata);
+        fclose($fp);
+
+        return filesize($filename);
+    } else {
+        return 0;
+    }
+}
+/**
+ * Appends raw data to the end of a file.
+ *
+ * @param string $rawdata The data to append.
+ * @param string $filename The path to the file.
+ * @return int|false The new file size after appending, or 0 if $rawdata is empty.
+ */
+function fileAdd($rawdata, $filename)
+{
+    if ($rawdata) {
+        try {
+            $fp = fopen($filename, 'a');//open for add
+            if ($fp === false) {
+                // 'Cannot open file '.$filename
+            } else {
+                fwrite($fp, $rawdata);
+                fclose($fp);
             }
-        }else{
-           //can't create folder or it is not writeable
-           return false;
+
+        } catch (\Exception  $e) {
+            // Cannot open file '.$filename.'  Error:'.$e->getMessage()
         }
-        return true;
+
+        return filesize($filename);
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * Generates a unique filename in a given directory by appending a counter if a file with the same name already exists.
+ * Example: if "file.txt" exists, it will try "file(1).txt", then "file(2).txt", and so on.
+ *
+ * @param string $folder The directory path where the file should be unique.
+ * @param string $filename The base name of the file (without extension as it's extracted via pathinfo).
+ * @param string $ext The file extension (e.g., ".txt" or "txt").
+ * @return string The full path to a unique filename.
+ */
+function getUniqueFileName($folder, $filename, $ext)
+{
+
+    $path_parts = pathinfo($filename);
+    $filename = $path_parts['filename'];
+    if (strpos($ext, '.') == false) {
+        $ext = '.' . $ext;
     }
 
-    /**
-     * Deletes a file if it exists.
-     *
-     * @param string $filename The path to the file to delete.
-     * @return void
-     */
-    function fileDelete( $filename ){
-        if(!empty($filename) && file_exists($filename)){
-            unlink($filename);
-        }
+    $file_fullpath = $folder . $filename . $ext;
+
+    $k = strpos($filename, '(');
+    $k2 = strpos($filename, ')');
+    if ($k > 0 && $k2 > 0) {
+        $cnt = intval(substr($filename, $k + 1, $k2 - $k));
+        $filename = substr($filename, 0, $k);
+    } else {
+        $cnt = 0;
     }
 
-    /**
-     * Saves raw data to a file. If the file exists, it's deleted first.
-     * Used for saving system version or temporary remote content.
-     *
-     * @param string $rawdata The data to save.
-     * @param string $filename The path to the file.
-     * @return int|false The number of bytes written to the file on success, or 0 if $rawdata is empty or $filename is not a string.
-     */
-    function fileSave($rawdata, $filename)
-    {
-        if(!empty($rawdata) && is_string($filename)){
-            fileDelete($filename);
-            $fp = fopen($filename, 'x');
-            fwrite($fp, $rawdata);
-            fclose($fp);
-
-            return filesize($filename);
-        }else{
-            return 0;
+    do {
+        if (file_exists($file_fullpath)) {
+            $cnt++;
+            $file_fullpath = $folder . $filename . "($cnt)$ext";
         }
-    }
-    /**
-     * Appends raw data to the end of a file.
-     *
-     * @param string $rawdata The data to append.
-     * @param string $filename The path to the file.
-     * @return int|false The new file size after appending, or 0 if $rawdata is empty.
-     */
-    function fileAdd($rawdata, $filename)
-    {
-        if($rawdata){
-            try{
-                $fp = fopen($filename,'a');//open for add
-                if($fp===false){
-                    // 'Cannot open file '.$filename
-                }else{
-                    fwrite($fp, $rawdata);
-                    fclose($fp);
-                }
+    } while (file_exists($file_fullpath));
 
-            }catch(\Exception  $e){
-                // Cannot open file '.$filename.'  Error:'.$e->getMessage()
-            }
-
-            return filesize($filename);
-        }else{
-            return 0;
-        }
-    }
-
-    /**
-     * Generates a unique filename in a given directory by appending a counter if a file with the same name already exists.
-     * Example: if "file.txt" exists, it will try "file(1).txt", then "file(2).txt", and so on.
-     *
-     * @param string $folder The directory path where the file should be unique.
-     * @param string $filename The base name of the file (without extension as it's extracted via pathinfo).
-     * @param string $ext The file extension (e.g., ".txt" or "txt").
-     * @return string The full path to a unique filename.
-     */
-    function getUniqueFileName($folder, $filename, $ext){
-
-        $path_parts = pathinfo($filename);
-        $filename = $path_parts['filename'];
-        if(strpos($ext,'.')==false){
-            $ext = '.'.$ext;
-        }
-
-        $file_fullpath = $folder.$filename.$ext;
-
-        $k = strpos($filename,'(');
-        $k2 = strpos($filename,')');
-        if($k>0 && $k2>0){
-            $cnt = intval(substr($filename,$k+1,$k2-$k));
-            $filename = substr($filename,0,$k);
-        }else{
-            $cnt = 0;
-        }
-
-        do{
-            if(file_exists($file_fullpath)){
-                $cnt++;
-                $file_fullpath = $folder.$filename."($cnt)$ext";
-            }
-        }while (file_exists($file_fullpath));
-
-        return $file_fullpath;
-    }
+    return $file_fullpath;
+}
 
 
 
-    /**
-     * Returns the target path as relative reference from the base path.
-     *
-     * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
-     * Both paths must be absolute and not contain relative parts.
-     *
-     * @param string $basePath   The base path
-     * @param string $targetPath The target path
-     *
-     * @return string The relative target path
-     */
-     /*  does not work
+/**
+ * Returns the target path as relative reference from the base path.
+ *
+ * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
+ * Both paths must be absolute and not contain relative parts.
+ *
+ * @param string $basePath   The base path
+ * @param string $targetPath The target path
+ *
+ * @return string The relative target path
+ */
+/*  does not work
     function getRelativePath($basePath, $targetPath)
     {
-        // Normalize path separators for cross-platform compatibility
-        $basePath = str_replace('\\', '/', rtrim($basePath, '/'));
-        $targetPath = str_replace('\\', '/', rtrim($targetPath, '/'));
+   // Normalize path separators for cross-platform compatibility
+   $basePath = str_replace('\\', '/', rtrim($basePath, '/'));
+   $targetPath = str_replace('\\', '/', rtrim($targetPath, '/'));
 
-        // If both paths are identical, return an empty string (they are the same)
-        if ($basePath === $targetPath) {
-            return '';
-        }
+   // If both paths are identical, return an empty string (they are the same)
+   if ($basePath === $targetPath) {
+       return '';
+   }
 
-        // Split both paths into their individual components
-        $baseDirs = explode('/', ltrim($basePath, '/'));
-        $targetDirs = explode('/', ltrim($targetPath, '/'));
+   // Split both paths into their individual components
+   $baseDirs = explode('/', ltrim($basePath, '/'));
+   $targetDirs = explode('/', ltrim($targetPath, '/'));
 
-        // Remove identical segments from the start of both paths
-        while (isset($baseDirs[0], $targetDirs[0]) && $baseDirs[0] === $targetDirs[0]) {
-            array_shift($baseDirs);
-            array_shift($targetDirs);
-        }
+   // Remove identical segments from the start of both paths
+   while (isset($baseDirs[0], $targetDirs[0]) && $baseDirs[0] === $targetDirs[0]) {
+       array_shift($baseDirs);
+       array_shift($targetDirs);
+   }
 
-        // Build the relative path by going up for each remaining base directory
-        $relativePath = str_repeat('../', count($baseDirs)) . implode('/', $targetDirs);
+   // Build the relative path by going up for each remaining base directory
+   $relativePath = str_repeat('../', count($baseDirs)) . implode('/', $targetDirs);
 
-        // If the relative path is empty (pointing to the same directory), return './'
-        if ($relativePath === '') {
-            return './';
-        }
+   // If the relative path is empty (pointing to the same directory), return './'
+   if ($relativePath === '') {
+       return './';
+   }
 
-        // Special case: ensure the result does not start with a schema-like structure (e.g., "file:colon")
-        if (strpos($relativePath, ':') !== false && strpos($relativePath, '/') === false) {
-            return './' . $relativePath;
-        }
+   // Special case: ensure the result does not start with a schema-like structure (e.g., "file:colon")
+   if (strpos($relativePath, ':') !== false && strpos($relativePath, '/') === false) {
+       return './' . $relativePath;
+   }
 
-        return $relativePath;
+   return $relativePath;
     }
     */
 
-    /**
-     * Returns the target path as relative reference from the base path.
-     *
-     * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
-     * Both paths must be absolute and not contain relative parts.
-     * Relative URLs from one resource to another are useful when generating self-contained downloadable document archives.
-     * Furthermore, they can be used to reduce the link size in documents.
-     *
-     * Example target paths, given a base path of "/a/b/c/d":
-     * - "/a/b/c/d"     -> ""
-     * - "/a/b/c/"      -> "./"
-     * - "/a/b/"        -> "../"
-     * - "/a/b/c/other" -> "other"
-     * - "/a/x/y"       -> "../../x/y"
-     *
-     * @param string $basePath   The base path
-     * @param string $targetPath The target path
-     *
-     * @return string The relative target path
-     */
-    function getRelativePath($basePath, $targetPath)
-    {
+/**
+ * Returns the target path as relative reference from the base path.
+ *
+ * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
+ * Both paths must be absolute and not contain relative parts.
+ * Relative URLs from one resource to another are useful when generating self-contained downloadable document archives.
+ * Furthermore, they can be used to reduce the link size in documents.
+ *
+ * Example target paths, given a base path of "/a/b/c/d":
+ * - "/a/b/c/d"     -> ""
+ * - "/a/b/c/"      -> "./"
+ * - "/a/b/"        -> "../"
+ * - "/a/b/c/other" -> "other"
+ * - "/a/x/y"       -> "../../x/y"
+ *
+ * @param string $basePath   The base path
+ * @param string $targetPath The target path
+ *
+ * @return string The relative target path
+ */
+function getRelativePath($basePath, $targetPath)
+{
 
-        $targetPath = str_replace("\0", '', $targetPath);
-        $targetPath = str_replace('\\', '/', $targetPath);
+    $targetPath = str_replace("\0", '', $targetPath);
+    $targetPath = str_replace('\\', '/', $targetPath);
 
-        //add last one
-        if( substr($targetPath, -1, 1) != '/' )  {$targetPath = $targetPath.'/';}
+    //add last one
+    if (substr($targetPath, -1, 1) != '/') {
+        $targetPath = $targetPath . '/';
+    }
 
-        if ($basePath === $targetPath){
-            return '';
-        }elseif (substr($targetPath,0,1)!='/' && !preg_match('/^[A-Z]:/i',$targetPath)) { //it is already relative
-            return $targetPath;
-        }
+    if ($basePath === $targetPath) {
+        return '';
+    } elseif (substr($targetPath, 0, 1) != '/' && !preg_match('/^[A-Z]:/i', $targetPath)) { //it is already relative
+        return $targetPath;
+    }
 
-        $baseDirs = explode('/', ltrim($basePath,'/'));
-        $targetDirs = explode('/', ltrim($targetPath,'/'));
-        array_pop($baseDirs);
-        $targetFile = array_pop($targetDirs);
+    $baseDirs = explode('/', ltrim($basePath, '/'));
+    $targetDirs = explode('/', ltrim($targetPath, '/'));
+    array_pop($baseDirs);
+    $targetFile = array_pop($targetDirs);
 
-        // Remove identical segments from the start of both paths
-        while (isset($baseDirs[0], $targetDirs[0]) && $baseDirs[0] === $targetDirs[0]) {
-            array_shift($baseDirs);
-            array_shift($targetDirs);
-        }/*
+    // Remove identical segments from the start of both paths
+    while (isset($baseDirs[0], $targetDirs[0]) && $baseDirs[0] === $targetDirs[0]) {
+        array_shift($baseDirs);
+        array_shift($targetDirs);
+    }/*
         foreach ($baseDirs as $i => $dir) {
             if (isset($targetDirs[$i]) && $dir === $targetDirs[$i]) {
                 unset($baseDirs[$i], $targetDirs[$i]);
@@ -916,17 +941,17 @@ use hserv\utilities\USystem;
             }
         }*/
 
-        $targetDirs[] = $targetFile;
-        $path = str_repeat('../', count($baseDirs)).implode('/', $targetDirs);
+    $targetDirs[] = $targetFile;
+    $path = str_repeat('../', count($baseDirs)) . implode('/', $targetDirs);
 
-        // A reference to the same base directory or an empty subdirectory must be prefixed with "./".
-        // This also applies to a segment with a colon character (e.g., "file:colon") that cannot be used
-        // as the first segment of a relative-path reference, as it would be mistaken for a scheme name
-        // (see http://tools.ietf.org/html/rfc3986#section-4.2).
-        return '' === $path || '/' === $path[0]
-            || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
-            ? './'.$path : $path;
-    }
+    // A reference to the same base directory or an empty subdirectory must be prefixed with "./".
+    // This also applies to a segment with a colon character (e.g., "file:colon") that cannot be used
+    // as the first segment of a relative-path reference, as it would be mistaken for a scheme name
+    // (see http://tools.ietf.org/html/rfc3986#section-4.2).
+    return '' === $path || '/' === $path[0]
+        || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
+        ? './' . $path : $path;
+}
 
 
 
@@ -937,31 +962,32 @@ use hserv\utilities\USystem;
 * @param mixed $dst
 * @param array $folders - folders to copy (first level only)
 */
-function folderRecurseCopy($src, $dst, $folders=null, $copy_files_in_root=true) {
+function folderRecurseCopy($src, $dst, $folders = null, $copy_files_in_root = true)
+{
     $res = false;
 
-    $src =  $src . ((substr($src,-1)=='/')?'':'/');
+    $src =  $src . ((substr($src, -1) == '/') ? '' : '/');
 
     $dir = opendir($src);
-    if($dir!==false){
+    if ($dir !== false) {
 
         if (file_exists($dst) || @mkdir($dst, 0777, true)) {
 
             $res = true;
 
-            while(false !== ( $file = readdir($dir)) ) {
-                if (( $file != '.' ) && ( $file != '..' )) {
-                    if ( is_dir($src . $file) ) {
+            while (false !== ($file = readdir($dir))) {
+                if (($file != '.') && ($file != '..')) {
+                    if (is_dir($src . $file)) {
 
-                        if(isEmptyArray($folders) || in_array($src.$file.'/',$folders))
-                        {
-                                $res = folderRecurseCopy($src.$file, $dst . '/' . $file, null, true);
-                                if(!$res) {break;}
+                        if (isEmptyArray($folders) || in_array($src . $file . '/', $folders)) {
+                            $res = folderRecurseCopy($src . $file, $dst . '/' . $file, null, true);
+                            if (!$res) {
+                                break;
+                            }
                         }
 
-                    }
-                    elseif ($copy_files_in_root) {
-                        copy($src.$file,  $dst . '/' . $file);
+                    } elseif ($copy_files_in_root) {
+                        copy($src . $file, $dst . '/' . $file);
                     }
                 }
             }
@@ -979,32 +1005,33 @@ function folderRecurseCopy($src, $dst, $folders=null, $copy_files_in_root=true) 
 *
 * @param mixed $src
 */
-function folderSubs($src, $exclude=null, $full_path=true) {
-    $res = array();
+function folderSubs($src, $exclude = null, $full_path = true)
+{
+    $res = [];
 
-    $src =  $src . ((substr($src,-1)=='/')?'':'/');
+    $src =  $src . ((substr($src, -1) == '/') ? '' : '/');
 
-    if(file_exists($src)){
+    if (file_exists($src)) {
 
         $dir = opendir($src);
-        if($dir!==false){
+        if ($dir !== false) {
 
 
-                while(false !== ( $file = readdir($dir)) ) {
-                    if (( $file != '.' ) && ( $file != '..' ) && is_dir($src . $file)) {
+            while (false !== ($file = readdir($dir))) {
+                if (($file != '.') && ($file != '..') && is_dir($src . $file)) {
 
-                            if(is_array($exclude) && in_array($file, $exclude)){
-                                continue;
-                            }
-
-                            if($full_path){
-                                $res[] = $src.$file.'/';
-                            }else{
-                                $res[] = $file;
-                            }
-
+                    if (is_array($exclude) && in_array($file, $exclude)) {
+                        continue;
                     }
+
+                    if ($full_path) {
+                        $res[] = $src . $file . '/';
+                    } else {
+                        $res[] = $file;
+                    }
+
                 }
+            }
             closedir($dir);
         }
     }
@@ -1018,29 +1045,30 @@ function folderSubs($src, $exclude=null, $full_path=true) {
 // Returns null  if given folder does not exist
 // Otherwise return real path
 //
-function isPathInHeuristUploadFolder($path, $check_existance=true){
+function isPathInHeuristUploadFolder($path, $check_existance = true)
+{
 
     chdir(HEURIST_FILESTORE_DIR);// relatively db root  or HEURIST_FILES_DIR??
     $heurist_dir = realpath(HEURIST_FILESTORE_DIR);
     $r_path = realpath($path);
 
-    if($check_existance && !$r_path) { //does not exist
+    if ($check_existance && !$r_path) { //does not exist
         return null;
     }
 
-    if($r_path){
-        $r_path = str_replace('\\','/',$r_path);
-        $heurist_dir = str_replace('\\','/',$heurist_dir);
+    if ($r_path) {
+        $r_path = str_replace('\\', '/', $r_path);
+        $heurist_dir = str_replace('\\', '/', $heurist_dir);
 
         //realpath gives real path on remote file server
-        if(strpos($r_path, '/srv/HEURIST_FILESTORE/')===0 ||
-           strpos($r_path, '/misc/heur-filestore/')===0 ||     //heurx
-           strpos($r_path, '/data/HEURIST_FILESTORE/')===0 ||  //huma-num
-           strpos($r_path, $heurist_dir)===0){
-               return $r_path;
-           }
-    }elseif(strpos($path, HEURIST_FILESTORE_DIR)===0){
-            return $path;
+        if (strpos($r_path, '/srv/HEURIST_FILESTORE/') === 0
+           || strpos($r_path, '/misc/heur-filestore/') === 0     //heurx
+           || strpos($r_path, '/data/HEURIST_FILESTORE/') === 0  //huma-num
+           || strpos($r_path, $heurist_dir) === 0) {
+            return $r_path;
+        }
+    } elseif (strpos($path, HEURIST_FILESTORE_DIR) === 0) {
+        return $path;
     }
 
     return false;
@@ -1063,9 +1091,9 @@ function saveURLasFile($url, $filename)
 {
     //Download file from remote server
     $rawdata = loadRemoteURLContent($url, false);//use proxy
-    if(is_string($rawdata)){
+    if (is_string($rawdata)) {
         return fileSave($rawdata, $filename);//returns file size
-    }else{
+    } else {
         //error_log('Can not access remote resource '.filter_var($url,FILTER_SANITIZE_URL)); //snyk security
         return 0;
     }
@@ -1077,7 +1105,8 @@ function saveURLasFile($url, $filename)
      * @param string $url The URL of the HTML document.
      * @return string|null The extracted title string, or null if not found or on error.
      */
-function getTitleFromURL($url){
+function getTitleFromURL($url)
+{
 
     $title = null;
 
@@ -1085,7 +1114,7 @@ function getTitleFromURL($url){
 
     $data = loadRemoteURLContentWithRange($url, "0-10000");//get title of webpage
 
-    if ($data){
+    if ($data) {
 
         // "/<title>(.*)<\/title>/siU"
         preg_match('!<\s*title[^>]*>\s*([^<]+?)\s*</title>!is', $data, $matches);
@@ -1099,29 +1128,30 @@ function getTitleFromURL($url){
     return $title;
 }
 
-    /**
-     * Loads content from a URL, with special handling for URLs on the same Heurist server.
-     * If the URL is local to the server, it attempts to include and execute the script directly
-     * instead of making an HTTP request via cURL. Otherwise, falls back to `loadRemoteURLContentWithRange`.
-     * Used for fetching registered database URLs, database registration, and getting current DB version.
-     *
-     * @param string $url The URL to load content from.
-     * @return string|false The content fetched from the URL, or false on failure.
-     */
-function loadRemoteURLContentSpecial($url){
+/**
+ * Loads content from a URL, with special handling for URLs on the same Heurist server.
+ * If the URL is local to the server, it attempts to include and execute the script directly
+ * instead of making an HTTP request via cURL. Otherwise, falls back to `loadRemoteURLContentWithRange`.
+ * Used for fetching registered database URLs, database registration, and getting current DB version.
+ *
+ * @param string $url The URL to load content from.
+ * @return string|false The content fetched from the URL, or false on failure.
+ */
+function loadRemoteURLContentSpecial($url)
+{
 
-    if(strpos($url, HEURIST_SERVER_URL)===0){
+    if (strpos($url, HEURIST_SERVER_URL) === 0) {
 
         //if requested url is on the same server
         //replace URL to script path in current installation folder
         //and execute script
-        if(strpos(strtolower($url), strtolower(HEURIST_INDEX_BASE_URL))===0){
+        if (strpos(strtolower($url), strtolower(HEURIST_INDEX_BASE_URL)) === 0) {
             $path = str_replace(HEURIST_INDEX_BASE_URL, HEURIST_DIR, $url);
-        }else{
+        } else {
             $path = str_replace(HEURIST_BASE_URL, HEURIST_DIR, $url);
         }
 
-        $path = substr($path,0,strpos($path,'?'));
+        $path = substr($path, 0, strpos($path, '?'));
 
         $parsed = parse_url($url);
         parse_str($parsed['query'], $_REQUEST);
@@ -1129,45 +1159,47 @@ function loadRemoteURLContentSpecial($url){
         $out = getScriptOutput($path);
 
         return $out;
-    }else{
+    } else {
         return loadRemoteURLContentWithRange($url, null, true);
     }
 }
 
-    /**
-     * Loads content from a remote URL using cURL. This is a wrapper for `loadRemoteURLContentWithRange` without a specific byte range.
-     *
-     * @global int|string|null $glb_curl_code Stores cURL error code or status.
-     * @global string|null $glb_curl_error Stores cURL error message.
-     * @param string $url The URL to fetch content from.
-     * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
-     * @return string|false The fetched content as a string on success, or false on failure.
-     */
-function loadRemoteURLContent($url, $bypassProxy = true) {
+/**
+ * Loads content from a remote URL using cURL. This is a wrapper for `loadRemoteURLContentWithRange` without a specific byte range.
+ *
+ * @global int|string|null $glb_curl_code Stores cURL error code or status.
+ * @global string|null $glb_curl_error Stores cURL error message.
+ * @param string $url The URL to fetch content from.
+ * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
+ * @return string|false The fetched content as a string on success, or false on failure.
+ */
+function loadRemoteURLContent($url, $bypassProxy = true)
+{
     return loadRemoteURLContentWithRange($url, null, $bypassProxy);
 }
 
-    /**
-     * Loads content from a remote URL using cURL, with options for range requests, proxy bypass, and timeout.
-     * Updates global variables $glb_curl_code and $glb_curl_error with cURL status.
-     *
-     * @global int|string|null $glb_curl_code Stores cURL error code or status.
-     * @global string|null $glb_curl_error Stores cURL error message.
-     * @param string $url The URL to fetch content from.
-     * @param string|null $range Optional. A specific byte range to fetch (e.g., "0-500"). Null to fetch entire content.
-     * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
-     * @param int $timeout Optional. cURL timeout in seconds. Defaults to 30.
-     * @param array|null $additional_headers Optional. Additional HTTP headers to send with the request.
-     * @return string|false The fetched content as a string on success, or false on failure.
-     */
-function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=30, $additional_headers=null) {
+/**
+ * Loads content from a remote URL using cURL, with options for range requests, proxy bypass, and timeout.
+ * Updates global variables $glb_curl_code and $glb_curl_error with cURL status.
+ *
+ * @global int|string|null $glb_curl_code Stores cURL error code or status.
+ * @global string|null $glb_curl_error Stores cURL error message.
+ * @param string $url The URL to fetch content from.
+ * @param string|null $range Optional. A specific byte range to fetch (e.g., "0-500"). Null to fetch entire content.
+ * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
+ * @param int $timeout Optional. cURL timeout in seconds. Defaults to 30.
+ * @param array|null $additional_headers Optional. Additional HTTP headers to send with the request.
+ * @return string|false The fetched content as a string on success, or false on failure.
+ */
+function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout = 30, $additional_headers = null)
+{
 
     global $glb_curl_code, $glb_curl_error;
 
     $glb_curl_code = null;
     $glb_curl_error = null;
 
-    if(!function_exists("curl_init"))  {
+    if (!function_exists("curl_init")) {
 
         $glb_curl_code = HEURIST_SYSTEM_FATAL;
         $glb_curl_error = 'Cannot init curl extension. Verify php installation';
@@ -1176,14 +1208,14 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     }
 
     $url = filter_var($url, FILTER_VALIDATE_URL);
-    if(empty($url) || $url===false){
+    if (empty($url) || $url === false) {
         $glb_curl_code = HEURIST_INVALID_REQUEST;
         $glb_curl_error = 'URL is not defined or invalid';
 
         return false;
     }
 
-    if(!(strpos(strtolower($url),'https://')===0 || strpos(strtolower($url),'http://')===0)){
+    if (!(strpos(strtolower($url), 'https://') === 0 || strpos(strtolower($url), 'http://') === 0)) {
         $glb_curl_code = HEURIST_INVALID_REQUEST;
         $glb_curl_error = 'URL is not started with a trusted scheme';
         return false;
@@ -1196,7 +1228,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     */
 
     $useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6';
-                 //'Firefox (WindowsXP) - Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.';
+    //'Firefox (WindowsXP) - Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.';
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//return the output as a string from curl_exec
@@ -1204,7 +1236,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_HEADER, 0);//don't include header in output
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);// follow server header redirects
     //Vulnerability curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);// don't verify peer cert
-    if(strpos(strtolower($url), strtolower(HEURIST_MAIN_SERVER))===0){
+    if (strpos(strtolower($url), strtolower(HEURIST_MAIN_SERVER)) === 0) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     }
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);// timeout after ten seconds
@@ -1215,23 +1247,23 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_AUTOREFERER, true);
     //curl_setopt($ch, CURLOPT_REFERER, HEURIST_SERVER_URL);
 
-    if($range){
+    if ($range) {
         curl_setopt($ch, CURLOPT_RANGE, $range);
     }
 
     // check if the proxy needs to be used, $httpProxyActive defined in heuristConfigIni.php
-    if(defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE){
+    if (defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE) {
         $bypassProxy = false;
     }
 
-    if ( (!$bypassProxy) && defined('HEURIST_HTTP_PROXY') ) {
+    if ((!$bypassProxy) && defined('HEURIST_HTTP_PROXY')) {
         curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-        if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
+        if (defined('HEURIST_HTTP_PROXY_AUTH')) {
             curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
         }
     }
 
-    if(is_array($additional_headers) && !empty($additional_headers)){ // Add additional/custom headers
+    if (is_array($additional_headers) && !empty($additional_headers)) { // Add additional/custom headers
         curl_setopt($ch, CURLOPT_HTTPHEADER, $additional_headers);
         //curl_setopt($curl, CURLOPT_HTTPHEADER, array('Expect:'));
     }
@@ -1248,19 +1280,19 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
 
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
-        if(strpos($glb_curl_error, $code) !== false){ // http error
+        if (strpos($glb_curl_error, $code) !== false) { // http error
             $glb_curl_error = explode(': ', $glb_curl_error)[1];
-            $glb_curl_error = 'Error Code : '.$error;
+            $glb_curl_error = 'Error Code : ' . $error;
         }
 
         unset($ch);
         return false;
     } else {
-        if(!$data){
+        if (!$data) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
             $glb_curl_code = HEURIST_SYSTEM_FATAL;
-            $glb_curl_error = 'HTTP Response Code: '.$code;
+            $glb_curl_error = 'HTTP Response Code: ' . $code;
         }
 
         unset($ch);
@@ -1268,24 +1300,25 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     }
 }
 
-    /**
-     * Detects the MIME content type of a remote URL using cURL by fetching its headers.
-     *
-     * @param string $url The URL to check.
-     * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
-     * @param int $timeout Optional. cURL timeout in seconds. Defaults to 30.
-     * @return string|false The MIME content type string on success, or false on failure or if URL is invalid.
-     */
-function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
+/**
+ * Detects the MIME content type of a remote URL using cURL by fetching its headers.
+ *
+ * @param string $url The URL to check.
+ * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
+ * @param int $timeout Optional. cURL timeout in seconds. Defaults to 30.
+ * @return string|false The MIME content type string on success, or false on failure or if URL is invalid.
+ */
+function loadRemoteURLContentType($url, $bypassProxy = true, $timeout = 30)
+{
 
-    if(!function_exists("curl_init"))  {
+    if (!function_exists("curl_init")) {
         return false;
     }
-    if(!$url){
+    if (!$url) {
         return false;
     }
 
-    if(!(strpos(strtolower($url),'https://')===0 || strpos(strtolower($url),'http://')===0)){
+    if (!(strpos(strtolower($url), 'https://') === 0 || strpos(strtolower($url), 'http://') === 0)) {
         return false;
     }
 
@@ -1302,13 +1335,13 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
     curl_setopt($ch, CURLOPT_URL, $url);
 
     // check if the proxy needs to be used, $httpProxyActive defined in heuristConfigIni.php
-    if(defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE){
+    if (defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE) {
         $bypassProxy = false;
     }
 
-    if ( (!$bypassProxy) && defined('HEURIST_HTTP_PROXY') ) {
+    if ((!$bypassProxy) && defined('HEURIST_HTTP_PROXY')) {
         curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-        if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
+        if (defined('HEURIST_HTTP_PROXY_AUTH')) {
             curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
         }
     }
@@ -1318,7 +1351,7 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
 
     if ($error) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-        USanitize::errorLog('CURL ERROR: http code = '.$code.'  curl error='.$error);
+        USanitize::errorLog('CURL ERROR: http code = ' . $code . '  curl error=' . $error);
     } else {
         $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
     }
@@ -1327,18 +1360,19 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
     return $content_type;
 }
 
-    /**
-     * Extracts the file extension from a URL's path component.
-     *
-     * @param string $url The URL to parse.
-     * @return string|null The file extension in lowercase, or null if no path or extension is found.
-     */
-function getURLExtension($url){
+/**
+ * Extracts the file extension from a URL's path component.
+ *
+ * @param string $url The URL to parse.
+ * @return string|null The file extension in lowercase, or null if no path or extension is found.
+ */
+function getURLExtension($url)
+{
     $extension = null;
     $ap = parse_url($url);
-    if( array_key_exists('path', $ap) ){
+    if (array_key_exists('path', $ap)) {
         $path = $ap['path'];
-        if($path){
+        if ($path) {
             $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
         }
     }
@@ -1351,9 +1385,10 @@ function getURLExtension($url){
  * @param string $url Wikipedia/Wikimedia URL to a file
  * @return array|array{page: string, mimeType: string, url: string, copyright: string, description: string, copyowner: string, caption: string}
  */
-function getWikimediaFileType($url){
+function getWikimediaFileType($url)
+{
 
-    if(!filter_var($url, FILTER_VALIDATE_URL) || strpos($url, 'wikipedia.org') === false && strpos($url, 'wikimedia.org') === false){
+    if (!filter_var($url, FILTER_VALIDATE_URL) || strpos($url, 'wikipedia.org') === false && strpos($url, 'wikimedia.org') === false) {
         return [];
     }
     $url = filter_var($url, FILTER_SANITIZE_URL);
@@ -1364,27 +1399,27 @@ function getWikimediaFileType($url){
         'prop' => 'imageinfo',
         'iiprop' => 'mime|url|user|extmetadata',
         'iiextmetadatafilter' => 'LicenseUrl|LicenseShortName|ImageDescription|Artist|ObjectName|DateTimeOriginal', // limit extended metadata
-        'format' => 'json'
+        'format' => 'json',
     ];
 
     $urlPath = parse_url($url, PHP_URL_PATH);
     $urlPath = explode('/', $urlPath);
-    foreach($urlPath as $pathPart){
+    foreach ($urlPath as $pathPart) {
 
-        if(empty($pathPart)){
+        if (empty($pathPart)) {
             continue;
         }
 
-        if(strpos($pathPart, 'File:') !== false){
+        if (strpos($pathPart, 'File:') !== false) {
             $wikimediaParams['titles'] = $pathPart;
             break;
-        }else if(preg_match("/\.[A-Za-z]{2,4}$/", $pathPart)){
+        } elseif (preg_match("/\.[A-Za-z]{2,4}$/", $pathPart)) {
             $wikimediaParams['titles'] = "File:{$pathPart}";
             break;
         }
     }
 
-    if(empty($wikimediaParams['titles'])){
+    if (empty($wikimediaParams['titles'])) {
         return [];
     }
 
@@ -1395,13 +1430,13 @@ function getWikimediaFileType($url){
     $response = loadRemoteURLContent($wikimediaURL);
 
     $jsonResponse = json_decode($response, true);
-    if(json_last_error() !== JSON_ERROR_NONE || empty($jsonResponse)){
+    if (json_last_error() !== JSON_ERROR_NONE || empty($jsonResponse)) {
         return [];
     }
 
     $results = [];
     $pages = $jsonResponse['query']['pages'];
-    foreach($pages as $page){
+    foreach ($pages as $page) {
 
         $imageInfo = $page['imageinfo'][0];
         $metadata = $imageInfo['extmetadata'];
@@ -1444,7 +1479,8 @@ function getWikimediaFileType($url){
  *                              returns 'bin' as a generic binary extension.
  * @return array An associative array with 'extension' (string|null), 'mimeType' (string|null), and 'needrefresh' (bool).
  */
-function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
+function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true)
+{
 
     $url = filter_var($url, FILTER_SANITIZE_URL);
 
@@ -1455,73 +1491,73 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
     $mimeType = null;
     $extraDetails = [];
 
-    if(strpos($url, 'soundcloud.com')!==false){
+    if (strpos($url, 'soundcloud.com') !== false) {
         $mimeType  = MT_SOUNDCLOUD;
         $extension = 'soundcloud';
-        $force_add = "('soundcloud','".MT_SOUNDCLOUD."', '0','','Soundcloud','')";
-    }elseif(strpos($url, 'vimeo.com')!==false){
+        $force_add = "('soundcloud','" . MT_SOUNDCLOUD . "', '0','','Soundcloud','')";
+    } elseif (strpos($url, 'vimeo.com') !== false) {
         $mimeType  = MT_VIMEO;
         $extension = 'vimeo';
-        $force_add = "('vimeo','".MT_VIMEO."', '0','','Vimeo Video','')";
-    }elseif(strpos($url, 'youtu.be')!==false || strpos($url, 'youtube.com')!==false){
+        $force_add = "('vimeo','" . MT_VIMEO . "', '0','','Vimeo Video','')";
+    } elseif (strpos($url, 'youtu.be') !== false || strpos($url, 'youtube.com') !== false) {
         $mimeType  = MT_YOUTUBE;
         $extension = 'youtube';
-        $force_add = "('youtube','".MT_YOUTUBE."', '0','','Youtube Video','')";
-    }elseif(strpos($url, 'wikipedia.org') !== false || strpos($url, 'wikimedia.org') !== false){
+        $force_add = "('youtube','" . MT_YOUTUBE . "', '0','','Youtube Video','')";
+    } elseif (strpos($url, 'wikipedia.org') !== false || strpos($url, 'wikimedia.org') !== false) {
         $extraDetails = getWikimediaFileType($url);
         $mimeType = @$extraDetails['mimeType'];
-    }else{
+    } else {
         $mimeType = loadRemoteURLContentType($url);
     }
 
 
-    if($mimeType!=null && $mimeType!==false){
+    if ($mimeType != null && $mimeType !== false) {
 
         //remove charset section
-        if(strpos($mimeType,';')>0){
+        if (strpos($mimeType, ';') > 0) {
             $parts = explode(';', $mimeType);
             $k = 0;
-            while($k<count($parts)){
-                if(strpos($parts[$k],'charset')!==false){
+            while ($k < count($parts)) {
+                if (strpos($parts[$k], 'charset') !== false) {
                     array_splice($parts, $k, 1);
                     //unset($parts[$k]);
-                }else{
+                } else {
                     $k++;
                 }
             }//while
             $mimeType = @$parts[0];
         }
 
-        if($mimeType){
+        if ($mimeType) {
 
-            if($mimeType==MIMETYPE_JSON ||  $mimeType=='application/ld+json'){
+            if ($mimeType == MIMETYPE_JSON ||  $mimeType == 'application/ld+json') {
                 $mimeType = MIMETYPE_JSON;
                 $extension = 'json';
                 $force_add = "('json','application/json', '0','','JSON','')";
             }
 
             $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
-                        .$mimeType.'"';
+                        . $mimeType . '"';
             $f_extension = mysql__select_value($mysqli, $ext_query);
 
-            if($f_extension==null && $force_add!=null){
+            if ($f_extension == null && $force_add != null) {
                 $mysqli->query('insert into defFileExtToMimetype ('
-    .'`fxm_Extension`,`fxm_MimeType`,`fxm_OpenNewWindow`,`fxm_IconFileName`,`fxm_FiletypeName`,`fxm_ImagePlaceholder`'
-                .') values '.$force_add);
+    . '`fxm_Extension`,`fxm_MimeType`,`fxm_OpenNewWindow`,`fxm_IconFileName`,`fxm_FiletypeName`,`fxm_ImagePlaceholder`'
+                . ') values ' . $force_add);
                 $needrefresh = true;
-            }else{
+            } else {
                 $extension = $f_extension;
             }
 
         }
     }
     //if extension not found apply bin: application/octet-stream - generic mime type
-    if($extension==null && $use_default_ext) {
+    if ($extension == null && $use_default_ext) {
         $extension = 'bin';
     }
 
-    $res = array('extension'=>$extension, 'mimeType' => $mimeType, 'needrefresh'=>$needrefresh);
-    if(!empty($extraDetails)){
+    $res = ['extension' => $extension, 'mimeType' => $mimeType, 'needrefresh' => $needrefresh];
+    if (!empty($extraDetails)) {
         $res['details'] = $extraDetails;
     }
 
@@ -1532,34 +1568,31 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
 
 
 //----------------------------------
-    /**
-     * Captures the output of a PHP script by including it within an output buffer.
-     *
-     * @global \hserv\System $system The global system object (though not directly used in this function's logic, it's declared global).
-     * @param string $path The path to the PHP script to execute.
-     * @param bool $print Optional. If false (default), returns the captured output as a string.
-     *                    If true, echoes the output directly and returns nothing.
-     * @return string|false|void If $print is false, returns the script's output as a string, or false if the script is not readable.
-     *                           If $print is true, echoes output and returns void (implicitly null).
-     */
+/**
+ * Captures the output of a PHP script by including it within an output buffer.
+ *
+ * @global \hserv\System $system The global system object (though not directly used in this function's logic, it's declared global).
+ * @param string $path The path to the PHP script to execute.
+ * @param bool $print Optional. If false (default), returns the captured output as a string.
+ *                    If true, echoes the output directly and returns nothing.
+ * @return string|false|void If $print is false, returns the script's output as a string, or false if the script is not readable.
+ *                           If $print is true, echoes output and returns void (implicitly null).
+ */
 function getScriptOutput($path, $print = false)
 {
     global $system;
 
     ob_start();
 
-    if( is_readable($path) && $path )
-    {
+    if (is_readable($path) && $path) {
         include_once $path;
-    }
-    else
-    {
+    } else {
         return false;
     }
 
-    if( $print == false ){
+    if ($print == false) {
         return ob_get_clean();
-    }else{
+    } else {
         echo ob_get_clean();
     }
 }
@@ -1567,46 +1600,51 @@ function getScriptOutput($path, $print = false)
 
 //----------------------------------------------- PARSING
 
-    /**
-     * Auto-detects CSV file delimiters (delimiter, line break, enclosure).
-     * Reads the beginning of the file to infer these settings.
-     * IMPORTANT: This function assumes the file is UTF-8 encoded for reliable detection.
-     *
-     * @param string $filename Path to the CSV file.
-     * @param string $csv_linebreak Optional. Initial guess or forced line break type ('auto', 'win', 'nix', 'mac'). Defaults to 'auto'.
-     * @param string $csv_enclosure Optional. CSV enclosure character. Defaults to '"'. If empty or 'none', a rare character is used internally.
-     * @return array An associative array with detected 'csv_linebreak', 'csv_delimiter', 'csv_enclosure',
-     *               or an 'error' key if the file cannot be read or is not UTF-8.
-     */
-function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='"'){
+/**
+ * Auto-detects CSV file delimiters (delimiter, line break, enclosure).
+ * Reads the beginning of the file to infer these settings.
+ * IMPORTANT: This function assumes the file is UTF-8 encoded for reliable detection.
+ *
+ * @param string $filename Path to the CSV file.
+ * @param string $csv_linebreak Optional. Initial guess or forced line break type ('auto', 'win', 'nix', 'mac'). Defaults to 'auto'.
+ * @param string $csv_enclosure Optional. CSV enclosure character. Defaults to '"'. If empty or 'none', a rare character is used internally.
+ * @return array An associative array with detected 'csv_linebreak', 'csv_delimiter', 'csv_enclosure',
+ *               or an 'error' key if the file cannot be read or is not UTF-8.
+ */
+function autoDetectSeparators($filename, $csv_linebreak = 'auto', $csv_enclosure = '"')
+{
 
     $handle = @fopen($filename, 'r');
     if (!$handle) {
         $s = null;
-        if (! file_exists($filename)) {$s = ' does not exist';}
-        elseif (! is_readable($filename)) {$s = ' is not readable';}
-            else {$s = ' could not be read';}
+        if (! file_exists($filename)) {
+            $s = ' does not exist';
+        } elseif (! is_readable($filename)) {
+            $s = ' is not readable';
+        } else {
+            $s = ' could not be read';
+        }
 
-        if($s){
-            return array('error'=>('File '.$filename. $s));
+        if ($s) {
+            return ['error' => ('File ' . $filename . $s)];
         }
     }
 
     //DETECT End of line
-    if($csv_enclosure=='' || $csv_enclosure=='none'){
+    if ($csv_enclosure == '' || $csv_enclosure == 'none') {
         $csv_enclosure = 'ʰ';//rare character
     }
 
     $eol = null;
-    if($csv_linebreak=='win'){
+    if ($csv_linebreak == 'win') {
         $eol = "\r\n";
-    }elseif($csv_linebreak=='nix'){
+    } elseif ($csv_linebreak == 'nix') {
         $eol = "\n";
-    }elseif($csv_linebreak=='mac'){
+    } elseif ($csv_linebreak == 'mac') {
         $eol = "\r";
     }
 
-    if($csv_linebreak=='auto' || $csv_linebreak==null || $eol==null){
+    if ($csv_linebreak == 'auto' || $csv_linebreak == null || $eol == null) {
         ini_set('auto_detect_line_endings', 'true');
 
         $line = fgets($handle, 1000000);//read line and auto detect line break
@@ -1615,11 +1653,11 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
         $data = fread($handle, 10);
         rewind($handle);
 
-        if(substr_count($data, "\r\n") > 0){
+        if (substr_count($data, "\r\n") > 0) {
             $eol = "\r\n";
-        }elseif(substr_count($data, "\n") > 0){
+        } elseif (substr_count($data, "\n") > 0) {
             $eol = "\n";
-        }else{
+        } else {
             $eol = "\r";
         }
     }
@@ -1630,10 +1668,10 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     setlocale(LC_ALL, 'en_US.utf8');
 
 
-    $delimiters = array("\t"=>0,','=>0,';'=>0,':'=>0,'|'=>0,'-'=>0);
+    $delimiters = ["\t" => 0,',' => 0,';' => 0,':' => 0,'|' => 0,'-' => 0];
     $force_tabs = false; // if the first line contains tab separators, default to tabs
 
-    foreach ($delimiters as $csv_delimiter=>$val){
+    foreach ($delimiters as $csv_delimiter => $val) {
         $line_no = 0;
 
         while (!feof($handle)) {
@@ -1646,66 +1684,71 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
             }
             */
 
-            $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
+            $fields = str_getcsv($line, $csv_delimiter, $csv_enclosure);// $escape = "\\"
 
             $cnt = count($fields);
-            if($cnt>200){ //too many fields
+            if ($cnt > 200) { //too many fields
                 $delimiters[$csv_delimiter] = 0; //not use
                 break;
-            }else{
-                if($line_no==0){
+            } else {
+                if ($line_no == 0) {
                     $delimiters[$csv_delimiter] = $cnt;
 
-                    if($cnt > 0 && $csv_delimiter == "\t"){
+                    if ($cnt > 0 && $csv_delimiter == "\t") {
                         $force_tabs = true;
                         break 2;
                     }
-                }elseif($delimiters[$csv_delimiter] != $cnt){
+                } elseif ($delimiters[$csv_delimiter] != $cnt) {
                     $delimiters[$csv_delimiter] = 0; //not use
                     break;
                 }
             }
 
-            if($line_no>10) {break;}
+            if ($line_no > 10) {
+                break;
+            }
             $line_no++;
         }
         rewind($handle);
     }//for delimiters
     fclose($handle);
 
-    if($force_tabs){
+    if ($force_tabs) {
         $csv_delimiter = "tab";
-    }else{
+    } else {
 
         $max = 0;
         $csv_delimiter = ',';//default
-        foreach ($delimiters as $delimiter=>$cnt){
-            if($cnt>$max){
+        foreach ($delimiters as $delimiter => $cnt) {
+            if ($cnt > $max) {
                 $csv_delimiter = $delimiter;
                 $max = $cnt;
             }
         }
-        if($csv_delimiter=="\t") {$csv_delimiter = "tab";}
+        if ($csv_delimiter == "\t") {
+            $csv_delimiter = "tab";
+        }
     }
 
-    if($eol=="\r\n"){
-        $csv_linebreak='win';
-    }elseif($eol=="\n"){
-        $csv_linebreak='nix';
-    }elseif($eol=="\r"){
-        $csv_linebreak='mac';
+    if ($eol == "\r\n") {
+        $csv_linebreak = 'win';
+    } elseif ($eol == "\n") {
+        $csv_linebreak = 'nix';
+    } elseif ($eol == "\r") {
+        $csv_linebreak = 'mac';
     }
 
-    return array('csv_linebreak'=>$csv_linebreak, 'csv_delimiter'=>$csv_delimiter, 'csv_enclosure'=>$csv_enclosure);
+    return ['csv_linebreak' => $csv_linebreak, 'csv_delimiter' => $csv_delimiter, 'csv_enclosure' => $csv_enclosure];
 }
 
-    /**
-     * Checks if a file is likely an XML file by reading its first few bytes for an XML declaration.
-     *
-     * @param string $filename Path to the file.
-     * @return bool True if the file starts with '<?xml' (possibly after BOM), false otherwise or if file is unreadable.
-     */
-function isXMLfile($filename){
+/**
+ * Checks if a file is likely an XML file by reading its first few bytes for an XML declaration.
+ *
+ * @param string $filename Path to the file.
+ * @return bool True if the file starts with '<?xml' (possibly after BOM), false otherwise or if file is unreadable.
+ */
+function isXMLfile($filename)
+{
 
     $res = false;
     $handle = @fopen($filename, 'r');
@@ -1718,25 +1761,26 @@ function isXMLfile($filename){
     return $res;
 }
 
-    /**
-     * Manages a semaphore-like lock file for long-running actions to prevent concurrent execution.
-     * Checks if an action is already in progress or updates/creates a timestamp for the action.
-     *
-     * @param string $action A unique name for the action (e.g., 'backup', 'verify_urls').
-     * @param int $range_minutes The duration in minutes. If an existing lock file for the action is older than this,
-     *                           it's considered stale and can be overridden. If $range_minutes < 0, the lock file is removed.
-     * @param string $db_name Optional. Database name to make the lock specific to a database. Defaults to empty (global lock).
-     * @return bool True if the action can proceed (no current lock or lock is stale/removed).
-     *              False if an action is currently in progress and the lock is not stale.
-     */
-function isActionInProgress($action, $range_minutes, $db_name=''){
+/**
+ * Manages a semaphore-like lock file for long-running actions to prevent concurrent execution.
+ * Checks if an action is already in progress or updates/creates a timestamp for the action.
+ *
+ * @param string $action A unique name for the action (e.g., 'backup', 'verify_urls').
+ * @param int $range_minutes The duration in minutes. If an existing lock file for the action is older than this,
+ *                           it's considered stale and can be overridden. If $range_minutes < 0, the lock file is removed.
+ * @param string $db_name Optional. Database name to make the lock specific to a database. Defaults to empty (global lock).
+ * @return bool True if the action can proceed (no current lock or lock is stale/removed).
+ *              False if an action is currently in progress and the lock is not stale.
+ */
+function isActionInProgress($action, $range_minutes, $db_name = '')
+{
 
-    $progress_flag = HEURIST_FILESTORE_ROOT.'_operation_locks'.($db_name?('_'.$db_name):'').'.info';
+    $progress_flag = HEURIST_FILESTORE_ROOT . '_operation_locks' . ($db_name ? ('_' . $db_name) : '') . '.info';
 
     //flag that backup in progress
-    if(file_exists($progress_flag)){
+    if (file_exists($progress_flag)) {
 
-        if($range_minutes<0){
+        if ($range_minutes < 0) {
             unlink($progress_flag);
             return false;
         }
@@ -1751,39 +1795,39 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
 
         while (!feof($reading)) {
             $line = fgets($reading);
-            if (strpos($line, $action)===0) {
+            if (strpos($line, $action) === 0) {
 
                 $datetime1 = date_create(trim(substr($line, strlen($action))));
                 $interval = date_diff($datetime1, $datetime2);
 
-                $allowed = ($interval->format('%y')>0 ||
-                $interval->format('%m')>0 || $interval->format('%d')>0 ||
-                $interval->format('%h')>0 || $interval->format('%i')>$range_minutes);
+                $allowed = ($interval->format('%y') > 0
+                || $interval->format('%m') > 0 || $interval->format('%d') > 0
+                || $interval->format('%h') > 0 || $interval->format('%i') > $range_minutes);
 
-                if($allowed){
-                    $line = $action.' '.$datetime2->format(DATE_8601)."\n";
+                if ($allowed) {
+                    $line = $action . ' ' . $datetime2->format(DATE_8601) . "\n";
                     $replaced = true;
-                }else{
+                } else {
                     $not_allowed = true;
                     break;
                 }
             }
             fputs($writing, $line);
         }
-        fclose($reading); fclose($writing);
+        fclose($reading);
+        fclose($writing);
         // might as well not overwrite the file if we didn't replace anything
-        if ($replaced)
-        {
+        if ($replaced) {
             rename('myfile.tmp', $progress_flag);
         } else {
             unlink('myfile.tmp');
         }
-        if($not_allowed){
+        if ($not_allowed) {
             return false;
         }
-    }elseif($range_minutes>0) {
+    } elseif ($range_minutes > 0) {
         $fp = fopen($progress_flag, 'w');
-        fwrite($fp, $action.' '. date_create('now')->format(DATE_8601));
+        fwrite($fp, $action . ' ' . date_create('now')->format(DATE_8601));
         fclose($fp);
     }
     return true;
@@ -1808,18 +1852,19 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
  *                      'returnType' (string, optional): If 'editor', returns URL to private view. Otherwise, public URL.
  * @return array|string|false The Nakala URL of the uploaded file on success, or false on failure.
  */
-function uploadFileToNakala($system, $params) {
+function uploadFileToNakala($system, $params)
+{
 
-    if($params['api_key']){ // just in case
+    if ($params['api_key']) { // just in case
         $params['apiKey'] = $params['api_key'];
     }
 
     $result = uploadFilesToNakala($system, $params, [$params['file']], $params['meta']);
 
-    if($result){
-        if($result['URL'][0] !== ''){
+    if ($result) {
+        if ($result['URL'][0] !== '') {
             $result = $result['URL'][0];
-        }else{
+        } else {
             $system->addError(HEURIST_ACTION_BLOCKED, $result['errors'][0]);
             $result = false;
         }
@@ -1848,7 +1893,8 @@ function uploadFileToNakala($system, $params) {
  * @param array $datas Array of Nakala metadata values, applied to group.
  * @return array|false [URL => Nakala URL, errors => File upload errors] on success, or false on failure.
  */
-function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
+function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas)
+{
 
     global $glb_curl_code, $glb_curl_error;
     $glb_curl_code = null;
@@ -1862,7 +1908,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
         '01234567-89ab-cdef-0123-456789abcdef',
         '33170cfe-f53c-550b-5fb6-4814ce981293',
         'f41f5957-d396-3bb9-ce35-a4692773f636',
-        'aae99aba-476e-4ff2-2886-0aaf1bfa6fd2'
+        'aae99aba-476e-4ff2-2886-0aaf1bfa6fd2',
     ];
 
     $useTest = in_array($apiKey, $testAPIKeys);
@@ -1875,7 +1921,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     $nakalaUnavailable = '<br><br>Nakala services appear to be unavailable.<br>Please create a ticket if this persists.';
 
     $curlLoaded = function_exists('curl_init');
-    if(!$curlLoaded || empty($filesToUpload) || empty($apiKey) || empty($datas)){
+    if (!$curlLoaded || empty($filesToUpload) || empty($apiKey) || empty($datas)) {
 
         $glb_curl_code = !$curlLoaded ? HEURIST_SYSTEM_FATAL : HEURIST_INVALID_REQUEST;
         $glb_curl_error = !$curlLoaded ? 'Cannot init curl extension. Verify php installation' : 'Required details are missing';
@@ -1889,7 +1935,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     $useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6';
 
     $curl = curl_init();
-    if(!$curl){
+    if (!$curl) {
         $system->addError(HEURIST_SYSTEM_FATAL, 'Failed to initialise CURL handler');
         return false;
     }
@@ -1909,9 +1955,9 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
 
     curl_setopt($curl, CURLOPT_AUTOREFERER, true);
 
-    if(defined("HEURIST_HTTP_PROXY")) {
+    if (defined("HEURIST_HTTP_PROXY")) {
         curl_setopt($curl, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-        if(defined('HEURIST_HTTP_PROXY_AUTH')) {
+        if (defined('HEURIST_HTTP_PROXY_AUTH')) {
             curl_setopt($curl, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
         }
     }
@@ -1922,14 +1968,14 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     $uploadedFileList = curl_exec($curl);
     $error = curl_error($curl);
 
-    if($error){
+    if ($error) {
 
         $glb_curl_code = 'curl';
         $glb_curl_error = $error;
 
         $code = intval(curl_getinfo($curl, CURLINFO_HTTP_CODE));
 
-        if($code == 401 || $code == 403 || $code >= 500){ // invalid/missing api key, unknown account/user, or Nakala server problem
+        if ($code == 401 || $code == 403 || $code >= 500) { // invalid/missing api key, unknown account/user, or Nakala server problem
 
             $glb_curl_error .= $code < 500 ? $missingApiKey : $nakalaUnavailable;
             $herror = $code < 500 ? HEURIST_INVALID_REQUEST : HEURIST_ACTION_BLOCKED;
@@ -1944,13 +1990,13 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     }
 
     $uploadedFileList = json_decode($uploadedFileList, true);
-    if(JSON_ERROR_NONE == json_last_error() && is_array($uploadedFileList)){
+    if (JSON_ERROR_NONE == json_last_error() && is_array($uploadedFileList)) {
 
-        if(array_key_exists('message', $uploadedFileList)){
+        if (array_key_exists('message', $uploadedFileList)) {
 
             $code = intval(curl_getinfo($curl, CURLINFO_HTTP_CODE));
 
-            if($code === 401 || $code === 403 || $code >= 500){ // invalid/missing api key, or unknown account/user
+            if ($code === 401 || $code === 403 || $code >= 500) { // invalid/missing api key, or unknown account/user
 
                 $glb_curl_error .= $code < 500 ? $missingApiKey : $nakalaUnavailable;
                 $herror = $code < 500 ? HEURIST_INVALID_REQUEST : HEURIST_ACTION_BLOCKED;
@@ -1968,18 +2014,18 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     $uploadedFiles = [];
     $fileErrors = [];
 
-    foreach($filesToUpload as $idx => $file){
+    foreach ($filesToUpload as $idx => $file) {
 
         $fileID = array_key_exists('id', $file) ? $file['id'] : $idx;
 
-        if(!file_exists($file['path'])){
+        if (!file_exists($file['path'])) {
             $fileErrors[] = "File #{$fileID}: Could not locate the file to be uploaded to Nakala";
             continue;
         }
 
         $sha1 = sha1_file($file['path']);
-        foreach($uploadedFileList as $nakalaFile){
-            if($nakalaFile['sha1'] == $sha1){
+        foreach ($uploadedFileList as $nakalaFile) {
+            if ($nakalaFile['sha1'] == $sha1) {
                 $uploadedFiles[] = $sha1;
                 continue 2;
             }
@@ -1994,20 +2040,20 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
 
         $error = curl_error($curl);
 
-        if($error){
+        if ($error) {
 
             $glb_curl_code = 'curl';
             $glb_curl_error = $error;
 
             $code = intval(curl_getinfo($curl, CURLINFO_HTTP_CODE));
 
-            if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+            if ($code == 401 || $code == 403) { // invalid/missing api key, or unknown account/user
                 $glb_curl_error .= $missingApiKey;
                 $herror = HEURIST_INVALID_REQUEST;
-            }elseif($code >= 500){
+            } elseif ($code >= 500) {
                 $glb_curl_error .= $nakalaUnavailable;
                 $herror = HEURIST_ACTION_BLOCKED;
-            }else{
+            } else {
                 $fileErrors[] = "File #{$fileID}: {$fileDetails['message']}";
                 continue;
             }
@@ -2020,7 +2066,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
 
         $fileDetails = json_decode($fileDetails, true);
 
-        if(JSON_ERROR_NONE != json_last_error() || !is_array($fileDetails)){ // json error occurred | is not array | is missing information
+        if (JSON_ERROR_NONE != json_last_error() || !is_array($fileDetails)) { // json error occurred | is not array | is missing information
 
             unset($curl);
             $system->addError(HEURIST_ACTION_BLOCKED, $unknownErrorMsg);
@@ -2028,17 +2074,17 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
             return false;
         }
 
-        if(array_key_exists('message', $fileDetails)){
+        if (array_key_exists('message', $fileDetails)) {
 
             $code = intval(curl_getinfo($curl, CURLINFO_HTTP_CODE));
 
-            if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+            if ($code == 401 || $code == 403) { // invalid/missing api key, or unknown account/user
                 $glb_curl_error .= $missingApiKey;
                 $herror = HEURIST_INVALID_REQUEST;
-            }elseif($code >= 500){
+            } elseif ($code >= 500) {
                 $glb_curl_error .= $nakalaUnavailable;
                 $herror = HEURIST_ACTION_BLOCKED;
-            }else{
+            } else {
                 $fileErrors[] = "File #{$fileID}: {$fileDetails['message']}";
                 continue;
             }
@@ -2051,25 +2097,25 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
 
         $sha1Nakala = $fileDetails['sha1'];
 
-        if($sha1 != $sha1Nakala){
+        if ($sha1 != $sha1Nakala) {
             $fileErrors[] = "File #{$fileID}: SHA1 mismatch between local Heurist file and uploaded Nakala file.";
             continue;
         }
 
         $fileArr = ['sha1' => $sha1];
-        if(array_key_exists('description', $file)){
+        if (array_key_exists('description', $file)) {
             $fileArr['description'] = htmlspecialchars($file['description']);
         }
 
         $uploadedFiles[$fileID] = $fileArr;
     }
 
-    if($uploadedFiles === []){
+    if ($uploadedFiles === []) {
         return ['URL' => '', 'errors' => $fileErrors];
     }
 
     $status = 'published'; // @todo: default to pending, once the retrieval request is working for privated files (currently returns 403 errors)
-    if(array_key_exists('status', $parameters) && $parameters['status'] === 'pending' || $parameters['status'] === 'published'){
+    if (array_key_exists('status', $parameters) && $parameters['status'] === 'pending' || $parameters['status'] === 'published') {
         $status = $parameters['status'];
     }
 
@@ -2085,17 +2131,17 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     $result = curl_exec($curl);
     $error = curl_error($curl);
 
-    if($error){
+    if ($error) {
 
         $glb_curl_code = 'curl';
         $glb_curl_error = $error;
 
         $code = intval(curl_getinfo($curl, CURLINFO_HTTP_CODE));
 
-        if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+        if ($code == 401 || $code == 403) { // invalid/missing api key, or unknown account/user
             $glb_curl_error .= $missingApiKey;
             $herror = HEURIST_INVALID_REQUEST;
-        }elseif($code >= 500){
+        } elseif ($code >= 500) {
             $glb_curl_error .= $nakalaUnavailable;
             $herror = HEURIST_ACTION_BLOCKED;
         }
@@ -2108,7 +2154,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
 
     $result = json_decode($result, true);
 
-    if(JSON_ERROR_NONE != json_last_error() || !is_array($result)){ // json error occurred | is not array | is missing information
+    if (JSON_ERROR_NONE != json_last_error() || !is_array($result)) { // json error occurred | is not array | is missing information
 
         unset($curl);
         $system->addError(HEURIST_ACTION_BLOCKED, $unknownErrorMsg);
@@ -2117,14 +2163,14 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     }
 
     $hasPayload = array_key_exists('payload', $result);
-    if(!$hasPayload && array_key_exists('message', $result)){
+    if (!$hasPayload && array_key_exists('message', $result)) {
 
         $code = intval(curl_getinfo($curl, CURLINFO_HTTP_CODE));
 
-        if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+        if ($code == 401 || $code == 403) { // invalid/missing api key, or unknown account/user
             $glb_curl_error .= $missingApiKey;
             $herror = HEURIST_INVALID_REQUEST;
-        }else{
+        } else {
             $glb_curl_error = $result['message'];
         }
 
@@ -2133,7 +2179,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
 
         return false;
 
-    }elseif(!$hasPayload){
+    } elseif (!$hasPayload) {
 
         unset($curl);
         $system->addError(HEURIST_ACTION_BLOCKED, $unknownErrorMsg);
@@ -2144,26 +2190,26 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     $externalURLs = [];
     $payload = $result['payload'];
 
-    if(array_key_exists('id', $payload)){
+    if (array_key_exists('id', $payload)) {
 
         $nakalaID = $result['payload']['id'];
         $returnType = array_key_exists('returnType', $parameters) ? $parameters['returnType'] : '';
         $linkToUI = $returnType === 'editor';
         $linkToUIAndID = $returnType === 'editor+id';
 
-        if($linkToUIAndID){
+        if ($linkToUIAndID) {
             $externalURLs[] = ['id' => $nakalaID, 'link' => "{$NAKALA_BASE_URL}{$nakalaID}"];
-        }elseif($linkToUI){ // returns link to private view
+        } elseif ($linkToUI) { // returns link to private view
             $externalURLs[] = "{$NAKALA_BASE_URL}{$nakalaID}";
-        }else{ // returns link to publically available file
-            foreach($uploadedFiles as $file){
+        } else { // returns link to publically available file
+            foreach ($uploadedFiles as $file) {
                 $externalURLs[] = "{$NAKALA_BASE_URL_API_FILE}{$nakalaID}/{$file['sha1']}";
             }
         }
 
-    }else{
+    } else {
 
-        if(array_key_exists('validationErrors', $payload)){
+        if (array_key_exists('validationErrors', $payload)) {
             $msg = 'Invalid metadata value(s) found:<br>' . implode('<br>', $payload['validationErrors']);
         }
 
@@ -2185,25 +2231,26 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
  * @param array $metas Cleaned and prepared metadata values
  * @return void
  */
-function prepareNakalaMetadata($datas, &$metas){
+function prepareNakalaMetadata($datas, &$metas)
+{
 
     $W3CDTF_REGEX = '/(\d{4}-\d{2}-\d{2}T\d{2}(:\d{2}){1,2}[-+]\d{2}:\d{2})|(\d{4}-\d{2}-\d{2})|(\d{4}-\d{2})|(\d{4})/';
-    foreach($datas as $data){
+    foreach ($datas as $data) {
 
-        if(array_key_exists('value', $data) && array_key_exists('lang', $data) &&
-            array_key_exists('typeUri', $data) && array_key_exists('propertyUri', $data)){ // pre-prepared value
+        if (array_key_exists('value', $data) && array_key_exists('lang', $data)
+            && array_key_exists('typeUri', $data) && array_key_exists('propertyUri', $data)) { // pre-prepared value
 
             $metas[] = [
                 'value' => $data['value'],
                 'lang' => $data['lang'],
                 'typeUri' => $data['typeUri'],
-                'propertyUri' => $data['propertyUri']
+                'propertyUri' => $data['propertyUri'],
             ];
 
             continue;
         }
 
-        if(!is_array($data) || !array_key_exists('values', $data) || !array_key_exists('field', $data)){
+        if (!is_array($data) || !array_key_exists('values', $data) || !array_key_exists('field', $data)) {
             continue;
         }
 
@@ -2211,30 +2258,30 @@ function prepareNakalaMetadata($datas, &$metas){
         $values = $data['values'];
         $propertyURI = $data['field']; // propertyUri
 
-        foreach($values as $value){
+        foreach ($values as $value) {
 
             $typeURI = null;
             $lang = null;
-            
-            if(empty($value) && empty(@$value['value'])){
+
+            if (empty($value) && empty(@$value['value'])) {
                 continue;
             }
 
-            if(is_array($value)){
+            if (is_array($value)) {
                 $typeURI = @$value['type'];
                 $value = @$value['value'];
             }
 
-            if(filter_var($value, FILTER_VALIDATE_URL)){
+            if (filter_var($value, FILTER_VALIDATE_URL)) {
                 $value = filter_var($value, FILTER_SANITIZE_URL);
                 $typeURI = PURL_TERM_URI;
-            }elseif(preg_match($W3CDTF_REGEX, $value, $matches)){
+            } elseif (preg_match($W3CDTF_REGEX, $value, $matches)) {
                 $value = $matches[0];
                 $typeURI = PURL_TERM_DATE;
-            }elseif((strlen($value) === 2 || strlen($value) === 3) && getLangCode2($value) !== null){
+            } elseif ((strlen($value) === 2 || strlen($value) === 3) && getLangCode2($value) !== null) {
                 $value = getLangCode2($value);
                 $typeURI = PURL_TERM_LANG;
-            }else{
+            } else {
                 [$lang, $value] = extractLangPrefix($value);
                 $typeURI = null; // W3_XML_SCHEMA_STRING
                 $lang = $lang ? getLangCode2($lang) : null;
@@ -2244,24 +2291,27 @@ function prepareNakalaMetadata($datas, &$metas){
                 'value' => $value,
                 'lang' => $lang,
                 'typeURI' => $typeURI,
-                'propertyURI' => $propertyURI
+                'propertyURI' => $propertyURI,
             ];
         }
     }
 }
 
-    /**
-     * Flushes PHP's output buffers.
-     * Note: This function is marked as "not used" in the original source comments.
-     *
-     * @param bool $start Optional. If true (default), restarts output buffering after flushing.
-     * @return void
-     */
-function flush_buffers($start=true){
+/**
+ * Flushes PHP's output buffers.
+ * Note: This function is marked as "not used" in the original source comments.
+ *
+ * @param bool $start Optional. If true (default), restarts output buffering after flushing.
+ * @return void
+ */
+function flush_buffers($start = true)
+{
     //ob_end_flush();
     @ob_flush();
     @flush();
-    if($start) {@ob_start();}
+    if ($start) {
+        @ob_start();
+    }
 }
 
 /**
@@ -2276,12 +2326,12 @@ function flush_buffers($start=true){
  * @return int|false|void Returns the size of the file (or range) in bytes if successful and not outputting entire file through readfile(),
  *                        false on failure to open file, or void if file is empty. `readfile` output is directly to client.
  */
-function fileReadByChunks($file_path, $range_min=0, $range_max=0)
+function fileReadByChunks($file_path, $range_min = 0, $range_max = 0)
 {
     // Get the size of the file
     $file_size = getFileSize($file_path);
 
-    if($file_size==0){
+    if ($file_size == 0) {
         return; //file does not exist
     }
 
@@ -2289,23 +2339,25 @@ function fileReadByChunks($file_path, $range_min=0, $range_max=0)
     $chunk_size = 10 * 1024 * 1024;
 
     // Check if the file is larger than the chunk size
-    if ($range_max==0 && $file_size < $chunk_size) {
+    if ($range_max == 0 && $file_size < $chunk_size) {
         // If the file is smaller than the chunk size, output the entire file
         return readfile($file_path);
     }
 
     // Open the file in binary read mode
     $handle = fopen($file_path, 'rb');
-    if(!$handle){
+    if (!$handle) {
         //error_log('file not found: '.htmlspecialchars($filename));
         return 0;
     }
 
-    if($range_max>0){ //output defined range only
-        if($range_min>0) {fseek($handle,$range_min);}
-        $chunk = fread($handle, $range_max-$range_min+1);
+    if ($range_max > 0) { //output defined range only
+        if ($range_min > 0) {
+            fseek($handle, $range_min);
+        }
+        $chunk = fread($handle, $range_max - $range_min + 1);
         echo $chunk;
-    }else{
+    } else {
         // Loop through the file and read it in chunks
         while (!feof($handle)) {
             echo fread($handle, $chunk_size); // Output the current chunk (was 1000)
@@ -2332,7 +2384,8 @@ function fileReadByChunks($file_path, $range_min=0, $range_max=0)
  *                               Defaults to false.
  * @return int The size of the file in bytes. Returns 0 if the file does not exist.
  */
-function getFileSize($file_path, $clear_stat_cache = false) {
+function getFileSize($file_path, $clear_stat_cache = false)
+{
     // If cache clearing is enabled, clear the file status cache
     if ($clear_stat_cache) {
         if (version_compare(phpversion(), '5.3.0') >= 0) {
@@ -2362,35 +2415,36 @@ function getFileSize($file_path, $clear_stat_cache = false) {
  * @param bool $keyAsSection whether the array keys are section headers
  * @return bool whether the saving has been successful
  */
-function saveIniFile($file, $data, $keyAsSection = false){
+function saveIniFile($file, $data, $keyAsSection = false)
+{
 
-    if(!is_array($data)){
+    if (!is_array($data)) {
         return false;
     }
 
-    if(array_key_exists('@comment', $data)){
+    if (array_key_exists('@comment', $data)) {
 
         $comments = $data['@comment'];
         unset($data['@comment']);
 
-        if(is_array($comments)){
-            foreach($comments as $comment){
-    
+        if (is_array($comments)) {
+            foreach ($comments as $comment) {
+
                 $comment = preg_match('/(?:\r|\n)$/', $comment) === false ? $comment . PHP_EOL : $comment;
                 $comment = preg_match('/^(?:;|#)/', $comment) === false ? "; {$comment}" : $comment;
                 $size = fileAdd($comment, $file);
-    
-                if($size === 0 && !empty($comment)){
+
+                if ($size === 0 && !empty($comment)) {
                     return false;
                 }
             }
-        }elseif(is_string($comments)){
+        } elseif (is_string($comments)) {
 
             $comments = preg_match('/(?:\r|\n)$/', $comments) === false ? $comments . PHP_EOL : $comments;
             $comments = preg_match('/^(?:;|#)/', $comments) === false ? "; {$comments}" : $comments;
             $size = fileAdd($comments, $file);
 
-            if($size === 0 && !empty($comments)){
+            if ($size === 0 && !empty($comments)) {
                 return false;
             }
         }
@@ -2398,14 +2452,14 @@ function saveIniFile($file, $data, $keyAsSection = false){
 
     $result = true;
 
-    if($keyAsSection){
+    if ($keyAsSection) {
 
-        foreach($data as $section => $sectionData){
+        foreach ($data as $section => $sectionData) {
 
-            if(!is_array($sectionData)){
+            if (!is_array($sectionData)) {
 
                 $size = fileAdd("{$section}={$sectionData}" . PHP_EOL, $file);
-                if($size === 0){
+                if ($size === 0) {
                     $result = false;
                     break;
                 }
@@ -2414,22 +2468,22 @@ function saveIniFile($file, $data, $keyAsSection = false){
             }
 
             $size = fileAdd(PHP_EOL . "[{$section}]" . PHP_EOL, $file);
-            if($size === 0){
+            if ($size === 0) {
                 $result = false;
                 break;
             }
 
             $result = saveIniFile($file, $sectionData);
-            if($result === false){
+            if ($result === false) {
                 break;
             }
         }
-    }else{
+    } else {
 
-        foreach($data as $key => $value){
+        foreach ($data as $key => $value) {
 
             $size = fileAdd("{$key}={$value}" . PHP_EOL, $file);
-            if($size === 0){
+            if ($size === 0) {
                 $result = false;
                 break;
             }
@@ -2439,10 +2493,11 @@ function saveIniFile($file, $data, $keyAsSection = false){
     return $result;
 }
 
-function getFileDetailsForNakala($mysqli, $ulfID){
+function getFileDetailsForNakala($mysqli, $ulfID)
+{
 
     $ulfID = intval($ulfID);
-    if($ulfID <= 0){
+    if ($ulfID <= 0) {
         return [false, 'Invalid file ID provided'];
     }
 
@@ -2451,7 +2506,7 @@ function getFileDetailsForNakala($mysqli, $ulfID){
     WHERE ulf_ID = {$ulfID} AND ulf_MimeExt = fxm_Extension AND ulf_UploaderUGrpID = ugr_ID";
 
     $fileResult = $mysqli->query($fileQuery);
-    if(!$fileResult){ // another mysql error, skip
+    if (!$fileResult) { // another mysql error, skip
         return [false, FILE_NO . $ulfID . R_ARROW . $mysqli->error];
     }
 
@@ -2465,7 +2520,7 @@ function getFileDetailsForNakala($mysqli, $ulfID){
      */
     $fileDetails = $fileResult->fetch_row();
     $filePath = resolveFilePath($fileDetails[1]);
-    if(!file_exists($filePath)){
+    if (!file_exists($filePath)) {
         return [false, FILE_NO . $ulfID . R_ARROW . 'Unable to locate the local file for transfer'];
     }
 
@@ -2473,7 +2528,7 @@ function getFileDetailsForNakala($mysqli, $ulfID){
         'path' => $filePath,
         'type' => $fileDetails[2],
         'name' => $fileDetails[0],
-        'description' => $fileDetails[3]
+        'description' => $fileDetails[3],
     ];
 
     $metaValues = [];
@@ -2481,7 +2536,7 @@ function getFileDetailsForNakala($mysqli, $ulfID){
         'value' => $fileDetails[0],
         'lang' => null,
         'typeUri' => W3_XML_SCHEMA_STRING,
-        'propertyUri' => NAKALA_REPO.'terms#title'
+        'propertyUri' => NAKALA_REPO . 'terms#title',
     ];
 
     $fileType = $fileDetails[2];
@@ -2495,15 +2550,15 @@ function getFileDetailsForNakala($mysqli, $ulfID){
      * other <=> anything else
      */
 
-    if(strpos($fileType, 'text') !== false || strpos($fileType, 'pdf') !== false){
+    if (strpos($fileType, 'text') !== false || strpos($fileType, 'pdf') !== false) {
         $fileType = 'http://purl.org/coar/resource_type/c_1843';
-    }elseif(strpos($fileType, 'sound') !== false || strpos($fileType, 'audio') !== false){
+    } elseif (strpos($fileType, 'sound') !== false || strpos($fileType, 'audio') !== false) {
         $fileType = 'http://purl.org/coar/resource_type/c_18cc';
-    }elseif(strpos($fileType, 'image') !== false){
+    } elseif (strpos($fileType, 'image') !== false) {
         $fileType = 'http://purl.org/coar/resource_type/c_c513';
-    }elseif(strpos($fileType, 'video') !== false){
+    } elseif (strpos($fileType, 'video') !== false) {
         $fileType = 'http://purl.org/coar/resource_type/c_12ce';
-    }else{ // other
+    } else { // other
         $fileType = 'http://purl.org/coar/resource_type/c_1843';
     }
 
@@ -2511,7 +2566,7 @@ function getFileDetailsForNakala($mysqli, $ulfID){
         'value' => $fileType,
         'lang' => null,
         'typeUri' => PURL_TERM_URI,
-        'propertyUri' => NAKALA_REPO.'terms#type'
+        'propertyUri' => NAKALA_REPO . 'terms#type',
     ];
 
     // Current Heurist user
@@ -2519,7 +2574,7 @@ function getFileDetailsForNakala($mysqli, $ulfID){
         'value' => $fileDetails[4],
         'lang' => null,
         'typeUri' => W3_XML_SCHEMA_STRING,
-        'propertyUri' => 'http://purl.org/dc/terms/creator'
+        'propertyUri' => 'http://purl.org/dc/terms/creator',
     ];
 
     // ulf_Added
@@ -2527,19 +2582,17 @@ function getFileDetailsForNakala($mysqli, $ulfID){
         'value' => $fileDetails[5],
         'lang' => null,
         'typeUri' => null,
-        'propertyUri' => NAKALA_REPO.'terms#created'
+        'propertyUri' => NAKALA_REPO . 'terms#created',
     ];
-    
-    if(!empty($fileDetails[3])){
+
+    if (!empty($fileDetails[3])) {
         $metaValues['description'] = [
             'value' => $fileDetails[3],
             'lang' => null,
             'typeUri' => W3_XML_SCHEMA_STRING,
-            'propertyUri' => 'http://purl.org/dc/terms/description'
+            'propertyUri' => 'http://purl.org/dc/terms/description',
         ];
     }
 
     return [$metaValues, $file];
 }
-
-?>

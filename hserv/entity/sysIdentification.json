@@ -98,6 +98,16 @@
                         "rst_DisplayName": "Description of the database/content up to 1Kb",
                         "rst_DisplayHelpText": "(or a URL to a stable website describing the project)"
                     }
+                },
+                {
+                    "dtID": "sys_dbDOI",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":250,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Database DOI (if obtained)",
+                        "rst_DisplayHelpText": "A persistent identifier (DOI) you have obtained for this database as a whole, e.g. from a data repository. Improves the Findability component of the FAIR score."
+                    }
                 }
         ]},
         {

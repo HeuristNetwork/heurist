@@ -204,6 +204,14 @@
         $res = user_getNotifications($system);
     }elseif($action == 'set_user_notification_settings'){
         $res = user_blockNotifications($system, $req_params['blocking']);
+    }elseif($action == 'get_db_metadata'){
+        // Human-readable listing of the locally cached Heurist_Reference_Index registration
+        // metadata (DBMetadata.xml, synced nightly by admin/utilities/downloadDBMetadata.php),
+        // for display on Design > Properties once the database has been registered.
+
+        $filestore_dir = $system->getFileStoreRootFolder() . $system->dbname() . '/';
+
+        $res = \hserv\utilities\DbMetadataReader::read($filestore_dir);
     }elseif($action == 'get_tinymce_formats'){
 
         $settings = $system->settings->getDatabaseSetting('TinyMCE formats');
