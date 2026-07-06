@@ -997,7 +997,7 @@ $.widget( "heurist.searchBuilder", {
                             'geo','year','date','integer','float','resource','relmarker','relationtype','file'];
 
             let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new({
-                mode: 5, rectypeids: rectype, fieldtypes: [...allowed_fieldtypes, 'header_ext', 'anyfield', 'separator'], field_order: node_order
+                mode: 5, rectypeids: rectype, fieldtypes: [...allowed_fieldtypes, 'header_ext', 'anyfield', 'separator', 'parent_link'], field_order: node_order
             });
 
             treedata[0].expanded = true; //first expanded
@@ -1153,7 +1153,7 @@ $.widget( "heurist.searchBuilder", {
                     let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
                     {
                         mode:5, rectypeids:rectypes, 
-                        fieldtypes: [...allowed_fieldtypes, 'header_ext'],
+                        fieldtypes: [...allowed_fieldtypes, 'header_ext', 'parent_link'],
                         parentcode: parentcode,
                         field_order:node_order//, enum_mode:'expanded' 
                     } );
