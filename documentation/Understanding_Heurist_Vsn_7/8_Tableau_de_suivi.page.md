@@ -4,7 +4,7 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 ## Full chapter content
 
-<table id="bkmrk-chapitre-1%C3%A8re-relect"><colgroup><col></col><col></col><col></col><col></col><col></col><col></col></colgroup><tbody><tr><th>Chapitre
+<table id="bkmrk-chapitre1%C3%A8re-relectu"><colgroup><col style="width: 187px;"></col><col style="width: 91px;"></col><col></col><col></col><col></col><col></col></colgroup><tbody><tr style="height: 10px;"><th>Chapitre
 
 </th><th>1ère relecture
 
@@ -16,7 +16,7 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </th><th>Readthedocs
 
-</th></tr><tr><td>Chapter 1: Overview
+</th></tr><tr><td>**Ch 1: Overview**
 
 </td><td>✅FAIT
 
@@ -32,7 +32,7 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>✅FAIT
 
-</td></tr><tr><td>Chapter 2: Getting started with Heurist
+</td></tr><tr><td>**Ch 2: Getting started with Heurist**
 
 </td><td>✅FAIT
 
@@ -48,7 +48,7 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>✅FAIT mais il faudra appliquer des corrections
 
-</td></tr><tr><td>Chapter 3: Basic structuring concepts
+</td></tr><tr><td>**Ch 3: Basic structuring concepts**
 
 </td><td>✅FAIT
 
@@ -62,7 +62,7 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>Bruno
 
-</td><td></td></tr><tr><td>Chapter 4: Data Entry
+</td><td></td></tr><tr><td>**Ch 4: Data Entry**
 
 </td><td>✅FAIT
 
@@ -74,7 +74,7 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>Shannon
 
-</td><td></td></tr><tr><td>Chapter 5: Modifying structure
+</td><td></td></tr><tr><td>**Ch 5: Modifying structure**
 
 </td><td>♻️ EN COURS
 
@@ -84,7 +84,7 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>XXX
 
-</td><td></td></tr><tr><td>Chapter 6: Populating the database
+</td><td></td></tr><tr><td>**Ch 6: Populating the database**
 
 </td><td>✅FAIT
 
@@ -100,7 +100,25 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 30/04/2026
 
-</td></tr><tr><td>Chapter 7: Use – Find/Filter and View
+</td></tr><tr><td>*suppl: 06a: Importing and matching references (worked example)*
+
+</td><td>♻️ EN COURS
+
+</td><td>Ian
+
+</td><td></td><td></td><td></td></tr><tr style="height: 10px;"><td>*suppl: 06b: IIIF Manifests, Canvases and Annotations*
+
+</td><td>♻️ EN COURS
+
+</td><td>Artem/Ian
+
+</td><td></td><td></td><td></td></tr><tr><td>*suppl: 06c: Omeka-S to Heurist*
+
+</td><td>♻️ EN COURS
+
+</td><td>Artem/Ian
+
+</td><td></td><td></td><td></td></tr><tr><td>**Ch 7: Use – Find/Filter and View**
 
 </td><td>✅FAIT
 
@@ -112,7 +130,7 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>Oanez
 
-</td><td></td></tr><tr><td>Chapter 8: Result Views and Export 'EN/FR'
+</td><td></td></tr><tr><td>**Ch 8: Result Views and Export 'EN/FR'**
 
 </td><td>✅FAIT
 
@@ -126,7 +144,7 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>Vincent
 
-</td><td></td></tr><tr><td>Chapter 8a: Custom report
+</td><td></td></tr><tr><td>*suppl: 08a: Getting started with custom reports*
 
 </td><td>♻️ EN COURS (~80%)
 
@@ -136,17 +154,13 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>Ian (modif à apporter pour le popup) (Maxine)
 
-</td><td></td></tr><tr><td>Chapter 8a: supplement: Smarty tutorial
+</td><td></td></tr><tr><td>*suppl: 08b: Custom reports - Advanced functions*
 
-</td><td>♻️ à mettre en HedgeDoc
+</td><td>♻️ EN COURS
 
-</td><td>Maël &amp; Ian
+</td><td>Ian
 
-</td><td>🖐️ A FAIRE
-
-</td><td>Sylvain
-
-</td><td></td></tr><tr><td>Chapter 8b: Mapping &amp; Visualisation 'EN/FR'
+</td><td></td><td></td><td></td></tr><tr><td>*suppl: 08c: Mapping &amp; Visualisation 'EN/FR'*
 
 </td><td>✅FAIT
 
@@ -160,7 +174,21 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>Maxine et Vincent (pour la partie graphique. dernière partie)
 
-</td><td></td></tr><tr><td>Chapter 9: Publishing and websites
+</td><td></td></tr><tr><td>*suppl: 08d: Smarty tutorial*
+
+</td><td>✅Draft
+
+02/07/2026
+
+</td><td>Maël/Ian
+
+</td><td>🖐️ A FAIRE
+
+</td><td>Sylvain
+
+</td><td></td></tr><tr><td>**Ch 09: Publishing, websites, URLS and archiving**
+
+</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>*suppl: 09a: Publishing websites and database archiving*
 
 </td><td>♻️ EN COURS
 
@@ -170,9 +198,15 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>XXX
 
-</td><td></td></tr><tr><td>Chapter 10: Administration
+</td><td></td></tr><tr><td>*suppl: 09b: Domains, URLs and custom website templates*
 
-</td><td>🖐️ A FAIRE
+</td><td>♻️ EN COURS
+
+</td><td>Ian/Artem
+
+</td><td></td><td></td><td></td></tr><tr><td>**Chapter 10: Administration of databases**
+
+</td><td>♻️ EN COURS
 
 </td><td>Suzanne/Ian (mostly accessible only to system admin)
 
@@ -180,21 +214,11 @@ marquer A FAIRE + nom, EN COURS + prénom, ou FAIT + prénom + date xx/xx/xxxx
 
 </td><td>XXX
 
-</td><td></td></tr><tr><td>Chapter 11: Server Management
+</td><td></td></tr><tr><td>**Chapter 11: Basic server management**
 
-</td><td>🖐️ A FAIRE
+</td><td>♻️ EN COURS
 
 </td><td>Ian
-
-</td><td>🖐️ A FAIRE
-
-</td><td>XXX
-
-</td><td></td></tr><tr><td>Chapter 12: Programming in Heurist
-
-</td><td>🖐️ A FAIRE
-
-</td><td>Ian / Artem / Brandon
 
 </td><td>🖐️ A FAIRE
 
