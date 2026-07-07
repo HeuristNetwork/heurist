@@ -82,64 +82,68 @@ require_once dirname(__FILE__).'/../../autoload.php';
 
     if($allow_action){
         
-        if($action=='resolve'){
+        try {
+            if($action=='resolve'){
 
-            // Full registered database URL resolution.
-            //
-            // Used by RecordResolver. Given a registered database ID, this performs
-            // the full DbRegis lookup chain:
-            // 1) local URL cache
-            // 2) local _INDEX_OF_REGISTERED_DATABASES
-            // 3) central Reference Index server lookup
-            // 4) destination server local ID lookup
-            //
-            // Returns the current database URL, for example:
-            // https://example.org/heurist/?db=my_database
-            //$res = DbRegis::registrationGet($req_params);
-            
-            try {
+                // Full registered database URL resolution.
+                //
+                // Used by RecordResolver. Given a registered database ID, this performs
+                // the full DbRegis lookup chain:
+                // 1) local URL cache
+                // 2) local _INDEX_OF_REGISTERED_DATABASES
+                // 3) central Reference Index server lookup
+                // 4) destination server local ID lookup
+                //
+                // Returns the current database URL, for example:
+                // https://example.org/heurist/?db=my_database
+                //$res = DbRegis::registrationGet($req_params);
+                
                 $res = DbRegis::registrationGet($req_params);
-                if(!$res){
-                    $error = DbRegis::getLastError();
-                }
-            } catch (Throwable $e) {
-                $res = null;
+                
+            }elseif($action=='resolve_local'){
+                // Destination-server local lookup only.
+                //
+                // Used internally by DbRegis::registrationGet() after the central
+                // Reference Index identifies the likely server for a registered DB ID.
+                // This does not query the central index. It checks this server's
+                // _INDEX_OF_REGISTERED_DATABASES and returns the current database URL.
+                $res = DbRegis::getDatabaseUrlLocal($req_params);
+
+            }elseif($action=='central_index_lookup'){ 
+                
+                // Central Reference Index lookup only.
+                //
+                // Given a registered DB ID, return the registered server/base URL from
+                // Heurist_Reference_Index. This value identifies the server to ask next;
+                // it should not be treated as the final database URL.        
+                $res = DbRegis::registrationGetFromCentralIndexDb($req_params);
+                
+            }elseif($action=='register'){
+                $res = DbRegis::registrationAdd($req_params);//returns ID or false
+            }elseif($action=='update'){
+                $res = DbRegis::registrationUpdate($req_params);
+            }elseif($action=='delete'){
+                $res = DbRegis::registrationDelete($req_params);//returns ID or false
+            }else{
                 $error = [
-                    'status' => HEURIST_SYSTEM_FATAL,
-                    'message' => $e->getMessage()
+                    'status' => HEURIST_INVALID_REQUEST,
+                    'message' => 'Action parameter is missing or incorrect'
                 ];
-            }            
-
-        }elseif($action=='resolve_local'){
-            // Destination-server local lookup only.
-            //
-            // Used internally by DbRegis::registrationGet() after the central
-            // Reference Index identifies the likely server for a registered DB ID.
-            // This does not query the central index. It checks this server's
-            // _INDEX_OF_REGISTERED_DATABASES and returns the current database URL.
-            $res = DbRegis::getDatabaseUrlLocal($req_params);
-
-        }elseif($action=='central_index_lookup'){ 
+            }
             
-            // Central Reference Index lookup only.
-            //
-            // Given a registered DB ID, return the registered server/base URL from
-            // Heurist_Reference_Index. This value identifies the server to ask next;
-            // it should not be treated as the final database URL.        
-            $res = DbRegis::registrationGetFromCentralIndexDb($req_params);
+            if(!$res && $error===null){
+                $error = DbRegis::getLastError();
+            }
             
-        }elseif($action=='register'){
-            $res = DbRegis::registrationAdd($req_params);//returns ID or false
-        }elseif($action=='update'){
-            $res = DbRegis::registrationUpdate($req_params);
-        }elseif($action=='delete'){
-            $res = DbRegis::registrationDelete($req_params);//returns ID or false
-        }else{
-            $system->addError(HEURIST_INVALID_REQUEST, 'Action parameter is missing or incorrect');
-        }
+        } catch (Throwable $e) {
+            $error = [
+                'status' => HEURIST_SYSTEM_FATAL,
+                'message' => $e->getMessage()
+            ];
+        }            
     }
 
-if(is_bool($res) && $res==false){
+if(is_bool($res) && $res===false){
     if($error){
         $response = $error;
     }else{
