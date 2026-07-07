@@ -1461,12 +1461,15 @@ class DbDefTerms extends DbEntityBase
                 }
                 $trm_ID = $mysqli->real_escape_string($trm_ID);
 
-                $query = 'SELECT trm_ID, COUNT(DISTINCT dtl_RecID) '
-                . 'FROM recDetails '
-                . 'INNER JOIN defTerms ON trm_ID = dtl_Value '
-                . 'INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
-                . 'WHERE dtl_Value IN ('. $trm_ID .') AND dty_Type="enum" '
-                . 'GROUP BY trm_ID';
+                $query = <<<QUERY
+                SELECT dtl_Value, COUNT(DISTINCT dtl_RecID) 
+                FROM recDetails 
+                INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID 
+                INNER JOIN Records ON rec_ID = dtl_RecID 
+                WHERE dtl_Value IN ({$trm_ID}) AND dty_Type="enum" AND rec_FlagTemporary != 1
+                GROUP BY dtl_Value
+                QUERY;
+
                 $trm_usage = mysql__select_assoc2($mysqli, $query);// [ trm_ID1 => count1, ... ]
                 if($trm_usage){
                     $res = $trm_usage;
@@ -1478,7 +1481,7 @@ class DbDefTerms extends DbEntityBase
                 }
 
                 // Retrieve terms used in relmarkers
-                $query = 'SELECT rl_RelationTypeID, count(rl_ID) FROM recLinks WHERE rl_RelationTypeID IN (' . $trm_ID . ') GROUP BY rl_RelationTypeID';
+                $query = "SELECT rl_RelationTypeID, count(rl_ID) FROM recLinks WHERE rl_RelationTypeID IN ({$trm_ID}) GROUP BY rl_RelationTypeID";
                 $reltype_usage = mysql__select_assoc2($mysqli, $query);// [ trm_ID1 => count1, ... ]
                 if($reltype_usage){
                     // Add results to $res
