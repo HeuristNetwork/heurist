@@ -151,6 +151,79 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         $ele.editing_input('setValue', [2 & status], true);
 
         this._setupLanguages();
+        this._setupRegisteredMetadata();
+    },
+
+    /**
+     * @brief If this database is registered and the Heurist Reference Index metadata has been
+     * synced locally (DBMetadata.xml, via the nightly admin/utilities/downloadDBMetadata.php cron),
+     * replaces the editable Display name / Rights / Owner / Description fields with a read-only,
+     * human-readable listing of that synced metadata, plus a link to edit it on the Reference Index
+     * and a note that local changes take a day to appear.
+     * Falls back to the normal editable fields if not registered or not yet synced.
+     * @memberof heurist.manageSysIdentification
+     */
+    _setupRegisteredMetadata: function(){
+
+        const regID = window.hWin.HAPI4.sysinfo['db_registeredid'];
+        if(!window.hWin.HEURIST4.util.isPositiveInt(regID)){
+            return; // not registered - editable fields (sys_dbName/Rights/Owner/Description) stand as-is
+        }
+
+        let that = this;
+
+        window.hWin.HAPI4.callserver('usr_info', {a: 'get_db_metadata'}, function(response){
+
+            if(!response || !response.exists || !window.hWin.HEURIST4.util.isArrayNotEmpty(response.fields)){
+                return; // not yet synced (first sync happens the night after registration) - leave editable fields
+            }
+
+            const fieldsToReplace = ['sys_dbName', 'sys_dbRights', 'sys_dbOwner', 'sys_dbDescription'];
+            let $anchor = null;
+
+            fieldsToReplace.forEach(function(fname){
+                let $fld = that._editing.getFieldByName(fname);
+                if($fld && $fld.length>0){
+                    if(!$anchor){ $anchor = $fld.closest('tr, .detailfield'); }
+                    $fld.closest('tr, .detailfield').hide();
+                }
+            });
+
+            const editURL = window.hWin.HAPI4.sysinfo['referenceServerURL']
+                +'?fmt=edit&recID='+regID
+                +'&db='+window.hWin.HAPI4.sysinfo.referenceServerIndexDatabase;
+
+            let html = '<div class="synced-metadata" style="padding:0.5em 1em;border:1px solid #ddd;border-radius:4px;margin:0.5em 0;">'
+                + '<div style="font-weight:bold;margin-bottom:0.5em;">'
+                + window.hWin.HR('Registered database metadata (Heurist Reference Index)') + '</div>';
+
+            response.fields.forEach(function(f){
+                html += '<div style="margin-bottom:0.4em;"><span style="font-weight:bold;">'
+                    + window.hWin.HEURIST4.util.htmlEscape(f.label) + ':</span> '
+                    + window.hWin.HEURIST4.util.htmlEscape(f.value) + '</div>';
+            });
+
+            html += '<div style="margin-top:0.5em;">'
+                + '<a class="dbLink" target="_blank" href="' + editURL + '">'
+                + window.hWin.HR('Edit this metadata on the Heurist Reference Index') + '</a></div>';
+
+            html += '<div style="margin-top:0.3em;font-style:italic;color:#777;">'
+                + window.hWin.HR('Changes made in the Heurist reference index will appear here the next day')
+                + '</div>';
+
+            if(response.modified){
+                html += '<div style="margin-top:0.3em;font-size:0.85em;color:#999;">'
+                    + window.hWin.HR('Last synced') + ': ' + response.modified + '</div>';
+            }
+
+            html += '</div>';
+
+            if($anchor && $anchor.length>0){
+                $(html).insertBefore($anchor.first());
+            }else{
+                that.editForm.prepend(html);
+            }
+        });
     },
 
     /**

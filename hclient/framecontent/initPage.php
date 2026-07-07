@@ -1,7 +1,7 @@
 <?php
 /**
 * initPage.php - Standard initialization script for Heurist pages
-* 
+*
 * It
 * 1) initializes System.php
 * 2) prints out html header with minimum set of scripts
@@ -22,7 +22,7 @@
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 
-require_once dirname(__FILE__).'/../../autoload.php';
+require_once dirname(__FILE__) . '/../../autoload.php';
 
 /*
 if(defined('IS_INDEX_PAGE')){
@@ -31,8 +31,10 @@ if(defined('IS_INDEX_PAGE')){
     define('ERROR_REDIR','startup/index.php'); //redirects to startup page - list of all databases
 }else{
 */
-    if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
-    define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
+if (!defined('PDIR')) {
+    define('PDIR', '../../');
+}//need for proper path to js and css
+define('ERROR_REDIR', dirname(__FILE__) . '/../../hclient/framecontent/infoPage.php');
 
 
 $error_msg = '';
@@ -42,42 +44,42 @@ $isSystemInited = false;
 global $system;
 $system = new hserv\System(true);
 
-if(@$_REQUEST['db']){
+if (@$_REQUEST['db']) {
     //if database is defined then connect to given database
     $isSystemInited = $system->init(@$_REQUEST['db']);
 }
 
-if(!$isSystemInited){
-    
+if (!$isSystemInited) {
+
     $treatWronDatabase = ERROR_REDIR;
-    
-    if(defined('IS_INDEX_PAGE')){
-        
-        if(isset($_REQUEST['db'])){
-            $treatWronDatabase = dirname(__FILE__).'/../../hclient/framecontent/dbNotFound.php';
-        }else{
+
+    if (defined('IS_INDEX_PAGE')) {
+
+        if (isset($_REQUEST['db'])) {
+            $treatWronDatabase = dirname(__FILE__) . '/../../hclient/framecontent/dbNotFound.php';
+        } else {
             //redirects to startup page - list of all databases
             $_REQUEST['list'] = 1;
-            $treatWronDatabase = dirname(__FILE__).'/../../startup/index.php'; 
+            $treatWronDatabase = dirname(__FILE__) . '/../../startup/index.php';
         }
     }
-    
-    include_once $treatWronDatabase;    
+
+    include_once $treatWronDatabase;
     exit;
 }
 
-if(defined('IS_INDEX_PAGE')){
+if (defined('IS_INDEX_PAGE')) {
 
     //verify database version against minimal required
     $current_db_version = getDbVersion($system->getMysqli());
-    
-    if(!$current_db_version){
+
+    if (!$current_db_version) {
         $message = 'Cannnot obtain current database version';
         include_once ERROR_REDIR;
         exit;
     }
 
-    if (version_compare(HEURIST_MIN_DBVERSION, $current_db_version)>0){ 
+    if (version_compare(HEURIST_MIN_DBVERSION, $current_db_version) > 0) {
         //older then minimal - force update
         include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
         exit;
@@ -86,32 +88,32 @@ if(defined('IS_INDEX_PAGE')){
     //check for missed tables
     $missed = hasAllTables($system->getMysqli());
 
-    if(is_array($missed)){
-        if(!empty($missed)){
-            $message = 'Database <b>'.$system->dbname()
-            .'</b> is missing the following tables:<br><br><i>'
-            .implode(', ',$missed)
-            .'</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
-            .CRITICAL_DB_ERROR_CONTACT_SYSADMIN.'</p>';
+    if (is_array($missed)) {
+        if (!empty($missed)) {
+            $message = 'Database <b>' . $system->dbname()
+            . '</b> is missing the following tables:<br><br><i>'
+            . implode(', ', $missed)
+            . '</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
+            . CRITICAL_DB_ERROR_CONTACT_SYSADMIN . '</p>';
 
             //to add to error log
-            $system->addError(HEURIST_DB_ERROR, 'Database '.$system->dbname()
-                    .' is missing the following tables: '.implode(', ',$missed));
+            $system->addError(HEURIST_DB_ERROR, 'Database ' . $system->dbname()
+                    . ' is missing the following tables: ' . implode(', ', $missed));
 
             include_once ERROR_REDIR;
             exit;
         }
-    }else{
-        $message = 'There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
+    } else {
+        $message = 'There is database server intermittens. ' . CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
 
-        $system->addError(HEURIST_DB_ERROR, 'Database '.$system->dbname(), $missed);
+        $system->addError(HEURIST_DB_ERROR, 'Database ' . $system->dbname(), $missed);
 
         include_once ERROR_REDIR;
         exit;
     }
 }
 
-if(!$system->hasAccess() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd'])){ // attempt login with provided creds
+if (!$system->hasAccess() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd'])) { // attempt login with provided creds
 
     $user_pwd = USanitize::getAdminPwd();
 
@@ -121,10 +123,10 @@ if(!$system->hasAccess() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd
 
     $attempt_login = false;
 
-    if($ugr_ID !== null){
+    if ($ugr_ID !== null) {
         $res = $mysqli->query("SELECT ugr_Name FROM sysUGrps WHERE ugr_ID = $ugr_ID");
         $username = $res ? $res->fetch_row()[0] : null;
-    }else{
+    } else {
 
         $username = $mysqli->real_escape_string($_REQUEST['user']);
 
@@ -133,8 +135,8 @@ if(!$system->hasAccess() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd
     }
 
     // Handle individual cases
-    if(intval($ugr_ID) > 2 &&
-        array_key_exists('rec_rectype', $_REQUEST) && strpos($_SERVER['REQUEST_URI'], 'recordEdit.php') !== false){
+    if (intval($ugr_ID) > 2
+        && array_key_exists('rec_rectype', $_REQUEST) && strpos($_SERVER['REQUEST_URI'], 'recordEdit.php') !== false) {
         // Record Edit from non-logged in user, use the provided default account
         // Cannot be a workgroup admin, a member of the DB managers workgroup or the DB owner
 
@@ -147,7 +149,7 @@ if(!$system->hasAccess() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd
         $attempt_login = intval($role_count) === 0;
     }
 
-    if($attempt_login && !empty($username) && $user_pwd!=null){
+    if ($attempt_login && !empty($username) && $user_pwd != null) {
         $system->doLogin($username, $user_pwd, 'public');
     }
 }
@@ -160,51 +162,53 @@ $is_admin = $system->isAdmin();
 // to limit access to particular page
 //
 $message = 'To perform this action you must be logged in ';
-if(defined('LOGIN_REQUIRED') && !$system->hasAccess()){
+if (defined('LOGIN_REQUIRED') && !$system->hasAccess()) {
     //No Need to show error message when login is required, login popup will be shown
     //$message = $login_warning
     exit;
-}elseif(defined('MANAGER_MEMBER_REQUIRED') && 
-        !($system->isDbOwner() || $system->isMember([$system->settings->get('sys_OwnerGroupID')]))){
-    $message .= 'as member of group \'Database Managers\'';     
-}elseif(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
+} elseif (defined('MANAGER_MEMBER_REQUIRED')
+        && !($system->isDbOwner() || $system->isMember([$system->settings->get('sys_OwnerGroupID')]))) {
+    $message .= 'as member of group \'Database Managers\'';
+} elseif (defined('MANAGER_REQUIRED') && !$is_admin) { //A member should also be able to create and open database
     $message .= 'as Administrator of group \'Database Managers\'';
-}elseif(defined('OWNER_REQUIRED') && !$system->isDbOwner()){
+} elseif (defined('OWNER_REQUIRED') && !$system->isDbOwner()) {
     $message .= 'as Database Owner';
-    
-}elseif(defined('ASSOC_MEMBERSHIP_REQUIRED')
-        && 'nonmember' == USystem::checkAssociationMembership($system, ASSOC_MEMBERSHIP_REQUIRED)){
-    
-        $is_error = false;
-        $message = file_get_contents(dirname(__FILE__).'/../../admin/verification/association_membership.html');
-        if (preg_match('/<div id="content">(.*?)<\/div>/is', $message, $matches)) {
-                $message = $matches[0]; 
-        }
-    
-}else{
+
+} elseif (defined('ASSOC_MEMBERSHIP_REQUIRED')
+        && 'nonmember' == USystem::checkAssociationMembership($system, ASSOC_MEMBERSHIP_REQUIRED)) {
+
+    $is_error = false;
+    $message = file_get_contents(dirname(__FILE__) . '/../../admin/verification/association_membership.html');
+    if (preg_match('/<div id="content">(.*?)<\/div>/is', $message, $matches)) {
+        $message = $matches[0];
+    }
+
+} else {
     $message = null;
     $invalid_access = false;
 }
 
-if($invalid_access){
+if ($invalid_access) {
     include_once ERROR_REDIR;
     exit;
 }
 
 // Check if current user has the necessary permissions
-if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS'))){
+if (!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS'))) {
 
     $required = '';
     $user_permissions = $system->getCurrentUser()['ugr_Permissions'];
 
-    if(defined('CREATE_RECORDS') && !$user_permissions['add'] && !$is_admin){
+    if (defined('CREATE_RECORDS') && !$user_permissions['add'] && !$is_admin) {
         $required = 'create';
     }
-    if(defined('DELETE_RECORDS') && !$user_permissions['delete'] && !$is_admin){
+    if (defined('DELETE_RECORDS') && !$user_permissions['delete'] && !$is_admin) {
         $required .=  $required === '' ? 'delete' : ' and delete';
     }
 
-    if($required !== ''){ $message = "To perform this action you need permission to $required records";}
+    if ($required !== '') {
+        $message = "To perform this action you need permission to $required records";
+    }
 }
 
 //$system->defineConstants();//init constants for record and field types
@@ -217,7 +221,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 <html lang="en">
 <head>
 
-<title><?php echo (@$_REQUEST['db']?htmlspecialchars($_REQUEST['db']):'').'. '.HEURIST_TITLE; ?></title>
+<title><?php echo (@$_REQUEST['db'] ? htmlspecialchars($_REQUEST['db']) : '') . '. ' . HEURIST_TITLE; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="robots" content="noindex,nofollow">
 
@@ -239,7 +243,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
 <?php
-    includeJQuery( defined('LOAD_BOOTSTRAP') );
+    includeJQuery(defined('LOAD_BOOTSTRAP'));
 ?>
 
 <script src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
@@ -267,7 +271,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
 
 <!-- CSS -->
-<?php include_once dirname(__FILE__).'/initPageCss.php';?>
+<?php include_once dirname(__FILE__) . '/initPageCss.php';?>
 
 <script type="text/javascript">
 
