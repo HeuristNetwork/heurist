@@ -2026,9 +2026,9 @@ console.log('onEditFormChange @todo check buttons!!!');
             }
 
             // Place width and height fields on the same line
-            let width_fld = (dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float') ? 
+            let width_fld = dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float' ? 
                             this._editing.getFieldByName('rst_DisplayWidth_ext') : this._editing.getFieldByName('rst_DisplayWidth');
-            let height_fld = this._editing.getFieldByName('rst_DisplayHeight');
+            let height_fld = dt_type=='blocktext' ? this._editing.getFieldByName('rst_DisplayHeight') : null;
             if(width_fld && height_fld){
 
                 // Change display + hide height help
@@ -2051,6 +2051,8 @@ console.log('onEditFormChange @todo check buttons!!!');
                         of: height_fld
                     });
                 }, 500);
+            }else if(width_fld){
+                width_fld.find('.header label').text('Width:');
             }
         }
 
@@ -2609,9 +2611,11 @@ console.log('onEditFormChange @todo check buttons!!!');
         if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
             fields['rst_DisplayOrder'] = '0';
         }
-        
+
         if(fields['rst_DisplayWidth']>255) fields['rst_DisplayWidth'] = 255;
         else if(fields['rst_DisplayWidth']=='') fields['rst_DisplayWidth'] = 40;
+
+        if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayHeight']) || fields['rst_DisplayHeight'] < 0) fields['rst_DisplayHeight'] = 0;
 
         this._stillNeedUpdateForRecID = recID;    
 
