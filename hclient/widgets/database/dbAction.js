@@ -51,6 +51,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _session_id:0,
     _select_file_dlg:null,
 
+    _alreadyCheckedMetadata: true,
 
     /**
      * @function _init
@@ -141,7 +142,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     that._$('#dbTitle').val(description).trigger('keyup');
                 }});
 
-            if(window.hWin.HAPI4.sysinfo['db_registeredid']>0){
+            if(window.hWin.HAPI4.sysinfo['db_registeredid'] > 0){
                 this._$('.dbDescription').text('');
                 this._$('span.dbId').text(window.hWin.HAPI4.sysinfo['db_registeredid']);
                 this._$('a.dbLink').attr('href',
@@ -170,6 +171,33 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         }
                 });
             }
+
+            if(window.hWin.HAPI4.sysinfo['db_registeredid'] <= 0 && !this.options.isdialog && $('.ui-menu6').length > 0){
+                // For new registers, ensure the user has clicked the metadata link before closing
+
+                $('.ui-menu6').slidersMenu('manageSwitchHandler', 'admin', 'dbRegister', () => {
+
+                    if(!this._alreadyCheckedMetadata){
+
+                        window.hWin.HEURIST4.msg.showMsgFlash('Opening metadata editor...', 3000);
+
+                        setTimeout(() => {
+                            this._$('a.dbLink')[0].click();
+                        }, 3000);
+
+                        return false;
+                    }
+
+                    $('.ui-menu6').slidersMenu('manageSwitchHandler', 'remove', 'dbRegister');
+                    return true;
+                });
+            }
+
+            this._on(this._$('a.dbLink'), {
+                click: () => {
+                    this._alreadyCheckedMetadata = true;
+                }
+            });
         }
 
         // User and database name inputs
@@ -468,15 +496,26 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     close: function(){ window.hWin.document.location = response_data.newdblink; } // Redirect to new DB link
                });
         }else if(this.options.actionName=='register'){
+
             this._$('.dbDescription').text(response_data.dbTitle);
             this._$('span.dbId').text(response_data.dbID);
+
             this._$('a.dbLink').attr('href',
                 `${window.hWin.HAPI4.sysinfo['referenceServerURL']}?fmt=edit&recID=${response_data.dbID}&db=${window.hWin.HAPI4.sysinfo.referenceServerIndexDatabase}`);
+
+            let content = `${div_res.html()}<br>The metadata editing form will open automatically when you close this popup.`;
             window.hWin.HEURIST4.msg.showMsgDlg(div_res.html(),
                null, window.hWin.HR('Database registered'), {
-                    width:700, height:'auto',
-                    close: function(){ window.hWin.document.location.reload(); } // Reload current page
+                    width:700, height:'auto', default_palette_class: 'ui-heurist-design', dialogId: 'registered-db',
+                    close: () => {
+                        if(!this._alreadyCheckedMetadata){
+                            this._$('a.dbLink')[0].click();
+                        }
+                        window.hWin.document.location.reload(); // Reload current page
+                    }
                });
+
+            this._alreadyCheckedMetadata = false;
         }else{ // For create, clone, restore
             this._$('#newusername').text(response_data.newusername);
             this._$('#newdblink').attr('href',response_data.newdblink).text(response_data.newdblink);
@@ -614,5 +653,4 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
              this._$('#div_header').show();
         }
     }
-
 });
