@@ -3807,7 +3807,7 @@ public static function importTerms($params){
 
                 $res = $def_terms->batch_action();
                 if(!$res){
-                    $results['error'][$idx][] = 'batch_action: '.self::$system->getErrorMsg();
+                    $results['error'][$idx][] = 'Importing terms error: '.self::$system->getErrorMsg();
                     continue 2;
                 }
 
@@ -3834,7 +3834,7 @@ public static function importTerms($params){
 
             $res = $def_terms->batch_action();
             if(!$res){
-                $results['error'][$idx] = 'batch_action(2): '.self::$system->getErrorMsg();
+                $results['error'][$idx] = 'Importing terms error: '.self::$system->getErrorMsg();
                 continue;
             }
 
