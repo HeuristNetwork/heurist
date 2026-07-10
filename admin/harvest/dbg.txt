@@ -1,0 +1,1 @@
+        $this->databaseRefs = [['server'=>'http://127.0.0.1/heurist','dbName'=>'osmak_1', 'registeredId'=>1750, 'title'=>'TEST!']];        
