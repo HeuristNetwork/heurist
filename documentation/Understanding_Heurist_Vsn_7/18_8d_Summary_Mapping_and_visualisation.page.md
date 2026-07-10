@@ -1,4 +1,4 @@
-# 08c: Summary : Mapping and visualisation
+# 8d: Summary : Mapping and visualisation
 
 Summary automatically generated on 11/25/2025 using the gpt-oss:120b model from the servers of [**Onyxia**](https://datalab.sspcloud.fr/) (INSEE) based on the complete document of the chapter.
 

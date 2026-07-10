@@ -1,4 +1,4 @@
-# 08d: Using IIIF - manifests, canvases and annotations
+# 8e: Using IIIF - manifests, canvases and annotations
 
 Note : This chapter supplement is in the Heurist gitHub /documentation/IIIF folder at 28 June 2026, but this version will becoem the authoritative source. Additonal documentation has been written since 28th June.
 

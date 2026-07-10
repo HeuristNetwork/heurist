@@ -1,4 +1,4 @@
-# Ch 08b: Mapping & Visualisation
+# 8c : Mapping & Visualisation
 
 Documentation written on **13/11/2025** by **Sylvain Besson** (MSH Lyon Saint-Étienne / CNRS) Updated **12/05/2026** by **Maxine Schoehuys--Kreiss**
 
@@ -12,7 +12,7 @@ Documentation written on **13/11/2025** by **Sylvain Besson** (MSH Lyon Saint-É
 - Perform a search or use a <span style="color: rgb(132, 63, 161);">\[Saved Filter\]</span> that returns the records you want to include in your map ②
 - Click on <span style="color: rgb(132, 63, 161);">\[Map\]</span> ③
 
-![](https://heurist-doc.huma-num.fr/uploads/01be3e53-99d9-4e49-a184-4936175af504.png)
+![01be3e53-99d9-4e49-a184-4936175af504.png](https://heurist-doc.huma-num.fr/uploads/01be3e53-99d9-4e49-a184-4936175af504.png)
 
 The **Map** view is divided into two parts: a map and a timeline. Both parts are interactive and interact with each other.
 
@@ -27,7 +27,7 @@ To get more information on **field types**, check [Chap 4. Data entries](https:/
 
 The records are clustered depending on their spatial closeness. It changes as the view is zoomed in or out. Clustering can be set in the layer description record.
 
-![](https://heurist-doc.huma-num.fr/uploads/5fa7e2bf-2cbc-4886-a7c7-e257544d40fc.gif)
+![5fa7e2bf-2cbc-4886-a7c7-e257544d40fc.gif](https://heurist-doc.huma-num.fr/uploads/5fa7e2bf-2cbc-4886-a7c7-e257544d40fc.gif)
 
 The map will display pointers taken from the geodata in you records. There are two possible sources of geodata that can be drawn: **current result sets** (search results) and **map layers**. The displayed field from the result set is normally Location (a geospatial field).
 
@@ -39,11 +39,11 @@ Some tools are available in the header:
     - <span style="color: rgb(132, 63, 161);">\[Result sets\]</span>: choose which set of records you want to display or hide
     - <span style="color: rgb(132, 63, 161);">\[Map Documents\]</span>: choose or import a background map (borders, geo features, tiled image background)
     - <span style="color: rgb(132, 63, 161);">\[Base map\]</span>: choose which base map you want to use (e.g. *OpenStreetMap*)
-- <span style="color: rgb(132, 63, 161);">\[Zoom in\]</span> and <span style="color: rgb(132, 63, 161);">\[Zoom out\]</span>![](https://heurist-doc.huma-num.fr/uploads/ef55f59f-129b-454a-964f-73c64a20b627.png)②
-- <span style="color: rgb(35, 111, 161);">\[Zoom to full extent\]</span>![](https://heurist-doc.huma-num.fr/uploads/19f1a1b3-59a6-4d68-9a93-8118c79c82e9.png)③
-- <span style="color: rgb(132, 63, 161);">\[Help\]</span>![](https://heurist-doc.huma-num.fr/uploads/a8ebe3b0-4128-4b0a-8a08-bcfb5084012a.png)④
+- <span style="color: rgb(132, 63, 161);">\[Zoom in\]</span> and <span style="color: rgb(132, 63, 161);">\[Zoom out\]</span>![ef55f59f-129b-454a-964f-73c64a20b627.png](https://heurist-doc.huma-num.fr/uploads/ef55f59f-129b-454a-964f-73c64a20b627.png)②
+- <span style="color: rgb(35, 111, 161);">\[Zoom to full extent\]</span>![19f1a1b3-59a6-4d68-9a93-8118c79c82e9.png](https://heurist-doc.huma-num.fr/uploads/19f1a1b3-59a6-4d68-9a93-8118c79c82e9.png)③
+- <span style="color: rgb(132, 63, 161);">\[Help\]</span>![a8ebe3b0-4128-4b0a-8a08-bcfb5084012a.png](https://heurist-doc.huma-num.fr/uploads/a8ebe3b0-4128-4b0a-8a08-bcfb5084012a.png)④
 
-![](https://heurist-doc.huma-num.fr/uploads/75c029ec-1d56-457a-b5f4-2d2a5b84f487.png)
+![75c029ec-1d56-457a-b5f4-2d2a5b84f487.png](https://heurist-doc.huma-num.fr/uploads/75c029ec-1d56-457a-b5f4-2d2a5b84f487.png)
 
 On the map, several features are available:
 
@@ -52,7 +52,7 @@ On the map, several features are available:
 - <span style="color: rgb(132, 63, 161);">\[Print\]</span> ③ : print a selected view of the map
 - <span style="color: rgb(132, 63, 161);">\[Map publication\]</span> ④ : generate an iframe to display the map on another web page and choose which map features to implement. It is also possible to export the map in KML format to use on Google Earth.
 
-![](https://heurist-doc.huma-num.fr/uploads/58cc08c1-1954-465f-8abf-656f05d0347f.png)
+![58cc08c1-1954-465f-8abf-656f05d0347f.png](https://heurist-doc.huma-num.fr/uploads/58cc08c1-1954-465f-8abf-656f05d0347f.png)
 
 #### 1.1.1 Focus on map publication
 
@@ -83,7 +83,7 @@ On the map, several features are available:
 
 ③ You can export a map in KML format for Google Earth.
 
-![](https://heurist-doc.huma-num.fr/uploads/1bd5bf0e-a92c-4def-b641-38100bfb274a.png)
+![1bd5bf0e-a92c-4def-b641-38100bfb274a.png](https://heurist-doc.huma-num.fr/uploads/1bd5bf0e-a92c-4def-b641-38100bfb274a.png)
 
 #### 1.1.2. Focus on the Heurist map document
 
@@ -127,7 +127,7 @@ The timeline has various navigation features:
     - choose the bar's position: stacked on the above the other, or wrapped to minimise height of timeline
     - filter map with current timeline range
 
-![](https://heurist-doc.huma-num.fr/uploads/3cdf26db-269b-4d18-a465-0c8b36a7b3b6.png)
+![3cdf26db-269b-4d18-a465-0c8b36a7b3b6.png](https://heurist-doc.huma-num.fr/uploads/3cdf26db-269b-4d18-a465-0c8b36a7b3b6.png)
 
 ## 2. Network view
 
@@ -137,7 +137,7 @@ The timeline has various navigation features:
 - Perform a search or use a \[Saved Filter\] that returns the records you want to include in your network ②
 - Click on \[Network\] ③
 
-![](https://heurist-doc.huma-num.fr/uploads/4ddf0f6b-9f0b-472d-b62f-13059848c950.png)
+![4ddf0f6b-9f0b-472d-b62f-13059848c950.png](https://heurist-doc.huma-num.fr/uploads/4ddf0f6b-9f0b-472d-b62f-13059848c950.png)
 
 The **Network** view displays a records' network diagram. It provides an interactive visualisation of the current results set. Records are shown as nodes, and the connections (pointer fields and relationships) as the lines between nodes (edges).
 
@@ -152,7 +152,7 @@ The **Network** view displays a records' network diagram. It provides an interac
 
 Here's an example of a network diagram:
 
-![](https://heurist-doc.huma-num.fr/uploads/60e068e3-10ab-434e-b3f1-ecc207e52483.gif)
+![60e068e3-10ab-434e-b3f1-ecc207e52483.gif](https://heurist-doc.huma-num.fr/uploads/60e068e3-10ab-434e-b3f1-ecc207e52483.gif)
 
 Each node displayed is a lab or a project. It shows how labs are interconnected through shared projects. Here you can see a record directly in the network viewer on the left.
 
@@ -162,14 +162,14 @@ Some features are available on the header to make your diagram more accessible:
     - <span style="color: rgb(132, 63, 161);">Select mode</span> ① : select and drag simple node or select and drag multiple node by a selecting box (click-right and drag)
     - <span style="color: rgb(132, 63, 161);">Gravity </span>② : determine to what degree entities are repositioned around the selected entity based on their relative weightings. Turn it on to choose the best presentation, and turn it off to lock down its position.
 
-![](https://heurist-doc.huma-num.fr/uploads/0d10fb6d-1eee-40a9-9958-4d819b94c652.png)
+![0d10fb6d-1eee-40a9-9958-4d819b94c652.png](https://heurist-doc.huma-num.fr/uploads/0d10fb6d-1eee-40a9-9958-4d819b94c652.png)
 
 - \[Link Control\]:
     - <span style="color: rgb(132, 63, 161);">Links</span> ① : show or hide empty links and expand links
     - <span style="color: rgb(132, 63, 161);">Node Size Formula</span> ② : choose between linear or logarithmic formula
     - <span style="color: rgb(132, 63, 161);">Fixed </span>③ : fix the size of the links
 
-![](https://heurist-doc.huma-num.fr/uploads/7cae3489-e972-4458-88b3-739817b6db77.png)
+![7cae3489-e972-4458-88b3-739817b6db77.png](https://heurist-doc.huma-num.fr/uploads/7cae3489-e972-4458-88b3-739817b6db77.png)
 
 - <span style="color: rgb(132, 63, 161);">\[Graph Control\]</span>:
     - <span style="color: rgb(132, 63, 161);">Refresh Data</span> ① : go back to the original presentation of the nodes
@@ -178,7 +178,7 @@ Some features are available on the header to make your diagram more accessible:
     - <span style="color: rgb(132, 63, 161);">Set Zoom</span> ④ : zoom in or out of the diagram and set the view back to show the complete diagram
     - <span style="color: rgb(132, 63, 161);">Export</span> ⑤ : export the network data to a Gephi GEFX file
 
-![](https://heurist-doc.huma-num.fr/uploads/fcb442d0-b49a-46ea-abe7-88c60885949a.png)
+![fcb442d0-b49a-46ea-abe7-88c60885949a.png](https://heurist-doc.huma-num.fr/uploads/fcb442d0-b49a-46ea-abe7-88c60885949a.png)
 
 ## 3. Crosstabs
 
@@ -188,7 +188,7 @@ Some features are available on the header to make your diagram more accessible:
 - Perform a search or use a <span style="color: rgb(132, 63, 161);">\[Saved Filter\]</span> that returns the records you want to include in your network. ②
 - Click on <span style="color: rgb(132, 63, 161);">\[Crosstabs\]</span> ③
 
-![](https://heurist-doc.huma-num.fr/uploads/bbf17797-f5e3-427c-8708-1e5fa2996770.png)
+![bbf17797-f5e3-427c-8708-1e5fa2996770.png](https://heurist-doc.huma-num.fr/uploads/bbf17797-f5e3-427c-8708-1e5fa2996770.png)
 
 The Crosstabs view provides a quantitative analysis of your data by calculating counts of aggregations sorted by category. A cross-tabulation is a way of calculating counts of aggregations sorted by category.
 
@@ -202,7 +202,7 @@ To run a simple cross-tabulation, search for the records you wish to analysis an
 
 Additionally, you can assign intervals by clicking on the pen ⑤.
 
-![](https://heurist-doc.huma-num.fr/uploads/7468dd0a-c049-42e3-a531-d8a09e38a484.png)
+![7468dd0a-c049-42e3-a531-d8a09e38a484.png](https://heurist-doc.huma-num.fr/uploads/7468dd0a-c049-42e3-a531-d8a09e38a484.png)
 
 ### 3.1. Focus on intervals
 
@@ -217,7 +217,7 @@ Then, add or remove intervals ② :
 - If you want remove all intervals, click on the blue arrow.
 - If you want to reset intervals, click on <span style="color: rgb(132, 63, 161);">\[Reset\]</span> ③.
 
-![](https://heurist-doc.huma-num.fr/uploads/0d2271f5-1660-4720-af10-e3e8c71ee99f.png)
+![0d2271f5-1660-4720-af10-e3e8c71ee99f.png](https://heurist-doc.huma-num.fr/uploads/0d2271f5-1660-4720-af10-e3e8c71ee99f.png)
 
 It is also possible to merge values:
 
@@ -226,7 +226,7 @@ It is also possible to merge values:
 3. click on the right arrow
 4. rename the new interval
 
-![](https://heurist-doc.huma-num.fr/uploads/2571548b-169a-4d19-bef7-1de2b1c4cabc.gif)
+![2571548b-169a-4d19-bef7-1de2b1c4cabc.gif](https://heurist-doc.huma-num.fr/uploads/2571548b-169a-4d19-bef7-1de2b1c4cabc.gif)
 
 Some other functionalities are available:
 
@@ -235,7 +235,7 @@ Some other functionalities are available:
 - Counts aggregates values ③
 - Display or hide null values and blank rows and columns ④
 
-![](https://heurist-doc.huma-num.fr/uploads/00d304cf-5fb1-4762-a793-67ad9fc381e7.png)
+![00d304cf-5fb1-4762-a793-67ad9fc381e7.png](https://heurist-doc.huma-num.fr/uploads/00d304cf-5fb1-4762-a793-67ad9fc381e7.png)
 
 ### 3.2. Results
 
@@ -245,8 +245,8 @@ You can see the results in table form or in a pie chart.
 
 The table's metadata is available ①. The table title can be customized ②. You can export the table in CSV or PDF format ③. You can search for a value in the table ④. The field or record type used as base for the crosstable is mentioned on its top ⑤.
 
-![](https://heurist-doc.huma-num.fr/uploads/b8843d9a-6cc3-4f26-983e-c3a7c1889818.png)
+![b8843d9a-6cc3-4f26-983e-c3a7c1889818.png](https://heurist-doc.huma-num.fr/uploads/b8843d9a-6cc3-4f26-983e-c3a7c1889818.png)
 
 You can also display your data as a pie chart.
 
-![](https://heurist-doc.huma-num.fr/uploads/3d94ef8f-e316-4a16-af81-47af703e3623.png)
+![3d94ef8f-e316-4a16-af81-47af703e3623.png](https://heurist-doc.huma-num.fr/uploads/3d94ef8f-e316-4a16-af81-47af703e3623.png)

@@ -1,4 +1,4 @@
-# 8a : Getting started with custom reports
+# 8a: Getting started with custom reports
 
 Documentation rédigée le 06/11/2025 par Shannon Bruderer mise à jour le 05/12/2025 par Shannon Bruderer
 
@@ -34,17 +34,17 @@ To work with Custom Reports, click on the <span style="color: rgb(132, 63, 161);
 
 The Custom Report template for your filtered data will appear below the <span style="color: rgb(132, 63, 161);">\[Report\]</span> button.
 
-![](https://heurist-doc.huma-num.fr/uploads/d72124d4-bb65-4cec-93fc-6f660b22ac00.png)
+![d72124d4-bb65-4cec-93fc-6f660b22ac00.png](https://heurist-doc.huma-num.fr/uploads/d72124d4-bb65-4cec-93fc-6f660b22ac00.png)
 
 ### The Toolbar
 
 In the upper part of the **Custom Report** tab, you’ll see a toolbar:
 
-![](https://heurist-doc.huma-num.fr/uploads/d8e86cb5-488d-40bd-911c-baa19ccafca1.png)
+![d8e86cb5-488d-40bd-911c-baa19ccafca1.png](https://heurist-doc.huma-num.fr/uploads/d8e86cb5-488d-40bd-911c-baa19ccafca1.png)
 
 #### Edit Tool
 
-![](https://heurist-doc.huma-num.fr/uploads/79c1beb9-c035-44aa-81d6-6e206f432aa7.png)
+![79c1beb9-c035-44aa-81d6-6e206f432aa7.png](https://heurist-doc.huma-num.fr/uploads/79c1beb9-c035-44aa-81d6-6e206f432aa7.png)
 
 Click<span style="color: rgb(132, 63, 161);"> \[Edit\] </span>to open the template editor and start writing your **Custom Report** with **Smarty**. The editor is split into three panels:
 
@@ -52,21 +52,20 @@ Click<span style="color: rgb(132, 63, 161);"> \[Edit\] </span>to open the templa
       
     Insert fields, loops, and conditions via dropdown helpers ②, and browse record types ③ to quickly add the correct field ④
 - **Editor pane** ⑤ : write and edit your HTML + Smarty template here.  
-    In the editor, you’ll see the default starter message/template (note that this template may chage through time as we improve on it, but it will contain a basic loop for records and some instructions to get started).
-    
+      
+    In the editor, you’ll see the default starter message/template (note that this template may chage through time as we improve on it, but it will contain a basic loop for records and some instructions to get started).   
     *{\* This is a simple Smarty report template which you can edit into something more sophisticated.*  
      *It should give basic output for any database, as it uses the standard record types which are part of all databases.*  
      *Enter html for web pages or other text format. Use tree on right to insert fields, loops and tests.*  
      *Use this format to include comments in your file, use &lt;!-- --&gt; for output of html comments.*  
-     *Smarty help describes many functions you can apply, loop counting/summing, custom functions etc. \*}*
-    
+     *Smarty help describes many functions you can apply, loop counting/summing, custom functions etc. \*}*  
       
     Below, we will go deeper into Smarty syntax — see X. Smarty Syntax in Heurist.
 - **Preview pane** ⑨ : shows the output when you click <span style="color: rgb(132, 63, 161);">\[Test\]</span> ⑧ .   
       
     You can choose to truncate the preview to *n* records ⑥ and select how to handle debug messages, warnings, and errors ⑦.
 
-![](https://heurist-doc.huma-num.fr/uploads/8d546035-c69d-49a6-9162-866b14eb7905.png):::info Tips :
+![8d546035-c69d-49a6-9162-866b14eb7905.png](https://heurist-doc.huma-num.fr/uploads/8d546035-c69d-49a6-9162-866b14eb7905.png):::info Tips :
 
 <p class="callout info">Click <span style="color: rgb(132, 63, 161);">\[Test\]</span> to preview ! Nothing is saved when testing.  
 Use <span style="color: rgb(132, 63, 161);">\[Save\]</span> (or <span style="color: rgb(132, 63, 161);">\[Save As\]</span>) to store your template and keep versions.  
@@ -78,7 +77,7 @@ Don't get tempted to write a lot of code and then test it because then you will 
 
 #### Create a new template
 
-![](https://heurist-doc.huma-num.fr/uploads/b15e250f-4f31-448a-8dca-bb4bfe84c27e.png)
+![b15e250f-4f31-448a-8dca-bb4bfe84c27e.png](https://heurist-doc.huma-num.fr/uploads/b15e250f-4f31-448a-8dca-bb4bfe84c27e.png)
 
 \[<span style="color: rgb(132, 63, 161);">Create a new template\]</span> works similarly to the <span style="color: rgb(132, 63, 161);">\[Edit\]</span> tool. It opens the same editor interface where you can create a new Custom Report template from scratch.
 
@@ -88,13 +87,13 @@ Use it when you want to **start a fresh layout** instead of editing an existing 
 
 #### Delete the Selected Template
 
-![](https://heurist-doc.huma-num.fr/uploads/908eefb4-58d6-49be-ab40-6528f7ef25c9.png)
+![908eefb4-58d6-49be-ab40-6528f7ef25c9.png](https://heurist-doc.huma-num.fr/uploads/908eefb4-58d6-49be-ab40-6528f7ef25c9.png)
 
 The \[<span style="color: rgb(132, 63, 161);">Delete\]</span> tool allows you to **delete** the currently selected template.
 
 When clicked, a **warning message** will pop up asking for confirmation.
 
-![](https://heurist-doc.huma-num.fr/uploads/1563b9ca-7411-472c-998c-400a6f25bc05.png)
+![1563b9ca-7411-472c-998c-400a6f25bc05.png](https://heurist-doc.huma-num.fr/uploads/1563b9ca-7411-472c-998c-400a6f25bc05.png)
 
 It will display the name of your template ① like *name\_file\_.tpl* . As here for exemple "Basic (inital record types).tpl"
 
@@ -102,7 +101,7 @@ Click <span style="color: rgb(132, 63, 161);">\[Proceed\]</span> to confirm dele
 
 #### Import and Export Templates
 
-![](https://heurist-doc.huma-num.fr/uploads/e4cb072c-5139-4059-87be-a9e32f904de7.png)![](https://heurist-doc.huma-num.fr/uploads/ca292056-ca7e-460d-af1d-d32105aa548d.png)
+![e4cb072c-5139-4059-87be-a9e32f904de7.png](https://heurist-doc.huma-num.fr/uploads/e4cb072c-5139-4059-87be-a9e32f904de7.png)![ca292056-ca7e-460d-af1d-d32105aa548d.png](https://heurist-doc.huma-num.fr/uploads/ca292056-ca7e-460d-af1d-d32105aa548d.png)
 
 The Import ← and Export → tools allow you to share and reuse Custom Report templates.
 
@@ -110,7 +109,7 @@ For this we have developed a 'global template' format (,gpl) which uses Heurist'
 
 <p class="callout info">Templates can only be exported from a registered database to ensure that there are Concept IDs for any definitions used in the template. If the database is not registered you will see the following message.</p>
 
-![](https://heurist-doc.huma-num.fr/uploads/b1b32ab7-095e-4126-9757-34cd73600510.png)
+![b1b32ab7-095e-4126-9757-34cd73600510.png](https://heurist-doc.huma-num.fr/uploads/b1b32ab7-095e-4126-9757-34cd73600510.png)
 
 Import lets you upload an existing global template file (.gpl) and convert it to a local template file (.tpl)
 
@@ -118,7 +117,7 @@ Export lets you download your customized template as a .gpl file, so you can bac
 
 ##### Obtain JavaScript to embed a report, and set a publishing schedule
 
-![](https://heurist-doc.huma-num.fr/uploads/46ab971b-127c-4fd7-aef9-e97e59e5a277.png)
+![46ab971b-127c-4fd7-aef9-e97e59e5a277.png](https://heurist-doc.huma-num.fr/uploads/46ab971b-127c-4fd7-aef9-e97e59e5a277.png)
 
 The \[Publish\] option lets you :
 
@@ -143,7 +142,7 @@ This allows the download of a plain text file without html formatting (assumng y
 
 #### Print
 
-![](https://heurist-doc.huma-num.fr/uploads/836bb8bc-875d-4e85-8e79-79efd7bd114a.png)
+![836bb8bc-875d-4e85-8e79-79efd7bd114a.png](https://heurist-doc.huma-num.fr/uploads/836bb8bc-875d-4e85-8e79-79efd7bd114a.png)
 
 The \[Print\] buttom simply generates a PDF of the output from your current **Custom Report** template. It’s a quick and convenient way to export information in an easy readable and shareable format.
 
@@ -154,7 +153,7 @@ The \[Print\] buttom simply generates a PDF of the output from your current **Cu
 
 #### Refresh
 
-![](https://heurist-doc.huma-num.fr/uploads/5b2cda3b-cc08-4abc-8311-0bac888bf3ec.png)
+![5b2cda3b-cc08-4abc-8311-0bac888bf3ec.png](https://heurist-doc.huma-num.fr/uploads/5b2cda3b-cc08-4abc-8311-0bac888bf3ec.png)
 
 Click on the \[Refresh\] buttom to update the data used by your Custom Report template.
 

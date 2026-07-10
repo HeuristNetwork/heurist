@@ -1,6 +1,6 @@
 # Ch 08 : Result sets, manipulation, custom reports and visualisation
 
-# 8a : Getting started with custom reports
+# 8a: Getting started with custom reports
 
 Documentation rédigée le 06/11/2025 par Shannon Bruderer mise à jour le 05/12/2025 par Shannon Bruderer
 
@@ -36,17 +36,17 @@ To work with Custom Reports, click on the <span style="color: rgb(132, 63, 161);
 
 The Custom Report template for your filtered data will appear below the <span style="color: rgb(132, 63, 161);">\[Report\]</span> button.
 
-![](https://heurist-doc.huma-num.fr/uploads/d72124d4-bb65-4cec-93fc-6f660b22ac00.png)
+![d72124d4-bb65-4cec-93fc-6f660b22ac00.png](https://heurist-doc.huma-num.fr/uploads/d72124d4-bb65-4cec-93fc-6f660b22ac00.png)
 
 ### The Toolbar
 
 In the upper part of the **Custom Report** tab, you’ll see a toolbar:
 
-![](https://heurist-doc.huma-num.fr/uploads/d8e86cb5-488d-40bd-911c-baa19ccafca1.png)
+![d8e86cb5-488d-40bd-911c-baa19ccafca1.png](https://heurist-doc.huma-num.fr/uploads/d8e86cb5-488d-40bd-911c-baa19ccafca1.png)
 
 #### Edit Tool
 
-![](https://heurist-doc.huma-num.fr/uploads/79c1beb9-c035-44aa-81d6-6e206f432aa7.png)
+![79c1beb9-c035-44aa-81d6-6e206f432aa7.png](https://heurist-doc.huma-num.fr/uploads/79c1beb9-c035-44aa-81d6-6e206f432aa7.png)
 
 Click<span style="color: rgb(132, 63, 161);"> \[Edit\] </span>to open the template editor and start writing your **Custom Report** with **Smarty**. The editor is split into three panels:
 
@@ -54,21 +54,20 @@ Click<span style="color: rgb(132, 63, 161);"> \[Edit\] </span>to open the templa
       
     Insert fields, loops, and conditions via dropdown helpers ②, and browse record types ③ to quickly add the correct field ④
 - **Editor pane** ⑤ : write and edit your HTML + Smarty template here.  
-    In the editor, you’ll see the default starter message/template (note that this template may chage through time as we improve on it, but it will contain a basic loop for records and some instructions to get started).
-    
+      
+    In the editor, you’ll see the default starter message/template (note that this template may chage through time as we improve on it, but it will contain a basic loop for records and some instructions to get started).   
     *{\* This is a simple Smarty report template which you can edit into something more sophisticated.*  
      *It should give basic output for any database, as it uses the standard record types which are part of all databases.*  
      *Enter html for web pages or other text format. Use tree on right to insert fields, loops and tests.*  
      *Use this format to include comments in your file, use &lt;!-- --&gt; for output of html comments.*  
-     *Smarty help describes many functions you can apply, loop counting/summing, custom functions etc. \*}*
-    
+     *Smarty help describes many functions you can apply, loop counting/summing, custom functions etc. \*}*  
       
     Below, we will go deeper into Smarty syntax — see X. Smarty Syntax in Heurist.
 - **Preview pane** ⑨ : shows the output when you click <span style="color: rgb(132, 63, 161);">\[Test\]</span> ⑧ .   
       
     You can choose to truncate the preview to *n* records ⑥ and select how to handle debug messages, warnings, and errors ⑦.
 
-![](https://heurist-doc.huma-num.fr/uploads/8d546035-c69d-49a6-9162-866b14eb7905.png):::info Tips :
+![8d546035-c69d-49a6-9162-866b14eb7905.png](https://heurist-doc.huma-num.fr/uploads/8d546035-c69d-49a6-9162-866b14eb7905.png):::info Tips :
 
 <p class="callout info">Click <span style="color: rgb(132, 63, 161);">\[Test\]</span> to preview ! Nothing is saved when testing.  
 Use <span style="color: rgb(132, 63, 161);">\[Save\]</span> (or <span style="color: rgb(132, 63, 161);">\[Save As\]</span>) to store your template and keep versions.  
@@ -80,7 +79,7 @@ Don't get tempted to write a lot of code and then test it because then you will 
 
 #### Create a new template
 
-![](https://heurist-doc.huma-num.fr/uploads/b15e250f-4f31-448a-8dca-bb4bfe84c27e.png)
+![b15e250f-4f31-448a-8dca-bb4bfe84c27e.png](https://heurist-doc.huma-num.fr/uploads/b15e250f-4f31-448a-8dca-bb4bfe84c27e.png)
 
 \[<span style="color: rgb(132, 63, 161);">Create a new template\]</span> works similarly to the <span style="color: rgb(132, 63, 161);">\[Edit\]</span> tool. It opens the same editor interface where you can create a new Custom Report template from scratch.
 
@@ -90,13 +89,13 @@ Use it when you want to **start a fresh layout** instead of editing an existing 
 
 #### Delete the Selected Template
 
-![](https://heurist-doc.huma-num.fr/uploads/908eefb4-58d6-49be-ab40-6528f7ef25c9.png)
+![908eefb4-58d6-49be-ab40-6528f7ef25c9.png](https://heurist-doc.huma-num.fr/uploads/908eefb4-58d6-49be-ab40-6528f7ef25c9.png)
 
 The \[<span style="color: rgb(132, 63, 161);">Delete\]</span> tool allows you to **delete** the currently selected template.
 
 When clicked, a **warning message** will pop up asking for confirmation.
 
-![](https://heurist-doc.huma-num.fr/uploads/1563b9ca-7411-472c-998c-400a6f25bc05.png)
+![1563b9ca-7411-472c-998c-400a6f25bc05.png](https://heurist-doc.huma-num.fr/uploads/1563b9ca-7411-472c-998c-400a6f25bc05.png)
 
 It will display the name of your template ① like *name\_file\_.tpl* . As here for exemple "Basic (inital record types).tpl"
 
@@ -104,7 +103,7 @@ Click <span style="color: rgb(132, 63, 161);">\[Proceed\]</span> to confirm dele
 
 #### Import and Export Templates
 
-![](https://heurist-doc.huma-num.fr/uploads/e4cb072c-5139-4059-87be-a9e32f904de7.png)![](https://heurist-doc.huma-num.fr/uploads/ca292056-ca7e-460d-af1d-d32105aa548d.png)
+![e4cb072c-5139-4059-87be-a9e32f904de7.png](https://heurist-doc.huma-num.fr/uploads/e4cb072c-5139-4059-87be-a9e32f904de7.png)![ca292056-ca7e-460d-af1d-d32105aa548d.png](https://heurist-doc.huma-num.fr/uploads/ca292056-ca7e-460d-af1d-d32105aa548d.png)
 
 The Import ← and Export → tools allow you to share and reuse Custom Report templates.
 
@@ -112,7 +111,7 @@ For this we have developed a 'global template' format (,gpl) which uses Heurist'
 
 <p class="callout info">Templates can only be exported from a registered database to ensure that there are Concept IDs for any definitions used in the template. If the database is not registered you will see the following message.</p>
 
-![](https://heurist-doc.huma-num.fr/uploads/b1b32ab7-095e-4126-9757-34cd73600510.png)
+![b1b32ab7-095e-4126-9757-34cd73600510.png](https://heurist-doc.huma-num.fr/uploads/b1b32ab7-095e-4126-9757-34cd73600510.png)
 
 Import lets you upload an existing global template file (.gpl) and convert it to a local template file (.tpl)
 
@@ -120,7 +119,7 @@ Export lets you download your customized template as a .gpl file, so you can bac
 
 ##### Obtain JavaScript to embed a report, and set a publishing schedule
 
-![](https://heurist-doc.huma-num.fr/uploads/46ab971b-127c-4fd7-aef9-e97e59e5a277.png)
+![46ab971b-127c-4fd7-aef9-e97e59e5a277.png](https://heurist-doc.huma-num.fr/uploads/46ab971b-127c-4fd7-aef9-e97e59e5a277.png)
 
 The \[Publish\] option lets you :
 
@@ -145,7 +144,7 @@ This allows the download of a plain text file without html formatting (assumng y
 
 #### Print
 
-![](https://heurist-doc.huma-num.fr/uploads/836bb8bc-875d-4e85-8e79-79efd7bd114a.png)
+![836bb8bc-875d-4e85-8e79-79efd7bd114a.png](https://heurist-doc.huma-num.fr/uploads/836bb8bc-875d-4e85-8e79-79efd7bd114a.png)
 
 The \[Print\] buttom simply generates a PDF of the output from your current **Custom Report** template. It’s a quick and convenient way to export information in an easy readable and shareable format.
 
@@ -156,22 +155,18 @@ The \[Print\] buttom simply generates a PDF of the output from your current **Cu
 
 #### Refresh
 
-![](https://heurist-doc.huma-num.fr/uploads/5b2cda3b-cc08-4abc-8311-0bac888bf3ec.png)
+![5b2cda3b-cc08-4abc-8311-0bac888bf3ec.png](https://heurist-doc.huma-num.fr/uploads/5b2cda3b-cc08-4abc-8311-0bac888bf3ec.png)
 
 Click on the \[Refresh\] buttom to update the data used by your Custom Report template.
 
 If your database has been modified (new records, edits, deletions) but the output of your report does not reflect these changes, simply hit Refresh to reload the most recent data and ensure your preview is accurate.
 
-# 08b: Custom reports - Advanced functions
-
-### Advanced topics in custom reports
-
-This chapter contains lots of undigested tips for advanced users, skip the first 10 pages or so to get to this material.
-
-Note: the content was copied via markdown export and lost much of its minor formatting. The images in particalr have been downgraded. The source is here: [https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit](https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit)
+# 8a bis: Custom reports in more detail
 
 Custom Reports are optional but they allow you to customize data display in powerful ways.  
 By default, when a record is displayed on a Heurist website, the usual Record View template is used. If you would like to alter how records appear, then you will need to define a Custom Report.
+
+*Note: the content was copied via markdown export and lost much of its minor formatting. The images in particalr have been downgraded. The source is here:* [*https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit*](https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit)
 
 Custom Reports work together with Saved Filters to publish content on a Heurist website or elsewhere on the web. The \*filter \*will retrieve records from the database, and hand the records to the \*custom report \*to format and display them. When you choose the Report tab in the View Pane, you will see the selected Custom Report attempt to display information about your current result set. This will only work correctly if the selected report has been configured to display records like those in the result set (e.g. a Custom Report designed to display information about Persons will probably fail to display information about Books or Places properly.)
 
@@ -195,28 +190,28 @@ Create periodically updated custom data feeds to be used in another platform (fo
 
 #### Report View Toolbar
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-k2fhavam.png)
+![embedded-image-k2fhavam.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-k2fhavam.png)
 
 The dropdown and buttons allow you to perform the following tasks:
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-x8p1vjlj.png)  
+  
 **Select dropdown**. Select an existing report from the drop down. This is immediately run against the current list of queried records. This lets you test run the report against a set of records and view the report on-screen.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-vntdmmla.png)**Edit button**. Edit the selected report template.
+![embedded-image-vntdmmla.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-vntdmmla.png)**Edit button**. Edit the selected report template.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-aaos1qmq.png)**Create**. Create a new custom report template using Smarty syntax. (Note that you can also create a new report from an existing one by duplicating it. This can be achieved using the “Save as” button at the bottom of the Edit report pane)
+![embedded-image-aaos1qmq.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-aaos1qmq.png)**Create**. Create a new custom report template using Smarty syntax. (Note that you can also create a new report from an existing one by duplicating it. This can be achieved using the “Save as” button at the bottom of the Edit report pane)
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-j27y2iqq.png)**Delete**. Deletes the current report template
+![embedded-image-j27y2iqq.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-j27y2iqq.png)**Delete**. Deletes the current report template
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-tj243kqj.png)**Import**. Import a template exported from another database (as a .gpl file). The .gpl file format is a special file format that allows templates to be interpreted by multiple databases, even if their structure differs.
+![embedded-image-tj243kqj.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-tj243kqj.png)**Import**. Import a template exported from another database (as a .gpl file). The .gpl file format is a special file format that allows templates to be interpreted by multiple databases, even if their structure differs.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-4luqqnpm.png)**Export**. Export a template as a .gpl file (this can then be imported to another database). Export converts field IDs to concept IDs.
+![embedded-image-4luqqnpm.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-4luqqnpm.png)**Export**. Export a template as a .gpl file (this can then be imported to another database). Export converts field IDs to concept IDs.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-balgsosq.png)**Publish**. If you wish to embed the report in another website (e.g. your Wordpress site), then click the globe icon to receive some html code that you can copy-and-paste directly into the relevant page, or a URL link with your data feed.
+![embedded-image-balgsosq.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-balgsosq.png)**Publish**. If you wish to embed the report in another website (e.g. your Wordpress site), then click the globe icon to receive some html code that you can copy-and-paste directly into the relevant page, or a URL link with your data feed.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-0yfnyich.png)**Print**. Print the report output or save as pdf.
+![embedded-image-0yfnyich.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-0yfnyich.png)**Print**. Print the report output or save as pdf.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-66fthcqz.png)**Refresh**. Use this to refresh the data used by the report template, if your database has been updated.
+![embedded-image-66fthcqz.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-66fthcqz.png)**Refresh**. Use this to refresh the data used by the report template, if your database has been updated.
 
 #### Create a custom report template
 
@@ -224,7 +219,7 @@ Tip : Before creating a new report template or editing an existing one, ensure y
 
 Go to Report View and from the Report toolbar, click New.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-v4gyy8hn.png)
+![embedded-image-v4gyy8hn.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-v4gyy8hn.png)
 
 The screen that opens is divided in three panels.
 
@@ -310,11 +305,11 @@ The publish option allows you to embed a custom report in an external website (e
 
 You can access the 'Publish Report' dialog by clicking the globe icon in the Report View:
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-k9qmzsna.png)
+![embedded-image-k9qmzsna.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-k9qmzsna.png)
 
 In this view, you will see some code that you can copy-and-paste into your website to make the report appear. This code will generate the report with whatever records you are currently viewing in the Explore Menu. You should using a filter to ensure that the correct records are selected for the published version of the report. For example, if you would like the report to show every 'Film' in your database, then you should filter the database just to show the 'Films' before opening the 'Publish Report' dialog.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-lrdtijzw.png)
+![embedded-image-lrdtijzw.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-lrdtijzw.png)
 
 If you find that the 'embed' code does not work in your website, you can try the 'javascript wrap' option. You can test out the generated report by clicking 'open in new window'.
 
@@ -324,7 +319,7 @@ Use the **Set up up publishing schedule** button to periodically regenerate the 
 
 When you click on Set up publishing schedule, you will see a list of scheduled reports. This list will of course be empty if you have set up a publishing schedule before.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-dxvdynyd.png)
+![embedded-image-dxvdynyd.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-dxvdynyd.png)
 
 Click the icon in the 'edit' column to change the settings of the publication schedule, the icon in the 'exec' column to regenerate the report, or the icons in the 'html' or 'js' columns to obtain a copy of the code to embed into your external website. You can delete the publishing schedule by clicking the icon in the 'Del' column.
 
@@ -332,7 +327,7 @@ Click the icon in the 'edit' column to change the settings of the publication sc
 
 When you click the edit icon, or the 'Add New Report Schedule' button, then the 'Edit report schedule' dialog will appear. If you are creating a new publication schedule, then the 'query' and 'template' fields will automatically be filled in for you. You will simply need to provide a title for the publication schedule, which is purely for your reference.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-zxfznjda.png)
+![embedded-image-zxfznjda.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-zxfznjda.png)
 
 <table id="bkmrk-idthis-identifies-th"><colgroup><col style="width: 117px;"></col><col></col></colgroup><tbody><tr><th>ID
 
@@ -388,14 +383,27 @@ Note. Reports work with record type and fields codes rather than names; this pre
 
 You can get started developing Smarty-based templates with a modicum of Smarty knowledge. As you learn more about Smarty you can develop more sophisticated templates. For example, the following snippet of code is used to display a list of the five latest news headlines on a news site:
 
-&lt;ul&gt;  
-{content type="headlines" var="headline" limit="5" sort="date" sort\_dir="desc"}  
-&lt;li&gt;  
-&lt;a href="{$headline.link}"&gt;{$headline.headline}&lt;/a&gt; ({$headline.date|date\_format: "%m %d, %Y"})  
-&lt;/li&gt;  
-{/content}  
-&lt;/ul&gt;  
-(See [Smarty Syntax for ](https://heuristref.net/h6-alpha/viewers/smarty/SmartySyntax.html)an overview of the smarty syntax,[ including worked examples. ](https://heuristref.net/h6-alpha/viewers/smarty/SmartySyntax.html)For complete Smarty Documentation go to the [Smarty Site itself.)](http://www.smarty.net/)
+```
+<ul>
+{content type="headlines" var="headline" limit="5" sort="date" sort_dir="desc"}
+<li>
+<a href="{$headline.link}">{$headline.headline}</a> ({$headline.date|date_format: "%m %d, %Y"})
+</li>
+{/content}
+</ul>
+```
+
+(See the Smarty Syntax section (next) for an overview of the smarty syntax, including worked examples. For complete Smarty Documentation go to the [Smarty Site](http://www.smarty.net/) itself.)
+
+###   
+
+# 8b: Custom reports - Advanced functions
+
+### Advanced topics in custom reports
+
+This chapter contains lots of undigested tips for advanced users, skip the first 10 pages or so to get to this material.
+
+Note: the content was copied via markdown export and lost much of its minor formatting. The images in particalr have been downgraded. The source is here: [https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit](https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit)
 
 ### Smarty Syntax
 
@@ -895,7 +903,7 @@ To help you with situations like this, we provide the 'wrap' function. The follo
 
 &lt;p&gt;Voice Recording: {wrap var=$r.f1000\_originalvalue dt="file" auto\_play="0"}&lt;/p&gt;
 
-Voice Recording: ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-mqgac2ai.png)
+Voice Recording: ![embedded-image-mqgac2ai.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-mqgac2ai.png)
 
 The wrap function works with images, audio files, video files and also with simple links.
 
@@ -909,7 +917,7 @@ If $r.f438 is an image, video, pdf or similar, viewers of the custom report will
 
 You don't need to remember how to write the 'wrap' function. When you use the wizard to insert a field into your custom report, simply choose the ' \*\*Field + function wrapper \*\*' option before clicking ' \*\*Insert field value \*\*', and the 'wrap' function will be included for you automatically.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-3nmxlhjt.png)
+![embedded-image-3nmxlhjt.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-3nmxlhjt.png)
 
 ##### For dates
 
@@ -1065,7 +1073,7 @@ Source de l'Information: {$src\_info.recTitle}
 <span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> Start Date: {$rel\_record.f10}</span>  
 <span style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"> End Date: {$rel\_record.f11}</span>
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-sznseod2.png)
+![embedded-image-sznseod2.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-sznseod2.png)
 
 #### ***Sorting related records***
 
@@ -1117,7 +1125,7 @@ Use h6-alpha
 
 I have put in rubbish dates 1111 and 9999
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-tk1vmvir.png)
+![embedded-image-tk1vmvir.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-tk1vmvir.png)
 
 getRelatedRecords returns an array of related records with additional header fields: recRelationType, recRelationNotes, recRelationStartDate, recRelationEndDate.
 
@@ -1350,7 +1358,7 @@ Or access image ids from $r.f8\_originalvalue.
 
 {foreach from=($r.f8\_originalvalue) item=$s name=images}
 
- &lt;div class="scrollimage"&gt;&lt;img src="[https://heuristref.net/h6-alpha/?db=balipaintings&amp;file={$s\['ulf\_ObfuscatedFileID'\]}](https://heuristref.net/h6-alpha/?db=balipaintings&file=%7B%24s%5b%27ulf_ObfuscatedFileID%27%5d%7D)"/&gt;&lt;/div&gt;
+ &lt;div class="scrollimage"&gt;&lt;img src="[https://heuristref.net/h6-alpha/?db=balipaintings&amp;file={$s\['ulf\_ObfuscatedFileID'\]}](https://heuristref.net/h6-alpha/?db=balipaintings&file=%7B%24s%5B%27ulf_ObfuscatedFileID%27%5D%7D)"/&gt;&lt;/div&gt;
 
 {/foreach}
 
@@ -1417,7 +1425,7 @@ There are 3 ways
     2) Via direct manifest URL   
     &lt;iframe width=1200 height=800 src="https://heurist.huma-num.fr/h6-alpha/hclient/widgets/viewers/miradorViewer.php?db=pret19\_test&amp;recID=&amp;url={urldecode($r.f1200)}"&gt;&lt;/iframe&gt;  
     3) Via file obfuscation ID {$r.f1200\_originalvalue\[0\].ulf\_ObfuscatedFileID}  
-    &lt;iframe width=1200 height=800 src="[https://heurist.huma-num.fr/h6-alpha/hclient/widgets/viewers/miradorViewer.php?db=pret19\_test&amp;iiif={$r.f1200\_originalvalue\[0\].ulf\_ObfuscatedFileID](https://heurist.huma-num.fr/h6-alpha/hclient/widgets/viewers/miradorViewer.php?db=pret19_test&iiif=%7B%24r.f1200_originalvalue%5b0%5d.ulf_ObfuscatedFileID)}"&gt;&lt;/iframe&gt;
+    &lt;iframe width=1200 height=800 src="[https://heurist.huma-num.fr/h6-alpha/hclient/widgets/viewers/miradorViewer.php?db=pret19\_test&amp;iiif={$r.f1200\_originalvalue\[0\].ulf\_ObfuscatedFileID](https://heurist.huma-num.fr/h6-alpha/hclient/widgets/viewers/miradorViewer.php?db=pret19_test&iiif=%7B%24r.f1200_originalvalue%5B0%5D.ulf_ObfuscatedFileID)}"&gt;&lt;/iframe&gt;
 
 #### **Embedding Mirador for IIIF images**
 
@@ -1522,7 +1530,7 @@ Note: JS must be enabled by your system adminstrator for your database (an entry
 An image carousel can be added to a page in a website by placing suitable JS code in the custom JS field, as shown below.  
 See also [https://www.w3schools.com/css/css\_image\_gallery.asp](https://www.w3schools.com/css/css_image_gallery.asp) for an alrernative CSS method.
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-xcnsffxc.png)
+![embedded-image-xcnsffxc.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-xcnsffxc.png)
 
 //image gallery on home page  
 var gallery = $('#image-gallery');  
@@ -1704,21 +1712,21 @@ The Smarty report formatter can be quite slow for large and complex reports. How
 
 First set up the report you want, the click on the globe icon above the report:
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-d8rpwpjz.png)
+![embedded-image-d8rpwpjz.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-d8rpwpjz.png)
 
 Then click on Set up publishing schedule:
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-vlfu2rzr.png)
+![embedded-image-vlfu2rzr.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-vlfu2rzr.png)
 
 Finally, add a new report schedule:
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-bg37zevi.png)
+![embedded-image-bg37zevi.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-bg37zevi.png)
 
 and set the values (file name is provided automatically)
 
 1440 minutes corresponds to a daily update
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-kuohxjh2.png)
+![embedded-image-kuohxjh2.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-kuohxjh2.png)
 
 Note: as of 19/5/2022 this function, developed many years ago and relatively little used, works well but the automatic triggering of the file refresh is not operational. If you require this, please send us an email (support at heuristnetwork dot org).
 
@@ -1945,7 +1953,7 @@ Watch this space (or at least, the interface!).
 
 When building these we will be able to select the fields in connected entities from a tree view, for example when building a filter for Persons one can make selections of fields in their Life Events, including fields of the Places linked to their Life Events (left).
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-veailkqb.png) ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-454gjnf3.png)
+![embedded-image-veailkqb.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-veailkqb.png) ![embedded-image-454gjnf3.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-454gjnf3.png)
 
 Note: the simple filter builder (left), facets builder (right), calculated field and custom reports editor each use a slightly different form of tree, due to slight differences in requirements (eg. multiple selection in the facets builder), but the principle is the same.
 
@@ -2231,15 +2239,15 @@ Note that it does not work properly if your template name contains a space chara
     {$record.f4} {\*Introduction/description of theme\*}  
     {break}  
     $term\_id just needs to be the term id or label. The header report should be getting the resulting interview extract record, and thus the necessary term id  
-    ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-xeangbfp.png)
+    ![embedded-image-xeangbfp.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-xeangbfp.png)
 
 #### **Counting records of different types:**
 
 - From Vincent Paillusson:  
-    ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-obxto6ef.png)  
+    ![embedded-image-obxto6ef.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-obxto6ef.png)  
     Ce code est complet et fonctionne avec n’importe quelle base ou set de résultats (que ce soit sur l’ensemble des record type ou seulement un seul)  
     Et voici ce qu’on obtient lorsqu’on ouvre le custom report dans un navigateur (Attention le nombre de résultats étant limité dans les tests et dans la visualisation des custom report via le mode Explore il ne sera pas possible d’afficher la totalité des ressources autrement qu’en ouvrant le custom report dans un navigateur):  
-    ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-xecjfyx5.png)
+    ![embedded-image-xecjfyx5.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-xecjfyx5.png)
 - Adding counts for entity types to a custom report  
     Ce code rendra le décompte (partie significative en **gras**).  
     &lt;b&gt;Total records:&lt;/b&gt; **{$heurist-&gt;getSysInfo('db\_total\_records')}**  
@@ -2351,7 +2359,7 @@ Note that it does not work properly if your template name contains a space chara
 
 <span style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);"> &lt;th data-priority="2"&gt;Standard Occupation&lt;/th&gt;</span>
 
-# Ch 08b: Mapping & Visualisation
+# 8c : Mapping & Visualisation
 
 Documentation written on **13/11/2025** by **Sylvain Besson** (MSH Lyon Saint-Étienne / CNRS) Updated **12/05/2026** by **Maxine Schoehuys--Kreiss**
 
@@ -2365,7 +2373,7 @@ Documentation written on **13/11/2025** by **Sylvain Besson** (MSH Lyon Saint-É
 - Perform a search or use a <span style="color: rgb(132, 63, 161);">\[Saved Filter\]</span> that returns the records you want to include in your map ②
 - Click on <span style="color: rgb(132, 63, 161);">\[Map\]</span> ③
 
-![](https://heurist-doc.huma-num.fr/uploads/01be3e53-99d9-4e49-a184-4936175af504.png)
+![01be3e53-99d9-4e49-a184-4936175af504.png](https://heurist-doc.huma-num.fr/uploads/01be3e53-99d9-4e49-a184-4936175af504.png)
 
 The **Map** view is divided into two parts: a map and a timeline. Both parts are interactive and interact with each other.
 
@@ -2380,7 +2388,7 @@ To get more information on **field types**, check [Chap 4. Data entries](https:/
 
 The records are clustered depending on their spatial closeness. It changes as the view is zoomed in or out. Clustering can be set in the layer description record.
 
-![](https://heurist-doc.huma-num.fr/uploads/5fa7e2bf-2cbc-4886-a7c7-e257544d40fc.gif)
+![5fa7e2bf-2cbc-4886-a7c7-e257544d40fc.gif](https://heurist-doc.huma-num.fr/uploads/5fa7e2bf-2cbc-4886-a7c7-e257544d40fc.gif)
 
 The map will display pointers taken from the geodata in you records. There are two possible sources of geodata that can be drawn: **current result sets** (search results) and **map layers**. The displayed field from the result set is normally Location (a geospatial field).
 
@@ -2392,11 +2400,11 @@ Some tools are available in the header:
     - <span style="color: rgb(132, 63, 161);">\[Result sets\]</span>: choose which set of records you want to display or hide
     - <span style="color: rgb(132, 63, 161);">\[Map Documents\]</span>: choose or import a background map (borders, geo features, tiled image background)
     - <span style="color: rgb(132, 63, 161);">\[Base map\]</span>: choose which base map you want to use (e.g. *OpenStreetMap*)
-- <span style="color: rgb(132, 63, 161);">\[Zoom in\]</span> and <span style="color: rgb(132, 63, 161);">\[Zoom out\]</span>![](https://heurist-doc.huma-num.fr/uploads/ef55f59f-129b-454a-964f-73c64a20b627.png)②
-- <span style="color: rgb(35, 111, 161);">\[Zoom to full extent\]</span>![](https://heurist-doc.huma-num.fr/uploads/19f1a1b3-59a6-4d68-9a93-8118c79c82e9.png)③
-- <span style="color: rgb(132, 63, 161);">\[Help\]</span>![](https://heurist-doc.huma-num.fr/uploads/a8ebe3b0-4128-4b0a-8a08-bcfb5084012a.png)④
+- <span style="color: rgb(132, 63, 161);">\[Zoom in\]</span> and <span style="color: rgb(132, 63, 161);">\[Zoom out\]</span>![ef55f59f-129b-454a-964f-73c64a20b627.png](https://heurist-doc.huma-num.fr/uploads/ef55f59f-129b-454a-964f-73c64a20b627.png)②
+- <span style="color: rgb(35, 111, 161);">\[Zoom to full extent\]</span>![19f1a1b3-59a6-4d68-9a93-8118c79c82e9.png](https://heurist-doc.huma-num.fr/uploads/19f1a1b3-59a6-4d68-9a93-8118c79c82e9.png)③
+- <span style="color: rgb(132, 63, 161);">\[Help\]</span>![a8ebe3b0-4128-4b0a-8a08-bcfb5084012a.png](https://heurist-doc.huma-num.fr/uploads/a8ebe3b0-4128-4b0a-8a08-bcfb5084012a.png)④
 
-![](https://heurist-doc.huma-num.fr/uploads/75c029ec-1d56-457a-b5f4-2d2a5b84f487.png)
+![75c029ec-1d56-457a-b5f4-2d2a5b84f487.png](https://heurist-doc.huma-num.fr/uploads/75c029ec-1d56-457a-b5f4-2d2a5b84f487.png)
 
 On the map, several features are available:
 
@@ -2405,7 +2413,7 @@ On the map, several features are available:
 - <span style="color: rgb(132, 63, 161);">\[Print\]</span> ③ : print a selected view of the map
 - <span style="color: rgb(132, 63, 161);">\[Map publication\]</span> ④ : generate an iframe to display the map on another web page and choose which map features to implement. It is also possible to export the map in KML format to use on Google Earth.
 
-![](https://heurist-doc.huma-num.fr/uploads/58cc08c1-1954-465f-8abf-656f05d0347f.png)
+![58cc08c1-1954-465f-8abf-656f05d0347f.png](https://heurist-doc.huma-num.fr/uploads/58cc08c1-1954-465f-8abf-656f05d0347f.png)
 
 #### 1.1.1 Focus on map publication
 
@@ -2436,7 +2444,7 @@ On the map, several features are available:
 
 ③ You can export a map in KML format for Google Earth.
 
-![](https://heurist-doc.huma-num.fr/uploads/1bd5bf0e-a92c-4def-b641-38100bfb274a.png)
+![1bd5bf0e-a92c-4def-b641-38100bfb274a.png](https://heurist-doc.huma-num.fr/uploads/1bd5bf0e-a92c-4def-b641-38100bfb274a.png)
 
 #### 1.1.2. Focus on the Heurist map document
 
@@ -2480,7 +2488,7 @@ The timeline has various navigation features:
     - choose the bar's position: stacked on the above the other, or wrapped to minimise height of timeline
     - filter map with current timeline range
 
-![](https://heurist-doc.huma-num.fr/uploads/3cdf26db-269b-4d18-a465-0c8b36a7b3b6.png)
+![3cdf26db-269b-4d18-a465-0c8b36a7b3b6.png](https://heurist-doc.huma-num.fr/uploads/3cdf26db-269b-4d18-a465-0c8b36a7b3b6.png)
 
 ## 2. Network view
 
@@ -2490,7 +2498,7 @@ The timeline has various navigation features:
 - Perform a search or use a \[Saved Filter\] that returns the records you want to include in your network ②
 - Click on \[Network\] ③
 
-![](https://heurist-doc.huma-num.fr/uploads/4ddf0f6b-9f0b-472d-b62f-13059848c950.png)
+![4ddf0f6b-9f0b-472d-b62f-13059848c950.png](https://heurist-doc.huma-num.fr/uploads/4ddf0f6b-9f0b-472d-b62f-13059848c950.png)
 
 The **Network** view displays a records' network diagram. It provides an interactive visualisation of the current results set. Records are shown as nodes, and the connections (pointer fields and relationships) as the lines between nodes (edges).
 
@@ -2505,7 +2513,7 @@ The **Network** view displays a records' network diagram. It provides an interac
 
 Here's an example of a network diagram:
 
-![](https://heurist-doc.huma-num.fr/uploads/60e068e3-10ab-434e-b3f1-ecc207e52483.gif)
+![60e068e3-10ab-434e-b3f1-ecc207e52483.gif](https://heurist-doc.huma-num.fr/uploads/60e068e3-10ab-434e-b3f1-ecc207e52483.gif)
 
 Each node displayed is a lab or a project. It shows how labs are interconnected through shared projects. Here you can see a record directly in the network viewer on the left.
 
@@ -2515,14 +2523,14 @@ Some features are available on the header to make your diagram more accessible:
     - <span style="color: rgb(132, 63, 161);">Select mode</span> ① : select and drag simple node or select and drag multiple node by a selecting box (click-right and drag)
     - <span style="color: rgb(132, 63, 161);">Gravity </span>② : determine to what degree entities are repositioned around the selected entity based on their relative weightings. Turn it on to choose the best presentation, and turn it off to lock down its position.
 
-![](https://heurist-doc.huma-num.fr/uploads/0d10fb6d-1eee-40a9-9958-4d819b94c652.png)
+![0d10fb6d-1eee-40a9-9958-4d819b94c652.png](https://heurist-doc.huma-num.fr/uploads/0d10fb6d-1eee-40a9-9958-4d819b94c652.png)
 
 - \[Link Control\]:
     - <span style="color: rgb(132, 63, 161);">Links</span> ① : show or hide empty links and expand links
     - <span style="color: rgb(132, 63, 161);">Node Size Formula</span> ② : choose between linear or logarithmic formula
     - <span style="color: rgb(132, 63, 161);">Fixed </span>③ : fix the size of the links
 
-![](https://heurist-doc.huma-num.fr/uploads/7cae3489-e972-4458-88b3-739817b6db77.png)
+![7cae3489-e972-4458-88b3-739817b6db77.png](https://heurist-doc.huma-num.fr/uploads/7cae3489-e972-4458-88b3-739817b6db77.png)
 
 - <span style="color: rgb(132, 63, 161);">\[Graph Control\]</span>:
     - <span style="color: rgb(132, 63, 161);">Refresh Data</span> ① : go back to the original presentation of the nodes
@@ -2531,7 +2539,7 @@ Some features are available on the header to make your diagram more accessible:
     - <span style="color: rgb(132, 63, 161);">Set Zoom</span> ④ : zoom in or out of the diagram and set the view back to show the complete diagram
     - <span style="color: rgb(132, 63, 161);">Export</span> ⑤ : export the network data to a Gephi GEFX file
 
-![](https://heurist-doc.huma-num.fr/uploads/fcb442d0-b49a-46ea-abe7-88c60885949a.png)
+![fcb442d0-b49a-46ea-abe7-88c60885949a.png](https://heurist-doc.huma-num.fr/uploads/fcb442d0-b49a-46ea-abe7-88c60885949a.png)
 
 ## 3. Crosstabs
 
@@ -2541,7 +2549,7 @@ Some features are available on the header to make your diagram more accessible:
 - Perform a search or use a <span style="color: rgb(132, 63, 161);">\[Saved Filter\]</span> that returns the records you want to include in your network. ②
 - Click on <span style="color: rgb(132, 63, 161);">\[Crosstabs\]</span> ③
 
-![](https://heurist-doc.huma-num.fr/uploads/bbf17797-f5e3-427c-8708-1e5fa2996770.png)
+![bbf17797-f5e3-427c-8708-1e5fa2996770.png](https://heurist-doc.huma-num.fr/uploads/bbf17797-f5e3-427c-8708-1e5fa2996770.png)
 
 The Crosstabs view provides a quantitative analysis of your data by calculating counts of aggregations sorted by category. A cross-tabulation is a way of calculating counts of aggregations sorted by category.
 
@@ -2555,7 +2563,7 @@ To run a simple cross-tabulation, search for the records you wish to analysis an
 
 Additionally, you can assign intervals by clicking on the pen ⑤.
 
-![](https://heurist-doc.huma-num.fr/uploads/7468dd0a-c049-42e3-a531-d8a09e38a484.png)
+![7468dd0a-c049-42e3-a531-d8a09e38a484.png](https://heurist-doc.huma-num.fr/uploads/7468dd0a-c049-42e3-a531-d8a09e38a484.png)
 
 ### 3.1. Focus on intervals
 
@@ -2570,7 +2578,7 @@ Then, add or remove intervals ② :
 - If you want remove all intervals, click on the blue arrow.
 - If you want to reset intervals, click on <span style="color: rgb(132, 63, 161);">\[Reset\]</span> ③.
 
-![](https://heurist-doc.huma-num.fr/uploads/0d2271f5-1660-4720-af10-e3e8c71ee99f.png)
+![0d2271f5-1660-4720-af10-e3e8c71ee99f.png](https://heurist-doc.huma-num.fr/uploads/0d2271f5-1660-4720-af10-e3e8c71ee99f.png)
 
 It is also possible to merge values:
 
@@ -2579,7 +2587,7 @@ It is also possible to merge values:
 3. click on the right arrow
 4. rename the new interval
 
-![](https://heurist-doc.huma-num.fr/uploads/2571548b-169a-4d19-bef7-1de2b1c4cabc.gif)
+![2571548b-169a-4d19-bef7-1de2b1c4cabc.gif](https://heurist-doc.huma-num.fr/uploads/2571548b-169a-4d19-bef7-1de2b1c4cabc.gif)
 
 Some other functionalities are available:
 
@@ -2588,7 +2596,7 @@ Some other functionalities are available:
 - Counts aggregates values ③
 - Display or hide null values and blank rows and columns ④
 
-![](https://heurist-doc.huma-num.fr/uploads/00d304cf-5fb1-4762-a793-67ad9fc381e7.png)
+![00d304cf-5fb1-4762-a793-67ad9fc381e7.png](https://heurist-doc.huma-num.fr/uploads/00d304cf-5fb1-4762-a793-67ad9fc381e7.png)
 
 ### 3.2. Results
 
@@ -2598,13 +2606,13 @@ You can see the results in table form or in a pie chart.
 
 The table's metadata is available ①. The table title can be customized ②. You can export the table in CSV or PDF format ③. You can search for a value in the table ④. The field or record type used as base for the crosstable is mentioned on its top ⑤.
 
-![](https://heurist-doc.huma-num.fr/uploads/b8843d9a-6cc3-4f26-983e-c3a7c1889818.png)
+![b8843d9a-6cc3-4f26-983e-c3a7c1889818.png](https://heurist-doc.huma-num.fr/uploads/b8843d9a-6cc3-4f26-983e-c3a7c1889818.png)
 
 You can also display your data as a pie chart.
 
-![](https://heurist-doc.huma-num.fr/uploads/3d94ef8f-e316-4a16-af81-47af703e3623.png)
+![3d94ef8f-e316-4a16-af81-47af703e3623.png](https://heurist-doc.huma-num.fr/uploads/3d94ef8f-e316-4a16-af81-47af703e3623.png)
 
-# 08c: Summary : Mapping and visualisation
+# 8d: Summary : Mapping and visualisation
 
 Summary automatically generated on 11/25/2025 using the gpt-oss:120b model from the servers of [**Onyxia**](https://datalab.sspcloud.fr/) (INSEE) based on the complete document of the chapter.
 
@@ -2976,7 +2984,7 @@ All changes are reflected instantly in the table.
 
 ---
 
-# 08d: Using IIIF - manifests, canvases and annotations
+# 8e: Using IIIF - manifests, canvases and annotations
 
 Note : This chapter supplement is in the Heurist gitHub /documentation/IIIF folder at 28 June 2026, but this version will becoem the authoritative source. Additonal documentation has been written since 28th June.
 
