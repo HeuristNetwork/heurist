@@ -1473,7 +1473,7 @@ class DbDefTerms extends DbEntityBase
                 if($trm_usage){
                     $res = $trm_usage;
                 }elseif(empty($mysqli->error)){
-                    $res = explode(',', $trm_ID);
+                    $res = array_fill_keys(explode(',', $trm_ID), 0);
                 }else{
                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve term usages', $mysqli->error);
                     return false;
