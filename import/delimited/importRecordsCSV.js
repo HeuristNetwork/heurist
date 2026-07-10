@@ -2600,23 +2600,40 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                         // update cached record
                         let rst_ID = response.data[0];
-                        if(rst_ID>0){
-
-                            record['rst_ID'] = String(rst_ID);
-                            $Db.rst(rty_ID).addRecord(rst_ID, record);
-
-                            // Set field selection to new field
-                            if(!imp_session['sequence'][currentSeqIndex]['mapping_flds']){
-                                imp_session['sequence'][currentSeqIndex]['mapping_flds'] = {};
-                            }
-                            let fld_index = fld_id.replace('sa_dt_', '');
-                            imp_session['sequence'][currentSeqIndex]['mapping_flds'][fld_index] = rst_ID;
-
-                            let $checked_boxes = $("input[id^='cbsa_dt_']:checked"); // save checked boxes
-                            _initFieldMapppingSelectors(); // recreate selects
-
-                            $checked_boxes.prop('checked', true).trigger('change'); // re-check boxes, they get reset by the above recreate
+                        if(rst_ID <= 0){
+                            return;
                         }
+
+                        record['rst_ID'] = String(rst_ID);
+                        $Db.rst(rty_ID).addRecord(rst_ID, record);
+
+                        // Set field selection to new field
+                        if(!imp_session['sequence'][currentSeqIndex]['mapping_flds']){
+                            imp_session['sequence'][currentSeqIndex]['mapping_flds'] = {};
+                        }
+                        let fld_index = fld_id.replace('sa_dt_', '');
+                        imp_session['sequence'][currentSeqIndex]['mapping_flds'][fld_index] = rst_ID;
+
+                        // Cache mapping before refresh
+                        let $checked_boxes = $("input[id^='cbsa_dt_']:checked:visible"); // save checked boxes
+                        let hasMapping = false;
+                        let fieldMapping = {};
+                        $.each($checked_boxes, function(idx, item){
+
+                            item = $(item);
+
+                            let field_type_id = $(`#sa_dt_${item.val()}`).val();
+                            if(field_type_id){
+                                fieldMapping[item.val()] = field_type_id;
+                                hasMapping = true;
+                            }
+                        });
+                        if(hasMapping){
+                            imp_session['sequence'][currentSeqIndex]['mapping_flds'] = fieldMapping;
+                        }
+
+                        _initFieldMapppingSelectors(); // recreate selects
+                        $checked_boxes.prop('checked', true).trigger('change'); // re-check boxes, they get reset by the above recreate
                     });
                 }
             };
@@ -3621,10 +3638,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                                 
                                                 //sel = window.hWin.HEURIST4.ui.initHSelect(sel, false);
                                                 sel.on('change', function(event){
-                                                   let sessionName = $(event.target).val();
-                                                   if(sessionName && preset_mappings[sessionName]){
-                                                       _initFieldMapppingSelectors( preset_mappings[sessionName] );
-                                                   }
+                                                    let sessionName = $(event.target).val();
+                                                    if(sessionName && preset_mappings[sessionName]){
+                                                        _initFieldMapppingSelectors( preset_mappings[sessionName] );
+                                                    }
                                                 });
 
 

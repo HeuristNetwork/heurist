@@ -523,7 +523,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
         }
     },
-    
+
+    /**
+     * @brief Cleans up the widget, removing event listeners.
+     * @memberof heurist.manageRecords
+     * @override
+     */
+    _destroy: function(){
+        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE);
+        this._super();
+    },
+
     /**
      * @brief Hides the RTS (Record Type Structure) actions menu.
      * @memberof heurist.manageRecords
@@ -5506,11 +5516,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         // Update width + height, and reset dialog's position to center
-        if(this._as_dialog){
+        if(this._as_dialog && this._as_dialog.dialog('instance') !== undefined){
             this._as_dialog.dialog('option', 'width', width);
             this._as_dialog.dialog('option', 'height', height);
             this._as_dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
-        }else if(this._edit_dialog){
+        }else if(this._edit_dialog && this._edit_dialog.dialog('instance') !== undefined){
             this._edit_dialog.dialog('option', 'width', width);
             this._edit_dialog.dialog('option', 'height', height);
             this._edit_dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
@@ -5518,7 +5528,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             return;
         }
 
-       
         this.editFormPopup.layout().resizeAll(); // resize layout
     },
 
