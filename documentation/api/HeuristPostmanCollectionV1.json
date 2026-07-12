@@ -2,26 +2,74 @@
   "info": {
     "name": "Heurist API - Verified Test Suite",
     "_postman_id": "heurist-api-verified-suite-v1",
-    "description": "Verified Heurist API test suite for routing, public access, session authentication, JWT authentication, and negative auth cases.",
+    "description": "Verified Heurist API test suite for routing, public access, session/JWT authentication, modern definition collection responses, semantic record-structure routes, and negative authentication cases. Beta.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {"key":"baseUrl","value":"https://heuristref.net"},
-    {"key":"apiPrefix","value":"/h7-alpha/api"},
-    {"key":"version","value":"h7-alpha"},
-    {"key":"db","value":"api_test"},
-    {"key":"username","value":"CHANGE_ME"},
-    {"key":"password","value":"CHANGE_ME"},
-    {"key":"jwtToken","value":""},
-    {"key":"publicRecordId","value":"1"},
-    {"key":"privateRecordId","value":"2"},
-    {"key":"rtyId","value":"10"},
-    {"key":"dtyId","value":"1"},
-    {"key":"rstId","value":"12"},
-    {"key":"trmId","value":"6529"},
-    {"key":"userId","value":"2"},
-    {"key":"groupId","value":"1"},
-    {"key":"iiifFileId","value":"a26f83404b3689e9473b90563ae874b959b849ed"}
+    {
+      "key": "baseUrl",
+      "value": "https://heuristref.net"
+    },
+    {
+      "key": "apiPrefix",
+      "value": "/h7-alpha/api"
+    },
+    {
+      "key": "version",
+      "value": "h7-alpha"
+    },
+    {
+      "key": "db",
+      "value": "api_test"
+    },
+    {
+      "key": "username",
+      "value": "CHANGE_ME"
+    },
+    {
+      "key": "password",
+      "value": "CHANGE_ME"
+    },
+    {
+      "key": "jwtToken",
+      "value": ""
+    },
+    {
+      "key": "publicRecordId",
+      "value": "1"
+    },
+    {
+      "key": "privateRecordId",
+      "value": "2"
+    },
+    {
+      "key": "rtyId",
+      "value": "10"
+    },
+    {
+      "key": "dtyId",
+      "value": "1"
+    },
+    {
+      "key": "rstId",
+      "value": "12"
+    },
+    {
+      "key": "trmId",
+      "value": "6529"
+    },
+    {
+      "key": "userId",
+      "value": "2"
+    },
+    {
+      "key": "groupId",
+      "value": "1"
+    },
+    {
+      "key": "iiifFileId",
+      "value": "a26f83404b3689e9473b90563ae874b959b849ed"
+    }
   ],
   "item": [
     {
@@ -29,34 +77,153 @@
       "item": [
         {
           "name": "Router debug for API path",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","pm.test('Router resolves to api.php', function () { pm.expect(pm.response.text()).to.include('hserv/controller/api.php'); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Router resolves to api.php', function () { pm.expect(pm.response.text()).to.include('hserv/controller/api.php'); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/records?routerDebug=1","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","records"],"query":[{"key":"routerDebug","value":"1"}]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records?routerDebug=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "records"
+              ],
+              "query": [
+                {
+                  "key": "routerDebug",
+                  "value": "1"
+                }
+              ]
+            }
           }
         },
         {
           "name": "Public IIIF manifest",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","pm.test('IIIF body contains id', function () { pm.expect(pm.response.json()).to.have.property('id'); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('IIIF body contains id', function () { pm.expect(pm.response.json()).to.have.property('id'); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/iiif/manifest/{{iiifFileId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","iiif","manifest","{{iiifFileId}}"]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/iiif/manifest/{{iiifFileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "iiif",
+                "manifest",
+                "{{iiifFileId}}"
+              ]
+            }
           }
         },
         {
           "name": "Guest access to private record returns empty",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","const body = pm.response.json();","pm.test('records array exists', function () { pm.expect(body.records).to.be.an('array'); });","pm.test('private record hidden from guest', function () { pm.expect(body.records.length).to.eql(0); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('records array exists', function () { pm.expect(body.records).to.be.an('array'); });",
+                  "pm.test('private record hidden from guest', function () { pm.expect(body.records.length).to.eql(0); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{privateRecordId}}&fmt=json","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","records"],"query":[{"key":"q","value":"ids:{{privateRecordId}}"},{"key":"fmt","value":"json"}]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{privateRecordId}}&fmt=json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "records"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "ids:{{privateRecordId}}"
+                },
+                {
+                  "key": "fmt",
+                  "value": "json"
+                }
+              ]
+            }
           }
         },
         {
           "name": "Guest access to public record succeeds",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","const body = pm.response.json();","pm.test('public record visible to guest', function () { pm.expect(body.records.length).to.eql(1); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('public record visible to guest', function () { pm.expect(body.records.length).to.eql(1); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{publicRecordId}}&fmt=json","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","records"],"query":[{"key":"q","value":"ids:{{publicRecordId}}"},{"key":"fmt","value":"json"}]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{publicRecordId}}&fmt=json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "records"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "ids:{{publicRecordId}}"
+                },
+                {
+                  "key": "fmt",
+                  "value": "json"
+                }
+              ]
+            }
           }
         }
       ]
@@ -66,10 +233,33 @@
       "item": [
         {
           "name": "RST without auth -> 401",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 401', function () { pm.response.to.have.status(401); });","const body = pm.response.json();","pm.test('Unauthorized message', function () { pm.expect(body.message).to.eql('Unauthorized'); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () { pm.response.to.have.status(401); });",
+                  "const body = pm.response.json();",
+                  "pm.test('Unauthorized message', function () { pm.expect(body.message).to.eql('Unauthorized'); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rstId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","rst","{{rstId}}"]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{apiPrefix}}",
+                "{{db}}",
+                "rst",
+                "{{rtyId}}"
+              ]
+            }
           }
         }
       ]
@@ -79,36 +269,142 @@
       "item": [
         {
           "name": "Login (session cookie)",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key":"Content-Type","value":"application/json"}],
-            "body": {"mode":"raw","raw":"{\n  \"login\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"},
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/login","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","login"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "login"
+              ]
+            }
           }
         },
         {
           "name": "Session-authenticated private record",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","const body = pm.response.json();","pm.test('private record visible after session login', function () { pm.expect(body.records.length).to.eql(1); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('private record visible after session login', function () { pm.expect(body.records.length).to.eql(1); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{privateRecordId}}&fmt=json","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","records"],"query":[{"key":"q","value":"ids:{{privateRecordId}}"},{"key":"fmt","value":"json"}]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{privateRecordId}}&fmt=json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "records"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "ids:{{privateRecordId}}"
+                },
+                {
+                  "key": "fmt",
+                  "value": "json"
+                }
+              ]
+            }
           }
         },
         {
-          "name": "Session-authenticated RST",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","pm.test('rst_ID returned', function () { pm.expect(pm.response.json()).to.have.property('rst_ID'); });"]}}],
+          "name": "Session-authenticated record structure collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('definition collection envelope', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta.entity).to.eql('recstructure'); pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rstId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","rst","{{rstId}}"]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{apiPrefix}}",
+                "{{db}}",
+                "rst",
+                "{{rtyId}}"
+              ]
+            }
           }
         },
         {
           "name": "Logout",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/logout","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","logout"]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "logout"
+              ]
+            }
           }
         }
       ]
@@ -119,31 +415,136 @@
         {
           "name": "Get JWT",
           "event": [
-            {"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","const body = pm.response.json();","pm.test('access_token exists', function () { pm.expect(body.access_token).to.be.a('string').and.not.empty; });","pm.test('token_type is Bearer', function () { pm.expect(body.token_type).to.eql('Bearer'); });","pm.collectionVariables.set('jwtToken', body.access_token);"]}}
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('access_token exists', function () { pm.expect(body.access_token).to.be.a('string').and.not.empty; });",
+                  "pm.test('token_type is Bearer', function () { pm.expect(body.token_type).to.eql('Bearer'); });",
+                  "pm.collectionVariables.set('jwtToken', body.access_token);"
+                ]
+              }
+            }
           ],
           "request": {
             "method": "POST",
-            "header": [{"key":"Content-Type","value":"application/json"}],
-            "body": {"mode":"raw","raw":"{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"db\": \"{{db}}\"\n}"},
-            "url": {"raw":"{{baseUrl}}/heurist/hserv/controller/auth.php","host":["{{baseUrl}}"],"path":["heurist","hserv","controller","auth.php"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"db\": \"{{db}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/heurist/hserv/controller/auth.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "hserv",
+                "controller",
+                "auth.php"
+              ]
+            }
           }
         },
         {
           "name": "JWT-authenticated private record",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","const body = pm.response.json();","pm.test('private record visible with JWT', function () { pm.expect(body.records.length).to.eql(1); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('private record visible with JWT', function () { pm.expect(body.records.length).to.eql(1); });"
+                ]
+              }
+            }
+          ],
           "request": {
-            "auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{privateRecordId}}&fmt=json","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","records"],"query":[{"key":"q","value":"ids:{{privateRecordId}}"},{"key":"fmt","value":"json"}]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{privateRecordId}}&fmt=json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "records"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "ids:{{privateRecordId}}"
+                },
+                {
+                  "key": "fmt",
+                  "value": "json"
+                }
+              ]
+            }
           }
         },
         {
-          "name": "JWT-authenticated RST",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","pm.test('rst_ID returned', function () { pm.expect(pm.response.json()).to.have.property('rst_ID'); });"]}}],
+          "name": "JWT-authenticated record structure collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('record structure collection returned', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta.entity).to.eql('recstructure'); });"
+                ]
+              }
+            }
+          ],
           "request": {
-            "auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rstId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","rst","{{rstId}}"]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{apiPrefix}}",
+                "{{db}}",
+                "rst",
+                "{{rtyId}}"
+              ]
+            }
           }
         }
       ]
@@ -153,11 +554,40 @@
       "item": [
         {
           "name": "Invalid JWT -> 401",
-          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 401', function () { pm.response.to.have.status(401); });","const body = pm.response.json();","pm.test('Invalid token message', function () { pm.expect(body.message).to.eql('Invalid token'); });"]}}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () { pm.response.to.have.status(401); });",
+                  "const body = pm.response.json();",
+                  "pm.test('Invalid token message', function () { pm.expect(body.message).to.eql('Invalid token'); });"
+                ]
+              }
+            }
+          ],
           "request": {
-            "header": [{"key":"Authorization","value":"Bearer abracadabra"}],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer abracadabra"
+              }
+            ],
             "method": "GET",
-            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rstId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","rst","{{rstId}}"]}
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rstId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "rst",
+                "{{rstId}}"
+              ]
+            }
           }
         }
       ]
@@ -167,23 +597,476 @@
       "item": [
         {
           "name": "Get rectype 10",
-          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/rty/{{rtyId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","rty","{{rtyId}}"]}}
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/rty/{{rtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "rty",
+                "{{rtyId}}"
+              ]
+            }
+          }
         },
         {
           "name": "Get detail type 1",
-          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/dty/{{dtyId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","dty","{{dtyId}}"]}}
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/dty/{{dtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "dty",
+                "{{dtyId}}"
+              ]
+            }
+          }
         },
         {
           "name": "Get term 6529",
-          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/trm/{{trmId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","trm","{{trmId}}"]}}
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/trm/{{trmId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "trm",
+                "{{trmId}}"
+              ]
+            }
+          }
         },
         {
           "name": "Get user 2",
-          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/users/{{userId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","users","{{userId}}"]}}
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          }
         },
         {
           "name": "Get group 1",
-          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/groups/{{groupId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","groups","{{groupId}}"]}}
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/groups/{{groupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "heurist",
+                "api",
+                "{{db}}",
+                "groups",
+                "{{groupId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Modern definition API",
+      "item": [
+        {
+          "name": "Record types collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is rectypes', function () { pm.expect(pm.response.json().meta.entity).to.eql('rectypes'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/rectypes?limit=2&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record type direct object",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body=pm.response.json();",
+                  "pm.test('direct object', function () { pm.expect(body).to.have.property('rty_ID'); pm.expect(body).to.not.have.property('items'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/rectypes/{{rtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fields collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is fields', function () { pm.expect(pm.response.json().meta.entity).to.eql('fields'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/fields?limit=2",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Field direct object",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('direct field object', function () { pm.expect(pm.response.json()).to.have.property('dty_ID'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/fields/{{dtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Terms collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is terms', function () { pm.expect(pm.response.json().meta.entity).to.eql('terms'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/terms?limit=2",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Term direct object",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('direct term object', function () { pm.expect(pm.response.json()).to.have.property('trm_ID'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/terms/{{trmId}}",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record structure collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is recstructure', function () { pm.expect(pm.response.json().meta.entity).to.eql('recstructure'); pm.expect(pm.response.json().meta.recordTypeId).to.eql(Number(pm.collectionVariables.get('rtyId'))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/recstructure/{{rtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record structure field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body=pm.response.json();",
+                  "pm.test('composite structure item', function () { pm.expect(Number(body.rst_RecTypeID)).to.eql(Number(pm.collectionVariables.get('rtyId'))); pm.expect(Number(body.rst_DetailTypeID)).to.eql(Number(pm.collectionVariables.get('dtyId'))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/recstructure/{{rtyId}}/{{dtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Short alias collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('short alias reports canonical entity', function () { pm.expect(pm.response.json().meta.entity).to.eql('rectypes'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/rty?limit=1",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
         }
       ]
     }

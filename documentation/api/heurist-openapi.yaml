@@ -1,0 +1,864 @@
+openapi: 3.1.0
+info:
+  title: Heurist Read API
+  version: 1.0.0-beta
+  summary: Public read access to Heurist records, database definitions, annotations and IIIF resources
+  description: 'This specification describes the public read API currently exposed through
+
+    `hserv/controller/api.php`.
+
+
+    The compact, unversioned base URI is retained. Descriptive and abbreviated
+
+    definition routes are equivalent aliases; neither form is deprecated.
+
+
+    The modern definition collection envelope currently applies only to record
+
+    types, fields, terms and record structures. Records keep their existing JSON
+
+    representation to avoid breaking established consumers. Successful IIIF
+
+    responses remain direct IIIF Presentation API resources and are never wrapped
+
+    in a Heurist-specific envelope.
+
+    '
+servers:
+- url: https://{host}/api
+  description: A Heurist installation
+  variables:
+    host:
+      default: heuristref.net
+      description: Host name of the Heurist server
+tags:
+- name: Records
+  description: Search for and retrieve records
+- name: Database structure
+  description: Retrieve record types, fields, terms and record structures
+- name: Authentication
+  description: Obtain JWT tokens or manage a browser-backed session
+- name: IIIF
+  description: Retrieve direct IIIF Presentation API v3 resources
+- name: Annotations
+  description: Read IIIF Web Annotation records and AnnotationPages
+paths:
+  /{database}/records:
+    get:
+      tags:
+      - Records
+      operationId: searchRecords
+      summary: Search records
+      description: Anonymous requests return only publicly visible records. The response format is the existing Heurist records
+        JSON contract.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Heurist search expression.
+      - name: w
+        in: query
+        schema:
+          type: string
+        description: Heurist search mode/domain.
+      - name: ids
+        in: query
+        schema:
+          type: string
+        example: 123,456
+        description: Comma-separated record identifiers.
+      - name: detail
+        in: query
+        schema:
+          type: string
+        description: Existing Heurist record detail option.
+      responses:
+        '200':
+          description: Record search response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/records/{recordId}:
+    get:
+      tags:
+      - Records
+      operationId: getRecord
+      summary: Retrieve one record
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordId'
+      - name: detail
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Existing Heurist records response containing the requested visible record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/rectypes:
+    get:
+      tags:
+      - Database structure
+      operationId: listRecordTypes
+      summary: Retrieve record type definitions
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Details'
+      - name: rty_ID
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+      - name: rty_Name
+        in: query
+        schema:
+          type: string
+      - name: rty_RecTypeGroupID
+        in: query
+        schema:
+          type: integer
+      - name: rty_OriginatingDBID
+        in: query
+        schema:
+          type: integer
+      responses: &id001
+        '200':
+          description: Definition collection; empty matches return an empty items array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefinitionCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/rectypes/{recordTypeId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getRecordType
+      summary: Retrieve one record type definition
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordTypeId'
+      - $ref: '#/components/parameters/Details'
+      responses: &id002
+        '200':
+          description: Definition object returned directly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Definition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/fields:
+    get:
+      tags:
+      - Database structure
+      operationId: listFields
+      summary: Retrieve field definitions
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Details'
+      - name: dty_ID
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+      - name: dty_Name
+        in: query
+        schema:
+          type: string
+      - name: dty_Type
+        in: query
+        schema:
+          type: string
+      - name: dty_Status
+        in: query
+        schema:
+          type: string
+      - name: dty_DetailTypeGroupID
+        in: query
+        schema:
+          type: integer
+      - name: dty_OriginatingDBID
+        in: query
+        schema:
+          type: integer
+      responses: *id001
+  /{database}/fields/{fieldId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getField
+      summary: Retrieve one field definition
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/FieldId'
+      - $ref: '#/components/parameters/Details'
+      responses: *id002
+  /{database}/terms:
+    get:
+      tags:
+      - Database structure
+      operationId: listTerms
+      summary: Retrieve vocabulary terms
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Details'
+      - name: trm_ID
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+      - name: trm_Label
+        in: query
+        schema:
+          type: string
+      - name: trm_Domain
+        in: query
+        schema:
+          type: string
+      - name: trm_Status
+        in: query
+        schema:
+          type: string
+      - name: trm_Code
+        in: query
+        schema:
+          type: string
+      - name: trm_ParentTermID
+        in: query
+        schema:
+          type: integer
+      - name: trm_OriginatingDBID
+        in: query
+        schema:
+          type: integer
+      responses: *id001
+  /{database}/terms/{termId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getTerm
+      summary: Retrieve one vocabulary term
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/TermId'
+      - $ref: '#/components/parameters/Details'
+      responses: *id002
+  /{database}/recstructure/{recordTypeId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getRecordStructure
+      summary: Retrieve the complete field structure of a record type
+      description: Returns a collection. The public identity is the record type identifier, not the internal `rst_ID` primary
+        key.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordTypeId'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Details'
+      - name: rst_DetailTypeID
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+      responses: *id001
+  /{database}/recstructure/{recordTypeId}/{fieldId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getRecordStructureField
+      summary: Retrieve one field within a record type structure
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordTypeId'
+      - $ref: '#/components/parameters/FieldId'
+      - $ref: '#/components/parameters/Details'
+      responses: *id002
+  /{database}/rty:
+    get:
+      tags:
+      - Database structure
+      operationId: listRecordTypesShort
+      summary: Compact alias for `rectypes`
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Details'
+      responses: *id001
+  /{database}/rty/{recordTypeId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getRecordTypeShort
+      summary: Compact alias for `rectypes/{recordTypeId}`
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordTypeId'
+      - $ref: '#/components/parameters/Details'
+      responses: *id002
+  /{database}/dty:
+    get:
+      tags:
+      - Database structure
+      operationId: listFieldsShort
+      summary: Compact alias for `fields`
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Details'
+      responses: *id001
+  /{database}/dty/{fieldId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getFieldShort
+      summary: Compact alias for `fields/{fieldId}`
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/FieldId'
+      - $ref: '#/components/parameters/Details'
+      responses: *id002
+  /{database}/trm:
+    get:
+      tags:
+      - Database structure
+      operationId: listTermsShort
+      summary: Compact alias for `terms`
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Details'
+      responses: *id001
+  /{database}/trm/{termId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getTermShort
+      summary: Compact alias for `terms/{termId}`
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/TermId'
+      - $ref: '#/components/parameters/Details'
+      responses: *id002
+  /{database}/rst/{recordTypeId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getRecordStructureShort
+      summary: Compact alias for `recstructure/{recordTypeId}`
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordTypeId'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Details'
+      responses: *id001
+  /{database}/rst/{recordTypeId}/{fieldId}:
+    get:
+      tags:
+      - Database structure
+      operationId: getRecordStructureFieldShort
+      summary: Compact alias for `recstructure/{recordTypeId}/{fieldId}`
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordTypeId'
+      - $ref: '#/components/parameters/FieldId'
+      - $ref: '#/components/parameters/Details'
+      responses: *id002
+  /{database}/login:
+    post:
+      tags:
+      - Authentication
+      operationId: loginSession
+      summary: Create a cookie-backed Heurist session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionLoginRequest'
+      responses:
+        '200':
+          description: Session established; response body is empty.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /{database}/logout:
+    post:
+      tags:
+      - Authentication
+      operationId: logoutSession
+      summary: End the current cookie-backed session
+      responses:
+        '200':
+          description: Session ended; response body is empty.
+  /{database}/iiif/manifest/{identifier}:
+    get:
+      tags:
+      - IIIF
+      operationId: getIiifManifest
+      summary: Retrieve an IIIF Presentation v3 Manifest
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/IiifIdentifier'
+      - name: omit_annotation_pages
+        in: query
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+      responses: &id003
+        '200':
+          description: Direct IIIF resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/iiif/canvas/{identifier}:
+    get:
+      tags:
+      - IIIF
+      operationId: getIiifCanvas
+      summary: Retrieve an IIIF Presentation v3 Canvas
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/IiifIdentifier'
+      - name: omit_annotation_pages
+        in: query
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+      responses: *id003
+  /{database}/iiif/page/{identifier}:
+    get:
+      tags:
+      - IIIF
+      operationId: getIiifPaintingPage
+      summary: Retrieve a painting AnnotationPage
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/IiifIdentifier'
+      responses: *id003
+  /{database}/iiif/annotation/{identifier}:
+    get:
+      tags:
+      - IIIF
+      operationId: getIiifPaintingAnnotation
+      summary: Retrieve a painting Annotation
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/IiifIdentifier'
+      responses: *id003
+  /{database}/iiif/annotations/{identifier}:
+    get:
+      tags:
+      - IIIF
+      operationId: getIiifLinkedAnnotationPage
+      summary: Retrieve a linked AnnotationPage
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/IiifIdentifier'
+      responses: *id003
+  /{database}/annotations/pages:
+    get:
+      tags:
+      - Annotations
+      operationId: listCanvasAnnotations
+      summary: Retrieve an AnnotationPage for a Canvas URI
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: uri
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uri
+      responses: *id003
+  /{database}/annotations/{annotationId}:
+    get:
+      tags:
+      - Annotations
+      operationId: getAnnotationRecord
+      summary: Retrieve one Web Annotation
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: annotationId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses: *id003
+  /{database}/annotations/{manifestRecordId}/pages:
+    get:
+      tags:
+      - Annotations
+      operationId: listManifestCanvasAnnotations
+      summary: Retrieve an AnnotationPage constrained to a Manifest record
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: manifestRecordId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      - name: uri
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uri
+      responses: *id003
+  /{database}/annotations/{manifestRecordId}/{annotationId}:
+    get:
+      tags:
+      - Annotations
+      operationId: getManifestAnnotation
+      summary: Retrieve one Web Annotation constrained to a Manifest record
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: manifestRecordId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      - name: annotationId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses: *id003
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT supplied in the Authorization header. Existing Heurist browser sessions may also be recognised.
+  parameters:
+    Database:
+      name: database
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+      example: my_database
+    RecordId:
+      name: recordId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    RecordTypeId:
+      name: recordTypeId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    FieldId:
+      name: fieldId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    TermId:
+      name: termId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    IiifIdentifier:
+      name: identifier
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 1000
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Details:
+      name: details
+      in: query
+      description: Entity-specific response projection. Existing DbDefXXX modes remain available; commonly used values include
+        id, name, list, full, raw and structure where supported.
+      schema:
+        type: string
+  schemas:
+    Error:
+      type: object
+      required:
+      - status
+      - message
+      properties:
+        status:
+          description: Heurist error status code
+          oneOf:
+          - type: integer
+          - type: string
+        message:
+          type: string
+        sysmsg:
+          type: string
+        error_title:
+          type: string
+      additionalProperties: true
+    Definition:
+      type: object
+      additionalProperties: true
+    DefinitionMeta:
+      type: object
+      required:
+      - database
+      - entity
+      properties:
+        database:
+          type: string
+        entity:
+          type: string
+          enum:
+          - rectypes
+          - fields
+          - terms
+          - recstructure
+        recordTypeId:
+          type: integer
+          minimum: 1
+      additionalProperties: false
+    Pagination:
+      type: object
+      required:
+      - total
+      - offset
+      - limit
+      - self
+      - next
+      properties:
+        total:
+          type: integer
+          minimum: 0
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        self:
+          type: string
+          format: uri
+        next:
+          oneOf:
+          - type: string
+            format: uri
+          - type: 'null'
+      additionalProperties: false
+    DefinitionCollection:
+      type: object
+      required:
+      - items
+      - meta
+      - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Definition'
+        meta:
+          $ref: '#/components/schemas/DefinitionMeta'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    Record:
+      type: object
+      additionalProperties: true
+    RecordSearchResponse:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/Record'
+      additionalProperties: true
+    SessionLoginRequest:
+      type: object
+      required:
+      - login
+      - password
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+          format: password
+    IiifResource:
+      type: object
+      additionalProperties: true
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication is required or the bearer token is invalid
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Requested item was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    MethodNotAllowed:
+      description: HTTP method is not supported
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

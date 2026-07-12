@@ -1,282 +1,138 @@
-# Heurist API Requests — Brief Overview
+# Heurist API Requests — Overview
 
-This document summarizes the current API entrypoint and URL shape. It is not a full endpoint-by-endpoint API specification.
+## Entry point and URI forms
 
-This document is intended as a high-level API overview. Detailed request examples are provided in the accompanying HeuristPostmanCollectionV1.json Postman collection. Please note that the Postman collection is currently beta and may not yet cover all endpoints or reflect the final API design.
+API requests are routed through the centralized root router and internally dispatched to the selected installation's `hserv/controller/api.php`.
 
-## Entry point
-
-API requests are routed through the centralized root router and then internally dispatched to:
+Primary forms:
 
 ```text
-/<version>/hserv/controller/api.php
+/api/<database>/<resource>/<selector>
+/<installation>/api/<database>/<resource>/<selector>
 ```
 
-Supported URL forms include:
+Examples:
 
 ```text
-/api/<db>/<entity>/<id-or-selector>
-/<version>/api/<db>/<entity>/<id-or-selector>
+/api/my_db/rectypes
+/heurist/api/my_db/records?q=ids:1,2,3
 ```
 
-Example:
+The compact unversioned `/api` form uses the configured production installation. Direct controller-query forms remain compatibility mechanisms and are not the preferred public interface.
 
-```text
-/api/my_db/rst/12
-/h7-alpha/api/my_db/records?q=ids:1,2,3
-```
+## Methods
 
-If the request path begins directly with `/api`, the API script treats it as if the default production version had been supplied.
-
-## Centralized Apache routing
-
-Apache should route all non-static requests through the root `index.php` entrypoint:
-
-```apache
-RewriteEngine On
-
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-
-RewriteRule ^.*$ /index.php [L,QSA]
-```
-
-The PHP router then recognizes `/api/...` and internally dispatches to the API entry script.
-
-## Request methods
-
-The API maps HTTP methods to internal Heurist actions:
+The generic entity router maps HTTP methods to internal actions:
 
 | HTTP method | Internal action |
 |---|---|
 | `GET` | `search` |
 | `POST` | `add` |
-| `PUT` | `save` |
-| `PATCH` | `save` |
+| `PUT` / `PATCH` | `save` |
 | `DELETE` | `delete` |
 
-The API also supports the `HTTP_X_HTTP_METHOD` override header for POST requests that need to emulate `PUT`, `PATCH`, or `DELETE`.
+The public definition contract currently documents GET only. Records and IIIF are GET-only through this entry point. Annotation writes exist for the Mirador workflow but are outside this read-API overview.
 
-Allowed internal actions are:
+## Definition API
 
-```text
-search
-add
-save
-delete
-```
+The first modernized group contains four resources:
 
-Not every entity supports every action.
-
-## Supported entity names
-
-The API maps short REST entity names to internal Heurist entity controllers.
-
-### Database structure entities
-
-| API entity | Internal entity |
+| Descriptive | Compact |
 |---|---|
-| `rtg` | `DefRecTypeGroups` |
-| `dtg` | `DefDetailTypeGroups` |
-| `vcg` | `DefVocabularyGroups` |
-| `rty` | `DefRecTypes` |
-| `dty` | `DefDetailTypes` |
-| `trm` | `DefTerms` |
-| `rst` | `DefRecStructure` |
+| `rectypes` | `rty` |
+| `fields` | `dty` |
+| `terms` | `trm` |
+| `recstructure` | `rst` |
 
-Longer aliases are also supported:
+Both names are equivalent aliases.
 
-| API alias | Internal entity |
-|---|---|
-| `fieldgroups` | `DefDetailTypeGroups` |
-| `rectypegroups` | `DefRecTypeGroups` |
-| `rectypes` | `DefRecTypes` |
-| `fields` | `DefDetailTypes` |
-| `terms` | `DefTerms` |
+Collections return:
 
-### User and workflow entities
-
-| API entity | Internal entity |
-|---|---|
-| `rem` | `UsrReminders` |
-| `reminders` | `DbUsrReminders` |
-| `swf` | `SysWorkflowRules` |
-| `tag` | `UsrTags` |
-| `users` | `SysUsers` |
-| `groups` | `SysGroups` |
-
-### Database and records
-
-| API entity | Internal behavior |
-|---|---|
-| `dbs` | `SysDatabases` |
-| `records` | record search/output only |
-
-The current API script supports record search via `records`. Other record write operations are not implemented through this REST entrypoint.
-
-### Authentication and session entities
-
-| API entity | Internal entity |
-|---|---|
-| `login` | `System` |
-| `logout` | `System` |
-
-### IIIF and annotations
-
-| API entity | Behavior |
-|---|---|
-| `annotations` | IIIF annotation server |
-| `iiif` | IIIF Presentation API v3, GET only |
-
-Examples:
-
-```text
-/api/osmak_annot/iiif/annotations/<file-obfuscated-id>
-/api/osmak_annot/annotations/pages?uri=<canvas-url>
+```json
+{
+  "items": [],
+  "meta": {"database": "my_db", "entity": "rectypes"},
+  "pagination": {"total": 0, "offset": 0, "limit": 1000, "self": "...", "next": null}
+}
 ```
 
-## URL and parameter forms
+Single record types, fields and terms return their definition object directly. Collection filters use native entity field names such as `rty_ID`, `dty_Type`, or `trm_ParentTermID`; there is no generic public `id` query parameter.
 
-The API supports multiple request forms.
-
-### REST-style path
+Record structure is addressed semantically:
 
 ```text
-/api/<db>/<entity>/<id>
+/recstructure/<recordTypeId>
+/recstructure/<recordTypeId>/<fieldId>
 ```
 
-Example:
+The first returns all fields for a record type; the second returns one field selected by record type and detail type. Internal `rst_ID` values are not part of this public route design.
+
+The existing `details` projections remain available because the same `DbDefXXX` classes serve internal Heurist clients.
+
+## Records
 
 ```text
-/api/my_db/rst/12
+/api/<database>/records
+/api/<database>/records/<recordId>
 ```
 
-### Database as query parameter
+Anonymous requests return only visible public records. Authenticated session or JWT requests may return additional records according to Heurist permissions.
 
-For backward compatibility, the database can be supplied as a query parameter:
+The initial public contract is JSON-only and documents `q`, `w`, `ids`, `detail`, `limit`, and `offset`. Existing alternative export formats remain implemented but are not yet part of the stable OpenAPI contract.
 
-```text
-/api/rst/12?db=my_db
-```
-
-### Entity as query parameter
-
-The API can also accept entity-style requests using parameters:
-
-```text
-/<version>/hserv/controller/api.php?db=my_db&ent=rst&id=12
-```
-
-In this case `ent` is translated to the corresponding API entity.
-
-## JSON request bodies
-
-For `POST`, `PUT`, and `PATCH` requests with:
-
-```text
-Content-Type: application/json
-```
-
-the API reads the request body and merges decoded JSON into request parameters.
-
-If the body contains a JSON object and no `fields` parameter is already present, the decoded JSON object is assigned to `fields`.
+Existing visibility behavior is retained: an inaccessible record query may return HTTP 200 with an empty `records` array.
 
 ## Authentication
 
-The API supports two authentication mechanisms:
+The API supports:
 
-1. existing cookie-backed Heurist sessions
-2. JWT Bearer tokens
+1. cookie-backed Heurist sessions;
+2. JWT bearer tokens.
 
-JWT authentication is enabled by defining the following in `heuristConfigIni.php`:
-
-```php
-$jwt_Secret = 'your-long-random-secret';
-$jwt_TTL    = 600;
-```
-
-API clients authenticate with:
+Bearer tokens are supplied as:
 
 ```text
 Authorization: Bearer <token>
 ```
 
-The API attempts to preserve an existing logged-in cookie session. If no user is present in the session, it tries JWT authentication.
-
-## Anonymous and public routes
-
-Some routes bypass or relax authentication.
-
-### Authentication skipped
-
-Authentication processing is skipped for:
+External integrations should prefer JWT. Browser session login and logout are available at:
 
 ```text
-login
-logout
-iiif
-public annotation reads
+POST /api/<database>/login
+POST /api/<database>/logout
 ```
 
-Public annotation reads include annotation page/page/annotation search requests.
+## IIIF
 
-### Anonymous search allowed
-
-Anonymous search may be allowed for:
+Public IIIF Presentation API v3 routes include:
 
 ```text
-records
-groups
-users
+/api/<database>/iiif/manifest/<identifier>
+/api/<database>/iiif/canvas/<identifier>
+/api/<database>/iiif/page/<identifier>
+/api/<database>/iiif/annotation/<identifier>
+/api/<database>/iiif/annotations/<identifier>
 ```
 
-Other protected routes require authentication.
+Successful output is direct IIIF JSON and is not wrapped in a Heurist response envelope.
 
-## Records API behavior
+## Annotation reads
 
-For:
+Public annotation reads include:
 
 ```text
-/api/<db>/records
+/api/<database>/annotations/pages?uri=<canvas-url>
+/api/<database>/annotations/<annotationId>
+/api/<database>/annotations/<manifestRecordId>/pages?uri=<canvas-url>
+/api/<database>/annotations/<manifestRecordId>/<annotationId>
 ```
 
-`GET` maps to record search/output and internally includes:
+## Errors and empty results
 
-```text
-record_output.php
-```
+API item lookups return HTTP 404 using `System::errorExitApi()` when the semantic item is not found. Collection searches with no matches return HTTP 200 with an empty collection.
 
-Other REST write methods for `records` currently return “Method Not Implemented”.
+Normal non-API `entityScrud` clients keep their existing response behavior.
 
-## IIIF API behavior
+## Test collection
 
-For:
-
-```text
-/api/<db>/iiif/<resource>/<id>
-```
-
-GET requests set IIIF request parameters and internally include:
-
-```text
-iiif_presentation.php
-```
-
-The API sets `restapi=1` so that controllers return API-appropriate responses and HTTP status codes.
-
-## Error responses
-
-API errors are returned as JSON with HTTP status codes.
-
-Typical examples include:
-
-| Condition | HTTP status |
-|---|---|
-| API route not found | `400` |
-| Method not allowed | `405` |
-| Unauthorized | `401` |
-| Method not implemented | `405` |
-
-When Bearer authentication fails, the API uses a `WWW-Authenticate` header describing the error.
-
+`HeuristPostmanCollectionV1.json` is the executable beta test suite. It covers routing, public access, session and JWT authentication, the modern definition response envelope, semantic record-structure routes, and negative authentication cases.
