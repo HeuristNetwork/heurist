@@ -155,73 +155,152 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     },
 
     /**
-     * @brief If this database is registered and the Heurist Reference Index metadata has been
-     * synced locally (DBMetadata.xml, via the nightly admin/utilities/downloadDBMetadata.php cron),
-     * replaces the editable Display name / Rights / Owner / Description fields with a read-only,
-     * human-readable listing of that synced metadata, plus a link to edit it on the Reference Index
-     * and a note that local changes take a day to appear.
-     * Falls back to the normal editable fields if not registered or not yet synced.
+     * @brief Handles the three display states for Design > Properties when a database is registered,
+     * per Ian Johnson's revised spec (July 2026):
+     *
+     *  State 1 — not registered: form unchanged, all fields editable.
+     *
+     *  State 2 — registered, no local DBMetadata.xml yet (between registration and first nightly
+     *            cron run, OR for pre-existing databases):
+     *            • Disable the four metadata fields (show them read-only without help text)
+     *            • Fetch metadata LIVE from the Reference Index and display it in a formatted panel
+     *              above the disabled fields, with missing fields shown in red
+     *            • DO NOT store the result locally
+     *
+     *  State 3 — registered AND local DBMetadata.xml exists (nightly sync has run):
+     *            • Hide the original metadata fields entirely
+     *            • Display the synced XML data with edit link + "changes appear next day" note
+     *
      * @memberof heurist.manageSysIdentification
      */
     _setupRegisteredMetadata: function(){
 
         const regID = window.hWin.HAPI4.sysinfo['db_registeredid'];
         if(!window.hWin.HEURIST4.util.isPositiveInt(regID)){
-            return; // not registered - editable fields (sys_dbName/Rights/Owner/Description) stand as-is
+            return; // State 1 — not registered, leave form as-is
         }
 
+        const METADATA_FIELDS = ['sys_dbName', 'sys_dbRights', 'sys_dbOwner', 'sys_dbDescription'];
         let that = this;
 
         window.hWin.HAPI4.callserver('usr_info', {a: 'get_db_metadata'}, function(response){
 
-            if(!response || !response.exists || !window.hWin.HEURIST4.util.isArrayNotEmpty(response.fields)){
-                return; // not yet synced (first sync happens the night after registration) - leave editable fields
+            if(!response || response.status !== window.hWin.ResponseStatus.OK){
+                return;
             }
 
-            const fieldsToReplace = ['sys_dbName', 'sys_dbRights', 'sys_dbOwner', 'sys_dbDescription'];
-            let $anchor = null;
-
-            fieldsToReplace.forEach(function(fname){
-                let $fld = that._editing.getFieldByName(fname);
-                if($fld && $fld.length>0){
-                    if(!$anchor){ $anchor = $fld.closest('tr, .detailfield'); }
-                    $fld.closest('tr, .detailfield').hide();
-                }
-            });
+            const data = response.data;
+            if(!data){
+                return;
+            }
 
             const editURL = window.hWin.HAPI4.sysinfo['referenceServerURL']
-                +'?fmt=edit&recID='+regID
-                +'&db='+window.hWin.HAPI4.sysinfo.referenceServerIndexDatabase;
+                + '?fmt=edit&recID=' + regID
+                + '&db=' + window.hWin.HAPI4.sysinfo['referenceServerIndexDatabase'];
 
-            let html = '<div class="synced-metadata" style="padding:0.5em 1em;border:1px solid #ddd;border-radius:4px;margin:0.5em 0;">'
-                + '<div style="font-weight:bold;margin-bottom:0.5em;">'
-                + window.hWin.HR('Registered database metadata (Heurist Reference Index)') + '</div>';
+            if(data.has_local_xml){
+                // ── State 3 — local DBMetadata.xml present ──────────────────────────
+                // Hide original fields, show simple synced-data panel
 
-            response.fields.forEach(function(f){
-                html += '<div style="margin-bottom:0.4em;"><span style="font-weight:bold;">'
-                    + window.hWin.HEURIST4.util.htmlEscape(f.label) + ':</span> '
-                    + window.hWin.HEURIST4.util.htmlEscape(f.value) + '</div>';
-            });
+                METADATA_FIELDS.forEach(function(fname){
+                    let $fld = that._editing.getFieldByName(fname);
+                    if($fld && $fld.length > 0){ $fld.hide(); }
+                });
 
-            html += '<div style="margin-top:0.5em;">'
-                + '<a class="dbLink" target="_blank" href="' + editURL + '">'
-                + window.hWin.HR('Edit this metadata on the Heurist Reference Index') + '</a></div>';
+                let html = '<div class="synced-metadata-state3" style="'
+                    + 'padding:0.8em 1em;border:1px solid #b8d4ea;border-radius:4px;'
+                    + 'background:#f0f7ff;margin:0 0 1em 0;">'
+                    + '<div style="font-weight:bold;color:#1a4a7a;margin-bottom:0.6em;">'
+                    + window.hWin.HR('Database metadata — from Heurist Reference Index') + '</div>';
 
-            html += '<div style="margin-top:0.3em;font-style:italic;color:#777;">'
-                + window.hWin.HR('Changes made in the Heurist reference index will appear here the next day')
-                + '</div>';
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty(data.fields)){
+                    data.fields.forEach(function(f){
+                        html += '<div style="margin-bottom:0.4em;">'
+                            + '<span style="font-weight:600;color:#4a6a88;">'
+                            + window.hWin.HEURIST4.util.htmlEscape(f.label) + ':</span> '
+                            + window.hWin.HEURIST4.util.htmlEscape(f.value) + '</div>';
+                    });
+                }
 
-            if(response.modified){
-                html += '<div style="margin-top:0.3em;font-size:0.85em;color:#999;">'
-                    + window.hWin.HR('Last synced') + ': ' + response.modified + '</div>';
-            }
+                html += '<div style="margin-top:0.8em;padding-top:0.6em;border-top:1px solid #c8daea;">'
+                    + '<a class="dbLink" target="_blank" href="' + editURL + '" style="font-weight:600;">'
+                    + window.hWin.HR('Edit this metadata on the Heurist Reference Index') + '</a>'
+                    + '<div style="margin-top:0.3em;font-style:italic;color:#7a96aa;font-size:0.9em;">'
+                    + window.hWin.HR('Changes made in the Heurist Reference Index will appear here the next day')
+                    + '</div>';
 
-            html += '</div>';
+                if(data.modified){
+                    html += '<div style="margin-top:0.2em;font-size:0.82em;color:#9aaabb;">'
+                        + window.hWin.HR('Last synced') + ': ' + data.modified + '</div>';
+                }
 
-            if($anchor && $anchor.length>0){
-                $(html).insertBefore($anchor.first());
-            }else{
-                that.editForm.prepend(html);
+                html += '</div></div>';
+
+                // Insert before the first metadata field row
+                let $first = that._editing.getFieldByName('sys_dbName');
+                if($first && $first.length > 0){
+                    $(html).insertBefore($first);
+                } else {
+                    that.editForm.prepend(html);
+                }
+
+            } else {
+                // ── State 2 — registered, no local XML yet ───────────────────────────
+                // Disable fields (read-only), show live Reference Index data above them
+                // (with missing fields in red to encourage completion)
+
+                METADATA_FIELDS.forEach(function(fname){
+                    let $fld = that._editing.getFieldByName(fname);
+                    if($fld && $fld.length > 0){
+                        // disable but keep visible; hide help text to reduce clutter
+                        $fld.find('input,textarea,select').prop('disabled', true);
+                        $fld.find('.heurist-helper2,.heurist-helper3').hide();
+                    }
+                });
+
+                const allLabels = data.all_labels || ['Display name', 'Description', 'Rights statement'];
+                const foundLabels = (data.fields || []).map(function(f){ return f.label; });
+
+                let html = '<div class="synced-metadata-state2" style="'
+                    + 'padding:0.8em 1em;border:1px solid #d0dcea;border-radius:4px;'
+                    + 'background:#f8fafc;margin:0 0 0.8em 0;">'
+                    + '<div style="font-weight:bold;color:#1a4a7a;margin-bottom:0.3em;">'
+                    + window.hWin.HR('Current metadata on the Heurist Reference Index') + '</div>'
+                    + '<div style="font-size:0.85em;color:#6a849a;margin-bottom:0.6em;font-style:italic;">'
+                    + window.hWin.HR('Fields above are non-editable. Edit directly on the Reference Index.') + '</div>';
+
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty(data.fields)){
+                    data.fields.forEach(function(f){
+                        html += '<div style="margin-bottom:0.35em;">'
+                            + '<span style="font-weight:600;color:#4a6a88;">'
+                            + window.hWin.HEURIST4.util.htmlEscape(f.label) + ':</span> '
+                            + window.hWin.HEURIST4.util.htmlEscape(f.value) + '</div>';
+                    });
+                }
+
+                // Show missing fields in red
+                allLabels.forEach(function(label){
+                    if(foundLabels.indexOf(label) === -1){
+                        html += '<div style="margin-bottom:0.35em;color:#c62828;">'
+                            + '<span style="font-weight:600;">'
+                            + window.hWin.HEURIST4.util.htmlEscape(label) + ':</span> '
+                            + '<em>' + window.hWin.HR('Not yet provided') + '</em></div>';
+                    }
+                });
+
+                html += '<div style="margin-top:0.7em;padding-top:0.5em;border-top:1px solid #dde4ee;">'
+                    + '<a class="dbLink" target="_blank" href="' + editURL + '" style="font-weight:600;">'
+                    + window.hWin.HR('Edit this metadata on the Heurist Reference Index') + '</a>'
+                    + '<div style="margin-top:0.3em;font-style:italic;color:#7a96aa;font-size:0.9em;">'
+                    + window.hWin.HR('Changes will appear here the next day once the nightly sync has run')
+                    + '</div></div></div>';
+
+                let $first = that._editing.getFieldByName('sys_dbName');
+                if($first && $first.length > 0){
+                    $(html).insertBefore($first);
+                } else {
+                    that.editForm.prepend(html);
+                }
             }
         });
     },
