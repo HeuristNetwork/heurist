@@ -178,7 +178,7 @@
     }
 
 
-    if(@$req_params['restapi']==1){
+    if(intval(@$req_params['restapi'])>0){
 
         if( is_bool($res) && !$res ){
 
@@ -188,18 +188,17 @@
             header(HEADER_CORS_POLICY);
             header(CTYPE_JSON);
 
-            $req = array();
-
-            if(@$req['a'] == 'search' && empty($res)){
-                $code = 404;
-            }elseif (@$req['a'] == 'save'){
-                $code = 201;
-            }else{
-                $code = 200;
+            if(intval(@$req_params['restapi'])===2 && isset($apiResponseContext)){
+                $res = prepareDefinitionApiResponse($res, $req_params, $apiResponseContext);
+                if($res===null){
+                    outputDefinitionApiError(404, 'not_found', 'Definition not found');
+                }
             }
+
+            $code = (@$req_params['a'] == 'save') ? 201 : 200;
             http_response_code($code);
 
-            print json_encode($res);
+            print json_encode($res, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
     }else{
         header(CTYPE_JSON);
@@ -268,6 +267,127 @@
         }
 
 
+    }
+
+    /**
+     * Converts the normal DbEntitySearch result into the public definition API format.
+     * This is used only for restapi=2 requests prepared by api.php.
+     *
+     * @param array $result Normal DbEntitySearch response.
+     * @param array $params Sanitized request parameters.
+     * @param array $context API route context prepared by api.php.
+     * @return array|null Collection envelope, single item, or null when an item is not found.
+     */
+    function prepareDefinitionApiResponse($result, $params, $context){
+
+        $items = definitionApiItems($result);
+        $mode = @$context['mode'] === 'item' ? 'item' : 'collection';
+
+        if($mode === 'item'){
+            return count($items)>0 ? reset($items) : null;
+        }
+
+        $offset = max(0, intval(@$params['offset']));
+        $limit = intval(@$params['limit']);
+        if($limit<1){
+            $limit = 1000;
+        }
+
+        $total = isset($result['count']) ? intval($result['count']) : count($items);
+
+        $meta = array(
+            'database' => @$params['db'],
+            'entity' => @$context['entity']
+        );
+        if(isset($context['recordTypeId'])){
+            $meta['recordTypeId'] = intval($context['recordTypeId']);
+        }
+
+        $pagination = array(
+            'total' => $total,
+            'offset' => $offset,
+            'limit' => $limit,
+            'self' => definitionApiPageUrl($offset, $limit),
+            'next' => null
+        );
+
+        $nextOffset = $offset + count($items);
+        if(count($items)>0 && $nextOffset < $total){
+            $pagination['next'] = definitionApiPageUrl($nextOffset, $limit);
+        }
+
+        return array(
+            'items' => array_values($items),
+            'meta' => $meta,
+            'pagination' => $pagination
+        );
+    }
+
+    /** Convert DbEntitySearch rows to API items while preserving the selected fields. */
+    function definitionApiItems($result){
+
+        if(!is_array($result) || !isset($result['records']) || !is_array($result['records'])){
+            return array();
+        }
+
+        // details=id produces a list of integer IDs and has no fields array.
+        if(!isset($result['fields']) || !is_array($result['fields'])){
+            return array_values($result['records']);
+        }
+
+        $fields = $result['fields'];
+        $records = $result['records'];
+        $items = array();
+
+        $orderedKeys = array();
+        if(isset($result['order']) && is_array($result['order'])){
+            $orderedKeys = $result['order'];
+        }else{
+            $orderedKeys = array_keys($records);
+        }
+
+        foreach($orderedKeys as $key){
+            if(!array_key_exists($key, $records)){
+                continue;
+            }
+            $row = $records[$key];
+            $item = array();
+            foreach($fields as $idx=>$field){
+                $item[$field] = array_key_exists($idx, $row) ? $row[$idx] : null;
+            }
+            $items[] = $item;
+        }
+
+        return $items;
+    }
+
+    /** Build an absolute paging URL, preserving all query parameters. */
+    function definitionApiPageUrl($offset, $limit){
+
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        $path = parse_url($requestUri, PHP_URL_PATH) ?: '';
+        $query = array();
+        $queryString = parse_url($requestUri, PHP_URL_QUERY);
+        if($queryString){
+            parse_str($queryString, $query);
+        }
+        $query['offset'] = intval($offset);
+        $query['limit'] = intval($limit);
+
+        $hostParams = USystem::getHostParams();
+        $base = rtrim($hostParams['server_url'], '/');
+        return $base.$path.'?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /** Output an API-specific error without changing normal entityScrud responses. */
+    function outputDefinitionApiError($status, $error, $message){
+        http_response_code(intval($status));
+        print json_encode(array(
+            'status' => intval($status),
+            'error' => $error,
+            'message' => $message
+        ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     /**

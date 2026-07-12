@@ -641,7 +641,7 @@ class DbEntitySearch
      * - If `$is_ids_only` is true: Returns an array of record IDs.
      * - Otherwise: Returns a structured array including field names, record data (potentially with
      *   calculated fields and multi-language translations), total count, offset, etc.
-     * - Supports a `restapi` format for simpler output.
+     * - Supports the legacy `restapi=1` simplified output. `restapi=2` retains the full internal result for API controller formatting.
      *
      * @param string $query The SQL query to execute.
      * @param bool $is_ids_only If true, only primary key IDs are fetched and returned.

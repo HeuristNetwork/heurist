@@ -107,6 +107,7 @@ $entities = array(
 'dty'=>'DefDetailTypes',
 'trm'=>'DefTerms',
 'rst'=>'DefRecStructure',
+'recstructure'=>'DefRecStructure',
 'rem'=>'UsrReminders',
 'swf'=>'SysWorkflowRules',
 'tag'=>'UsrTags',
@@ -380,9 +381,57 @@ if (@$requestUri[3]=='iiif') {
 else
 {
     //action
-    $req_params['entity'] = @$entities[@$requestUri[3]];
+    $requestedResource = @$requestUri[3];
+    $req_params['entity'] = @$entities[$requestedResource];
     $req_params['a'] = $method;
     $req_params['restapi'] = 1; //set http response code
+
+    // Modern public response format is initially limited to the four
+    // definition resources. restapi=2 tells DbEntitySearch to retain its
+    // full internal result so entityScrud.php can prepare the API response.
+    $definitionResources = array(
+        'rty' => 'rectypes',
+        'rectypes' => 'rectypes',
+        'dty' => 'fields',
+        'fields' => 'fields',
+        'trm' => 'terms',
+        'terms' => 'terms',
+        'rst' => 'recstructure',
+        'recstructure' => 'recstructure'
+    );
+
+    if($method === 'search' && isset($definitionResources[$requestedResource])){
+        $req_params['restapi'] = 2;
+        $apiResponseContext = array(
+            'mode' => 'collection',
+            'entity' => $definitionResources[$requestedResource]
+        );
+
+        if($apiResponseContext['entity'] === 'recstructure'){
+            // /recstructure/{recordTypeId} returns all fields for a record type.
+            // /recstructure/{recordTypeId}/{detailTypeId} returns one field.
+            if(isset($requestUri[4]) && $requestUri[4] !== ''){
+                $req_params['rst_RecTypeID'] = $requestUri[4];
+                $apiResponseContext['recordTypeId'] = intval($requestUri[4]);
+            }
+            if(isset($requestUri[5]) && $requestUri[5] !== ''){
+                $req_params['rst_DetailTypeID'] = $requestUri[5];
+                $apiResponseContext['detailTypeId'] = intval($requestUri[5]);
+                $apiResponseContext['mode'] = 'item';
+            }
+            if(!isset($req_params['details'])){
+                $req_params['details'] = 'structure';
+            }
+        }elseif(isset($requestUri[4]) && $requestUri[4] !== ''){
+            $primaryFields = array(
+                'rectypes' => 'rty_ID',
+                'fields' => 'dty_ID',
+                'terms' => 'trm_ID'
+            );
+            $req_params[$primaryFields[$apiResponseContext['entity']]] = $requestUri[4];
+            $apiResponseContext['mode'] = 'item';
+        }
+    }
 
     if(@$requestUri[3]=='annotations'){
         // Supported annotation API paths:
@@ -420,7 +469,7 @@ else
                 $req_params['fields']['source'] = 'mirador';
             }
         }
-    }elseif(@$requestUri[4]!=null){
+    }elseif(@$requestUri[4]!=null && !isset($definitionResources[$requestedResource])){
       $req_params['recID'] = $requestUri[4];
     }
 
