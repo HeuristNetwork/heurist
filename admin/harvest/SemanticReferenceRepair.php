@@ -27,9 +27,9 @@ final class SemanticReferenceRepair
         $updated = 0;
 
         foreach ($databaseRefs as $dbRef) {
-            $rtyRows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], 'rty', [], 0);
-            $dtyRows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], 'dty', [], 0);
-            $trmRows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], 'trm', [], 0);
+            $rtyRows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], 'rty', []);
+            $dtyRows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], 'dty', []);
+            $trmRows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], 'trm', []);
 
             $localRtyOrigins = $this->buildLocalOriginMap('RTY', $rtyRows, $dbRef['registeredId']);
             $localTrmOrigins = $this->buildLocalOriginMap('TRM', $trmRows, $dbRef['registeredId']);
@@ -97,7 +97,7 @@ final class SemanticReferenceRepair
         $unresolvedInverses = 0;
 
         foreach ($databaseRefs as $dbRef) {
-            $rows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], 'trm', [], 0);
+            $rows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], 'trm', []);
             $localTrmOrigins = $this->buildLocalOriginMap('TRM', $rows, $dbRef['registeredId']);
 
             foreach ($rows as $row) {

@@ -72,35 +72,34 @@ final class ApiClient
         return $this->extractRecords($json);
     }
 
-    public function fetchRows(string $server, string $dbName, string $entity, array $filters, int $totalCount): array
+    public function fetchRows(string $server, string $dbName, string $entity, array $filters): array
     {
+        // The modern definition API returns a collection envelope:
+        // {items: [], meta: {...}, pagination: {total, offset, limit, self, next}}.
+        // Follow pagination.next instead of issuing a separate count request or
+        // calculating subsequent offsets in the harvester.
+        $params = array_merge(['details' => 'raw', 'limit' => API_LIMIT, 'offset' => 0], $filters);
+        $url = $this->buildUrl($server, $dbName, $entity, $params);
+
         $all = [];
-        $offset = 0;
+        $visitedUrls = [];
 
-        if ($totalCount === 0) {
-            $countParams = array_merge(['details' => 'id', 'limit' => 1, 'offset' => 0], $filters);
-            $countUrl = $this->buildUrl($server, $dbName, $entity, $countParams);
-            $countJson = $this->getJson($countUrl, $server);
-            $totalCount = $this->extractTotalCount($countJson);
-        }
+        while ($url !== null) {
+            if (isset($visitedUrls[$url])) {
+                throw new RuntimeException("Definition API pagination loop detected for {$url}");
+            }
+            $visitedUrls[$url] = true;
 
-        while ($offset < $totalCount) {
-            $params = array_merge(['details' => 'raw', 'limit' => API_LIMIT, 'offset' => $offset], $filters);
-            $url = $this->buildUrl($server, $dbName, $entity, $params);
             $json = $this->getJson($url, $server);
-            $records = $this->extractRecords($json);
-            $reccount = $this->extractReccount($json, count($records));
+            $items = $this->extractDefinitionItems($json, $url);
 
-            foreach ($records as $record) {
-                if (is_array($record)) {
-                    $all[] = $record;
+            foreach ($items as $item) {
+                if (is_array($item)) {
+                    $all[] = $item;
                 }
             }
 
-            if ($reccount <= 0) {
-                break;
-            }
-            $offset += $reccount;
+            $url = $this->extractNextPageUrl($json, $url);
         }
 
         return $all;
@@ -217,24 +216,37 @@ final class ApiClient
         return [];
     }
 
-    private function extractTotalCount(array $json): int
+    private function extractDefinitionItems(array $json, string $url): array
     {
-        if (array_key_exists('count', $json)) {
-            return (int)$json['count'];
+        if (!array_key_exists('items', $json) || !is_array($json['items'])) {
+            throw new RuntimeException("Definition API response from {$url} does not contain an items array");
         }
-        if (array_key_exists('reccount', $json)) {
-            return (int)$json['reccount'];
+        if (!array_key_exists('pagination', $json) || !is_array($json['pagination'])) {
+            throw new RuntimeException("Definition API response from {$url} does not contain pagination metadata");
         }
-        $records = $this->extractRecords($json);
-        return count($records);
+
+        return $json['items'];
     }
 
-    private function extractReccount(array $json, int $fallback): int
+    private function extractNextPageUrl(array $json, string $url): ?string
     {
-        if (array_key_exists('reccount', $json)) {
-            return (int)$json['reccount'];
+        $pagination = $json['pagination'];
+
+        foreach (['total', 'offset', 'limit', 'self', 'next'] as $key) {
+            if (!array_key_exists($key, $pagination)) {
+                throw new RuntimeException("Definition API pagination from {$url} is missing {$key}");
+            }
         }
-        return $fallback;
+
+        $next = $pagination['next'];
+        if ($next === null || $next === '') {
+            return null;
+        }
+        if (!is_string($next) || !preg_match('~^https?://~i', $next)) {
+            throw new RuntimeException("Definition API pagination.next from {$url} is not an absolute URL");
+        }
+
+        return $next;
     }
 
 }
