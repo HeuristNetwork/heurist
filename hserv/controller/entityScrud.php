@@ -191,7 +191,7 @@
             if(intval(@$req_params['restapi'])===2 && isset($apiResponseContext)){
                 $res = prepareDefinitionApiResponse($res, $req_params, $apiResponseContext);
                 if($res===null){
-                    outputDefinitionApiError(404, 'not_found', 'Definition not found');
+                    $system->errorExitApi('Definition not found', HEURIST_NOT_FOUND);
                 }
             }
 
@@ -379,16 +379,6 @@
         return $base.$path.'?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }
 
-    /** Output an API-specific error without changing normal entityScrud responses. */
-    function outputDefinitionApiError($status, $error, $message){
-        http_response_code(intval($status));
-        print json_encode(array(
-            'status' => intval($status),
-            'error' => $error,
-            'message' => $message
-        ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        exit;
-    }
 
     /**
      * Finds invalid UTF-8 strings in a recursive array walk.
