@@ -132,14 +132,41 @@
         $params['format'] = 'json';
     }
 
+    $is_records_api = isset($apiResponseContext)
+        && is_array($apiResponseContext)
+        && @$apiResponseContext['entity'] === 'records';
+    $is_api_ids_response = false;
 
+    if($is_records_api){
+        $params['limit'] = isset($params['limit']) ? intval($params['limit']) : 1000;
+        if($params['limit'] < 1 || $params['limit'] > 1000){
+            $params['limit'] = 1000;
+        }
+        $params['offset'] = isset($params['offset']) ? max(0, intval($params['offset'])) : 0;
+
+        $is_api_ids_response = (@$params['detail'] === 'ids');
+        $api_field_selection = recordsApiParseFields($system, $params, $is_api_ids_response);
+        $params['_api_records'] = array(
+            'mode' => @$apiResponseContext['mode'] === 'item' ? 'item' : 'collection',
+            'database' => $system->dbname(),
+            'headers' => $api_field_selection['headers'],
+            'details' => $api_field_selection['details'],
+            'fields_explicit' => $api_field_selection['explicit'],
+            'ids_only' => $is_api_ids_response
+        );
+    }
 
     $search_params = array();
     $search_params['w'] = filter_var(@$params['w'], FILTER_SANITIZE_STRING);
 
+    if($is_records_api){
+        $search_params['limit'] = $params['limit'];
+        $search_params['offset'] = $params['offset'];
+    }
+
     if(@$params['format']=='gephi' || @$params['format']=='geojson'){
         $search_params['limit'] = (@$params['limit']>0)?intval($params['limit']):null;
-    }elseif(!(@$params['offset'] || @$params['limit'])){
+    }elseif(!$is_records_api && !(@$params['offset'] || @$params['limit'])){
         $search_params['needall'] = 1;  //search without limit of returned record count
     }
 
@@ -246,6 +273,51 @@
         $response = recordSearch($system, $search_params);//search ids
     }
 
+    if($is_records_api){
+        if(!is_array($response) || @$response['status'] !== HEURIST_OK){
+            $system->errorExitApi();
+        }
+
+        $search_data = is_array(@$response['data']) ? $response['data'] : array();
+        $total = intval(@$search_data['count']);
+        $offset = intval(@$search_data['offset']);
+        $returned = intval(@$search_data['reccount']);
+        $limit = intval($params['limit']);
+
+        if($params['_api_records']['mode'] === 'item'){
+            $params['_api_records']['self'] = recordsApiSelfLink();
+        }else{
+            list($self_url, $next_url) = recordsApiPaginationLinks($offset, $limit, $returned, $total);
+            $params['_api_records']['pagination'] = array(
+                'total' => $total,
+                'offset' => $offset,
+                'limit' => $limit,
+                'self' => $self_url,
+                'next' => $next_url
+            );
+        }
+
+        if($is_api_ids_response){
+            $ids = array_values(is_array(@$search_data['records']) ? $search_data['records'] : array());
+            $payload = array(
+                'records' => $ids,
+                'meta' => array(
+                    'database' => $system->dbname(),
+                    'entity' => 'records',
+                    'self' => $params['_api_records']['self'] ?? null,
+                    'fields' => array('headers' => array(), 'details' => array())
+                )
+            );
+            if($params['_api_records']['mode'] !== 'item'){
+                unset($payload['meta']['self']);
+                $payload['pagination'] = $params['_api_records']['pagination'];
+            }
+            dataOutput($payload);
+            $system->dbclose();
+            exit;
+        }
+    }
+
     $system->defineConstant('DT_PARENT_ENTITY');
     $system->defineConstant('DT_START_DATE');
     $system->defineConstant('DT_END_DATE');
@@ -302,6 +374,130 @@
 
     $system->dbclose();
 
+
+/**
+ * Parse the public records API fields parameter.
+ * detail=ids has precedence and disables fields.
+ */
+function recordsApiParseFields($system, array $params, bool $idsOnly): array
+{
+    if($idsOnly){
+        return array('headers' => array(), 'details' => array(), 'explicit' => false);
+    }
+
+    $allowedHeaders = array(
+        'rec_ID', 'rec_RecTypeID', 'rec_Title', 'rec_URL', 'rec_ScratchPad',
+        'rec_OwnerUGrpID', 'rec_NonOwnerVisibility', 'rec_URLLastVerified',
+        'rec_URLErrorMessage', 'rec_Added', 'rec_Modified',
+        'rec_AddedByUGrpID', 'rec_Hash', 'rec_FlagTemporary'
+    );
+
+    if(!array_key_exists('fields', $params) || $params['fields'] === null || $params['fields'] === ''){
+        return array(
+            'headers' => array('rec_ID', 'rec_RecTypeID', 'rec_Title'),
+            'details' => true,
+            'explicit' => false
+        );
+    }
+
+    $fields = is_array($params['fields']) ? $params['fields'] : explode(',', (string)$params['fields']);
+    $headers = array();
+    $details = array();
+
+    foreach($fields as $field){
+        $field = trim((string)$field);
+        if($field === ''){
+            continue;
+        }
+        if(ctype_digit($field) && intval($field) > 0){
+            $details[] = intval($field);
+        }elseif(in_array($field, $allowedHeaders, true)){
+            $headers[] = $field;
+        }else{
+            $system->errorExitApi('Invalid records field: '.$field, HEURIST_INVALID_REQUEST, true, 400);
+        }
+    }
+
+    // Normal object responses always include the two identity headers.
+    // rec_Title remains a default only when fields is omitted.
+    $headers = array_values(array_unique(array_merge(
+        array('rec_ID', 'rec_RecTypeID'),
+        $headers
+    )));
+    $details = array_values(array_unique($details));
+
+    if(!empty($details)){
+        $found = array();
+        $res = $system->getMysqli()->query(
+            'SELECT dty_ID FROM defDetailTypes WHERE dty_ID IN ('.implode(',', $details).')'
+        );
+        if($res){
+            while($row = $res->fetch_row()){
+                $found[] = intval($row[0]);
+            }
+            $res->close();
+        }
+        $missing = array_values(array_diff($details, $found));
+        if(!empty($missing)){
+            $system->errorExitApi(
+                'Unknown detail field ID: '.implode(',', $missing),
+                HEURIST_INVALID_REQUEST,
+                true,
+                400
+            );
+        }
+    }
+
+    return array(
+        'headers' => $headers,
+        'details' => $details,
+        'explicit' => true
+    );
+}
+
+
+/** Build a canonical self link for a non-paginated item request. */
+function recordsApiSelfLink(): string
+{
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+    $parts = parse_url($requestUri);
+    $path = $parts['path'] ?? $requestUri;
+    $query = array();
+    if(!empty($parts['query'])){
+        parse_str($parts['query'], $query);
+    }
+    unset($query['offset'], $query['limit']);
+    $self = HEURIST_SERVER_URL.$path;
+    if(!empty($query)){
+        $self .= '?'.http_build_query($query);
+    }
+    return $self;
+}
+
+/** Build self and next links while preserving the current API query. */
+function recordsApiPaginationLinks(int $offset, int $limit, int $returned, int $total): array
+{
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+    $parts = parse_url($requestUri);
+    $path = $parts['path'] ?? $requestUri;
+    $query = array();
+    if(!empty($parts['query'])){
+        parse_str($parts['query'], $query);
+    }
+
+    $query['offset'] = $offset;
+    $query['limit'] = $limit;
+    $base = HEURIST_SERVER_URL.$path;
+    $self = $base.'?'.http_build_query($query);
+
+    $next = null;
+    if($returned > 0 && ($offset + $returned) < $total){
+        $query['offset'] = $offset + $returned;
+        $next = $base.'?'.http_build_query($query);
+    }
+
+    return array($self, $next);
+}
 
 /**
  * Writes file references out into CSV format.
