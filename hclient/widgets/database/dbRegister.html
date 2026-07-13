@@ -26,21 +26,21 @@
     </legend>
 
         <div>
-            <div class="header" style="vertical-align:top;min-width:100px">Registration URL:</div>
+            <label for="serverURL" class="header" style="vertical-align:top;min-width:100px;display:inline-block;">Registration URL:</label>
             <input readonly="readonly" style="background-color:lightgray;width: 520px;margin-bottom: 10px;" tabindex="-1" id="serverURL"/>
         </div>
         <div style="margin-bottom:8px;">
-            <div class="header" style="vertical-align:top;min-width:100px">Display name:</div>
+            <label for="dbDisplayName" class="header" style="vertical-align:top;min-width:100px;display:inline-block;">Display name:</label>
             <input type="text" maxlength="63" size="60" id="dbDisplayName" class="text" style="border:1px solid;padding:2px" tabindex="0"/>
             <div class="heurist-helper2">Short display name for this database (from Design &rsaquo; Properties). Sent to the Heurist Reference Index as the database title.</div>
         </div>
         <div style="margin-bottom:8px;">
-            <div class="header" style="vertical-align:top;min-width:100px">Rights statement:</div>
+            <label for="dbRights" class="header" style="vertical-align:top;min-width:100px;display:inline-block;">Rights statement:</label>
             <textarea maxlength="1000" cols="70" rows="2" id="dbRights" class="text" style="border:1px solid;padding:2px" tabindex="0"></textarea>
             <div class="heurist-helper2">Ownership and copyright statement (from Design &rsaquo; Properties). Sent to the Heurist Reference Index.</div>
         </div>
         <div>
-            <div class="header" style="vertical-align:top;min-width:100px">Database Description:</div>
+            <label for="dbTitle" class="header" style="vertical-align:top;min-width:100px;display:inline-block;">Database Description:</label>
             <textarea maxlength="1000" cols="70" rows="3" id="dbTitle" class="text" style="border:1px solid;padding:2px" tabindex="0" autofocus=""></textarea>
             <div class="heurist-helper2">
                 Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)<br>
@@ -48,7 +48,7 @@
             </div>
         </div>
         <div id="div_need_password" style="display:none">
-            <div class="header" style="min-width:100px">Sysadmin bypass:</div>
+            <label for="pwd" class="header" style="min-width:100px;display:inline-block;">Sysadmin bypass:</label>
             <div style="margin-top: 10px;display:inline-block;">
                 <input type="password" maxlength="64" size="25" id="pwd"/>
             </div>
@@ -109,7 +109,7 @@
     
     </fieldset>
     
-    <div class="heurist-helper1" style="margin-top: 15px; margin-bottom: 20px;"\>
+    <div class="heurist-helper1" style="margin-top: 15px; margin-bottom: 20px;">
         <div class="header"><b>Please edit the collection metadata 
                 describing this database:</b></div>
         <div class="text ui-corner-all" style="margin:4px">

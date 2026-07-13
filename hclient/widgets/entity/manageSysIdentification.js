@@ -200,7 +200,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 
             if(data.has_local_xml){
                 // ── State 3 — local DBMetadata.xml present ──────────────────────────
-                // Hide original fields, show simple synced-data panel
+                // Hide original fields, show simple synced-data panel with Refresh button
 
                 METADATA_FIELDS.forEach(function(fname){
                     let $fld = that._editing.getFieldByName(fname);
@@ -225,34 +225,40 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 html += '<div style="margin-top:0.8em;padding-top:0.6em;border-top:1px solid #c8daea;">'
                     + '<a class="dbLink" target="_blank" href="' + editURL + '" style="font-weight:600;">'
                     + window.hWin.HR('Edit this metadata on the Heurist Reference Index') + '</a>'
-                    + '<div style="margin-top:0.3em;font-style:italic;color:#7a96aa;font-size:0.9em;">'
-                    + window.hWin.HR('Changes made in the Heurist Reference Index will appear here the next day')
+                    + '<div style="margin-top:0.5em;">'
+                    + '<button class="btn-sync-metadata" style="font-size:0.85em;padding:3px 12px;'
+                    + 'cursor:pointer;border:1px solid #4a9adb;border-radius:3px;background:#e8f4ff;color:#1a5a9a;">'
+                    + window.hWin.HR('Refresh from Reference Index') + '</button>'
+                    + '<span class="sync-status" style="margin-left:0.6em;font-size:0.82em;color:#7a96aa;"></span>'
                     + '</div>';
 
                 if(data.modified){
-                    html += '<div style="margin-top:0.2em;font-size:0.82em;color:#9aaabb;">'
+                    html += '<div style="margin-top:0.3em;font-size:0.82em;color:#9aaabb;">'
                         + window.hWin.HR('Last synced') + ': ' + data.modified + '</div>';
                 }
 
                 html += '</div></div>';
 
-                // Insert before the first metadata field row
+                let $panel = $(html);
                 let $first = that._editing.getFieldByName('sys_dbName');
                 if($first && $first.length > 0){
-                    $(html).insertBefore($first);
+                    $panel.insertBefore($first);
                 } else {
-                    that.editForm.prepend(html);
+                    that.editForm.prepend($panel);
                 }
+
+                $panel.find('.btn-sync-metadata').on('click', function(){
+                    that._syncMetadata($panel);
+                });
 
             } else {
                 // ── State 2 — registered, no local XML yet ───────────────────────────
-                // Disable fields (read-only), show live Reference Index data above them
-                // (with missing fields in red to encourage completion)
+                // Disable fields, show live Reference Index data above them with missing
+                // fields in red, and a button to save the metadata locally
 
                 METADATA_FIELDS.forEach(function(fname){
                     let $fld = that._editing.getFieldByName(fname);
                     if($fld && $fld.length > 0){
-                        // disable but keep visible; hide help text to reduce clutter
                         $fld.find('input,textarea,select').prop('disabled', true);
                         $fld.find('.heurist-helper2,.heurist-helper3').hide();
                     }
@@ -278,7 +284,6 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                     });
                 }
 
-                // Show missing fields in red
                 allLabels.forEach(function(label){
                     if(foundLabels.indexOf(label) === -1){
                         html += '<div style="margin-bottom:0.35em;color:#c62828;">'
@@ -291,17 +296,77 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 html += '<div style="margin-top:0.7em;padding-top:0.5em;border-top:1px solid #dde4ee;">'
                     + '<a class="dbLink" target="_blank" href="' + editURL + '" style="font-weight:600;">'
                     + window.hWin.HR('Edit this metadata on the Heurist Reference Index') + '</a>'
+                    + '<div style="margin-top:0.5em;">'
+                    + '<button class="btn-sync-metadata" style="font-size:0.85em;padding:3px 12px;'
+                    + 'cursor:pointer;border:1px solid #4a9adb;border-radius:3px;background:#e8f4ff;color:#1a5a9a;">'
+                    + window.hWin.HR('Save metadata locally') + '</button>'
+                    + '<span class="sync-status" style="margin-left:0.6em;font-size:0.82em;color:#7a96aa;"></span>'
+                    + '</div>'
                     + '<div style="margin-top:0.3em;font-style:italic;color:#7a96aa;font-size:0.9em;">'
-                    + window.hWin.HR('Changes will appear here the next day once the nightly sync has run')
+                    + window.hWin.HR('Saving metadata locally stores a copy from the Reference Index on this server')
                     + '</div></div></div>';
 
+                let $panel = $(html);
                 let $first = that._editing.getFieldByName('sys_dbName');
                 if($first && $first.length > 0){
-                    $(html).insertBefore($first);
+                    $panel.insertBefore($first);
                 } else {
-                    that.editForm.prepend(html);
+                    that.editForm.prepend($panel);
                 }
+
+                $panel.find('.btn-sync-metadata').on('click', function(){
+                    that._syncMetadata($panel);
+                });
             }
+        });
+    },
+
+    /**
+     * @brief Called when the user clicks "Save metadata locally" or "Refresh from Reference Index".
+     * Calls usr_info?a=sync_db_metadata on the server, which fetches the current XML from the
+     * Reference Index, validates it, and saves it to DBMetadata.xml. On success the panel is
+     * updated in place without a full page reload.
+     *
+     * @param {jQuery} $panel The metadata panel containing the sync button and status span.
+     * @memberof heurist.manageSysIdentification
+     */
+    _syncMetadata: function($panel){
+
+        let that = this;
+        let $btn = $panel.find('.btn-sync-metadata');
+        let $status = $panel.find('.sync-status');
+
+        $btn.prop('disabled', true).css('opacity', 0.6);
+        $status.text(window.hWin.HR('Fetching from Reference Index…')).css('color', '#7a96aa');
+
+        window.hWin.HAPI4.callserver('usr_info', {a: 'sync_db_metadata'}, function(response){
+
+            if(!response || response.status !== window.hWin.ResponseStatus.OK
+                || !response.data || !response.data.ok){
+                let msg = (response && response.message)
+                    ? response.message : 'Could not reach the Reference Index';
+                $status.text('⚠ ' + msg).css('color', '#c62828');
+                $btn.prop('disabled', false).css('opacity', 1);
+                return;
+            }
+
+            $status.text(window.hWin.HR('Saved. Reloading…')).css('color', '#2e7d32');
+
+            // Re-run setup after a brief pause so State 3 panel renders cleanly
+            setTimeout(function(){
+                $panel.remove();
+
+                // Re-enable and re-show fields before re-running (they'll be hidden in State 3)
+                ['sys_dbName','sys_dbRights','sys_dbOwner','sys_dbDescription'].forEach(function(fname){
+                    let $fld = that._editing.getFieldByName(fname);
+                    if($fld && $fld.length > 0){
+                        $fld.find('input,textarea,select').prop('disabled', false);
+                        $fld.show();
+                    }
+                });
+
+                that._setupRegisteredMetadata();
+            }, 600);
         });
     },
 

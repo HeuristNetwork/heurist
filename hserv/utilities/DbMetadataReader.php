@@ -114,6 +114,70 @@ class DbMetadataReader {
         return $base;
     }
 
+    /**
+     * User-triggered sync: fetches metadata from the Heurist Reference Index, validates it,
+     * and saves it to DBMetadata.xml in the database's settings directory.
+     * Called by the usr_info?a=sync_db_metadata controller action when the user clicks
+     * "Save metadata locally" or "Refresh from Reference Index" in Design > Properties.
+     *
+     * @param int    $regID        The sysIdentification.sys_dbRegisteredID value.
+     * @param string $filestore_dir The database's filestore root directory.
+     * @return array{ok:bool, fields:array, modified:string}|array{ok:bool, error:string}
+     */
+    public static function syncToLocal($regID, $filestore_dir){
+
+        if(!isPositiveInt($regID)){
+            return ['ok' => false, 'error' => 'Invalid registration ID'];
+        }
+
+        $url = rtrim(HEURIST_INDEX_BASE_URL, '/')
+            . '/export/xml/flathml.php?w=a&db=' . HEURIST_INDEX_DATABASE . '&q=ids:' . intval($regID);
+
+        $xml_data = loadRemoteURLContentWithRange($url, null, true, 15);
+
+        if(empty($xml_data)){
+            global $glb_curl_error;
+            return ['ok' => false,
+                'error' => 'Could not reach the Heurist Reference Index. '
+                    . ($glb_curl_error ? 'Transport error: ' . $glb_curl_error : 'No data returned.')];
+        }
+
+        // Validate XML before writing anything to disk
+        libxml_use_internal_errors(true);
+        $parsed = simplexml_load_string($xml_data);
+        $xml_errors = libxml_get_errors();
+        libxml_clear_errors();
+
+        if($parsed === false){
+            $detail = '';
+            foreach($xml_errors as $e){ $detail .= trim($e->message) . ' (line ' . $e->line . ') '; }
+            return ['ok' => false,
+                'error' => 'The Reference Index returned invalid XML and has not been saved. ' . trim($detail)];
+        }
+
+        // Write to disk
+        $settings_dir = rtrim($filestore_dir, '/') . '/settings/';
+        if(!folderCreate($settings_dir, true)){
+            return ['ok' => false, 'error' => 'Could not create or write to the settings folder: ' . $settings_dir];
+        }
+
+        $target = $settings_dir . 'DBMetadata.xml';
+        if(fileSave($xml_data, $target) <= 0){
+            return ['ok' => false, 'error' => 'Downloaded XML was valid but could not be written to: ' . $target];
+        }
+
+        // Return parsed fields so the UI can update immediately without a second round-trip
+        $fields = self::parseXmlString($xml_data);
+        return [
+            'ok'          => true,
+            'has_local_xml' => true,
+            'exists'      => true,
+            'fields'      => $fields,
+            'all_labels'  => self::ALL_LABELS,
+            'modified'    => date(DATE_8601)
+        ];
+    }
+
     // ─── parsing ───────────────────────────────────────────────────────────────
 
     /**

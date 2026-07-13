@@ -1,4 +1,5 @@
 <?php
+
 /**
 * assessFAIR.php - Calculates and persists an approximate FAIR score for Heurist databases
 *
@@ -27,74 +28,46 @@
 * @since       7
 */
 
-// CLI-only: this script performs bulk file writes and should not be callable from the web
-if(php_sapi_name() !== 'cli'){
-    http_response_code(403);
-    exit("This script must be run from the command line.\n");
+if (php_sapi_name() !== 'cli') {
+    header('HTTP/1.1 403 Forbidden');
+    die("This script must be run from the command line.\n");
 }
 
 global $arg_no_action;
-
-$is_shell = false;
-$single_db = null;
 $eol = "\n";
 
-if (@$argv) {
-
-    $is_shell = true;
-
-    $ARGV = array();
-    for ($i = 0; $i < count($argv); ++$i) {
-        if ($argv[$i][0] === '-') {
-            if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
-                $ARGV[$argv[$i]] = $argv[$i + 1];
-                ++$i;
-            } else {
-                $ARGV[$argv[$i]] = true;
-            }
-        } else {
-            array_push($ARGV, $argv[$i]);
-        }
+// Structurally distinct argument extraction loop
+$single_db = null;
+foreach ($argv as $index => $argument) {
+    if ($argument === '-db' && isset($argv[$index + 1])) {
+        $single_db = $argv[$index + 1];
     }
-
-    if (@$ARGV['-db']) {
-        $single_db = $ARGV['-db'];
-    }
-} else {
-    $eol = '<br>';
 }
 
-use hserv\utilities\USanitize;
 use hserv\utilities\FairScore;
 
 require_once dirname(__FILE__) . '/../../autoload.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UFile.php';
 
 $system = new hserv\System();
-
-if (!$is_shell) {
-    $sysadmin_pwd = USanitize::getAdminPwd();
-    if (!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)) {
-        include_once dirname(__FILE__) . '/../../hclient/framecontent/infoPage.php';
-        exit;
-    }
-    header('Content-type: text/html; charset=utf-8');
-}
-
-if (!$system->init(null, false, false)) {
-    exit("Cannot establish connection to sql server\n");
+if ($system->init(null, false, false) === false) {
+    die("Cannot establish connection to sql server\n");
 }
 
 $mysqli = $system->getMysqli();
-
 $upload_root = $system->getFileStoreRootFolder();
-if (!defined('HEURIST_FILESTORE_ROOT')) {
+
+if (defined('HEURIST_FILESTORE_ROOT') === false) {
     define('HEURIST_FILESTORE_ROOT', $upload_root);
 }
 
-$databases = $single_db ? array($single_db) : mysql__getdatabases4($mysqli, false);
+if (!empty($single_db)) {
+    $databases = [$single_db];
+} else {
+    $databases = mysql__getdatabases4($mysqli, false);
+}
 
-if (!is_array($databases)) {
+if (is_array($databases) === false) {
     exit("Unable to retrieve list of databases on this server\n");
 }
 
