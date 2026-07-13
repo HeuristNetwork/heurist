@@ -188,7 +188,7 @@
             header(HEADER_CORS_POLICY);
             header(CTYPE_JSON);
 
-            if(intval(@$req_params['restapi'])===2 && isset($apiResponseContext)){
+            if(isset($apiResponseContext) && is_array($apiResponseContext)){
                 $res = prepareDefinitionApiResponse($res, $req_params, $apiResponseContext);
                 if($res===null){
                     $system->errorExitApi('Definition not found', HEURIST_NOT_FOUND);
@@ -271,7 +271,7 @@
 
     /**
      * Converts the normal DbEntitySearch result into the public definition API format.
-     * This is used only for restapi=2 requests prepared by api.php.
+     * This is used only when api.php supplies explicit definition response context.
      *
      * @param array $result Normal DbEntitySearch response.
      * @param array $params Sanitized request parameters.

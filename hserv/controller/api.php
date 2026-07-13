@@ -387,8 +387,9 @@ else
     $req_params['restapi'] = 1; //set http response code
 
     // Modern public response format is initially limited to the four
-    // definition resources. restapi=2 tells DbEntitySearch to retain its
-    // full internal result so entityScrud.php can prepare the API response.
+    // definition resources. Explicit API response context tells the shared
+    // entity search layer to retain its full internal result for formatting
+    // at the entityScrud.php controller boundary.
     $definitionResources = array(
         'rty' => 'rectypes',
         'rectypes' => 'rectypes',
@@ -401,7 +402,6 @@ else
     );
 
     if($method === 'search' && isset($definitionResources[$requestedResource])){
-        $req_params['restapi'] = 2;
         $apiResponseContext = array(
             'mode' => 'collection',
             'entity' => $definitionResources[$requestedResource]
@@ -431,6 +431,8 @@ else
             $req_params[$primaryFields[$apiResponseContext['entity']]] = $requestUri[4];
             $apiResponseContext['mode'] = 'item';
         }
+
+        $req_params['api_response_context'] = $apiResponseContext;
     }
 
     if(@$requestUri[3]=='annotations'){

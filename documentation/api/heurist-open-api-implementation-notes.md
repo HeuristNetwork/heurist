@@ -78,7 +78,7 @@ return one structure entry selected by `rst_RecTypeID` and `rst_DetailTypeID`.
 
 `DbDefXXX` classes and all existing `details` modes remain unchanged because these classes are used throughout Heurist, not only by the public API.
 
-The API asks `DbEntitySearch` to retain its normal internal result and prepares the public envelope at the `entityScrud.php` controller boundary. The temporary `restapi=2` marker distinguishes this path from the legacy simplified `restapi=1` output. This numeric marker should eventually be replaced by an explicit API response context while keeping `restapi` boolean.
+The API asks `DbEntitySearch` to retain its normal internal result and prepares the public envelope at the `entityScrud.php` controller boundary. `restapi` remains a boolean API indicator, while explicit `api_response_context` carries the response mode and canonical entity information required by the formatter.
 
 Normal non-API `entityScrud.php` responses remain unchanged.
 
