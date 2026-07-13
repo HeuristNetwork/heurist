@@ -475,6 +475,16 @@ else
 
     if($req_params['entity']=='Records'){
         if($method=='search'){
+            // Public records API always returns the stable JSON representation.
+            // Export-specific options remain available to direct/internal
+            // record_output.php callers but are not part of this API contract.
+            $req_params['format'] = 'json';
+            unset($req_params['fmt'], $req_params['extended'], $req_params['depth'], $req_params['linkmode']);
+
+            $apiResponseContext = array(
+                'entity' => 'records',
+                'mode' => isset($requestUri[4]) && $requestUri[4] !== '' ? 'item' : 'collection'
+            );
             include_once '../../hserv/controller/record_output.php';
         }else{
             exitWithError('Method not allowed', 405, array('Allow' => 'GET'));

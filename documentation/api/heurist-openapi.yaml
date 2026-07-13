@@ -15,9 +15,9 @@ info:
 
     The modern definition collection envelope currently applies only to record
 
-    types, fields, terms and record structures. Records keep their existing JSON
+    types, fields, terms and record structures. Record responses retain the established
 
-    representation to avoid breaking established consumers. Successful IIIF
+    `records` array and record/detail objects while adding metadata and pagination. Successful IIIF
 
     responses remain direct IIIF Presentation API resources and are never wrapped
 
@@ -49,8 +49,9 @@ paths:
       - Records
       operationId: searchRecords
       summary: Search records
-      description: Anonymous requests return only publicly visible records. The response format is the existing Heurist records
-        JSON contract.
+      description: Anonymous requests return only publicly visible records. The response keeps the established records
+        array and record detail structure, and adds metadata and pagination. A missing or inaccessible record returns
+        an empty records array.
       security:
       - {}
       - bearerAuth: []
@@ -74,14 +75,40 @@ paths:
           type: string
         example: 123,456
         description: Comma-separated record identifiers.
+      - name: fields
+        in: query
+        schema:
+          type: string
+        description: Comma-separated record header fields and/or numeric detail type IDs. rec_ID and rec_RecTypeID are always included in normal object mode. When omitted, rec_Title and all details are also returned. An explicit fields=rec_ID still returns record objects.
       - name: detail
         in: query
         schema:
           type: string
-        description: Existing Heurist record detail option.
-      responses:
+          enum:
+          - ids
+        description: Set to ids for an ID-only records array. This mode takes precedence over and ignores fields.
+        RecordItemMeta:
+      type: object
+      required:
+      - database
+      - entity
+      - self
+      - fields
+      properties:
+        database:
+          type: string
+        entity:
+          type: string
+          const: records
+        self:
+          type: string
+          format: uri
+        fields:
+          $ref: '#/components/schemas/RecordFieldsMeta'
+      additionalProperties: false
+  responses:
         '200':
-          description: Record search response
+          description: Records response with metadata and pagination
           content:
             application/json:
               schema:
@@ -106,23 +133,34 @@ paths:
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordId'
+      - name: fields
+        in: query
+        schema:
+          type: string
+        description: Comma-separated record header fields and/or numeric detail type IDs. rec_ID and rec_RecTypeID are always included in normal object mode. When omitted, rec_Title and all details are also returned. An explicit fields=rec_ID still returns record objects.
       - name: detail
         in: query
         schema:
           type: string
+          enum:
+          - ids
+        description: Set to ids for an ID-only records array. This mode takes precedence over and ignores fields.
       responses:
         '200':
-          description: Existing Heurist records response containing the requested visible record
+          description: Records response for one requested record. Missing or inaccessible records return an empty records array.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecordSearchResponse'
+                $ref: '#/components/schemas/RecordItemResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/ServerError'
+      description: Anonymous requests return only publicly visible records. The response keeps the established records
+        array and record detail structure, and adds metadata and pagination. A missing or inaccessible record returns
+        an empty records array.
   /{database}/rectypes:
     get:
       tags:
@@ -307,8 +345,8 @@ paths:
       - Database structure
       operationId: getRecordStructure
       summary: Retrieve the complete field structure of a record type
-      description: Returns a collection. The public identity is the record type identifier, not the internal `rst_ID` primary
-        key.
+      description: Returns a collection. The public identity is the record type identifier, not the internal `rst_ID`
+        primary key.
       security:
       - bearerAuth: []
       parameters:
@@ -711,8 +749,8 @@ components:
     Details:
       name: details
       in: query
-      description: Entity-specific response projection. Existing DbDefXXX modes remain available; commonly used values include
-        id, name, list, full, raw and structure where supported.
+      description: Entity-specific response projection. Existing DbDefXXX modes remain available; commonly used
+        values include id, name, list, full, raw and structure where supported.
       schema:
         type: string
   schemas:
@@ -814,17 +852,58 @@ components:
       additionalProperties: false
     Record:
       type: object
+      description: A Heurist record object. By default it contains rec_ID, rec_RecTypeID, rec_Title and all visible
+        details. The fields parameter can reduce the returned properties.
+      properties:
+        rec_ID:
+          type: string
+        rec_RecTypeID:
+          type: string
+        rec_Title:
+          oneOf:
+          - type: string
+          - type: 'null'
+        details:
+          $ref: '#/components/schemas/RecordDetails'
       additionalProperties: true
     RecordSearchResponse:
       type: object
       required:
       - records
+      - meta
+      - pagination
       properties:
         records:
           type: array
+          description: Record objects, or record IDs when detail=ids.
           items:
-            $ref: '#/components/schemas/Record'
-      additionalProperties: true
+            oneOf:
+            - $ref: '#/components/schemas/Record'
+            - type: integer
+            - type: string
+        meta:
+          $ref: '#/components/schemas/RecordsMeta'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    RecordItemResponse:
+      type: object
+      required:
+      - records
+      - meta
+      properties:
+        records:
+          type: array
+          maxItems: 1
+          description: One record object, one record ID when detail=ids, or an empty array when missing or inaccessible.
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/Record'
+            - type: integer
+            - type: string
+        meta:
+          $ref: '#/components/schemas/RecordItemMeta'
+      additionalProperties: false
     SessionLoginRequest:
       type: object
       required:
@@ -839,6 +918,56 @@ components:
     IiifResource:
       type: object
       additionalProperties: true
+    RecordDetails:
+      type: object
+      description: Map keyed by detail type ID; each value is a map keyed by detail row ID.
+      additionalProperties:
+        type: object
+        additionalProperties: {}
+    RecordDetailField:
+      type: object
+      required:
+      - dty_ID
+      - dty_Name
+      - dty_Type
+      properties:
+        dty_ID:
+          type: string
+        dty_Name:
+          type: string
+        dty_Type:
+          type: string
+      additionalProperties: false
+    RecordFieldsMeta:
+      type: object
+      required:
+      - headers
+      - details
+      properties:
+        headers:
+          type: array
+          items:
+            type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecordDetailField'
+      additionalProperties: false
+    RecordsMeta:
+      type: object
+      required:
+      - database
+      - entity
+      - fields
+      properties:
+        database:
+          type: string
+        entity:
+          type: string
+          const: records
+        fields:
+          $ref: '#/components/schemas/RecordFieldsMeta'
+      additionalProperties: false
   responses:
     BadRequest:
       description: Invalid request

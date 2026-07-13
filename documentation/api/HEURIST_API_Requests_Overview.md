@@ -151,3 +151,35 @@ API errors use HTTP status codes and the existing Heurist response-status consta
 ```
 
 The `error` value is one of the existing `HEURIST_*` status values, such as `invalid`, `notfound`, `denied`, `blocked`, `database`, or `system`. Internal diagnostics such as `sysmsg` are not exposed by the public API. Ordinary non-API Heurist responses are unchanged.
+
+
+## Public records response
+
+`GET /api/<db>/records` returns JSON with three top-level sections:
+
+```json
+{
+  "records": [],
+  "meta": {
+    "database": "mydb",
+    "entity": "records",
+    "fields": {"headers": [], "details": []}
+  },
+  "pagination": {
+    "total": 0,
+    "offset": 0,
+    "limit": 1000,
+    "self": "...",
+    "next": null
+  }
+}
+```
+
+The `fields` parameter selects record header fields and numeric detail type IDs. If it
+is omitted, the default headers `rec_ID`, `rec_RecTypeID` and `rec_Title` are returned
+with all details. `detail=ids` overrides `fields` and returns IDs rather than record
+objects. Missing or inaccessible records return HTTP 200 with an empty `records` array.
+
+### Records field and item response rules
+
+For normal records object responses, `rec_ID` and `rec_RecTypeID` are always returned. When `fields` is omitted, `rec_Title` and all visible details are also returned. A single-record path is not paginated: its response contains `records` and `meta.self`, but no `pagination` section. Missing or inaccessible records return HTTP 200 with an empty `records` array.

@@ -1073,6 +1073,142 @@
           }
         }
       ]
+    },
+    {
+      "name": "7. Records response schema",
+      "item": [
+        {
+          "name": "Default record fields and metadata",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('records is an array', function () { pm.expect(body.records).to.be.an('array'); });",
+                  "pm.test('meta and pagination exist', function () { pm.expect(body).to.have.property('meta'); pm.expect(body).to.have.property('pagination'); });",
+                  "pm.test('default headers reported', function () { pm.expect(body.meta.fields.headers).to.eql(['rec_ID','rec_RecTypeID','rec_Title']); });",
+                  "pm.test('pagination keys exist', function () { pm.expect(body.pagination).to.include.keys('total','offset','limit','self','next'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{publicRecordId}}",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "fields=rec_ID returns objects",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('record remains an object', function () { pm.expect(body.records[0]).to.be.an('object'); pm.expect(body.records[0]).to.have.property('rec_ID'); });",
+                  "pm.test('only rec_ID is reported as header', function () { pm.expect(body.meta.fields.headers).to.eql(['rec_ID']); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{publicRecordId}}&fields=rec_ID",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "detail=ids overrides fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('records contains IDs', function () { pm.expect(body.records).to.be.an('array'); pm.expect(['number','string']).to.include(typeof body.records[0]); });",
+                  "pm.test('field metadata is empty', function () { pm.expect(body.meta.fields.headers).to.eql([]); pm.expect(body.meta.fields.details).to.eql([]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{publicRecordId}}&detail=ids&fields=rec_Title",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public pagination is applied",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('limit is applied', function () { pm.expect(body.records.length).to.be.at.most(1); pm.expect(body.pagination.limit).to.eql(1); pm.expect(body.pagination.offset).to.eql(0); });",
+                  "pm.test('next is present when more records exist', function () { if (body.pagination.total > body.records.length) { pm.expect(body.pagination.next).to.be.a('string'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=sortby:-m&limit=1&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Private record remains hidden from guest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('empty records array', function () { pm.expect(body.records).to.eql([]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records/{{privateRecordId}}",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        }
+      ]
     }
   ]
 }

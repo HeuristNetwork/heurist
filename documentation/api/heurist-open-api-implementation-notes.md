@@ -134,3 +134,18 @@ API errors use HTTP status codes and the existing Heurist response-status consta
 ```
 
 The `error` value is one of the existing `HEURIST_*` status values, such as `invalid`, `notfound`, `denied`, `blocked`, `database`, or `system`. Internal diagnostics such as `sysmsg` are not exposed by the public API. Ordinary non-API Heurist responses are unchanged.
+
+
+## Records response modernization
+
+The records API retains the existing `records` array and native record/detail objects.
+API responses now add `meta` and `pagination`, using the same pagination keys as
+definition collections. Anonymous requests respect `limit` and `offset`; the API
+default and maximum limit are both 1000.
+
+The public `fields` parameter accepts record header names and numeric detail type IDs.
+When omitted, the API returns `rec_ID`, `rec_RecTypeID`, `rec_Title` and all details.
+`fields=rec_ID` still returns an array of record objects. The only documented `detail`
+mode is `detail=ids`, which overrides `fields` and returns an array of record IDs inside
+the normal records response envelope. `extended`, `depth`, `linkmode`, `format` and
+`fmt` remain internal/export options and are not part of the public records contract.
