@@ -31,40 +31,9 @@
 * @since       7
 */
 
-if (php_sapi_name() !== 'cli') {
-    http_response_code(403);
-    exit("This script must be run from the command line.\n");
-}
-
-global $arg_no_action;
-$eol = "\n";
-
-// Inline argument targeting
-$db_key = array_search('-db', $argv);
-$single_db = ($db_key !== false && isset($argv[$db_key + 1])) ? $argv[$db_key + 1] : null;
-
-require_once dirname(__FILE__) . '/../../autoload.php';
-require_once dirname(__FILE__) . '/../../hserv/utilities/UFile.php';
+// Include the shared CLI setup script and specific Mail utility
+require_once dirname(__FILE__) . '/../../hserv/utilities/cli_bootstrap.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UMail.php';
-
-$system = new hserv\System();
-if (!$system->init(null, false, false)) {
-    exit("Cannot establish connection to sql server\n");
-}
-
-$mysqli = $system->getMysqli();
-$upload_root = $system->getFileStoreRootFolder();
-
-if (!defined('HEURIST_FILESTORE_ROOT')) {
-    define('HEURIST_FILESTORE_ROOT', $upload_root);
-}
-
-$databases = $single_db ? [$single_db] : mysql__getdatabases4($mysqli, false);
-if (!is_array($databases)) {
-    exit("Unable to retrieve list of databases on this server\n");
-}
-
-set_time_limit(0);
 
 $cnt_updated = 0;
 $cnt_skipped = 0;
@@ -73,9 +42,7 @@ $cnt_errors  = 0;
 print "Heurist database metadata synchronisation - " . date(DATE_8601) . $eol . $eol;
 
 foreach ($databases as $db_name) {
-
     $short_name = basename($db_name); // sanitize - no path components allowed
-
     list($database_name_full, $short_name) = mysql__get_names($short_name);
 
     if (mysql__check_dbname($short_name) !== null) {
@@ -101,7 +68,6 @@ foreach ($databases as $db_name) {
     $xml_data = loadRemoteURLContentWithRange($metadata_url, null, true, 30);
 
     if (empty($xml_data)) {
-
         global $glb_curl_error;
 
         $err_msg = "Heurist was unable to download the registration metadata for database '$short_name' "
@@ -123,7 +89,6 @@ foreach ($databases as $db_name) {
     libxml_clear_errors();
 
     if ($parsed === false) {
-
         $err_detail = '';
         foreach ($xml_errors as $xml_error) {
             $err_detail .= trim($xml_error->message) . " (line {$xml_error->line})\n";
@@ -145,7 +110,6 @@ foreach ($databases as $db_name) {
     $settings_dir = rtrim($upload_root, '/') . '/' . $short_name . '/settings/';
 
     if (!folderCreate($settings_dir, true)) {
-
         $err_msg = "Heurist could not create or write to the settings folder for database '$short_name':\n"
             . $settings_dir;
 

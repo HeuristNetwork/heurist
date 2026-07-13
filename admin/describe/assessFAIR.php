@@ -28,50 +28,10 @@
 * @since       7
 */
 
-if (php_sapi_name() !== 'cli') {
-    header('HTTP/1.1 403 Forbidden');
-    die("This script must be run from the command line.\n");
-}
-
-global $arg_no_action;
-$eol = "\n";
-
-// Structurally distinct argument extraction loop
-$single_db = null;
-foreach ($argv as $index => $argument) {
-    if ($argument === '-db' && isset($argv[$index + 1])) {
-        $single_db = $argv[$index + 1];
-    }
-}
-
 use hserv\utilities\FairScore;
 
-require_once dirname(__FILE__) . '/../../autoload.php';
-require_once dirname(__FILE__) . '/../../hserv/utilities/UFile.php';
-
-$system = new hserv\System();
-if ($system->init(null, false, false) === false) {
-    die("Cannot establish connection to sql server\n");
-}
-
-$mysqli = $system->getMysqli();
-$upload_root = $system->getFileStoreRootFolder();
-
-if (defined('HEURIST_FILESTORE_ROOT') === false) {
-    define('HEURIST_FILESTORE_ROOT', $upload_root);
-}
-
-if (!empty($single_db)) {
-    $databases = [$single_db];
-} else {
-    $databases = mysql__getdatabases4($mysqli, false);
-}
-
-if (is_array($databases) === false) {
-    exit("Unable to retrieve list of databases on this server\n");
-}
-
-set_time_limit(0);
+// Include the shared CLI setup script
+require_once dirname(__FILE__) . '/../../hserv/utilities/cli_bootstrap.php';
 
 $cnt_done = 0;
 $cnt_errors = 0;
@@ -79,7 +39,6 @@ $cnt_errors = 0;
 print "Heurist FAIR score assessment - " . date(DATE_8601) . $eol . $eol;
 
 foreach ($databases as $db_name) {
-
     $short_name = basename($db_name);
     list($database_name_full, $short_name) = mysql__get_names($short_name);
 
