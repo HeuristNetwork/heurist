@@ -136,3 +136,18 @@ Normal non-API `entityScrud` clients keep their existing response behavior.
 ## Test collection
 
 `HeuristPostmanCollectionV1.json` is the executable beta test suite. It covers routing, public access, session and JWT authentication, the modern definition response envelope, semantic record-structure routes, and negative authentication cases.
+
+
+## API error responses
+
+API errors use HTTP status codes and the existing Heurist response-status constants from `consts.php`:
+
+```json
+{
+  "status": 404,
+  "error": "notfound",
+  "message": "Definition not found"
+}
+```
+
+The `error` value is one of the existing `HEURIST_*` status values, such as `invalid`, `notfound`, `denied`, `blocked`, `database`, or `system`. Internal diagnostics such as `sysmsg` are not exposed by the public API. Ordinary non-API Heurist responses are unchanged.

@@ -241,7 +241,9 @@
                 "exec": [
                   "pm.test('Status is 401', function () { pm.response.to.have.status(401); });",
                   "const body = pm.response.json();",
-                  "pm.test('Unauthorized message', function () { pm.expect(body.message).to.eql('Unauthorized'); });"
+                  "pm.test('Unauthorized message', function () { pm.expect(body.message).to.eql('Unauthorized'); });",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('API error envelope uses Heurist status constant', function () { pm.expect(errorBody.status).to.eql(401); pm.expect(errorBody.error).to.eql('denied'); pm.expect(errorBody.message).to.be.a('string'); });"
                 ]
               }
             }
@@ -562,7 +564,9 @@
                 "exec": [
                   "pm.test('Status is 401', function () { pm.response.to.have.status(401); });",
                   "const body = pm.response.json();",
-                  "pm.test('Invalid token message', function () { pm.expect(body.message).to.eql('Invalid token'); });"
+                  "pm.test('Invalid token message', function () { pm.expect(body.message).to.eql('Invalid token'); });",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('API error envelope uses Heurist status constant', function () { pm.expect(errorBody.status).to.eql(401); pm.expect(errorBody.error).to.eql('denied'); pm.expect(errorBody.message).to.be.a('string'); });"
                 ]
               }
             }

@@ -720,20 +720,32 @@ components:
       type: object
       required:
       - status
+      - error
       - message
       properties:
         status:
-          description: Heurist error status code
-          oneOf:
-          - type: integer
-          - type: string
+          type: integer
+          description: HTTP response status code.
+          example: 404
+        error:
+          type: string
+          description: Heurist API response status constant defined in consts.php.
+          enum:
+          - invalid
+          - notfound
+          - denied
+          - blocked
+          - error
+          - database
+          - syscfg
+          - system
+          - network
+          - unknown
+          example: notfound
         message:
           type: string
-        sysmsg:
-          type: string
-        error_title:
-          type: string
-      additionalProperties: true
+          example: Definition not found
+      additionalProperties: false
     Definition:
       type: object
       additionalProperties: true

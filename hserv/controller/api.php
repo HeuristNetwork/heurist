@@ -220,7 +220,7 @@ if(@$requestUri[1]!== 'api' || @$req_params['ent']!=null){
     if(@$entities[$req_params['ent']] != null ){
         $requestUri = array(0, 'api', $req_params['db'], $req_params['ent'], @$req_params['id']);
     }else{
-        exitWithError('API Not Found', 400);
+        exitWithError('API route not found', 404);
     }
 
 }
@@ -229,7 +229,7 @@ elseif(@$req_params['db'] && @$requestUri[2]!=null){ //backward when database is
     if(@$entities[$requestUri[2]]!=null){
         $requestUri = array(0, 'api', $req_params['db'], $requestUri[2], @$requestUri[3]);
     }else{
-        exitWithError('API Not Found', 400);
+        exitWithError('API route not found', 404);
     }
 
 }elseif(@$requestUri[2]!=null){
@@ -240,7 +240,7 @@ $allowed_methods = array('search','add','save','delete');
 
 $method = getAction($method);
 if($method == null || !in_array($method, $allowed_methods)){
-    exitWithError('Method Not Allowed CCC', 405);
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, PATCH, DELETE'));
 }
 
 if($method=='save' || $method=='add'){
@@ -350,7 +350,7 @@ if (@$requestUri[3]=='iiif') {
 
         include_once '../../hserv/controller/iiif_presentation.php';
     }else{
-        exitWithError('Method Not Allowed DDD', 405);
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
     }
 
 }elseif (@$entities[@$requestUri[3]]=='System') {
@@ -477,7 +477,7 @@ else
         if($method=='search'){
             include_once '../../hserv/controller/record_output.php';
         }else{
-            exitWithError('Method Not Implemented', 405);
+            exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
         }
     }else{
         include_once '../../hserv/controller/entityScrud.php';
@@ -552,7 +552,21 @@ function authenticateApiRequestWithJwt($system){
  * @param array $headers Optional response headers.
  * @return void
  */
-function exitWithError($message, $code, $headers = array()){
+function exitWithError($message, $code, $headers = array(), $error_code = null){
+
+    if($error_code === null){
+        if($code === 401 || $code === 403){
+            $error_code = HEURIST_REQUEST_DENIED;
+        }elseif($code === 404){
+            $error_code = HEURIST_NOT_FOUND;
+        }elseif($code === 409){
+            $error_code = HEURIST_ACTION_BLOCKED;
+        }elseif($code >= 500){
+            $error_code = HEURIST_SYSTEM_FATAL;
+        }else{
+            $error_code = HEURIST_INVALID_REQUEST;
+        }
+    }
 
     header(HEADER_CORS_POLICY);
     header(CTYPE_JSON);
@@ -562,7 +576,11 @@ function exitWithError($message, $code, $headers = array()){
     }
 
     http_response_code($code);
-    print json_encode(array("status"=>'invalid', "message"=>$message));
+    print json_encode(array(
+        'status' => $code,
+        'error' => $error_code,
+        'message' => $message
+    ));
     exit;
 }
 
