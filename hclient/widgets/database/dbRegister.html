@@ -29,6 +29,16 @@
             <div class="header" style="vertical-align:top;min-width:100px">Registration URL:</div>
             <input readonly="readonly" style="background-color:lightgray;width: 520px;margin-bottom: 10px;" tabindex="-1" id="serverURL"/>
         </div>
+        <div style="margin-bottom:8px;">
+            <div class="header" style="vertical-align:top;min-width:100px">Display name:</div>
+            <input type="text" maxlength="63" size="60" id="dbDisplayName" class="text" style="border:1px solid;padding:2px" tabindex="0"/>
+            <div class="heurist-helper2">Short display name for this database (from Design &rsaquo; Properties). Sent to the Heurist Reference Index as the database title.</div>
+        </div>
+        <div style="margin-bottom:8px;">
+            <div class="header" style="vertical-align:top;min-width:100px">Rights statement:</div>
+            <textarea maxlength="1000" cols="70" rows="2" id="dbRights" class="text" style="border:1px solid;padding:2px" tabindex="0"></textarea>
+            <div class="heurist-helper2">Ownership and copyright statement (from Design &rsaquo; Properties). Sent to the Heurist Reference Index.</div>
+        </div>
         <div>
             <div class="header" style="vertical-align:top;min-width:100px">Database Description:</div>
             <textarea maxlength="1000" cols="70" rows="3" id="dbTitle" class="text" style="border:1px solid;padding:2px" tabindex="0" autofocus=""></textarea>

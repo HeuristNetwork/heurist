@@ -205,13 +205,30 @@
     }elseif($action == 'set_user_notification_settings'){
         $res = user_blockNotifications($system, $req_params['blocking']);
     }elseif($action == 'get_db_metadata'){
-        // Human-readable listing of the locally cached Heurist_Reference_Index registration
-        // metadata (DBMetadata.xml, synced nightly by admin/utilities/downloadDBMetadata.php),
-        // for display on Design > Properties once the database has been registered.
+        // Returns database metadata for Design > Properties display.
+        // Three states, matching the new spec (Ian Johnson, July 2026):
+        //   has_local_xml=false, fields=[]   → not registered, or fetch failed
+        //   has_local_xml=false, fields=[..] → registered, no local XML yet; fields come from a live
+        //                                      fetch from the Reference Index (DO NOT store the result)
+        //   has_local_xml=true,  fields=[..] → registered + nightly sync has run; render from local file
 
         $filestore_dir = $system->getFileStoreRootFolder() . $system->dbname() . '/';
 
-        $res = \hserv\utilities\DbMetadataReader::read($filestore_dir);
+        $local = \hserv\utilities\DbMetadataReader::read($filestore_dir);
+
+        if($local['exists']){
+            // State 3 — local DBMetadata.xml present (written by nightly downloadDBMetadata.php cron)
+            $res = $local;
+        } else {
+            // State 2 — registered but no local XML yet: fetch live from the Reference Index
+            $regID = $system->settings->get('sys_dbRegisteredID');
+            if(isPositiveInt($regID)){
+                $res = \hserv\utilities\DbMetadataReader::fetchLive(intval($regID));
+            } else {
+                // State 1 — not registered
+                $res = ['has_local_xml' => false, 'exists' => false, 'fields' => [], 'all_labels' => \hserv\utilities\DbMetadataReader::ALL_LABELS];
+            }
+        }
     }elseif($action == 'get_tinymce_formats'){
 
         $settings = $system->settings->getDatabaseSetting('TinyMCE formats');

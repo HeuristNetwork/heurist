@@ -1,5 +1,4 @@
 <?php
-
 /**
 * downloadDBMetadata.php - Nightly synchronisation of database metadata from the Heurist Reference Index
 *
@@ -31,10 +30,49 @@
 * @since       7
 */
 
+// CLI-only: this script performs bulk file writes and should not be callable from the web
+if(php_sapi_name() !== 'cli'){
+    http_response_code(403);
+    exit("This script must be run from the command line.\n");
+}
+
 global $arg_no_action;
 
+$is_shell = false;
+$single_db = null;
+$eol = "\n";
+
+if (@$argv) {
+
+    $is_shell = true;
+
+    // handle command-line queries
+    // e.g.  php -f downloadDBMetadata.php -- -db mydatabase
+    $ARGV = array();
+    for ($i = 0; $i < count($argv); ++$i) {
+        if ($argv[$i][0] === '-') {
+            if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
+                $ARGV[$argv[$i]] = $argv[$i + 1];
+                ++$i;
+            } else {
+                $ARGV[$argv[$i]] = true;
+            }
+        } else {
+            array_push($ARGV, $argv[$i]);
+        }
+    }
+
+    if (@$ARGV['-db']) {
+        $single_db = $ARGV['-db'];
+    }
+} else {
+    // Artem: this script must only be called from the command line, not via a web request.
+    http_response_code(403);
+    header('Content-type: text/plain');
+    exit("This script may only be run from the command line (e.g. php -f downloadDBMetadata.php).\n");
+}
+
 use hserv\utilities\USanitize;
-use hserv\utilities\UAdminScript;
 
 require_once dirname(__FILE__) . '/../../autoload.php';
 
@@ -42,10 +80,36 @@ require_once dirname(__FILE__) . '/../../autoload.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UFile.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UMail.php';
 
-$ctx = UAdminScript::bootstrap(@$argv, @$passwordForServerFunctions);
-$mysqli = $ctx['mysqli'];
-$upload_root = $ctx['upload_root'];
-$eol = $ctx['eol'];
+$system = new hserv\System();
+
+if (!$is_shell) {
+    // web invocation must be password protected like other server-function scripts
+    $sysadmin_pwd = USanitize::getAdminPwd();
+    if (!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)) {
+        include_once dirname(__FILE__) . '/../../hclient/framecontent/infoPage.php';
+        exit;
+    }
+    header('Content-type: text/html; charset=utf-8');
+}
+
+if (!$system->init(null, false, false)) {
+    exit("Cannot establish connection to sql server\n");
+}
+
+$mysqli = $system->getMysqli();
+
+$upload_root = $system->getFileStoreRootFolder();
+if (!defined('HEURIST_FILESTORE_ROOT')) {
+    define('HEURIST_FILESTORE_ROOT', $upload_root);
+}
+
+$databases = $single_db ? array($single_db) : mysql__getdatabases4($mysqli, false);
+
+if (!is_array($databases)) {
+    exit("Unable to retrieve list of databases on this server\n");
+}
+
+set_time_limit(0);
 
 $cnt_updated = 0;
 $cnt_skipped = 0;
@@ -53,17 +117,25 @@ $cnt_errors  = 0;
 
 print "Heurist database metadata synchronisation - " . date(DATE_8601) . $eol . $eol;
 
-UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full, $short_name) use ($mysqli, $upload_root, $eol, &$cnt_updated, &$cnt_skipped, &$cnt_errors) {
+foreach ($databases as $db_name) {
+
+    $short_name = basename($db_name); // sanitize - no path components allowed
+
+    list($database_name_full, $short_name) = mysql__get_names($short_name);
+
+    if (mysql__check_dbname($short_name) !== null) {
+        continue; //not a valid heurist database name
+    }
 
     $regID = mysql__select_value(
         $mysqli,
-        'SELECT sys_dbRegisteredID FROM `' . $database_name_full . '`.sysIdentification LIMIT 1',
+        'SELECT sys_dbRegisteredID FROM `' . $database_name_full . '`.sysIdentification LIMIT 1'
     );
 
     if (!isPositiveInt($regID)) {
         // database is not registered with the Heurist Reference Index - nothing to do
         $cnt_skipped++;
-        return;
+        continue;
     }
 
     print "Database '$short_name' is registered (ID #$regID)$eol";
@@ -86,7 +158,7 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
         print "  ERROR: download failed - " . ($glb_curl_error ?: 'no data returned') . $eol;
         sendEmailToAdmin('Heurist metadata sync failed for ' . $short_name, $err_msg, false);
         $cnt_errors++;
-        return;
+        continue;
     }
 
     // validate the downloaded content is well-formed XML before overwriting anything
@@ -111,7 +183,7 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
         print "  ERROR: downloaded content is not valid XML$eol";
         sendEmailToAdmin('Heurist metadata sync: invalid XML for ' . $short_name, $err_msg, false);
         $cnt_errors++;
-        return;
+        continue;
     }
 
     // settings subdirectory of this database's filestore directory
@@ -125,7 +197,7 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
         print "  ERROR: cannot access settings folder $settings_dir$eol";
         sendEmailToAdmin('Heurist metadata sync: filestore error for ' . $short_name, $err_msg, false);
         $cnt_errors++;
-        return;
+        continue;
     }
 
     $target_file = $settings_dir . 'DBMetadata.xml';
@@ -141,6 +213,6 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
         sendEmailToAdmin('Heurist metadata sync: write failure for ' . $short_name, $err_msg, false);
         $cnt_errors++;
     }
-});
+}
 
 print $eol . "Finished. Updated: $cnt_updated   Not registered (skipped): $cnt_skipped   Errors: $cnt_errors" . $eol;
