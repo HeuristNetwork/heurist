@@ -204,14 +204,6 @@
         $res = user_getNotifications($system);
     }elseif($action == 'set_user_notification_settings'){
         $res = user_blockNotifications($system, $req_params['blocking']);
-    }elseif($action == 'get_db_metadata'){
-        // Human-readable listing of the locally cached Heurist_Reference_Index registration
-        // metadata (DBMetadata.xml, synced nightly by admin/utilities/downloadDBMetadata.php),
-        // for display on Design > Properties once the database has been registered.
-
-        $filestore_dir = $system->getFileStoreRootFolder() . $system->dbname() . '/';
-
-        $res = \hserv\utilities\DbMetadataReader::read($filestore_dir);
     }elseif($action == 'get_tinymce_formats'){
 
         $settings = $system->settings->getDatabaseSetting('TinyMCE formats');
@@ -812,6 +804,23 @@
 
                     // Upload file
                     $res = uploadFileToNakala($system, $params);//from record edit - define file field
+
+                    if($res !== false){
+                        global $glb_nakala_id;
+                        if($glb_nakala_id){
+                            // Log the DOI alongside any other repository deposits for this database -
+                            // purely additive, doesn't change $res / the response sent to the client
+                            recordExternalIdentifier($system, "{$repo_id}_{$glb_nakala_id}", [
+                                'Service' => 'nakala',
+                                'Label' => 'Nakala file upload (record edit)',
+                                'ID' => $glb_nakala_id,
+                                'DOI' => $glb_nakala_id,
+                                'DOIRegistered' => ($params['status'] === 'published'),
+                                'URL' => is_array($res) ? @$res['link'] : $res,
+                                'Date' => date('Y-m-d')
+                            ]);
+                        }
+                    }
 
                 }
 
