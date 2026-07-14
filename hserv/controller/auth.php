@@ -5,11 +5,11 @@ use hserv\utilities\UJwt;
 
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  UJwt::json_out(405, ['error'=>'method_not_allowed']);
+  UJwt::json_out(405, ['status'=>405, 'error'=>HEURIST_INVALID_REQUEST, 'message'=>'Method not allowed'], ['Allow'=>'POST']);
 }
 
 if(!isset($jwt_Secret) || strlen($jwt_Secret)<8){
-  UJwt::json_out(405, ['error'=>'method_not_allowed']);
+  UJwt::json_out(405, ['status'=>405, 'error'=>HEURIST_INVALID_REQUEST, 'message'=>'Method not allowed'], ['Allow'=>'POST']);
 }
 
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
@@ -30,11 +30,11 @@ $database = $in['db'] ?? null;
 $system = new hserv\System();
 if( !isset($database) || !$system->init($database) ){
     //$system->errorExitApi();
-    UJwt::json_out(400, ['error'=>'invalid_database_param'], ['WWW-Authenticate' => 'Basic realm="api", charset="UTF-8"']);
+    UJwt::json_out(400, ['status'=>400, 'error'=>HEURIST_INVALID_REQUEST, 'message'=>'Invalid database parameter'], ['WWW-Authenticate' => 'Basic realm="api", charset="UTF-8"']);
 }
 
 if (!$username || !$password || !$system->doLogin($username, $password, 'none')){
-  UJwt::json_out(401, ['error'=>'invalid_credentials'], ['WWW-Authenticate' => 'Basic realm="api", charset="UTF-8"']);
+  UJwt::json_out(401, ['status'=>401, 'error'=>HEURIST_REQUEST_DENIED, 'message'=>'Invalid credentials'], ['WWW-Authenticate' => 'Basic realm="api", charset="UTF-8"']);
 }
 
 $ttl = ($jwt_TTL??600); //10 minutes

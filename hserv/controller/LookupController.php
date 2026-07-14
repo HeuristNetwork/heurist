@@ -2019,7 +2019,7 @@ if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== fal
 
     }else{
 
-        $url = $base_url.http_build_query($params);// forward request to ESTC server
+        $url = $baseURL.http_build_query($params);// forward request to ESTC server
         $response = loadRemoteURLContentWithRange($url, null, true, 60);
     }
 

@@ -183,7 +183,7 @@ final class SemanticGlobalHarvester
         // Do not retain rows across the whole run. The global-pass algorithm can
         // touch hundreds of databases; refetching is preferable to unbounded memory growth.
         $spec = ENTITY_SPECS[$type];
-        $rows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], $spec['api'], [], 0);
+        $rows = $this->client->fetchRows($dbRef['server'], $dbRef['dbName'], $spec['api'], []);
         logLine("  fetched " . count($rows) . " {$type} rows from {$dbRef['dbName']}");
         return $rows;
     }

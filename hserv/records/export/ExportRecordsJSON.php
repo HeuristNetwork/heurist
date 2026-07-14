@@ -36,6 +36,9 @@ class ExportRecordsJSON extends ExportRecords {
      */
     private $is_restapi = false;
 
+    /** @var array Detail type IDs actually included in public API records. */
+    private $api_detail_type_ids = array();
+
     /**
      * @var int Total number of records available (used by DataTables).
      */
@@ -117,6 +120,10 @@ protected function _outputPrepare($data, $params){
 
         $this->records_cnt = intval(@$params['recordsTotal']);
         $this->records_cnt_filtered = intval(@$params['recordsFiltered']);
+        $this->api_detail_type_ids = array();
+        if(is_array($this->api_records) && is_array(@$this->api_records['details'])){
+            $this->api_detail_type_ids = array_map('intval', $this->api_records['details']);
+        }
 
     }
     return $res;
@@ -358,6 +365,9 @@ protected function _outputRecord($record){
                 $this->maplayer_records[] = array('id'=>$record['rec_ID']);
         }
 
+        if(is_array($this->api_records)){
+            $record = $this->prepareApiRecord($record);
+        }
         fwrite($this->fd, $this->comma.json_encode($record));//as is
     }
     $this->comma = ',';
@@ -386,7 +396,25 @@ protected function _outputFooter(){
 
     }elseif($this->is_restapi==1){
 
-        fwrite($this->fd, ']}'); //close records
+        if(is_array($this->api_records)){
+            $meta = array(
+                'database' => $this->api_records['database'],
+                'entity' => 'records',
+                'fields' => array(
+                    'headers' => array_values($this->api_records['headers']),
+                    'details' => $this->apiDetailDefinitions()
+                )
+            );
+            if(@$this->api_records['mode'] === 'item'){
+                $meta['self'] = $this->api_records['self'];
+                fwrite($this->fd, '],"meta":'.json_encode($meta).'}');
+            }else{
+                fwrite($this->fd, '],"meta":'.json_encode($meta)
+                    .',"pagination":'.json_encode($this->api_records['pagination']).'}');
+            }
+        }else{
+            fwrite($this->fd, ']}'); //close records
+        }
 
     }else {
 
@@ -411,6 +439,71 @@ protected function _outputFooter(){
 
 }
 
+
+    /** Keep the public API record object stable and limited to requested fields. */
+    private function prepareApiRecord(array $record): array
+    {
+        $result = array();
+        foreach($this->api_records['headers'] as $header){
+            if(array_key_exists($header, $record)){
+                $result[$header] = $record[$header];
+            }
+        }
+
+        $details = is_array(@$record['details']) ? $record['details'] : array();
+        if($this->api_records['details'] === true){
+            $result['details'] = $details;
+            foreach(array_keys($details) as $dtyID){
+                if(is_numeric($dtyID) && intval($dtyID)>0){
+                    $this->api_detail_type_ids[] = intval($dtyID);
+                }
+            }
+        }elseif(is_array($this->api_records['details']) && !empty($this->api_records['details'])){
+            $selected = array();
+            foreach($this->api_records['details'] as $dtyID){
+                $key = (string)$dtyID;
+                if(array_key_exists($key, $details)){
+                    $selected[$key] = $details[$key];
+                }elseif(array_key_exists(intval($dtyID), $details)){
+                    $selected[$key] = $details[intval($dtyID)];
+                }
+            }
+            $result['details'] = $selected;
+        }
+
+        return $result;
+    }
+
+    /** Return name and type metadata for detail fields in the current response. */
+    private function apiDetailDefinitions(): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $this->api_detail_type_ids))));
+        if(empty($ids)){
+            return array();
+        }
+
+        $rows = array();
+        $query = 'SELECT dty_ID, dty_Name, dty_Type FROM defDetailTypes WHERE dty_ID IN ('
+            .implode(',', $ids).')';
+        $res = $this->mysqli->query($query);
+        if($res){
+            $byId = array();
+            while($row = $res->fetch_assoc()){
+                $byId[intval($row['dty_ID'])] = array(
+                    'dty_ID' => (string)$row['dty_ID'],
+                    'dty_Name' => $row['dty_Name'],
+                    'dty_Type' => $row['dty_Type']
+                );
+            }
+            $res->close();
+            foreach($ids as $id){
+                if(isset($byId[$id])){
+                    $rows[] = $byId[$id];
+                }
+            }
+        }
+        return $rows;
+    }
 
     /**
      * Produces a flattened JSON-like array structure for a record, suitable for DataTables.

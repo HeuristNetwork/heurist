@@ -1008,44 +1008,57 @@ class System {
      *                     If false, behaves more like `errorExit` but still uses the error structure.
      * @return void This function calls `exit`.
      */
-    public function errorExitApi( $message=null, $error_code=null, $is_api=true) {
+    public function errorExitApi($message = null, $error_code = null, $is_api = true, $http_status = null, $headers = array())
+    {
 
-        $this->dbclose();
-
-        if($message){
-            if($error_code==null){
+        if ($message) {
+            if ($error_code == null) {
                 $error_code = HEURIST_INVALID_REQUEST;
             }
             $this->addError($error_code, $message);
         }
 
         $response = $this->getError();
+        $this->dbclose();
 
-
-        if($is_api){
-            header(HEADER_CORS_POLICY);
+        if (!$is_api) {
             header(CTYPE_JSON);
-
-            $status = @$response['status'];
-            if($status==HEURIST_INVALID_REQUEST){
-                $code = 400; // Bad Request - the request could not be understood or was missing required parameters.
-            }elseif($status==HEURIST_REQUEST_DENIED) {
-                $code = 403; // Forbidden - access denied
-            }elseif($status==HEURIST_NOT_FOUND){
-                $code = 404; //Not Found - resource was not found.
-            }elseif($status==HEURIST_ACTION_BLOCKED) {
-                $code = 409; //cannot add an existing object already exists or constraints violation
-            }else{
-                //HEURIST_ERROR, HEURIST_UNKNOWN_ERROR, HEURIST_DB_ERROR, HEURIST_SYSTEM_CONFIG, HEURIST_SYSTEM_FATAL
-                $code = 500; //An unexpected internal error has occurred. Please contact Support for more information.
-            }
-
-            http_response_code($code);
-        }else{
-            header(CTYPE_JSON);
+            print json_encode($response);
+            exit;
         }
 
-        print json_encode( $response );
+        $error = @$response['status'];
+        if (!$error) {
+            $error = HEURIST_ERROR;
+        }
+
+        if ($http_status === null) {
+            if ($error == HEURIST_INVALID_REQUEST) {
+                $http_status = 400;
+            } elseif ($error == HEURIST_REQUEST_DENIED) {
+                $http_status = 403;
+            } elseif ($error == HEURIST_NOT_FOUND) {
+                $http_status = 404;
+            } elseif ($error == HEURIST_ACTION_BLOCKED) {
+                $http_status = 409;
+            } else {
+                $http_status = 500;
+            }
+        }
+
+        header(HEADER_CORS_POLICY);
+        header(CTYPE_JSON);
+        foreach ($headers as $name => $value) {
+            header($name.': '.$value);
+        }
+        http_response_code($http_status);
+
+        // Public API errors deliberately omit sysmsg and other internal diagnostics.
+        print json_encode(array(
+            'status' => $http_status,
+            'error' => $error,
+            'message' => @$response['message'] ?: 'Request failed'
+        ));
 
         exit;
     }

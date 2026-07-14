@@ -107,6 +107,7 @@ $entities = array(
 'dty'=>'DefDetailTypes',
 'trm'=>'DefTerms',
 'rst'=>'DefRecStructure',
+'recstructure'=>'DefRecStructure',
 'rem'=>'UsrReminders',
 'swf'=>'SysWorkflowRules',
 'tag'=>'UsrTags',
@@ -219,7 +220,7 @@ if(@$requestUri[1]!== 'api' || @$req_params['ent']!=null){
     if(@$entities[$req_params['ent']] != null ){
         $requestUri = array(0, 'api', $req_params['db'], $req_params['ent'], @$req_params['id']);
     }else{
-        exitWithError('API Not Found', 400);
+        exitWithError('API route not found', 404);
     }
 
 }
@@ -228,7 +229,7 @@ elseif(@$req_params['db'] && @$requestUri[2]!=null){ //backward when database is
     if(@$entities[$requestUri[2]]!=null){
         $requestUri = array(0, 'api', $req_params['db'], $requestUri[2], @$requestUri[3]);
     }else{
-        exitWithError('API Not Found', 400);
+        exitWithError('API route not found', 404);
     }
 
 }elseif(@$requestUri[2]!=null){
@@ -239,7 +240,7 @@ $allowed_methods = array('search','add','save','delete');
 
 $method = getAction($method);
 if($method == null || !in_array($method, $allowed_methods)){
-    exitWithError('Method Not Allowed CCC', 405);
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, PATCH, DELETE'));
 }
 
 if($method=='save' || $method=='add'){
@@ -349,7 +350,7 @@ if (@$requestUri[3]=='iiif') {
 
         include_once '../../hserv/controller/iiif_presentation.php';
     }else{
-        exitWithError('Method Not Allowed DDD', 405);
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
     }
 
 }elseif (@$entities[@$requestUri[3]]=='System') {
@@ -380,9 +381,59 @@ if (@$requestUri[3]=='iiif') {
 else
 {
     //action
-    $req_params['entity'] = @$entities[@$requestUri[3]];
+    $requestedResource = @$requestUri[3];
+    $req_params['entity'] = @$entities[$requestedResource];
     $req_params['a'] = $method;
     $req_params['restapi'] = 1; //set http response code
+
+    // Modern public response format is initially limited to the four
+    // definition resources. Explicit API response context tells the shared
+    // entity search layer to retain its full internal result for formatting
+    // at the entityScrud.php controller boundary.
+    $definitionResources = array(
+        'rty' => 'rectypes',
+        'rectypes' => 'rectypes',
+        'dty' => 'fields',
+        'fields' => 'fields',
+        'trm' => 'terms',
+        'terms' => 'terms',
+        'rst' => 'recstructure',
+        'recstructure' => 'recstructure'
+    );
+
+    if($method === 'search' && isset($definitionResources[$requestedResource])){
+        $apiResponseContext = array(
+            'mode' => 'collection',
+            'entity' => $definitionResources[$requestedResource]
+        );
+
+        if($apiResponseContext['entity'] === 'recstructure'){
+            // /recstructure/{recordTypeId} returns all fields for a record type.
+            // /recstructure/{recordTypeId}/{detailTypeId} returns one field.
+            if(isset($requestUri[4]) && $requestUri[4] !== ''){
+                $req_params['rst_RecTypeID'] = $requestUri[4];
+                $apiResponseContext['recordTypeId'] = intval($requestUri[4]);
+            }
+            if(isset($requestUri[5]) && $requestUri[5] !== ''){
+                $req_params['rst_DetailTypeID'] = $requestUri[5];
+                $apiResponseContext['detailTypeId'] = intval($requestUri[5]);
+                $apiResponseContext['mode'] = 'item';
+            }
+            if(!isset($req_params['details'])){
+                $req_params['details'] = 'structure';
+            }
+        }elseif(isset($requestUri[4]) && $requestUri[4] !== ''){
+            $primaryFields = array(
+                'rectypes' => 'rty_ID',
+                'fields' => 'dty_ID',
+                'terms' => 'trm_ID'
+            );
+            $req_params[$primaryFields[$apiResponseContext['entity']]] = $requestUri[4];
+            $apiResponseContext['mode'] = 'item';
+        }
+
+        $req_params['api_response_context'] = $apiResponseContext;
+    }
 
     if(@$requestUri[3]=='annotations'){
         // Supported annotation API paths:
@@ -420,15 +471,25 @@ else
                 $req_params['fields']['source'] = 'mirador';
             }
         }
-    }elseif(@$requestUri[4]!=null){
+    }elseif(@$requestUri[4]!=null && !isset($definitionResources[$requestedResource])){
       $req_params['recID'] = $requestUri[4];
     }
 
     if($req_params['entity']=='Records'){
         if($method=='search'){
+            // Public records API always returns the stable JSON representation.
+            // Export-specific options remain available to direct/internal
+            // record_output.php callers but are not part of this API contract.
+            $req_params['format'] = 'json';
+            unset($req_params['fmt'], $req_params['extended'], $req_params['depth'], $req_params['linkmode']);
+
+            $apiResponseContext = array(
+                'entity' => 'records',
+                'mode' => isset($requestUri[4]) && $requestUri[4] !== '' ? 'item' : 'collection'
+            );
             include_once '../../hserv/controller/record_output.php';
         }else{
-            exitWithError('Method Not Implemented', 405);
+            exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
         }
     }else{
         include_once '../../hserv/controller/entityScrud.php';
@@ -503,7 +564,21 @@ function authenticateApiRequestWithJwt($system){
  * @param array $headers Optional response headers.
  * @return void
  */
-function exitWithError($message, $code, $headers = array()){
+function exitWithError($message, $code, $headers = array(), $error_code = null){
+
+    if($error_code === null){
+        if($code === 401 || $code === 403){
+            $error_code = HEURIST_REQUEST_DENIED;
+        }elseif($code === 404){
+            $error_code = HEURIST_NOT_FOUND;
+        }elseif($code === 409){
+            $error_code = HEURIST_ACTION_BLOCKED;
+        }elseif($code >= 500){
+            $error_code = HEURIST_SYSTEM_FATAL;
+        }else{
+            $error_code = HEURIST_INVALID_REQUEST;
+        }
+    }
 
     header(HEADER_CORS_POLICY);
     header(CTYPE_JSON);
@@ -513,7 +588,11 @@ function exitWithError($message, $code, $headers = array()){
     }
 
     http_response_code($code);
-    print json_encode(array("status"=>'invalid', "message"=>$message));
+    print json_encode(array(
+        'status' => $code,
+        'error' => $error_code,
+        'message' => $message
+    ));
     exit;
 }
 

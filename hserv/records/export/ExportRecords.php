@@ -66,6 +66,9 @@ abstract class ExportRecords {
     /** @var array|bool An array of detail type IDs to retrieve. True means all details, false means no details. */
     protected $retrieve_detail_fields = false;
 
+    /** @var array|null Public records API response/field context. */
+    protected $api_records = null;
+
     /**
      * @var int Mode for exporting extended data in JSON/GeoJSON formats:
      *          0: Heurist internal format (default).
@@ -167,6 +170,7 @@ abstract class ExportRecords {
         }
 
         $this->extended_mode = intval(@$params['extended']) > 0 ? intval($params['extended']) : 0;
+        $this->api_records = is_array(@$params['_api_records']) ? $params['_api_records'] : null;
 
         // Handling depth and linked records
         $max_depth = 0;
@@ -219,6 +223,24 @@ abstract class ExportRecords {
         $default_all_fields = true;
         $this->retrieve_header_fields = array();
         $this->retrieve_detail_fields = array();
+
+        if(is_array($this->api_records)){
+            $publicHeaders = is_array(@$this->api_records['headers']) ? $this->api_records['headers'] : array();
+            $internalHeaders = $publicHeaders;
+            // These fields are required internally to load and process records;
+            // ExportRecordsJSON removes them again when they were not requested.
+            if(!in_array('rec_RecTypeID', $internalHeaders, true)){
+                array_unshift($internalHeaders, 'rec_RecTypeID');
+            }
+            if(!in_array('rec_ID', $internalHeaders, true)){
+                array_unshift($internalHeaders, 'rec_ID');
+            }
+            $this->retrieve_header_fields = implode(',', array_values(array_unique($internalHeaders)));
+            $this->retrieve_detail_fields = $this->api_records['details'] === true
+                ? true
+                : (is_array($this->api_records['details']) ? $this->api_records['details'] : array());
+            return;
+        }
 
         if (!empty($params['detail'])) {
             $params['columns'] = is_array($params['detail']) ? $params['detail'] : explode(',', $params['detail']);

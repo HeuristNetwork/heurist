@@ -2917,7 +2917,7 @@ function recordSearch($system, $params, $relation_query=null)
             return $system->addError(HEURIST_ERROR, 'Invalid search request; unable to construct valid SQL query', null);
         }
 
-        if($is_count_only || ($is_ids_only && @$params['needall']) || !$system->hasAccess() ){ //not logged in
+        if($is_count_only || ($is_ids_only && @$params['needall']) ){
             $search_detail_limit = PHP_INT_MAX;
             $aquery['limit'] = '';
             if($is_count_only) {$aquery['sort'] = '';}
