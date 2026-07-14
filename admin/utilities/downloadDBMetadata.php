@@ -31,21 +31,9 @@
 * @since       7
 */
 
-global $arg_no_action;
-
-use hserv\utilities\USanitize;
-use hserv\utilities\UAdminScript;
-
-require_once dirname(__FILE__) . '/../../autoload.php';
-
-// not autoloaded classes - plain function libraries
-require_once dirname(__FILE__) . '/../../hserv/utilities/UFile.php';
+// Include the shared CLI setup script and specific Mail utility
+require_once dirname(__FILE__) . '/../../hserv/utilities/cli_bootstrap.php';
 require_once dirname(__FILE__) . '/../../hserv/utilities/UMail.php';
-
-$ctx = UAdminScript::bootstrap(@$argv, @$passwordForServerFunctions);
-$mysqli = $ctx['mysqli'];
-$upload_root = $ctx['upload_root'];
-$eol = $ctx['eol'];
 
 $cnt_updated = 0;
 $cnt_skipped = 0;
@@ -53,7 +41,13 @@ $cnt_errors  = 0;
 
 print "Heurist database metadata synchronisation - " . date(DATE_8601) . $eol . $eol;
 
-UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full, $short_name) use ($mysqli, $upload_root, $eol, &$cnt_updated, &$cnt_skipped, &$cnt_errors) {
+foreach ($databases as $db_name) {
+    $short_name = basename($db_name); // sanitize - no path components allowed
+    list($database_name_full, $short_name) = mysql__get_names($short_name);
+
+    if (mysql__check_dbname($short_name) !== null) {
+        continue; //not a valid heurist database name
+    }
 
     $regID = mysql__select_value(
         $mysqli,
@@ -63,7 +57,7 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
     if (!isPositiveInt($regID)) {
         // database is not registered with the Heurist Reference Index - nothing to do
         $cnt_skipped++;
-        return;
+        continue;
     }
 
     print "Database '$short_name' is registered (ID #$regID)$eol";
@@ -74,7 +68,6 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
     $xml_data = loadRemoteURLContentWithRange($metadata_url, null, true, 30);
 
     if (empty($xml_data)) {
-
         global $glb_curl_error;
 
         $err_msg = "Heurist was unable to download the registration metadata for database '$short_name' "
@@ -86,7 +79,7 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
         print "  ERROR: download failed - " . ($glb_curl_error ?: 'no data returned') . $eol;
         sendEmailToAdmin('Heurist metadata sync failed for ' . $short_name, $err_msg, false);
         $cnt_errors++;
-        return;
+        continue;
     }
 
     // validate the downloaded content is well-formed XML before overwriting anything
@@ -96,7 +89,6 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
     libxml_clear_errors();
 
     if ($parsed === false) {
-
         $err_detail = '';
         foreach ($xml_errors as $xml_error) {
             $err_detail .= trim($xml_error->message) . " (line {$xml_error->line})\n";
@@ -111,21 +103,20 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
         print "  ERROR: downloaded content is not valid XML$eol";
         sendEmailToAdmin('Heurist metadata sync: invalid XML for ' . $short_name, $err_msg, false);
         $cnt_errors++;
-        return;
+        continue;
     }
 
     // settings subdirectory of this database's filestore directory
     $settings_dir = rtrim($upload_root, '/') . '/' . $short_name . '/settings/';
 
     if (!folderCreate($settings_dir, true)) {
-
         $err_msg = "Heurist could not create or write to the settings folder for database '$short_name':\n"
             . $settings_dir;
 
         print "  ERROR: cannot access settings folder $settings_dir$eol";
         sendEmailToAdmin('Heurist metadata sync: filestore error for ' . $short_name, $err_msg, false);
         $cnt_errors++;
-        return;
+        continue;
     }
 
     $target_file = $settings_dir . 'DBMetadata.xml';
@@ -141,6 +132,6 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
         sendEmailToAdmin('Heurist metadata sync: write failure for ' . $short_name, $err_msg, false);
         $cnt_errors++;
     }
-});
+}
 
 print $eol . "Finished. Updated: $cnt_updated   Not registered (skipped): $cnt_skipped   Errors: $cnt_errors" . $eol;
