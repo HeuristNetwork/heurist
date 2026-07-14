@@ -4955,7 +4955,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 let autoResizePopup = this.usrPreferences.autoResizePopup;
                 let $span = $('<span>', {
                     html: `<input type="checkbox" class="autoResizePopup" ${autoResizePopup ? 'checked="checked"' : ''} /> autoresize`,
-                    style: 'position: absolute;top: 25%;right: 4em;font-weight: normal;cursor: pointer;'
+                    style: 'position: absolute;top: 25%;right: 4em;font-weight: normal;cursor: pointer;',
+                    title: 'Scale the form to use as much as possible of the window without losing the buttons.\nIf off, buttons may be hidden if the screen or form is resized.'
                 }).appendTo(dlg_header);
                 this._autoResizeCheckbox = $span.find('input');
 
