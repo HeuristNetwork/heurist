@@ -205,13 +205,62 @@
     }elseif($action == 'set_user_notification_settings'){
         $res = user_blockNotifications($system, $req_params['blocking']);
     }elseif($action == 'get_db_metadata'){
-        // Human-readable listing of the locally cached Heurist_Reference_Index registration
-        // metadata (DBMetadata.xml, synced nightly by admin/utilities/downloadDBMetadata.php),
-        // for display on Design > Properties once the database has been registered.
+        // Returns database metadata for Design > Properties display.
+        // Three states (Ian Johnson's revised spec, Jul 2026):
+        //   has_local_xml=false, fields=[]   → not registered, or live fetch failed
+        //   has_local_xml=false, fields=[..] → registered, no local XML yet; fields from a live
+        //                                      fetch from the Reference Index (NOT stored to disk)
+        //   has_local_xml=true,  fields=[..] → local DBMetadata.xml present (user has synced);
+        //                                      render from local file
 
         $filestore_dir = $system->getFileStoreRootFolder() . $system->dbname() . '/';
 
-        $res = \hserv\utilities\DbMetadataReader::read($filestore_dir);
+        $local = \hserv\utilities\DbMetadataReader::read($filestore_dir);
+
+        if($local['exists']){
+            // State 3 — local DBMetadata.xml present (user clicked "Sync" at some point)
+            $res = $local;
+        } else {
+            // State 2 — registered but no local XML: fetch live (display only, do not store)
+            $regID = $system->settings->get('sys_dbRegisteredID');
+            if(isPositiveInt($regID)){
+                $res = \hserv\utilities\DbMetadataReader::fetchLive(intval($regID));
+            } else {
+                // State 1 — not registered
+                $res = ['has_local_xml' => false, 'exists' => false, 'fields' => [],
+                        'all_labels' => \hserv\utilities\DbMetadataReader::ALL_LABELS];
+            }
+        }
+
+    }elseif($action == 'sync_db_metadata'){
+        // User-triggered sync: fetch the current XML for this database from the Heurist Reference
+        // Index and save it locally as DBMetadata.xml in the settings directory.
+        // Called when the user clicks "Save metadata locally" (State 2) or
+        // "Refresh from Reference Index" (State 3) in Design > Properties.
+        // Per Ian Johnson's revised spec (Jul 2026): sync is user-initiated, not automatic.
+
+        if(!$system->isDBOwner()){
+            $system->addError(HEURIST_REQUEST_DENIED, 'Only the database owner can sync metadata');
+            $res = false;
+        } else {
+            $regID = $system->settings->get('sys_dbRegisteredID');
+
+            if(!isPositiveInt($regID)){
+                $system->addError(HEURIST_INVALID_REQUEST,
+                    'This database is not registered with the Heurist Reference Index');
+                $res = false;
+            } else {
+                $filestore_dir = $system->getFileStoreRootFolder() . $system->dbname() . '/';
+                $result = \hserv\utilities\DbMetadataReader::syncToLocal(intval($regID), $filestore_dir);
+
+                if($result['ok']){
+                    $res = $result; // includes parsed fields for immediate UI update
+                } else {
+                    $system->addError(HEURIST_ERROR, $result['error']);
+                    $res = false;
+                }
+            }
+        }
     }elseif($action == 'get_tinymce_formats'){
 
         $settings = $system->settings->getDatabaseSetting('TinyMCE formats');
@@ -812,6 +861,23 @@
 
                     // Upload file
                     $res = uploadFileToNakala($system, $params);//from record edit - define file field
+
+                    if($res !== false){
+                        global $glb_nakala_id;
+                        if($glb_nakala_id){
+                            // Log the DOI alongside any other repository deposits for this database -
+                            // purely additive, doesn't change $res / the response sent to the client
+                            recordExternalIdentifier($system, "{$repo_id}_{$glb_nakala_id}", [
+                                'Service' => 'nakala',
+                                'Label' => 'Nakala file upload (record edit)',
+                                'ID' => $glb_nakala_id,
+                                'DOI' => $glb_nakala_id,
+                                'DOIRegistered' => ($params['status'] === 'published'),
+                                'URL' => is_array($res) ? @$res['link'] : $res,
+                                'Date' => date('Y-m-d')
+                            ]);
+                        }
+                    }
 
                 }
 

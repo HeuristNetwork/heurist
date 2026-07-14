@@ -1839,6 +1839,10 @@ function isActionInProgress($action, $range_minutes, $db_name = '')
  *
  * @global int|string|null $glb_curl_code Stores cURL error code from Nakala API calls.
  * @global string|null $glb_curl_error Stores cURL error message from Nakala API calls.
+ * @global string|null $glb_nakala_id Stores the Nakala identifier (= reserved DOI string) of the
+ *                      uploaded record after a successful call, regardless of 'returnType' - read
+ *                      this if you need the identifier/DOI but called with the default (file URL)
+ *                      or 'editor' returnType. See getRepositoryDOI() to confirm/regain its DOI status later.
  * @param \hserv\System $system The Heurist system instance.
  * @param array $params An associative array of parameters:
  *                      'apiKey' (string): User's Nakala API Key.
@@ -1896,25 +1900,20 @@ function uploadFileToNakala($system, $params)
 function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas)
 {
 
-    global $glb_curl_code, $glb_curl_error;
+    global $glb_curl_code, $glb_curl_error, $glb_nakala_id;
     $glb_curl_code = null;
     $glb_curl_error = '';
+    $glb_nakala_id = null; // exposes the Nakala identifier/DOI to the caller regardless of 'returnType', see getRepositoryDOI()
 
     $herror = HEURIST_ACTION_BLOCKED;
 
     $apiKey = $parameters['apiKey'] ?? '';
-    $testAPIKeys = [
-        // Nakala => https://test.nakala.fr/
-        '01234567-89ab-cdef-0123-456789abcdef',
-        '33170cfe-f53c-550b-5fb6-4814ce981293',
-        'f41f5957-d396-3bb9-ce35-a4692773f636',
-        'aae99aba-476e-4ff2-2886-0aaf1bfa6fd2',
-    ];
 
-    $useTest = in_array($apiKey, $testAPIKeys);
-    $NAKALA_BASE_URL = $useTest ? 'https://test.nakala.fr/u/datas/' : 'https://nakala.fr/u/datas/';
-    $NAKALA_BASE_URL_API_FILE = $useTest ? 'https://apitest.nakala.fr/data/' : 'https://api.nakala.fr/data/';
-    $NAKALA_BASE_URL_API = $useTest ? 'https://apitest.nakala.fr/datas' : 'https://api.nakala.fr/datas';
+    $nakalaUrls = getNakalaBaseUrls($apiKey);
+    $useTest = $nakalaUrls['useTest'];
+    $NAKALA_BASE_URL = $nakalaUrls['ui'];
+    $NAKALA_BASE_URL_API_FILE = $nakalaUrls['apiFile'];
+    $NAKALA_BASE_URL_API = $nakalaUrls['api'];
 
     $missingApiKey = '<br><br>Your Nakala API key is either missing or invalid, please check it under Design > External repositories';
     $unknownErrorMsg = 'An unknown response was received from Nakala after uploading the selected file.<br>Please create a ticket if this persists.';
@@ -2193,6 +2192,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas)
     if (array_key_exists('id', $payload)) {
 
         $nakalaID = $result['payload']['id'];
+        $glb_nakala_id = $nakalaID; // Nakala identifier IS the DOI string from creation onward - see getNakalaDataDetails()
         $returnType = array_key_exists('returnType', $parameters) ? $parameters['returnType'] : '';
         $linkToUI = $returnType === 'editor';
         $linkToUIAndID = $returnType === 'editor+id';
@@ -2595,4 +2595,304 @@ function getFileDetailsForNakala($mysqli, $ulfID)
     }
 
     return [$metaValues, $file];
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * DOI retrieval / "regaining" for external repositories (Nakala now, Zenodo etc. to follow)
+ *
+ * Background (see Nakala documentation, eg. https://documentation.huma-num.fr/en/nakala-en/):
+ * Nakala assigns its identifier in DOI format ("10.34847/nkl.xxxxxxxx" on production) to a data
+ * record the instant it's created via POST /datas - this is the value already captured as
+ * $nakalaID in uploadFilesToNakala() above. The nuance is that this identifier is only actually
+ * *registered* with DataCite (and therefore resolvable at https://doi.org/{doi}) once the record's
+ * status is 'published'. While status is 'pending' (private - the default used for whole-database
+ * archive uploads, see export/dbbackup/exportMyDataPopup.php) the DOI string is reserved but not
+ * live, and Nakala's API has been observed to return 403 for GET requests against the caller's own
+ * pending records (see the @todo above uploadFilesToNakala()).
+ *
+ * Publishing is irreversible - once a Nakala record is published it cannot be unpublished or
+ * deleted - so nothing here triggers publication automatically; it always requires an explicit
+ * call to publishNakalaData(), which callers should only make after explicit user confirmation.
+ * ------------------------------------------------------------------------------------------- */
+
+/**
+ * Checks whether a Nakala API key is one of Nakala's published sandbox/test keys.
+ * Factored out of uploadFilesToNakala() so every Nakala-related function agrees on whether a
+ * given key targets the production or test/sandbox platform.
+ *
+ * @param string $apiKey
+ * @return bool
+ */
+function isNakalaTestApiKey($apiKey)
+{
+    $testAPIKeys = [
+        // Nakala => https://test.nakala.fr/
+        '01234567-89ab-cdef-0123-456789abcdef',
+        '33170cfe-f53c-550b-5fb6-4814ce981293',
+        'f41f5957-d396-3bb9-ce35-a4692773f636',
+        'aae99aba-476e-4ff2-2886-0aaf1bfa6fd2',
+    ];
+    return in_array($apiKey, $testAPIKeys);
+}
+
+/**
+ * Returns the set of Nakala base URLs appropriate for a given API key (production vs test/sandbox).
+ *
+ * @param string $apiKey
+ * @return array{useTest: bool, ui: string, apiFile: string, api: string}
+ */
+function getNakalaBaseUrls($apiKey)
+{
+    $useTest = isNakalaTestApiKey($apiKey);
+    return [
+        'useTest' => $useTest,
+        'ui'      => $useTest ? 'https://test.nakala.fr/u/datas/' : 'https://nakala.fr/u/datas/',
+        'apiFile' => $useTest ? 'https://apitest.nakala.fr/data/' : 'https://api.nakala.fr/data/',
+        'api'     => $useTest ? 'https://apitest.nakala.fr/datas' : 'https://api.nakala.fr/datas',
+    ];
+}
+
+/**
+ * Fetches the current status and DOI for a single Nakala data record via GET /datas/{identifier}.
+ * Use this to confirm/regain the DOI of a record that was uploaded earlier (eg. by reading the
+ * identifier back out of this database's external_IDs.json - see recordExternalIdentifier()).
+ *
+ * If Nakala refuses the read (403/401 - currently expected for the depositor's own 'pending'
+ * records, see the file-level note above) this does NOT fail outright: it falls back to the
+ * reserved identifier/DOI we already have, with doiRegistered forced to false, since the caller
+ * usually already has the identifier from the original upload and just wants to know whether it
+ * has gone live since.
+ *
+ * @param \hserv\System $system
+ * @param string $apiKey     Nakala API key for the account that owns/can read the record
+ * @param string $identifier Nakala data identifier (= reserved DOI string), as returned at creation
+ * @return array|false ['identifier'=>, 'doi'=>, 'doiRegistered'=>bool, 'status'=>, 'link'=>] or false on hard failure
+ */
+function getNakalaDataDetails($system, $apiKey, $identifier)
+{
+
+    if (empty($apiKey) || empty($identifier)) {
+        $system->addError(HEURIST_INVALID_REQUEST, 'An API key and a data identifier are both required to retrieve a Nakala DOI');
+        return false;
+    }
+
+    $urls = getNakalaBaseUrls($apiKey);
+
+    $curl = curl_init();
+    if (!$curl) {
+        $system->addError(HEURIST_SYSTEM_FATAL, 'Failed to initialise CURL handler');
+        return false;
+    }
+
+    curl_setopt($curl, CURLOPT_URL, $urls['api'] . '/' . rawurlencode($identifier));
+    curl_setopt($curl, CURLOPT_HTTPHEADER, ["X-API-KEY: {$apiKey}"]);
+    curl_setopt($curl, CURLOPT_COOKIEFILE, '/dev/null');
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_HEADER, 0);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+    curl_setopt($curl, CURLOPT_MAXREDIRS, 5);
+
+    if (defined('HEURIST_HTTP_PROXY')) {
+        curl_setopt($curl, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+        if (defined('HEURIST_HTTP_PROXY_AUTH')) {
+            curl_setopt($curl, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+        }
+    }
+
+    $body = curl_exec($curl);
+    $code = intval(curl_getinfo($curl, CURLINFO_HTTP_CODE));
+    $error = curl_error($curl);
+    curl_close($curl);
+
+    if ($error) {
+        $system->addError(HEURIST_ACTION_BLOCKED, "Nakala services appear to be unavailable: {$error}");
+        return false;
+    }
+
+    if ($code === 401 || $code === 403) {
+        // 401: "Donnée non publiée, clé d'API manquante ou compte utilisateur inexistant"
+        // 403: "Droit sur la donnée insuffisant"
+        // Both mean we cannot read the record right now - typically because it's still 'pending'.
+        // Not fatal: fall back to what we already know rather than blocking the caller's workflow.
+        // See file-level note above the function definitions.
+        return [
+            'identifier' => $identifier,
+            'doi' => $identifier,
+            'doiRegistered' => false,
+            'status' => 'pending',
+            'link' => "{$urls['ui']}{$identifier}",
+        ];
+    }
+
+    $result = json_decode($body, true);
+
+    if (JSON_ERROR_NONE != json_last_error() || !is_array($result) || !array_key_exists('status', $result)) {
+        $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was received from Nakala while retrieving DOI/status information.');
+        return false;
+    }
+
+    $status = $result['status']; // Nakala returns 'public' for a published record (not 'published')
+    // and 'pending' while still private. Check for both to be safe.
+    $isPublished = ($status === 'public' || $status === 'published');
+
+    return [
+        'identifier' => $identifier,
+        'doi' => $identifier, // the Nakala identifier IS the DOI string - see file-level note above
+        'doiRegistered' => $isPublished,
+        'status' => $status,
+        'link' => "{$urls['ui']}{$identifier}",
+    ];
+}
+
+/**
+ * Publishes a previously 'pending' Nakala data record. This is what actually causes Nakala to
+ * register the record's DOI with DataCite, making it live/resolvable at https://doi.org/{doi}.
+ *
+ * IMPORTANT: this makes the record (and its description) PUBLIC, and Nakala does not support
+ * unpublishing or deleting published data. Callers MUST obtain explicit, informed confirmation
+ * from the Heurist user before calling this - never call it automatically as part of a routine
+ * DOI check (see getNakalaDataDetails()).
+ *
+ * @param \hserv\System $system
+ * @param string $apiKey
+ * @param string $identifier
+ * @return bool True on success, false on failure (see $system->getError())
+ */
+function publishNakalaData($system, $apiKey, $identifier)
+{
+
+    if (empty($apiKey) || empty($identifier)) {
+        $system->addError(HEURIST_INVALID_REQUEST, 'An API key and a data identifier are both required to publish a Nakala record');
+        return false;
+    }
+
+    $urls = getNakalaBaseUrls($apiKey);
+
+    $curl = curl_init();
+    if (!$curl) {
+        $system->addError(HEURIST_SYSTEM_FATAL, 'Failed to initialise CURL handler');
+        return false;
+    }
+
+    // The Nakala API docs confirm: status is a PATH PARAMETER, not a request body.
+    // Endpoint: PUT /datas/{identifier}/status/{status}
+    // Available status values: 'published', 'moderated'
+    // Success response: 204 No Content (no body)
+    curl_setopt($curl, CURLOPT_URL, $urls['api'] . '/' . rawurlencode($identifier) . '/status/published');
+    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
+    curl_setopt($curl, CURLOPT_POSTFIELDS, '');
+    curl_setopt($curl, CURLOPT_HTTPHEADER, ["X-API-KEY: {$apiKey}", 'Content-Length: 0']);
+    curl_setopt($curl, CURLOPT_COOKIEFILE, '/dev/null');
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_HEADER, 0);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+
+    if (defined('HEURIST_HTTP_PROXY')) {
+        curl_setopt($curl, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+        if (defined('HEURIST_HTTP_PROXY_AUTH')) {
+            curl_setopt($curl, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+        }
+    }
+
+    $body = curl_exec($curl);
+    $code = intval(curl_getinfo($curl, CURLINFO_HTTP_CODE));
+    $error = curl_error($curl);
+    curl_close($curl);
+
+    if ($error || ($code !== 204 && $code >= 400)) {
+        $msg = $error ?: "Nakala returned HTTP {$code} while attempting to publish the record";
+        $system->addError(HEURIST_ACTION_BLOCKED, $msg);
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Placeholder for Zenodo DOI retrieval - not yet implemented, see getRepositoryDOI().
+ *
+ * Zenodo has a similar nuance to Nakala: creating a deposition (POST /api/deposit/depositions)
+ * immediately returns a numeric internal 'id' plus a *pre-reserved* DOI under
+ * metadata.prereserve_doi.doi, but that DOI is only registered/resolvable once the deposition is
+ * explicitly published (POST /api/deposit/depositions/{id}/actions/publish) - at which point
+ * GET /api/deposit/depositions/{id} returns a top-level 'doi' field.
+ *
+ * To wire Zenodo in:
+ *   1. Implement this to call that GET endpoint with a Bearer token (Authorization header), and
+ *      return the same shape as getNakalaDataDetails().
+ *   2. Add a 'zenodo' branch to getRepositoryDOI() below.
+ *   3. No changes are needed to the credentials layer - user_getRepositoryCredentials2() in
+ *      dbsUsersGroups.php already supports an arbitrary 'service' name per account.
+ *
+ * @param \hserv\System $system
+ * @param string $apiKey
+ * @param string $identifier
+ * @return false
+ */
+function getZenodoDOI($system, $apiKey, $identifier)
+{
+    $system->addError(HEURIST_ACTION_BLOCKED, 'DOI retrieval for Zenodo is not yet implemented.');
+    return false;
+}
+
+/**
+ * Generic, repository-agnostic entry point for (re)confirming the DOI of a record previously
+ * deposited in an external repository. This is the function to call from UI actions such as
+ * 'Regain DOI' (see repoController.php, action=getdoi / action=publish).
+ *
+ * To add support for a new repository: write a get<Name>DOI($system, $apiKey, $identifier)
+ * function returning the same shape as getNakalaDataDetails(), then add a branch below.
+ *
+ * @param \hserv\System $system
+ * @param string $service    Repository service name, eg. 'nakala', 'zenodo' - this is the
+ *                            'service' value from repository credentials, NOT the service_id
+ *                            (see user_getRepositoryCredentials2() in dbsUsersGroups.php)
+ * @param string $apiKey
+ * @param string $identifier
+ * @return array|false ['identifier'=>, 'doi'=>, 'doiRegistered'=>bool, 'status'=>, 'link'=>] or false
+ */
+function getRepositoryDOI($system, $service, $apiKey, $identifier)
+{
+
+    $service = strtolower(trim((string) $service));
+
+    if (strpos($service, 'nakala') !== false) {
+        return getNakalaDataDetails($system, $apiKey, $identifier);
+    } elseif (strpos($service, 'zenodo') !== false) {
+        return getZenodoDOI($system, $apiKey, $identifier);
+    }
+
+    $system->addError(HEURIST_INVALID_REQUEST, "DOI retrieval is not supported for repository service '{$service}'");
+    return false;
+}
+
+/**
+ * Records (or updates) a repository deposit's identifying information - service, internal ID,
+ * DOI, publication status, etc - in this database's external_IDs.json settings file
+ * (HEURIST_FILESTORE_DIR/{dbname}/settings/external_IDs.json, via SystemSettings::setDatabaseSetting()).
+ *
+ * Centralising this here (rather than each upload flow building the array by hand) keeps the
+ * schema consistent across repositories and across the different places Heurist can deposit data
+ * (whole-database archive export, single-file 'transfer to remote' batch action, record-edit file
+ * upload, etc).
+ *
+ * @param \hserv\System $system
+ * @param string $key   Unique key for this entry within external_IDs.json, eg. 'NakalaDBBackup' or "{serviceID}_{ulf_ID}"
+ * @param array $entry  Associative array - recognised keys: Service, Label, ID, DOI, DOIRegistered, Status, URL, Date, Note, Data
+ * @return bool True on success
+ */
+function recordExternalIdentifier($system, $key, $entry)
+{
+
+    $defaults = [
+        'Service' => null, 'Label' => null, 'ID' => null, 'DOI' => null,
+        'DOIRegistered' => false, 'Status' => null, 'URL' => null,
+        'Date' => date('Y-m-d'), 'Note' => null, 'Data' => null,
+    ];
+
+    $entry = array_merge($defaults, $entry);
+
+    return $system->settings->setDatabaseSetting('External IDs', [$key => $entry], 1) !== false;
 }

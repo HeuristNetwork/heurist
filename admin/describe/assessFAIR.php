@@ -28,30 +28,27 @@
 * @since       7
 */
 
-global $arg_no_action;
-
-use hserv\utilities\USanitize;
-use hserv\utilities\UAdminScript;
 use hserv\utilities\FairScore;
 
-require_once dirname(__FILE__) . '/../../autoload.php';
-require_once dirname(__FILE__) . '/../../hserv/utilities/UFile.php';
-
-$ctx = UAdminScript::bootstrap(@$argv, @$passwordForServerFunctions);
-$mysqli = $ctx['mysqli'];
-$upload_root = $ctx['upload_root'];
-$eol = $ctx['eol'];
+// Include the shared CLI setup script
+require_once dirname(__FILE__) . '/../../hserv/utilities/cli_bootstrap.php';
 
 $cnt_done = 0;
 $cnt_errors = 0;
 
 print "Heurist FAIR score assessment - " . date(DATE_8601) . $eol . $eol;
 
-UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full, $short_name) use ($mysqli, $upload_root, $eol, &$cnt_done, &$cnt_errors) {
+foreach ($databases as $db_name) {
+    $short_name = basename($db_name);
+    list($database_name_full, $short_name) = mysql__get_names($short_name);
+
+    if (mysql__check_dbname($short_name) !== null) {
+        continue;
+    }
 
     if (!hasTable($mysqli, 'sysIdentification', $database_name_full) || !hasTable($mysqli, 'Records', $database_name_full)) {
         // not a valid/complete Heurist database (e.g. mid-creation or broken) - skip silently
-        return;
+        continue;
     }
 
     try {
@@ -59,7 +56,7 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
     } catch (\Throwable $e) {
         print "Database '$short_name': ERROR calculating score - " . $e->getMessage() . $eol;
         $cnt_errors++;
-        return;
+        continue;
     }
 
     $filestore_dir = rtrim($upload_root, '/') . '/' . $short_name . '/';
@@ -72,6 +69,6 @@ UAdminScript::eachValidDatabase($ctx['databases'], function ($database_name_full
         print "Database '$short_name': ERROR writing FAIRscore.txt to $filestore_dir" . "settings/" . $eol;
         $cnt_errors++;
     }
-});
+}
 
 print $eol . "Finished. Scored: $cnt_done   Errors: $cnt_errors" . $eol;
