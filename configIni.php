@@ -75,11 +75,12 @@ of the codebase and rename it to index.html
 // ---------------------------------------------------------------------------------
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "7.1.3";// sets current program version number, determined by Heurist development lead
+$version = "7.2.1";// sets current program version number, determined by Heurist development lead
 
 $experimental = false; // do not change, false blocks execution of untested experimental code
 
 // ---------------------------------------------------------------------------------
+// 7.2.1  14 July 2026 IIIF annotation management, update API, update metadata management
 // 7.1.3  05 June 2026 Website optimisation, on-demand load of many components & image rescaling fixes
 // 7.1.2  22 May 2026 Improve custom report building and use, optimise PID resolver, interface improvements
 // 7.1.1  13 March 2026 Improved network viualiser and website generation speed fixes
