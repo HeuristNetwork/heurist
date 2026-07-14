@@ -77,4 +77,14 @@ echo "$LOG_PREFIX [GPL] Done."
 
 echo "$LOG_PREFIX [OWNERSHIP] Fixing ownership to $OWNER:$GROUP..."
 chown -R "$OWNER:$GROUP" "REPO_DIR_ASSOC" "$REPO_DIR_GPL"
-echo "$LOG_PREFIX [OWNERSHIP] Ownership fixed."
+# Group-writable files; searchable/traversable directories.
+# Preserve executable status for files already marked executable by Git.
+chmod -R ug+rwX "$REPO_DIR"
+
+# Ensure new files inherit the repository group.
+find "$REPO_DIR" -type d -exec chmod g+s {} +
+
+# Scripts that must always be directly executable.
+chmod ug+x "$REPO_DIR/copy_distribution_files.sh"
+
+echo "$LOG_PREFIX [PERMISSIONS] Ownership and permissions fixed."
