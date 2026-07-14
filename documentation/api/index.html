@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HEURIST — Open API</title>
+
+    <link rel="stylesheet" href="../../hclient/assets/css/heurist.css">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+    <style>
+        body{font-size:1.05em}
+        .api-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin:18px 0}
+        .api-link{display:block;background:#fff;border:1px solid #cdd6ea;border-radius:12px;padding:16px;color:#1f2937}
+        .api-link:hover{text-decoration:none;border-color:#8fa0c6;box-shadow:0 3px 12px rgba(0,0,0,.06)}
+        .api-link strong{display:block;color:#1f4ed8;margin-bottom:5px}
+        code{background:#fff;border:1px solid #d9e1f5;border-radius:6px;padding:2px 5px}
+        .note{background:#fff;border-left:4px solid #676E80;padding:12px 14px;border-radius:8px;margin:16px 0}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-inner" style="max-width:900px">
+            <div class="left">
+                <img class="logo" src="../../hclient/assets/v6/h6logo_inv.png" alt="HEURIST">
+                <span class="title">Heurist Open API</span>
+            </div>
+            <div class="right"></div>
+        </div>
+    </div>
+
+    <div class="container-full" style="max-width:900px">
+        <div class="main" style="margin:12px 0">
+            <div class="section-title"><div>Open API documentation</div></div>
+
+            <div class="section-sub">
+                <p>
+                    The Heurist Open API provides public record and IIIF access, authenticated
+                    access to database definitions, and IIIF Web Annotation endpoints.
+                </p>
+
+                <div class="api-links">
+                    <a class="api-link" href="swagger/">
+                        <strong>Interactive Swagger documentation</strong>
+                        Browse endpoints, inspect schemas, authorize with a JWT, and run requests.
+                    </a>
+
+                    <a class="api-link" href="../openapi.yaml">
+                        <strong>OpenAPI specification</strong>
+                        Download the authoritative machine-readable YAML contract.
+                    </a>
+
+                    <a class="api-link" href="HeuristPostmanCollectionV1.json">
+                        <strong>Postman collection</strong>
+                        Download API examples and the executable regression test collection.
+                    </a>
+
+                    <a class="api-link" href="HeuristPostmanEnvironmentV1.json">
+                        <strong>Postman environment</strong>
+                        Download the environment template and replace its placeholder values.
+                    </a>
+                </div>
+
+                <div class="note">
+                    <strong>API base URL:</strong> <code>../../</code> relative to this page.
+                    Public records and IIIF resources may be accessed anonymously. Database
+                    definitions and private records require authentication.
+                </div>
+
+                <h2>Guides and examples</h2>
+                <ul>
+                    <li><a href="HEURIST_API_Requests_Overview.md">API requests overview</a></li>
+                    <li><a href="HEURIST_API_Authentication.md">Authentication guide</a></li>
+                    <li><a href="curl_api_auth_examples.sh">cURL authentication examples</a></li>
+                    <li><a href="r_httr2_api_auth_examples.R">R / httr2 authentication examples</a></li>
+                </ul>
+
+                <p class="small">
+                    The OpenAPI YAML is the canonical public contract. Swagger UI presents that
+                    contract interactively; the Postman collection provides executable examples and tests.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -9,7 +9,7 @@ namespace hserv\controller;
  *
  * RouteResult shape:
  * [
- *   'mode'     => 'INTERNAL'|'REDIRECT'|'NOT_FOUND',
+ *   'mode'     => 'INTERNAL'|'REDIRECT'|'FILE'|'NOT_FOUND',
  *   'status'   => 200|302|404,
  *   'script'   => '/abs/path/to/script.php'|null,
  *   'location' => '/heurist/?db=...'|null,
@@ -140,14 +140,22 @@ final class RequestRouter
             return self::resultRedirect("/{$activeVersion}/startup/{$qs}", 302, []);
         }
 
-        // ---- 2) API
+        // ---- 2) API documentation
+        // Public documentation URLs are mapped to the active version's
+        // documentation/api folder. Files are served internally so the stable
+        // /api/docs and /api/openapi.yaml URLs do not expose a version folder.
+        if (self::isApiDocumentationRoute($segments)) {
+            return self::routeApiDocumentation($activeVersion, $segments);
+        }
+
+        // ---- 3) API
         // IMPORTANT: API must be executed as an entry script (do not go via index.php)
         if (self::isApiRoute($segments)) {
             $script = self::serverRoot() . "/{$activeVersion}/hserv/controller/api.php";
             return self::resultInternal($activeVersion, $query, $script);
         }
 
-        // ---- 3) /db/* pretty namespace (record/def/file)
+        // ---- 4) /db/* pretty namespace (record/def/file)
         // Map /db/* URLs into canonical params, then continue to version/index.php.
         if (self::isDbResolverRoute($segments)) {
             $params = self::paramsFromDbResolverPath($segments);
@@ -167,7 +175,7 @@ final class RequestRouter
             return self::resultInternal($activeVersion, $params);
         }
 
-        // ---- 4) Own-domain website handling (must preserve host -> never redirect)
+        // ---- 5) Own-domain website handling (must preserve host -> never redirect)
         // Apply URL substitutions before entering the own-domain handler so
         // idenk.net/About behaves the same as /IDENK/About.
         if ($mustPreserveHost) {
@@ -188,17 +196,17 @@ final class RequestRouter
             return self::routeOwnDomain($activeVersion, $mappedDb, $mappedWebsite, $segments, $query);
         }
 
-        // ---- 5) Version root (/<version>)
+        // ---- 6) Version root (/<version>)
         if ($versionPrefix !== null && empty($segments)) {
             return self::resultInternal($activeVersion, []);
         }
 
-        // ---- 6) Empty path (rare if root is rewritten): fall into app
+        // ---- 7) Empty path (rare if root is rewritten): fall into app
         if (empty($segments)) {
             return self::resultInternal($activeVersion, []);
         }
 
-        // ---- 7) Versionless /<db> and /<db>/<action>/...
+        // ---- 8) Versionless /<db> and /<db>/<action>/...
         $dbCandidate = $segments[0];
 
         // Avoid treating reserved prefixes as db
@@ -289,6 +297,19 @@ final class RequestRouter
                 } else {
                     echo "404 Not Found";
                 }
+                exit;
+
+            case 'FILE':
+                $file = $res['script'] ?? null;
+                if (!$file || !is_file($file)) {
+                    http_response_code(404);
+                    echo "404 Not Found";
+                    exit;
+                }
+                http_response_code($res['status'] ?? 200);
+                header('Content-Type: ' . self::contentTypeForFile($file));
+                header('X-Content-Type-Options: nosniff');
+                readfile($file);
                 exit;
 
             case 'INTERNAL':
@@ -408,6 +429,17 @@ final class RequestRouter
         ];
     }
 
+    private static function resultFile(string $file): array
+    {
+        return [
+            'mode'     => 'FILE',
+            'status'   => 200,
+            'script'   => $file,
+            'location' => null,
+            'params'   => [],
+        ];
+    }
+
     private static function resultRedirect(string $location, int $status, array $params = []): array
     {
         return [
@@ -431,6 +463,70 @@ final class RequestRouter
     }
 
     // ----------------- Specific route handlers -----------------
+
+    /**
+     * Maps stable API documentation URLs to files under
+     * /<version>/documentation/api.
+     *
+     * Public routes:
+     *   /api/openapi.yaml       -> documentation/api/heurist-openapi.yaml
+     *   /api/docs/              -> documentation/api/index.html
+     *   /api/docs/<path>        -> documentation/api/<path>
+     *
+     * The same routes work with an explicit version prefix.
+     */
+    private static function routeApiDocumentation(string $version, array $segments): array
+    {
+        $base = self::serverRoot() . "/{$version}/documentation/api";
+
+        if (($segments[1] ?? '') === 'openapi.yaml') {
+            if (count($segments) !== 2) {
+                return self::result404();
+            }
+            $file = $base . '/heurist-openapi.yaml';
+            return is_file($file) ? self::resultFile($file) : self::result404();
+        }
+
+        if (($segments[1] ?? '') !== 'docs') {
+            return self::result404();
+        }
+
+        $requestPath = self::stripQueryString($_SERVER['REQUEST_URI'] ?? '/api/docs/');
+        $relative = array_slice($segments, 2);
+
+        // Directory-style URLs are required for relative links in index pages.
+        if (empty($relative)) {
+            if (substr($requestPath, -1) !== '/') {
+                return self::resultRedirect($requestPath . '/', 302, []);
+            }
+            $relative = ['index.html'];
+        }
+
+        foreach ($relative as $segment) {
+            if ($segment === '.' || $segment === '..'
+                || preg_match('/^[A-Za-z0-9._-]+$/', $segment) !== 1) {
+                return self::result404();
+            }
+        }
+
+        $file = $base . '/' . implode('/', $relative);
+        if (is_dir($file)) {
+            if (substr($requestPath, -1) !== '/') {
+                return self::resultRedirect($requestPath . '/', 302, []);
+            }
+            $file .= '/index.html';
+        }
+
+        $realBase = realpath($base);
+        $realFile = realpath($file);
+        if ($realBase === false || $realFile === false
+            || strpos($realFile, $realBase . DIRECTORY_SEPARATOR) !== 0
+            || !is_file($realFile)) {
+            return self::result404();
+        }
+
+        return self::resultFile($realFile);
+    }
 
     private static function routeOwnDomain(string $version, ?string $db, $website, array $segments, array $query = []): array
     {
@@ -1041,9 +1137,39 @@ final class RequestRouter
         return !empty($segments) && $segments[0] === 'startup';
     }
 
+    private static function isApiDocumentationRoute(array $segments): bool
+    {
+        return count($segments) >= 2
+            && $segments[0] === 'api'
+            && in_array($segments[1], ['docs', 'openapi.yaml'], true);
+    }
+
     private static function isApiRoute(array $segments): bool
     {
         return !empty($segments) && $segments[0] === 'api';
+    }
+
+    private static function contentTypeForFile(string $file): string
+    {
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $types = [
+            'html' => 'text/html; charset=utf-8',
+            'htm'  => 'text/html; charset=utf-8',
+            'css'  => 'text/css; charset=utf-8',
+            'js'   => 'application/javascript; charset=utf-8',
+            'json' => 'application/json; charset=utf-8',
+            'yaml' => 'application/yaml; charset=utf-8',
+            'yml'  => 'application/yaml; charset=utf-8',
+            'md'   => 'text/markdown; charset=utf-8',
+            'txt'  => 'text/plain; charset=utf-8',
+            'png'  => 'image/png',
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'svg'  => 'image/svg+xml',
+            'ico'  => 'image/x-icon',
+        ];
+        return $types[$ext] ?? 'application/octet-stream';
     }
 
     private static function isDbResolverRoute(array $segments): bool
