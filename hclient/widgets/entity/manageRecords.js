@@ -107,6 +107,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     _source_def: null, // source def from source db
 
+    _autoResizeCheckbox: null,
+
     /**
      * @brief Initializes the manageRecords widget.
      * @override
@@ -2377,37 +2379,31 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .addClass('ui-heurist-btn-header1')
                 .css({float:'right', height: '18px'})
                 .on('click', function(){
-                    
-                        /*
-                        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
-                        this.options['width']  = this.usrPreferences['width'];
-                        this.options['height'] = this.usrPreferences['height'];
-                        */
-                    
-                        window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
-                                width: 800,
-                                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
-                                select_mode:'select_multi', 
-                                selection_ids:order,
-                                select_return_mode:'recordset', //ids by default
-                                onselect:function(event, data){
-                                    if(data && data.selection){
-                                        //assign new set of tags to record
-                                        
-                                        let request = {};
-                                        request['a']       = 'batch'; //batch action
-                                        request['entity']  = 'usrTags';
-                                        request['mode']    = 'replace';
-                                        request['tagIDs']  = data.selection.getOrder();
-                                        request['recIDs']  = that._currentEditID;
-                                        request['request_id'] = window.hWin.HEURIST4.util.random();
-                                        
-                                        window.hWin.HAPI4.EntityMgr.doRequest(request, null);
-                                        //update panel
-                                       
-                                    }
-                                }
-                        });
+
+                    window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                        width: 800,
+                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
+                        select_mode:'select_multi', 
+                        selection_ids:order,
+                        select_return_mode:'recordset', //ids by default
+                        onselect:function(event, data){
+                            if(data && data.selection){
+                                //assign new set of tags to record
+                                
+                                let request = {};
+                                request['a']       = 'batch'; //batch action
+                                request['entity']  = 'usrTags';
+                                request['mode']    = 'replace';
+                                request['tagIDs']  = data.selection.getOrder();
+                                request['recIDs']  = that._currentEditID;
+                                request['request_id'] = window.hWin.HEURIST4.util.random();
+                                
+                                window.hWin.HAPI4.EntityMgr.doRequest(request, null);
+                                //update panel
+                                
+                            }
+                        }
+                    });
                 })
              .appendTo(panel);        
                              
@@ -4915,38 +4911,75 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             let $dlg = this._as_dialog.dialog('widget');
             let dlg_header = $dlg.find('.ui-dialog-titlebar');
             
-            if(dlg_header.find('.btn_Fullscreen').length==0){
-            
-                $('<span>', {class: 'btn_Fullscreen'}).appendTo(dlg_header);
-                $('<span>', {class: 'btn_Standard'}).appendTo(dlg_header);
+            if(!this._autoResizeCheckbox){
 
-                dlg_header.find('.btn_Fullscreen').button({label:window.hWin.HR('Fullscreen')}).css({
-                    margin: '-0.9em 0 0 0',
-                    right: '12.5em',
-                    top: '45%',
-                    position: 'absolute',
-                    background: 'none',
-                    color: 'white'
-                }).on('click',(e) => {
-                    this._setDialogSize(true);
+                $('<span>', {
+                    class: 'btn_Fullscreen',
+                    style: 'margin: -0.9em 0px 0px;right: 26.5em;top: 45%;position: absolute;background: none;color: white;'
+                })
+                .button({label:window.hWin.HR('Fullscreen')})
+                .appendTo(dlg_header);
+
+                $('<span>', {
+                    class: 'btn_Standard',
+                    style: 'margin: -0.9em 0px 0px;right: 18.5em;top: 45%;position: absolute;background: none;color: white;'
+                })
+                .button({label:window.hWin.HR('Standard')})
+                .appendTo(dlg_header);
+
+                $('<span>', {
+                    class: 'btn_Small',
+                    style: 'margin: -0.9em 0px 0px;right: 12.25em;top: 45%;position: absolute;background: none;color: white;'
+                })
+                .button({label:window.hWin.HR('Small')})
+                .appendTo(dlg_header);
+
+                this._on(dlg_header.find('.btn_Fullscreen'), {
+                    click: () => {
+                        this._setDialogSize(false, 'full');
+                    }
                 });
 
-                dlg_header.find('.btn_Standard').button({label:window.hWin.HR('Standard')}).css({
-                    margin: '-0.9em 0 0 0',
-                    right: '5.5em',
-                    top: '45%',
-                    position: 'absolute',
-                    background: 'none',
-                    color: 'white'
-                }).on('click',(e) => {
-                    this._setDialogSize(false);
+                this._on(dlg_header.find('.btn_Standard'), {
+                    click: () => {
+                        this._setDialogSize(false, 'standard');
+                    }
                 });
-                
+
+                this._on(dlg_header.find('.btn_Small'), {
+                    click: () => {
+                        this._setDialogSize(false, 'small');
+                    }
+                });
+
+                let autoResizePopup = this.usrPreferences.autoResizePopup;
+                let $span = $('<span>', {
+                    html: `<input type="checkbox" class="autoResizePopup" ${autoResizePopup ? 'checked="checked"' : ''} /> autoresize`,
+                    style: 'position: absolute;top: 25%;right: 4em;font-weight: normal;cursor: pointer;'
+                }).appendTo(dlg_header);
+                this._autoResizeCheckbox = $span.find('input');
+
+                this._on($span, {
+                    click: (e) => {
+
+                        if(e.target.tagName === 'SPAN'){
+
+                            this._autoResizeCheckbox.prop('checked', !this._autoResizeCheckbox.prop('checked'));
+                            this._autoResizeCheckbox.trigger('change');
+                        }
+                    }
+                });
+
+                this._on(this._autoResizeCheckbox, {
+                    change: () => {
+                        this.saveUiPreferences();
+                    }
+                });
             }
 
             $dlg.css('box-shadow', '2px 3px 10px #00000080');
 
-            window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE, () => this._setDialogSize(true));
+            window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE, () => this._setDialogSize(true, 'full'));
         }
 
         //add record title at the top ======================
@@ -5415,6 +5448,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         if(this.usrPreferences.height<300) this.usrPreferences.height=300;
         if (this.usrPreferences.width>this.defaultPrefs.width) this.usrPreferences.width=this.defaultPrefs.width;
         if (this.usrPreferences.height>this.defaultPrefs.height) this.usrPreferences.height=this.defaultPrefs.height;
+        if(!Object.hasOwn(this.usrPreferences, 'autoResizePopup')) this.usrPreferences.autoResizePopup = true;
         return this.usrPreferences;
     },
     
@@ -5492,6 +5526,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         params.optfields = optfields;
         params.summary_tabs = activeTabs;
 
+        params.autoResizePopup = this._autoResizeCheckbox ? this._autoResizeCheckbox.is(':checked') : params.autoResizePopup;
+
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         
         return true;
@@ -5501,31 +5537,37 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     /**
      * @brief Sets the size of the edit dialog (popup).
      * @memberof heurist.manageRecords
-     * @param {boolean} [is_full=false] If true, sets to 95% of window dimensions; otherwise, 80%.
+     * @param {boolean} [isAutoResize=false] If true, first checks that the user wants auto resizing.
+     * @param {string} [size='standard'] Which of the preset sizes should be used. {'standard', 'full', 'small'}
      * Adjusts the width and height of the `_as_dialog` or `_edit_dialog` and centers it.
      * Then, triggers a resize of the internal layout.
      */
-    _setDialogSize: function(is_full = false){
+    _setDialogSize: function(isAutoResize = false, size = 'standard'){
+
+        if(isAutoResize && !this._autoResizeCheckbox?.is(':checked') || !this._as_dialog && !this._edit_dialog){
+            return;
+        }
 
         let width = window.hWin.innerWidth * 0.8;
         let height = window.hWin.innerHeight * 0.8;
 
-        if(is_full){
+        if(size === 'full'){
             width = window.hWin.innerWidth * 0.95;
             height = window.hWin.innerHeight * 0.95;
+        }else if(size === 'small'){
+            width = window.hWin.innerWidth * 0.75;
+            height = window.hWin.innerHeight * 0.75;
         }
 
         // Update width + height, and reset dialog's position to center
-        if(this._as_dialog && this._as_dialog.dialog('instance') !== undefined){
+        if(this._as_dialog?.dialog('instance') !== undefined){
             this._as_dialog.dialog('option', 'width', width);
             this._as_dialog.dialog('option', 'height', height);
             this._as_dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
-        }else if(this._edit_dialog && this._edit_dialog.dialog('instance') !== undefined){
+        }else if(this._edit_dialog?.dialog('instance') !== undefined){
             this._edit_dialog.dialog('option', 'width', width);
             this._edit_dialog.dialog('option', 'height', height);
             this._edit_dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
-        }else{
-            return;
         }
 
         this.editFormPopup.layout().resizeAll(); // resize layout
