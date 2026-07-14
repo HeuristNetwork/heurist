@@ -3235,8 +3235,21 @@ class RecordsBatch
 
                     if($rtn){ // register URL ($rtn)
 
+                        global $glb_nakala_id;
+                        $nakalaIdentifier = $glb_nakala_id; // reserved DOI string, set by uploadFilesToNakala() regardless of returnType
+
+                        $ulfParams = ['repository' => $serviceID];
+                        if($nakalaIdentifier){
+                            // "Touch" the file record with its DOI - the Nakala identifier IS the DOI
+                            // string from creation onward, but is only registered/resolvable with
+                            // DataCite once $status is 'published' (see getNakalaDataDetails() to
+                            // confirm/regain this later if it changes after the fact)
+                            $ulfParams['doi'] = $nakalaIdentifier;
+                            $ulfParams['doiRegistered'] = ($status === 'published');
+                        }
+
                         if($serviceID){
-                            $fields = ['ulf_Parameters' => "{\"repository\":\"{$serviceID}\"}"];
+                            $fields = ['ulf_Parameters' => json_encode($ulfParams)];
                         }else{
                             $fields = null;
                         }
@@ -3245,6 +3258,18 @@ class RecordsBatch
                         if(!isPositiveInt($new_ulfID)){
                             $sqlErrors[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $mysqli->error;
                             $failedIDs[] = $row[2];
+                        }elseif($nakalaIdentifier){
+                            // Also log it at database level, alongside any other repository deposits
+                            // (eg. the whole-database archive backup) in this database's external_IDs.json
+                            recordExternalIdentifier($this->system, "{$serviceID}_{$new_ulfID}", [
+                                'Service' => 'nakala',
+                                'Label' => "Nakala file transfer (file #{$new_ulfID})",
+                                'ID' => $nakalaIdentifier,
+                                'DOI' => $nakalaIdentifier,
+                                'DOIRegistered' => ($status === 'published'),
+                                'URL' => $rtn,
+                                'Date' => $today
+                            ]);
                         }
                     }else{
 

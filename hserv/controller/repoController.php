@@ -1,8 +1,7 @@
 <?php
-
 /**
 * repoController.php - Handler for external repository configuration and file manipulations
-*
+* 
 * Parameters:
 * action - Specifies the operation to perform regarding external repositories. Possible values:
 *   list   - Retrieves a list of available external repositories for the current user (calls user_getRepositoryList).
@@ -84,68 +83,127 @@ see dbsUserGroups.php for repository credentials methods
     user_saveRepositoryCredentials - Saves repository credentials in ugr_Preferences
 
 */
-require_once dirname(__FILE__) . '/../../autoload.php';
-require_once dirname(__FILE__) . '/../structure/dbsUsersGroups.php';
+require_once dirname(__FILE__).'/../../autoload.php';
+require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
 
 $need_compress = false;
 
 $system = new hserv\System();
 
-if (!$system->init(@$_REQUEST['db'])) {
+if(!$system->init(@$_REQUEST['db'])){
     //get error and response
     $response = $system->getError();
-} else {
+}else{
 
-    if (!$system->getUserId() > 0) {
+   if(!$system->getUserId()>0){
         $response = $system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in');
         // 'Administrator permissions are required');
-    } else {
+   }else{
 
         //for kml step2,step3,set_primary_rectype,step3
         $action = @$_REQUEST["a"];
         $res = false;
         $ugr_ID = $system->getUserId();
 
-        if ($action == 'list') {
+        if($action=='list'){
             //get list of available repositories for given user (including for database and groups)
 
             //array(ugr_ID, serviceName)
             $res = user_getRepositoryList($system, $ugr_ID, true);
 
-            if (@$_REQUEST['include_test'] == 1 && is_array($res)) { // add test accounts
+            if(@$_REQUEST['include_test'] == 1 && is_array($res)){ // add test accounts
 
                 // add Nakala testing
-                array_push($res, ['tnakala', 'Nakala', 0, 'tnakala'], ['unakala1', 'Nakala', 0, 'unakala1'], ['unakala2', 'Nakala', 0, 'unakala2'], ['unakala3', 'Nakala', 0, 'unakala3']);
+                array_push($res, ['tnakala', 'Nakala', 0, 'tnakala'], ['unakala1', 'Nakala', 0, 'unakala1'], ['unakala2', 'Nakala', 0, 'unakala2'], ['unakala3', 'Nakala', 0, 'unakala3'] );
             }
 
-        } elseif ($action == 'get') {
+        }elseif($action=='get'){
             //get credentials (to edit on client side) for given user
 
             $res = user_getRepositoryCredentials($system, true, $ugr_ID);
 
-        } elseif ($action == 'update') {
+        }elseif($action=='update'){
             //save credentials
             $to_delete = @$_REQUEST["delete"];
             $to_edit = @$_REQUEST["edit"];
 
             $res = user_saveRepositoryCredentials($system, $to_edit, $to_delete);
 
-            //}elseif($action=='upload'){
-            //upload and register file to external repository
+        }elseif($action=='getdoi' || $action=='publish'){
+            // (Re)confirm, or publish-and-register, the DOI for a record already deposited in an
+            // external repository. Works for any service with a get<Name>DOI() implementation
+            // wired into getRepositoryDOI() (see hserv/utilities/UFile.php) - currently Nakala only.
+            //
+            // Params: service_id (eg. "nakala_1"), identifier (the repository's data identifier,
+            // as returned at upload time / stored in this database's external_IDs.json)
+            //
+            // 'publish' makes the deposit PUBLIC and PERMANENT (for Nakala, this cannot be undone) -
+            // the client MUST get explicit user confirmation before sending this action.
 
+            $serviceID = @$_REQUEST['service_id'];
+            $identifier = @$_REQUEST['identifier'];
 
-        } else {
+            if(empty($serviceID) || empty($identifier)){
+
+                $system->addError(HEURIST_INVALID_REQUEST, 'service_id and identifier are both required');
+                $res = false;
+
+            }else{
+
+                $credentials = user_getRepositoryCredentials2($system, $serviceID);
+                $cred = is_array($credentials) ? (@$credentials[$serviceID] ?: null) : null;
+
+                if($cred == null || empty($cred['params']['writeApiKey'])){
+
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Credentials for the specified repository/account were not found');
+                    $res = false;
+
+                }else{
+
+                    $apiKey = $cred['params']['writeApiKey'];
+                    $service = $cred['service'];
+
+                    if($action == 'publish'){
+
+                        if(strpos(strtolower($service), 'nakala') === false){
+                            $system->addError(HEURIST_INVALID_REQUEST, "Publishing is not yet implemented for repository service '{$service}'");
+                            $res = false;
+                        }elseif(!publishNakalaData($system, $apiKey, $identifier)){
+                            $res = false;
+                        }else{
+                            $res = getNakalaDataDetails($system, $apiKey, $identifier);
+                        }
+
+                    }else{
+                        $res = getRepositoryDOI($system, $service, $apiKey, $identifier);
+                    }
+
+                    if($res !== false){
+                        // Keep this database's external_IDs.json in sync with whatever we just confirmed/published
+                        recordExternalIdentifier($system, $serviceID.'_'.$identifier, [
+                            'Service' => $service,
+                            'ID' => $identifier,
+                            'DOI' => $res['doi'],
+                            'DOIRegistered' => $res['doiRegistered'],
+                            'Status' => $res['status'],
+                            'URL' => $res['link']
+                        ]);
+                    }
+                }
+            }
+
+        }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");
             $res = false;
         }
 
-        if (is_bool($res) && $res == false) {
-            $response = $system->getError();
-        } else {
-            $response = ["status" => HEURIST_OK, "data" => $res];
+        if(is_bool($res) && $res==false){
+                $response = $system->getError();
+        }else{
+                $response = array("status"=>HEURIST_OK, "data"=> $res);
         }
-    }
+   }
 }
 header(CTYPE_JSON);
 print json_encode($response);
-
+?>
