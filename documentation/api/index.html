@@ -63,7 +63,7 @@
                 </div>
 
                 <div class="note">
-                    <strong>API base URL:</strong> <code>../../</code> relative to this page.
+                    <strong>API base URL:</strong> <code id="api-base-url">../</code>.
                     Public records and IIIF resources may be accessed anonymously. Database
                     definitions and private records require authentication.
                 </div>
@@ -83,5 +83,9 @@
             </div>
         </div>
     </div>
+    <script>
+        const apiBase = new URL('../', window.location.href);
+        document.getElementById('api-base-url').textContent = apiBase.href;
+    </script>
 </body>
 </html>
