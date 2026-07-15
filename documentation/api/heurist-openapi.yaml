@@ -167,8 +167,7 @@ paths:
       - Database structure
       operationId: listRecordTypes
       summary: Retrieve record type definitions
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/Limit'
@@ -210,8 +209,7 @@ paths:
       - Database structure
       operationId: getRecordType
       summary: Retrieve one record type definition
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordTypeId'
@@ -237,8 +235,7 @@ paths:
       - Database structure
       operationId: listFields
       summary: Retrieve field definitions
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/Limit'
@@ -276,8 +273,7 @@ paths:
       - Database structure
       operationId: getField
       summary: Retrieve one field definition
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/FieldId'
@@ -289,8 +285,7 @@ paths:
       - Database structure
       operationId: listTerms
       summary: Retrieve vocabulary terms
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/Limit'
@@ -332,8 +327,7 @@ paths:
       - Database structure
       operationId: getTerm
       summary: Retrieve one vocabulary term
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/TermId'
@@ -347,8 +341,7 @@ paths:
       summary: Retrieve the complete field structure of a record type
       description: Returns a collection. The public identity is the record type identifier, not the internal `rst_ID`
         primary key.
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordTypeId'
@@ -367,8 +360,7 @@ paths:
       - Database structure
       operationId: getRecordStructureField
       summary: Retrieve one field within a record type structure
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordTypeId'
@@ -381,8 +373,7 @@ paths:
       - Database structure
       operationId: listRecordTypesShort
       summary: Compact alias for `rectypes`
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/Limit'
@@ -395,8 +386,7 @@ paths:
       - Database structure
       operationId: getRecordTypeShort
       summary: Compact alias for `rectypes/{recordTypeId}`
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordTypeId'
@@ -408,8 +398,7 @@ paths:
       - Database structure
       operationId: listFieldsShort
       summary: Compact alias for `fields`
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/Limit'
@@ -422,8 +411,7 @@ paths:
       - Database structure
       operationId: getFieldShort
       summary: Compact alias for `fields/{fieldId}`
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/FieldId'
@@ -435,8 +423,7 @@ paths:
       - Database structure
       operationId: listTermsShort
       summary: Compact alias for `terms`
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/Limit'
@@ -449,8 +436,7 @@ paths:
       - Database structure
       operationId: getTermShort
       summary: Compact alias for `terms/{termId}`
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/TermId'
@@ -462,8 +448,7 @@ paths:
       - Database structure
       operationId: getRecordStructureShort
       summary: Compact alias for `recstructure/{recordTypeId}`
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordTypeId'
@@ -477,8 +462,7 @@ paths:
       - Database structure
       operationId: getRecordStructureFieldShort
       summary: Compact alias for `recstructure/{recordTypeId}/{fieldId}`
-      security:
-      - bearerAuth: []
+      security: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordTypeId'

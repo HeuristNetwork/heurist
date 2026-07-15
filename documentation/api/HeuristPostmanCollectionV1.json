@@ -232,18 +232,16 @@
       "name": "2. Protected route without auth",
       "item": [
         {
-          "name": "RST without auth -> 401",
+          "name": "RST without auth -> 200",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 401', function () { pm.response.to.have.status(401); });",
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
                   "const body = pm.response.json();",
-                  "pm.test('Unauthorized message', function () { pm.expect(body.message).to.eql('Unauthorized'); });",
-                  "const errorBody = pm.response.json();",
-                  "pm.test('API error envelope uses Heurist status constant', function () { pm.expect(errorBody.status).to.eql(401); pm.expect(errorBody.error).to.eql('denied'); pm.expect(errorBody.message).to.be.a('string'); });"
+                  "pm.test('Public definition response is returned', function () { pm.expect(body).to.be.an('object'); });"
                 ]
               }
             }
@@ -261,6 +259,9 @@
                 "rst",
                 "{{rtyId}}"
               ]
+            },
+            "auth": {
+              "type": "noauth"
             }
           }
         }

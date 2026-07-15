@@ -305,7 +305,14 @@ $skip_auth_processing =
 // current session/JWT if provided
 $allow_anonymous = false;
 if($method === 'search'){
-    $allow_anonymous = ($resource === 'records' || $resource === 'groups' || $resource === 'users');
+    $publicSearchResources = array(
+        'records', 'groups', 'users',
+        'rty', 'rectypes',
+        'dty', 'fields',
+        'trm', 'terms',
+        'rst', 'recstructure'
+    );
+    $allow_anonymous = in_array($resource, $publicSearchResources, true);    
 }
 
 if(!$skip_auth_processing){
