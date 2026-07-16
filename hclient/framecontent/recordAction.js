@@ -421,6 +421,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             + '</div>').appendTo($fieldset);
 
             $('<div style="padding: 0.2em; width: 100%;display: none;" class="input">'
+                + '<div class="header" style="padding-right: 16px;"><label>Upload Status</label></div>'
+                + '<div id="nakala_status_container">'
+                + '<label style="display: block; margin: 1em 0px 0.5em;"><input name="nakala_status" value="pending" type="radio" checked="checked" />Private (viewable only by the uploader, will use the API key for Heurist)</label>'
+                + '<label style="display: block; margin-bottom: 1em;"><input name="nakala_status" value="published" type="radio" />Public (publishes and mints the file with Nakala)</label></div>'
+            + '</div>').appendTo($fieldset);
+
+            $('<div style="padding: 0.2em; width: 100%;display: none;" class="input">'
                 + '<div class="header" style="padding-right: 16px;"><label for="sel_license">License</label></div>'
                 + '<select id="sel_license" style="max-width:30em" data-init="0"></select>'
             + '</div>').appendTo($fieldset);
@@ -455,7 +462,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             let repo = $sel_repos.val();
                             if(repo.indexOf('nakala')===0 || repo.indexOf('nakala')===1){
                                 $('#sel_license').parent().show();
-                                _popuplateNakalaLicense();
+                                $('#nakala_status_container').parent().show();
+                                _popuplateNakalaLicense ();
                             }
                         });
                         
@@ -822,6 +830,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select a license', 3000);
                         return;
                     }
+                    request['status'] = $('[name="nakala_status"]:checked').val();
                 }
 
             }else if(action_type=='delete_detail'){

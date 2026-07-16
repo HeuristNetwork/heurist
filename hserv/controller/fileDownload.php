@@ -278,8 +278,8 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
                         $apiKey = !empty($creds[$credID]['params']['readApiKey']) ? $creds[$credID]['params']['readApiKey'] : $creds[$credID]['params']['writeApiKey'];
 
-                        if(strpos($creds[$credID]['service'], 'nakala') !== false){
-                            header("X-API-KEY: {$apiKey}");
+                        if(strpos($creds[$credID]['service'], 'nakala') !== false && $req_params['mode'] !== 'url'){
+                            serveNakalaFile($system, $external_url, $apiKey);
                         }
                     }
                 }
@@ -339,4 +339,47 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
     $system->dbclose();
 
+/**
+ * Special handling for private Nakala files
+ *
+ * @param hserv\System $system
+ * @param string $url
+ * @param string $apiKey
+ * @return void
+ */
+function serveNakalaFile($system, $url, $apiKey){
+
+    $urlParts = explode('/', $url);
+    $doi = '';
+
+    while(!empty($urlParts)){
+
+        $part = array_pop($urlParts);
+
+        if(preg_match('/^nkl\./', $part) === 1){
+            $doi = array_pop($urlParts) . "/{$part}";
+            break;
+        }
+    }
+
+    if(empty($doi)){
+        return;
+    }
+
+    $result = getNakalaDataDetails($system, $apiKey, $doi);
+    if(!$result || $result['status'] === 'public'){ // unable to get file, or file is public no special action needed
+        return;
+    }
+
+    $result = loadRemoteURLContentWithRange($url, null, true, 30, ["X-API-KEY: {$apiKey}"], true);
+
+    if(is_array($result)){ // serve file
+
+        header("Content-Type: {$result['type']}");
+        echo $result['data'];
+
+        exit;
+    }
+
+}
 ?>

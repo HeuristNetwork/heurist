@@ -1075,8 +1075,9 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             echo_flush2('failed<br>');
                         } else {
 
-                            $nakalaID = htmlspecialchars($rtn_upload['id']);
-                            $nakalaURL = $rtn_upload['link'];
+                            $results = $rtn_upload['URL'];
+                            $nakalaID = htmlspecialchars($results['id']);
+                            $nakalaURL = $results['link'];
                             $nakalaDOI = $nakalaID; // Nakala's identifier IS the DOI string from creation onward - see getNakalaDataDetails() in UFile.php
 
                             recordExternalIdentifier($system, 'NakalaDBBackup', [

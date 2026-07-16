@@ -1188,9 +1188,10 @@ function loadRemoteURLContent($url, $bypassProxy = true)
  * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
  * @param int $timeout Optional. cURL timeout in seconds. Defaults to 30.
  * @param array|null $additional_headers Optional. Additional HTTP headers to send with the request.
- * @return string|false The fetched content as a string on success, or false on failure.
+ * @param bool $includeContentType Optional. Whether to include the content type with the response
+ * @return array|string|false The fetched content as a string (or array if includeContentType is true) on success, or false on failure.
  */
-function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout = 30, $additional_headers = null)
+function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout = 30, $additional_headers = null, $includeContentType = false)
 {
 
     global $glb_curl_code, $glb_curl_error;
@@ -1294,7 +1295,10 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
             $glb_curl_error = 'HTTP Response Code: ' . $code;
         }
 
+        $data = $includeContentType ? ['data' => $data, 'type' => curl_getinfo($ch, CURLINFO_CONTENT_TYPE)] : $data;
+
         unset($ch);
+
         return $data;
     }
 }
@@ -1305,9 +1309,10 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
  * @param string $url The URL to check.
  * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
  * @param int $timeout Optional. cURL timeout in seconds. Defaults to 30.
+ * @param array|null $headers Optional. Additional headers to set, e.g. API key
  * @return string|false The MIME content type string on success, or false on failure or if URL is invalid.
  */
-function loadRemoteURLContentType($url, $bypassProxy = true, $timeout = 30)
+function loadRemoteURLContentType($url, $bypassProxy = true, $timeout = 30, $headers = null)
 {
 
     if (!function_exists("curl_init")) {
@@ -1343,6 +1348,10 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout = 30)
         if (defined('HEURIST_HTTP_PROXY_AUTH')) {
             curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
         }
+    }
+
+    if (is_array($headers) && !empty($headers)) { // Add additional/custom headers
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     }
 
     $data = curl_exec($ch);
@@ -1476,9 +1485,10 @@ function getWikimediaFileType($url)
  * @param string $url The URL to analyze.
  * @param bool $use_default_ext Optional. If true (default) and no specific extension can be determined,
  *                              returns 'bin' as a generic binary extension.
+ * @param array|null $headers Optional. Additional headers that are required, e.g. API Keys
  * @return array An associative array with 'extension' (string|null), 'mimeType' (string|null), and 'needrefresh' (bool).
  */
-function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true)
+function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true, $headers = null)
 {
 
     $url = filter_var($url, FILTER_SANITIZE_URL);
@@ -1506,7 +1516,7 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true)
         $extraDetails = getWikimediaFileType($url);
         $mimeType = @$extraDetails['mimeType'];
     } else {
-        $mimeType = loadRemoteURLContentType($url);
+        $mimeType = loadRemoteURLContentType($url, true, 30, $headers);
     }
 
 
@@ -1838,10 +1848,6 @@ function isActionInProgress($action, $range_minutes, $db_name = '')
  *
  * @global int|string|null $glb_curl_code Stores cURL error code from Nakala API calls.
  * @global string|null $glb_curl_error Stores cURL error message from Nakala API calls.
- * @global string|null $glb_nakala_id Stores the Nakala identifier (= reserved DOI string) of the
- *                      uploaded record after a successful call, regardless of 'returnType' - read
- *                      this if you need the identifier/DOI but called with the default (file URL)
- *                      or 'editor' returnType. See getRepositoryDOI() to confirm/regain its DOI status later.
  * @param \hserv\System $system The Heurist system instance.
  * @param array $params An associative array of parameters:
  *                      'apiKey' (string): User's Nakala API Key.
@@ -1853,7 +1859,7 @@ function isActionInProgress($action, $range_minutes, $db_name = '')
  *                      'meta' (array): Array of Nakala metadata values.
  *                      'status' (string, optional): Status for the Nakala deposit (e.g., 'pending', 'published'). Defaults to 'pending'.
  *                      'returnType' (string, optional): If 'editor', returns URL to private view. Otherwise, public URL.
- * @return array|string|false The Nakala URL of the uploaded file on success, or false on failure.
+ * @return array|false An array containing the Nakala URL and DOI on success, or false on failure.
  */
 function uploadFileToNakala($system, $params)
 {
@@ -1866,7 +1872,7 @@ function uploadFileToNakala($system, $params)
 
     if ($result) {
         if ($result['URL'][0] !== '') {
-            $result = $result['URL'][0];
+            $result['URL'] = $result['URL'][0];
         } else {
             $system->addError(HEURIST_ACTION_BLOCKED, $result['errors'][0]);
             $result = false;
@@ -1878,7 +1884,7 @@ function uploadFileToNakala($system, $params)
 
 /**
  * @todo: Consider move to class in repoController.php
- * Uploads a group of file to the Nakala repository and returns its Nakala URL.
+ * Uploads a bundle of files to the Nakala repository and returns its Nakala URL.
  * Handles API key authentication, file uploads, metadata submission, and error checking.
  *
  * @global int|string|null $glb_curl_code Stores cURL error code from Nakala API calls.
@@ -1899,10 +1905,9 @@ function uploadFileToNakala($system, $params)
 function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas)
 {
 
-    global $glb_curl_code, $glb_curl_error, $glb_nakala_id;
+    global $glb_curl_code, $glb_curl_error;
     $glb_curl_code = null;
     $glb_curl_error = '';
-    $glb_nakala_id = null; // exposes the Nakala identifier/DOI to the caller regardless of 'returnType', see getRepositoryDOI()
 
     $herror = HEURIST_ACTION_BLOCKED;
 
@@ -2112,7 +2117,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas)
         return ['URL' => '', 'errors' => $fileErrors];
     }
 
-    $status = 'published'; // @todo: default to pending, once the retrieval request is working for privated files (currently returns 403 errors)
+    $status = 'pending';
     if (array_key_exists('status', $parameters) && $parameters['status'] === 'pending' || $parameters['status'] === 'published') {
         $status = $parameters['status'];
     }
@@ -2188,25 +2193,7 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas)
     $externalURLs = [];
     $payload = $result['payload'];
 
-    if (array_key_exists('id', $payload)) {
-
-        $nakalaID = $result['payload']['id'];
-        $glb_nakala_id = $nakalaID; // Nakala identifier IS the DOI string from creation onward - see getNakalaDataDetails()
-        $returnType = array_key_exists('returnType', $parameters) ? $parameters['returnType'] : '';
-        $linkToUI = $returnType === 'editor';
-        $linkToUIAndID = $returnType === 'editor+id';
-
-        if ($linkToUIAndID) {
-            $externalURLs[] = ['id' => $nakalaID, 'link' => "{$NAKALA_BASE_URL}{$nakalaID}"];
-        } elseif ($linkToUI) { // returns link to private view
-            $externalURLs[] = "{$NAKALA_BASE_URL}{$nakalaID}";
-        } else { // returns link to publically available file
-            foreach ($uploadedFiles as $file) {
-                $externalURLs[] = "{$NAKALA_BASE_URL_API_FILE}{$nakalaID}/{$file['sha1']}";
-            }
-        }
-
-    } else {
+    if(!array_key_exists('id', $payload)){
 
         if (array_key_exists('validationErrors', $payload)) {
             $msg = 'Invalid metadata value(s) found:<br>' . implode('<br>', $payload['validationErrors']);
@@ -2220,7 +2207,22 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas)
         return false;
     }
 
-    return ['URL' => $externalURLs, 'errors' => $fileErrors];
+    $nakalaID = $result['payload']['id'];
+    $returnType = array_key_exists('returnType', $parameters) ? $parameters['returnType'] : '';
+    $linkToUI = $returnType === 'editor';
+    $linkToUIAndID = $returnType === 'editor+id';
+
+    if($linkToUIAndID){
+        $externalURLs[] = ['id' => $nakalaID, 'link' => "{$NAKALA_BASE_URL}{$nakalaID}"];
+    }elseif($linkToUI){ // returns link to private view
+        $externalURLs[] = "{$NAKALA_BASE_URL}{$nakalaID}";
+    }else{ // returns link to publically available file
+        foreach ($uploadedFiles as $file) {
+            $externalURLs[] = "{$NAKALA_BASE_URL_API_FILE}{$nakalaID}/{$file['sha1']}";
+        }
+    }
+
+    return ['DOI' => $nakalaID, 'URL' => $externalURLs, 'errors' => $fileErrors];
 }
 
 /**

@@ -3199,7 +3199,7 @@ class RecordsBatch
             ];
 
             $apiKey = $credentials[$serviceID]['params']['writeApiKey']; // $this->system->settings->get('sys_NakalaKey')
-            $status = @$this->data['status'] === 'pending' || @$this->data['status'] === 'published' ? $this->data['status'] : 'published'; // pending | published; @todo: default to pending
+            $status = @$this->data['status'] === 'pending' || @$this->data['status'] === 'published' ? $this->data['status'] : 'pending'; // pending | published
 
             while($row = $res->fetch_row()){
 
@@ -3235,8 +3235,7 @@ class RecordsBatch
 
                     if($rtn){ // register URL ($rtn)
 
-                        global $glb_nakala_id;
-                        $nakalaIdentifier = $glb_nakala_id; // reserved DOI string, set by uploadFilesToNakala() regardless of returnType
+                        $nakalaIdentifier = @$rtn['DOI']; // reserved DOI string, set by uploadFilesToNakala() regardless of returnType
 
                         $ulfParams = ['repository' => $serviceID];
                         if($nakalaIdentifier){
@@ -3245,16 +3244,17 @@ class RecordsBatch
                             // DataCite once $status is 'published' (see getNakalaDataDetails() to
                             // confirm/regain this later if it changes after the fact)
                             $ulfParams['doi'] = $nakalaIdentifier;
-                            $ulfParams['doiRegistered'] = ($status === 'published');
+                            $ulfParams['doiRegistered'] = $status === 'published';
                         }
 
+                        $fields = [];
                         if($serviceID){
-                            $fields = ['ulf_Parameters' => json_encode($ulfParams)];
+                            $fields['ulf_Parameters'] = json_encode($ulfParams);
                         }else{
                             $fields = null;
                         }
 
-                        $new_ulfID = $fileEntity->registerURL($rtn, false, 0, $fields);// register nakala url
+                        $new_ulfID = $fileEntity->registerURL($rtn['URL'], false, 0, $fields);// register nakala url
                         if(!isPositiveInt($new_ulfID)){
                             $sqlErrors[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $mysqli->error;
                             $failedIDs[] = $row[2];
@@ -3267,7 +3267,7 @@ class RecordsBatch
                                 'ID' => $nakalaIdentifier,
                                 'DOI' => $nakalaIdentifier,
                                 'DOIRegistered' => ($status === 'published'),
-                                'URL' => $rtn,
+                                'URL' => $rtn['URL'],
                                 'Date' => $today
                             ]);
                         }

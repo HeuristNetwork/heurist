@@ -359,15 +359,28 @@ class DbRecUploadedFiles extends DbEntityBase
             $mimetypeExt = strtolower($fieldvalues['ulf_MimeExt']);
             $mimeType = mysql__select_value($this->system->getMysqli(),
                     'select fxm_Mimetype from defFileExtToMimetype where fxm_Extension="'.addslashes($mimetypeExt).'"');
+                    
+            if(!$mimeType && strpos($mimetypeExt, '/') > 0){ // check if extension is mimetype
+
+                $mimeType = mysql__select_value($this->system->getMysqli(), 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_Mimetype = ?', ['s', $mimetypeExt]);
+
+                if($mimeType){ // convert mimetype to extension
+                    $this->data['fields']['ulf_MimeExt'] = $mimeType;
+                }
+            }
 
             if(!$mimeType){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Extension: '.$mimetypeExt.'<br> '.$this->error_ext);
-                    return false;
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Extension: '.$mimetypeExt.'<br> '.$this->error_ext);
+                return false;
             }
 
             if($fieldvalues['ulf_FileSizeKB']<0 || !is_numeric($fieldvalues['ulf_FileSizeKB'])){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Invalid file size value: '.$fieldvalues['ulf_FileSizeKB']);
-                    return false;
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Invalid file size value: '.$fieldvalues['ulf_FileSizeKB']);
+                return false;
+            }
+
+            if(!empty($this->data['fields']['ulf_Parameters']) && is_array($this->data['fields']['ulf_Parameters'])){
+                $this->data['fields']['ulf_Parameters'] = json_encode($this->data['fields']['ulf_Parameters']);
             }
         }
 
@@ -1106,7 +1119,7 @@ class DbRecUploadedFiles extends DbEntityBase
 
             $fileParams = null;
             if(array_key_exists('repository', $this->data)){
-                $fileParams = ['ulf_Parameters' => "{\"repository\":\"{$this->data['repository']}\"}"];
+                $fileParams = ['ulf_Parameters' => ["repository" => $this->data['repository']]];
             }
 
             if(!empty($rec_fields)){
@@ -1838,7 +1851,16 @@ class DbRecUploadedFiles extends DbEntityBase
                 $fields['ulf_MimeExt'] = 'png';
             }else{
 
-                $ext = recognizeMimeTypeFromURL($this->system->getMysqli(), $url);
+                $headers = null;
+                $serviceID = @$fields['ulf_Parameters']['repository'];
+                if(strpos($url, 'nakala') !== false && !empty($serviceID)){
+                    $credentials = user_getRepositoryCredentials2($this->system, $serviceID);
+                    if($credentials && @$credentials[$serviceID]['params']['writeApiKey']){
+                        $headers = ["X-API-KEY: {$credentials[$serviceID]['params']['writeApiKey']}"];
+                    }
+                }
+
+                $ext = recognizeMimeTypeFromURL($this->system->getMysqli(), $url, true, $headers);
                 if(@$ext['extension']){
                     $fields['ulf_MimeExt'] = $ext['extension'];
                 }else{
@@ -2988,7 +3010,7 @@ class DbRecUploadedFiles extends DbEntityBase
         }
 
         $apiKey = $credentials[$serviceID]['params']['writeApiKey'];
-        $status = @$this->data['status'] === 'pending' || @$this->data['status'] === 'published' ? $this->data['status'] : 'published'; // pending | published; @todo: default to pending
+        $status = @$this->data['status'] === 'pending' || @$this->data['status'] === 'published' ? $this->data['status'] : 'pending'; // pending | published
 
         if(!empty($files)){
             $fileCond = count($files) > 1 ? 'IN (' . implode(',', $files) . ')' : "= {$files[0]}";
@@ -3038,12 +3060,23 @@ class DbRecUploadedFiles extends DbEntityBase
             $new_ulfID = $ulfID;
             if($rtn){ // register URL
 
-                $fields = null;
+                $fields = [];
+                $ulfParams = ['repository' => $serviceID];
+                if(@$rtn['DOI']){
+                    // "Touch" the file record with its DOI - the Nakala identifier IS the DOI
+                    // string from creation onward, but is only registered/resolvable with
+                    // DataCite once $status is 'published' (see getNakalaDataDetails() to
+                    // confirm/regain this later if it changes after the fact)
+                    $ulfParams['doi'] = $rtn['DOI'];
+                    $ulfParams['doiRegistered'] = $status === 'published';
+                }
                 if($serviceID){
-                    $fields = ['ulf_Parameters' => "{\"repository\":\"{$serviceID}\"}"];
+                    $fields['ulf_Parameters'] = json_encode($ulfParams);
+                }else{
+                    $fields = null;
                 }
 
-                $new_ulfID = $this->registerURL($rtn, false, 0, $fields);// register nakala url
+                $new_ulfID = $this->registerURL($rtn['URL'], false, 0, $fields);// register nakala url
                 if(!is_numeric($new_ulfID) || $new_ulfID > 0){
                     $results['error'][$ulfID] = FILE_NO . $ulfID . R_ARROW . $mysqli->error;
                     continue;

@@ -857,23 +857,27 @@
                     // User API Key
                     $params['apiKey'] = $credentials[$repo_id]['params']['writeApiKey'];
 
-                    $params['status'] = @$req_params['status'] === 'pending' || @$req_params['status'] === 'published' ? $this->data['status'] : 'published'; // publish uploaded file, return url to newly uploaded file on Nakala; @todo: default to pending
+                    $params['status'] = @$req_params['status'] === 'pending' || @$req_params['status'] === 'published' ? $this->data['status'] : 'pending'; // publish uploaded file, return url to newly uploaded file on Nakala
 
                     // Upload file
                     $res = uploadFileToNakala($system, $params);//from record edit - define file field
 
                     if($res !== false){
-                        global $glb_nakala_id;
-                        if($glb_nakala_id){
+
+                        $nakalaDOI = @$res['DOI'];
+                        $res = $res['URL'];
+
+                        if($nakalaDOI){
+
                             // Log the DOI alongside any other repository deposits for this database -
                             // purely additive, doesn't change $res / the response sent to the client
-                            recordExternalIdentifier($system, "{$repo_id}_{$glb_nakala_id}", [
+                            recordExternalIdentifier($system, "{$repo_id}_{$nakalaDOI}", [
                                 'Service' => 'nakala',
                                 'Label' => 'Nakala file upload (record edit)',
-                                'ID' => $glb_nakala_id,
-                                'DOI' => $glb_nakala_id,
+                                'ID' => $nakalaDOI,
+                                'DOI' => $nakalaDOI,
                                 'DOIRegistered' => ($params['status'] === 'published'),
-                                'URL' => is_array($res) ? @$res['link'] : $res,
+                                'URL' => $res,
                                 'Date' => date('Y-m-d')
                             ]);
                         }
