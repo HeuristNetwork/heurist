@@ -6,11 +6,17 @@ use hserv\utilities\USystem;
 final class SessionStore
 {
     private const SESSION_NAME = 'heurist-sessionid';
+    private int $cookieLifetime = 0;
 
     public function isActive(): bool
     {
         return session_status() === PHP_SESSION_ACTIVE;
     }
+    
+    public function setCookieLifetime(int $seconds): void
+    {
+        $this->cookieLifetime = max(0, $seconds);
+    }    
 
     public function start(): bool
     {
@@ -28,15 +34,41 @@ final class SessionStore
 
         session_cache_limiter('none');
 
+        /*
+         * Keep server-side session files long enough for persistent logins.
+         * Cookie lifetime is controlled by USystem::sessionUpdateCookies().
+         *
+         * Important: PHP's automatic session cookie is disabled below. Otherwise
+         * every later session_start() can emit a plain browser-session cookie
+         *   Set-Cookie: heurist-sessionid=...; path=/
+         * which overwrites the persistent remember-me cookie in the browser.
+         */
         ini_set('session.gc_maxlifetime', (string)(30 * 24 * 60 * 60));
 
-        $ok = @session_start();
+        if (!empty($_COOKIE[self::SESSION_NAME])) {
+            $cookieSessionId = (string)$_COOKIE[self::SESSION_NAME];
 
-        if ($ok && empty($_COOKIE[self::SESSION_NAME])) {
-            USystem::sessionUpdateCookies(0);
+            // Conservative validation for PHP session IDs.
+            if (preg_match('/^[A-Za-z0-9,-]{16,128}$/', $cookieSessionId) === 1) {
+                session_id($cookieSessionId);
+            }
         }
 
-        return $ok;
+        $ok = @session_start([
+            'use_cookies' => 0,
+            'use_only_cookies' => 0
+        ]);
+
+        if (!$ok) {
+            return false;
+        }
+
+        if (empty($_COOKIE[self::SESSION_NAME]) || $this->cookieLifetime > 0) {
+            $lifetime = $this->cookieLifetime > 0 ? time() + $this->cookieLifetime : 0;
+            USystem::sessionUpdateCookies($lifetime);
+        }
+
+        return true;
     }
 
     public function close(): void

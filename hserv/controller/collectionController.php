@@ -1,11 +1,12 @@
 <?php
 /**
 * DEPRECATED - to be changed to localStorage
-* 
+*
 * collectionController.php - Controller to manage user's collection of record ids
 *
-* Manages user's collection of record ids stored in SESSION
-* see for client side utilsCollection.js, used in recordList
+* Temporary server-side fallback for user's collection of record ids.
+* This controller intentionally uses a separate "heurist-collection" session,
+* not the main "heurist-sessionid" authentication session.
 *
 * @project     Heurist academic knowledge management system
 * @package Controller
@@ -32,19 +33,11 @@ if(strpos($db, HEURIST_DB_PREFIX)===0){
     $dbname_full = HEURIST_DB_PREFIX.$db;
 }
 
-//since this script is called after system is inited we can be sure that session is available already
-if (@$_COOKIE['heurist-sessionid'] && session_status() !== PHP_SESSION_ACTIVE) {
-    session_name('heurist-sessionid');
-    /* @todo test
-    session_set_cookie_params ( 0, '/', '', $is_https);
-    session_cache_limiter('none');
-    session_id($_COOKIE['heurist-sessionid']);
-    */
-    @session_start();
-}
+$hasWriteAction = array_key_exists('add', $_REQUEST)
+    || array_key_exists('remove', $_REQUEST)
+    || array_key_exists('clear', $_REQUEST);
 
-// note $collection is a reference - SW also we suppress warnings to let the system create the key
-$collection = &$_SESSION[$dbname_full]['record-collection'];
+$needsSession = $hasWriteAction || array_key_exists('fetch', $_REQUEST);
 
 /**
  * Checks if a string contains only digits.
@@ -56,32 +49,72 @@ function digits ($s) {
     return preg_match('/^\d+$/', $s);
 }
 
-if (array_key_exists('add', $_REQUEST)) {
-    $ids = array_filter(explode(',', $_REQUEST['add']), 'digits');
-    foreach ($ids as $id) {
-        $collection[$id] = true;
+$collection = array();
+
+if ($needsSession) {
+
+    /*
+     * Deprecated collection storage is isolated from the main Heurist
+     * authentication session. Do not use "heurist-sessionid" here:
+     * raw session_start() would otherwise overwrite remember-me cookies.
+     */
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_name('heurist-collection');
+        session_cache_limiter('none');
+
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'httponly' => true,
+            'samesite' => 'Strict'
+        ]);
+
+        @session_start();
+    }
+
+    if (isset($_SESSION[$dbname_full]['record-collection'])
+        && is_array($_SESSION[$dbname_full]['record-collection'])) {
+        $collection = $_SESSION[$dbname_full]['record-collection'];
+    }
+
+    if (array_key_exists('add', $_REQUEST)) {
+        $ids = array_filter(explode(',', $_REQUEST['add']), 'digits');
+        foreach ($ids as $id) {
+            $collection[$id] = true;
+        }
+    }
+
+    if (array_key_exists('remove', $_REQUEST)) {
+        $ids = array_filter(explode(',', $_REQUEST['remove']), 'digits');
+        foreach ($ids as $id) {
+            unset($collection[$id]);
+        }
+    }
+
+    if (array_key_exists('clear', $_REQUEST)) {
+        $collection = array();
+    }
+
+    if ($hasWriteAction) {
+        if (!isset($_SESSION[$dbname_full]) || !is_array($_SESSION[$dbname_full])) {
+            $_SESSION[$dbname_full] = array();
+        }
+        $_SESSION[$dbname_full]['record-collection'] = $collection;
+    }
+
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
     }
 }
-
-if (array_key_exists('remove', $_REQUEST)) {
-    $ids = array_filter(explode(',', $_REQUEST['remove']), 'digits');
-    foreach ($ids as $id) {
-        unset($collection[$id]);
-    }
-}
-
-if (array_key_exists('clear', $_REQUEST) || !$collection) {
-    $collection = array();
-}
-$_SESSION[$dbname_full]['record-collection'] = $collection;
-session_write_close();
 
 $rv = array(
     'count' => count($collection)
 );
 
 if (array_key_exists('fetch', $_REQUEST)) {
-    $rv['ids'] = @$collection ? array_keys($collection): array();
+    $rv['ids'] = $collection ? array_keys($collection): array();
 }
 
 print json_encode($rv);

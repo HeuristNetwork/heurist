@@ -11,36 +11,20 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       4.0
-* 
+*
 * @todo move controller
 */
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
+require_once dirname(__FILE__).'/../../autoload.php';
 
-    require_once 'USystem.php';
-
-    session_name('heurist-sessionid');
-    session_cache_limiter('none');
-
-    /*
-    //get session id from cookes
-    if (@$_COOKIE['heurist-sessionid']) {
-            session_id($_COOKIE['heurist-sessionid']);
-    }
-    }*/
-
-    @session_start();
-    if (!@$_COOKIE['heurist-sessionid']) {
-        hserv\utilities\USystem::sessionUpdateCookies(0);
-    }
-}
+$session = new \hserv\session\SessionStore();
 
 if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     $captchanumber = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz';// Initializing PHP variable with string
     $captcha_code = substr(str_shuffle($captchanumber), 0, 4);// Getting first 6 word after shuffle.
 
-    $_SESSION["captcha_code"] = $captcha_code;
-    
+    $session->set('captcha_code', $captcha_code);
+
     $target_layer = imagecreatetruecolor(50,24);
     $captcha_background = imagecolorallocate($target_layer, 255, 160, 119);//#dbdfe6  219, 223, 230);
     imagefill($target_layer,0,0,$captcha_background);
@@ -49,7 +33,6 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     header("Content-type: image/jpeg");
     imagejpeg($target_layer);
     imagedestroy($target_layer);
-    session_write_close();    
 }else{  //TRIVIA CAPTCHA
     $planets = array('Sun','Jupiter','Saturn','Uranus','Neptune','Earth','Venus','Mars','Titan','Mercury','Moon','Europa','Triton','Pluto');
     $ran0 = random_int(0,13);
@@ -57,7 +40,8 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     $ran2 = random_int(1,9);
     // $captcha_code = strtolower($planets[$ran0]).($ran1+$ran2);
     $captcha_code = ($ran1+$ran2) + 1;
-    $_SESSION["captcha_code"] = $captcha_code;
+
+    $session->set('captcha_code', $captcha_code);
 
     // print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of $ran1 and $ran2";
     $value = $ran1." + ".$ran2." + 1 = ";
@@ -69,6 +53,5 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     }else{
         print $value;
     }
-    session_write_close();
 }
 ?>
