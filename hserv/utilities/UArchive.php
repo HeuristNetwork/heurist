@@ -17,7 +17,7 @@ namespace hserv\utilities;
 use hserv\utilities\USanitize;
 
 define('MAX_FILES', 10000);
-define('MAX_SIZE', 2147483648);// 1 GB = 1073741824, Ian doubled size 29/6/26
+define('MAX_SIZE', 5 * 1024 * 1024 * 1024);// 1 GB = 1073741824, Ian doubled size 29/6/26 2147483648
 define('MAX_RATIO', 90);
 define('READ_LENGTH', 1024);
 define('WRITE_LENGTH', 4096);//16384
@@ -218,95 +218,108 @@ class UArchive {
         $totalSize = 0;
 
         $zip = new \ZipArchive();
-        if ($zip->open($zipfile) === true) {
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $filename = $zip->getNameIndex($i);
-                $stats = $zip->statIndex($i);
+        
+        $openResult = $zip->open($zipfile);
 
-                if (strpos($filename, '../') !== false || substr($filename, 0, 1) === '/') {
-                    throw new \Exception('Archive contains unsecure entry '.$filename);
+        if ($openResult !== true) {
+            $errorText = method_exists($zip, 'getStatusString')
+                ? $zip->getStatusString()
+                : 'Unknown ZIP error';
+
+            throw new \Exception(
+                'Unable to open ZIP archive: '.$zipfile
+                .' (ZipArchive error '.$openResult.': '.$errorText.')'
+            );
+        }        
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $filename = $zip->getNameIndex($i);
+            $stats = $zip->statIndex($i);
+
+            if (strpos($filename, '../') !== false || substr($filename, 0, 1) === '/') {
+                throw new \Exception('Archive contains unsecure entry '.$filename);
+            }
+
+            if (substr($filename, -1) !== '/') {
+                $fileCount++;
+                if ($fileCount > MAX_FILES) {
+                    // Reached max. number of files
+                    throw new \Exception('Archive contains more than '.MAX_FILES.' entries');
                 }
 
-                if (substr($filename, -1) !== '/') {
-                    $fileCount++;
-                    if ($fileCount > MAX_FILES) {
-                        // Reached max. number of files
-                        throw new \Exception('Archive contains more than '.MAX_FILES.' entries');
-                    }
+                $destination_file = $destination_dir.$filename;
 
-                    $destination_file = $destination_dir.$filename;
+                $fp = $zip->getStream($filename); // Compliant
+                if (!$fp) {
+                    throw new \Exception('Unable to open stream for '.$filename);
+                }
 
-                    $fp = $zip->getStream($filename); // Compliant
-                    if (!$fp) {
-                        throw new \Exception('Unable to open stream for '.$filename);
-                    }
+                // make sure the destination subdirectory exists
+                $destination_file = $destination_dir . $filename;
+                $parentDir = dirname($destination_file);
+                if (!is_dir($parentDir) && !mkdir($parentDir, 0777, true)) {
+                    throw new \Exception('Cannot create subfolder on unzip: '.$parentDir);
+                }
 
-                    // make sure the destination subdirectory exists
-                    $destination_file = $destination_dir . $filename;
-                    $parentDir = dirname($destination_file);
-                    if (!is_dir($parentDir) && !mkdir($parentDir, 0777, true)) {
-                        throw new \Exception('Cannot create subfolder on unzip: '.$parentDir);
-                    }
-
-                    // open output in truncate mode so we never append to leftovers
-                    $ofp = fopen($destination_file, 'wb');
-                    if (!$ofp) {
-                        fclose($fp);
-                        throw new \Exception('Cannot open destination file for write: '.$destination_file);
-                    }
-
-                    $currentSize = 0;
-                    while (!feof($fp)) {
-                        $chunk = fread($fp, READ_LENGTH);        // READ_LENGTH is 1024 in your file
-                        if ($chunk === false) {                  // read error
-                            fclose($fp);
-                            fclose($ofp);
-                            @unlink($destination_file);
-                            throw new \Exception('Read error while extracting '.$filename);
-                        }
-                        if ($chunk === '') {                     // nothing more to read
-                            break;
-                        }
-
-                        $readLen = strlen($chunk);
-                        $currentSize += $readLen;
-                        $totalSize   += $readLen;
-
-                        if ($totalSize > MAX_SIZE) {
-                            fclose($fp);
-                            fclose($ofp);
-                            @unlink($destination_file);
-                            throw new \Exception('Extraction size limit reached ('.MAX_SIZE.' bytes). Please ask system administrator to increase limit in UArchive.php.');
-                        }
-
-                        if ($stats['comp_size'] > 0 && $stats['comp_size'] > READ_LENGTH) {
-                            $ratio = floor($currentSize / $stats['comp_size']);
-                            if ($ratio > MAX_RATIO) {
-                                fclose($fp);
-                                fclose($ofp);
-                                @unlink($destination_file);
-                                throw new \Exception('Maximum allowed compression ratio detected ('.$ratio.' > '.MAX_RATIO.')');
-                            }
-                        }
-
-                        if (fwrite($ofp, $chunk) === false) {
-                            fclose($fp);
-                            fclose($ofp);
-                            @unlink($destination_file);
-                            throw new \Exception('Write error while extracting '.$destination_file);
-                        }
-                    }
+                // open output in truncate mode so we never append to leftovers
+                $ofp = fopen($destination_file, 'wb');
+                if (!$ofp) {
                     fclose($fp);
-                    fclose($ofp);
+                    throw new \Exception('Cannot open destination file for write: '.$destination_file);
+                }
 
-                } else {
-                    if (!file_exists($destination_dir.$filename) && !mkdir($destination_dir.$filename, 0777, true)) {
-                        throw new \Exception('Cannot create subfolder on unzip');
+                $currentSize = 0;
+                while (!feof($fp)) {
+                    $chunk = fread($fp, READ_LENGTH);        // READ_LENGTH is 1024 in your file
+                    if ($chunk === false) {                  // read error
+                        fclose($fp);
+                        fclose($ofp);
+                        @unlink($destination_file);
+                        throw new \Exception('Read error while extracting '.$filename);
                     }
+                    if ($chunk === '') {                     // nothing more to read
+                        break;
+                    }
+
+                    $readLen = strlen($chunk);
+                    $currentSize += $readLen;
+                    $totalSize   += $readLen;
+
+                    if ($totalSize > MAX_SIZE) {
+                        fclose($fp);
+                        fclose($ofp);
+                        @unlink($destination_file);
+                        throw new \Exception('Extraction size limit reached ('.MAX_SIZE.' bytes). Please ask system administrator to increase limit in UArchive.php.');
+                    }
+
+                    if ($stats['comp_size'] > 0 && $stats['comp_size'] > READ_LENGTH) {
+                        $ratio = floor($currentSize / $stats['comp_size']);
+                        if ($ratio > MAX_RATIO) {
+                            fclose($fp);
+                            fclose($ofp);
+                            @unlink($destination_file);
+                            throw new \Exception('Maximum allowed compression ratio detected ('.$ratio.' > '.MAX_RATIO.')');
+                        }
+                    }
+
+                    if (fwrite($ofp, $chunk) === false) {
+                        fclose($fp);
+                        fclose($ofp);
+                        @unlink($destination_file);
+                        throw new \Exception('Write error while extracting '.$destination_file);
+                    }
+                }
+                fclose($fp);
+                fclose($ofp);
+
+            } else {
+                if (!file_exists($destination_dir.$filename) && !mkdir($destination_dir.$filename, 0777, true)) {
+                    throw new \Exception('Cannot create subfolder on unzip');
                 }
             }
-            $zip->close();
         }
+        $zip->close();
+    
 
         return $fileCount;
 

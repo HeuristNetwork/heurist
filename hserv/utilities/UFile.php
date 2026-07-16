@@ -489,7 +489,6 @@ function folderSize($dir)
  */
 function folderFirstFile($dir, $ext = null, $recursion = true)
 {
-
     $dir = realpath($dir);
 
     if ($dir !== false) {
