@@ -386,6 +386,9 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 request['sort:rty_ID'] = '1';   
             }else if(this.input_sort_type.val()=='count'){
                 request['sort:rty_RecCount'] = '-1';   
+            }else if(this.input_sort_type.val()=='ccode'){
+                request['sort:rty_OriginatingDBID'] = '1';
+                request['sort:rty_IDInOriginatingDB'] = '1';
             }else{
                 request['sort:rty_Name'] = '1';   
             }

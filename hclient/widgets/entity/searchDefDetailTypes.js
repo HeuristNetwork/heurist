@@ -285,6 +285,9 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             request['sort:dty_Modified'] = '-1' 
         }else if(this.input_sort_type.val()=='type'){
             request['sort:dty_Type'] = '1' 
+        }else if(this.input_sort_type.val()=='ccode'){
+            request['sort:dty_OriginatingDBID'] = '1';
+            request['sort:dty_IDInOriginatingDB'] = '1';
         }else{
             request['sort:dty_Name'] = '1';   
         }
