@@ -34,17 +34,26 @@ final class AuthSessionService
 
         $dbname = $this->system->dbnameFull();
         if ($dbname) {
-            $keepAlive = $this->system->session()->updateDb($dbname, function (&$dbSession) use ($envVersion, $dbHostName) {
-                if (isset($envVersion)) {
-                    $dbSession['dbHostCode'] = $envVersion;
-                    $dbSession['dbHostName'] = $dbHostName;
+            $keepAlive = $this->system->session()->update(function (&$session) use ($dbname, $envVersion, $dbHostName) {
+
+                if (!isset($session[$dbname]) || !is_array($session[$dbname])) {
+                    return false;
                 }
 
-                return !empty($dbSession['keepalive']);
+                if (isset($envVersion)) {
+                    $session[$dbname]['dbHostCode'] = $envVersion;
+                    $session[$dbname]['dbHostName'] = $dbHostName;
+                }
+
+                return !empty($session[$dbname]['keepalive']);
             });
 
-            if ($keepAlive && !USystem::sessionUpdateCookies()) {
-                USanitize::errorLog('CANNOT UPDATE COOKIE ' . session_id() . '   ' . $dbname);
+            if ($keepAlive) {
+                $this->system->session()->setCookieLifetime($this->cookieLifetimeSeconds('remember'));
+
+                if (!USystem::sessionUpdateCookies()) {
+                    USanitize::errorLog('CANNOT UPDATE COOKIE ' . session_id() . '   ' . $dbname);
+                }
             }
         }
 
@@ -217,6 +226,27 @@ final class AuthSessionService
 
         return true;
     }
+    
+    private function normaliseSessionType(mixed $sessionType): string
+    {
+        $sessionType = strtolower(trim((string)$sessionType));
+
+        return match ($sessionType) {
+            'remember', 'rememberme', 'remember_me', 'keep', 'persistent', 'private', '1', 'true', 'yes', 'y' => 'remember',
+            'shared' => 'shared',
+            'none' => 'none',
+            default => 'public',
+        };
+    }
+
+    private function cookieLifetimeSeconds(string $sessionType): int
+    {
+        return match ($sessionType) {
+            'remember' => 30 * 24 * 60 * 60,
+            'shared' => 24 * 60 * 60,
+            default => 0,
+        };
+    }
 
     /**
      * Authenticates a user and, unless session_type is "none", stores ugr_ID in the DB-scoped session.
@@ -229,6 +259,8 @@ final class AuthSessionService
             $this->system->addError(HEURIST_INVALID_REQUEST, "Username / password not defined");
             return false;
         }
+        
+        $session_type = $this->normaliseSessionType($session_type);
 
         $mysqli = $this->system->getMysqli();
         $user = null;
@@ -306,13 +338,18 @@ final class AuthSessionService
 
     private function doLoginSession(int $userID, string $session_type): void
     {
-        $lifetime = 0;
+        $session_type = $this->normaliseSessionType($session_type);
 
-        if ($session_type === 'shared') {
-            $lifetime = time() + 24 * 60 * 60;
-        } elseif ($session_type === 'remember') {
-            $lifetime = time() + 30 * 24 * 60 * 60;
-        }
+        $cookieLifetime = $this->cookieLifetimeSeconds($session_type);
+        $cookieExpires = $cookieLifetime > 0 ? time() + $cookieLifetime : 0;
+
+        /*
+         * Important: SessionStore::updateDb() may reopen the PHP session.
+         * Set the desired cookie lifetime before that happens, otherwise
+         * PHP's own session_start() can emit a session-only Set-Cookie header
+         * after our persistent cookie and overwrite it in the browser.
+         */
+        $this->system->session()->setCookieLifetime($cookieLifetime);
 
         $this->system->session()->updateDb($this->system->dbnameFull(), function (&$dbSession) use ($userID, $session_type) {
             $dbSession['ugr_ID'] = $userID;
@@ -324,7 +361,7 @@ final class AuthSessionService
             }
         });
 
-        USystem::sessionUpdateCookies($lifetime);
+        USystem::sessionUpdateCookies($cookieExpires);
 
         \user_updateLoginTime($this->system->getMysqli(), $userID);
     }
