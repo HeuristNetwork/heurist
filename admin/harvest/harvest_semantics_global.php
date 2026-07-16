@@ -53,10 +53,17 @@ function main(): void
         // semantic map, so the schema preparer clears it first.
         (new SemanticSchema($targetPdo))->prepareTargetForRun();
 
+        $isSingleGroup = resolveSingleGroupOption($cfg);
+        if ($isSingleGroup) {
+            logLine('Group mode: single imported-definition group per definition table');
+        } else {
+            logLine('Group mode: origin/imported-via database groups');
+        }
+
         $targetRepo = new TargetRepository($targetPdo);
         $semanticRepo = new SemanticMapRepository($targetPdo);
         $client = new ApiClient();
-        $entityImporter = new SemanticEntityImporter($targetRepo, $semanticRepo);
+        $entityImporter = new SemanticEntityImporter($targetRepo, $semanticRepo, $isSingleGroup);
         $structureImporter = new SemanticStructureImporter($targetRepo, $semanticRepo);
         $referenceRepair = new SemanticReferenceRepair($client, $targetRepo, $semanticRepo);
 
@@ -86,4 +93,56 @@ function main(): void
 
     logLine(str_repeat('=', 90));
     logLine('Global semantic harvest completed');
+}
+
+
+function resolveSingleGroupOption(array $cfg): bool
+{
+    $value = null;
+
+    if (PHP_SAPI === 'cli') {
+        $options = getopt('', ['single-group::', 'singleGroup::', 'isSingleGroup::']);
+        foreach (['single-group', 'singleGroup', 'isSingleGroup'] as $key) {
+            if (array_key_exists($key, $options)) {
+                $value = $options[$key];
+                if ($value === false) {
+                    $value = '1';
+                }
+                break;
+            }
+        }
+
+        global $argv;
+        foreach ($argv ?? [] as $arg) {
+            if (preg_match('/^(?:isSingleGroup|singleGroup|single-group)=(.+)$/', $arg, $m)) {
+                $value = $m[1];
+                break;
+            }
+        }
+    } else {
+        foreach (['isSingleGroup', 'singleGroup', 'single-group'] as $key) {
+            if (isset($_REQUEST[$key])) {
+                $value = $_REQUEST[$key];
+                break;
+            }
+        }
+    }
+
+    if ($value === null && isset($cfg['target']['isSingleGroup'])) {
+        $value = $cfg['target']['isSingleGroup'];
+    }
+    if ($value === null && isset($cfg['isSingleGroup'])) {
+        $value = $cfg['isSingleGroup'];
+    }
+
+    if ($value === null) {
+        return false;
+    }
+
+    if (is_bool($value)) {
+        return $value;
+    }
+
+    $value = strtolower(trim((string)$value));
+    return in_array($value, ['1', 'true', 'yes', 'on'], true);
 }

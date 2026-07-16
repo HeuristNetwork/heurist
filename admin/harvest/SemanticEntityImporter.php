@@ -9,7 +9,8 @@ final class SemanticEntityImporter
 
     public function __construct(
         private TargetRepository $targetRepo,
-        private SemanticMapRepository $semanticRepo
+        private SemanticMapRepository $semanticRepo,
+        private bool $isSingleGroup = false
     ) {}
 
     public function importEntityRow(
@@ -51,21 +52,18 @@ final class SemanticEntityImporter
         $prepared = prepareBaseRow($row, $spec, $origin, $currentRegisteredId);
         $prepared = $this->ensureUniqueConceptNameForInsert($type, $spec, $origin, $prepared, $currentDbName);
 
-        $groupDbName = $origin['db'] === $currentRegisteredId
-            ? $currentDbName
-            : ('Origin_DB_' . $origin['db'] . '_via_' . $currentDbName);
-        $groupRegisteredId = (int)$origin['db'];
+        $groupSpec = $this->resolveGroupSpec($origin, $currentRegisteredId, $currentDbName);
 
         if ($type === 'RTY') {
-            $prepared['rty_RecTypeGroupID'] = $this->getGroupId($groupDbName, $groupRegisteredId, 'rty');
+            $prepared['rty_RecTypeGroupID'] = $this->getGroupId($groupSpec['name'], $groupSpec['registeredId'], 'rty');
         } elseif ($type === 'DTY') {
-            $prepared['dty_DetailTypeGroupID'] = $this->getGroupId($groupDbName, $groupRegisteredId, 'dty');
+            $prepared['dty_DetailTypeGroupID'] = $this->getGroupId($groupSpec['name'], $groupSpec['registeredId'], 'dty');
             if ($neutraliseReferences) {
                 unset($prepared['dty_JsonTermIDTree'], $prepared['dty_PtrTargetRectypeIDs']);
             }
         } elseif ($type === 'TRM') {
             $domain = normaliseTermDomain((string)($row['trm_Domain'] ?? 'enum'));
-            $prepared['trm_VocabularyGroupID'] = $this->getGroupId($groupDbName, $groupRegisteredId, 'trm', $domain);
+            $prepared['trm_VocabularyGroupID'] = $this->getGroupId($groupSpec['name'], $groupSpec['registeredId'], 'trm', $domain);
             if ($neutraliseReferences) {
                 $prepared['trm_ParentTermID'] = null;
                 $prepared['trm_InverseTermID'] = null;
@@ -89,12 +87,61 @@ final class SemanticEntityImporter
         return $targetId;
     }
 
+    /** @return array{name:string,registeredId:int} */
+    private function resolveGroupSpec(array $origin, int $currentRegisteredId, string $currentDbName): array
+    {
+        if ($this->isSingleGroup) {
+            return ['name' => 'Imported definitions', 'registeredId' => 0];
+        }
+
+        // Heurist core definitions are intentionally consolidated into one
+        // group, even when a core-origin concept is first encountered through
+        // another database, or a non-core-origin concept is available from the
+        // core definitions database as a derived copy.
+        if ($origin['db'] === 2 || $currentRegisteredId === 2 || $this->isHeuristCoreDefinitionsDbName($currentDbName)) {
+            return ['name' => 'Heurist_Core_Definitions', 'registeredId' => 2];
+        }
+
+        if ($origin['db'] === $currentRegisteredId) {
+            return ['name' => $currentDbName, 'registeredId' => $currentRegisteredId];
+        }
+
+        // Derived/fallback imports are grouped by the database where the
+        // definition was actually found. The origin DB remains visible in the
+        // group name, while the [DB###] suffix records imported-via DB ID.
+        return [
+            'name' => 'Origin_DB_' . $origin['db'] . '_via_' . $currentDbName,
+            'registeredId' => $currentRegisteredId,
+        ];
+    }
+
+    private function isHeuristCoreDefinitionsDbName(string $dbName): bool
+    {
+        return strcasecmp($dbName, 'Heurist_Core_Definitions') === 0
+            || strcasecmp($dbName, 'hdb_Heurist_Core_Definitions') === 0;
+    }
+
     private function getGroupId(string $dbName, int $registeredId, string $kind, ?string $domain = null): int
     {
-        $key = $kind . ':' . ($domain ?? '');
-        $dbKey = (string)$registeredId;
+        $domain = $kind === 'trm' ? normaliseTermDomain((string)($domain ?? 'enum')) : '';
+        $key = $kind . ':' . $domain;
+        $dbKey = $this->isSingleGroup ? 'single' : ($registeredId . ':' . $dbName);
         if (isset($this->groupIds[$dbKey][$key])) {
             return $this->groupIds[$dbKey][$key];
+        }
+
+        if ($this->isSingleGroup) {
+            if ($kind === 'rty') {
+                $id = $this->targetRepo->ensureSingleImportedRecTypeGroup();
+            } elseif ($kind === 'dty') {
+                $id = $this->targetRepo->ensureSingleImportedDetailTypeGroup();
+            } elseif ($kind === 'trm') {
+                $id = $this->targetRepo->ensureSingleImportedVocabularyGroup($domain);
+            } else {
+                throw new RuntimeException("Unknown group kind {$kind}");
+            }
+            $this->groupIds[$dbKey][$key] = $id;
+            return $id;
         }
 
         if ($kind === 'rty') {
@@ -102,7 +149,7 @@ final class SemanticEntityImporter
         } elseif ($kind === 'dty') {
             $id = $this->targetRepo->ensureDetailTypeGroupForSourceDatabase($dbName, $registeredId);
         } elseif ($kind === 'trm') {
-            $id = $this->targetRepo->ensureVocabularyGroupForSourceDatabase($dbName, $registeredId, normaliseTermDomain((string)($domain ?? 'enum')));
+            $id = $this->targetRepo->ensureVocabularyGroupForSourceDatabase($dbName, $registeredId, $domain);
         } else {
             throw new RuntimeException("Unknown group kind {$kind}");
         }

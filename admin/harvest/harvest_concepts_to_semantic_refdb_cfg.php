@@ -7,6 +7,7 @@ return [
          'dbHost' => '127.0.0.1',
          'dbPort' => 3306,
          'database' => 'hdb_osmak_core2',  
+         'isSingleGroup' => 1,
          //'database' => 'hdb_Heurist_Concept_Definitions',
          //'dbAdminUsername' => '',
          //'dbAdminPassword' =>  '',

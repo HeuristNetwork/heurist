@@ -341,7 +341,7 @@ rst_Status = 'pending'
 
 ## 6. Groups
 
-Target groups are created by origin DB ID.
+By default, target groups are created from the database provenance of the imported definition.
 
 Group types:
 
@@ -354,7 +354,69 @@ Vocabulary groups are separated by term domain:
 - `enum`
 - `relation`
 
-Group names include the originating registered DB ID. If a definition is imported as a derived/fallback copy through a different DB, the group name may also note the DB through which it was imported.
+For definitions imported from their own origin database, the group name is:
+
+```text
+Database_Name [DB###]
+```
+
+For definitions imported as derived/fallback copies through another database, the group name is:
+
+```text
+Origin_DB_xxxx_via_Database_Name [DByyyy]
+```
+
+where:
+
+- `xxxx` is the concept's originating DB ID
+- `yyyy` is the registered DB ID where this definition row was actually found and imported from
+
+### Heurist core definitions exception
+
+Definitions found in, or originating from, `Heurist_Core_Definitions` are consolidated into:
+
+```text
+Heurist_Core_Definitions [DB2]
+```
+
+This avoids creating many small fallback groups for core definitions that are frequently encountered through the core database.
+
+### Single-group mode
+
+The script supports a single-group mode for simpler test or production target databases.
+
+CLI examples:
+
+```bash
+php harvest_semantics_global.php --single-group=1
+php harvest_semantics_global.php --isSingleGroup=1
+php harvest_semantics_global.php isSingleGroup=1
+```
+
+HTTP/request examples if the script is invoked through a web request:
+
+```text
+?isSingleGroup=1
+?singleGroup=1
+```
+
+The option can also be set in the config:
+
+```php
+return [
+    'target' => [
+        'database' => 'hdb_Heurist_Concept_Definitions',
+        'isSingleGroup' => 1,
+    ],
+];
+```
+
+When enabled, the harvester creates/reuses one group per definition table/domain:
+
+- `Imported definitions` in `defRecTypeGroups`
+- `Imported definitions` in `defDetailTypeGroups`
+- `Imported definitions enum` in `defVocabularyGroups`
+- `Imported definitions rel` in `defVocabularyGroups`
 
 ## 7. Name duplication resolution
 

@@ -49,6 +49,34 @@ final class TargetRepository
         ]);
     }
 
+    public function ensureSingleImportedRecTypeGroup(): int
+    {
+        return $this->ensureGroup('defRecTypeGroups', 'rtg_ID', 'rtg_Name', 'Imported definitions', [
+            'rtg_Domain' => 'functionalgroup',
+            'rtg_Description' => 'All record type definitions imported by the semantic harvester',
+        ]);
+    }
+
+    public function ensureSingleImportedDetailTypeGroup(): int
+    {
+        return $this->ensureGroup('defDetailTypeGroups', 'dtg_ID', 'dtg_Name', 'Imported definitions', [
+            'dtg_Description' => 'All detail type definitions imported by the semantic harvester',
+        ]);
+    }
+
+    public function ensureSingleImportedVocabularyGroup(string $domain): int
+    {
+        $domain = normaliseTermDomain($domain);
+        $name = $domain === 'relation' ? 'Imported definitions rel' : 'Imported definitions enum';
+        return $this->ensureGroup('defVocabularyGroups', 'vcg_ID', 'vcg_Name', $name, [
+            'vcg_Domain' => $domain,
+            'vcg_Description' => $domain === 'relation'
+                ? 'All relation terms imported by the semantic harvester'
+                : 'All enum terms imported by the semantic harvester',
+        ]);
+    }
+
+
     public function ensureGroupsForSourceDatabase(string $dbName, int $registeredId): array
     {
         $rtyGroupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " [DB{$registeredId}]", 40);
