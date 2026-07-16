@@ -214,7 +214,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
         this.HAPI.RecordMgr.lookupService(request, (response) => {
 
-            response = that.$H.isJSON(response);
+            response = this.$H.isJSON(response);
 
             if(response.status != window.hWin.ResponseStatus.OK){
                 return;
@@ -222,7 +222,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
             let recordset = new HRecordSet(response.data);
             recordset.each2((trm_ID, term) => {
-                that.$Hui.addoption(selBf[0], trm_ID, term['trm_Label']);
+                this.$Hui.addoption(selBf[0], trm_ID, term['trm_Label']);
             });
         });
     },
