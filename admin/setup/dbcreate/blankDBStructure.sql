@@ -580,6 +580,7 @@ CREATE TABLE recUploadedFiles (
   ulf_Parameters text COMMENT 'Parameters including source (flickr,youtube...), default player etc. used to determine special processing',
   ulf_WhoCanView enum('viewable','loginrequired') NULL COMMENT 'Defines if the file is visible when not logged in. If public or blank then file is visible to all',
   ulf_MD5Checksum text(32) NULL COMMENT 'A checksum for the uploaded file which can be used to verify integrity and to merge duplicates',
+--   ulf_DOI varchar(250) default NULL COMMENT 'Persistent identifier (DOI) obtained for this file resource',
   PRIMARY KEY  (ulf_ID),
   KEY ulf_ObfuscatedFileIDKey (ulf_ObfuscatedFileID),
   KEY ulf_Description (ulf_Description(100)),

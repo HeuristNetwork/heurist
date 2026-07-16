@@ -44,9 +44,20 @@
 --              Findability calculation (assessFAIR.php) to award a bonus when the database owner
 --              has obtained a persistent identifier for the database as a whole.
 
---    ALTER TABLE sysIdentification
+-- ALTER TABLE sysIdentification
 --    ADD sys_dbDOI varchar(250) default NULL
 --    COMMENT 'Persistent identifier (DOI) obtained for this database as a whole, if any. Used in FAIR score Findability calculation';
+
+
+-- Source version: 1.3.0
+-- Target version: 1.4.0
+-- Safety rating: SAFE
+-- Description: Add recUploadedFiles.ulf_DOI - file-level DOI
+
+-- ALTER TABLE recUploadedFiles
+--   ADD ulf_DOI varchar(250) default NULL
+-- COMMENT 'Persistent identifier (DOI) obtained for this file resource';
+
 
 
 -- Source version: 1.3.0 
