@@ -101,7 +101,9 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageDefGroups, {
         if(rtg_Order.length < 3){ // set trash group to lower priority
 
             const trashID = $Db.getTrashGroupId('rtg');
-            fields = [{rtg_ID: trashID, rtg_Order: '100'}];
+            if(trashID>0){
+                fields = [{rtg_ID: trashID, rtg_Order: '100'}];
+            }
         }else{
 
             let order = 99;
@@ -109,6 +111,12 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageDefGroups, {
                 ++order;
                 fields.push({rtg_ID: rtg_Order[idx], rtg_Order: String(order)});
             }
+        }
+        
+        if(fields.length==0){
+            this._checkingGroups = false;
+            this._triggerRefresh('rtg');
+            return;
         }
 
         let request = {
