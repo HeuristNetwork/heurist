@@ -751,6 +751,190 @@
       "name": "6. Modern definition API",
       "item": [
         {
+          "name": "Databases collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('database collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is databases', function () { pm.expect(body.meta.entity).to.eql('databases'); });",
+                  "pm.test('server-level metadata has no database', function () { pm.expect(body.meta.database).to.eql(null); });",
+                  "pm.test('database items are field objects', function () { if (body.items.length) { pm.expect(body.items[0]).to.have.property('sys_Database'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/databases?details=full&limit=2&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Databases short alias collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('database collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is databases', function () { pm.expect(body.meta.entity).to.eql('databases'); });",
+                  "pm.test('server-level metadata has no database', function () { pm.expect(body.meta.database).to.eql(null); });",
+                  "pm.test('database items are field objects', function () { if (body.items.length) { pm.expect(body.items[0]).to.have.property('sys_Database'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/dbs?details=full&limit=2&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Database direct object",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('direct database object', function () { pm.expect(body).to.have.property('sys_Database'); pm.expect(body).to.not.have.property('items'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/databases/{{db}}?details=full",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Database direct object short alias",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('direct database object', function () { pm.expect(body).to.have.property('sys_Database'); pm.expect(body).to.not.have.property('items'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/dbs/{{db}}?details=full",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Databases collection with ignored database segment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('database collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is databases', function () { pm.expect(body.meta.entity).to.eql('databases'); });",
+                  "pm.test('server-level metadata has no database', function () { pm.expect(body.meta.database).to.eql(null); });",
+                  "pm.test('database items are field objects', function () { if (body.items.length) { pm.expect(body.items[0]).to.have.property('sys_Database'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/databases?details=full&limit=2&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Databases short alias with ignored database segment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('database collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is databases', function () { pm.expect(body.meta.entity).to.eql('databases'); });",
+                  "pm.test('server-level metadata has no database', function () { pm.expect(body.meta.database).to.eql(null); });",
+                  "pm.test('database items are field objects', function () { if (body.items.length) { pm.expect(body.items[0]).to.have.property('sys_Database'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/dbs?details=full&limit=2&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
           "name": "Record types collection",
           "event": [
             {

@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Heurist Read API
   version: 1.0.0-beta
-  summary: Public read access to Heurist records, database definitions, annotations and IIIF resources
+  summary: Public read access to Heurist databases, records, database definitions, annotations and IIIF resources
   description: 'This specification describes the public read API currently exposed through
 
     `hserv/controller/api.php`.
@@ -13,7 +13,7 @@ info:
     definition routes are equivalent aliases; neither form is deprecated.
 
 
-    The modern definition collection envelope currently applies only to record
+    The modern definition collection envelope applies to server databases, record
 
     types, fields, terms and record structures. Record responses retain the established
 
@@ -32,6 +32,8 @@ servers:
       default: heuristref.net
       description: Host name of the Heurist server
 tags:
+- name: Databases
+  description: List registered databases available on the server
 - name: Records
   description: Search for and retrieve records
 - name: Database structure
@@ -43,6 +45,162 @@ tags:
 - name: Annotations
   description: Read IIIF Web Annotation records and AnnotationPages
 paths:
+  /databases:
+    get:
+      tags:
+      - Databases
+      operationId: listDatabases
+      summary: List registered databases
+      description: Server-level public route. No database path segment or authentication is required. Results use the standard collection envelope. Use details=full to include registration ID, title, rights and description.
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/DatabaseDetails'
+      - $ref: '#/components/parameters/RegisteredDatabaseIdFilter'
+      responses:
+        '200':
+          description: Registered databases
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /databases/{databaseName}:
+    get:
+      tags:
+      - Databases
+      operationId: getDatabase
+      summary: Retrieve one registered database
+      description: Server-level public route. The database is selected by its database name.
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/DatabaseName'
+      - $ref: '#/components/parameters/DatabaseDetails'
+      responses:
+        '200':
+          description: Registered database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseDefinition'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+  /dbs:
+    get:
+      tags:
+      - Databases
+      operationId: listDatabasesShortAlias
+      summary: List registered databases using the short alias
+      description: Equivalent alias of /databases.
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/DatabaseDetails'
+      - $ref: '#/components/parameters/RegisteredDatabaseIdFilter'
+      responses:
+        '200':
+          description: Registered databases
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /dbs/{databaseName}:
+    get:
+      tags:
+      - Databases
+      operationId: getDatabaseShortAlias
+      summary: Retrieve one registered database using the short alias
+      description: Equivalent alias of /databases/{databaseName}.
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/DatabaseName'
+      - $ref: '#/components/parameters/DatabaseDetails'
+      responses:
+        '200':
+          description: Registered database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseDefinition'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+  /{database}/databases:
+    get:
+      tags:
+      - Databases
+      operationId: listDatabasesWithIgnoredDatabaseSegment
+      summary: List registered databases with a compatibility database segment
+      description: Compatibility form. The database path segment is accepted but ignored; the result is the same server-level collection as /databases.
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/DatabaseDetails'
+      - $ref: '#/components/parameters/RegisteredDatabaseIdFilter'
+      responses:
+        '200':
+          description: Registered databases
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/dbs:
+    get:
+      tags:
+      - Databases
+      operationId: listDatabasesShortAliasWithIgnoredDatabaseSegment
+      summary: List registered databases using the short alias and a compatibility database segment
+      description: Compatibility form. The database path segment is accepted but ignored; the result is the same server-level collection as /dbs.
+      security:
+      - {}
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/DatabaseDetails'
+      - $ref: '#/components/parameters/RegisteredDatabaseIdFilter'
+      responses:
+        '200':
+          description: Registered databases
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/records:
     get:
       tags:
@@ -680,6 +838,32 @@ components:
         type: string
         minLength: 1
       example: my_database
+    DatabaseName:
+      name: databaseName
+      in: path
+      required: true
+      description: Heurist database name as returned in sys_Database.
+      schema:
+        type: string
+        minLength: 1
+      example: my_database
+    DatabaseDetails:
+      name: details
+      in: query
+      description: Return only database names with id, or full database registration information with full.
+      schema:
+        type: string
+        enum:
+        - id
+        - full
+        default: id
+    RegisteredDatabaseIdFilter:
+      name: sys_dbRegisteredID
+      in: query
+      description: Filter by registered database ID. Comparison syntax such as >0 is accepted.
+      schema:
+        type: string
+      example: '>0'
     RecordId:
       name: recordId
       in: path
@@ -767,6 +951,54 @@ components:
         message:
           type: string
           example: Definition not found
+      additionalProperties: false
+    DatabaseDefinition:
+      type: object
+      required:
+      - sys_Database
+      properties:
+        sys_Database:
+          type: string
+          description: Database name used in API path segments.
+        sys_dbRegisteredID:
+          type: integer
+          description: Registered database identifier.
+        sys_dbName:
+          type: string
+          description: Display name of the database.
+        sys_dbRights:
+          type: string
+        sys_dbDescription:
+          type: string
+      additionalProperties: true
+    DatabaseMeta:
+      type: object
+      required:
+      - database
+      - entity
+      properties:
+        database:
+          type: 'null'
+          description: Always null because database listing is a server-level request.
+        entity:
+          type: string
+          const: databases
+      additionalProperties: false
+    DatabaseSearchResponse:
+      type: object
+      required:
+      - items
+      - meta
+      - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatabaseDefinition'
+        meta:
+          $ref: '#/components/schemas/DatabaseMeta'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
       additionalProperties: false
     Definition:
       type: object
