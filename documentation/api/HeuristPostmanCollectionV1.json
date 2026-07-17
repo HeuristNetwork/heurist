@@ -59,6 +59,14 @@
       "value": "6529"
     },
     {
+      "key": "trlParentId",
+      "value": "6529"
+    },
+    {
+      "key": "trlTermId",
+      "value": "6529"
+    },
+    {
       "key": "userId",
       "value": "2"
     },
@@ -1142,6 +1150,132 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/terms/{{trmId}}",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Term links collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is termlinks', function () { pm.expect(body.meta.entity).to.eql('termlinks'); });",
+                  "pm.test('term-link item shape', function () { if (body.items.length) { pm.expect(body.items[0]).to.have.all.keys('trl_ParentID','trl_TermID'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/termlinks?limit=2&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Term links by parent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is termlinks', function () { pm.expect(body.meta.entity).to.eql('termlinks'); });",
+                  "pm.test('term-link item shape', function () { if (body.items.length) { pm.expect(body.items[0]).to.have.all.keys('trl_ParentID','trl_TermID'); } });",
+                  "pm.test('all links match parentId', function () { body.items.forEach(function (item) { pm.expect(Number(item.trl_ParentID)).to.eql(Number(pm.collectionVariables.get('trlParentId'))); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/termlinks?parentId={{trlParentId}}&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Term links by term",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is termlinks', function () { pm.expect(body.meta.entity).to.eql('termlinks'); });",
+                  "pm.test('term-link item shape', function () { if (body.items.length) { pm.expect(body.items[0]).to.have.all.keys('trl_ParentID','trl_TermID'); } });",
+                  "pm.test('all links match termId', function () { body.items.forEach(function (item) { pm.expect(Number(item.trl_TermID)).to.eql(Number(pm.collectionVariables.get('trlTermId'))); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/termlinks?termId={{trlTermId}}&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Term links short alias",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('collection envelope exists', function () { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta).to.be.an('object'); pm.expect(body.pagination).to.be.an('object'); });",
+                  "pm.test('pagination contract', function () { pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('canonical entity is termlinks', function () { pm.expect(body.meta.entity).to.eql('termlinks'); });",
+                  "pm.test('term-link item shape', function () { if (body.items.length) { pm.expect(body.items[0]).to.have.all.keys('trl_ParentID','trl_TermID'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/trl?limit=2&offset=0",
               "host": [
                 "{{baseUrl}}"
               ]

@@ -15,7 +15,7 @@ info:
 
     The modern definition collection envelope applies to server databases, record
 
-    types, fields, terms and record structures. Record responses retain the established
+    types, fields, terms, term links and record structures. Record responses retain the established
 
     `records` array and record/detail objects while adding metadata and pagination. Successful IIIF
 
@@ -37,7 +37,7 @@ tags:
 - name: Records
   description: Search for and retrieve records
 - name: Database structure
-  description: Retrieve record types, fields, terms and record structures
+  description: Retrieve record types, fields, terms, term links and record structures
 - name: Authentication
   description: Obtain JWT tokens or manage a browser-backed session
 - name: IIIF
@@ -491,6 +491,45 @@ paths:
       - $ref: '#/components/parameters/TermId'
       - $ref: '#/components/parameters/Details'
       responses: *id002
+  /{database}/termlinks:
+    get:
+      tags:
+      - Database structure
+      operationId: listTermLinks
+      summary: Retrieve term parent-link relationships
+      description: Returns rows from `defTermsLinks`. Each item preserves the parent and term IDs. Links may represent either the explicit `trm_ParentTermID` hierarchy or an additional implicit vocabulary/parent association.
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - name: parentId
+        in: query
+        description: Return links whose `trl_ParentID` equals this term ID.
+        schema:
+          type: integer
+          minimum: 1
+      - name: termId
+        in: query
+        description: Return links whose `trl_TermID` equals this term ID.
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: Term links
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermLinkSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/recstructure/{recordTypeId}:
     get:
       tags:
@@ -600,6 +639,45 @@ paths:
       - $ref: '#/components/parameters/TermId'
       - $ref: '#/components/parameters/Details'
       responses: *id002
+  /{database}/trl:
+    get:
+      tags:
+      - Database structure
+      operationId: listTermLinksShort
+      summary: Compact alias for `termlinks`
+      description: Equivalent alias of `/{database}/termlinks`.
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - name: parentId
+        in: query
+        description: Return links whose `trl_ParentID` equals this term ID.
+        schema:
+          type: integer
+          minimum: 1
+      - name: termId
+        in: query
+        description: Return links whose `trl_TermID` equals this term ID.
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: Term links
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermLinkSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/rst/{recordTypeId}:
     get:
       tags:
@@ -1017,6 +1095,7 @@ components:
           - rectypes
           - fields
           - terms
+          - termlinks
           - recstructure
         recordTypeId:
           type: integer
@@ -1063,6 +1142,49 @@ components:
             $ref: '#/components/schemas/Definition'
         meta:
           $ref: '#/components/schemas/DefinitionMeta'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    TermLink:
+      type: object
+      required:
+      - trl_ParentID
+      - trl_TermID
+      properties:
+        trl_ParentID:
+          type: integer
+          minimum: 1
+          description: Parent term or vocabulary ID stored in `defTermsLinks`.
+        trl_TermID:
+          type: integer
+          minimum: 1
+          description: Linked term ID stored in `defTermsLinks`.
+      additionalProperties: false
+    TermLinkMeta:
+      type: object
+      required:
+      - database
+      - entity
+      properties:
+        database:
+          type: string
+        entity:
+          type: string
+          const: termlinks
+      additionalProperties: false
+    TermLinkSearchResponse:
+      type: object
+      required:
+      - items
+      - meta
+      - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermLink'
+        meta:
+          $ref: '#/components/schemas/TermLinkMeta'
         pagination:
           $ref: '#/components/schemas/Pagination'
       additionalProperties: false
