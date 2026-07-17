@@ -79,10 +79,10 @@ final class TargetRepository
 
     public function ensureGroupsForSourceDatabase(string $dbName, int $registeredId): array
     {
-        $rtyGroupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " [DB{$registeredId}]", 40);
-        $dtyGroupName = $this->makeUniqueBoundedGroupName('defDetailTypeGroups', 'dtg_Name', $dbName, " [DB{$registeredId}]", 63);
-        $enumGroupName = $this->makeUniqueBoundedGroupName('defVocabularyGroups', 'vcg_Name', $dbName, " [DB{$registeredId} enum]", 40);
-        $relationGroupName = $this->makeUniqueBoundedGroupName('defVocabularyGroups', 'vcg_Name', $dbName, " [DB{$registeredId} rel]", 40);
+        $rtyGroupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " db{$registeredId}", 40);
+        $dtyGroupName = $this->makeUniqueBoundedGroupName('defDetailTypeGroups', 'dtg_Name', $dbName, " db{$registeredId}", 63);
+        $enumGroupName = $this->makeUniqueBoundedGroupName('defVocabularyGroups', 'vcg_Name', $dbName, " db{$registeredId}", 40); //was " [DB{$registeredId} enum]", 40);
+        $relationGroupName = $this->makeUniqueBoundedGroupName('defVocabularyGroups', 'vcg_Name', $dbName, " dv{$registeredId} (relations)", 40);
 
         return [
             'rty' => $this->ensureGroup('defRecTypeGroups', 'rtg_ID', 'rtg_Name', $rtyGroupName, [
