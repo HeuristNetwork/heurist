@@ -106,6 +106,7 @@ $entities = array(
 'rty'=>'DefRecTypes',
 'dty'=>'DefDetailTypes',
 'trm'=>'DefTerms',
+'trl'=>'DefTermsLinks', 'termlinks'=>'DefTermsLinks',
 'rst'=>'DefRecStructure',
 'recstructure'=>'DefRecStructure',
 'rem'=>'UsrReminders',
@@ -322,7 +323,7 @@ if($method === 'search'){
         'records', 'groups', 'users', 'dbs', 'databases',
         'rty', 'rectypes',
         'dty', 'fields',
-        'trm', 'terms',
+        'trm', 'terms', 'trl', 'termlinks',
         'rst', 'recstructure'
     );
     $allow_anonymous = in_array($resource, $publicSearchResources, true);    
@@ -419,6 +420,8 @@ else
         'fields' => 'fields',
         'trm' => 'terms',
         'terms' => 'terms',
+        'trl' => 'termlinks',
+        'termlinks' => 'termlinks',
         'rst' => 'recstructure',
         'recstructure' => 'recstructure'
     );
@@ -456,6 +459,16 @@ else
         }
 
         $req_params['api_response_context'] = $apiResponseContext;
+    }
+
+    // Public term-link filters use concise API parameter names.
+    if(in_array($requestedResource, array('trl', 'termlinks'), true)){
+        if(isset($req_params['parentId'])){
+            $req_params['trl_ParentID'] = $req_params['parentId'];
+        }
+        if(isset($req_params['termId'])){
+            $req_params['trl_TermID'] = $req_params['termId'];
+        }
     }
 
     if(@$requestUri[3]=='annotations'){
