@@ -140,7 +140,7 @@
     $need_config = false;
 
     if( (!$system_init_failed)  //system can be inited beforehand for getDefinitionsModTime
-        && ($system->isInited() || $system->init($dbname)))
+        && ($system->isInited() || $system->init($dbname, $req_params['api_response_context']['entity']!=='databases')))
     {
 
         //USanitize::sanitizeRequest($req_params); it brokes json strings

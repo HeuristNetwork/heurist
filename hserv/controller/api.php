@@ -119,7 +119,7 @@ $entities = array(
 'terms'=>'DefTerms',
 'reminders'=>'DbUsrReminders',
 
-'dbs'=>'SysDatabases',
+'dbs'=>'SysDatabases', 'databases'=>'SysDatabases',
 'users'=>'SysUsers',
 'groups'=>'SysGroups',
 'records'=>'Records', //only search allowed
@@ -232,8 +232,20 @@ elseif(@$req_params['db'] && @$requestUri[2]!=null){ //backward when database is
         exitWithError('API route not found', 404);
     }
 
+}elseif(@$requestUri[2]==='dbs' || @$requestUri[2]==='databases'){
+    $req_params['db'] = null;    
+    if(@$requestUri[3]!=='dbs'){
+        array_splice( $requestUri, 3, 0, 'dbs' );
+    }
 }elseif(@$requestUri[2]!=null){
     $req_params['db'] = $requestUri[2];
+}
+
+// Database listing is a server-level resource and never belongs to the
+// database segment in the URL. Treat both /api/dbs and /api/{db}/dbs
+// (and their /databases aliases) identically.
+if(in_array(@$requestUri[3], array('dbs', 'databases'), true)){
+    $req_params['db'] = null;
 }
 
 $allowed_methods = array('search','add','save','delete');
@@ -299,14 +311,15 @@ $skip_auth_processing =
     ($resource === 'login') ||
     ($resource === 'logout') ||
     $is_public_annotation_read ||
-    ($resource === 'iiif');
+    ($resource === 'iiif') ||
+    in_array($resource, ['dbs','databases'], true);
 
 // Routes that may be used anonymously, but should still use
 // current session/JWT if provided
 $allow_anonymous = false;
 if($method === 'search'){
     $publicSearchResources = array(
-        'records', 'groups', 'users',
+        'records', 'groups', 'users', 'dbs', 'databases',
         'rty', 'rectypes',
         'dty', 'fields',
         'trm', 'terms',
@@ -398,6 +411,8 @@ else
     // entity search layer to retain its full internal result for formatting
     // at the entityScrud.php controller boundary.
     $definitionResources = array(
+        'dbs' => 'databases',
+        'databases' => 'databases',
         'rty' => 'rectypes',
         'rectypes' => 'rectypes',
         'dty' => 'fields',
@@ -433,7 +448,8 @@ else
             $primaryFields = array(
                 'rectypes' => 'rty_ID',
                 'fields' => 'dty_ID',
-                'terms' => 'trm_ID'
+                'terms' => 'trm_ID',
+                'databases' => 'sys_Database'
             );
             $req_params[$primaryFields[$apiResponseContext['entity']]] = $requestUri[4];
             $apiResponseContext['mode'] = 'item';
