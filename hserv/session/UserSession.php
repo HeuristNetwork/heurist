@@ -192,11 +192,12 @@ final class UserSession
                 }
 
                 $dbWithHost = $dbname;
-                if (isset($dbSession['dbHostName'])) {
-                    $dbWithHost = $dbSession['dbHostName'] . ': ' . $dbWithHost;
+                $dbNameFull = HEURIST_DB_PREFIX.$dbname;
+                if (isset($dbSession[$dbNameFull]['dbHostName'])) {
+                    $dbWithHost = $dbSession[$dbNameFull]['dbHostName'] . ': ' . $dbWithHost;
                 }
-                if (isset($dbSession['dbHostCode'])) {
-                    $dbname = $dbSession['dbHostCode'] . '-' . $dbname;
+                if (isset($dbSession[$dbNameFull]['dbHostCode'])) {
+                    $dbname = $dbSession[$dbNameFull]['dbHostCode'] . '-' . $dbname;
                 }
 
                 $dbrecent[] = [
