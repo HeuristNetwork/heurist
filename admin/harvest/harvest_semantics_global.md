@@ -46,31 +46,27 @@ This is intentional. Without `sysHeuristSemantics`, the script has no reliable m
 
 Do not run this script against a target database that contains manually curated definition data unless that data has been backed up or the required semantic tracking tables have already been created and populated.
 
-### 2.2 `defTermsLinks` is recreated by the script
+### 2.2 `defTermsLinks` is imported from the source APIs
 
-At the end of the run, the script rebuilds:
+`defTerms.trm_ParentTermID` stores the explicit parent of a term. The separate
+`defTermsLinks` table may contain both that explicit relationship and additional
+implicit vocabulary membership links. It must therefore not be rebuilt only from
+`trm_ParentTermID`.
 
-```sql
-defTermsLinks
+After all terms have target-local IDs, the script requests:
+
+```text
+/api/{database}/termlinks
 ```
 
-from the final values in:
+for every source database. Both `trl_ParentID` and `trl_TermID` are resolved from
+source-local IDs through their semantic term identities and mapped to target-local
+term IDs. Duplicate mapped relationships are suppressed.
 
-```sql
-defTerms.trm_ParentTermID
-```
-
-The script clears `defTermsLinks` and inserts one row for each term with a non-null parent:
-
-```sql
-INSERT IGNORE INTO defTermsLinks (trl_ParentID, trl_TermID)
-SELECT trm_ParentTermID, trm_ID
-FROM defTerms
-WHERE trm_ParentTermID IS NOT NULL
-  AND trm_ParentTermID > 0;
-```
-
-This makes the term hierarchy link table deterministic after all term parent references have been repaired.
+All source pages are fetched and mapped before the target table is changed. The
+script then replaces `defTermsLinks` inside the same transaction used for term
+reference repair. If an API or mapping step fails, the previous target link table
+is preserved by rollback.
 
 ## 3. Configuration
 
@@ -281,7 +277,9 @@ trm_ParentTermID
 trm_InverseTermID
 ```
 
-using semantic mappings and target-local IDs.
+using semantic mappings and target-local IDs. It also imports the complete
+`defTermsLinks` relationship set from the public `termlinks` API so both explicit
+and implicit vocabulary links are retained.
 
 ### 5.5 Reference repair
 
@@ -547,22 +545,23 @@ in `heuristConfigIni.php`.
 
 ### `defTermsLinks` is empty
 
-Check whether `defTerms.trm_ParentTermID` has been repaired:
+Verify that each source server supports the public endpoint:
 
-```sql
-SELECT COUNT(*)
-FROM defTerms
-WHERE trm_ParentTermID IS NOT NULL
-  AND trm_ParentTermID > 0;
+```text
+/api/{database}/termlinks
 ```
 
-If this returns zero, the issue is term parent repair, not `defTermsLinks`.
-
-If parent IDs exist, rebuild should populate `defTermsLinks` at the final step.
+Check the harvest log for fetched, mapped and unresolved link counts. A link is
+skipped when either source-local term ID cannot be resolved to a semantic term in
+the target. Confirm that both linked terms were returned by the source `trm` API
+and imported into the target.
 
 ### Duplicate term link error
 
-The global-pass harvester clears and rebuilds `defTermsLinks` rather than maintaining links term-by-term. If duplicate `trl_CompositeKey` errors occur, check whether legacy triggers are inserting duplicate links during term parent repair and whether `defTermsLinks` was cleared before repair.
+Mapped links are deduplicated in memory and inserted with `INSERT IGNORE`. If a
+legacy trigger inserts term links while `trm_ParentTermID` is repaired, the table
+is cleared first and the complete API-derived relationship set is restored in the
+same transaction.
 
 ### Unexpected external definitions imported
 

@@ -21,7 +21,7 @@ final class TargetRepository
 
     public function ensureRecTypeGroupForSourceDatabase(string $dbName, int $registeredId): int
     {
-        $groupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " [DB{$registeredId}]", 40);
+        $groupName = $this->makeUniqueBoundedGroupName('defRecTypeGroups', 'rtg_Name', $dbName, " db{$registeredId}", 40);
         return $this->ensureGroup('defRecTypeGroups', 'rtg_ID', 'rtg_Name', $groupName, [
             'rtg_Domain' => 'functionalgroup',
             'rtg_Description' => "Harvested concepts from {$dbName}",
@@ -30,7 +30,7 @@ final class TargetRepository
 
     public function ensureDetailTypeGroupForSourceDatabase(string $dbName, int $registeredId): int
     {
-        $groupName = $this->makeUniqueBoundedGroupName('defDetailTypeGroups', 'dtg_Name', $dbName, " [DB{$registeredId}]", 63);
+        $groupName = $this->makeUniqueBoundedGroupName('defDetailTypeGroups', 'dtg_Name', $dbName, " db{$registeredId}", 63);
         return $this->ensureGroup('defDetailTypeGroups', 'dtg_ID', 'dtg_Name', $groupName, [
             'dtg_Description' => "Harvested concepts from {$dbName}",
         ]);
@@ -39,7 +39,7 @@ final class TargetRepository
     public function ensureVocabularyGroupForSourceDatabase(string $dbName, int $registeredId, string $domain): int
     {
         $domain = normaliseTermDomain($domain);
-        $suffix = $domain === 'relation' ? " [DB{$registeredId} rel]" : " [DB{$registeredId} enum]";
+        $suffix = $domain === 'relation' ? " db{$registeredId} (relations)" : " db{$registeredId}";
         $groupName = $this->makeUniqueBoundedGroupName('defVocabularyGroups', 'vcg_Name', $dbName, $suffix, 40);
         return $this->ensureGroup('defVocabularyGroups', 'vcg_ID', 'vcg_Name', $groupName, [
             'vcg_Domain' => $domain,
@@ -236,17 +236,35 @@ final class TargetRepository
         $this->pdo->exec('DELETE FROM `defTermsLinks`');
     }
 
-    public function rebuildTermLinksFromParentIds(): void
+    /**
+     * Replace defTermsLinks with the complete mapped relationship set.
+     *
+     * @param array<int,array{parentId:int,termId:int}> $links
+     */
+    public function replaceTermLinks(array $links): void
     {
-        // Build defTermsLinks from the canonical target-local parent IDs stored in
-        // defTerms after all TRM parent repairs have completed. This makes the
-        // hierarchy table deterministic and avoids relying on legacy triggers.
         $this->deleteAllTermLinks();
-        $this->pdo->exec(
+
+        if (!$links) {
+            return;
+        }
+
+        $stmt = $this->pdo->prepare(
             'INSERT IGNORE INTO `defTermsLinks` (`trl_ParentID`, `trl_TermID`) ' .
-            'SELECT `trm_ParentTermID`, `trm_ID` FROM `defTerms` ' .
-            'WHERE `trm_ParentTermID` IS NOT NULL AND `trm_ParentTermID` > 0'
+            'VALUES (:parentId, :termId)'
         );
+
+        foreach ($links as $link) {
+            $parentId = (int)($link['parentId'] ?? 0);
+            $termId = (int)($link['termId'] ?? 0);
+            if ($parentId <= 0 || $termId <= 0 || $parentId === $termId) {
+                continue;
+            }
+
+            $stmt->bindValue(':parentId', $parentId, PDO::PARAM_INT);
+            $stmt->bindValue(':termId', $termId, PDO::PARAM_INT);
+            $stmt->execute();
+        }
     }
 
     private function makeUniqueBoundedGroupName(string $table, string $nameField, string $baseName, string $suffix, int $maxLength): string

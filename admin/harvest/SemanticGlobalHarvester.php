@@ -16,6 +16,7 @@ final class SemanticGlobalHarvester
         private SemanticEntityImporter $entityImporter,
         private SemanticStructureImporter $structureImporter,
         private SemanticReferenceRepair $referenceRepair,
+        private SemanticTermLinksImporter $termLinksImporter,
         private string $targetDbName
     ) {}
 
@@ -32,10 +33,20 @@ final class SemanticGlobalHarvester
         $this->runEntityPass('TRM', originOnly: true, neutraliseReferences: true);
         $this->runEntityPass('TRM', originOnly: false, neutraliseReferences: true);
 
+        // Fetch and map the complete source term-link set before modifying the
+        // target. If any source API request fails, the existing target links
+        // remain untouched.
+        $mappedTermLinks = $this->termLinksImporter->collectMappedLinks($this->databaseRefs);
+
         $this->targetPdo->beginTransaction();
         try {
+            // Clear links before term parent repair so legacy triggers cannot
+            // collide with existing rows. The complete explicit + implicit set
+            // is restored below in the same transaction.
+            $this->targetRepo->deleteAllTermLinks();
             $this->referenceRepair->repairDtyReferences($this->databaseRefs);
             $this->referenceRepair->repairTermReferences($this->databaseRefs);
+            $this->targetRepo->replaceTermLinks($mappedTermLinks);
             $this->targetPdo->commit();
         } catch (Throwable $e) {
             if ($this->targetPdo->inTransaction()) {
@@ -46,18 +57,6 @@ final class SemanticGlobalHarvester
 
         $this->runStructurePass(originOnly: true);
         $this->runStructurePass(originOnly: false);
-
-        $this->targetPdo->beginTransaction();
-        try {
-            logLine('Final step: rebuilding defTermsLinks from defTerms parent IDs');
-            $this->targetRepo->rebuildTermLinksFromParentIds();
-            $this->targetPdo->commit();
-        } catch (Throwable $e) {
-            if ($this->targetPdo->inTransaction()) {
-                $this->targetPdo->rollBack();
-            }
-            throw $e;
-        }
     }
 
     private function discoverDatabases(array $sources): void

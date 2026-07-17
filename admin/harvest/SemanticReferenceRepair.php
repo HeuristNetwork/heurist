@@ -83,12 +83,6 @@ final class SemanticReferenceRepair
     {
         logLine('Reference repair: TRM parent and inverse links');
 
-        // The target hierarchy table is rebuilt deterministically at the end of
-        // the run from defTerms.trm_ParentTermID. Clear it before parent repairs
-        // so legacy triggers, if present, cannot fail on duplicate link rows
-        // while defTerms is being updated.
-        $this->targetRepo->deleteAllTermLinks();
-
         $trmTargetMap = $this->semanticRepo->loadTargetIdMap('trm');
         $updated = 0;
         $resolvedParents = 0;

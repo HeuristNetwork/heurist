@@ -27,6 +27,7 @@ require_once __DIR__ . '/SemanticMapRepository.php';
 require_once __DIR__ . '/SemanticEntityImporter.php';
 require_once __DIR__ . '/SemanticStructureImporter.php';
 require_once __DIR__ . '/SemanticReferenceRepair.php';
+require_once __DIR__ . '/SemanticTermLinksImporter.php';
 require_once __DIR__ . '/SemanticGlobalHarvester.php';
 
 set_time_limit(0);//no limit
@@ -66,6 +67,7 @@ function main(): void
         $entityImporter = new SemanticEntityImporter($targetRepo, $semanticRepo, $isSingleGroup);
         $structureImporter = new SemanticStructureImporter($targetRepo, $semanticRepo);
         $referenceRepair = new SemanticReferenceRepair($client, $targetRepo, $semanticRepo);
+        $termLinksImporter = new SemanticTermLinksImporter($client, $semanticRepo);
 
         $harvester = new SemanticGlobalHarvester(
             $client,
@@ -75,6 +77,7 @@ function main(): void
             $entityImporter,
             $structureImporter,
             $referenceRepair,
+            $termLinksImporter,
             $targetDbName
         );
     } catch (Throwable $e) {
