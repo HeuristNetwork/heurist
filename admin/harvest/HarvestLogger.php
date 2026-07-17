@@ -16,7 +16,7 @@ function logRunHeader(array $sources): void
     $lines[] = 'Run started: ' . date('Y-m-d H:i:s');
     $lines[] = 'Sources accessed:';
     foreach ($sources as $index => $sourceCfg) {
-        $lines[] = '  ' . ($index + 1) . '. ' . $sourceCfg['server'] . ' registry DB ' . $sourceCfg['registryDatabase'];
+        $lines[] = '  ' . ($index + 1) . '. ' . $sourceCfg['server'];
     }
     $lines[] = str_repeat('-', 90);
 

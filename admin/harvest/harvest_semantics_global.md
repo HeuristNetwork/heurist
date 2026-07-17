@@ -97,11 +97,8 @@ return [
     'sources' => [
         [
             'server' => 'https://heuristref.net/h7-alpha/',
-            'registryDatabase' => 'Heurist_Concept_Definitions',
 
             // optional; defaults may be loaded from heuristConfigIni.php
-            'username' => '2',
-            'password' => '<password>',
         ],
     ],
 ];
@@ -138,43 +135,25 @@ $passwordForDatabaseAccess
 
 ### 3.2 Source section
 
-Each source entry defines one Heurist server and one registry database used to retrieve the list of registered databases on that server.
+Each source entry defines one Heurist server. The harvester retrieves registered databases from the server-level public `/api/databases` endpoint.
 
 Required:
 
 ```php
 'server' => 'https://heuristref.net/h7-alpha/'
-'registryDatabase' => 'Heurist_Concept_Definitions'
 ```
 
 Optional:
 
 ```php
-'username' => '2'
 'login' => '2'
-'password' => '<password>'
 'jwt' => '<pre-issued-token>'
 'token' => '<pre-issued-token>'
 'accessToken' => '<pre-issued-token>'
 'authEndpoint' => '<custom-auth-endpoint>'
 ```
 
-If both source username/login and password are omitted, the script defaults to:
-
-```php
-username = '2'
-password = $passwordForDatabaseAccess
-```
-
-from `heuristConfigIni.php`.
-
-If a username/login is provided but password is omitted, the script uses:
-
-```php
-$passwordForDatabaseAccess
-```
-
-as the source password.
+Source authentication parameters are no longer supported or required. Database discovery and definition searches use public API routes.
 
 ## 4. Target tracking tables
 
@@ -233,7 +212,7 @@ The tracking table records the semantic identity of the RTY and DTY concepts, th
 
 ### 5.1 Source database discovery
 
-For each configured source server, the script authenticates if credentials or a token are available, then asks the registry database for registered databases with `sys_dbRegisteredID > 0`.
+For each configured source server, the script calls the server-level public `/api/databases` endpoint with `details=full` and `sys_dbRegisteredID=>0`, then follows `pagination.next` until all registered databases are collected.
 
 Discovered databases are ordered by registered ID. This increases the chance that original definitions are encountered before derived copies.
 

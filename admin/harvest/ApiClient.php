@@ -4,72 +4,40 @@ declare(strict_types=1);
 
 final class ApiClient
 {
-    /** @var array<string,string> */
-    private array $bearerTokensByServer = [];
-
     /**
-     * Authenticate once per configured source server. If a pre-issued token is
-     * supplied in config, use it. Otherwise, if login/password are supplied,
-     * POST JSON credentials to the server login endpoint and extract JWT/token
-     * from the JSON response.
+     * Retrieves all registered databases exposed by the server-level public
+     * /api/databases endpoint. The endpoint uses the standard collection
+     * envelope and may paginate, so follow pagination.next until exhausted.
      */
-    public function authenticateSource(array $sourceCfg): void
+    public function fetchRegisteredDatabases(string $server): array
     {
-        $server = normaliseServerUrl((string)$sourceCfg['server']);
-
-        $preissued = (string)($sourceCfg['jwt'] ?? $sourceCfg['token'] ?? $sourceCfg['accessToken'] ?? '');
-        if ($preissued !== '') {
-            $this->bearerTokensByServer[$server] = $preissued;
-            logLine("  Auth: using pre-issued bearer token for {$server}");
-            return;
-        }
-
-        
-        $username = (string)($sourceCfg['username'] ?? '');
-        $password = (string)($sourceCfg['password'] ?? '');
-        if ($username === '' && $password === '') {
-            logLine("  Auth: no username/password configured for {$server}; requests will be anonymous/sessionless");
-            return;
-        }
-        if ($username === '' || $password === '') {
-            throw new RuntimeException("Both username and password are required for JWT authentication on {$server}");
-        }
-        $registryDb = normaliseDbNameForApi((string)$sourceCfg['registryDatabase']);
-        /*
-        $endpoint = (string)($sourceCfg['authEndpoint'] ?? '');
-        if ($endpoint === '') {
-            $url = normaliseServerUrl($server) . 'api/' . rawurlencode($registryDb) . '/login';
-        } elseif (preg_match('~^https?://~i', $endpoint)) {
-            $url = $endpoint;
-        } else {
-            $url = normaliseServerUrl($server) . ltrim($endpoint, '/');
-        }*/
-
-        $url = normaliseServerUrl($server) . 'hserv/controller/auth.php';
-
-        $json = $this->postJson($url, [
-            'username' => $username,
-            'password' => $password,
-            'db' => $registryDb,
-        ]);
-
-        $token = $this->extractAuthToken($json);
-        if ($token === null) {
-            throw new RuntimeException("Login succeeded but no JWT/token was found in response from {$url}");
-        }
-
-        $this->bearerTokensByServer[$server] = $token;
-        logLine("  Auth: acquired bearer token for {$server}");
-    }
-
-    public function fetchRegisteredDatabases(string $server, string $registryDb): array
-    {
-        $url = $this->buildUrl($server, $registryDb, 'dbs', [
-            'details' => 'raw',
+        $url = $this->buildUrl($server, null, 'databases', [
+            'details' => 'full',
             'sys_dbRegisteredID' => '>0',
+            'limit' => API_LIMIT,
+            'offset' => 0,
         ]);
-        $json = $this->getJson($url, $server);
-        return $this->extractRecords($json);
+
+        $all = [];
+        $visitedUrls = [];
+
+        while ($url !== null) {
+            if (isset($visitedUrls[$url])) {
+                throw new RuntimeException("Database API pagination loop detected for {$url}");
+            }
+            $visitedUrls[$url] = true;
+
+            $json = $this->getJson($url);
+            $items = $this->extractCollectionItems($json, $url, 'Database');
+            foreach ($items as $item) {
+                if (is_array($item)) {
+                    $all[] = $item;
+                }
+            }
+            $url = $this->extractNextPageUrl($json, $url);
+        }
+
+        return $all;
     }
 
     public function fetchRows(string $server, string $dbName, string $entity, array $filters): array
@@ -90,7 +58,7 @@ final class ApiClient
             }
             $visitedUrls[$url] = true;
 
-            $json = $this->getJson($url, $server);
+            $json = $this->getJson($url);
             $items = $this->extractDefinitionItems($json, $url);
 
             foreach ($items as $item) {
@@ -105,49 +73,32 @@ final class ApiClient
         return $all;
     }
 
-    private function buildUrl(string $server, string $dbName, string $entity, array $params): string
+    private function buildUrl(string $server, ?string $dbName, string $entity, array $params): string
     {
-        $dbName = normaliseDbNameForApi($dbName);
-        return normaliseServerUrl($server)
-            . 'api/' . rawurlencode($dbName)
-            . '/' . rawurlencode($entity)
-            . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+        $path = 'api/';
+        if ($dbName !== null && $dbName !== '') {
+            $path .= rawurlencode(normaliseDbNameForApi($dbName)) . '/';
+        }
+        $path .= rawurlencode($entity);
+
+        $query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+        return normaliseServerUrl($server) . $path . ($query !== '' ? '?' . $query : '');
     }
 
-    private function getJson(string $url, ?string $server = null): array
+    private function getJson(string $url): array
     {
-        $body = $this->requestJson('GET', $url, null, $server);
+        $body = $this->requestJson('GET', $url);
         return $this->decodeJsonBody($url, $body);
     }
 
-    private function postJson(string $url, array $payload): array
+    private function requestJson(string $method, string $url): string
     {
-        $body = $this->requestJson('POST', $url, json_encode($payload, JSON_UNESCAPED_SLASHES), null);
-        return $this->decodeJsonBody($url, $body);
-    }
-
-    private function requestJson(string $method, string $url, ?string $body, ?string $server): string
-    {
-        $headers = [
-            'Accept: application/json',
-        ];
-
-        if ($body !== null) {
-            $headers[] = 'Content-Type: application/json';
-            $headers[] = 'Content-Length: ' . strlen($body);
-        }
-
-        $token = $server !== null ? ($this->bearerTokensByServer[normaliseServerUrl($server)] ?? null) : null;
-        if ($token !== null && $token !== '') {
-            $headers[] = 'Authorization: Bearer ' . $token;
-        }
-
         $context = stream_context_create([
             'http' => [
                 'method' => $method,
                 'timeout' => HTTP_TIMEOUT_SECONDS,
-                'header' => implode("\r\n", $headers) . "\r\n",
-                'content' => $body ?? '',
+                'header' => "Accept: application/json
+",
                 'ignore_errors' => true,
             ],
         ]);
@@ -174,26 +125,6 @@ final class ApiClient
         return $json;
     }
 
-    private function extractAuthToken(array $json): ?string
-    {
-        foreach (['jwt', 'token', 'access_token', 'auth_token', 'bearer_token'] as $key) {
-            if (isset($json[$key]) && is_string($json[$key]) && $json[$key] !== '') {
-                return $json[$key];
-            }
-        }
-
-        foreach (['data', 'response', 'result'] as $containerKey) {
-            if (isset($json[$containerKey]) && is_array($json[$containerKey])) {
-                $token = $this->extractAuthToken($json[$containerKey]);
-                if ($token !== null) {
-                    return $token;
-                }
-            }
-        }
-
-        return null;
-    }
-
     private function extractHttpStatus(array $headers): int
     {
         foreach ($headers as $header) {
@@ -204,27 +135,19 @@ final class ApiClient
         return 200;
     }
 
-    private function extractRecords(array $json): array
-    {
-        if (array_key_exists('records', $json) && is_array($json['records'])) {
-            return $json['records'];
-        }
-        // Backward tolerance for bare raw arrays.
-        if (isListArray($json)) { //since 8.1 array_is_list
-            return $json;
-        }
-        return [];
-    }
-
     private function extractDefinitionItems(array $json, string $url): array
     {
+        return $this->extractCollectionItems($json, $url, 'Definition');
+    }
+
+    private function extractCollectionItems(array $json, string $url, string $label): array
+    {
         if (!array_key_exists('items', $json) || !is_array($json['items'])) {
-            throw new RuntimeException("Definition API response from {$url} does not contain an items array");
+            throw new RuntimeException("{$label} API response from {$url} does not contain an items array");
         }
         if (!array_key_exists('pagination', $json) || !is_array($json['pagination'])) {
-            throw new RuntimeException("Definition API response from {$url} does not contain pagination metadata");
+            throw new RuntimeException("{$label} API response from {$url} does not contain pagination metadata");
         }
-
         return $json['items'];
     }
 

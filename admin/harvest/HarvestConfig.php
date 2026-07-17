@@ -156,43 +156,13 @@ function loadConfig(string $path): array
         if (!is_array($source)) {
             continue;
         }
-        $server = (string)($source['server'] ?? $source['url'] ?? '');
-        $registryDb = (string)($source['registryDatabase'] ?? $source['database'] ?? $source['db'] ?? '');
-        if ($server === '' || $registryDb === '') {
-            throw new RuntimeException('Each source requires server and registryDatabase');
+        $server = trim((string)($source['server'] ?? $source['url'] ?? ''));
+        if ($server === '') {
+            throw new RuntimeException('Each source requires server');
         }
-
-        $normalised = [
+        $normalisedSources[] = [
             'server' => normaliseServerUrl($server),
-            'registryDatabase' => normaliseDbNameForApi($registryDb),
         ];
-
-        $sourceUsername = (string)($source['username'] ?? $source['login'] ?? '');
-        $sourcePassword = (string)($source['password'] ?? '');
-
-        if ($sourceUsername === '' && $sourcePassword === '') {
-            // If source credentials are omitted completely, use the standard
-            // database-access user and password from heuristConfigIni.php.
-            $sourceUsername = '2';
-            $sourcePassword = (string)($credentialDefaults['passwordForDatabaseAccess'] ?? '');
-        } elseif ($sourcePassword === '' && $sourceUsername !== '') {
-            $sourcePassword = (string)($credentialDefaults['passwordForDatabaseAccess'] ?? '');
-        }
-
-        if ($sourceUsername !== '') {
-            $normalised['username'] = $sourceUsername;
-        }
-        if ($sourcePassword !== '') {
-            $normalised['password'] = $sourcePassword;
-        }
-
-        foreach (['jwt', 'token', 'accessToken', 'authEndpoint'] as $key) {
-            if (array_key_exists($key, $source) && $source[$key] !== null && $source[$key] !== '') {
-                $normalised[$key] = (string)$source[$key];
-            }
-        }
-
-        $normalisedSources[] = $normalised;
     }
 
     return [

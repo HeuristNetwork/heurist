@@ -65,9 +65,7 @@ final class SemanticGlobalHarvester
         logLine('Discovering registered source databases');
         foreach ($sources as $sourceCfg) {
             $server = normaliseServerUrl((string)$sourceCfg['server']);
-            $registryDb = (string)$sourceCfg['registryDatabase'];
-            $this->client->authenticateSource($sourceCfg);
-            $databases = $this->client->fetchRegisteredDatabases($server, $registryDb);
+            $databases = $this->client->fetchRegisteredDatabases($server);
 
             foreach ($databases as $dbInfo) {
                 if (!is_array($dbInfo)) {
