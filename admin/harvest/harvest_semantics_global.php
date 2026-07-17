@@ -100,39 +100,8 @@ function resolveSingleGroupOption(array $cfg): bool
 {
     $value = null;
 
-    if (PHP_SAPI === 'cli') {
-        $options = getopt('', ['single-group::', 'singleGroup::', 'isSingleGroup::']);
-        foreach (['single-group', 'singleGroup', 'isSingleGroup'] as $key) {
-            if (array_key_exists($key, $options)) {
-                $value = $options[$key];
-                if ($value === false) {
-                    $value = '1';
-                }
-                break;
-            }
-        }
-
-        global $argv;
-        foreach ($argv ?? [] as $arg) {
-            if (preg_match('/^(?:isSingleGroup|singleGroup|single-group)=(.+)$/', $arg, $m)) {
-                $value = $m[1];
-                break;
-            }
-        }
-    } else {
-        foreach (['isSingleGroup', 'singleGroup', 'single-group'] as $key) {
-            if (isset($_REQUEST[$key])) {
-                $value = $_REQUEST[$key];
-                break;
-            }
-        }
-    }
-
-    if ($value === null && isset($cfg['target']['isSingleGroup'])) {
+    if (isset($cfg['target']['isSingleGroup'])) {
         $value = $cfg['target']['isSingleGroup'];
-    }
-    if ($value === null && isset($cfg['isSingleGroup'])) {
-        $value = $cfg['isSingleGroup'];
     }
 
     if ($value === null) {
