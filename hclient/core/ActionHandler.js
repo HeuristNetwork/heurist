@@ -617,14 +617,14 @@ class ActionHandler {
             }
             case "menu-help-acknowledgements":
                 contentURL = window.hWin.HRes('acknowledgementsHeurist');
-                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:500});
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:550});
                 break;
             case "menu-help-about":
                 contentURL = window.hWin.HRes('aboutHeurist');
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
                     open: function( event, ui ) {
                         let $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
-                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']+' (2026-07-03 12:00)');
+                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']+' (2026-07-18 9:00)');
                         
                         if(window.hWin.HAPI4.sysinfo.host_logo){
                             $('<div style="height:40px;padding-left:4px;float:right"><a href="'

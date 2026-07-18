@@ -1,399 +1,130 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        <meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
-        <meta http-equiv="Pragma" content="no-cache">
-        <meta http-equiv="Cache-Control" content="no-cache">
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <meta http-equiv="Lang" content="en">
-        <meta name="author" content="Artem Osmakov and Ian Johnson">
-        <meta http-equiv="Reply-to" content="@.com">
-        <meta name="generator" content="PhpED 8.0">
-        <meta name="description" content="Documentatin of the use of extrernal libraries by Heurist">
-        <meta name="keywords" content="Libraries, JS, PHP, Heurist">
-        <meta name="creation-date" content="09/06/2012">
-        <meta name="revisit-after" content="15 days">
-        <title>Heurist use of extrenal libraries</title>
-        <link rel="stylesheet" type="text/css" href="../h4styles.css">
-        <style>
-            tr:nth-child(even) {
-                background-color: #D6EEEE;
-            }
-            caption{
-                text-align: left;
-                font-size:16px;
-                font-weight:bold;
-            }
-        </style>            
-    </head>
-    <body>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Artem Osmakov and Ian Johnson">
+    <meta name="description" content="Third-party libraries used by Heurist, including versions, authors and licences">
+    <title>HEURIST — Third-party libraries</title>
 
-        <u>Last updated 30 Oct 2024</u>
-        <p>Where a version is indicated followed by a later version in brackets the brackets indicate the current version as at Jan 2024.</p>
-        <p>Note: The statuses indicated here reflect HEURIST_SUPPORT/external_h5</p>
-        <p> ** See also external_libraries.txt ** </p>
+    <link rel="stylesheet" href="../../hclient/assets/css/heurist.css">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <style>
+        body{font-size:1.02em}
+        .header-inner,.container-full{max-width:1180px}
+        .intro{margin-bottom:18px}
+        .library-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d9e1f5;border-radius:12px;overflow:hidden;margin:12px 0 24px}
+        .library-table th,.library-table td{padding:10px 12px;border-bottom:1px solid #e7ecf7;text-align:left;vertical-align:top}
+        .library-table th{background:#f3f6ff;white-space:nowrap}
+        .library-table tr:last-child td{border-bottom:0}
+        .library-table tbody tr:nth-child(even){background:#fafbfe}
+        .library-table code{white-space:nowrap}
+        .status{display:inline-block;padding:3px 7px;border-radius:999px;background:#fff4d6;border:1px solid #efd38a;font-size:.84em}
+        .note{background:#fff;border-left:4px solid #676E80;padding:12px 14px;border-radius:8px;margin:16px 0}
+        .small-note{font-size:.9em;color:#475569}
+        h2{margin-top:28px}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-inner">
+            <div class="left">
+                <img class="logo" src="../../hclient/assets/v6/h6logo_inv.png" alt="HEURIST">
+                <span class="title">Third-party libraries</span>
+            </div>
+            <div class="right"></div>
+        </div>
+    </div>
 
-        
-        <table style="border-spacing:0; color:#000000; border-color:#000000; border-style:solid; border-width:1px; font-size:12px; vertical-align:top; width:100%">
-            <caption>Javascript</caption> 
-            <thead>
-                <tr style="font-size:14px">
-                    <th style="width:219px">Library</th>
-                    <th style="width:70px">CDN</th>
-                    <th style="width:113px">Current version<br>used</th>
-                    <th style="width:106px">Latest version<br>available</th>
-                    <th style="width:738px">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><span style="background-color:#e67e22">CLEANUP/REPLACEMENT REQUIRED?</span></td>
-                </tr>
+    <div class="container-full">
+        <div class="main">
+            <div class="section-title"><div>External software used by Heurist</div></div>
+            <div class="section-sub">
+                <div class="intro">
+                    <p><strong>Last updated:</strong> 18 July 2026.</p>
+                    <p>This register identifies third-party software distributed with, loaded by, or used to build Heurist. Installed Composer versions should be checked against <code>composer.lock</code>.</p>
+                </div>
 
-                <tr>
-                    <td>timemap.js</td>
-                    <td></td>
-                    <td>2.01</td>
-                    <td>discontinued ~2010</td>
-                    <td>Used only by special application Digital Harlem and Beyond 1914/Melbourne Uni.<span style="color:#e74c3c">
-                    <br>These applications are now maintained by a consultant, Systemik Systems, and are no longer our responsibility</span></td>
-                </tr>
+                <div class="note">
+                    Some legacy libraries contain local modifications. Their upstream licence remains applicable, and modifications should be recorded in <code>documentation/modifications_to_external_functions.txt</code>.
+                </div>
 
-                <tr>
-                    <td>VIS</td>
-                    <td></td>
-                    <td>4.4.0</td>
-                    <td>discontinued ~2018</td>
-                    <td>we use only timeline (original code was modified). Was heavily modified for fuzzy dates.
-                        <br>Need to extract only code for timeline since the size of package is 1.5Mb (used in map.php)
-                        <br>See for new: https://github.com/visjs/vis-timeline</td>
-                </tr>
+                <h2>Core JavaScript and interface libraries</h2>
+                <table class="library-table">
+                    <thead><tr><th>Name</th><th>Version used</th><th>Author / project</th><th>Licence</th><th>Use in Heurist</th></tr></thead>
+                    <tbody>
+                        <tr><td><a href="https://getbootstrap.com/" target="_blank" rel="noopener">Bootstrap</a></td><td>5.0.2</td><td>Bootstrap Authors and Twitter</td><td>MIT</td><td>Responsive layout and interface components in users' custom websites based on Heurist CMS.</td></tr>
+                        <tr><td><a href="https://jquery.com/" target="_blank" rel="noopener">jQuery</a></td><td>3.7.1</td><td>OpenJS Foundation and jQuery contributors</td><td>MIT</td><td>Core client-side library.</td></tr>
+                        <tr><td><a href="https://jqueryui.com/" target="_blank" rel="noopener">jQuery UI</a></td><td>1.14.0</td><td>OpenJS Foundation and jQuery UI contributors</td><td>MIT</td><td>Widgets, interactions and themes.</td></tr>
+                        <tr><td><a href="https://codemirror.net/5/" target="_blank" rel="noopener">CodeMirror</a></td><td>5.61.0</td><td>Marijn Haverbeke and contributors</td><td>MIT</td><td>Smarty template and HTML editing.</td></tr>
+                        <tr><td><a href="https://www.tiny.cloud/" target="_blank" rel="noopener">TinyMCE</a></td><td>5.0.11</td><td>Tiny Technologies, Inc. and contributors</td><td>LGPL-2.1-or-later</td><td>WYSIWYG editing of block-text fields.</td></tr>
+                        <tr><td><a href="https://github.com/blueimp/jQuery-File-Upload" target="_blank" rel="noopener">jQuery File Upload</a></td><td>9.12.1</td><td>Sebastian Tschan</td><td>MIT</td><td>File upload; locally modified and partly integrated into Heurist.</td></tr>
+                        <tr><td><a href="https://keith-wood.name/calendars.html" target="_blank" rel="noopener">jQuery Calendars</a></td><td>2.1.1</td><td>Keith Wood</td><td>MIT</td><td>Calendar control for temporal objects.</td></tr>
+                        <tr><td><a href="https://fancyapps.com/fancybox/3/" target="_blank" rel="noopener">jQuery Fancybox</a></td><td>3.3.5</td><td>Janis Skarnelis / fancyApps</td><td>GPL-3.0 or commercial licence</td><td>Gallery and image viewer; locally modified.</td></tr>
+                        <tr><td><a href="https://github.com/mar10/fancytree" target="_blank" rel="noopener">Fancytree</a></td><td>2.5.0</td><td>Martin Wendt and contributors</td><td>MIT</td><td>Saved-search, term and record-type trees.</td></tr>
+                        <tr><td><a href="https://datatables.net/" target="_blank" rel="noopener">DataTables</a></td><td>2.1.6</td><td>SpryMedia Ltd / Allan Jardine</td><td>MIT</td><td>Interactive tabular displays.</td></tr>
+                        <tr><td><a href="https://evoluteur.github.io/colorpicker/" target="_blank" rel="noopener">Evol.ColorPicker</a></td><td>3.2.4</td><td>Olivier Giulieri</td><td>MIT</td><td>Colour picker; locally modified.</td></tr>
+                        <tr><td><a href="https://github.com/allpro/layout" target="_blank" rel="noopener">jQuery Layout</a></td><td>1.3.0</td><td>Kevin Dalman / Fabrizio Balliano and contributors</td><td>MIT or GPL</td><td>Cardinal layout control; locally modified and discontinued.</td></tr>
+                        <tr><td><a href="https://github.com/mar10/jquery-ui-contextmenu" target="_blank" rel="noopener">jQuery UI Contextmenu</a></td><td>1.8.0</td><td>Martin Wendt</td><td>MIT</td><td>Context menus in saved-search trees; locally modified.</td></tr>
+                    </tbody>
+                </table>
 
-                <tr>
-                    <td><span style="background-color:#e67e22">IN USE</span></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
+                <h2>Mapping and geospatial libraries</h2>
+                <table class="library-table">
+                    <thead><tr><th>Name</th><th>Version used</th><th>Author / project</th><th>Licence</th><th>Use in Heurist</th></tr></thead>
+                    <tbody>
+                        <tr><td><a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a></td><td>1.9.4</td><td>Volodymyr Agafonkin and Leaflet contributors</td><td>BSD-2-Clause</td><td>Interactive mapping.</td></tr>
+                        <tr><td><a href="https://github.com/Leaflet/Leaflet.draw" target="_blank" rel="noopener">Leaflet.draw</a></td><td>1.0.4</td><td>Jacob Toye, Jon West, Smartrak and Leaflet contributors</td><td>MIT</td><td>Drawing and editing map geometry.</td></tr>
+                        <tr><td><a href="https://github.com/Leaflet/Leaflet.markercluster" target="_blank" rel="noopener">Leaflet.markercluster</a></td><td>1.4.1</td><td>Dave Leaver, Smartrak and contributors</td><td>MIT</td><td>Marker clustering.</td></tr>
+                        <tr><td><a href="https://github.com/perliedman/leaflet-control-geocoder" target="_blank" rel="noopener">Leaflet Control Geocoder</a></td><td>1.7.0</td><td>Per Liedman and contributors</td><td>BSD-2-Clause</td><td>Geocoding control.</td></tr>
+                        <tr><td><a href="https://github.com/mejackreed/Leaflet-IIIF" target="_blank" rel="noopener">Leaflet-IIIF</a></td><td>3.0.0</td><td>Jack Reed and contributors</td><td>MIT</td><td>IIIF image tile-layer support.</td></tr>
+                        <tr><td><a href="https://github.com/mapbox/cheap-ruler" target="_blank" rel="noopener">cheap-ruler</a></td><td>Unknown</td><td>Mapbox</td><td>ISC</td><td>Fast geodesic approximations; version could not be identified from the deployed copy.</td></tr>
+                        <tr><td><a href="https://github.com/mapbox/wellknown" target="_blank" rel="noopener">wellknown</a></td><td>Unknown</td><td>Mapbox contributors</td><td>ISC</td><td>WKT parsing and stringification; version could not be identified from the deployed copy.</td></tr>
+                        <tr><td><a href="https://github.com/chrisveness/geodesy" target="_blank" rel="noopener">Geodesy</a></td><td>1.1.3</td><td>Chris Veness</td><td>MIT</td><td>Coordinate conversion and geodesic calculations.</td></tr>
+                        <tr><td><a href="https://github.com/calvinmetcalf/shapefile-js" target="_blank" rel="noopener">shapefile-js</a></td><td>Unknown</td><td>Calvin Metcalf</td><td>MIT</td><td>Shapefile-to-GeoJSON parsing; version could not be identified from the deployed copy.</td></tr>
+                    </tbody>
+                </table>
 
-                <tr>
-                    <td>
-                        <p>JQuery</p>
-                    </td>
-                    <td>yes</td>
-                    <td>3.7.1</td>
-                    <td>3.7.1</td>
-                    <td></td>
-                </tr>
+                <h2>Visualisation and media libraries</h2>
+                <table class="library-table">
+                    <thead><tr><th>Name</th><th>Version used</th><th>Author / project</th><th>Licence</th><th>Use in Heurist</th></tr></thead>
+                    <tbody>
+                        <tr><td><a href="https://d3js.org/" target="_blank" rel="noopener">D3.js</a></td><td>3.4.11</td><td>Mike Bostock and contributors</td><td>BSD-3-Clause</td><td>Relationship and network visualisations.</td></tr>
+                        <tr><td><a href="https://projectmirador.org/" target="_blank" rel="noopener">Mirador</a></td><td>4.1.0</td><td>Project Mirador contributors</td><td>Apache-2.0</td><td>IIIF image and manifest viewer.</td></tr>
+                        <tr><td><a href="https://github.com/ProjectMirador/mirador-annotation-editor" target="_blank" rel="noopener">Mirador Annotation Editor (MAE)</a></td><td>1.3.0</td><td>Project Mirador contributors</td><td>Apache-2.0</td><td>Web Annotation editing in Mirador.</td></tr>
+                        <tr><td><a href="https://github.com/almende/vis" target="_blank" rel="noopener">vis.js</a></td><td>4.4.0</td><td>Almende B.V. and contributors</td><td>Apache-2.0 or MIT</td><td>Legacy timeline, heavily modified for fuzzy dates.</td></tr>
+                    </tbody>
+                </table>
 
-                <tr>
-                    <td>
-                        <p>JQuery-UI</p>
-                    </td>
-                    <td>yes</td>
-                    <td>1.14.0</td>
-                    <td>1.14.0</td>
-                    <td></td>
-                </tr>
-                
-                <tr>
-                    <td>
-                        <p>jquery.widgets</p>
-                    </td>
-                    <td></td>
-                    <td>various</td>
-                    <td></td>
-                    <td>
-                        <p>
-                            jquery-file-upload 9.12.1 (10.32.0 last mod ~2021) - upload files in editTerms,smarty template, manageFilesUpload.php 
-                                    and main usage in editing_input.<br>
-                                    Heavily modified UploadHandler,php has been integrated into heurist repo. Minor modifications in js. <br>
-                            jquery-ui-iconfont-master - icons compliant with jquery ui-icon-xxx. Works with all jQuery UI themes. Discontinued. May replace with fontawesome.<br>
-                            jquery.calendars-2.1.1- editTemporalObject<br>
-                            jquery.fancybox 3.3.5 (5.0, discontinued)- gallery and image viewer - original code was modified<br>
-                            jquery.fancytree 2.16.1 (2.38.3) - treeview component (saved searches, terms, rt structure) - small mods in css<br>
-                            jquery.layout 1.3.0 (1.4.3, discontinued 2014)- cardinal layout control - original code was modified<br>
-                            jquery.ui-contextmenu.js 1.8.0 (1.8.1 ~2016) - context menu plugin (used in saved search treeview)<br>
-                            jquery.datatable<br>
-                            ui.tabs.paging<br>
-                            evol.colorpicker.js 3.2.4 (3.4.3) - color picker in map.php, modified<br>
-                        </p>
-                    </td>
-                </tr>
-                
-                
-                <tr>
-                    <td>
-                        <p>Leaflet (Mapping)</p>
-                    </td>
-                    <td>yes</td>
-                    <td>1.9.4</td>
-                    <td></td>
-                    <td></td>
-                </tr>
+                <h2>Composer-managed PHP libraries</h2>
+                <table class="library-table">
+                    <thead><tr><th>Name</th><th>Version used</th><th>Author / project</th><th>Licence</th><th>Use in Heurist</th></tr></thead>
+                    <tbody>
+                        <tr><td><a href="https://github.com/easyrdf/easyrdf" target="_blank" rel="noopener">easyrdf/easyrdf</a></td><td>1.1.1</td><td>Nicholas Humfrey, Alexey Zakhlestin and contributors</td><td>BSD-3-Clause</td><td>RDF parsing, serialisation and graph handling.</td></tr>
+                        <tr><td><a href="https://github.com/phayes/geoPHP" target="_blank" rel="noopener">phayes/geoPHP</a></td><td>1.2</td><td>Patrick Hayes</td><td>GPL-2.0 or BSD-style licence</td><td>Geometry operations.</td></tr>
+                        <tr><td><a href="https://github.com/gasparesganga/php-shapefile" target="_blank" rel="noopener">gasparesganga/php-shapefile</a></td><td>3.4.1</td><td>Gaspare Sganga</td><td>MIT</td><td>Shapefile reading and writing.</td></tr>
+                        <tr><td><a href="https://www.smarty.net/" target="_blank" rel="noopener">Smarty</a></td><td>5.4.5</td><td>Monte Ohrt, Uwe Tews, Rodney Rehm, Simon Wisselink and contributors</td><td>LGPL-3.0</td><td>Custom report templates.</td></tr>
+                        <tr><td><a href="https://htmlpurifier.org/" target="_blank" rel="noopener">HTML Purifier</a></td><td>4.19.0</td><td>Edward Z. Yang and contributors</td><td>LGPL-2.1-or-later</td><td>HTML sanitisation.</td></tr>
+                        <tr><td><a href="https://github.com/smalot/pdfparser" target="_blank" rel="noopener">Smalot PDF Parser</a></td><td>2.12.5</td><td>Sebastien Malot</td><td>LGPL-3.0</td><td>PDF parsing.</td></tr>
+                        <tr><td><a href="https://github.com/PHPMailer/PHPMailer" target="_blank" rel="noopener">PHPMailer</a></td><td>6.12.0</td><td>Marcus Bointon, Jim Jagielski, Andy Prevost, Brent R. Matzelle and contributors</td><td>LGPL-2.1-only</td><td>Email composition and delivery.</td></tr>
+                        <tr><td><a href="https://github.com/symfony/polyfill-mbstring" target="_blank" rel="noopener">symfony/polyfill-mbstring</a></td><td>1.37.0</td><td>Nicolas Grekas and Symfony contributors</td><td>MIT</td><td>UTF-8 support when the PHP <code>mbstring</code> extension is unavailable.</td></tr>
+                        <tr><td><a href="https://tcpdf.org/" target="_blank" rel="noopener">TCPDF</a></td><td>Unknown</td><td>Nicola Asuni</td><td>LGPL-3.0-or-later</td><td>PDF and barcode generation, where separately installed.</td></tr>
+                        <tr><td><a href="https://github.com/ifsnop/mysqldump-php" target="_blank" rel="noopener">mysqldump-php</a></td><td>Unknown</td><td>Diego Torres Milano and contributors</td><td>MIT</td><td>Database export.</td></tr>
+                    </tbody>
+                </table>
 
-                <tr>
-                    <td>
-                        <p>leaflet.plugins</p>
-                    </td>
-                    <td></td>
-                    <td>various</td>
-                    <td></td>
-                    <td>
-                        <p>bookmarks - https://github.com/w8r/Leaflet.Bookmarks<br>
-                           draw 
-                           geocoder - https://github.com/perliedman/leaflet-control-geocoder<br>
-                           providers - https://github.com/leaflet-extras/leaflet-providers<br>
-                           print - https://github.com/Igor-Vladyka/leaflet.browser.print<br>
-                           markercluster   - https://github.com/Leaflet/Leaflet.markercluster<br>
-                           leaflet.draw - editor https://github.com/Leaflet/Leaflet.draw<br>
-                           leaflet-iiif.js - L.TileLayer extension<br> 
-                           leaflet-tileLayerPixelFilter.js  - https://github.com/greeninfo/L.TileLayer.PixelFilter<br>
-                           wise-leaflet-pip - extension for Polygon<br>
-                           leaflet.circle.topolygon - converter for drawn circle to polygon<br>
-                           
-                        </p>
-                    </td>
-                </tr>
-                
-                <tr>
-                    <td>js</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p>js/geodesy-master - convert UTM to/from WGS in mapDraw.php<br>
-                            js/wellknown.js - parse/stringfy WKT to json in mapDraw.php and in utils_geo.parseWKTCoordinates<br>
-                            js/shapefile - shp to json parser see map.php<br>
-                            js/platform.js - browser and platform detect<br>
-                            js/cheapRuler.js - collection of very fast approximations to common geodesic measurements
-                        </p>
-                    </td>
-                </tr>
+                <h2>Icons</h2>
+                <table class="library-table">
+                    <thead><tr><th>Name</th><th>Author / project</th><th>Licence</th><th>Notes</th></tr></thead>
+                    <tbody>
+                        <tr><td><a href="https://icons8.com/" target="_blank" rel="noopener">Icons8</a></td><td>Icons8 LLC</td><td>Icons8 licence / applicable subscription terms</td><td>Selected default icons; reuse is governed by Icons8 terms.</td></tr>
+                        <tr><td><a href="https://mkkeck.github.io/jquery-ui-iconfont" target="_blank" rel="noopener">jQuery UI Icon Font</a></td><td>Michael Keck</td><td>CC BY-SA 3.0</td><td>Icon font compatible with jQuery UI classes.</td></tr>
+                        <tr><td><a href="https://icons.getbootstrap.com/" target="_blank" rel="noopener">Bootstrap Icons</a></td><td>Bootstrap Authors</td><td>MIT</td><td>Interface icons.</td></tr>
+                    </tbody>
+                </table>
 
-
-                <tr>
-                    <td>
-                        <p>Mirador</p>
-                    </td>
-                    <td></td>
-                    <td>3</td>
-                    <td></td>
-                    <td>
-                        <p>Image visualisation client. https://github.com/ProjectMirador/mirador-integration</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td><p>TinyMCE</p></td>
-                    <td></td>
-                    <td>5.0.11</td>
-                    <td>6.8.2</td>
-                    <td>
-                        <p>WYSIWYG editingfor blocktext fields in record edit. </p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>CodeMirror</p>
-                    </td>
-                    <td></td>
-                    <td>5.6.1</td>
-                    <td>6</td>
-                    <td>
-                        <p>Smarty template code editing and direct HTML edit for CMS pages</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>D3 (used for network diagrams)</p>
-                    </td>
-                    <td></td>
-                    <td>3.4.11</td>
-                    <td>7.8.5</td>
-                    <td>
-                        <p>3.4.11<br>
-                            links visualization <a href="http://d3js.org/">http://d3js.org/</a><br>
-                            <a href="https://github.com/d3/d3-plugins/tree/master/fisheye">https://github.com/d3/d3-plugins/tree/master/fisheye</a></p>
-                    </td>
-                </tr>
-
-            </tbody>
-        </table>
-
-        <br>
-        
-        <table style="border-spacing:0; color:#000000; border-color:#000000; border-style:solid; border-width:1px; font-size:12px; vertical-align:top; width:100%">
-            <caption>PHP</caption> 
-            <thead>
-                <tr style="font-size:14px">
-                    <th style="width:219px">Library</th>
-                    <th style="width:70px">Composer</th>
-                    <th style="width:113px">Current version<br>used</th>
-                    <th style="width:106px">Latest version<br>available</th>
-                    <th style="width:738px">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <p>phayes/geophp</p>
-                    </td>
-                    <td>Yes</td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p>native PHP library for geometry operations.<a href="https://github.com/phayes/geoPHP">https://github.com/phayes/geoPHP</a></p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>gasparesganga/phpShapefile</p>
-                    </td>
-                    <td>Yes</td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p>Shapefile handling. Doesn&#39;t Leaflet or GeoPHP or js/shapefile do this?<br>
-                            <a href="https://gasparesganga.com/labs/php-shapefile/">https://gasparesganga.com/labs/php-shapefile/</a></p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>php/tileserver.php (serving tilemaps)</p>
-                    </td>
-                    <td></td>
-                    <td>2016</td>
-                    <td>2016</td>
-                    <td>
-                        <p>https://github.com/maptiler/tileserver-php/  (was touched last time in 2016)</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>Smarty (for custom reports)</p>
-                    </td>
-                    <td>Yes</td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p><a href="http://www.smarty.net">http://www.smarty.net</a></p>
-                    </td>
-                </tr>
-
-
-                <tr>
-                    <td>
-                        <p>ezyang/hmlpurifier</p>
-                    </td>
-                    <td>Yes</td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p><a href="http://ezyang.com">http://ezyang.com</a>,<a href="http://htmlpurifier.org/">http://htmlpurifier.org/</a></p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>smalot/pdfparser</p>
-                    </td>
-                    <td>Yes</td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p>PHP parser for PDF files.<a href="http://www.pdfparser.org">http://www.pdfparser.org</a></p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>tecknickcom/tcpdf</td>
-                    <td>Yes</td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p>A PHP class for generating PDF documents and barcodes.<a href="http://www.tcpdf.org/">http://www.tcpdf.org/</a><br>
-                            <span style="color:#e74c3c">Not included in our support files</span></p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>php/Mysqldump.php</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>dump database in dbUtils.php exportMyDataPopup.php. 
-                        https://github.com/ifsnop/mysqldump-php Can use Composer to update.</td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>phpmailer (email sending)</p>
-                    </td>
-                    <td>Yes</td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p></p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>symfony/polyfill-mbstring</p>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p>PHPMailer dependency. To support UTF-8 if the Mbstring PHP extension is not enabled</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>composer</p>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p>Code support</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>autoload.php</p>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <p>File generated by composer</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <p>php/phpZotero/syncZotero.php</p>
-                    </td>
-                    <td></td>
-                    <td>0.2</td>
-                    <td>Discontinued</td>
-                    <td>
-                        <p>To be replaced with https://github.com/fcheslack/libZotero  ????</p>
-                    </td>
-                </tr>
-
-            </tbody>
-        </table>
-        
-    </body>
+            </div>
+        </div>
+    </div>
+</body>
 </html>
