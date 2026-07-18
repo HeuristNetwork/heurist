@@ -2,9 +2,9 @@
 
 ### Advanced topics in custom reports
 
-This chapter contains lots of undigested tips for advanced users, skip the first 10 pages or so to get to this material.
+Note (July 2026): the content was copied via markdown export and lost much of its minor formatting. The images in particular have been downgraded. The original source is here: [https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit](https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit)
 
-Note: the content was copied via markdown export and lost much of its minor formatting. The images in particalr have been downgraded. The source is here: [https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit](https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit)
+This chapter contains lots of undigested tips for advanced users, skip the first 10 pages or so to get to this material.
 
 ### Smarty Syntax
 
