@@ -597,9 +597,8 @@ class UImage {
             $img = UImage::gd_orient_image($img, $orientation);
         }
 
-        $no_enlarge = false;
         // calculate image size
-        // note - we never change the aspect ratio of the image!
+        // note - we never change the aspect ratio or enlarge the source image
         $orig_x = imagesx($img);
         $orig_y = imagesy($img);
 
@@ -607,8 +606,7 @@ class UImage {
         $ry = $y / $orig_y;
 
         $scale = $rx ? ($ry ? min($rx, $ry) : $rx) : $ry;
-
-        if ($no_enlarge  &&  $scale > 1) {
+        if ($scale > 1) {
             $scale = 1;
         }
 

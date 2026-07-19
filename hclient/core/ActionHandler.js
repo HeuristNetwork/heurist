@@ -624,7 +624,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
                     open: function( event, ui ) {
                         let $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
-                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']+' (2026-07-18 9:00)');
+                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']+' (2026-07-19 9:00)');
                         
                         if(window.hWin.HAPI4.sysinfo.host_logo){
                             $('<div style="height:40px;padding-left:4px;float:right"><a href="'
