@@ -9,6 +9,7 @@ namespace hserv\entity;
 use hserv\entity\DbRecordTypeEntity;
 use hserv\entity\DbIiifCanvas;
 use hserv\utilities\USanitize;
+use hserv\utilities\UImage;
 use hserv\iiif\IiifAnnotationJson;
 use hserv\records\import\IiifAnnotationImportWriter;
 
@@ -401,6 +402,17 @@ class DbAnnotations extends DbRecordTypeEntity
         }
         $res = $writer->savePreparedAnnotation($prepared);
         $writer->end();
+
+        // Mirador creates the annotation first, then we create and attach its
+        // thumbnail. This keeps remote image work outside the direct writer and
+        // provides one reusable record-based method for the later batch action.
+        if($createThumbnail && is_array($res) && intval($res['data'] ?? 0)>0){
+            $thumbnailId = $this->createAnnotationThumbnail(intval($res['data']), false);
+            if($thumbnailId>0){
+                $res['thumbnail_ulf_id'] = $thumbnailId;
+            }
+        }
+
         return $res;
     }
 
@@ -469,13 +481,6 @@ class DbAnnotations extends DbRecordTypeEntity
 
         if($ulf_ID>0){
             $changed = $this->appendUniqueField($details, 'DT_FILE_RESOURCE', $ulf_ID) || $changed;
-        }
-
-        if($createThumbnail && defined('DT_THUMBNAIL') && @$parsed['selector_value'] && @$parsed['canvas']){
-            $thumb_id = $this->getAnnotationImage($manifestUrl, $parsed['id'], $parsed['selector_value'], $parsed['canvas']);
-            if($thumb_id>0){
-                $changed = $this->setField($details, 'DT_THUMBNAIL', $thumb_id) || $changed;
-            }
         }
 
         if(!$changed && $recordId>0 && $oldJson === $parsed['json']){
@@ -815,67 +820,246 @@ class DbAnnotations extends DbRecordTypeEntity
     /**
     * 
     */
-    private function getAnnotationImage($manifestUrl, $anno_uid, $region, $canvas_url){
-
-        if(!$region){
+    /**
+     * Create and attach a thumbnail for one saved IIIF Annotation record.
+     *
+     * This record-based entry point is also suitable for the planned batch action.
+     * At present FragmentSelector and SvgSelector are supported. SVG selections use
+     * their rectangular bounding box because IIIF Image API regions are rectangular.
+     *
+     * @return int Registered thumbnail ulf_ID, or 0 when no thumbnail was created.
+     */
+    public function createAnnotationThumbnail(int $recID, bool $replaceExisting=false): int
+    {
+        if($recID<1 || !$this->ensureDefinitionsReady(false)){
             return 0;
         }
-            $region = substr($region, 5);
 
-            // https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json
-            // https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/canvas/f11/
-            $url = $canvas_url;
+        $details = $this->loadRecordDetails($recID, array(
+            'DT_THUMBNAIL',
+            'DT_ANNOTATION_SELECTOR_TYPE',
+            'DT_ANNOTATION_SELECTOR_VALUE',
+            'DT_IIIF_CANVAS',
+            'DT_URL'
+        ));
 
-            if($manifestUrl){ //target manifest url
-                //find image service uri by canvas in manifest
-                $iiif_manifest_url = filter_var($manifestUrl, FILTER_SANITIZE_URL);
-                $iiif_manifest = loadRemoteURLContent($iiif_manifest_url);//retrieve iiif manifest into manifest
-                $iiif_manifest = json_decode($iiif_manifest, true);
-                if($iiif_manifest!==false && is_array($iiif_manifest)){
+        $existingThumbnail = intval($this->getFirstDetailValue($details, 'DT_THUMBNAIL'));
+        if($existingThumbnail>0 && !$replaceExisting){
+            return $existingThumbnail;
+        }
 
-                    //"@context": "http://iiif.io/api/presentation/2/context.json"
-                    //sequences->canvases->images->resource->service->@id
-                    $context_url = 'http'.'://iiif.io/api/presentation/2/context.json';
+        $selectorType = (string)$this->getTermCodeOrLabel(
+            $this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_TYPE')
+        );
+        $selectorValue = (string)$this->getFirstDetailValue($details, 'DT_ANNOTATION_SELECTOR_VALUE');
+        $region = $this->annotationSelectorRegion($selectorType, $selectorValue);
+        if($region===null){
+            return 0;
+        }
 
-                    if(@$iiif_manifest['@context']==$context_url){
+        $dbCanvas = new DbIiifCanvas($this->system);
+        $canvasRecID = intval($this->getFirstDetailValue($details, 'DT_IIIF_CANVAS'));
+        $canvasUrl = trim((string)$this->getFirstDetailValue($details, 'DT_URL'));
+        $source = $canvasRecID>0
+            ? $dbCanvas->thumbnailSourceForCanvasRecord($canvasRecID)
+            : $dbCanvas->thumbnailSourceForCanvasUrl($canvasUrl);
 
-                        $url = $this->getImageUrlV2($iiif_manifest, $url);
+        if(!is_array($source) || empty($source['type'])){
+            USanitize::errorLog('Cannot create IIIF annotation thumbnail: Canvas image source is not available. Annotation record '.$recID);
+            return 0;
+        }
 
-                    }else{ //version 3
-                        //"@context": "http://iiif.io/api/presentation/3/context.json"
-                        //items(type:Canvas)->items[AnnotationPage]->items[Annotation]->body->service[0]->id
+        $tmpFile = tempnam(HEURIST_SCRATCH_DIR, 'annotation_thumb_');
+        if(!$tmpFile){
+            return 0;
+        }
 
-                        $url = $this->getImageUrlV3($iiif_manifest, $url);
-                    }
-
-                }
+        try{
+            $created = false;
+            if($source['type']==='iiif'){
+                $serviceUrl = trim((string)($source['service_url'] ?? ''));
+                $created = $serviceUrl!==''
+                    && UImage::getIiifRegionThumbnail($serviceUrl, $region, $tmpFile, 200, 200)!==null;
+            }elseif($source['type']==='local'){
+                $created = UImage::createRegionThumbnail(
+                    (string)($source['file_path'] ?? ''),
+                    $region,
+                    $tmpFile,
+                    floatval($source['canvas_width'] ?? 0),
+                    floatval($source['canvas_height'] ?? 0),
+                    200,
+                    200,
+                    false
+                );
+            }elseif($source['type']==='remote'){
+                $created = UImage::createRegionThumbnail(
+                    (string)($source['image_url'] ?? ''),
+                    $region,
+                    $tmpFile,
+                    floatval($source['canvas_width'] ?? 0),
+                    floatval($source['canvas_height'] ?? 0),
+                    200,
+                    200,
+                    true
+                );
             }
 
-            if(strpos($url, '/canvas/')>0){
-                //remove /canvas to get image url
-                $url = str_replace('/canvas/','/',$url);
+            if(!$created || !file_exists($tmpFile) || filesize($tmpFile)<1){
+                USanitize::errorLog('Cannot create annotation-region thumbnail. Annotation record '.$recID
+                    .'; source_type='.(string)$source['type'].'; region='.$region);
+                return 0;
             }
-            // {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}
-            $url = $url.'/'.$region.'/!200,200/0/default.jpg';
 
-            $tmp_file = HEURIST_SCRATCH_DIR.'/'.basename($anno_uid.'.jpg');//basename for snyk
-            //tempnam(HEURIST_SCRATCH_DIR,'iiif_thumb');
-            //tempnam()
-            $res = saveURLasFile($url, $tmp_file);
-
-            if($res>0){
-                $entity = new DbRecUploadedFiles($this->system);
-
-                $dtl_UploadedFileID = $entity->registerFile($tmp_file, null);//it returns ulf_ID
-
-                if($dtl_UploadedFileID===false){
-                    $err_msg = $this->system->getError();
-                    $err_msg = $err_msg['message'];
-                    $this->system->clearError();
-                }else{
-                    if(is_array($dtl_UploadedFileID)&&!empty($dtl_UploadedFileID)){$dtl_UploadedFileID = $dtl_UploadedFileID[0];}
-                    return $dtl_UploadedFileID;
-                }
+            $entity = new DbRecUploadedFiles($this->system);
+            $thumbnailId = $entity->registerFile(
+                $tmpFile,
+                'annotation_'.$recID.'_thumbnail.jpg',
+                true,
+                false,
+                array('ulf_Description'=>'Thumbnail for IIIF annotation record '.$recID)
+            );
+            if(is_array($thumbnailId)){
+                $thumbnailId = reset($thumbnailId);
             }
+            $thumbnailId = intval($thumbnailId);
+            if($thumbnailId<1){
+                $this->system->clearError();
+                return 0;
+            }
+
+            if(!$this->updateAnnotationThumbnailDirect($recID, $thumbnailId)){
+                return 0;
+            }
+            return $thumbnailId;
+        }finally{
+            if(file_exists($tmpFile)){
+                @unlink($tmpFile);
+            }
+        }
     }
+
+    /** Convert a stored selector to an IIIF Image API pixel region. */
+    private function annotationSelectorRegion(string $selectorType, string $selectorValue): ?string
+    {
+        $selectorType = strtolower(trim($selectorType));
+        $selectorValue = trim($selectorValue);
+        if($selectorValue===''){
+            return null;
+        }
+
+        if($selectorType==='fragmentselector' || $selectorType==='fragment'){
+            if(preg_match('/(?:^|[&#])xywh=(?:pixel:)?([0-9.]+),([0-9.]+),([0-9.]+),([0-9.]+)/i', $selectorValue, $m)){
+                return $this->normalisePixelRegion($m[1], $m[2], $m[3], $m[4]);
+            }
+            return null;
+        }
+
+        if($selectorType==='svgselector' || $selectorType==='svg'){
+            return $this->svgSelectorBoundingRegion($selectorValue);
+        }
+
+        return null;
+    }
+
+    private function normalisePixelRegion($x, $y, $width, $height): ?string
+    {
+        $x = max(0, (int)floor((float)$x));
+        $y = max(0, (int)floor((float)$y));
+        $width = (int)ceil((float)$width);
+        $height = (int)ceil((float)$height);
+        return ($width>0 && $height>0) ? $x.','.$y.','.$width.','.$height : null;
+    }
+
+    /** Return the bounding rectangle of common MAE SVG selector shapes. */
+    private function svgSelectorBoundingRegion(string $svg): ?string
+    {
+        $previous = libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+        $loaded = $dom->loadXML($svg, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+        if(!$loaded){
+            return null;
+        }
+
+        $xs = array();
+        $ys = array();
+        $addPoint = static function($x, $y) use (&$xs, &$ys): void {
+            if(is_numeric($x) && is_numeric($y)){
+                $xs[] = (float)$x;
+                $ys[] = (float)$y;
+            }
+        };
+
+        foreach($dom->getElementsByTagName('*') as $node){
+            $name = strtolower($node->localName ?: $node->nodeName);
+            if($name==='rect'){
+                $x = (float)$node->getAttribute('x');
+                $y = (float)$node->getAttribute('y');
+                $w = (float)$node->getAttribute('width');
+                $h = (float)$node->getAttribute('height');
+                $addPoint($x, $y); $addPoint($x+$w, $y+$h);
+            }elseif($name==='circle'){
+                $cx = (float)$node->getAttribute('cx');
+                $cy = (float)$node->getAttribute('cy');
+                $r = (float)$node->getAttribute('r');
+                $addPoint($cx-$r, $cy-$r); $addPoint($cx+$r, $cy+$r);
+            }elseif($name==='ellipse'){
+                $cx = (float)$node->getAttribute('cx');
+                $cy = (float)$node->getAttribute('cy');
+                $rx = (float)$node->getAttribute('rx');
+                $ry = (float)$node->getAttribute('ry');
+                $addPoint($cx-$rx, $cy-$ry); $addPoint($cx+$rx, $cy+$ry);
+            }elseif($name==='line'){
+                $addPoint($node->getAttribute('x1'), $node->getAttribute('y1'));
+                $addPoint($node->getAttribute('x2'), $node->getAttribute('y2'));
+            }elseif($name==='polygon' || $name==='polyline'){
+                preg_match_all('/-?(?:\d+\.?\d*|\.\d+)/', $node->getAttribute('points'), $nums);
+                for($i=0; $i+1<count($nums[0]); $i+=2){
+                    $addPoint($nums[0][$i], $nums[0][$i+1]);
+                }
+            }elseif($name==='path'){
+                // MAE normally emits polygonal M/L paths. Pairing path numbers gives
+                // a safe thumbnail bounding box; exact SVG masking is unnecessary here.
+                preg_match_all('/-?(?:\d+\.?\d*|\.\d+)/', $node->getAttribute('d'), $nums);
+                for($i=0; $i+1<count($nums[0]); $i+=2){
+                    $addPoint($nums[0][$i], $nums[0][$i+1]);
+                }
+            }
+        }
+
+        if(empty($xs) || empty($ys)){
+            return null;
+        }
+        return $this->normalisePixelRegion(min($xs), min($ys), max($xs)-min($xs), max($ys)-min($ys));
+    }
+
+    /** Replace DT_THUMBNAIL without invoking the generic record save pipeline. */
+    private function updateAnnotationThumbnailDirect(int $recID, int $ulfID): bool
+    {
+        if($recID<1 || $ulfID<1 || !defined('DT_THUMBNAIL')){
+            return false;
+        }
+        $mysqli = $this->system->getMysqli();
+        $mysqli->begin_transaction();
+        try{
+            if(!$mysqli->query('DELETE FROM recDetails WHERE dtl_RecID='.intval($recID)
+                .' AND dtl_DetailTypeID='.intval(DT_THUMBNAIL))){
+                throw new \RuntimeException($mysqli->error);
+            }
+            $query = 'INSERT INTO recDetails '
+                .'(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID) VALUES ('
+                .intval($recID).','.intval(DT_THUMBNAIL).',NULL,'.intval($ulfID).')';
+            if(!$mysqli->query($query)){
+                throw new \RuntimeException($mysqli->error);
+            }
+            $mysqli->commit();
+            return true;
+        }catch(\Throwable $e){
+            $mysqli->rollback();
+            USanitize::errorLog('Cannot attach IIIF annotation thumbnail: '.$e->getMessage());
+            return false;
+        }
+    }
+
 }

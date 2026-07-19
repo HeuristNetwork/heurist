@@ -174,19 +174,140 @@ class DbIiifCanvas extends DbRecordTypeEntity
         return mysql__select_list2($mysqli, $query) ?: array();
     }
 
-    /** Find RT_IIIF_CANVAS records that use the given registered file. */
+    /** Find RT_IIIF_CANVAS or RT_MEDIA_RECORD records that use the given registered file. */
     public function canvasRecordsForFileID(int $ulfID): array
     {
         if($ulfID<1 || !$this->lookupDefinitionsReady(array('RT_IIIF_CANVAS', 'DT_FILE_RESOURCE'))){
             return array();
         }
+
+        $recordTypeIDs = array(intval($this->recordTypeId()));
+        if((defined('RT_MEDIA_RECORD') || $this->system->defineConstant('RT_MEDIA_RECORD'))
+            && defined('RT_MEDIA_RECORD') && intval(RT_MEDIA_RECORD)>0){
+            $recordTypeIDs[] = intval(RT_MEDIA_RECORD);
+        }
+        $recordTypeIDs = array_values(array_unique(array_filter($recordTypeIDs)));
+
         $mysqli = $this->system->getMysqli();
         $query = 'SELECT DISTINCT r.rec_ID FROM Records r, recDetails d '
-            .'WHERE r.rec_ID=d.dtl_RecID AND r.rec_RecTypeID='.intval($this->recordTypeId())
+            .'WHERE r.rec_ID=d.dtl_RecID AND r.rec_RecTypeID IN ('.implode(',', $recordTypeIDs).')'
             .' AND d.dtl_DetailTypeID='.intval(DT_FILE_RESOURCE)
             .' AND (d.dtl_UploadedFileID='.intval($ulfID).' OR d.dtl_Value="'.intval($ulfID).'")'
             .' ORDER BY r.rec_ID';
         return mysql__select_list2($mysqli, $query) ?: array();
+    }
+
+
+    /**
+     * Resolve the image source needed to create an annotation-region thumbnail.
+     * Returns normalized Image API service information for a managed Canvas.
+     */
+    public function thumbnailSourceForCanvasRecord(int $canvasRecID): ?array
+    {
+        if($canvasRecID<1 || !$this->lookupDefinitionsReady(array(
+            'RT_IIIF_CANVAS', 'DT_FILE_RESOURCE', 'DT_IIIF_IMAGE_SERVICE'
+        ))){
+            return null;
+        }
+
+        $details = $this->loadRecordDetails($canvasRecID, array(
+            'DT_FILE_RESOURCE',
+            'DT_IIIF_IMAGE_SERVICE',
+            $this->detailId('DT_WIDTH', '3-1040'),
+            $this->detailId('DT_HEIGHT', '3-1041')
+        ));
+        $ulfID = intval($this->getFirstDetailValue($details, 'DT_FILE_RESOURCE'));
+        $dimensions = $this->dimensionValuesFromDetails($details);
+        $service = $this->imageServiceFromDetails($details);
+        $fileinfo = $ulfID>0 ? IiifMediaHelper::registeredFileInfoForUlfID($this->system, $ulfID) : null;
+
+        // Prefer an explicit Image API service. Older Canvas records may instead
+        // point DT_FILE_RESOURCE at an iiif_image info.json external resource.
+        if(!$service && is_array($fileinfo) && IiifMediaHelper::isIiifImageInfoFile($fileinfo)){
+            $infoUrl = trim((string)($fileinfo['ulf_ExternalFileReference'] ?? ''));
+            if($infoUrl!==''){
+                $service = array(
+                    'id' => IiifCanvasJson::imageServiceIdFromUrl($infoUrl),
+                    'type' => 'ImageService2'
+                );
+            }
+        }
+
+        if(is_array($service) && !empty($service['id'])){
+            return array(
+                'type' => 'iiif',
+                'canvas_rec_id' => $canvasRecID,
+                'ulf_id' => $ulfID,
+                'service_url' => IiifCanvasJson::imageServiceIdFromUrl((string)$service['id']),
+                'service' => $service,
+                'canvas_width' => floatval($dimensions['width'] ?? 0),
+                'canvas_height' => floatval($dimensions['height'] ?? 0)
+            );
+        }
+
+        if(!is_array($fileinfo)){
+            return null;
+        }
+
+        $mimeType = strtolower(trim((string)($fileinfo['fxm_MimeType'] ?? '')));
+        if($mimeType!=='' && strpos($mimeType, 'image/')!==0){
+            return null;
+        }
+
+        $externalUrl = trim((string)($fileinfo['ulf_ExternalFileReference'] ?? ''));
+        if($externalUrl!==''){
+            return array(
+                'type' => 'remote',
+                'canvas_rec_id' => $canvasRecID,
+                'ulf_id' => $ulfID,
+                'image_url' => $externalUrl,
+                'canvas_width' => floatval($dimensions['width'] ?? 0),
+                'canvas_height' => floatval($dimensions['height'] ?? 0)
+            );
+        }
+
+        $fullPath = trim((string)($fileinfo['fullPath'] ?? ''));
+        $fullPath = resolveFilePath($fullPath);
+        if($fullPath!=='' && file_exists($fullPath)){
+            return array(
+                'type' => 'local',
+                'canvas_rec_id' => $canvasRecID,
+                'ulf_id' => $ulfID,
+                'file_path' => $fullPath,
+                'canvas_width' => floatval($dimensions['width'] ?? 0),
+                'canvas_height' => floatval($dimensions['height'] ?? 0)
+            );
+        }
+
+        return null;
+    }
+
+    /** Resolve annotation thumbnail source from a canonical or stored Canvas URL. */
+    public function thumbnailSourceForCanvasUrl(string $canvasUrl): ?array
+    {
+        $canvasUrl = trim($canvasUrl);
+        if($canvasUrl===''){
+            return null;
+        }
+
+        foreach($this->canvasRecordsForCanonicalUrl($canvasUrl) as $canvasRecID){
+            $source = $this->thumbnailSourceForCanvasRecord(intval($canvasRecID));
+            if($source){
+                return $source;
+            }
+        }
+
+        $fileID = $this->fileObfuscatedIDFromCanonicalCanvasUrl($canvasUrl);
+        if($fileID){
+            $ulfID = $this->ulfIDFromObfuscatedID($fileID);
+            foreach($this->canvasRecordsForFileID($ulfID) as $canvasRecID){
+                $source = $this->thumbnailSourceForCanvasRecord(intval($canvasRecID));
+                if($source){
+                    return $source;
+                }
+            }
+        }
+        return null;
     }
 
 

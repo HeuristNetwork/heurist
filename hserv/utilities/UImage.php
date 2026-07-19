@@ -903,7 +903,162 @@ class UImage {
 
         return $thumbUrl;
     }
+
+
+    /**
+     * Download a rectangular region from a IIIF Image API service.
+     *
+     * $region must be a pixel region in x,y,width,height form. The server performs
+     * the crop and constrains the result to the requested thumbnail dimensions.
+     * The downloaded response is stored directly in $thumbnail_file.
+     *
+     * @return string|null The IIIF request URL, or null on failure.
+     */
+    public static function getIiifRegionThumbnail(
+        string $serviceUrl,
+        string $region,
+        string $thumbnailFile,
+        int $maxWidth=200,
+        int $maxHeight=200
+    ): ?string {
+        $serviceUrl = preg_replace('~/info\.json$~i', '', rtrim(trim($serviceUrl), '/'));
+        $region = trim($region);
+        $maxWidth = max(1, $maxWidth);
+        $maxHeight = max(1, $maxHeight);
+
+        if($serviceUrl==='' || !preg_match('/^\d+,\d+,\d+,\d+$/', $region)){
+            return null;
+        }
+
+        $requestUrl = $serviceUrl.'/'.rawurlencode($region)
+            .'/!'.$maxWidth.','.$maxHeight.'/0/default.jpg';
+
+        if(!$thumbnailFile){
+            return $requestUrl;
+        }
+
+        if(file_exists($thumbnailFile)){
+            @unlink($thumbnailFile);
+        }
+        $saved = saveURLasFile($requestUrl, $thumbnailFile);
+        return ($saved && file_exists($thumbnailFile) && filesize($thumbnailFile)>0)
+            ? $requestUrl
+            : null;
+    }
     
+    /**
+     * Crop a Canvas selector region from a normal local or remote image and scale
+     * it to the requested thumbnail bounds. Selector coordinates are rescaled
+     * when Canvas dimensions differ from the physical image dimensions.
+     */
+    public static function createRegionThumbnail(
+        string $source,
+        string $region,
+        string $thumbnailFile,
+        float $canvasWidth=0,
+        float $canvasHeight=0,
+        int $maxWidth=200,
+        int $maxHeight=200,
+        bool $isRemote=false
+    ): bool {
+        if($source==='' || $thumbnailFile==='' ||
+            !preg_match('/^(\d+),(\d+),(\d+),(\d+)$/', trim($region), $m)){
+            return false;
+        }
+
+        $sourceFile = $source;
+        $temporarySource = null;
+        if($isRemote){
+            $temporarySource = tempnam(HEURIST_SCRATCH_DIR, 'annotation_source_');
+            if(!$temporarySource || !saveURLasFile($source, $temporarySource)){
+                if($temporarySource && file_exists($temporarySource)){
+                    @unlink($temporarySource);
+                }
+                return false;
+            }
+            $sourceFile = $temporarySource;
+        }
+
+        try{
+            $imageInfo = @getimagesize($sourceFile);
+            if(!is_array($imageInfo) || empty($imageInfo[0]) || empty($imageInfo[1])){
+                return false;
+            }
+
+            $imageWidth = intval($imageInfo[0]);
+            $imageHeight = intval($imageInfo[1]);
+            $scaleX = $canvasWidth>0 ? $imageWidth/$canvasWidth : 1;
+            $scaleY = $canvasHeight>0 ? $imageHeight/$canvasHeight : 1;
+
+            $x = max(0, intval(round(intval($m[1])*$scaleX)));
+            $y = max(0, intval(round(intval($m[2])*$scaleY)));
+            $width = max(1, intval(round(intval($m[3])*$scaleX)));
+            $height = max(1, intval(round(intval($m[4])*$scaleY)));
+            if($x >= $imageWidth || $y >= $imageHeight){
+                return false;
+            }
+            $width = min($width, $imageWidth-$x);
+            $height = min($height, $imageHeight-$y);
+            $maxWidth = max(1, $maxWidth);
+            $maxHeight = max(1, $maxHeight);
+
+            if(file_exists($thumbnailFile)){
+                @unlink($thumbnailFile);
+            }
+
+            if(extension_loaded('imagick')){
+                try{
+                    $image = new \Imagick($sourceFile);
+                    $image->setIteratorIndex(0);
+                    $image->cropImage($width, $height, $x, $y);
+                    $image->setImagePage(0, 0, 0, 0);
+                    $image->thumbnailImage($maxWidth, $maxHeight, true);
+                    $image->setImageFormat('jpeg');
+                    $image->setImageCompressionQuality(85);
+                    $image->writeImage($thumbnailFile);
+                    $image->clear();
+                    $image->destroy();
+                    return file_exists($thumbnailFile) && filesize($thumbnailFile)>0;
+                }catch(\ImagickException $e){
+                    USanitize::errorLog('Cannot crop annotation thumbnail with Imagick: '.$e->getMessage());
+                    return false;
+                }
+            }
+
+            $memoryError = UImage::checkMemoryForImage($sourceFile, $imageInfo['mime'] ?? '');
+            if($memoryError){
+                USanitize::errorLog('Cannot crop annotation thumbnail: '.$memoryError);
+                return false;
+            }
+
+            $image = UImage::safeLoadImage($sourceFile, $imageInfo['mime'] ?? '');
+            if(!$image){
+                return false;
+            }
+            $crop = imagecrop($image, array('x'=>$x, 'y'=>$y, 'width'=>$width, 'height'=>$height));
+            imagedestroy($image);
+            if(!$crop){
+                return false;
+            }
+
+            $ratio = min($maxWidth/$width, $maxHeight/$height, 1);
+            $newWidth = max(1, intval(round($width*$ratio)));
+            $newHeight = max(1, intval(round($height*$ratio)));
+            $thumb = imagecreatetruecolor($newWidth, $newHeight);
+            $white = imagecolorallocate($thumb, 255, 255, 255);
+            imagefilledrectangle($thumb, 0, 0, $newWidth, $newHeight, $white);
+            imagecopyresampled($thumb, $crop, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+            imagedestroy($crop);
+            $saved = imagejpeg($thumb, $thumbnailFile, 85);
+            imagedestroy($thumb);
+            return $saved && file_exists($thumbnailFile) && filesize($thumbnailFile)>0;
+        }finally{
+            if($temporarySource && file_exists($temporarySource)){
+                @unlink($temporarySource);
+            }
+        }
+    }
+
     /**
      * Creates a thumbnail image from the first page of a PDF file.
      * Uses ImageMagick's `convert` command if Imagick extension is not loaded, otherwise uses Imagick.
