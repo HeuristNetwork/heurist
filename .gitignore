@@ -2,6 +2,7 @@
 ## Eclipse
 #################
 
+*.obsidian
 *.pydevproject
 .project
 .metadata
