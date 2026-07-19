@@ -1019,11 +1019,144 @@ class DbAnnotations extends DbRecordTypeEntity
                     $addPoint($nums[0][$i], $nums[0][$i+1]);
                 }
             }elseif($name==='path'){
-                // MAE normally emits polygonal M/L paths. Pairing path numbers gives
-                // a safe thumbnail bounding box; exact SVG masking is unnecessary here.
-                preg_match_all('/-?(?:\d+\.?\d*|\.\d+)/', $node->getAttribute('d'), $nums);
-                for($i=0; $i+1<count($nums[0]); $i+=2){
-                    $addPoint($nums[0][$i], $nums[0][$i+1]);
+                $path = trim($node->getAttribute('d'));
+                preg_match_all('/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/', $path, $matches);
+                $tokens = $matches[0];
+                $count = count($tokens);
+                $index = 0;
+                $command = '';
+                $currentX = 0.0;
+                $currentY = 0.0;
+                $startX = 0.0;
+                $startY = 0.0;
+
+                while($index<$count){
+                    if(ctype_alpha($tokens[$index])){
+                        $command = $tokens[$index++];
+                    }
+                    if($command===''){
+                        break;
+                    }
+
+                    $relative = ctype_lower($command);
+                    $upper = strtoupper($command);
+                    if($upper==='Z'){
+                        $currentX = $startX;
+                        $currentY = $startY;
+                        $addPoint($currentX, $currentY);
+                        $command = '';
+                        continue;
+                    }
+
+                    $needed = array('M'=>2, 'L'=>2, 'H'=>1, 'V'=>1, 'A'=>7)[$upper] ?? 0;
+                    if($needed===0 || $index+$needed>$count || ctype_alpha($tokens[$index])){
+                        $command = '';
+                        continue;
+                    }
+
+                    if($upper==='M' || $upper==='L'){
+                        $x = (float)$tokens[$index++];
+                        $y = (float)$tokens[$index++];
+                        if($relative){
+                            $x += $currentX;
+                            $y += $currentY;
+                        }
+                        $currentX = $x;
+                        $currentY = $y;
+                        if($upper==='M'){
+                            $startX = $x;
+                            $startY = $y;
+                            $command = $relative ? 'l' : 'L';
+                        }
+                        $addPoint($x, $y);
+                    }elseif($upper==='H'){
+                        $x = (float)$tokens[$index++];
+                        if($relative){ $x += $currentX; }
+                        $currentX = $x;
+                        $addPoint($currentX, $currentY);
+                    }elseif($upper==='V'){
+                        $y = (float)$tokens[$index++];
+                        if($relative){ $y += $currentY; }
+                        $currentY = $y;
+                        $addPoint($currentX, $currentY);
+                    }elseif($upper==='A'){
+                        $rx = abs((float)$tokens[$index++]);
+                        $ry = abs((float)$tokens[$index++]);
+                        $rotation = deg2rad(fmod((float)$tokens[$index++], 360.0));
+                        $largeArc = ((int)$tokens[$index++])!==0;
+                        $sweep = ((int)$tokens[$index++])!==0;
+                        $endX = (float)$tokens[$index++];
+                        $endY = (float)$tokens[$index++];
+                        if($relative){
+                            $endX += $currentX;
+                            $endY += $currentY;
+                        }
+
+                        $startArcX = $currentX;
+                        $startArcY = $currentY;
+                        $addPoint($startArcX, $startArcY);
+                        $addPoint($endX, $endY);
+
+                        if($rx>0 && $ry>0 && (abs($endX-$startArcX)>0.000001 || abs($endY-$startArcY)>0.000001)){
+                            $cosPhi = cos($rotation);
+                            $sinPhi = sin($rotation);
+                            $dx = ($startArcX-$endX)/2.0;
+                            $dy = ($startArcY-$endY)/2.0;
+                            $xp = $cosPhi*$dx + $sinPhi*$dy;
+                            $yp = -$sinPhi*$dx + $cosPhi*$dy;
+                            $lambda = ($xp*$xp)/($rx*$rx) + ($yp*$yp)/($ry*$ry);
+                            if($lambda>1){
+                                $factor = sqrt($lambda);
+                                $rx *= $factor;
+                                $ry *= $factor;
+                            }
+
+                            $denominator = ($rx*$rx*$yp*$yp) + ($ry*$ry*$xp*$xp);
+                            $coefficient = 0.0;
+                            if($denominator>0){
+                                $numerator = max(0.0, ($rx*$rx*$ry*$ry) - ($rx*$rx*$yp*$yp) - ($ry*$ry*$xp*$xp));
+                                $coefficient = sqrt($numerator/$denominator);
+                                if($largeArc===$sweep){ $coefficient = -$coefficient; }
+                            }
+                            $cxp = $coefficient*($rx*$yp/$ry);
+                            $cyp = $coefficient*(-$ry*$xp/$rx);
+                            $cx = $cosPhi*$cxp - $sinPhi*$cyp + ($startArcX+$endX)/2.0;
+                            $cy = $sinPhi*$cxp + $cosPhi*$cyp + ($startArcY+$endY)/2.0;
+
+                            $vectorAngle = static function(float $ux, float $uy, float $vx, float $vy): float {
+                                $dot = $ux*$vx + $uy*$vy;
+                                $len = sqrt(($ux*$ux+$uy*$uy)*($vx*$vx+$vy*$vy));
+                                if($len<=0){ return 0.0; }
+                                $angle = acos(max(-1.0, min(1.0, $dot/$len)));
+                                return ($ux*$vy-$uy*$vx)<0 ? -$angle : $angle;
+                            };
+                            $theta1 = $vectorAngle(1.0, 0.0, ($xp-$cxp)/$rx, ($yp-$cyp)/$ry);
+                            $delta = $vectorAngle(
+                                ($xp-$cxp)/$rx,
+                                ($yp-$cyp)/$ry,
+                                (-$xp-$cxp)/$rx,
+                                (-$yp-$cyp)/$ry
+                            );
+                            if(!$sweep && $delta>0){ $delta -= 2*M_PI; }
+                            if($sweep && $delta<0){ $delta += 2*M_PI; }
+
+                            foreach(array(0.0, M_PI/2, M_PI, 3*M_PI/2) as $testAngle){
+                                $offset = fmod($testAngle-$theta1 + 4*M_PI, 2*M_PI);
+                                $inside = $delta>=0
+                                    ? $offset <= $delta+0.000001
+                                    : (2*M_PI-$offset) <= -$delta+0.000001;
+                                if($inside){
+                                    $addPoint(
+                                        $cx + $rx*cos($testAngle)*$cosPhi - $ry*sin($testAngle)*$sinPhi,
+                                        $cy + $rx*cos($testAngle)*$sinPhi + $ry*sin($testAngle)*$cosPhi
+                                    );
+                                }
+                            }
+                        }
+
+                        $currentX = $endX;
+                        $currentY = $endY;
+                    }
                 }
             }
         }

@@ -85,19 +85,31 @@ class IiifMediaHelper
         }
 
         $mimeType = strtolower((string)($fileinfo['fxm_MimeType'] ?? ''));
-        $externalUrl = $fileinfo['ulf_ExternalFileReference'] ?? null;
+        $externalUrl = trim((string)($fileinfo['ulf_ExternalFileReference'] ?? ''));
         if(($out['width']===null || $out['height']===null)
             && strpos($mimeType, 'image/')===0
-            && !$externalUrl
-            && !self::isIiifImageInfoFile($fileinfo)
-            && $resourceUrl){
-            $size = @getimagesize($resourceUrl);
-            if(is_array($size)){
-                if(($out['width']===null || $out['width']<=0) && !empty($size[0])){
-                    $out['width'] = floatval($size[0]);
-                }
-                if(($out['height']===null || $out['height']<=0) && !empty($size[1])){
-                    $out['height'] = floatval($size[1]);
+            && !self::isIiifImageInfoFile($fileinfo)){
+
+            // For local registered images inspect the original file, not the ordinary
+            // Heurist media URL. The latter may return a display-sized image (for example
+            // 400px wide), which would make Canvas and annotation coordinates incorrect.
+            $imageSource = trim((string)($fileinfo['fullPath'] ?? ''));
+            if($imageSource!=='' && function_exists('resolveFilePath')){
+                $imageSource = resolveFilePath($imageSource);
+            }
+            if($imageSource==='' || !file_exists($imageSource)){
+                $imageSource = $externalUrl !== '' ? $externalUrl : (string)$resourceUrl;
+            }
+
+            if($imageSource!==''){
+                $size = @getimagesize($imageSource);
+                if(is_array($size)){
+                    if(($out['width']===null || $out['width']<=0) && !empty($size[0])){
+                        $out['width'] = floatval($size[0]);
+                    }
+                    if(($out['height']===null || $out['height']<=0) && !empty($size[1])){
+                        $out['height'] = floatval($size[1]);
+                    }
                 }
             }
         }
