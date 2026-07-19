@@ -227,25 +227,51 @@ final class AuthSessionService
         return true;
     }
     
-    private function normaliseSessionType(mixed $sessionType): string
+    /**
+     * Normalises legacy and current session type values.
+     *
+     * @param mixed $sessionType
+     */
+    private function normaliseSessionType($sessionType): string
     {
         $sessionType = strtolower(trim((string)$sessionType));
 
-        return match ($sessionType) {
-            'remember', 'rememberme', 'remember_me', 'keep', 'persistent', 'private', '1', 'true', 'yes', 'y' => 'remember',
-            'shared' => 'shared',
-            'none' => 'none',
-            default => 'public',
-        };
+        switch ($sessionType) {
+            case 'remember':
+            case 'rememberme':
+            case 'remember_me':
+            case 'keep':
+            case 'persistent':
+            case 'private':
+            case '1':
+            case 'true':
+            case 'yes':
+            case 'y':
+                return 'remember';
+
+            case 'shared':
+                return 'shared';
+
+            case 'none':
+                return 'none';
+
+            default:
+                return 'public';
+        }
     }
 
     private function cookieLifetimeSeconds(string $sessionType): int
     {
-        return match ($sessionType) {
-            'remember' => 30 * 24 * 60 * 60,
-            'shared' => 24 * 60 * 60,
-            default => 0,
-        };
+        switch ($sessionType) {
+            case 'remember':
+                return 30 * 24 * 60 * 60;
+
+            case 'shared':
+                return 24 * 60 * 60;
+
+            default:
+                return 0;
+        }
     }
 
     /**
