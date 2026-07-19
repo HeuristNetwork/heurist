@@ -406,8 +406,9 @@ class DbAnnotations extends DbRecordTypeEntity
         // Mirador creates the annotation first, then we create and attach its
         // thumbnail. This keeps remote image work outside the direct writer and
         // provides one reusable record-based method for the later batch action.
-        if($createThumbnail && is_array($res) && intval($res['data'] ?? 0)>0){
-            $thumbnailId = $this->createAnnotationThumbnail(intval($res['data']), false);
+        $recID = intval($res['data'] ?? 0);
+        if($createThumbnail && is_array($res) && $recID>0){
+            $thumbnailId = $this->createAnnotationThumbnail($recID, true);
             if($thumbnailId>0){
                 $res['thumbnail_ulf_id'] = $thumbnailId;
             }
