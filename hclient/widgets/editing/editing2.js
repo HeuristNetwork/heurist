@@ -336,6 +336,7 @@ function HEditing(_options) {
 
                         headerHelpText = window.hWin.HEURIST4.util.stripTags(headerHelpText, 'a,div,span,p,h1,h2,h3,h4,h5,h6,u,i,b,strong,em,hr,br');
                         headerHelpText = window.hWin.HEURIST4.util.removeInlineHandlers(headerHelpText);
+                        headerHelpText = headerHelpText === 'undefined' ? '' : headerHelpText;
 
                         let hele = $('<h4>')
                             .html(headerText)
@@ -368,6 +369,7 @@ function HEditing(_options) {
                         let headerHelpText = fields[idx]['groupHelpText'];
                         headerHelpText = window.hWin.HEURIST4.util.stripTags(headerHelpText, 'a,div,span,p,h1,h2,h3,h4,h5,h6,u,i,b,strong,em,hr,br');
                         headerHelpText = window.hWin.HEURIST4.util.removeInlineHandlers(headerHelpText);
+                        headerHelpText = headerHelpText === 'undefined' ? '' : headerHelpText;
 
                         let $group_ele = $('<div>').css('width', '100%').appendTo(fieldContainer);
                         let $field_ele = $('<fieldset>').addClass(options.className).appendTo($group_ele);
@@ -438,6 +440,7 @@ function HEditing(_options) {
                     let headerHelpText = fields[idx]['groupHelpText'];
                     headerHelpText = window.hWin.HEURIST4.util.stripTags(headerHelpText, 'a,div,span,p,h1,h2,h3,h4,h5,h6,u,i,b,strong,em,hr,br');
                     headerHelpText = window.hWin.HEURIST4.util.removeInlineHandlers(headerHelpText);
+                    headerHelpText = headerHelpText === 'undefined' ? '' : headerHelpText;
 
                     const is_header_visible = fields[idx]['groupTitleVisible'];
                     
