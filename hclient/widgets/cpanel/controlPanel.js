@@ -625,7 +625,7 @@ $.widget( "heurist.controlPanel", {
 
         this.fair_score = $('<div>', {
             id: 'heuristFAIRScore',
-            style: 'float: left;cursor: pointer;margin-top: 1em;margin-left: 2em;display: flex;width: 5em'
+            style: 'float: left;cursor: pointer;margin-top: 1em;margin-left: 1em;display: flex;'
         }).insertAfter(this.div_dbname);
 
         if($.heurist.fairScoreIndicator){

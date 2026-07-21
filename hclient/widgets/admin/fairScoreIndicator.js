@@ -68,7 +68,7 @@ $.widget("heurist.fairScoreIndicator", {
             color: '#fff',
             'background-color': colour,
             cursor: 'pointer'
-        }).text('FAIR ' + total);
+        }).text(`FAIR ${total}/10 (experiment)`);
 
         this._on($badge, {click: this._showInfoPopup});
 
