@@ -209,6 +209,8 @@ You will be encouraged to find an existing record type:
 
 Click **Continue** and you will first be asked to choose a new icon for the record type. This is a limited list of default icons (which we plan to improve with some more Humanities-appropriate icons) – you may find nothing particularly suitable for a medieval scroll, Greek pottery, wall paintings, a writer or a brutalist structure. Go ahead and choose a reasonable icon (use a different icon for each record type as this will allow you to distinguish them quickly) and then later replace it with an icon from an icon library or one that you create yourself:
 
+<p class="callout info">These icons provide a starting point. We STRONGLY encourage you to find more suitable icons, or create new ones, for your key item types, and replace the icon you have added from this list.</p>
+
 ![](https://heurist-doc.huma-num.fr/uploads/2bc7c0ce-5e8c-41a9-8b60-b68f899641c0.png)
 
 After choosing an icon, you can fill in the basic attributes of the new record type:

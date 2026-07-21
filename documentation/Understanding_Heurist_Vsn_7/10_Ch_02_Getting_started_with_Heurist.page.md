@@ -157,101 +157,61 @@ The **Admin &gt; Manage users** menu provides functionalities to organise the co
 
 Heurist databases provide support for group work and collaborative projects. There can be several users, organised in different workgroups. Each record is owned by one or several workgroup(s), or by one or several individual user(s), and only these groups and individuals can edit the data within the record.
 
+<p class="callout info">Individuals are effectively a workgroup of one. They are numbered in sequence with workgroups. Workgroup 2 is the database owner (the person who created the database - the owner can be changed by the owner to another user, see Administration, chapter 10).</p>
+
 Heurist's security model for database access allows you to manage groups and users and their access permissions in a controlled and centralised manner.
 
-Workgroups can be added, edited and deleted (except workgroup 1 = Database Managers). Two types of access roles “administrator” or “member” are available in each workgroup. New users can also be added or imported from other existing databases.
+A workgroup is any set of users (e.g. department, research unit, project group, discipline group etc.), who need to share resources. Users can be members of several workgroups. In order to share the ability to edit a particular record you and your colleagues must be members of the workgroup which owns the record.
+
+You become a member of a workgroup if you create a new workgroup or if you are added as a member to the workgroup (by an Administrator of the workgroup). Workgroups/users can be added, edited and deleted (except workgroup 1 = Database Managers and User 2 = database owner). Two types of access roles “administrator” or “member” are available in each workgroup. New users can also be added or imported from other existing databases. The person creating a workgroup becomes an Admin of that workgroup and cannot be removed from it.
 
 Database structure can only be modified by administrators in the Database Managers workgroup, although other users can add terms to term fields (dropdowns) during data entry. The following table describes each group and the permissions for each role by group.
 
-<table id="bkmrk-role-%2F-groupgroup-0%3A" style="width: 100%;"><colgroup><col style="width: 14.2917%;"></col><col style="width: 33.5033%;"></col><col style="width: 29.2014%;"></col><col style="width: 23.1228%;"></col></colgroup><tbody><tr><th style="width: 14.2917%;">Role / Group
+**Group 1: Database Managers :** The Database Managers Group is created by default for all new databases. The database creator is given the unique role of Owner. A database can have only one Owner.
 
-</th><th style="width: 33.5033%;">Group 0: All Users
-
-</th><th style="width: 29.2014%;">Group 1: Database Managers Group
-
-</th><th style="width: 23.1228%;">Group 2+: Workgroups
-
-</th></tr><tr><td style="width: 14.2917%;">Description
-
-</td><td style="width: 33.5033%;">A notional group consisting of all activated Heurist users in the control table (and by extension everyone who might have access to a Heurist database that references that control table).
-
-</td><td style="width: 29.2014%;">The Database Managers Group is created by default for all new databases. The database creator is given the unique role of Owner. A database can have only one Owner.
+- **Administrator**
+- Add/edit/delete records and field definitions.
+- Clone, clear and delete the database.
+- Run all database administration utilities.
+- Carry out any tasks that the Administrators of individual groups can do (whether or not they are a member of that group).
+- For example:Add, edit and view records specific to any group.
+    
+    Allocate users to any group (as Administrators or members).
+    
+    Change record Ownership to any workgroup.  
+    Register the database (only available to the database owner, user #2)
+- **Member**
+- Being a member of the Database Managers Group confers no special rights; they have the same rights as members of any other group.
 
 As well as having administration rights over this group, Administrators in this group are DBAdmins 'SuperUsers' for any database that uses a particular control table and therefore have DBAdmin rights over Group 0 and all other workgroups.
 
-</td><td style="width: 23.1228%;">Any number of additional workgroups can be created. The first of these has ID 2 (@todo), another has ID 3 for all “Other users” and subsequent groups have ID 4+.
+**Group &gt;=2: Workgroups :** Any number of additional workgroups can be created. The first of these has ID 2 (the owner of the database), another has ID 3 for all “Other users” and subsequent groups have ID 4+.
 
-A workgroup is any other set of users (e.g. department, research unit, project group, discipline group etc.), who need to share resources. In order to share the ability to edit records you and your colleagues must be members of the same workgroup.
+- **Administrator**
+- Add or remove members from that workgroup
+- Define or remove group tags.
+- Carry out other tasks (if any) specific to the group.
+- **Member**
+- Make, edit and view all records owned by the workgroup.
+- Change workgroup Ownership of a record to another workgroup of which they are a member.
+- Find, add and delete workgroup tags to/from records.
+- Log into a database that has been restricted to a workgroup of which they are a member.
+- Enter records in the workgroup blog.
+- Manage Workgroups, such as viewing details for other members of the workgroup, but not adding or removing members.
 
-You become a member of a workgroup if you create a new workgroup or if you are added as a member to the workgroup (by an Administrator of the workgroup).
+**Group 0: All Users :** A notional group consisting of all activated Heurist users in the control table (and by extension everyone who might have access to a Heurist database that references that control table).
 
-The person creating a workgroup becomes an Admin of that workgroup and cannot be removed from it.
+- Edit records which do not belong to a specific workgroup (the normal default for new records).
+- View data in workgroup-owned records that are marked as viewable outside the workgroup (the normal default for new records).
+- Bookmark visible records and create personal data such as tags, comments, reminders and notes, as well as saved searches and publication output.
+- Create a database.
+- Create a workgroup.
+- Run some database administration utilities.
+- Export database definitions.
 
-</td></tr><tr><td style="width: 14.2917%;">Logged In User
+**Non-logged-in:** The Heurist publication mechanism, designed for rendering Heurist data within public websites, bypasses the need to log in to view certain types of data. To be rendered in published output, the data must not be marked as belonging to a particular workgroup and/or must be marked as viewable outside the workgroup which owns the record. Personal data created by a logged-in user is never viewable through this mechanism, and it does not allow any modification whatsoever of the database.
 
-</td><td style="width: 33.5033%;">Edit records which do not belong to a specific workgroup (the normal default for new records).
-
-View data in workgroup-owned records that are marked as viewable outside the workgroup (the normal default for new records).
-
-Bookmark visible records and create personal data such as tags, comments, reminders and notes, as well as saved searches and publication output.
-
-Create a database.
-
-Create a workgroup.
-
-Run some database administration utilities.
-
-Export database definitions.
-
-</td><td style="width: 29.2014%;"></td><td style="width: 23.1228%;"></td></tr><tr><td style="width: 14.2917%;">Owner
-
-</td><td style="width: 33.5033%;"></td><td style="width: 29.2014%;">Register group.
-
-</td><td style="width: 23.1228%;"></td></tr><tr><td style="width: 14.2917%;">Administrator
-
-</td><td style="width: 33.5033%;"></td><td style="width: 29.2014%;">Add/edit/delete records and field definitions.
-
-Clone, clear and delete the database.
-
-Run all database administration utilities.
-
-Carry out any tasks that the Administrators of individual groups can do (whether or not they are a member of that group).
-
-For example:
-
-- Add, edit and view records specific to any group.
-- Allocate users to any group (as Administrators or members).
-- Change record Ownership to any workgroup.
-
-</td><td style="width: 23.1228%;">Add or remove members from that workgroup
-
-Define or remove group tags.
-
-Carry out other tasks (if any) specific to the group.
-
-</td></tr><tr><td style="width: 14.2917%;">Member
-
-</td><td style="width: 33.5033%;"></td><td style="width: 29.2014%;">Being a member of the Database Managers Group confers no special rights; they have the same rights as members of any other group.
-
-</td><td style="width: 23.1228%;">Make, edit and view all records owned by the workgroup.
-
-Change workgroup Ownership of a record to another workgroup of which they are a member.
-
-Find, add and delete workgroup tags to/from records.
-
-Log into a database that has been restricted to a workgroup of which they are a member.
-
-Enter records in the workgroup blog.
-
-Manage Workgroups, such as viewing details for other members of the workgroup, but not adding or removing members.
-
-</td></tr><tr><td style="width: 14.2917%;">Non Logged-In User
-
-</td><td style="width: 33.5033%;">The Heurist publication mechanism, designed for rendering Heurist data within public websites, bypasses the need to log in to view certain types of data. To be rendered in published output, the data must not be marked as belonging to a particular workgroup and/or must be marked as viewable outside the workgroup which owns the record. Personal data created by a logged-in user is never viewable through this mechanism, and it does not allow any modification whatsoever of the database.
-
-</td><td style="width: 29.2014%;"></td><td style="width: 23.1228%;"></td></tr></tbody></table>
-
-For advanced functionalities, adding new users, assigning workgroup memberships, importing new users, see @todo-link Admin.
+For advanced functionalities, adding new users, assigning workgroup memberships, importing new users, see Chapter 10 Administration.
 
 ### 4.2 Roles and Permissions
 
@@ -273,12 +233,12 @@ You can set the Ownership and visibility of a record individually. The default i
 
 **Viewability** (Record is viewable by) can be set to:
 
-- Hidden: Records are only visible to workgroup members.
-- Viewable: Any (logged-in) user, regardless of workgroup, can view the record. By default, all new records are set to Viewable by any Heurist user.
-- Pending: This provides the same viewability as Viewable above, but 'flags' that the record is not available for Public viewing. For instance, if you area making edits to a record and haven't reviewed these yet.
-- Public: The record (other than fields marked 'Restricted') can be published for Public (external to Heurist) viewing.
+- **Hidden:** Records are only visible to workgroup members.
+- **Viewable:** Any (logged-in) user, regardless of workgroup, can view the record. By default, all new records are set to Viewable by any Heurist user.
+- **Pending:** This provides the same viewability as Viewable above, but 'flags' that the record is not available for Public viewing. For instance, if you area making edits to a record and haven't reviewed these yet.
+- **Public:** The record (other than fields marked 'Restricted') can be published for Public (external to Heurist) viewing.
 
-Any records you want others to see can be made Viewable. They will not be editable by anyone who is not part of the Owner group.
+Any records you want others to see can be made Viewable. They will not be editable by anyone who is not part of the Owner group - because records are never editable except by their owner(s).
 
 The default access of all new records can be set in the Database properties : Menu **Design &gt; Properties**, section **Behaviour**.
 
@@ -318,7 +278,7 @@ you may wish to skip this section and return to it later</p>
 - Access
 - Default Access
 
-<p class="callout warning">TO BE CONTINUED  
+<p class="callout info">TO BE CONTINUED @TODO  
 This determines whether anyone outside your workgroup can see records by default when imported. This can be:  
 Hidden. Not viewable.  
 Viewable. Viewable.  
@@ -333,7 +293,7 @@ This function allows one to set up a range of settings which apply to your use o
 
 \*@todo: verify the veracity of the following tip:
 
-<p class="callout warning">As user preferences are stored in your session variables on your web browser, it is important to check the “Keep me logged in for a month” (which is extended each time you log in from the same computer within one month) so that they are remembered. </p>
+<p class="callout info">As user preferences are stored in your session variables on your web browser, it is important to check the “Keep me logged in for a month” (which is extended each time you log in from the same computer within one month) so that they are remembered. </p>
 
  ![](https://heurist-doc.huma-num.fr/uploads/6481e3ba-301b-435b-9b58-f3318c84b31e.png)
 
@@ -343,15 +303,21 @@ Most of these settings are fairly self-explanatory, but we will thus explain som
 
 **Bookmarklet**
 
-This function still exists but we do not recommend using it as it does not pick up highlighted text on https pages.
+This function still exists but we do not recommend using it as it does not pick up highlighted text on https:// pages.
 
 - You can drag the bookmarklet to your browser toolbar.
-- It lets you capture the information you highlight in any web page displayed in the browser   
+- It lets you capture the information you highlight in any http:// web page displayed in the browser   
     (including a bookmarks file and search list, such as Google) and analyse it for bibliographic information.
 
 **Mapping**
 
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/xlPimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/xlPimage.png)
+
+@TODO
+
 **Filter**
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/AQYimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/AQYimage.png)
 
 - Heurist filter string to execute when loading the search page.   
     Add any filter expression to execute when you navigate to the Home Page (you can run a search and copy the syntax here if you wish). The default is to show all records edited within the last week. For example, to show all 'favourite' (or 'favorite') tagged records, use the following syntax: Tag:favourite,favorite
@@ -367,6 +333,8 @@ This function still exists but we do not recommend using it as it does not pick 
     Scans your current records for any that are similar to the one you are creating and presents these with a dialog. You can choose one of the presented records or continue to create a new one.
 
 **Other**
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/Krgimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/Krgimage.png)
 
 - User interface style / level of user.   
     Determines the level of help and functionality that is provided based on your expertise.
@@ -401,11 +369,13 @@ To move the visualisation around, click in the whitespace and drag with your mou
 
 ![](https://heurist-doc.huma-num.fr/uploads/dcc965b6-897f-4e9c-a193-c17d336a8738.png)
 
-When you open a Heurist database, you are taken by default to the Explore menu. The Explore menu offers a range of powerful tools for viewing, querying and filtering your data. In this introductory video, we look at some of the basic exploration tools built-in to the Explore menu, and also learn how to create a custom filter for more sophisticated analysis.
-
 #### 5.3.1 The Explore Overview Screen\*\*
 
-When you log in to a Heurist database, you are taken to the Explore menu and presented with the overview screen. To edit the database title, description and other information, click ‘edit metadata’.
+When you log in to or reopen a Heurist database, you are taken to the Explore menu and presented with the overview screen. To edit the database title, description and other information, click ‘edit metadata’.
+
+The Explore menu offers a range of powerful tools for viewing, querying and filtering your data. In this introductory video, we look at some of the basic exploration tools built-in to the Explore menu, and also learn how to create a custom filter for more sophisticated analysis.
+
+@todo: The metadata editing has been greatly improved as of late July 2026 and will require re-documenting
 
 ![](https://heurist-doc.huma-num.fr/uploads/5a3261d1-af04-45e1-8b4d-913f83685eb4.png)
 
@@ -515,15 +485,17 @@ This opens the Reminder form, where you can change the reminder details.
 
 ### 5.7 Ticket system
 
-Heurist is the product of working with a very large number of projects over a period of two decades. We greatly value feedback about possible improvements, bug reports or just things which annoy you. Please do not hesitate to send us bug reports and feature requests.
+Heurist is the product of working with a very large number of projects over a period of two decades. We greatly value feedback about possible improvements, bug reports or just things which annoy you. Please do not hesitate to send us bug reports and feature requests using the ticket system which is available in the top bar of the Heurist interface and in the Help menu.
 
-[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/w7Bimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/w7Bimage.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/68himage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/68himage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/w7Bimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/w7Bimage.png)![](https://docs.heuristref.net/loading.gif)
 
 **Help &gt; Ticket (bug report / feature request)** allows users to report bugs or issues encountered when using Heurist, or send comments, feature requests and enhancements to the Heurist development team (general queries can be sent to the team via the page on [Heurist Network Association](https://heuristref.net/Heurist_Contacts/web/5417/10746)). There is also a link to report bugs or requests a the top of the data entry form.
 
-![](https://heurist-doc.huma-num.fr/uploads/97340514-3e92-4fd0-b5dd-95e2f0da2189.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/9q5image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/9q5image.png)
 
-Please provide a screenshot as this is very helpful in understanding the source of bugs. The function automatically reports the server and database in use, the web browser version and your email address.
+Please provide a screenshot (you can insert two in this form) as this is very helpful in understanding the source of bugs. The function automatically reports the server and database in use, the web browser version and your email address.
 
 <p class="callout info">You can insert screenshots from the clipboard while editing the text fields with Ctrl-V or Cmd-V (you do not need to click on the image box). To insert a second screenshot, click on the + sign to get a second image box before inserting</p>
 
@@ -689,4 +661,4 @@ Once your database has been created, data can be entered manually through the st
 
 The process of manual data entry will be discussed at the same time as the setup of data structures, since the two can be done together so that you can test out and evolve the structure with real data rather than having to plan everything on paper in advance.
 
-Bulk import of data from spreadsheets and other sources is discussed in the section [POPULATE](https://heurist-doc.huma-num.fr/3J9WBsJ_Timj676v-0G_5A)
+Bulk import of data from spreadsheets and other sources is discussed in chapter 6 - Populating the database.

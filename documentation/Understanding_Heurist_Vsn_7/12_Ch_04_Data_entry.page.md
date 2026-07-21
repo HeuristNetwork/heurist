@@ -1,6 +1,6 @@
 # Ch 04: Data entry
 
-Documentation rédigée le XX/XX/XXXX par Y mise à jour le 25/06/2026 par Oanez Hélary
+*Documentation rédigée le XX/XX/XXXX par Y mise à jour le 25/06/2026 par Oanez Hélary*
 
 When you create or edit a record it opens automatically in **data entry** mode. It is a form where the fields to fill are specific to each **entity type** and the values given to the fields change for each **record**.
 
@@ -203,10 +203,10 @@ Not all icons appear beside each field, as the actions they trigger isn't always
 - Numeric (integer or decimal)
 - Text (single line)
 - Memo text (multi-line or html)
-- Date / temporal
+- Date / temporal *More complex fields with specific behaviours*
 - Geospatial
 - File or media URL
-- Record pointer / Foreign Key
+- Record pointer / Foreign Key  *These fields are the key to linking records*
 - Relationship marker
 
 ### 3.1. Simple type fields

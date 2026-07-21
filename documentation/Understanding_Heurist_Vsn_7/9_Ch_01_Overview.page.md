@@ -34,7 +34,7 @@ This document aims to give a reasonably concise but comprehensive narrative of H
 
 There are a range of learning resources, FAQs and links to exemplar projects on the [Heurist Network website](http://HeuristNetwork.org):
 
-![](https://heurist-doc.huma-num.fr/uploads/d0ee5f2d-d8f4-47ae-9a87-2cc58c9ece46.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/4Q0image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/4Q0image.png)
 
 ### 2.2 **Online help**
 

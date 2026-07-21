@@ -1,5 +1,293 @@
 # Ch 08 : Result sets, manipulation, custom reports and visualisation
 
+# Ch 8: Result Views and Export
+
+Documentation written on 04/11/2025 by Sylvain Besson (MSH Lyon Saint-Étienne / CNRS)  
+Updating 25/06/2026 by Vincent Paillusson (HTL)
+
+## 1. Record View
+
+<p class="callout warning">Explore → Filter → Record</p>
+
+The **Record** view shows all the elements of a recording. The differents fields and associated metadata and possibly relationship between recordings.
+
+How to start:
+
+- To begin, click on **\[Explore\]**. ①
+- Perform a search or use a **\[Saved Filter\]** that returns the records you want to include in your report. ①
+- Select a [**record**](https://heurist-doc.huma-num.fr/6SWzTuSCQtShLJfucCVoUg#) ②
+- Click on **\[Record\]** ③
+
+![Record view](https://heurist-doc.huma-num.fr/uploads/f565dfd5-0d20-43a5-b1ca-7a74314533e1.png)
+
+Once on the **\[Record\]** view selected, the record’s metadatas appear. There is several informations:
+
+- Title ①: title of the record
+- Icon ②: record’s type icon
+- **Record H-ID** ②: Intern Heurist record ID
+    - Workflow stage ④ which give some information on the workflow stage
+- **Media** ⑤: Picture of the media
+
+![311dc84a-6eec-4d9e-a2d9-610f0c0e8e9f.png](https://heurist-doc.huma-num.fr/uploads/311dc84a-6eec-4d9e-a2d9-610f0c0e8e9f.png)
+
+#### Focus on medias
+
+- If a media exists in the **record**, a thumbnail is displayed
+- It is possible to display in **\[full screen\]** ![19f1a1b3-59a6-4d68-9a93-8118c79c82e9.png](https://heurist-doc.huma-num.fr/uploads/19f1a1b3-59a6-4d68-9a93-8118c79c82e9.png) ① or viewing it in popup ![2af48b38-0885-4685-97b2-ede4e8407969.png](https://heurist-doc.huma-num.fr/uploads/2af48b38-0885-4685-97b2-ede4e8407969.png) ②
+- The media can also be displayed on **\[Mirador\]** (using Heurist’s automatic IIIF manifest) ③ or **\[OpenSeadragon\]** ![78e932f2-d82a-4c69-9fba-c9efd90ae890.png](https://heurist-doc.huma-num.fr/uploads/78e932f2-d82a-4c69-9fba-c9efd90ae890.png) viewer ④
+- You can **\[download\]** ![60955b67-0421-4c06-b809-0dac5661efea.png](https://heurist-doc.huma-num.fr/uploads/60955b67-0421-4c06-b809-0dac5661efea.png) it ! ⑤
+- By hovering over **\[description\]**, a description appears if this field has been completed ⑥
+- Finally by going over **\[rights\]**, the rights of the media appears if it was filled during the record creation ⑦
+
+![Media buttons](https://heurist-doc.huma-num.fr/uploads/a5b63664-f99d-4d3b-acdd-c32076b2f8b3.png)
+
+##### Click on **\[More…\]**
+
+- **Cite as** ① : The record can be cited in XML or HTML. The updating date of the record is shown as the lastest modification date.
+- **Added** ②: Creation date of the **record**
+- **Updated** ③: Last **record** update
+- **Ownership** ④: Communicate who owns the record and who can read it
+- **Rating** ⑤: You can rate each record from one to five
+- **Tags** ⑥: You can tag records to find them more easily
+
+  
+![More button](https://heurist-doc.huma-num.fr/uploads/4a49ab1d-3766-4fdc-b422-3edcbdb52858.png)
+
+## 2. List view
+
+<p class="callout warning">Explore → List View</p>
+
+**\[List view\]** allows essentialy to show the whole selected data in table format ③.
+
+You can choose the field you need ①. You can also save the settings ②. It is also possible to export by simple copy/past (CSV with tab as separator), by excel format and PDF format ③.
+
+![list view fonctionnalities](https://heurist-doc.huma-num.fr/uploads/790e143e-6f77-447b-aa09-4ba167459e04.png)
+
+<p class="callout info">**🛟**   
+**Tip:** If you want to export data with more export formats, you may want to try the Export view described in the following section.</p>
+
+## 3. Export View
+
+The **Export view** allows to export the request results under differents data formats:
+
+**CSV ①**  
+**XML ②**  
+**JSON ③**  
+**RDF ④**  
+**GeoJSON ⑤**  
+**KML ⑥**  
+**GEPHI ⑦**  
+**IIIF ⑧**  
+**HuNI ⑨**
+
+<p class="callout info">Several formats can be exported as a data feed, as well as a fixed format file. The data feed capability is particualrly useful for sending live data to a processing workflow, often combined with a saved search which filters the required set of output records. It can be a very useful, simpler alteraitv eto usign th Heurist API.</p>
+
+![5a247a55-e8bd-460f-b8ac-53413a0c45e5.png](https://heurist-doc.huma-num.fr/uploads/5a247a55-e8bd-460f-b8ac-53413a0c45e5.png)
+
+### CSV / TSV (Delimited) files
+
+When you click on **\[CSV\]**, a pop-up opens allowing you to choose the fields you want to export and a range of settings.
+
+<p class="callout info"> Note that by default CSV files are exported as tab-separated, since this causes much fewer problems with complex text (which often contains commas and unmatched quote marks, but very rarely contains actual tab characters)</p>
+
+<p class="callout info">CSV/TSV exports are a particularly good way of temporarily exporting some fields, carrying out some manipulation in an externa program eg. a spreadsheet, Open Refine or R, and reimporting the results with Populate &gt; Import - Delimtied text / CSV. Because all exported CSV/TSV files automatically include the Hursit ID (H-ID)\_ which is uniqiue to each record, it is very easy to reimport the data into the soure records, overwriting or adding to existing values in the same or differnet fields.</p>
+
+First, you must choose the records you want to export ①. You can choose between the current result set and any single type of record occuring within the resultset.
+
+<p class="callout info">We STRONGLY recommend only exporting one record type at a time. Delimited files are really not meant for dealing with heterogeneous data, and mixed exports will restrict the exportable fields to record metadata and shared fields.</p>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/rLHimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/rLHimage.png)
+
+After the records selection, you choose one of the two available export settings ② :  
+\- a single joined file  
+\- a file by record type (if multiple types are selected).
+
+You can choose to display the fields in either Form order (the default) or alphabetic order. Alphabetic order may make it easier to select fields in some circumstances.
+
+The main step of the export setting is to select the fields you want to export ③ . They can be any type of field including the constructed title, **record pointers** and **relationship markers**.
+
+You can export metadata about the records ④ as well as the data from the data fields ⑤ .
+
+<p class="callout info">If you have a current resultset with more than one record type in it, you will only be able to choose the metadata and fields which are shared by all the record types in the resultset. </p>
+
+If the record type you are exporting contains record pointer or relationship marker fields, you can drill down into those record types and export fields from within those records. They can be included in the main file ("single joined file") or exported as separate files with linking IDs ("File by record type").
+
+<p class="callout info">You should use "File by record type" where there are multiple values in record pointer fields, since the values in each related record will need to be kept separate. For simple cases without repeated value record pointers "single joined file" may be appropriate.</p>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/PUoimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/PUoimage.png)
+
+Note how you have some additional options appearing on the right against any selected fields.
+
+For most purposes you will want to use *Value*, as the other options can be done more effectively in an external spreadsheet. However *Group by* will group records into a single record for each value encountered in the column, while *Count* will count the number of occurrences for the field in those groups. The results can be a little hard to interpret.
+
+<p class="callout info">**🛟 Tip:**  
+The H-ID is ALWAYS included in the export because it uniquely identifies every record, so it is essential if you need to import/update data back into the database or to make links between records eg. record pointers</p>
+
+Finally, when ending the CSV export setting, you can change the field/column delimiter for the csv (for example: tab, semicolon, comma, etc.) and character used for quotemarking the textual content.
+
+You can also save settings ⑦ by giving it a name in order to use it later.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/DXyimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/DXyimage.png)
+
+**Handling of record pointers and relationships**
+
+For all other export types, it is possible to choose between:
+
+- - Export the records and their relationships (relationship of the type pointer or the relationships maker)
+    - Export only the pointer relationships
+    - Don’t follow the pointer relationships or the relationships makers
+    - Follow all relationships including inverse pointers (🚨**warnings**: it could export the entire database)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/qwUimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/qwUimage.png)
+
+### XML
+
+“**Extensible Markup Language (XML)** is a markup language and file format for storing, transmitting, and reconstructing data. It defines a set of rules for encoding documents in a format that is both human-readable and machine-readable.” (source: [**Wikipedia**](https://en.wikipedia.org/wiki/XML))
+
+Heurist defines an XML schema called Heurist Markup Language (HML). HML can be used both as an interpretable archivable format (it is included as the primary element of Publish &gt; Safeguard file) and as a data source which can be transformed with XSLT transforms, Python, PHP, or many other languages to a required format.
+
+Check the box "Include human-readable names and local IDs for everything" if you plan to look at the XML file and interpret its structure (this will create a very large file duer to repetition). It is often better to export an explanation of the structure through Populate &gt;Heurist XML/JSON - Download template.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/P0Jimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/P0Jimage.png)
+
+### JSON
+
+“**JSON (JavaScript Object Notation)** is an open standard file format and data interchange format that uses human-readable text to store and transmit data objects consisting of name–value pairs and arrays (or other serializable values).” (source: [**Wikipedia**](https://en.wikipedia.org/wiki/JSON))
+
+The choices are similar to XML/HML, except that it cannot include the human readable forms. However, as with XML, you can download the information in the form of a JSon tempalte through Populate &gt;Heurist XML/JSON - Download template.
+
+### RDF
+
+“The **Resource Description Framework (RDF)** is a method to describe and exchange graph data.” (source: [**Wikipedia**](https://en.wikipedia.org/wiki/Resource_Description_Framework))
+
+In this format, you can specify the serialisation you want: rdfxml, json, ntriples or turtle
+
+As this function is still in development (July 2026) it requires a special password to access. Contact the Heurist development team for further information.
+
+#### GeoJSON
+
+“**GeoJSON** is an open standard format designed for representing simple geographical features, along with their non-spatial attributes. It is based on the JSON format.” (source: [**Wikipedia**](https://en.wikipedia.org/wiki/GeoJSON))  
+You can select the export detail between: No = no detail, Inline = Inline detail, and Full = maximum detail
+
+### KML
+
+“**Keyhole Markup Language (KML)** is an XML notation for expressing geographic annotation and visualization within two-dimensional maps and three-dimensional Earth browsers. It is best known for its use in Google Maps but is widely importable into GIS and mapping packages” (source: [**Wikipedia**](https://en.wikipedia.org/wiki/Keyhole_Markup_Language))
+
+There are no options for this export format, it is exported immediately as soon as you click on the button.
+
+### GEPHI
+
+GEPHI export generates a GEFX file which can be loaded immediately into GEPHI. Note that this export function is also available directly within the network visualisation graph in the **Network** tab.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/GE2image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/GE2image.png)
+
+In addition to the normal node and edge fields, you can choose to add additional fields to the export ①.
+
+![7b64c475-727f-4705-a325-d423ed6666ef.png](https://heurist-doc.huma-num.fr/uploads/7b64c475-727f-4705-a325-d423ed6666ef.png)
+
+This leads to the pop-up below. We recommend only selecting fields relevant to the record type being exported. You can also export with jsut the default fields ② which will be sufficient in most cases.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/SQ3image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/SQ3image.png)
+
+<p class="callout info">**🛟 Tip:**  
+It can be useful to check the box limiting the export to the first 1000 nodes in order to check that the export gives you what you want in GEPHI, befor exporting a very large dataset.</p>
+
+### IIIF
+
+“The International Image Interoperability Framework (IIIF, spoken as ‘triple-I-F’) defines several application programming interfaces that provide a standardised method of describing and delivering images over the web, as well as “presentation based metadata”\[1\] (that is, structural metadata) about structured sequences of images” . (source: [**Wikipedia**](https://en.wikipedia.org/wiki/International_Image_Interoperability_Framework)). IIIF can also handle tiled image delivery andimage annotation.
+
+Heursit acts as both a IIIF manifest delivery system and image server, and as an IIIF display and annotation client, notably through the use of Mirador Vsn 4 and Open Sea Dragon viewers, and the MAE annotation framework. Heurist can also read and atomise manifests containing annotations, and recompose manifests including those annotaitons and others created within Heurist.
+
+IIIF is a rich and complex system. Heurist's IIIF implementation is discussed in detial in chapter 8e.
+
+### HuNI
+
+“**HuNI** (pronounced “honey”) brings together information about the people, works, events, organisations and places that form Australia and Canada’s past and present.” (source: [**huni.net**](https://huni.net.au/#/search)). It is an old infrastrucute project dating to the 2000s with limited functionality (essentially harvesting simple metadata from 40+ Australian sources, providing simple search, bookmarking as a 'collecction' and exporting a CSV file with title and URL of the bookmarked records. The HuNI export format has the particularity of exporting one XML file per record. It may be of some use if that fits with your needs.
+
+#### HTML
+
+ This option exports HTML pages for public records (one file-per-record) using the Record view format.
+
+**📊 Export‑type quick‑reference table – Which format to choose?**
+
+<table id="bkmrk-needcsvxmlrdfjsongeo" style="border-collapse: collapse; border-spacing: 0px; background-color: transparent; margin-top: 0px; display: block; width: 728px; overflow: auto;"><colgroup><col style="width: 122px;"></col><col style="width: 61px;"></col><col style="width: 67px;"></col><col style="width: 62px;"></col><col style="width: 70px;"></col><col style="width: 107px;"></col><col style="width: 63px;"></col><col style="width: 77px;"></col><col style="width: 57px;"></col><col style="width: 70px;"></col></colgroup><tbody><tr style="background-color: rgb(255, 255, 255); border-top: 1px solid rgb(204, 204, 204);"><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">Need
+
+</th><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">CSV
+
+</th><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">XML
+
+</th><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">RDF
+
+</th><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">JSON
+
+</th><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">GeoJSON
+
+</th><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">KML
+
+</th><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">Gephi
+
+</th><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">IIIF
+
+</th><th class="align-left" style="padding: 6px 13px; text-align: left; font-weight: bold; border: 1px solid rgb(221, 221, 221);">HuNI
+
+</th></tr><tr style="background-color: rgb(255, 255, 255); border-top: 1px solid rgb(204, 204, 204);"><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">Spreadsheet
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td></tr><tr style="background-color: rgb(248, 248, 248); border-top: 1px solid rgb(204, 204, 204);"><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">Markup (tagging)
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td></tr><tr style="background-color: rgb(255, 255, 255); border-top: 1px solid rgb(204, 204, 204);"><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">Versatile (generic data)
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td></tr><tr style="background-color: rgb(248, 248, 248); border-top: 1px solid rgb(204, 204, 204);"><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">Spatial (geographic)
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td></tr><tr style="background-color: rgb(255, 255, 255); border-top: 1px solid rgb(204, 204, 204);"><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">Networks
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td></tr><tr style="background-color: rgb(248, 248, 248); border-top: 1px solid rgb(204, 204, 204);"><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">High‑resolution images
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);">✅
+
+</td><td style="padding: 6px 13px; border: 1px solid rgb(221, 221, 221);"></td></tr></tbody></table>
+
+1Password menu is available. Press down arrow to select.
+
 # 8a: Getting started with custom reports
 
 Documentation rédigée le 06/11/2025 par Shannon Bruderer mise à jour le 05/12/2025 par Shannon Bruderer
@@ -221,242 +509,6 @@ The \[Print\] buttom simply generates a PDF of the output from your current **Cu
 Click on the \[Refresh\] buttom to update the data used by your Custom Report template. For filters other than Facet filters (where you must make surther selections) you may also simply hit the Filter button to rerun the filter, which will cause the report to be rewritten.
 
 If your database has been modified (new records, edits, deletions) but the output of your report does not reflect these changes, simply hit Refresh to reload the most recent data and ensure your preview is accurate.
-
-# 8a bis: Custom reports in more detail
-
-Custom Reports are optional but they allow you to customize data display in powerful ways.  
-By default, when a record is displayed on a Heurist website, the usual Record View template is used. If you would like to alter how records appear, then you will need to define a Custom Report.
-
-*Note: the content was copied via markdown export and lost much of its minor formatting. The images in particalr have been downgraded. The source is here:* [*https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit*](https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit)
-
-Custom Reports work together with Saved Filters to publish content on a Heurist website or elsewhere on the web. The \*filter \*will retrieve records from the database, and hand the records to the \*custom report \*to format and display them. When you choose the Report tab in the View Pane, you will see the selected Custom Report attempt to display information about your current result set. This will only work correctly if the selected report has been configured to display records like those in the result set (e.g. a Custom Report designed to display information about Persons will probably fail to display information about Books or Places properly.)
-
-Smarty Heurist reports are powered by the Smarty Template Engine. For an overview of the Smarty template language, visit [Smarty Syntax](https://smarty-php.github.io/smarty/5.x/designers/language-basic-syntax/). It allows you to embed data from the database into an HTML template which determines the form of the output. You can use CSS, Javascript and even PHP within custom reports. Smarty is an extremely powerful system and almost anything is possible, if you know how.
-
-Simple templates can produce neatly formatted lists in text (e.g. CSV and HTML formats), including media (e.g. images and videos). For example, a report might extract and display the first and last names of all writers born before 1900 along with an alphabetical list of their works.
-
-More complex reports can be configured to retrieve and display information from related records of different nature. For instance, in the case of a database documenting archeological dig sites, excavation campaigns, and objects retrieved, each defined as a different entity, a custom template can produce a nested list of all sites, with the details of each of their respective campaigns ordered chronologically, and display a gallery with a picture of each object for each campaign.
-
-Such complex reports can use all the power of the Smarty template language, including PHP functions (standard or user-defined) directly within the template. They can display data using complex layouts, such as grid or flexbox, and may also include JavaScript to provide interactivity and CSS to customise their appearance.
-
-Custom reports can be used in many different places. You can use custom reports, for example, to:
-
-Display search results on your website
-
-Customise the popups on a Heurist map
-
-Embed Heurist content in another page
-
-Create periodically updated custom data feeds to be used in another platform (for instance, in csv, json, or xml format).
-
-#### Report View Toolbar
-
-![embedded-image-k2fhavam.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-k2fhavam.png)
-
-The dropdown and buttons allow you to perform the following tasks:
-
-  
-**Select dropdown**. Select an existing report from the drop down. This is immediately run against the current list of queried records. This lets you test run the report against a set of records and view the report on-screen.
-
-![embedded-image-vntdmmla.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-vntdmmla.png)**Edit button**. Edit the selected report template.
-
-![embedded-image-aaos1qmq.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-aaos1qmq.png)**Create**. Create a new custom report template using Smarty syntax. (Note that you can also create a new report from an existing one by duplicating it. This can be achieved using the “Save as” button at the bottom of the Edit report pane)
-
-![embedded-image-j27y2iqq.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-j27y2iqq.png)**Delete**. Deletes the current report template
-
-![embedded-image-tj243kqj.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-tj243kqj.png)**Import**. Import a template exported from another database (as a .gpl file). The .gpl file format is a special file format that allows templates to be interpreted by multiple databases, even if their structure differs.
-
-![embedded-image-4luqqnpm.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-4luqqnpm.png)**Export**. Export a template as a .gpl file (this can then be imported to another database). Export converts field IDs to concept IDs.
-
-![embedded-image-balgsosq.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-balgsosq.png)**Publish**. If you wish to embed the report in another website (e.g. your Wordpress site), then click the globe icon to receive some html code that you can copy-and-paste directly into the relevant page, or a URL link with your data feed.
-
-![embedded-image-0yfnyich.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-0yfnyich.png)**Print**. Print the report output or save as pdf.
-
-![embedded-image-66fthcqz.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-66fthcqz.png)**Refresh**. Use this to refresh the data used by the report template, if your database has been updated.
-
-#### Create a custom report template
-
-Tip : Before creating a new report template or editing an existing one, ensure you have run a search in order to have a data subset to test your template.
-
-Go to Report View and from the Report toolbar, click New.
-
-![embedded-image-v4gyy8hn.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-v4gyy8hn.png)
-
-The screen that opens is divided in three panels.
-
-The Actions Pane on the right lets you quickly enter some basic actions (conditional functions, variable and loops) based on the fields and terms available for your record query. (See Actions Pane below \[@link\]).
-
-The middle pane is the Editor pane, where you can enter code manually, using HTML and the Smarty syntax. Upon creation it contains some a basic example template by default, which you can then use as a starting point or remove and start from scratch. The basic template consists of:
-
-- Some guidance as comments, enclosed in {\* \*}. Remove or add comments as you wish.
-- A records loop which should enclose everything you want reproduced for each record.
-- Some example fields within the loop (to create a simple report wich lists the record ID and the record title).
-
-The left pane is the Preview pane. When you click the “test” button, it will run your code on the data subset currently selected and display the output of your custom template on the white space below. Note that nothing gets saved when you click “test”.
-
-When complete, click Save to save your report structure. If it is the first time you save this template, you will be prompted to enter a name for your template. It will now be made available for selection when you choose to print or publish the report. Click Close Editor when finished.
-
-#### ***Actions Pane***
-
-The Actions Pane provides a records/fields tree of your database structure that assists you in creating a simple template (with loops, fields &amp; functions) to produce neatly formatted lists in text (e.g. CSV, and HTML formats, including images, video and so forth).
-
-More complex formats can use all the power of the Smarty template language, including PHP functions (standard or user-defined) directly in the template.
-
-To use the Actions pane, insert the cursor in the code where you wish to insert the syntax. Press Enter to add extra lines if required. Select the appropriate record type. For each code string, first position the cursor in the appropriate location in the report, then select the appropriate function from the actions pane. In the following example, the user has created an If statement wrapper, and can now enter variable code between the If statements as required
-
-Note. Untyped pointers do not appear on this list; instead a dialog will assist you.
-
-To enter field variable details, for an IF Statement or Repeat Loop, click on the insert option for the relevant field. This displays the Insert dialog:
-
-Note. You can output the leaf term alone or the leaf term with its hierarchy (where terms are hierarchical).
-
-These have the following elements which you can insert into the code:
-
-<table id="bkmrk-insert-fields-valuei"><colgroup><col style="width: 126px;"></col><col></col></colgroup><tbody><tr><th>Insert Fields Value
-
-</th><th>Inserts the value of the selected field. From the dropdown you can specify how the field information is displayed. Field Only. Normally use Field Only. This inserts the field specification to render the content of the field as-is. Field + Function Wrapper. This inserts the field with the wrap function, which is useful for special types such as URLs, images and videos, as it inserts required html code, for example: {wrap var=$r.recURL dt="url"} inserts a hyperlink. {wrap var=$r.thumbnail\_image\_originalvalue dt="file" width="300" height="auto"} inserts an image.
-
-</th></tr><tr><td>Test Value (IF)
-
-</td><td>Click this button to insert a test value for the loop.
-
-</td></tr></tbody></table>
-
-#### ***Preview Results***
-
-To preview the results of your template, click TEST. The report output is shown in the bottom Pane (only a subset of the data is shown, for efficiency).
-
-The two dropdowns let you set the the scope of the query (for the test only, not the published report), and to troubleshoot the code (show warnings, show errors etc.):
-
-The test results are updated immediately.
-
-#### ***Edit, Copy &amp; Delete Template***
-
-To edit a template, go to Report View, select a report from the Select Template dropdown. Click Edit . The Template screen Displays. Edit the template as required (see above). When complete, click Save, or Save as to create (copy) a new report from an existing report. Click Close Editor when finished.
-
-To delete a template, select a report from the Select Template dropdown and click Delete .
-
-Warning. If you delete the report template at the next step you cannot retrieve the report again.
-
-Click OK at the prompt to delete the report.
-
-### Report Basics
-
-To get started with a custom report, you need to understand the basics of html and the Smarty syntax.
-
-https://heurist.huma-num.fr/heurist/
-
-### Topics to be covered
-
-@todo: these links go to the old pages
-
-[Editing a Report Template](https://heuristref.net/h6-alpha/Heurist_Help_System/view/519): How to create a basic report to show data about your records in a customised format
-
-[Publish Report](https://heuristref.net/h6-alpha/Heurist_Help_System/view/582): How to embed a report in an external website, or how to schedule large/complex reports to be regenerated and cached in the background
-
-[Advanced Usage](https://heuristref.net/h6-alpha/Heurist_Help_System/view/737): How to use all the features of the Smarty templating language and Heurist's report editor
-
-[Custom Reports Cookbook](https://heuristref.net/h6-alpha/Heurist_Help_System/view/784): Some recipes for commonly-requested features of custom reports, e.g. linking reports together or displaying records in an interactive table. The cookbook also has some tips for making the code of your reports more readable and easier to maintain
-
-The basics are explained below. For more detail, see the help pages on [Editing a Report Template](https://heuristref.net/h6-alpha/?db=Heurist_Help_System&website&pageid=519), [Report Publishing Options](https://heuristref.net/h6-alpha/?db=Heurist_Help_System&website&pageid=582) and [Advanced Usage](https://heuristref.net/h6-alpha/?db=Heurist_Help_System&website&pageid=737).
-
-### Publish Report
-
-The publish option allows you to embed a custom report in an external website (e.g. a Wordpress blog). It also allows you to schedule reports to be regenerated periodically and then cached. Scheduling reports is a good option when you are generating large or complex reports, e.g. tabular displays of lots of data, or reports that perform complex computation or statistical analysis.
-
-You can access the 'Publish Report' dialog by clicking the globe icon in the Report View:
-
-![embedded-image-k9qmzsna.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-k9qmzsna.png)
-
-In this view, you will see some code that you can copy-and-paste into your website to make the report appear. This code will generate the report with whatever records you are currently viewing in the Explore Menu. You should using a filter to ensure that the correct records are selected for the published version of the report. For example, if you would like the report to show every 'Film' in your database, then you should filter the database just to show the 'Films' before opening the 'Publish Report' dialog.
-
-![embedded-image-lrdtijzw.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-lrdtijzw.png)
-
-If you find that the 'embed' code does not work in your website, you can try the 'javascript wrap' option. You can test out the generated report by clicking 'open in new window'.
-
-**Scheduled Reports**
-
-Use the **Set up up publishing schedule** button to periodically regenerate the report according to a defined schedule. This is a good option for complex reports that are slow to generate. By generating the report in advance, you will provide a better experience for visitors to your site: a cached version of the report will be waiting on Heurist's servers to be downloaded instantly by the visitor. The drawback of this approach is that visitors may not see the most up-to-date information. They will instead see a snapshot of the database at the time the report was generated.
-
-When you click on Set up publishing schedule, you will see a list of scheduled reports. This list will of course be empty if you have set up a publishing schedule before.
-
-![embedded-image-dxvdynyd.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-dxvdynyd.png)
-
-Click the icon in the 'edit' column to change the settings of the publication schedule, the icon in the 'exec' column to regenerate the report, or the icons in the 'html' or 'js' columns to obtain a copy of the code to embed into your external website. You can delete the publishing schedule by clicking the icon in the 'Del' column.
-
-**NB:** This screen only edits or deletes *publishing schedules*. If you want to edit or the delete the actual *report*, then you need to go back to the 'Report View' and click the relevant icon.
-
-When you click the edit icon, or the 'Add New Report Schedule' button, then the 'Edit report schedule' dialog will appear. If you are creating a new publication schedule, then the 'query' and 'template' fields will automatically be filled in for you. You will simply need to provide a title for the publication schedule, which is purely for your reference.
-
-![embedded-image-zxfznjda.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-zxfznjda.png)
-
-<table id="bkmrk-idthis-identifies-th"><colgroup><col style="width: 117px;"></col><col></col></colgroup><tbody><tr><th>ID
-
-</th><th>This identifies the published report and will be generated when the report is published.
-
-</th></tr><tr><td>Title
-
-</td><td>The title of the generated report.
-
-</td></tr><tr><td>Type
-
-</td><td>Select the type of report (i.e. the report syntax used). Note. Currently only Smarty reports are supported. See
-
-[Create Report Template](https://heuristref.net/h6-alpha/viewers/smarty/CreateReportTemplate.html)
-
-.
-
-</td></tr><tr><td>File Path
-
-</td><td>The file path where the report is generated to. Leave blank to use the default path which is: datbasename/generated-reports
-
-</td></tr><tr><td>File Name
-
-</td><td>The base name of the report files. This will be completed with file types.
-
-</td></tr><tr><td>Query
-
-</td><td>The Heurist query you used as a base for the report. This is required since the reports are generated dynamically, using the current set of records.
-
-</td></tr><tr><td>Template
-
-</td><td>The name of the template used to generate this report (defaults to current template).
-
-</td></tr><tr><td>Interval
-
-</td><td>To schedule a report to be run regularly, specify the interval in minutes between regenerations of the report output. The default is zero (only run on demand). Leave blank for no schedule.
-
-</td></tr></tbody></table>
-
-When complete, click Save. Your report schedule will be added to the list of scheduled reports.
-
-### Editing a Report Template
-
-You can create custom reports templates using the Smarty Report Engine. These templates then become available in the Report toolbar to be run against any result-set.
-
-About Smarty
-
-Note. Smarty is open source software, developed by the developers of the PHP programming language. Heurist uses the latest release of its software. This version is optimized for web servers that use PHP5. Any templates you create via the Report View adhere to the same syntax and structure of Smarty templates; all standard Smarty template plugins and modifiers can be used, and your templates are parsed, cached, and displayed by the latest release of Smarty.
-
-Smarty works by allowing you to incorporate various variables and plugins into the HTML syntax of your reports. This gives you complete control over what is displayed to the end user. Smarty files are basic HTML files that can be edited in any text editor; you do not need to install anything extra to use Smarty. You therefore have complete control over the HTML displayed to the end user. You can link Smarty files to JavaScript, CSS stylesheets, and other files.
-
-Note. Reports work with record type and fields codes rather than names; this prevents formats being broken if field names are edited.
-
-You can get started developing Smarty-based templates with a modicum of Smarty knowledge. As you learn more about Smarty you can develop more sophisticated templates. For example, the following snippet of code is used to display a list of the five latest news headlines on a news site:
-
-```
-<ul>
-{content type="headlines" var="headline" limit="5" sort="date" sort_dir="desc"}
-<li>
-<a href="{$headline.link}">{$headline.headline}</a> ({$headline.date|date_format: "%m %d, %Y"})
-</li>
-{/content}
-</ul>
-```
-
-(See the Smarty Syntax section (next) for an overview of the smarty syntax, including worked examples. For complete Smarty Documentation go to the [Smarty Site](http://www.smarty.net/) itself.)
-
-###   
 
 # 8b: Custom reports - Advanced functions
 
@@ -3483,3 +3535,239 @@ Try a small trimmed Manifest first. Failures may be caused by remote annotation-
 </td><td>Build or take over a Manifest in Heurist
 
 </td></tr></tbody></table>
+
+# 8a bis: Custom reports OLD VERSION
+
+Custom Reports are optional but they allow you to customize data display in powerful ways.  
+By default, when a record is displayed on a Heurist website, the usual Record View template is used. If you would like to alter how records appear, then you will need to define a Custom Report.
+
+*Note: the content was copied via markdown export and lost much of its minor formatting. The images in particalr have been downgraded. The source is here:* [*https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit*](https://docs.google.com/document/d/1Jyytaln1-aCm3paZ4rBKho0puXBGaJ97/edit)
+
+Custom Reports work together with Saved Filters to publish content on a Heurist website or elsewhere on the web. The \*filter \*will retrieve records from the database, and hand the records to the \*custom report \*to format and display them. When you choose the Report tab in the View Pane, you will see the selected Custom Report attempt to display information about your current result set. This will only work correctly if the selected report has been configured to display records like those in the result set (e.g. a Custom Report designed to display information about Persons will probably fail to display information about Books or Places properly.)
+
+Smarty Heurist reports are powered by the Smarty Template Engine. For an overview of the Smarty template language, visit [Smarty Syntax](https://smarty-php.github.io/smarty/5.x/designers/language-basic-syntax/). It allows you to embed data from the database into an HTML template which determines the form of the output. You can use CSS, Javascript and even PHP within custom reports. Smarty is an extremely powerful system and almost anything is possible, if you know how.
+
+Simple templates can produce neatly formatted lists in text (e.g. CSV and HTML formats), including media (e.g. images and videos). For example, a report might extract and display the first and last names of all writers born before 1900 along with an alphabetical list of their works.
+
+More complex reports can be configured to retrieve and display information from related records of different nature. For instance, in the case of a database documenting archeological dig sites, excavation campaigns, and objects retrieved, each defined as a different entity, a custom template can produce a nested list of all sites, with the details of each of their respective campaigns ordered chronologically, and display a gallery with a picture of each object for each campaign.
+
+Such complex reports can use all the power of the Smarty template language, including PHP functions (standard or user-defined) directly within the template. They can display data using complex layouts, such as grid or flexbox, and may also include JavaScript to provide interactivity and CSS to customise their appearance.
+
+Custom reports can be used in many different places. You can use custom reports, for example, to:
+
+Display search results on your website
+
+Customise the popups on a Heurist map
+
+Embed Heurist content in another page
+
+Create periodically updated custom data feeds to be used in another platform (for instance, in csv, json, or xml format).
+
+#### Report View Toolbar
+
+![embedded-image-k2fhavam.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-k2fhavam.png)
+
+The dropdown and buttons allow you to perform the following tasks:
+
+  
+**Select dropdown**. Select an existing report from the drop down. This is immediately run against the current list of queried records. This lets you test run the report against a set of records and view the report on-screen.
+
+![embedded-image-vntdmmla.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-vntdmmla.png)**Edit button**. Edit the selected report template.
+
+![embedded-image-aaos1qmq.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-aaos1qmq.png)**Create**. Create a new custom report template using Smarty syntax. (Note that you can also create a new report from an existing one by duplicating it. This can be achieved using the “Save as” button at the bottom of the Edit report pane)
+
+![embedded-image-j27y2iqq.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-j27y2iqq.png)**Delete**. Deletes the current report template
+
+![embedded-image-tj243kqj.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-tj243kqj.png)**Import**. Import a template exported from another database (as a .gpl file). The .gpl file format is a special file format that allows templates to be interpreted by multiple databases, even if their structure differs.
+
+![embedded-image-4luqqnpm.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-4luqqnpm.png)**Export**. Export a template as a .gpl file (this can then be imported to another database). Export converts field IDs to concept IDs.
+
+![embedded-image-balgsosq.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-balgsosq.png)**Publish**. If you wish to embed the report in another website (e.g. your Wordpress site), then click the globe icon to receive some html code that you can copy-and-paste directly into the relevant page, or a URL link with your data feed.
+
+![embedded-image-0yfnyich.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-0yfnyich.png)**Print**. Print the report output or save as pdf.
+
+![embedded-image-66fthcqz.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-66fthcqz.png)**Refresh**. Use this to refresh the data used by the report template, if your database has been updated.
+
+#### Create a custom report template
+
+Tip : Before creating a new report template or editing an existing one, ensure you have run a search in order to have a data subset to test your template.
+
+Go to Report View and from the Report toolbar, click New.
+
+![embedded-image-v4gyy8hn.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-v4gyy8hn.png)
+
+The screen that opens is divided in three panels.
+
+The Actions Pane on the right lets you quickly enter some basic actions (conditional functions, variable and loops) based on the fields and terms available for your record query. (See Actions Pane below \[@link\]).
+
+The middle pane is the Editor pane, where you can enter code manually, using HTML and the Smarty syntax. Upon creation it contains some a basic example template by default, which you can then use as a starting point or remove and start from scratch. The basic template consists of:
+
+- Some guidance as comments, enclosed in {\* \*}. Remove or add comments as you wish.
+- A records loop which should enclose everything you want reproduced for each record.
+- Some example fields within the loop (to create a simple report wich lists the record ID and the record title).
+
+The left pane is the Preview pane. When you click the “test” button, it will run your code on the data subset currently selected and display the output of your custom template on the white space below. Note that nothing gets saved when you click “test”.
+
+When complete, click Save to save your report structure. If it is the first time you save this template, you will be prompted to enter a name for your template. It will now be made available for selection when you choose to print or publish the report. Click Close Editor when finished.
+
+#### ***Actions Pane***
+
+The Actions Pane provides a records/fields tree of your database structure that assists you in creating a simple template (with loops, fields &amp; functions) to produce neatly formatted lists in text (e.g. CSV, and HTML formats, including images, video and so forth).
+
+More complex formats can use all the power of the Smarty template language, including PHP functions (standard or user-defined) directly in the template.
+
+To use the Actions pane, insert the cursor in the code where you wish to insert the syntax. Press Enter to add extra lines if required. Select the appropriate record type. For each code string, first position the cursor in the appropriate location in the report, then select the appropriate function from the actions pane. In the following example, the user has created an If statement wrapper, and can now enter variable code between the If statements as required
+
+Note. Untyped pointers do not appear on this list; instead a dialog will assist you.
+
+To enter field variable details, for an IF Statement or Repeat Loop, click on the insert option for the relevant field. This displays the Insert dialog:
+
+Note. You can output the leaf term alone or the leaf term with its hierarchy (where terms are hierarchical).
+
+These have the following elements which you can insert into the code:
+
+<table id="bkmrk-insert-fields-valuei"><colgroup><col style="width: 126px;"></col><col></col></colgroup><tbody><tr><th>Insert Fields Value
+
+</th><th>Inserts the value of the selected field. From the dropdown you can specify how the field information is displayed. Field Only. Normally use Field Only. This inserts the field specification to render the content of the field as-is. Field + Function Wrapper. This inserts the field with the wrap function, which is useful for special types such as URLs, images and videos, as it inserts required html code, for example: {wrap var=$r.recURL dt="url"} inserts a hyperlink. {wrap var=$r.thumbnail\_image\_originalvalue dt="file" width="300" height="auto"} inserts an image.
+
+</th></tr><tr><td>Test Value (IF)
+
+</td><td>Click this button to insert a test value for the loop.
+
+</td></tr></tbody></table>
+
+#### ***Preview Results***
+
+To preview the results of your template, click TEST. The report output is shown in the bottom Pane (only a subset of the data is shown, for efficiency).
+
+The two dropdowns let you set the the scope of the query (for the test only, not the published report), and to troubleshoot the code (show warnings, show errors etc.):
+
+The test results are updated immediately.
+
+#### ***Edit, Copy &amp; Delete Template***
+
+To edit a template, go to Report View, select a report from the Select Template dropdown. Click Edit . The Template screen Displays. Edit the template as required (see above). When complete, click Save, or Save as to create (copy) a new report from an existing report. Click Close Editor when finished.
+
+To delete a template, select a report from the Select Template dropdown and click Delete .
+
+Warning. If you delete the report template at the next step you cannot retrieve the report again.
+
+Click OK at the prompt to delete the report.
+
+### Report Basics
+
+To get started with a custom report, you need to understand the basics of html and the Smarty syntax.
+
+https://heurist.huma-num.fr/heurist/
+
+### Topics to be covered
+
+@todo: these links go to the old pages
+
+[Editing a Report Template](https://heuristref.net/h6-alpha/Heurist_Help_System/view/519): How to create a basic report to show data about your records in a customised format
+
+[Publish Report](https://heuristref.net/h6-alpha/Heurist_Help_System/view/582): How to embed a report in an external website, or how to schedule large/complex reports to be regenerated and cached in the background
+
+[Advanced Usage](https://heuristref.net/h6-alpha/Heurist_Help_System/view/737): How to use all the features of the Smarty templating language and Heurist's report editor
+
+[Custom Reports Cookbook](https://heuristref.net/h6-alpha/Heurist_Help_System/view/784): Some recipes for commonly-requested features of custom reports, e.g. linking reports together or displaying records in an interactive table. The cookbook also has some tips for making the code of your reports more readable and easier to maintain
+
+The basics are explained below. For more detail, see the help pages on [Editing a Report Template](https://heuristref.net/h6-alpha/?db=Heurist_Help_System&website&pageid=519), [Report Publishing Options](https://heuristref.net/h6-alpha/?db=Heurist_Help_System&website&pageid=582) and [Advanced Usage](https://heuristref.net/h6-alpha/?db=Heurist_Help_System&website&pageid=737).
+
+### Publish Report
+
+The publish option allows you to embed a custom report in an external website (e.g. a Wordpress blog). It also allows you to schedule reports to be regenerated periodically and then cached. Scheduling reports is a good option when you are generating large or complex reports, e.g. tabular displays of lots of data, or reports that perform complex computation or statistical analysis.
+
+You can access the 'Publish Report' dialog by clicking the globe icon in the Report View:
+
+![embedded-image-k9qmzsna.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-k9qmzsna.png)
+
+In this view, you will see some code that you can copy-and-paste into your website to make the report appear. This code will generate the report with whatever records you are currently viewing in the Explore Menu. You should using a filter to ensure that the correct records are selected for the published version of the report. For example, if you would like the report to show every 'Film' in your database, then you should filter the database just to show the 'Films' before opening the 'Publish Report' dialog.
+
+![embedded-image-lrdtijzw.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-lrdtijzw.png)
+
+If you find that the 'embed' code does not work in your website, you can try the 'javascript wrap' option. You can test out the generated report by clicking 'open in new window'.
+
+**Scheduled Reports**
+
+Use the **Set up up publishing schedule** button to periodically regenerate the report according to a defined schedule. This is a good option for complex reports that are slow to generate. By generating the report in advance, you will provide a better experience for visitors to your site: a cached version of the report will be waiting on Heurist's servers to be downloaded instantly by the visitor. The drawback of this approach is that visitors may not see the most up-to-date information. They will instead see a snapshot of the database at the time the report was generated.
+
+When you click on Set up publishing schedule, you will see a list of scheduled reports. This list will of course be empty if you have set up a publishing schedule before.
+
+![embedded-image-dxvdynyd.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-dxvdynyd.png)
+
+Click the icon in the 'edit' column to change the settings of the publication schedule, the icon in the 'exec' column to regenerate the report, or the icons in the 'html' or 'js' columns to obtain a copy of the code to embed into your external website. You can delete the publishing schedule by clicking the icon in the 'Del' column.
+
+**NB:** This screen only edits or deletes *publishing schedules*. If you want to edit or the delete the actual *report*, then you need to go back to the 'Report View' and click the relevant icon.
+
+When you click the edit icon, or the 'Add New Report Schedule' button, then the 'Edit report schedule' dialog will appear. If you are creating a new publication schedule, then the 'query' and 'template' fields will automatically be filled in for you. You will simply need to provide a title for the publication schedule, which is purely for your reference.
+
+![embedded-image-zxfznjda.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-zxfznjda.png)
+
+<table id="bkmrk-idthis-identifies-th"><colgroup><col style="width: 117px;"></col><col></col></colgroup><tbody><tr><th>ID
+
+</th><th>This identifies the published report and will be generated when the report is published.
+
+</th></tr><tr><td>Title
+
+</td><td>The title of the generated report.
+
+</td></tr><tr><td>Type
+
+</td><td>Select the type of report (i.e. the report syntax used). Note. Currently only Smarty reports are supported. See
+
+[Create Report Template](https://heuristref.net/h6-alpha/viewers/smarty/CreateReportTemplate.html)
+
+.
+
+</td></tr><tr><td>File Path
+
+</td><td>The file path where the report is generated to. Leave blank to use the default path which is: datbasename/generated-reports
+
+</td></tr><tr><td>File Name
+
+</td><td>The base name of the report files. This will be completed with file types.
+
+</td></tr><tr><td>Query
+
+</td><td>The Heurist query you used as a base for the report. This is required since the reports are generated dynamically, using the current set of records.
+
+</td></tr><tr><td>Template
+
+</td><td>The name of the template used to generate this report (defaults to current template).
+
+</td></tr><tr><td>Interval
+
+</td><td>To schedule a report to be run regularly, specify the interval in minutes between regenerations of the report output. The default is zero (only run on demand). Leave blank for no schedule.
+
+</td></tr></tbody></table>
+
+When complete, click Save. Your report schedule will be added to the list of scheduled reports.
+
+### Editing a Report Template
+
+You can create custom reports templates using the Smarty Report Engine. These templates then become available in the Report toolbar to be run against any result-set.
+
+About Smarty
+
+Note. Smarty is open source software, developed by the developers of the PHP programming language. Heurist uses the latest release of its software. This version is optimized for web servers that use PHP5. Any templates you create via the Report View adhere to the same syntax and structure of Smarty templates; all standard Smarty template plugins and modifiers can be used, and your templates are parsed, cached, and displayed by the latest release of Smarty.
+
+Smarty works by allowing you to incorporate various variables and plugins into the HTML syntax of your reports. This gives you complete control over what is displayed to the end user. Smarty files are basic HTML files that can be edited in any text editor; you do not need to install anything extra to use Smarty. You therefore have complete control over the HTML displayed to the end user. You can link Smarty files to JavaScript, CSS stylesheets, and other files.
+
+Note. Reports work with record type and fields codes rather than names; this prevents formats being broken if field names are edited.
+
+You can get started developing Smarty-based templates with a modicum of Smarty knowledge. As you learn more about Smarty you can develop more sophisticated templates. For example, the following snippet of code is used to display a list of the five latest news headlines on a news site:
+
+```
+<ul>
+{content type="headlines" var="headline" limit="5" sort="date" sort_dir="desc"}
+<li>
+<a href="{$headline.link}">{$headline.headline}</a> ({$headline.date|date_format: "%m %d, %Y"})
+</li>
+{/content}
+</ul>
+```
+
+(See the Smarty Syntax section (next) for an overview of the smarty syntax, including worked examples. For complete Smarty Documentation go to the [Smarty Site](http://www.smarty.net/) itself.)
+
+###

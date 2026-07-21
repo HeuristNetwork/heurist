@@ -1,4 +1,4 @@
-# 8a bis: Custom reports in more detail
+# 8a bis: Custom reports OLD VERSION
 
 Custom Reports are optional but they allow you to customize data display in powerful ways.  
 By default, when a record is displayed on a Heurist website, the usual Record View template is used. If you would like to alter how records appear, then you will need to define a Custom Report.
