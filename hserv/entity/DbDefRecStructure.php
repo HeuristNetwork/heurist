@@ -133,6 +133,7 @@ class DbDefRecStructure extends DbEntityBase
                 }else{
                     $fields = @$this->data['details'];
                 }
+                $is_structure = strpos($fields, 'dty_') !== false;
                 if(isEmptyStr($fields)){
                     $fields =  implode(',', $this->fieldNames);
                 }

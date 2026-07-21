@@ -52,6 +52,10 @@ $.widget("heurist.fairScoreIndicator", {
 
         this.element.empty();
 
+        if(score.is_default){ // skip badge rendering
+            return;
+        }
+
         let $badge = $('<span>', {
             'class': 'fair-score-badge',
             title: window.hWin.HR('Click to see information about FAIR principles and this rating')
@@ -105,7 +109,7 @@ $.widget("heurist.fairScoreIndicator", {
         html += '</div>';
 
         window.hWin.HEURIST4.msg.showMsgDlg(html, null, {title: 'FAIR score'},
-            {default_palette_class: 'ui-heurist-design', dialogId: 'fair-score-info'});
+            {default_palette_class: 'ui-heurist-admin', dialogId: 'fair-score-info'});
     },
 
     _scoreRow: function(label, value){
@@ -120,6 +124,8 @@ $.widget("heurist.fairScoreIndicator", {
      * Uses HAPI4 user preferences to track when it was last shown, so it surfaces roughly monthly.
      */
     _maybeShowMonthlyPopup: function(){
+
+        return; // block monthly popup, doesn't account for other popups that maybe open (e.g. new version or monthly ticket request)
 
         const score = this._getScore();
         if(score.is_default){
@@ -192,7 +198,7 @@ $.widget("heurist.fairScoreIndicator", {
             + '</div>';
 
         window.hWin.HEURIST4.msg.showMsgDlg(html, null, {title: 'FAIRness estimate'},
-            {default_palette_class: 'ui-heurist-design', dialogId: 'fairness-monthly-popup', width: 520});
+            {default_palette_class: 'ui-heurist-admin', dialogId: 'fairness-monthly-popup', width: 520});
     },
 
     _destroy: function(){
