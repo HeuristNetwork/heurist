@@ -34,6 +34,8 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     
     _entityName:'sysIdentification',
 
+    _loadedMetadata: false,
+
     /**
      * @brief Initializes the widget.
      * @override
@@ -180,7 +182,6 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             return; // State 1 — not registered, leave form as-is
         }
 
-        const METADATA_FIELDS = ['sys_dbName', 'sys_dbRights', 'sys_dbOwner', 'sys_dbDescription'];
         let that = this;
 
         window.hWin.HAPI4.callserver('usr_info', {a: 'get_db_metadata'}, function(response){
@@ -202,34 +203,27 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 // ── State 3 — local DBMetadata.xml present ──────────────────────────
                 // Hide original fields, show simple synced-data panel with Refresh button
 
-                METADATA_FIELDS.forEach(function(fname){
-                    let $fld = that._editing.getFieldByName(fname);
-                    if($fld && $fld.length > 0){ $fld.hide(); }
-                });
-
                 let html = '<div class="synced-metadata-state3" style="'
                     + 'padding:0.8em 1em;border:1px solid #b8d4ea;border-radius:4px;'
-                    + 'background:#f0f7ff;margin:0 0 1em 0;">'
+                    + 'background:#f0f7ff;margin:0 0 1em 0;width: 65em;max-width: 65em;">'
                     + '<div style="font-weight:bold;color:#1a4a7a;margin-bottom:0.6em;">'
-                    + window.hWin.HR('Database metadata — from Heurist Reference Index') + '</div>';
+                    + window.hWin.HR('Database metadata — from Heurist Reference Index') + '</div>'
+                    + '<div style="padding-bottom: 1em;">Metadata for registered databases are now edited through the Heurist<br>'
+                    + 'Reference Index which allow more complete metadata and supports FAIR<br>principles of Findability:</div>';
 
-                if(window.hWin.HEURIST4.util.isArrayNotEmpty(data.fields)){
-                    data.fields.forEach(function(f){
-                        html += '<div style="margin-bottom:0.4em;">'
-                            + '<span style="font-weight:600;color:#4a6a88;">'
-                            + window.hWin.HEURIST4.util.htmlEscape(f.label) + ':</span> '
-                            + window.hWin.HEURIST4.util.htmlEscape(f.value) + '</div>';
-                    });
-                }
+                let editMetaLabel = that._loadedMetadata ? 'Either: ' : '';
+                let refreshMetaLabel = that._loadedMetadata ? 'Or: ' : '';
+                let refreshMetaPadding = that._loadedMetadata ? 'padding-left: 1.5em;' : '';
 
                 html += '<div style="margin-top:0.8em;padding-top:0.6em;border-top:1px solid #c8daea;">'
-                    + '<a class="dbLink" target="_blank" href="' + editURL + '" style="font-weight:600;">'
+                    + editMetaLabel + '<a class="dbLink" target="_blank" href="' + editURL + '" style="font-weight:600;">'
                     + window.hWin.HR('Edit this metadata on the Heurist Reference Index') + '</a>'
-                    + '<div style="margin-top:0.5em;">'
-                    + '<button class="btn-sync-metadata" style="font-size:0.85em;padding:3px 12px;'
-                    + 'cursor:pointer;border:1px solid #4a9adb;border-radius:3px;background:#e8f4ff;color:#1a5a9a;">'
-                    + window.hWin.HR('Refresh from Reference Index') + '</button>'
-                    + '<span class="sync-status" style="margin-left:0.6em;font-size:0.82em;color:#7a96aa;"></span>'
+                    + (that._loadedMetadata ? '<br><span style="padding-left: 3em;">(you may wish to copy and paste the metadata shown above)</span>' : '')
+                    + '<div style="margin-top:1em;">'
+                    + refreshMetaLabel + '<span class="btn-sync-metadata" style="font-weight:600; cursor: pointer; text-decoration: underline; '+ refreshMetaPadding +'">'
+                    + window.hWin.HR('Pull the edited metadata from the reference index') + '</span>'
+                    + '<span class="sync-status" style="margin-left:0.6em;font-size:0.9em;color:#7a96aa;"></span>'
+                    + (that._loadedMetadata ? '<br><span style="padding-left: 3em;">(permanently replaces the metadata shown above)</span>' : '')
                     + '</div>';
 
                 if(data.modified){
@@ -239,37 +233,45 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 
                 html += '</div></div>';
 
-                let $panel = $(html);
-                let $first = that._editing.getFieldByName('sys_dbName');
+                let $field = $('<div>', {
+                    class: 'metadata-info',
+                    html: `<div style="min-width: 250px;width: 250px;"></div><span style="min-width: 40px;display: table-cell;"></span><div class="input-cell">${html}</div>`
+                });
+                let $first = that._editing.getFieldByName('sys_Thumb');
                 if($first && $first.length > 0){
-                    $panel.insertBefore($first);
+                    $field.insertAfter($first);
                 } else {
-                    that.editForm.prepend($panel);
+                    that.editForm.prepend($field);
                 }
 
-                $panel.find('.btn-sync-metadata').on('click', function(){
-                    that._syncMetadata($panel);
+                $field.find('.btn-sync-metadata').on('click', function(){
+                    that._loadedMetadata = true;
+                    that._syncMetadata($field);
                 });
+
+                if(that._loadedMetadata){ // show 'Current local metadata (non-editable)' section
+                    that._toggleMetadataFields(true, false, true);
+                    that._setupNonEditableMetadata();
+                    //that._loadedMetadata = false;
+                    that._displayCollectedMetadata(true, data.fields, data.all_labels);
+                }else{
+                    that._toggleMetadataFields(true, true, true);
+                    that._displayCollectedMetadata(false, data.fields, data.all_labels);
+                }
 
             } else {
                 // ── State 2 — registered, no local XML yet ───────────────────────────
                 // Disable fields, show live Reference Index data above them with missing
                 // fields in red, and a button to save the metadata locally
 
-                METADATA_FIELDS.forEach(function(fname){
-                    let $fld = that._editing.getFieldByName(fname);
-                    if($fld && $fld.length > 0){
-                        $fld.find('input,textarea,select').prop('disabled', true);
-                        $fld.find('.heurist-helper2,.heurist-helper3').hide();
-                    }
-                });
+                that._toggleMetadataFields(false, false, false);
 
                 const allLabels = data.all_labels || ['Display name', 'Description', 'Rights statement'];
                 const foundLabels = (data.fields || []).map(function(f){ return f.label; });
 
                 let html = '<div class="synced-metadata-state2" style="'
                     + 'padding:0.8em 1em;border:1px solid #d0dcea;border-radius:4px;'
-                    + 'background:#f8fafc;margin:0 0 0.8em 0;">'
+                    + 'background:#f8fafc;margin:0.8em 0px;width: 65em;max-width: 65em;">'
                     + '<div style="font-weight:bold;color:#1a4a7a;margin-bottom:0.3em;">'
                     + window.hWin.HR('Current metadata on the Heurist Reference Index') + '</div>'
                     + '<div style="font-size:0.85em;color:#6a849a;margin-bottom:0.6em;font-style:italic;">'
@@ -306,16 +308,19 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                     + window.hWin.HR('Saving metadata locally stores a copy from the Reference Index on this server')
                     + '</div></div></div>';
 
-                let $panel = $(html);
-                let $first = that._editing.getFieldByName('sys_dbName');
+                let $field = $('<div>', {
+                    html: `<div style="min-width: 250px;width: 250px;"></div><span style="min-width: 40px;display: table-cell;"></span><div class="input-cell">${html}</div>`
+                });
+                let $first = that._editing.getFieldByName('sys_Thumb');
                 if($first && $first.length > 0){
-                    $panel.insertBefore($first);
+                    $field.insertAfter($first);
                 } else {
-                    that.editForm.prepend($panel);
+                    that.editForm.prepend($field);
                 }
 
-                $panel.find('.btn-sync-metadata').on('click', function(){
-                    that._syncMetadata($panel);
+                $field.find('.btn-sync-metadata').button().on('click', function(){
+                    that._loadedMetadata = true;
+                    that._syncMetadata($field.find('.input-cell div'));
                 });
             }
         });
@@ -357,16 +362,36 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 $panel.remove();
 
                 // Re-enable and re-show fields before re-running (they'll be hidden in State 3)
-                ['sys_dbName','sys_dbRights','sys_dbOwner','sys_dbDescription'].forEach(function(fname){
-                    let $fld = that._editing.getFieldByName(fname);
-                    if($fld && $fld.length > 0){
-                        $fld.find('input,textarea,select').prop('disabled', false);
-                        $fld.show();
-                    }
-                });
+                that._toggleMetadataFields(false, false, false);
 
                 that._setupRegisteredMetadata();
             }, 600);
+        });
+    },
+
+    _toggleMetadataFields: function(disable = true, hideField = false, hideHelp = false){
+
+        ['sys_dbName','sys_dbRights','sys_dbOwner','sys_dbDescription'].forEach((fname) => {
+
+            let $fld = this._editing.getFieldByName(fname);
+            if($fld && $fld.length > 0){
+
+                // Set readonly property
+                if($fld.editing_input('instance') !== undefined){
+                    $fld.editing_input('option', 'readonly', disable);
+                }else{
+                    disable ? $fld.addClass('ui-state-disabled') : $fld.removeClass('ui-state-disabled');
+                    $fld.find('input,textarea,select').prop('disabled', disable);
+                }
+
+                // Set fields and help visibility
+                hideField ? $fld.hide() : $fld.show();
+                hideHelp ? $fld.find('.heurist-helper1,.heurist-helper2,.heurist-helper3').hide() : $fld.find('.heurist-helper1,.heurist-helper2,.heurist-helper3').show();
+
+                // Trigger refresh
+                let value = $fld.editing_input('getValues')[0];
+                $fld.editing_input('setValue', value);
+            }
         });
     },
 
@@ -655,8 +680,6 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             
             //close populate section
             $('.ui-menu6').slidersMenu('closeContainer', 'populate');
-
-            
         });
 
     },
@@ -665,6 +688,66 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         this._super();
         if(!this.options.isdialog && $('.ui-menu6').length > 0){
             $('.ui-menu6').slidersMenu('manageSwitchHandler', 'remove', this.options.entity.entityName);
+        }
+    },
+
+    _setupNonEditableMetadata: function(){
+
+        if(this.editForm.find('#metadata-header').length > 0){
+            return;
+        }
+
+        let $thumbField = this._editing.getFieldByName('sys_Thumb');
+        let $prevField = $('<h3 class="separator" style="padding-left: 3em;">Current local metadata (non-editable)</h3>').insertAfter($thumbField);
+
+        //const HTMLBASE = '<div style="min-width: 250px;width: 250px;"></div><span style="min-width: 40px;display: table-cell;"></span><div class="input-cell"></div>';
+        ['sys_dbName','sys_dbRights','sys_dbOwner','sys_dbDescription'].forEach((fname) => {
+
+            let $fld = this._editing.getFieldByName(fname);
+            if($fld){
+                $fld.insertAfter($prevField);
+                $prevField = $fld;
+
+                if($fld.find('.required').length > 0){
+                    $fld.find('.required').removeClass('required');
+                }
+            }
+        });
+    },
+
+    _displayCollectedMetadata: function(normalFieldsShowns, fields, requiredFields){
+
+        const checkForRequiredFields = window.hWin.HEURIST4.util.isArrayNotEmpty(requiredFields);
+        let missingFields = requiredFields;
+
+        let $container = $('<div>', {
+            style: 'padding: 1.5em 0px 0.5em;',
+            html: normalFieldsShowns ? '<div>The current metadata in the reference index are as follows:</div><br>' : ''
+        }).appendTo(this.editForm.find('.metadata-info .synced-metadata-state3'));
+
+        for(let field of fields){
+
+            $('<div>', {
+                style: 'cursor: default; padding-bottom: 0.25em;',
+                html: `<div class="truncate" style="display: inline-block; width: 10em; font-weight: bold;">${field.label}</div> 
+                <div class="truncate" style="display: inline-block; width: 54em;" title="${field.value}">${field.value}</div>`
+            }).appendTo($container);
+
+            if(checkForRequiredFields){
+                let index = missingFields.indexOf(field.label);
+                if(index >= 0){
+                    missingFields.splice(index, 1);
+                }
+            }
+        }
+
+        for(let label of missingFields){
+
+            $('<div>', {
+                style: 'cursor: default; padding-bottom: 0.25em;',
+                html: `<div class="truncate" style="display: inline-block; width: 10em; font-weight: bold;">${label}</div> 
+                <input disabled="true" style="background-color: #FF7C7C;" size="30" placeholder="No Value" />`
+            }).appendTo($container);
         }
     }
     

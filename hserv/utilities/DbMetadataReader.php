@@ -31,14 +31,26 @@ class DbMetadataReader {
     const KNOWN_FIELDS = [
         '2-1'   => 'Display name',
         '2-12'  => 'Description',
-        '2-311' => 'Rights statement',
+        '2-311' => 'Rights statement'
     ];
+
+    /**
+     * List of all fields within the Database registration record type
+     * @var array
+     */
+    private static $ALL_RECORD_FIELDS = [];
 
     /**
      * All field labels in display order — sent to the client so it can render missing fields in red
      * (per Ian's spec: "show missing fields in red so it makes people want to fix them").
      */
     const ALL_LABELS = ['Display name', 'Description', 'Rights statement'];
+
+    /**
+     * Record type ID for the database registration on the reference index database
+     * @var int
+     */
+    const DB_REG_RECTYPE = 101;
 
     // ─── file helpers ──────────────────────────────────────────────────────────
 
@@ -75,6 +87,7 @@ class DbMetadataReader {
         }
 
         $fields = self::parseXmlString($content);
+
         $base['fields'] = $fields;
 
         return $base;
@@ -182,7 +195,7 @@ class DbMetadataReader {
 
     /**
      * Parses a flathml XML string and extracts the known concept-code detail fields.
-     * Returns an ordered array of {label, value} pairs, in the order of KNOWN_FIELDS.
+     * Returns an ordered array of {label, value} pairs, in the order of KNOWN_FIELDS then $ALL_RECORD_FIELDS.
      *
      * @param string $xml_string Raw XML from flathml.php export.
      * @return array<int, array{label:string, value:string}>
@@ -197,9 +210,12 @@ class DbMetadataReader {
             return [];
         }
 
+        self::getDBRegFields();
+
         // flathml wraps records under <hml><records><record> but the exact depth varies with
         // export parameters. Search broadly with XPath to avoid fragile positional assumptions.
-        $details = $xml->xpath('//detail');
+        $xml->registerXPathNamespace('heurist', 'https://heuristnetwork.org');
+        $details = $xml->xpath('//heurist:detail');
 
         $found = [];
         if(is_array($details)){
@@ -207,7 +223,7 @@ class DbMetadataReader {
                 $attrs = $detail->attributes();
                 $conceptID = trim((string)($attrs['conceptID'] ?? ''));
 
-                if($conceptID === '' || !array_key_exists($conceptID, self::KNOWN_FIELDS)){
+                if($conceptID === '' || !\array_key_exists($conceptID, self::KNOWN_FIELDS) && !\array_key_exists($conceptID, self::$ALL_RECORD_FIELDS)){
                     continue;
                 }
 
@@ -223,14 +239,61 @@ class DbMetadataReader {
             }
         }
 
-        // Return in the stable display order defined by KNOWN_FIELDS
+        // Return in the stable display order defined by self::KNOWN_FIELDS
         $ordered = [];
         foreach(self::KNOWN_FIELDS as $conceptID => $label){
             if(isset($found[$conceptID])){
                 $ordered[] = ['label' => $label, 'value' => $found[$conceptID]];
             }
         }
+        foreach(self::$ALL_RECORD_FIELDS as $conceptID => $label){
+            if(\array_key_exists($conceptID, self::KNOWN_FIELDS) || !isset($found[$conceptID])){
+                continue;
+            }
+
+            $ordered[] = ['label' => $label, 'value' => $found[$conceptID]];
+        }
 
         return $ordered;
+    }
+
+    /**
+     * Retrieve field definitions from Reference Index database
+     *
+     * @return array{error: string, ok: bool|array{ok: bool}}
+     */
+    private static function getDBRegFields(){
+
+        //https://heuristref.net/api/Heurist_Reference_Index/rst/101?method=GET&details=rst_DisplayName,dty_Type,dty_OriginatingDBID,dty_IDInOriginatingDB
+        $url = str_replace('/heurist/', '/api/', HEURIST_INDEX_BASE_URL);
+        $url .= HEURIST_INDEX_DATABASE . '/rst/' . self::DB_REG_RECTYPE . '?details=rst_DisplayName,dty_Type,dty_OriginatingDBID,dty_IDInOriginatingDB';
+
+        $json = loadRemoteURLContentWithRange($url, null, true, 15);
+        if(empty($json)){
+            global $glb_curl_error;
+            return ['ok' => false,
+                'error' => 'Could not reach the Heurist Reference Index. '
+                    . ($glb_curl_error ? 'Transport error: ' . $glb_curl_error : 'No data returned.')];
+        }
+
+        $json = json_decode($json, true);
+        if(json_last_error() !== JSON_ERROR_NONE){
+            return ['ok' => false,
+                'error' => 'Could not parse field data from Reference Index.'];
+        }
+        $fields = $json['items'];
+
+        foreach($fields as $field){
+
+            $conceptID = "{$field['dty_OriginatingDBID']}-{$field['dty_IDInOriginatingDB']}";
+
+            if($field['dty_Type'] === 'separator' || \array_key_exists($conceptID, self::KNOWN_FIELDS)){
+                continue;
+            }
+
+            self::$ALL_RECORD_FIELDS[$conceptID] = $field['rst_DisplayName'];
+        }
+
+        return ['ok' => true];
     }
 }

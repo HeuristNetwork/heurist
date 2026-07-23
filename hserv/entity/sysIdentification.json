@@ -24,7 +24,7 @@
             }
         },
         {
-        "groupHeader": "General information",
+        "groupHeader": "General metadata",
         "groupTitleVisible": true,
         "groupType": "group",
             "children":[
