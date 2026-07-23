@@ -245,26 +245,7 @@ paths:
           enum:
           - ids
         description: Set to ids for an ID-only records array. This mode takes precedence over and ignores fields.
-        RecordItemMeta:
-      type: object
-      required:
-      - database
-      - entity
-      - self
-      - fields
-      properties:
-        database:
-          type: string
-        entity:
-          type: string
-          const: records
-        self:
-          type: string
-          format: uri
-        fields:
-          $ref: '#/components/schemas/RecordFieldsMeta'
-      additionalProperties: false
-  responses:
+      responses:
         '200':
           description: Records response with metadata and pagination
           content:
@@ -711,6 +692,8 @@ paths:
       - Authentication
       operationId: loginSession
       summary: Create a cookie-backed Heurist session
+      parameters:
+      - $ref: '#/components/parameters/Database'
       requestBody:
         required: true
         content:
@@ -728,6 +711,8 @@ paths:
       - Authentication
       operationId: logoutSession
       summary: End the current cookie-backed session
+      parameters:
+      - $ref: '#/components/parameters/Database'
       responses:
         '200':
           description: Session ended; response body is empty.
@@ -1223,6 +1208,25 @@ components:
           $ref: '#/components/schemas/RecordsMeta'
         pagination:
           $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    RecordItemMeta:
+      type: object
+      required:
+      - database
+      - entity
+      - self
+      - fields
+      properties:
+        database:
+          type: string
+        entity:
+          type: string
+          const: records
+        self:
+          type: string
+          format: uri
+        fields:
+          $ref: '#/components/schemas/RecordFieldsMeta'
       additionalProperties: false
     RecordItemResponse:
       type: object

@@ -84,3 +84,10 @@ After deployment, verify:
 ```
 
 Also test Swagger's **Authorize** function and one anonymous records request, one authenticated definition request, and one IIIF request.
+
+## Validate the OpenAPI specification
+
+After modifying `heurist-openapi.yaml`, validate it before committing:
+
+```bash
+npx @redocly/cli lint documentation/api/heurist-openapi.yaml
