@@ -362,13 +362,21 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 $panel.remove();
 
                 // Re-enable and re-show fields before re-running (they'll be hidden in State 3)
-                that._toggleMetadataFields(false, false, false);
+                that._toggleMetadataFields(true, true, false);
 
                 that._setupRegisteredMetadata();
-            }, 600);
+            }, 100);
         });
     },
 
+    /**
+     * @brief Handle the metadata fields, depending on whether the Metadata XML file is: available for download or on this server
+     *
+     * @param {boolean} disable Whether to disable the field and make it readonly
+     * @param {boolean} hideField Whether to hide the field compeltely
+     * @param {boolean} hideHelp Whether to hide the help text
+     * @memberof heurist.manageSysIdentification
+     */
     _toggleMetadataFields: function(disable = true, hideField = false, hideHelp = false){
 
         ['sys_dbName','sys_dbRights','sys_dbOwner','sys_dbDescription'].forEach((fname) => {
@@ -668,7 +676,13 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 
         this._super(fields, afterAction, onErrorAction);
     },	
-    
+
+    /**
+     * @brief After saving actions, like remove the swap block handler
+     * @param {int} recID Record ID
+     * @param {object} fields Record Fields
+     * @memberof heurist.manageSysIdentification
+     */
     _afterSaveEventHandler: function( recID, fields ){
         this._super( recID, fields );
         
@@ -691,6 +705,10 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         }
     },
 
+    /**
+     * @brief Move the metadata fields to their new location with a separate header
+     * @memberof heurist.manageSysIdentification
+     */
     _setupNonEditableMetadata: function(){
 
         if(this.editForm.find('#metadata-header').length > 0){
@@ -715,6 +733,13 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         });
     },
 
+    /**
+     * @brief List fields taken from the Metadata XML and those that are missing (considered required/essential)
+     * @param {boolean} normalFieldsShowns Whether the normal metadata fields are still being shown
+     * @param {array} fields Fields that have been sent to the Reference Index record
+     * @param {array} requiredFields List of fields that are required for the DB registration form
+     * @memberof heurist.manageSysIdentification
+     */
     _displayCollectedMetadata: function(normalFieldsShowns, fields, requiredFields){
 
         const checkForRequiredFields = window.hWin.HEURIST4.util.isArrayNotEmpty(requiredFields);
