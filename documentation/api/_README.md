@@ -83,7 +83,7 @@ After deployment, verify:
 /api/docs/HeuristPostmanEnvironmentV1.json
 ```
 
-Also test Swagger's **Authorize** function and one anonymous records request, one authenticated definition request, and one IIIF request.
+Also test Swagger's **Authorize** function, one anonymous records request, one anonymous definition request, one authenticated private-record request, and one IIIF request.
 
 ## Validate the OpenAPI specification
 
@@ -91,3 +91,8 @@ After modifying `heurist-openapi.yaml`, validate it before committing:
 
 ```bash
 npx @redocly/cli lint documentation/api/heurist-openapi.yaml
+```
+
+The specification must parse as valid YAML, satisfy OpenAPI 3.1 requirements,
+contain no unresolved local `$ref` references, and declare every path parameter
+used in a route.
