@@ -3665,6 +3665,8 @@ class RecordsBatch
         $resetIncValue = $this->data['continue']!=1;
         
         // need to add cycle by record type (rec_RecTypeID)
+        $this->recIDs = mysql__select_list2($mysqli, 'SELECT rec_ID FROM Records where rec_ID in ('.implode(',',$this->recIDs).') ORDER BY rec_RecTypeID, rec_ID');
+        
         
         // if $resetIncValue is false need to find max current value
         
@@ -3683,22 +3685,29 @@ class RecordsBatch
 
             $sql_errors[$recID] = array();
             
-            
+            // Cycle through values
+            while($values = $res->fetch_row()){
+
+                $value = $values[1];
+                
+                //value must either numeric or alphanumeric with suffix -123
+                
 
 
-            // Update details value + modified
-            $dtl_rec = array('dtl_ID' => intval($values[0]), 'dtl_Value' => $value, 'dtl_Modified' => $date_mode);
+                // Update details value + modified
+                $dtl_rec = array('dtl_ID' => intval($values[0]), 'dtl_Value' => $value, 'dtl_Modified' => $date_mode);
 
-            $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl_rec);
-            if(!is_numeric($ret)){
-                $sql_errors[$recID][] = $ret;
-                continue;
-            }
+                $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl_rec);
+                if(!is_numeric($ret)){
+                    $sql_errors[$recID][] = $ret;
+                    continue;
+                }
 
-            // Update record modified
-            $ret = mysql__insertupdate($mysqli, 'Records', 'rec', array('rec_ID' => $recID, 'rec_Modified' => $date_mode));
-            if(!is_numeric($ret)){
-                $sql_errors[$recID][] = $ret;
+                // Update record modified
+                $ret = mysql__insertupdate($mysqli, 'Records', 'rec', array('rec_ID' => $recID, 'rec_Modified' => $date_mode));
+                if(!is_numeric($ret)){
+                    $sql_errors[$recID][] = $ret;
+                }
             }
             
             array_push($completed_recs, $recID);
