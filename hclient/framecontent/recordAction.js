@@ -23,7 +23,7 @@
  *
  * @param {string} _action_type - The type of action to perform (e.g., 'add_detail', 'replace_detail',
  *                                'delete_detail', 'rectype_change', 'extract_pdf', 'url_to_file',
- *                                'local_to_repository', 'case_conversion', 'nl2br', 'translation', 'reset_thumbs').
+ *                                'local_to_repository', 'case_conversion', 'nl2br', 'translation', 'reset_thumbs', 'increment').
  *                                This determines the UI and server-side handling.
  * @param {string|number} [_scope_type] - The initial scope of records to act upon.
  *                                     Can be a string like 'All', 'Current', 'Selected', 'Collected',
@@ -226,6 +226,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             case 'case_conversion':
             case 'nl2br':
             case 'translation':
+            case 'increment':
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
                 break;
@@ -308,6 +309,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 allowed = ['file'];    
             }else if(action_type=='case_conversion' || action_type=='translation'){
                 allowed = ['freetext','blocktext'];
+            }else if(action_type=='increment'){
+                allowed = ['freetext','integer','float'];
             }
 
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
@@ -368,7 +371,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _createInputElement('fld-1', window.hWin.HR('Value to find'));
             _createInputElement('fld-2', window.hWin.HR('Replace with'));
             
-        }else if(action_type=='delete_detail'){
+        }
+        else if(action_type=='delete_detail'){
             
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 +'<div class="header">'
@@ -572,6 +576,17 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             window.hWin.HEURIST4.ui.createLanguageSelect($fieldset.find('#sel_language'), null, null, true);
 
             _check_field_repeat = true;
+            
+        }else if(action_type=='increment'){
+
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+
+                + '<label><input id="cb_increment_continue" type="checkbox" name="increment_continue" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Insert increments starting after current largest value</label><br>'
+                
+                + '<label><input id="cb_increment_fillgaps" type="checkbox" name="increment_fillgaps" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Find and insert missing values in the sequence first</label>'
+            + '</div>').appendTo($fieldset);
+
+            
         }
 
     }
@@ -871,6 +886,17 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 }else 
                 if($('#cb_translation_replace').is(':checked')){
                         request['replace'] = 1;
+                }
+                
+            }else if(action_type=='increment'){
+
+                request['a'] = action_type;
+            
+                if($('#cb_increment_fillgaps').is(':checked')){
+                        request['fillgaps'] = 1;
+                }
+                if($('#cb_increment_continue').is(':checked')){
+                        request['continue'] = 1;
                 }
                 
             }

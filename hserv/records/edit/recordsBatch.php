@@ -3634,5 +3634,91 @@ class RecordsBatch
     }
 
     
+    public function fieldIncrementValue(){
+        
+        if(!$this->_validateParamsAndCounts()){
+            return false;
+        }elseif (isEmptyArray(@$this->recIDs)){
+            return $this->result_data;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $date_mode = date(DATE_8601);// for tags, rec_modified and dtl_modified
+
+        // Field details
+        $dtyID = intval($this->data['dtyID']);
+        $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
+        $baseTag = "~increment value $dtyName $date_mode";
+
+        // Check field is freetext or numeric
+        $fld_type = $this->getDetailType($dtyID);
+        if($dtyID < 1 || (!($fld_type == 'freetext' || $fld_type == 'integer') || $fld_type == 'float')){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Increment value can be assigned either to freetext or numeric field');
+            return false;
+        }
+        $completed_recs = array();
+        $skipped_recs = array();
+        $sql_errors = array();
+
+        
+        $fillGaps = $this->data['fillgaps']==1;
+        $resetIncValue = $this->data['continue']!=1;
+        
+        // need to add cycle by record type (rec_RecTypeID)
+        
+        // if $resetIncValue is false need to find max current value
+        
+        
+        // Cycle through records
+        foreach ($this->recIDs as $recID){
+            $res = $mysqli->query("SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_DetailTypeID = $dtyID AND dtl_RecID = $recID");
+
+            if(!$res){
+                $sql_errors[$recID] = $mysqli->error;
+                continue;
+            }elseif($res->num_rows == 0){ // no values within field
+                array_push($skipped_recs, $recID);
+                continue;
+            }
+
+            $sql_errors[$recID] = array();
+            
+            
+
+
+            // Update details value + modified
+            $dtl_rec = array('dtl_ID' => intval($values[0]), 'dtl_Value' => $value, 'dtl_Modified' => $date_mode);
+
+            $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl_rec);
+            if(!is_numeric($ret)){
+                $sql_errors[$recID][] = $ret;
+                continue;
+            }
+
+            // Update record modified
+            $ret = mysql__insertupdate($mysqli, 'Records', 'rec', array('rec_ID' => $recID, 'rec_Modified' => $date_mode));
+            if(!is_numeric($ret)){
+                $sql_errors[$recID][] = $ret;
+            }
+            
+            array_push($completed_recs, $recID);
+            if(!empty($sql_errors[$recID])){
+                $sql_errors[$recID] = implode(' ;', $sql_errors[$recID]);
+            }else{
+                unset($sql_errors[$recID]);
+            }
+        }        
+        
+        // Final touches to report
+        $this->_assignTagsAndReport('processed', $completed_recs, $baseTag);
+        $this->_assignTagsAndReport('undefined', $skipped_recs, $baseTag); //skipped
+        $this->_assignTagsAndReport('errors',  $sql_errors, $baseTag);
+
+        $this->result_data['undefined'] = count($skipped_recs);
+        $this->result_data['undefined_list'] = $skipped_recs;
+
+        return $this->result_data;
+    }
+    
 }
 ?>
