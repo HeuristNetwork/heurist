@@ -173,18 +173,34 @@ $.widget( "heurist.controlPanel", {
         
         // current and last databases dropdown
         this.div_dbname = this.element.find('div.dblist-container');
+        
+        this.div_dbname.css({
+            'background-position': 'left center',
+            'background-repeat': 'no-repeat',
+            'background-image': `url("${window.hWin.HAPI4.baseURL}hclient/assets/database.png")`,
+            'padding-left': '25px'
+        });
+
+        if(window.hWin.HEURIST4.util.isPositiveInt(window.hWin.HAPI4.sysinfo.db_registeredid)){
+
+            let $regID = $('<span>', {
+                style: 'font-size: 10px; cursor: pointer;',
+                title: 'The unique ID of this database determined by the Heurist Reference Index',
+                text: window.hWin.HAPI4.sysinfo.db_registeredid
+            }).appendTo(this.div_dbname);
+
+            this._on($regID, {
+                click: () => {
+                    window.open(`${window.hWin.HAPI4.sysinfo.referenceServerURL}${window.hWin.HAPI4.sysinfo.referenceServerIndexDatabase}/view/${window.hWin.HAPI4.sysinfo.db_registeredid}`, '_blank');
+                }
+            });
+        }
 
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.sysinfo.dbrecent)){
 
-            this.div_dbname.css({
-                'background-position': 'left center',
-                'background-repeat': 'no-repeat',
-                'background-image': 'url("'+window.hWin.HAPI4.baseURL+'hclient/assets/database.png")'});
-
             let wasCtrl = false;
             let selObj = window.hWin.HEURIST4.ui.createSelector(null, window.hWin.HAPI4.sysinfo.dbrecent);
-            $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', outline: 'none',
-                           'min-width':'150px', 'margin-left':'25px' })
+            $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', outline: 'none', 'min-width':'150px', 'margin-left': '5px' })
             .on('click', function(event){
                 wasCtrl = event.shiftKey;
             })
@@ -221,12 +237,10 @@ $.widget( "heurist.controlPanel", {
             
         }else{
 
-            $("<div>").css({'font-size':'1em', 'font-weight':'bold', 'padding-left':'25px',
-                'background-position': 'left center',
-                'background-repeat': 'no-repeat',
-                'background-image': 'url("'+window.hWin.HAPI4.baseURL+'hclient/assets/database.png")' })
-            .text(window.hWin.HAPI4.database).appendTo( this.div_dbname );
-
+            $('<div>', {
+                style: 'font-size: 1em; font-weight: bold; padding-left: 5px; display: inline-block;',
+                text: window.hWin.HAPI4.database
+            }).appendTo( this.div_dbname );
         }
 
         // MAIN MENU-----------------------------------------------------
