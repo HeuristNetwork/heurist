@@ -34,7 +34,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     
     _entityName:'sysIdentification',
 
-    _loadedMetadata: false,
+    _firstMetadataRetrieval: false,
 
     /**
      * @brief Initializes the widget.
@@ -211,19 +211,19 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                     + '<div style="padding-bottom: 1em;">Metadata for registered databases are now edited through the Heurist<br>'
                     + 'Reference Index which allow more complete metadata and supports FAIR<br>principles of Findability:</div>';
 
-                let editMetaLabel = that._loadedMetadata ? 'Either: ' : '';
-                let refreshMetaLabel = that._loadedMetadata ? 'Or: ' : '';
-                let refreshMetaPadding = that._loadedMetadata ? 'padding-left: 1.5em;' : '';
+                let editMetaLabel = that._firstMetadataRetrieval ? 'Either: ' : '';
+                let refreshMetaLabel = that._firstMetadataRetrieval ? 'Or: ' : '';
+                let refreshMetaPadding = that._firstMetadataRetrieval ? 'padding-left: 1.5em;' : '';
 
                 html += '<div style="margin-top:0.8em;padding-top:0.6em;border-top:1px solid #c8daea;">'
                     + editMetaLabel + '<a class="dbLink" target="_blank" href="' + editURL + '" style="font-weight:600;">'
                     + window.hWin.HR('Edit this metadata on the Heurist Reference Index') + '</a>'
-                    + (that._loadedMetadata ? '<br><span style="padding-left: 3em;">(you may wish to copy and paste the metadata shown above)</span>' : '')
+                    + (that._firstMetadataRetrieval ? '<br><span style="padding-left: 3em;">(you may wish to copy and paste the metadata shown above)</span>' : '')
                     + '<div style="margin-top:1em;">'
                     + refreshMetaLabel + '<span class="btn-sync-metadata" style="font-weight:600; cursor: pointer; text-decoration: underline; '+ refreshMetaPadding +'">'
                     + window.hWin.HR('Pull the edited metadata from the reference index') + '</span>'
                     + '<span class="sync-status" style="margin-left:0.6em;font-size:0.9em;color:#7a96aa;"></span>'
-                    + (that._loadedMetadata ? '<br><span style="padding-left: 3em;">(permanently replaces the metadata shown above)</span>' : '')
+                    + (that._firstMetadataRetrieval ? '<br><span style="padding-left: 3em;">(permanently replaces the metadata shown above)</span>' : '')
                     + '</div>';
 
                 if(data.modified){
@@ -245,14 +245,13 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 }
 
                 $field.find('.btn-sync-metadata').on('click', function(){
-                    that._loadedMetadata = true;
                     that._syncMetadata($field);
                 });
 
-                if(that._loadedMetadata){ // show 'Current local metadata (non-editable)' section
+                if(that._firstMetadataRetrieval){ // show 'Current local metadata (non-editable)' section
                     that._toggleMetadataFields(true, false, true);
                     that._setupNonEditableMetadata();
-                    //that._loadedMetadata = false;
+                    that._firstMetadataRetrieval = false;
                     that._displayCollectedMetadata(true, data.fields, data.all_labels);
                 }else{
                     that._toggleMetadataFields(true, true, true);
@@ -319,7 +318,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 }
 
                 $field.find('.btn-sync-metadata').button().on('click', function(){
-                    that._loadedMetadata = true;
+                    that._firstMetadataRetrieval = true;
                     that._syncMetadata($field.find('.input-cell div'));
                 });
             }
@@ -771,7 +770,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             $('<div>', {
                 style: 'cursor: default; padding-bottom: 0.25em;',
                 html: `<div class="truncate" style="display: inline-block; width: 10em; font-weight: bold;">${label}</div> 
-                <input disabled="true" style="background-color: #FF7C7C;" size="30" placeholder="No Value" />`
+                <input disabled="true" style="background-color: #f8e0df; border: none;" size="30" placeholder="No Value" />`
             }).appendTo($container);
         }
     }

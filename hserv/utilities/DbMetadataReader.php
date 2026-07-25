@@ -232,9 +232,10 @@ class DbMetadataReader {
                     continue;
                 }
 
-                // keep only the first occurrence per field
                 if(!isset($found[$conceptID])){
-                    $found[$conceptID] = $value;
+                    $found[$conceptID] = [$value];
+                }else{
+                    $found[$conceptID][] = $value;
                 }
             }
         }
@@ -243,7 +244,7 @@ class DbMetadataReader {
         $ordered = [];
         foreach(self::KNOWN_FIELDS as $conceptID => $label){
             if(isset($found[$conceptID])){
-                $ordered[] = ['label' => $label, 'value' => $found[$conceptID]];
+                $ordered[] = ['label' => $label, 'value' => implode('; ', $found[$conceptID])];
             }
         }
         foreach(self::$ALL_RECORD_FIELDS as $conceptID => $label){
@@ -251,7 +252,7 @@ class DbMetadataReader {
                 continue;
             }
 
-            $ordered[] = ['label' => $label, 'value' => $found[$conceptID]];
+            $ordered[] = ['label' => $label, 'value' => implode('; ', $found[$conceptID])];
         }
 
         return $ordered;
