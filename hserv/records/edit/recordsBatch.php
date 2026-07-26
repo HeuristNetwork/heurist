@@ -3634,100 +3634,314 @@ class RecordsBatch
     }
 
     
+    /**
+     * Returns the numeric increment suffix from a freetext value.
+     *
+     * Increment suffixes use the form "-<integer>" at the end of the value.
+     * For example, "ABC-12" returns 12. Values without such a suffix return null.
+     *
+     * @param mixed $value Existing detail value.
+     * @return int|null
+     */
+    private function _getIncrementSuffix($value){
+
+        $value = (string)$value;
+        if(preg_match('/-(\d+)$/u', $value, $matches)===1){
+            return intval($matches[1]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Adds or replaces the trailing numeric increment suffix of a freetext value.
+     *
+     * Examples:
+     * - "ABC" + 3 => "ABC-3"
+     * - "ABC-12" + 3 => "ABC-3"
+     * - empty value + 3 => "3"
+     *
+     * @param mixed $value Existing detail value.
+     * @param int $incrementValue Increment value to assign.
+     * @return string
+     */
+    private function _setIncrementSuffix($value, $incrementValue){
+
+        $value = (string)$value;
+        $incrementValue = intval($incrementValue);
+
+        if($value===''){
+            return (string)$incrementValue;
+        }
+
+        if(preg_match('/-\d+$/u', $value)===1){
+            return preg_replace('/-\d+$/u', '-'.$incrementValue, $value);
+        }
+
+        return $value.'-'.$incrementValue;
+    }
+
+
+    /**
+     * Builds the sequence values to assign to records without an increment.
+     *
+     * Existing values must be positive integers. When gap filling is enabled,
+     * the sequence starts with the smallest unused positive integers. Otherwise,
+     * it starts after the highest existing value.
+     *
+     * Examples:
+     * - existing [1, 3, 4], count 3, fill gaps => [2, 5, 6]
+     * - existing [1, 3, 4], count 3, continue  => [5, 6, 7]
+     * - existing [], count 3                  => [1, 2, 3]
+     *
+     * @param array $existingValues Existing sequence values.
+     * @param int $requiredCount Number of new values required.
+     * @param bool $fillGaps Whether missing positive integers should be used first.
+     * @return array<int>
+     */
+    private function _getIncrementSequence(array $existingValues, int $requiredCount, bool $fillGaps=false): array{
+
+        if($requiredCount<=0){
+            return array();
+        }
+
+        $usedValues = array();
+        $maxValue = 0;
+
+        foreach($existingValues as $value){
+            if(!is_numeric($value)){
+                continue;
+            }
+
+            $value = intval($value);
+            if($value<=0){
+                continue;
+            }
+
+            $usedValues[$value] = true;
+            if($value>$maxValue){
+                $maxValue = $value;
+            }
+        }
+
+        $sequence = array();
+
+        if($fillGaps){
+            $candidate = 1;
+            while(count($sequence)<$requiredCount){
+                if(!isset($usedValues[$candidate])){
+                    $sequence[] = $candidate;
+                    $usedValues[$candidate] = true;
+                }
+                $candidate++;
+            }
+        }else{
+            $candidate = $maxValue + 1;
+            while(count($sequence)<$requiredCount){
+                $sequence[] = $candidate;
+                $candidate++;
+            }
+        }
+
+        return $sequence;
+    }
+
+    /**
+     * Assigns sequential values to a field for the selected records.
+     *
+     * For freetext fields, the sequence is stored as a trailing "-<integer>"
+     * suffix, preserving the rest of the existing value. For integer and float
+     * fields, the detail value itself is replaced by the integer sequence value.
+     *
+     * Modes:
+     * - Default: replace existing sequence values and number records from 1.
+     * - continue=1: preserve numbered records and continue after the maximum.
+     * - fillgaps=1: preserve numbered records and assign the smallest unused
+     *   positive integers before continuing above the maximum.
+     *
+     * Sequences are calculated independently for each record type.
+     *
+     * @return array|false Batch-operation report, or false on validation failure.
+     */
     public function fieldIncrementValue(){
-        
+
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (isEmptyArray(@$this->recIDs)){
+        }elseif(isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 
-        $mysqli = $this->system->getMysqli();
-        $date_mode = date(DATE_8601);// for tags, rec_modified and dtl_modified
+        // Incrementing ALL records requires an explicit record list for grouping.
+        if($this->recIDs[0]==='all'){
+            $whereRecType = '';
+            if(!isEmptyArray($this->rtyIDs)){
+                $whereRecType = ' WHERE rec_RecTypeID IN ('.implode(',', $this->rtyIDs).')';
+            }
+            $this->recIDs = mysql__select_list2(
+                $this->system->getMysqli(),
+                'SELECT rec_ID FROM Records'.$whereRecType.' ORDER BY rec_RecTypeID, rec_ID'
+            );
+            if(isEmptyArray($this->recIDs)){
+                $this->result_data['processed'] = 0;
+                return $this->result_data;
+            }
+        }
 
-        // Field details
+        $mysqli = $this->system->getMysqli();
+        $date_mode = date(DATE_8601);
+
         $dtyID = intval($this->data['dtyID']);
-        $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
+        $dtyName = (@$this->data['dtyName']
+            ? "'".$this->data['dtyName']."'"
+            : 'id:'.$dtyID);
+        $dtyType = $this->getDetailType($dtyID);
         $baseTag = "~increment value $dtyName $date_mode";
 
-        // Check field is freetext or numeric
-        $fld_type = $this->getDetailType($dtyID);
-        if($dtyID < 1 || (!($fld_type == 'freetext' || $fld_type == 'integer') || $fld_type == 'float')){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Increment value can be assigned either to freetext or numeric field');
+        if(!in_array($dtyType, array('freetext', 'integer', 'float'), true)){
+            $this->system->addError(
+                HEURIST_INVALID_REQUEST,
+                'Increment value can be assigned only to freetext, integer or float fields'
+            );
             return false;
         }
+
         $completed_recs = array();
         $skipped_recs = array();
         $sql_errors = array();
 
-        
-        $fillGaps = $this->data['fillgaps']==1;
-        $resetIncValue = $this->data['continue']!=1;
-        
-        // need to add cycle by record type (rec_RecTypeID)
-        $this->recIDs = mysql__select_list2($mysqli, 'SELECT rec_ID FROM Records where rec_ID in ('.implode(',',$this->recIDs).') ORDER BY rec_RecTypeID, rec_ID');
-        
-        
-        // if $resetIncValue is false need to find max current value
-        
-        
-        // Cycle through records
-        foreach ($this->recIDs as $recID){
-            $res = $mysqli->query("SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_DetailTypeID = $dtyID AND dtl_RecID = $recID");
+        $fillGaps = (@$this->data['fillgaps'] == 1);
+        $continueSequence = (@$this->data['continue'] == 1 || $fillGaps);
 
-            if(!$res){
-                $sql_errors[$recID] = $mysqli->error;
-                continue;
-            }elseif($res->num_rows == 0){ // no values within field
-                array_push($skipped_recs, $recID);
-                continue;
-            }
+        // mysql__select_assoc_grouped groups by its first selected column.
+        $recordsByRecType = mysql__select_assoc_grouped(
+            $mysqli,
+            'SELECT rec_RecTypeID, rec_ID FROM Records '
+            .'WHERE rec_ID IN ('.implode(',', $this->recIDs).') '
+            .'ORDER BY rec_RecTypeID, rec_ID'
+        );
 
-            $sql_errors[$recID] = array();
-            
-            // Cycle through values
-            while($values = $res->fetch_row()){
+        foreach($recordsByRecType as $recTypeID => $recordIDs){
 
-                $value = $values[1];
-                
-                //value must either numeric or alphanumeric with suffix -123
-                
+            $detailsByRecord = array();
+            $existingIncrementValues = array();
+            $recordsToAssign = array();
 
+            foreach($recordIDs as $recID){
+                $recID = intval($recID);
 
-                // Update details value + modified
-                $dtl_rec = array('dtl_ID' => intval($values[0]), 'dtl_Value' => $value, 'dtl_Modified' => $date_mode);
+                $res = $mysqli->query(
+                    'SELECT dtl_ID, dtl_Value FROM recDetails '
+                    .'WHERE dtl_DetailTypeID='.$dtyID.' AND dtl_RecID='.$recID.' '
+                    .'ORDER BY dtl_ID LIMIT 1'
+                );
 
-                $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl_rec);
-                if(!is_numeric($ret)){
-                    $sql_errors[$recID][] = $ret;
+                if(!$res){
+                    $sql_errors[$recID] = $mysqli->error;
                     continue;
                 }
 
-                // Update record modified
-                $ret = mysql__insertupdate($mysqli, 'Records', 'rec', array('rec_ID' => $recID, 'rec_Modified' => $date_mode));
-                if(!is_numeric($ret)){
-                    $sql_errors[$recID][] = $ret;
+                $dtlID = -1;
+                $currentValue = null;
+
+                if($res->num_rows>0){
+                    $values = $res->fetch_row();
+                    $dtlID = intval($values[0]);
+                    $currentValue = $values[1];
+                }
+                $res->close();
+
+                $detailsByRecord[$recID] = array(
+                    'dtlID' => $dtlID,
+                    'value' => $currentValue
+                );
+
+                $existingIncrement = null;
+                if($dtlID>0){
+                    if($dtyType==='freetext'){
+                        $existingIncrement = $this->_getIncrementSuffix($currentValue);
+                    }elseif(is_numeric($currentValue)){
+                        $existingIncrement = intval($currentValue);
+                    }
+                }
+
+                // Sequence values are positive integers; zero/negative values are replaced.
+                if($continueSequence && $existingIncrement!==null && $existingIncrement>0){
+                    $existingIncrementValues[] = $existingIncrement;
+                    $skipped_recs[] = $recID;
+                }else{
+                    $recordsToAssign[] = $recID;
                 }
             }
-            
-            array_push($completed_recs, $recID);
-            if(!empty($sql_errors[$recID])){
-                $sql_errors[$recID] = implode(' ;', $sql_errors[$recID]);
-            }else{
-                unset($sql_errors[$recID]);
+
+            if(isEmptyArray($recordsToAssign)){
+                continue;
             }
-        }        
-        
-        // Final touches to report
+
+            $sequence = $this->_getIncrementSequence(
+                $continueSequence ? $existingIncrementValues : array(),
+                count($recordsToAssign),
+                $fillGaps
+            );
+
+            foreach($recordsToAssign as $idx => $recID){
+                $recID = intval($recID);
+                $dtlID = $detailsByRecord[$recID]['dtlID'];
+                $currentValue = $detailsByRecord[$recID]['value'];
+                $incrementValue = $sequence[$idx];
+
+                $value = ($dtyType==='freetext')
+                    ? $this->_setIncrementSuffix($currentValue, $incrementValue)
+                    : $incrementValue;
+
+                if($dtlID>0){
+                    $dtl_rec = array(
+                        'dtl_ID' => $dtlID,
+                        'dtl_Value' => $value,
+                        'dtl_Modified' => $date_mode
+                    );
+                }else{
+                    $dtl_rec = array(
+                        'dtl_RecID' => $recID,
+                        'dtl_DetailTypeID' => $dtyID,
+                        'dtl_Value' => $value,
+                        'dtl_Modified' => $date_mode
+                    );
+                }
+
+                $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl_rec);
+                if(!is_numeric($ret)){
+                    $sql_errors[$recID] = $ret;
+                    continue;
+                }
+
+                $ret = mysql__insertupdate(
+                    $mysqli,
+                    'Records',
+                    'rec',
+                    array('rec_ID' => $recID, 'rec_Modified' => $date_mode)
+                );
+                if(!is_numeric($ret)){
+                    $sql_errors[$recID] = ERR_REC_MODDATE.$ret;
+                    continue;
+                }
+
+                if(!recordUpdateTitle($this->system, $recID, intval($recTypeID), null)){
+                    $sql_errors[$recID] = ERR_REC_TITLE;
+                }
+
+                $completed_recs[] = $recID;
+            }
+        }
+
         $this->_assignTagsAndReport('processed', $completed_recs, $baseTag);
-        $this->_assignTagsAndReport('undefined', $skipped_recs, $baseTag); //skipped
-        $this->_assignTagsAndReport('errors',  $sql_errors, $baseTag);
+        $this->_assignTagsAndReport('errors', $sql_errors, $baseTag);
 
         $this->result_data['undefined'] = count($skipped_recs);
         $this->result_data['undefined_list'] = $skipped_recs;
 
         return $this->result_data;
     }
+
     
 }
 ?>

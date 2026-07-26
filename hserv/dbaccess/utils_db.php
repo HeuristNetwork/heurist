@@ -471,6 +471,29 @@ $mysqli->kill($thread_id);
         return $matches;
     }
 
+    
+    function mysql__select_assoc_grouped($mysqli, $query):array{
+
+        $matches = array();
+        if($mysqli && $query){
+
+            $curVal = null;
+            $res = $mysqli->query($query);
+            if ($res){
+                while ($row = $res->fetch_row()){
+                    if($curVal!==$row[0]){
+                        $curVal = $row[0];
+                        $matches[$row[0]] = [];
+                    }
+                    $matches[$row[0]][] = $row[1];
+                }
+                $res->close();
+            }
+        }
+        return $matches;
+    }
+    
+    
     /**
     * returns array  key_column(first filed)=>array(field=>val,....)
     *
