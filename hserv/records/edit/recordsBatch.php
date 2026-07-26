@@ -3638,14 +3638,20 @@ class RecordsBatch
      * Returns the numeric increment suffix from a freetext value.
      *
      * Increment suffixes use the form "-<integer>" at the end of the value.
-     * For example, "ABC-12" returns 12. Values without such a suffix return null.
+     * For example, "ABC-12" and "12" return 12. Other values return null.
      *
      * @param mixed $value Existing detail value.
      * @return int|null
      */
     private function _getIncrementSuffix($value){
 
-        $value = (string)$value;
+        $value = trim((string)$value);
+
+        // A freetext value containing digits only is already the sequence value.
+        if(preg_match('/^\d+$/u', $value)===1){
+            return intval($value);
+        }
+
         if(preg_match('/-(\d+)$/u', $value, $matches)===1){
             return intval($matches[1]);
         }
@@ -3660,6 +3666,7 @@ class RecordsBatch
      * - "ABC" + 3 => "ABC-3"
      * - "ABC-12" + 3 => "ABC-3"
      * - empty value + 3 => "3"
+     * - "908" + 3 => "3"
      *
      * @param mixed $value Existing detail value.
      * @param int $incrementValue Increment value to assign.
@@ -3670,7 +3677,7 @@ class RecordsBatch
         $value = (string)$value;
         $incrementValue = intval($incrementValue);
 
-        if($value===''){
+        if($value==='' || preg_match('/^\d+$/u', trim($value))===1){
             return (string)$incrementValue;
         }
 
