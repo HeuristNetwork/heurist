@@ -35,16 +35,26 @@ if(!array_key_exists('type', $req_params)){
     $system->errorExitApi('Stats type not supported', HEURIST_INVALID_REQUEST, false);
 }elseif(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) === false){
     $system->errorExitApi('Only the main Heurist server can use this function', HEURIST_ACTION_BLOCKED, false);
-}elseif(empty($_FILES) || (!array_key_exists('stats_file', $_FILES) && !array_key_exists('stats_zip', $_FILES))){
-    $system->errorExitApi('Stats file is missing', HEURIST_INVALID_REQUEST, false);
 }elseif(!array_key_exists('server', $req_params) || empty($req_params['server'])){
     $system->errorExitApi('Missing server name', HEURIST_REQUEST_DENIED, false);
 }
 
-$server_name = htmlspecialchars($req_params['server']);
-if($server_name == 'localhost' || $server_name == '127.0.0.1' || $server_name == '::1' || isLocalHost()){
+$server_name = trim((string)$req_params['server']);
+if($server_name === 'localhost' || $server_name === '127.0.0.1' || $server_name === '::1' || isLocalHost()){
     $system->errorExitApi('Function is not for local setups', HEURIST_ACTION_BLOCKED);
     exit;
+}
+
+ensureStatsFolder();
+
+if($req_params['type'] === 'server_activity'){
+    saveServerActivity($req_params);
+    dataOutput(['status' => HEURIST_OK, 'data' => 1]);
+    exit;
+}
+
+if(empty($_FILES) || (!array_key_exists('stats_file', $_FILES) && !array_key_exists('stats_zip', $_FILES))){
+    $system->errorExitApi('Stats file is missing', HEURIST_INVALID_REQUEST, false);
 }
 
 $stat_types = $req_params['type'];
@@ -77,21 +87,6 @@ if(!$is_zip && $file_type !== 'text/plain' && $file_type !== 'txt'){
     $system->errorExitApi('Multiple loose files are not handled', HEURIST_ACTION_BLOCKED, false);
 }
 
-$dir_name = explode('/', ALL_STATS);
-$dir_name = array_pop($dir_name);
-
-$is_dir_writable = folderExists(ALL_STATS, true);
-if($is_dir_writable === -1){
-    $res = folderCreate2(ALL_STATS, '', true);
-    if($res !== ''){
-        $system->errorExitApi("Heurist is unable to create the {$dir_name} directory", HEURIST_ERROR, false);
-    }
-}elseif($is_dir_writable < 0){
-    $system->errorExitApi("Heurist is unable to access the {$dir_name} directory", HEURIST_ERROR, false);
-}elseif(!file_exists(ALL_STATS . '/.htaccess')){
-    allowWebAccessForForlder(ALL_STATS . '/');
-}
-
 $new_file = ALL_STATS . "/{$server_name}_{$type_label}_stats." . ($is_zip ? 'zip' : 'txt'); // in case the zipping fails, add server name as prefix
 
 move_uploaded_file($temp_file, $new_file);
@@ -104,6 +99,78 @@ if($is_zip){
 
 dataOutput(['status' => HEURIST_OK, 'data' => 1]);
 exit;
+
+/**
+ * Ensure the shared server statistics directory exists and is writable.
+ *
+ * @return void
+ */
+function ensureStatsFolder(){
+
+    global $system;
+
+    $dir_name = basename(ALL_STATS);
+    $is_dir_writable = folderExists(ALL_STATS, true);
+
+    if($is_dir_writable === -1){
+        $res = folderCreate2(ALL_STATS, '', true);
+        if($res !== ''){
+            $system->errorExitApi("Heurist is unable to create the {$dir_name} directory", HEURIST_ERROR, false);
+        }
+    }elseif($is_dir_writable < 0){
+        $system->errorExitApi("Heurist is unable to access the {$dir_name} directory", HEURIST_ERROR, false);
+    }elseif(!file_exists(ALL_STATS . '/.htaccess')){
+        allowWebAccessForForlder(ALL_STATS . '/');
+    }
+}
+
+/**
+ * Append one server activity report to servers.log as a CSV row.
+ *
+ * Columns: date, server, server_ip, server_admin, server_db_count.
+ *
+ * @param array $params Sanitised request parameters.
+ * @return void
+ */
+function saveServerActivity($params){
+
+    global $system;
+
+    $server = trim((string)($params['server'] ?? ''));
+    $server_ip = trim((string)($params['server_ip'] ?? ''));
+    $server_admin = trim((string)($params['server_admin'] ?? ''));
+    $server_db_count = $params['server_db_count'] ?? null;
+
+    if($server === ''){
+        $system->errorExitApi('Missing server name', HEURIST_INVALID_REQUEST, false);
+    }
+    if($server_ip !== 'Unknown' && !filter_var($server_ip, FILTER_VALIDATE_IP)){
+        $system->errorExitApi('Invalid server IP address', HEURIST_INVALID_REQUEST, false);
+    }
+    if(filter_var($server_db_count, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) === false){
+        $system->errorExitApi('Invalid server database count', HEURIST_INVALID_REQUEST, false);
+    }
+
+    $handle = @fopen(ALL_STATS . '/servers.log', 'ab');
+    if($handle === false){
+        $system->errorExitApi('Unable to open server activity log', HEURIST_ERROR, false);
+    }
+
+    if(!flock($handle, LOCK_EX)){
+        fclose($handle);
+        $system->errorExitApi('Unable to lock server activity log', HEURIST_ERROR, false);
+    }
+
+    $report_date = getNow()->format('Y-m-d');
+    $saved = fputcsv($handle, [$report_date, $server, $server_ip, $server_admin, (int)$server_db_count]);
+    fflush($handle);
+    flock($handle, LOCK_UN);
+    fclose($handle);
+
+    if($saved === false){
+        $system->errorExitApi('Unable to save server activity report', HEURIST_ERROR, false);
+    }
+}
 
 /**
  * Zip text into server's file within ALL_SERVER_STATS.

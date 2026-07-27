@@ -652,8 +652,69 @@ class USystem {
         self::heuristVersionCheck();// Check if different local and server code versions are different
         self::updateDeeplLanguages();// Get list of allowed target languages from Deepl API
         self::removePreparedParameters($system);// Remove potential leftover prepared parameters
+        self::sendDailyReportToMainServer();
     }
 
+    /**
+     * Sends a daily report to main server
+     * Short report (server,ip,admin email,number of database) to main server (heuristref)
+     *
+     * @param \hserv\System $system Initialised Heurist system instance
+     * @return void
+     */
+    private static function sendDailyReportToMainServer( $system ){
+        
+        if(isLocalHost()){
+            return;
+        }
+        
+        $mysqli = $system->getMysqli();
+        $databases = mysql__getdatabases4($mysqli);
+        $db_count = count($databases);
+        
+        if($db_count<10){
+            return;
+        }
+        
+        $script = HEURIST_MAIN_SERVER . '/heurist/admin/describe/allServerStats.php';
+        
+        $ch = curl_init($script);
+
+        curl_setopt($ch, CURLOPT_POST, true);
+        $server_host = preg_replace('/:\d+$/', '', (string)SERVER_NAME);
+        $resolved_ip = gethostbyname($server_host);
+        $server_ip = filter_var($resolved_ip, FILTER_VALIDATE_IP) ? $resolved_ip : '';
+
+        if($server_ip === ''){
+            $server_ip = $_SERVER['SERVER_ADDR'] ?? '';
+        }
+        if(!filter_var($server_ip, FILTER_VALIDATE_IP)){
+            $server_ip = 'Unknown';
+        }
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, [
+            'type' => 'server_activity',
+            'server' => SERVER_NAME,
+            'server_ip' => $server_ip,
+            'server_admin' => HEURIST_MAIL_TO_ADMIN,
+            'server_db_count' => $db_count
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+        curl_setopt($ch, CURLOPT_POSTREDIR, 3);
+
+        $response = curl_exec($ch);
+        if($response === false){
+            error_log('Unable to send daily server activity report: '.curl_error($ch));
+        }
+
+        curl_close($ch);
+    }
+    
     /**
      * Sends a daily error report by email to the admin.
      * Consolidates error log files from the past 30 days, archives them, and emails the content.
