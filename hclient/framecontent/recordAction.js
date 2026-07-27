@@ -23,7 +23,8 @@
  *
  * @param {string} _action_type - The type of action to perform (e.g., 'add_detail', 'replace_detail',
  *                                'delete_detail', 'rectype_change', 'extract_pdf', 'url_to_file',
- *                                'local_to_repository', 'case_conversion', 'nl2br', 'translation', 'reset_thumbs', 'increment').
+ *                                'local_to_repository', 'case_conversion', 'nl2br', 'translation', 
+ *                                'reset_thumbs', 'increment' ,'iiif_thumbs').
  *                                This determines the UI and server-side handling.
  * @param {string|number} [_scope_type] - The initial scope of records to act upon.
  *                                     Can be a string like 'All', 'Current', 'Selected', 'Collected',
@@ -36,7 +37,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     const _className = "RecordAction",
     _version   = "0.4";
 
-    let selectRecordScope, allSelectedRectypes;
+    let selectRecordScope, allSelectedRectypes,
+        iiifAnnotationRtyID = 0,
+        iiifThumbsAvailable = true;
 
     let action_type = _action_type,
         init_scope_type = _scope_type,
@@ -191,14 +194,38 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         //$(selScope)
         selectRecordScope.val(inititally_selected);
         
-        _onRecordScopeChange();
-        
         if(action_type=='rectype_change'){
             $('#div_sel_rectype').show();
             _fillSelectRecordTypes();
-        }else if(action_type=='reset_thumbs'){
+        }else if(action_type=='reset_thumbs' || action_type=='iiif_thumbs'  || action_type=='increment'){
             $('#cb_add_tags').parent().hide();
         }
+        
+        if(action_type=='iiif_thumbs'){
+            $('#sel_record_scope').parent().hide();
+
+            iiifAnnotationRtyID = Number($Db.getLocalID('rty', '2-109'));
+            let currentRectypes = window.hWin.HAPI4.currentRecordset.getRectypes();
+            iiifThumbsAvailable = iiifAnnotationRtyID>0 && currentRectypes.includes(iiifAnnotationRtyID);
+
+            if(!iiifThumbsAvailable){
+                
+                $('#div_header').html($('#div_header').html()+'<br>'+
+                '<p style="color:red">The current result set does not contain IIIF Annotation records.</p>');
+            }
+
+            let $fieldset = $('#div_widget>fieldset');
+            $fieldset.empty();
+            
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+
+                + '<label><input id="cb_iiif_thumbs_missedonly" type="checkbox" name="cb_iiif_thumbs_missedonly" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Create thumbnails for missed only</label><br>'
+                
+            + '</div>').appendTo($fieldset);
+            
+        }
+        
+        _onRecordScopeChange();
     }
 
     //
@@ -206,7 +233,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     function _onRecordScopeChange() {
         
-        let isdisabled = (selectRecordScope.val()=='');
+        let isdisabled = (selectRecordScope.val()==''
+            || (action_type=='iiif_thumbs' && !iiifThumbsAvailable));
         
         let ele = $('#btn-ok');
         ele.off('click');
@@ -756,8 +784,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         let request = { tag: $('#cb_add_tags').is(':checked')?1:0 };
 
-        if(action_type=='reset_thumbs'){
-           request['a'] = action_type; 
+        if(action_type=='reset_thumbs' || action_type=='iiif_thumbs'){
+           request['a'] = action_type;
+           if(action_type=='iiif_thumbs' && $('#cb_iiif_thumbs_missedonly').is(':checked')){
+               request['missedonly'] = 1;
+           }
         }else
         if(action_type!='rectype_change'){
 
@@ -910,6 +941,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         let scope_type = selectRecordScope.val();
         let scope;
 
+        if(action_type=='iiif_thumbs'){
+            scope_type = iiifAnnotationRtyID;
+        }
+        
         if(scope_type=="Selected" || scope_type=="Collected"){
             scope = scope_type == 'Selected' ? window.hWin.HAPI4.currentRecordsetSelection : window.hWin.HAPI4.currentRecordsetCollected;
         }else{
@@ -919,6 +954,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }
         }
         request['recIDs'] = scope.join(',');
+
 
         if(action_type=='rectype_change'){
             

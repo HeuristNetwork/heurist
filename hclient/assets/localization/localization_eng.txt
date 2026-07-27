@@ -288,6 +288,7 @@
 #menu-selected-increment#Insert incremental values
 #menu-selected-nl2br#Multiline text to HTML
 #menu-selected-translation#Translation
+#menu-selected-iiif-thumbs#IIIF Annotations thumbnails
 #Share#
 #menu-selected-notify#Notify (email)
 #menu-selected-notify-hint#Select one or more records, then click to send notification
@@ -483,6 +484,8 @@
 #case_conversion#Correct field capitalisations
 #nl2br#Multiline text to HTML
 #translation#Translate text field
+#increment#Insert incremental values
+#iiif_thumbs#IIIF Annotations thumbnails
 #record_action_add_record# 
 #record_action_add_detail#This function adds a new value for a specific field to the set of records selected in the dropdown. Existing values are unaffected. Addition will add values even if this exceeds the valid repeat count (eg. more than one value for single-value fields) - check the database afterwards for validity using Verify > Verify integrity.
 #record_action_replace_detail#This function replaces a specified value in a particular field for the set of records selected in the dropdown. Other fields / values are not affected.
@@ -497,6 +500,8 @@
 #case_conversion_add#Paste a list of exception words / phrases below, one per line (may include punctuation including spaces)<br>These words / phrases will be converted to the upper/lower case form indicated. Applies to whole words / phrases only.
 #record_action_nl2br#This function converts new lines to &lt;br&gt; and &lt;p&gt; html tags for the chosen field for the records selected in the dropdown.
 #record_action_increment#This function inserts incremental values for a field ending with a numeric suffix, for example xxx-0075 which has missing values in some records.<br><br>It either finds the largest numeric suffix value and increments the suffix from that point, or it finds suffix values missing from the sequence and uses those first.
+#record_action_iiif_thumbs#This function recreates thumbnails for IIIF Annotation records.
+#record_action_fails_iiif_thumbs#Records that failed to create thumbnail
 #record_action_passed#Records passed to process
 #record_action_noaccess#Non-editable records found (may be due to permissions)
 #record_action_processed#Records processed
@@ -517,6 +522,7 @@
 #record_action_undefined_translation#Records with undefined fields
 #record_action_translated_translation#Records with already translated fields
 #record_action_undefined_increment#Records with assigned values (skipped)
+#record_action_undefined_iiif_thumbs#Skipped records (thumbnail already exist)
 #record_action_errors#Errors
 #thumbs3#preview
 #feature_request#Please request from Heurist team if needed or add to code and do a pull request

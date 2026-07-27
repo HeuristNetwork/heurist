@@ -74,7 +74,7 @@ abstract class RecordsBatchAction
             return false;
         }
 
-        if(@$this->data['a']!='reset_thumbs' && !$this->_validateDetailType()){
+        if(!in_array(@$this->data['a'], array('reset_thumbs', 'iiif_thumbs')) && !$this->_validateDetailType()){
             return false;
         }
 

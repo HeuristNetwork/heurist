@@ -26,6 +26,7 @@ use hserv\records\batch\file\RecordsBatchExtractPdf;
 use hserv\records\batch\file\RecordsBatchUrlToFile;
 use hserv\records\batch\file\RecordsBatchUploadToRepository;
 use hserv\records\batch\file\RecordsBatchResetThumbnails;
+use hserv\records\batch\file\RecordsBatchCreateIiifAnnotationThumbnails;
 use hserv\records\batch\record\RecordsBatchChangeRecordType;
 use hserv\records\batch\record\RecordsBatchCreateSubRecords;
 use hserv\records\batch\relationship\RecordsBatchAddReverseChildPointer;
@@ -147,6 +148,11 @@ class RecordsBatch
     public function resetThumbnails()
     {
         return $this->executeAction(RecordsBatchResetThumbnails::class);
+    }
+
+    public function createIiifAnnotationThumbnails()
+    {
+        return $this->executeAction(RecordsBatchCreateIiifAnnotationThumbnails::class);
     }
 
     public function createSubRecords()
