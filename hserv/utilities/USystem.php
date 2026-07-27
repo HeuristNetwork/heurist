@@ -652,7 +652,7 @@ class USystem {
         self::heuristVersionCheck();// Check if different local and server code versions are different
         self::updateDeeplLanguages();// Get list of allowed target languages from Deepl API
         self::removePreparedParameters($system);// Remove potential leftover prepared parameters
-        self::sendDailyReportToMainServer();
+        self::sendDailyReportToMainServer( $system );
     }
 
     /**
@@ -665,7 +665,7 @@ class USystem {
     private static function sendDailyReportToMainServer( $system ){
         
         if(isLocalHost()){
-            return;
+            //return;
         }
         
         $mysqli = $system->getMysqli();
@@ -676,12 +676,16 @@ class USystem {
             return;
         }
         
-        $script = HEURIST_MAIN_SERVER . '/heurist/admin/describe/allServerStats.php';
+        $script = HEURIST_MAIN_SERVER . '/h7-alpha/admin/describe/allServerStats.php';
+        //DEBUG $script = 'http://127.0.0.1/heurist/admin/describe/allServerStats.php';
+        
+        $serverName = !defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME) ? gethostbyname(gethostname()) : HEURIST_SERVER_NAME;
+        
         
         $ch = curl_init($script);
 
         curl_setopt($ch, CURLOPT_POST, true);
-        $server_host = preg_replace('/:\d+$/', '', (string)SERVER_NAME);
+        $server_host = preg_replace('/:\d+$/', '', (string)$serverName);
         $resolved_ip = gethostbyname($server_host);
         $server_ip = filter_var($resolved_ip, FILTER_VALIDATE_IP) ? $resolved_ip : '';
 
@@ -694,9 +698,9 @@ class USystem {
 
         curl_setopt($ch, CURLOPT_POSTFIELDS, [
             'type' => 'server_activity',
-            'server' => SERVER_NAME,
+            'server' => $serverName,
             'server_ip' => $server_ip,
-            'server_admin' => HEURIST_MAIL_TO_ADMIN,
+            'server_admin' => defined('HEURIST_MAIL_TO_ADMIN')?HEURIST_MAIL_TO_ADMIN:'',
             'server_db_count' => $db_count
         ]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
