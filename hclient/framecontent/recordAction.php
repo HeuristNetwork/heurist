@@ -157,6 +157,9 @@ if(!in_array($action_type, $allowed_actions)){
 
     </div>
 
+    <div id="div_progress" class="content_div" style="display:none; min-height:140px; padding:16px;">
+    </div>
+
     <div id="div_result" class="content_div" style="display: none;">
         RESULT
     </div>

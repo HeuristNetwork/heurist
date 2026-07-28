@@ -42,15 +42,16 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         iiifThumbsAvailable = true,
         progressSessionId = null,
         progressWidgetActive = false,
-        progressOwnerAction = null;
+        progressOwnerAction = null,
+        progressWidgetContainer = null;
 
     const progressStorageKey = 'heurist-recordAction-progress-' + window.hWin.HAPI4.database;
     const progressThresholds = {
-        extract_pdf: 10,
-        url_to_file: 10,
+        extract_pdf: 1,
+        url_to_file: 1,
         local_to_repository: 10,
         reset_thumbs: 10,
-        iiif_thumbs: 10,
+        iiif_thumbs: 1,
         translation: 10,
         rectype_change: 50,
         add_detail: 50,
@@ -261,7 +262,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         
         let isdisabled = (selectRecordScope.val()==''
             || (action_type=='iiif_thumbs' && !iiifThumbsAvailable));
-        
+
+
         let ele = $('#btn-ok');
         ele.off('click');
         if(isdisabled){
@@ -815,8 +817,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
     function _stopProgressWidget(){
         if(progressWidgetActive){
-            window.hWin.HEURIST4.msg.hideProgress();
+            window.hWin.HEURIST4.msg.hideProgress(progressWidgetContainer);
             progressWidgetActive = false;
+        }
+        if(progressWidgetContainer){
+            progressWidgetContainer.hide();
         }
     }
 
@@ -839,7 +844,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         _stopProgressWidget();
         progressSessionId = sessionId;
         progressOwnerAction = ownerAction || action_type;
+        $('#div_parameters').hide();
+        $('#div_result').hide();
+        progressWidgetContainer = $('#div_progress').show();
         window.hWin.HEURIST4.msg.showProgress({
+            container: progressWidgetContainer,
             session_id: sessionId,
             interval: 900,
             persistentState: true,
@@ -857,6 +866,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             },
             onComplete: function(state){
                 progressWidgetActive = false;
+                if(progressWidgetContainer){
+                    progressWidgetContainer.hide();
+                }
                 if(state && state.status === 'completed' && state.result){
                     if(progressOwnerAction === action_type){
                         _displayActionResult(state.result);
@@ -880,17 +892,19 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             return;
         }
 
-        if(stored.action_type !== action_type){
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                'Another record batch action is still active or has a result waiting to be viewed.<br><br>'
-                + 'Please wait until the current action is completed, or terminate it before starting a different action.',
-                null,
-                'Record batch action in progress'
+        if(stored.action_type && stored.action_type !== action_type){
+            action_type = stored.action_type;
+            $('#div_header').html(window.hWin.HR('record_action_'+action_type));
+            _fillSelectRecordScope();
+
+            let actionLabel = window.hWin.HR('record_action_'+action_type);
+            window.hWin.HEURIST4.msg.showMsgFlash(
+                'The previous action &quot;'+actionLabel+'&quot; is in progress.',
+                2000
             );
-            $('#btn-ok').off('click').addClass('ui-state-disabled');
         }
 
-        _startProgressWidget(stored.session_id, stored.action_type);
+        _startProgressWidget(stored.session_id, action_type);
     }
 
     function _displayActionResult(response){
@@ -1208,17 +1222,22 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 started: Date.now()
             });
             _startProgressWidget(progressSessionId, action_type);
+        }else{
+            // show hourglass/wait icon
+            $('body > div:not(.loading)').hide();
+            $('.loading').show();
         }
+        
+        $('#btn-ok').addClass('ui-state-disabled').off('click')
 
-        // show hourglass/wait icon
-        $('body > div:not(.loading)').hide();
-        $('.loading').show();
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
 
-            $('body > div:not(.loading)').show();
+            //$('body > div:not(.loading)').show();
             $('body > #ui-datepicker-div').hide();
             $('.loading').hide();
+            $('#btn-ok').removeClass('ui-state-disabled').on('click',_startAction);
+            
             let success = (response.status == window.hWin.ResponseStatus.OK);
             if(success){
                 _stopProgressWidget();
