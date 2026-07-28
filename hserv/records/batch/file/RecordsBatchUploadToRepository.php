@@ -143,7 +143,12 @@ class RecordsBatchUploadToRepository extends RecordsBatchFileAction
             $apiKey = $credentials[$serviceID]['params']['writeApiKey']; // $this->system->settings->get('sys_NakalaKey')
             $status = @$this->data['status'] === 'pending' || @$this->data['status'] === 'published' ? $this->data['status'] : 'pending'; // pending | published
 
+            $progressSeen = array();
             while($row = $res->fetch_row()){
+                $progressSeen[intval($row[2])] = true;
+                if(!$this->_progressStep(count($progressSeen)-1, null, 'Uploading files', 1)){
+                    break;
+                }
 
                 if($cur_ulfID != $row[1]){
 

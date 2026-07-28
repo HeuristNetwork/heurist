@@ -63,7 +63,20 @@ class RecordsBatch
 
         $this->session_id = @$this->data['session'];
         if($this->session_id!=null){
-            mysql__update_progress($system->getMysqli(), $this->session_id, true, '0,1');
+            $payload = array(
+                'status' => 'running',
+                'done' => 0,
+                'total' => 0,
+                'note' => 'Preparing records',
+                'action' => @$this->data['a'],
+                'updated' => time()
+            );
+            mysql__update_progress(
+                $system->getMysqli(),
+                $this->session_id,
+                true,
+                json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            );
         }
 
         // Refresh list of current user groups.
@@ -182,9 +195,38 @@ class RecordsBatch
 
     public function removeSession()
     {
-        if($this->session_id!=null){
-            mysql__update_progress($this->system->getMysqli(), $this->session_id, false, 'REMOVE');
+        if($this->session_id==null){
+            return;
         }
+
+        $current = mysql__update_progress(
+            $this->system->getMysqli(),
+            $this->session_id,
+            false,
+            null
+        );
+
+        // Keep an explicit terminate marker; do not overwrite it with a completed result.
+        if($current==='terminate'){
+            return;
+        }
+
+        $payload = array(
+            'status' => 'completed',
+            'done' => intval(@$this->result_data['processed']),
+            'total' => intval(@$this->result_data['passed']),
+            'note' => 'Completed',
+            'action' => @$this->data['a'],
+            'updated' => time(),
+            'result' => $this->result_data
+        );
+
+        mysql__update_progress(
+            $this->system->getMysqli(),
+            $this->session_id,
+            false,
+            json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        );
     }
 }
 ?>

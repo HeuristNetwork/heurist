@@ -33,6 +33,10 @@ $.widget('heurist.progressReport', {
 
         interval: 900,
 
+        // Opt-in persistent JSON state. Legacy callers continue to use
+        // the original done,total[,note] protocol unchanged.
+        persistentState: false,
+
         // UI
         steps: null,
         content: null,
@@ -198,14 +202,34 @@ content += ''
                 // - step updates may be embedded (your current logic handles)
                 if (!txt) return;
 
-                // termination
-                if (String(txt).trim() === 'terminate') {
+                const text = String(txt).trim();
+
+                // Legacy termination marker.
+                if (text === 'terminate') {
                     this._complete({status:'terminated'});
                     return;
                 }
 
-                // parse "done,total[,note]"
-                const resp = String(txt).split(',');
+                // Persistent JSON state used by record batch actions.
+                if (o.persistentState && text.charAt(0) === '{') {
+                    let state = null;
+                    try {
+                        state = JSON.parse(text);
+                    } catch (e) {
+                        if ($.isFunction(o.onError)) o.onError(e);
+                        return;
+                    }
+
+                    this.setProgress(state.done || 0, state.total || 0, state.note || '');
+
+                    if (state.status === 'completed' || state.status === 'terminated' || state.status === 'error') {
+                        this._complete(state);
+                    }
+                    return;
+                }
+
+                // Backwards-compatible "done,total[,note]" format.
+                const resp = text.split(',');
                 let done = parseInt(resp[0], 10) || 0;
                 let total = parseInt(resp[1], 10) || 0;
                 let note = (resp.length>=3 ? resp.slice(2).join(',') : '');

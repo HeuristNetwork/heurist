@@ -219,6 +219,7 @@ class RecordsBatchFieldIncrement extends RecordsBatchAction
             .'ORDER BY rec_RecTypeID, rec_ID'
         );
 
+        $progressDone = 0;
         foreach($recordsByRecType as $recTypeID => $recordIDs){
 
             $detailsByRecord = array();
@@ -226,6 +227,9 @@ class RecordsBatchFieldIncrement extends RecordsBatchAction
             $recordsToAssign = array();
 
             foreach($recordIDs as $recID){
+                if(!$this->_progressStep($progressDone, null, 'Preparing increment values', 10)){
+                    break 2;
+                }
                 $recID = intval($recID);
 
                 $res = $mysqli->query(
@@ -283,6 +287,9 @@ class RecordsBatchFieldIncrement extends RecordsBatchAction
             );
 
             foreach($recordsToAssign as $idx => $recID){
+                if(!$this->_progressStep($progressDone, null, 'Assigning increment values', 10)){
+                    break 2;
+                }
                 $recID = intval($recID);
                 $dtlID = $detailsByRecord[$recID]['dtlID'];
                 $currentValue = $detailsByRecord[$recID]['value'];
@@ -329,6 +336,7 @@ class RecordsBatchFieldIncrement extends RecordsBatchAction
                 }
 
                 $completed_recs[] = $recID;
+                $progressDone++;
             }
         }
 

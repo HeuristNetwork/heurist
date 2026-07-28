@@ -63,7 +63,10 @@ class RecordsBatchChangeRecordType extends RecordsBatchAction
 
             $baseTag = "~changed rectype $rtyName $now";
 
-            foreach ($this->recIDs as $recID) {
+            foreach ($this->recIDs as $progressIdx => $recID) {
+            if(!$this->_progressStep($progressIdx, null, 'Processing records', 10)){
+                break;
+            }
                    //update record edit date
                    $rec_update['rec_ID'] = $recID;
 

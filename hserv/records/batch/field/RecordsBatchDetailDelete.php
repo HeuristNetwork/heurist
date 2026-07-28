@@ -186,7 +186,10 @@ class RecordsBatchDetailDelete extends RecordsBatchAction
             }
         }
 
-        foreach ($this->recIDs as $recID) {
+        foreach ($this->recIDs as $progressIdx => $recID) {
+            if(!$this->_progressStep($progressIdx, null, 'Processing records', 10)){
+                break;
+            }
 
             $recID = intval($recID);
 

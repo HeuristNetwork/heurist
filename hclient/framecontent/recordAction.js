@@ -39,7 +39,27 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
     let selectRecordScope, allSelectedRectypes,
         iiifAnnotationRtyID = 0,
-        iiifThumbsAvailable = true;
+        iiifThumbsAvailable = true,
+        progressSessionId = null,
+        progressWidgetActive = false,
+        progressOwnerAction = null;
+
+    const progressStorageKey = 'heurist-recordAction-progress-' + window.hWin.HAPI4.database;
+    const progressThresholds = {
+        extract_pdf: 10,
+        url_to_file: 10,
+        local_to_repository: 10,
+        reset_thumbs: 10,
+        iiif_thumbs: 10,
+        translation: 10,
+        rectype_change: 50,
+        add_detail: 50,
+        replace_detail: 50,
+        delete_detail: 50,
+        case_conversion: 50,
+        nl2br: 50,
+        increment: 50
+    };
 
     let action_type = _action_type,
         init_scope_type = _scope_type,
@@ -80,6 +100,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         _fillSelectRecordScope();
         
         $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).on('click', function(){window.close();});
+
+        $(window).on('beforeunload.recordAction', function(){
+            _stopProgressWidget();
+        });
+
+        window.setTimeout(_restoreProgressSession, 0);
     }
 
     //
@@ -763,6 +789,175 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
     }
 
+    function _getStoredProgress(){
+        try {
+            const value = window.hWin.localStorage.getItem(progressStorageKey);
+            return value ? JSON.parse(value) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function _storeProgress(data){
+        try {
+            window.hWin.localStorage.setItem(progressStorageKey, JSON.stringify(data));
+        } catch (e) {
+            // Progress still works for the current dialog even when storage is unavailable.
+        }
+    }
+
+    function _clearStoredProgress(){
+        try {
+            window.hWin.localStorage.removeItem(progressStorageKey);
+        } catch (e) {
+        }
+    }
+
+    function _stopProgressWidget(){
+        if(progressWidgetActive){
+            window.hWin.HEURIST4.msg.hideProgress();
+            progressWidgetActive = false;
+        }
+    }
+
+    function _recordCount(request){
+        if(!request || !request.recIDs){
+            return 0;
+        }
+        if(request.recIDs === 'ALL'){
+            return Number.MAX_SAFE_INTEGER;
+        }
+        return String(request.recIDs).split(',').filter(Boolean).length;
+    }
+
+    function _needsProgress(request){
+        const threshold = progressThresholds[action_type] || 50;
+        return _recordCount(request) > threshold;
+    }
+
+    function _startProgressWidget(sessionId, ownerAction){
+        _stopProgressWidget();
+        progressSessionId = sessionId;
+        progressOwnerAction = ownerAction || action_type;
+        window.hWin.HEURIST4.msg.showProgress({
+            session_id: sessionId,
+            interval: 900,
+            persistentState: true,
+            onAbort: function(api){
+                const endpoint = api.options.endpoint;
+                window.hWin.HEURIST4.util.sendRequest(
+                    endpoint,
+                    {terminate:1, t:Date.now(), session:api.getSessionId()},
+                    null,
+                    function(){
+                        api.destroy();
+                    },
+                    'text'
+                );
+            },
+            onComplete: function(state){
+                progressWidgetActive = false;
+                if(state && state.status === 'completed' && state.result){
+                    if(progressOwnerAction === action_type){
+                        _displayActionResult(state.result);
+                        _clearStoredProgress();
+                    }
+                }else if(state && state.status === 'terminated'){
+                    _clearStoredProgress();
+                    window.hWin.HEURIST4.msg.showMsgFlash('The record batch action was terminated.', 3000);
+                }else if(state && state.status === 'error'){
+                    _clearStoredProgress();
+                    window.hWin.HEURIST4.msg.showMsgErr(state.error || 'The record batch action failed.');
+                }
+            }
+        });
+        progressWidgetActive = true;
+    }
+
+    function _restoreProgressSession(){
+        const stored = _getStoredProgress();
+        if(!stored || !stored.session_id){
+            return;
+        }
+
+        if(stored.action_type !== action_type){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Another record batch action is still active or has a result waiting to be viewed.<br><br>'
+                + 'Please wait until the current action is completed, or terminate it before starting a different action.',
+                null,
+                'Record batch action in progress'
+            );
+            $('#btn-ok').off('click').addClass('ui-state-disabled');
+        }
+
+        _startProgressWidget(stored.session_id, stored.action_type);
+    }
+
+    function _displayActionResult(response){
+        $('#div_parameters').hide();
+        $('.ui-selectmenu-menu').remove();
+        $('#div_result').empty();
+
+        let sResult = '';
+        for(let key in response){
+            if(key && key.indexOf('_')<0 && response[key]>0){
+                const lbl_key = 'record_action_'+key;
+                let lbl = window.hWin.HR(lbl_key);
+                if(lbl==lbl_key){
+                    lbl = window.hWin.HR(lbl_key+'_'+action_type);
+                }
+                let tag_link = '';
+                if(response[key+'_tag']){
+                    tag_link = '<span><a href="'+
+                    encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +'&q=tag:"'+response[key+'_tag']+'"')+
+                    '" target="_blank">view</a></span>';
+                }else if(response[key+'_tag_error']){
+                    tag_link = '<span>'+response[key+'_tag_error']['message']+'</span>';
+                }else if(key=="processed"){
+                    if(action_type!='reset_thumbs'){
+                        tag_link = '<span><a href="'+
+                        encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                            +'&q=sortby:-m after:"5 minutes ago"')+
+                        '" target="_blank">view recent changes</a></span>';
+                    }
+                }else if(key=='fails' && response['fails_list'] && response['fails_list'].length>0){
+                    tag_link = '<span style="background-color:#ffcccc"><a href="'+
+                    encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +'&q=ids:'+response['fails_list'].join(','))+
+                    '" target="_blank">view</a></span>';
+                }else if(key == 'limited' && action_type == 'add_detail' && response[key] > 0){
+                    tag_link = `<span style="display: block; font-size: 0.9em; padding: 5px 5px;">
+                                    For single value fields which were skipped because they already have a value,<br>
+                                    use "Recode > Replace field value" to replace all, or selected, existing values with the new value.
+                                </span>`;
+                }
+
+                sResult += '<div style="padding:4px"><span>'+lbl+'</span><span>&nbsp;&nbsp;'
+                    +response[key]+'</span>'+tag_link+'</div>';
+
+                if(key=='errors' && response['errors_list']){
+                    const recids = Object.keys(response['errors_list']);
+                    if(recids && recids.length>0){
+                        sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
+                        for(let key2 in response['errors_list']){
+                            let text = response['errors_list'][key2];
+                            if(Array.isArray(text)){
+                                text = text.join('<br>');
+                            }
+                            sResult += (key2+': '+ text + '<br>');
+                        }
+                        sResult += '</div>';
+                    }
+                }
+            }
+        }
+
+        $('#div_result').html(sResult).css({padding:'10px'}).show();
+        $('#btn-ok').button('option','label',window.hWin.HR('New Action'));
+        $('#btn-cancel').button('option','label',window.hWin.HR('Close'));
+    }
+
     // 
     //  Main action 
     //
@@ -998,6 +1193,22 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     */
      function _startAction_continue(request)
      {   
+        if(_needsProgress(request)){
+            const stored = _getStoredProgress();
+            if(stored && stored.session_id){
+                _restoreProgressSession();
+                return;
+            }
+
+            progressSessionId = String(window.hWin.HEURIST4.util.random());
+            request.session = progressSessionId;
+            _storeProgress({
+                session_id: progressSessionId,
+                action_type: action_type,
+                started: Date.now()
+            });
+            _startProgressWidget(progressSessionId, action_type);
+        }
 
         // show hourglass/wait icon
         $('body > div:not(.loading)').hide();
@@ -1010,101 +1221,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('.loading').hide();
             let success = (response.status == window.hWin.ResponseStatus.OK);
             if(success){
-                $('#div_parameters').hide();
-                
-                /*
-                $('select').each(function(idx, item){
-                   if($(item).hSelect('instance')!==undefined) $(item).hSelect('destroy'); //destroy all hSelects 
-                });
-                */
-                $('.ui-selectmenu-menu').remove();
-
-                $('#div_result').empty();
-
-                response = response['data'];
- 
-                /*
-                *       passed - count of given rec ids
-                *       noaccess - no rights to edit
-                *       processed - success
-                _tag   _tag_error
-                *       undefined - value not found (no assosiated pdf files)
-                *       limited - skipped
-                *       errors     - sql error on search or updata
-                errors_list
-                */
-                let sResult = '';
-                for(let key in response){
-                    if(key && key.indexOf('_')<0 && response[key]>0){
-                        //main report entry
-                        const lbl_key = 'record_action_'+key;
-                        let lbl = window.hWin.HR(lbl_key);
-                        if(lbl==lbl_key){ //not translated
-                            //not found - try to find specified for particular action
-                            lbl = window.hWin.HR(lbl_key+'_'+action_type);
-                        }
-                        let tag_link = '';
-                        if(response[key+'_tag']){
-                            tag_link = '<span><a href="'+
-                            encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                +'&q=tag:"'+response[key+'_tag']+'"')+
-                            '" target="_blank">view</a></span>';
-                            
-                        }else if(response[key+'_tag_error']){
-                            tag_link = '<span>'+response[key+'_tag_error']['message']+'</span>';
-                            
-                        }else if(key=="processed"){
-                            
-                            if(action_type!='reset_thumbs'){
-                                tag_link = '<span><a href="'+
-                                encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                    +'&q=sortby:-m after:"5 minutes ago"')+
-                                '" target="_blank">view recent changes</a></span>';
-                            }
-                            
-                        }else if(key=='fails' && response['fails_list'] && response['fails_list'].length>0){
-
-                            tag_link = '<span style="background-color:#ffcccc"><a href="'+
-                            encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                +'&q=ids:'+response['fails_list'].join(','))+
-                            '" target="_blank">view</a></span>';
-                        }else if(key == 'limited' && action_type == 'add_detail' && response[key] > 0){
-                            tag_link = `<span style="display: block; font-size: 0.9em; padding: 5px 5px;">
-                                            For single value fields which were skipped because they already have a value,<br>
-                                            use "Recode > Replace field value" to replace all, or selected, existing values with the new value.
-                                        </span>`;
-                        }
-                        
-                        sResult = sResult + '<div style="padding:4px"><span>'+lbl+'</span><span>&nbsp;&nbsp;'
-                        +response[key]+'</span>'
-                        +tag_link+'</div>';
-                        
-                        if(key=='errors' && response['errors_list']){
-                            let recids = Object.keys(response['errors_list']);
-                            if(recids && recids.length>0){
-                                sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
-                                for(let key2 in response['errors_list']){
-                                    let text = response['errors_list'][key2];
-                                    if(Array.isArray(text)){
-                                        text = text.join('<br>');
-                                    }
-                                    sResult += (key2+': '+ text + '<br>');   
-                                }
-                                sResult += '</div>';   
-                            }
-                        }
-                        
-                        
-                        
-                    }
-                }
-
-                $('#div_result').html(sResult);
-                $('#div_result').css({padding:'10px'}).show();
-                $('#btn-ok').button('option','label',window.hWin.HR('New Action'));
-                $('#btn-cancel').button('option','label',window.hWin.HR('Close'));
-
+                _stopProgressWidget();
+                _clearStoredProgress();
+                _displayActionResult(response['data']);
             }else{
+                _stopProgressWidget();
+                _clearStoredProgress();
                 $('#div_result').hide();
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }

@@ -52,7 +52,12 @@ class RecordsBatchResetThumbnails extends RecordsBatchAction
         $res = $mysqli->query($query);
         if ($res){
 
+            $progressDone = 0;
             while ($row = $res->fetch_row()){
+                if(!$this->_progressStep($progressDone, null, 'Resetting thumbnails', 1)){
+                    break;
+                }
+                $progressDone++;
                 $obfuscation_id = preg_replace('/[^a-z0-9]/', "", $row[0]);//for snyk
                 $thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.$obfuscation_id.'.png';//'ulf_ObfuscatedFileID'
                 if(file_exists($thumbnail_file)){

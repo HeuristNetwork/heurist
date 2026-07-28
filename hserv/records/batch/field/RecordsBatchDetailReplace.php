@@ -225,7 +225,10 @@ class RecordsBatchDetailReplace extends RecordsBatchAction
 
         $is_multiline = !empty($splitValues);
 
-        foreach ($this->recIDs as $recID) {
+        foreach ($this->recIDs as $progressIdx => $recID) {
+            if(!$this->_progressStep($progressIdx, null, 'Processing records', 10)){
+                break;
+            }
 
             $query = 'SELECT dtl_ID, dtl_RecID '
                     .($is_multiline?'':', dtl_Value')

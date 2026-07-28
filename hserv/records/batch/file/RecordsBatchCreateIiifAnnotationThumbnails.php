@@ -108,13 +108,24 @@ class RecordsBatchCreateIiifAnnotationThumbnails extends RecordsBatchAction
         $processedRecIDs = array();
         $failedRecIDs = array();
 
-        foreach($annotationRecIDs as $recID){
+        $total = count($annotationRecIDs);
+        $this->_progressInit($total, 'Creating IIIF annotation thumbnails');
+
+        foreach($annotationRecIDs as $idx => $recID){
+            if(!$this->_progressUpdate($idx, $total, 'Creating thumbnail')){
+                break;
+            }
+
             $recID = intval($recID);
             $thumbnailID = $dbAnnotations->createAnnotationThumbnail($recID, $replaceExisting);
             if($thumbnailID>0){
                 $processedRecIDs[] = $recID;
             }else{
                 $failedRecIDs[$recID] = 'Thumbnail was not created';
+            }
+
+            if(!$this->_progressUpdate($idx + 1, $total, 'Creating thumbnail')){
+                break;
             }
         }
 

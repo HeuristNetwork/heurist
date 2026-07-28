@@ -96,7 +96,12 @@ class RecordsBatchUrlToFile extends RecordsBatchFileAction
             $rec_IDs = array();
             $ulf_ID_new = null;
 
+            $progressSeen = array();
             while ($row = $res->fetch_row()){
+                $progressSeen[intval($row[3])] = true;
+                if(!$this->_progressStep(count($progressSeen)-1, null, 'Downloading files', 1)){
+                    break;
+                }
                 if($ulf_ID!=$row[1]){
 
                     if($ulf_ID_new>0){

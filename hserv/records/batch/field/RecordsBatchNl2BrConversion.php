@@ -74,7 +74,10 @@ class RecordsBatchNl2BrConversion extends RecordsBatchAction
         $sql_errors = array();
 
         // Cycle through records
-        foreach ($this->recIDs as $recID){
+        foreach ($this->recIDs as $progressIdx => $recID){
+            if(!$this->_progressStep($progressIdx, null, 'Processing records', 10)){
+                break;
+            }
 
             $res = $mysqli->query("SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_DetailTypeID = $dtyID AND dtl_RecID = $recID");
 

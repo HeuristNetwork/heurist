@@ -24,6 +24,8 @@ abstract class RecordsBatchAction
     protected $not_putify = null;
     protected $purifier = null;
     protected $session_id = null;
+    protected $progress_total = 0;
+    protected $progress_done = 0;
 
     public function __construct($system, $data)
     {
@@ -37,6 +39,80 @@ abstract class RecordsBatchAction
     public function getReport()
     {
         return $this->result_data;
+    }
+
+    /**
+     * Initialise or update the persistent progress state for this action.
+     */
+    protected function _progressInit($total, $note = '')
+    {
+        $this->progress_total = max(0, intval($total));
+        $this->progress_done = 0;
+        return $this->_progressWrite('running', 0, $this->progress_total, $note);
+    }
+
+    /**
+     * Update progress and return false when the user has requested termination.
+     */
+    protected function _progressUpdate($done, $total = null, $note = '')
+    {
+        return $this->_progressStep($done, $total, $note, 1);
+    }
+
+    /**
+     * Check for termination on every call, but persist progress only at the
+     * requested interval. Use interval 1 for slow actions and 10 or more for
+     * fast record loops.
+     */
+    protected function _progressStep($done, $total = null, $note = '', $updateEvery = 10, $force = false)
+    {
+        if($this->session_id===null){
+            return true;
+        }
+
+        $current = mysql__update_progress($this->system->getMysqli(), $this->session_id, false, null);
+        if($current==='terminate'){
+            $this->result_data['terminated'] = 1;
+            return false;
+        }
+
+        $this->progress_done = max(0, intval($done));
+        if($total!==null){
+            $this->progress_total = max(0, intval($total));
+        }
+
+        $updateEvery = max(1, intval($updateEvery));
+        if($force || $this->progress_done===0 || $this->progress_done >= $this->progress_total
+           || ($this->progress_done % $updateEvery)===0){
+            $this->_progressWrite('running', $this->progress_done, $this->progress_total, $note);
+        }
+        return true;
+    }
+
+    protected function _progressWrite($status, $done, $total, $note = '', $result = null)
+    {
+        if($this->session_id===null){
+            return null;
+        }
+
+        $payload = array(
+            'status' => $status,
+            'done' => intval($done),
+            'total' => intval($total),
+            'note' => $note,
+            'action' => @$this->data['a'],
+            'updated' => time()
+        );
+        if($result!==null){
+            $payload['result'] = $result;
+        }
+
+        return mysql__update_progress(
+            $this->system->getMysqli(),
+            $this->session_id,
+            false,
+            json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        );
     }
 
     protected function _initPutifier(){
@@ -158,6 +234,11 @@ abstract class RecordsBatchAction
 
         }
 
+
+        $progressTotal = (@$this->recIDs[0]==='all')
+            ? intval(@$this->result_data['passed'])
+            : count((array)$this->recIDs);
+        $this->_progressInit($progressTotal, 'Preparing records');
 
         return true;
     }

@@ -94,7 +94,10 @@ class RecordsBatchExtractPdf extends RecordsBatchAction
 
         $parser = new \Smalot\PdfParser\Parser();
 
-        foreach ($this->recIDs as $recID) {
+        foreach ($this->recIDs as $progressIdx => $recID) {
+            if(!$this->_progressStep($progressIdx, null, 'Processing records', 1)){
+                break;
+            }
 
             $sql = 'select count(dtl_ID) from recDetails where dtl_RecID='.$recID.' AND dtl_DetailTypeID = '.$this->data['dtyID'];
             $isExistsAlready = mysql__select_value($mysqli, $sql)>0;

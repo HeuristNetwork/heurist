@@ -163,7 +163,10 @@ class RecordsBatchDetailAdd extends RecordsBatchAction
         $limitedRecIDs = array();//over limit - skip
         $sqlErrors = array();
 
-        foreach ($this->recIDs as $recID) {
+        foreach ($this->recIDs as $progressIdx => $recID) {
+            if(!$this->_progressStep($progressIdx, null, 'Processing records', 10)){
+                break;
+            }
             $recID = intval($recID);//redundant for snyk
             //check field limit for this record
             $query = "select rec_RecTypeID, tmp.cnt from Records ".
