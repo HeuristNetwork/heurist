@@ -990,7 +990,7 @@ if(!empty($import_webfonts)){
         }
 
         div.thumbnail img {
-            width: 200px;
+            max-width: 200px;
             border: 2px solid #FFF;
             -moz-box-shadow: 0 2px 4px #BBB;
             -webkit-box-shadow: 0 2px 4px #bbb;

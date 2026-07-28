@@ -316,7 +316,7 @@ class RecordMediaRenderer
             if (($isImage || $this->isPdf($thumb)) && !$this->withoutHeader) {
                 $onclick = ' onclick="window.hWin.HEURIST4.ui.showPlayer(this,this.parentNode,'.$this->h($thumb['id'] ?? '').',\''.$this->h($thumb['player'].'&origin=recview').'\')"';
             }
-            return '<img id="img'.$this->h($thumb['id'] ?? '').'" style="width:200px" src="'.$this->h($thumb['thumb'] ?? '').'"'.$onclick.'>'
+            return '<img id="img'.$this->h($thumb['id'] ?? '').'" src="'.$this->h($thumb['thumb'] ?? '').'"'.$onclick.'>'
                 .'<div id="player'.$this->h($thumb['id'] ?? '').'" style="min-height:240px;min-width:320px;display:none;"></div>';
         }
 
