@@ -57,7 +57,7 @@ require_once 'initPage.php';
 $action_type = @$_REQUEST['action'];
 $allowed_actions = array('add_detail','replace_detail','delete_detail','rectype_change',
             'extract_pdf','url_to_file','local_to_repository','reset_thumbs',
-            'case_conversion','nl2br','translation','increment');
+            'case_conversion','nl2br','translation','increment','iiif_thumbs');
 if(!in_array($action_type, $allowed_actions)){
     //@todo - it does not work since initPage already produces some output
     // need to call this piece of code with callback function in initPage after system itit
@@ -66,6 +66,7 @@ if(!in_array($action_type, $allowed_actions)){
 }
 
 ?>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/progressReport.js"></script>
 <script type="text/javascript" src="recordAction.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
@@ -154,6 +155,9 @@ if(!in_array($action_type, $allowed_actions)){
             </fieldset>
         </div>
 
+    </div>
+
+    <div id="div_progress" class="content_div" style="display:none; min-height:140px; padding:16px;">
     </div>
 
     <div id="div_result" class="content_div" style="display: none;">

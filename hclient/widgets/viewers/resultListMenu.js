@@ -596,6 +596,10 @@ $.widget( "heurist.resultListMenu", {
             this.detailBatchEditPopup('reset_thumbs', function(){
                 that.reloadSearch();
             });
+            
+        }else if(action == "menu-selected-iiif-thumbs"){
+
+            this.detailBatchEditPopup('iiif_thumbs');
 
         }else if(action == "menu-selected-case-conversion"){
 

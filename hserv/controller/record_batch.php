@@ -84,6 +84,10 @@ require_once dirname(__FILE__).'/../records/edit/recordsBatch.php';
 
             $res = $dbRecDetails->resetThumbnails();
 
+        }elseif(@$_REQUEST['a'] == 'iiif_thumbs'){
+
+            $res = $dbRecDetails->createIiifAnnotationThumbnails();
+
         }elseif(@$_REQUEST['a'] == 'create_sub_records'){
 
             $res = $dbRecDetails->createSubRecords();
