@@ -633,21 +633,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                             let icon = window.hWin.HAPI4.getImageUrl(that._entityName, trmid, 'icon', null, null, true);
                             content += `<br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-size:contain; background-repeat:no-repeat; background-image: url("${icon}")' height=64 width=64 />`;
-                            /*
-                            const ele_context = this;
-
-                            window.hWin.HAPI4.checkImage(that._entityName, trmid, 'icon', function(response){
-                                if(response.status == window.hWin.ResponseStatus.OK && response.data == 'ok'){
-
-                                    let icon = window.hWin.HAPI4.getImageUrl(that._entityName, trmid, 'icon', null, null, true);
-                                    content += `<br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-size:contain; background-repeat:no-repeat; background-image: url("${icon}")' height=64 width=64 />`;
-                                }
-
-                                callback.call(ele_context, content);
-                            });
-
-                            return '';
-                            */
                         }
 
                         return content;

@@ -542,9 +542,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             switch ( fields[i] ) {
                 case 'dtyid': html += fld2('dty_ID',30,null,'text-align:right'); break;
-                case 'ccode': 
-                    html += ('<div class="item truncate" style="min-width:80px;max-width:80px;text-align:center">'
-                            +$Db.getConceptID('dty',recID,true)+'</div>');
+                case 'ccode':
+                    html += `<div class="item truncate conceptID" style="min-width:80px;max-width:80px;text-align:center">${$Db.getConceptID('dty',recID,true)}</div>`;
                     break;
                 case 'group': 
                     html += __action_btn('group','ui-icon-carat-d','Change group');
@@ -2571,6 +2570,27 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     });
                 }
             }
+        });
+    },
+
+    _onPageRender: function(){
+
+        this.recordList.find('.conceptID').each(async (idx, conceptLabel) => {
+
+            const rtyID = $(conceptLabel).closest('.recordDiv').attr('recid');
+
+            if(!window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+                return;
+            }
+
+            const originalDBID = $Db.rty(rtyID, 'rty_OriginatingDBID');
+            if(!window.hWin.HEURIST4.util.isPositiveInt(originalDBID)){
+                return;
+            }
+
+            const originalDB = await $Db.getOriginatingDBName(originalDBID);
+
+            conceptLabel.title = `Original Database: ${originalDB}`;
         });
     }
 

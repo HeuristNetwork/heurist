@@ -3839,6 +3839,58 @@ window.hWin.HEURIST4.dbs = {
         }
 
         return parts.join(trm_separator);
+    },
+
+    getOriginatingDBName: async function(originatingDBID){
+
+        const regID = Number.parseInt(window.hWin.HAPI4.sysinfo.db_registeredid);
+        if(!window.hWin.HEURIST4.registeredDatabases){
+            window.hWin.HEURIST4.registeredDatabases = { [regID]: window.hWin.HAPI4.database };
+        }
+
+        if(window.hWin.HEURIST4.util.isempty(originatingDBID) || originatingDBID == 0){
+            return originatingDBID == 0 ? window.hWin.HAPI4.database : 'Unknown';
+        }
+
+        if(window.hWin.HEURIST4.util.isPositiveInt(originatingDBID)){
+            originatingDBID = Number.parseInt(originatingDBID);
+        }else if(originatingDBID.indexOf('-') < 0){
+            originatingDBID = Number.parseInt(originatingDBID.split('-')[0]);
+        }
+
+        if(Number.isNaN(originatingDBID) || Object.hasOwn(window.hWin.HEURIST4.registeredDatabases, originatingDBID)){
+            return Number.isNaN(originatingDBID) ? 'Unknown' : window.hWin.HEURIST4.registeredDatabases[originatingDBID];
+        }
+
+        try{
+
+            //https://heuristref.net/api/Heurist_Reference_Index/records/2?method=GET
+            const baseURL = window.hWin.HAPI4.sysinfo.referenceServerURL.replace('/heurist/', '/api/');
+            const URL = `${baseURL}${window.hWin.HAPI4.sysinfo.referenceServerIndexDatabase}/records/${originatingDBID}`;
+
+            let response = await fetch(URL);
+            if(!response.ok){
+                window.hWin.HEURIST4.registeredDatabases[originatingDBID] = 'Unknown';
+                return 'Unknown';
+            }
+
+            let json = await response.json();
+            if(json.records.length === 0){
+                window.hWin.HEURIST4.registeredDatabases[originatingDBID] = 'Unknown';
+                return 'Unknown';
+            }
+
+            let record = json.records.shift();
+            let database = record?.details?.[1091];
+            database = database === undefined ? 'Unknown' : Object.values(database)[0];
+
+            window.hWin.HEURIST4.registeredDatabases[originatingDBID] = database;
+
+            return database;
+
+        }catch{
+            return 'Unknown';
+        }
     }
 
 }//end dbs
