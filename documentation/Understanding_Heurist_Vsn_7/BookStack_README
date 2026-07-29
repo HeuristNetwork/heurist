@@ -1,0 +1,12 @@
+BookStack SYNCHRONISATION to Heurist.Huma-Num.fr server
+
+There are three scripts to dump the BookStack database in various formats,
+
+     BookStack_MD_JSon_PNG_Snapshot.sh     complete snapshot as MD, JSon and a files directory
+     BookStack_Filesystem_Daily_Dump.sh    MySQL dump
+     BookStack_API_Daily_Dump.sh           dump via API in a dated directory, to be kept for 1 month
+
+and two scripts to push the changes to the Huma-Num server and the Heurist gitHub
+
+     BookStack_push_to_remote.sh
+     BookStack_Commit_To_GitHub.sh       not working at 21 July 2026 due to git conflicts
