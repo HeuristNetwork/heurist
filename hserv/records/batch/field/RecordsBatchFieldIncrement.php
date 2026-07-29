@@ -252,8 +252,10 @@ class RecordsBatchFieldIncrement extends RecordsBatchAction
 
         $defaultPrefix = '';
         if(array_key_exists('prefix', $this->data)){
-            $defaultPrefix = trim((string)$this->data['prefix']);
-        }elseif($dtyType==='freetext'){
+            $defaultPrefix = trim(strip_tags((string)$this->data['prefix']));
+        }
+            
+        if($defaultPrefix=='' && $dtyType==='freetext'){
             
             $query = 'SELECT d.dtl_Value FROM Records r '
                 .'INNER JOIN recDetails d ON d.dtl_RecID=r.rec_ID '
