@@ -49,7 +49,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     const progressThresholds = {
         extract_pdf: 1,
         url_to_file: 1,
-        local_to_repository: 10,
+        local_to_repository: 1,
         reset_thumbs: 10,
         iiif_thumbs: 1,
         translation: 10,
@@ -637,10 +637,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
 
-                + '<label><input id="cb_increment_continue" type="checkbox" name="increment_continue" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Insert increments starting after current largest value</label><br>'
+                + '<label><input id="cb_increment_fillgaps" type="radio" name="increment_fillgaps" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">fill gaps in the sequence and then increment from the largest existing value</label><br>'
                 
-                + '<label><input id="cb_increment_fillgaps" type="checkbox" name="increment_fillgaps" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Find and insert missing values in the sequence first</label>'
-            + '</div>').appendTo($fieldset);
+                + '<label><input type="radio" name="increment_fillgaps" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">ignore gaps in the sequence and increment from the largest existing value</label>'
+                
+                +'<div style="padding: 0.2em; min-width: 600px;" class="input">'
+                +'<label for="increment_prefix">Default prefix for text fields: </label> <input id="increment_prefix" style="max-width:30em"/>'
+                
+            + '</div></div>').appendTo($fieldset);
 
             
         }
@@ -1133,10 +1137,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 request['a'] = action_type;
             
                 if($('#cb_increment_fillgaps').is(':checked')){
-                        request['fillgaps'] = 1;
+                    request['fillgaps'] = 1;
                 }
-                if($('#cb_increment_continue').is(':checked')){
-                        request['continue'] = 1;
+                
+                if($('#increment_prefix').val()){
+                    request['prefix'] = $('#increment_prefix').val();
                 }
                 
             }

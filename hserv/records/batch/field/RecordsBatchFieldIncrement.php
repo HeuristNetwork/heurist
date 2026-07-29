@@ -11,8 +11,8 @@ use hserv\records\batch\RecordsBatchAction;
  * fields, the detail value itself is replaced by the integer sequence value.
  *
  * Modes:
- * - Default: replace existing sequence values and number records from 1.
- * - continue=1: preserve numbered records and continue after the maximum.
+ * - Default:  reset=0, fillgaps=1
+ * - reset=1: replace existing sequence values and number records from 1.
  * - fillgaps=1: preserve numbered records and assign the smallest unused
  *   positive integers before continuing above the maximum.
  *
@@ -24,8 +24,9 @@ use hserv\records\batch\RecordsBatchAction;
  * - 'dtyID': (int) Field receiving the sequence.
  * - 'dtyName': (string, optional) Field name used in tags.
  * - 'tag': (int, optional) If 1, assign outcome tags.
- * - 'continue': (int, optional) If 1, retain existing sequence values and continue after the maximum.
+ * - 'reset': (int, optional) If 1, replace existing sequence values and number records from 1.
  * - 'fillgaps': (int, optional) If 1, retain existing sequence values and fill unused positive integers first.
+ * - 'prefix': (string,optional) If defined, it is used as default prefix for freetext field. Otherwise it tales first existing prefix in field
  *
  * Report format:
  * - passed, noaccess: selected and inaccessible record counts.
@@ -209,7 +210,7 @@ class RecordsBatchFieldIncrement extends RecordsBatchAction
         $sql_errors = array();
 
         $fillGaps = (@$this->data['fillgaps'] == 1);
-        $continueSequence = (@$this->data['continue'] == 1 || $fillGaps);
+        $continueSequence = $fillGaps || @$this->data['reset'] != 1;
 
         // mysql__select_assoc_grouped groups by its first selected column.
         $recordsByRecType = mysql__select_assoc_grouped(
