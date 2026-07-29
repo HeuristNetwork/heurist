@@ -6,12 +6,14 @@ use hserv\records\batch\RecordsBatchAction;
 /**
  * Assigns sequential values to a field for the selected records.
  *
- * For freetext fields, the sequence is stored as a trailing "-<integer>"
- * suffix, preserving the rest of the existing value. For integer and float
+ * For freetext fields, the sequence is stored as a trailing, zero-padded
+ * "-<integer>" suffix, preserving an existing prefix. A supplied `prefix`
+ * is used for values without a prefix; otherwise the first prefix found in
+ * the selected freetext values is used as the default. For integer and float
  * fields, the detail value itself is replaced by the integer sequence value.
  *
  * Modes:
- * - Default:  reset=0, fillgaps=1
+ * - Default: continue after the largest existing sequence value.
  * - reset=1: replace existing sequence values and number records from 1.
  * - fillgaps=1: preserve numbered records and assign the smallest unused
  *   positive integers before continuing above the maximum.
@@ -26,7 +28,10 @@ use hserv\records\batch\RecordsBatchAction;
  * - 'tag': (int, optional) If 1, assign outcome tags.
  * - 'reset': (int, optional) If 1, replace existing sequence values and number records from 1.
  * - 'fillgaps': (int, optional) If 1, retain existing sequence values and fill unused positive integers first.
- * - 'prefix': (string,optional) If defined, it is used as default prefix for freetext field. Otherwise it tales first existing prefix in field
+ * - 'prefix': (string, optional) Default prefix for freetext values without one.
+ *   If omitted, the first existing freetext prefix found in the selection is used.
+ * - 'digits': (int, optional) Number of digits in the zero-padded freetext
+ *   sequence suffix. Defaults to 4.
  *
  * Report format:
  * - passed, noaccess: selected and inaccessible record counts.
@@ -70,32 +75,59 @@ class RecordsBatchFieldIncrement extends RecordsBatchAction
     }
 
 /**
- * Adds or replaces the trailing numeric increment suffix of a freetext value.
+ * Returns the prefix before a trailing numeric sequence suffix.
  *
- * Examples:
- * - "ABC" + 3 => "ABC-3"
- * - "ABC-12" + 3 => "ABC-3"
- * - empty value + 3 => "3"
- * - "908" + 3 => "3"
+ * For example, "ABC-0012" returns "ABC". Values without a trailing
+ * "-<integer>" suffix return null.
  *
  * @param mixed $value Existing detail value.
- * @param int $incrementValue Increment value to assign.
- * @return string
+ * @return string|null
  */
-    private function _setIncrementSuffix($value, $incrementValue){
+    private function _getIncrementPrefix($value){
 
-        $value = (string)$value;
+        $value = trim((string)$value);
+        if(preg_match('/^(.*)-(\d+)$/u', $value, $matches)===1){
+            return trim($matches[1]);
+        }elseif($value!==''){
+            return $value;
+        }
+
+        return null;
+    }
+
+    /**
+     * Adds or replaces the trailing numeric increment suffix of a freetext value.
+     *
+     * Existing prefixes are preserved. Values without a prefix use the supplied
+     * default prefix. The numeric suffix is left-padded with zeroes.
+     *
+     * @param mixed $value Existing detail value.
+     * @param int $incrementValue Increment value to assign.
+     * @param string $defaultPrefix Prefix used when the value has no prefix.
+     * @param int $digits Number of digits in the padded suffix.
+     * @return string
+     */
+    private function _setIncrementSuffix($value, $incrementValue, $defaultPrefix, $digits){
+
+        $value = trim((string)$value);
         $incrementValue = intval($incrementValue);
-
-        if($value==='' || preg_match('/^\d+$/u', trim($value))===1){
-            return (string)$incrementValue;
+        $digits = intval($digits);
+        if($digits<1){
+            $digits = 4;
         }
 
-        if(preg_match('/-\d+$/u', $value)===1){
-            return preg_replace('/-\d+$/u', '-'.$incrementValue, $value);
+        $suffix = str_pad((string)$incrementValue, $digits, '0', STR_PAD_LEFT);
+        $prefix = $this->_getIncrementPrefix($value);
+
+        if($prefix===null){
+            if($value!=='' && preg_match('/^\d+$/u', $value)!==1){
+                $prefix = $value;
+            }else{
+                $prefix = trim((string)$defaultPrefix);
+            }
         }
 
-        return $value.'-'.$incrementValue;
+        return $prefix==='' ? $suffix : $prefix.'-'.$suffix;
     }
 
 /**
@@ -209,8 +241,52 @@ class RecordsBatchFieldIncrement extends RecordsBatchAction
         $skipped_recs = array();
         $sql_errors = array();
 
-        $fillGaps = (@$this->data['fillgaps'] == 1);
-        $continueSequence = $fillGaps || @$this->data['reset'] != 1;
+        $resetSequence = false; //DISABLED (@$this->data['reset'] == 1);
+        $continueSequence = !$resetSequence;
+        $fillGaps = $continueSequence && (@$this->data['fillgaps'] == 1);
+
+        $digits = intval(@$this->data['digits']);
+        if($digits<1){
+            $digits = 4;
+        }
+
+        $defaultPrefix = '';
+        if(array_key_exists('prefix', $this->data)){
+            $defaultPrefix = trim((string)$this->data['prefix']);
+        }elseif($dtyType==='freetext'){
+            
+            $query = 'SELECT d.dtl_Value FROM Records r '
+                .'INNER JOIN recDetails d ON d.dtl_RecID=r.rec_ID '
+                .'WHERE r.rec_ID IN ('.implode(',', $this->recIDs).') '
+                .'AND d.dtl_DetailTypeID='.$dtyID.' '
+                ."AND d.dtl_Value REGEXP '-[0-9]+$' "
+                .'ORDER BY r.rec_RecTypeID, r.rec_ID, d.dtl_ID LIMIT 1';
+            $value = mysql__select_value($mysqli, $query);
+            
+            if($value==null){
+                $query = 'SELECT d.dtl_Value FROM Records r '
+                    .'INNER JOIN recDetails d ON d.dtl_RecID=r.rec_ID '
+                    .'WHERE r.rec_ID IN ('.implode(',', $this->recIDs).') '
+                    .'AND d.dtl_DetailTypeID='.$dtyID.' '
+                    .'ORDER BY r.rec_RecTypeID, r.rec_ID, d.dtl_ID LIMIT 1';
+                $value = mysql__select_value($mysqli, $query);
+            }
+            
+            if($mysqli->error){
+                $this->system->addError(
+                    HEURIST_DB_ERROR,
+                    'Cannot determine the default increment prefix: '.$mysqli->error
+                );
+                return false;
+            }
+
+            if($value!==null){
+                $foundPrefix = $this->_getIncrementPrefix($value);
+                if($foundPrefix!==null){
+                    $defaultPrefix = $foundPrefix;
+                }
+            }
+        }
 
         // mysql__select_assoc_grouped groups by its first selected column.
         $recordsByRecType = mysql__select_assoc_grouped(
@@ -297,7 +373,7 @@ class RecordsBatchFieldIncrement extends RecordsBatchAction
                 $incrementValue = $sequence[$idx];
 
                 $value = ($dtyType==='freetext')
-                    ? $this->_setIncrementSuffix($currentValue, $incrementValue)
+                    ? $this->_setIncrementSuffix($currentValue, $incrementValue, $defaultPrefix, $digits)
                     : $incrementValue;
 
                 if($dtlID>0){
