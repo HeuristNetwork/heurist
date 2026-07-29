@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Written by ChatGPT & Ian Johnson 3 July 2026
+# Written by ChatGPT & Ian Johnson 3 July 2026, revised with image renaming to stable value 29 July 2026
 
 # This version outputs:
 #    the MD (a single file containing the whole book), 
@@ -11,6 +11,15 @@ set -euo pipefail
 
 # Note that the JSon file which contains the complete textual data has a date of export near the end, 
 # so it will change every day. That does not seem to be the case for the MD file or image files.
+#
+# BookStack gives the files in each portable export new random names. To prevent
+# GitHub seeing unchanged images as new files each day, this script renames each
+# image using its stable BookStack image ID and updates the matching references
+# in data.json. The export therefore remains usable/importable.
+#
+# Each book is first built in a temporary directory and then copied into the
+# snapshot with rsync --delete. This prevents files from previous snapshots,
+# including files whose page/chapter names have changed, accumulating.
 
 
 BASE_URL="https://docs.heuristref.net"
@@ -19,9 +28,6 @@ EXPORT_BASE="/srv/BACKUP/BookStack"
 OUT_DIR="${EXPORT_BASE}/daily_MD_JSon_files_snapshot"
 
 TOKEN="$(cat "$TOKEN_FILE")"
-
-# Old codeTO BE DELETED, removes preeding work rm -rf "$OUT_DIR/"
-# mkdir -p "$OUT_DIR"
 
 safe_name() {
   echo "$1" | tr '/: *?"<>|' '_' | sed 's/__*/_/g' | cut -c1-160
@@ -41,25 +47,78 @@ api_file() {
     -o "$2"
 }
 
+normalise_export_images() {
+  local export_dir="$1"
+  local json="$export_dir/data.json"
+  local id old extension new temporary_json
+
+  [ -f "$json" ] || return 0
+
+  # The image ID is stable between exports, whereas the filename generated
+  # inside each portable ZIP is not.
+  jq -r '
+    .. | objects
+    | select(
+        (.type == "gallery" or .type == "drawio")
+        and (.id != null)
+        and (.file != null)
+      )
+    | [.id, .file]
+    | @tsv
+  ' "$json" |
+  while IFS=$'\t' read -r id old; do
+    [ -f "$export_dir/files/$old" ] || continue
+
+    extension="${old##*.}"
+    new="image-${id}.${extension}"
+
+    [ "$old" = "$new" ] && continue
+
+    mv -f "$export_dir/files/$old" \
+          "$export_dir/files/$new"
+
+    temporary_json="${json}.tmp"
+
+    # Update every JSON file reference to the renamed image. References in
+    # page content such as [[bsexport:image:123]] already use the stable ID.
+    jq --arg old "$old" --arg new "$new" '
+      walk(
+        if type == "object" and .file? == $old
+        then .file = $new
+        else .
+        end
+      )
+    ' "$json" > "$temporary_json"
+
+    mv "$temporary_json" "$json"
+  done
+}
+
 export_book() {
   local book_id="$1"
   local book_name="$2"
   local book_dir="$3"
-  local zipfile="$book_dir/portable_export.zip"
+  local work_dir
+  local zipfile
+
+  work_dir="$(mktemp -d)"
+  zipfile="$work_dir/portable_export.zip"
 
   echo "Exporting book: $book_name"
 
-  mkdir -p "$book_dir"
+  mkdir -p "$work_dir/export"
 
   # 1. Portable ZIP: contains book.json, files/, pages/, etc.
   api_file "${BASE_URL}/api/books/${book_id}/export/zip" "$zipfile"
-  unzip -q "$zipfile" -d "$book_dir"
+  unzip -q "$zipfile" -d "$work_dir/export"
   rm -f "$zipfile"
+
+  normalise_export_images "$work_dir/export"
 
   # 2. Whole-book Markdown
   echo "Exporting whole book markdown"
   api_file "${BASE_URL}/api/books/${book_id}/export/markdown" \
-    "$book_dir/${book_id}_${book_name}.book.md"
+    "$work_dir/export/${book_id}_${book_name}.book.md"
 
   # 3. Chapters belonging to this book
   echo "Exporting chapters"
@@ -72,7 +131,7 @@ export_book() {
       chapter_name="$(safe_name "$(echo "$chapter" | jq -r '.name')")"
 
       api_file "${BASE_URL}/api/chapters/${chapter_id}/export/markdown" \
-        "$book_dir/${chapter_id}_${chapter_name}.chapter.md"
+        "$work_dir/export/${chapter_id}_${chapter_name}.chapter.md"
   done
 
   # 4. Pages belonging to this book
@@ -86,8 +145,14 @@ export_book() {
       page_name="$(safe_name "$(echo "$page" | jq -r '.name')")"
 
       api_file "${BASE_URL}/api/pages/${page_id}/export/markdown" \
-        "$book_dir/${page_id}_${page_name}.page.md"
+        "$work_dir/export/${page_id}_${page_name}.page.md"
   done
+
+  # Replace the previous snapshot only after the new export is complete.
+  mkdir -p "$book_dir"
+  rsync -a --delete "$work_dir/export/" "$book_dir/"
+
+  rm -rf "$work_dir"
 }
 
 # Main loop: one directory per book
