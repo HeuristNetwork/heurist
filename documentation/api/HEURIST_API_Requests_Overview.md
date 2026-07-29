@@ -82,6 +82,52 @@ The initial public contract is JSON-only and documents `q`, `w`, `ids`, `detail`
 
 Existing visibility behavior is retained: an inaccessible record query may return HTTP 200 with an empty `records` array.
 
+
+## Map and timeline presentation API
+
+The map API exposes stable, engine-neutral representations and geographic data. It does not return Leaflet objects, runtime layer IDs, jQuery widget state, or `window.hWin` configuration. Anonymous requests return only records visible under normal Heurist database and record permissions. Session or JWT authentication may expose additional records.
+
+### MapDocument and MapLayer
+
+```text
+GET /api/<database>/map/document/<recordId>
+GET /api/<database>/map/layer/<recordId>
+```
+
+A MapDocument response uses `format: heurist-map-document` and preserves the original map bookmark in `mapBookmark.raw`. Recognised bookmarks also include parsed bounds or point coordinates. CRS and world-base-map terms include local term ID, code, and label. Layer references remain in stored `DT_MAP_LAYER` order. Minimum and maximum zoom values retain existing Heurist semantics and are not automatically interpreted as Leaflet zoom levels.
+
+A MapLayer response uses `format: heurist-map-layer`. It separates data acquisition (`source`), symbology (`style`), temporal settings (`timeline`), and display behaviour (`options`). Supported source types include `heurist-query`, `record`, `inline-geojson`, `remote-geojson`, `tile`, `image`, `iiif`, and `geotiff`.
+
+### GeoJSON
+
+```text
+GET  /api/<database>/map/<recordId>
+GET  /api/<database>/map?q=<encoded-query>
+POST /api/<database>/map
+```
+
+The response is a GeoJSON `FeatureCollection` with a `meta` object. POST accepts a serialisable query plus `limit`, `offset`, and `simplify`. GET is intended for simple or URL-safe encoded queries.
+
+```json
+{
+  "query": {"t": 10, "sort": "rec_Title"},
+  "limit": 1000,
+  "offset": 0,
+  "simplify": true
+}
+```
+
+### Timeline
+
+```text
+GET  /api/<database>/time?q=<encoded-query>
+POST /api/<database>/time
+```
+
+Timeline responses use `format: heurist-timeline` and contain normalised `recordId`, `title`, `start`, `end`, and `group` values. POST accepts a serialisable query plus `limit` and `offset`.
+
+In the initial implementation, `meta.total` is the number of returned features or timeline items, not the complete pre-pagination search count.
+
 ## Authentication
 
 The API supports:

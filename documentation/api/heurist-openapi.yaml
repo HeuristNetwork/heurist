@@ -2,7 +2,8 @@ openapi: 3.1.0
 info:
   title: Heurist Read API
   version: 1.0.0-beta
-  summary: Public read access to Heurist databases, records, database definitions, annotations and IIIF resources
+  summary: Public read access to Heurist databases, records, database definitions, maps, timeline data, annotations
+    and IIIF resources
   description: 'This specification describes the public read API currently exposed through
 
     `hserv/controller/api.php`.
@@ -23,7 +24,9 @@ info:
 
     in a Heurist-specific envelope.
 
-    '
+
+
+    Map and timeline endpoints return engine-neutral MapDocument, MapLayer, GeoJSON and temporal presentation resources.'
 servers:
 - url: https://{host}/api
   description: A Heurist installation
@@ -44,6 +47,10 @@ tags:
   description: Retrieve direct IIIF Presentation API v3 resources
 - name: Annotations
   description: Read IIIF Web Annotation records and AnnotationPages
+- name: Maps
+  description: Retrieve public MapDocument and MapLayer definitions and geographic data as GeoJSON
+- name: Timeline
+  description: Retrieve public temporal data for Heurist record queries
 paths:
   /databases:
     get:
@@ -51,7 +58,8 @@ paths:
       - Databases
       operationId: listDatabases
       summary: List registered databases
-      description: Server-level public route. No database path segment or authentication is required. Results use the standard collection envelope. Use details=full to include registration ID, title, rights and description.
+      description: Server-level public route. No database path segment or authentication is required. Results use
+        the standard collection envelope. Use details=full to include registration ID, title, rights and description.
       security:
       - {}
       parameters:
@@ -151,7 +159,8 @@ paths:
       - Databases
       operationId: listDatabasesWithIgnoredDatabaseSegment
       summary: List registered databases with a compatibility database segment
-      description: Compatibility form. The database path segment is accepted but ignored; the result is the same server-level collection as /databases.
+      description: Compatibility form. The database path segment is accepted but ignored; the result is the same
+        server-level collection as /databases.
       security:
       - {}
       parameters:
@@ -179,7 +188,8 @@ paths:
       - Databases
       operationId: listDatabasesShortAliasWithIgnoredDatabaseSegment
       summary: List registered databases using the short alias and a compatibility database segment
-      description: Compatibility form. The database path segment is accepted but ignored; the result is the same server-level collection as /dbs.
+      description: Compatibility form. The database path segment is accepted but ignored; the result is the same
+        server-level collection as /dbs.
       security:
       - {}
       parameters:
@@ -237,7 +247,9 @@ paths:
         in: query
         schema:
           type: string
-        description: Comma-separated record header fields and/or numeric detail type IDs. rec_ID and rec_RecTypeID are always included in normal object mode. When omitted, rec_Title and all details are also returned. An explicit fields=rec_ID still returns record objects.
+        description: Comma-separated record header fields and/or numeric detail type IDs. rec_ID and rec_RecTypeID
+          are always included in normal object mode. When omitted, rec_Title and all details are also returned.
+          An explicit fields=rec_ID still returns record objects.
       - name: detail
         in: query
         schema:
@@ -276,7 +288,9 @@ paths:
         in: query
         schema:
           type: string
-        description: Comma-separated record header fields and/or numeric detail type IDs. rec_ID and rec_RecTypeID are always included in normal object mode. When omitted, rec_Title and all details are also returned. An explicit fields=rec_ID still returns record objects.
+        description: Comma-separated record header fields and/or numeric detail type IDs. rec_ID and rec_RecTypeID
+          are always included in normal object mode. When omitted, rec_Title and all details are also returned.
+          An explicit fields=rec_ID still returns record objects.
       - name: detail
         in: query
         schema:
@@ -286,7 +300,8 @@ paths:
         description: Set to ids for an ID-only records array. This mode takes precedence over and ignores fields.
       responses:
         '200':
-          description: Records response for one requested record. Missing or inaccessible records return an empty records array.
+          description: Records response for one requested record. Missing or inaccessible records return an empty
+            records array.
           content:
             application/json:
               schema:
@@ -329,7 +344,7 @@ paths:
         in: query
         schema:
           type: integer
-      responses: &id001
+      responses:
         '200':
           description: Definition collection; empty matches return an empty items array.
           content:
@@ -353,7 +368,7 @@ paths:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordTypeId'
       - $ref: '#/components/parameters/Details'
-      responses: &id002
+      responses:
         '200':
           description: Definition object returned directly
           content:
@@ -405,7 +420,19 @@ paths:
         in: query
         schema:
           type: integer
-      responses: *id001
+      responses:
+        '200':
+          description: Definition collection; empty matches return an empty items array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefinitionCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/fields/{fieldId}:
     get:
       tags:
@@ -417,7 +444,21 @@ paths:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/FieldId'
       - $ref: '#/components/parameters/Details'
-      responses: *id002
+      responses:
+        '200':
+          description: Definition object returned directly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Definition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/terms:
     get:
       tags:
@@ -459,7 +500,19 @@ paths:
         in: query
         schema:
           type: integer
-      responses: *id001
+      responses:
+        '200':
+          description: Definition collection; empty matches return an empty items array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefinitionCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/terms/{termId}:
     get:
       tags:
@@ -471,14 +524,29 @@ paths:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/TermId'
       - $ref: '#/components/parameters/Details'
-      responses: *id002
+      responses:
+        '200':
+          description: Definition object returned directly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Definition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/termlinks:
     get:
       tags:
       - Database structure
       operationId: listTermLinks
       summary: Retrieve term parent-link relationships
-      description: Returns rows from `defTermsLinks`. Each item preserves the parent and term IDs. Links may represent either the explicit `trm_ParentTermID` hierarchy or an additional implicit vocabulary/parent association.
+      description: Returns rows from `defTermsLinks`. Each item preserves the parent and term IDs. Links may represent
+        either the explicit `trm_ParentTermID` hierarchy or an additional implicit vocabulary/parent association.
       security: []
       parameters:
       - $ref: '#/components/parameters/Database'
@@ -531,7 +599,19 @@ paths:
         schema:
           type: integer
           minimum: 1
-      responses: *id001
+      responses:
+        '200':
+          description: Definition collection; empty matches return an empty items array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefinitionCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/recstructure/{recordTypeId}/{fieldId}:
     get:
       tags:
@@ -544,7 +624,21 @@ paths:
       - $ref: '#/components/parameters/RecordTypeId'
       - $ref: '#/components/parameters/FieldId'
       - $ref: '#/components/parameters/Details'
-      responses: *id002
+      responses:
+        '200':
+          description: Definition object returned directly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Definition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/rty:
     get:
       tags:
@@ -557,7 +651,19 @@ paths:
       - $ref: '#/components/parameters/Limit'
       - $ref: '#/components/parameters/Offset'
       - $ref: '#/components/parameters/Details'
-      responses: *id001
+      responses:
+        '200':
+          description: Definition collection; empty matches return an empty items array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefinitionCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/rty/{recordTypeId}:
     get:
       tags:
@@ -569,7 +675,21 @@ paths:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordTypeId'
       - $ref: '#/components/parameters/Details'
-      responses: *id002
+      responses:
+        '200':
+          description: Definition object returned directly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Definition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/dty:
     get:
       tags:
@@ -582,7 +702,19 @@ paths:
       - $ref: '#/components/parameters/Limit'
       - $ref: '#/components/parameters/Offset'
       - $ref: '#/components/parameters/Details'
-      responses: *id001
+      responses:
+        '200':
+          description: Definition collection; empty matches return an empty items array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefinitionCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/dty/{fieldId}:
     get:
       tags:
@@ -594,7 +726,21 @@ paths:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/FieldId'
       - $ref: '#/components/parameters/Details'
-      responses: *id002
+      responses:
+        '200':
+          description: Definition object returned directly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Definition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/trm:
     get:
       tags:
@@ -607,7 +753,19 @@ paths:
       - $ref: '#/components/parameters/Limit'
       - $ref: '#/components/parameters/Offset'
       - $ref: '#/components/parameters/Details'
-      responses: *id001
+      responses:
+        '200':
+          description: Definition collection; empty matches return an empty items array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefinitionCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/trm/{termId}:
     get:
       tags:
@@ -619,7 +777,21 @@ paths:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/TermId'
       - $ref: '#/components/parameters/Details'
-      responses: *id002
+      responses:
+        '200':
+          description: Definition object returned directly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Definition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/trl:
     get:
       tags:
@@ -672,7 +844,19 @@ paths:
       - $ref: '#/components/parameters/Limit'
       - $ref: '#/components/parameters/Offset'
       - $ref: '#/components/parameters/Details'
-      responses: *id001
+      responses:
+        '200':
+          description: Definition collection; empty matches return an empty items array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefinitionCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/rst/{recordTypeId}/{fieldId}:
     get:
       tags:
@@ -685,7 +869,21 @@ paths:
       - $ref: '#/components/parameters/RecordTypeId'
       - $ref: '#/components/parameters/FieldId'
       - $ref: '#/components/parameters/Details'
-      responses: *id002
+      responses:
+        '200':
+          description: Definition object returned directly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Definition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/login:
     post:
       tags:
@@ -734,7 +932,7 @@ paths:
           enum:
           - 0
           - 1
-      responses: &id003
+      responses:
         '200':
           description: Direct IIIF resource
           content:
@@ -770,7 +968,24 @@ paths:
           enum:
           - 0
           - 1
-      responses: *id003
+      responses:
+        '200':
+          description: Direct IIIF resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/iiif/page/{identifier}:
     get:
       tags:
@@ -782,7 +997,24 @@ paths:
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/IiifIdentifier'
-      responses: *id003
+      responses:
+        '200':
+          description: Direct IIIF resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/iiif/annotation/{identifier}:
     get:
       tags:
@@ -794,7 +1026,24 @@ paths:
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/IiifIdentifier'
-      responses: *id003
+      responses:
+        '200':
+          description: Direct IIIF resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/iiif/annotations/{identifier}:
     get:
       tags:
@@ -806,7 +1055,24 @@ paths:
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/IiifIdentifier'
-      responses: *id003
+      responses:
+        '200':
+          description: Direct IIIF resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/annotations/pages:
     get:
       tags:
@@ -823,7 +1089,24 @@ paths:
         schema:
           type: string
           format: uri
-      responses: *id003
+      responses:
+        '200':
+          description: Direct IIIF resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/annotations/{annotationId}:
     get:
       tags:
@@ -839,7 +1122,24 @@ paths:
         required: true
         schema:
           type: string
-      responses: *id003
+      responses:
+        '200':
+          description: Direct IIIF resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/annotations/{manifestRecordId}/pages:
     get:
       tags:
@@ -862,7 +1162,24 @@ paths:
         schema:
           type: string
           format: uri
-      responses: *id003
+      responses:
+        '200':
+          description: Direct IIIF resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/annotations/{manifestRecordId}/{annotationId}:
     get:
       tags:
@@ -884,7 +1201,272 @@ paths:
         required: true
         schema:
           type: string
-      responses: *id003
+      responses:
+        '200':
+          description: Direct IIIF resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/IiifResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/map/{recordId}:
+    get:
+      tags:
+      - Maps
+      operationId: getRecordGeoJson
+      summary: Retrieve geographic data for one record
+      description: Returns a GeoJSON FeatureCollection for one visible Heurist record. Linked-place geometry may
+        be included according to normal Heurist mapping rules.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordId'
+      - name: simplify
+        in: query
+        description: Simplify complex geometries when supported.
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: GeoJSON for one record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapGeoJsonResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/map:
+    get:
+      tags:
+      - Maps
+      operationId: searchMapGeoJson
+      summary: Search geographic data
+      description: Runs a Heurist query and returns visible geographic records as a GeoJSON FeatureCollection. GET
+        is intended for simple or encoded query strings.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: q
+        in: query
+        required: true
+        description: Encoded Heurist search expression or serialised query object.
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - name: simplify
+        in: query
+        description: Simplify complex geometries when supported.
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: GeoJSON search result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapGeoJsonResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+      - Maps
+      operationId: searchMapGeoJsonPost
+      summary: Search geographic data using a structured query
+      description: POST form for large or structured Heurist queries that are unsuitable for URL query parameters.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MapSearchRequest'
+      responses:
+        '200':
+          description: GeoJSON search result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapGeoJsonResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/map/document/{recordId}:
+    get:
+      tags:
+      - Maps
+      operationId: getMapDocument
+      summary: Retrieve a public MapDocument
+      description: Returns an engine-neutral representation of an RT_MAP_DOCUMENT record. Layer order and original
+        bookmark text are preserved.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordId'
+      responses:
+        '200':
+          description: Public MapDocument
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapDocument'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/map/layer/{recordId}:
+    get:
+      tags:
+      - Maps
+      operationId: getMapLayer
+      summary: Retrieve a public MapLayer
+      description: Returns an engine-neutral representation of an RT_MAP_LAYER record and its linked data source.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordId'
+      responses:
+        '200':
+          description: Public MapLayer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapLayer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/time:
+    get:
+      tags:
+      - Timeline
+      operationId: searchTimeline
+      summary: Search timeline data
+      description: Returns timeline items extracted from temporal fields of visible records. GET is intended for
+        simple or encoded queries.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: q
+        in: query
+        required: true
+        description: Encoded Heurist search expression or serialised query object.
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Timeline search result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+      - Timeline
+      operationId: searchTimelinePost
+      summary: Search timeline data using a structured query
+      description: POST form for large or structured Heurist queries that are unsuitable for URL query parameters.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimelineSearchRequest'
+      responses:
+        '200':
+          description: Timeline search result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
 components:
   securitySchemes:
     bearerAuth:
@@ -1309,6 +1891,452 @@ components:
           const: records
         fields:
           $ref: '#/components/schemas/RecordFieldsMeta'
+      additionalProperties: false
+    MapSearchRequest:
+      type: object
+      required:
+      - query
+      properties:
+        query:
+          oneOf:
+          - type: object
+            additionalProperties: true
+          - type: string
+          description: Serialisable Heurist query.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 1000
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+        simplify:
+          type: boolean
+          default: false
+      additionalProperties: false
+    TimelineSearchRequest:
+      type: object
+      required:
+      - query
+      properties:
+        query:
+          oneOf:
+          - type: object
+            additionalProperties: true
+          - type: string
+          description: Serialisable Heurist query.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 1000
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+      additionalProperties: false
+    TermDescriptor:
+      type:
+      - object
+      - 'null'
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        code:
+          type:
+          - string
+          - 'null'
+        label:
+          type:
+          - string
+          - 'null'
+      required:
+      - id
+      - code
+      - label
+      additionalProperties: false
+    MapBookmark:
+      type:
+      - object
+      - 'null'
+      description: Original map bookmark plus parsed values where recognised. Zoom values retain Heurist semantics.
+      properties:
+        raw:
+          type: string
+        type:
+          type: string
+        bounds:
+          type: object
+          properties:
+            west:
+              type: number
+            south:
+              type: number
+            east:
+              type: number
+            north:
+              type: number
+          required:
+          - west
+          - south
+          - east
+          - north
+          additionalProperties: false
+        point:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+          required:
+          - latitude
+          - longitude
+          additionalProperties: false
+        minimumZoom:
+          type:
+          - number
+          - 'null'
+        maximumZoom:
+          type:
+          - number
+          - 'null'
+        zoom:
+          type:
+          - number
+          - 'null'
+      required:
+      - raw
+      - type
+      additionalProperties: true
+    MapDocumentLayerReference:
+      type: object
+      required:
+      - id
+      - recordId
+      - title
+      - order
+      - visible
+      properties:
+        id:
+          type: integer
+        recordId:
+          type: integer
+        title:
+          type: string
+        order:
+          type: integer
+          minimum: 1
+        visible:
+          type: boolean
+      additionalProperties: false
+    MapDocument:
+      type: object
+      required:
+      - format
+      - version
+      - id
+      - title
+      - mapBookmark
+      - geoObject
+      - symbology
+      - minimumZoom
+      - maximumZoom
+      - zoomToPointInKM
+      - worldBaseMap
+      - crs
+      - layers
+      properties:
+        format:
+          type: string
+          const: heurist-map-document
+        version:
+          type: integer
+          const: 1
+        id:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        mapBookmark:
+          $ref: '#/components/schemas/MapBookmark'
+        geoObject: {}
+        symbology: {}
+        minimumZoom:
+          type:
+          - number
+          - 'null'
+          description: Existing Heurist minimum-zoom semantic value; not necessarily a map-engine zoom level.
+        maximumZoom:
+          type:
+          - number
+          - 'null'
+          description: Existing Heurist maximum-zoom semantic value; not necessarily a map-engine zoom level.
+        zoomToPointInKM:
+          type:
+          - number
+          - 'null'
+        worldBaseMap:
+          $ref: '#/components/schemas/TermDescriptor'
+        crs:
+          $ref: '#/components/schemas/TermDescriptor'
+        layers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapDocumentLayerReference'
+      additionalProperties: false
+    MapLayerSource:
+      type: object
+      required:
+      - type
+      - recordId
+      - title
+      properties:
+        type:
+          type: string
+          enum:
+          - heurist-query
+          - record
+          - inline-geojson
+          - remote-geojson
+          - tile
+          - image
+          - iiif
+          - geotiff
+        recordId:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        query:
+          oneOf:
+          - type: object
+            additionalProperties: true
+          - type: string
+        url:
+          type: string
+        fileId:
+          type: integer
+        tileSchema: {}
+        worldFile: {}
+        crs:
+          $ref: '#/components/schemas/TermDescriptor'
+      additionalProperties: true
+    MapLayerStyle:
+      type: object
+      required:
+      - type
+      - symbol
+      - thematic
+      properties:
+        type:
+          type: string
+          enum:
+          - simple
+          - thematic
+        symbol: {}
+        thematic: {}
+      additionalProperties: false
+    MapLayer:
+      type: object
+      required:
+      - format
+      - version
+      - id
+      - title
+      - description
+      - visible
+      - selectable
+      - source
+      - style
+      - timeline
+      - options
+      properties:
+        format:
+          type: string
+          const: heurist-map-layer
+        version:
+          type: integer
+          const: 1
+        id:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        description:
+          type: string
+        visible:
+          type: boolean
+        selectable:
+          type: boolean
+        source:
+          $ref: '#/components/schemas/MapLayerSource'
+        style:
+          $ref: '#/components/schemas/MapLayerStyle'
+        timeline:
+          type: object
+          required:
+          - enabled
+          - fields
+          properties:
+            enabled:
+              type: boolean
+            fields:
+              type: array
+              items: {}
+          additionalProperties: false
+        options:
+          type: object
+          properties:
+            markerClustering:
+              type: boolean
+            zoomToExtent:
+              type: boolean
+            minimumZoom:
+              type:
+              - number
+              - 'null'
+            maximumZoom:
+              type:
+              - number
+              - 'null'
+            popupTemplate:
+              type:
+              - string
+              - 'null'
+          additionalProperties: true
+      additionalProperties: false
+    GeoJsonGeometry:
+      type:
+      - object
+      - 'null'
+      description: A GeoJSON geometry object.
+      additionalProperties: true
+    GeoJsonFeature:
+      type: object
+      required:
+      - type
+      - properties
+      - geometry
+      properties:
+        type:
+          type: string
+          const: Feature
+        id: {}
+        properties:
+          type: object
+          additionalProperties: true
+        geometry:
+          $ref: '#/components/schemas/GeoJsonGeometry'
+      additionalProperties: true
+    MapResponseMeta:
+      type: object
+      required:
+      - database
+      - recordId
+      - total
+      - offset
+      - limit
+      properties:
+        database:
+          type: string
+        recordId:
+          type:
+          - integer
+          - 'null'
+        total:
+          type: integer
+          minimum: 0
+          description: Number of returned features in the initial implementation.
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+      additionalProperties: false
+    MapGeoJsonResponse:
+      type: object
+      required:
+      - type
+      - features
+      - meta
+      properties:
+        type:
+          type: string
+          const: FeatureCollection
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoJsonFeature'
+        meta:
+          $ref: '#/components/schemas/MapResponseMeta'
+      additionalProperties: false
+    TimelineItem:
+      type: object
+      required:
+      - recordId
+      - title
+      - start
+      - end
+      - group
+      properties:
+        recordId:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        start:
+          type:
+          - string
+          - 'null'
+        end:
+          type:
+          - string
+          - 'null'
+        group: {}
+      additionalProperties: false
+    TimelineMeta:
+      type: object
+      required:
+      - total
+      - offset
+      - limit
+      properties:
+        total:
+          type: integer
+          minimum: 0
+          description: Number of returned timeline items in the initial implementation.
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+      additionalProperties: false
+    TimelineResponse:
+      type: object
+      required:
+      - format
+      - version
+      - items
+      - meta
+      properties:
+        format:
+          type: string
+          const: heurist-timeline
+        version:
+          type: integer
+          const: 1
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineItem'
+        meta:
+          $ref: '#/components/schemas/TimelineMeta'
       additionalProperties: false
   responses:
     BadRequest:

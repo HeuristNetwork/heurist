@@ -2,7 +2,7 @@
   "info": {
     "name": "Heurist API - Verified Test Suite",
     "_postman_id": "heurist-api-verified-suite-v1",
-    "description": "Verified Heurist API test suite for routing, public access, session/JWT authentication, modern definition collection responses, semantic record-structure routes, and negative authentication cases. Beta.",
+    "description": "Verified Heurist API beta test suite for routing, public access, authentication, definitions, records, map presentation, GeoJSON, timeline data, IIIF, and annotations.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -1528,6 +1528,210 @@
           }
         }
       ]
+    },
+    {
+      "name": "8. Map and timeline API",
+      "item": [
+        {
+          "name": "MapDocument by record ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/map/document/{{mapDocumentId}}",
+            "description": "Returns the public engine-neutral RT_MAP_DOCUMENT representation."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"MapDocument format\", () => pm.expect(json.format).to.eql(\"heurist-map-document\"));",
+                  "pm.test(\"MapDocument version\", () => pm.expect(json.version).to.eql(1));",
+                  "pm.test(\"Layers preserve order\", () => { if (json.layers.length > 1) pm.expect(json.layers[0].order).to.be.below(json.layers[1].order); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "MapLayer by record ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/map/layer/{{mapLayerId}}",
+            "description": "Returns the public engine-neutral RT_MAP_LAYER representation."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"MapLayer format\", () => pm.expect(json.format).to.eql(\"heurist-map-layer\"));",
+                  "pm.test(\"Source has a type\", () => pm.expect(json.source.type).to.be.a(\"string\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GeoJSON for one record",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/map/{{mapRecordId}}",
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"GeoJSON FeatureCollection\", () => pm.expect(json.type).to.eql(\"FeatureCollection\"));",
+                  "pm.test(\"Features array\", () => pm.expect(json.features).to.be.an(\"array\"));",
+                  "pm.test(\"Meta record ID\", () => pm.expect(json.meta.recordId).to.eql(Number(pm.environment.get(\"mapRecordId\"))));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GeoJSON query (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/map?q={{mapQuery}}&limit=1000&offset=0",
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"GeoJSON FeatureCollection\", () => pm.expect(json.type).to.eql(\"FeatureCollection\"));",
+                  "pm.test(\"Map metadata\", () => pm.expect(json.meta).to.include.keys(\"total\", \"offset\", \"limit\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GeoJSON query (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/map",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": {\n    \"t\": \"{{mapRecordTypeId}}\",\n    \"sort\": \"rec_Title\"\n  },\n  \"limit\": 1000,\n  \"offset\": 0,\n  \"simplify\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"GeoJSON FeatureCollection\", () => pm.expect(json.type).to.eql(\"FeatureCollection\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Timeline query (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/time?q={{timeQuery}}&limit=1000&offset=0",
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Timeline format\", () => pm.expect(json.format).to.eql(\"heurist-timeline\"));",
+                  "pm.test(\"Timeline items\", () => pm.expect(json.items).to.be.an(\"array\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Timeline query (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/time",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": {\n    \"t\": \"{{timelineRecordTypeId}}\",\n    \"sort\": \"rec_Title\"\n  },\n  \"limit\": 1000,\n  \"offset\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Timeline format\", () => pm.expect(json.format).to.eql(\"heurist-timeline\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Public MapDocument, MapLayer, GeoJSON and timeline endpoints. Configure the map-related environment values before running."
     }
   ]
 }

@@ -83,7 +83,7 @@ After deployment, verify:
 /api/docs/HeuristPostmanEnvironmentV1.json
 ```
 
-Also test Swagger's **Authorize** function, one anonymous records request, one anonymous definition request, one authenticated private-record request, and one IIIF request.
+Also test Swagger's **Authorize** function, one anonymous records request, one anonymous definition request, one MapDocument request, one GeoJSON query, one timeline query, one authenticated private-record request, and one IIIF request.
 
 ## Validate the OpenAPI specification
 
