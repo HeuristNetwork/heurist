@@ -3853,10 +3853,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         //reset
                         $('#prepareWarnings').css('display','none');    
                         $('#mrr_warning').text('');
+                        let showingWarningsAndErrors = false;
                             
                         if(res['utm_warning']>0){
                             $('#prepareWarnings').show();
                             $('#btnShowUTMWarnings').show();
+                            showingWarningsAndErrors = true;
                         }else{
                             $('#btnShowUTMWarnings').hide();
                         }
@@ -3866,6 +3868,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $('#mrr_warning').text('Data errors: '+res['count_warning']);
                             $('#prepareWarnings').show();//.css('display','inline-block');
                             $('#btnShowWarnings').show();
+                            showingWarningsAndErrors = true;
 
                             if(res['missed_required']==true){
                                 window.hWin.HEURIST4.msg.showMsgErr({
@@ -3888,6 +3891,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             
                             $('#mrr_error').text('Rows with unrecognised terms: '+res['count_error']);
                             $('#prepareErrors').show();//.css('display','inline-block');
+                            showingWarningsAndErrors = true;
                             
                             window.hWin.HEURIST4.msg.showMsgErr({
                                 message: (res['count_error']==1?'There is one row ':('There are '+res['count_error']+' ROWS '))
@@ -3929,6 +3933,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                             $('#prepareErrors').css('display','none');
                             _showStep(5);
+                        }
+
+                        if(showingWarningsAndErrors){
+                            $('.warningMessage').show();
+                            $('.first-cell').prop('width', '150');
+                        }else{
+                            $('.warningMessage').hide();
+                            $('.first-cell').prop('width', '250');
                         }
                     }else{
                         _showStep(4);
@@ -4081,6 +4093,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             +'</div>';
                             
                             //skipped_details
+                        }
+
+                        if($('#ignoreErrors').is(':checked')){ // uncheck ignore all errors
+                            $('#ignoreErrors').prop('checked', false);
                         }
                           
                         msg = msg +'</td></tr></table>';
@@ -5316,6 +5332,33 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $('#sa_match2, [for="sa_match2"]').attr('title', '');
         }
     }
+
+    function _onIgnoreErrors(){
+
+        let $ignoreErrors = $('#ignoreErrors');
+        let isChecked = $ignoreErrors.is(':checked');
+        $ignoreErrors.prop('checked', false);
+
+        if(!isChecked){
+            window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), true);
+            return;
+        }
+
+        let $dlg;
+        let msg = `<div>
+            Are you sure you want to ignore the data errors / warnings reported below?<br>
+            Please click on the highlighted warnings below and correct the errors if possible.
+        </div>`;
+
+        let btns = {};
+        btns[window.hWin.HR('Yes')] = () => {
+            window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), false);
+            $dlg.dialog('close');
+        };
+        btns[window.hWin.HR('No')] = () => { $dlg.dialog('close'); };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: window.hWin.HR('Ignore reported data errors')}, {default_palette_class: 'ui-heurist-populate'});
+    }
     
     //public members
     let that = {
@@ -5373,8 +5416,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
          */
         onIgnoreRectype: function(event){
             _onIgnoreRectype();
-        }
-        
+        },
+
+        onIgnoreErrors: function(){
+            _onIgnoreErrors();
+        }        
         
     }
 

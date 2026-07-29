@@ -452,6 +452,12 @@ if(!$format){ $format='csv';}
                     Click on list of record types to skip steps
                 </div>
 
+                <div class="warningMessage">
+                    <label>
+                        <input type="checkbox" id="ignoreErrors" class="text" onchange="{importRecordsCSV.onIgnoreErrors()}" />&nbsp;
+                        Ignore data errors, import anyway
+                    </label>
+                </div>
 
             </div>
         </div>
@@ -539,12 +545,18 @@ if(!$format){ $format='csv';}
         </div>
 <!-- end radiogroup setting divs -->
 
-        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:31px">
+        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:25px">
             <table role="presentation" class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
-                                        <td rowspan="3" width="250">
+                                        <td rowspan="3" width="250" class="first-cell">
                                             <h2 id="mrr_big">Existing: 0&nbsp;&nbsp;&nbsp;New: 0</h2>
+                                        </td>
+                                        <td rowspan="3">
+                                            <div style="color: red; display: none;" class="warningMessage">Click to correct, then<br>click <strong>Prepare again</strong></div>
+                                        </td>
+                                        <td rowspan="3">
+                                            <span style="color: red; transform: scaleX(3); left: 1em; display: none;" class="ui-icon ui-icon-arrowthick-1-e warningMessage"></span>
                                         </td>
                                         <td rowspan="3">
                                             <div id="prepareWarnings"
@@ -588,7 +600,7 @@ if(!$format){ $format='csv';}
         </div>
 
 
-        <table class="tbmain" style="width:99%;position:absolute;bottom:0px;" cellspacing="0" cellpadding="2">
+        <table class="tbmain" style="width:99%;position:absolute;bottom: -2px;" cellspacing="0" cellpadding="2">
             <caption></caption>
             <thead><tr>
                 <th style="width:75px;">Use value<br><a href="#" class="lnk_SelectAll link_styling">Select all</a></th>
