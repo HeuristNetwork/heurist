@@ -1139,6 +1139,7 @@ final class RequestRouter
 
     private static function isApiDocumentationRoute(array $segments): bool
     {
+        // api/docs
         return count($segments) >= 2
             && $segments[0] === 'api'
             && in_array($segments[1], ['docs', 'openapi.yaml'], true);

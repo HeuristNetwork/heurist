@@ -284,6 +284,12 @@ if($method=='save' || $method=='add'){
 // ----------------------------------------------------
 $resource = @$requestUri[3];
 
+// Map/time POST requests are read-only structured searches, not entity additions.
+if(in_array($resource, array('map', 'time'), true)
+    && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'){
+    $method = 'search';
+}
+
 // Routes where auth processing is not needed here
 $is_public_annotation_read =
     ($resource === 'annotations'
@@ -324,7 +330,8 @@ if($method === 'search'){
         'rty', 'rectypes',
         'dty', 'fields',
         'trm', 'terms', 'trl', 'termlinks',
-        'rst', 'recstructure'
+        'rst', 'recstructure',
+        'map', 'time'
     );
     $allow_anonymous = in_array($resource, $publicSearchResources, true);    
 }
@@ -351,7 +358,26 @@ if(!$skip_auth_processing){
 }
 // ----------------------------------------------------
 
-if (@$requestUri[3]=='iiif') {
+if(in_array(@$requestUri[3], array('map', 'time'), true)) {
+
+    if($method!=='search'){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+    }
+
+    if($requestUri[3]==='time'){
+        $req_params['resource'] = 'time';
+        $req_params['id'] = null;
+    }elseif(in_array(@$requestUri[4], array('document', 'layer'), true)){
+        $req_params['resource'] = $requestUri[4];
+        $req_params['id'] = @$requestUri[5];
+    }else{
+        $req_params['resource'] = 'geojson';
+        $req_params['id'] = @$requestUri[4];
+    }
+    $req_params['restapi'] = 1;
+    include_once '../../hserv/controller/map_presentation.php';
+
+}elseif (@$requestUri[3]=='iiif') {
     
     // IIIF Presentation API routes, for example:
     //   /api/{db}/iiif/manifest/{manifestRecID}
