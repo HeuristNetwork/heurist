@@ -56,11 +56,14 @@ class DbMapLayer extends DbRecordTypeEntity
     public function getPublicRecord(int $recordId): ?array
     {
         $this->defineRequiredConstants();
-        $record = recordSearchByID($this->system, $recordId, true,
+        $record = recordSearchByID($this->system, $recordId, false,
             'rec_ID,rec_RecTypeID,rec_Title');
         if(!is_array($record) || intval(@$record['rec_RecTypeID']) !== $this->recordTypeId()){
             return null;
         }
+        
+        $record['details'] = $this->loadRecordDetails($recordId);
+        
         return $record;
     }
 
@@ -81,9 +84,16 @@ class DbMapLayer extends DbRecordTypeEntity
             // Temporary/current-search layers may keep the query on the layer itself.
             return $layer;
         }
-        $source = recordSearchByID($this->system, $sourceId, true,
+        $source = recordSearchByID($this->system, $sourceId, false,
             'rec_ID,rec_RecTypeID,rec_Title');
-        return is_array($source) ? $source : null;
+            
+        if(!is_array($source)){
+            return null;
+        }
+        
+        $source['details'] = $this->loadRecordDetails($sourceId);    
+        
+        return $source;
     }
 
     /**

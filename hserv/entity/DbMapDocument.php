@@ -61,11 +61,14 @@ class DbMapDocument extends DbRecordTypeEntity
         }
 
         // recordSearchByID applies normal record visibility rules.
-        $record = recordSearchByID($this->system, $recordId, true,
+        $record = recordSearchByID($this->system, $recordId, false,
             'rec_ID,rec_RecTypeID,rec_Title');
         if(!is_array($record) || intval(@$record['rec_RecTypeID']) !== $this->recordTypeId()){
             return null;
         }
+        
+        $record['details'] = $this->loadRecordDetails($recordId);
+        
         return $record;
     }
 
