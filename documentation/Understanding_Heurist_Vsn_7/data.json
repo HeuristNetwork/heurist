@@ -3,7 +3,7 @@
     "id": 7,
     "name": "Understanding Heurist 2026 Vsn 7",
     "description_html": "<p>End-user manual for the Heurist academic knowledge management platform. 2026 (version 7).</p><p>PLEASE NOTE, <strong>THIS IS A WORK IN PROGRESS</strong> and is still being actively developed.</p>",
-    "cover": "oUKQDpZbKnqfExQ20izO.jpg",
+    "cover": "MRdPnUstPMJGGcQTDRY7.jpg",
     "chapters": [
       {
         "id": 26,
@@ -1466,7 +1466,7 @@
     ],
     "tags": []
   },
-  "exported_at": "2026-07-29T13:48:26+00:00",
+  "exported_at": "2026-07-30T03:50:03+00:00",
   "instance": {
     "id": "601b40de-1441-46ce-a991-353c0ece91dc",
     "version": "v26.05.1"
