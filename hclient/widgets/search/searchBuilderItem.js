@@ -735,6 +735,9 @@ Whole value = EQUAL
                             rst_DefaultValue: '',
                             rst_MaxValues:100};
             ed_options['dtFields'] = dtFields;
+
+            ed_options.dtFields.rst_Display = 'visible';
+            ed_options.dtFields.rst_MayModify = 'open';
             
             this._predicate_reltype_ele = $("<div>").editing_input(ed_options).appendTo(this.values_container);
             let ele = this._predicate_reltype_ele.find('.editint-inout-repeat-button')
@@ -772,6 +775,12 @@ Whole value = EQUAL
         }else if(field_type=='freetext' || field_type=='blocktext' || field_type==prev_type){
             ed_options.values = prev_value;
         }
+
+        if(!ed_options.dtFields){
+            ed_options.dtFields = {};
+        }
+        ed_options.dtFields.rst_Display = 'visible';
+        ed_options.dtFields.rst_MayModify = 'open';
 
         //init input elements
         this._predicate_input_ele = $("<div>")
