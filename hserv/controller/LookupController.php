@@ -39,6 +39,7 @@ use function count;
 use function defined;
 use function define;
 use function is_bool;
+use function is_string;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
@@ -102,7 +103,9 @@ class LookupController{
             'action' => 'import_records' // 'record_output'
         ],
 
-        'wikidata_SPARQL' => 'https://query.wikidata.org/sparql?'
+        'wikidata_SPARQL' => 'https://query.wikidata.org/sparql?',
+
+        'orcid' => 'https://orcid.org/{__ORCID__}/record'
     ];
 
     private const SERVICE_PARAMETERS = [ // array
@@ -146,6 +149,16 @@ class LookupController{
 
         'wikidata_SPARQL' => [
             'query' => ALPHANUMERIC
+        ],
+
+        'orcid' => [
+            'id' => '/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/'
+        ]
+    ];
+
+    private const LOOKUP_NO_QUERY = [
+        'orcid' => [
+            'id' => '{__ORCID__}'
         ]
     ];
 
@@ -236,6 +249,9 @@ class LookupController{
         }elseif($this->lookupMetadata){
             $this->isValid = true;
             $this->isMetadata = true;
+        }elseif(array_key_exists($this->lookupType, self::LOOKUP_NO_QUERY)){
+            $this->isValid = true;
+            $this->lookupURL = $this->serviceURLs[$this->lookupType];
         }elseif(!is_array($serviceURLs)){
             $this->isValid = $serviceURLs == $this->lookupURL || strpos($this->lookupURL, $serviceURLs) === 0;
         }else{
@@ -266,12 +282,63 @@ class LookupController{
         return $this->isValid;
     }
 
+    private function verifyRequestURI() : bool{
+
+        if(!array_key_exists($this->lookupType, self::LOOKUP_NO_QUERY)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Provided service "'. htmlspecialchars($this->lookupType) .'" is not valid');
+            return false;
+        }
+
+        $replacements = self::LOOKUP_NO_QUERY[$this->lookupType];
+        $serviceParams = self::SERVICE_PARAMETERS[$this->lookupType];
+        $hasReplacedValue = false;
+
+        foreach($serviceParams as $field => $type){
+
+            if(!array_key_exists($field, $this->request) || !array_key_exists($field, $replacements)){
+                continue;
+            }
+
+            $value = null;
+            if($type === NUMERIC){
+                $value = intval($this->request[$field]);
+            }elseif($type === ALPHANUMERIC || is_string($type) && preg_match($type, $this->request[$field]) === 1){
+                $value = htmlspecialchars($this->request[$field], ENT_NOQUOTES);
+            }
+
+            if($value !== null){
+                $this->lookupURL = str_replace($replacements[$field], $value, $this->lookupURL);
+                $hasReplacedValue = true;
+            }
+        }
+
+        $missingFields = [];
+        preg_match_all("/{__\w+__}/", $this->lookupURL, $missingFields);
+
+        if(!$hasReplacedValue || !empty($missingFields)){
+            $fields = [];
+            foreach($replacements as $field => $replace){
+                if(in_array($replace, $missingFields)){
+                    $fields[] = $field;
+                }
+            }
+            $message = !$hasReplacedValue ? 'No values have been replaced within the requested URL' : 'The following parameters are missing:<br><strong>'. implode(', ', $fields) .'</strong>';
+            $this->system->addError(HEURIST_ACTION_BLOCKED, $message);
+        }
+
+        return $hasReplacedValue;
+    }
+
     private function verifyRequestParameters() : bool{
 
         global $accessToken_GeonamesAPI;
 
         $lookupType = strpos($this->lookupType, 'bnf') !== false ? 'bnf' : $this->lookupType;
         $lookupType = strpos($this->lookupType, 'nakala') !== false ? 'nakala' : $lookupType;
+
+        if(array_key_exists($lookupType, self::LOOKUP_NO_QUERY)){
+            return $this->verifyRequestURI();
+        }
 
         if($this->isESTC || $this->isDebug || $this->isMetadata || !array_key_exists($lookupType, self::SERVICE_PARAMETERS) || !$this->isValid){
             $this->isValid || $this->system->addError(HEURIST_INVALID_REQUEST, 'Provided service "'. htmlspecialchars($lookupType) .'" is not valid');
@@ -298,9 +365,9 @@ class LookupController{
                 continue;
             }
 
-            if($field === NUMERIC){
+            if($type === NUMERIC){
                 $newQuery[$field] = intval($urlQuery[$field]);
-            }else{
+            }elseif($type === ALPHANUMERIC || is_string($type) && preg_match($type, $urlQuery[$field]) === 1){
                 $newQuery[$field] = htmlspecialchars($urlQuery[$field], ENT_NOQUOTES);
             }
         }
@@ -325,7 +392,8 @@ class LookupController{
         }
 
         if(empty($newURL) || empty($newQuery) || !filter_var($newURL, FILTER_VALIDATE_URL)){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Invalid URL provided');
+            $message = empty($newQuery) ? 'No query parameters provided' : 'Invalid URL provided';
+            $this->system->addError(HEURIST_ACTION_BLOCKED, $message);
             return false;
         }
 
@@ -421,6 +489,10 @@ class LookupController{
 
             case 'opentheso':
                 $this->processOpenthesoSearch();
+                break;
+
+            case 'orcid':
+                $this->processORCIDSearch();
                 break;
 
             case 'geonames':
@@ -1114,6 +1186,45 @@ class LookupController{
         }
 
         $this->lookupResponse = $results;
+    }
+
+    private function processORCIDSearch() : void{
+
+        $this->lookupResponse = is_array($this->lookupResponse) ? $this->lookupResponse : json_decode($this->lookupResponse, true);
+        $record = [];
+
+        if(json_last_error() !== JSON_ERROR_NONE){ // no result
+            $this->lookupResponse = $record;
+            return;
+        }
+
+        if(array_key_exists('person', $this->lookupResponse)){
+
+            $personDetails = $this->lookupResponse['person'];
+
+            $record['given-names'] = !empty(@$personDetails['name']['given-names']['value']) ? $personDetails['name']['given-names']['value'] : '';
+            $record['family-name'] = !empty(@$personDetails['name']['family-name']['value']) ? $personDetails['name']['family-name']['value'] : '';
+            $record['keywords'] = !empty(@$personDetails['keywords']['keyword']) && !empty(@$personDetails['keywords']['keyword'][0]['content'])
+                ? $personDetails['keywords']['keyword'][0]['content'] : '';
+        }
+
+        if(array_key_exists('activities-summary', $this->lookupResponse)){
+
+            $employmentDetails = $this->lookupResponse['activities-summary'];
+
+            $record['employment'] = !empty(@$employmentDetails['employments']['affiliation-group'])
+                && !empty(@$employmentDetails['employments']['affiliation-group'][0]['summaries'])
+                && !empty(@$employmentDetails['employments']['affiliation-group'][0]['summaries'][0]['employment-summary']['organization']['name'])
+                    ? $employmentDetails['employments']['affiliation-group'][0]['summaries'][0]['employment-summary']['organization']['name'] : '';
+        }
+
+        $record['orcid'] = $this->request['id'];
+        $record['url'] = $this->lookupURL;
+
+        // researcher-urls => researcher-url[] => url-name & url['value']
+        // addresses => address => country['value']
+
+        $this->lookupResponse = $record;
     }
 
     private function retrieveMetadata() : bool{
