@@ -109,6 +109,8 @@ global $is_api;
 
             if(DT_ZIP_FILE>0 && @$record['details'][DT_ZIP_FILE]){
                 $shp_file = fileRetrievePath(array_shift($record['details'][DT_ZIP_FILE]),'shp',true);
+                //$dbf_file = substr($shp_file,0,-3).'dbf';
+                //$shx_file = substr($shp_file,0,-3).'shx';
                 $isZipArchive = true;
 
             }elseif(DT_SHAPE_FILE>0 && @$record['details'][DT_SHAPE_FILE]){
@@ -181,20 +183,26 @@ global $is_api;
                             'shp'   => $shp_file,
                             'dbf'   => $dbf_file);
 
+                        $ignore_shx = true;
                         if($shx_file && file_exists($shx_file)){
                             $files['shx'] = $shx_file;
+                            $ignore_shx = false;
                         }
-                        $shapeFile = new ShapefileReader($files, array(Shapefile::OPTION_IGNORE_FILE_SHX=>true));
+                        $shapeFile = new ShapefileReader($files, array(
+                                        Shapefile::OPTION_IGNORE_FILE_SHX=>$ignore_shx, 
+                                        Shapefile::OPTION_IGNORE_FILE_DBF=>false));
                     }elseif(file_exists($shp_file)){
                         //if provide only shapefile, it finds other automatically
-                        $shapeFile = new ShapefileReader($shp_file, array(Shapefile::OPTION_IGNORE_FILE_SHX=>true, Shapefile::OPTION_IGNORE_FILE_DBF=>true));
+                        $shapeFile = new ShapefileReader($shp_file, array(
+                                        Shapefile::OPTION_IGNORE_FILE_SHX=>true, 
+                                        Shapefile::OPTION_IGNORE_FILE_DBF=>true));
                     }else{
                         $system->errorExitApi('Cannot process shp file', HEURIST_ERROR, null);
                     }
 
                     $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");
                     $fd = fopen($tmp_destination, 'w');//less than 1MB in memory otherwise as temp file
-                    fwrite($fd, '[');
+                    fwrite($fd, '{"type":"FeatureCollection","features":[');
                     $rec_cnt = 0;
 
                     // Read all the records
@@ -251,7 +259,7 @@ global $is_api;
                         }
                     }//for records
 
-                    fwrite($fd, ']');
+                    fwrite($fd, ']}');
                     $is_compressed = true;
 
                     if($is_compressed){

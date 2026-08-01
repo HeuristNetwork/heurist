@@ -424,7 +424,7 @@ function HMapLayer( _options ) {
         let rec_ID = _recordset.fld(_record, 'rec_ID');
                     
         const request = {recID:rec_ID};             
-        //perform loading kml as geojson
+        //perform loading shp as geojson
         window.hWin.HAPI4.RecordMgr.load_shp_as_geojson(request,
             function(response){
                 if(response){
