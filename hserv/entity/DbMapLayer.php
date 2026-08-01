@@ -41,7 +41,7 @@ class DbMapLayer extends DbRecordTypeEntity
             'DT_MINIMUM_ZOOM_LEVEL', 'DT_MAXIMUM_ZOOM_LEVEL',
             'DT_TIMELINE_FIELDS', 'DT_QUERY_STRING', 'DT_SERVICE_URL',
             'DT_FILE_RESOURCE', 'DT_MAP_IMAGE_LAYER_SCHEMA',
-            'DT_MAP_IMAGE_WORLDFILE', 'DT_CRS'
+            'DT_MAP_IMAGE_WORLDFILE', 'DT_CRS', 'DT_GEO_OBJECT', 'DT_MIME_TYPE'
         );
         $this->requiredTermConstants = array();
     }

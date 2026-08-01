@@ -89,7 +89,7 @@ class MapPresentationService
             'id' => intval($record['rec_ID']),
             'title' => (string)($record['rec_Title'] ?? ''),
             'mapBookmark' => $this->parseBookmark($bookmarkRaw),
-            'geoObject' => $this->normaliseGeo($this->documents->value($record, 'DT_GEO_OBJECT')),
+            'bounds' => $this->normaliseGeo($this->documents->value($record, 'DT_GEO_OBJECT')),
             'symbology' => $this->decodeJson($this->documents->value($record, 'DT_SYMBOLOGY')),
             'minimumZoom' => $this->numberOrNull($this->documents->value($record, 'DT_MINIMUM_ZOOM')),
             'maximumZoom' => $this->numberOrNull($this->documents->value($record, 'DT_MAXIMUM_ZOOM')),
@@ -188,6 +188,46 @@ class MapPresentationService
             
             $source['url'] = "heurist/hserv/controller/$script_name.php?db="
                                 .$this->system->dbname().'&format=geojson&recID='.$record['rec_ID'];
+        }elseif($type=='tile'){
+            
+            $fileId = $this->layers->value($record, 'DT_SERVICE_URL');
+            $fileinfo = fileGetFullInfo($this->system, $fileId);
+            if(!isEmptyArray($fileinfo)){
+                $fileinfo = $fileinfo[0];//
+                $url = $fileinfo['ulf_ExternalFileReference'];    
+                
+                if(!(strpos($url,'{q}')>0 || strpos($url,'{z}/{x}/{y}')>0)){
+                    $url = rtrim($url,'/') . '/{z}/{x}/{y}.'.$fileinfo['ulf_MimeExt'];
+                    /*
+                    $mimeType = intval($this->layers->value($record, 'DT_MIME_TYPE'));
+                    if($mimeType>0){
+                        $mimeType = ConceptCode::getTermConceptID($mimeType);
+                        $extension = ($mimeType == '2-540')? 'png' :($mimeType == '2-537'?'jpg':'gif');
+                        $url = $url.'.'.$extension;
+                    }
+                    */
+                }
+                
+                $source['url'] = $url;
+            }
+            
+            $source['bounds'] = $this->normaliseGeo($this->layers->value($record, 'DT_GEO_OBJECT'));
+            // 
+            $minZoom = $this->layers->value($record, 'DT_MINIMUM_ZOOM_LEVEL');
+            $maxZoom = $this->layers->value($record, 'DT_MAXIMUM_ZOOM_LEVEL');
+            
+            if($minZoom>0) { $source['minZoom'] = $minZoom; }
+            $source['maxZoom'] = ($maxZoom>0)?$maxZoom :19; //mandatory
+
+            $schema = $this->layers->value($record, 'DT_MAP_IMAGE_LAYER_SCHEMA');
+            //if($schema !== null){ $source['tileSchema'] = $schema; }
+            //TMS naming schema
+            $tmsSchema = ConceptCode::getTermLocalID('2-548');
+            if(intval($schema) == $tmsSchema){
+                $source['tms'] = true;    
+            }
+            
+            
         }else{
             $query = $this->layers->value($record, 'DT_QUERY_STRING');
             if($query !== null){ $source['query'] = $this->parseQuery($query); } 
@@ -199,8 +239,6 @@ class MapPresentationService
         }
         $file = $this->layers->value($record, 'DT_FILE_RESOURCE');
         if($file !== null){ $source['fileId'] = intval($file); }
-        $schema = $this->layers->value($record, 'DT_MAP_IMAGE_LAYER_SCHEMA');
-        if($schema !== null){ $source['tileSchema'] = $this->decodeJson($schema); }
         
         $world = $this->layers->value($record, 'DT_MAP_IMAGE_WORLDFILE');
         if($world !== null){ $source['worldFile'] = $this->scalar($world); }
