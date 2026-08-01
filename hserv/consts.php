@@ -478,7 +478,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_GIVEN_NAMES' => array(2, 18),
     'DT_GENDER' => array(2, 20),
     'DT_EMAIL' => array(2, 23),
-    'DT_GEO_OBJECT' => array(2, 28),
+    'DT_GEO_OBJECT' => array(2, 28),  //extent
     'DT_MIME_TYPE' => array(2, 29),
     'DT_IMAGE_TYPE' => array(2, 30),
     'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2, 31),

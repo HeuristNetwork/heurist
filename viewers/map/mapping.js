@@ -2996,7 +2996,7 @@ $.widget( "heurist.mapping", {
             let cname = (style.iconFont.indexOf('ui-icon-')==0?'':'ui-icon-')+style.iconFont;
             let fsize = style.iconSize;
             let isize = 6+fsize;
-            let bgcolor = (style.fillColor0?(';background-color:'+style.fillColor):';background:none');
+            let bgcolor = (style.fillColor?(';background-color:'+style.fillColor):';background:none');
             
             myIcon = L.divIcon({  
                 html: '<div class="ui-icon '+cname+'" style="border:none;font-size:'    //padding:2px;;width:'+isize+'px;

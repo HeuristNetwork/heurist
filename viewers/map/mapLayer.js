@@ -273,7 +273,7 @@ function HMapLayer( _options ) {
 
                 if(layer_url.indexOf('{q}')<0 && layer_url.indexOf('{x}')<0){
                     layer_url = layer_url 
-                                + (layer_url[layer_url.length-1]=='/'?'':'/') + '{q}'
+                                + (layer_url[layer_url.length-1]=='/'?'':'/') + '{z}/{x}/{y}'  //'{q}'
                                 + ext;
                 }
                 
