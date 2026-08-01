@@ -162,10 +162,13 @@ class MapPresentationService
             'RT_GEOTIFF_SOURCE' => 'geotiff',
             'RT_IMAGE_SOURCE' => 'image',
             'RT_KML_SOURCE' => 'remote-geojson',
-            'RT_FILE_SOURCE' => 'remote-geojson',
+            'RT_FILE_SOURCE' => 'remote-geojson', //csv, kml, geojson
             'RT_SHP_SOURCE' => 'remote-geojson'
         );
         foreach($map as $constant=>$candidate){
+            
+            $this->system->defineConstant($constant);
+            
             if(defined($constant) && intval(constant($constant)) === $rty){ $type = $candidate; break; }
         }
 
@@ -175,17 +178,30 @@ class MapPresentationService
             'title' => (string)($record['rec_Title'] ?? '')
         );
 
-        $query = $this->layers->value($record, 'DT_QUERY_STRING');
-        if($query !== null){ $source['query'] = $this->parseQuery($query); }
-        $url = $this->layers->value($record, 'DT_SERVICE_URL');
-        if($url !== null){
-            $source['url'] = $this->scalar($url);
-            if(stripos((string)$source['url'], '/info.json') !== false){ $source['type'] = 'iiif'; }
+        if($type=='remote-geojson'){
+            //HEURIST_BASE_URL.
+            
+            $script_name = 'record_map_source'; //for kml,csv,geojson
+            if(defined('RT_SHP_SOURCE') && $rty === intval(RT_SHP_SOURCE)){
+                $script_name = 'record_shp'; //for shp
+            }
+            
+            $source['url'] = "heurist/hserv/controller/$script_name.php?db="
+                                .$this->system->dbname().'&format=geojson&recID='.$record['rec_ID'];
+        }else{
+            $query = $this->layers->value($record, 'DT_QUERY_STRING');
+            if($query !== null){ $source['query'] = $this->parseQuery($query); } 
+            $url = $this->layers->value($record, 'DT_SERVICE_URL');
+            if($url !== null){
+                $source['url'] = $this->scalar($url);
+                if(stripos((string)$source['url'], '/info.json') !== false){ $source['type'] = 'iiif'; }
+            }
         }
         $file = $this->layers->value($record, 'DT_FILE_RESOURCE');
         if($file !== null){ $source['fileId'] = intval($file); }
         $schema = $this->layers->value($record, 'DT_MAP_IMAGE_LAYER_SCHEMA');
         if($schema !== null){ $source['tileSchema'] = $this->decodeJson($schema); }
+        
         $world = $this->layers->value($record, 'DT_MAP_IMAGE_WORLDFILE');
         if($world !== null){ $source['worldFile'] = $this->scalar($world); }
         $crs = $this->layers->value($record, 'DT_CRS');
@@ -233,8 +249,9 @@ class MapPresentationService
         $text = trim((string)$value);
         $json = json_decode($text, true);
         if(is_array($json)){ return $json; }
-        parse_str(ltrim($text, '?'), $parsed);
-        return !empty($parsed) ? $parsed : array('q'=>$text);
+        return ltrim($text, '?');
+        //parse_str(ltrim($text, '?'), $parsed);
+        //return !empty($parsed) ? $parsed : array('q'=>$text);
     }
 
     private function decodeJson($value)
