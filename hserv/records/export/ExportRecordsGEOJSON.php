@@ -96,7 +96,6 @@ protected function _outputPrepare($data, $params){
         $this->detail_mode = $this->is_leaflet ?0:intval(@$params['detail_mode']);
         $this->separate_entity = $this->is_leaflet && (intval(@$params['separate'])==1);
 
-
         $this->find_geo_by_pointer_dty = null;
         $this->find_by_geofields = null;
 

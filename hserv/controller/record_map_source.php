@@ -81,7 +81,7 @@
                 $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "data");
             }
 
-            if(@$record['details'][DT_KML]){
+            if(@$record['details'][DT_KML]){ //KML snippet
                 //snippet - format unknown
                 $file_content = array_shift($record['details'][DT_KML]);
                 if($tmp_destination){
@@ -94,6 +94,8 @@
                     $kml_file = array_shift($record['details'][DT_KML_FILE]);
                 }else{
                     $kml_file = array_shift($record['details'][DT_FILE_RESOURCE]);
+                    // csv, geojson
+                    $input_format = ($kml_file['fxm_MimeType']=='text/plain' || $kml_file['fxm_MimeType']=='application/csv')?'csv':'geojson';
                 }
                 $kml_file = $kml_file['file'];
                 $url = @$kml_file['ulf_ExternalFileReference'];
@@ -163,7 +165,7 @@
             }
 
             //output format
-            if(@$params['format']=='geojson'){
+            if(@$params['format']=='geojson' && $input_format!=='geojson'){
 
                 //detect type of data
                 if($input_format==null){
@@ -237,7 +239,8 @@
                     //it outputs geojson and exits
                     $classname = 'hserv\records\export\ExportRecordsGEOJSON';
                     $outputHandler = new $classname($system);
-                    $res = $outputHandler->output($recdata, array('format'=>'geojson', 'leaflet'=>true, 'depth'=>0, 'simplify'=>true) );
+                    //leaflet = true - with wrapper 
+                    $res = $outputHandler->output($recdata, array('format'=>'geojson', 'leaflet'=>false, 'depth'=>0, 'simplify'=>true) );
 
                 }else{
                     //entire kml is considered as unified map entry
@@ -334,6 +337,8 @@
                         header('Content-Type: application/vnd.google-earth.kml+xml');
                     }elseif($input_format=='csv'){
                         header('Content-Type: text/csv');
+                    }elseif($input_format=='geojson'){
+                        header('Content-Type: application/geo+json');
                     }elseif($input_format=='dbf'){
                         header('Content-Type: application/x-dbase');
                     }
