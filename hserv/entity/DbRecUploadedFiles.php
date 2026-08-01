@@ -621,9 +621,9 @@ class DbRecUploadedFiles extends DbEntityBase
                     if(!$this->records[$idx]['ulf_OrigFileName']){
                         $this->records[$idx]['ulf_OrigFileName'] = ULF_REMOTE;
                     }
-                    if(!@$this->records[$idx]['ulf_PreferredSource']){
-                        $this->records[$idx]['ulf_PreferredSource'] = 'external';
-                    }
+                }
+                if(!@$this->records[$idx]['ulf_PreferredSource']){
+                    $this->records[$idx]['ulf_PreferredSource'] = 'external';
                 }
             }else{
                 $this->records[$idx]['ulf_PreferredSource'] = 'local';
