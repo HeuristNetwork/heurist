@@ -825,7 +825,7 @@ $.widget( "heurist.mapping", {
         
         let HeuristTilerLayer = L.TileLayer.extend({
                         getBounds: function(){
-                            return this.options._extent;  
+                            return this.options.extent || this.options.bounds || this.options._extent;  
                         }});
         if(layer_options['IIIF']){ 
                 //IIIF layer can work as a basemap for CRS.Simple
@@ -883,18 +883,36 @@ $.widget( "heurist.mapping", {
                 // TMS naming scheme (Y is flipped)
                 // Tile Map Service: an early standard supported by OpenLayers. 
                 // One difference is the y axis is positive southwards in TMS
-            
+                
+/* working
+    new_layer = L.tileLayer(layer_url, {
+      tms: true,
+      minZoom: 18,
+      maxZoom: 19,
+      // prevents Leaflet from requesting tiles outside the image extent.
+      bounds: imageBounds,
+      noWrap: true,
+      opacity: 0.80,
+      keepBuffer: 0,
+      updateWhenIdle: true,
+      attribution: 'Bromley Fire Map'
+    }).addTo(this.nativemap);
+*/                
+/* OUTDATED - in the last leaflet version tms is supported natively   
                 let TMS_Layer = HeuristTilerLayer.extend({
+                    
                     getTileUrl: function (tilePoint) {
                         //this._adjustTilePoint(tilePoint);
                         let zoom = this._getZoomForUrl();
-                        return L.Util.template(this._url, {
+                        let url = L.Util.template(this._url, {
                             s: this._getSubdomain(tilePoint),
                             q: this._maptiler(tilePoint.x, tilePoint.y, zoom),
                             z: zoom,
                             x: tilePoint.x,
                             y: Math.pow(2, zoom) - tilePoint.y - 1
                         });
+                       
+                        return url;
                     },
                     _maptiler: function (x, y, z) { //invert Y
                         
@@ -904,8 +922,12 @@ $.widget( "heurist.mapping", {
                         return s;
                     }
                 });    
-                
-            new_layer = new TMS_Layer(layer_url, layer_options).addTo(this.nativemap);  
+*/                
+            layer_options['tms'] = true;   
+            //layer_options['minZoom'] = 18;
+            if(!layer_options['maxZoom']) {layer_options['maxZoom'] = 19;} //max zoom is mandatory
+
+            new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);  
 
             /*            
               layer_url = 'http://127.0.0.1/heurist/external/php/tileserver.php?/index.json?/c:/xampp/htdocs/HEURIST_FILESTORE/tileserver/mapa/{z}/{x}/{y}.png';
@@ -915,6 +937,7 @@ $.widget( "heurist.mapping", {
                 
         }else{
             // Google Map/OSM
+            if(!layer_options['maxZoom']) {layer_options['maxZoom'] = 19;} //max zoom is mandatory
             
             //transparency for jpeg  layer_options['OSM'] && 
             if(layer_options['extension']=='.jpg'){
