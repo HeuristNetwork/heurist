@@ -360,7 +360,7 @@ function HMapLayer( _options ) {
             return;
         }
 
-        let image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
+        let image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&fullres=1&file='+
                 file_info[0];
                 
         if(file_info[1]=='tif' || file_info[1]=='tiff'){
