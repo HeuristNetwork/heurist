@@ -640,10 +640,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 + '<label><input id="cb_increment_fillgaps" type="radio" name="increment_fillgaps" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Fill gaps in the sequence and then continue from the largest existing value</label><br>'
                 + '<label><input type="radio" name="increment_fillgaps" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Ignore gaps and continue from the largest existing value</label>'
                 + '<div style="padding: 0.2em; min-width: 600px;" class="input">'
-                + '<label for="increment_prefix">Default prefix for text fields: </label> <input id="increment_prefix" style="max-width:30em"/>'
+                + '<label for="increment_prefix">Default prefix (if a text field): </label> <input id="increment_prefix" style="max-width:30em"/>'
                 + '</div>'
                 + '<div style="padding: 0.2em; min-width: 600px;" class="input">'
-                + '<label for="increment_digits">Digits in text sequence suffix: </label> <input id="increment_digits" type="number" min="1" max="8" value="4" style="width:5em"/>'
+                + '<label for="increment_digits">Digits in numeric suffix (text fields only): </label> <input id="increment_digits" type="number" min="1" max="8" value="4" style="width:5em"/>'
                 + '</div>'
             + '</div>').appendTo($fieldset);
 
