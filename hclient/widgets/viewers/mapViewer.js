@@ -40,6 +40,10 @@ $.widget('heurist.mapViewer', {
         recordset: null,
         selection: null,
 
+        eventbased: true,
+        search_realm: null,
+        current_search_filter: null,
+
         currentResultsLayer: {
             id: 'current-results',
             title: null,
@@ -67,6 +71,7 @@ $.widget('heurist.mapViewer', {
         this._resizeObserver = null;
         this._instanceId = this._createInstanceId();
         this._mapEventHandlers = {};
+        this._events = null;
 
         this.element
             .addClass('heurist-map-viewer')
@@ -84,8 +89,131 @@ $.widget('heurist.mapViewer', {
             return;
         }
 
+        this._bindHostEvents();
         this._createIframe();
         this._observeResize();
+    },
+
+    /** Bind Heurist application events when event-based synchronization is enabled. */
+    _bindHostEvents: function() {
+        if (!this.options.eventbased) return;
+
+        var that = this;
+        var hapi = window.hWin && window.hWin.HAPI4;
+        if (!hapi || !hapi.Event) return;
+
+        this._events = hapi.Event.ON_CREDENTIALS
+            + ' ' + hapi.Event.ON_LAYOUT_RESIZE
+            + ' ' + hapi.Event.ON_REC_SELECT
+            + ' ' + hapi.Event.ON_SYSTEM_INITED
+            + ' ' + hapi.Event.ON_REC_SEARCH_FINISH
+            + ' ' + hapi.Event.ON_REC_SEARCHSTART;
+
+        $(this.document).on(this._events, function(event, data) {
+            if (event.type === hapi.Event.ON_CREDENTIALS) {
+                if (that.options.recordset != null && !hapi.has_access()) {
+                    that.options.recordset = null;
+                    that.options.query = null;
+                    that.options.selection = null;
+                    that.setQuery(null);
+                }
+
+            } else if (event.type === hapi.Event.ON_LAYOUT_RESIZE) {
+                that._scheduleResize(400);
+
+            } else if (event.type === hapi.Event.ON_REC_SEARCH_FINISH) {
+                if (!((data && data.search_realm === 'mapping_recordset') ||
+                    that._isSameRealm(data))) {
+                    return;
+                }
+
+                var recordset = data && data.recordset ? data.recordset : null;
+
+                if (that.options.current_search_filter && recordset) {
+                    var queryUtil = window.hWin.HEURIST4 &&
+                        window.hWin.HEURIST4.query;
+                    var util = window.hWin.HEURIST4 &&
+                        window.hWin.HEURIST4.util;
+
+                    if (queryUtil && typeof queryUtil.mergeHeuristQuery === 'function') {
+                        var subQuery = queryUtil.mergeHeuristQuery(
+                            recordset.getIds(2000),
+                            that.options.current_search_filter
+                        );
+                        that.setQuery(subQuery);
+                    } else {
+                        that.setRecordSet(recordset);
+                    }
+                } else {
+                    that.setRecordSet(recordset);
+                }
+
+                that.loadanimation(false);
+
+            } else if (event.type === hapi.Event.ON_REC_SEARCHSTART) {
+                if (!that._isSameRealm(data)) return;
+
+                that.options.recordset = null;
+                that.options.query = null;
+                that.options.selection = null;
+                that.clearSelection();
+
+                if (data && !data.reset && data.q !== '') {
+                    that.loadanimation(true);
+                } else {
+                    that.setQuery(null);
+                    that.loadanimation(false);
+                }
+
+            } else if (event.type === hapi.Event.ON_REC_SELECT) {
+                if (!that._isSameRealm(data) ||
+                    (data && data.source === that.element.attr('id'))) {
+                    return;
+                }
+
+                if (data && data.reset) {
+                    that.clearSelection();
+                } else {
+                    var selection = hapi.getSelection(data && data.selection, true);
+                    that._doVisualizeSelection(selection);
+                }
+
+            } else if (event.type === hapi.Event.ON_SYSTEM_INITED) {
+                that.refresh();
+            }
+        });
+    },
+
+    /** Check whether a host event belongs to this widget's search realm. */
+    _isSameRealm: function(data) {
+        var util = window.hWin && window.hWin.HEURIST4 &&
+            window.hWin.HEURIST4.util;
+        var eventRealm = data ? data.search_realm : null;
+        var eventRealmIsEmpty = util && typeof util.isempty === 'function'
+            ? util.isempty(eventRealm)
+            : eventRealm == null || eventRealm === '';
+
+        return (!this.options.search_realm && eventRealmIsEmpty) ||
+            (this.options.search_realm &&
+                this.options.search_realm === eventRealm);
+    },
+
+    /** Apply a Heurist record selection to the current-results map layer. */
+    _doVisualizeSelection: function(selection) {
+        return this.setSelection(selection, {
+            replace: true,
+            zoom: true
+        });
+    },
+
+    /** Debounce map resize requests from host layout changes. */
+    _scheduleResize: function(delay) {
+        var that = this;
+        if (this._resizeTimer) clearTimeout(this._resizeTimer);
+        this._resizeTimer = setTimeout(function() {
+            that._resizeTimer = 0;
+            that.resize();
+        }, delay || 100);
     },
 
     /** Create the standalone map iframe and register its one-time configuration. */
@@ -101,6 +229,8 @@ $.widget('heurist.mapViewer', {
             })
             .css({ width: '100%', height: '100%', border: 0, display: 'block' })
             .appendTo(this._frameContainer);
+
+        this.loadanimation(true);
 
         this._on(this._mapFrame, {
             load: function() {
@@ -230,6 +360,7 @@ $.widget('heurist.mapViewer', {
             .then(function() {
                 if (that._isDestroyed) return;
                 that.resize();
+                that.loadanimation(false);
                 that._invokeCallback('onready', {
                     mapApi: that._mapApi,
                     widget: that
@@ -286,6 +417,19 @@ $.widget('heurist.mapViewer', {
             }
 
             that.options.selection = recordIds;
+
+            if (that.options.eventbased) {
+                var hapi = window.hWin && window.hWin.HAPI4;
+                if (hapi && hapi.Event && hapi.Event.ON_REC_SELECT) {
+                    $(that.document).trigger(hapi.Event.ON_REC_SELECT, {
+                        selection: recordIds,
+                        source: that.element.attr('id'),
+                        search_realm: that.options.search_realm,
+                        reset: recordIds.length === 0
+                    });
+                }
+            }
+
             that._invokeCallback('onselect', recordIds, event.detail || {});
         };
 
@@ -339,6 +483,7 @@ $.widget('heurist.mapViewer', {
             'heurist-map-edit-layer-requested', handlers.editLayer
         );
         this._mapEventHandlers = {};
+        this._events = null;
     },
 
     /** Set or replace the stable current-results query layer. */
@@ -619,6 +764,21 @@ $.widget('heurist.mapViewer', {
         }
     },
 
+    /** Show or hide the iframe loading indicator. */
+    loadanimation: function(show) {
+        if (!this._mapFrame) return;
+
+        if (show) {
+            this._mapFrame.css(
+                'background',
+                'url(' + window.hWin.HAPI4.baseURL +
+                'hclient/assets/loading-animation-white.gif) no-repeat center center'
+            );
+        } else {
+            this._mapFrame.css('background', 'none');
+        }
+    },
+
     _observeResize: function() {
         var that = this;
         if (typeof ResizeObserver === 'function') {
@@ -648,6 +808,8 @@ $.widget('heurist.mapViewer', {
         if (this._resizeObserver) this._resizeObserver.disconnect();
 
         delete (window.HEURIST_MAP_INSTANCES || {})[this._instanceId];
+        if (this._events) $(this.document).off(this._events);
+        this._events = null;
         this._unbindMapEvents();
 
         this._pendingOperations.splice(0).forEach(function(operation) {
