@@ -257,8 +257,8 @@ abstract class DbRecordTypeEntity extends DbEntityBase
             $fieldType = intval($row[0]);
             if($row[3]){
                 $value = $row[3];
-            }elseif($row[2]){
-                $value = $row[1].' '.$row[2];
+            }elseif($row[2]){  //geometry WKT
+                $value = $row[2]; //$row[1].' '.
             }else{
                 $value = $row[1];
             }

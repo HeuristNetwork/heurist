@@ -16,6 +16,7 @@
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../records/edit/recordTitleMask.php';
 
@@ -31,6 +32,16 @@ class DbDefRecTypes extends DbEntityBase
     private $where_for_count = null;
     private $rty_counts = null;
 
+    
+    public function setData($data){
+        parent::setData($data);
+        if($this->isvalid()){
+           if(is_string(@$this->data[$this->primaryField]) && strpos($this->data[$this->primaryField],'-')>0){
+               $this->data[$this->primaryField] = ConceptCode::getRecTypeLocalID($this->data[$this->primaryField]);
+           }
+        }        
+    }    
+    
     /**
      * Searches for Record Type definitions based on criteria in `$this->data`.
      *

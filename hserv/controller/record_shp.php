@@ -109,7 +109,7 @@ global $is_api;
 
             if(DT_ZIP_FILE>0 && @$record['details'][DT_ZIP_FILE]){
                 $shp_file = fileRetrievePath(array_shift($record['details'][DT_ZIP_FILE]),'shp',true);
-                //$dbf_file = substr($shp_file,0,-3).'dbf';
+                $dbf_file = substr($shp_file,0,-3).'dbf';
                 //$shx_file = substr($shp_file,0,-3).'shx';
                 $isZipArchive = true;
 
@@ -225,7 +225,7 @@ global $is_api;
 
 
                         $geo = @$feature['geometry'];
-                        if(!isEmptyArray(@$geo['coordinates'])){
+                        if($need_simplify && !isEmptyArray(@$geo['coordinates'])){
 
                             if($geo['type']=='LineString'){
 
@@ -249,7 +249,10 @@ global $is_api;
 
                             }
                         }
-
+                        if(@$feature['properties']){
+                            $feature['properties']['rec_ID'] = ($rec_cnt+1);
+                            //$feature['properties']['rec_RecTypeID'] = RT_PLACE;
+                        }
 
                         if($rec_cnt>0) {fwrite($fd, ',');}
                         fwrite($fd, json_encode($feature));

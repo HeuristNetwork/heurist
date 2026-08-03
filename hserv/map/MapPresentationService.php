@@ -159,7 +159,7 @@ class MapPresentationService
             'RT_MAP_LAYER' => 'heurist-query',
             'RT_TLCMAP_DATASET' => 'heurist-query',
             'RT_TILED_IMAGE_SOURCE' => 'tile',
-            'RT_GEOTIFF_SOURCE' => 'geotiff',
+            //'RT_GEOTIFF_SOURCE' => 'geotiff',
             'RT_IMAGE_SOURCE' => 'image',
             'RT_KML_SOURCE' => 'remote-geojson',
             'RT_FILE_SOURCE' => 'remote-geojson', //csv, kml, geojson
@@ -177,6 +177,8 @@ class MapPresentationService
             'recordId' => intval($record['rec_ID'] ?? 0),
             'title' => (string)($record['rec_Title'] ?? '')
         );
+        
+        $file = $this->layers->value($record, 'DT_FILE_RESOURCE');        
 
         if($type=='remote-geojson'){
             //HEURIST_BASE_URL.
@@ -227,6 +229,19 @@ class MapPresentationService
                 $source['tms'] = true;    
             }
             
+        }elseif($type=='image'){
+
+            $fileinfo = fileGetFullInfo($this->system, $file);
+            if(!isEmptyArray($fileinfo)){
+                $fileinfo = $fileinfo[0];
+                $url = @$fileinfo['ulf_ExternalFileReference'];    
+                if(!$url){
+                    $fileIdObfuscated = @$fileinfo['ulf_ObfuscatedFileID'];
+                    $url = HEURIST_BASE_URL.'?fullres=1&db='.$this->system->dbname().'&file='.$fileIdObfuscated;
+                }
+            }
+            $source['bounds'] = $this->normaliseGeo($this->layers->value($record, 'DT_GEO_OBJECT'));
+            $source['url'] = $url;
             
         }else{
             $query = $this->layers->value($record, 'DT_QUERY_STRING');
@@ -237,11 +252,10 @@ class MapPresentationService
                 if(stripos((string)$source['url'], '/info.json') !== false){ $source['type'] = 'iiif'; }
             }
         }
-        $file = $this->layers->value($record, 'DT_FILE_RESOURCE');
         if($file !== null){ $source['fileId'] = intval($file); }
         
-        $world = $this->layers->value($record, 'DT_MAP_IMAGE_WORLDFILE');
-        if($world !== null){ $source['worldFile'] = $this->scalar($world); }
+        //$world = $this->layers->value($record, 'DT_MAP_IMAGE_WORLDFILE');
+        //if($world !== null){ $source['worldFile'] = $this->scalar($world); }
         $crs = $this->layers->value($record, 'DT_CRS');
         if($crs !== null){ $source['crs'] = $this->termDescriptor($crs); }
         return $source;
@@ -303,7 +317,15 @@ class MapPresentationService
     private function normaliseGeo($value)
     {
         if($value === null || $value === ''){ return null; }
-        return array('raw'=>(string)$value);
+        
+        $bbox = null;
+        $geom = \geoPHP::load($value, 'wkt');
+        if($geom!==null && !$geom->isEmpty()){
+            $bbox = $geom->getBBox();
+        }
+        return $bbox;
+        
+        //return array('raw'=>(string)$value);
     }
 
     private function scalar($value): ?string
