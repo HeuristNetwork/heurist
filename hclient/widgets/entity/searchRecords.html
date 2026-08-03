@@ -43,21 +43,10 @@
 
 <div style="display: block; padding:5px 0px" id="addrec_helper">
 
-    <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
-        <div id="lbl_add_record" class="heurist-helper1" style="padding-top:10px;font-weight:bold;padding-bottom: 12px;">
-                Select in list or add new
-        </div>
-    </div>
-    <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
-        <button class="btn_AddRecord" style="z-index:2;height:2em;"></button>
-        <button id="btn_select_rt" style="z-index:2;height:2em;font-size:12px;display:none;"></button>
-    </div>
-    <div class="div-table-cell not-addonly" style="padding-right:0.5em;text-align:right;" title="Value used by add new record">
-        <input id="fill_in_data" class="text ui-widget-content ui-corner-all"
-                style="max-width: 10em; min-width: 10em; width: 10em; margin-right:0.2em"/>
-    </div>
     <div class="div-table-cell not-addonly" style="padding-right:0.5em;text-align:right;">
-        <label style="padding-right: 0.5em;" for="input_search">Find</label>
+        <label class="heurist-helper1" style="padding-right: 0.5em;font-size:11px;vertical-align:middle;font-weight:bold;" for="input_search">
+            Find, then select from list
+        </label>
 
         <input id="input_search" class="text ui-widget-content ui-corner-all" 
                 style="max-width: 10em; min-width: 10em; width: 10em; margin-right:0.2em"/>
@@ -66,6 +55,23 @@
         <select id="sel_rectypes" class="text ui-widget-content ui-corner-all" 
                 style="max-width:150px;min-width:150px"></select>
     </div>
+
+    <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
+        <div id="lbl_add_record" class="heurist-helper1" style="padding-top:10px;font-weight:bold;padding-bottom:12px;font-size:11px;">
+            Select in list or add new
+        </div>
+    </div>
+
+    <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
+        <button class="btn_AddRecord" style="z-index:2;height:2em;"></button>
+        <button id="btn_select_rt" style="z-index:2;height:2em;font-size:12px;display:none;"></button>
+    </div>
+
+    <div class="div-table-cell not-addonly" style="padding-right:0.5em;text-align:right;" title="Value used by add new record">
+        <input id="fill_in_data" class="text ui-widget-content ui-corner-all"
+                style="max-width: 10em; min-width: 10em; width: 10em; margin-right:0.2em"/>
+    </div>
+
 </div>
 
 <div style="display: none;" id="parententity_header" style="margin-left: 10px;cursor: pointer;">

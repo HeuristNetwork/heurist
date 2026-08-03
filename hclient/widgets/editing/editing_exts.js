@@ -1326,7 +1326,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
             $('<span>', {style: 'position: absolute;right: 5px;'}).html(icon).appendTo($(option).css('padding-right', '25px'));
         });
 
-        let $trm_btns = $select.parents('.input-div').find('.btn_add_term, .btn_add_term');
+        let $trm_btns = $select.parents('.input-div').find('.btn_add_term');
         if($trm_btns.length > 0){
             $trm_btns.clone(true, true).css({
                 'position': 'relative',
@@ -1349,6 +1349,29 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
         }else{
             $menu.width(width+30); // make slightly bigger than needed to avoid resizing
         }
+    }else{
+
+        setTimeout(() => {
+
+            // Increase max-height of menuWidget if there is space
+            const defMaxHeight = 220;
+            let $editor = $select.parents('.editForm.recordEditor');
+            let editorTop = $editor.length > 0 ? $editor.position().top : 0;
+
+            let menuTop = $menu.position().top;
+            let $widget = $select.hSelect('widget').is(':visible') ? $select.hSelect('widget') : $select.parents('.input-div').find('.sel_link2');
+            let widgetTop = $widget.position().top;
+
+            if($editor.length > 0 && menuTop > widgetTop){ // check that the editor container exists & that the menu is going downwards
+
+                let editorHeight = $editor.height();
+                let newHeight = editorHeight - menuTop - 20;
+
+                $menu.css('max-height', `${newHeight < defMaxHeight ? defMaxHeight : newHeight}px`);
+            }else{
+                $menu.css('max-height', `${defMaxHeight}px`);
+            }
+        }, 500);
     }
 
     $inpt.trigger('select'); // auto focus + highlight existing search
@@ -1505,7 +1528,7 @@ function browseRecords(_editing_input, $input, popupTitle){
     // event is false for confirmation of select mode for parent entity
     // 
     let __show_select_dialog = function(event){
-        
+
             if(that.is_disabled) return;
         
             if(event!==false){
@@ -1522,9 +1545,8 @@ function browseRecords(_editing_input, $input, popupTitle){
                     //__show_select_dialog(false); 
                 }
             }
-            
-            
-             // Save record first without validation, only if this is a new record
+
+            // Save record first without validation, only if this is a new record
             if(that.options.editing){
                 let et = that.options.editing.getFieldByName('rec_Title');
                 
@@ -1548,8 +1570,11 @@ function browseRecords(_editing_input, $input, popupTitle){
                     }
                 }
             }
-            
-            
+
+            if(that.selObj?.hSelect('instance') !== undefined){
+                popup_options['init_filter'] = $(that.selObj).hSelect('menuWidget').find('.input_menu_filter').val();
+            }
+
             let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+that.configMode.entity, 
                 {width: null,  //null triggers default width within particular widget
                 height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
@@ -1736,7 +1761,10 @@ function browseRecords(_editing_input, $input, popupTitle){
                     $(that.selObj).hide();
 
                     let search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/v6/magglass_12x11.gif',
-                        filter_icon = window.hWin.HAPI4.baseURL+'hclient/assets/v6/filter_icon_black18.png';
+                        filter_icon = window.hWin.HAPI4.baseURL+'hclient/assets/v6/filter_icon_black18.png',
+                        add_link = s_action == 'select'
+                            ? '' : '<span style="padding-left: 1em;"><span class="ui-icon ui-icon-plus" style="position: relative;padding-right: 5px;"></span> Add target record</span>';
+
                     let opt = window.hWin.HEURIST4.ui.addoption(that.selObj, 'select', 
                     '<div style="width:300px;padding:15px 0px">'
                     +'<span style="padding:0px 4px 0 10px;vertical-align:sub">'
@@ -1744,16 +1772,15 @@ function browseRecords(_editing_input, $input, popupTitle){
                     + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+filter_icon+ '&quot;);"/></span>'
                     +'<input class="input_menu_filter" size="10" style="outline: none;background:none;border: 1px solid lightgray;"/>'
 +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered value" '
-+'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'                   
-                    +'<span class="show-select-dialog"><span style="padding:0px 4px 0 20px;vertical-align:sub">'
++'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'
+                    +'<span class="show-select-dialog" style="cursor:pointer;"><span style="padding: 0px 4px 0 5px;vertical-align:sub;">'
                     +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                     + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
-                    + window.hWin.HR('Search') + (s_action=='select'?'':('/' +  window.hWin.HR('Add'))) 
+                    + add_link
                     + '</span><div class="not-found" style="padding:10px;color:darkgreen;display:none;">'
                     +window.hWin.HR('No records match the filter')+'</div></div>');
-                    
-                   
-                    
+
+
                     $.each(window.hWin.HEURIST4.browseRecordCache[key], function(idx, item){
                         
                         let title = item['rec_Title'].slice(0,64).replace(/[\r\n]+/g, ' ');
