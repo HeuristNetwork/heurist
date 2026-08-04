@@ -452,7 +452,7 @@ if(!$format){ $format='csv';}
                     Click on list of record types to skip steps
                 </div>
 
-                <div class="warningMessage">
+                <div class="importIgnoreErrors">
                     <label>
                         <input type="checkbox" id="ignoreErrors" class="text" onchange="{importRecordsCSV.onIgnoreErrors()}" />&nbsp;
                         Ignore data errors, import anyway

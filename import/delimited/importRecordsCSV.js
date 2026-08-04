@@ -3937,9 +3937,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                         if(showingWarningsAndErrors){
                             $('.warningMessage').show();
+                            $('.importIgnoreErrors').css('display', 'inline-block');
                             $('.first-cell').prop('width', '150');
                         }else{
-                            $('.warningMessage').hide();
+                            $('.warningMessage, .importIgnoreErrors').hide();
                             $('.first-cell').prop('width', '250');
                         }
                     }else{
@@ -5256,6 +5257,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }else{
             $('#divFieldMapping2').hide();
         }
+        $('.warningMessage, .importIgnoreErrors').hide();
+        $('.first-cell').prop('width', '250');
 
         if(page==1){
             $("#selImportId").val('');  //clear selection
