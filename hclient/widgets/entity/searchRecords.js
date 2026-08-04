@@ -208,7 +208,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 if(that.selectRectype.val().indexOf(',') === -1){
                     that._trigger( "onaddrecord", null, {'_rectype_id': that.selectRectype.val(), 'fill_in_data': search_val} );
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
+                    window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of All types, please select type from tabs', 5000);
                 }
             }
         });
@@ -298,7 +298,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     if(that.selectRectype.val().indexOf(',') === -1){
                         that._trigger( "onaddrecord", null, {'_rectype_id': that.selectRectype.val(), 'fill_in_data': search_val} );
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
+                        window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of All types, please select type from tabs', 5000);
                     }
                 }
             }else if(is_addonly){
