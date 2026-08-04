@@ -1915,7 +1915,7 @@ The other entries in the menu are discussed in the following pages.
 
 - **Edit definiton** gives access to all the settings associated with an existing field – its name, help, width and height, cardinality, target record types etc.
 - **+ field** allows insertion of new fields
-- **+ connection**  is a shortcut method for inserting the connection field types (record pointers and relationship markers). It exists to encourage users to think about, and use, these very useful functions
+- **+ connection** is a shortcut method for inserting the connection field types (record pointers and relationship markers). It exists to encourage users to think about, and use, these very useful functions
 - **+ tab or heading** allows insertion of new structural and layout elements such as tabs and dividers within tabs (these are shown as expansible sections in the navigation tree and may be dragged to move blocks of fields associated with them).
 - **+ explanatory text** allows insertion of a block of text which will show up <span style="background-color:rgb(206,212,217);">on a grey background</span> in the data entry form. It can be used to provide instructions or make notes on record structure changes which are needed (it will appear on every record). It has a title, which appears even if help is off, and a body which appears only if help is on
 - **+ sub-record** allows a set of fields to be designated as a sub-record, transferred to a new record type, linked to the current record type by a child record pointer field, and then all the data is transferred and the record pointers updated.
@@ -2063,15 +2063,23 @@ The **May modify** dropdown allows for locking a field so that it cannot be edit
 
 An intermediate value **Edit discouraged** is provided which allows the value in the field to be modified but pops up a warning message that this is discouraged. This may be useful where the value does not normally require modification but may occasionally require correction. It also avoids accidental inadvertent modification of the fields without the user being aware of it.
 
-#### **Computed fields**
+#### **Calculated / computed fields**
 
-Heurist provides an ability to compute field values in a variety of ways, enabling users to integrate statistical analysis into the process of data entry, or the generation of websites. The calculation can be based solely on fields within the record (e.g. combining the length and breadth of a painting to calculate its area) or can combine information from linked records (e.g. counting all the children of a particular Person).
+Heurist provides an ability to compute field values in a variety of ways, enabling users to integrate statistical analysis into the process of data entry, or the generation of websites. A particularly useful way of using this is to automatically split up a complex field, such as a bibliographic reference or a complex item identifier, into its components.
 
-There is no special field type for compute fields; any text, date, or numeric field can be used as a computed field; Heurist will perform a calculation based on data in the database and store the result in the field.
+The calculation can be based solely on fields within the record (e.g. combining the length and breadth of a painting to calculate its area) or can combine information from linked records (e.g. counting all the children of a particular Person).
 
-Click on **Formula:** ![b9050ac5-de1a-4105-a2bd-42181f753529.png](https://heurist-doc.huma-num.fr/uploads/b9050ac5-de1a-4105-a2bd-42181f753529.png)**select** to bring up a form to specify the computation:
+There is no special field type for computed fields; any text, date, or numeric field can be used as a computed field; Heurist will perform a calculation based on data in the database and store the result in the field.
 
-Either select a compute formula from the list or click on the ADD NEW CALCULATION button which will lead to the calculation construction form, where one can develop the code using [SMARTY syntax](https://docs.heuristref.net/https:/www.smarty.net/docs/en/language.basic.syntax.tpl/) in the same way it is used for custom reports.
+Click on **Formula:**![b9050ac5-de1a-4105-a2bd-42181f753529.png](https://heurist-doc.huma-num.fr/uploads/b9050ac5-de1a-4105-a2bd-42181f753529.png)**select** to bring up a form to specify the computation:
+
+Either select a compute formula from the list or click on the ADD NEW CALCULATION button which will lead to the calculation construction form, where one can develop the code using [SMARTY syntax](https://docs.heuristref.net/https:/www.smarty.net/docs/en/language.basic.syntax.tpl/) in the same way it is used for custom reports. You can simply ask an AI to write Smarty code for you and replace the variable names it uses such as {$pages} with the appropriate Heurist field such as {$r.f1118}.
+
+The final line of the code must print a value which is the value which will be inserted into the field. For example, to extract the 'short title' and page numbers from a reference such as "Nakada1982\_01: 152-3, II-197" in in field 1118 you simply need one of these lines in the formula:
+
+{{$r.f1118}|regex\_replace:'/\\s\*:.\*$/':''} --&gt; Nakada1982\_01
+
+{{$r.f1118}|regex\_replace:'/^\[^:\]\*:\\s\*/':''} --&gt; 152-3, II-197
 
 //TODO-link
 
@@ -2259,7 +2267,7 @@ However it is not possible to delete any vocabulary or term which has been used 
 
 ![dbcdf329-7f15-4903-961b-0d54755632ad.png](https://heurist-doc.huma-num.fr/uploads/dbcdf329-7f15-4903-961b-0d54755632ad.png)
 
-To import a vocabulary, select the vocabulary (or child term) and click the Import button ![bb487d09-f3b8-41ec-9a85-8d9216980c36.png](https://heurist-doc.huma-num.fr/uploads/bb487d09-f3b8-41ec-9a85-8d9216980c36.png)
+To import a vocabulary, select the vocabulary (or child term) and click the Import button![bb487d09-f3b8-41ec-9a85-8d9216980c36.png](https://heurist-doc.huma-num.fr/uploads/bb487d09-f3b8-41ec-9a85-8d9216980c36.png)
 
 Step 1, prepare data for import as a comma or tab-separated file.   
  Paste the data or upload an existing CSV file (e.g. a previously exported vocabulary).
@@ -2270,7 +2278,7 @@ Step 3, map columns to term field. When ready to import, click **Import**.
 
 ##### **Export**
 
-To export a vocabulary, select it and click the Export button ![768ebe8d-5264-4f34-9a04-17412887cafd.png](https://heurist-doc.huma-num.fr/uploads/768ebe8d-5264-4f34-9a04-17412887cafd.png) The vocabulary is exported as a CSV file.
+To export a vocabulary, select it and click the Export button ![768ebe8d-5264-4f34-9a04-17412887cafd.png](https://heurist-doc.huma-num.fr/uploads/768ebe8d-5264-4f34-9a04-17412887cafd.png)The vocabulary is exported as a CSV file.
 
 #### **TUTORIAL**
 
@@ -2320,7 +2328,7 @@ Clicking on **merge into target term** allows terms to be combined when dragged 
 
 ##### Reordering terms in the vocabulary tree
 
-The ![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/OWcimage.png) icon which appears on hover over a term will pop up a window which allows terms in that branch of the vocabulary to be reordered by drag and drop
+The ![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/OWcimage.png)icon which appears on hover over a term will pop up a window which allows terms in that branch of the vocabulary to be reordered by drag and drop
 
 ##### **Effects on search**
 
@@ -10510,6 +10518,16 @@ This chapter outlines some useful procedures for managing Heurist servers, inclu
 
 Heurist is designed to run on any Linux server
 
+#### **Handy Unix commands &amp; other useful things**
+
+- <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">Disk usage of subdirectories, largest first : </span>  
+    <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);"> </span>*sudo du -sh /var/log/\*/ | sort -hr*
+- <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">Delete files older than 30 days : </span>  
+    <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);"> </span>*/usr/bin/find /var/log -maxdepth 1 -type f -name '\*.gz' -mtime +30 -delete*  
+     (maxdepth 1 will go down one level into immediate subdirectory)
+- The MySQL password (for the *root* and/or *heurist* user) <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">is set in the </span>*user*<span style="color:rgb(34,34,34);background-color:rgb(255,255,255);"> table of the </span>*mysql*<span style="color:rgb(34,34,34);background-color:rgb(255,255,255);"> database,</span>  
+    <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">and configured in the /var/www/html/HEURIST/heuristConfigIni.php file for all instances, which may be overridden for a specific instance by /var/www/html/HEURIST/hx-xxxxxx/configIni.php.</span>
+
 #### **Protocol for full update of Heurist servers**
 
 **On HeuristRef.net (Heurit development team)**
@@ -10594,3 +10612,184 @@ Heurist's web interface includes a restricted menu (Admin &gt; Server Manager) w
 Since this is only available to the server managers, and since the functions are relatively self obvious and include some explanation when selected, we will not bother with further documentation.
 
 ![embedded-image-kfkdrrre.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-kfkdrrre.png)
+
+#### Log files and performance
+
+There are often numerous timestamped tables such as:
+
+```
+import20260709033509.ibd
+import20260710034725.ibd
+import20260711005435.ibd
+```
+
+These are import-working tables and may collectively consume substantial space across thousands of databases (in practice on Huma-Num in July 2026 they only consume a few hundred MBytes). Investigate them with:
+
+```
+SELECT TABLE_SCHEMA, TABLE_NAME,
+       ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024, 1) AS size_mb
+FROM information_schema.TABLES
+WHERE TABLE_NAME REGEXP '^import[0-9]{14}$'
+ORDER BY DATA_LENGTH + INDEX_LENGTH DESC;
+```
+
+They should only be dropped after confirming that Heurist no longer needs them.
+
+To see the largest tables across the server :
+
+*Note: on the Huma-Num server this times out. It's probably a good idea to focus on rec\_Details which is generally the largest table i nteh database. Records could also be large.*
+
+```
+SELECT TABLE_SCHEMA, TABLE_NAME,
+       ENGINE,
+       ROUND(DATA_LENGTH / 1024 / 1024, 1) AS data_mb,
+       ROUND(INDEX_LENGTH / 1024 / 1024, 1) AS index_mb,
+       ROUND(DATA_FREE / 1024 / 1024, 1) AS free_mb
+FROM information_schema.TABLES
+ORDER BY DATA_LENGTH + INDEX_LENGTH DESC
+LIMIT 50;
+```
+
+### Performance
+
+Nothing in the filenames suggests an obvious InnoDB performance fault. The useful checks are:
+
+```
+SELECT VERSION();
+
+SHOW VARIABLES WHERE Variable_name IN
+('innodb_buffer_pool_size',
+ 'innodb_file_per_table',
+ 'slow_query_log',
+ 'long_query_time',
+ 'innodb_temp_data_file_path');
+
+SHOW GLOBAL STATUS WHERE Variable_name IN
+('Innodb_buffer_pool_reads',
+ 'Innodb_buffer_pool_read_requests',
+ 'Created_tmp_disk_tables',
+ 'Created_tmp_tables');
+```
+
+The main performance consideration will usually be whether `<span class="editor-theme-code">innodb_buffer_pool_size</span>` is suitably matched to the server’s RAM and workload—not reducing `<span class="editor-theme-code">ibdata1</span>`. The slow-query log is valuable here: analyse it before discarding the old contents, because it can identify the queries and indexes responsible for poor performance.
+
+#### Log rotation
+
+### Immediate cleanup: rotate the slow-query log
+
+First check whether it is already managed:
+
+```
+sudo grep -R "slow.log\|slow_query" /etc/logrotate.d /etc/logrotate.conf
+```
+
+If not, create `<span class="editor-theme-code">/etc/logrotate.d/mysql-slow</span>` containing:
+
+```
+/var/lib/mysql/*-slow.log {
+    weekly
+    rotate 12
+    size 100M
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 640 mysql mysql
+    sharedscripts
+    postrotate
+        /usr/bin/mysqladmin flush-logs >/dev/null 2>&1 || true
+    endscript
+}
+```
+
+Do not simply delete the active slow log: MySQL may retain the open file handle, meaning the disk space is not actually released until the log is reopened.
+
+Test the configuration with:
+
+```
+sudo logrotate -d /etc/logrotate.d/mysql-slow
+```
+
+###   
+
+# Ch 07a : Recoding and verification
+
+### Introduction
+
+In this chapter we will look at ways that data in the database can be verified for consistency and modified through batch processes.
+
+### Design &gt; Verification
+
+TODO
+
+### Recode menu
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/yPSimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/yPSimage.png)
+
+The Recode menu operates on the current result set, except where indicated.
+
+#### Add field value?
+
+TODO
+
+#### Replace field value
+
+TODO
+
+#### Delete field value
+
+TODO
+
+#### Relate : Link
+
+TODO
+
+#### Foreign key match
+
+TODO
+
+#### Change record types
+
+TODO
+
+#### Local files to remote repository
+
+TODO
+
+#### Remote URLs to local files
+
+TODO
+
+#### Reset thumbnails
+
+TODO
+
+#### Case conversion
+
+TODO
+
+#### Multiline text to HTML
+
+TODO
+
+#### Translation
+
+TODO
+
+#### Extract text from PDF files
+
+TODO
+
+#### Insert incremental values
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/AhTimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/AhTimage.png)
+
+This function is designed to fill in or extend values which increment by 1. This can be applied to text fields as well as to numeric fields. It is typically used to create sequences of identifiers which are more appropriate to the users' needs than the simple sequential numbering of the Heurist identifiers (H-IDs), although the use of the latter are strongly recommended wherever possible as they are unique and an unequivocal identifier for every record (even across all registered databases provided they are prefixed with the database ID - see chapter ????).
+
+The function will automatically pick up an existing prefix in a text field, so if there are values abcd-1, abcd-2, ... it will generate values with a prefix abcd- followed by the next available number. If multiple prefixes are used you should specify the prefix you want, otherwise the prefix is unpredictable (generally the last one used).
+
+By default this function left pads numbers with zeroes (default 4 digits), so you will get values such as abcd-0008 etc. but this can be changed with *Digits in numeric suffix (text fields only)*
+
+#### Create IIIF annotation thumbnails
+
+TODO

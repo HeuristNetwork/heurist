@@ -6,6 +6,16 @@ This chapter outlines some useful procedures for managing Heurist servers, inclu
 
 Heurist is designed to run on any Linux server
 
+#### **Handy Unix commands &amp; other useful things**
+
+- <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Disk usage of subdirectories, largest first : </span>  
+    <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> </span>*sudo du -sh /var/log/\*/ | sort -hr*
+- <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Delete files older than 30 days : </span>  
+    <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> </span>*/usr/bin/find /var/log -maxdepth 1 -type f -name '\*.gz' -mtime +30 -delete*  
+     (maxdepth 1 will go down one level into immediate subdirectory)
+- The MySQL password (for the *root* and/or *heurist* user) <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">is set in the </span>*user*<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> table of the </span>*mysql*<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> database,</span>  
+    <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">and configured in the /var/www/html/HEURIST/heuristConfigIni.php file for all instances, which may be overridden for a specific instance by /var/www/html/HEURIST/hx-xxxxxx/configIni.php.</span>
+
 #### **Protocol for full update of Heurist servers**
 
 **On HeuristRef.net (Heurit development team)**
@@ -90,3 +100,102 @@ Heurist's web interface includes a restricted menu (Admin &gt; Server Manager) w
 Since this is only available to the server managers, and since the functions are relatively self obvious and include some explanation when selected, we will not bother with further documentation.
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-kfkdrrre.png)
+
+#### Log files and performance
+
+There are often numerous timestamped tables such as:
+
+```
+import20260709033509.ibd
+import20260710034725.ibd
+import20260711005435.ibd
+```
+
+These are import-working tables and may collectively consume substantial space across thousands of databases (in practice on Huma-Num in July 2026 they only consume a few hundred MBytes). Investigate them with:
+
+```
+SELECT TABLE_SCHEMA, TABLE_NAME,
+       ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024, 1) AS size_mb
+FROM information_schema.TABLES
+WHERE TABLE_NAME REGEXP '^import[0-9]{14}$'
+ORDER BY DATA_LENGTH + INDEX_LENGTH DESC;
+```
+
+They should only be dropped after confirming that Heurist no longer needs them.
+
+To see the largest tables across the server :
+
+*Note: on the Huma-Num server this times out. It's probably a good idea to focus on rec\_Details which is generally the largest table i nteh database. Records could also be large.*
+
+```
+SELECT TABLE_SCHEMA, TABLE_NAME,
+       ENGINE,
+       ROUND(DATA_LENGTH / 1024 / 1024, 1) AS data_mb,
+       ROUND(INDEX_LENGTH / 1024 / 1024, 1) AS index_mb,
+       ROUND(DATA_FREE / 1024 / 1024, 1) AS free_mb
+FROM information_schema.TABLES
+ORDER BY DATA_LENGTH + INDEX_LENGTH DESC
+LIMIT 50;
+```
+
+### Performance
+
+Nothing in the filenames suggests an obvious InnoDB performance fault. The useful checks are:
+
+```
+SELECT VERSION();
+
+SHOW VARIABLES WHERE Variable_name IN
+('innodb_buffer_pool_size',
+ 'innodb_file_per_table',
+ 'slow_query_log',
+ 'long_query_time',
+ 'innodb_temp_data_file_path');
+
+SHOW GLOBAL STATUS WHERE Variable_name IN
+('Innodb_buffer_pool_reads',
+ 'Innodb_buffer_pool_read_requests',
+ 'Created_tmp_disk_tables',
+ 'Created_tmp_tables');
+```
+
+The main performance consideration will usually be whether `<span class="editor-theme-code">innodb_buffer_pool_size</span>` is suitably matched to the server’s RAM and workload—not reducing `<span class="editor-theme-code">ibdata1</span>`. The slow-query log is valuable here: analyse it before discarding the old contents, because it can identify the queries and indexes responsible for poor performance.
+
+#### Log rotation
+
+### Immediate cleanup: rotate the slow-query log
+
+First check whether it is already managed:
+
+```
+sudo grep -R "slow.log\|slow_query" /etc/logrotate.d /etc/logrotate.conf
+```
+
+If not, create `<span class="editor-theme-code">/etc/logrotate.d/mysql-slow</span>` containing:
+
+```
+/var/lib/mysql/*-slow.log {
+    weekly
+    rotate 12
+    size 100M
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 640 mysql mysql
+    sharedscripts
+    postrotate
+        /usr/bin/mysqladmin flush-logs >/dev/null 2>&1 || true
+    endscript
+}
+```
+
+Do not simply delete the active slow log: MySQL may retain the open file handle, meaning the disk space is not actually released until the log is reopened.
+
+Test the configuration with:
+
+```
+sudo logrotate -d /etc/logrotate.d/mysql-slow
+```
+
+###   

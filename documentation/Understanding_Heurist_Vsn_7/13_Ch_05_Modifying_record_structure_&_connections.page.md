@@ -108,7 +108,7 @@ The other entries in the menu are discussed in the following pages.
 
 - **Edit definiton** gives access to all the settings associated with an existing field – its name, help, width and height, cardinality, target record types etc.
 - **+ field** allows insertion of new fields
-- **+ connection**  is a shortcut method for inserting the connection field types (record pointers and relationship markers). It exists to encourage users to think about, and use, these very useful functions
+- **+ connection** is a shortcut method for inserting the connection field types (record pointers and relationship markers). It exists to encourage users to think about, and use, these very useful functions
 - **+ tab or heading** allows insertion of new structural and layout elements such as tabs and dividers within tabs (these are shown as expansible sections in the navigation tree and may be dragged to move blocks of fields associated with them).
 - **+ explanatory text** allows insertion of a block of text which will show up <span style="background-color: rgb(206, 212, 217);">on a grey background</span> in the data entry form. It can be used to provide instructions or make notes on record structure changes which are needed (it will appear on every record). It has a title, which appears even if help is off, and a body which appears only if help is on
 - **+ sub-record** allows a set of fields to be designated as a sub-record, transferred to a new record type, linked to the current record type by a child record pointer field, and then all the data is transferred and the record pointers updated.
@@ -256,15 +256,23 @@ The **May modify** dropdown allows for locking a field so that it cannot be edit
 
 An intermediate value **Edit discouraged** is provided which allows the value in the field to be modified but pops up a warning message that this is discouraged. This may be useful where the value does not normally require modification but may occasionally require correction. It also avoids accidental inadvertent modification of the fields without the user being aware of it.
 
-#### **Computed fields**
+#### **Calculated / computed fields**
 
-Heurist provides an ability to compute field values in a variety of ways, enabling users to integrate statistical analysis into the process of data entry, or the generation of websites. The calculation can be based solely on fields within the record (e.g. combining the length and breadth of a painting to calculate its area) or can combine information from linked records (e.g. counting all the children of a particular Person).
+Heurist provides an ability to compute field values in a variety of ways, enabling users to integrate statistical analysis into the process of data entry, or the generation of websites. A particularly useful way of using this is to automatically split up a complex field, such as a bibliographic reference or a complex item identifier, into its components.
 
-There is no special field type for compute fields; any text, date, or numeric field can be used as a computed field; Heurist will perform a calculation based on data in the database and store the result in the field.
+The calculation can be based solely on fields within the record (e.g. combining the length and breadth of a painting to calculate its area) or can combine information from linked records (e.g. counting all the children of a particular Person).
 
-Click on **Formula:** ![](https://heurist-doc.huma-num.fr/uploads/b9050ac5-de1a-4105-a2bd-42181f753529.png)**select** to bring up a form to specify the computation:
+There is no special field type for computed fields; any text, date, or numeric field can be used as a computed field; Heurist will perform a calculation based on data in the database and store the result in the field.
 
-Either select a compute formula from the list or click on the ADD NEW CALCULATION button which will lead to the calculation construction form, where one can develop the code using [SMARTY syntax](https://docs.heuristref.net/https:/www.smarty.net/docs/en/language.basic.syntax.tpl/) in the same way it is used for custom reports.
+Click on **Formula:**![](https://heurist-doc.huma-num.fr/uploads/b9050ac5-de1a-4105-a2bd-42181f753529.png)**select** to bring up a form to specify the computation:
+
+Either select a compute formula from the list or click on the ADD NEW CALCULATION button which will lead to the calculation construction form, where one can develop the code using [SMARTY syntax](https://docs.heuristref.net/https:/www.smarty.net/docs/en/language.basic.syntax.tpl/) in the same way it is used for custom reports. You can simply ask an AI to write Smarty code for you and replace the variable names it uses such as {$pages} with the appropriate Heurist field such as {$r.f1118}.
+
+The final line of the code must print a value which is the value which will be inserted into the field. For example, to extract the 'short title' and page numbers from a reference such as "Nakada1982\_01: 152-3, II-197" in in field 1118 you simply need one of these lines in the formula:
+
+{{$r.f1118}|regex\_replace:'/\\s\*:.\*$/':''} --&gt; Nakada1982\_01
+
+{{$r.f1118}|regex\_replace:'/^\[^:\]\*:\\s\*/':''} --&gt; 152-3, II-197
 
 //TODO-link
 
@@ -452,7 +460,7 @@ However it is not possible to delete any vocabulary or term which has been used 
 
 ![](https://heurist-doc.huma-num.fr/uploads/dbcdf329-7f15-4903-961b-0d54755632ad.png)
 
-To import a vocabulary, select the vocabulary (or child term) and click the Import button ![](https://heurist-doc.huma-num.fr/uploads/bb487d09-f3b8-41ec-9a85-8d9216980c36.png)
+To import a vocabulary, select the vocabulary (or child term) and click the Import button![](https://heurist-doc.huma-num.fr/uploads/bb487d09-f3b8-41ec-9a85-8d9216980c36.png)
 
 Step 1, prepare data for import as a comma or tab-separated file.   
  Paste the data or upload an existing CSV file (e.g. a previously exported vocabulary).
@@ -463,7 +471,7 @@ Step 3, map columns to term field. When ready to import, click **Import**.
 
 ##### **Export**
 
-To export a vocabulary, select it and click the Export button ![](https://heurist-doc.huma-num.fr/uploads/768ebe8d-5264-4f34-9a04-17412887cafd.png) The vocabulary is exported as a CSV file.
+To export a vocabulary, select it and click the Export button ![](https://heurist-doc.huma-num.fr/uploads/768ebe8d-5264-4f34-9a04-17412887cafd.png)The vocabulary is exported as a CSV file.
 
 #### **TUTORIAL**
 
@@ -513,7 +521,7 @@ Clicking on **merge into target term** allows terms to be combined when dragged 
 
 ##### Reordering terms in the vocabulary tree
 
-The ![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/OWcimage.png) icon which appears on hover over a term will pop up a window which allows terms in that branch of the vocabulary to be reordered by drag and drop
+The ![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/OWcimage.png)icon which appears on hover over a term will pop up a window which allows terms in that branch of the vocabulary to be reordered by drag and drop
 
 ##### **Effects on search**
 
