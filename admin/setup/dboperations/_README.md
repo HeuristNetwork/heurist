@@ -8,7 +8,7 @@ This directory contains scripts for various database operations, including daily
 
 - `Heurist Welcome attachment.docx`: Source of attachment document for welcome email.
 - `Heurist Welcome attachment.pdf`: Attachment for welcome email.
-- `dailyCronJobs.php`: Performs daily maintenance tasks for Heurist databases.
+- `dailyCronJobs.php`: Performs daily maintenance tasks for Heurist databases. See md file for futher information.
 - `deleteDB.php`: Deletes one or more Heurist databases.
 - `resetDB.php`: Removes and recreates a demo database, typically for a daily cron job.
 - `welcomeEmail.html`: Content of welcome  and notification emails.

@@ -6,7 +6,8 @@
 * @fileOverview This script is designed to be run by a daily cron job. It can perform several actions:
 *               1. `reminder`: Sends record reminders as specified in `usrReminders`.
 *               2. `report`: Updates reports based on schedules in `usrReportSchedule`.
-*               3. `url`: Checks if `rec_URL` and URL-like values are valid (database is skipped if `sys_URLCheckFlag` is false).
+*               3. `url`: Checks if `rec_URL` and URL-like values are valid 
+*                   (database is skipped if `sys_URLCheckFlag` is false).
 *
 *               Databases listed in `HEURIST/databases_exclude_cronjobs.txt` are ignored.
 *               This script is intended to be run from the shell only.
@@ -14,7 +15,7 @@
 *               `if (!@$serverName && php_sapi_name() == 'cli') {$serverName = 'heuristref.net';}`
 *
 * @project     Heurist academic knowledge management system
-* @package Admin/dboperations
+* @package     Admin/dboperations
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
