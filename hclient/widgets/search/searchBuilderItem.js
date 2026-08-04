@@ -782,6 +782,13 @@ Whole value = EQUAL
         ed_options.dtFields.rst_Display = 'visible';
         ed_options.dtFields.rst_MayModify = 'open';
 
+        if(field_type === 'enum'){
+            ed_options.dtFields.rst_FilteredJsonTermIDTree = $Db.dty(ed_options.dtID, 'dty_JsonTermIDTree');
+        }
+        if(field_type === 'resource'){
+            ed_options.dtFields.rst_PtrFilteredIDs = $Db.dty(ed_options.dtID, 'dty_PtrTargetRectypeIDs');
+        }
+
         //init input elements
         this._predicate_input_ele = $("<div>")
             .editing_input(ed_options).appendTo(this.values_container);
