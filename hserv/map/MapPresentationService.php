@@ -188,7 +188,7 @@ class MapPresentationService
                 $script_name = 'record_shp'; //for shp
             }
             
-            $source['url'] = "heurist/hserv/controller/$script_name.php?db="
+            $source['url'] = HEURIST_BASE_URL."hserv/controller/$script_name.php?db="
                                 .$this->system->dbname().'&format=geojson&recID='.$record['rec_ID'];
         }elseif($type=='tile'){
             
