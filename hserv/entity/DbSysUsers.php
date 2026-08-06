@@ -157,7 +157,7 @@ class DbSysUsers extends DbEntityBase
         }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_FirstName,ugr_LastName,ugr_eMail,ugr_Department,ugr_Organisation,'
-            .'ugr_City,ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,usr_ExternalAuthentication';
+            .'ugr_City,ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,usr_ExternalAuthentication,ugr_ORCID';
 
             if($needRole){
                 $this->data['details'] .= ',ugl_Role';
@@ -291,6 +291,12 @@ class DbSysUsers extends DbEntityBase
                     return false;
                 }
                 $fieldvalues['ugr_eMail'] = $email_address;
+            }
+
+            $orcid = @$fieldvalues['ugr_ORCID'];
+            if(!empty($orcid) && preg_match('/^\d{4}\-\d{4}\-\d{4}\-\d{4}&/', $orcid) === false){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'ORCID is not valid, ensure it is in the format of XXXX-XXXX-XXXX-XXXX');
+                return false;
             }
 
         }
