@@ -66,6 +66,7 @@ class LookupController{
     private array $lookupHeaders = [];
     private int $lookupTimeout = 30;
     private $lookupResponse = null;
+    private bool $isPublicLookup = false;
 
     private bool $isValid = false;
     private bool $isESTC = false;
@@ -162,6 +163,8 @@ class LookupController{
         ]
     ];
 
+    private const ALLOWED_PUBLIC_LOOKUPS = ['orcid'];
+
     private string $nakalaFile = '';
     private string $openthesoFile = '';
 
@@ -186,7 +189,7 @@ class LookupController{
 
     private function setupSystem() : bool{
 
-        if($this->system->getUserId() < 1){
+        if($this->system->getUserId() < 1 && !$this->isPublicLookup){
             $this->system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in to use the external lookup services');
             return false;
         }elseif(!defined('HEURIST_FILESTORE_ROOT')){
@@ -231,7 +234,7 @@ class LookupController{
             return false;
         }
 
-        $this->database = @$this->request['db'];
+        $this->database = @$this->request['db'] ?? '';
         $this->isDebug = @$this->request['dbg'] == 1;
 
         $this->lookupType = $this->request['serviceType'];
@@ -278,6 +281,8 @@ class LookupController{
 
             $this->system->addError(HEURIST_REQUEST_DENIED, $this->ESTCMsg);
         }
+
+        $this->isPublicLookup = in_array($this->lookupType, self::ALLOWED_PUBLIC_LOOKUPS);
 
         return $this->isValid;
     }
