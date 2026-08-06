@@ -11,7 +11,17 @@ userRegistration.html - HTML strucutre for the new user registration form.
 -->
 <h1>Register for Heurist</h1>
 
+<div style="margin-bottom: 10px; font-size: 12px;">
+    Optional: Enter your ORCID (Open Researcher and Contributor ID) to start<br><br>
+    Anyone can obtain an ORCID identifier at <a href="https://www.orcid.org/register" target="_blank">https://www.orcid.org/register</a>
+</div>
+
 <form name="formRegistration" class="registration-form"  style="display: inline-block;width:60%">
+    <div>
+        <div class="header"><label for="ugr_ORCID">ORCID identifier</label></div>
+        <input type="text" name="ugr_ORCID" id="ugr_ORCID" class="text ui-widget-content ui-corner-all mandatory"  maxlength="20"/>
+        <span id="orcid-data-link" style="color:blue;cursor:pointer;text-decoration:underline;padding-left:10px;font-size:smaller;display:none;">retrieve your data from ORCID</span>
+    </div>
     <div>
         <div class="header"><label for="ugr_FirstName">Given name</label></div>
         <input type="text" name="ugr_FirstName" id="ugr_FirstName" class="text ui-widget-content ui-corner-all mandatory"  maxlength="40" style="width:35em"/>
