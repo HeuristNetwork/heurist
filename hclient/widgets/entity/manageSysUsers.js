@@ -661,6 +661,8 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             content.hide();
             this.editForm.find('#'+content.attr('aria-labelledby')).hide(); // .ui-accordion-header 
         }
+
+        this._setupORCIDField();
     },
     
     /**
@@ -725,13 +727,21 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
      * @brief Retrieves and validates form values, including SAML settings.
      * @override
      * @memberof heurist.manageSysUsers
-     * @returns {object} The validated field values.
+     * @returns {object|null} The validated field values.
      * Calls `_Saml_from_UI` to ensure the latest SAML settings from the UI are captured
      * into the 'usr_ExternalAuthentication' field before calling the parent's
      * `_getValidatedValues` method.
      */
     _getValidatedValues: function(){
+
         this._Saml_from_UI( this._currentSaml );
+
+        const ORCID = this._editing.getValue('ugr_ORCID');
+        if(!window.hWin.HEURIST4.util.isempty(ORCID) && !ORCID.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/)){
+            this._editing.getFieldByName('ugr_ORCID').editing_input('showErrorMsg', 'Invalid ORCID, must be in format of XXXX-XXXX-XXXX-XXXX');
+            return null;
+        }
+
         return this._super();
     },
     
@@ -880,6 +890,203 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 }
             }
         );
+    },
+
+    /**
+     * @brief Setup additional controls for ugr_ORCID field.
+     * @memberof heurist.manageSysUsers
+     */
+    _setupORCIDField: function(){
+
+        let $orcidField = this._editing.getFieldByName('ugr_ORCID');
+
+        if(!$orcidField || $orcidField.find('.orcid-link').length > 0){
+            return;
+        }
+
+        // Link to ORCID.org
+        $('<a>', {
+            href: 'https://orcid.org',
+            target: '_blank',
+            class: 'fake_link orcid-link',
+            style: 'display: block; font-size: smaller;',
+            text: 'https://orcid.org'
+        }).appendTo($orcidField.find('.header'));
+
+        // Link to retrieve ORCID data
+        let $getData = $('<span>', {
+            class: 'fake_link get-orcid-details',
+            style: 'font-size: smaller; padding-left: 30px; display: none;',
+            text: 'retrieve data from ORCID'
+        }).appendTo($orcidField.find('.input-div'));
+
+        let $orcidInput = $orcidField.find('input');
+        this._on($orcidInput, {
+            keyup: () => {
+                const currentValue = $orcidInput.val();
+                currentValue !== '' ? $getData.show() : $getData.hide();
+            }
+        });
+        if($orcidInput.val() !== ''){
+            $getData.show();
+        }
+
+        this._on($getData, {
+            click: () => {
+                this._getDataFromORCID();
+            }
+        });
+    },
+
+    /**
+     * @brief Lookup ORCID data and map back to entity fields.
+     * @memberof heurist.manageSysUsers
+     */
+    _getDataFromORCID: function(){
+
+        const ORCID = this._editing.getValue('ugr_ORCID');
+
+        if(window.hWin.HEURIST4.util.isempty(ORCID)){
+            window.hWin.HEURIST4.msg.showMsgFlash('Please enter an ORCID...', 3000);
+            $getData.hide();
+            return;
+        }else if(!ORCID.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/)){
+            let error = {
+                message: 'Invalid ORCID identifier provided.<br>It must be in the format of 0000-1111-2222-3333.',
+                status: window.hWin.ResponseStatus.INVALID_REQUEST
+            };
+            window.hWin.HEURIST4.msg.showMsgErr(error);
+            return;
+        }
+
+        let request = {
+            serviceType: 'orcid',
+            id: ORCID
+        };
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog?.closest('div[role="dialog"]'));
+
+        window.hWin.HAPI4.RecordMgr.lookupService(request, (response) => {
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+            response = window.hWin.HEURIST4.util.isJSON(response);
+            if(!response || Object.hasOwn(response, 'status') && response.status !== window.hWin.ResponseStatus.OK){
+                response = !response ? {status: 'error', message: 'Heurist has failed to retrieve your data from ORCID.<br>Please submit a ticket.'} : response;
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            this._handleDataFromORCID(response);
+        });
+    },
+
+    /**
+     * @brief Process and display ORCID lookup data for the user.
+     * @memberof heurist.manageSysUsers
+     * @param {object} orcidData ORCID record data formatted from external lookup
+     */
+    _handleDataFromORCID: function(orcidData){
+
+        // sysUGrps fields to ORCID lookup fields
+        const ORCID_FIELD_MAPPING = {
+            ugr_FirstName: 'given-names',
+            ugr_LastName: 'family-name',
+            ugr_Name: 'orcid',
+            ugr_Organisation: 'employment',
+            ugr_Interests: 'keywords'
+        };
+
+        if(!window.hWin.HEURIST4.util.isJSON(orcidData)){
+            return;
+        }
+
+        // Setup table content
+        let tableContent = '';
+        for(const formField in ORCID_FIELD_MAPPING){
+
+            if(!Object.hasOwn(ORCID_FIELD_MAPPING, formField)){
+                continue;
+            }
+
+            const orcidField = ORCID_FIELD_MAPPING[formField];
+            if(window.hWin.HEURIST4.util.isempty(orcidData[orcidField])){
+                continue;
+            }
+
+            let fieldValue = this._editing.getValue(formField);
+            fieldValue = window.hWin.HEURIST4.util.isempty(fieldValue) ? '' : fieldValue;
+            let orcidValue = orcidData[orcidField];
+
+            const fieldOption = fieldValue === ''
+                ? '<em>No value</em>'
+                : `<input type="radio" name="${formField}" value="0" style="vertical-align:top;" checked="checked" /> 
+                <span style="display:inline-block;max-width:16em;padding-top:2px;cursor:default;" class="truncate">${fieldValue}</span>`;
+            const checkboxImport = fieldValue === '' ? 'checked="checked" ' : '';
+
+            const fieldIndex = this.getEntityFieldIdx(formField);
+            tableContent += `<tr>
+                <td style="padding-bottom: 10px;"><strong>${this.options.entity.fields[fieldIndex].dtFields['rst_DisplayName']}</strong></td>
+                <td style="padding-bottom: 10px;" title="${fieldValue}">${fieldOption}</td>
+                <td style="padding-bottom: 10px;" title="${orcidValue}">
+                    <input type="radio" name="${formField}" value="1" style="vertical-align: top;" ${checkboxImport}/> 
+                    <span style="display:inline-block;max-width:20em;padding-top:2px;cursor:default;" class="truncate">${orcidValue}</span>
+                </td>
+            </tr>`;
+        }
+
+        if(tableContent === ''){
+            window.hWin.HEURIST4.msg.showMsgFlash('Heurist could not find any public data it could use for this form.', 5000);
+            return;
+        }
+
+        // Setup dialog
+        let $dlg;
+        let content = `<div>
+            Below is a list of data that Heurist has retrieved from your public ORCID record.<br><br>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 12.5em; padding: 7.5px 0px;">Field</th>
+                        <th style="width: 20em; padding: 7.5px 0px;">Current values <span class="fake_link" style="font-size: smaller;">select all</span></th>
+                        <th style="width: 30em; padding: 7.5px 0px;">ORCID values <span class="fake_link" style="font-size: smaller;">select all</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableContent}
+                </tbody>
+            </table>
+        </div>`;
+
+        let btns = {};
+        btns[window.hWin.HR('Import selected data')] = () => {
+
+            for(const formField in ORCID_FIELD_MAPPING){
+
+                if(!Object.hasOwn(ORCID_FIELD_MAPPING, formField)){
+                    continue;
+                }
+
+                const option = $dlg.find(`input[name="${formField}"]:checked`);
+                if(option.val() !== '1'){ // retain original value
+                    continue;
+                }
+
+                const orcidField = ORCID_FIELD_MAPPING[formField];
+                if(window.hWin.HEURIST4.util.isempty(orcidData[orcidField])){
+                    continue;
+                }
+
+                this._editing.setFieldValueByName(formField, orcidData[orcidField]);
+            }
+
+            $dlg.dialog('close');
+        };
+        btns[window.hWin.HR('Cancel')] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: window.hWin.HR('Importing ORCID data')}, {default_palette_class: 'ui-heurist-admin', dialogId: 'import-orcid-data'});
     }
     
 });
