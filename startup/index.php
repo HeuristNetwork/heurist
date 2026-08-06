@@ -233,7 +233,8 @@ if (!defined('PDIR')){
                 ugr_LastName: 'family-name',
                 ugr_Name: 'orcid',
                 ugr_Organisation: 'employment',
-                ugr_Interests: 'keywords'
+                ugr_Interests: 'keywords',
+                ugr_URLs: 'url'
             };
 
             for(const field in ORCID_FIELD_MAPPING){
