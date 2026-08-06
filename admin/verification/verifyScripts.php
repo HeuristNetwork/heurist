@@ -49,7 +49,7 @@ print '<br>[end]';
 function checkVersionDatabase(){
     global $system, $mysqli, $databases;
 
-    $min_version = '1.3.18';  //HEURIST_MIN_DBVERSION
+    $min_version = '1.3.19';  //HEURIST_MIN_DBVERSION
 
     foreach ($databases as $db_name){
 
@@ -77,7 +77,7 @@ function checkVersionDatabase(){
                 }
 
                 if(@$_REQUEST['upgrade'] && $is_old_version && version_compare($current_db_version, '1.3.0')>=0){
-                        $rep = updateDatabseTo_v1_3_18($system);
+                        $rep = updateDatabseTo_v1_3_19($system);
 
                         if($rep!==false &&  version_compare('1.3.14', $current_db_version)>0){ //older than 1.3.14
                             $rep2 = recreateRecDetailsDateIndex($system, true, true);

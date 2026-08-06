@@ -29,11 +29,11 @@
 use hserv\structure\ConceptCode;
 
 
-    function updateDatabseTo_v1_3_18($system, $dbname=null){
+    function updateDatabseTo_v1_3_19($system, $dbname=null){
 
         $mysqli = $system->getMysqli();
         
-        $currentSubSubVersion = 18;
+        $currentSubSubVersion = 19;
 
         if($dbname){
             mysql__usedatabase($mysqli, $dbname);
@@ -212,12 +212,12 @@ EXP
             $report[] = 'Upgraded to 1.3.16';
        }
 
-       if($dbVerSubSub<17){
-           
+        if($dbVerSubSub<17){
+
             list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_Password', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_Password` varchar(255) NOT NULL COMMENT 'Encrypted password string'", true);
 
             $report[] = 'Upgraded to 1.3.17';
-       }
+        }
 
        if($dbVerSubSub<18){
 
@@ -227,8 +227,15 @@ EXP
 
             $report[] = 'Upgraded to 1.3.18';
        }
-       
-       
+
+        if($dbVerSubSub < 19){
+
+            [$is_added, $report[]] = alterTable($system, 'sysUGrps', 'ugr_ORCID', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_ORCID` varchar(19) default NULL COMMENT 'An ORC ID associated with this user account, formatted as: 0000-1111-2222-3333'", true);
+            [$is_added, $report[]] = alterTable($system, 'defRecStructure', 'rst_DisplayHelpText', "ALTER TABLE `defRecStructure` ADD COLUMN `rst_DisplayHelpText` varchar(5000) default NULL COMMENT 'The user help text to be displayed for this detail type for this record type'", true);
+
+            $report[] = 'Upgraded to 1.3.19';
+        }
+
        }catch(Exception $exception){
             return false;
        }
