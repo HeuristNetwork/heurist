@@ -93,8 +93,8 @@ class MapPresentationService
             'symbology' => $this->decodeJson($this->documents->value($record, 'DT_SYMBOLOGY')),
             'minZoom' => $this->numberOrNull($this->documents->value($record, 'DT_MINIMUM_ZOOM_LEVEL')),
             'maxZoom' => $this->numberOrNull($this->documents->value($record, 'DT_MAXIMUM_ZOOM_LEVEL')),
-            'minimumZoomKm' => $this->numberOrNull($this->documents->value($record, 'DT_MINIMUM_ZOOM')),
-            'maximumZoomKm' => $this->numberOrNull($this->documents->value($record, 'DT_MAXIMUM_ZOOM')),
+            'minimumZoomKm' => $this->numberOrNull($this->documents->value($record, 'DT_MAXIMUM_ZOOM')),
+            'maximumZoomKm' => $this->numberOrNull($this->documents->value($record, 'DT_MINIMUM_ZOOM')),
             'zoomToPointInKM' => $this->numberOrNull($this->documents->value($record, 'DT_ZOOM_KM_POINT')),
             'worldBaseMap' => $this->termDescriptor($this->documents->value($record, 'DT_WORLD_BASEMAP')),
             'crs' => $this->termDescriptor($this->documents->value($record, 'DT_CRS')),
@@ -157,8 +157,8 @@ class MapPresentationService
                 'zoomToExtent' => false,
                 'minZoom' => $effectiveMinZoom,
                 'maxZoom' => $effectiveMaxZoom,
-                'minimumZoomKm' => $this->numberOrNull($this->layers->value($layer, 'DT_MINIMUM_ZOOM')),
-                'maximumZoomKm' => $this->numberOrNull($this->layers->value($layer, 'DT_MAXIMUM_ZOOM')),
+                'minimumZoomKm' => $this->numberOrNull($this->layers->value($layer, 'DT_MAXIMUM_ZOOM')),
+                'maximumZoomKm' => $this->numberOrNull($this->layers->value($layer, 'DT_MINIMUM_ZOOM')),
                 'popupTemplate' => $this->scalar($this->layers->value($layer, 'DT_SMARTY_TEMPLATE'))
             )
         );
