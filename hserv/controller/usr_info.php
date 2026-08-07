@@ -774,7 +774,8 @@
                         'path' => HEURIST_FILESTORE_DIR . DIR_SCRATCH
                                 . USanitize::sanitizeFileName(USanitize::sanitizePath($req_params['file'][0]['name'])),
                         'type' => htmlspecialchars($req_params['file'][0]['type']),
-                        'name' => htmlspecialchars($req_params['file'][0]['original_name'])
+                        'name' => htmlspecialchars($req_params['file'][0]['original_name']),
+                        'embargoed' => @$req_params['embargo']
                     ];
 
                     // Metadata

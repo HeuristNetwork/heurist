@@ -1520,6 +1520,14 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
                         </div>
                     </div>
 
+                    <div>
+                        <div class="header optional" style="vertical-align: top; display: table-cell;"><label>Embargo:</label></div>
+                        <span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>
+                        <div class="input-cell" style="padding-bottom: 12px;">
+                            <input class="text ui-widget-content ui-corner-all datepicker" id="embargo">
+                        </div>
+                    </div>
+
                 </fieldset>`;
 
                 let btns = {};
@@ -1535,6 +1543,7 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
                     let created = $dlg.find('#created').val();
                     let license = $dlg.find('#license').val();
                     let account = $dlg.find('#account').val();
+                    let embargoDate = $dlg.find('#embargo').val();
 
                     if(window.hWin.HEURIST4.util.isempty(account)){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select an account to use...', 3000);
@@ -1598,6 +1607,7 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
                             license: license
                         },
                         status: status,
+                        embargoed: embargoDate,
                         apiKey: account
                     };
 
@@ -1607,13 +1617,6 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
 
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         if(response.status == window.hWin.ResponseStatus.OK){ // returned URL
-
-                            /*that._editing.setFieldValueByName2('ulf_ExternalFileReference', response.data, false);
-                            let ele = that._editing.getFieldByName('ulf_ExternalFileReference');
-                            if(ele.editing_input('instance') !== undefined){ // trigger blur event
-                                ele.editing_input('getInputs')[0].trigger('blur');
-                            }*/
-
                             that._afterExternalUpload(response.data, account);
                             $dlg.dialog('close');
                         }else{
@@ -1626,6 +1629,11 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
                 };
 
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Prepare file metadata'}, {default_palette_class: 'ui-heurist-publish', dialogId: 'nakala_metadata'});
+
+                // Setup datepicker
+                $dlg.find('.datepicker').datepicker({
+                    dateFormat: 'yy-mm-dd'
+                }).attr('readonly', true);
 
                 // Click handler for author search
                 $dlg.find('#lookup_author').on('click',() => {
