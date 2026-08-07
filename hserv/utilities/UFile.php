@@ -2109,6 +2109,15 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas)
         if (array_key_exists('description', $file)) {
             $fileArr['description'] = htmlspecialchars($file['description']);
         }
+        if (array_key_exists('embargoed', $file) && !empty($file['embargoed'])) {
+
+            $now = strtotime('now');
+            $timestamp = strtotime($file['embargoed']);
+
+            if($timestamp > $now){ // ensure the dates in the future
+                $fileArr['embargoed'] = date('Y-m-d', $timestamp);
+            }
+        }
 
         $uploadedFiles[$fileID] = $fileArr;
     }
