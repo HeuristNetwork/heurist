@@ -148,8 +148,6 @@ $.widget('heurist.mapViewer', {
                     that.setRecordSet(recordset);
                 }
 
-                that.loadanimation(false);
-
             } else if (event.type === hapi.Event.ON_REC_SEARCHSTART) {
                 if (!that._isSameRealm(data)) return;
 
@@ -158,11 +156,8 @@ $.widget('heurist.mapViewer', {
                 that.options.selection = null;
                 that.clearSelection();
 
-                if (data && !data.reset && data.q !== '') {
-                    that.loadanimation(true);
-                } else {
+                if (!(data && !data.reset && data.q !== '')) {
                     that.setQuery(null);
-                    that.loadanimation(false);
                 }
 
             } else if (event.type === hapi.Event.ON_REC_SELECT) {
@@ -229,8 +224,6 @@ $.widget('heurist.mapViewer', {
             })
             .css({ width: '100%', height: '100%', border: 0, display: 'block' })
             .appendTo(this._frameContainer);
-
-        this.loadanimation(true);
 
         this._on(this._mapFrame, {
             load: function() {
@@ -360,7 +353,6 @@ $.widget('heurist.mapViewer', {
             .then(function() {
                 if (that._isDestroyed) return;
                 that.resize();
-                that.loadanimation(false);
                 that._invokeCallback('onready', {
                     mapApi: that._mapApi,
                     widget: that
@@ -761,21 +753,6 @@ $.widget('heurist.mapViewer', {
             msg.showMsgErr(normalized.message);
         } else if (window.console) {
             console.error('mapViewer:', normalized);
-        }
-    },
-
-    /** Show or hide the iframe loading indicator. */
-    loadanimation: function(show) {
-        if (!this._mapFrame) return;
-
-        if (show) {
-            this._mapFrame.css(
-                'background',
-                'url(' + window.hWin.HAPI4.baseURL +
-                'hclient/assets/loading-animation-white.gif) no-repeat center center'
-            );
-        } else {
-            this._mapFrame.css('background', 'none');
         }
     },
 

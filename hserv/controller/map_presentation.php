@@ -44,7 +44,8 @@ $params['restapi'] = 1;
 $params['zip'] = 0;
 $params['file'] = 0;
 $params['simplify'] = !empty($params['simplify']) ? 1 : 0;
-if($resource === 'time'){ $params['leaflet'] = 1; }
+//if($resource === 'time'){ $params['leaflet'] = 1; }
+$params['leaflet'] = 1;
 if($id > 0){ $params['q'] = 'ids:'.$id; }
 if(isset($params['query']) && is_array($params['query'])){ $params['q'] = $params['query']; }
 $req_params = $params;
@@ -76,7 +77,7 @@ if($resource === 'time'){
     $result = array('format'=>'heurist-timeline','version'=>1,'items'=>$items,
         'meta'=>array('total'=>count($items),'offset'=>$offset,'limit'=>$limit));
 }else{
-    $features = $data['features'] ?? ($data['geojson']['features'] ?? array());
+    $features = $data['geojson'];
     $result = array('type'=>'FeatureCollection','features'=>$features,
         'meta'=>array('database'=>(string)($params['db'] ?? ''),'recordId'=>$id ?: null,
             'total'=>count($features),'offset'=>$offset,'limit'=>$limit));

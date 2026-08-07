@@ -32,7 +32,6 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       4.0
 */
-
     use hserv\structure\ConceptCode;
     use hserv\utilities\USanitize;
     use hserv\utilities\UArchive;
