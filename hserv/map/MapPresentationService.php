@@ -91,8 +91,10 @@ class MapPresentationService
             'mapBookmark' => $this->parseBookmark($bookmarkRaw),
             'bounds' => $this->normaliseGeo($this->documents->value($record, 'DT_GEO_OBJECT')),
             'symbology' => $this->decodeJson($this->documents->value($record, 'DT_SYMBOLOGY')),
-            'minimumZoom' => $this->numberOrNull($this->documents->value($record, 'DT_MINIMUM_ZOOM')),
-            'maximumZoom' => $this->numberOrNull($this->documents->value($record, 'DT_MAXIMUM_ZOOM')),
+            'minZoom' => $this->numberOrNull($this->documents->value($record, 'DT_MINIMUM_ZOOM_LEVEL')),
+            'maxZoom' => $this->numberOrNull($this->documents->value($record, 'DT_MAXIMUM_ZOOM_LEVEL')),
+            'minimumZoomKm' => $this->numberOrNull($this->documents->value($record, 'DT_MINIMUM_ZOOM')),
+            'maximumZoomKm' => $this->numberOrNull($this->documents->value($record, 'DT_MAXIMUM_ZOOM')),
             'zoomToPointInKM' => $this->numberOrNull($this->documents->value($record, 'DT_ZOOM_KM_POINT')),
             'worldBaseMap' => $this->termDescriptor($this->documents->value($record, 'DT_WORLD_BASEMAP')),
             'crs' => $this->termDescriptor($this->documents->value($record, 'DT_CRS')),
@@ -121,6 +123,17 @@ class MapPresentationService
         $thematicRaw = $this->layers->value($layer, 'DT_MAP_THEMATIC');
         $timelineFields = $this->layers->values($layer, 'DT_TIMELINE_FIELDS');
 
+        // Native zoom levels may be defined on the MapLayer itself or inherited
+        // from its linked source record (notably tiled-image sources). Explicit
+        // MapLayer values take precedence over source values.
+        $layerMinZoom = $this->numberOrNull($this->layers->value($layer, 'DT_MINIMUM_ZOOM_LEVEL'));
+        $layerMaxZoom = $this->numberOrNull($this->layers->value($layer, 'DT_MAXIMUM_ZOOM_LEVEL'));
+        $sourceMinZoom = $this->numberOrNull($this->layers->value($sourceRecord, 'DT_MINIMUM_ZOOM_LEVEL'));
+        $sourceMaxZoom = $this->numberOrNull($this->layers->value($sourceRecord, 'DT_MAXIMUM_ZOOM_LEVEL'));
+
+        $effectiveMinZoom = $layerMinZoom !== null ? $layerMinZoom : $sourceMinZoom;
+        $effectiveMaxZoom = $layerMaxZoom !== null ? $layerMaxZoom : $sourceMaxZoom;
+
         return array(
             'format' => 'heurist-map-layer',
             'version' => 1,
@@ -142,9 +155,10 @@ class MapPresentationService
             'options' => array(
                 'markerClustering' => false,
                 'zoomToExtent' => false,
-                // These retain Heurist layer semantics; clients decide how to interpret them.
-                'minimumZoom' => $this->numberOrNull($this->layers->value($layer, 'DT_MINIMUM_ZOOM_LEVEL')),
-                'maximumZoom' => $this->numberOrNull($this->layers->value($layer, 'DT_MAXIMUM_ZOOM_LEVEL')),
+                'minZoom' => $effectiveMinZoom,
+                'maxZoom' => $effectiveMaxZoom,
+                'minimumZoomKm' => $this->numberOrNull($this->layers->value($layer, 'DT_MINIMUM_ZOOM')),
+                'maximumZoomKm' => $this->numberOrNull($this->layers->value($layer, 'DT_MAXIMUM_ZOOM')),
                 'popupTemplate' => $this->scalar($this->layers->value($layer, 'DT_SMARTY_TEMPLATE'))
             )
         );

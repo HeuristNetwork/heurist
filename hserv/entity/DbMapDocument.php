@@ -39,6 +39,7 @@ class DbMapDocument extends DbRecordTypeEntity
             'RT_MAP_DOCUMENT', 'RT_MAP_LAYER', 'DT_NAME', 'DT_MAP_LAYER',
             'DT_MAP_BOOKMARK', 'DT_GEO_OBJECT', 'DT_SYMBOLOGY',
             'DT_MINIMUM_ZOOM', 'DT_MAXIMUM_ZOOM', 'DT_ZOOM_KM_POINT',
+            'DT_MINIMUM_ZOOM_LEVEL', 'DT_MAXIMUM_ZOOM_LEVEL',
             'DT_WORLD_BASEMAP', 'DT_CRS'
         );
         $this->requiredTermConstants = array();
