@@ -108,7 +108,7 @@
             }
         }
 
-    } elseif (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
+    } elseif (false && $action == "save_prefs"){
 
         if($system->authSession()->verifyCredentials($dbname)>0){
             user_setPreferences($system, $req_params);

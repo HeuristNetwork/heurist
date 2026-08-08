@@ -16,6 +16,8 @@
 namespace hserv\controller;
 
 use hserv\controller\ReportController;
+use hserv\controller\MapController;
+use hserv\controller\UserController;
 use hserv\records\import\IiifManifestImporter;
 use hserv\System;
 use hserv\utilities\USanitize;
@@ -93,7 +95,17 @@ class FrontController
         }
 
         // Detect controller class
-        if (@$this->req_params['controller'] == 'ReportController'  // $this->req_params['controller']
+        if (@$this->req_params['controller'] == 'MapController') {
+
+            $controller = new MapController($this->system, $this->req_params);
+            $controller->handleRequest(@$this->req_params['action']);
+
+        }elseif (@$this->req_params['controller'] == 'UserController') {
+
+            $controller = new UserController($this->system, $this->req_params);
+            $controller->handleRequest(@$this->req_params['action']);
+
+        }elseif (@$this->req_params['controller'] == 'ReportController'  // $this->req_params['controller']
             || @$this->req_params['template']
             || @$this->req_params['template_body']
             || @$this->req_params['template_id']) {
