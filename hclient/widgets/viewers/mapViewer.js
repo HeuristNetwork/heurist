@@ -23,6 +23,9 @@ $.widget('heurist.mapViewer', {
     
     options: {
         presentationMode: 'iframe',
+        viewerMode: 'map',              // map | configuration
+        configurationMode: 'preferences',  // preferences | website | publish
+        configurationValue: null,
 
         database: window.hWin.HAPI4.database,
         apiBaseUrl: window.hWin.HAPI4.baseURL + 'api',
@@ -52,6 +55,8 @@ $.widget('heurist.mapViewer', {
         },
 
         onready: null,
+        onconfiguration: null,
+        oncancelconfiguration: null,
         onselect: null,
         onerror: null,
         oneditdocument: null,
@@ -72,7 +77,6 @@ $.widget('heurist.mapViewer', {
         this._instanceId = this._createInstanceId();
         this._mapEventHandlers = {};
         this._events = null;
-        this._iframeStarted = false;
 
         this.element
             .addClass('heurist-map-viewer')
@@ -91,36 +95,8 @@ $.widget('heurist.mapViewer', {
         }
 
         this._bindHostEvents();
-        this._bindVisibilityEvents();
-        this._observeResize();
-        this._ensureIframeInitialized();
-    },
-
-    /** Start the standalone iframe only when the widget is actually visible. */
-    _ensureIframeInitialized: function() {
-        if (this._isDestroyed || this._iframeStarted || !this._isWidgetVisible()) {
-            return false;
-        }
-        this._iframeStarted = true;
         this._createIframe();
-        return true;
-    },
-
-    /** Return whether the widget is currently visible in the Heurist layout. */
-    _isWidgetVisible: function() {
-        return this.element && this.element.length > 0 && this.element.is(':visible');
-    },
-
-    /** Catch the standard Heurist show notification used by tab/panel containers. */
-    _bindVisibilityEvents: function() {
-        var that = this;
-        this.element.on('myOnShowEvent.mapViewer', function(event) {
-            if (!event.target || event.target === that.element[0] ||
-                event.target.id === that.element.attr('id')) {
-                if (that._ensureIframeInitialized()) return;
-                that._scheduleResize(50);
-            }
-        });
+        this._observeResize();
     },
 
     /** Bind Heurist application events when event-based synchronization is enabled. */
@@ -148,7 +124,6 @@ $.widget('heurist.mapViewer', {
                 }
 
             } else if (event.type === hapi.Event.ON_LAYOUT_RESIZE) {
-                that._ensureIframeInitialized();
                 that._scheduleResize(400);
 
             } else if (event.type === hapi.Event.ON_REC_SEARCH_FINISH) {
@@ -204,7 +179,6 @@ $.widget('heurist.mapViewer', {
                 }
 
             } else if (event.type === hapi.Event.ON_SYSTEM_INITED) {
-                if (that._ensureIframeInitialized()) return;
                 that.refresh();
             }
         });
@@ -276,6 +250,31 @@ $.widget('heurist.mapViewer', {
     _buildHeuristMapOptions: function() {
         var hapi = window.hWin && window.hWin.HAPI4;
         var source = $.extend(true, {}, this.options.heuristMapOptions || {});
+        var savedMapSettings = null;
+
+        // HAPI already has the logged-in user's preferences in memory. Reuse
+        // that value on normal startup instead of making another controller
+        // request from the iframe. Explicit widget/runtime options still win
+        // because mapConfig.js overlays them on top of heuristMapSettings.
+console.log('_buildHeuristMapOptions');        
+        if (hapi && typeof hapi.get_prefs === 'function') {
+            try {
+                savedMapSettings = hapi.get_prefs('heurist-map');
+                if (typeof savedMapSettings === 'string' && savedMapSettings) {
+                    savedMapSettings = JSON.parse(savedMapSettings);
+                }
+            } catch (error) {
+                savedMapSettings = null;
+            }
+        }
+        if (source.heuristMapSettings == null && savedMapSettings && typeof savedMapSettings === 'object') {
+            source.heuristMapSettings = savedMapSettings;
+        }
+
+        source.viewerMode = this.options.viewerMode === 'configuration'
+            ? 'configuration' : 'map';
+        source.configurationMode = this.options.configurationMode || 'preferences';
+        source.configurationValue = this.options.configurationValue || null;
 
         source.database = this.options.database || source.database ||
             (hapi ? hapi.database : null);
@@ -293,6 +292,12 @@ $.widget('heurist.mapViewer', {
             initiallyActive: true,
             keepContent: true
         }, source.dynamicDocument || {});
+
+        source.host = $.extend({
+            type: 'heurist',
+            baseUrl: hapi ? hapi.baseURL : null,
+            database: source.database
+        }, source.host || {});
 
         source.ui = $.extend({
             enabled: true,
@@ -372,9 +377,19 @@ $.widget('heurist.mapViewer', {
         Promise.resolve(mapApi.ready())
             .then(function() {
                 if (that._isDestroyed) return;
-                that._bindMapEvents();
                 that._isReady = true;
 
+                if (that.options.viewerMode === 'configuration') {
+                    that._openConfigurationNow({
+                        mode: that.options.configurationMode,
+                        value: that.options.configurationValue
+                    }).catch(function(error) {
+                        that._reportError(error, 'open-configuration');
+                    });
+                    return null;
+                }
+
+                that._bindMapEvents();
                 return that._initializeContent();
             })
             .then(function() {
@@ -383,7 +398,7 @@ $.widget('heurist.mapViewer', {
             })
             .then(function() {
                 if (that._isDestroyed) return;
-                that.resize();
+                if (that.options.viewerMode !== 'configuration') that.resize();
                 that._invokeCallback('onready', {
                     mapApi: that._mapApi,
                     widget: that
@@ -398,21 +413,23 @@ $.widget('heurist.mapViewer', {
     _initializeContent: function() {
         var that = this;
         var query = this.options.query || this._recordsetToQuery(this.options.recordset);
-        this._currentQuery = this._normalizeQuery(query);
+        var operation;
 
-        // Establish the requested active document first. If a persisted document
-        // is active, the query is stored in the inactive dynamic document without
-        // loading its GeoJSON.
-        var operation = (this.options.mapDocument != null && this.options.mapDocument !== '')
-            ? Promise.resolve(this._mapApi.activateMapDocument(this.options.mapDocument))
-            : this._activateDynamicDocument();
+        if (query) {
+            operation = this._activateDynamicDocument().then(function() {
+                return that._setQueryNow(query, {});
+            });
+        } else if (this.options.mapDocument != null) {
+            operation = Promise.resolve(
+                this._mapApi.activateMapDocument(this.options.mapDocument)
+            );
+        } else {
+            operation = this._activateDynamicDocument();
+        }
 
         return operation.then(function() {
-            return that._currentQuery
-                ? that._setQueryNow(that._currentQuery, {})
-                : null;
-        }).then(function() {
-            return that._applySavedSelectionIfPossible();
+            var selection = that._normalizeRecordIds(that.options.selection);
+            return selection.length ? that._setSelectionNow(selection, {}) : null;
         });
     },
 
@@ -474,29 +491,6 @@ $.widget('heurist.mapViewer', {
             }
         };
 
-        this._mapEventHandlers.documentActivated = function(event) {
-            var document = event.detail && event.detail.document;
-            if (document && String(document.id) === 'dynamic') {
-                that._applySavedSelectionIfPossible();
-            }
-        };
-
-        this._mapEventHandlers.layerVisibility = function(event) {
-            var detail = event.detail || {};
-            var layerId = String((that.options.currentResultsLayer || {}).id || 'current-results');
-            if (String(detail.layerId) === layerId && detail.visible === true) {
-                that._applySavedSelectionIfPossible();
-            }
-        };
-
-        this._mapEventHandlers.layerLoaded = function(event) {
-            var layer = event.detail && event.detail.layer;
-            var layerId = String((that.options.currentResultsLayer || {}).id || 'current-results');
-            if (layer && String(layer.id) === layerId) {
-                that._applySavedSelectionIfPossible();
-            }
-        };
-
         this._mapApi.addEventListener(
             'heurist-map-selection-changed', this._mapEventHandlers.selection
         );
@@ -508,15 +502,6 @@ $.widget('heurist.mapViewer', {
         );
         this._mapApi.addEventListener(
             'heurist-map-edit-layer-requested', this._mapEventHandlers.editLayer
-        );
-        this._mapApi.addEventListener(
-            'heurist-map-document-activated', this._mapEventHandlers.documentActivated
-        );
-        this._mapApi.addEventListener(
-            'heurist-map-layer-visibility-changed', this._mapEventHandlers.layerVisibility
-        );
-        this._mapApi.addEventListener(
-            'heurist-map-layer-loaded', this._mapEventHandlers.layerLoaded
         );
     },
 
@@ -535,31 +520,62 @@ $.widget('heurist.mapViewer', {
         if (handlers.editLayer) this._mapApi.removeEventListener(
             'heurist-map-edit-layer-requested', handlers.editLayer
         );
-        if (handlers.documentActivated) this._mapApi.removeEventListener(
-            'heurist-map-document-activated', handlers.documentActivated
-        );
-        if (handlers.layerVisibility) this._mapApi.removeEventListener(
-            'heurist-map-layer-visibility-changed', handlers.layerVisibility
-        );
-        if (handlers.layerLoaded) this._mapApi.removeEventListener(
-            'heurist-map-layer-loaded', handlers.layerLoaded
-        );
         this._mapEventHandlers = {};
         this._events = null;
     },
 
+    /** Open the generalized configuration editor through the iframe API. */
+    openConfiguration: function(options) {
+        return this._enqueueOrRun('_openConfigurationNow', [options || {}]);
+    },
+
+    _openConfigurationNow: function(options) {
+        var that = this;
+        if (!this._mapApi || typeof this._mapApi.openConfigurationDialog !== 'function') {
+            return Promise.reject(new Error('Map configuration API is not available'));
+        }
+
+        var mode = options.mode || this.options.configurationMode || 'preferences';
+        var value = options.value !== undefined
+            ? options.value : this.options.configurationValue;
+        var configurationOnly = this.options.viewerMode === 'configuration';
+
+        return new Promise(function(resolve) {
+            that._mapApi.openConfigurationDialog({
+                mode: mode,
+                value: value || null,
+                onSave: function(settings, context) {
+                    that.options.configurationValue = context.serialized;
+                    that._invokeCallback('onconfiguration', context.serialized, context);
+                    if (typeof options.onSave === 'function') {
+                        options.onSave(context.serialized, context);
+                    }
+
+                    // Configuration-only viewer has no MapApplication/Leaflet runtime.
+                    // Saving here only returns the serialized settings to the caller;
+                    // live application is intentionally handled only by the normal map mode.
+                    if (configurationOnly) {
+                        resolve(context.serialized);
+                        return true;
+                    }
+
+                    resolve(context.serialized);
+                    return true;
+                },
+                onCancel: function(settings, context) {
+                    that._invokeCallback('oncancelconfiguration', settings, context);
+                    if (typeof options.onCancel === 'function') options.onCancel(settings, context);
+                    resolve(null);
+                }
+            });
+        });
+    },
+
     /** Set or replace the stable current-results query layer. */
     setQuery: function(query, options) {
-        var normalizedQuery = this._normalizeQuery(query);
-        this.options.query = normalizedQuery;
+        this.options.query = query || null;
         this.options.recordset = null;
-        this._currentQuery = normalizedQuery;
-
-        if (!this._isWidgetVisible() || !this._isReady || !this._mapApi) {
-            this._ensureIframeInitialized();
-            return Promise.resolve(false);
-        }
-        return this._setQueryNow(normalizedQuery, options || {});
+        return this._enqueueOrRun('_setQueryNow', [query, options || {}]);
     },
 
     _setQueryNow: function(query, options) {
@@ -570,50 +586,30 @@ $.widget('heurist.mapViewer', {
 
         this._currentQuery = normalizedQuery;
 
-        var storedLayer = typeof this._mapApi.getDocumentLayer === 'function'
-            ? this._mapApi.getDocumentLayer(layerId, 'dynamic')
-            : this._mapApi.getLayer(layerId);
-
         if (!normalizedQuery) {
-            if (!storedLayer) return Promise.resolve(null);
-            return Promise.resolve(this._mapApi.clearLayer(layerId, { documentId: 'dynamic' }));
+            if (!this._mapApi.getLayer(layerId)) return Promise.resolve(null);
+            return Promise.resolve(this._mapApi.clearLayer(layerId));
         }
 
-        // heurist-map deliberately owns the query while the dynamic document is
-        // inactive or current-results is hidden. setQueryForLayer updates stored
-        // state but only reloads data when the layer is active and visible.
-        if (storedLayer) {
-            this._currentLayerCreated = true;
-            return Promise.resolve(this._mapApi.setQueryForLayer(layerId, normalizedQuery, {
-                reload: true,
-                zoom: options.zoom === true
-            })).then(function(result) {
-                return that._applySavedSelectionIfPossible().then(function() { return result; });
-            });
-        }
-
-        return Promise.resolve(this._mapApi.addQueryLayer(normalizedQuery, {
-            id: layerId,
-            title: options.title || layerOptions.title || this._currentResultsTitle(),
-            visible: layerOptions.visible !== false,
-            selectable: layerOptions.selectable !== false,
-            zoom: options.zoom === true
-        })).then(function(result) {
-            that._currentLayerCreated = true;
-            return that._applySavedSelectionIfPossible().then(function() { return result; });
-        }).catch(function(error) {
-            // Compatibility/recovery path for an older heurist-map build where a
-            // failed initial load left the stored layer definition but getLayer()
-            // could not see it. Reuse the existing definition instead of trying
-            // to add current-results again.
-            if (/already exists/i.test(error && error.message || '')) {
+        return this._activateDynamicDocument().then(function() {
+            if (that._mapApi.getLayer(layerId)) {
                 that._currentLayerCreated = true;
                 return that._mapApi.setQueryForLayer(layerId, normalizedQuery, {
                     reload: true,
                     zoom: options.zoom === true
                 });
             }
-            throw error;
+
+            return that._mapApi.addQueryLayer(normalizedQuery, {
+                id: layerId,
+                title: options.title || layerOptions.title || that._currentResultsTitle(),
+                visible: layerOptions.visible !== false,
+                selectable: layerOptions.selectable !== false,
+                zoom: options.zoom === true
+            }).then(function(result) {
+                that._currentLayerCreated = true;
+                return result;
+            });
         });
     },
 
@@ -621,26 +617,16 @@ $.widget('heurist.mapViewer', {
     setRecordSet: function(recordset, options) {
         this.options.recordset = recordset || null;
         this.options.query = null;
-        this._currentQuery = this._recordsetToQuery(recordset);
-
-        if (!this._isWidgetVisible() || !this._isReady || !this._mapApi) {
-            this._ensureIframeInitialized();
-            return Promise.resolve(false);
-        }
-        return this._setQueryNow(this._currentQuery, options || {});
+        return this._enqueueOrRun('_setQueryNow', [
+            this._recordsetToQuery(recordset), options || {}
+        ]);
     },
 
     /** Synchronize a host-side record selection to the current-results layer. */
     setSelection: function(recordIds, options) {
         var ids = this._normalizeRecordIds(recordIds);
         this.options.selection = ids;
-
-        if (!this._isWidgetVisible() || !this._isReady || !this._mapApi) {
-            this._ensureIframeInitialized();
-            return Promise.resolve(false);
-        }
-        if (!this._canApplyCurrentSelection()) return Promise.resolve(false);
-        return this._setSelectionNow(ids, options || {});
+        return this._enqueueOrRun('_setSelectionNow', [ids, options || {}]);
     },
 
     _setSelectionNow: function(recordIds, options) {
@@ -663,29 +649,6 @@ $.widget('heurist.mapViewer', {
         });
     },
 
-    /** Return whether selection can currently be rendered on current-results. */
-    _canApplyCurrentSelection: function() {
-        if (!this._mapApi) return false;
-        var active = this._mapApi.getActiveMapDocument();
-        if (!active || String(active.id) !== 'dynamic') return false;
-
-        var layerId = String((this.options.currentResultsLayer || {}).id || 'current-results');
-        var layer = this._mapApi.getLayer(layerId);
-        return Boolean(layer && layer.visible !== false && layer.loadState !== 'error'
-            && layer.loadState !== 'loading' && layer.loadState !== 'deferred');
-    },
-
-    /** Apply the latest saved host selection when current-results can display it. */
-    _applySavedSelectionIfPossible: function() {
-        if (!this._isReady || !this._mapApi || !this._canApplyCurrentSelection()) {
-            return Promise.resolve(false);
-        }
-        return this._setSelectionNow(this.options.selection || [], {
-            replace: true,
-            zoom: false
-        });
-    },
-
     clearSelection: function() {
         return this.setSelection([], {});
     },
@@ -693,11 +656,7 @@ $.widget('heurist.mapViewer', {
     /** Activate a persisted MapDocument. */
     setMapDocument: function(documentId, options) {
         this.options.mapDocument = documentId;
-        if (!this._isWidgetVisible() || !this._isReady || !this._mapApi) {
-            this._ensureIframeInitialized();
-            return Promise.resolve(false);
-        }
-        return this._setMapDocumentNow(documentId, options || {});
+        return this._enqueueOrRun('_setMapDocumentNow', [documentId, options || {}]);
     },
 
     _setMapDocumentNow: function(documentId, options) {
@@ -710,11 +669,7 @@ $.widget('heurist.mapViewer', {
     /** Reload the current query layer, or the active persisted document. */
     refresh: function() {
         var that = this;
-        if (!this._isWidgetVisible() || !this._isReady || !this._mapApi) {
-            this._ensureIframeInitialized();
-            return Promise.resolve(false);
-        }
-        return this._refreshNow().then(function(result) {
+        return this._enqueueOrRun('_refreshNow', []).then(function(result) {
             that.resize();
             return result;
         });
@@ -740,13 +695,8 @@ $.widget('heurist.mapViewer', {
     },
 
     resize: function() {
-        if (!this._isWidgetVisible()) {
-            return Promise.resolve(false);
-        }
-        if (!this._isReady || !this._mapApi) {
-            this._ensureIframeInitialized();
-            return Promise.resolve(false);
-        }
+        if (!this._isReady || !this._mapApi) return Promise.resolve(false);
+        if (this.options.viewerMode === 'configuration') return Promise.resolve(true);
         return Promise.resolve(this._mapApi.invalidateSize());
     },
 
@@ -904,8 +854,6 @@ $.widget('heurist.mapViewer', {
         var that = this;
         if (typeof ResizeObserver === 'function') {
             this._resizeObserver = new ResizeObserver(function() {
-                if (!that._isWidgetVisible()) return;
-                that._ensureIframeInitialized();
                 if (that._resizeTimer) clearTimeout(that._resizeTimer);
                 that._resizeTimer = setTimeout(function() {
                     that._resizeTimer = 0;
@@ -931,7 +879,6 @@ $.widget('heurist.mapViewer', {
         if (this._resizeObserver) this._resizeObserver.disconnect();
 
         delete (window.HEURIST_MAP_INSTANCES || {})[this._instanceId];
-        this.element.off('.mapViewer');
         if (this._events) $(this.document).off(this._events);
         this._events = null;
         this._unbindMapEvents();

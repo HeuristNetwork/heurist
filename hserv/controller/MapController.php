@@ -306,7 +306,7 @@ class MapController
             'ui' => $this->pick($value['ui'] ?? [], [
                 'enabled','placement','position','initiallyExpanded','showCurrentDocument',
                 'showMapDocuments','showLayers','showBaseMaps','showLegend','showZoomControl',
-                'showSearch','showPublish'
+                'showSearch','showPublish','controlCss'
             ]),
             'mapDocuments' => $this->pick($value['mapDocuments'] ?? [], ['allowed','initiallyActive']),
             'baseMaps' => $this->pick($value['baseMaps'] ?? [], ['allowed','initial']),
@@ -319,7 +319,8 @@ class MapController
     {
         $dynamic = $this->pick($value['dynamicDocument'] ?? [], [
             'enabled','title','initiallyActive','minZoom','maxZoom','minimumZoomKm',
-            'maximumZoomKm','zoomToPointInKM','bounds','symbology'
+            'maximumZoomKm','zoomToPointInKM','bounds','symbology','selectSymbology',
+            'preventContinuousWorldBasemap'
         ]);
 
         $layer = $this->pick($value['currentResultsLayer'] ?? [], ['title','visible','selectable','style']);
@@ -351,7 +352,7 @@ class MapController
      */
     private function getMapId(bool $required = true): ?string
     {
-        $id = trim((string)($this->req_params['id'] ?? ''));
+        $id = trim((string)($this->req_params['id'] ?? $this->req_params['map_id'] ?? ''));
         if($id === ''){
             if($required){
                 $this->system->addError(HEURIST_INVALID_REQUEST, 'Published map id is required');
@@ -418,7 +419,11 @@ class MapController
     /** Build the public standalone page URL for a saved map. */
     private function buildShowUrl(string $id): string
     {
+        //shortcut
         return HEURIST_BASE_URL.'?db='.rawurlencode($this->system->dbname())
-            .'&controller=MapController&action=show&id='.rawurlencode($id);
+            .'&map_id='.rawurlencode($id);
+        //long    
+        //return HEURIST_BASE_URL.'?db='.rawurlencode($this->system->dbname())
+        //    .'&controller=MapController&action=show&id='.rawurlencode($id);
     }
 }

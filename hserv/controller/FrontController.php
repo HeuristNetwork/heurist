@@ -95,7 +95,11 @@ class FrontController
         }
 
         // Detect controller class
-        if (@$this->req_params['controller'] == 'MapController') {
+        if (@$this->req_params['controller'] == 'MapController' || @$this->req_params['map_id']) {
+            
+            if(!@$this->req_params['action']){
+                $this->req_params['action'] = 'show';    
+            }
 
             $controller = new MapController($this->system, $this->req_params);
             $controller->handleRequest(@$this->req_params['action']);
