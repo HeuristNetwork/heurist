@@ -32,11 +32,9 @@ $.widget('heurist.mapViewer', {
         mapApplicationUrl: window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/mapViewer.html', 
         //mapApplicationUrl: '/heurist/external/heurist-map/index.html',
 
-        serverUrl: null,
         accessToken: null,
         requestHeaders: null,
 
-        heuristMapOptions: null,      // legacy/runtime compatibility
         heuristMapSettings: null,     // persisted {format,version,options,config}
         heuristMapState: null,        // initial reproducible map state
         mapDocument: null,
@@ -278,63 +276,31 @@ $.widget('heurist.mapViewer', {
     /** Build the single bootstrap contract consumed by heurist-map. */
     _buildHeuristMapBootstrap: function() {
         var hapi = window.hWin && window.hWin.HAPI4;
-        var legacy = $.extend(true, {}, this.options.heuristMapOptions || {});
         var saved = this._getSavedMapSettings();
-        var explicit = this._cloneMapSettings(this.options.heuristMapSettings || legacy.heuristMapSettings || null);
-        var legacySettings = this._extractLegacyMapSettings(legacy);
+        var explicit = this._cloneMapSettings(this.options.heuristMapSettings);
 
-        // Preferences are the base. Legacy/explicit widget settings override them once,
-        // here in the host wrapper. heurist-map must not perform a second precedence merge.
-        var settings = this._mergeMapSettings(saved, legacySettings, explicit);
+        // Preferences are the base. Explicit widget settings override them once,
+        // here in the host wrapper. heurist-map performs no second precedence merge.
+        var settings = this._mergeMapSettings(saved, explicit);
         if (this.options.viewerMode === 'configuration' && this.options.configurationValue) {
             settings = this._mergeMapSettings(settings, this.options.configurationValue);
         }
 
-        var database = this.options.database || legacy.database ||
-            (hapi ? hapi.database : null);
-        var apiBaseUrl = this.options.apiBaseUrl || legacy.apiBaseUrl ||
-            (hapi ? hapi.baseURL + 'api' : null);
-
-        var availableBaseMaps = Array.isArray(legacy.baseMaps)
-            ? legacy.baseMaps
-            : (Array.isArray(legacy.baseMaps?.available) ? legacy.baseMaps.available : null);
+        var database = this.options.database || (hapi ? hapi.database : null);
+        var apiBaseUrl = this.options.apiBaseUrl || (hapi ? hapi.baseURL + 'api' : null);
 
         return {
             runtime: {
                 viewerMode: this.options.viewerMode === 'configuration' ? 'configuration' : 'map',
                 configurationMode: this.options.configurationMode || 'preferences',
-                containerId: legacy.containerId || legacy.id || 'heurist-map',
-                engine: legacy.engine || 'leaflet',
-                readonly: legacy.readonly !== false,
                 database: database,
                 apiBaseUrl: apiBaseUrl,
-                serverUrl: this.options.serverUrl || legacy.serverUrl || null,
-                accessToken: this.options.accessToken || legacy.accessToken || null,
-                requestHeaders: $.extend({}, legacy.requestHeaders || {}, this.options.requestHeaders || {}),
-                host: $.extend({
-                    type: 'heurist',
-                    baseUrl: hapi ? hapi.baseURL : null,
-                    database: database
-                }, this._extractRuntimeHost(legacy.host)),
-                documents: {
-                    query: legacy.documents?.query ?? null,
-                    autoLoad: legacy.documents?.autoLoad !== false,
-                    activateFirst: legacy.documents?.activateFirst !== false
-                },
-                baseMaps: {
-                    available: availableBaseMaps
-                },
-                uiRuntime: {
-                    showOptions: legacy.ui?.showOptions !== false,
-                    showScaleControl: legacy.ui?.showScaleControl !== false,
-                    showHomeControl: legacy.ui?.showHomeControl !== false,
-                    baseMapsInitiallyExpanded: legacy.ui?.baseMapsInitiallyExpanded !== false,
-                    maxHeight: legacy.ui?.controlPanelMaxHeight || legacy.ui?.maxHeight || '70vh'
-                }
+                accessToken: this.options.accessToken || null,
+                requestHeaders: $.extend({}, this.options.requestHeaders || {}),
+                baseUrl: hapi ? hapi.baseURL : null
             },
             settings: settings,
-            state: this.options.heuristMapState || legacy.initialState || null,
-            mapDocument: this.options.mapDocument || null
+            state: this.options.heuristMapState || null
         };
     },
 
@@ -349,45 +315,6 @@ $.widget('heurist.mapViewer', {
         } catch (error) {
             return null;
         }
-    },
-
-    /** Keep only persisted-setting-shaped values from the old mixed options object. */
-    _extractLegacyMapSettings: function(source) {
-        if (!source || typeof source !== 'object') return null;
-        var options = {};
-        var config = {};
-
-        if (source.ui) options.ui = $.extend(true, {}, source.ui);
-        if (source.mapDocuments) options.mapDocuments = $.extend(true, {}, source.mapDocuments);
-        if (source.interaction) options.interaction = $.extend(true, {}, source.interaction);
-        if (source.baseMaps && !Array.isArray(source.baseMaps)) {
-            var baseMapSettings = {};
-            if (source.baseMaps.allowed !== undefined) baseMapSettings.allowed = source.baseMaps.allowed;
-            if (source.baseMaps.initial !== undefined) baseMapSettings.initial = source.baseMaps.initial;
-            if (Object.keys(baseMapSettings).length) options.baseMaps = baseMapSettings;
-        }
-        if (source.dynamicDocument) {
-            config.dynamicDocument = $.extend(true, {}, source.dynamicDocument);
-            delete config.dynamicDocument.id;
-            delete config.dynamicDocument.keepContent;
-            delete config.dynamicDocument.layers;
-        }
-        if (source.currentResultsLayer) {
-            config.currentResultsLayer = $.extend(true, {}, source.currentResultsLayer);
-            delete config.currentResultsLayer.id;
-        }
-
-        if (!Object.keys(options).length && !Object.keys(config).length) return null;
-        return { format: 'heurist-map-settings', version: 1, options: options, config: config };
-    },
-
-    _extractRuntimeHost: function(host) {
-        if (!host || typeof host !== 'object') return {};
-        var result = {};
-        ['type', 'baseUrl', 'database'].forEach(function(key) {
-            if (host[key] !== undefined) result[key] = host[key];
-        });
-        return result;
     },
 
     _cloneMapSettings: function(value) {
