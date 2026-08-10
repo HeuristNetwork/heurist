@@ -1596,9 +1596,9 @@ class HPredicate {
         $this->value = $value;
         $p_type = strtolower($this->pred_type);
 
-        if(!isEmptyArray($value) &&
+        if($p_type!='geo' && !isEmptyArray($value) &&
             !(is_numeric(@$value[0]) || is_string(@$value[0])) )
-        { //subqueries
+        { //subqueries; geo may use an associative bounds object
             //special behavior for relation - extract reltypes and record ids
 
             if($p_type=='related' ||
@@ -1954,6 +1954,8 @@ class HPredicate {
      */
     private function predicateSpatial(){
 
+        global $mysqli;
+
         $p = "rd".$this->qlevel.'.';
         $p = '';
 
@@ -1961,12 +1963,42 @@ class HPredicate {
 
         if($this->isEmptyValue()){
             $res = SQL_NOT.$res.$p.'dtl_Geo IS NOT NULL)';//not defined
-        }elseif($this->value==''){
+        }elseif($this->value===''){
             $res = $res.$p.'dtl_Geo IS NOT NULL)';//any not null value
         }else {
-            $res = $res
-            .$p.'dtl_Geo is not null AND ST_Contains(ST_GeomFromText(\''.$this->value.'\'), '
-            .$p.'dtl_Geo) limit 1)';//MBRContains
+            $spatialFunction = 'ST_Contains';
+            $wkt = $this->value;
+
+            // Preferred JSON-query viewport form:
+            // {"geo":{"west":-16,"south":32,"east":40,"north":72}}
+            if(is_array($this->value)){
+                $required = array('west','south','east','north');
+                foreach($required as $key){
+                    if(!array_key_exists($key, $this->value) || !is_numeric($this->value[$key])){
+                        $this->error_message = 'Invalid geo extent. Expected numeric west, south, east and north values.';
+                        return null;
+                    }
+                }
+
+                $west = (float)$this->value['west'];
+                $south = (float)$this->value['south'];
+                $east = (float)$this->value['east'];
+                $north = (float)$this->value['north'];
+
+                if($west < -180 || $west > 180 || $east < -180 || $east > 180
+                    || $south < -90 || $south > 90 || $north < -90 || $north > 90
+                    || $south > $north){
+                    $this->error_message = 'Invalid geo extent coordinates.';
+                    return null;
+                }
+
+                $wkt = "POLYGON (($west $south, $east $south, $east $north, $west $north, $west $south))";
+                $spatialFunction = 'ST_Intersects';
+            }
+
+            $wkt = $mysqli->real_escape_string((string)$wkt);
+            $res .= $p.'dtl_Geo is not null AND '.$spatialFunction
+                .'(ST_GeomFromText(\''.$wkt.'\'), '.$p.'dtl_Geo) limit 1)';
         }
         return array("where"=>$res);
     }

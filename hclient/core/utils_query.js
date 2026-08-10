@@ -729,11 +729,15 @@ window.hWin.HEURIST4.query = {
         for(const idx in subqueries){
             
             if(!subqueries[idx]) { continue; }
-
-            let subquery = subqueries[idx].replaceAll(removeParenthesis, '');
             
-            let result = window.hWin.HEURIST4.query.stringQueryToPlainText(subquery);
-            query = query.replace(subqueries[idx], result);
+            try{
+                let subquery = subqueries[idx].replaceAll(removeParenthesis, '');
+                
+                let result = window.hWin.HEURIST4.query.stringQueryToPlainText(subquery);
+                query = query.replace(subqueries[idx], result);
+            }catch{
+                continue;
+            }
         }
 
         let parts = [...query.matchAll(/(?:".*?"|[^"\s]+)+(?=\s*|\s*$)/g)]; // extract via spaces, not within double quotes
