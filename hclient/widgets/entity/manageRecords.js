@@ -217,42 +217,36 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         const is_create_actions_buttons = true;
         if(is_create_actions_buttons){ // || this.options.rts_editor
 
+            const plusIcon = '<span class="ui-icon ui-icon-plus" style="font-size: 1em;margin-right: 1em;vertical-align: -5px;"></span>';
+
             this.rts_actions_menu = 
             $('<div class="rts-editor-actions" style="display: none;">'
 
-                +`<div data-action="edit" class="rts-editor-action">
+                +`<div data-action="edit" class="rts-editor-action" style="margin-bottom: 5px;">
                     <span class="ui-icon ui-icon-pencil" title="Edit" style="margin-right: 0.5em;"></span>
-                    edit definition
+                    edit field definition
                 </div>`
 
+                +'<div style="font-style: italic;font-size: 0.85em;font-weight: bold;padding: 5px 0px 2.5px 5px;">insert below current position</div>'
+
                 +`<div data-action="field" class="rts-editor-action" title="Add a new field to this record type">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    field
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}field
                 </div>`
 
                 +`<div data-action="connector" class="rts-editor-action" title="Add a new connecting field to this record type">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    connection
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}connection
                 </div>`
 
                 +`<div data-action="block" class="rts-editor-action" title="Add a new group/separator">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    tab or heading
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}tab / heading
                 </div>`
 
                 +`<div data-action="explain" class="rts-editor-action" title="Add a new explanation separator">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    explanatory text
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}explanatory text
                 </div>`
 
                 +`<div data-action="sub-record" class="rts-editor-action" title="Create a sub-record" class="admin-only">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    sub-record
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}sub-record
                 </div>`
 
                 +`<div class="edit_rts_sel" class="rts-editor-action" title="Requirement type">
@@ -397,7 +391,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         if(that.options.rts_editor){
                             that.options.rts_editor.manageDefRecStructure('highlightNode', null);
                         }
-                    }, 800);  
+                    }, 100);  
                 },
                 click: function(event){
                         let trg = $(event.target);                     
@@ -646,7 +640,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that.rts_actions_menu
                     .attr('data-did', dtId)
                     .show()
-                    .position({ my:'left top', at:'left bottom', of: positionElement});
+                    .position({ my:'left top+10', at:'left bottom', of: positionElement});
 
                 that.options.rts_editor.manageDefRecStructure('highlightNode', dtId);
 
@@ -656,7 +650,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         if(that.options.rts_editor){
                             that.options.rts_editor.manageDefRecStructure('highlightNode', null); 
                         }
-                    }, 800);
+                    }, 100);
             }});
         }else{
             //placeholder
