@@ -130,6 +130,7 @@ class MapPresentationService
         $layerMaxZoom = $this->numberOrNull($this->layers->value($layer, 'DT_MAXIMUM_ZOOM_LEVEL'));
         $sourceMinZoom = $this->numberOrNull($this->layers->value($sourceRecord, 'DT_MINIMUM_ZOOM_LEVEL'));
         $sourceMaxZoom = $this->numberOrNull($this->layers->value($sourceRecord, 'DT_MAXIMUM_ZOOM_LEVEL'));
+        $dynamicRequests = $this->termBoolean($this->layers->value($sourceRecord, 'DT_IS_LOADED_BY_EXTENT'), false);
 
         $effectiveMinZoom = $layerMinZoom !== null ? $layerMinZoom : $sourceMinZoom;
         $effectiveMaxZoom = $layerMaxZoom !== null ? $layerMaxZoom : $sourceMaxZoom;
@@ -155,6 +156,7 @@ class MapPresentationService
             'options' => array(
                 'markerClustering' => false,
                 'zoomToExtent' => false,
+                'dynamicRequests' => $dynamicRequests,
                 'minZoom' => $effectiveMinZoom,
                 'maxZoom' => $effectiveMaxZoom,
                 'minimumZoomKm' => $this->numberOrNull($this->layers->value($layer, 'DT_MAXIMUM_ZOOM')),

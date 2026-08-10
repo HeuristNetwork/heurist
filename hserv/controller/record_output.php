@@ -139,8 +139,8 @@
 
     if($is_records_api){
         $params['limit'] = isset($params['limit']) ? intval($params['limit']) : 1000;
-        if($params['limit'] < 1 || $params['limit'] > 1000){
-            $params['limit'] = 1000;
+        if($params['limit'] < 1 || $params['limit'] > 5000){
+            $params['limit'] = 5000;
         }
         $params['offset'] = isset($params['offset']) ? max(0, intval($params['offset'])) : 0;
 

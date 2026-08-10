@@ -38,7 +38,7 @@ class DbMapLayer extends DbRecordTypeEntity
         $this->requiredConstants = array(
             'RT_MAP_LAYER', 'DT_NAME', 'DT_DATA_SOURCE', 'DT_IS_VISIBLE',
             'DT_SYMBOLOGY', 'DT_MAP_THEMATIC', 'DT_SMARTY_TEMPLATE',
-            'DT_MINIMUM_ZOOM', 'DT_MAXIMUM_ZOOM',
+            'DT_MINIMUM_ZOOM', 'DT_MAXIMUM_ZOOM','DT_IS_LOADED_BY_EXTENT',
             'DT_MINIMUM_ZOOM_LEVEL', 'DT_MAXIMUM_ZOOM_LEVEL',
             'DT_TIMELINE_FIELDS', 'DT_QUERY_STRING', 'DT_SERVICE_URL',
             'DT_FILE_RESOURCE', 'DT_MAP_IMAGE_LAYER_SCHEMA',

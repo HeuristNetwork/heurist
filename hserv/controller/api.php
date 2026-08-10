@@ -273,8 +273,9 @@ if($method=='save' || $method=='add'){
     }*/
 }else{
 
-    if(@$req_params['limit']==null || $req_params['limit']>1000 || $req_params['limit']<1){
-        $req_params['limit']=1000;
+    $params['limit'] = isset($params['limit']) ? intval($params['limit']) : 1000;
+    if($params['limit'] < 1 || $params['limit'] > 5000){
+        $params['limit'] = 5000;
     }
 
 }
