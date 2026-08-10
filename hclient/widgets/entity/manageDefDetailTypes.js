@@ -2500,7 +2500,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         this._on($ele.find('input'), {
             change: (event) => {
-                $typeEle.editing_input('setValue', event.target.value);
+                const type = event.target.value;
+                $typeEle.editing_input('setValue', type);
+                this._onDataTypeChange(type);
             }
         });
 
@@ -2519,6 +2521,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             const translationStub = element.getAttribute('data-translate');
             element.innerHTML = window.hWin.HR(translationStub);
         });
+
+        this.options.newFieldType = 'resource';
     },
 
     /**
