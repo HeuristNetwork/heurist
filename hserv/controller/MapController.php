@@ -218,9 +218,9 @@ class MapController
     /**
      * Output a standalone page containing the heurist-map application.
      *
-     * The complete published envelope is exposed as `window.heuristMapPublished`
-     * for the map bootstrap. Runtime connection values are supplied separately
-     * and are never taken from the stored user configuration.
+     * The stored publish document is converted into the normal
+     * `window.heuristMapBootstrap` contract. Runtime connection values are
+     * supplied separately and are never taken from stored user configuration.
      *
      * @return void
      */
@@ -237,8 +237,6 @@ class MapController
             dataOutput($this->system->getError());
             return;
         }
-
-        $publishedJson = json_encode($document, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 
         $baseUrl = rtrim(HEURIST_BASE_URL, '/').'/';
         $bootstrap = [
@@ -309,7 +307,7 @@ class MapController
         ];
     }
 
-    /** Filter persisted heuristMapOptions to the agreed user-editable schema. */
+    /** Filter persisted heurist map options to the agreed user-editable schema. */
     private function filterOptions(array $value): array
     {
         return [
@@ -327,21 +325,18 @@ class MapController
     /** Filter persisted heuristMapConfig to the agreed user-editable schema. */
     private function filterConfig(array $value): array
     {
-        $dynamic = $this->pick($value['dynamicDocument'] ?? [], [
-            'enabled','title','initiallyActive','minZoom','maxZoom','minimumZoomKm',
-            'maximumZoomKm','zoomToPointInKM','bounds','symbology','selectSymbology',
-            'preventContinuousWorldBasemap'
+        $defaults = $this->pick($value['defaults'] ?? [], [
+            'zoomToPointInKM','symbology','selectSymbology','preventContinuousWorldBasemap',
+            'markerClustering','maxAllowedFeatures','dynamicRequests','popupTemplate'
         ]);
 
-        $layer = $this->pick($value['currentResultsLayer'] ?? [], ['title','visible','selectable','style']);
-        $layer['options'] = $this->pick($value['currentResultsLayer']['options'] ?? [], [
-            'markerClustering','maxAllowedFeatures','dynamicRequests','minZoom','maxZoom',
-            'minimumZoomKm','maximumZoomKm','popupTemplate'
+        $dynamic = $this->pick($value['dynamicDocument'] ?? [], [
+            'enabled','title','minZoom','maxZoom','minimumZoomKm','maximumZoomKm','bounds'
         ]);
 
         return [
-            'dynamicDocument' => $dynamic,
-            'currentResultsLayer' => $layer
+            'defaults' => $defaults,
+            'dynamicDocument' => $dynamic
         ];
     }
 
