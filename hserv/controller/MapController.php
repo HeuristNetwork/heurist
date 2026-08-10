@@ -239,13 +239,24 @@ class MapController
         }
 
         $publishedJson = json_encode($document, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
-        $runtime = [
-            'containerId' => 'heurist-map',
-            'apiBaseUrl' => rtrim(HEURIST_BASE_URL, '/').'/api',
-            'database' => $this->system->dbname()
+
+        $baseUrl = rtrim(HEURIST_BASE_URL, '/').'/';
+        $bootstrap = [
+            'runtime' => [
+                'database' => $this->system->dbname(),
+                'baseUrl' => $baseUrl,
+                'apiBaseUrl' => $baseUrl.'api'
+            ],
+            'settings' => [
+                'format' => 'heurist-map-settings',
+                'version' => 1,
+                'options' => $document['options'] ?? [],
+                'config' => $document['config'] ?? []
+            ],
+            'state' => $document['state'] ?? null
         ];
-        $runtimeJson = json_encode($runtime, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
-        $assetBase = rtrim(HEURIST_BASE_URL, '/').'/external/heurist-map/';
+        $bootstrapJson = json_encode($bootstrap, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        $assetBase = $baseUrl.'external/heurist-map/';
 
         header('Content-Type: text/html; charset=utf-8');
         header('Cache-Control: no-cache');
@@ -257,8 +268,7 @@ class MapController
             .'<link rel="stylesheet" href="'.htmlspecialchars($assetBase.'heurist-map-main.css', ENT_QUOTES, 'UTF-8').'">'
             .'<style>html,body,#heurist-map{width:100%;height:100%;margin:0;padding:0;overflow:hidden}</style>'
             .'</head><body><div id="heurist-map"></div><script>'
-            .'window.heuristMapPublished='.$publishedJson.';'
-            .'window.heuristMapOptions='.$runtimeJson.';'
+            .'window.heuristMapBootstrap='.$bootstrapJson.';'
             .'</script><script type="module" src="'.htmlspecialchars($assetBase.'heurist-map.js', ENT_QUOTES, 'UTF-8').'"></script>'
             .'</body></html>';
     }
