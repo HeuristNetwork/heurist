@@ -38,51 +38,17 @@ if($resource === 'document' || $resource === 'layer'){
 }
 
 // Reuse the mature search/visibility/GeoJSON implementation. The public
-// controller normalises request parameters and wraps pagination metadata.
+// controller normalises request parameters; the exporter writes the final response directly.
 $params['format'] = 'geojson';
 $params['restapi'] = 1;
 $params['zip'] = 0;
 $params['file'] = 0;
 $params['simplify'] = !empty($params['simplify']) ? 1 : 0;
 //if($resource === 'time'){ $params['leaflet'] = 1; }
-$params['leaflet'] = 1;
+$params['leaflet'] = \hserv\records\export\ExportRecordsGEOJSON::LEAFLET_FEATURE_COLLECTION;
+
 if($id > 0){ $params['q'] = 'ids:'.$id; }
 if(isset($params['query']) && is_array($params['query'])){ $params['q'] = $params['query']; }
 $req_params = $params;
 
-ob_start();
 include dirname(__FILE__).'/record_output.php';
-$raw = ob_get_clean();
-$data = json_decode($raw, true);
-if(!is_array($data)){
-    print $raw;
-    return;
-}
-
-$offset = max(0, intval($params['offset'] ?? 0));
-$limit = max(1, intval($params['limit'] ?? 1000));
-if($resource === 'time'){
-    $items = array();
-    foreach(($data['timeline'] ?? array()) as $entry){
-        foreach(($entry['when'] ?? array()) as $span){
-            $items[] = array(
-                'recordId'=>intval($entry['rec_ID'] ?? 0),
-                'title'=>(string)($entry['rec_Title'] ?? ''),
-                'start'=>$span[0] ?? null,
-                'end'=>$span[3] ?? ($span[0] ?? null),
-                'group'=>null
-            );
-        }
-    }
-    $result = array('format'=>'heurist-timeline','version'=>1,'items'=>$items,
-        'meta'=>array('total'=>count($items),'offset'=>$offset,'limit'=>$limit));
-}else{
-    $features = $data['geojson'];
-    $result = array('type'=>'FeatureCollection','features'=>$features,
-        'meta'=>array('database'=>(string)($params['db'] ?? ''),'recordId'=>$id ?: null,
-            'total'=>count($features),'offset'=>$offset,'limit'=>$limit));
-}
-header(HEADER_CORS_POLICY);
-$system->setResponseHeader();
-header('Content-Type: application/json; charset=utf-8');
-print json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
