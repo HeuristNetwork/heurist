@@ -1449,9 +1449,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         $icon.find('div.heurist-helper1').text('Images to represent this record type'); // replace help text
 
         // Move library and upload links
-        $icon.find('.file-options-container')
-             .insertBefore($icon.find('div.image_input.fileupload'))
-             .css('padding-top', '4px');
+        const $imageControls = $icon.find('.file-options-container');
+        $imageControls.insertBefore($icon.find('div.image_input.fileupload'));
 
         // Move thumbnail field
         let $thumb_img = $thumb.find('div.image_input');
@@ -1468,6 +1467,39 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             'click': function(){
                 $thumb.find('span.btn_input_clear').trigger('click');
             }
+        });
+        $icon.find('span.btn_input_clear').insertBefore($imageControls);
+
+        $icon.find('.header').removeClass('optional').addClass('required');
+        $thumb.find('.header').removeClass('optional').addClass('required');
+
+        const helpTextStyle = 'padding-left: 10px; position: relative; top: -1px;';
+        const $imageControlsAnchor = $imageControls.find('a');
+        $imageControlsAnchor.each((idx) => {
+
+            const $control = $($imageControlsAnchor[idx]);
+            $control.css('text-decoration', 'none');
+
+            if($control.find('.ui-icon-grid').length > 0){
+                $('<span>', {
+                    style: helpTextStyle,
+                    text: 'Choose from default set of icons (can be changed later)'
+                }).appendTo($control);
+            }else{
+                $('<span>', {
+                    style: helpTextStyle,
+                    text: 'Choose an icon file or image on your computer (must be appropriate size)'
+                }).appendTo($control);
+            }
+        });
+
+        $icon.find('div.image_input').css('margin-left', '');
+
+        $imageControls.css({
+            'padding-left': '2em',
+            position: 'relative',
+            top: '6px',
+            'vertical-align': ''
         });
     },
 
@@ -1641,13 +1673,59 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             if(fields) fields['isfull'] = 1;
         }
 
-        if(fields==null) return; //validation failed
+        const isNewRecType = !window.hWin.HEURIST4.util.isPositiveInt(this._currentEditID);
+        if(!isNewRecType && !Object.hasOwn(fields, 'checkedIcon')){
+
+            let _checkForIcon = async () => {
+                let result = await this._checkForIcon();
+                fields['checkedIcon'] = await this._checkForIcon();
+                this._saveEditAndClose(fields, afterAction, onErrorAction);
+            };
+
+            _checkForIcon();
+            return;
+        }
+
+        this._editing.getFieldByName('rty_Icon').editing_input('showErrorMsg', null);
+        if((isNewRecType && window.hWin.HEURIST4.util.isempty(fields['rty_Icon'])) || fields['checkedIcon'] === false){
+            window.hWin.HEURIST4.msg.showMsgFlash('Please set an icon for the record type', 5000);
+            this._editing.getFieldByName('rty_Icon').editing_input('showErrorMsg', 'An icon is required');
+            return;
+        }
+
+        if(fields == null) return; //validation failed
 
         if(fields['rty_TitleMask'] && fields['rty_TitleMask'].indexOf('<b>XXXXX</b>') != -1) { // add rectype name to default title mask
             fields['rty_TitleMask'] = fields['rty_TitleMask'].replace('XXXXX', fields['rty_Name']);
         }
 
         this._super(fields, afterAction, onErrorAction);
+    },
+
+    /**
+     * @brief Check whether the record type has an icon, backup check when rty_Icon isn't in the record
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @returns {bool} Whether the icon exists or not
+     */
+    _checkForIcon: async function(){
+
+        const iconURL = window.hWin.HAPI4.getImageUrl('defRecTypes', this._currentEditID, 'icon', 3);
+
+        try{
+
+            let response = await fetch(iconURL);
+
+            if(!response.ok){
+                return false;
+            }
+
+            let result = await response.json();
+
+            return result?.data === 'ok';
+        }catch{
+            return false;
+        }
     },
     
     /**
