@@ -2170,22 +2170,34 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
     _onPageRender: function(){
 
-        this.recordList.find('.conceptID').each(async (idx, conceptLabel) => {
+        this._retrieveOriginalDBs = true;
 
-            const rtyID = $(conceptLabel).closest('.recordDiv').attr('recid');
+        this._on(this.recordList.find('.conceptID'), {
+            mouseenter: () => {
 
-            if(!window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
-                return;
+                if(!this._retrieveOriginalDBs){
+                    return;
+                }
+
+                this._retrieveOriginalDBs = false;
+                this.recordList.find('.conceptID').each(async (idx, conceptLabel) => {
+
+                    const rtyID = $(conceptLabel).closest('.recordDiv').attr('recid');
+
+                    if(!window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+                        return;
+                    }
+
+                    const originalDBID = $Db.rty(rtyID, 'rty_OriginatingDBID');
+                    if(!window.hWin.HEURIST4.util.isPositiveInt(originalDBID)){
+                        return;
+                    }
+
+                    const originalDB = await $Db.getOriginatingDBName(originalDBID);
+
+                    conceptLabel.title = `db: ${originalDB}`;
+                });
             }
-
-            const originalDBID = $Db.rty(rtyID, 'rty_OriginatingDBID');
-            if(!window.hWin.HEURIST4.util.isPositiveInt(originalDBID)){
-                return;
-            }
-
-            const originalDB = await $Db.getOriginatingDBName(originalDBID);
-
-            conceptLabel.title = `Original Database: ${originalDB}`;
         });
     }
 
