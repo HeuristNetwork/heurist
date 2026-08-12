@@ -126,21 +126,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 return;
             }
             this._$('#div_block').hide();
-            
-
-            let that = this;
-            window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
-                if(!window.hWin.HEURIST4.util.isempty(response)){
-                    let record = response.getFirstRecord();
-                    let description = response.fld(record, 'sys_dbDescription');
-                    let displayName = response.fld(record, 'sys_dbName');
-                    let rights      = response.fld(record, 'sys_dbRights');
-                    // Pre-fill all three fields - user can review/edit before submitting
-                    that._$('#dbDisplayName').val(displayName || '');
-                    that._$('#dbRights').val(rights || '');
-                    that._$('.dbDescription').text(description);
-                    that._$('#dbTitle').val(description).trigger('keyup');
-                }});
 
             if(window.hWin.HAPI4.sysinfo['db_registeredid']>0){
                 this._$('.dbDescription').text('');
@@ -164,13 +149,29 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 }
 
                 this._on(this._$('#dbTitle'),{keyup:
-                        function ( event ){
-                            let len = $(event.target).val().length;
-                            let ele = this._$('#cntChars').text(len);
-                            ele.parent().css('color',(len<40)?'red':'#6A7C99'); // Visual feedback for length
-                        }
+                    function ( event ){
+                        let len = $(event.target).val().length;
+                        let ele = this._$('#cntChars').text(len);
+                        ele.parent().css('color',(len<40)?'red':'#6A7C99'); // Visual feedback for length
+                    }
                 });
             }
+
+            // Retrieve Database metadata
+            let that = this;
+            window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
+                if(!window.hWin.HEURIST4.util.isempty(response)){
+                    let record = response.getFirstRecord();
+                    let description = response.fld(record, 'sys_dbDescription');
+                    let displayName = response.fld(record, 'sys_dbName');
+                    let rights      = response.fld(record, 'sys_dbRights');
+                    // Pre-fill all three fields - user can review/edit before submitting
+                    that._$('#dbDisplayName').val(displayName || '');
+                    that._$('#dbRights').val(rights || '');
+                    that._$('.dbDescription').text(description);
+                    that._$('#dbTitle').val(description).trigger('keyup');
+                }
+            });
         }
 
         // User and database name inputs
