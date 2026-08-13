@@ -306,6 +306,11 @@ $.widget('heurist.mapViewer', {
                 that._mapBootstrap = that._mapBootstrap || that._buildHeuristMapBootstrap();
                 that._mapBootstrap.state = state == null ? null : $.extend(true, {}, state);
                 that.options.heuristMapState = state == null ? null : $.extend(true, {}, state);
+            },
+            // Generic host editing bridge. MapDocument and MapLayer are both ordinary
+            // Heurist records, so the child only needs to provide the persisted record ID.
+            editRecord: function(recordId) {
+                return that._openRecordEdit(recordId);
             }
         };
     },
@@ -334,7 +339,8 @@ $.widget('heurist.mapViewer', {
                 apiBaseUrl: apiBaseUrl,
                 accessToken: this.options.accessToken || null,
                 requestHeaders: $.extend({}, this.options.requestHeaders || {}),
-                baseUrl: hapi ? hapi.baseURL : null
+                baseUrl: hapi ? hapi.baseURL : null,
+                readonly: false
             },
             settings: settings,
             state: this.options.heuristMapState || null
@@ -949,11 +955,41 @@ $.widget('heurist.mapViewer', {
     },
 
     _openRecordEdit: function(recordId) {
-        if (!(Number(recordId) > 0)) return false;
+        var id = Number(recordId);
+        if (!(id > 0)) {
+            return Promise.reject(new Error('A valid Heurist record ID is required for editing'));
+        }
+
         var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
-        if (!ui || typeof ui.openRecordEdit !== 'function') return false;
-        ui.openRecordEdit(Number(recordId), null, { selectOnSave: true });
-        return true;
+        if (!ui || typeof ui.openRecordEdit !== 'function') {
+            return Promise.reject(new Error('Heurist record editor is not available'));
+        }
+
+        return new Promise(function(resolve, reject) {
+            var settled = false;
+            var saved = false;
+
+            function finish(result) {
+                if (settled) return;
+                settled = true;
+                resolve(result);
+            }
+
+            try {
+                ui.openRecordEdit(id, null, {
+                    selectOnSave: true,
+                    onselect: function() {
+                        saved = true;
+                        finish({ saved: true, recordId: id });
+                    },
+                    onClose: function() {
+                        if (!saved) finish({ saved: false, recordId: id });
+                    }
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
     },
 
     _invokeCallback: function(name) {
