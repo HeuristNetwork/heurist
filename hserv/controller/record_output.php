@@ -61,10 +61,12 @@
     use hserv\utilities\USanitize;
     use hserv\utilities\USystem;
     use hserv\records\export\RecordsExportCSV;
+    use hserv\records\search\RecordDetailsByPath;
 
     require_once dirname(__FILE__).'/../../autoload.php';
 
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
+    require_once dirname(__FILE__).'/../records/search/RecordDetailsByPath.php';
     require_once dirname(__FILE__).'/../records/search/recordFile.php';
     require_once dirname(__FILE__).'/../structure/dbsTerms.php';
     require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
@@ -136,6 +138,35 @@
         && is_array($apiResponseContext)
         && @$apiResponseContext['entity'] === 'records';
     $is_api_ids_response = false;
+
+    // Public API operation for direct/linked detail paths. This deliberately
+    // bypasses the normal record exporter because path-qualified detail keys
+    // are not ordinary numeric dty_ID keys.
+    if($is_records_api && @$apiResponseContext['mode'] === 'details'){
+        try{
+            $provider = new RecordDetailsByPath($system);
+            $detailsResult = $provider->fetch(@$params['ids'], @$params['fields']);
+            $payload = array(
+                'records' => $detailsResult['records'],
+                'meta' => array(
+                    'database' => $system->dbname(),
+                    'entity' => 'records',
+                    'self' => recordsApiSelfLink(),
+                    'fields' => array(
+                        'headers' => array('rec_ID', 'rec_RecTypeID'),
+                        'details' => $detailsResult['fields']
+                    )
+                )
+            );
+            dataOutput($payload);
+            $system->dbclose();
+            exit;
+        }catch(\InvalidArgumentException $e){
+            $system->errorExitApi($e->getMessage(), HEURIST_INVALID_REQUEST, true, 400);
+        }catch(\Throwable $e){
+            $system->errorExitApi($e->getMessage(), HEURIST_ERROR, true, 500);
+        }
+    }
 
     if($is_records_api){
         $params['limit'] = isset($params['limit']) ? intval($params['limit']) : 1000;

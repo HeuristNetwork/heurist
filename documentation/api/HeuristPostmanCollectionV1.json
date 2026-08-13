@@ -77,6 +77,14 @@
     {
       "key": "iiifFileId",
       "value": "a26f83404b3689e9473b90563ae874b959b849ed"
+    },
+    {
+      "key": "linkedDetailSourceId",
+      "value": "1"
+    },
+    {
+      "key": "linkedDetailPath",
+      "value": ""
     }
   ],
   "item": [
@@ -1524,6 +1532,153 @@
               "host": [
                 "{{baseUrl}}"
               ]
+            }
+          }
+        },
+        {
+          "name": "Record details by direct path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('records array exists', function () { pm.expect(body.records).to.be.an('array'); });",
+                  "pm.test('public source record is returned', function () { pm.expect(body.records.length).to.eql(1); });",
+                  "pm.test('records metadata identifies records', function () { pm.expect(body.meta.entity).to.eql('records'); });",
+                  "pm.test('path metadata is returned', function () { pm.expect(body.meta.fields.details).to.be.an('array').and.not.empty; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [{{publicRecordId}}],\n  \"fields\": [\"{{rtyId}}:{{dtyId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records/details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{apiPrefix}}",
+                "{{db}}",
+                "records",
+                "details"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Record details invalid path -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', function () { pm.response.to.have.status(400); });",
+                  "const body = pm.response.json();",
+                  "pm.test('invalid request error is returned', function () { pm.expect(body).to.have.property('message'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [{{publicRecordId}}],\n  \"fields\": [\"not-a-field-path\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records/details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{apiPrefix}}",
+                "{{db}}",
+                "records",
+                "details"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Record details by linked path",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('linkedDetailPath')) {",
+                  "  pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('records array exists', function () { pm.expect(body.records).to.be.an('array'); });",
+                  "pm.test('linked field path metadata is returned', function () { pm.expect(body.meta.fields.details[0].code).to.eql(pm.environment.get('linkedDetailPath')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [{{linkedDetailSourceId}}],\n  \"fields\": [\"{{linkedDetailPath}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records/details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{apiPrefix}}",
+                "{{db}}",
+                "records",
+                "details"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
             }
           }
         }

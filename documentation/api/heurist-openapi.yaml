@@ -315,6 +315,49 @@ paths:
       description: Anonymous requests return only publicly visible records. The response keeps the established records
         array and record detail structure, and adds metadata and pagination. A missing or inaccessible record returns
         an empty records array.
+  /{database}/records/details:
+    post:
+      tags:
+      - Records
+      operationId: getRecordDetailsByPath
+      summary: Retrieve selected direct or linked record details
+      description: >-
+        Retrieves selected detail values for an explicit set of source records. Field paths use the existing Heurist
+        short-code notation, for example `10:237` for a direct field or `10:lt240:48:237` for a field reached through
+        linked records. Missing or inaccessible source records are omitted. Record and field visibility follow the same
+        permissions as the normal records API. Values preserve the normal Heurist multi-value structure keyed by detail
+        row ID.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordDetailsByPathRequest'
+            example:
+              ids: [101, 102, 103]
+              fields:
+              - '10:237'
+              - '10:lt240:48:237'
+      responses:
+        '200':
+          description: Selected direct and linked record details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordDetailsByPathResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/rectypes:
     get:
       tags:
@@ -1827,6 +1870,114 @@ components:
             - type: string
         meta:
           $ref: '#/components/schemas/RecordItemMeta'
+      additionalProperties: false
+    RecordDetailsByPathRequest:
+      type: object
+      required:
+      - ids
+      - fields
+      properties:
+        ids:
+          type: array
+          minItems: 1
+          maxItems: 5000
+          items:
+            type: integer
+            minimum: 1
+          description: Source record identifiers. Missing or inaccessible records are omitted from the response.
+        fields:
+          type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+          description: >-
+            Heurist detail paths. A numeric detail ID is also accepted for direct fields. Full paths may contain
+            `lt`, `lf`, `rt`, and `rf` link/relation segments, for example `10:lt240:48:237`.
+      additionalProperties: false
+    RecordDetailPathDefinition:
+      type: object
+      required:
+      - code
+      - dty_ID
+      - dty_Name
+      - dty_Type
+      properties:
+        code:
+          type: string
+        dty_ID:
+          type: string
+        dty_Name:
+          type: string
+        dty_Type:
+          type: string
+      additionalProperties: false
+    RecordDetailsByPathRecord:
+      type: object
+      required:
+      - rec_ID
+      - rec_RecTypeID
+      - details
+      properties:
+        rec_ID:
+          type: string
+        rec_RecTypeID:
+          type: string
+        details:
+          type: object
+          description: >-
+            Map keyed by the requested full field path. Each value is the normal Heurist detail-value map keyed by
+            detail row ID. Requested paths with no visible value may be absent.
+          additionalProperties:
+            type: object
+            additionalProperties: {}
+      additionalProperties: false
+    RecordDetailsByPathMeta:
+      type: object
+      required:
+      - database
+      - entity
+      - self
+      - fields
+      properties:
+        database:
+          type: string
+        entity:
+          type: string
+          const: records
+        self:
+          type: string
+          format: uri
+        fields:
+          type: object
+          required:
+          - headers
+          - details
+          properties:
+            headers:
+              type: array
+              items:
+                type: string
+            details:
+              type: array
+              items:
+                $ref: '#/components/schemas/RecordDetailPathDefinition'
+          additionalProperties: false
+      additionalProperties: false
+    RecordDetailsByPathResponse:
+      type: object
+      required:
+      - records
+      - meta
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecordDetailsByPathRecord'
+        meta:
+          $ref: '#/components/schemas/RecordDetailsByPathMeta'
       additionalProperties: false
     SessionLoginRequest:
       type: object

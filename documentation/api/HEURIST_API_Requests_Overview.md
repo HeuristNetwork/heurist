@@ -82,6 +82,61 @@ The initial public contract is JSON-only and documents `q`, `w`, `ids`, `detail`
 
 Existing visibility behavior is retained: an inaccessible record query may return HTTP 200 with an empty `records` array.
 
+### Direct and linked record details
+
+```text
+POST /api/<database>/records/details
+```
+
+This read-only operation retrieves selected detail values for an explicit set of source records. It accepts the existing Heurist short field-path notation used by facet and thematic-map definitions. For example:
+
+```json
+{
+  "ids": [101, 102, 103],
+  "fields": [
+    "10:237",
+    "10:lt240:48:237",
+    "10:lt240:48:1160"
+  ]
+}
+```
+
+A direct path such as `10:237` reads detail type 237 from each visible source record. A linked path such as `10:lt240:48:237` follows the encoded link path and returns detail type 237 from the matching linked records. Fields sharing the same path are grouped internally so their detail IDs can be retrieved together.
+
+The operation is available anonymously for public records and also honours the current session or JWT. Missing or inaccessible source records are omitted. Linked records and individual fields are filtered through the same record and field visibility rules as normal record retrieval.
+
+The response follows the Records API envelope but uses full field paths as keys under each record's `details` object:
+
+```json
+{
+  "records": [
+    {
+      "rec_ID": "101",
+      "rec_RecTypeID": "10",
+      "details": {
+        "10:237": {"12345": "value"},
+        "10:lt240:48:237": {"22331": "10443"}
+      }
+    }
+  ],
+  "meta": {
+    "database": "mydb",
+    "entity": "records",
+    "self": "...",
+    "fields": {
+      "headers": ["rec_ID", "rec_RecTypeID"],
+      "details": [
+        {"code": "10:237", "dty_ID": "237", "dty_Name": "...", "dty_Type": "..."}
+      ]
+    }
+  }
+}
+```
+
+Each path value preserves the normal Heurist multi-value structure keyed by `dtl_ID`. Requested paths with no visible values may be absent. The endpoint does not use pagination because the caller supplies the source record IDs explicitly.
+
+The legacy `record_search.php?a=links_details` controller action is unchanged and remains a compatibility mechanism for existing internal clients.
+
 
 ## Map and timeline presentation API
 

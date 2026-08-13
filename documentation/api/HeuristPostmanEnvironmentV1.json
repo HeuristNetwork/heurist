@@ -144,6 +144,18 @@
       "value": "t:10",
       "type": "default",
       "enabled": true
+    },
+    {
+      "key": "linkedDetailSourceId",
+      "value": "1",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "linkedDetailPath",
+      "value": "",
+      "type": "default",
+      "enabled": true
     }
   ],
   "_postman_variable_scope": "environment",
