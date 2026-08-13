@@ -119,8 +119,7 @@ class MapPresentationService
         $sourceRecord = $this->layers->getDataSource($layer);
         if(!$sourceRecord){ return null; }
 
-        $styleRaw = $this->layers->value($layer, 'DT_SYMBOLOGY');
-        $thematicRaw = $this->layers->value($layer, 'DT_MAP_THEMATIC');
+        $style = $this->buildStyle($this->layers->value($layer, 'DT_SYMBOLOGY'));
         $timelineFields = $this->layers->values($layer, 'DT_TIMELINE_FIELDS');
 
         // Native zoom levels may be defined on the MapLayer itself or inherited
@@ -144,11 +143,7 @@ class MapPresentationService
             'visible' => $this->termBoolean($this->layers->value($layer, 'DT_IS_VISIBLE'), true),
             'selectable' => true,
             'source' => $this->buildSource($sourceRecord),
-            'style' => array(
-                'type' => $thematicRaw ? 'thematic' : 'simple',
-                'symbol' => $this->decodeJson($styleRaw),
-                'thematic' => $this->decodeJson($thematicRaw)
-            ),
+            'style' => $style,
             'timeline' => array(
                 'enabled' => !empty($timelineFields),
                 'fields' => array_values($timelineFields)
@@ -275,6 +270,49 @@ class MapPresentationService
         $crs = $this->layers->value($record, 'DT_CRS');
         if($crs !== null){ $source['crs'] = $this->termDescriptor($crs); }
         return $source;
+    }
+
+
+    /**
+     * Split the persisted DT_SYMBOLOGY value into the public style structure.
+     *
+     * Map Layer symbology is stored as one JSON value. In the current persisted
+     * format the first array item is the ordinary/base symbol and subsequent
+     * items are thematic-map definitions. Older simple layers may store the
+     * symbol object directly rather than wrapping it in an array.
+     *
+     * @param mixed $value Raw DT_SYMBOLOGY detail value.
+     * @return array Public style structure with type, symbol and thematic maps.
+     */
+    private function buildStyle($value): array
+    {
+        $decoded = $this->decodeJson($value);
+        $symbol = null;
+        $thematic = array();
+
+        if(is_array($decoded)){
+            $keys = array_keys($decoded);
+            $isList = empty($decoded) || $keys === range(0, count($decoded) - 1);
+
+            if($isList){
+                if(isset($decoded[0]) && is_array($decoded[0])){
+                    $symbol = $decoded[0];
+                }
+                for($i = 1; $i < count($decoded); $i++){
+                    if(is_array($decoded[$i])){
+                        $thematic[] = $decoded[$i];
+                    }
+                }
+            }else{
+                // Backward compatibility with simple symbology stored as one object.
+                $symbol = $decoded;
+            }
+        }
+
+        return array(
+            'symbol' => $symbol,
+            'thematic' => $thematic
+        );
     }
 
     private function parseBookmark(?string $raw): ?array
