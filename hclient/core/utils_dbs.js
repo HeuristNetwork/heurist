@@ -3841,21 +3841,76 @@ window.hWin.HEURIST4.dbs = {
         return parts.join(trm_separator);
     },
 
+    getRegisteredDatabases: async function(){
+
+        window.hWin.getReigsteredDBs = true;
+
+        return new Promise((resolve) => {
+
+            const request = {remote:'master', detail: 'header'};
+
+            window.hWin.HAPI4.RecordMgr.search(request, (response) => {
+
+                if(response.status !== window.hWin.ResponseStatus.OK){
+                    window.hWin.getReigsteredDBs = false;
+                    resolve(false);
+                    return;
+                }
+
+                const recordSet = new HRecordSet(response.data);
+
+                recordSet.each((recID, record) => {
+
+                    const recURL = recordSet.fld(record, 'rec_URL');
+                    const parameters = window.hWin.HEURIST4.util.getUrlParams(recURL === '' ? null : recURL);
+                    recID = Number.parseInt(recID);
+
+                    if(window.hWin.HEURIST4.util.isempty(parameters?.db) || !window.hWin.HEURIST4.util.isPositiveInt(recID)){
+                        return;
+                    }
+
+                    window.hWin.HEURIST4.registeredDatabases[recID] = parameters.db;
+                });
+
+                window.hWin.getReigsteredDBs = false;
+                resolve(true);
+            });
+        });
+    },
+
     getOriginatingDBName: async function(originatingDBID){
+
+        if(window.hWin.HEURIST4.util.isPositiveInt(originatingDBID)){
+            originatingDBID = Number.parseInt(originatingDBID);
+        }else if(typeof originatingDBID === 'string' && originatingDBID.indexOf('-') < 0){
+            originatingDBID = Number.parseInt(originatingDBID.split('-')[0]);
+        }
+
+        if(window.hWin.getReigsteredDBs){
+
+            return new Promise((resolve) => {
+                let interval = setInterval(() => {
+                    if(Object.hasOwn(window.hWin.HEURIST4.registeredDatabases, originatingDBID) || !window.hWin.getReigsteredDBs){
+                        clearInterval(interval);
+                        resolve(Object.hasOwn(window.hWin.HEURIST4.registeredDatabases, originatingDBID) ? window.hWin.HEURIST4.registeredDatabases[originatingDBID] : 'Unknown');
+                    }
+                }, 1000);
+            });
+        }
 
         const regID = Number.parseInt(window.hWin.HAPI4.sysinfo.db_registeredid);
         if(!window.hWin.HEURIST4.registeredDatabases){
+
             window.hWin.HEURIST4.registeredDatabases = { [regID]: window.hWin.HAPI4.database };
+
+            let result = await $Db.getRegisteredDatabases();
+            if(!result || !Number.isNaN(originatingDBID) && !Object.hasOwn(window.hWin.HEURIST4.registeredDatabases, originatingDBID)){
+                window.hWin.HEURIST4.registeredDatabases[originatingDBID] = 'Unknown';
+            }
         }
 
         if(window.hWin.HEURIST4.util.isempty(originatingDBID) || originatingDBID == 0){
             return originatingDBID == 0 ? window.hWin.HAPI4.database : 'Unknown';
-        }
-
-        if(window.hWin.HEURIST4.util.isPositiveInt(originatingDBID)){
-            originatingDBID = Number.parseInt(originatingDBID);
-        }else if(originatingDBID.indexOf('-') < 0){
-            originatingDBID = Number.parseInt(originatingDBID.split('-')[0]);
         }
 
         if(Number.isNaN(originatingDBID) || Object.hasOwn(window.hWin.HEURIST4.registeredDatabases, originatingDBID)){

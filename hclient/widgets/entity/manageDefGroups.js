@@ -173,7 +173,7 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
             //specify add new/save order buttons above record list
             let btn_array = [
                 {
-                    showLabel: true, icon: 'ui-icon-plus', label: window.hWin.HR('Add Group'), css: {'margin':'5px','float':'left',padding:'3px'}, class: 'btnAddButton ui-button-action',
+                    showLabel: true, icon: 'ui-icon-plus', label: window.hWin.HR('Add Group'), css: {'margin':'5px','float':'left',padding:'3px'}, class: 'btnAddButton',
                     click: function() { that._onActionListener(null, 'add'); }
                 },
                 {

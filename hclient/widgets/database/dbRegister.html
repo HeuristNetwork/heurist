@@ -26,21 +26,21 @@
     </legend>
 
         <div>
-            <label for="serverURL" class="header" style="vertical-align:top;min-width:100px;display:inline-block;">Registration URL:</label>
+            <label for="serverURL" class="header" style="vertical-align:top;min-width:100px;display:inline-block;text-align:left;">Registration URL:</label>
             <input readonly="readonly" style="background-color:lightgray;width: 520px;margin-bottom: 10px;" tabindex="-1" id="serverURL"/>
         </div>
-        <div style="margin-bottom:8px;">
-            <label for="dbDisplayName" class="header" style="vertical-align:top;min-width:100px;display:inline-block;">Display name:</label>
+        <div>
+            <label for="dbDisplayName" class="header" style="min-width:100px;display:block;text-align:left;padding: 1em 0px 0.25em;">Display name:</label>
             <input type="text" maxlength="63" size="60" id="dbDisplayName" class="text" style="border:1px solid;padding:2px" tabindex="0"/>
             <div class="heurist-helper2">Short display name for this database (from Design &rsaquo; Properties). Sent to the Heurist Reference Index as the database title.</div>
         </div>
-        <div style="margin-bottom:8px;">
-            <label for="dbRights" class="header" style="vertical-align:top;min-width:100px;display:inline-block;">Rights statement:</label>
+        <div>
+            <label for="dbRights" class="header" style="min-width:100px;display:block;text-align:left;padding: 1em 0px 0.25em;">Rights statement:</label>
             <textarea maxlength="1000" cols="70" rows="2" id="dbRights" class="text" style="border:1px solid;padding:2px" tabindex="0"></textarea>
             <div class="heurist-helper2">Ownership and copyright statement (from Design &rsaquo; Properties). Sent to the Heurist Reference Index.</div>
         </div>
         <div>
-            <label for="dbTitle" class="header" style="vertical-align:top;min-width:100px;display:inline-block;">Database Description:</label>
+            <label for="dbTitle" class="header" style="min-width:100px;display:block;text-align:left;padding: 1em 0px 0.25em;">Database Description:</label>
             <textarea maxlength="1000" cols="70" rows="3" id="dbTitle" class="text" style="border:1px solid;padding:2px" tabindex="0" autofocus=""></textarea>
             <div class="heurist-helper2">
                 Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)<br>
@@ -57,9 +57,8 @@
             </div>
         </div> 
         <div>
-            <div class="header"></div>
             <div style="padding-top:10px" xstyle="display:inline-block;vertical-align:top;padding-left:4px">
-                <button class="ui-button-action" id="btnRegisterDb">Register <span class="dbname"></span></button>
+                <button class="ui-button-action" id="btnRegisterDb" style="float: right;margin-right: 10em;">Register <span class="dbname" style="display: block;"></span></button>
             </div>
             
         </div>
