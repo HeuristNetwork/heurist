@@ -16,7 +16,7 @@
 namespace hserv\controller;
 
 use hserv\controller\ReportController;
-use hserv\controller\MapController;
+use hserv\controller\MapPublishedController;
 use hserv\controller\UserController;
 use hserv\records\import\IiifManifestImporter;
 use hserv\System;
@@ -95,13 +95,13 @@ class FrontController
         }
 
         // Detect controller class
-        if (@$this->req_params['controller'] == 'MapController' || @$this->req_params['map_id']) {
+        if (@$this->req_params['controller'] == 'MapPublishedController' || @$this->req_params['map_id']) {
             
             if(!@$this->req_params['action']){
                 $this->req_params['action'] = 'show';    
             }
 
-            $controller = new MapController($this->system, $this->req_params);
+            $controller = new MapPublishedController($this->system, $this->req_params);
             $controller->handleRequest(@$this->req_params['action']);
 
         }elseif (@$this->req_params['controller'] == 'UserController') {

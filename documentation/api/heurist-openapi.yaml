@@ -48,7 +48,7 @@ tags:
 - name: Annotations
   description: Read IIIF Web Annotation records and AnnotationPages
 - name: Maps
-  description: Retrieve public MapDocument and MapLayer definitions and geographic data as GeoJSON
+  description: Retrieve public MapDocument and MapLayer definitions, Heurist record/query GeoJSON, and file-backed map datasource content
 - name: Timeline
   description: Retrieve public temporal data for Heurist record queries
 paths:
@@ -1377,6 +1377,81 @@ paths:
           $ref: '#/components/responses/MethodNotAllowed'
         '500':
           $ref: '#/components/responses/ServerError'
+  /{database}/map/data/{recordId}:
+    get:
+      tags:
+      - Maps
+      operationId: getMapDataSource
+      summary: Retrieve a file-backed map datasource
+      description: >-
+        Retrieves or converts a map datasource record backed by KML, KMZ, CSV, TSV,
+        GeoJSON, or SHP/DBF/SHX data. `format=geojson` converts supported source data
+        to GeoJSON; `format=rawfile` returns a ZIP archive containing the source
+        file(s), optionally with metadata; `format=source` proxies the original
+        source representation (shapefiles are returned as ZIP because they are
+        intrinsically multi-file). This route is GET-only.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordId'
+      - name: format
+        in: query
+        description: Output representation. Defaults to geojson.
+        schema:
+          type: string
+          enum: [geojson, rawfile, source]
+          default: geojson
+      - name: simplify
+        in: query
+        description: Simplify complex geometry during conversion. Datasource conversion defaults to true; set false to disable.
+        schema:
+          type: boolean
+          default: true
+      - name: metadata
+        in: query
+        description: When format=rawfile, include a metadata text file in the returned ZIP archive.
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Converted GeoJSON, original datasource content, or a raw datasource ZIP archive.
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/MapDataGeoJsonResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapDataGeoJsonResponse'
+            application/zip:
+              schema:
+                type: string
+                format: binary
+            text/csv:
+              schema:
+                type: string
+            text/tab-separated-values:
+              schema:
+                type: string
+            application/vnd.google-earth.kml+xml:
+              schema:
+                type: string
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /{database}/map/document/{recordId}:
     get:
       tags:
@@ -2409,6 +2484,20 @@ components:
           type: integer
           minimum: 1
       additionalProperties: false
+    MapDataGeoJsonResponse:
+      type: object
+      required:
+      - type
+      - features
+      properties:
+        type:
+          type: string
+          const: FeatureCollection
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoJsonFeature'
+      additionalProperties: true
     MapGeoJsonResponse:
       type: object
       required:

@@ -85,6 +85,10 @@
     {
       "key": "linkedDetailPath",
       "value": ""
+    },
+    {
+      "key": "mapDataSourceId",
+      "value": "1"
     }
   ],
   "item": [
@@ -1737,6 +1741,67 @@
           ]
         },
         {
+          "name": "Datasource GeoJSON",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/map/data/{{mapDataSourceId}}?format=geojson&simplify=1",
+            "description": "Returns a file-backed KML/KMZ/CSV/TSV/GeoJSON/SHP datasource as GeoJSON. The datasource route is GET-only."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Datasource GeoJSON FeatureCollection\", () => pm.expect(json.type).to.eql(\"FeatureCollection\"));",
+                  "pm.test(\"Datasource features array\", () => pm.expect(json.features).to.be.an(\"array\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Datasource POST rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/map/data/{{mapDataSourceId}}?format=geojson",
+            "description": "Verifies that POST is reserved for ordinary map record/query searches and is not accepted by /map/data/{recordId}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 405\", () => pm.response.to.have.status(405));",
+                  "pm.test(\"Allow header is GET\", () => pm.expect(pm.response.headers.get(\"Allow\")).to.eql(\"GET\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
           "name": "GeoJSON for one record",
           "request": {
             "method": "GET",
@@ -1886,7 +1951,7 @@
           ]
         }
       ],
-      "description": "Public MapDocument, MapLayer, GeoJSON and timeline endpoints. Configure the map-related environment values before running."
+      "description": "Public MapDocument/MapLayer presentation, Heurist record/query GeoJSON, file-backed datasource, and timeline endpoints. MapDocument/MapLayer/data routes are GET-only; POST is supported for ordinary map and timeline queries. Configure the map-related environment values before running."
     }
   ]
 }

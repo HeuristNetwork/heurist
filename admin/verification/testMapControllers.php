@@ -1,6 +1,6 @@
 <?php
 /**
-* testMapControllers.php - Browser test for MapController and UserController
+* testMapControllers.php - Browser test for MapPublishedController and UserController
 *
 * Verifies the new FrontController-based map publication and user preference
 * controller actions using the current browser session. The script is intended
@@ -46,7 +46,7 @@ pre { margin: 2px 0; white-space: pre-wrap; word-break: break-word; font-size: 1
 </style>
 </head>
 <body>
-<h1>MapController / UserController tests</h1>
+<h1>MapPublishedController / UserController tests</h1>
 <p class="note">
 Uses the current browser login session. It tries both Heurist FrontController locations,
 updates the <code>heurist-map</code> preference temporarily and restores its original value,
@@ -314,51 +314,51 @@ and creates/deletes one temporary published map.
                     query: 'ids:1',
                     _testMarker: mapMarker
                 },
-                // This must be stripped by MapController's allowlist.
+                // This must be stripped by MapPublishedController's allowlist.
                 accessToken: 'MUST-NOT-BE-SAVED'
             };
 
             result = await request(
-                controllerUrl(endpoint, db, 'MapController', 'save'),
+                controllerUrl(endpoint, db, 'MapPublishedController', 'save'),
                 { data: JSON.stringify(published) },
                 'POST'
             );
             const saveMapOk = result.response.ok && isOkJson(result.json) && result.json.data && result.json.data.id;
             if (saveMapOk) mapId = result.json.data.id;
-            addResult('MapController save', Boolean(saveMapOk), result.json || result.text);
+            addResult('MapPublishedController save', Boolean(saveMapOk), result.json || result.text);
 
             if (mapId) {
-                result = await request(controllerUrl(endpoint, db, 'MapController', 'get', { id: mapId }));
+                result = await request(controllerUrl(endpoint, db, 'MapPublishedController', 'get', { id: mapId }));
                 const got = result.json && result.json.data;
                 const getMapOk = result.response.ok && isOkJson(result.json) && got &&
                     got.format === 'heurist-map-publish' && got.version === 1 &&
                     got.config && got.config.dynamicDocument && got.config.dynamicDocument.title === mapMarker &&
                     got.state && got.state._testMarker === mapMarker &&
                     !Object.prototype.hasOwnProperty.call(got, 'accessToken');
-                addResult('MapController get + saved envelope', Boolean(getMapOk), result.json || result.text);
+                addResult('MapPublishedController get + saved envelope', Boolean(getMapOk), result.json || result.text);
 
-                const showUrl = controllerUrl(endpoint, db, 'MapController', 'show', { id: mapId });
+                const showUrl = controllerUrl(endpoint, db, 'MapPublishedController', 'show', { id: mapId });
                 const showResponse = await fetch(showUrl, { credentials: 'same-origin', cache: 'no-store' });
                 const showText = await showResponse.text();
                 const showOk = showResponse.ok && /<!doctype html>/i.test(showText) &&
                     showText.includes('window.heuristMapPublished=') &&
                     showText.includes('heurist-map.js');
-                addResult('MapController show standalone HTML', showOk, 'HTTP ' + showResponse.status + '; ' + showText.substring(0, 350));
+                addResult('MapPublishedController show standalone HTML', showOk, 'HTTP ' + showResponse.status + '; ' + showText.substring(0, 350));
 
                 result = await request(
-                    controllerUrl(endpoint, db, 'MapController', 'delete', { id: mapId }),
+                    controllerUrl(endpoint, db, 'MapPublishedController', 'delete', { id: mapId }),
                     {},
                     'POST'
                 );
                 const deleteOk = result.response.ok && isOkJson(result.json) && result.json.data === true;
-                addResult('MapController delete', deleteOk, result.json || result.text);
+                addResult('MapPublishedController delete', deleteOk, result.json || result.text);
 
                 if (deleteOk) {
                     const deletedId = mapId;
                     mapId = null;
-                    result = await request(controllerUrl(endpoint, db, 'MapController', 'get', { id: deletedId }));
+                    result = await request(controllerUrl(endpoint, db, 'MapPublishedController', 'get', { id: deletedId }));
                     const goneOk = !isOkJson(result.json);
-                    addResult('MapController get after delete fails', goneOk, result.json || result.text);
+                    addResult('MapPublishedController get after delete fails', goneOk, result.json || result.text);
                 }
             }
 
@@ -368,7 +368,7 @@ and creates/deletes one temporary published map.
             // Best-effort cleanup if a test failed after creating a map.
             if (endpoint && mapId) {
                 try {
-                    await request(controllerUrl(endpoint, db, 'MapController', 'delete', { id: mapId }), {}, 'POST');
+                    await request(controllerUrl(endpoint, db, 'MapPublishedController', 'delete', { id: mapId }), {}, 'POST');
                 } catch (e) { /* report already contains the actual failure */ }
             }
 

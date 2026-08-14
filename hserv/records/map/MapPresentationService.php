@@ -14,16 +14,13 @@
 * @author      Ian Johnson     <ian.johnson@heuristnetwork.org>
 * @since       7.0
 */
-namespace hserv\map;
+namespace hserv\records\map;
 
 use hserv\entity\DbMapDocument;
 use hserv\entity\DbMapLayer;
 use hserv\structure\ConceptCode;
 
-require_once dirname(__FILE__).'/../entity/DbMapDocument.php';
-require_once dirname(__FILE__).'/../entity/DbMapLayer.php';
-require_once dirname(__FILE__).'/../structure/dbsTerms.php';
-require_once dirname(__FILE__).'/../structure/ConceptCode.php';
+require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 
 /**
  * Builds public MapDocument and MapLayer representations.
@@ -149,7 +146,7 @@ class MapPresentationService
                 'fields' => array_values($timelineFields)
             ),
             'options' => array(
-                'markerClustering' => false,
+                //'markerClustering' => false, to be implemented later
                 'zoomToExtent' => false,
                 'dynamicRequests' => $dynamicRequests,
                 'minZoom' => $effectiveMinZoom,
@@ -194,13 +191,11 @@ class MapPresentationService
         if($type=='remote-geojson'){
             //HEURIST_BASE_URL.
             
-            $script_name = 'record_map_source'; //for kml,csv,geojson
-            if(defined('RT_SHP_SOURCE') && $rty === intval(RT_SHP_SOURCE)){
-                $script_name = 'record_shp'; //for shp
-            }
-            
-            $source['url'] = HEURIST_BASE_URL."hserv/controller/$script_name.php?db="
-                                .$this->system->dbname().'&format=geojson&recID='.$record['rec_ID'];
+            // All file-backed map sources are served through the common map-data API.
+            // MapDataSourceService detects KML/KMZ/CSV/TSV/GeoJSON/SHP internally.
+            $source['url'] = rtrim(HEURIST_BASE_URL, '/').'/api/'
+                .rawurlencode($this->system->dbname()).'/map/data/'
+                .intval($record['rec_ID']); //.'?format=geojson'; geojson is default output
         }elseif($type=='tile'){
             
             $fileId = $this->layers->value($record, 'DT_SERVICE_URL');
@@ -254,7 +249,7 @@ class MapPresentationService
             $source['bounds'] = $this->normaliseGeo($this->layers->value($record, 'DT_GEO_OBJECT'));
             $source['url'] = $url;
             
-        }else{
+        }else{ //heurist-query
             $query = $this->layers->value($record, 'DT_QUERY_STRING');
             if($query !== null){ $source['query'] = $this->parseQuery($query); } 
             $url = $this->layers->value($record, 'DT_SERVICE_URL');

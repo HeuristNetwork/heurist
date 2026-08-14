@@ -31,7 +31,7 @@ The generic entity router maps HTTP methods to internal actions:
 | `PUT` / `PATCH` | `save` |
 | `DELETE` | `delete` |
 
-The public definition contract currently documents GET only. Records and IIIF are GET-only through this entry point. Annotation writes exist for the Mirador workflow but are outside this read-API overview.
+The public definition contract currently documents GET only. Normal record reads and IIIF presentation routes are GET-only, while `POST /records/details`, structured map/timeline searches, login/logout, and annotation writes use POST for their specific operations.
 
 ## Definition API
 
@@ -153,7 +153,9 @@ A MapDocument response uses `format: heurist-map-document` and preserves the ori
 
 A MapLayer response uses `format: heurist-map-layer`. It separates data acquisition (`source`), symbology (`style`), temporal settings (`timeline`), and display behaviour (`options`). Supported source types include `heurist-query`, `record`, `inline-geojson`, `remote-geojson`, `tile`, `image`, `iiif`, and `geotiff`.
 
-### GeoJSON
+MapDocument and MapLayer presentation routes are GET-only. File-backed `remote-geojson` sources use the common `/map/data/<recordId>` endpoint rather than format-specific legacy controllers.
+
+### Heurist record/query GeoJSON
 
 ```text
 GET  /api/<database>/map/<recordId>
@@ -161,7 +163,7 @@ GET  /api/<database>/map?q=<encoded-query>
 POST /api/<database>/map
 ```
 
-The response is a GeoJSON `FeatureCollection` with a `meta` object. POST accepts a serialisable query plus `limit`, `offset`, and `simplify`. GET is intended for simple or URL-safe encoded queries.
+The response is a GeoJSON `FeatureCollection` with a `meta` object. POST is accepted for the ordinary record/query route only and is intended for serialisable queries too large or structured for a URL. It accepts a query plus `limit`, `offset`, and `simplify`.
 
 ```json
 {
@@ -171,6 +173,18 @@ The response is a GeoJSON `FeatureCollection` with a `meta` object. POST accepts
   "simplify": true
 }
 ```
+
+### File-backed map datasource
+
+```text
+GET /api/<database>/map/data/<recordId>?format=geojson
+GET /api/<database>/map/data/<recordId>?format=rawfile
+GET /api/<database>/map/data/<recordId>?format=source
+```
+
+This route handles datasource records backed by KML, KMZ, CSV, TSV, GeoJSON, or SHP/DBF/SHX files. `format=geojson` converts the source when required; a GeoJSON source is returned without conversion. `format=rawfile` returns a ZIP archive containing the original source file(s), optionally with metadata. `format=source` proxies the original representation; shapefiles remain ZIP archives because they consist of multiple related files.
+
+Datasource conversion simplifies complex geometries by default; use `simplify=0` to disable simplification. `metadata=1` applies to `rawfile`. The `/map/data/...` route is **GET-only**; POST is reserved for ordinary map record/query searches.
 
 ### Timeline
 

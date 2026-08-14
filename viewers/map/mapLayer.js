@@ -422,10 +422,10 @@ function HMapLayer( _options ) {
         
         let layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         let rec_ID = _recordset.fld(_record, 'rec_ID');
-                    
-        const request = {recID:rec_ID};             
+          
+        const url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+rec_ID;  // ?format=geojson
         //perform loading shp as geojson
-        window.hWin.HAPI4.RecordMgr.load_shp_as_geojson(request,
+        window.hWin.HEURIST4.util.sendRequest(url, null, null, 
             function(response){
                 if(response){
                     let dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
@@ -467,12 +467,10 @@ function HMapLayer( _options ) {
         let layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         const rec_ID = _recordset.fld(_record, 'rec_ID');
             
-        //let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_map_source.php?db='
-        //            +window.hWin.HAPI4.database+'&format=geojson&recID='+rec_ID;
-                    
-        const request = {recID:rec_ID};             
+        const url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+rec_ID;  // ?format=geojson
+
         //perform loading kml as geojson
-        window.hWin.HAPI4.RecordMgr.load_kml_as_geojson(request,
+        window.hWin.HEURIST4.util.sendRequest(url, null, null, 
             function(response){
                 if(response){
                     let dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
@@ -1358,7 +1356,8 @@ function HMapLayer( _options ) {
         },
         
         //
-        //  sends request for map data (json, kml or shp) and text file with links (to record view and hml) 
+        //  Sends request for map data (json, kml or shp) and text file with links (to record view and hml) 
+        //  to download map data
         //
         getMapData: function(){
             
@@ -1421,20 +1420,26 @@ function HMapLayer( _options ) {
             }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] ||
                      rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){  //csv
 
+                url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+dataset_ID+'?format=rawfile'
+                        + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
+                /*
                 url = window.hWin.HAPI4.baseURL 
                         + 'hserv/controller/record_map_source.php?db='+ window.hWin.HAPI4.database
                         + '&format=rawfile&recID='+dataset_ID
                         + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
-
+                */
                 window.open(url, '_blank');
                 
             }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE']){
                 
+                url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+dataset_ID+'?format=rawfile'
+                        + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
+                /*
                 url = window.hWin.HAPI4.baseURL 
                         + 'hserv/controller/record_shp.php?db='+ window.hWin.HAPI4.database
                         + '&format=rawfile&recID='+dataset_ID
                         + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
-
+                */
                 window.open(url, '_blank');
             }
             

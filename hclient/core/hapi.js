@@ -692,31 +692,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 _callserver('LookupController', request, callback);
             }
 
-            //
-            // load kml in geojson format
-            // request
-            //  recID - record id that has reference to kml file or has kml snippet
-            //  simplify - reduce points
-            //
-            , load_kml_as_geojson: function (request, callback) {
-                request['format'] = 'geojson';
-                // start search
-                _callserver('record_map_source', request, callback);
-            }
-
-            //
-            // load kml in geojson format
-            // request
-            //  recID - record id that has reference to shp file
-            //  simplify - reduce points
-            //
-            , load_shp_as_geojson: function (request, callback) {
-                request['format'] = 'geojson'; //or wkt
-                request['api'] = 0; //not api request
-                // start search
-                _callserver('record_shp', request, callback);
-            }
-
             /**
             * Search relation within given set of records
             *

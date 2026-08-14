@@ -75,6 +75,8 @@
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 use hserv\utilities\UJwt;
+use hserv\controller\MapPresentationController;
+use hserv\controller\MapDataController;    
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
@@ -251,6 +253,8 @@ if(in_array(@$requestUri[3], array('dbs', 'databases'), true)){
 
 $allowed_methods = array('search','add','save','delete');
 
+// Preserve the normalised HTTP verb for route-specific method checks.
+$http_method = strtoupper((string)$method);
 $method = getAction($method);
 if($method == null || !in_array($method, $allowed_methods)){
     exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, PATCH, DELETE'));
@@ -285,9 +289,26 @@ if($method=='save' || $method=='add'){
 // ----------------------------------------------------
 $resource = @$requestUri[3];
 
-// Map/time POST requests are read-only structured searches, not entity additions.
-if(in_array($resource, array('map', 'time'), true)
-    && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'){
+// Map and timeline routes have method rules that differ from generic entities.
+// Presentation definitions and file-backed datasource output are GET-only.
+// POST is accepted only for ordinary map record/query searches and timeline searches.
+$is_map_record_query = ($resource === 'map'
+    && !in_array(@$requestUri[4], array('document', 'layer', 'data'), true));
+$is_timeline_query = ($resource === 'time');
+
+if($resource === 'map'){
+    if(in_array(@$requestUri[4], array('document', 'layer', 'data'), true)){
+        if($http_method !== 'GET'){
+            exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
+        }
+    }elseif(!in_array($http_method, array('GET', 'POST'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+    }
+}elseif($resource === 'time' && !in_array($http_method, array('GET', 'POST'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+}
+
+if(($is_map_record_query || $is_timeline_query) && $http_method === 'POST'){
     $method = 'search';
 }
 
@@ -368,22 +389,31 @@ if(!$skip_auth_processing){
 
 if(in_array(@$requestUri[3], array('map', 'time'), true)) {
 
-    if($method!=='search'){
-        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
-    }
+    $req_params['restapi'] = 1;
 
     if($requestUri[3]==='time'){
-        $req_params['resource'] = 'time';
-        $req_params['id'] = null;
+        $controller = new MapDataController($system, $req_params);
+        $controller->outputRecordGeoJson(null, true);
+
     }elseif(in_array(@$requestUri[4], array('document', 'layer'), true)){
-        $req_params['resource'] = $requestUri[4];
-        $req_params['id'] = @$requestUri[5];
+
+        $controller = new MapPresentationController($system, $req_params);
+        $controller->handleRequest((string)$requestUri[4], intval(@$requestUri[5]));
+
+    }elseif(@$requestUri[4] === 'data'){
+        // File-backed datasource: KML/KMZ/CSV/TSV/GeoJSON/SHP.
+        // GET /api/{db}/map/data/{recID}?format=geojson|rawfile|source
+        $controller = new MapDataController($system, $req_params);
+        $controller->outputDataSource(intval(@$requestUri[5]));
+
     }else{
-        $req_params['resource'] = 'geojson';
-        $req_params['id'] = @$requestUri[4];
+        // Ordinary Heurist record/query GeoJSON.
+        $controller = new MapDataController($system, $req_params);
+        $recordId = isset($requestUri[4]) && is_numeric($requestUri[4])
+            ? intval($requestUri[4])
+            : null;
+        $controller->outputRecordGeoJson($recordId, false);
     }
-    $req_params['restapi'] = 1;
-    include_once '../../hserv/controller/map_presentation.php';
 
 }elseif (@$requestUri[3]=='iiif') {
     

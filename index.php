@@ -168,7 +168,7 @@ if( @$_REQUEST['isalive']==1){
     redirectURL('hserv/controller/api.php?'.$query_string);
     return;
     
-}elseif (in_array(@$_REQUEST['controller'], array('ReportController','ImportAnnotations','MapController','UserController')) || 
+}elseif (in_array(@$_REQUEST['controller'], array('ReportController','ImportAnnotations','MapPublishedController','UserController')) || 
             array_key_exists('map_id', $_REQUEST) ||
             array_key_exists('template', $_REQUEST) || 
             array_key_exists('template_id', $_REQUEST)){

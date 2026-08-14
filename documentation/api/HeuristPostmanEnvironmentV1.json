@@ -122,6 +122,12 @@
       "enabled": true
     },
     {
+      "key": "mapDataSourceId",
+      "value": "1",
+      "type": "default",
+      "enabled": true
+    },
+    {
       "key": "mapRecordTypeId",
       "value": "10",
       "type": "default",
