@@ -1352,7 +1352,22 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
         }
 
         //find resouce record , if not found create new one
-        $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID=".intval($record_type).$query;
+        // Aug 2026 (Dharma IDENK project): Indonesian names, among others, may only use a single name. 
+        // If this is entered as a single name rather than a surname with missing given name, the 
+        // person is identified as an organisation when exported and imported to Heurist. 
+        // The solution is to convert the Organisation record to a Person record, but then it
+        // needs to search both types to avoid creating a duplicate 
+        if($record_type == RT_PERSON || $record_type == RT_ORGANISATION){
+            $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID in (".
+            intval(RT_PERSON).",".intval(RT_ORGANISATION).")".$query;
+        }else{ // all other record types
+            $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID=".intval($record_type).$query;
+        }
+          
+        if($record_type == RT_PERSON || $record_type == RT_ORGANISATION){
+            $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID in (".
+                intval(RT_PERSON).",".intval(RT_ORGANISATION).")".$query;
+        }
         //$res = $mysqli->query($query);
         $res = mysql__select_param_query($mysqli,$query,$value_params);
         if($res){
