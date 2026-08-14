@@ -1608,9 +1608,9 @@ function prepareErrors(){
 
         $outputLines[] = <<<WARNING
         <script>
-            window.hWin.HEURIST4.msg.showMsgDlg("Warning: {$tot_erros} warnings reported: Please check the warnings listed. 
+            window.hWin.HEURIST4.msg.showMsgDlg(`Warning: {$tot_erros} warnings reported: Please check the warnings listed. 
             We do not map all fields from Zotero as for most purposes these are fields of little use in your database. 
-            Please create a ticket at top of page if you think the Zotero import needs updating.", null, "Zotero synchronisation warnings");
+            Please create a ticket at top of page if you think the Zotero import needs updating.`, null, "Zotero synchronisation warnings");
         </script>
         WARNING;
     }
@@ -1622,6 +1622,8 @@ function prepareErrors(){
  * @return void
  */
 function handleUnresolvedPointers($mysqli, $unresolved_pointers){
+
+    global $outputLines;
 
     // try to find 'unresolved pointers
     // $rec_id - record to be updated
@@ -1636,6 +1638,13 @@ function handleUnresolvedPointers($mysqli, $unresolved_pointers){
         //           detail id in resource OR simialr array for next level  => value
         //  $dt_id=>$resource_rt_id=>$resource_details
 
+        $rec_id = intval($rec_id);
+        if(!isPositiveInt($rec_id)){
+            $rec_id = htmlspecialchars($rec_id);
+            $outputLines[] = "Invalid record ID provided for handling pointers: {$rec_id}";
+            continue;
+        }
+
         foreach($pntdata as $dt_id => $recdata){  //detail id in main record
 
             foreach($recdata as $resource_rt_id => $resource_details){ //recordtype
@@ -1648,10 +1657,27 @@ function handleUnresolvedPointers($mysqli, $unresolved_pointers){
 
                 foreach($recource_recid as $idx => $res_rec_id){
 
+                    $res_rec_id = intval($res_rec_id);
+                    if(!isPositiveInt($res_rec_id)){
+                        $res_rec_id = htmlspecialchars($res_rec_id);
+                        $outputLines[] = "Invalid record pointer target provided: {$res_rec_id}";
+                        continue;
+                    }
+
                     //update main record
-                    $insertValues = implode(',', [$rec_id, $dt_id, $res_rec_id, 1]);
-                    $query = "INSERT INT recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) VALUES ({$insertValues})";
-                    $mysqli->query($query);
+                    $insertValues = ['dtl_RecID' => $rec_id, 'dtl_DetailTypeID' => $dt_id, 'dtl_Value' => $res_rec_id, 'dtl_AddedByImport' => 1];
+                    $result = mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $insertValues);
+
+                    if(!isPositiveInt($result)){
+
+                        $recTitles = mysql__select_list2($mysqli, "SELECT rec_Title FROM Records WHERE rec_ID IN ({$rec_id},{$res_rec_id})");
+                        $recTitles[$rec_id] ??= "Rec #<strong>{$rec_id}</strong>";
+                        $recTitles[$res_rec_id] ??= "Rec #<strong>{$res_rec_id}</strong>";
+
+                        $msg = "Failed to connect {$recTitles[$res_rec_id]} to {$recTitles[$rec_id]}";
+                        $msg .= !empty($result) ? ", reason: {$result}" : '';
+                        $outputLines[] = $msg;
+                    }
                 }
             }
         }
