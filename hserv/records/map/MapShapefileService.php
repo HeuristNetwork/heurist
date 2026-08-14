@@ -103,7 +103,7 @@ class MapShapefileService
                     $feature['properties'] = array();
                 }
                 // External feature IDs must not look like Heurist record IDs.
-                $feature['properties']['rec_ID'] = 'shp-'.($count + 1);
+                // $feature['properties']['rec_ID'] = 'shp-'.($count + 1);
 
                 if($count > 0){
                     fwrite($fd, ',');

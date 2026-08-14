@@ -151,6 +151,13 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
         this._on(fields_sel,{change: this._onThemeFieldSelect});
 
+        const btnSelectAnotherField = this.element.find('#btn_select_another_field').button({
+            icon:'ui-icon-circle-b-plus'
+        });
+        this._on(btnSelectAnotherField, {click:function(){
+            this._updateFieldSelectionVisibility(true);
+        }});
+
         this._on(this.element.find('button[id^="btn_f"]').button(), 
                                     {click:this._onThemeFieldAction});
         this.element.find('button[id^="btn_f_range_add"]').button({icon:'ui-icon-circle-b-plus'});
@@ -158,8 +165,28 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         this._initSymbolEditor(this.element.find('#tm_symbol'));
         
         this._on(this.element.find('#tm_symbol'), {change:function(){
-            this._renderSymbolPreview( null, //update all 
+            this._renderSymbolPreview( null, //update all
                         this.mapDefaultSymbol, this.element.find('#tm_symbol').val(), null);
+        }});
+
+        // Keep list labels in sync while the user edits titles. Full validation and
+        // range persistence still happen in _saveThematicMap/_saveThemeField.
+        this._on(this.element.find('#tm_name'), {input:function(event){
+            if(this.currentThemeIdx<0) return;
+
+            const title = $(event.target).val();
+            this.options.thematic_mapping[this.currentThemeIdx].title = title;
+            this.element.find('#thematic_maps_list option')
+                .eq(this.currentThemeIdx).text(title);
+        }});
+
+        this._on(this.element.find('#f_title'), {input:function(event){
+            if(!(this.currentField>0) || !this.selectedFields[this.currentField]) return;
+
+            const title = $(event.target).val();
+            this.selectedFields[this.currentField].title = title;
+            this.element.find('#selected_fields option[value="'+this.currentField+'"]')
+                .text(title);
         }});
         
         
@@ -621,7 +648,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 
                 window.hWin.HEURIST4.msg.showMsgDlg('<br>You removed all thematic maps. Exit this form?',
                     function(){
-                        that._context_on_close =  (that.baseLayerSymbol)?that.baseLayerSymbol:'';    
+                        // Return an explicit empty thematic-map result instead of an
+                        // empty string. The caller treats a falsey context as Cancel, so
+                        // returning '' left the removed thematic map in the underlying
+                        // symbology field. Preserve a base symbol, if this widget was
+                        // invoked with one, using the same array shape as normal Save.
+                        that._context_on_close = that.baseLayerSymbol ? [that.baseLayerSymbol] : [];
                         that.closeDialog();
                     });
                 
@@ -718,7 +750,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             let base_symbol = window.hWin.HEURIST4.util.isJSON( t_map.symbol );
             base_symbol = (!base_symbol)?'':JSON.stringify(base_symbol);
-            this.element.find('#tm_symbol').val(base_symbol);
+            this.element.find('#tm_symbol').val(base_symbol).trigger('change');
             
             this.selectedFields = {};
             
@@ -735,12 +767,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     
                     this.selectedFields[key] = fld;
                     
-                    window.hWin.HEURIST4.ui.addoption(fields_sel[0], key, fld.title+' ('+fld.code+'  '+key+')');
+                    window.hWin.HEURIST4.ui.addoption(fields_sel[0], key, fld.title);
                 }
                 
                 fields_sel[0].selectedIndex = 0;
                 fields_sel.trigger('change');
-            }        
+            }
+
+            this._updateFieldSelectionVisibility(fields_sel.find('option').length===0);
         }else{
              document.getElementById('thematic_maps_list').selectedIndex = this.currentThemeIdx;
         }
@@ -748,6 +782,27 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     },
     
     //-----------------------
+    /**
+     * Show or hide the field-selection controls. Once a theme already has fields,
+     * the selection tree is kept out of the way until the user explicitly asks to
+     * select another field.
+     *
+     * @param {boolean} showSelector True to show record type/field selection controls.
+     */
+    _updateFieldSelectionVisibility: function(showSelector){
+        const fields_sel = this.element.find('#selected_fields');
+        const hasSelectedFields = fields_sel.find('option').length>0;
+        const panel = this.element.find('#field_selection_panel');
+        const button = this.element.find('#btn_select_another_field');
+
+        if(!hasSelectedFields){
+            showSelector = true;
+        }
+
+        panel.toggle(showSelector===true);
+        button.toggle(hasSelectedFields && showSelector!==true);
+    },
+
     /**
      * @brief Adds a field selected from the Fancytree to the current thematic map's field list.
      * @memberof heurist.thematicMapping
@@ -770,11 +825,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             //+' ('+this.selectedFields[key].code+'  '+key+')'
             window.hWin.HEURIST4.ui.addoption(sel[0], key, this.selectedFields[key].title);
-            
-            if(!(sel[0].selectedIndex>0)){
-                sel[0].selectedIndex = 0;  
-                sel.trigger('change');
-            } 
+
+            // The newly added field becomes the current field, then collapse the
+            // selection tree so the user can concentrate on defining its ranges.
+            sel.val(key).trigger('change');
+            this._updateFieldSelectionVisibility(false);
         } 
         
     },
@@ -914,8 +969,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             ? '<select class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"></select>'
             : ('<input class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"/>'
               +'<span>&nbsp;&lt;&gt;&nbsp;</span><input class="val2 text ui-widget-content ui-corner-all" style="width:100px"/>'))
-            +'<span class="field-symbol-preview" style="position:relative;top:9px;display:inline-block;width:40px;height:40px;margin:2px"></span>'
-            +'<input class="field-symbol text ui-widget-content ui-corner-all" style="width:250px"/>'
+            +'<span class="field-symbol-preview" title="Click to edit symbol" '
+            +'style="display:inline-block;vertical-align:middle;min-width:76px;height:34px;margin:2px 6px;cursor:pointer"></span>'
+            +'<input type="hidden" class="field-symbol"/>'
             +'</div>').appendTo(this.element.find('#f_ranges'));
 
         ele.uniqueId();
@@ -978,33 +1034,50 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
      * The "Open editor" button launches the `showEditSymbologyDialog`.
      */
     _initSymbolEditor: function(fele){
-        
-        let f_ranges = this.element.find('#f_ranges');
-        fele.attr('readonly','readonly');
-        
+
+        const parent = fele.parent();
+        const preview = parent.find('.field-symbol-preview').first();
+
+        const openEditor = function(){
+            let current_val = window.hWin.HEURIST4.util.isJSON( fele.val() );
+            if(!current_val) current_val = {};
+            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 4, function(new_value){
+                fele.val(JSON.stringify(new_value)).trigger('change');
+            });
+        };
+
+        // Keep JSON as internal state for the existing save logic, but do not expose it.
+        fele.attr('type', 'hidden');
+
+        preview.attr('tabindex', '0').on({
+            click: openEditor,
+            keydown: function(event){
+                if(event.key==='Enter' || event.key===' '){
+                    event.preventDefault();
+                    openEditor();
+                }
+            }
+        });
+
         $('<span>')
-        .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
-        .attr('tabindex', '-1')
-        .attr('title', 'Reset default symbology')
-        .appendTo( f_ranges.find(fele.parent()) )
-        .css({'line-height': '20px',cursor:'pointer',
-            outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'})
-            .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                function(){fele.val('');}); }});
-        
-        let $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
-            .addClass('smallbutton btn_add_term')
-            .css({'line-height': '20px',cursor:'pointer','text-decoration':'underline'}) //'vertical-align':'top'
-            .appendTo( fele.parent('div') );
-        
-        $btn_edit_switcher.on( { click: function(){
-                let current_val = window.hWin.HEURIST4.util.isJSON( fele.val() );
-                if(!current_val) current_val = {};
-                window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 4, function(new_value){
-                    fele.val(JSON.stringify(new_value)).trigger('change');
+            .addClass('smallbutton ui-icon ui-icon-circlesmall-close')
+            .attr('tabindex', '-1')
+            .attr('title', 'Reset to inherited symbology')
+            .appendTo(parent)
+            .css({'line-height':'20px',cursor:'pointer',outline:'none','outline-style':'none',
+                  'box-shadow':'none','border-color':'transparent'})
+            .on({click:function(){
+                window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?', function(){
+                    fele.val('').trigger('change');
                 });
-        }});
-            
+            }});
+
+        $('<span>Edit</span>', {title:'Open symbology editor'})
+            .addClass('smallbutton btn_add_term')
+            .css({'line-height':'20px','vertical-align':'middle',cursor:'pointer','text-decoration':'underline'})
+            .appendTo(parent)
+            .on({click:openEditor});
+
     },//_initSymbolEditor
     
     /**
@@ -1037,6 +1110,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 delete that.selectedFields[that.currentField];
                 that.currentField = 0;
                 that._onThemeFieldSelect();
+                that._updateFieldSelectionVisibility(
+                    that.element.find('#selected_fields option').length===0
+                );
                 
                 });
                 
@@ -1427,77 +1503,72 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
      * Updates the `background-color`, `border`, etc., of the `ele` to show a visual preview.
      */
     _renderSymbolPreview: function(ele, layer_symbol, base_symbol, range_symbol){
-        
-            if(ele==null){
-                //update all ranges
-                let that = this;
-                let f_ranges = this.element.find('#f_ranges');
-                if(f_ranges.children().length>0){
-                    $.each(f_ranges.children(), function(i, ele){
-                        ele = $(ele);
 
-                        that._renderSymbolPreview( ele.find('.field-symbol-preview'), 
-                            that.mapDefaultSymbol, that.element.find('#tm_symbol').val(), 
-                            ele.find('.field-symbol').val());
-                    });
-                }
-                return;
+        const that = this;
+        const renderer = window.hWin.HEURIST4.ui.renderMapSymbolPreview;
+
+        if(!window.hWin.HEURIST4.util.isFunction(renderer)){
+            if(!this._symbolPreviewLoading){
+                this._symbolPreviewLoading = $.getScript(
+                    window.hWin.HAPI4.baseURL+'hclient/widgets/entity/popups/mapSymbolPreview.js'
+                ).done(function(){
+                    that._symbolPreviewLoading = null;
+                    that._renderSymbolPreview(null, that.mapDefaultSymbol,
+                        that.element.find('#tm_symbol').val(), null);
+                }).fail(function(){
+                    that._symbolPreviewLoading = null;
+                    console.error('Unable to load mapSymbolPreview.js');
+                });
             }
-        
-            //theme symbology
-            base_symbol = window.hWin.HEURIST4.util.isJSON( base_symbol );
-            base_symbol = (base_symbol)?base_symbol:layer_symbol;
-            
-            base_symbol = window.hWin.HEURIST4.ui.prepareMapSymbol(base_symbol, null)
-            
-            function __mergeThematicSymbol(basesymbol, fsymb){
-                
-                    let use_style = window.hWin.HEURIST4.util.cloneJSON( basesymbol );
-                    if($.isPlainObject(range_symbol)){ // range_symbol was defined as parameter, but fsymb is used here. Assuming fsymb is range_symbol
-                        let keys = Object.keys(fsymb);
-                        for(let j=0; j<keys.length; j++){
-                            use_style[keys[j]] = fsymb[keys[j]];
-                        }
+            return;
+        }
+
+        function mergeSymbol(base, override){
+            const result = window.hWin.HEURIST4.util.cloneJSON(base || {});
+            override = window.hWin.HEURIST4.util.isJSON(override);
+            if($.isPlainObject(override)){
+                Object.keys(override).forEach(function(key){
+                    result[key] = override[key];
+                });
+
+                // Keep preview semantics identical to heurist-map thematicSymbolResolver:
+                // CircleMarker size is rendered from radius, while historic thematic
+                // range definitions vary point size with iconSize. An iconSize override
+                // therefore controls the effective circle diameter unless the range also
+                // provides an explicit radius.
+                if(result.iconType==='circle'
+                    && Object.prototype.hasOwnProperty.call(override, 'iconSize')
+                    && !Object.prototype.hasOwnProperty.call(override, 'radius')){
+                    const diameter = Array.isArray(override.iconSize)
+                        ? Number(override.iconSize[0])
+                        : Number(override.iconSize);
+                    if(Number.isFinite(diameter) && diameter>=0){
+                        result.radius = diameter/2;
                     }
-                    
-                    return use_style;
-            }    
-
-            range_symbol = window.hWin.HEURIST4.util.isJSON( range_symbol );
-        
-            let style = __mergeThematicSymbol(base_symbol, range_symbol);
-        
-            let dcss = {'display':'inline-block', 'background-image':'none'};
-            if(style['stroke']!==false){
-                
-                let opacity = style['opacity']>0?style['opacity']:1;
-                let weight = (style['weight']>0&&style['weight']<10)?style['weight']:10;
-                dcss['width']  = 22-weight*2; 
-                dcss['height'] = 22-weight*2;
-                
-                dcss['border'] = weight+'px solid '
-                                + window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
-                if ( style['opacity']>0 && style['opacity']<1 ) {
-                    dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
-                    dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
                 }
-                
-            } else {
-                dcss['border'] = 'none';
             }
+            return result;
+        }
 
-            if(style['fill']!==false){
-                let fillColor = style['fillColor']?style['fillColor']:style['color'];
-                let fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
-                dcss['background-color'] = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
-            }else{
-                dcss['background'] = 'none';
-            }
-                                                
-            ele.css(dcss);
-                                                        
+        let theme_symbol = window.hWin.HEURIST4.util.isJSON(base_symbol);
+        theme_symbol = theme_symbol ? theme_symbol : layer_symbol;
+        theme_symbol = window.hWin.HEURIST4.ui.prepareMapSymbol(
+            window.hWin.HEURIST4.util.cloneJSON(theme_symbol || {}), null);
+
+        if(ele==null){
+            renderer(this.element.find('#tm_symbol_preview')[0], theme_symbol, {geometryType:null});
+
+            this.element.find('#f_ranges .field-range').each(function(){
+                const row = $(this);
+                that._renderSymbolPreview(row.find('.field-symbol-preview'),
+                    layer_symbol, base_symbol, row.find('.field-symbol').val());
+            });
+            return;
+        }
+
+        const effective_symbol = window.hWin.HEURIST4.ui.prepareMapSymbol(
+            mergeSymbol(theme_symbol, range_symbol), null);
+        renderer($(ele)[0], effective_symbol, {geometryType:null});
     }
-    
-    
 
 });
