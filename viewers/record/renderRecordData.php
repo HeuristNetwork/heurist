@@ -553,6 +553,18 @@ if(!$system->hasAccess()){
                 $network.find('.show_network').on('click', () => openNetworkGraph(recID));
             }
 
+            function createRecordGroups2(recID, groups){
+            
+                document.querySelectorAll(".fieldRow").forEach(el => {
+                    el.style.display = "";
+                });
+
+                document.querySelectorAll(".moreRow").forEach(el => {
+                    el.style.display = "none";
+                });            
+                
+                createRecordGroups(recID, groups);
+            }
             //
             // Add group headers to record viewer
             //
@@ -1323,10 +1335,11 @@ function print_details(array $bib) {
         $link_cnt = print_relation_details($bib);
         $link_cnt = print_linked_details($bib, $link_cnt);//links from
         if($is_map_popup){ // && $link_cnt>3 //linkRow
+/* createRecordGroups2(<?php echo intval($bib['rec_ID']); ?>,  <?php echo json_encode($group_details, JSON_FORCE_OBJECT);?> ); */
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
             <a href="#more" oncontextmenu="return false;"
-                onClick='$(".fieldRow").css("display","");$(".moreRow").hide();createRecordGroups(<?php echo intval($bib['rec_ID']); ?>, <?php echo json_encode($group_details, JSON_FORCE_OBJECT);?>);return false;' style="color:blue">
+                onClick='document.querySelectorAll(".fieldRow").forEach(el => {el.style.display = "";});document.querySelectorAll(".moreRow").forEach(el => {el.style.display = "none";});return false;' style="color:blue">            
                 more...
             </a>
             </div><div class="detail"></div></div></div>

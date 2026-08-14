@@ -2471,7 +2471,7 @@ $.widget( "heurist.mapping", {
 
                 //scan all visible layers
                 this.nativemap.eachLayer(function(top_layer){    
-                    if(top_layer.feature && top_layer.contains(latlng) &&
+                    if(top_layer.feature && window.hWin.HEURIST4.util.isFunction(top_layer.contains) && top_layer.contains(latlng) &&
                         (top_layer instanceof L.Polygon || top_layer instanceof L.Circle || top_layer instanceof L.Rectangle)
                     ){
 
