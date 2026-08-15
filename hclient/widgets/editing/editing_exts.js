@@ -595,6 +595,28 @@ function editSymbology(current_value, mode_edit, callback){
     
     _editing_symbology.initEditForm( editFields, recdata );
 
+    // Gradient values are numeric. HEditing normally renders integer/float fields
+    // as text inputs, so use native numeric inputs here to prevent accidental
+    // non-numeric values and expose browser increment controls.
+    if(mode_edit==5){
+        const numericFields = {
+            strokeOpacity1:{min:0,max:100,step:1},
+            strokeOpacity2:{min:0,max:100,step:1},
+            fillOpacity1:{min:0,max:100,step:1},
+            fillOpacity2:{min:0,max:100,step:1},
+            iconSize1:{min:0,step:1},
+            iconSize2:{min:0,step:1}
+        };
+
+        $.each(numericFields, function(fieldName, limits){
+            const inputs = _editing_symbology.getInputs(fieldName);
+            if(!inputs) return;
+            $(inputs).each(function(){
+                $(this).attr($.extend({type:'number'}, limits));
+            });
+        });
+    }
+
     let edit_buttons = [
         {text:window.hWin.HR('Cancel'), 
             id:'btnRecCancel',

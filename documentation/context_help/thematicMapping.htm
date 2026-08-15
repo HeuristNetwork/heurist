@@ -6,33 +6,111 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Lang" content="en">
-<meta name="author" content="Ian Johnson">
-<meta http-equiv="Reply-to" content="@.com">
-<meta name="description" content="">
-<meta name="keywords" content="">
-<meta name="creation-date" content="2018-01-01">
+<meta name="author" content="Heurist Network">
+<meta name="description" content="User guide to defining thematic maps for Heurist map layers">
+<meta name="keywords" content="Heurist, thematic mapping, map symbology, ranges, categories">
 <title>Thematic Mapping</title>
 <link rel="stylesheet" type="text/css" href="../../h4styles.css">
 </head>
-    <body>
+<body>
+<div id="content">
 
-        <div id="content">
+<h2>Thematic Mapping</h2>
+<hr>
 
-            <h2>Thematic Mapping</h2>
+<p>
+Thematic maps change the appearance of records on a map according to the values of one or more record fields.
+For example, a field such as <i>Country</i> can control colour, <i>Population</i> can control symbol size,
+and <i>City type</i> can control the marker symbol.
+</p>
 
-            <hr>
-            
-            <ul>
-                <li>Define base symbology</li>
-                <li>Select record type from map query result set</li>
-                <li>Select fields that will define one or several symbology properties based on field value. 
-                    For example "Country" for "color" "Population" for "size" and "City type" for "icon"</li>
-                <li>Define ranges or categories for field values</li>
-                <li>For each range/category define symbology properties that will overwrtire base symbology</li>
-            </ul>
-			
-        </div>
+<h3>Opening the thematic map editor</h3>
+<p>
+Open the symbology editor for a map layer and choose the thematic maps option. A map layer may contain several
+thematic map definitions. Use the <b>Thematic maps</b> list to select the definition you want to edit, or use the
+plus button to add another one.
+</p>
 
-    </body>
+<h3>Thematic map settings</h3>
+<ul>
+    <li><b>Title</b> &mdash; the name displayed for this thematic map.</li>
+    <li><b>Active by default</b> &mdash; makes this thematic map active when the map layer is first loaded.</li>
+    <li><b>Base symbol</b> &mdash; optional symbology applied before field-specific rules. Click the symbol sample or <b>Edit</b> to modify it. Use <b>Reset</b> to inherit the layer's normal symbology.</li>
+</ul>
+<p>
+A thematic map can override only the properties that need to change. Any property not specified by the thematic
+map continues to use the base symbol or the normal layer symbology.
+</p>
 
+<h3>Selecting fields</h3>
+<p>
+The <b>Fields</b> list contains the fields used by the selected thematic map. If no field has yet been selected,
+the field-selection area is displayed automatically. Choose the relevant record type, then select a field from
+the record structure.
+</p>
+<p>
+After at least one field has been added, the field-selection area is hidden to leave more space for editing ranges
+and categories. Click <b>Select another field</b> whenever you need to add another field.
+</p>
+<p>
+Several fields may contribute different parts of the final symbol. For example, one field can determine colour,
+another can determine size, and another can determine the icon.
+</p>
+
+<h3>Defining ranges and categories</h3>
+<p>
+Select a field in the <b>Fields</b> list to edit its ranges or categories. The field <b>Title</b> can be changed to a
+more suitable label for use in the thematic map.
+</p>
+<ul>
+    <li><b>Add range</b> &mdash; adds a range or category manually.</li>
+    <li><b>Generate ranges...</b> &mdash; creates ranges automatically from the values occurring in the layer data.</li>
+    <li><b>Remove all ranges</b> &mdash; clears the ranges for the selected field.</li>
+    <li><b>Symbol gradient...</b> &mdash; applies graduated colours, opacity or symbol sizes across the existing ranges.</li>
+</ul>
+<p>
+For each range/category, enter the value or value range and define any symbology properties that should override
+the base symbol. The symbol sample shows the effective result. Click the sample or <b>Edit</b> to open the symbology
+editor; use <b>Reset</b> to remove the range-specific override.
+</p>
+
+<h3>Generating ranges automatically</h3>
+<p>
+For numeric and date fields, specify the number of intervals and, if required, the minimum and maximum values and
+rounding. For term-list fields, ranges can be generated from the values currently found in the database or from
+all terms in the vocabulary.
+</p>
+
+<h3>Using a symbol gradient</h3>
+<p>
+The symbol gradient dialog can vary stroke colour, fill colour, stroke opacity, fill opacity and symbol size from
+a starting value to an ending value. Heurist distributes the values across the ranges already defined for the
+selected field. Opacity values range from 0 (transparent) to 100 (opaque).
+</p>
+
+<h3>Saving and removing thematic maps</h3>
+<p>
+Click <b>Save thematic map</b> to return the thematic definitions to the layer symbology editor. A thematic map must
+have a title and at least one field with ranges/categories before it can be saved.
+</p>
+<p>
+Use <b>Remove theme</b> to delete the selected thematic map. If the final thematic map is removed, the editor closes
+and returns the remaining ordinary layer symbology, so the thematic mapping is removed from the layer when the
+parent symbology editor is saved.
+</p>
+
+<h3>How symbols are combined</h3>
+<p>The final symbol for a record is built in this order:</p>
+<ol>
+    <li>Normal map-layer symbology.</li>
+    <li>The thematic map's optional <b>Base symbol</b>.</li>
+    <li>Overrides defined by the matching range/category for each thematic field.</li>
+</ol>
+<p>
+This allows thematic fields to modify only selected properties without redefining the complete symbol for every
+range or category.
+</p>
+
+</div>
+</body>
 </html>

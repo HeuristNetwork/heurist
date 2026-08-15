@@ -76,8 +76,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     options: {
     
         height: 780,
-        width:  1100,
+        width:  920,
         modal:  true,
+        closeOnEscape: false,
         title:  'Define thematic mapping',
         default_palette_class: 'ui-heurist-design', 
         
@@ -114,6 +115,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         treediv.remove();
         
     },
+    
+    _initDialog: function(){
+        this.options.beforeClose = ()=>this._onBeforeClose();
+        this._super();
+    },
         
     /**
      * @brief Gets the action buttons for the dialog.
@@ -129,6 +135,23 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         return res;
     },    
         
+        
+        // The base dialog used to close immediately on Escape, which discarded
+        // changes without any warning. Handle Escape here only while this is the
+        // topmost dialog; nested editors (symbol/gradient dialogs) must receive it
+        // themselves.
+    //    this._on($(window.hWin.document), {keydown:function(event){
+    //        if(!(event.key === 'Escape' || event.keyCode === 27)) return; });
+    _onBeforeClose: function(){
+            const that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                '<br>Discard changes and close the thematic map editor?',
+                function(){that.closeDialog(true);});
+
+            return false;
+    },
+    
+                
     /**
      * @brief Initializes the main controls of the widget after HTML content is loaded.
      * @override
@@ -157,6 +180,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         this._on(btnSelectAnotherField, {click:function(){
             this._updateFieldSelectionVisibility(true);
         }});
+
+
 
         this._on(this.element.find('button[id^="btn_f"]').button(), 
                                     {click:this._onThemeFieldAction});
@@ -342,7 +367,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 this.options.thematic_mapping.unshift(this.baseLayerSymbol);
             }
             this._context_on_close =  this.options.thematic_mapping;
-            this.closeDialog();
+            this.closeDialog(true);
         }
         
         
@@ -654,7 +679,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         // symbology field. Preserve a base symbol, if this widget was
                         // invoked with one, using the same array shape as normal Save.
                         that._context_on_close = that.baseLayerSymbol ? [that.baseLayerSymbol] : [];
-                        that.closeDialog();
+                        that.closeDialog(true);
                     });
                 
             }else{

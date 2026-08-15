@@ -426,6 +426,7 @@
                 modal:  (options['modal']!==false),
                 title: window.hWin.HEURIST4.util.isempty(options['title'])?'':window.hWin.HR(options['title']), //title will be set in  initControls as soon as entity config is loaded
                 position: options['position'],
+                closeOnEscape: options.closeOnEscape,
                 beforeClose: options.beforeClose,
                 resizeStop: function( event, ui ) {
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });

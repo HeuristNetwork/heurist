@@ -14,6 +14,17 @@
 * @since       4.0
 */
 -->
+<style>
+    #thematic_maps_list, #selected_fields {
+        font-size: 1.1em;
+        line-height: 1.6em;
+    }
+    #thematic_maps_list option, #selected_fields option {
+        font-size: 1.05em;
+        line-height: 1.6em;
+        padding: 3px 4px;
+    }
+</style>
 <div id="div_search" class="ent_wrapper">
     <div class="ent_header" style="height:110px;border-bottom:1px solid gray;padding:0px">
     
@@ -22,12 +33,12 @@
                 Thematic maps
                 <span id="btn_tm_add" class="ui-icon ui-icon-circle-b-plus" style="margin-top:2px;float:right;cursor:pointer" title="Add new thematic map"/>
             </h4>
-            <select id="thematic_maps_list" size="5" style="width:290px;margin:5px"></select>
+            <select id="thematic_maps_list" size="3" style="width:290px;margin:5px"></select>
         </div>
     
         <fieldset style="display:inline-block"><legend style="display:none"></legend>
             <div style="padding: 0.2em; width: 100%; line-height:2" class="input">
-                <div class="header">
+                <div class="header_narrow">
                     <label for="tm_name">Title:</label>
                 </div>
                 <div style="line-height:1em">
@@ -36,7 +47,7 @@
                 </div>
             </div>
             <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
-                <div class="header">
+                <div class="header_narrow">
                     <label for="tm_active">Active by default:</label>
                 </div>
                 <div style="line-height:1em">
@@ -44,7 +55,7 @@
                 </div>
             </div>
             <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
-                <div class="header">
+                <div class="header_narrow">
                     <label for="tm_symbol">Base symbol:</label>
                 </div>
                 <div style="line-height:1em">
@@ -66,7 +77,7 @@
                 <label for="sel_record_scope">Select field:</label><br>
                 <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:270px;margin-top:7px"></select>
             </div>
-            <div class="detailRow rtt-tree tree-csv" style="padding:10px; overflow:auto; position:absolute; width:280px; top:147px;bottom:0px" id="rectype_tree">
+            <div class="detailRow rtt-tree tree-csv" style="padding:10px; overflow:auto; position:absolute; width:280px; top:180px;bottom:0px" id="rectype_tree">
             </div>
         </div>
     </div>
@@ -75,15 +86,17 @@
     <div id="div_work_area" style="display:none;position:absolute; top:115px; bottom:0px; left:301px; right:0px; border-left:1px solid gray;overflow:auto; padding:0px 10px">
         <h4 style="margin: 5px;">Ranges / categories</h4>
         <div style="margin-top: 10px">
-                <label for="f_title">Title:</label>
-                <input id="f_title" class="text ui-widget-content ui-corner-all" style="width:300px;"/>
-                <button id="btn_f_remove" >Remove field</button>
+            <div style="display:inline-block;width:80px;text-align:right;padding-right:5px" class="header_narrow">
+                <label for="f_title">Title</label>
+            </div>
+            <input id="f_title" class="text ui-widget-content ui-corner-all" style="width:300px;"/>
+            <button id="btn_f_remove">Remove field</button>
         </div>
         <div id="f_toolbar" style="padding:5px;margin-top: 22px">
             <button id="btn_f_range_add">Add range</button>
             <button id="btn_f_range_auto">Generate ranges...</button>
             <button id="btn_f_range_reset">Remove all ranges</button>
-            <button id="btn_f_range_symb" style="margin-left:200px">Symbol gradient...</button>
+            <button id="btn_f_range_symb">Symbol gradient...</button>
         </div>
         <div id="f_ranges"></div>
     </div>
