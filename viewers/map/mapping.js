@@ -214,7 +214,7 @@ $.widget( "heurist.mapping", {
     {name:'OpenStreetMap'},
     //{name:'OpenPtMap'},
     {name:'OpenTopoMap'},
-    /* account disableb - it is a risk of cost overruns
+    /* account disabled - it is a risk of cost overruns
     {name:'MapBox.StreetMap', options:{accessToken: accessToken_MapBox}},
     {name:'MapBox.Satellite', options:{accessToken: accessToken_MapBox}},
     {name:'MapBox.Combined', options:{accessToken: accessToken_MapBox}},

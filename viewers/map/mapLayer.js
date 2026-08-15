@@ -425,7 +425,7 @@ function HMapLayer( _options ) {
           
         const url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+rec_ID;  // ?format=geojson
         //perform loading shp as geojson
-        window.hWin.HEURIST4.util.sendRequest(url, null, null, 
+        $.getJSON(url, 
             function(response){
                 if(response){
                     let dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
@@ -470,7 +470,7 @@ function HMapLayer( _options ) {
         const url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+rec_ID;  // ?format=geojson
 
         //perform loading kml as geojson
-        window.hWin.HEURIST4.util.sendRequest(url, null, null, 
+        $.getJSON(url, 
             function(response){
                 if(response){
                     let dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
