@@ -28,6 +28,7 @@
      * @param {Object} [options]
      * @param {?string} [options.geometryType=null] point|line|polygon. Null renders
      *        a composite preview because thematic editing does not know geometry.
+     * @param {number} [options.rectypeId=12] Record type used when iconType=rectype.
      */
     window.hWin.HEURIST4.ui.renderMapSymbolPreview = function(container, symbol, options){
         container = $(container);
@@ -51,7 +52,7 @@
 
         const geometryType = options.geometryType || null;
         if(geometryType==='point'){
-            container.append(createPointSample(symbol));
+            container.append(createPointSample(symbol, options));
         }else if(geometryType==='line'){
             container.append(createLineSample(symbol));
         }else if(geometryType==='polygon'){
@@ -60,12 +61,12 @@
             // Geometry is unknown during editing. A point sample shows marker-specific
             // settings while a polygon sample shows fill/stroke styling. A separate line
             // sample adds little information and makes the preview unnecessarily busy.
-            container.append(createPointSample(symbol));
+            container.append(createPointSample(symbol, options));
             container.append(createPolygonSample(symbol));
         }
     };
 
-    function createPointSample(symbol){
+    function createPointSample(symbol, options){
         const wrapper = $('<span>').css({
             display:'inline-flex', width:'24px', height:'28px',
             'align-items':'center', 'justify-content':'center', overflow:'hidden'
@@ -85,17 +86,96 @@
         }
 
         if(iconType==='url' && symbol.iconUrl){
-            return wrapper.append($('<img>', {src:String(symbol.iconUrl), alt:''}).css({
+            const image = $('<img>', {src:String(symbol.iconUrl), alt:''}).css({
                 width:pointSize(symbol)+'px', height:pointSize(symbol)+'px',
                 'object-fit':'contain', 'max-width':'24px', 'max-height':'28px'
-            }));
+            });
+            applyImageSymbolFilter(image, symbol);
+            return wrapper.append(image);
         }
 
-        // rectype cannot resolve to a particular record-type icon here because a
-        // thematic layer may contain several record types. Use the symbol colours
-        // as a generic point swatch instead.
+        if(iconType==='rectype'){
+            const rectypeId = parseInt(options && options.rectypeId) || 12;
+            const iconBaseURL = window.hWin.HAPI4 && window.hWin.HAPI4.iconBaseURL;
+
+            if(iconBaseURL){
+                const size = pointSize(symbol);
+                const image = $('<img>', {
+                    src:String(iconBaseURL)+rectypeId,
+                    alt:''
+                }).css({
+                    width:size+'px', height:size+'px',
+                    'object-fit':'contain', 'max-width':'24px', 'max-height':'28px'
+                });
+                applyImageSymbolFilter(image, symbol);
+
+                // Fall back to a generic marker if the record-type icon is unavailable.
+                image.on('error', function(){
+                    $(this).replaceWith(createGenericPoint(symbol));
+                });
+                return wrapper.append(image);
+            }
+        }
+
+        return wrapper.append(createGenericPoint(symbol));
+    }
+
+    /**
+     * Apply the same monochrome-image tinting method used by heurist-map.
+     * The editor treats fillColor as the marker fill for URL/record-type icons;
+     * color is retained as a compatibility fallback.
+     */
+    function applyImageSymbolFilter(image, symbol){
+        const tintColor = symbol.color;
+        const filter = hexToCssFilter(tintColor);
+        if(filter) image.css('filter', filter);
+    }
+
+    /** Return a deterministic CSS filter which tints a dark/monochrome icon toward a hex color. */
+    function hexToCssFilter(color){
+        const rgb = parseHex(color);
+        if(!rgb) return '';
+        const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+        const invert = Math.round(hsl.l * 100);
+        const saturation = Math.round(100 + hsl.s * 900);
+        const brightness = Math.round(60 + hsl.l * 80);
+        return 'brightness(0) saturate(100%) invert('+invert+'%) sepia(100%) saturate('+saturation+
+               '%) hue-rotate('+Math.round(hsl.h * 360 - 45)+'deg) brightness('+brightness+'%) contrast(100%)';
+    }
+
+    function parseHex(value){
+        const text = String(value || '').trim();
+        let match = /^#([0-9a-f]{6})$/i.exec(text);
+        if(match){
+            return {r:parseInt(match[1].slice(0,2),16), g:parseInt(match[1].slice(2,4),16), b:parseInt(match[1].slice(4,6),16)};
+        }
+        match = /^#([0-9a-f]{3})$/i.exec(text);
+        if(!match) return null;
+        const hex = match[1].split('').map(function(c){ return c+c; }).join('');
+        return {r:parseInt(hex.slice(0,2),16), g:parseInt(hex.slice(2,4),16), b:parseInt(hex.slice(4,6),16)};
+    }
+
+    function rgbToHsl(r, g, b){
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r,g,b);
+        const min = Math.min(r,g,b);
+        let h = 0;
+        let saturation = 0;
+        const lightness = (max + min) / 2;
+        if(max !== min){
+            const delta = max - min;
+            saturation = lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+            if(max === r) h = (g - b) / delta + (g < b ? 6 : 0);
+            else if(max === g) h = (b - r) / delta + 2;
+            else h = (r - g) / delta + 4;
+            h /= 6;
+        }
+        return {h:h, s:saturation, l:lightness};
+    }
+
+    function createGenericPoint(symbol){
         const size = Math.min(24, pointSize(symbol));
-        const marker = $('<span>').css({
+        return $('<span>').css({
             display:'inline-block', width:size+'px', height:size+'px',
             'box-sizing':'border-box', 'border-radius':'50%',
             border: symbol.stroke===false ? 'none' : Math.max(1, Number(symbol.weight)||1)+'px solid '+
@@ -103,7 +183,6 @@
             background: symbol.fill===false ? 'transparent' :
                     cssColorWithOpacity(symbol.fillColor || symbol.color || '#777', numberOr(symbol.fillOpacity, 1))
         });
-        return wrapper.append(marker);
     }
 
     function createLineSample(symbol){

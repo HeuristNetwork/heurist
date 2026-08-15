@@ -96,7 +96,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     enumValues: null, 
     fieldSelected: null,
     popele: null, //element for popup dialog
-    maplayer_ids: null, //list of ids from map layer - result of maplayer_query 
+    maplayer_ids: null, //list of ids from map layer - result of maplayer_query
+    previewRecTypeID: 12, //record type used for iconType=rectype preview
+    _initialThematicState: null,
     
     /**
      * @brief Destroys the widget and its components.
@@ -143,12 +145,90 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //    this._on($(window.hWin.document), {keydown:function(event){
     //        if(!(event.key === 'Escape' || event.keyCode === 27)) return; });
     _onBeforeClose: function(){
-            const that = this;
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                '<br>Discard changes and close the thematic map editor?',
-                function(){that.closeDialog(true);});
 
-            return false;
+        // No warning is needed when the dialog contents are unchanged.
+        if(this._initialThematicState!==null
+            && this._initialThematicState===this._serializeThematicState()){
+            return true;
+        }
+
+        const that = this;
+        window.hWin.HEURIST4.msg.showMsgDlg(
+            '<br>Discard changes and close the thematic map editor?',
+            function(){that.closeDialog(true);});
+
+        return false;
+    },
+
+    /**
+     * Serialize the editable thematic-map state without saving or validating it.
+     * Current theme/field controls are overlaid so unsaved edits are detected.
+     *
+     * @returns {string}
+     */
+    _serializeThematicState: function(){
+
+        const themes = window.hWin.HEURIST4.util.cloneJSON(this.options.thematic_mapping || []);
+
+        if(this.currentThemeIdx>=0 && themes[this.currentThemeIdx]){
+            const theme = themes[this.currentThemeIdx];
+
+            theme.title = this.element.find('#tm_name').val();
+            theme.active = this.element.find('#tm_active').is(':checked');
+
+            const symbol = window.hWin.HEURIST4.util.isJSON(this.element.find('#tm_symbol').val());
+            theme.symbol = symbol || '';
+
+            const fields = window.hWin.HEURIST4.util.cloneJSON(this.selectedFields || {});
+
+            if(this.currentField>0 && fields[this.currentField]){
+                const field = fields[this.currentField];
+                field.title = this.element.find('#f_title').val();
+
+                const ranges = [];
+                this.element.find('#f_ranges .field-range').each(function(){
+                    const row = $(this);
+                    let value;
+
+                    if(row.find('select.val1').length>0){
+                        value = row.find('select.val1').val();
+                    }else{
+                        const val1 = row.find('input.val1').val();
+                        const val2 = row.find('input.val2').val();
+
+                        if(val1 && val2){
+                            value = val1+'<>'+val2;
+                        }else{
+                            value = val1 || val2 || '';
+                        }
+                    }
+
+                    if(value){
+                        const rangeSymbol =
+                            window.hWin.HEURIST4.util.isJSON(row.find('.field-symbol').val());
+                        ranges.push({value:value, symbol:rangeSymbol || ''});
+                    }
+                });
+
+                field.ranges = ranges;
+            }
+
+            theme.fields = Object.keys(fields).map(function(key){
+                const field = fields[key];
+                if(!field) return null;
+
+                if(Array.isArray(field.ranges)){
+                    field.ranges.forEach(function(range){
+                        if(range) delete range.uid;
+                    });
+                }
+                return field;
+            }).filter(function(field){
+                return field && Array.isArray(field.ranges) && field.ranges.length>0;
+            });
+        }
+
+        return JSON.stringify(themes);
     },
     
                 
@@ -256,6 +336,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             themes_list.trigger('change');
         }
         
+
+        // Baseline for close-warning detection, after the initial theme/field
+        // has been materialised into the editing controls.
+        this._initialThematicState = this._serializeThematicState();
+        
         this._on(this.element.find('#btn_map_remove').button(), 
                                     {click:this._onThematicMapDelete});
 
@@ -303,7 +388,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         
                         if(rty_IDs.length>0){
 
-                            for(let i=0; i<rty_IDs.length; i++){
+                            
+                            // Use the first record type represented in the layer for
+                            // iconType=rectype previews. Fall back to Place (RT 12).
+                            that.previewRecTypeID = parseInt(rty_IDs[0]) || 12;
+                            that._renderSymbolPreview(null, that.mapDefaultSymbol,
+                                that.element.find('#tm_symbol').val(), null);
+
+for(let i=0; i<rty_IDs.length; i++){
                                 let name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_IDs[i], 'rty_Name'));
                                 
                                 let option = document.createElement("option");
@@ -1581,7 +1673,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             window.hWin.HEURIST4.util.cloneJSON(theme_symbol || {}), null);
 
         if(ele==null){
-            renderer(this.element.find('#tm_symbol_preview')[0], theme_symbol, {geometryType:null});
+            renderer(this.element.find('#tm_symbol_preview')[0], theme_symbol,
+                {geometryType:null, rectypeId:this.previewRecTypeID || 12});
 
             this.element.find('#f_ranges .field-range').each(function(){
                 const row = $(this);
@@ -1593,7 +1686,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
         const effective_symbol = window.hWin.HEURIST4.ui.prepareMapSymbol(
             mergeSymbol(theme_symbol, range_symbol), null);
-        renderer($(ele)[0], effective_symbol, {geometryType:null});
+        renderer($(ele)[0], effective_symbol,
+            {geometryType:null, rectypeId:this.previewRecTypeID || 12});
     }
 
 });
