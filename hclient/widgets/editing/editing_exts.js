@@ -61,11 +61,52 @@ function editSymbology(current_value, mode_edit, callback){
         delete current_value.maplayer_query;
     }
 
-    let editForm = $('<div class="ent_content_full editForm" style="top:0">')
-    .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
-
     let _editing_symbology;
     let _refreshSymbolPreviews = null;
+
+    /*
+     * Create the dialog wrapper before HEditing builds its controls. Widgets such
+     * as hSelect and the colour picker inspect their DOM ancestry during
+     * initialisation. On the first opening there was previously no .ui-dialog
+     * parent yet, while on subsequent openings the wrapper already existed.
+     * Keeping the dialog closed while the form is constructed gives first and
+     * subsequent openings the same DOM lifecycle.
+     */
+    edit_symb_dialog = popup_dlg.dialog({
+        autoOpen: false,
+        height: (mode_edit==2 || mode_edit==6 || mode_edit==7) ? 300 : ((mode_edit==5) ? 500 : 700),
+        width:  740,
+        modal:  true,
+        title: window.hWin.HR((mode_edit==5)?'Define symbology gradient values':'Define Symbology'),
+        buttons: [],
+        resizeStop: function( event, ui ) {//fix bug
+
+        },
+        open: function(){
+            // Always give keyboard focus to the dialog itself. This is required
+            // on repeated openings as well as on the first one.
+            const dialogWidget = $(this).dialog('widget');
+            setTimeout(function(){
+                dialogWidget.attr('tabindex', '-1').trigger('focus');
+            }, 0);
+        },
+        beforeClose: function(){
+            //show warning in case of modification
+            if(_editing_symbology && _editing_symbology.isModified()){
+
+                window.hWin.HEURIST4.msg.showMsgOnExit(window.hWin.HR('Warn_Lost_Data'),
+                    ()=>{edit_symb_dialog.parent().find('#btnRecSave').trigger('click');}, //save
+                    ()=>{_editing_symbology.setModified(false); edit_symb_dialog.dialog('close'); }); //ignore and close
+                return false;
+            }
+            return true;
+        }
+    });
+
+    edit_symb_dialog.parent().addClass('ui-heurist-design');
+
+    let editForm = $('<div class="ent_content_full editForm" style="top:0">')
+    .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
     
     _editing_symbology = new HEditing({container:editForm, 
         onchange:
@@ -168,9 +209,13 @@ function editSymbology(current_value, mode_edit, callback){
         }},
         {"dtID": "opacity",
             "dtFields":{
-                "dty_Type":"float",
+                "dty_Type":"integer",
                 "rst_DisplayName": "Stroke opacity:",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
+                "rst_Spinner": "1",
+                "rst_SpinnerStep": "1",
+                "rst_MinValue": "0",
+                "rst_MaxValue": "100"
         }},
         
         {"dtID": "fillColor",
@@ -183,9 +228,13 @@ function editSymbology(current_value, mode_edit, callback){
         }},
         {"dtID": "fillOpacity",
             "dtFields":{
-                "dty_Type":"float",
+                "dty_Type":"integer",
                 "rst_DisplayName": "Fill opacity:",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
+                "rst_Spinner": "1",
+                "rst_SpinnerStep": "1",
+                "rst_MinValue": "0",
+                "rst_MaxValue": "100"
         }}
         ];
         
@@ -441,7 +490,7 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayWidth":40,
                 "rst_Display":(current_value['iconType']=='iconfont'?"visible":"hidden"),
                 "rst_DefaultValue": "location",
-                "rst_DisplayHelpText": "Define name of icon from set: <a href='http://mkkeck.github.io/jquery-ui-iconfont/' target=_blank>jQuery UI Icon Font</a> or <a href='https://fontawesome.com/icons' target=_blank>Font Awesome</a>"
+                "rst_DisplayHelpText": "Define name of icon from set: <a href='http://mkkeck.github.io/jquery-ui-iconfont/' target=_blank>jQuery UI Icon Font</a> or <a href='https://fontawesome.com/search?ic=free-collection' target=_blank>Font Awesome</a>"
         }},
         {"dtID": "iconSize",
             "dtFields":{
@@ -507,12 +556,12 @@ function editSymbology(current_value, mode_edit, callback){
         }},
         {"dtID": "opacity",
             "dtFields":{
-                "dty_Type":"float",
+                "dty_Type":"integer",
                 "rst_DisplayName": "Stroke opacity:",
                 "rst_DisplayWidth": 5,
                 "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
                 "rst_Spinner": "1",
-                "rst_SpinnerStep": "0.1",
+                "rst_SpinnerStep": "1",
                 "rst_MinValue": "0",
                 "rst_MaxValue": "100"
             }
@@ -559,12 +608,12 @@ function editSymbology(current_value, mode_edit, callback){
         }},
         {"dtID": "fillOpacity",
             "dtFields":{
-                "dty_Type":"float",
+                "dty_Type":"integer",
                 "rst_DisplayName": "Fill opacity:",
                 "rst_DisplayWidth": 5,
                 "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
                 "rst_Spinner": "1",
-                "rst_SpinnerStep": "0.1",
+                "rst_SpinnerStep": "1",
                 "rst_MinValue": "0",
                 "rst_MaxValue": "100"
             }
@@ -623,8 +672,8 @@ function editSymbology(current_value, mode_edit, callback){
     }
 
     // Live symbol previews are useful for the normal style editors only.
-    // mode 3 has separate marker/outline/fill sections; mode 2 has outline/fill.
-    if(mode_edit===2 || mode_edit===3){
+    // modes 1 and 3 have separate marker/outline/fill sections; mode 2 has outline/fill.
+    if(mode_edit===1 || mode_edit===2 || mode_edit===3){
 
         const __initSymbolPreviews = function(){
             if(!window.hWin.HEURIST4.ui.renderMapSymbolPreview) return;
@@ -647,14 +696,14 @@ function editSymbology(current_value, mode_edit, callback){
                     .appendTo(row);
 
                 let sample = $('<span>')
-                    .css({display:'inline-block',width:'85px',height:'34px',
+                    .css({display:'inline-block',width:'90px',height:'34px',
                           'vertical-align':'middle','line-height':'normal'})
                     .appendTo(row);
 
                 previews.push({element:sample, geometryType:geometryType});
             }
 
-            if(mode_edit===3){
+            if(mode_edit===1 || mode_edit===3){
                 __addPreview('iconType', 'point', 'Preview:');
                 __addPreview('stroke', 'line', 'Preview:');
                 __addPreview('fill', 'polygon', 'Preview:');
@@ -737,33 +786,11 @@ function editSymbology(current_value, mode_edit, callback){
         
     ];                
 
-    //
-    //
-    edit_symb_dialog = popup_dlg.dialog({
-        autoOpen: true,
-        height: (mode_edit==2 || mode_edit==6 || mode_edit==7) ? 300 : ((mode_edit==5) ? 500 : 700), //((mode_edit==3)?750:700),
-        width:  740,
-        modal:  true,
-        title: window.hWin.HR((mode_edit==5)?'Define symbology gradient values':'Define Symbology'),
-        resizeStop: function( event, ui ) {//fix bug
-           
-        },
-        beforeClose: function(){
-            //show warning in case of modification
-            if(_editing_symbology.isModified()){
-                
-                window.hWin.HEURIST4.msg.showMsgOnExit(window.hWin.HR('Warn_Lost_Data'),
-                    ()=>{edit_symb_dialog.parent().find('#btnRecSave').trigger('click');}, //save
-                    ()=>{_editing_symbology.setModified(false); edit_symb_dialog.dialog('close'); }); //ignore and close
-                return false;   
-            }
-            return true;
-        },
-
-        buttons: edit_buttons
-    });                
-
-    edit_symb_dialog.parent().addClass('ui-heurist-design');
+    // The dialog wrapper already exists, so all form widgets have been
+    // initialised against the correct dialog parent. Add the action buttons and
+    // only now make the dialog visible.
+    edit_symb_dialog.dialog('option', 'buttons', edit_buttons);
+    edit_symb_dialog.dialog('open');
     
     if(mode_edit==3 && maplayer_query){
             

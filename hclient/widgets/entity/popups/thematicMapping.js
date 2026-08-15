@@ -99,6 +99,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     maplayer_ids: null, //list of ids from map layer - result of maplayer_query
     previewRecTypeID: 12, //record type used for iconType=rectype preview
     _initialThematicState: null,
+    _initialThematicContext: null,
     
     /**
      * @brief Destroys the widget and its components.
@@ -146,16 +147,27 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //        if(!(event.key === 'Escape' || event.keyCode === 27)) return; });
     _onBeforeClose: function(){
 
+        // Cancel/close must preserve the original symbology. The caller accepts [] as
+        // a valid saved result, so leaving _context_on_close empty would otherwise
+        // overwrite the existing thematic configuration.
+        const originalContext = window.hWin.HEURIST4.util.cloneJSON(
+            this._initialThematicContext || []);
+
         // No warning is needed when the dialog contents are unchanged.
         if(this._initialThematicState!==null
             && this._initialThematicState===this._serializeThematicState()){
+            this._context_on_close = originalContext;
             return true;
         }
 
         const that = this;
         window.hWin.HEURIST4.msg.showMsgDlg(
             '<br>Discard changes and close the thematic map editor?',
-            function(){that.closeDialog(true);});
+            function(){
+                that._context_on_close = window.hWin.HEURIST4.util.cloneJSON(
+                    that._initialThematicContext || []);
+                that.closeDialog(true);
+            });
 
         return false;
     },
@@ -308,6 +320,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }else{
             this.options.thematic_mapping = [];//
         }
+
+        // Keep an untouched copy of the complete incoming symbology (including the
+        // ordinary/base symbol). It is returned on Cancel/discard so the caller does
+        // not mistake an empty close context for a request to clear thematic maps.
+        this._initialThematicContext = window.hWin.HEURIST4.util.cloneJSON(
+            this.options.thematic_mapping);
             
         let i=0;
         while(i<this.options.thematic_mapping.length){

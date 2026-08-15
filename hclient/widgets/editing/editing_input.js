@@ -1326,8 +1326,8 @@ $.widget( "heurist.editing_input", {
 
                     // Keep controls in a separate row below the raw textarea. This avoids
                     // awkward wrapping when the textarea is made visible.
-                    let $thematic_controls = $('<div>')
-                        .css({display:'block',clear:'both','margin-top':'4px'})
+                    let $thematic_controls = $('<span>')
+                        .css({display:'inline-block','vertical-align':'top','margin-left':'4px'})
                         .insertAfter($input);
 
                     let $btn_edit_switcher = $('<button type="button">Thematic maps configuration</button>',
@@ -1335,7 +1335,7 @@ $.widget( "heurist.editing_input", {
                         .appendTo($thematic_controls)
                         .button();
 
-                    let $btn_raw_switcher = $('<span>Show raw</span>', {title: 'Show/hide raw thematic map JSON'})
+                    let $btn_raw_switcher = $('<span>show raw</span>', {title: 'Show/hide raw thematic map JSON'})
                         .addClass('smallbutton btn_add_term')
                         .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
                               'text-decoration':'underline','margin-left':'10px'})
@@ -1344,10 +1344,10 @@ $.widget( "heurist.editing_input", {
                     this._on($btn_raw_switcher, {click:function(){
                         if($input.is(':visible')){
                             $input.hide();
-                            $btn_raw_switcher.text('Show raw');
+                            $btn_raw_switcher.text('show raw');
                         }else{
                             $input.show();
-                            $btn_raw_switcher.text('Hide raw');
+                            $btn_raw_switcher.text('hide raw');
                             __adjustTextareaHeight();
                         }
                     }});
@@ -4363,6 +4363,18 @@ $.widget( "heurist.editing_input", {
                     const isMapLayer =
                         that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
 
+                    // For Map Layer records the raw DT_SYMBOLOGY JSON is an advanced
+                    // editing option. Hide it initially and keep all editor controls in
+                    // a separate row below the textarea so the layout remains stable
+                    // when raw JSON is shown.
+                    let $symbology_controls = $inputdiv;
+                    if(isMapLayer){
+                        $input.hide();
+                        $symbology_controls = $('<span>')
+                            .css({display:'inline-block','white-space':'nowrap','margin-left':'4px'})
+                            .insertAfter($input);
+                    }
+
                     /**
                      * Resolve the datasource currently selected in the Map Layer editor.
                      * This must be evaluated on every action because the user may change
@@ -4432,7 +4444,7 @@ $.widget( "heurist.editing_input", {
                         .addClass('smallbutton btn_add_term')
                         .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
                               'text-decoration':'underline'})
-                        .appendTo($inputdiv);
+                        .appendTo($symbology_controls);
 
                     this._on($btn_edit_switcher, {click:function(){
                         let current_val = __currentSymbology();
@@ -4468,7 +4480,7 @@ $.widget( "heurist.editing_input", {
                             .addClass('smallbutton btn_add_term')
                             .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
                                   'text-decoration':'underline','margin-left':'10px'})
-                            .appendTo($inputdiv);
+                            .appendTo($symbology_controls);
 
                         this._on($btn_thematic, {click:function(){
                             __getMapLayerDataSource(function(source){
@@ -4499,6 +4511,24 @@ $.widget( "heurist.editing_input", {
                                     }
                                 );
                             });
+                        }});
+
+                        let $btn_raw_symbology = $('<span>show raw</span>',
+                                {title:'Show/hide raw symbology JSON'})
+                            .addClass('smallbutton btn_add_term')
+                            .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                                  'text-decoration':'underline','margin-left':'10px'})
+                            .appendTo($symbology_controls);
+
+                        this._on($btn_raw_symbology, {click:function(){
+                            if($input.is(':visible')){
+                                $input.hide();
+                                $btn_raw_symbology.text('show raw');
+                            }else{
+                                $input.show();
+                                $btn_raw_symbology.text('hide raw');
+                                __adjustTextareaHeight();
+                            }
                         }});
                     }
                 }             
