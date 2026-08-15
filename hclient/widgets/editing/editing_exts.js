@@ -65,6 +65,7 @@ function editSymbology(current_value, mode_edit, callback){
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
 
     let _editing_symbology;
+    let _refreshSymbolPreviews = null;
     
     _editing_symbology = new HEditing({container:editForm, 
         onchange:
@@ -86,6 +87,10 @@ function editSymbology(current_value, mode_edit, callback){
                         ele_icon_font.show();
                     }
                 }
+            }
+
+            if(_refreshSymbolPreviews){
+                _refreshSymbolPreviews();
             }
 
         },
@@ -436,7 +441,7 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayWidth":40,
                 "rst_Display":(current_value['iconType']=='iconfont'?"visible":"hidden"),
                 "rst_DefaultValue": "location",
-                "rst_DisplayHelpText": "Define name of icon from set: <a href='http://mkkeck.github.io/jquery-ui-iconfont/' target=_blank>http://mkkeck.github.io/jquery-ui-iconfont/</a>"
+                "rst_DisplayHelpText": "Define name of icon from set: <a href='http://mkkeck.github.io/jquery-ui-iconfont/' target=_blank>jQuery UI Icon Font</a> or <a href='https://fontawesome.com/icons' target=_blank>Font Awesome</a>"
         }},
         {"dtID": "iconSize",
             "dtFields":{
@@ -617,6 +622,78 @@ function editSymbology(current_value, mode_edit, callback){
         });
     }
 
+    // Live symbol previews are useful for the normal style editors only.
+    // mode 3 has separate marker/outline/fill sections; mode 2 has outline/fill.
+    if(mode_edit===2 || mode_edit===3){
+
+        const __initSymbolPreviews = function(){
+            if(!window.hWin.HEURIST4.ui.renderMapSymbolPreview) return;
+
+            const previews = [];
+
+            function __addPreview(beforeFieldName, geometryType, label){
+                let field = _editing_symbology.getFieldByName(beforeFieldName);
+                if(!field || field.length===0) return;
+
+                let row = $('<div class="map-symbol-preview-row">')
+                    .css({display:'block',margin:'3px 0 7px 0','min-height':'36px',
+                          'line-height':'34px','white-space':'nowrap'})
+                    .insertBefore(field);
+
+                // Match the normal symbology field layout: fixed label column followed
+                // by a compact input/sample column.
+                $('<span>').text(label).css({display:'inline-block',width:'150px',
+                        'text-align':'right','padding-right':'5px','vertical-align':'middle'})
+                    .appendTo(row);
+
+                let sample = $('<span>')
+                    .css({display:'inline-block',width:'85px',height:'34px',
+                          'vertical-align':'middle','line-height':'normal'})
+                    .appendTo(row);
+
+                previews.push({element:sample, geometryType:geometryType});
+            }
+
+            if(mode_edit===3){
+                __addPreview('iconType', 'point', 'Preview:');
+                __addPreview('stroke', 'line', 'Preview:');
+                __addPreview('fill', 'polygon', 'Preview:');
+            }else{
+                __addPreview('color', 'line', 'Preview:');
+                __addPreview('fillColor', 'polygon', 'Preview:');
+            }
+
+            _refreshSymbolPreviews = function(){
+                let symbol = _editing_symbology.getValues() || {};
+                symbol = window.hWin.HEURIST4.util.cloneJSON(symbol);
+
+                if(!window.hWin.HEURIST4.util.isnull(symbol.stroke)){
+                    symbol.stroke = window.hWin.HEURIST4.util.istrue(symbol.stroke);
+                }
+                if(!window.hWin.HEURIST4.util.isnull(symbol.fill)){
+                    symbol.fill = window.hWin.HEURIST4.util.istrue(symbol.fill);
+                }
+
+                symbol = window.hWin.HEURIST4.ui.prepareMapSymbol(symbol, null);
+
+                // Symbology editing has no reliable record-type context. Use Place.
+                previews.forEach(function(item){
+                    window.hWin.HEURIST4.ui.renderMapSymbolPreview(
+                        item.element, symbol, {geometryType:item.geometryType, rectypeId:12});
+                });
+            };
+
+            _refreshSymbolPreviews();
+        };
+
+        if(window.hWin.HEURIST4.ui.renderMapSymbolPreview){
+            __initSymbolPreviews();
+        }else{
+            $.getScript(window.hWin.HAPI4.baseURL+
+                'hclient/widgets/entity/popups/mapSymbolPreview.js', __initSymbolPreviews);
+        }
+    }
+
     let edit_buttons = [
         {text:window.hWin.HR('Cancel'), 
             id:'btnRecCancel',
@@ -697,7 +774,7 @@ function editSymbology(current_value, mode_edit, callback){
                 .css({background:geofield_input.css('background'), 
                       cursor:'pointer',
                       padding: '2px',
-                      width: '500px',
+                      width: '300px',
                      'fonst-size':'10px !important',   
                      'fonst-style':'italic', 
                      'text-decoration':'underline'});

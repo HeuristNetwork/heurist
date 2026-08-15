@@ -122,8 +122,7 @@
 
     /**
      * Apply the same monochrome-image tinting method used by heurist-map.
-     * The editor treats fillColor as the marker fill for URL/record-type icons;
-     * color is retained as a compatibility fallback.
+     * URL/record-type image markers use symbol.color, matching heurist-map.
      */
     function applyImageSymbolFilter(image, symbol){
         const tintColor = symbol.color;

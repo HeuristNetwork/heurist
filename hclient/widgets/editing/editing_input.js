@@ -1320,11 +1320,37 @@ $.widget( "heurist.editing_input", {
             
             if(this.configMode && this.configMode['thematicmap']){ //-----------------------------------------------
 
-                    let $btn_edit_switcher = $( '<span>themes editor</span>', {title: 'Open thematic maps editor'})
-                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                    // The JSON value is an implementation detail. Keep it available for
+                    // advanced/debug use, but hide it by default.
+                    $input.hide();
+
+                    // Keep controls in a separate row below the raw textarea. This avoids
+                    // awkward wrapping when the textarea is made visible.
+                    let $thematic_controls = $('<div>')
+                        .css({display:'block',clear:'both','margin-top':'4px'})
+                        .insertAfter($input);
+
+                    let $btn_edit_switcher = $('<button type="button">Thematic maps configuration</button>',
+                            {title: 'Open thematic maps editor'})
+                        .appendTo($thematic_controls)
+                        .button();
+
+                    let $btn_raw_switcher = $('<span>Show raw</span>', {title: 'Show/hide raw thematic map JSON'})
                         .addClass('smallbutton btn_add_term')
-                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                        .appendTo( $inputdiv );
+                        .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                              'text-decoration':'underline','margin-left':'10px'})
+                        .appendTo($thematic_controls);
+
+                    this._on($btn_raw_switcher, {click:function(){
+                        if($input.is(':visible')){
+                            $input.hide();
+                            $btn_raw_switcher.text('Show raw');
+                        }else{
+                            $input.show();
+                            $btn_raw_switcher.text('Hide raw');
+                            __adjustTextareaHeight();
+                        }
+                    }});
                     
                     this._on( $btn_edit_switcher, { click: function(){
                         
@@ -1335,7 +1361,7 @@ $.widget( "heurist.editing_input", {
                             {maplayer_query: this.configMode['thematicmap']===true?null:this.configMode['thematicmap'], //query from map layer
                             thematic_mapping: current_val,
                                 onClose: function(context){
-                                    if(context){
+                                    if(context!==null && context!==undefined){
                                         let newval = window.hWin.HEURIST4.util.isJSON(context);
                                         newval = (!newval)?'':JSON.stringify(newval);
                                         $input.val(newval);
@@ -4333,88 +4359,149 @@ $.widget( "heurist.editing_input", {
                         $btn_edit_switcher2.on( { click: __openThemeDialog });
                     
                 }else{
-                
-                    let $btn_edit_switcher = $( '<span>style editor</span>', {title: 'Open symbology editor'})
-                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                        .addClass('smallbutton btn_add_term')
-                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                        .appendTo( $inputdiv );
-                    
-                    this._on( $btn_edit_switcher, { click: function(){
-                        
-                            let mode_edit = 0;
-                            let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
-                            if(!current_val) current_val = {};
-                        
-                            if(that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
-                                
-                                //get query from linked datasource
-                                let ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']);
-                                let vals = ele.editing_input('getValues');
-                                let dataset_record_id = vals[0];
-                                
-                                if(dataset_record_id>0){
-                                    
-                                    const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
-                                
-                                    let server_request = {
-                                        q: 'ids:'+dataset_record_id,
-                                        restapi: 1,
-                                        columns: 
-                                        ['rec_ID', 'rec_RecTypeID', DT_QUERY_STRING],
-                                        zip: 1,
-                                        format:'json'};
-                    
-                                    //perform search see record_output.php       
-                                    window.hWin.HAPI4.RecordMgr.search_new(server_request,
-                                        function(response){
-                                               if(window.hWin.HEURIST4.util.isJSON(response)) {
-                                                    let hquery = null;
-                                                    mode_edit = 3;
-                                                    if(response['records'] && response['records'].length>0){
-                                                        let rectype = response['records'][0]['rec_RecTypeID']; 
-                                                        
-                                                        if (rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE']
-                                                        || rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
-                                                            //show image filter dialogue
-                                                            window.hWin.HEURIST4.ui.showImgFilterDialog(current_val, function(new_value){
-                                                                $input.val(JSON.stringify(new_value));
-                                                                that.onChange();
-                                                            });
-                                                            return;                                                            
-                                                        }else if (rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
-                                                            
-                                                            let res = response['records'][0]['details'];
-                                                            if(res[DT_QUERY_STRING]){
-                                                                //{12:{4407:"t:10"}}
-                                                                hquery = res[DT_QUERY_STRING][ Object.keys(res[DT_QUERY_STRING])[0] ];
-                                                            }
-                                                            
-                                                        }
-                                                    }
-                                                    
-                                                    current_val.maplayer_query = hquery;
-                                                    
-                                                    window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 
-                                                            hquery==null?1:3, function(new_value){
-                                                        $input.val(JSON.stringify(new_value));
-                                                        that.onChange();
-                                                    });
-                                                    
-                                                }
-                                            });
-                                    return;        
+
+                    const isMapLayer =
+                        that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
+
+                    /**
+                     * Resolve the datasource currently selected in the Map Layer editor.
+                     * This must be evaluated on every action because the user may change
+                     * DT_DATA_SOURCE while the record edit form remains open.
+                     */
+                    function __getMapLayerDataSource(callback){
+                        if(!isMapLayer){
+                            callback(null);
+                            return;
+                        }
+
+                        let ele = that.options.editing.getFieldByName(
+                            window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']);
+                        if(!ele){
+                            callback(null);
+                            return;
+                        }
+
+                        let vals = ele.editing_input('getValues');
+                        let dataset_record_id = vals ? vals[0] : null;
+                        if(!(dataset_record_id>0)){
+                            callback(null);
+                            return;
+                        }
+
+                        const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+                        let server_request = {
+                            q: 'ids:'+dataset_record_id,
+                            restapi: 1,
+                            columns: ['rec_ID', 'rec_RecTypeID', DT_QUERY_STRING],
+                            zip: 1,
+                            format:'json'
+                        };
+
+                        window.hWin.HAPI4.RecordMgr.search_new(server_request, function(response){
+                            let source = {recordId:dataset_record_id, recTypeId:null, query:null};
+
+                            if(window.hWin.HEURIST4.util.isJSON(response) &&
+                               response['records'] && response['records'].length>0){
+                                let record = response['records'][0];
+                                source.recTypeId = record['rec_RecTypeID'];
+
+                                if(source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
+                                    let details = record['details'];
+                                    if(details && details[DT_QUERY_STRING]){
+                                        source.query = details[DT_QUERY_STRING][Object.keys(details[DT_QUERY_STRING])[0]];
+                                    }
                                 }
                             }
-                        
-                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, function(new_value){
-                                $input.val(JSON.stringify(new_value));
-                                that.onChange();
-                            });
+
+                            callback(source);
+                        });
+                    }
+
+                    function __currentSymbology(){
+                        let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                        return current_val || {};
+                    }
+
+                    function __storeSymbology(new_value){
+                        $input.val(JSON.stringify(new_value));
+                        that.onChange();
+                    }
+
+                    let $btn_edit_switcher = $('<span>style editor</span>',
+                            {title:'Open symbology editor'})
+                        .addClass('smallbutton btn_add_term')
+                        .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                              'text-decoration':'underline'})
+                        .appendTo($inputdiv);
+
+                    this._on($btn_edit_switcher, {click:function(){
+                        let current_val = __currentSymbology();
+
+                        if(!isMapLayer){
+                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, __storeSymbology);
+                            return;
+                        }
+
+                        __getMapLayerDataSource(function(source){
+                            if(source &&
+                               (source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE'] ||
+                                source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'])){
+                                window.hWin.HEURIST4.ui.showImgFilterDialog(current_val, __storeSymbology);
+                                return;
+                            }
+
+                            let mode_edit = source ? 1 : 0;
+                            let hquery = source ? source.query : null;
+                            if(hquery) mode_edit = 3;
+
+                            current_val.maplayer_query = hquery;
+                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, __storeSymbology);
+                        });
                     }});
-            
-                }
-             
+
+                    // Direct access from a Map Layer record. Availability cannot be
+                    // determined when the form is created because DT_DATA_SOURCE may be
+                    // changed by the user, so validate it on click.
+                    if(isMapLayer){
+                        let $btn_thematic = $('<span>thematic maps</span>',
+                                {title:'Open thematic maps editor'})
+                            .addClass('smallbutton btn_add_term')
+                            .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                                  'text-decoration':'underline','margin-left':'10px'})
+                            .appendTo($inputdiv);
+
+                        this._on($btn_thematic, {click:function(){
+                            __getMapLayerDataSource(function(source){
+                                if(!source ||
+                                   source.recTypeId!=window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] ||
+                                   !source.query){
+                                    window.hWin.HEURIST4.msg.showMsgFlash(
+                                        'Not supported for current data source', 2000);
+                                    return;
+                                }
+
+                                let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                                if(!current_val) current_val = [];
+
+                                window.hWin.HEURIST4.ui.showRecordActionDialog(
+                                    'thematicMapping',
+                                    {
+                                        maplayer_query: source.query,
+                                        thematic_mapping: current_val,
+                                        onClose: function(context){
+                                            if(context!==null && context!==undefined){
+                                                let newval = window.hWin.HEURIST4.util.isJSON(context);
+                                                newval = (!newval)?'':JSON.stringify(newval);
+                                                $input.val(newval);
+                                                that.onChange();
+                                            }
+                                        }
+                                    }
+                                );
+                            });
+                        }});
+                    }
+                }             
         }//end color/symbol editor
         
         else if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
