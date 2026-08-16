@@ -64,6 +64,19 @@ function editSymbology(current_value, mode_edit, callback){
     let _editing_symbology;
     let _refreshSymbolPreviews = null;
 
+    // During the transition to heurist-map, keep the old per-user map style as
+    // the canonical fallback for normal MapLayer symbology previews. Modes 1
+    // and 3 edit ordinary map symbols; their blank/unset properties should
+    // therefore preview exactly as they do in existing Heurist maps.
+    let _previewDefaultSymbol = {};
+    if(mode_edit===1 || mode_edit===3){
+        let defaultStyle = window.hWin.HAPI4.get_prefs_def('map_default_style', {});
+        defaultStyle = window.hWin.HEURIST4.util.isJSON(defaultStyle);
+        if(defaultStyle && $.isPlainObject(defaultStyle)){
+            _previewDefaultSymbol = window.hWin.HEURIST4.util.cloneJSON(defaultStyle);
+        }
+    }
+
     /*
      * Create the dialog wrapper before HEditing builds its controls. Widgets such
      * as hSelect and the colour picker inspect their DOM ancestry during
@@ -713,8 +726,18 @@ function editSymbology(current_value, mode_edit, callback){
             }
 
             _refreshSymbolPreviews = function(){
-                let symbol = _editing_symbology.getValues() || {};
-                symbol = window.hWin.HEURIST4.util.cloneJSON(symbol);
+                let editedSymbol = _editing_symbology.getValues() || {};
+                editedSymbol = window.hWin.HEURIST4.util.cloneJSON(editedSymbol);
+
+                // Do not write inherited values back into the editor. They are
+                // only the preview base. Empty editor values mean "inherit";
+                // explicit false/0 values remain valid overrides.
+                let symbol = window.hWin.HEURIST4.util.cloneJSON(_previewDefaultSymbol);
+                $.each(editedSymbol, function(key, value){
+                    if(value !== null && typeof value !== 'undefined' && value !== ''){
+                        symbol[key] = value;
+                    }
+                });
 
                 if(!window.hWin.HEURIST4.util.isnull(symbol.stroke)){
                     symbol.stroke = window.hWin.HEURIST4.util.istrue(symbol.stroke);
