@@ -116,7 +116,6 @@ class MapPresentationService
         $sourceRecord = $this->layers->getDataSource($layer);
         if(!$sourceRecord){ return null; }
 
-        $style = $this->buildStyle($this->layers->value($layer, 'DT_SYMBOLOGY'));
         $timelineFields = $this->layers->values($layer, 'DT_TIMELINE_FIELDS');
 
         // Native zoom levels may be defined on the MapLayer itself or inherited
@@ -130,6 +129,8 @@ class MapPresentationService
 
         $effectiveMinZoom = $layerMinZoom !== null ? $layerMinZoom : $sourceMinZoom;
         $effectiveMaxZoom = $layerMaxZoom !== null ? $layerMaxZoom : $sourceMaxZoom;
+        
+        $style = $this->buildStyle($this->layers->value($layer, 'DT_SYMBOLOGY'));
 
         return array(
             'format' => 'heurist-map-layer',
@@ -290,12 +291,13 @@ class MapPresentationService
             $isList = empty($decoded) || $keys === range(0, count($decoded) - 1);
 
             if($isList){
-                if(isset($decoded[0]) && is_array($decoded[0])){
-                    $symbol = $decoded[0];
-                }
-                for($i = 1; $i < count($decoded); $i++){
+                for($i = 0; $i < count($decoded); $i++){
                     if(is_array($decoded[$i])){
-                        $thematic[] = $decoded[$i];
+                        if(isset($decoded[$i]['fields'])){
+                            $thematic[] = $decoded[$i];    
+                        }else{
+                            $symbol = $decoded[$i];
+                        }
                     }
                 }
             }else{

@@ -56,9 +56,11 @@ window.hWin.cfg_widgets = [
     {id:'heurist_reportViewer', name:'Report', widgetname:'reportViewer', script:'hclient/widgets/report/reportViewer.js'},
     
     
-    {id:'heurist_Map', name:'Map (old)', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
-    {id:'heurist_Map2', name:'Map', title:'Map and timeline',
+    {id:'heurist_Map', name:'Map', title:'Map and timeline',
                 widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js', minh:300, minw:300},  // map in iframe
+    {id:'heurist_Map2', name:'Map', title:'Map',
+                widgetname:'mapViewer', script:'hclient/widgets/viewers/mapViewer.js', minh:300, minw:300},  // map in iframe
+
     {id:'heurist_StoryMap', name:'StoryMap', title:'Story Map',
                 widgetname:'app_storymap', script:'hclient/widgets/viewers/app_storymap.js', minh:300, minw:200},
     {id:'heurist_Frame', name:'Static Page', widgetname:'staticPage', script:'hclient/widgets/viewers/staticPage.js'},
@@ -180,8 +182,7 @@ window.hWin.cfg_layouts = [
                                 showProgress:false,is_single_selection:true, 'data-logaction':'open_Record'}
                     },    // H3 record viewer
                     {appid:'heurist_resultListDataTable', name: 'List View', options:{ dataTableParams:{}, show_export_buttons:true } },
-                    {appid:'heurist_Map', options:{'data-logaction':'open_MapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
-                    {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
+                    {appid:'heurist_Map', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off'} }}, 
                     
                     {appid:'heurist_reportViewer', name: 'Custom Reports'},
@@ -221,9 +222,9 @@ window.hWin.cfg_layouts = [
                     },    // H3 record viewer
                     {appid:'heurist_resultListDataTable', name: 'List View', 
                         options:{ dataTableParams:{}, show_export_buttons:true } },
-                    //{appid:'heurist_Map', options:{'data-logaction':'open_MapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
-                    {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
+                    {appid:'heurist_Map', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off', ui_main:true} }}, 
+                    {appid:'heurist_Map2', name: 'Map (new)'}, 
                     
                     {appid:'heurist_reportViewer', name: 'Report'},
                         
@@ -271,7 +272,7 @@ window.hWin.cfg_layouts = [
                     },    // H3 record viewer
                     {appid:'heurist_resultListDataTable', name: 'List View', 
                         options:{ dataTableParams:{}, show_export_buttons:true } },
-                    {appid:'heurist_Map2', name:'Map', options:{'data-logaction':'open_MapTime', leaflet:true
+                    {appid:'heurist_Map', name:'Map', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off', ui_main:true} }}, 
                     
                     {appid:'heurist_reportViewer', name: 'Report'},
