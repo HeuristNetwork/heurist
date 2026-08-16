@@ -4,7 +4,7 @@
 *
 * Resolves file-backed map datasource records and returns either GeoJSON,
 * original source content, or a raw-file archive. Supported source formats are
-* KML, KMZ, CSV, TSV, GeoJSON and SHP/DBF/SHX.
+* KML, KMZ, CSV, TSV, GeoJSON, ZIP-packaged CSV/TSV/GeoJSON and SHP/DBF/SHX.
 *
 * @project     Heurist academic knowledge management system
 * @package     map
@@ -128,7 +128,8 @@ class MapDataSourceService
             'csv'=>'csv',
             'tsv'=>'tsv',
             'geojson'=>'geojson',
-            'json'=>'geojson'
+            'json'=>'geojson',
+            'zip'=>'zip'
         );
         if(isset($byExt[$ext])){
             return $byExt[$ext];
@@ -136,6 +137,9 @@ class MapDataSourceService
 
         $mime = strtolower(trim((string)$mimeType));
         if(in_array($mime, array('application/vnd.google-earth.kmz'), true)){ return 'kmz'; }
+        if(in_array($mime, array('application/zip','application/x-zip-compressed','multipart/x-zip'), true)){
+            return $preferKml ? 'kmz' : 'zip';
+        }
         if(in_array($mime, array('application/vnd.google-earth.kml+xml','application/kml+xml'), true)){ return 'kml'; }
         if(in_array($mime, array('text/tab-separated-values','text/tsv','application/tsv'), true)){ return 'tsv'; }
         if(in_array($mime, array('text/csv','application/csv','application/vnd.ms-excel'), true)){ return 'csv'; }
@@ -145,7 +149,7 @@ class MapDataSourceService
             $trimmed = ltrim($content);
 
             if(strncmp($trimmed, 'PK', 2) === 0){
-                return 'kmz';
+                return $preferKml ? 'kmz' : 'zip';
             }
 
             if($trimmed !== '' && ($trimmed[0] === '{' || $trimmed[0] === '[')){
@@ -219,7 +223,7 @@ class MapDataSourceService
     }
 
     /**
-     * Resolve KML/KMZ/CSV/TSV/GeoJSON source content.
+     * Resolve KML/KMZ/CSV/TSV/GeoJSON/ZIP source content.
      */
     private function resolveSource(array $record): array
     {
@@ -254,7 +258,7 @@ class MapDataSourceService
 
         if(!$fileDetail){
             throw new \RuntimeException(
-                'Datasource record does not contain KML, KMZ, CSV, TSV or GeoJSON data'
+                'Datasource record does not contain KML, KMZ, CSV, TSV, GeoJSON or ZIP data'
             );
         }
 
@@ -303,7 +307,7 @@ class MapDataSourceService
 
         if($source['format'] === null){
             throw new \RuntimeException(
-                'Cannot determine map datasource format. Supported formats are KMZ, KML, CSV, TSV and GeoJSON'
+                'Cannot determine map datasource format. Supported formats are KMZ, KML, CSV, TSV, GeoJSON and ZIP'
             );
         }
 
@@ -329,6 +333,19 @@ class MapDataSourceService
         if($format === 'kmz'){
             $content = $this->extractKmzContent($content);
             $format = 'kml';
+        }elseif($format === 'zip'){
+            $extracted = $this->extractZipDataSource($content);
+            $content = $extracted['content'];
+            $format = $extracted['format'];
+        }
+
+        if($format === 'geojson'){
+            return array(
+                'type' => 'content',
+                'content' => $content,
+                'contentType' => 'application/geo+json; charset=utf-8',
+                'filename' => null
+            );
         }
 
         if($format === 'csv' || $format === 'tsv'){
@@ -546,8 +563,103 @@ class MapDataSourceService
         return $kml;
     }
 
+
+    /**
+     * Extract one CSV, TSV or GeoJSON datasource from a generic ZIP archive.
+     *
+     * Non-map files in the archive are ignored. More than one supported map-data
+     * file is ambiguous and is rejected rather than choosing one implicitly.
+     *
+     * @return array{format:string,content:string}
+     */
+    private function extractZipDataSource(string $content): array
+    {
+        $res = folderExistsVerbose(HEURIST_SCRATCH_DIR, true, 'scratch');
+        if($res !== true){
+            throw new \RuntimeException('Cannot extract ZIP datasource to scratch folder. '.$res);
+        }
+
+        $tmp = tempnam(HEURIST_SCRATCH_DIR, 'map_zip_');
+        if(!$tmp){
+            throw new \RuntimeException('Cannot create temporary ZIP datasource file');
+        }
+
+        if(file_put_contents($tmp, $content) === false){
+            @unlink($tmp);
+            throw new \RuntimeException('Cannot write temporary ZIP datasource file');
+        }
+
+        $files = UArchive::unzipFlat($tmp, HEURIST_SCRATCH_DIR);
+        @unlink($tmp);
+
+        if($files === false){
+            throw new \RuntimeException('Cannot extract ZIP datasource archive');
+        }
+
+        $supported = array(
+            'csv' => 'csv',
+            'tsv' => 'tsv',
+            'geojson' => 'geojson',
+            'json' => 'geojson'
+        );
+        $matches = array();
+
+        try{
+            foreach($files as $file){
+                $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                if(isset($supported[$ext])){
+                    $matches[] = array(
+                        'path' => $file,
+                        'format' => $supported[$ext]
+                    );
+                }
+            }
+
+            if(empty($matches)){
+                throw new \RuntimeException(
+                    'ZIP datasource does not contain a CSV, TSV or GeoJSON file'
+                );
+            }
+
+            if(count($matches) > 1){
+                $names = array_map(
+                    static function(array $match): string {
+                        return basename($match['path']);
+                    },
+                    $matches
+                );
+                throw new \RuntimeException(
+                    'ZIP datasource contains more than one supported map-data file: '.implode(', ', $names)
+                );
+            }
+
+            $data = file_get_contents($matches[0]['path']);
+            if($data === false){
+                throw new \RuntimeException('Cannot read map data from ZIP datasource');
+            }
+
+            return array(
+                'format' => $matches[0]['format'],
+                'content' => $data
+            );
+        }finally{
+            foreach($files as $file){
+                if(is_string($file) && is_file($file)){
+                    @unlink($file);
+                }
+            }
+        }
+    }
+
     private function buildRawArchive(array $record, array &$source, array $options): array
     {
+        // A generic ZIP datasource is already a raw archive. Return it directly
+        // unless metadata must be added, in which case wrap the original ZIP
+        // together with the metadata text file below.
+        if($source['format'] === 'zip' && empty($options['metadata'])){
+            return $this->sourceResult($record, $source);
+        }
+
         $name = $this->datasetName($record);
         $ext = $source['format'];
         $pathExt = strtolower(pathinfo((string)$source['sourceName'], PATHINFO_EXTENSION));
@@ -629,7 +741,8 @@ class MapDataSourceService
             'kml' => 'application/vnd.google-earth.kml+xml; charset=utf-8',
             'csv' => 'text/csv; charset=utf-8',
             'tsv' => 'text/tab-separated-values; charset=utf-8',
-            'geojson' => 'application/geo+json; charset=utf-8'
+            'geojson' => 'application/geo+json; charset=utf-8',
+            'zip' => 'application/zip'
         );
         return $types[$format] ?? 'application/octet-stream';
     }
