@@ -115,7 +115,7 @@ function imgFilter( current_cfg, main_callback, $container=null ){
                 {   
                     default_palette_class: 'ui-heurist-explore',
                     width: 300,
-                    height: 450,
+                    height: 490,
                     close: function(){ // Cleanup on dialog close
                         $dlg.dialog('destroy');       
                         $dlg.remove();
@@ -145,16 +145,32 @@ function imgFilter( current_cfg, main_callback, $container=null ){
 
         $.each($dlg.find('input'), function(idx, item){
             item = $(item);
-            _default_values[item.attr('name')] = item.val(); // Store initial value as default
+            const name = item.attr('name');
+            _default_values[name] = item.val(); // Store initial value as default
+
+            if(name === 'transparentColor'){
+                const value = current_cfg && !window.hWin.HEURIST4.util.isempty(current_cfg[name])
+                    ? current_cfg[name]
+                    : '';
+
+                item.colorpicker({
+                    hideButton: false, // show button right to input
+                    showOn: 'both',
+                    val: value
+                }).css('max-width', '130px');
+
+                item.parent('.evo-cp-wrap').css({display:'inline-block', width:'180px'});
+                return;
+            }
             
             // Update display span when slider value changes
-            $(item).on({change:function(e){
+            item.on({change:function(e){
                 $(e.target).prev().text( $(e.target).val() );
             }});
 
             // Apply current configuration if provided
-            if(current_cfg && !window.hWin.HEURIST4.util.isempty(current_cfg[item.attr('name')])){
-                let val = parseFloat(current_cfg[item.attr('name')]); // Ensure numeric value
+            if(current_cfg && !window.hWin.HEURIST4.util.isempty(current_cfg[name])){
+                let val = parseFloat(current_cfg[name]); // Ensure numeric value
                 item.val( val ).trigger('change'); // Set value and trigger change to update display
             }
         });
@@ -191,13 +207,23 @@ function imgFilter( current_cfg, main_callback, $container=null ){
         $.each($dlg.find('input'), function(idx, item){
             item = $(item);
             
+            const name = item.attr('name');
             let val = item.val();
+
+            if(name === 'transparentColor'){
+                val = String(val || '').trim();
+                if(val !== ''){
+                    filter_cfg[name] = val;
+                }
+                return;
+            }
+
             // Only include if value is different from default
-            if(val!=_default_values[item.attr('name')]){
+            if(val!=_default_values[name]){
                 let suffix = item.attr('data-suffix'); // e.g., 'px', '%', 'deg'
                 if(!suffix) suffix = ''; // Default to empty suffix
                 
-                filter_cfg[item.attr('name')] = val+suffix; // e.g., { "blur": "2px" }
+                filter_cfg[name] = val+suffix; // e.g., { "blur": "2px" }
                 // filter = filter + item.attr('name')+'('+val+suffix+') '; // Example: "blur(2px) brightness(0.8) "
             }
         });
