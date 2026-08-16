@@ -168,9 +168,246 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
             let useMapcluster = {change: function(){ that._$('#mapcluster_on').prop('checked', true); }};
             this._on(this._$('#mapcluster_grid'), useMapcluster);
             this._on(this._$('#mapcluster_count'), useMapcluster);
-            this._on(this._$('#mapcluster_zoom'), useMapcluster);        
+            this._on(this._$('#mapcluster_zoom'), useMapcluster);
+
+            // New heurist-map configuration editor. mapViewer is loaded lazily because
+            // profilePreferences is also used in contexts where the map viewer is absent.
+            this._$('#btn_heurist_map_config').button();
+            this._on(this._$('#btn_heurist_map_config'), {
+                click: function(){
+                    that._openHeuristMapConfiguration();
+                }
+            });
         
         return this._super();
+    },
+
+    /**
+     * Open the standalone heurist-map configuration editor without displaying a map.
+     *
+     * mapViewer runs in viewerMode "configuration", therefore heurist-map exposes only
+     * MapConfigurationDialog and does not initialise MapApplication/Leaflet. The iframe
+     * host temporarily fills the viewport so the dialog rendered inside the same-origin
+     * iframe has a normal modal viewport; the map itself is never shown.
+     *
+     * @returns {void}
+     */
+    _openHeuristMapConfiguration: function(){
+
+        let that = this;
+
+        if(this._heuristMapConfigHost){
+            return;
+        }
+
+        let $button = this._$('#btn_heurist_map_config');
+        $button.prop('disabled', true);
+
+        this._loadMapViewerWidget()
+            .then(function(){
+
+                if(that._heuristMapConfigHost){
+                    return;
+                }
+
+                let ownerDocument = that.element && that.element[0]
+                    ? that.element[0].ownerDocument
+                    : document;
+
+                let $host = $('<div>')
+                    .addClass('heurist-map-preferences-config-host')
+                    .css({
+                        position: 'fixed',
+                        inset: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        'z-index': 999999,
+                        background: 'transparent'
+                    })
+                    .appendTo(ownerDocument.body);
+
+                that._heuristMapConfigHost = $host;
+
+                $host.mapViewer({
+                    presentationMode: 'iframe',
+                    viewerMode: 'configuration',
+                    configurationMode: 'preferences',
+                    configurationValue: that._getHeuristMapConfigurationValue(),
+                    eventbased: false,
+
+                    onconfiguration: function(settings){
+                        that._closeHeuristMapConfiguration();
+                        that._saveHeuristMapConfiguration(settings);
+                    },
+
+                    oncancelconfiguration: function(){
+                        that._closeHeuristMapConfiguration();
+                    },
+
+                    onerror: function(error){
+                        that._closeHeuristMapConfiguration();
+                        window.hWin.HEURIST4.msg.showMsgErr(
+                            error && error.message ? error.message : error
+                        );
+                    }
+                });
+
+                // The child document is transparent in configuration mode. Force
+                // the iframe itself to occupy the host from (0,0); mapViewer's
+                // normal presentation styles must not leave a top offset/margin
+                // when it is used as a modal configuration transport.
+                $host.find('iframe').css({
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    margin: 0,
+                    padding: 0,
+                    border: 0,
+                    display: 'block',
+                    background: 'transparent'
+                });
+            })
+            .catch(function(error){
+                window.hWin.HEURIST4.msg.showMsgErr(
+                    error && error.message ? error.message : error
+                );
+            })
+            .finally(function(){
+                if(!that._heuristMapConfigHost){
+                    $button.prop('disabled', false);
+                }
+            });
+    },
+
+    /**
+     * Return the currently loaded heurist-map preference as an object suitable
+     * for mapViewer.configurationValue. HAPI may expose persisted JSON either
+     * as a parsed object or as its stored string representation.
+     *
+     * @returns {object|null}
+     */
+    _getHeuristMapConfigurationValue: function(){
+
+        let hapi = window.hWin && window.hWin.HAPI4;
+        if(!hapi){
+            return null;
+        }
+
+        let value = null;
+        try{
+            if(typeof hapi.get_prefs === 'function'){
+                value = hapi.get_prefs('heurist-map');
+            }else if(hapi.currentUser && hapi.currentUser['ugr_Preferences']){
+                value = hapi.currentUser['ugr_Preferences']['heurist-map'];
+            }
+
+            if(typeof value === 'string' && value){
+                value = JSON.parse(value);
+            }
+        }catch(ignore){
+            return null;
+        }
+
+        return value && typeof value === 'object' && !Array.isArray(value)
+            ? $.extend(true, {}, value)
+            : null;
+    },
+
+    /** Lazy-load mapViewer.js when it is not already registered. */
+    _loadMapViewerWidget: function(){
+
+        if($.heurist && $.heurist.mapViewer){
+            return Promise.resolve();
+        }
+
+        if(this._mapViewerLoadPromise){
+            return this._mapViewerLoadPromise;
+        }
+
+        let scriptUrl = window.hWin.HAPI4.baseURL + 'hclient/widgets/viewers/mapViewer.js';
+        let that = this;
+
+        this._mapViewerLoadPromise = new Promise(function(resolve, reject){
+            $.getScript(scriptUrl)
+                .done(function(){
+                    if($.heurist && $.heurist.mapViewer){
+                        resolve();
+                    }else{
+                        reject(new Error('mapViewer widget was not registered'));
+                    }
+                })
+                .fail(function(jqxhr, settings, exception){
+                    reject(new Error(
+                        'Unable to load mapViewer.js' + (exception ? ': ' + exception : '')
+                    ));
+                });
+        }).finally(function(){
+            that._mapViewerLoadPromise = null;
+        });
+
+        return this._mapViewerLoadPromise;
+    },
+
+    /** Destroy the temporary configuration-only mapViewer host. */
+    _closeHeuristMapConfiguration: function(){
+
+        let $host = this._heuristMapConfigHost;
+        this._heuristMapConfigHost = null;
+
+        if($host){
+            try{
+                if($host.mapViewer('instance')){
+                    $host.mapViewer('destroy');
+                }
+            }catch(ignore){
+                // The iframe may already have been removed after an initialisation error.
+            }
+            $host.remove();
+        }
+
+        this._$('#btn_heurist_map_config').prop('disabled', false);
+    },
+
+    /**
+     * Persist settings returned by MapConfigurationDialog in the standard heurist-map
+     * user preference. MapConfigurationDialog deliberately owns no persistence.
+     *
+     * @param {object} settings Serialized heurist-map settings.
+     */
+    _saveHeuristMapConfiguration: function(settings){
+
+        if(!settings || typeof settings !== 'object'){
+            window.hWin.HEURIST4.msg.showMsgErr('Invalid Heurist map configuration');
+            return;
+        }
+
+        // Store heurist-map as one JSON preference value. This mirrors
+        // HeuristHostAdapter.saveMapPreferences() and, importantly, preserves
+        // boolean values used by the Map Controls section. Passing the nested
+        // object directly through SystemMgr.save_prefs() allows form-style
+        // transport to coerce booleans into strings/scalars.
+        let serialized = JSON.stringify(settings);
+        let request = {'heurist-map': serialized};
+
+        window.hWin.HAPI4.SystemMgr.save_prefs(request, function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+
+                if(window.hWin.HAPI4.currentUser &&
+                   window.hWin.HAPI4.currentUser['ugr_Preferences']){
+                    // Keep the in-memory representation identical to the stored
+                    // preference. _getHeuristMapConfigurationValue() and
+                    // mapViewer both accept and parse the JSON string.
+                    window.hWin.HAPI4.currentUser['ugr_Preferences']['heurist-map'] = serialized;
+                }
+
+                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                window.hWin.HEURIST4.msg.showMsgFlash('Heurist mapping configuration is saved');
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
     },
     
     
@@ -354,6 +591,12 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
                     }
                 );
             
+    },
+
+    /** Clean up configuration-only mapViewer with the preferences widget. */
+    _destroy: function(){
+        this._closeHeuristMapConfiguration();
+        return this._super();
     }
         
 });
