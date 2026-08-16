@@ -2321,28 +2321,28 @@ private static function validateGeoField($wkt, $rec_id, $table, $field){
         array_shift($coords);
     }
 
-    $x = '';
-    $y = '';
+    $lat = '';
+    $long = '';
 
     if(count($coords) == 2){
 
         // Remove starting spaces
-        $x = ltrim($coords[0]);
-        $y = ltrim($coords[1]);
+        $lat = ltrim($coords[0]);
+        $long = ltrim($coords[1]);
 
         // Remove non-digits, excluding periods (.) and minus symbol from x and y
-        if(!is_numeric($x)){
-            $x = preg_replace('/[^-0-9.]/', '', $x);
-            $x = preg_replace('/-{2,}/', '-', $x);
+        if(!is_numeric($lat)){
+            $lat = preg_replace('/[^-0-9.]/', '', $lat);
+            $lat = preg_replace('/-{2,}/', '-', $lat);
         }
-        if(!is_numeric($y)){
-            $y = preg_replace('/[^-0-9.]/', '', $y);
-            $y = preg_replace('/-{2,}/', '-', $y);
+        if(!is_numeric($long)){
+            $long = preg_replace('/[^-0-9.]/', '', $long);
+            $long = preg_replace('/-{2,}/', '-', $long);
         }
 
-        if(is_numeric($x) && is_numeric($y)){ // treat as a set of coords
+        if(is_numeric($lat) && is_numeric($long)){ // treat as a set of coords
 
-            $constructed_geo = "POINT (" . $x . " " . $y . ")";// use a basic point
+            $constructed_geo = "POINT (" . $long  . " " . $lat . ")";// use a basic point
             $geo_len = strlen($constructed_geo);// in case field needs enlarging within import table
             $test_geom = geoPHP::load($constructed_geo, 'wkt');
 
