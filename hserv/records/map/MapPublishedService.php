@@ -199,9 +199,13 @@ class MapPublishedService
         return array(
             'ui' => $this->pick($value['ui'] ?? array(), array(
                 'enabled','placement','position','initiallyExpanded','showCurrentDocument',
-                'showMapDocuments','showLayers','showBaseMaps','showLegend','showZoomControl',
-                'showSearch','showPublish','controlCss'
+                'showMapDocuments','showLayers','showBaseMaps','showLegend','showHomeControl',
+                'showOptions','showPublish','controlCss'
             )),
+            'nativeControls' => $this->pick(
+                $value['nativeControls'] ?? array(),
+                array('zoom','scale','bookmark','print','selector','search')
+            ),
             'mapDocuments' => $this->pick(
                 $value['mapDocuments'] ?? array(),
                 array('allowed','initiallyActive')
@@ -221,11 +225,12 @@ class MapPublishedService
     {
         $defaults = $this->pick($value['defaults'] ?? array(), array(
             'zoomToPointInKM','symbology','selectSymbology','preventContinuousWorldBasemap',
-            'markerClustering','maxAllowedFeatures','dynamicRequests','popupTemplate'
+            'markerClustering','markerClusterGridPixels','maxAllowedFeatures','popupTemplate'
         ));
 
         $dynamic = $this->pick($value['dynamicDocument'] ?? array(), array(
-            'enabled','title','minZoom','maxZoom','minimumZoomKm','maximumZoomKm','bounds'
+            'enabled','title','minZoom','maxZoom','minimumZoomKm','maximumZoomKm','bounds',
+            'dynamicRequests'
         ));
 
         return array(

@@ -34,6 +34,7 @@ $.widget('heurist.mapViewer', {
 
         accessToken: null,
         requestHeaders: null,
+        baseMapProviderOptions: null, // e.g. {MapTilesAPI:{apikey:'...'}}
 
         heuristMapSettings: null,     // persisted {format,version,options,config}
         heuristMapState: null,        // initial reproducible map state
@@ -339,6 +340,7 @@ $.widget('heurist.mapViewer', {
                 apiBaseUrl: apiBaseUrl,
                 accessToken: this.options.accessToken || null,
                 requestHeaders: $.extend({}, this.options.requestHeaders || {}),
+                baseMapProviderOptions: $.extend(true, {}, this.options.baseMapProviderOptions || {}),
                 baseUrl: hapi ? hapi.baseURL : null,
                 readonly: false
             },
