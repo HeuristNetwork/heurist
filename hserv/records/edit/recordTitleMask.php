@@ -930,7 +930,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
                     if($dt_type=="enum" || $dt_type=="relationtype"){
                         $value = self::__get_enum_value($detail['dtl_Value'], $enum_param_name);
                     }elseif($dt_type=='date'){
-                        $value = Temporal::toHumanReadable(trim($detail['dtl_Value']));
+                        $value = Temporal::toHumanReadable(trim($detail['dtl_Value']), true);
                     }elseif($dt_type=="file"){
                         $value = self::__get_file_name(intval($detail['dtl_UploadedFileID']));
                     }elseif($dt_type=='freetext' || $dt_type=='blocktext'){

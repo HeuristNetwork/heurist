@@ -1351,6 +1351,8 @@ class Temporal {
                 }else{
                     return $dt2->toReadable($calendar);
                 }
+            }elseif($print_invalid_str && $mode <= 1){
+                return $dt;
             }else{
                 $dt = $print_invalid_str && is_string($dt) && !empty($dt) ? '('. $dt .')' : '';
                 return 'invalid temporal object'. $dt;

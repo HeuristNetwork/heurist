@@ -779,7 +779,7 @@ public static function output($data, $params){
                             }
                         }elseif($dt_type=='date'){
                             foreach($values as $val){
-                                $vals[] = Temporal::toHumanReadable(trim($val));
+                                $vals[] = Temporal::toHumanReadable(trim($val), true);
                                 if($include_temporals){
                                     $date_temporals[] = trim($val);
                                 }
