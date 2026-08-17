@@ -301,53 +301,7 @@ $.widget( "heurist.recordListExt", {
             this.export_button[0].style.setProperty('color', '#FFF', 'important');
 
             this._on(this.export_button, {
-                click: function(){
-
-                    if(!this.options.recordset || this.options.recordset.length() == 0){
-                        window.hWin.HEURIST4.msg.showMsgFlash('No records to export...', 3000);
-                        return;
-                    }
-
-                    // Set current query and current recordset
-                    if(!this._query_request && this.options.selection && this.options.selection.length > 0){
-                        window.hWin.HEURIST4.current_query_request = {
-                            q: `[{"ids":"${this.options.selection.join(',')}"}]`,
-                            w: 'a',
-                            db: window.hWin.HAPI4.database,
-                            search_realm: this.options.search_realm
-                        };
-                    }else{
-                        window.hWin.HEURIST4.current_query_request = this._query_request;
-                    }
-
-                    if(this.options.selection && this.options.selection.length > 0){ // filter complete subset by selected records
-
-                        let records = this.options.recordset.getSubSetByIds(this.options.selection);
-                        window.hWin.HAPI4.currentRecordset = records;
-                    }else{
-                        window.hWin.HAPI4.currentRecordset = this.options.recordset;
-                    }
-
-                    // open export menu in dialog/popup
-                    let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
-                    
-                    if(typeof this.options.export_options !== 'string'){
-                        this.options.export_options = 'all';
-                    }
-
-                    let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
-                    if(handle_formats){
-                        url += `&output=${this.options.export_options}`
-                    }
-
-                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
-                        onpopupload: function(){
-                            if(handle_formats){
-                                $('#export_record_popup').dialog('widget').hide();
-                            }
-                        }
-                    });
-                }
+                click: this._exportRecords
             });
 
         }
@@ -1112,6 +1066,76 @@ $.widget( "heurist.recordListExt", {
 
         crosstabs.assignRecordset(recordset);
 
+    },
+
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Allows the user to export the current record set.
+     */
+    _exportRecords: function(){
+
+        if(this._retrievingMissingScripts){
+            return;
+        }
+
+        if(!this.options.recordset || this.options.recordset.length() == 0){
+            window.hWin.HEURIST4.msg.showMsgFlash('No records to export...', 3000);
+            return;
+        }
+
+        if(typeof $.heurist?.recordAction !== 'function'){
+
+            this._retrievingMissingScripts = true;
+
+            $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/record/recordAction.js`).then(() => {
+                this._retrievingMissingScripts = false;
+                this._exportRecords();
+            });
+
+            return;
+        }
+
+        // Set current query and current recordset
+        if(!this._query_request && this.options.selection && this.options.selection.length > 0){
+            window.hWin.HEURIST4.current_query_request = {
+                q: `[{"ids":"${this.options.selection.join(',')}"}]`,
+                w: 'a',
+                db: window.hWin.HAPI4.database,
+                search_realm: this.options.search_realm
+            };
+        }else{
+            window.hWin.HEURIST4.current_query_request = this._query_request;
+        }
+
+        if(this.options.selection && this.options.selection.length > 0){ // filter complete subset by selected records
+
+            let records = this.options.recordset.getSubSetByIds(this.options.selection);
+            window.hWin.HAPI4.currentRecordset = records;
+        }else{
+            window.hWin.HAPI4.currentRecordset = this.options.recordset;
+        }
+
+        // open export menu in dialog/popup
+        let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
+        
+        if(typeof this.options.export_options !== 'string'){
+            this.options.export_options = 'all';
+        }
+
+        let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
+        if(handle_formats){
+            url += `&output=${this.options.export_options}`
+        }
+
+        window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
+            onpopupload: function(){
+                if(handle_formats){
+                    $('#export_record_popup').dialog('widget').hide();
+                }
+            }
+        });
     }
     
 

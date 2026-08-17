@@ -4753,8 +4753,24 @@ $.widget( "heurist.resultList", {
 
     _exportRecords: function(){
 
+        if(this._retrievingMissingScripts){
+            return;
+        }
+
         if(!this._currentRecordset || this._currentRecordset.length() == 0){
             window.hWin.HEURIST4.msg.showMsgFlash('No records to export...', 3000);
+            return;
+        }
+
+        if(typeof $.heurist?.recordAction !== 'function'){
+
+            this._retrievingMissingScripts = true;
+
+            $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/record/recordAction.js`).then(() => {
+                this._retrievingMissingScripts = false;
+                this.exportRecords();
+            });
+
             return;
         }
 
