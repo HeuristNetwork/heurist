@@ -1346,41 +1346,41 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             // add edit structure button
             //
             if(this.options.suppress_edit_structure!==true){
-                
-            let $s = $('<div style="margin: 15px 0 20px 175px;'
-            +'padding: 10px 10px 5px;display: block;">'
-            +'<div class="input-cell"><span style="display: inline-block; padding-left: 20px; padding-bottom: 10px;"><button></button></span>'
-            +'<span class="heurist-helper3" style="display:inline-block;vertical-align: middle;padding-left: 20px;">'
-            + window.hWin.HR('manageDefRectypes_edit_fields_hint')
-            +'</span>'
-            +'</div></div>');
-            
-            let edit_ele = this._editing.getFieldByName('rty_ShowURLOnEditForm');
-            $s.insertAfter(edit_ele);
-        
-            let btn = $s.find('button');
-            let new_record_params = {RecTypeID: this._currentEditID};
-            btn.button({icon:'ui-icon-pencil',label: window.hWin.HR('manageDefRectypes_edit_fields')})
-                            .css({'font-weight': 'bold','font-size':'12px'})
-                            .addClass('ui-heurist-button')
-                            .width(150)
-                            .on('click', function(){
-                                //close this form and open edit structure
-                                function __openEditStructure(){
-                                    that._currentEditID = null;
-                                    that._getEditDialog(true).dialog('close');
-                                    
-                                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                                        {new_record_params:new_record_params, 
-                                            edit_structure:true});
-                                }
-                                
-                                if(that._editing.isModified()){
-                                    that._saveEditAndClose( null , __openEditStructure );
-                                }else{
-                                    __openEditStructure();
-                                }
-                            });
+
+                let $s = $('<div>', {
+                    style: 'margin: 15px 0 20px 175px;padding: 10px 10px 5px;display: block;',
+                    html: `<div class="input-cell">
+                        <span style="display: inline-block; padding-left: 2em; padding-bottom: 1em;"><button></button></span>
+                        <span style="padding-left: 1.5em;font-size: 1.1em;">${window.hWin.HR('manageDefRectypes_edit_fields_hint')}</span>
+                        <div style="padding-left: 2em;font-size: 1.1em;">${window.hWin.HR('manageDefRectypes_edit_fields_hint_extra')}</div>
+                    </div>`
+                });
+
+                let edit_ele = this._editing.getFieldByName('rty_ShowURLOnEditForm');
+                $s.insertAfter(edit_ele);
+
+                let btn = $s.find('button');
+                let new_record_params = {RecTypeID: this._currentEditID};
+                btn.button({icon:'ui-icon-pencil',label: window.hWin.HR('manageDefRectypes_edit_fields')})
+                    .css({'font-weight': 'bold','font-size':'12px', 'width': '25em'})
+                    .addClass('ui-heurist-button')
+                    .on('click', function(){
+                        //close this form and open edit structure
+                        function __openEditStructure(){
+                            that._currentEditID = null;
+                            that._getEditDialog(true).dialog('close');
+                            
+                            window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                                {new_record_params:new_record_params, 
+                                    edit_structure:true});
+                        }
+                        
+                        if(that._editing.isModified()){
+                            that._saveEditAndClose( null , __openEditStructure );
+                        }else{
+                            __openEditStructure();
+                        }
+                    });
             }
             
             let edit_ele = this._editing.getFieldByName('rty_ID');

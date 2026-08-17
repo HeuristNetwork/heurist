@@ -580,17 +580,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             let sep_id = $(div_ele).attr('separator-dtid');
 
-            let ele = $('<div'+(sep_id>0?(' data-dtid="'+sep_id+'"'):'')
-                    +'><span class="ui-icon ui-icon-gear"></span></div>')
-            .css({'display':(sep_id>0?'inline-block':'table-cell'),'vertical-align':'top',
-                'min-width':'32px','cursor':'pointer','padding-top':'0.4em'});
+            let ele = $(`<div${sep_id > 0 ? ` data-dtid="${sep_id}"` : ''}><span class="ui-icon ui-icon-gear"></span></div>`)
+                .css({display: sep_id > 0 ? 'inline-block' : 'table-cell','vertical-align': 'top','min-width': '32px',cursor: 'pointer','padding-top': '0.4em'});
+
             if(sep_id>0){
                 ele.insertBefore($(div_ele));    
             }else{
                 ele.prependTo($(div_ele));        
             }
-                
-           
+
             that._on(ele,{mouseover:function(event){
                 clearTimeout(that._menuTimeoutId);
                 let el = $(event.target);
@@ -1358,9 +1356,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     //togglerContent_open:    '&nbsp;',
                     //togglerContent_closed:  '&nbsp;',
                     north:{
-                        size: 60,
-                        maxHeight:60,
-                        minHeight:60,
+                        size: 40,
+                        maxHeight: 40,
+                        minHeight: 40,
                         initHidden:!this.options.edit_structure,
                         contentSelector: '.editStructureHeader', 
                         spacing_open: 3,
@@ -4704,7 +4702,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         return (Number(a['swf_Order'])<Number(b['swf_Order'])?-1:1);
                 });
             }
-        
+
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:10px 0px 5px 15px;">'
 
@@ -4772,30 +4770,27 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         .on('click', function(){that._updateStructureFromSource(false);}); // update record structure from source
                 
                 let btn = this.element.find('.btn-edit-rt2');        
-                if(this.options.edit_structure){
-                    
-                    let cont = this.element.find('.editStructureHeader').css({overflow:'hidden'});
-                    btn.hide();
-                    
-                    $('<div style="float:left;">'
-                        +'<span style="margin-top: 15px;display: inline-block;font-size: 12px;">Fields for: </span>'
-                        +'<h1 style="float:right;margin:10px;">'
-                        +$Db.rty(this._currentEditRecTypeID,'rty_Name')+'</h1></div>')
-                        .appendTo(cont);      
-                    
-                    $('<span>').addClass('heurist-helper3').css({'float':'left','margin': '10px'}).html(
-                        'This is an empty record. Test data entry as you develop the structure. '
-                        +'<br>If you want to retain the data entered, hit [Save data], otherwise [Close]')  
-                            .appendTo(cont);      
-                
-                    this.element.find('.btn-edit-rt').hide(); //Attributes button next to Edit title mask
-                }else{
-                    btn.button({icon:'ui-icon-gear',label:'<span style="display:inline-block;margin-top:5px;">Modify structure</span>'})
-                            .css(btn_css)
-                            .width(130)
-                            .on('click', function(){that.editRecordType(true);});
-                }                        
-                        
+
+                let cont = this.element.find('.editStructureHeader').css({overflow:'hidden', padding: '0px 10px'});
+
+                $('<div>', {
+                    style: 'float: left;',
+                    html: `<span style="margin-top: 15px;display: inline-block;font-size: 12px;">Modify structure: </span>
+                    <h1 style="float:right;margin:10px;">${$Db.rty(this._currentEditRecTypeID,'rty_Name')}</h1>`
+                }).appendTo(cont);      
+
+                $('<span>', {
+                    class: 'heurist-helper3',
+                    style: 'float: left; margin: 10px;font-size: 1em;',
+                    html: 'This is an empty record. Test data entry as you develop the structure.<br>If you want to retain the data entered, hit [Save data], otherwise [Close]'
+                }).appendTo(cont);
+
+                this.element.find('.btn-edit-rt').hide(); //Attributes button next to Edit title mask
+                btn.button({icon:'ui-icon-gear',label:'<span style="display:inline-block;margin-top:5px;">Modify structure</span>'})
+                        .css(btn_css)
+                        .width(130)
+                        .on('click', function(){that.editRecordType(true);});
+
                 btn.find('.ui-button-icon')
                             .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
 
@@ -5105,22 +5100,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             let btn_close_editor = this.element.find('.btn-edit-rt-back');
                 
             if(btn_close_editor.length > 0){
-                if(that.options.edit_structure){
-                    btn_close_editor.hide();
-                }else{
-                    btn_close_editor.off('click');
-                    btn_close_editor.button({icon:'ui-icon-gear-crossed'}).show()
-                        .on('click', () => {this._switchToDataMode(false)});
-                    if(btn_css) btn_close_editor.css(btn_css);
 
-                    // Flash button
-                    btn_close_editor.fadeIn(100).fadeOut(100).effect('highlight', {color: '#307D96'}, 1000);
-                }
+                btn_close_editor.off('click');
+                btn_close_editor.button({icon:'ui-icon-gear-crossed'}).show()
+                    .on('click', () => {this._switchToDataMode(false)});
+                if(btn_css) btn_close_editor.css(btn_css);
+
+                // Flash button
+                btn_close_editor.fadeIn(100).fadeOut(100).effect('highlight', {color: '#307D96'}, 1000);
             }
-            if(!this.options.edit_structure){
-                this.element.find('.btn-edit-rt2').hide();
-            }
-            
+            this.element.find('.btn-edit-rt2').hide();
+
             //switch on optional fields, disable checckbox and hide
             this.element.find('.chb_opt_fields').prop('checked',true).attr('disabled', true).trigger('change');
             this.element.find('.lbl_opt_fields').hide();
@@ -5210,6 +5200,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     that.options.rts_editor.manageDefRecStructure('highlightNode', null);
                 }
             });
+
+            let recTitle = this._getField('rec_Title');
+            if(window.hWin.HEURIST4.util.isempty(recTitle) || this.options.edit_structure){
+                this.editFormPopup.layout().show('north');
+            }
         }else{
 
             $(this.element).find('.separator-hidden').hide();
@@ -5242,6 +5237,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //to save space - hide all fieldsets without visible fields
             this._showHideEmptyFieldGroups();
 
+            this.editFormPopup.layout().hide('north');
         }
 
                 

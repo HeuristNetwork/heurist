@@ -357,8 +357,9 @@
 #resultList_reorder_list_changed#Reorder list has been changed.
 #Warn_Lost_Data#You have made changes to the data. Click "Save" otherwise all changes will be lost.
 #Warn_Lost_Data_On_Structure_Edit#Click "Save data" to save the data entered, "Drop data changes" to abandon modifications.<br>Structure changes are saved automatically - they are not affected by your choice.
-#manageDefRectypes_edit_fields#Edit fields
-#manageDefRectypes_edit_fields_hint#This will open a blank record of this type in structure modification mode.<br>Tip: You can switch on structure modification mode at any time while entering data to make instant structural changes
+#manageDefRectypes_edit_fields#Modify record structure (fields, tabs etc.)
+#manageDefRectypes_edit_fields_hint#creates a new empty record
+#manageDefRectypes_edit_fields_hint_extra#To add or modify fields, tabs, field order etc. there is no need to return to Design mode.<br>Simply edit any record (new or existing) and click <strong>Modify structure</strong> at the top of the form.<br>Sturctural modifications made in a record apply immediately to all records of that type.
 #manageDefRectypes_new_hint#Before defining new record (entity) types we suggest importing suitable definitions from templates (Heurist databases registered in the Heurist clearinghouse). Those with registration IDs less than 1000 are templates curated by the Heurist team. <br><br>This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.<br><br>Use main menu:  Design > Browse templates
 #manageDefRectypes_delete_stop#<p>Record type <b>[rtyName]</b> is referenced by the following fields:</p>[FieldList]<p>Please remove these fields altogether, or click the links above <br>to modify base field (will affect all record types which use it).</p>
 #manageDefRectypes_delete_warn#Are you sure you wish to delete this record type?

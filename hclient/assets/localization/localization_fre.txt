@@ -468,8 +468,7 @@
 #resultList_reorder_list_changed#La liste de réorganisation a été modifiée.
 #Warn_Lost_Data#Vous avez fait des modifications dans les données. Cliquez sur "Sauvegarder", autrement tous vos changements seront perdus.
 #Warn_Lost_Data_On_Structure_Edit#Cliquer sur "Sauvegarder les données" pour enregsitrer les mofications ou "Annuler les modifications".<br>Les changements de structure sont enregistrés automatiquement - ils ne sont pas affectés par ce choix.
-#manageDefRectypes_edit_fields#Editer les champs
-#manageDefRectypes_edit_fields_hint#Cela ouvrira un enregistrement vierge en mode "modification de structure".<br>Astuce  : vous pouvez activer le mode "modification de structure" à tout moment pendant la saisie des données pour effectuer des changements structurels.
+
 #manageDefRectypes_new_hint#Avant de définir de nouveaux types d'enregistrements (entités), nous vous suggérons de regarder du coté. des structures proposées par les modèles (bases de données Heurist publiées dans le catalogue dédié). Les bases de données possédant un ID inférieur à 1000 proposent des modèles réalisés par l'équipe Heurist. <br><br>Ceci est tout particulièrement important pour les enregistrements de type "BIBLIOGRAPHIC" - les structures du modèle #6 ("Bibliographic definitions") sont normalisées et optimisées pour assurer une compatibilité maximale avec des fonctions telles que la synchronisation avec Zotero, mais aussi le format Harvard ou encore entre entre bases de données.<br><br>Utilisez le menu principal : Conception > Parcourir les modèles
 #manageDefRectypes_delete_stop#<p>Le type d'enregistrement <b>[rtyName]</b> est utilisé par les champs suivants :</p>[FieldList]<p>Veuillez supprimer ces champs, ou cliquez sur les liens ci-dessous <br>pour modifier pour modifier le champ de base (modifiera tous les types d'enresgitrements qui l'utilise).</p>
 #manageDefRectypes_delete_warn#Êtes vous sûr de vouloir supprimer ce type d'enregistrement ?
