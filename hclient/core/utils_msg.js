@@ -298,6 +298,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * @returns {jQuery} The jQuery object representing the dialog element.
      */
     showPrompt: function(message, callbackFunc, sTitle, ext_options){
+
+        ext_options = ext_options || {};
+        // Prompt validation callbacks may return false to keep the prompt open.
+        ext_options.keepOpenOnFalse = true;
         
         if(message.indexOf('dlg-prompt-value')<0){
             const value = window.hWin.HEURIST4.util.htmlEscape(ext_options?.value??'');
@@ -319,7 +323,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(ele.attr('type')!='checkbox' || ele.is(':checked')){ // Also handles checkbox type input
                     val =  ele.val();
                 }
-                callbackFunc.call(this, val); // Call the user-provided callback with the value
+                return callbackFunc.call(this, val); // false keeps a validating prompt open
             }
         },
         window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle, ext_options);
@@ -1569,11 +1573,17 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if (window.hWin.HEURIST4.util.isFunction(buttons)){ //}typeof buttons === "function"){
 
             let callback = buttons;
+            const keepOpenOnFalse = ext_options.keepOpenOnFalse===true;
+            delete ext_options.keepOpenOnFalse;
 
             buttons = {};
             buttons[lblYes] = function() {
-                $dlg.dialog( "close" );
-                callback.call();
+                if(keepOpenOnFalse){
+                    if(callback.call()!==false) $dlg.dialog( "close" );
+                }else{
+                    $dlg.dialog( "close" );
+                    callback.call();
+                }
             };
             buttons[lblNo] = function() {
                 $dlg.dialog( "close" );

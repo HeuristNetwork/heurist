@@ -15,88 +15,137 @@
 */
 -->
 <style>
-    #thematic_maps_list, #selected_fields {
-        font-size: 1.1em;
-        line-height: 1.6em;
+    .thematic-list {
+        margin:5px;
+        width:290px;
+        min-height:72px;
+        max-height:92px;
+        overflow-y:auto;
+        border:1px solid #ccc;
+        background:white;
+        box-sizing:border-box;
     }
-    #thematic_maps_list option, #selected_fields option {
-        font-size: 1.05em;
-        line-height: 1.6em;
-        padding: 3px 4px;
+    .thematic-list-item {
+        display:flex;
+        align-items:center;
+        min-height:25px;
+        padding:2px 3px 2px 6px;
+        cursor:pointer;
     }
+    .thematic-list-item:hover { background:#f3f3f3; }
+    .thematic-list-item.selected { background:#dfeaf5; }
+    .thematic-list-title {
+        flex:1;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+    .thematic-list-actions { display:flex; gap:3px; }
+    .thematic-list-actions .ui-icon { cursor:pointer; }
+    .thematic-help {
+        max-width:560px;
+        padding:12px 18px;
+        line-height:1.45;
+        color:#555;
+    }
+    .thematic-section-heading {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        margin:5px;
+        width:290px;
+        box-sizing:border-box;
+        font-weight:bold;
+    }
+    .thematic-add-label { font-weight:normal; color:#777; cursor:pointer; white-space:nowrap; }
+    .thematic-add-label .ui-icon { display:inline-block; vertical-align:middle; cursor:pointer; }
+    #renderer_settings h2, #div_work_area h2 { margin:6px 0 10px 5px; font-size:1.35em; }
+    .tm-active-help { color:#666; font-size:0.95em; margin-left:6px; display:block }
+    #renderer_empty_hint { margin-top:14px; }
+    #renderer_settings { margin-top:0px !important; }
+    #single_record_scope { padding:10px 0 0 18px; }
 </style>
 <div id="div_search" class="ent_wrapper">
-    <div class="ent_header" style="height:110px;border-bottom:1px solid gray;padding:0px">
-    
-        <div style="width:300px;display:inline-block">
-            <h4 style="margin: 5px;width:290px;">
-                Thematic maps
-                <span id="btn_tm_add" class="ui-icon ui-icon-circle-b-plus" style="margin-top:2px;float:right;cursor:pointer" title="Add new thematic map"/>
+    <div class="ent_header" style="height:130px;border-bottom:1px solid gray;padding:0;display:flex;align-items:flex-start;flex-wrap:nowrap;overflow:hidden">
+
+        <div style="width:300px;min-width:300px;flex:0 0 300px;vertical-align:top">
+            <h4 class="thematic-section-heading">
+                <span>Thematic renderers</span>
+                <span class="thematic-add-label tm-add-label">
+                    <span id="btn_tm_add" class="ui-icon ui-icon-circle-b-plus" title="Add thematic renderer"></span>
+                    Add renderer
+                </span>
             </h4>
-            <select id="thematic_maps_list" size="3" style="width:290px;margin:5px"></select>
+            <div id="thematic_maps_list" class="thematic-list" role="listbox" aria-label="Thematic renderers"></div>
         </div>
-    
-        <fieldset style="display:inline-block"><legend style="display:none"></legend>
-            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">
-                <div class="header_narrow">
-                    <label for="tm_name">Title:</label>
-                </div>
-                <div style="line-height:1em">
-                    <input id="tm_name" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em;"/>
-                    <button id="btn_map_remove">Remove theme</button>
-                </div>
+
+        <div id="renderer_empty_hint" class="thematic-help" style="display:none;flex:1;vertical-align:top">
+            <b>Add a thematic renderer</b> to style layer features according to their attribute values.
+            A layer can have <b>multiple renderers</b>, for example one showing population, another showing
+            category or status, and another showing chronology. Only one renderer is displayed at a time,
+            and users can switch between the layer's <b>Default symbology</b> and any defined thematic renderer.
+        </div>
+
+        <fieldset id="renderer_settings" style="display:none;flex:1;vertical-align:top;border:0;padding:4px 10px;min-width:0"><legend style="display:none"></legend>
+            <h2 id="tm_title_display"></h2>
+            <div style="padding:0.2em;width:100%;line-height:2" class="input">
+                <label for="tm_active"><b>Active by default:</b></label>
+                <input id="tm_active" class="text ui-widget-content ui-corner-all" type="checkbox"/>
+                <span class="tm-active-help">Only one renderer can be active by default. If none is active, the layer opens with its default symbology.</span>
             </div>
-            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
-                <div class="header_narrow">
-                    <label for="tm_active">Active by default:</label>
-                </div>
-                <div style="line-height:1em">
-                    <input id="tm_active" class="text ui-widget-content ui-corner-all" type="checkbox"/>
-                </div>
-            </div>
-            <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
-                <div class="header_narrow">
-                    <label for="tm_symbol">Base symbol:</label>
-                </div>
-                <div style="line-height:1em">
-                    <span id="tm_symbol_preview" class="field-symbol-preview" title="Click to edit symbol"
-                          style="display:inline-block;vertical-align:middle;min-width:56px;height:34px;margin-right:6px;cursor:pointer"></span>
-                    <input id="tm_symbol" type="hidden"/>
-                </div>
+            <div style="padding:0.2em;width:100%;line-height:2" class="input">
+                <label for="tm_symbol"><b>Base symbol:</b></label>
+                <span id="tm_symbol_preview" class="field-symbol-preview" title="Click to edit symbol"
+                      style="display:inline-block;vertical-align:middle;min-width:56px;height:34px;margin-left:6px;margin-right:6px;cursor:pointer"></span>
+                <input id="tm_symbol" type="hidden"/>
             </div>
         </fieldset>
     </div>
 
     <!-- TREE for field selection -->
-    <div style="top:115px; bottom:0; position:absolute; width:300px;" class="input ent_content">
-        <h4 style="margin: 5px;width:290px;">Fields</h4>
-        <select id="selected_fields" size="5" style="width:290px;margin:5px"></select>
-        <button id="btn_select_another_field" style="display:none;margin:8px 18px 10px 18px;width:264px;font-weight:bold">Select another field</button>
+    <div id="fields_section" style="display:none;top:135px;bottom:0;position:absolute;width:300px;" class="input ent_content">
+        <h4 class="thematic-section-heading">
+            <span>Fields</span>
+            <span class="thematic-add-label field-add-label">
+                <span class="ui-icon ui-icon-circle-b-plus" title="Add field"></span>
+                Add field
+            </span>
+        </h4>
+        <div id="selected_fields" class="thematic-list" role="listbox" aria-label="Thematic fields"></div>
         <div id="field_selection_panel">
-            <div style="padding:10px 0 0 18px">
-                <label for="sel_record_scope">Select field:</label><br>
+            <div id="record_scope_selector" style="padding:10px 0 0 18px">
+                <label for="sel_record_scope">Record types in layer:</label><br>
                 <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:270px;margin-top:7px"></select>
             </div>
-            <div class="detailRow rtt-tree tree-csv" style="padding:10px; overflow:auto; position:absolute; width:280px; top:180px;bottom:0px" id="rectype_tree">
+            <div id="single_record_scope" style="display:none">
+                Layer record type: <b id="single_record_scope_name"></b>
             </div>
+            <div class="detailRow rtt-tree tree-csv" style="padding:10px;overflow:auto;position:absolute;width:280px;top:180px;bottom:0px" id="rectype_tree"></div>
         </div>
     </div>
 
+    <div id="field_empty_hint" class="thematic-help" style="display:none;position:absolute;top:135px;bottom:0;left:301px;right:0;border-left:1px solid gray;overflow:auto;">
+        <h3>Add fields to this renderer</h3>
+        <p>Fields determine how attribute values change the appearance of map features. Define ranges or categories for a field, then assign the symbol properties to use for matching values.</p>
+        <p>A renderer may use <b>multiple fields</b>. Each field can contribute a different part of the final symbol: for example, <i>Country</i> can control colour, <i>Population</i> can control symbol size, and <i>City type</i> can control the marker icon. These changes are combined, so you do not need a separate renderer for every visual property.</p>
+        <p>Select a field on the left to begin. You can add further fields at any time.</p>
+    </div>
+
     <!-- FIELD's ranges -->
-    <div id="div_work_area" style="display:none;position:absolute; top:115px; bottom:0px; left:301px; right:0px; border-left:1px solid gray;overflow:auto; padding:0px 10px">
-        <h4 style="margin: 5px;">Ranges / categories</h4>
-        <div style="margin-top: 10px">
-            <div style="display:inline-block;width:80px;text-align:right;padding-right:5px" class="header_narrow">
-                <label for="f_title">Title:</label>
+    <div id="div_work_area" style="display:none;position:absolute;top:135px;bottom:0;left:301px;right:0;border-left:1px solid gray;overflow:auto;padding:0 10px">
+        <h2 id="f_title_display"></h2>
+        <div style="margin-top:10px">
+            <div style="display:inline-block;text-align:right;padding:0px 5px">
+                <label for="f_title">Label:</label>
             </div>
             <input id="f_title" class="text ui-widget-content ui-corner-all" style="width:300px;"/>
-            <button id="btn_f_remove">Remove field</button>
         </div>
-        <div id="f_toolbar" style="padding:5px;margin-top: 22px">
+        <div style="margin:18px 5px 4px 5px;color:#666">Mode: <b>Ranges / categories</b></div>
+        <div id="f_toolbar" style="padding:5px;margin-top:4px">
             <button id="btn_f_range_add">Add range</button>
             <button id="btn_f_range_auto">Generate ranges...</button>
             <button id="btn_f_range_reset">Remove all ranges</button>
-            <button id="btn_f_range_symb" style="margin-left: 27px;">Symbol gradient...</button>
+            <button id="btn_f_range_symb" style="margin-left:27px;">Symbol gradient...</button>
         </div>
         <div id="f_ranges"></div>
     </div>

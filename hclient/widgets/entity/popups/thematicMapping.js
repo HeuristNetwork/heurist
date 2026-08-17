@@ -185,7 +185,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         if(this.currentThemeIdx>=0 && themes[this.currentThemeIdx]){
             const theme = themes[this.currentThemeIdx];
 
-            theme.title = this.element.find('#tm_name').val();
             theme.active = this.element.find('#tm_active').is(':checked');
 
             const symbol = window.hWin.HEURIST4.util.isJSON(this.element.find('#tm_symbol').val());
@@ -262,18 +261,10 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         this.selectRecordScope.empty();
 
         
-        let fields_sel = this.element.find('#selected_fields');
-        
-        this._on(fields_sel,{change: this._onThemeFieldSelect});
-
-        const btnSelectAnotherField = this.element.find('#btn_select_another_field').button({
-            icon:'ui-icon-circle-b-plus'
-        });
-        this._on(btnSelectAnotherField, {click:function(){
+        this._on(this.element.find('.field-add-label'), {click:function(event){
+            window.hWin.HEURIST4.util.stopEvent(event);
             this._updateFieldSelectionVisibility(true);
         }});
-
-
 
         this._on(this.element.find('button[id^="btn_f"]').button(), 
                                     {click:this._onThemeFieldAction});
@@ -286,32 +277,19 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         this.mapDefaultSymbol, this.element.find('#tm_symbol').val(), null);
         }});
 
-        // Keep list labels in sync while the user edits titles. Full validation and
-        // range persistence still happen in _saveThematicMap/_saveThemeField.
-        this._on(this.element.find('#tm_name'), {input:function(event){
-            if(this.currentThemeIdx<0) return;
-
-            const title = $(event.target).val();
-            this.options.thematic_mapping[this.currentThemeIdx].title = title;
-            this.element.find('#thematic_maps_list option')
-                .eq(this.currentThemeIdx).text(title);
-        }});
-
+        // Label is editable metadata only. It must not change the field name shown
+        // in the Fields list or in the selected-field heading.
         this._on(this.element.find('#f_title'), {input:function(event){
             if(!(this.currentField>0) || !this.selectedFields[this.currentField]) return;
-
-            const title = $(event.target).val();
-            this.selectedFields[this.currentField].title = title;
-            this.element.find('#selected_fields option[value="'+this.currentField+'"]')
-                .text(title);
+            this.selectedFields[this.currentField].title = $(event.target).val();
         }});
         
         
         this.options.thematic_mapping = window.hWin.HEURIST4.util.isJSON( this.options.thematic_mapping );
         
-        //load list of thematic maps
+        // Load list of thematic renderers. The renderer list is a normal HTML list
+        // rather than a native SELECT so each row can expose rename/delete actions.
         let themes_list = this.element.find('#thematic_maps_list');
-        this._on(themes_list,{change: this._onThematicMapSelect});
         themes_list.empty();
         
         if(this.options.thematic_mapping)
@@ -331,7 +309,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         while(i<this.options.thematic_mapping.length){
             let t_map = this.options.thematic_mapping[i];
             if(t_map.fields){ //with fields - thematic map
-                window.hWin.HEURIST4.ui.addoption(themes_list[0], i, t_map.title);
                 i++;
             }else{ //without fields - this is base symbol
                 this.baseLayerSymbol = t_map;
@@ -347,11 +324,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }
         this.mapDefaultSymbol = window.hWin.HEURIST4.ui.prepareMapSymbol(def_style, null);
 
-        if(themes_list.find('option').length==0){
-            this._addThematicMap();
+        this._renderThematicRendererList();
+        if(this.options.thematic_mapping.length>0){
+            this._selectThematicRenderer(0, false);
         }else{
-            themes_list[0].selectedIndex = 0;
-            themes_list.trigger('change');
+            this.currentThemeIdx = -1;
+            this._updateThematicWorkflowVisibility();
         }
         
 
@@ -359,11 +337,15 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         // has been materialised into the editing controls.
         this._initialThematicState = this._serializeThematicState();
         
-        this._on(this.element.find('#btn_map_remove').button(), 
-                                    {click:this._onThematicMapDelete});
-
-        this._on(this.element.find('#btn_tm_add'),
+        this._on(this.element.find('.tm-add-label'),
                                     {click:this._addThematicMap});
+
+        this._on(this.element.find('#tm_active'), {change:function(event){
+            if(this.currentThemeIdx<0 || !$(event.target).is(':checked')) return;
+            for(let i=0; i<this.options.thematic_mapping.length; i++){
+                this.options.thematic_mapping[i].active = (i===this.currentThemeIdx);
+            }
+        }});
                         
         this.popele = this.element.find('#divAutoRanges');
         this._on(this.popele.find('input,select'),{change:this._definePreviewRanges});
@@ -375,10 +357,10 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         let selScope = this.selectRecordScope.get(0);
         this.selectRecordScope = window.hWin.HEURIST4.ui.createRectypeSelectNew( selScope,
         {
-            topOptions: [{key:'-1',title:'select record type...'}],
+            topOptions: [],
             useHtmlSelect: false,
             useCounts: false,
-            showAllRectypes: true
+            showAllRectypes: false
         });
         this._on( this.selectRecordScope, {
                 change: this._onRecordScopeChange} );        
@@ -413,24 +395,43 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                             that._renderSymbolPreview(null, that.mapDefaultSymbol,
                                 that.element.find('#tm_symbol').val(), null);
 
-for(let i=0; i<rty_IDs.length; i++){
-                                let name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_IDs[i], 'rty_Name'));
-                                
-                                let option = document.createElement("option");
+                            // Restrict the selector to record types actually present in the layer.
+                            $(selScope).empty();
+
+                            let groupOption = document.createElement('option');
+                            groupOption.text = 'Record types in layer';
+                            groupOption.disabled = true;
+                            $(groupOption).attr('group', 1);
+                            selScope.appendChild(groupOption);
+
+                            let firstName = '';
+                            for(let i=0; i<rty_IDs.length; i++){
+                                let name = $Db.rty(rty_IDs[i], 'rty_Name') || ('Record type '+rty_IDs[i]);
+                                if(i===0) firstName = name;
+
+                                let option = document.createElement('option');
                                 option.text = name;
                                 option.value = rty_IDs[i];
                                 $(option).attr('depth', 1);
-                                selScope.insertBefore(option, selScope.options[1]);
+                                selScope.appendChild(option);
                             }
-                            
-                            let option = document.createElement("option");
-                            option.text = 'Record types in layer';
-                            option.disabled = 'disabled'
-                            $(option).attr('group', 1);
-                            selScope.insertBefore(option, selScope.options[1]);
-                            
-                            that.selectRecordScope.val(rty_IDs[0])
+
+                            that.selectRecordScope.val(rty_IDs[0]);
                             that.selectRecordScope.hSelect('refresh');
+
+                            if(rty_IDs.length===1){
+                                that.element.find('#record_scope_selector').hide();
+                                that.element.find('#single_record_scope_name').text(firstName);
+                                that.element.find('#single_record_scope').show();
+                                // With the selector hidden, move the field tree up to avoid
+                                // leaving the space normally occupied by the selector.
+                                that.element.find('#rectype_tree').css('top', '130px');
+                            }else{
+                                that.element.find('#single_record_scope').hide();
+                                that.element.find('#record_scope_selector').show();
+                                that.element.find('#rectype_tree').css('top', '180px');
+                            }
+
                             that.selectRecordScope.trigger('change');
                             
                             
@@ -470,17 +471,28 @@ for(let i=0; i<rty_IDs.length; i++){
      * sets this array as the result for `_context_on_close`, and closes the dialog.
      */
     doAction: function(){
-        
-        //get values
-        if(this._saveThematicMap()){
-            if(this.baseLayerSymbol){
-                this.options.thematic_mapping.unshift(this.baseLayerSymbol);
+
+        if(!this._saveThematicMap(true)) return;
+
+        // Switching renderers is allowed while a renderer is still being built, but
+        // final Save requires every renderer to contain at least one effective field.
+        for(let i=0; i<this.options.thematic_mapping.length; i++){
+            const renderer = this.options.thematic_mapping[i];
+            if(!Array.isArray(renderer.fields) || renderer.fields.length===0){
+                this._selectThematicRenderer(i, false);
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Thematic renderer "'+renderer.title+'" needs at least one field with ranges/categories',
+                    error_title: 'Incomplete thematic renderer'
+                });
+                return;
             }
-            this._context_on_close =  this.options.thematic_mapping;
-            this.closeDialog(true);
         }
-        
-        
+
+        if(this.baseLayerSymbol){
+            this.options.thematic_mapping.unshift(this.baseLayerSymbol);
+        }
+        this._context_on_close = this.options.thematic_mapping;
+        this.closeDialog(true);
     },
     
     /**
@@ -734,92 +746,160 @@ for(let i=0; i<rty_IDs.length; i++){
      * Appends a new, empty thematic map object to `this.options.thematic_mapping`.
      * Adds an option for the new map to the selection list and selects it.
      */
-    _addThematicMap: function(){
-        
-        if(this._saveThematicMap()){
-        
-            let last_idx = this.options.thematic_mapping.length;
-            const newname = 'New Thematic map';
-            this.options.thematic_mapping.push({title:newname, active:false, fields:[]});
-
-            
-            let themes_list = this.element.find('#thematic_maps_list');
-            window.hWin.HEURIST4.ui.addoption(themes_list[0], last_idx, newname);
-           
-           
-            
-            themes_list[0].selectedIndex = last_idx;
-            themes_list.trigger('change');
-        }
+    _rendererTitleExists: function(title, excludeIdx){
+        const normalized = String(title || '').trim().toLocaleLowerCase();
+        if(!normalized) return false;
+        return this.options.thematic_mapping.some(function(renderer, idx){
+            return idx!==excludeIdx
+                && String(renderer?.title || '').trim().toLocaleLowerCase()===normalized;
+        });
     },
-    
-    
-    /**
-     * @brief Handles deletion of the currently selected thematic map configuration.
-     * @memberof heurist.thematicMapping
-     * @param {boolean} [unconditional=false] If true, deletes without confirmation.
-     * If `unconditional` is false, prompts the user for confirmation.
-     * If confirmed, removes the map from `this.options.thematic_mapping` and the UI list.
-     * If no maps remain, prompts to exit; otherwise, selects the first map.
-     */
-    _onThematicMapDelete: function(unconditional){
-        if(this.currentThemeIdx>=0){
-            
-            let that = this;
 
-            if(unconditional!==true){    
-                window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                    function(){that._onThematicMapDelete(true);});
-                return;
-            }
-            
-            let themes_list = this.element.find('#thematic_maps_list');
-            this.options.thematic_mapping.splice(this.currentThemeIdx, 1);
-            //remove from select
-            themes_list.find('option').eq(this.currentThemeIdx).remove();
-            
-            if(this.options.thematic_mapping.length==0){
-                //offer exit
-                
-                window.hWin.HEURIST4.msg.showMsgDlg('<br>You removed all thematic maps. Exit this form?',
-                    function(){
-                        // Return an explicit empty thematic-map result instead of an
-                        // empty string. The caller treats a falsey context as Cancel, so
-                        // returning '' left the removed thematic map in the underlying
-                        // symbology field. Preserve a base symbol, if this widget was
-                        // invoked with one, using the same array shape as normal Save.
-                        that._context_on_close = that.baseLayerSymbol ? [that.baseLayerSymbol] : [];
-                        that.closeDialog(true);
-                    });
-                
-            }else{
-                this.currentField = 0;
-                this.currentThemeIdx = -1;
-                themes_list[0].selectedIndex = 0;
-                themes_list.trigger('change');
-            }
-        }
+    /** Render the thematic renderer list, including per-row rename/delete actions. */
+    _renderThematicRendererList: function(){
+        const that = this;
+        const list = this.element.find('#thematic_maps_list').empty();
+
+        this.options.thematic_mapping.forEach(function(renderer, idx){
+            const row = $('<div class="thematic-list-item thematic-renderer-item" role="option">')
+                .attr('data-index', idx)
+                .attr('aria-selected', idx===that.currentThemeIdx ? 'true' : 'false')
+                .toggleClass('selected', idx===that.currentThemeIdx)
+                .appendTo(list);
+
+            $('<span class="thematic-list-title thematic-renderer-title">')
+                .text(renderer.title || '')
+                .appendTo(row);
+
+            const actions = $('<span class="thematic-list-actions thematic-renderer-actions">').appendTo(row);
+            $('<span class="ui-icon ui-icon-pencil" title="Rename renderer">')
+                .appendTo(actions)
+                .on('click', function(event){
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    that._renameThematicMap(idx);
+                });
+            $('<span class="ui-icon ui-icon-trash" title="Remove renderer">')
+                .appendTo(actions)
+                .on('click', function(event){
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    that._onThematicMapDelete(false, idx);
+                });
+
+            row.on('click', function(){
+                that._selectThematicRenderer(idx, true);
+            });
+        });
     },
-    
-    /**
-     * @brief Saves the current thematic map configuration being edited.
-     * @memberof heurist.thematicMapping
-     * @returns {boolean} True if save was successful or no map was being edited, false if validation failed.
-     * If `this.currentThemeIdx` is valid:
-     *  - Updates the title, active state, and base symbol from UI inputs.
-     *  - Calls `_saveThemeField()` to save the currently edited field's ranges.
-     *  - Reconstructs the `fields` array for the current thematic map from `this.selectedFields`,
-     *    only including fields that have defined ranges.
-     *  - Validates that a title and at least one field with ranges are present.
-     *  - Updates the thematic map's title in the selection list.
-     */
-    _saveThematicMap: function(){
+
+    /** Show the add/rename prompt and keep it open when validation fails. */
+    _promptRendererTitle: function(title, currentValue, excludeIdx, callback){
+        const that = this;
+        return window.hWin.HEURIST4.msg.showPrompt(
+            window.hWin.HR('Thematic renderer title') + ':',
+            function(value){
+                value = String(value || '').trim();
+                if(window.hWin.HEURIST4.util.isempty(value)){
+                    window.hWin.HEURIST4.msg.showMsgFlash(
+                        window.hWin.HR('Renderer title is required'), 2000);
+                    return false;
+                }
+                if(that._rendererTitleExists(value, excludeIdx)){
+                    window.hWin.HEURIST4.msg.showMsgFlash(
+                        window.hWin.HR('A thematic renderer with this title already exists'), 2000);
+                    return false;
+                }
+                callback(value);
+                return true;
+            },
+            {
+                title: window.hWin.HR(title),
+                yes: window.hWin.HR(excludeIdx>=0 ? 'Rename' : 'Add'),
+                no: window.hWin.HR('Cancel')
+            },
+            {default_palette_class:'ui-heurist-design', value:currentValue || ''}
+        );
+    },
+
+    /** Add a new thematic renderer. A brand-new definition remains empty until this is used. */
+    _addThematicMap: function(event){
+        if(event) window.hWin.HEURIST4.util.stopEvent(event);
+        this._saveThematicMap(false);
+
+        const that = this;
+        this._promptRendererTitle('New thematic renderer', '', -1, function(newname){
+            const idx = that.options.thematic_mapping.length;
+            that.options.thematic_mapping.push({title:newname, active:false, fields:[]});
+            that.currentThemeIdx = -1;
+            that._renderThematicRendererList();
+            that._selectThematicRenderer(idx, false);
+        });
+    },
+
+    /** Rename a renderer using the same prompt and duplicate-title validation as Add. */
+    _renameThematicMap: function(idx){
+        if(!(idx>=0) || !this.options.thematic_mapping[idx]) return;
+        this._saveThematicMap(false);
+
+        const that = this;
+        const renderer = this.options.thematic_mapping[idx];
+        this._promptRendererTitle('Rename thematic renderer', renderer.title, idx, function(newname){
+            renderer.title = newname;
+            that._renderThematicRendererList();
+            if(idx===that.currentThemeIdx){
+                that.element.find('#tm_title_display').text(newname);
+            }
+        });
+    },
+
+    /** Select a renderer, preserving unfinished edits in the previously selected renderer. */
+    _selectThematicRenderer: function(idx, saveCurrent){
+        if(!(idx>=0) || !this.options.thematic_mapping[idx]) return false;
+        if(saveCurrent!==false) this._saveThematicMap(false);
+
+        this.currentThemeIdx = idx;
+        this._renderThematicRendererList();
+        this._loadThematicRenderer(idx);
+        return true;
+    },
+
+    /** Delete a thematic renderer. Removing the last one returns the editor to its empty state. */
+    _onThematicMapDelete: function(unconditional, idx){
+        idx = Number.isInteger(idx) ? idx : this.currentThemeIdx;
+        if(!(idx>=0) || !this.options.thematic_mapping[idx]) return;
+
+        const that = this;
+        if(unconditional!==true){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                '<br>'+window.hWin.HR('Remove this thematic renderer?'),
+                function(){ that._onThematicMapDelete(true, idx); }
+            );
+            return;
+        }
+
+        if(idx===this.currentThemeIdx) this._saveThematicMap(false);
+        this.options.thematic_mapping.splice(idx, 1);
+        this.currentField = 0;
+        this.selectedFields = {};
+
+        if(this.options.thematic_mapping.length===0){
+            this.currentThemeIdx = -1;
+            this._renderThematicRendererList();
+            this._updateThematicWorkflowVisibility();
+            return;
+        }
+
+        const nextIdx = Math.min(idx, this.options.thematic_mapping.length-1);
+        this.currentThemeIdx = -1;
+        this._renderThematicRendererList();
+        this._selectThematicRenderer(nextIdx, false);
+    },
+
+    _saveThematicMap: function(validate){
         
         if(this.currentThemeIdx>=0){
         
             let t_map = this.options.thematic_mapping[this.currentThemeIdx];
         
-            t_map.title = this.element.find('#tm_name').val();
             t_map.active = this.element.find('#tm_active').is(':checked');
             t_map.symbol = window.hWin.HEURIST4.util.isJSON(this.element.find('#tm_symbol').val());
             if(!t_map.symbol) t_map.symbol =  '';
@@ -838,14 +918,13 @@ for(let i=0; i<rty_IDs.length; i++){
                 }
             }
             
-            if(window.hWin.HEURIST4.util.isempty(t_map.title)){
-                window.hWin.HEURIST4.msg.showMsgErr({
-                    message: 'Title is mandatory',
-                    error_title: 'Missing title'
-                });
-                return false;
+            if(t_map.active){
+                for(let i=0; i<this.options.thematic_mapping.length; i++){
+                    if(i!==this.currentThemeIdx) this.options.thematic_mapping[i].active = false;
+                }
             }
-            if(t_map.fields.length==0){
+
+            if(validate!==false && t_map.fields.length==0){
                 window.hWin.HEURIST4.msg.showMsgErr({
                     message: 'Need to define at least one field with ranges/categories',
                     error_title: 'Missing field'
@@ -853,9 +932,6 @@ for(let i=0; i<rty_IDs.length; i++){
                 return false;
             }
 
-            //rename in the list
-            this.element.find('#thematic_maps_list').find('option').eq(this.currentThemeIdx).html(t_map.title);
-            
             this.options.thematic_mapping[this.currentThemeIdx] = t_map;
             
         }
@@ -872,50 +948,60 @@ for(let i=0; i<rty_IDs.length; i++){
      * Populates `this.selectedFields` and the "Selected Fields" list based on the loaded map.
      * Triggers selection of the first field in the list.
      */
-    _onThematicMapSelect: function( event ){
-        
-        if(this._saveThematicMap()){
-        
-            this.currentThemeIdx = event?event.target.selectedIndex:0;
-            
-            let t_map = this.options.thematic_mapping[this.currentThemeIdx];
-        
-            this.element.find('#tm_name').val(t_map.title);
-            this.element.find('#tm_active').prop('checked', t_map.active);
-            
-            let base_symbol = window.hWin.HEURIST4.util.isJSON( t_map.symbol );
-            base_symbol = (!base_symbol)?'':JSON.stringify(base_symbol);
-            this.element.find('#tm_symbol').val(base_symbol).trigger('change');
-            
-            this.selectedFields = {};
-            
-            let flds = t_map.fields;
-            
-            let fields_sel = this.element.find('#selected_fields');
-            fields_sel.empty();
-            
-            if(flds){
-                for(let i=0; i<flds.length; i++){
-                    let fld = flds[i];
-                    let key = fld.code.split(':');
-                    key = key[key.length-1];//dty_ID
-                    
-                    this.selectedFields[key] = fld;
-                    
-                    window.hWin.HEURIST4.ui.addoption(fields_sel[0], key, fld.title);
-                }
-                
-                fields_sel[0].selectedIndex = 0;
-                fields_sel.trigger('change');
-            }
-
-            this._updateFieldSelectionVisibility(fields_sel.find('option').length===0);
-        }else{
-             document.getElementById('thematic_maps_list').selectedIndex = this.currentThemeIdx;
-        }
-        
+    _onThematicMapSelect: function(event){
+        const idx = event?.currentTarget?.dataset?.index ?? event?.target?.dataset?.index;
+        return this._selectThematicRenderer(parseInt(idx), true);
     },
-    
+
+    /** Load a renderer into the right-hand controls. */
+    _loadThematicRenderer: function(idx){
+        const t_map = this.options.thematic_mapping[idx];
+        if(!t_map) return;
+
+        this.element.find('#tm_title_display').text(t_map.title || '');
+        this.element.find('#tm_active').prop('checked', t_map.active===true);
+
+        let base_symbol = window.hWin.HEURIST4.util.isJSON(t_map.symbol);
+        base_symbol = (!base_symbol) ? '' : JSON.stringify(base_symbol);
+        this.element.find('#tm_symbol').val(base_symbol).trigger('change');
+
+        this.selectedFields = {};
+        this.currentField = 0;
+        const flds = t_map.fields || [];
+
+        for(let i=0; i<flds.length; i++){
+            const fld = flds[i];
+            let key = fld.code.split(':');
+            key = key[key.length-1];
+            this.selectedFields[key] = fld;
+        }
+
+        this._renderThemeFieldList();
+        const fieldKeys = Object.keys(this.selectedFields);
+        if(fieldKeys.length>0){
+            this._selectThemeField(fieldKeys[0], false);
+            this._updateFieldSelectionVisibility(false);
+        }else{
+            this._onThemeFieldSelect();
+            this._updateFieldSelectionVisibility(true);
+        }
+        this._updateThematicWorkflowVisibility();
+    },
+
+    /** Toggle the renderer, field and explanatory empty states. */
+    _updateThematicWorkflowVisibility: function(){
+        const hasRenderer = this.currentThemeIdx>=0 && !!this.options.thematic_mapping[this.currentThemeIdx];
+        const hasFields = hasRenderer && Object.keys(this.selectedFields || {}).length>0;
+
+        this.element.find('#renderer_empty_hint').toggle(!hasRenderer);
+        this.element.find('#renderer_settings').toggle(hasRenderer);
+        this.element.find('#fields_section').toggle(hasRenderer);
+        this.element.find('#field_empty_hint').toggle(hasRenderer && !hasFields);
+        if(!hasRenderer || !hasFields){
+            this.element.find('#div_work_area').hide();
+        }
+    },
+
     //-----------------------
     /**
      * Show or hide the field-selection controls. Once a theme already has fields,
@@ -925,17 +1011,15 @@ for(let i=0; i<rty_IDs.length; i++){
      * @param {boolean} showSelector True to show record type/field selection controls.
      */
     _updateFieldSelectionVisibility: function(showSelector){
-        const fields_sel = this.element.find('#selected_fields');
-        const hasSelectedFields = fields_sel.find('option').length>0;
+        const hasSelectedFields = Object.keys(this.selectedFields || {}).length>0;
         const panel = this.element.find('#field_selection_panel');
-        const button = this.element.find('#btn_select_another_field');
 
         if(!hasSelectedFields){
             showSelector = true;
         }
 
         panel.toggle(showSelector===true);
-        button.toggle(hasSelectedFields && showSelector!==true);
+        this.element.find('#field_empty_hint').toggle(this.currentThemeIdx>=0 && !hasSelectedFields);
     },
 
     /**
@@ -956,14 +1040,11 @@ for(let i=0; i<rty_IDs.length; i++){
         
         if(!this.selectedFields[key]){
             this.selectedFields[key] = {code:node.data.code, title:node.data.name, ranges:[]};
-            let sel = this.element.find('#selected_fields');
-            
-            //+' ('+this.selectedFields[key].code+'  '+key+')'
-            window.hWin.HEURIST4.ui.addoption(sel[0], key, this.selectedFields[key].title);
+            this._renderThemeFieldList();
 
             // The newly added field becomes the current field, then collapse the
             // selection tree so the user can concentrate on defining its ranges.
-            sel.val(key).trigger('change');
+            this._selectThemeField(key, true);
             this._updateFieldSelectionVisibility(false);
         } 
         
@@ -1047,36 +1128,112 @@ for(let i=0; i<rty_IDs.length; i++){
      * Clears and repopulates the range definition area (`#f_ranges`) based on the selected field's configuration.
      * Shows the work area if a field is selected, hides it otherwise.
      */
-    _onThemeFieldSelect: function(event){                                                           
-        
-        let main_area = this.element.find('#div_work_area');        
-        let f_ranges = main_area.find('#f_ranges');
-        let selfield;
-        
-        //save previous
-        this._saveThemeField();
-        
-        this.currentField = event?$(event.target).val():0;
-        
-        f_ranges.empty()
-        
-        if(this.currentField>0){
-            this.element.find('#div_work_area').show();    
-        
-            selfield = this.selectedFields[this.currentField];
-            
-            //add title
-            main_area.find('#f_title').val(selfield.title);
-            
-            //add ranges elements
-            for (let k=0;k<selfield.ranges.length;k++){
+    _onThemeFieldSelect: function(event){
+        let key = 0;
+        if(typeof event === 'string' || typeof event === 'number'){
+            key = event;
+        }else if(event){
+            key = event.currentTarget?.dataset?.key ?? event.target?.dataset?.key ?? 0;
+        }
+        return this._selectThemeField(key, true);
+    },
+
+    /**
+     * Return the structural field name represented by a thematic field code.
+     * The editable field.title is a label and is deliberately not used as the
+     * list/header name except as a fallback for legacy/unknown definitions.
+     */
+    _getThemeFieldName: function(field){
+        if(!field) return '';
+
+        const codeParts = String(field.code || '').split(':');
+        const dtyID = codeParts[codeParts.length - 1];
+        const fieldName = dtyID ? $Db.dty(dtyID, 'dty_Name') : null;
+
+        return fieldName || field.title || '';
+    },
+
+    /** Render the selected-fields list with per-row remove actions. */
+    _renderThemeFieldList: function(){
+        const that = this;
+        const list = this.element.find('#selected_fields').empty();
+
+        Object.keys(this.selectedFields || {}).forEach(function(key){
+            const field = that.selectedFields[key];
+            if(!field) return;
+
+            const row = $('<div class="thematic-list-item thematic-field-item" role="option">')
+                .attr('data-key', key)
+                .attr('aria-selected', String(key)===String(that.currentField) ? 'true' : 'false')
+                .toggleClass('selected', String(key)===String(that.currentField))
+                .appendTo(list);
+
+            $('<span class="thematic-list-title thematic-field-title">')
+                .text(that._getThemeFieldName(field))
+                .appendTo(row);
+
+            const actions = $('<span class="thematic-list-actions thematic-field-actions">').appendTo(row);
+            $('<span class="ui-icon ui-icon-trash" title="Remove field">')
+                .appendTo(actions)
+                .on('click', function(evt){
+                    window.hWin.HEURIST4.util.stopEvent(evt);
+                    that._removeThemeField(key);
+                });
+
+            row.on('click', function(){
+                that._selectThemeField(key, true);
+            });
+        });
+    },
+
+    /** Select a thematic field and load its range editor. */
+    _selectThemeField: function(key, saveCurrent){
+        const main_area = this.element.find('#div_work_area');
+        const f_ranges = main_area.find('#f_ranges');
+
+        if(saveCurrent!==false) this._saveThemeField();
+        this.currentField = key && this.selectedFields[key] ? key : 0;
+        f_ranges.empty();
+        this._renderThemeFieldList();
+
+        if(this.currentField){
+            const selfield = this.selectedFields[this.currentField];
+            main_area.show();
+            main_area.find('#f_title_display').text(this._getThemeFieldName(selfield));
+            main_area.find('#f_title').val(selfield.title || '');
+
+            for(let k=0; k<selfield.ranges.length; k++){
                 this._defThemeFieldRange(k, selfield.ranges[k]);
             }
         }else{
-            this.element.find('#div_work_area').hide();    
+            main_area.hide();
+            main_area.find('#f_title_display').text('');
         }
+        this._updateThematicWorkflowVisibility();
+        return true;
     },
-    
+
+    /** Remove a field from the current renderer. */
+    _removeThemeField: function(key){
+        if(!this.selectedFields[key]) return;
+        const that = this;
+        window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?', function(){
+            if(String(that.currentField)===String(key)) that._saveThemeField();
+            delete that.selectedFields[key];
+            that.currentField = 0;
+            that._renderThemeFieldList();
+
+            const remaining = Object.keys(that.selectedFields);
+            if(remaining.length>0){
+                that._selectThemeField(remaining[0], false);
+                that._updateFieldSelectionVisibility(false);
+            }else{
+                that._selectThemeField(0, false);
+                that._updateFieldSelectionVisibility(true);
+            }
+        });
+    },
+
     /**
      * @brief Defines and renders a single range configuration row in the UI.
      * @memberof heurist.thematicMapping
@@ -1236,22 +1393,7 @@ for(let i=0; i<rty_IDs.length; i++){
                                 ?$(event.target).attr('id')
                                 :$(event.target).parent().attr('id');
             
-            if(key=='btn_f_remove'){
-                window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                function(){
-
-                that.element.find('#selected_fields').find('option[value="'+that.currentField+'"]').remove();                
-                that.selectedFields[that.currentField] = null;
-                delete that.selectedFields[that.currentField];
-                that.currentField = 0;
-                that._onThemeFieldSelect();
-                that._updateFieldSelectionVisibility(
-                    that.element.find('#selected_fields option').length===0
-                );
-                
-                });
-                
-            }else if(key=='btn_f_range_add'){
+            if(key=='btn_f_range_add'){
                 
                 let selfield = this.selectedFields[this.currentField];
                 let idx = selfield.ranges.length

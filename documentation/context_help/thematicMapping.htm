@@ -7,60 +7,60 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Lang" content="en">
 <meta name="author" content="Heurist Network">
-<meta name="description" content="User guide to defining thematic maps for Heurist map layers">
+<meta name="description" content="User guide to defining thematic renderers for Heurist map layers">
 <meta name="keywords" content="Heurist, thematic mapping, map symbology, ranges, categories">
-<title>Thematic Mapping</title>
+<title>Thematic Renderers</title>
 <link rel="stylesheet" type="text/css" href="../../h4styles.css">
 </head>
 <body>
 <div id="content">
 
-<h2>Thematic Mapping</h2>
+<h2>Thematic Renderers</h2>
 <hr>
 
 <p>
-Thematic maps change the appearance of records on a map according to the values of one or more record fields.
+Thematic renderers change the appearance of records on a map according to the values of one or more record fields.
 For example, a field such as <i>Country</i> can control colour, <i>Population</i> can control symbol size,
 and <i>City type</i> can control the marker symbol.
 </p>
 
 <h3>Opening the thematic map editor</h3>
 <p>
-Open the symbology editor for a map layer and choose the thematic maps option. A map layer may contain several
-thematic map definitions. Use the <b>Thematic maps</b> list to select the definition you want to edit, or use the
-plus button to add another one.
+Open the symbology editor for a map layer and choose the thematic renderers option. A map layer may contain several
+thematic renderer definitions. A new definition starts with no renderer. Use <b>Add renderer</b> to create one, then
+use the pencil or bin icons in the renderer list to rename or remove it.
 </p>
 
-<h3>Thematic map settings</h3>
+<h3>Thematic renderer settings</h3>
 <ul>
-    <li><b>Title</b> &mdash; the name displayed for this thematic map.</li>
-    <li><b>Active by default</b> &mdash; makes this thematic map active when the map layer is first loaded.</li>
+    <li><b>Title</b> &mdash; the name displayed for this thematic renderer. Titles must be unique within the layer.</li>
+    <li><b>Active by default</b> &mdash; makes this renderer active when the map layer is first loaded. Only one renderer can be active by default; if none is active, the layer uses its default symbology.</li>
     <li><b>Base symbol</b> &mdash; optional symbology applied before field-specific rules. Click the symbol sample or <b>Edit</b> to modify it. Use <b>Reset</b> to inherit the layer's normal symbology.</li>
 </ul>
 <p>
-A thematic map can override only the properties that need to change. Any property not specified by the thematic
+A thematic renderer can override only the properties that need to change. Any property not specified by the thematic
 map continues to use the base symbol or the normal layer symbology.
 </p>
 
 <h3>Selecting fields</h3>
 <p>
-The <b>Fields</b> list contains the fields used by the selected thematic map. If no field has yet been selected,
-the field-selection area is displayed automatically. Choose the relevant record type, then select a field from
-the record structure.
+The <b>Fields</b> list contains the fields used by the selected thematic renderer. If no field has yet been selected,
+the field-selection area is displayed automatically. Choose a record type represented in the layer, then select a field from
+the record structure. If the layer contains only one record type, it is shown directly instead of displaying a selector.
 </p>
 <p>
 After at least one field has been added, the field-selection area is hidden to leave more space for editing ranges
-and categories. Click <b>Select another field</b> whenever you need to add another field.
+and categories. Click <b>Add field</b> whenever you need to add another field.
 </p>
 <p>
-Several fields may contribute different parts of the final symbol. For example, one field can determine colour,
+Several fields may contribute different parts of the final symbol in the same renderer. For example, one field can determine colour,
 another can determine size, and another can determine the icon.
 </p>
 
 <h3>Defining ranges and categories</h3>
 <p>
 Select a field in the <b>Fields</b> list to edit its ranges or categories. The field <b>Title</b> can be changed to a
-more suitable label for use in the thematic map.
+more suitable label for use in the thematic renderer.
 </p>
 <ul>
     <li><b>Add range</b> &mdash; adds a range or category manually.</li>
@@ -88,22 +88,22 @@ a starting value to an ending value. Heurist distributes the values across the r
 selected field. Opacity values range from 0 (transparent) to 100 (opaque).
 </p>
 
-<h3>Saving and removing thematic maps</h3>
+<h3>Saving and removing thematic renderers</h3>
 <p>
-Click <b>Save thematic map</b> to return the thematic definitions to the layer symbology editor. A thematic map must
+Click <b>Save thematic map</b> to return the thematic renderer definitions to the layer symbology editor. Each thematic renderer must
 have a title and at least one field with ranges/categories before it can be saved.
 </p>
 <p>
-Use <b>Remove theme</b> to delete the selected thematic map. If the final thematic map is removed, the editor closes
-and returns the remaining ordinary layer symbology, so the thematic mapping is removed from the layer when the
-parent symbology editor is saved.
+Use the bin icon in the renderer list to delete a thematic renderer. If the final renderer is removed, the editor
+returns to its initial empty state. You can add another renderer, or save the empty renderer set to remove thematic
+rendering from the layer.
 </p>
 
 <h3>How symbols are combined</h3>
 <p>The final symbol for a record is built in this order:</p>
 <ol>
     <li>Normal map-layer symbology.</li>
-    <li>The thematic map's optional <b>Base symbol</b>.</li>
+    <li>The thematic renderer's optional <b>Base symbol</b>.</li>
     <li>Overrides defined by the matching range/category for each thematic field.</li>
 </ol>
 <p>

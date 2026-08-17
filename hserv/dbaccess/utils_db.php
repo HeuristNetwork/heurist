@@ -1162,6 +1162,7 @@ $mysqli->kill($thread_id);
             }
 
             if(!$res){
+                error_log('Error: '.$error);
                 $res = 'Unable to execute script '.htmlspecialchars(basename($script_file)).' for database '.$database_name_full;
             }
         }

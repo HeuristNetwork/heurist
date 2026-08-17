@@ -1199,6 +1199,7 @@ class DbUtils {
         
         if($res!==true){
             $res[1] = 'Cannot create database tables. '.$res[1];
+            //error_log('Error :'.$res[1]);
             self::$system->addErrorArr($res);
         }elseif($level<2){
             return true;  //without constraints and triggers
