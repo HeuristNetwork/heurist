@@ -17,7 +17,7 @@
  */
 
 /*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinyMCE, EditorCodeMirror,
-translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile */
+translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile, selectGeoField */
 
 /**
  * @namespace heurist.editing_input
@@ -530,7 +530,7 @@ $.widget( "heurist.editing_input", {
                ((that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                 that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'])
                 && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
-            
+                
             //saw TODO this really needs to check many exist
             let repeatable = (Number(this.f('rst_MaxValues')) != 1  || is_translation)? true : false;
             
@@ -553,7 +553,8 @@ $.widget( "heurist.editing_input", {
 
                 //translation for text field only    
                 let rec_translate = this._isForRecords && !is_translation
-                                    && (this.detailType == 'freetext' || this.detailType == 'blocktext');
+                                    && (this.detailType == 'freetext' || this.detailType == 'blocktext')
+                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS']);
 
                 let styles = {
                     display:'block', 
@@ -571,8 +572,7 @@ $.widget( "heurist.editing_input", {
                     .appendTo( btn_cont )
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
-                .attr('title', 'Add another ' + window.hWin.HEURIST4.util.stripTags(lblTitle) +(is_translation?' translation':' value' ))                    
-                .css(styles);
+                .attr('title', 'Add another ' + window.hWin.HEURIST4.util.stripTags(lblTitle) +(is_translation?' translation':' value' ))       .css(styles);
 
                 if(rec_translate){ // add translate icon
 
@@ -1372,8 +1372,9 @@ $.widget( "heurist.editing_input", {
                     }});
             }else
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
-            && this.options.dtID > 0 || this.options.dtID === 'bug_Description')
+             && this.options.dtID > 0 || this.options.dtID === 'bug_Description')
             {
 
                 const isCMS_record = 
@@ -1887,7 +1888,7 @@ $.widget( "heurist.editing_input", {
                 
                 //hide wyswyg options for custom js and css fields
                 if (isCMS_record && (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'] || 
-                    this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])){
+                    this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])) {
                 
                     isCMS_content = true;
                     $btn_edit_switcher.find('span.wysiwyg').hide();
@@ -4325,8 +4326,64 @@ $.widget( "heurist.editing_input", {
             
         }//end if by detailType
 
+        //----------------- DataSource geo field-path selector
+        if(this.options.dtID > 0 &&
+           window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'] &&
+           this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS']){
+
+            // DT_GEO_FIELDS is repeatable: every input stores exactly one coded path.
+            // Keep the stored path hidden and show its human-readable hierarchy title.
+            $input.hide();
+
+            let $geo_field_title = $('<span>')
+                .css({'line-height':'20px','vertical-align':'top','margin-right':'8px'})
+                .insertBefore($input);
+
+            function __refreshGeoFieldTitle(){
+                let code = $.trim($input.val() || '');
+                let title = '';
+
+                if(code){
+                    let hierarchy = $Db.getHierarchyTitles(code);
+                    if(hierarchy && hierarchy.harchy){
+                        title = hierarchy.harchy.join('');
+                    }
+                }
+
+                $geo_field_title.html(title || '<i>'+window.hWin.HR('No geo field selected')+'</i>');
+            }
+
+            __refreshGeoFieldTitle();
+
+            let $btn_geo_fields = $('<span>Select geo field</span>',
+                    {title:'Select a geographic field from the query result or linked records'})
+                .addClass('smallbutton btn_add_term')
+                .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                      'text-decoration':'underline','margin-left':'6px'})
+                .appendTo($inputdiv);
+
+            this._on($btn_geo_fields, {click:function(){
+                let DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+                let queryField = that.options.editing
+                    ? that.options.editing.getFieldByName(DT_QUERY_STRING)
+                    : null;
+                let query = null;
+
+                if(queryField){
+                    let values = queryField.editing_input('getValues');
+                    query = values && values.length ? values[0] : null;
+                }
+
+                selectGeoField(query, function(value){
+                    $input.val(value);
+                    __refreshGeoFieldTitle();
+                    that.onChange();
+                }, that.element.closest('div[role="dialog"]'));
+            }});
+        }
+
         //----------------- color or symbology editor
-        if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
+        else if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
 
                 if(that.options.rectypeID!=window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
                     $input.attr('readonly','readonly');

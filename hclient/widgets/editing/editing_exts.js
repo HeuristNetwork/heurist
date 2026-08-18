@@ -457,7 +457,7 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_Display": (ptr_fields.length>0 && mode_edit===3)?"visible":"hidden",
                 "rst_FieldConfig":ptr_fields, //{"entity":"defDetailTypes","csv":false},
                 "rst_DisplayHelpText": "Geo fields from query resultset or linked records to be mapped"
-        }},*/
+        }},
 
         {"dtID": "geofield",
             "dtFields":{
@@ -468,7 +468,7 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayWidth":50,
                 "rst_DisplayHelpText": "Geo fields from query resultset or linked records to be mapped"
         }},
-        
+        */        
         {
         "groupHeader": "Symbols",
         "groupTitleVisible": true,
@@ -815,172 +815,50 @@ function editSymbology(current_value, mode_edit, callback){
     edit_symb_dialog.dialog('option', 'buttons', edit_buttons);
     edit_symb_dialog.dialog('open');
     
-    if(mode_edit==3 && maplayer_query){
-            
-            let intputs  = _editing_symbology.getInputs('geofield');
-            let geofield_input = $(intputs[0]);
-            let geofield_lbls = $('<div>').insertBefore(geofield_input);
-            geofield_lbls
-                .css({background:geofield_input.css('background'), 
-                      cursor:'pointer',
-                      padding: '2px',
-                      width: '300px',
-                     'fonst-size':'10px !important',   
-                     'fonst-style':'italic', 
-                     'text-decoration':'underline'});
-            geofield_input.hide();
-            
-            let titles = [];
-            if(current_value['geofield']){
-                let codes = current_value['geofield'].split(',');
-                for(let i=0; i<codes.length; i++){
-                    let code = codes[i];
-                    if(code && code.indexOf(':')>0){
-                        let harchy = $Db.getHierarchyTitles(code);
-                        if(harchy){
-                            titles.push(harchy.harchy.join(''));
-                        }
-                    }
-                }
-            }
-            if(titles.length>0){
-                geofield_lbls.html(titles.join('<br>'));    
-            }else{
-                geofield_lbls.html(window.hWin.HR('Click to select geo fields'));    
-            }
-            
-            
+    //@todo remove this section of code - geo fields are defined in RT_QUERY_SOURCE in DT_GEO_FIELDS
+    if(false &&  mode_edit==3 && maplayer_query){
 
-            $(geofield_lbls).on({click: function(e){
-                
-                if(!maplayer_rty || maplayer_rty.length==0) {return;}
-                
-                let maplayer_rty_treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, maplayer_rty, ['geo','resource'] );                 
-                
-                let popele = edit_symb_dialog.find('#divFieldSelector');
-                if(popele.length==0){
-                   popele = $('<div id="divFieldSelector"><div class="rtt-tree"/></div>').appendTo(edit_symb_dialog);
-                }
-            
-                if(maplayer_rty_treedata && maplayer_rty_treedata.length>0){
-                    maplayer_rty_treedata[0].expanded = true;
-                } 
-                
-                let treediv = popele.find('.rtt-tree');
-            
-                treediv.fancytree({
-            checkbox: true,
-            selectMode: 3,  // single
-            source: maplayer_rty_treedata,
-            beforeSelect: function(event, data){
-                // A node is about to be selected: prevent this, for folder-nodes:
-                if( data.node.hasChildren() ){
-                    return false;
-                }
-            },
-            renderNode: function(event, data){
-                if(data.node.parent && (data.node.parent.type == 'resource' || data.node.parent.type == 'rectype')){ // add left border+margin
-                    $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
-                }
-                if(data.node.type == 'resource' || data.node.type == 'rectype'){
-                    $(data.node.li).find('.fancytree-checkbox').hide();
-                }
-            },
-            lazyLoad: function(event, data){
-                let node = data.node;
-                let parentcode = node.data.code; 
-                let rectypes = node.data.rt_ids;
-
-                if(parentcode.split(":").length<5){  //limit with 3 levels
-                
-                    let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
-                        rectypes, (parentcode.split(":").length<3?['geo','resource']:['geo']), parentcode );
-                    if(res.length>1){
-                        data.result = res;
-                    }else{
-                        data.result = res[0].children;
-                    }
-
-                }else{
-                    data.result = [];
-                }                            
-
-                return data;                                                   
-            },
-            loadChildren: function(e, data){
-                setTimeout(function(){
-                   
-                    },500);
-            },
-            click: function(e, data){
-                
-                let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
-                let setDefaults = !data.node.isExpanded();
-
-                if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                    if(!isExpander){
-                        data.node.setExpanded(!data.node.isExpanded());
-                    }
-                }else if( data.node.lazy && !isExpander) {
-                    data.node.setExpanded( true );
-                }
-            },
-            keydown: function(e, data) {
-                if( e.which === 32 ) {
-                    data.node.toggleSelected();
-                    return false;
-                }
-            }
+        let inputs = _editing_symbology.getInputs('geofield');
+        let geofield_input = $(inputs[0]);
+        let geofield_lbls = $('<div>').insertBefore(geofield_input);
+        geofield_lbls.css({
+            background: geofield_input.css('background'),
+            cursor: 'pointer',
+            padding: '2px',
+            width: '300px',
+            'font-size': '10px',
+            'font-style': 'italic',
+            'text-decoration': 'underline'
         });
-                
-                let $dlg2, btns = [
-                    {text:window.hWin.HR('Apply'),
-                        click: function(){
-                            
-                            let tree = $.ui.fancytree.getTree(treediv);
-                            let fieldIds = tree.getSelectedNodes(false);
-                            let k, len = fieldIds.length;
-                            let selectedFields = [], titles = [];
-                            
-                            for (k=0;k<len;k++){
-                                let node =  fieldIds[k];
-                                if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
-                                
-                                if(!node.children || node.children.length==0){
-                                    let code = node.data.code;
-                                    selectedFields.push(code);
-                                    let harchy = $Db.getHierarchyTitles(code);
-                                    titles.push(harchy.harchy.join(''));
-                                }
-                            }                            
-                           
-                           
-                            _editing_symbology.setFieldValueByName2('geofield',selectedFields.join(','),true);
-                            geofield_lbls.html(titles.join('<br>'));
-                            $dlg2.dialog('close');
-                            
-                            //
+        geofield_input.hide();
 
-                        }
-                    },
-                    {text:window.hWin.HR('Close'),
-                        click: function() { $dlg2.dialog('close'); }
+        function __refreshGeoFieldLabels(value){
+            let titles = [];
+            let codes = value ? value.split(',') : [];
+            for(let i=0; i<codes.length; i++){
+                let code = codes[i];
+                if(code && code.indexOf(':')>0){
+                    let harchy = $Db.getHierarchyTitles(code);
+                    if(harchy){
+                        titles.push(harchy.harchy.join(''));
                     }
-                ];
-        
-                $dlg2 = window.hWin.HEURIST4.msg.showElementAsDialog({
-                    window:  window.hWin, //opener is top most heurist window
-                    title: window.hWin.HR('Select geo field to be mapped'),
-                    width: 400,
-                    height: 600,
-                    element:  popele[0],
-                    resizable: true,
-                    buttons: btns,
-                    default_palette_class: 'ui-heurist-design'
-                });        
-                
-            }});
-        
+                }
+            }
+            geofield_lbls.html(titles.length>0
+                ? titles.join('<br>')
+                : window.hWin.HR('Click to select geo fields'));
+        }
+
+        __refreshGeoFieldLabels(current_value['geofield']);
+
+        $(geofield_lbls).on({click: function(){
+            selectGeoField(maplayer_query, function(value){
+                _editing_symbology.setFieldValueByName2('geofield', value, true);
+                current_value['geofield'] = value;
+                __refreshGeoFieldLabels(value);
+            }, edit_symb_dialog);
+        }});
+
     }//mode 3
         
     
@@ -989,6 +867,156 @@ function editSymbology(current_value, mode_edit, callback){
     });
     
 }//end editSymbology
+
+/**
+ * Opens a selector for one geographic field path available from a Heurist query.
+ *
+ * The selected value is returned as one Heurist field-path code, for example
+ * "10:lt134:12:28". Resource fields may be followed through linked records;
+ * only geographic fields are selectable. The dialog closes immediately after
+ * a geographic field is selected.
+ *
+ * @memberof Widgets.Editing
+ * @param {string|object} mapQuery Heurist query defining the DataSource result set.
+ * @param {function} callback Receives the selected field-path code.
+ * @param {jQuery|null} parentDialog Optional parent dialog used to host the selector element.
+ */
+function selectGeoField(mapQuery, callback, parentDialog){
+
+    if(window.hWin.HEURIST4.util.isempty(mapQuery)){
+        window.hWin.HEURIST4.msg.showMsgFlash('A query is required to select a geo field', 2000);
+        return;
+    }
+
+    let request = {
+        q: mapQuery,
+        w: 'a',
+        detail: 'count_by_rty'
+    };
+
+    window.HAPI4.RecordMgr.search(request, function(response){
+
+        if(response.status != window.hWin.ResponseStatus.OK){
+            window.hWin.HEURIST4.msg.showMsgErr(response);
+            return;
+        }
+
+        let recordTypes = [];
+        if(response.data && $.isPlainObject(response.data.recordtypes)){
+            recordTypes = Object.keys(response.data.recordtypes);
+        }
+        if(recordTypes.length==0){
+            window.hWin.HEURIST4.msg.showMsgFlash('No record types found for this query', 2000);
+            return;
+        }
+
+        let treeData = window.hWin.HEURIST4.dbs.createRectypeStructureTree(
+            null, 6, recordTypes, ['geo','resource']);
+
+        if(!treeData || treeData.length==0){
+            window.hWin.HEURIST4.msg.showMsgFlash('No geographic fields found for this query', 2000);
+            return;
+        }
+        treeData[0].expanded = true;
+
+        let host = parentDialog && parentDialog.length
+            ? parentDialog
+            : $(window.hWin.document).find('body');
+        let popele = host.find('#divGeoFieldSelector');
+        if(popele.length==0){
+            popele = $('<div id="divGeoFieldSelector"><div class="rtt-tree"/></div>').appendTo(host);
+        }
+
+        let treediv = popele.find('.rtt-tree');
+        if(treediv.hasClass('fancytree-container')){
+            try{ treediv.fancytree('destroy'); }catch(e){}
+        }
+        treediv.empty();
+
+        let $dlg = null;
+
+        function __selectNode(node){
+            if(!node || window.hWin.HEURIST4.util.isempty(node.data.code)) return;
+            if(node.type == 'resource' || node.type == 'rectype') return;
+
+            if(window.hWin.HEURIST4.util.isFunction(callback)){
+                callback.call(this, node.data.code);
+            }
+            if($dlg){
+                $dlg.dialog('close');
+            }
+        }
+
+        treediv.fancytree({
+            checkbox: false,
+            source: treeData,
+            renderNode: function(event, data){
+                if(data.node.parent &&
+                   (data.node.parent.type == 'resource' || data.node.parent.type == 'rectype')){
+                    $(data.node.li).attr('style',
+                        'border-left: black solid 1px !important;margin-left: 9px;');
+                }
+            },
+            lazyLoad: function(event, data){
+                let node = data.node;
+                let parentcode = node.data.code;
+                let rectypes = node.data.rt_ids;
+
+                if(parentcode.split(':').length<5){
+                    let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree(
+                        null, 6, rectypes,
+                        (parentcode.split(':').length<3 ? ['geo','resource'] : ['geo']),
+                        parentcode);
+                    data.result = res.length>1 ? res : res[0].children;
+                }else{
+                    data.result = [];
+                }
+                return data;
+            },
+            click: function(e, data){
+                let node = data.node;
+                let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+
+                if(node.type != 'resource' && node.type != 'rectype' && !node.lazy){
+                    __selectNode(node);
+                    return false;
+                }
+
+                if($(e.originalEvent.target).is('span') && node.children && node.children.length>0){
+                    if(!isExpander){
+                        node.setExpanded(!node.isExpanded());
+                    }
+                }else if(node.lazy && !isExpander){
+                    node.setExpanded(true);
+                }
+            },
+            keydown: function(e, data){
+                if(e.which === 13 || e.which === 32){
+                    let node = data.node;
+                    if(node.type != 'resource' && node.type != 'rectype' && !node.lazy){
+                        __selectNode(node);
+                    }else{
+                        node.setExpanded(!node.isExpanded());
+                    }
+                    return false;
+                }
+            }
+        });
+
+        $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
+            window: window.hWin,
+            title: window.hWin.HR('Select geo field'),
+            width: 400,
+            height: 600,
+            element: popele[0],
+            resizable: true,
+            buttons: [
+                {text:window.hWin.HR('Close'), click:function(){ $dlg.dialog('close'); }}
+            ],
+            default_palette_class: 'ui-heurist-design'
+        });
+    });
+}
 
 /**
  * Calculates the geographic extent (bounding box) of an image based on its dimensions and an associated world file.

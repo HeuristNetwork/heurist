@@ -252,7 +252,16 @@ class MapPresentationService
             
         }else{ //heurist-query
             $query = $this->layers->value($record, 'DT_QUERY_STRING');
-            if($query !== null){ $source['query'] = $this->parseQuery($query); } 
+            if($query !== null){ $source['query'] = $this->parseQuery($query); }
+
+            $geoFields = array_values(array_filter(
+                $this->layers->values($record, 'DT_GEO_FIELDS'),
+                static function($value){
+                    return $value !== null && trim((string)$value) !== '';
+                }
+            ));
+            if(!empty($geoFields)){ $source['geoFields'] = $geoFields; }
+
             $url = $this->layers->value($record, 'DT_SERVICE_URL');
             if($url !== null){
                 $source['url'] = $this->scalar($url);
