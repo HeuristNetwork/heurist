@@ -200,7 +200,7 @@ class USanitize {
             $message = '';
         }else{
             if($allowed_tags==null) {
-                $allowed_tags = '<a><u><i><div><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><h5><h6><p><ul><li><img><blockquote><pre><span><bibl><persName><audio><video><iframe><source><table><th><tr><td><article><aside><details><figcaption><figure><footer><header><main><mark><nav><section><summary><time>';
+                $allowed_tags = '<a><u><i><div><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><h5><h6><p><ol><ul><li><img><blockquote><pre><span><bibl><persName><audio><video><iframe><source><table><th><tr><td><article><aside><details><figcaption><figure><footer><header><main><mark><nav><section><summary><time>';
                 
             }elseif($allowed_tags===false){
                 $allowed_tags = null;
