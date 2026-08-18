@@ -48,6 +48,9 @@ class RecordDetailsByPath
     /** Number of record headers loaded in one recordSearch() request. */
     private const RECORD_CHUNK_SIZE = 1000;
 
+    /** @var array<string,array> Parsed/validated request plans keyed by normalized field-code list. */
+    private $requestPlans = array();
+
     /** Minimal record headers required by recordSearchDetails() visibility checks. */
     private const DETAIL_HEADER_FIELDS = 'rec_ID,rec_RecTypeID,rec_OwnerUGrpID';
 
@@ -73,7 +76,14 @@ class RecordDetailsByPath
     {
         $ids = $this->normalizeRecordIds($recordIds);
         $codes = $this->normalizeFieldCodes($fieldCodes);
-        $plan = $this->buildRequestPlan($codes);
+
+        $planKey = implode("\x1F", $codes);
+        if(isset($this->requestPlans[$planKey])){
+            $plan = $this->requestPlans[$planKey];
+        }else{
+            $plan = $this->buildRequestPlan($codes);
+            $this->requestPlans[$planKey] = $plan;
+        }
 
         $sourceRecords = $this->loadAccessibleRecords($ids);
         $outputById = array();

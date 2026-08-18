@@ -535,6 +535,24 @@ function HMapLayer( _options ) {
         let layer_timefields = _recordset.fld(options.rec_layer || _record, 
                         window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']);
         let layer_default_style = null;
+
+        // DT_GEO_FIELDS is the canonical source of mapping field paths.
+        // The field is repeatable: each value is one complete coded path.
+        const geo_fields_dty = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'];
+        if(geo_fields_dty>0){
+            let geo_fields = _recordset.fld(_record, geo_fields_dty);
+            if(!window.hWin.HEURIST4.util.isempty(geo_fields)){
+                if(!Array.isArray(geo_fields)) geo_fields = [geo_fields];
+                $.each(geo_fields, function(i, value){
+                    if(typeof value !== 'string') return;
+                    value = value.trim();
+                    if(value && layer_geofields.indexOf(value)<0){
+                        layer_geofields.push(value);
+                    }
+                });
+            }
+        }
+
         if(window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']>0){
             let layer_themes = _recordset.fld(options.rec_layer || _record, 
                                         window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
@@ -558,7 +576,9 @@ function HMapLayer( _options ) {
 }        
 */            
            
-            //find "geofield" in thematic maps - download geodata from these fields only
+            // Backward compatibility: older MapLayers stored geofield in
+            // DT_SYMBOLOGY. Use it only when DT_GEO_FIELDS is not defined for the
+            // DataSource. Keep raw coded paths; the server now interprets them.
             layer_themes = window.hWin.HEURIST4.util.isJSON(layer_themes);
             
             if(layer_themes){
@@ -569,23 +589,13 @@ function HMapLayer( _options ) {
 
                 $.each(layer_themes, function(i,item){
                     if(item.geofield){
-                        //geo field can be 2 types
-                        //1. code request (rt:dt:rt:dt) that alows to drill for geo values in linked records
-                        //2. dty_ID - record pointer/resource field 
-                        let geofields = item.geofield.split(',');
-                        for(let k=0; k<geofields.length; k++){
-                            let geofield = geofields[k];
-                            if(geofield.indexOf(':')>0){
-                                //1. code request
-                                let field = window.hWin.HEURIST4.query.createFacetQuery(geofield, true, false);
-                                if(field['facet'] && field['facet']=='$IDS'){
-                                    layer_geofields.push({id:field['id']}); //in main record
-                                }else{
-                                    layer_geofields.push({id:field['id'],q:field['facet']}); //in linked records
+                        if(layer_geofields.length===0){
+                            let geofields = String(item.geofield).split(',');
+                            for(let k=0; k<geofields.length; k++){
+                                let geofield = geofields[k].trim();
+                                if(geofield && layer_geofields.indexOf(geofield)<0){
+                                    layer_geofields.push(geofield);
                                 }
-                            }else{
-                                //2. pointer field
-                                layer_geofields.push(geofield);    
                             }
                         }
                         
