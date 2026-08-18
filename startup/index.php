@@ -1121,7 +1121,7 @@ div.coverall-div {
 
     background-image: url(../hclient/assets/loading-animation-white.gif);
     background-repeat: no-repeat;
-    background-position: center;     
+    background-position: center;
 
     cursor:wait;
     user-select: none;

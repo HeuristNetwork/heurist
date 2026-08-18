@@ -737,7 +737,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         this._Saml_from_UI( this._currentSaml );
 
         const ORCID = this._editing.getValue('ugr_ORCID');
-        if(!window.hWin.HEURIST4.util.isempty(ORCID) && !ORCID.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/)){
+        if(!window.hWin.HEURIST4.util.isempty(ORCID) && !ORCID.match(/^\d{4}-\d{4}-\d{4}-\d{4}$/)){
             this._editing.getFieldByName('ugr_ORCID').editing_input('showErrorMsg', 'Invalid ORCID, must be in format of XXXX-XXXX-XXXX-XXXX');
             return null;
         }
@@ -950,7 +950,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             window.hWin.HEURIST4.msg.showMsgFlash('Please enter an ORCID...', 3000);
             $getData.hide();
             return;
-        }else if(!ORCID.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/)){
+        }else if(!ORCID.match(/^\d{4}-\d{4}-\d{4}-\d{4}$/)){
             let error = {
                 message: 'Invalid ORCID identifier provided.<br>It must be in the format of 0000-1111-2222-3333.',
                 status: window.hWin.ResponseStatus.INVALID_REQUEST
