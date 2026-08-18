@@ -2293,7 +2293,7 @@ function print_public_details(array $bib) {
                     || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
 
         print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.htmlspecialchars($bd['rollover']).'"':'')
-                .'>' . strip_tags($bd['val'], ALLOWED_TAGS.'<p><a><em><img><figure><figcaption>') . '</span>';// add value
+                .'>' . strip_tags($bd['val'], ALLOWED_TAGS.'<p><a><em><img><figure><figcaption><ul><ol><li>') . '</span>';// add value
         $prevLbl = $bd['name'];
     }
 

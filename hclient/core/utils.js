@@ -570,7 +570,7 @@ window.hWin.HEURIST4.util = {
         if (jqXHR && jqXHR.status === 0 && jqXHR.readyState === 0) {
             return {
                 status: window.hWin.ResponseStatus.CANCELLED,
-                message: 'Request aborted',
+                message: navigator.onLine ? 'Request aborted' : 'Sorry, you do not have a network connection',
                 aborted: true,
                 request_code: request_code
             };
