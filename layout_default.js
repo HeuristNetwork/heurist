@@ -224,7 +224,6 @@ window.hWin.cfg_layouts = [
                         options:{ dataTableParams:{}, show_export_buttons:true } },
                     {appid:'heurist_Map', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off', ui_main:true} }}, 
-                    {appid:'heurist_Map2', name: 'Map (new)'}, 
                     
                     {appid:'heurist_reportViewer', name: 'Report'},
                         
@@ -240,7 +239,9 @@ window.hWin.cfg_layouts = [
  
                     {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
                                 url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs', showProgress:false,
-                                css:{overflow:'hidden'}}}
+                                css:{overflow:'hidden'}}},
+
+                    {appid:'heurist_Map2', name: 'Map2 (test)'}
             ]}]
         }
     },    
