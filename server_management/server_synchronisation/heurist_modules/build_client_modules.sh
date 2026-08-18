@@ -24,8 +24,8 @@ GROUP="${HEURIST_CLIENT_GROUP:-heurist}"
 BRANCH="${HEURIST_CLIENT_BRANCH:-main}"
 
 # Override these environment variables if a repository uses a different URL.
-HEURIST_MAP_REPO="${HEURIST_MAP_REPO:-https://github.com/HeuristNetwork/heurist-map.git}"
-HEURIST_MIRADOR4_REPO="${HEURIST_MIRADOR4_REPO:-https://github.com/HeuristNetwork/heurist-mirador4.git}"
+HEURIST_MAP_REPO="${HEURIST_MAP_REPO:-git@github.com:HeuristNetwork/heurist-map.git}"
+HEURIST_MIRADOR4_REPO="${HEURIST_MIRADOR4_REPO:-git@github.com:HeuristNetwork/heurist-mirador4.git}"
 
 RUN_LOG="$(mktemp /tmp/heurist-client-modules.XXXXXX.log)"
 TEE_PID=""
