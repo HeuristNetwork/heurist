@@ -885,6 +885,10 @@ class DbRegis {
                 //we already checked it on previos step - database missed on this server
                 self::addErrorToCache($dbID, 'Database with ID#'.$dbID.' is not found in Heurist Reference Index database');
                 
+            }elseif(strpos($resServer, 'https://heurist-usyd.cloud.edu.au/heurist/?db=') === 0){
+                // special case, USDY server is out of date
+                $dburl = self::checkUSDYServer($resServer);
+
             }else{
                 //request to server where database can reside
                 $server = self::normalizeServerUrl($resServer, true);
@@ -1288,4 +1292,26 @@ class DbRegis {
         mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $detail);
     }
 
+    /**
+     * Simple check for University of Sydney database, as it's version of Heurist is out of date
+     *
+     * @param string $url URL to Heurist database on USDY server
+     * @return string|false False on failure, otherwise URL to database
+     */
+    private static function checkUSDYServer($url){
+
+        if(!filter_var($url, FILTER_VALIDATE_URL)){
+            self::addError(HEURIST_INVALID_REQUEST, 'Invalid URL to University of Sydney server.');
+            return false;
+        }
+
+        $headers = get_headers($url);
+
+        if(!$headers || strpos($headers[0], '200') === false){
+            self::addError(HEURIST_ACTION_BLOCKED, 'Unable to find Heurist database on University of Sydney server.');
+            return false;
+        }
+
+        return $url;
+    }
 }
