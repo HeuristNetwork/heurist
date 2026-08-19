@@ -2992,7 +2992,7 @@ $.widget( "heurist.resultList", {
         }
 
         let $ownership = this.div_toolbar.find('#toggleOwnerDisplay');
-        if(this.options.entityName == 'records' && $ownership.length === 0 && this.options.recordDivClass !== 'public'){
+        if(this.options.entityName == 'records' && $ownership.length === 0 && window.hWin.HAPI4.has_access() && this.options.recordDivClass !== 'public'){
 
             $ownership = $('<span>', {
                 style: 'float: left; padding: 6px 0 0 1.5em;',
