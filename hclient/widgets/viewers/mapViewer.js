@@ -312,6 +312,11 @@ $.widget('heurist.mapViewer', {
             // Heurist records, so the child only needs to provide the persisted record ID.
             editRecord: function(recordId) {
                 return that._openRecordEdit(recordId);
+            },
+            // Legacy Heurist editors remain entirely in the parent application.
+            // heurist-map passes/receives JSON only and never touches HAPI4 directly.
+            editSymbology: function(value, options) {
+                return that._editSymbology(value, options || {});
             }
         };
     },
@@ -954,6 +959,145 @@ $.widget('heurist.mapViewer', {
             return window.hWin.HR('Current results');
         }
         return 'Current results';
+    },
+
+    /** Open the legacy Heurist symbology/thematic editor and optionally persist DT_SYMBOLOGY. */
+    _editSymbology: function(value, options) {
+        var that = this;
+        var current = that._normalizeSymbologyValue(value) || {};
+        var recordId = Number(options && options.recordId);
+        var persist = options && options.persist === true;
+        var thematic = options && options.thematic === true;
+
+        return new Promise(function(resolve, reject) {
+            var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+            if (!ui) {
+                reject(new Error('Heurist symbology editor is not available'));
+                return;
+            }
+
+            var settled = false;
+            function accept(newValue) {
+                if (settled || newValue == null) return;
+                var parsed = that._normalizeSymbologyValue(newValue);
+                if (!parsed) {
+                    settled = true;
+                    reject(new Error('Symbology editor returned invalid JSON'));
+                    return;
+                }
+
+                // The ordinary editor returns only the base symbol. Preserve any
+                // canonical thematic renderers already attached to the layer.
+                if (!thematic && Array.isArray(current.thematic) && current.thematic.length) {
+                    parsed = {
+                        symbol: parsed.symbol && Array.isArray(parsed.thematic)
+                            ? parsed.symbol : parsed,
+                        thematic: $.extend(true, [], current.thematic)
+                    };
+                }
+
+                // thematicMapping returns the original canonical value on Cancel.
+                // Treat an unchanged result as a no-op and do not rewrite the record.
+                if (JSON.stringify(parsed) === JSON.stringify(current)) {
+                    settled = true;
+                    resolve(parsed);
+                    return;
+                }
+
+                settled = true;
+                if (!persist) {
+                    resolve(parsed);
+                    return;
+                }
+                that._saveLayerSymbology(recordId, parsed).then(function() {
+                    resolve(parsed);
+                }).catch(reject);
+            }
+
+            function cancel() {
+                if (settled) return;
+                settled = true;
+                resolve(null);
+            }
+
+            try {
+                if (thematic) {
+                    if (typeof ui.showRecordActionDialog !== 'function') {
+                        reject(new Error('Heurist thematic mapping editor is not available'));
+                        return;
+                    }
+                    ui.showRecordActionDialog('thematicMapping', {
+                        maplayer_query: options && options.query ? options.query : null,
+                        symbology: $.extend(true, {}, current),
+                        onClose: accept
+                    });
+                } else {
+                    if (typeof ui.showEditSymbologyDialog !== 'function') {
+                        reject(new Error('Heurist symbology editor is not available'));
+                        return;
+                    }
+                    // Mode 1 is the old map-legend style editor. Configuration/default
+                    // symbology has no persisted layer and uses the general mode 0.
+                    ui.showEditSymbologyDialog(
+                        $.extend(true, {}, current),
+                        recordId > 0 ? 1 : 0,
+                        accept,
+                        cancel
+                    );
+                }
+            } catch (error) {
+                reject(error);
+            }
+        });
+    },
+
+    _normalizeSymbologyValue: function(value) {
+        if (value && typeof value === 'object') return $.extend(true, {}, value);
+        if (typeof value !== 'string' || !value.trim()) return null;
+        try {
+            var parsed = JSON.parse(value);
+            return parsed && typeof parsed === 'object' ? parsed : null;
+        } catch (ignore) {
+            return null;
+        }
+    },
+
+    _getSymbologyFieldId: function() {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        var value = hapi && hapi.sysinfo && hapi.sysinfo.dbconst
+            ? hapi.sysinfo.dbconst.DT_SYMBOLOGY : null;
+        if (!(Number(value) > 0) && window.hWin && Number(window.hWin.DT_SYMBOLOGY) > 0) {
+            value = window.hWin.DT_SYMBOLOGY;
+        }
+        return Number(value) > 0 ? Number(value) : null;
+    },
+
+    _saveLayerSymbology: function(recordId, value) {
+        var id = Number(recordId);
+        var dtyID = this._getSymbologyFieldId();
+        var hapi = window.hWin && window.hWin.HAPI4;
+        if (!(id > 0) || !(dtyID > 0)) {
+            return Promise.reject(new Error('Cannot resolve Layer record or DT_SYMBOLOGY'));
+        }
+        if (!hapi || !hapi.RecordMgr || typeof hapi.RecordMgr.batch_details !== 'function') {
+            return Promise.reject(new Error('Heurist RecordMgr.batch_details is not available'));
+        }
+
+        return new Promise(function(resolve, reject) {
+            hapi.RecordMgr.batch_details({
+                a: 'addreplace',
+                recIDs: id,
+                dtyID: dtyID,
+                rVal: JSON.stringify(value)
+            }, function(response) {
+                if (response && response.status == window.hWin.ResponseStatus.OK) {
+                    resolve(response);
+                } else {
+                    reject(new Error(response && response.message
+                        ? response.message : 'Cannot save layer symbology'));
+                }
+            });
+        });
     },
 
     _openRecordEdit: function(recordId) {

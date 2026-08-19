@@ -279,46 +279,55 @@ class MapPresentationService
 
 
     /**
-     * Split the persisted DT_SYMBOLOGY value into the public style structure.
+     * Normalize persisted DT_SYMBOLOGY to the canonical public style format.
      *
-     * Map Layer symbology is stored as one JSON value. In the current persisted
-     * format the first array item is the ordinary/base symbol and subsequent
-     * items are thematic-map definitions. Older simple layers may store the
-     * symbol object directly rather than wrapping it in an array.
+     * Canonical values are:
+     *  - a plain symbol object when no thematic renderers exist;
+     *  - {symbol:{...}, thematic:[...]} when thematic renderers exist.
+     *
+     * Legacy array values remain readable.
      *
      * @param mixed $value Raw DT_SYMBOLOGY detail value.
-     * @return array Public style structure with type, symbol and thematic maps.
+     * @return array Canonical style value.
      */
     private function buildStyle($value): array
     {
         $decoded = $this->decodeJson($value);
-        $symbol = null;
+        if(!is_array($decoded)){ return array(); }
+
+        $keys = array_keys($decoded);
+        $isList = empty($decoded) || $keys === range(0, count($decoded) - 1);
+
+        $symbol = array();
         $thematic = array();
 
-        if(is_array($decoded)){
-            $keys = array_keys($decoded);
-            $isList = empty($decoded) || $keys === range(0, count($decoded) - 1);
-
-            if($isList){
-                for($i = 0; $i < count($decoded); $i++){
-                    if(is_array($decoded[$i])){
-                        if(isset($decoded[$i]['fields'])){
-                            $thematic[] = $decoded[$i];    
-                        }else{
-                            $symbol = $decoded[$i];
-                        }
-                    }
+        if(!$isList && (array_key_exists('symbol', $decoded) || array_key_exists('thematic', $decoded))){
+            $symbol = isset($decoded['symbol']) && is_array($decoded['symbol'])
+                ? $decoded['symbol']
+                : array();
+            $thematic = isset($decoded['thematic']) && is_array($decoded['thematic'])
+                ? array_values($decoded['thematic'])
+                : array();
+        }elseif($isList){
+            // Legacy format: [baseSymbol, thematicRenderer, ...].
+            foreach($decoded as $item){
+                if(!is_array($item)){ continue; }
+                if(isset($item['fields']) && is_array($item['fields'])){
+                    $thematic[] = $item;
+                }else{
+                    $symbol = isset($item['symbol']) && is_array($item['symbol'])
+                        ? $item['symbol']
+                        : $item;
                 }
-            }else{
-                // Backward compatibility with simple symbology stored as one object.
-                $symbol = $decoded;
             }
+        }else{
+            // Simple non-thematic symbology.
+            $symbol = $decoded;
         }
 
-        return array(
-            'symbol' => $symbol,
-            'thematic' => $thematic
-        );
+        return count($thematic)>0
+            ? array('symbol'=>$symbol, 'thematic'=>$thematic)
+            : $symbol;
     }
 
     private function parseBookmark(?string $raw): ?array

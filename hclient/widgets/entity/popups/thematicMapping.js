@@ -66,7 +66,7 @@ It creates thematic map in the following format
  * @property {string} [title='Define thematic mapping'] Default title of the dialog.
  * @property {string} [default_palette_class='ui-heurist-design'] Default CSS class for theming.
  * @property {?string} maplayer_query The HAPI query string for the map layer, used to determine relevant record types and potentially data ranges.
- * @property {?object|object[]} thematic_mapping The initial thematic mapping configuration(s) to load.
+ * @property {?object} symbology Canonical layer symbology: a plain symbol, or {symbol,thematic}.
  * @property {string} [path='widgets/entity/popups/'] Path to the widget's HTML template.
  * @property {string} [htmlContent='thematicMapping.html'] Name of the HTML template file.
  */
@@ -83,7 +83,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         default_palette_class: 'ui-heurist-design', 
         
         maplayer_query: null,
-        thematic_mapping: null, //json with all symbols/ranges
+        symbology: null, //canonical plain symbol or {symbol, thematic}
+        thematic_mapping: null, //legacy input alias; accepted for backward compatibility
         
         path: 'widgets/entity/popups/', //location of this widget
         
@@ -145,13 +146,62 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         // themselves.
     //    this._on($(window.hWin.document), {keydown:function(event){
     //        if(!(event.key === 'Escape' || event.keyCode === 27)) return; });
+    /**
+     * Normalize editor input to the canonical vector symbology structure.
+     * Legacy [baseSymbol, thematicRenderer, ...] input remains readable.
+     */
+    _normalizeSymbology: function(value){
+
+        value = window.hWin.HEURIST4.util.isJSON(value);
+        if(!value) return {symbol:null, thematic:[]};
+
+        if($.isPlainObject(value) && (Object.hasOwn(value, 'symbol') || Array.isArray(value.thematic))){
+            return {
+                symbol: $.isPlainObject(value.symbol) ? value.symbol : null,
+                thematic: Array.isArray(value.thematic) ? value.thematic : []
+            };
+        }
+
+        if(Array.isArray(value)){
+            let symbol = null;
+            let thematic = [];
+            value.forEach(function(item){
+                if(!$.isPlainObject(item)) return;
+                if(Array.isArray(item.fields)){
+                    thematic.push(item);
+                }else{
+                    symbol = $.isPlainObject(item.symbol) ? item.symbol : item;
+                }
+            });
+            return {symbol:symbol, thematic:thematic};
+        }
+
+        return $.isPlainObject(value)
+            ? {symbol:value, thematic:[]}
+            : {symbol:null, thematic:[]};
+    },
+
+    /**
+     * Return the canonical persisted value. Keep simple symbology simple when
+     * no thematic renderers are defined.
+     */
+    _buildCanonicalSymbology: function(themes){
+
+        const symbol = window.hWin.HEURIST4.util.cloneJSON(this.baseLayerSymbol || {});
+        const thematic = window.hWin.HEURIST4.util.cloneJSON(themes || []);
+
+        return thematic.length>0
+            ? {symbol:symbol, thematic:thematic}
+            : symbol;
+    },
+
     _onBeforeClose: function(){
 
         // Cancel/close must preserve the original symbology. The caller accepts [] as
         // a valid saved result, so leaving _context_on_close empty would otherwise
         // overwrite the existing thematic configuration.
         const originalContext = window.hWin.HEURIST4.util.cloneJSON(
-            this._initialThematicContext || []);
+            this._initialThematicContext || {});
 
         // No warning is needed when the dialog contents are unchanged.
         if(this._initialThematicState!==null
@@ -239,7 +289,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             });
         }
 
-        return JSON.stringify(themes);
+        return JSON.stringify(this._buildCanonicalSymbology(themes));
     },
     
                 
@@ -285,37 +335,19 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }});
         
         
-        this.options.thematic_mapping = window.hWin.HEURIST4.util.isJSON( this.options.thematic_mapping );
-        
-        // Load list of thematic renderers. The renderer list is a normal HTML list
-        // rather than a native SELECT so each row can expose rename/delete actions.
-        let themes_list = this.element.find('#thematic_maps_list');
-        themes_list.empty();
-        
-        if(this.options.thematic_mapping)
-        {
-            if(!Array.isArray(this.options.thematic_mapping)) this.options.thematic_mapping = [this.options.thematic_mapping];
-        }else{
-            this.options.thematic_mapping = [];//
-        }
+        const incoming = this.options.symbology != null
+            ? this.options.symbology
+            : this.options.thematic_mapping;
+        const symbology = this._normalizeSymbology(incoming);
 
-        // Keep an untouched copy of the complete incoming symbology (including the
-        // ordinary/base symbol). It is returned on Cancel/discard so the caller does
-        // not mistake an empty close context for a request to clear thematic maps.
+        this.baseLayerSymbol = window.hWin.HEURIST4.util.cloneJSON(symbology.symbol || {});
+        this.options.symbology = this._buildCanonicalSymbology(symbology.thematic);
+        this.options.thematic_mapping = window.hWin.HEURIST4.util.cloneJSON(symbology.thematic);
+
+        // Keep the canonical incoming value for Cancel/discard.
         this._initialThematicContext = window.hWin.HEURIST4.util.cloneJSON(
-            this.options.thematic_mapping);
-            
-        let i=0;
-        while(i<this.options.thematic_mapping.length){
-            let t_map = this.options.thematic_mapping[i];
-            if(t_map.fields){ //with fields - thematic map
-                i++;
-            }else{ //without fields - this is base symbol
-                this.baseLayerSymbol = t_map;
-                this.options.thematic_mapping.splice(i,1);
-            }
-        }
-        
+            this.options.symbology);
+
         //default layer symbol
         let def_style = window.hWin.HEURIST4.util.isJSON(this.baseLayerSymbol);
         if(!def_style){
@@ -467,8 +499,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
      * @override
      * @memberof heurist.thematicMapping
      * Calls `_saveThematicMap()` to save the current configuration. If successful,
-     * it prepends the base layer symbol (if any) to the `thematic_mapping` array,
-     * sets this array as the result for `_context_on_close`, and closes the dialog.
+     * it returns the canonical symbology value and closes the dialog.
      */
     doAction: function(){
 
@@ -488,10 +519,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }
         }
 
-        if(this.baseLayerSymbol){
-            this.options.thematic_mapping.unshift(this.baseLayerSymbol);
-        }
-        this._context_on_close = this.options.thematic_mapping;
+        this.options.symbology = this._buildCanonicalSymbology(
+            this.options.thematic_mapping);
+        this._context_on_close = this.options.symbology;
         this.closeDialog(true);
     },
     

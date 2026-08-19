@@ -91,6 +91,40 @@ function hMapDocument( _options )
         //_loadMapDocuments();
     }
     
+    /**
+     * Split vector symbology into its base symbol and thematic renderer list.
+     * Supports both the legacy array format and canonical {symbol,thematic}.
+     */
+    function _splitVectorSymbology(value){
+        value = window.hWin.HEURIST4.util.isJSON(value);
+        if(!value) return {symbol:null, thematic:[]};
+
+        if($.isPlainObject(value) && (Object.hasOwn(value, 'symbol') || Array.isArray(value.thematic))){
+            return {
+                symbol: $.isPlainObject(value.symbol) ? value.symbol : null,
+                thematic: Array.isArray(value.thematic) ? value.thematic : []
+            };
+        }
+
+        if(Array.isArray(value)){
+            let symbol = null;
+            let thematic = [];
+            $.each(value, function(i, item){
+                if(!$.isPlainObject(item)) return;
+                if(Array.isArray(item.fields)){
+                    thematic.push(item);
+                }else{
+                    symbol = $.isPlainObject(item.symbol) ? item.symbol : item;
+                }
+            });
+            return {symbol:symbol, thematic:thematic};
+        }
+
+        return $.isPlainObject(value)
+            ? {symbol:value, thematic:[]}
+            : {symbol:null, thematic:[]};
+    }
+
     //
     // loads all map documents from server
     //
@@ -193,40 +227,31 @@ function hMapDocument( _options )
                         } 
 
                         if(DT_SYMBOLOGY>0){
-                            let layer_themes = resdata.fld(record, DT_SYMBOLOGY);
-                            layer_themes = window.hWin.HEURIST4.util.isJSON(layer_themes);
-                            
-                            if(layer_themes){
-                                
+                            const symbology = _splitVectorSymbology(
+                                resdata.fld(record, DT_SYMBOLOGY)
+                            );
+                            const layer_themes = symbology.thematic;
+
+                            if(layer_themes.length>0){
                                 let $themes = [];
-                            
-                                if($.isPlainObject(layer_themes)){
-                                    layer_themes = [layer_themes];
-                                }
-                                
+
                                 $.each(layer_themes, function(i, theme){
-                                    if(theme && theme.fields){ //object with field is theme
-                                        
+                                    if(theme && theme.fields){
                                         let themeName = theme.title?theme.title:'Thematic map';
 
-                                        let $theme = {};  
+                                        let $theme = {};
                                         $theme['key'] = 'theme'+recID+'_'+i;
                                         $theme['title'] = "<span style='font-style:italic;'>" + themeName + "</span>";
                                         $theme['type'] = 'theme';
-                                        $theme['layer_id'] = recID; //reference to parent layer
-                                        $theme['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
-                                        $theme['theme'] = theme;     
+                                        $theme['layer_id'] = recID;
+                                        $theme['mapdoc_id'] = mapdoc_id;
+                                        $theme['theme'] = theme;
                                         $theme['selected'] = (theme.active===true);
-                                        
-                                        
-                                        
-                                        
 
                                         $themes.push($theme);
-                                        
                                     }
                                 });
-                                
+
                                 if($themes.length>0){
                                     if(mapdoc_id==0 && $themes.length==1){
                                         //do not add the only theme for current search
@@ -234,7 +259,6 @@ function hMapDocument( _options )
                                         $res['expanded'] = true;
                                         $res['children'] = $themes;
                                     }
-                                
                                 }
                             }
                         }
@@ -605,24 +629,7 @@ console.log(treedata);
     function _getSymbology( mapdoc_id, rec_id ){
         
         function __extractStyle( def_style ){
-            
-            let layer_themes = window.hWin.HEURIST4.util.isJSON(def_style);
-            let layer_default_style = null;
-            
-            if(layer_themes!==false){
-                if($.isPlainObject(layer_themes)){
-                    layer_themes = [layer_themes];
-                }
-
-                $.each(layer_themes, function(i, theme){
-                    if(!theme.fields){
-                        //object without fields is layer's default symbol
-                        layer_default_style = theme.symbol?theme.symbol:theme;
-                        return false;
-                    }
-                });
-            }
-            return layer_default_style;
+            return _splitVectorSymbology(def_style).symbol;
         }
         
         
@@ -693,8 +700,12 @@ console.log(treedata);
                 delete new_value.sym_Name;
             }
             
-            //update style
-            _recset.setFld(_record, DT_SYMBOLOGY, new_value);
+            //update style without discarding thematic renderers
+            const current_symbology = _splitVectorSymbology(_recset.fld(_record, DT_SYMBOLOGY));
+            const persisted_style = current_symbology.thematic.length>0
+                ? {symbol:new_value, thematic:current_symbology.thematic}
+                : new_value;
+            _recset.setFld(_record, DT_SYMBOLOGY, persisted_style);
             (_record['layer']).applyStyle(new_value);
             
            //callback to update ui in mapManager

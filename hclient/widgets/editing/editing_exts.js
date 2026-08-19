@@ -38,9 +38,10 @@
  * @param {function} callback - A function to be called when the symbology is saved.
  *                                                         It receives the updated symbology object or array as its argument.
  */
-function editSymbology(current_value, mode_edit, callback){
+function editSymbology(current_value, mode_edit, callback, cancelCallback){
 
     let edit_symb_dialog = null; //assigned on popup_dlg.dialog
+    let _saved = false;
     
     let dialog_div_id = 'heurist-dialog-editSymbology'+(mode_edit>=3?mode_edit:'');
     
@@ -113,6 +114,11 @@ function editSymbology(current_value, mode_edit, callback){
                 return false;
             }
             return true;
+        },
+        close: function(){
+            if(!_saved && window.hWin.HEURIST4.util.isFunction(cancelCallback)){
+                cancelCallback.call(this);
+            }
         }
     });
 
@@ -153,20 +159,32 @@ function editSymbology(current_value, mode_edit, callback){
             _editing_symbology = this;
             
             if(current_value){
-                //detect base layer symbology
-                if(Array.isArray(current_value)){
-                    let thematicMap = [];
-                    let baseSymb = {};
+                // Canonical vector symbology is either a plain base symbol or
+                // {symbol:{...}, thematic:[...]}. Keep the legacy array readable.
+                let thematicMap = [];
+                let baseSymb = current_value;
+
+                if($.isPlainObject(current_value) &&
+                   (Object.hasOwn(current_value, 'symbol') || Array.isArray(current_value.thematic))){
+                    baseSymb = $.isPlainObject(current_value.symbol) ? current_value.symbol : {};
+                    thematicMap = Array.isArray(current_value.thematic) ? current_value.thematic : [];
+                }else if(Array.isArray(current_value)){
+                    baseSymb = {};
                     for(let i=0; i<current_value.length; i++){
-                        if(current_value[i].fields){
-                            //thematic map
+                        if(current_value[i] && current_value[i].fields){
                             thematicMap.push(current_value[i]);
-                        }else{
-                            baseSymb = current_value[i];
+                        }else if(current_value[i]){
+                            baseSymb = current_value[i].symbol || current_value[i];
                         }
                     }
-                    current_value = baseSymb;
-                    current_value.thematicMap = JSON.stringify(thematicMap);
+                }
+
+                current_value = window.hWin.HEURIST4.util.cloneJSON(baseSymb || {});
+                if(mode_edit==3 && maplayer_query && thematicMap.length>0){
+                    current_value.thematicMap = JSON.stringify({
+                        symbol: window.hWin.HEURIST4.util.cloneJSON(current_value),
+                        thematic: window.hWin.HEURIST4.util.cloneJSON(thematicMap)
+                    });
                 }
                 
                 if(mode_edit==4 && window.hWin.HEURIST4.util.isempty(current_value.stroke)){
@@ -789,16 +807,23 @@ function editSymbology(current_value, mode_edit, callback){
                 if(res['iconType']=='circle'){
                     res['radius'] = (res['iconSize']>0?res['iconSize']:8);
                 }
-                if(res['thematicMap']){
+                if(Object.hasOwn(res, 'thematicMap')){
                     let tmaps = window.hWin.HEURIST4.util.isJSON(res['thematicMap']);
                     delete res['thematicMap'];
                     if(tmaps){
-                        tmaps.unshift(res);
-                        res = tmaps;
+                        if($.isPlainObject(tmaps) && Array.isArray(tmaps.thematic)){
+                            res = tmaps.thematic.length>0
+                                ? {symbol:res, thematic:tmaps.thematic}
+                                : res;
+                        }else if(Array.isArray(tmaps)){
+                            let thematic = tmaps.filter(function(item){ return item && item.fields; });
+                            res = thematic.length>0 ? {symbol:res, thematic:thematic} : res;
+                        }
                     }
                 }
                 
                 _editing_symbology.setModified(false);
+                _saved = true;
                 edit_symb_dialog.dialog('close');
                 
                 if(window.hWin.HEURIST4.util.isFunction(callback)){

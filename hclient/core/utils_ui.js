@@ -2788,9 +2788,100 @@ window.hWin.HEURIST4.ui = {
     //
     // show map style edit dialog
     //
-    showEditSymbologyDialog: function(current_value, mode_edit, callback){
+    showEditSymbologyDialog: function(current_value, mode_edit, callback, cancelCallback){
         //todo optionally load dynamically editing_exts.js
-        editSymbology(current_value, mode_edit, callback);
+        editSymbology(current_value, mode_edit, callback, cancelCallback);
+    },
+
+    /**
+     * Open the reusable heurist-map configuration dialog through mapViewer.
+     *
+     * The caller owns persistence. This helper only creates the configuration-only
+     * iframe transport and returns the serialized settings through callbacks/Promise.
+     * It can therefore be reused by Preferences, Website editor, or other Heurist UI.
+     *
+     * options: {mode, value, onSave, onCancel, onError}
+     * @returns {Promise<object|null>}
+     */
+    showMapConfigurationDialog: function(options){
+        options = options || {};
+        let ui = window.hWin.HEURIST4.ui;
+        let doc_body = $(window.hWin.document).find('body');
+
+        if(ui._heuristMapConfigurationPromise){
+            return ui._heuristMapConfigurationPromise;
+        }
+
+        function loadMapViewer(){
+            if($.heurist && $.heurist.mapViewer){
+                return Promise.resolve();
+            }
+            return new Promise(function(resolve, reject){
+                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/mapViewer.js')
+                    .done(function(){
+                        if($.heurist && $.heurist.mapViewer){
+                            resolve();
+                        }else{
+                            reject(new Error('mapViewer widget was not registered'));
+                        }
+                    })
+                    .fail(function(jqxhr, settings, exception){
+                        reject(new Error('Unable to load mapViewer.js'+(exception?': '+exception:'')));
+                    });
+            });
+        }
+
+        function closeHost(){
+            let host = ui._heuristMapConfigurationHost;
+            ui._heuristMapConfigurationHost = null;
+            if(host){
+                try{
+                    if(host.mapViewer('instance')) host.mapViewer('destroy');
+                }catch(ignore){}
+                host.remove();
+            }
+        }
+
+        ui._heuristMapConfigurationPromise = loadMapViewer().then(function(){
+            return new Promise(function(resolve, reject){
+                let host = $('<div>')
+                    .addClass('heurist-map-configuration-host')
+                    .css({position:'fixed', inset:0, width:'100vw', height:'100vh',
+                          'z-index':999999, background:'transparent'})
+                    .appendTo(doc_body);
+                ui._heuristMapConfigurationHost = host;
+
+                host.mapViewer({
+                    presentationMode: 'iframe',
+                    viewerMode: 'configuration',
+                    configurationMode: options.mode || 'preferences',
+                    configurationValue: options.value || null,
+                    eventbased: false,
+                    onconfiguration: function(settings, context){
+                        closeHost();
+                        if(typeof options.onSave === 'function') options.onSave(settings, context);
+                        resolve(settings);
+                    },
+                    oncancelconfiguration: function(settings, context){
+                        closeHost();
+                        if(typeof options.onCancel === 'function') options.onCancel(settings, context);
+                        resolve(null);
+                    },
+                    onerror: function(error){
+                        closeHost();
+                        if(typeof options.onError === 'function') options.onError(error);
+                        reject(error instanceof Error ? error : new Error(error && error.message ? error.message : String(error)));
+                    }
+                });
+
+                host.find('iframe').css({position:'absolute', top:0, left:0, width:'100%', height:'100%',
+                    margin:0, padding:0, border:0, display:'block', background:'transparent'});
+            });
+        }).finally(function(){
+            ui._heuristMapConfigurationPromise = null;
+        });
+
+        return ui._heuristMapConfigurationPromise;
     },
 
     //

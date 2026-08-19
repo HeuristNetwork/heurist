@@ -526,6 +526,57 @@ function HMapLayer( _options ) {
     //
     // query layer
     //
+    /**
+     * Normalize vector DT_SYMBOLOGY into separate base symbol and thematic renderers.
+     *
+     * Accepted persisted formats:
+     *  - simple symbol object;
+     *  - legacy array containing a base symbol plus thematic renderer objects;
+     *  - canonical {symbol:{...}, thematic:[...]} object.
+     *
+     * Used only by recordset/query vector layers. Raster/tile DT_SYMBOLOGY remains
+     * an image-filter definition.
+     */
+    function _normalizeVectorSymbology(value){
+
+        value = window.hWin.HEURIST4.util.isJSON(value);
+
+        if(!value){
+            return {symbol:null, thematic:[]};
+        }
+
+        if($.isPlainObject(value) && (Object.hasOwn(value, 'symbol') || Array.isArray(value.thematic))){
+            return {
+                symbol: $.isPlainObject(value.symbol) ? value.symbol : null,
+                thematic: Array.isArray(value.thematic) ? value.thematic : []
+            };
+        }
+
+        if(Array.isArray(value)){
+            let symbol = null;
+            let thematic = [];
+
+            $.each(value, function(i, item){
+                if(!$.isPlainObject(item)) return;
+
+                if(Array.isArray(item.fields)){
+                    thematic.push(item);
+                }else{
+                    symbol = $.isPlainObject(item.symbol) ? item.symbol : item;
+                }
+            });
+
+            return {symbol:symbol, thematic:thematic};
+        }
+
+        if($.isPlainObject(value)){
+            return {symbol:value, thematic:[]};
+        }
+
+        return {symbol:null, thematic:[]};
+    }
+
+
     function _addQueryLayer(){
 
         let layer_popup_template = _recordset.fld(options.rec_layer || _record, 
@@ -553,59 +604,26 @@ function HMapLayer( _options ) {
             }
         }
 
+        let layer_thematic = [];
         if(window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']>0){
-            let layer_themes = _recordset.fld(options.rec_layer || _record, 
-                                        window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
-  
-/*            
-        {   //additional filter and default layer symbol
-            "geofield": "2-134"//2-134 (birth) or 1161-254 (death) Field id for pointer to Place, optional    
-            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
-        },  
-        OR "symbol":{"geofield":...., }
-        {
-            "title": "First theme ever",
-            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
-            "rules": {}, //find records linked to place
-            "fields": []
-        }
-        
-{
-            "title": "Death",
-            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#000000","iconSize":"6"}
-}        
-*/            
-           
+            const symbology = _normalizeVectorSymbology(
+                _recordset.fld(options.rec_layer || _record,
+                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'])
+            );
+
+            layer_default_style = symbology.symbol;
+            layer_thematic = symbology.thematic;
+
             // Backward compatibility: older MapLayers stored geofield in
-            // DT_SYMBOLOGY. Use it only when DT_GEO_FIELDS is not defined for the
-            // DataSource. Keep raw coded paths; the server now interprets them.
-            layer_themes = window.hWin.HEURIST4.util.isJSON(layer_themes);
-            
-            if(layer_themes){
-                
-                if($.isPlainObject(layer_themes)){
-                    layer_themes = [layer_themes];
-                }
-
-                $.each(layer_themes, function(i,item){
-                    if(item.geofield){
-                        if(layer_geofields.length===0){
-                            let geofields = String(item.geofield).split(',');
-                            for(let k=0; k<geofields.length; k++){
-                                let geofield = geofields[k].trim();
-                                if(geofield && layer_geofields.indexOf(geofield)<0){
-                                    layer_geofields.push(geofield);
-                                }
-                            }
-                        }
-                        
-                        layer_default_style = item.symbol?item.symbol:item;
-                        return false;       
-                    }else if(!item.fields){
-                        layer_default_style = item.symbol?item.symbol:item;
+            // DT_SYMBOLOGY. Use it only when DT_GEO_FIELDS is not defined.
+            if(layer_geofields.length===0 && layer_default_style && layer_default_style.geofield){
+                let geofields = String(layer_default_style.geofield).split(',');
+                for(let k=0; k<geofields.length; k++){
+                    let geofield = geofields[k].trim();
+                    if(geofield && layer_geofields.indexOf(geofield)<0){
+                        layer_geofields.push(geofield);
                     }
-                });
-
+                }
             }
         }
         if(layer_geofields.length==0) layer_geofields = null;
@@ -707,9 +725,13 @@ function HMapLayer( _options ) {
                                 );
                             }//for
                             
-                            _recordset.setFld(_record, 
+                            const current_symbology = {
+                                symbol: layer_default_style || {},
+                                thematic: thematic_map
+                            };
+                            _recordset.setFld(_record,
                                         window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'],
-                                        JSON.stringify(thematic_map)
+                                        JSON.stringify(current_symbology)
                                             );
                         }
                         
@@ -754,8 +776,11 @@ function HMapLayer( _options ) {
     //
     function _addRecordSet(){
         
-        let layer_style = _recordset.fld(options.rec_layer || _record, 
-                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        const symbology = _normalizeVectorSymbology(
+            _recordset.fld(options.rec_layer || _record,
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'])
+        );
+        let layer_style = symbology.symbol;
         let layer_popup_template = _recordset.fld(options.rec_layer || _record, 
                     window.hWin.HAPI4.sysinfo['dbconst']['DT_SMARTY_TEMPLATE']);
                     
