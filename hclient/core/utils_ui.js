@@ -2834,6 +2834,7 @@ window.hWin.HEURIST4.ui = {
         function closeHost(){
             let host = ui._heuristMapConfigurationHost;
             ui._heuristMapConfigurationHost = null;
+            ui._raiseMapConfigurationChildDialog = null;
             if(host){
                 try{
                     if(host.mapViewer('instance')) host.mapViewer('destroy');
@@ -2847,9 +2848,20 @@ window.hWin.HEURIST4.ui = {
                 let host = $('<div>')
                     .addClass('heurist-map-configuration-host')
                     .css({position:'fixed', inset:0, width:'100vw', height:'100vh',
-                          'z-index':999999, background:'transparent'})
+                          'z-index':10000, background:'transparent'})
                     .appendTo(doc_body);
                 ui._heuristMapConfigurationHost = host;
+
+                // Host-side editors live outside the iframe. Raise their overlay
+                // and dialog above this temporary configuration-host stacking context.
+                ui._raiseMapConfigurationChildDialog = function(dialog){
+                    let baseZ = parseInt(host.css('z-index'), 10);
+                    if(!(baseZ>0)) baseZ = 10000;
+                    let dlg = dialog ? $(dialog).closest('.ui-dialog') : doc_body.find('.ui-dialog:visible').last();
+                    let overlay = doc_body.children('.ui-widget-overlay:visible').last();
+                    if(overlay.length) overlay.css('z-index', baseZ + 10);
+                    if(dlg && dlg.length) dlg.css('z-index', baseZ + 11);
+                };
 
                 host.mapViewer({
                     presentationMode: 'iframe',

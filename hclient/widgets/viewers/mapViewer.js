@@ -1031,6 +1031,11 @@ $.widget('heurist.mapViewer', {
                         symbology: $.extend(true, {}, current),
                         onClose: accept
                     });
+                    setTimeout(function(){
+                        if (typeof ui._raiseMapConfigurationChildDialog === 'function') {
+                            ui._raiseMapConfigurationChildDialog();
+                        }
+                    }, 0);
                 } else {
                     if (typeof ui.showEditSymbologyDialog !== 'function') {
                         reject(new Error('Heurist symbology editor is not available'));

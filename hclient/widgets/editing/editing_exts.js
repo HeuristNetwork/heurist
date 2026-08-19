@@ -54,12 +54,71 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             .appendTo( $(window.hWin.document).find('body') );
     }
     
-    //heurist query for map query layer is passed via symbology value
+    // Heurist query for a map query layer may be passed temporarily with the
+    // symbology value. Clone first so opening the editor never mutates the caller's
+    // object while extracting this transient property.
+    if(current_value && typeof current_value === 'object'){
+        current_value = window.hWin.HEURIST4.util.cloneJSON(current_value);
+    }
+
     let maplayer_rty = null; //record types in mapquery resultset
     let maplayer_query = true;
     if(current_value && current_value.maplayer_query){
         maplayer_query = current_value.maplayer_query;
         delete current_value.maplayer_query;
+    }
+
+    // Canonical vector symbology:
+    //   simple   -> {iconType:..., color:..., ...}
+    //   thematic -> {symbol:{...}, thematic:[...]}
+    //
+    // Keep backward compatibility with the old array representation, but edit only
+    // the base symbol in this dialog. The thematic renderers are kept separately
+    // and merged back on Save.
+    let _thematicRenderers = [];
+
+    if(current_value){
+        let parsedValue = window.hWin.HEURIST4.util.isJSON(current_value);
+        if(parsedValue){
+            current_value = parsedValue;
+        }
+
+        if($.isPlainObject(current_value) && Array.isArray(current_value.thematic)){
+            _thematicRenderers = window.hWin.HEURIST4.util.cloneJSON(current_value.thematic);
+            current_value = window.hWin.HEURIST4.util.cloneJSON(current_value.symbol || {});
+        }else if(Array.isArray(current_value)){
+            let baseSymbol = {};
+            let thematic = [];
+
+            for(let i=0; i<current_value.length; i++){
+                let item = current_value[i];
+                if(!item) continue;
+
+                if(item.fields){
+                    thematic.push(item);
+                }else{
+                    baseSymbol = item.symbol ? item.symbol : item;
+                }
+            }
+
+            _thematicRenderers = window.hWin.HEURIST4.util.cloneJSON(thematic);
+            current_value = window.hWin.HEURIST4.util.cloneJSON(baseSymbol);
+        }
+    }
+
+    // HRecordSet treats array values as repeatable field values. Map symbol
+    // iconSize, however, may arrive from older/runtime styles as [width,height].
+    // The symbology editor has one scalar Icon size field, so collapse it before
+    // constructing HRecordSet. Radius is a Leaflet output alias, not another
+    // editor field; use it only as a fallback value and remove it from recdata.
+    if(current_value && $.isPlainObject(current_value)){
+        if(Array.isArray(current_value.iconSize)){
+            current_value.iconSize = current_value.iconSize.length>0 ? current_value.iconSize[0] : '';
+        }
+        if(window.hWin.HEURIST4.util.isempty(current_value.iconSize) && current_value.radius>0){
+            current_value.iconSize = current_value.radius;
+        }
+        delete current_value.radius;
     }
 
     let _editing_symbology;
@@ -102,6 +161,10 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             const dialogWidget = $(this).dialog('widget');
             setTimeout(function(){
                 dialogWidget.attr('tabindex', '-1').trigger('focus');
+                let ui = window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+                if(ui && typeof ui._raiseMapConfigurationChildDialog === 'function'){
+                    ui._raiseMapConfigurationChildDialog(dialogWidget);
+                }
             }, 0);
         },
         beforeClose: function(){
@@ -159,34 +222,17 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             _editing_symbology = this;
             
             if(current_value){
-                // Canonical vector symbology is either a plain base symbol or
-                // {symbol:{...}, thematic:[...]}. Keep the legacy array readable.
-                let thematicMap = [];
-                let baseSymb = current_value;
 
-                if($.isPlainObject(current_value) &&
-                   (Object.hasOwn(current_value, 'symbol') || Array.isArray(current_value.thematic))){
-                    baseSymb = $.isPlainObject(current_value.symbol) ? current_value.symbol : {};
-                    thematicMap = Array.isArray(current_value.thematic) ? current_value.thematic : [];
-                }else if(Array.isArray(current_value)){
-                    baseSymb = {};
-                    for(let i=0; i<current_value.length; i++){
-                        if(current_value[i] && current_value[i].fields){
-                            thematicMap.push(current_value[i]);
-                        }else if(current_value[i]){
-                            baseSymb = current_value[i].symbol || current_value[i];
-                        }
-                    }
-                }
-
-                current_value = window.hWin.HEURIST4.util.cloneJSON(baseSymb || {});
-                if(mode_edit==3 && maplayer_query && thematicMap.length>0){
+                // mode 3 exposes thematic mapping as a nested block-text editor.
+                // It receives the canonical value so thematicMapping can edit the same
+                // structure used by DT_SYMBOLOGY and the public map API.
+                if(mode_edit==3 && maplayer_query && _thematicRenderers.length>0){
                     current_value.thematicMap = JSON.stringify({
                         symbol: window.hWin.HEURIST4.util.cloneJSON(current_value),
-                        thematic: window.hWin.HEURIST4.util.cloneJSON(thematicMap)
+                        thematic: window.hWin.HEURIST4.util.cloneJSON(_thematicRenderers)
                     });
                 }
-                
+
                 if(mode_edit==4 && window.hWin.HEURIST4.util.isempty(current_value.stroke)){
                     current_value.stroke = '';
                 }else{
@@ -807,21 +853,37 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
                 if(res['iconType']=='circle'){
                     res['radius'] = (res['iconSize']>0?res['iconSize']:8);
                 }
+                // The nested thematic editor now returns canonical symbology.
+                // Keep compatibility with a legacy thematic array during transition.
+                let thematicRenderers = window.hWin.HEURIST4.util.cloneJSON(_thematicRenderers);
+
                 if(Object.hasOwn(res, 'thematicMap')){
                     let tmaps = window.hWin.HEURIST4.util.isJSON(res['thematicMap']);
                     delete res['thematicMap'];
-                    if(tmaps){
-                        if($.isPlainObject(tmaps) && Array.isArray(tmaps.thematic)){
-                            res = tmaps.thematic.length>0
-                                ? {symbol:res, thematic:tmaps.thematic}
-                                : res;
-                        }else if(Array.isArray(tmaps)){
-                            let thematic = tmaps.filter(function(item){ return item && item.fields; });
-                            res = thematic.length>0 ? {symbol:res, thematic:thematic} : res;
+
+                    if($.isPlainObject(tmaps) && Array.isArray(tmaps.thematic)){
+                        thematicRenderers = window.hWin.HEURIST4.util.cloneJSON(tmaps.thematic);
+                    }else if(Array.isArray(tmaps)){
+                        thematicRenderers = [];
+                        for(let i=0; i<tmaps.length; i++){
+                            if(tmaps[i] && tmaps[i].fields){
+                                thematicRenderers.push(tmaps[i]);
+                            }
                         }
+                    }else if(!tmaps){
+                        thematicRenderers = [];
                     }
                 }
-                
+
+                // Persist/output the compact canonical form. If there are no thematic
+                // renderers, retain the plain symbol object.
+                if(thematicRenderers.length>0){
+                    res = {
+                        symbol: res,
+                        thematic: thematicRenderers
+                    };
+                }
+
                 _editing_symbology.setModified(false);
                 _saved = true;
                 edit_symb_dialog.dialog('close');

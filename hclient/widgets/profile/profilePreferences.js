@@ -469,9 +469,9 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
             
     },
 
-    /** Clean up configuration-only mapViewer with the preferences widget. */
+    /** Standard widget cleanup. Map configuration host cleanup is owned by
+     * HEURIST4.ui.showMapConfigurationDialog(). */
     _destroy: function(){
-        this._closeHeuristMapConfiguration();
         return this._super();
     }
         
