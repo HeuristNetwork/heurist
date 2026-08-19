@@ -47,82 +47,229 @@
 
 <div style="display: flex; gap: 35px; justify-content: flex-start; align-items: flex-start; height:96%">
 
-<div style="width:300px;height:92%">
+    <div style="width:300px;height:92%">
 
-    <h4>Choose a component</h4>
-    <select id="components" class="text ui-widget-content ui-corner-all" style="min-width:290px;padding:4px;overflow-y:auto;height:100%" 
+        <h4>Choose a component</h4>
+        <select id="components" class="text ui-widget-content ui-corner-all" style="min-width:290px;padding:4px;overflow-y:auto;height:100%" 
             size="26" title="">
-    </select>
+        </select>
 
-</div>
-
-<div style="width: 300px;margin-top: 50px;background: #F4F2F4 !important;padding-left: 10px;" class="ui-widget-content ui-corner-all">
-
-    <h2 id="help_name">#</h2>
-    <div id="descriptions" style="padding:10px 5px;min-height:400px;font-size: 12px;">
-        <div id="group">
-            <div>
-                A group is normally used to keep several other elements together so that they can be displayed and scaled across the page, for example a search on the left, results in the middle and a custom report or map on the right. 
-                <br><br>Groups will normally be defined as flex so that they can adjust widths or heights proportionally according to the width and height of the screen or container.
-                <br><br>
-                Without groups, all the elements will normally be displayed one above the other.
-            </div>
-        </div>
-
-        <div id="simple_text">
-            <div>
-                The simple text box contains WYSIWYG text which can be edited with the embedded TinyMCE text editor. This allows for headings, font styles, quotes, hyperlinks, etc...
-                <br><br>
-                Embedded media referenced by the database (whether local to the database or a remote reference) will be rendered in place in the page.
-                <br><br>
-                The simple text box may occupy the whole width of the page or be placed within a container or other element to be scaled in width and/or sit next to other elements.
-            </div>
-        </div>
-        
-        
-        <div id="cover">
-            <div>
-                Full screen background image, project logo, description and 'Get Started' button. Header and footer will be hidden.
-            </div>
-        </div>
-
-        <div id="landing">
-            <div>
-                Project title and logo, description and couple of buttons. Image on the right side. Header and footer are visible.
-            </div>
-        </div>
-
-        <div id="about">
-            <div>
-                Four section page: About project, Couple of Features, Our team.
-            </div>
-        </div>
-        
-        <div id="HMenu">
-            <div>
-                List of actions presented as list of buttons, navigation bar or tree view that allows to 
-                <ul>
-                <li>navigate to specified page</li>
-                <li>open record's info</li>
-                <li>execute saved filter</li> 
-                <li>add new record</li></ul>
-            </div>
-        </div>
-
-        <div id="features">
-            <div>
-                Features as cards with images, short description and links to particular pages of website
-            </div>
-        </div>
-        
-        
-        <div id="missing">
-            <div>
-                Description to be provided
-            </div>
-        </div>
     </div>
-    <!--<p style="padding:5px;border:1px solid gray; min-height:100px; min-width:100px;display:none;">Placeholder for image</p>-->
-</div>
+
+    <div style="width: 300px;margin-top: 50px;background: #F4F2F4 !important;padding-left: 10px;" class="ui-widget-content ui-corner-all">
+
+        <h2 id="help_name">#</h2>
+        <div id="descriptions" style="padding:10px 5px;min-height:400px;font-size: 12px;">
+            <div id="group">
+                <div>
+                    A group is normally used to keep several other elements together so that they can be displayed and scaled across the page, for example a search on the left, results in the middle and a custom report or map on the right. 
+                    <br><br>Groups will normally be defined as flex so that they can adjust widths or heights proportionally according to the width and height of the screen or container.
+                    <br><br>
+                    Without groups, all the elements will normally be displayed one above the other.
+                </div>
+            </div>
+
+            <div id="simple_text">
+                <div>
+                    The simple text box contains WYSIWYG text which can be edited with the embedded TinyMCE text editor. This allows for headings, font styles, quotes, hyperlinks, etc...
+                    <br><br>
+                    Embedded media referenced by the database (whether local to the database or a remote reference) will be rendered in place in the page.
+                    <br><br>
+                    The simple text box may occupy the whole width of the page or be placed within a container or other element to be scaled in width and/or sit next to other elements.
+                </div>
+            </div>
+
+
+            <div id="cover">
+                <div>
+                    Full screen background image, project logo, description and 'Get Started' button. Header and footer will be hidden.
+                </div>
+            </div>
+
+            <div id="landing">
+                <div>
+                    Project title and logo, description and couple of buttons. Image on the right side. Header and footer are visible.
+                </div>
+            </div>
+
+            <div id="about">
+                <div>
+                    Four section page: About project, Couple of Features, Our team.
+                </div>
+            </div>
+
+            <div id="HMenu">
+                <div>
+                    List of actions presented as list of buttons, navigation bar or tree view that allows to 
+                    <ul>
+                        <li>navigate to specified page</li>
+                        <li>open record's info</li>
+                        <li>execute saved filter</li> 
+                        <li>add new record</li></ul>
+                </div>
+            </div>
+
+            <div id="features">
+                <div>
+                    Features as cards with images, short description and links to particular pages of website
+                </div>
+            </div>
+
+            <!-- The following descriptions written by ChatGPT Sol 5 lite 19/8/26, could do with more detail -->
+
+            <div id="simple_page">
+                <div>
+                    Creates a simple blank page to which text, images and other components can be added.
+                </div>
+            </div>
+
+            <div id="discover">
+                <div>
+                    Creates a discovery page combining search filters, a results list and a map or timeline.
+                </div>
+            </div>
+
+            <div id="network">
+                <div>
+                    Creates a discovery page combining search filters, a results list and a network diagram.
+                </div>
+            </div>
+
+            <div id="database">
+                <div>
+                    Creates a page presenting information about the database, its contents and its purpose.
+                </div>
+            </div>
+
+            <div id="blog">
+                <div>
+                    Creates a blog page displaying dated posts which can be searched and filtered.
+                </div>
+            </div>
+
+            <div id="accordion">
+                <div>
+                    Organises content into collapsible sections, allowing one or more sections to be opened as required.
+                </div>
+            </div>
+
+            <div id="tabs">
+                <div>
+                    Organises content into separate tabbed sections, with one section displayed at a time.
+                </div>
+            </div>
+
+            <div id="cardinal">
+                <div>
+                    Creates a five-part layout with central, top, bottom, left and right panels.
+                </div>
+            </div>
+
+            <div id="2_columns">
+                <div>
+                    Creates two side-by-side columns containing editable text.
+                </div>
+            </div>
+
+            <div id="3_columns">
+                <div>
+                    Creates three side-by-side columns containing editable text.
+                </div>
+            </div>
+
+            <div id="text_banner">
+                <div>
+                    Displays editable text over a banner background image.
+                </div>
+            </div>
+
+            <div id="filter">
+                <div>
+                    Provides search and filter controls which users can use to select the records displayed by other components.
+                </div>
+            </div>
+
+            <div id="saved_filter">
+                <div>
+                    Displays one or more saved filters which users can select to control the records displayed by other components.
+                </div>
+            </div>
+
+            <div id="result_list">
+                <div>
+                    Displays the current set of records using the standard Heurist results list and its available viewing modes.
+                </div>
+            </div>
+
+            <div id="custom_report">
+                <div>
+                    Displays the current results using a selected custom report, or displays a formatted view of a selected record.
+                </div>
+            </div>
+
+            <div id="data_table">
+                <div>
+                    Displays the current results as a configurable table of rows and columns.
+                </div>
+            </div>
+
+            <div id="map_timeline">
+                <div>
+                    Displays records containing spatial or temporal information on a map, timeline, or both.
+                </div>
+            </div>
+
+            <div id="story_map">
+                <div>
+                    Presents an ordered sequence of records as a narrated story linked to locations on a map.
+                </div>
+            </div>
+
+            <div id="network_graph">
+                <div>
+                    Displays records as nodes in a network graph, with links representing their relationships.
+                </div>
+            </div>
+
+            <div id="menu">
+                <div>
+                    Provides a navigation menu containing links to pages within the website.
+                </div>
+            </div>
+
+            <div id="HRecordList">
+                <div>
+                    Displays a configurable list of records, optionally including actions and links for each record.
+                </div>
+            </div>
+
+            <div id="add_record">
+                <div>
+                    Provides a button which opens a form for creating a new record of a specified type.
+                </div>
+            </div>
+
+            <div id="email_form">
+                <div>
+                    Provides a form which visitors can use to send an email to the website owner.
+                </div>
+            </div>
+
+            <div id="mediaViewer">
+                <div>
+                    Displays images and other media as a viewer or thumbnail gallery.
+                </div>
+            </div>
+
+            <div id="missing">
+                <div>
+                    Description to be provided - please bring this to the attention of the Heurist development team
+                </div>
+            </div>
+
+
+        </div>
+        <!--<p style="padding:5px;border:1px solid gray; min-height:100px; min-width:100px;display:none;">Placeholder for image</p>-->
+    </div>
 
 </div>
