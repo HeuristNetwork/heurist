@@ -281,7 +281,8 @@ function HEditing(_options) {
                     }else if(fields[idx].groupType == 'group_break'){
                         prev_children = null;    
                     }else if (innerGroups.indexOf(fields[idx].groupType) !== -1){ // group inside
-                        fields[idx].groupType = fields[idx].groupType.indexOf('_inner') > 0 ? fields[idx].groupType.replace('_inner', '') : `${fields[idx].groupType}_break`;
+                        const breakClass = fields[idx].groupType.indexOf('_break') > 0 ? fields[idx].groupType : `${fields[idx].groupType}_break`;
+                        fields[idx].groupType = fields[idx].groupType.indexOf('_inner') > 0 ? fields[idx].groupType.replace('_inner', '') : breakClass;
                     }else{
                         prev_children = fields[idx].children;    
                     }
