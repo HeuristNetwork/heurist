@@ -1686,11 +1686,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             return;
         }
 
-        this._editing.getFieldByName('rty_Icon').editing_input('showErrorMsg', null);
-        if((isNewRecType && window.hWin.HEURIST4.util.isempty(fields['rty_Icon'])) || fields['checkedIcon'] === false){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please set an icon for the record type', 5000);
-            this._editing.getFieldByName('rty_Icon').editing_input('showErrorMsg', 'An icon is required');
-            return;
+        if(this._editing){
+
+            this._editing.getFieldByName('rty_Icon').editing_input('showErrorMsg', null);
+
+            if((isNewRecType && window.hWin.HEURIST4.util.isempty(fields['rty_Icon'])) || fields['checkedIcon'] === false){
+                window.hWin.HEURIST4.msg.showMsgFlash('Please set an icon for the record type', 5000);
+                this._editing.getFieldByName('rty_Icon').editing_input('showErrorMsg', 'An icon is required');
+                return;
+            }
         }
 
         if(fields == null) return; //validation failed
