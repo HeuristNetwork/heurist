@@ -126,7 +126,7 @@ class MapPublishedController
             }
 
             $baseUrl = rtrim(HEURIST_BASE_URL, '/').'/';
-            $assetBase = $baseUrl.'external/heurist-map/';
+            $assetBase = $baseUrl.'hclient/bundles/heurist-map/';
 
             header('Content-Type: text/html; charset=utf-8');
             header('Cache-Control: no-cache');

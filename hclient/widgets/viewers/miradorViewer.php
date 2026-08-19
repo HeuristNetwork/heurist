@@ -410,8 +410,8 @@ if(strpos($url, 'hserv/controller/record_output.php')!==false){
 
 $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
 
-$mirador4DistPath = dirname(__FILE__).'/../../../external/mirador4/dist';
-$mirador4DistUrl = '../../../external/mirador4/dist/';
+$mirador4DistPath = dirname(__FILE__).'/../../bundles/heurist-mirador4';
+$mirador4DistUrl = '../../bundles/heurist-mirador4/';
 $mirador4JsAsset = findMirador4DistAsset($mirador4DistPath, 'js');
 $mirador4CssAsset = findMirador4DistAsset($mirador4DistPath, 'css');
 $use_mirador4_bundle = $mirador4JsAsset !== null;

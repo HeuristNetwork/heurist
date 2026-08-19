@@ -30,7 +30,7 @@ $.widget('heurist.mapViewer', {
         database: window.hWin.HAPI4.database,
         apiBaseUrl: window.hWin.HAPI4.baseURL + 'api',
         mapApplicationUrl: window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/mapViewer.html', 
-        //mapApplicationUrl: '/heurist/external/heurist-map/index.html',
+        //mapApplicationUrl: '/heurist/hclient/bundles/heurist-map/index.html',
 
         accessToken: null,
         requestHeaders: null,
@@ -384,7 +384,7 @@ $.widget('heurist.mapViewer', {
 
     /** Return the configured standalone application URL. */
     _buildIframeUrl: function() {
-        return this.options.mapApplicationUrl || '/heurist/external/heurist-map/index.html';
+        return this.options.mapApplicationUrl || '/heurist/hclient/bundles/heurist-map/index.html';
     },
 
     /** Wait until the standalone bootstrap exposes its public API. */

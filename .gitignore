@@ -224,6 +224,7 @@ vendor/
 help/
 external/
 node_modules/
+hclient/bundles/heurist-*/
 tests/
 descriptors/
 composer.lock
