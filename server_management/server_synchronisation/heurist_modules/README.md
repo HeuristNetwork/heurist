@@ -11,8 +11,7 @@ This package introduces one server-side orchestration script for independent cli
 /var/www/html/HEURIST/
     heurist-map/                    # dedicated main-branch checkout
     heurist-mirador4/               # dedicated main-branch checkout
-    HEURIST_SUPPORT/
-        external_h5/
+    h7-alpha/hclinet/bundles/
             heurist-map/            # deployed dist, no *.map files
             heurist-mirador4/       # deployed dist, no *.map files
 ```
@@ -23,7 +22,7 @@ This package introduces one server-side orchestration script for independent cli
 2. Node must satisfy the Vite version used by the projects. For the current `heurist-map` Vite 8 build, use Node 20.19+ or 22.12+.
 3. Do **not** install Vite globally. `npm ci` installs the exact project-local Vite from `package-lock.json`.
 4. Ensure the cron user can clone/fetch both repositories without interactive authentication.
-5. Ensure `/var/www/html/HEURIST` and `HEURIST_SUPPORT/external_h5` are writable by the build user (or run the deployment cron as the existing server-management user/root).
+5. Ensure `/var/www/html/HEURIST` is writable by the build user (or run the deployment cron as the existing server-management user/root).
 6. Both repositories should commit `package-lock.json` and provide a normal `npm run build` command.
 7. Both repositories must contain the `deploy:heurist` command and corresponding deployment script.
 
@@ -45,8 +44,8 @@ Run once manually:
 Then inspect:
 
 ```bash
-ls -la /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5/heurist-map
-ls -la /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5/heurist-mirador4
+ls -la /var/www/html/HEURIST/h7-alpha/hclinet/bundles/heurist-map
+ls -la /var/www/html/HEURIST/h7-alpha/hclinet/bundles/heurist-mirador4
 ```
 
 ## Cron
@@ -66,7 +65,7 @@ The defaults can be overridden without editing the script:
 
 ```bash
 HEURIST_ROOT=/var/www/html/HEURIST
-HEURIST_CLIENT_DIST_ROOT=/var/www/html/HEURIST/HEURIST_SUPPORT/external_h5
+HEURIST_CLIENT_DIST_ROOT=/var/www/html/HEURIST/h7-alpha/hclient/bundles
 HEURIST_MAP_REPO=https://github.com/HeuristNetwork/heurist-map.git
 HEURIST_MIRADOR4_REPO=https://github.com/HeuristNetwork/heurist-mirador4.git
 HEURIST_CLIENT_BRANCH=main

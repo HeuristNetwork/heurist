@@ -8,7 +8,7 @@
 #
 # Dedicated source checkouts live under /var/www/html/HEURIST.
 # Built distributions are published under:
-#   /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5/<module>
+#   /var/www/html/HEURIST/h7-alpha/hclient/bundles/<module>
 #
 # Routine output is written to LOG_FILE. Cron receives output only on failure,
 # so MAILTO sends mail only when the run is unsuccessful.
@@ -16,7 +16,7 @@
 set -Eeuo pipefail
 
 HEURIST_ROOT="${HEURIST_ROOT:-/var/www/html/HEURIST}"
-DIST_ROOT="${HEURIST_CLIENT_DIST_ROOT:-$HEURIST_ROOT/HEURIST_SUPPORT/external_h5}"
+DIST_ROOT="${HEURIST_CLIENT_DIST_ROOT:-$HEURIST_ROOT/h7-alpha/hclient/bundles}"
 LOG_FILE="${HEURIST_CLIENT_MODULE_LOG:-/var/log/heurist_client_modules.log}"
 LOG_PREFIX="[heurist-client-modules]"
 OWNER="${HEURIST_CLIENT_OWNER:-osmakov}"
