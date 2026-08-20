@@ -129,7 +129,8 @@ $.widget( "heurist.resultList", {
         transparent_background: false,
         
         aggregate_values: null, //supplementary values per record id - usually to store counts, sum, avg 
-        aggregate_link: null,    //link to assigned to aggregate value label
+        aggregate_link: null,   //link to assigned to aggregate value label
+        aggregate_pretext: '',  //extra text before aggregate value label
         
         allow_record_content_view: false,   // show record_content mode as an option, for Webpages, 
                                             // can be overridden if the initial view mode is record_content or if set to blog mode
@@ -228,7 +229,9 @@ $.widget( "heurist.resultList", {
     _expandedHeightCache: {},
 
     _showRecordOwner: false, // whether to show the record owner inline
-    
+
+    _longestAggregateLabel: 0,
+
     // the constructor
     _create: function() {
 
@@ -1809,20 +1812,25 @@ $.widget( "heurist.resultList", {
 
         let sCount = '';
         if(this.options.aggregate_values){
+
             sCount = this.options.aggregate_values[recID];
-            if(!(sCount>0)) {
-                sCount = ''
+
+            if(!window.hWin.HEURIST4.util.isPositiveInt(sCount)) {
+                sCount = '<span class="rec_Aggregate empty_Aggregate"></span>';
             }else {
-                
-                if(this.options.aggregate_link){    
-                    sCount = '<a href="'
-                    + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                    + '&q=' + encodeURIComponent(this.options.aggregate_link.replace('[ID]',recID))
-                    + '" target="_blank" title="Count of records which reference this record. Opens list in new tab">'+sCount+'</a>';
+
+                sCount = sCount > 999 ? '>999' : sCount;
+                sCount = !window.hWin.HEURIST4.util.isempty(this.options.aggregate_pretext) ? `${this.options.aggregate_pretext}${sCount}` : sCount;
+
+                this._longestAggregateLabel = sCount.length > this._longestAggregateLabel ? sCount.length : this._longestAggregateLabel;
+
+                if(this.options.aggregate_link){
+                    sCount = `<a href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&q=${encodeURIComponent(this.options.aggregate_link.replace('[ID]',recID))}"`
+                    +` target="_blank" title="Count of records which reference this record. Opens list in new tab">${sCount}</a>`;
                 }
-                sCount = '<span style="margin-right:10px">'+sCount+'</span>';
+                sCount = `<span class="rec_Aggregate">${sCount}</span>`;
             }
-        }                   
+        }
 
         // Apply user pref font size
         let usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
@@ -1846,7 +1854,7 @@ $.widget( "heurist.resultList", {
 
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
-        + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle" '+title_font_size+'>' //  '+rectypeTitleClass+'
+        + '<div title="'+(is_logged ? `dbl-click to edit: ${recID} ` : '')+recTitle_strip_all+'" class="recordTitle" '+title_font_size+'>' //  '+rectypeTitleClass+'
         +   sCount;
 
         let show_as_link = rectypeID > 0 && $Db.rty(rectypeID, 'rty_ShowURLOnEditForm') != 0;
@@ -3361,8 +3369,10 @@ $.widget( "heurist.resultList", {
         
         if(preserve_selection){
             this._lastSelectedIndex = preserved_last_selected;
-        }        
-        
+        }
+
+        this._longestAggregateLabel = 0;
+
         let html = '', html_groups = {}, tab_header = '', stitle;
         for(; (idx<len && this._count_of_divs<pagesize); idx++) {
             const recID = rec_order[idx];
@@ -3411,7 +3421,7 @@ $.widget( "heurist.resultList", {
                 this._count_of_divs++;
             }
         }
-        
+
         //activate tab mode        
         if(this.options.view_mode=='tabs'){
             if(rec_toload.length>0){
@@ -3526,6 +3536,14 @@ $.widget( "heurist.resultList", {
         }
 
         this.div_content[0].innerHTML += html;
+
+        if(this._longestAggregateLabel > 0){
+            this.div_content.find('.rec_Aggregate').css({
+                display: 'inline-block',
+                width: `${this._longestAggregateLabel}ch`,
+                'margin-right': '10px'
+            });
+        }
 
         if(this.options.groupByField){ //init show/hide btn for groups
             if(this.options.groupByCss!=null){

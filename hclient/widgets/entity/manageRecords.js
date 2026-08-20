@@ -823,7 +823,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 "searchrecordsonlinkscount": function( event, data ){
                     this.recordList.resultList({
                         aggregate_values: data.links_count,
-                        aggregate_link: data.links_query
+                        aggregate_link: data.links_query,
+                        aggregate_pretext: 'n='
                     });
                 },
                 
