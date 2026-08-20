@@ -1211,25 +1211,19 @@ function HMapLayer( _options ) {
     // find what theme fit for given feature
     //
     function _defineThematicMapSymbol(feature, themes){
-        
-        let recID = feature.rec_ID;
-        let new_symbol = false;
-        
+        const layerStyle = that.getStyle() || {};
+        const effectiveLayerStyle = options.mapwidget.mapping(
+            'setStyleDefaultValues', window.hWin.HEURIST4.util.cloneJSON(layerStyle));
+        let new_symbol = window.hWin.HEURIST4.util.cloneJSON(effectiveLayerStyle);
+        let matched = false;
+
         for(let k=0; k<themes.length; k++)
             for(let i=0; i<themes[k].fields.length; i++)
             {
-                
                 let theme = themes[k];
                 let ftheme = theme.fields[i];
-                
                 let tfield = ftheme.code;
-                /*
-                if(typeof tfield == 'string' && tfield.indexOf(':')>0){
-                    let codes = tfield.split(':');
-                    tfield = codes[codes.length-1];
-                }
-                */
-                
+
                 let value = feature[tfield];
                 if(ftheme.isNumeric && window.hWin.HEURIST4.util.isNumber(feature[tfield])){
                     value = Number(feature[tfield]);
@@ -1245,10 +1239,10 @@ function HMapLayer( _options ) {
                         if(Array.isArray(range.value))
                         {
                             if(window.hWin.HEURIST4.util.findArrayIndex(value, range.value)>-1){
-                                fsymb = range.symbol;       
+                                fsymb = range.symbol;
                                 break;
                             }
-                        }else if(!window.hWin.HEURIST4.util.isnull(range.min) && 
+                        }else if(!window.hWin.HEURIST4.util.isnull(range.min) &&
                             !window.hWin.HEURIST4.util.isnull(range.max)){
 
                                 if(value>=range.min && value<=range.max){
@@ -1261,35 +1255,29 @@ function HMapLayer( _options ) {
                             }
                     }//for
                     if(fsymb!=null){
-                        //if theme.symbol is not defined it takes def_layer_style)
-                        if(new_symbol){
-                            new_symbol = _mergeThematicSymbol(new_symbol, fsymb);
-                        }else{
-                            new_symbol = _mergeThematicSymbol(theme.symbol?theme.symbol:that.getStyle(), fsymb);
-                        }
+                        // Explicit theme properties inherit the effective layer symbol;
+                        // the matching range/facet then overrides the effective theme.
+                        // With several active themes, only explicit properties from the
+                        // later theme/range override the already-resolved result.
+                        new_symbol = _mergeThematicSymbol(new_symbol, theme.symbol || {});
+                        new_symbol = _mergeThematicSymbol(new_symbol, fsymb || {});
+                        matched = true;
                     }
                 }
             }
-            
-        return new_symbol;        
-        
+
+        return matched ? new_symbol : false;
     }
-    
-    //
-    //
-    //
-    function _mergeThematicSymbol(basesymbol, fsymb){
-        
-            let use_style = window.hWin.HEURIST4.util.cloneJSON( basesymbol );
-        
-            let keys = Object.keys(fsymb);
-            for(let j=0; j<keys.length; j++){
-                use_style[keys[j]] = fsymb[keys[j]];
-            }
-            
-            return use_style;
-    }    
-    
+
+    function _mergeThematicSymbol(basesymbol, override){
+        const result = window.hWin.HEURIST4.util.cloneJSON(basesymbol || {});
+        const local = window.hWin.HEURIST4.map.canonicalizeMapSymbol(override || {});
+        Object.keys(local).forEach(function(key){
+            result[key] = local[key];
+        });
+        return result;
+    }
+
     //public members
     let that = {
 

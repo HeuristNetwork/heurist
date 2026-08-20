@@ -1359,6 +1359,7 @@ $.widget( "heurist.editing_input", {
                             window.hWin.HEURIST4.ui.showThematicMappingDialog(
                             {maplayer_query: this.configMode['thematicmap']===true?null:this.configMode['thematicmap'], //query from map layer
                             symbology: current_val,
+                                parentSymbol: window.hWin.HEURIST4.map.getDefaultMapSymbol(),
                                 onClose: function(context){
                                     if(context!==null && context!==undefined){
                                         let newval = window.hWin.HEURIST4.util.isJSON(context);
@@ -4523,7 +4524,8 @@ $.widget( "heurist.editing_input", {
                             if(hquery) mode_edit = 3;
 
                             current_val.maplayer_query = hquery;
-                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, __storeSymbology);
+                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, __storeSymbology, null,
+                                window.hWin.HEURIST4.map.getDefaultMapSymbol());
                         });
                     }});
 
@@ -4555,6 +4557,7 @@ $.widget( "heurist.editing_input", {
                                     {
                                         maplayer_query: source.query,
                                         symbology: current_val,
+                                        parentSymbol: window.hWin.HEURIST4.map.getDefaultMapSymbol(),
                                         onClose: function(context){
                                             if(context!==null && context!==undefined){
                                                 let newval = window.hWin.HEURIST4.util.isJSON(context);

@@ -1508,7 +1508,7 @@ class HSystemMgr {
      * Loads the necessary scripts for editing records.
      * Checks and loads any missing scripts from the following:
      *  jquery.fileupload.js, wellknown.js, ui-tabs-paging.js, evol.colorpicker.js,
-     *  editing2.js, editing_input.js, editingBrowse.js, editingTranslation.js, editingHelpers.js,
+     *  editing2.js, editing_inputs.js, editingBrowse.js, mapSymbolEditor.js, editingHelpers.js,
      *  temporalObjectLibrary.js and utils_geo.js
      *
      * @param {function} callback callback function after all the scripts have been loaded

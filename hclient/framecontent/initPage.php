@@ -250,6 +250,8 @@ if (!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS'))
 <script src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
 
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
 

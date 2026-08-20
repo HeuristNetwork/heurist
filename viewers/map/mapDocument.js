@@ -645,8 +645,9 @@ console.log(treedata);
         
         let layer_title = _recset.fld(_record, 'rec_Title');
         let layer_style = _getSymbology(  mapdoc_id, rec_id );
+        let parent_style = options.mapwidget.mapping('setStyleDefaultValues', {}, false, false);
 
-        let current_value = layer_style;//affected_layer.options.default_style;
+        let current_value = window.hWin.HEURIST4.util.cloneJSON(layer_style || {});//affected_layer.options.default_style;
         current_value.sym_Name = layer_title; //affected_layer.options.layer_name;
         //open edit dialog to specify symbology
         window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, 1, function(new_value){
@@ -678,7 +679,7 @@ console.log(treedata);
             if(window.hWin.HEURIST4.util.isFunction(callback)){
                 callback( new_title, new_style );
             }
-        });        
+        }, null, parent_style);        
     }
 
     function _editImageFilter( mapdoc_id, layer_id, callback ){

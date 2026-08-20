@@ -74,6 +74,17 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
         current_value = window.hWin.HEURIST4.util.cloneJSON(symbology.symbol || {});
     }
 
+    // Canonical map opacity is 0..1. Accept old 0..100 values at the editor
+    // boundary, but keep graph modes 6/7 on their existing independent contract.
+    if(mode_edit!==6 && mode_edit!==7 && current_value && $.isPlainObject(current_value)){
+        if(Object.hasOwn(current_value, 'opacity')){
+            current_value.opacity = window.hWin.HEURIST4.map.normalizeOpacity(current_value.opacity);
+        }
+        if(Object.hasOwn(current_value, 'fillOpacity')){
+            current_value.fillOpacity = window.hWin.HEURIST4.map.normalizeOpacity(current_value.fillOpacity);
+        }
+    }
+
     // HRecordSet treats array values as repeatable field values. Map symbol
     // iconSize, however, may arrive from older/runtime styles as [width,height].
     // The symbology editor has one scalar Icon size field, so collapse it before
@@ -84,7 +95,7 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             current_value.iconSize = current_value.iconSize.length>0 ? current_value.iconSize[0] : '';
         }
         if(window.hWin.HEURIST4.util.isempty(current_value.iconSize) && current_value.radius>0){
-            current_value.iconSize = current_value.radius;
+            current_value.iconSize = Number(current_value.radius) * 2;
         }
         delete current_value.radius;
     }
@@ -165,19 +176,16 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             let mode = isChanged?'visible':'hidden';
             edit_symb_dialog.parent().find('#btnRecSave').css('visibility', mode);
 
-            if(isChanged){
-
-                let ele = _editing_symbology.getFieldByName('iconType');
-                if(ele!=null){
-                    let res = ele.editing_input('getValues'); 
-                    let ele_icon_url = _editing_symbology.getFieldByName('iconUrl').hide();
-                    let ele_icon_font = _editing_symbology.getFieldByName('iconFont').hide();
-                    if(res[0]=='url'){
-                        ele_icon_url.show();
-                    }else if(res[0]=='iconfont'){
-                        ele_icon_font.show();
-                    }
-                }
+            // Icon-dependent fields must follow Icon source on every change. Do not
+            // couple visibility to the modified flag: HEditing may refresh field
+            // wrappers independently, which previously left the Icon field visible
+            // after switching to Record type icon.
+            let ele = _editing_symbology.getFieldByName('iconType');
+            if(ele!=null){
+                let res = ele.editing_input('getValues');
+                const iconType = res && res.length ? res[0] : '';
+                _editing_symbology.getFieldByName('iconUrl').toggle(iconType==='url');
+                _editing_symbology.getFieldByName('iconFont').toggle(iconType==='iconfont');
             }
 
             if(_refreshSymbolPreviews){
@@ -254,13 +262,13 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
         }},
         {"dtID": "opacity",
             "dtFields":{
-                "dty_Type":"integer",
+                "dty_Type":"float",
                 "rst_DisplayName": "Stroke opacity:",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 1 (opaque)",
                 "rst_Spinner": "1",
-                "rst_SpinnerStep": "1",
+                "rst_SpinnerStep": "0.1",
                 "rst_MinValue": "0",
-                "rst_MaxValue": "100"
+                "rst_MaxValue": "1"
         }},
         
         {"dtID": "fillColor",
@@ -273,13 +281,13 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
         }},
         {"dtID": "fillOpacity",
             "dtFields":{
-                "dty_Type":"integer",
+                "dty_Type":"float",
                 "rst_DisplayName": "Fill opacity:",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 1 (opaque)",
                 "rst_Spinner": "1",
-                "rst_SpinnerStep": "1",
+                "rst_SpinnerStep": "0.1",
                 "rst_MinValue": "0",
-                "rst_MaxValue": "100"
+                "rst_MaxValue": "1"
         }}
         ];
         
@@ -307,13 +315,13 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             "dtFields":{
                 "dty_Type":"integer",
                 "rst_DisplayName": "Stroke opacity from :",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 1 (opaque)"
         }},
         {"dtID": "strokeOpacity2",
             "dtFields":{
                 "dty_Type":"integer",
                 "rst_DisplayName": "to:",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 1 (opaque)"
         }},
         {"dtID": "fillColor1",
             "dtFields":{
@@ -335,13 +343,13 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             "dtFields":{
                 "dty_Type":"float",
                 "rst_DisplayName": "Fill opacity from:",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 1 (opaque)"
         }},
         {"dtID": "fillOpacity2",
             "dtFields":{
                 "dty_Type":"float",
                 "rst_DisplayName": "to:",
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 1 (opaque)"
         }},
         {"dtID": "iconSize1",
             "dtFields":{
@@ -476,8 +484,11 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             "dtFields":{
                 "dty_Type":"freetext",
                 //"rst_RequirementType":"required",                        
-                "rst_DisplayName":"Name:",
-                "rst_Display": (mode_edit===1)?"visible":"hidden"
+                "rst_DisplayName":"Label:",
+                // sym_Name is legacy/transient metadata, not a map-symbol property.
+                // Show it only when the caller explicitly supplied it (old map layer
+                // title editing or thematic range label editing).
+                "rst_Display": Object.hasOwn(current_value || {}, 'sym_Name')?"visible":"hidden"
         }},
 
         /*
@@ -601,14 +612,14 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
         }},
         {"dtID": "opacity",
             "dtFields":{
-                "dty_Type":"integer",
+                "dty_Type":"float",
                 "rst_DisplayName": "Stroke opacity:",
                 "rst_DisplayWidth": 5,
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 1 (opaque)",
                 "rst_Spinner": "1",
-                "rst_SpinnerStep": "1",
+                "rst_SpinnerStep": "0.1",
                 "rst_MinValue": "0",
-                "rst_MaxValue": "100"
+                "rst_MaxValue": "1"
             }
         }
         
@@ -653,14 +664,14 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
         }},
         {"dtID": "fillOpacity",
             "dtFields":{
-                "dty_Type":"integer",
+                "dty_Type":"float",
                 "rst_DisplayName": "Fill opacity:",
                 "rst_DisplayWidth": 5,
-                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 1 (opaque)",
                 "rst_Spinner": "1",
-                "rst_SpinnerStep": "1",
+                "rst_SpinnerStep": "0.1",
                 "rst_MinValue": "0",
-                "rst_MaxValue": "100"
+                "rst_MaxValue": "1"
             }
         }
         ]}
@@ -699,10 +710,10 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
     // non-numeric values and expose browser increment controls.
     if(mode_edit==5){
         const numericFields = {
-            strokeOpacity1:{min:0,max:100,step:1},
-            strokeOpacity2:{min:0,max:100,step:1},
-            fillOpacity1:{min:0,max:100,step:1},
-            fillOpacity2:{min:0,max:100,step:1},
+            strokeOpacity1:{min:0,max:1,step:0.1},
+            strokeOpacity2:{min:0,max:1,step:0.1},
+            fillOpacity1:{min:0,max:1,step:0.1},
+            fillOpacity2:{min:0,max:1,step:0.1},
             iconSize1:{min:0,step:1},
             iconSize2:{min:0,step:1}
         };
@@ -716,9 +727,9 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
         });
     }
 
-    // Live symbol previews are useful for the normal style editors only.
-    // modes 1 and 3 have separate marker/outline/fill sections; mode 2 has outline/fill.
-    if(mode_edit===1 || mode_edit===2 || mode_edit===3){
+    // Live previews are available for every map-symbol mode. Graph node/edge
+    // editors (6/7) use a different symbol schema and remain intentionally separate.
+    if(mode_edit!==6 && mode_edit!==7){
 
         const __initSymbolPreviews = function(){
             if(!window.hWin.HEURIST4.ui.renderMapSymbolPreview) return;
@@ -748,18 +759,38 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
                 previews.push({element:sample, geometryType:geometryType});
             }
 
-            if(mode_edit===1 || mode_edit===3){
+            if(mode_edit===5){
+                __addPreview('strokeColor1', null, 'From preview:');
+                __addPreview('strokeColor2', null, 'To preview:');
+            }else if(mode_edit===2){
+                __addPreview('color', 'line', 'Preview:');
+                __addPreview('fillColor', 'polygon', 'Preview:');
+            }else{
                 __addPreview('iconType', 'point', 'Preview:');
                 __addPreview('stroke', 'line', 'Preview:');
                 __addPreview('fill', 'polygon', 'Preview:');
-            }else{
-                __addPreview('color', 'line', 'Preview:');
-                __addPreview('fillColor', 'polygon', 'Preview:');
             }
 
             _refreshSymbolPreviews = function(){
                 let editedSymbol = _editing_symbology.getValues() || {};
                 editedSymbol = window.hWin.HEURIST4.util.cloneJSON(editedSymbol);
+
+                if(mode_edit===5){
+                    const endpoints = [
+                        {color:editedSymbol.strokeColor1, opacity:editedSymbol.strokeOpacity1,
+                         fillColor:editedSymbol.fillColor1, fillOpacity:editedSymbol.fillOpacity1,
+                         iconSize:editedSymbol.iconSize1},
+                        {color:editedSymbol.strokeColor2, opacity:editedSymbol.strokeOpacity2,
+                         fillColor:editedSymbol.fillColor2, fillOpacity:editedSymbol.fillOpacity2,
+                         iconSize:editedSymbol.iconSize2}
+                    ];
+                    previews.forEach(function(item, index){
+                        const symbol = window.hWin.HEURIST4.ui.prepareMapSymbol(endpoints[index] || {}, null);
+                        window.hWin.HEURIST4.ui.renderMapSymbolPreview(
+                            item.element, symbol, {rectypeId:12});
+                    });
+                    return;
+                }
 
                 // Do not write inherited values back into the editor. They are
                 // only the preview base. Empty editor values mean "inherit";
@@ -810,6 +841,14 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             css:{'visibility':'hidden', 'float':'right'},  
             click: function() { 
                 let res = _editing_symbology.getValues(); //all values
+                if(mode_edit!==6 && mode_edit!==7){
+                    if(Object.hasOwn(res, 'opacity')){
+                        res.opacity = window.hWin.HEURIST4.map.normalizeOpacity(res.opacity);
+                    }
+                    if(Object.hasOwn(res, 'fillOpacity')){
+                        res.fillOpacity = window.hWin.HEURIST4.map.normalizeOpacity(res.fillOpacity);
+                    }
+                }
                 //remove empty values
                 let propNames = Object.getOwnPropertyNames(res);
                 for (let i = 0; i < propNames.length; i++) {
@@ -819,7 +858,7 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
                     }
                 }
                 if(res['iconType']=='circle'){
-                    res['radius'] = (res['iconSize']>0?res['iconSize']:8);
+                    res['radius'] = (res['iconSize']>0 ? Number(res['iconSize'])/2 : 4);
                 }
                 // The nested thematic editor now returns canonical symbology.
                 // Keep compatibility with a legacy thematic array during transition.

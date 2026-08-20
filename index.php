@@ -308,7 +308,7 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFolders.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingSymbology.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/mapSymbolEditor.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingBrowse.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingTranslation.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingHelpers.js"></script>

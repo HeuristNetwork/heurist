@@ -1963,15 +1963,13 @@ function editThematicSetting(type, ID){
 
     // Graph node/edge styling intentionally uses the special symbology editor modes
     // 6 and 7. Route through the shared launcher so mapSymbolEditor.js can remain
-    // dynamically loaded through the centralized map editor launcher.
-    window.hWin.HEURIST4.ui.showEditSymbologyDialog(
-        details.settings,
-        type === 'nodes' ? 6 : 7,
-        (styling) => {
-            putSetting(`setting_styling_${type}${ID}`, styling);
-            setThematicSetting(type, ID);
-        }
-    );
+    // dynamically loaded through the centralized map editor launcher.    
+    window.hWin.HEURIST4.ui.showEditSymbologyDialog(details.settings, type === 'nodes' ? 6 : 7, (styling) => {
+
+        putSetting(`setting_styling_${type}${ID}`, styling);
+
+        setThematicSetting(type, ID);
+    });
 }
 
 const hexToFilterCache = {};

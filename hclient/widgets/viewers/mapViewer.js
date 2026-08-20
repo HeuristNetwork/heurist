@@ -968,6 +968,17 @@ $.widget('heurist.mapViewer', {
         var recordId = Number(options && options.recordId);
         var persist = options && options.persist === true;
         var thematic = options && options.thematic === true;
+        var mapUtil = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.map;
+        var configuredDefault = that._mapBootstrap && that._mapBootstrap.settings
+            && that._mapBootstrap.settings.config && that._mapBootstrap.settings.config.defaults
+            ? that._mapBootstrap.settings.config.defaults.symbology : null;
+        var parentSymbol = options && $.isPlainObject(options.parentSymbol)
+            ? $.extend(true, {}, options.parentSymbol)
+            : (recordId > 0 && mapUtil
+                ? (configuredDefault
+                    ? mapUtil.normalizeMapSymbol(configuredDefault, mapUtil.DEFAULT_MAP_SYMBOL)
+                    : mapUtil.getDefaultMapSymbol())
+                : (mapUtil ? mapUtil.DEFAULT_MAP_SYMBOL : null));
 
         return new Promise(function(resolve, reject) {
             var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
@@ -1029,8 +1040,14 @@ $.widget('heurist.mapViewer', {
                     ui.showThematicMappingDialog({
                         maplayer_query: options && options.query ? options.query : null,
                         symbology: $.extend(true, {}, current),
+                        parentSymbol: parentSymbol,
                         onClose: accept
                     });
+                    setTimeout(function(){
+                        if (typeof ui._raiseMapConfigurationChildDialog === 'function') {
+                            ui._raiseMapConfigurationChildDialog();
+                        }
+                    }, 0);
                 } else {
                     if (typeof ui.showEditSymbologyDialog !== 'function') {
                         reject(new Error('Heurist symbology editor is not available'));
@@ -1042,7 +1059,8 @@ $.widget('heurist.mapViewer', {
                         $.extend(true, {}, current),
                         recordId > 0 ? 1 : 0,
                         accept,
-                        cancel
+                        cancel,
+                        parentSymbol
                     );
                 }
             } catch (error) {

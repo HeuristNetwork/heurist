@@ -41,6 +41,7 @@ if(isLocalHost()){
 ?>
 <script type="text/javascript"  src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js" integrity="sha384-w7CXHFrOIXSmCXYnTQGa05l+TdEU+qxHtOaPqyTojic8o3wGz3rfRGuNNOKU0uDW" crossorigin="anonymous"></script>
 
+
 <!-- leaflet plugins -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-tileLayerPixelFilter.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/geocoder/Control.Geocoder.js"></script>

@@ -67,7 +67,7 @@ It creates thematic map in the following format
  * @property {string} [default_palette_class='ui-heurist-design'] Default CSS class for theming.
  * @property {?string} maplayer_query The HAPI query string for the map layer, used to determine relevant record types and potentially data ranges.
  * @property {?object} symbology Canonical layer symbology: a plain symbol, or {symbol,thematic}.
- * @property {string} [path='widgets/editing/'] Path to the widget's HTML template.
+ * @property {string} [path='widgets/entity/popups/'] Path to the widget's HTML template.
  * @property {string} [htmlContent='mapThemesEditor.html'] Name of the HTML template file.
  */
 $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
@@ -84,6 +84,7 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
         
         maplayer_query: null,
         symbology: null, //canonical plain symbol or {symbol, thematic}
+        parentSymbol: null, //effective parent of the MapLayer symbol; defaults to configured map style
         thematic_mapping: null, //legacy input alias; accepted for backward compatibility
         
         path: 'widgets/editing/', //location of this widget
@@ -219,7 +220,10 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
                     if(value){
                         const rangeSymbol =
                             window.hWin.HEURIST4.util.isJSON(row.find('.field-symbol').val());
-                        ranges.push({value:value, symbol:rangeSymbol || ''});
+                        const rangeLabel = row.find('.field-label').val();
+                        const rangeData = {value:value, symbol:rangeSymbol || ''};
+                        if(rangeLabel) rangeData.label = rangeLabel;
+                        ranges.push(rangeData);
                     }
                 });
 
@@ -300,13 +304,14 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
         this._initialThematicContext = window.hWin.HEURIST4.util.cloneJSON(
             this.options.symbology);
 
-        //default layer symbol
-        let def_style = window.hWin.HEURIST4.util.isJSON(this.baseLayerSymbol);
-        if(!def_style){
-            def_style = window.hWin.HAPI4.get_prefs('map_default_style');
-            if(def_style) def_style = window.hWin.HEURIST4.util.isJSON(def_style);
-        }
-        this.mapDefaultSymbol = window.hWin.HEURIST4.ui.prepareMapSymbol(def_style, null);
+        // Effective layer symbol: built-in -> configured default -> sparse layer symbol.
+        // This is the parent for thematic-renderer symbols.
+        const defaultParent = $.isPlainObject(this.options.parentSymbol)
+            ? window.hWin.HEURIST4.map.normalizeMapSymbol(
+                this.options.parentSymbol, window.hWin.HEURIST4.map.DEFAULT_MAP_SYMBOL)
+            : window.hWin.HEURIST4.map.getDefaultMapSymbol();
+        this.mapDefaultSymbol = window.hWin.HEURIST4.map.normalizeMapSymbol(
+            this.baseLayerSymbol, defaultParent);
 
         this._renderThematicRendererList();
         if(this.options.thematic_mapping.length>0){
@@ -1246,6 +1251,7 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
             +'<span class="field-symbol-preview" title="Click to edit symbol" '
             +'style="display:inline-block;vertical-align:middle;min-width:76px;height:34px;margin:2px 6px;cursor:pointer"></span>'
             +'<input type="hidden" class="field-symbol"/>'
+            +'<input type="hidden" class="field-label"/>'
             +'</div>').appendTo(this.element.find('#f_ranges'));
 
         ele.uniqueId();
@@ -1276,8 +1282,9 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
         }
         
         if(range.symbol){
-            ele.find('.field-symbol').val($.isPlainObject(range.symbol)?JSON.stringify(range.symbol):range.symbol);    
+            ele.find('.field-symbol').val($.isPlainObject(range.symbol)?JSON.stringify(range.symbol):range.symbol);
         }
+        ele.find('.field-label').val(range.label || range.title || '');
         ele.find('.field-symbol').trigger('change');
 
         this._initSymbolEditor( ele.find('.field-symbol') ); 
@@ -1311,13 +1318,37 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
 
         const parent = fele.parent();
         const preview = parent.find('.field-symbol-preview').first();
+        const that = this;
 
         const openEditor = function(){
             let current_val = window.hWin.HEURIST4.util.isJSON( fele.val() );
             if(!current_val) current_val = {};
-            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 4, function(new_value){
-                fele.val(JSON.stringify(new_value)).trigger('change');
-            });
+            const labelInput = parent.find('.field-label').first();
+            if(!fele.is('#tm_symbol') && labelInput.length){
+                // sym_Name is a transient editor field; store the result as range.label,
+                // never inside the inheritable symbol object.
+                current_val.sym_Name = labelInput.val() || '';
+            }
+
+            // Theme symbol inherits the effective layer symbol. Range/facet symbols
+            // inherit the effective theme symbol. The public launcher resolves the
+            // effective value for editing and returns a sparse difference on Save.
+            let parentSymbol = that.mapDefaultSymbol;
+            if(!fele.is('#tm_symbol')){
+                const themeSymbol = window.hWin.HEURIST4.util.isJSON(
+                    that.element.find('#tm_symbol').val()) || {};
+                parentSymbol = window.hWin.HEURIST4.map.normalizeMapSymbol(
+                    themeSymbol, that.mapDefaultSymbol);
+            }
+
+            window.hWin.HEURIST4.ui.showEditSymbologyDialog(
+                current_val, 4, function(new_value){
+                    if(!fele.is('#tm_symbol') && labelInput.length && $.isPlainObject(new_value)){
+                        labelInput.val(new_value.sym_Name || '');
+                        delete new_value.sym_Name;
+                    }
+                    fele.val(JSON.stringify(new_value)).trigger('change');
+                }, null, parentSymbol);
         };
 
         // Keep JSON as internal state for the existing save logic, but do not expose it.
@@ -1411,41 +1442,40 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
                         colorGradient = window.hWin.HEURIST4.ui.getColourGradient(new_value.strokeColor1, new_value.strokeColor2, cnt);
                     }
                     
-                    function __prepareInt(val){
-                        if(!window.hWin.HEURIST4.util.isNumber(val)){
-                            val = 0
-                        }else{
-                            val = parseInt(val);
-                        }
-                        return val;
+                    function __prepareNumber(val){
+                        if(!window.hWin.HEURIST4.util.isNumber(val)) return 0;
+                        return Number(val);
+                    }
+                    function __roundOpacity(val){
+                        return Math.round(val * 1000) / 1000;
                     }
 
-                    new_value.fillOpacity1 = __prepareInt(new_value.fillOpacity1);
-                    new_value.fillOpacity2 = __prepareInt(new_value.fillOpacity2);
+                    new_value.fillOpacity1 = __prepareNumber(new_value.fillOpacity1);
+                    new_value.fillOpacity2 = __prepareNumber(new_value.fillOpacity2);
 
                     if(new_value.fillOpacity1>0 || new_value.fillOpacity2>0){
                         let step = (new_value.fillOpacity2 - new_value.fillOpacity1)/cnt;
                         let val = new_value.fillOpacity1;
                         for(let i=0; i<cnt; i++){
-                            fillOpacity.push((i==cnt-1 || val>new_value.fillOpacity2)?new_value.fillOpacity2:val);
-                            val = Math.round(val + step);
+                            fillOpacity.push(__roundOpacity((i==cnt-1 || val>new_value.fillOpacity2)?new_value.fillOpacity2:val));
+                            val = __roundOpacity(val + step);
                         }
                     }
 
-                    new_value.strokeOpacity1 = __prepareInt(new_value.strokeOpacity1);
-                    new_value.strokeOpacity2 = __prepareInt(new_value.strokeOpacity2);
+                    new_value.strokeOpacity1 = __prepareNumber(new_value.strokeOpacity1);
+                    new_value.strokeOpacity2 = __prepareNumber(new_value.strokeOpacity2);
 
                     if(new_value.strokeOpacity1>0 || new_value.strokeOpacity2>0){
                         let step = (new_value.strokeOpacity2 - new_value.strokeOpacity1)/cnt;
                         let val = new_value.strokeOpacity1;
                         for(let i=0; i<cnt; i++){
-                            strokeOpacity.push((i==cnt-1 || val>new_value.strokeOpacity2)?new_value.strokeOpacity2:val);
-                            val = Math.round(val + step);
+                            strokeOpacity.push(__roundOpacity((i==cnt-1 || val>new_value.strokeOpacity2)?new_value.strokeOpacity2:val));
+                            val = __roundOpacity(val + step);
                         }
                     }
 
-                    new_value.iconSize1 = __prepareInt(new_value.iconSize1);
-                    new_value.iconSize2 = __prepareInt(new_value.iconSize2);
+                    new_value.iconSize1 = __prepareNumber(new_value.iconSize1);
+                    new_value.iconSize2 = __prepareNumber(new_value.iconSize2);
 
                     if(new_value.iconSize1>0 || new_value.iconSize2>0){
                         let step = (new_value.iconSize2 - new_value.iconSize1)/cnt;
@@ -1783,36 +1813,13 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
         }
 
         function mergeSymbol(base, override){
-            const result = window.hWin.HEURIST4.util.cloneJSON(base || {});
-            override = window.hWin.HEURIST4.util.isJSON(override);
-            if($.isPlainObject(override)){
-                Object.keys(override).forEach(function(key){
-                    result[key] = override[key];
-                });
-
-                // Keep preview semantics identical to heurist-map thematicSymbolResolver:
-                // CircleMarker size is rendered from radius, while historic thematic
-                // range definitions vary point size with iconSize. An iconSize override
-                // therefore controls the effective circle diameter unless the range also
-                // provides an explicit radius.
-                if(result.iconType==='circle'
-                    && Object.prototype.hasOwnProperty.call(override, 'iconSize')
-                    && !Object.prototype.hasOwnProperty.call(override, 'radius')){
-                    const diameter = Array.isArray(override.iconSize)
-                        ? Number(override.iconSize[0])
-                        : Number(override.iconSize);
-                    if(Number.isFinite(diameter) && diameter>=0){
-                        result.radius = diameter/2;
-                    }
-                }
-            }
-            return result;
+            override = window.hWin.HEURIST4.util.isJSON(override) || {};
+            return window.hWin.HEURIST4.map.normalizeMapSymbol(override, base);
         }
 
-        let theme_symbol = window.hWin.HEURIST4.util.isJSON(base_symbol);
-        theme_symbol = theme_symbol ? theme_symbol : layer_symbol;
-        theme_symbol = window.hWin.HEURIST4.ui.prepareMapSymbol(
-            window.hWin.HEURIST4.util.cloneJSON(theme_symbol || {}), null);
+        let theme_symbol = window.hWin.HEURIST4.util.isJSON(base_symbol) || {};
+        theme_symbol = window.hWin.HEURIST4.map.normalizeMapSymbol(
+            theme_symbol, layer_symbol || this.mapDefaultSymbol);
 
         if(ele==null){
             renderer(this.element.find('#tm_symbol_preview')[0], theme_symbol,
@@ -1826,8 +1833,7 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
             return;
         }
 
-        const effective_symbol = window.hWin.HEURIST4.ui.prepareMapSymbol(
-            mergeSymbol(theme_symbol, range_symbol), null);
+        const effective_symbol = mergeSymbol(theme_symbol, range_symbol);
         renderer($(ele)[0], effective_symbol,
             {geometryType:null, rectypeId:this.previewRecTypeID || 12});
     }

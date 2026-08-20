@@ -11,12 +11,8 @@ This directory houses widgets that provide various editing functionalities withi
 - `editTheme.json`: JSON configuration for theme editing.
 - `editTranslations.js`: Widget for editing multi-language translations
 - `editing2.js`: Defines the HEditing class for dynamic form generation and management.
-- `editingBrowse.js`: Record/term browsing helpers used by editing_input.
-- `editingTranslation.js`: Translation helpers used by editing_input.
-- `editingHelpers.js`: Miscellaneous helpers used by editing_input.
-- `mapSymbolEditor.js`: Map/graph symbol editor, loaded on demand through `HEURIST4.ui.showEditSymbologyDialog`.
-- `mapThemesEditor.js` / `mapThemesEditor.html`: Thematic map editor, loaded on demand through `HEURIST4.ui.showThematicMappingDialog`.
-- `mapSymbolPreview.js`: Compact map symbol preview renderer.
+- `editingBrowse.js`, `editingTranslation.js`, `editingHelpers.js`: editing_input support helpers.
+- `mapSymbolEditor.js`, `mapThemesEditor.js`, `mapSymbolPreview.js`: map symbology editors and previews.
 - `editing_input.js`: Defines the `heurist.editing_input` jQuery UI widget for form input controls.
 - `editorCodeMirror.js`: Provides a wrapper class `EditorCodeMirror` to integrate the CodeMirror editor.
 - `imgFilter.html`: Content for imgFilter dialog
