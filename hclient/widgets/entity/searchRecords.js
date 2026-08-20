@@ -217,7 +217,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         this._on( this.btn_select_rt, {
             click:  function(){
                 this._select_mode = 0;
-                this.selectRectype.hSelect('open'); console.log(this.selectRectype.hSelect('menuWidget'));
+                this.selectRectype.hSelect('open');
                 this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
                 return false;
             }
@@ -490,7 +490,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             if(this.options.pointer_field_id>0 && this.options.pointer_source_rectype>0){
                 if(this.element.find('#cb_getcounts').is(':checked')){
                     links_count = {source:this.options.pointer_source_rectype, 
-                                   target:this.rectype_filter, // Note: this.rectype_filter is not explicitly defined, likely meant rectype_filter
+                                   target:rectype_filter,
                                    dty_ID:this.options.pointer_field_id};
                 }            
             }    
