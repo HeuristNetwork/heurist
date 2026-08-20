@@ -485,10 +485,9 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
                 "dty_Type":"freetext",
                 //"rst_RequirementType":"required",                        
                 "rst_DisplayName":"Label:",
-                // sym_Name is legacy/transient metadata, not a map-symbol property.
-                // Show it only when the caller explicitly supplied it (old map layer
-                // title editing or thematic range label editing).
-                "rst_Display": Object.hasOwn(current_value || {}, 'sym_Name')?"visible":"hidden"
+                // sym_Name is retained only for backwards-compatible data transport.
+                // It is not a map-symbol property and is not edited here.
+                "rst_Display": "hidden"
         }},
 
         /*
