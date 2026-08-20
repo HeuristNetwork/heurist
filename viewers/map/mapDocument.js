@@ -91,40 +91,6 @@ function hMapDocument( _options )
         //_loadMapDocuments();
     }
     
-    /**
-     * Split vector symbology into its base symbol and thematic renderer list.
-     * Supports both the legacy array format and canonical {symbol,thematic}.
-     */
-    function _splitVectorSymbology(value){
-        value = window.hWin.HEURIST4.util.isJSON(value);
-        if(!value) return {symbol:null, thematic:[]};
-
-        if($.isPlainObject(value) && (Object.hasOwn(value, 'symbol') || Array.isArray(value.thematic))){
-            return {
-                symbol: $.isPlainObject(value.symbol) ? value.symbol : null,
-                thematic: Array.isArray(value.thematic) ? value.thematic : []
-            };
-        }
-
-        if(Array.isArray(value)){
-            let symbol = null;
-            let thematic = [];
-            $.each(value, function(i, item){
-                if(!$.isPlainObject(item)) return;
-                if(Array.isArray(item.fields)){
-                    thematic.push(item);
-                }else{
-                    symbol = $.isPlainObject(item.symbol) ? item.symbol : item;
-                }
-            });
-            return {symbol:symbol, thematic:thematic};
-        }
-
-        return $.isPlainObject(value)
-            ? {symbol:value, thematic:[]}
-            : {symbol:null, thematic:[]};
-    }
-
     //
     // loads all map documents from server
     //
@@ -227,7 +193,7 @@ function hMapDocument( _options )
                         } 
 
                         if(DT_SYMBOLOGY>0){
-                            const symbology = _splitVectorSymbology(
+                            const symbology = window.hWin.HEURIST4.map.splitSymbology(
                                 resdata.fld(record, DT_SYMBOLOGY)
                             );
                             const layer_themes = symbology.thematic;
@@ -629,7 +595,7 @@ console.log(treedata);
     function _getSymbology( mapdoc_id, rec_id ){
         
         function __extractStyle( def_style ){
-            return _splitVectorSymbology(def_style).symbol;
+            return window.hWin.HEURIST4.map.splitSymbology(def_style).symbol;
         }
         
         
@@ -701,7 +667,7 @@ console.log(treedata);
             }
             
             //update style without discarding thematic renderers
-            const current_symbology = _splitVectorSymbology(_recset.fld(_record, DT_SYMBOLOGY));
+            const current_symbology = window.hWin.HEURIST4.map.splitSymbology(_recset.fld(_record, DT_SYMBOLOGY));
             const persisted_style = current_symbology.thematic.length>0
                 ? {symbol:new_value, thematic:current_symbology.thematic}
                 : new_value;

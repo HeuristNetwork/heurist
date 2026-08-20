@@ -1508,7 +1508,7 @@ class HSystemMgr {
      * Loads the necessary scripts for editing records.
      * Checks and loads any missing scripts from the following:
      *  jquery.fileupload.js, wellknown.js, ui-tabs-paging.js, evol.colorpicker.js,
-     *  editing2.js, editing_inputs.js, editing_exts.js,
+     *  editing2.js, editing_input.js, editingBrowse.js, editingTranslation.js, editingHelpers.js,
      *  temporalObjectLibrary.js and utils_geo.js
      *
      * @param {function} callback callback function after all the scripts have been loaded
@@ -1571,7 +1571,9 @@ class HSystemMgr {
             scripts.push(`${editingBase}editing_input.js`);
         }
         if(typeof openSearchMenu === 'undefined'){
-            scripts.push(`${editingBase}editing_exts.js`);
+            scripts.push(`${editingBase}editingBrowse.js`);
+            scripts.push(`${editingBase}editingTranslation.js`);
+            scripts.push(`${editingBase}editingHelpers.js`);
         }
         if(typeof EditorCodeMirror === 'undefined'){
             scripts.push(`${editingBase}editorCodeMirror.js`);

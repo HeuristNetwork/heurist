@@ -538,42 +538,7 @@ function HMapLayer( _options ) {
      * an image-filter definition.
      */
     function _normalizeVectorSymbology(value){
-
-        value = window.hWin.HEURIST4.util.isJSON(value);
-
-        if(!value){
-            return {symbol:null, thematic:[]};
-        }
-
-        if($.isPlainObject(value) && (Object.hasOwn(value, 'symbol') || Array.isArray(value.thematic))){
-            return {
-                symbol: $.isPlainObject(value.symbol) ? value.symbol : null,
-                thematic: Array.isArray(value.thematic) ? value.thematic : []
-            };
-        }
-
-        if(Array.isArray(value)){
-            let symbol = null;
-            let thematic = [];
-
-            $.each(value, function(i, item){
-                if(!$.isPlainObject(item)) return;
-
-                if(Array.isArray(item.fields)){
-                    thematic.push(item);
-                }else{
-                    symbol = $.isPlainObject(item.symbol) ? item.symbol : item;
-                }
-            });
-
-            return {symbol:symbol, thematic:thematic};
-        }
-
-        if($.isPlainObject(value)){
-            return {symbol:value, thematic:[]};
-        }
-
-        return {symbol:null, thematic:[]};
+        return window.hWin.HEURIST4.map.splitSymbology(value);
     }
 
 

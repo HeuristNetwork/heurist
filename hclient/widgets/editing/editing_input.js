@@ -604,7 +604,7 @@ $.widget( "heurist.editing_input", {
                         if(is_translation){
 
                             if(typeof translationSupport!=='undefined' && window.hWin.HEURIST4.util.isFunction(translationSupport)){
-                                translationSupport(this); //see editing_exts
+                                translationSupport(this); //see editingTranslation.js
                             }
                             
                         }else if($(event.target).hasClass('ui-icon-translate') && (that.detailType == 'freetext' || that.detailType == 'blocktext')){ // request language, then create new input with language prefix
@@ -1356,10 +1356,9 @@ $.widget( "heurist.editing_input", {
                         
                             let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
                             if(!current_val) current_val = [];
-                            window.hWin.HEURIST4.ui.showRecordActionDialog(
-                            'thematicMapping',
+                            window.hWin.HEURIST4.ui.showThematicMappingDialog(
                             {maplayer_query: this.configMode['thematicmap']===true?null:this.configMode['thematicmap'], //query from map layer
-                            thematic_mapping: current_val,
+                            symbology: current_val,
                                 onClose: function(context){
                                     if(context!==null && context!==undefined){
                                         let newval = window.hWin.HEURIST4.util.isJSON(context);
@@ -2681,7 +2680,7 @@ $.widget( "heurist.editing_input", {
             
             let __show_select_function = null;
             if(typeof browseRecords!=='undefined' && window.hWin.HEURIST4.util.isFunction(browseRecords)){
-                __show_select_function = browseRecords(that, $input);//see editing_exts
+                __show_select_function = browseRecords(that, $input);//see editingBrowse.js
             }
             
             that._findAndAssignTitle($input, value, __show_select_function);
@@ -4552,11 +4551,10 @@ $.widget( "heurist.editing_input", {
                                 let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
                                 if(!current_val) current_val = [];
 
-                                window.hWin.HEURIST4.ui.showRecordActionDialog(
-                                    'thematicMapping',
+                                window.hWin.HEURIST4.ui.showThematicMappingDialog(
                                     {
                                         maplayer_query: source.query,
-                                        thematic_mapping: current_val,
+                                        symbology: current_val,
                                         onClose: function(context){
                                             if(context!==null && context!==undefined){
                                                 let newval = window.hWin.HEURIST4.util.isJSON(context);

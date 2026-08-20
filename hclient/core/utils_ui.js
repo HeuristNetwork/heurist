@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global showLoginDialog,editSymbology,imgFilter,editTheme,HPublishDialog */
+/* global showLoginDialog,editTheme,HPublishDialog */
 
 /*
 Selectors:
@@ -73,13 +73,6 @@ mergeCss
 createRecordLinkInfo - return ui for link and relationship
 
 onInactive invokes cb after ms user inactivity
-
-For mapping:
-
-prepareMapSymbol
-
-showEditSymbologyDialog
-showImgFilterDialog
 
 initGalleryContainer
 */
@@ -2746,171 +2739,6 @@ window.hWin.HEURIST4.ui = {
     },
 
     //
-    //
-    //
-    initEditSymbologyControl: function(element, value){
-
-                element.attr('readonly','readonly');
-                
-                value = window.hWin.HEURIST4.util.isJSON(value);
-                if (value) {
-                    element.val(JSON.stringify(value));   
-                }
-                
-                let parent_div = element.parent(); //$dlg.find(sname+'_div')
-        
-                $('<span>')
-                .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
-                .attr('tabindex', '-1')
-                .attr('title', 'Reset default symbology')
-                .appendTo( parent_div )
-                .css({'line-height': '20px',cursor:'pointer',
-                    outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'})
-                    .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                        function(){element.val('');}); }});
-                
-                let $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
-                    .addClass('smallbutton btn_add_term')
-                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                    .appendTo( parent_div );
-                
-                $btn_edit_switcher.on( { click: function(){
-                        let current_val = window.hWin.HEURIST4.util.isJSON( element.val() );
-                        if(!current_val) current_val = {};
-                        window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, function(new_value){
-                            element.val(JSON.stringify(new_value));
-                        });
-                }});
-        
-    },
-
-    
-    //
-    // show map style edit dialog
-    //
-    showEditSymbologyDialog: function(current_value, mode_edit, callback, cancelCallback){
-        //todo optionally load dynamically editing_exts.js
-        editSymbology(current_value, mode_edit, callback, cancelCallback);
-    },
-
-    /**
-     * Open the reusable heurist-map configuration dialog through mapViewer.
-     *
-     * The caller owns persistence. This helper only creates the configuration-only
-     * iframe transport and returns the serialized settings through callbacks/Promise.
-     * It can therefore be reused by Preferences, Website editor, or other Heurist UI.
-     *
-     * options: {mode, value, onSave, onCancel, onError}
-     * @returns {Promise<object|null>}
-     */
-    showMapConfigurationDialog: function(options){
-        options = options || {};
-        let ui = window.hWin.HEURIST4.ui;
-        let doc_body = $(window.hWin.document).find('body');
-
-        if(ui._heuristMapConfigurationPromise){
-            return ui._heuristMapConfigurationPromise;
-        }
-
-        function loadMapViewer(){
-            if($.heurist && $.heurist.mapViewer){
-                return Promise.resolve();
-            }
-            return new Promise(function(resolve, reject){
-                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/mapViewer.js')
-                    .done(function(){
-                        if($.heurist && $.heurist.mapViewer){
-                            resolve();
-                        }else{
-                            reject(new Error('mapViewer widget was not registered'));
-                        }
-                    })
-                    .fail(function(jqxhr, settings, exception){
-                        reject(new Error('Unable to load mapViewer.js'+(exception?': '+exception:'')));
-                    });
-            });
-        }
-
-        function closeHost(){
-            let host = ui._heuristMapConfigurationHost;
-            ui._heuristMapConfigurationHost = null;
-            ui._raiseMapConfigurationChildDialog = null;
-            if(host){
-                try{
-                    if(host.mapViewer('instance')) host.mapViewer('destroy');
-                }catch(ignore){}
-                host.remove();
-            }
-        }
-
-        ui._heuristMapConfigurationPromise = loadMapViewer().then(function(){
-            return new Promise(function(resolve, reject){
-                let host = $('<div>')
-                    .addClass('heurist-map-configuration-host')
-                    .css({position:'fixed', inset:0, width:'100vw', height:'100vh',
-                          'z-index':10000, background:'transparent'})
-                    .appendTo(doc_body);
-                ui._heuristMapConfigurationHost = host;
-
-                // Host-side editors live outside the iframe. Raise their overlay
-                // and dialog above this temporary configuration-host stacking context.
-                ui._raiseMapConfigurationChildDialog = function(dialog){
-                    let baseZ = parseInt(host.css('z-index'), 10);
-                    if(!(baseZ>0)) baseZ = 10000;
-                    let dlg = dialog ? $(dialog).closest('.ui-dialog') : doc_body.find('.ui-dialog:visible').last();
-                    let overlay = doc_body.children('.ui-widget-overlay:visible').last();
-                    if(overlay.length) overlay.css('z-index', baseZ + 10);
-                    if(dlg && dlg.length) dlg.css('z-index', baseZ + 11);
-                };
-
-                host.mapViewer({
-                    presentationMode: 'iframe',
-                    viewerMode: 'configuration',
-                    configurationMode: options.mode || 'preferences',
-                    configurationValue: options.value || null,
-                    eventbased: false,
-                    onconfiguration: function(settings, context){
-                        closeHost();
-                        if(typeof options.onSave === 'function') options.onSave(settings, context);
-                        resolve(settings);
-                    },
-                    oncancelconfiguration: function(settings, context){
-                        closeHost();
-                        if(typeof options.onCancel === 'function') options.onCancel(settings, context);
-                        resolve(null);
-                    },
-                    onerror: function(error){
-                        closeHost();
-                        if(typeof options.onError === 'function') options.onError(error);
-                        reject(error instanceof Error ? error : new Error(error && error.message ? error.message : String(error)));
-                    }
-                });
-
-                host.find('iframe').css({position:'absolute', top:0, left:0, width:'100%', height:'100%',
-                    margin:0, padding:0, border:0, display:'block', background:'transparent'});
-            });
-        }).finally(function(){
-            ui._heuristMapConfigurationPromise = null;
-        });
-
-        return ui._heuristMapConfigurationPromise;
-    },
-
-    //
-    // show map style edit dialog
-    //
-    showImgFilterDialog: function(current_value, callback){
-        //todo optionally load dynamically editing_exts.js
-        if(typeof imgFilter !== 'undefined' && window.hWin.HEURIST4.util.isFunction(imgFilter)){  // already loaded
-            imgFilter( current_value, callback );    
-        }else{
-            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/imgFilter.js', function(){
-                window.hWin.HEURIST4.ui.showImgFilterDialog(current_value, callback);
-            }); 
-        }
-    },
-    
-    //
     // show heurist theme dialog
     //
     showEditThemeDialog: function(current_value, needName, callback){
@@ -3192,8 +3020,6 @@ window.hWin.HEURIST4.ui = {
             let scripts = [ path+actionName+'.js'];
             if(actionName=='recordAdd'){
                 scripts = [path+'recordAccess.js', path+'recordAdd.js'];
-            }else if( actionName=='thematicMapping'){
-                scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/popups/'+actionName+'.js'];
             }else if(actionName=='dbCreate'){
                 scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/baseAction.js', 
                            window.hWin.HAPI4.baseURL + 'hclient/widgets/database/dbAction.js'];
@@ -3797,54 +3623,6 @@ window.hWin.HEURIST4.ui = {
 
     },
     
-    //
-    //
-    //    
-    prepareMapSymbol: function(style, def_style){
-            
-        if(!def_style){
-            //'#00b0f0' - lighty blue
-            def_style = {iconType:'rectype', color:'#ff0000', fillColor:'#ff0000', weight:3, opacity:1, 
-                    dashArray: '',
-                    fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
-        }
-        
-        if(!style) style = {};
-        if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
-        if(!(style.iconType=='url' && typeof style.iconSize == 'string' && style.iconSize.indexOf(',')>0)){
-            style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize;
-        }
-        style.color = (style.color?style.color:def_style.color);   //light blue
-        style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
-        style.weight = (window.hWin.HEURIST4.util.isNumber(style.weight) && style.weight>=0) ?style.weight :def_style.weight;
-        style.opacity = (window.hWin.HEURIST4.util.isNumber(style.opacity) && style.opacity>=0) ?style.opacity :def_style.opacity;
-        style.fillOpacity = (window.hWin.HEURIST4.util.isNumber(style.fillOpacity) && style.fillOpacity>=0) ?style.fillOpacity :def_style.fillOpacity;
-        
-        style.fill = window.hWin.HEURIST4.util.isnull(style.fill)?def_style.fill:style.fill;
-        style.fill = window.hWin.HEURIST4.util.istrue(style.fill);
-        style.stroke = window.hWin.HEURIST4.util.isnull(style.stroke)?def_style.stroke :style.stroke;
-        style.stroke = window.hWin.HEURIST4.util.istrue(style.stroke);
-
-        if(style.stroke){
-            style.dashArray = window.hWin.HEURIST4.util.isnull(style.dashArray)?def_style.dashArray:style.dashArray;
-        }
-        
-        if(!style.iconFont && def_style.iconFont){
-            style.iconFont = def_style.iconFont;
-        }
-        
-        //opacity accepts values 0~1 so need to 
-        if(style.fillOpacity>1){
-            style.fillOpacity = style.fillOpacity/100;
-        }
-        if(style.opacity>1){
-            style.opacity = style.opacity/100;
-        }
-        
-        return style;        
-    },
-    
-  
     /**
     * ptr_mode: browseonly, dropdown, addonly, addorbrowse
     */

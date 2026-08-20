@@ -29,6 +29,7 @@ if(!defined('PDIR')){
 
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_map.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 

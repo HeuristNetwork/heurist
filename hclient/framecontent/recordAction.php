@@ -66,11 +66,12 @@ if(!in_array($action_type, $allowed_actions)){
 }
 
 ?>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/progressReport.js"></script>
 <script type="text/javascript" src="recordAction.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingBrowse.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingTranslation.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingHelpers.js"></script>
 
 
 <script type="text/javascript">
@@ -155,9 +156,6 @@ if(!in_array($action_type, $allowed_actions)){
             </fieldset>
         </div>
 
-    </div>
-
-    <div id="div_progress" class="content_div" style="display:none; min-height:140px; padding:16px;">
     </div>
 
     <div id="div_result" class="content_div" style="display: none;">

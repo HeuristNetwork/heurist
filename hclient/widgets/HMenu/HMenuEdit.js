@@ -415,7 +415,7 @@ console.log(item);
             
             let that = this;
         
-            //see editing_exts.js    
+            //see editingBrowse.js    
             selectEntity(
                 {entity:'usrSavedSearches', csv:true, title:'Select saved filters', default_palette_class:'ui-heurist-publish'},
                 (sel)=>{

@@ -996,7 +996,7 @@ $.widget('heurist.mapViewer', {
                     };
                 }
 
-                // thematicMapping returns the original canonical value on Cancel.
+                // mapThemesEditor returns the original canonical value on Cancel.
                 // Treat an unchanged result as a no-op and do not rewrite the record.
                 if (JSON.stringify(parsed) === JSON.stringify(current)) {
                     settled = true;
@@ -1022,20 +1022,15 @@ $.widget('heurist.mapViewer', {
 
             try {
                 if (thematic) {
-                    if (typeof ui.showRecordActionDialog !== 'function') {
+                    if (typeof ui.showThematicMappingDialog !== 'function') {
                         reject(new Error('Heurist thematic mapping editor is not available'));
                         return;
                     }
-                    ui.showRecordActionDialog('thematicMapping', {
+                    ui.showThematicMappingDialog({
                         maplayer_query: options && options.query ? options.query : null,
                         symbology: $.extend(true, {}, current),
                         onClose: accept
                     });
-                    setTimeout(function(){
-                        if (typeof ui._raiseMapConfigurationChildDialog === 'function') {
-                            ui._raiseMapConfigurationChildDialog();
-                        }
-                    }, 0);
                 } else {
                     if (typeof ui.showEditSymbologyDialog !== 'function') {
                         reject(new Error('Heurist symbology editor is not available'));

@@ -42,7 +42,7 @@
             'align-items':'center',
             'justify-content':'center',
             gap:'5px',
-            width:'90px',
+            width:'56px',
             height:'34px',
             padding:'1px 3px',
             'box-sizing':'border-box',
