@@ -760,8 +760,30 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
             }
 
             if(mode_edit===5){
-                __addPreview('strokeColor1', null, 'From preview:');
-                __addPreview('strokeColor2', null, 'To preview:');
+                // Gradient endpoints belong together. Keep both previews on one row
+                // rather than inserting two full-width preview rows into the form.
+                let field = _editing_symbology.getFieldByName('strokeColor1');
+                if(field && field.length){
+                    let row = $('<div class="map-symbol-preview-row map-symbol-gradient-preview-row">')
+                        .css({display:'block',margin:'3px 0 7px 0','min-height':'36px',
+                              'line-height':'34px','white-space':'nowrap'})
+                        .insertBefore(field);
+
+                    $('<span>').text('Preview:').css({display:'inline-block',width:'150px',
+                            'text-align':'right','padding-right':'5px','vertical-align':'middle'})
+                        .appendTo(row);
+
+                    ['From','To'].forEach(function(label){
+                        $('<span>').text(label+':').css({display:'inline-block','margin-left':'8px',
+                                'margin-right':'4px','vertical-align':'middle'})
+                            .appendTo(row);
+                        let sample = $('<span>')
+                            .css({display:'inline-block',width:'70px',height:'34px',
+                                  'vertical-align':'middle','line-height':'normal'})
+                            .appendTo(row);
+                        previews.push({element:sample, geometryType:null});
+                    });
+                }
             }else if(mode_edit===2){
                 __addPreview('color', 'line', 'Preview:');
                 __addPreview('fillColor', 'polygon', 'Preview:');
