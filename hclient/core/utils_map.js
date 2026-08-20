@@ -27,6 +27,19 @@
     const ui = H.ui;
     const map = H.map;
 
+    // utils_map.js is also loaded by legacy mapping pages that may run inside an
+    // iframe. window.hWin points to the main Heurist host window, so re-running
+    // this file in a child frame would otherwise overwrite the host's public map
+    // editor launchers with functions closed over the child frame's window/$.
+    //
+    // If the host has already registered the map editor API, it owns this module.
+    // Leave the existing host registrations untouched.
+    if(window !== window.hWin &&
+       typeof ui.showEditSymbologyDialog === 'function' &&
+       typeof ui.showThematicMappingDialog === 'function'){
+        return;
+    }
+
     /**
      * Split persisted vector symbology into a sparse base symbol and thematic renderers.
      * Reads the canonical object, the legacy array representation, and simple symbols.
