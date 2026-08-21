@@ -520,7 +520,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                 if(data.node.key < 1){
                     return;
-                }else if(that.previewEditor){
+                }else if(that.previewEditor && that.previewEditor.manageRecords('instance')){
                     that.previewEditor.manageRecords('focusField', data.node.key);
                 }
             },
@@ -1653,7 +1653,11 @@ console.log('onEditFormChange @todo check buttons!!!');
                                     //that2.editField( that2._open_formlet_for_recID); does not open formlet, seems to be called too early
                                     setTimeout(function(id){ that2.editField(id); }, 2000, that2._open_formlet_for_recID);
                                 }else{
-                                    setTimeout(function(id){ that.manageRecords('focusField', id); }, 2000, that2._open_formlet_for_recID);
+                                    setTimeout(function(id){ 
+                                         if(that.manageRecords('instance')){
+                                            that.manageRecords('focusField', id);  
+                                         }
+                                    }, 2000, that2._open_formlet_for_recID);
                                 }
                             }
                             that2._show_optional = false;
@@ -1764,7 +1768,9 @@ console.log('onEditFormChange @todo check buttons!!!');
                 }
 
                 //adjust preview editor position
-                this.previewEditor.manageRecords('focusField', this._currentEditID);
+                if(this.previewEditor && this.previewEditor.manageRecords('instance')){
+                    this.previewEditor.manageRecords('focusField', this._currentEditID);    
+                }
             }
             
             let v = that._editing.getValue('rst_CreateChildIfRecPtr');

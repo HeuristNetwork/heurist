@@ -1134,8 +1134,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     
                     
                     let newVal = (action=='show_in_list')?1:0;
-                    this._saveEditAndClose({rty_ID:recID, rty_ShowInLists:newVal });
-                    
+                    this._updateRecType({rty_ID:recID, rty_ShowInLists:newVal }); //in _saveEditAndClose
+                     
                 }else if(action=='duplicate'){
                     
                     this._duplicateType(recID);
@@ -1217,7 +1217,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             const currentGID = $Db.rty(this._currentEditID, 'rty_RecTypeGroupID');
             if(this.options.select_mode == 'manager' && window.hWin.HEURIST4.util.isPositiveInt(trashGID) && trashGID !== currentGID){
                 this.moving_record_type_to_trash = true;
-                this._saveEditAndClose({rty_ID: this._currentEditID, rty_ShowInLists: 0, rty_RecTypeGroupID: trashGID});
+                this._updateRecType({rty_ID: this._currentEditID, rty_ShowInLists: 0, rty_RecTypeGroupID: trashGID});  //_saveEditAndClose
             }else{
                 this.deleted_from_group_ID = $Db.rty(this._currentEditID,'rty_RecTypeGroupID');
                 this._super(); 
@@ -1651,6 +1651,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     },
     */
 
+    _updateRecType: function(fields, afterAction){
+
+    
+        $.heurist.manageEntity.prototype._saveEditAndClose.call(
+            this,
+            fields,
+            afterAction
+        );    
+    },
+    
     /**
      * @brief Saves the record type and closes the edit dialog.
      * @memberof heurist.manageDefRecTypes
@@ -2114,7 +2124,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
 
         let that = this;
-        this._saveEditAndClose( params ,
+        this._updateRecType( params ,  //was _saveEditAndClose
             function(){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 that.searchForm.searchDefRecTypes('startSearch');
