@@ -2225,7 +2225,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             $rec_count = mysql__select_value($mysqli, 'SELECT count(rec_ID) FROM Records '
             .'WHERE (rec_RecTypeID IN ('.implode(',',$rty_ID).')) AND (NOT rec_FlagTemporary)');
             
-            if($rec_count>$limitOnUpdate){
+            if($limitOnUpdate>0 && $rec_count>$limitOnUpdate){
                 //
                 return ['skipped' => "There are {$rec_count} records that have dependent calculation fields based type of updated record. To avoid slowdown, please use Admin > Rebuild calculation fields."];
             }

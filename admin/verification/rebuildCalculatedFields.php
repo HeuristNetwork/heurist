@@ -57,7 +57,7 @@ if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
         }
 
         $system->setResponseHeader();
-        $res = recordUpdateCalcFields($system, null, $rty_IDs, $sessionId);
+        $res = recordUpdateCalcFields($system, null, $rty_IDs, $sessionId, 0);
 
         //2b. response to client side
         if( is_bool($res) && !$res ){
@@ -76,7 +76,7 @@ if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
             $rty_IDs = null;
         }
 
-        $res = recordUpdateCalcFields($system, null, $rty_IDs);
+        $res = recordUpdateCalcFields($system, null, $rty_IDs, null, 0);
     }
 }
 
