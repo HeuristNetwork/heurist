@@ -25,7 +25,7 @@
  * @param {Array<Object>} current_value - The current symbology configuration object or an array for thematic maps.
  *                                                  If null, a new symbology is being defined.
  * @param {number} mode_edit - Defines the type of symbology editor to open:
- *                             1: Symbology editor from map legend.
+ *                             1: Symbology editor for
  *                             2: Symbology for general map draw style.
  *                             3: Symbology editor from record edit for a map layer.
  *                             4: Symbology editor for a thematic map.
@@ -126,10 +126,10 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
      */
     edit_symb_dialog = popup_dlg.dialog({
         autoOpen: false,
-        height: (mode_edit==2 || mode_edit==6 || mode_edit==7) ? 300 : ((mode_edit==5) ? 500 : 700),
+        height: (mode_edit==2 || mode_edit==6 || mode_edit==7) ? 300 : ((mode_edit==5) ? 500 : 770),
         width:  740,
         modal:  true,
-        title: window.hWin.HR((mode_edit==5)?'Define symbology gradient values':'Define Symbology'),
+        title: window.hWin.HR((mode_edit==5)?'Define symbology gradient values':((mode_edit==4)?'Symbology for thematic map range/category':'Define Symbology')),
         buttons: [],
         resizeStop: function( event, ui ) {//fix bug
 
@@ -210,12 +210,12 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
                 }
 
                 if(mode_edit==4 && window.hWin.HEURIST4.util.isempty(current_value.stroke)){
-                    current_value.stroke = '';
+                    current_value.stroke = ''; //initiallly not defined for ranges
                 }else{
                     current_value.stroke = window.hWin.HEURIST4.util.istrue(current_value.stroke)?'1':'0';    
                 }
                 if(mode_edit==4 && window.hWin.HEURIST4.util.isempty(current_value.fill)){
-                    current_value.fill = '';
+                    current_value.fill = ''; //initiallly not defined for ranges
                 }else{
                     current_value.fill = window.hWin.HEURIST4.util.istrue(current_value.fill)?'1':'0';
                 }
@@ -431,10 +431,7 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
     }
     else{
         
-        let ptr_fields = [];
-        if(mode_edit===3){ 
-            
-            if(maplayer_query){
+        if(mode_edit===3 && maplayer_query){ 
             
                 let request = { q: maplayer_query,
                         w: 'a',
@@ -452,65 +449,10 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
                         console.error(response.message);
                     }
                 });
-            
-            }else{
-            
-                //get list of pointer fields
-                let rty_as_place = window.hWin.HAPI4.sysinfo['rty_as_place']; 
-                rty_as_place = (rty_as_place)?rty_as_place.split(','):[];
-                rty_as_place.push((''+window.hWin.HAPI4.sysinfo['dbconst']['RT_PLACE']));
-                
-                $Db.dty().each2(function(dty_ID, record){
-                    
-                    let dty_Type = record['dty_Type'];
-                    if(record['dty_Type']=='resource') 
-                    {
-                        let ptr = record['dty_PtrTargetRectypeIDs'];
-                        if(ptr){
-                            ptr = ptr.split(',');  
-                            const has_entry = ptr.filter(value => rty_as_place.includes(value));
-                            if(has_entry.length>0){
-                              ptr_fields.push({"key":$Db.getConceptID('dty',dty_ID),"title":record['dty_Name']});  
-                            }
-                        } 
-                    }
-                });
-            }
         }
         
         
         editFields = [                
-        {"dtID": "sym_Name",
-            "dtFields":{
-                "dty_Type":"freetext",
-                //"rst_RequirementType":"required",                        
-                "rst_DisplayName":"Label:",
-                // sym_Name is retained only for backwards-compatible data transport.
-                // It is not a map-symbol property and is not edited here.
-                "rst_Display": "hidden"
-        }},
-
-        /*
-        {"dtID": "geofield2",
-            "dtFields":{
-                "dty_Type":"enum",
-                //"rst_RequirementType":"required",                        
-                "rst_DisplayName":"Field to be mapped:",
-                "rst_Display": (ptr_fields.length>0 && mode_edit===3)?"visible":"hidden",
-                "rst_FieldConfig":ptr_fields, //{"entity":"defDetailTypes","csv":false},
-                "rst_DisplayHelpText": "Geo fields from query resultset or linked records to be mapped"
-        }},
-
-        {"dtID": "geofield",
-            "dtFields":{
-                "dty_Type":"blocktext",
-                //"rst_RequirementType":"required",                        
-                "rst_DisplayName":"Field to be mapped:",
-                "rst_Display": (maplayer_query && mode_edit===3)?"visible":"hidden",
-                "rst_DisplayWidth":50,
-                "rst_DisplayHelpText": "Geo fields from query resultset or linked records to be mapped"
-        }},
-        */        
         {
         "groupHeader": "Symbols",
         "groupTitleVisible": true,
@@ -697,8 +639,13 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
                         }}
                 ]}
             );
+        }else if(mode_edit===4){ //legend label for thematic map range
+            editFields.unshift({"dtID": "legendLabel",
+            "dtFields":{
+                "dty_Type":"freetext",
+                "rst_DisplayName":"Legend caption:",
+                }});
         }
-        
         
     }
     
@@ -929,55 +876,7 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
     // only now make the dialog visible.
     edit_symb_dialog.dialog('option', 'buttons', edit_buttons);
     edit_symb_dialog.dialog('open');
-    
-    //@todo remove this section of code - geo fields are defined in RT_QUERY_SOURCE in DT_GEO_FIELDS
-    if(false &&  mode_edit==3 && maplayer_query){
-
-        let inputs = _editing_symbology.getInputs('geofield');
-        let geofield_input = $(inputs[0]);
-        let geofield_lbls = $('<div>').insertBefore(geofield_input);
-        geofield_lbls.css({
-            background: geofield_input.css('background'),
-            cursor: 'pointer',
-            padding: '2px',
-            width: '300px',
-            'font-size': '10px',
-            'font-style': 'italic',
-            'text-decoration': 'underline'
-        });
-        geofield_input.hide();
-
-        function __refreshGeoFieldLabels(value){
-            let titles = [];
-            let codes = value ? value.split(',') : [];
-            for(let i=0; i<codes.length; i++){
-                let code = codes[i];
-                if(code && code.indexOf(':')>0){
-                    let harchy = $Db.getHierarchyTitles(code);
-                    if(harchy){
-                        titles.push(harchy.harchy.join(''));
-                    }
-                }
-            }
-            geofield_lbls.html(titles.length>0
-                ? titles.join('<br>')
-                : window.hWin.HR('Click to select geo fields'));
-        }
-
-        __refreshGeoFieldLabels(current_value['geofield']);
-
-        $(geofield_lbls).on({click: function(){
-            selectGeoField(maplayer_query, function(value){
-                _editing_symbology.setFieldValueByName2('geofield', value, true);
-                current_value['geofield'] = value;
-                __refreshGeoFieldLabels(value);
-            }, edit_symb_dialog);
-        }});
-
-    }//mode 3
         
-    
-    
         }//on init
     });
     

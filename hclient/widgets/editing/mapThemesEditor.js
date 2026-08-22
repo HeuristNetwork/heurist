@@ -1323,18 +1323,13 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
         const openEditor = function(){
             let current_val = window.hWin.HEURIST4.util.isJSON( fele.val() );
             if(!current_val) current_val = {};
-            const labelInput = parent.find('.field-label').first();
-            if(!fele.is('#tm_symbol') && labelInput.length){
-                // sym_Name is a transient editor field; store the result as range.label,
-                // never inside the inheritable symbol object.
-                current_val.sym_Name = labelInput.val() || '';
-            }
 
             // Theme symbol inherits the effective layer symbol. Range/facet symbols
             // inherit the effective theme symbol. The public launcher resolves the
             // effective value for editing and returns a sparse difference on Save.
             let parentSymbol = that.mapDefaultSymbol;
-            if(!fele.is('#tm_symbol')){
+            const isBaseSymbol = fele.is('#tm_symbol');
+            if(!isBaseSymbol){ //range symbol
                 const themeSymbol = window.hWin.HEURIST4.util.isJSON(
                     that.element.find('#tm_symbol').val()) || {};
                 parentSymbol = window.hWin.HEURIST4.map.normalizeMapSymbol(
@@ -1342,11 +1337,7 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
             }
 
             window.hWin.HEURIST4.ui.showEditSymbologyDialog(
-                current_val, 4, function(new_value){
-                    if(!fele.is('#tm_symbol') && labelInput.length && $.isPlainObject(new_value)){
-                        labelInput.val(new_value.sym_Name || '');
-                        delete new_value.sym_Name;
-                    }
+                current_val, isBaseSymbol?1:4, function(new_value){
                     fele.val(JSON.stringify(new_value)).trigger('change');
                 }, null, parentSymbol);
         };

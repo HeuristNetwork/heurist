@@ -279,12 +279,11 @@
         if(hasParent && !isGraphMode){
             let semanticValue = H.util.isJSON(current_value);
             semanticValue = semanticValue ? H.util.cloneJSON(semanticValue) : {};
-            // sym_Name is transient editor metadata (legacy layer title / thematic
-            // range label). It must never participate in map-symbol inheritance/diff.
+            // legendLabel must never participate in map-symbol inheritance/diff.
             if($.isPlainObject(semanticValue) && !Object.hasOwn(semanticValue, 'symbol')){
-                if(Object.hasOwn(semanticValue, 'sym_Name')){
-                    editorMetadata.sym_Name = semanticValue.sym_Name;
-                    delete semanticValue.sym_Name;
+                if(Object.hasOwn(semanticValue, 'legendLabel')){
+                    editorMetadata.legendLabel = semanticValue.legendLabel;
+                    delete semanticValue.legendLabel;
                 }
                 if(Object.hasOwn(semanticValue, 'maplayer_query')){
                     editorMetadata.maplayer_query = semanticValue.maplayer_query;
@@ -304,14 +303,14 @@
                 callback(editedValue);
                 return;
             }
-
+            
             let semanticEdited = H.util.isJSON(editedValue);
             semanticEdited = semanticEdited ? H.util.cloneJSON(semanticEdited) : {};
             let editedLabel;
             if($.isPlainObject(semanticEdited) && !Object.hasOwn(semanticEdited, 'symbol')
-                    && Object.hasOwn(semanticEdited, 'sym_Name')){
-                editedLabel = semanticEdited.sym_Name;
-                delete semanticEdited.sym_Name;
+                    && Object.hasOwn(semanticEdited, 'legendLabel')){
+                editedLabel = semanticEdited.legendLabel;
+                delete semanticEdited.legendLabel;
             }
             const editedParts = map.splitSymbology(semanticEdited);
             const effective = editedParts.symbol || semanticEdited || {};
@@ -323,7 +322,7 @@
             const renderers = thematic.length ? thematic : editedParts.thematic;
             const result = map.buildSymbology(sparse, renderers);
             if(typeof editedLabel !== 'undefined' && $.isPlainObject(result) && !Object.hasOwn(result, 'symbol')){
-                result.sym_Name = editedLabel;
+                result.legendLabel = editedLabel;
             }
             callback(result);
         }

@@ -648,25 +648,9 @@ console.log(treedata);
         let parent_style = options.mapwidget.mapping('setStyleDefaultValues', {}, false, false);
 
         let current_value = window.hWin.HEURIST4.util.cloneJSON(layer_style || {});//affected_layer.options.default_style;
-        current_value.sym_Name = layer_title; //affected_layer.options.layer_name;
         //open edit dialog to specify symbology
         window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, 1, function(new_value){
-
-            let new_title = null, new_style = null;
-            
-            //rename in list
-            if(!window.hWin.HEURIST4.util.isempty(new_value.sym_Name)
-                && current_value.sym_Name!=new_value.sym_Name)
-            {
-                new_title = new_value.sym_Name;
-                _recset.setFld(_record, 'rec_Title', new_value.sym_Name);
-
-                //update label in timeline                                                
-                options.mapwidget.mapping('updateTimelineLayerName', (_record['layer']).getNativeId(), new_value.sym_Name);
-                
-                delete new_value.sym_Name;
-            }
-            
+           
             //update style without discarding thematic renderers
             const current_symbology = window.hWin.HEURIST4.map.splitSymbology(_recset.fld(_record, DT_SYMBOLOGY));
             const persisted_style = current_symbology.thematic.length>0
