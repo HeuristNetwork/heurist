@@ -220,10 +220,7 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
                     if(value){
                         const rangeSymbol =
                             window.hWin.HEURIST4.util.isJSON(row.find('.field-symbol').val());
-                        const rangeLabel = row.find('.field-label').val();
-                        const rangeData = {value:value, symbol:rangeSymbol || ''};
-                        if(rangeLabel) rangeData.label = rangeLabel;
-                        ranges.push(rangeData);
+                        ranges.push({value:value, symbol:rangeSymbol || ''});
                     }
                 });
 
@@ -476,12 +473,66 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
             }
         }
 
+        // Category ranges are persisted by term ID for matching. Store the current
+        // term caption in the range symbol so the standalone map/legend does not need
+        // a terminology lookup. A caption explicitly entered in the symbology editor
+        // always wins. Rebuild each range in canonical {value,symbol} form so obsolete
+        // range-level label/title metadata and temporary UI properties are not saved.
+        this._prepareRangeLegendLabels();
+
         this.options.symbology = window.hWin.HEURIST4.map.buildSymbology(
             this.baseLayerSymbol, this.options.thematic_mapping);
         this._context_on_close = this.options.symbology;
         this.closeDialog(true);
     },
     
+    /**
+     * Ensure enum/category ranges carry a human-readable legend caption in their
+     * symbol. The range value remains the term ID used for matching. Existing
+     * symbol.legendLabel values are user-defined and are therefore preserved.
+     *
+     * Range objects are rebuilt in canonical {value,symbol} form at the final save
+     * boundary; presentation metadata belongs to the symbol, not to the range.
+     */
+    _prepareRangeLegendLabels: function(){
+
+        const themes = this.options.thematic_mapping || [];
+
+        $.each(themes, function(i, theme){
+            if(!theme || !Array.isArray(theme.fields)) return;
+
+            $.each(theme.fields, function(j, field){
+                if(!field || !Array.isArray(field.ranges)) return;
+
+                let key = String(field.code || '').split(':');
+                key = key[key.length-1];
+                const isEnum = $Db.dty(key, 'dty_Type') === 'enum';
+
+                field.ranges = field.ranges.map(function(range){
+                    if(!range) return null;
+
+                    let symbol = window.hWin.HEURIST4.util.isJSON(range.symbol);
+                    symbol = $.isPlainObject(symbol)
+                        ? window.hWin.HEURIST4.util.cloneJSON(symbol)
+                        : {};
+
+                    if(isEnum && window.hWin.HEURIST4.util.isempty(symbol.legendLabel)){
+                        const termIDs = String(range.value || '').split(',').map(function(value){
+                            return value.trim();
+                        }).filter(Boolean);
+                        const labels = termIDs.map(function(termID){
+                            return $Db.trm(termID, 'trm_Label') || '';
+                        }).filter(Boolean);
+
+                        if(labels.length>0) symbol.legendLabel = labels.join(', ');
+                    }
+
+                    return {value:range.value, symbol:Object.keys(symbol).length ? symbol : ''};
+                }).filter(Boolean);
+            });
+        });
+    },
+
     /**
      * @brief Hides the progress bar and shows the main search/config div.
      * @override
@@ -1251,7 +1302,6 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
             +'<span class="field-symbol-preview" title="Click to edit symbol" '
             +'style="display:inline-block;vertical-align:middle;min-width:76px;height:34px;margin:2px 6px;cursor:pointer"></span>'
             +'<input type="hidden" class="field-symbol"/>'
-            +'<input type="hidden" class="field-label"/>'
             +'</div>').appendTo(this.element.find('#f_ranges'));
 
         ele.uniqueId();
@@ -1284,7 +1334,6 @@ $.widget( "heurist.mapThemesEditor", $.heurist.recordAction, {
         if(range.symbol){
             ele.find('.field-symbol').val($.isPlainObject(range.symbol)?JSON.stringify(range.symbol):range.symbol);
         }
-        ele.find('.field-label').val(range.label || range.title || '');
         ele.find('.field-symbol').trigger('change');
 
         this._initSymbolEditor( ele.find('.field-symbol') ); 
