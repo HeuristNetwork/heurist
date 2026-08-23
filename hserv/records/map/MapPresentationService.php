@@ -262,6 +262,12 @@ class MapPresentationService
             ));
             if(!empty($geoFields)){ $source['geoFields'] = $geoFields; }
 
+            $featureMode = $this->termBoolean(
+                $this->layers->value($record, 'DT_GEO_OUTPUTMODE'),
+                false
+            );
+            $source['geoOutputMode'] = $featureMode ? 'features' : 'records';
+
             $url = $this->layers->value($record, 'DT_SERVICE_URL');
             if($url !== null){
                 $source['url'] = $this->scalar($url);
@@ -359,6 +365,8 @@ class MapPresentationService
     private function termBoolean($value, bool $default): bool
     {
         if($value === null || $value === ''){ return $default; }
+        if($value === false || $value === 0 || $value === '0'){ return false; }
+        if($value === true || $value === 1 || $value === '1'){ return true; }
         $code = strtolower((string)$this->terms->getTermCode(intval($value)));
         $label = strtolower((string)$this->terms->getTermLabel(intval($value)));
         return !in_array($code, array('no','false','0'), true) && !in_array($label, array('no','false'), true);
