@@ -21,14 +21,15 @@
 namespace hserv\records\search;
 
 require_once dirname(__FILE__).'/SearchTypes.php';
+require_once dirname(__FILE__, 3).'/utilities/Temporal.php';
 
 /**
  * Normalizes Heurist query syntax and compiles flat searches to parameterized SQL.
  */
 final class QueryBuilder
 {
-    private const DEFAULT_LIMIT = 1000000;
-    private const MAX_LIMIT = 100000;
+    private const DEFAULT_LIMIT = 1000;
+    private const MAX_LIMIT = 5000;
     private const MAX_SQL_LINK_DEPTH = 8;
 
     /** Canonical keyword aliases accepted by the plain-text converter. */
@@ -64,6 +65,18 @@ final class QueryBuilder
 
     /** @var array<int,array> Subqueries collected while tokenizing plain text. */
     private $textSubqueries = array();
+
+    /** @var \mysqli|null Active database connection for definition lookups. */
+    private $mysqli;
+
+    /** @var array<int,string|null> Field types read from defDetailTypes. */
+    private $fieldTypeCache = array();
+
+    /** @param \mysqli|null $mysqli Active Heurist database connection. */
+    public function __construct($mysqli = null)
+    {
+        $this->mysqli = $mysqli;
+    }
 
     /**
      * Convert JSON, a decoded query array, or plain text to canonical JSON-query arrays.
@@ -321,6 +334,10 @@ final class QueryBuilder
             if(in_array($base, array('links','related','r','relf'), true)){
                 throw new UnsupportedQueryException('Predicate requires chunked execution: '.$key);
             }
+            if(in_array($base, array('lt','linked_to','linkedto','lf','linked_from','linkedfrom'), true)
+                && $this->isLinkFieldPresenceTest($suffix, $value)){
+                continue;
+            }
             if(in_array($base, array('rt','related_to','relatedto','rf','related_from','relatedfrom'), true)
                 && $suffix !== ''){
                 throw new UnsupportedQueryException('Relation-marker predicates require chunked execution: '.$key);
@@ -335,7 +352,7 @@ final class QueryBuilder
                 }
                 $this->assertSqlExecutable($child, $depth+1);
             }elseif(is_array($value)
-                && !in_array($base, array('t','type','typeid','id','ids','sortby','sort','s'), true)){
+                && !in_array($base, array('t','type','typeid','id','ids','sortby','sort','s','geo'), true)){
                 throw new UnsupportedQueryException('Nested query cannot be compiled to SQL: '.$key);
             }
         }
@@ -407,13 +424,13 @@ final class QueryBuilder
             case 'notes':
                 return $this->textCondition($r.'.rec_ScratchPad', $value, $state);
             case 'added':
-                return $this->scalarCondition($r.'.rec_Added', $value, $state);
+                return $this->headerDateCondition($r.'.rec_Added', $value, $state);
             case 'modified':
-                return $this->scalarCondition($r.'.rec_Modified', $value, $state);
+                return $this->headerDateCondition($r.'.rec_Modified', $value, $state);
             case 'before':
-                return $this->forcedComparison($r.'.rec_Modified', '<', $value, $state);
+                return $this->headerDateCondition($r.'.rec_Modified', '<='.(string)$value, $state);
             case 'after': case 'since':
-                return $this->forcedComparison($r.'.rec_Modified', '>', $value, $state);
+                return $this->headerDateCondition($r.'.rec_Modified', '>'.(string)$value, $state);
             case 'addedby':
                 return $this->integerCondition($r.'.rec_AddedByUGrpID', $value, $state);
             case 'owner': case 'workgroup': case 'wg':
@@ -438,8 +455,14 @@ final class QueryBuilder
                 return 'EXISTS (SELECT 1 FROM usrRecTagLinks rtl INNER JOIN usrTags ut ON ut.tag_ID=rtl.rtl_TagID '
                     .'WHERE rtl.rtl_RecID='.$r.'.rec_ID AND ut.tag_Text LIKE ? ESCAPE "\\\\")';
             case 'lt': case 'linked_to': case 'linkedto':
+                if($this->isLinkFieldPresenceTest($suffix, $value)){
+                    return $this->fieldCondition(intval($suffix), $value, $state, $r);
+                }
                 return $this->compileResourceLink($r, 'to', $suffix, $value, $state, $depth+1);
             case 'lf': case 'linked_from': case 'linkedfrom':
+                if($this->isLinkFieldPresenceTest($suffix, $value)){
+                    return $this->fieldCondition(intval($suffix), $value, $state, $r);
+                }
                 return $this->compileResourceLink($r, 'from', $suffix, $value, $state, $depth+1);
             case 'rt': case 'related_to': case 'relatedto':
                 return $this->compileRelationship($r, 'to', $value, $state, $depth+1);
@@ -677,17 +700,44 @@ final class QueryBuilder
     private function fieldCondition(int $fieldId, $value, array &$state, string $recordAlias = 'r'): string
     {
         if($fieldId < 1){ throw new QueryValidationException('Field ID must be positive'); }
-        if($value === null || strtoupper(trim((string)$value)) === 'NULL'){
+        $nullValue = $value === null ? 'NULL' : strtoupper(trim((string)$value));
+        if($nullValue === 'NULL'){
             $this->bind($state, $fieldId, 'i');
             return 'NOT EXISTS (SELECT 1 FROM recDetails d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID AND d.dtl_DetailTypeID=?)';
         }
-        $this->bind($state, $fieldId, 'i');
-        if((string)$value === ''){
+        if($nullValue === '-NULL'){
+            $this->bind($state, $fieldId, 'i');
             return 'EXISTS (SELECT 1 FROM recDetails d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID AND d.dtl_DetailTypeID=?)';
         }
-        $condition = $this->scalarCondition('d.dtl_Value', $value, $state);
+        $this->bind($state, $fieldId, 'i');
+        if((string)$value === ''){
+            return 'EXISTS (SELECT 1 FROM recDetails d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND d.dtl_DetailTypeID=? AND (d.dtl_Value IS NOT NULL AND d.dtl_Value<>""))';
+        }
+
+        $fieldType = $this->fieldType($fieldId);
+        if($fieldType === 'date'){
+            $condition = $this->detailDateCondition($value, $state);
+            return 'EXISTS (SELECT 1 FROM recDetailsDateIndex di WHERE di.rdi_RecID='.$recordAlias.'.rec_ID '
+                .'AND di.rdi_DetailTypeID=? AND '.$condition.')';
+        }
+        if(in_array($fieldType, array('integer','float','resource'), true)){
+            $condition = $this->numericCondition('CAST(d.dtl_Value AS DECIMAL(65,20))', $value, $state);
+        }elseif(in_array($fieldType, array('enum','relationtype'), true)){
+            $condition = $this->termCondition('d.dtl_Value', $value, $state);
+        }else{
+            $condition = $this->scalarCondition('d.dtl_Value', $value, $state);
+        }
         return 'EXISTS (SELECT 1 FROM recDetails d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
             .'AND d.dtl_DetailTypeID=? AND '.$condition.')';
+    }
+
+    /** A suffixed link with NULL/-NULL is the corresponding field-presence query. */
+    private function isLinkFieldPresenceTest(string $suffix, $value): bool
+    {
+        if($suffix === '' || !ctype_digit($suffix) || is_array($value)){ return false; }
+        $value = strtoupper(trim((string)$value));
+        return $value === 'NULL' || $value === '-NULL';
     }
 
     private function fieldCountCondition(int $fieldId, $value, array &$state, string $recordAlias = 'r'): string
@@ -710,36 +760,78 @@ final class QueryBuilder
             $this->bind($state, intval($suffix), 'i');
             $fieldSql = ' AND gd.dtl_DetailTypeID=?';
         }
-        $text = trim((string)$value);
+        if($value === null || (!is_array($value) && strtoupper(trim((string)$value)) === 'NULL')){
+            return 'NOT EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.')';
+        }
+        if(!is_array($value) && strtoupper(trim((string)$value)) === '-NULL'){
+            return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.')';
+        }
+        $text = is_array($value) ? '' : trim((string)$value);
         if($text === ''){
+            if(is_array($value)){
+                foreach(array('west','south','east','north') as $key){
+                    if(!array_key_exists($key, $value) || !is_numeric($value[$key])){
+                        throw new QueryValidationException('Invalid geo extent. Expected numeric west, south, east and north values');
+                    }
+                }
+                $west = (float)$value['west']; $south = (float)$value['south'];
+                $east = (float)$value['east']; $north = (float)$value['north'];
+                if($west < -180 || $west > 180 || $east < -180 || $east > 180
+                    || $south < -90 || $south > 90 || $north < -90 || $north > 90
+                    || $south > $north){
+                    throw new QueryValidationException('Invalid geo extent coordinates');
+                }
+                $wkt = "POLYGON (($west $south, $east $south, $east $north, $west $north, $west $south))";
+                $this->bind($state, $wkt, 's');
+                return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+                    .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.' '
+                    .'AND ST_Intersects(ST_GeomFromText(?),gd.dtl_Geo))';
+            }
             return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
                 .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.')';
         }
         $this->bind($state, $text, 's');
         return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
             .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.' '
-            .'AND MBRIntersects(gd.dtl_Geo,ST_GeomFromText(?)))';
+            .'AND ST_Contains(ST_GeomFromText(?),gd.dtl_Geo))';
     }
 
     private function textCondition(string $column, $value, array &$state): string
     {
         $text = (string)$value;
+        if(strpos($text, '@') === 0){ return $this->fulltextCondition($column, $text, $state); }
+        if(strpos($text, '==') === 0){
+            $this->bind($state, substr($text, 2), 's');
+            return 'BINARY '.$column.' = BINARY ?';
+        }
         if(strpos($text, '=') === 0){
             return $this->forcedComparison($column, '=', substr($text, 1), $state);
         }
         if(strpos($text, '-') === 0){
-            $this->bind($state, '%'.$this->escapeLike(substr($text, 1)).'%', 's');
+            $this->bind($state, $this->likePattern(substr($text, 1)), 's');
             return $column.' NOT LIKE ? ESCAPE "\\\\"';
         }
-        $this->bind($state, '%'.$this->escapeLike($text).'%', 's');
+        $this->bind($state, $this->likePattern($text), 's');
         return $column.' LIKE ? ESCAPE "\\\\"';
     }
 
     private function scalarCondition(string $column, $value, array &$state): string
     {
+        $text = trim((string)$value);
+        if(strpos($text, '@') === 0){ return $this->fulltextCondition($column, $text, $state); }
+        if(strpos($text, '==') === 0){
+            $this->bind($state, substr($text, 2), 's');
+            return 'BINARY '.$column.' = BINARY ?';
+        }
+        if(($range = $this->splitRange($text, '<>')) !== null){
+            $this->bind($state, $range[0], 's'); $this->bind($state, $range[1], 's');
+            return $column.' BETWEEN ? AND ?';
+        }
         list($operator, $cleanValue) = $this->comparison((string)$value);
         if($operator === 'LIKE' || $operator === 'NOT LIKE'){
-            $this->bind($state, '%'.$this->escapeLike($cleanValue).'%', 's');
+            $this->bind($state, $this->likePattern($cleanValue), 's');
             return $column.' '.$operator.' ? ESCAPE "\\\\"';
         }
         return $this->forcedComparison($column, $operator, $cleanValue, $state);
@@ -781,6 +873,10 @@ final class QueryBuilder
 
     private function inCondition(string $column, array $values, array &$state): string
     {
+        if(count($values) === 1){
+            $this->bind($state, reset($values), 'i');
+            return $column.' = ?';
+        }
         $placeholders = implode(',', array_fill(0, count($values), '?'));
         foreach($values as $value){ $this->bind($state, $value, 'i'); }
         return $column.' IN ('.$placeholders.')';
@@ -848,7 +944,169 @@ final class QueryBuilder
 
     private function escapeLike(string $value): string
     {
-        return str_replace(array('\\','%','_'), array('\\\\','\\%','\\_'), $value);
+        return str_replace('\\', '\\\\', $value);
+    }
+
+    /** Preserve legacy % and _ wildcards and add contains wildcards when absent. */
+    private function likePattern(string $value): string
+    {
+        $value = $this->escapeLike($value);
+        return strpos($value, '%') === false && strpos($value, '_') === false
+            ? '%'.$value.'%'
+            : $value;
+    }
+
+    /** Read the existing definition table directly; one lookup per field per request. */
+    private function fieldType(int $fieldId): ?string
+    {
+        if(array_key_exists($fieldId, $this->fieldTypeCache)){ return $this->fieldTypeCache[$fieldId]; }
+        if(!$this->mysqli){ return $this->fieldTypeCache[$fieldId] = null; }
+        $result = $this->mysqli->query('SELECT dty_Type FROM defDetailTypes WHERE dty_ID='.$fieldId.' LIMIT 1');
+        if(!$result){ throw new SearchExecutionException('Unable to read field type: '.$this->mysqli->error); }
+        $row = $result->fetch_row();
+        $result->close();
+        return $this->fieldTypeCache[$fieldId] = ($row ? (string)$row[0] : null);
+    }
+
+    /** Numeric exact/comparison and legacy low<>high range. */
+    private function numericCondition(string $column, $value, array &$state): string
+    {
+        $text = trim((string)$value);
+        if(($range = $this->splitRange($text, '<>')) !== null){
+            if(!is_numeric($range[0]) || !is_numeric($range[1])){
+                throw new QueryValidationException('Numeric range requires two numeric values');
+            }
+            $this->bind($state, (float)$range[0], 'd'); $this->bind($state, (float)$range[1], 'd');
+            return $column.' BETWEEN ? AND ?';
+        }
+        list($operator, $cleanValue) = $this->comparison($text);
+        if(!is_numeric($cleanValue)){ throw new QueryValidationException('Numeric field requires a numeric value'); }
+        if($operator === 'LIKE'){ $operator = '='; }
+        if($operator === 'NOT LIKE'){ $operator = '<>'; }
+        $this->bind($state, (float)$cleanValue, 'd');
+        return $column.' '.$operator.' ?';
+    }
+
+    /** Enum IDs include descendants unless an exact (=) match was requested. */
+    private function termCondition(string $column, $value, array &$state): string
+    {
+        $text = trim((string)$value); $exact = false; $negate = false;
+        if(strpos($text, '=') === 0){ $exact = true; $text = trim(substr($text, 1)); }
+        elseif(strpos($text, '-') === 0){ $negate = true; $text = trim(substr($text, 1)); }
+
+        $ids = preg_split('/\s*,\s*/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        if(!empty($ids) && count(array_filter($ids, static function($id){ return ctype_digit($id) && intval($id)>0; })) === count($ids)){
+            $ids = array_values(array_unique(array_map('intval', $ids)));
+            if(!$exact){ $ids = array_values(array_unique(array_merge($ids, $this->termChildrenAll($ids)))); }
+            $condition = $this->inCondition($column, $ids, $state);
+            return $negate ? 'NOT ('.$condition.')' : $condition;
+        }
+
+        $this->bind($state, $this->likePattern($text), 's');
+        $this->bind($state, $text, 's');
+        $condition = $column.' IN (SELECT trm_ID FROM defTerms '
+            .'WHERE trm_Label LIKE ? ESCAPE "\\\\" OR trm_Code=?)';
+        return $negate ? 'NOT ('.$condition.')' : $condition;
+    }
+
+    /** Load all descendant term IDs through the existing closure table. */
+    private function termChildrenAll(array $parentIds): array
+    {
+        if(!$this->mysqli || empty($parentIds)){ return array(); }
+        $found = array(); $pending = array_values(array_unique(array_map('intval', $parentIds)));
+        while(!empty($pending)){
+            $result = $this->mysqli->query(
+                'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID IN ('.implode(',', $pending).')'
+            );
+            if(!$result){ throw new SearchExecutionException('Unable to read term descendants: '.$this->mysqli->error); }
+            $next = array();
+            while($row = $result->fetch_row()){
+                $id = intval($row[0]);
+                if($id > 0 && !isset($found[$id])){ $found[$id] = true; $next[] = $id; }
+            }
+            $result->close(); $pending = $next;
+        }
+        foreach($parentIds as $id){ unset($found[intval($id)]); }
+        return array_map('intval', array_keys($found));
+    }
+
+    /** Header dates use ISO values and legacy slash/<> BETWEEN syntax. */
+    private function headerDateCondition(string $column, $value, array &$state): string
+    {
+        $text = trim((string)$value);
+        $operator = null;
+        foreach(array('>=','<=','>','<','=') as $candidate){
+            if(strpos($text, $candidate) === 0){ $operator = $candidate; $text = trim(substr($text, strlen($candidate))); break; }
+        }
+        $range = $this->splitRange($text, '<>') ?? $this->splitRange($text, '/');
+        if($range !== null){
+            $from = \Temporal::dateToISO($range[0]); $to = \Temporal::dateToISO($range[1]);
+            if($from === null || $to === null){ throw new QueryValidationException('Invalid date range'); }
+            $this->bind($state, $from, 's'); $this->bind($state, $to, 's');
+            return $column.' BETWEEN ? AND ?';
+        }
+        $iso = \Temporal::dateToISO($text);
+        if($iso === null){ throw new QueryValidationException('Invalid date value: '.$text); }
+        if($operator !== null){ $this->bind($state, $iso, 's'); return $column.' '.$operator.' ?'; }
+        $pattern = preg_match('/^\d{4}[-\/]\d{2}$/', $text) ? str_replace('/', '-', $text).'%' : $iso.'%';
+        $this->bind($state, $pattern, 's');
+        return $column.' LIKE ?';
+    }
+
+    /** Detail dates are compared through recDetailsDateIndex estimated bounds. */
+    private function detailDateCondition($value, array &$state): string
+    {
+        $text = trim((string)$value); $operator = null;
+        foreach(array('>=','<=','>','<','=') as $candidate){
+            if(strpos($text, $candidate) === 0){ $operator = $candidate; $text = trim(substr($text, strlen($candidate))); break; }
+        }
+        $within = strpos($text, '><') !== false;
+        $temporal = new \Temporal($text, !$within);
+        if(!$temporal->isValid()){ throw new QueryValidationException('Invalid temporal value: '.$text); }
+        $timespan = $temporal->getMinMax();
+        $min = (float)$timespan[0]; $max = (float)$timespan[1];
+        if($within){
+            $this->bind($state, $min, 'd'); $this->bind($state, $max, 'd');
+            return '? <= di.rdi_estMinDate AND di.rdi_estMaxDate <= ?';
+        }
+        if($operator === '='){
+            $this->bind($state, $min, 'd'); $this->bind($state, $max, 'd');
+            return '(di.rdi_estMinDate = ? OR di.rdi_estMaxDate = ?)';
+        }
+        if($operator === '<' || $operator === '<='){
+            $this->bind($state, $max, 'd'); return 'di.rdi_estMaxDate '.$operator.' ?';
+        }
+        if($operator === '>' || $operator === '>='){
+            $this->bind($state, $min, 'd'); return 'di.rdi_estMinDate '.$operator.' ?';
+        }
+        $this->bind($state, $min, 'd'); $this->bind($state, $max, 'd');
+        return 'di.rdi_estMaxDate >= ? AND di.rdi_estMinDate <= ?';
+    }
+
+    private function splitRange(string $value, string $separator): ?array
+    {
+        $position = strpos($value, $separator);
+        if($position === false){ return null; }
+        $left = trim(substr($value, 0, $position));
+        $right = trim(substr($value, $position + strlen($separator)));
+        return $left !== '' && $right !== '' ? array($left, $right) : null;
+    }
+
+    /** @, @+ and @- mean any word, all words and no words respectively. */
+    private function fulltextCondition(string $column, string $value, array &$state): string
+    {
+        $mode = substr($value, 0, 2); $text = trim(substr($value, 1));
+        if($mode === '@+' || $mode === '@-'){ $text = trim(substr($value, 2)); }
+        if($text === ''){ throw new QueryValidationException('Full-text search value cannot be empty'); }
+        if($mode === '@+'){
+            $words = preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY);
+            $text = implode(' ', array_map(static function($word){ return '+'.$word; }, $words));
+            $this->bind($state, $text, 's');
+            return 'MATCH('.$column.') AGAINST (? IN BOOLEAN MODE)';
+        }
+        $this->bind($state, $text, 's');
+        $condition = 'MATCH('.$column.') AGAINST (?)';
+        return $mode === '@-' ? 'NOT ('.$condition.')' : $condition;
     }
 
     private function isAssociative(array $value): bool

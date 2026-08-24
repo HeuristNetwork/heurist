@@ -45,8 +45,8 @@ final class RecordSearchService
     public function __construct($system, ?QueryBuilder $builder = null, ?QueryExecutor $executor = null)
     {
         $this->system = $system;
-        $this->builder = $builder ?? new QueryBuilder();
         $this->executor = $executor ?? new QueryExecutor($system->getMysqli());
+        $this->builder = $builder ?? new QueryBuilder($system->getMysqli());
     }
 
     /** Execute a search and always return the requested page and full count. */

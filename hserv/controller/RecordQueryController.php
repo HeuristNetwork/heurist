@@ -45,7 +45,7 @@ final class RecordQueryController
     public function __construct($system, $service = null)
     {
         $this->system = $system;
-        $this->builder = new QueryBuilder();
+        $this->builder = new QueryBuilder($system->getMysqli());
         $this->service = $service ?? new RecordSearchService($system, $this->builder);
     }
 
