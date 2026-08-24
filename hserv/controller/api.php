@@ -76,7 +76,8 @@ use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 use hserv\utilities\UJwt;
 use hserv\controller\MapPresentationController;
-use hserv\controller\MapDataController;    
+use hserv\controller\MapDataController;
+use hserv\controller\RecordQueryController;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
@@ -309,6 +310,37 @@ if($resource === 'map'){
 }
 
 if(($is_map_record_query || $is_timeline_query) && $http_method === 'POST'){
+    $method = 'search';
+}
+
+// The modern records collection search is read-only for both GET and POST.
+$is_record_query = ($resource === 'records' && !isset($requestUri[4]));
+if($is_record_query){
+    if(!in_array($http_method, array('GET','POST'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+    }
+    if($http_method === 'POST'
+        && stripos($contentType, 'application/json') === 0
+        && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if($http_method === 'POST' && is_array($json)
+        && !isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
+        $contractKeys = array('rules','limit','offset','fields','detail');
+        $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
+        if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
+            $req_params['query'] = $json;
+        }
+    }
+    if($http_method === 'POST' && is_array($json)){
+        if(array_key_exists('fields', $json)){
+            $req_params['fields'] = $json['fields'];
+        }else{
+            // api.php's generic JSON handler temporarily places the whole body
+            // in fields; that is not the records search output-field option.
+            unset($req_params['fields']);
+        }
+    }
     $method = 'search';
 }
 
@@ -578,6 +610,14 @@ else
 
     if($req_params['entity']=='Records'){
         $isRecordDetailsRequest = (@$requestUri[4] === 'details');
+        $isRecordQueryRequest = !isset($requestUri[4]);
+
+        if($isRecordQueryRequest){
+            $controller = new RecordQueryController($system);
+            $controller->output($req_params);
+            $system->dbclose();
+            exit;
+        }
 
         if($isRecordDetailsRequest && ($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'){
             exitWithError('Method not allowed', 405, array('Allow' => 'POST'));

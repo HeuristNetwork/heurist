@@ -36,7 +36,7 @@ class MapDataController
     }
 
     /**
-     * Output a file-backed datasource record.
+     * Output a file-backed datasource record (shp, kml, ccv, geojson files)
      *
      * Route: /api/{db}/map/data/{recID}
      */

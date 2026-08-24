@@ -507,6 +507,16 @@ $.widget( "heurist.search", {
         .addClass(this.options.button_class+' ui-button-action')
         .button({showLabel:true, icon:this._is_publication?'ui-icon-search':'ui-icon-filter'});
 
+        // Temporary comparison button for the modern /api/{db}/records engine.
+        this.btn_search_new_engine = $("<button>", {
+            label: 'New',
+            title: 'Run this filter with the new search engine'
+        })
+        .css({'min-height':'30px','min-width':'42px','margin-left':'3px'})
+        .appendTo(this.div_search_as_user)
+        .addClass(this.options.button_class)
+        .button({showLabel:true});
+
         if(!(this._is_publication || this.options.is_h6style)){
             this.btn_search_as_user.css({'font-size':'1.3em','min-width':'9em'})      
         }else
@@ -681,6 +691,14 @@ $.widget( "heurist.search", {
                     that.input_search.val(window.hWin.HEURIST4.current_query_request.q);
                 }
                 that._doSearch(true);
+            }
+        });
+        this._on(this.btn_search_new_engine, {
+            click: function(){
+                if(that._use_global_query){
+                    that.input_search.val(window.hWin.HEURIST4.current_query_request.q);
+                }
+                that._doSearch(true, true);
             }
         });
         /* AAAA */        
@@ -1161,7 +1179,7 @@ $.widget( "heurist.search", {
      * @description Executes a search based on the content of the input field and the selected search domain.
      * @param {boolean} fl_btn - Flag indicating if the search was triggered by a button click (not actively used).
      */
-    _doSearch: function(fl_btn){
+    _doSearch: function(fl_btn, isNewEngine){
 
         let qsearch = this.input_search.val();
 
@@ -1180,6 +1198,9 @@ $.widget( "heurist.search", {
             request.source = this.element.attr('id');
             request.search_realm = this.options.search_realm;
             request.search_page = this.options.search_page;
+            if(isNewEngine === true){
+                request.isNewEngine = true;
+            }
 
             this.query_request = request;
             window.hWin.HAPI4.RecordSearch.doSearch( this, request );
@@ -1259,6 +1280,7 @@ $.widget( "heurist.search", {
         //this.btn_search_allonly.remove();  // bookamrks search off
         if(this.btn_saved_filters) this.btn_saved_filters.remove();
         this.btn_search_as_user.remove();  // bookamrks search on
+        this.btn_search_new_engine.remove();
         this.btn_search_domain.remove();
 
         this.menu_search_domain.remove();
