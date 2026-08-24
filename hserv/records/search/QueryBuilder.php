@@ -281,9 +281,13 @@ final class QueryBuilder
             if(!$this->isKnownPredicate($base)){
                 throw new QueryValidationException('Unknown query predicate: '.$key);
             }
-            if(in_array($base, array('f','field','fc','count','cnt'), true)
+            if(in_array($base, array('fc','count','cnt'), true)
                 && ($suffix === '' || !ctype_digit($suffix) || intval($suffix)<1)){
                 throw new QueryValidationException('Predicate '.$key.' requires a numeric field ID');
+            }
+            if(in_array($base, array('f','field'), true)
+                && $suffix !== '' && (!ctype_digit($suffix) || intval($suffix)<1)){
+                throw new QueryValidationException('Predicate '.$key.' has an invalid field ID');
             }
             if($base === 'relf' && ($suffix === '' || !ctype_digit($suffix) || intval($suffix)<1)){
                 throw new QueryValidationException('Predicate '.$key.' requires a numeric Relationship field ID');
@@ -438,6 +442,7 @@ final class QueryBuilder
             case 'access':
                 return $this->scalarCondition($r.'.rec_NonOwnerVisibility', $value, $state);
             case 'f': case 'field':
+                if($suffix === ''){ return $this->anyFieldCondition($value, $state, $r); }
                 return $this->fieldCondition(intval($suffix), $value, $state, $r);
             case 'fc': case 'count': case 'cnt':
                 return $this->fieldCountCondition(intval($suffix), $value, $state, $r);
@@ -732,6 +737,44 @@ final class QueryBuilder
             .'AND d.dtl_DetailTypeID=? AND '.$condition.')';
     }
 
+    /**
+     * Search title, non-resource detail values, enum labels/codes and linked titles.
+     * This is the modern equivalent of legacy f/field without a detail type ID.
+     */
+    private function anyFieldCondition($value, array &$state, string $recordAlias = 'r'): string
+    {
+        if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
+        $text = (string)$value;
+        $conditions = array();
+
+        $conditions[] = $this->textCondition($recordAlias.'.rec_Title', $text, $state);
+
+        $detailCondition = $this->textCondition('ad.dtl_Value', $text, $state);
+        $conditions[] = 'EXISTS (SELECT 1 FROM recDetails ad '
+            .'INNER JOIN defDetailTypes adt ON adt.dty_ID=ad.dtl_DetailTypeID '
+            .'WHERE ad.dtl_RecID='.$recordAlias.'.rec_ID '
+            .'AND adt.dty_Type<>"resource" AND adt.dty_Type<>"enum" '
+            .'AND '.$detailCondition.')';
+
+        $termText = $text;
+        if(strpos($termText, '@+') === 0 || strpos($termText, '@-') === 0){ $termText = substr($termText, 2); }
+        elseif(strpos($termText, '@') === 0){ $termText = substr($termText, 1); }
+        $termCondition = $this->termCondition('ae.dtl_Value', $termText, $state);
+        $conditions[] = 'EXISTS (SELECT 1 FROM recDetails ae '
+            .'INNER JOIN defDetailTypes aet ON aet.dty_ID=ae.dtl_DetailTypeID '
+            .'WHERE ae.dtl_RecID='.$recordAlias.'.rec_ID AND aet.dty_Type="enum" '
+            .'AND '.$termCondition.')';
+
+        $linkedTitleCondition = $this->textCondition('alr.rec_Title', $text, $state);
+        $conditions[] = 'EXISTS (SELECT 1 FROM recLinks al '
+            .'INNER JOIN Records alr ON alr.rec_ID=al.rl_TargetID '
+            .'WHERE al.rl_SourceID='.$recordAlias.'.rec_ID '
+            .'AND al.rl_RelationID IS NULL AND al.rl_DetailTypeID>0 '
+            .'AND '.$linkedTitleCondition.')';
+
+        return '('.implode(' OR ', $conditions).')';
+    }
+
     /** A suffixed link with NULL/-NULL is the corresponding field-presence query. */
     private function isLinkFieldPresenceTest(string $suffix, $value): bool
     {
@@ -990,8 +1033,10 @@ final class QueryBuilder
     /** Enum IDs include descendants unless an exact (=) match was requested. */
     private function termCondition(string $column, $value, array &$state): string
     {
-        $text = trim((string)$value); $exact = false; $negate = false;
-        if(strpos($text, '=') === 0){ $exact = true; $text = trim(substr($text, 1)); }
+        $text = trim((string)$value); $exact = false; $caseSensitive = false; $negate = false;
+        if(strpos($text, '==') === 0){
+            $exact = true; $caseSensitive = true; $text = trim(substr($text, 2));
+        }elseif(strpos($text, '=') === 0){ $exact = true; $text = trim(substr($text, 1)); }
         elseif(strpos($text, '-') === 0){ $negate = true; $text = trim(substr($text, 1)); }
 
         $ids = preg_split('/\s*,\s*/', $text, -1, PREG_SPLIT_NO_EMPTY);
@@ -1002,10 +1047,11 @@ final class QueryBuilder
             return $negate ? 'NOT ('.$condition.')' : $condition;
         }
 
-        $this->bind($state, $this->likePattern($text), 's');
+        $this->bind($state, $exact ? $text : $this->likePattern($text), 's');
         $this->bind($state, $text, 's');
         $condition = $column.' IN (SELECT trm_ID FROM defTerms '
-            .'WHERE trm_Label LIKE ? ESCAPE "\\\\" OR trm_Code=?)';
+            .'WHERE '.($caseSensitive ? 'BINARY trm_Label = BINARY ?' : ($exact ? 'trm_Label=?' : 'trm_Label LIKE ? ESCAPE "\\\\"'))
+            .' OR trm_Code=?)';
         return $negate ? 'NOT ('.$condition.')' : $condition;
     }
 
