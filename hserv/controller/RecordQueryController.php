@@ -18,7 +18,7 @@
 
 namespace hserv\controller;
 
-use hserv\records\search\QueryBuilder;
+use hserv\records\search\query\QueryBuilder;
 use hserv\records\search\QueryValidationException;
 use hserv\records\search\RecordSearchService;
 use hserv\records\search\SearchExecutionException;

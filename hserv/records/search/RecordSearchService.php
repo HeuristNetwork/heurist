@@ -19,8 +19,10 @@
 
 namespace hserv\records\search;
 
-require_once dirname(__FILE__).'/QueryBuilder.php';
+require_once dirname(__FILE__).'/query/QueryBuilder.php';
 require_once dirname(__FILE__).'/QueryExecutor.php';
+
+use hserv\records\search\query\QueryBuilder;
 
 /** Executes flat, logical, resource-link, and relationship record searches. */
 final class RecordSearchService
