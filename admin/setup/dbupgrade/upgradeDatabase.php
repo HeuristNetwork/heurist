@@ -134,12 +134,12 @@ if(!defined('PDIR')){
                             if( file_exists($dir.$filename) ){
 
                                 if($trg_maj==1 && $src_min==2){
-                                    include_once $filename;
+                                    include_once HEURIST_DIR.'admin/setup/dbupgrade/DBUpgrade_1.2.0_to_1.3.0.php';
                                     $rep = updateDatabseTo_v3($system);//PHP
                                 }elseif($src_min==3 && $src_sub<$trg_sub){
 
                                     if($src_sub<18){
-                                        include_once $filename;
+                                        include_once HEURIST_DIR.'admin/setup/dbupgrade/DBUpgrade_1.3.0_to_1.3.14.php';
                                         $rep = updateDatabseTo_v1_3_18($system);
 
                                         if($rep!==false && $src_sub<14){ //for db_utils.php
@@ -156,7 +156,8 @@ if(!defined('PDIR')){
                                     }
 
                                 }else{
-                                    $rep = executeScript($system, $dir.$filename);//execute SQL script
+                                    $safe_filename = 'DBUpgrade_'.$src_maj.'.'.$src_min.'.0_to_'.$trg_maj.'.'.($src_min+1).'.0.sql';
+                                    $rep = executeScript($system, $dir.$safe_filename);//execute SQL script
                                 }
 
                                 if($rep){
@@ -349,6 +350,9 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
      */
     function executeScript($system, $filename){
 
+        if(!preg_match('/^[\w\/.]+\.sql$/', $filename)){
+            return false;
+        }
         if(db_script($system->dbnameFull(), $filename)){ //dbnameFullWithHost
             return true;
         }else{
