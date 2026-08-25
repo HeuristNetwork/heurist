@@ -3,8 +3,9 @@
 * RecordQueryController.php - Modern record-query HTTP adapter
 *
 * Converts public or internal request parameters into SearchRequest, invokes
-* RecordSearchService, and emits the stable IDs/count response. Query parsing,
-* SQL generation, expansion, and record output do not belong in this class.
+* RecordSearchService, and emits the stable IDs/count and optional expansion
+* graph response. Query parsing, SQL generation, expansion execution, and
+* record output do not belong in this class.
 *
 * @project     Heurist academic knowledge management system
 * @package     Controller
@@ -60,16 +61,11 @@ final class RecordQueryController
             $query = array(array('_all'=>true));
         }
 
-        $rules = $params['rules'] ?? null;
-        if($rules !== null && $rules !== '' && $rules !== array()){
-            throw new UnsupportedQueryException('rules execution will be introduced in Phase 5');
-        }
-
         $normalized = $this->builder->normalize($query);
         return new SearchRequest($normalized, array(
             'limit' => $params['limit'] ?? 1000,
             'offset' => $params['offset'] ?? 0,
-            'rules' => $rules,
+            'rules' => $params['rules'] ?? null,
             'fields' => $params['fields'] ?? null,
             'detail' => $params['detail'] ?? null
         ));
@@ -106,5 +102,5 @@ final class RecordQueryController
             $this->system->errorExitApi('Record query execution failed', HEURIST_ERROR, true, 500);
         }
     }
-
 }
+

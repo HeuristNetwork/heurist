@@ -64,3 +64,4 @@ if(!$system->init($req_params['db'] ?? null)){
 $controller = new RecordQueryController($system);
 $controller->output($req_params);
 $system->dbclose();
+

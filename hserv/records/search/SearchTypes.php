@@ -32,13 +32,13 @@ final class SearchRequest
     /** @var int */
     public $offset;
 
-    /** @var mixed Existing ruleset; executed in a later phase. */
+    /** @var mixed JSON ruleset or compact expansion path. */
     public $rules;
 
     /** @var array|string|null Requested output fields for the later output stage. */
     public $fields;
 
-    /** @var string|null Requested output detail level for the later output stage. */
+    /** @var string Requested output detail level. */
     public $detail;
 
     /**
@@ -52,7 +52,8 @@ final class SearchRequest
         $this->offset = max(0, intval($options['offset'] ?? 0));
         $this->rules = $options['rules'] ?? null;
         $this->fields = $options['fields'] ?? null;
-        $this->detail = isset($options['detail']) ? (string)$options['detail'] : null;
+        $detail = strtolower(trim((string)($options['detail'] ?? 'ids')));
+        $this->detail = $detail === '' ? 'ids' : $detail;
     }
 }
 
@@ -76,30 +77,37 @@ final class SearchResult
     /** @var string|null Reserved for future materialized expansion results. */
     public $resultToken;
 
+    /** @var ExpansionResult|null Explicit graph output for this top-level page. */
+    public $graph;
+
     public function __construct(
         array $ids,
         int $total,
         int $offset,
         int $limit,
-        ?string $resultToken = null
+        ?string $resultToken = null,
+        ?ExpansionResult $graph = null
     ) {
         $this->ids = array_values(array_map('intval', $ids));
         $this->total = $total;
         $this->offset = max(0, $offset);
         $this->limit = max(1, $limit);
         $this->resultToken = $resultToken;
+        $this->graph = $graph;
     }
 
     /** Return the stable array representation used at controller boundaries. */
     public function toArray(): array
     {
-        return array(
+        $result = array(
             'ids' => $this->ids,
             'total' => $this->total,
             'offset' => $this->offset,
             'limit' => $this->limit,
             'resultToken' => $this->resultToken
         );
+        if($this->graph !== null){ $result['graph'] = $this->graph->toArray(); }
+        return $result;
     }
 }
 

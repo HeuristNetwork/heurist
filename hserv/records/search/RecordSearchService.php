@@ -62,15 +62,55 @@ final class RecordSearchService
         if(empty($context['forceChunked']) && $this->builder->supportsSqlExecution($query)){
             $ids = $this->executor->executeIds($this->builder->buildIds($query, $context));
             $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
-            return new SearchResult($ids, $total, $request->offset, $request->limit);
+            return $this->withGraph(
+                new SearchResult($ids, $total, $request->offset, $request->limit),
+                $request,
+                $context
+            );
         }
         $ids = $this->evaluateGroup($query, null, 'all', $context, 0);
-        return new SearchResult(
+        return $this->withGraph(new SearchResult(
             array_slice($ids, $request->offset, $request->limit),
             count($ids),
             $request->offset,
             $request->limit
+        ), $request, $context);
+    }
+
+    /** Add graph output only when it was requested explicitly. */
+    private function withGraph(
+        SearchResult $result,
+        SearchRequest $request,
+        array $context
+    ): SearchResult {
+        if($request->detail !== 'graph'
+            || $request->rules === null || $request->rules === '' || $request->rules === array()){
+            return $result;
+        }
+        require_once dirname(__FILE__).'/ExpansionEngine.php';
+        $engine = new ExpansionEngine($this->system, $this, $this->executor);
+        $result->graph = $engine->expand(
+            new ExpansionRequest($result->ids, $request->rules, array(
+                'includeHeaders'=>$this->graphHeadersRequested($request->fields)
+            )),
+            $context
         );
+        return $result;
+    }
+
+    /** Standard graph headers are optional and never loaded for a bare graph. */
+    private function graphHeadersRequested($fields): bool
+    {
+        if($fields === null || $fields === ''){ return false; }
+        $values = is_array($fields) ? $fields : explode(',', (string)$fields);
+        foreach($values as $value){
+            if(is_array($value)){ continue; }
+            $field = strtolower(trim((string)$value));
+            if(in_array($field, array('rec_title','rec_rectypeid'), true)){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

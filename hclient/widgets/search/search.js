@@ -342,7 +342,7 @@ $.widget( "heurist.search", {
             .appendTo(this.div_search_input);
 
             this._on( link, {  click: function(){
-                window.open(window.hWin.HRes('advanced_search'),'_blank');
+                window.open(window.hWin.HRes('searchQueryLanguage'),'_blank');
             } });
 
             let adjustTextareaRows = (context) => {
