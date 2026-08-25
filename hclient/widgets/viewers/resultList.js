@@ -784,7 +784,7 @@ $.widget( "heurist.resultList", {
         //media carousel/viewer --------------
         if(this.options.show_fancybox_viewer){
             this.fancybox_button = $( '<button>' )
-                .button({icon: "ui-icon-arrow-4-diag", showLabel:false, label:window.hWin.HR('Clicking on thumbnail opens full screen media viewer')})
+                .button({icon: "ui-icon-fullscreen", showLabel:false, label:window.hWin.HR('Clicking on thumbnail in results below opens full screen media viewer')})
                 .css({'float':'right','width':'28px', height:'28px', 'font-size':'1em', 'margin-right':'15px'})
                 .appendTo( this.div_toolbar );
             
