@@ -123,14 +123,14 @@ final class FieldPredicateCompiler
     {
         if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
         $text = (string)$value;
-        if(strpos($text, '@-') === 0){ $text = '@'.substr($text, 2); }
+        $positiveExclusion = strpos($text, '@-') === 0;
         $queries = array();
         $isDbOwner = !empty(($state['context'] ?? array())['isDbOwner']);
         $detailSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records asrc ON asrc.rec_ID=ad.dtl_RecID ';
         $enumSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records esrc ON esrc.rec_ID=ae.dtl_RecID ';
         $linkSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records lsrc ON lsrc.rec_ID=al.rl_SourceID ';
 
-        $detailCondition = $this->textCondition('ad.dtl_Value', $text, $state);
+        $detailCondition = $this->textCondition('ad.dtl_Value', $text, $state, $positiveExclusion);
         $queries[] = 'SELECT ad.dtl_RecID AS rec_ID FROM recDetails ad '
             .'INNER JOIN defDetailTypes adt ON adt.dty_ID=ad.dtl_DetailTypeID '
             .$detailSourceJoin
@@ -147,7 +147,7 @@ final class FieldPredicateCompiler
             .'WHERE aet.dty_Type="enum" '
             .'AND '.$termCondition.$this->detailVisibilityCondition('ae', 'esrc', $state);
 
-        $linkedTitleCondition = $this->textCondition('alr.rec_Title', $text, $state);
+        $linkedTitleCondition = $this->textCondition('alr.rec_Title', $text, $state, $positiveExclusion);
         $queries[] = 'SELECT al.rl_SourceID AS rec_ID FROM recLinks al '
             .'INNER JOIN Records alr ON alr.rec_ID=al.rl_TargetID '
             .$linkSourceJoin
@@ -308,10 +308,17 @@ final class FieldPredicateCompiler
             .'AND ST_Contains(ST_GeomFromText(?),gd.dtl_Geo)'
             .$this->detailVisibilityCondition('gd', $recordAlias, $state).')';
     }
-    public function textCondition(string $column, $value, SqlBuildContext $state): string
+    public function textCondition(
+        string $column,
+        $value,
+        SqlBuildContext $state,
+        bool $positiveFulltext = false
+    ): string
     {
         $text = (string)$value;
-        if(strpos($text, '@') === 0){ return $this->fulltextCondition($column, $text, $state); }
+        if(strpos($text, '@') === 0){
+            return $this->fulltextCondition($column, $text, $state, $positiveFulltext);
+        }
         if(strpos($text, '==') === 0){
             $state->bind(substr($text, 2), 's');
             return 'BINARY '.$column.' = BINARY ?';
@@ -562,7 +569,7 @@ final class FieldPredicateCompiler
     /** Header dates use ISO values and legacy slash/<> BETWEEN syntax. */
     public function headerDateCondition(string $column, $value, SqlBuildContext $state): string
     {
-        $text = trim((string)$value);
+        $text = $this->normalizeRelativeDate(trim((string)$value));
         $operator = null;
         foreach(array('>=','<=','>','<','=') as $candidate){
             if(strpos($text, $candidate) === 0){ $operator = $candidate; $text = trim(substr($text, strlen($candidate))); break; }
@@ -585,7 +592,7 @@ final class FieldPredicateCompiler
     /** Detail dates are compared through recDetailsDateIndex estimated bounds. */
     public function detailDateCondition($value, SqlBuildContext $state): string
     {
-        $text = trim((string)$value); $operator = null;
+        $text = $this->normalizeRelativeDate(trim((string)$value)); $operator = null;
         $within = strpos($text, '><') !== false;
         $overlap = strpos($text, '<>') !== false;
         if(!$within && !$overlap){
@@ -623,21 +630,91 @@ final class FieldPredicateCompiler
         return $left !== '' && $right !== '' ? array($left, $right) : null;
     }
 
-    /** @, @+ and @- mean any word, all words and no words respectively. */
-    public function fulltextCondition(string $column, string $value, SqlBuildContext $state): string
+    /** @, @+ and @- mean any word, all usable words and no words respectively. */
+    public function fulltextCondition(
+        string $column,
+        string $value,
+        SqlBuildContext $state,
+        bool $positiveOnly = false
+    ): string
     {
-        $mode = substr($value, 0, 2); $text = trim(substr($value, 1));
-        if($mode === '@+' || $mode === '@-'){ $text = trim(substr($value, 2)); }
+        $mode = strpos($value, '@+') === 0 ? '@+' : (strpos($value, '@-') === 0 ? '@-' : '@');
+        $text = trim(substr($value, $mode === '@' ? 1 : 2));
         if($text === ''){ throw new QueryValidationException('Full-text search value cannot be empty'); }
-        if($mode === '@+'){
-            $words = preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY);
-            $text = implode(' ', array_map(static function($word){ return '+'.$word; }, $words));
-            $state->bind($text, 's');
-            return 'MATCH('.$column.') AGAINST (? IN BOOLEAN MODE)';
+
+        if($mode === '@+' || $mode === '@-'){
+            $words = $this->indexableFulltextWords($text);
+            if(empty($words)){
+                $state->bind($this->likePattern($text), 's');
+                $condition = $column.' LIKE ? ESCAPE "\\\\"';
+                return $mode === '@-' && !$positiveOnly ? 'NOT ('.$condition.')' : $condition;
+            }
+            if($mode === '@+'){
+                $text = implode(' ', array_map(static function($word){ return '+'.$word; }, $words));
+                $state->bind($text, 's');
+                return 'MATCH('.$column.') AGAINST (? IN BOOLEAN MODE)';
+            }
+            $text = implode(' ', $words);
         }
         $state->bind($text, 's');
-        $condition = 'MATCH('.$column.') AGAINST (?)';
-        return $mode === '@-' ? 'NOT ('.$condition.')' : $condition;
+        $boolean = $mode === '@' && preg_match('/(?:^|\s)[+-]\S/u', $text);
+        $condition = 'MATCH('.$column.') AGAINST (?'.($boolean ? ' IN BOOLEAN MODE' : '').')';
+        return $mode === '@-' && !$positiveOnly ? 'NOT ('.$condition.')' : $condition;
+    }
+
+    /** Apply the same indexability limits used by legacy InnoDB full-text search. */
+    private function indexableFulltextWords(string $text): array
+    {
+        preg_match_all('/(\w+)/u', $text, $matches);
+        $stopwords = array(
+            'a','about','an','are','as','at','be','by','com','de','en','for','from','how','i',
+            'in','is','it','la','of','on','or','that','the','this','to','und','was','what',
+            'when','where','who','will','with','www'
+        );
+        $words = array();
+        foreach($matches[0] ?? array() as $word){
+            $length = strlen($word);
+            if($length>2 && $length<85 && !in_array(strtolower($word), $stopwords, true)){
+                $words[] = $word;
+            }
+        }
+        return $words;
+    }
+
+    /** Convert convenient relative expressions to deterministic ISO values/ranges. */
+    private function normalizeRelativeDate(string $value): string
+    {
+        $prefix = '';
+        foreach(array('><','<>','>=','<=','>','<','=') as $operator){
+            if(strpos($value, $operator) === 0){
+                $prefix = $operator; $value = trim(substr($value, strlen($operator))); break;
+            }
+        }
+        $phrase = strtolower(trim($value));
+        $today = new \DateTimeImmutable('today');
+        if($phrase === 'today'){ $value = $today->format('Y-m-d'); }
+        elseif($phrase === 'now'){ $value = (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s'); }
+        elseif($phrase === 'yesterday'){ $value = $today->modify('-1 day')->format('Y-m-d'); }
+        elseif($phrase === 'tomorrow'){ $value = $today->modify('+1 day')->format('Y-m-d'); }
+        elseif($phrase === 'month'){
+            $value = $prefix === ''
+                ? $today->format('Y-m-01').'/'.$today->format('Y-m-t')
+                : $today->format('Y-m-01');
+        }elseif($phrase === 'year'){
+            $value = $prefix === ''
+                ? $today->format('Y-01-01').'/'.$today->format('Y-12-31')
+                : $today->format('Y-01-01');
+        }elseif($phrase === 'last month'){
+            $date = $today->modify('first day of last month');
+            $value = $prefix === '' ? $date->format('Y-m-01').'/'.$date->format('Y-m-t') : $date->format('Y-m-01');
+        }elseif($phrase === 'last year'){
+            $date = $today->modify('-1 year');
+            $value = $prefix === '' ? $date->format('Y-01-01').'/'.$date->format('Y-12-31') : $date->format('Y-01-01');
+        }elseif(preg_match('/^(?:(\d+|a|one)\s+)?(day|week|month|year)s?\s+ago$/', $phrase, $match)){
+            $amount = isset($match[1]) && ctype_digit($match[1]) ? intval($match[1]) : 1;
+            $value = $today->modify('-'.$amount.' '.$match[2])->format('Y-m-d');
+        }
+        return $prefix.$value;
     }
     public function isAssociative(array $value): bool
     {

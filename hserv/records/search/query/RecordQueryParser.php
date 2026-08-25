@@ -160,18 +160,18 @@ final class RecordQueryParser
                 throw new QueryValidationException('Unknown query predicate: '.$key);
             }
             if(in_array($base, array('fc','count','cnt'), true)
-                && ($suffix === '' || !ctype_digit($suffix) || intval($suffix)<1)){
-                throw new QueryValidationException('Predicate '.$key.' requires a numeric field ID');
+                && ($suffix === '' || !$this->isResolvableFieldSuffix($suffix))){
+                throw new QueryValidationException('Predicate '.$key.' requires a field ID or field name');
             }
             if(in_array($base, array('f','field'), true)
                 && $suffix !== '' && !$this->isValidFieldSuffix($suffix)){
                 throw new QueryValidationException('Predicate '.$key.' has an invalid field ID');
             }
-            if($base === 'relf' && ($suffix === '' || !ctype_digit($suffix) || intval($suffix)<1)){
-                throw new QueryValidationException('Predicate '.$key.' requires a numeric Relationship field ID');
+            if($base === 'relf' && ($suffix === '' || !$this->isResolvableFieldSuffix($suffix))){
+                throw new QueryValidationException('Predicate '.$key.' requires a Relationship field ID or name');
             }
-            if($base === 'r' && $suffix !== '' && (!ctype_digit($suffix) || intval($suffix)<1)){
-                throw new QueryValidationException('Predicate '.$key.' has an invalid Relationship field ID');
+            if($base === 'r' && $suffix !== '' && !$this->isResolvableFieldSuffix($suffix)){
+                throw new QueryValidationException('Predicate '.$key.' has an invalid Relationship field');
             }
             if(($base === 'any' || $base === 'all' || $base === 'not') && !is_array($value)){
                 throw new QueryValidationException($base.' requires a query array');
@@ -310,12 +310,19 @@ final class RecordQueryParser
     }
     private function plainKeyword(string $raw): array
     {
-        $raw = strtolower(trim($raw));
-        if(preg_match('/^([a-z_]+?)([0-9]+)$/', $raw, $matches)){
+        $raw = trim($raw);
+        $lower = strtolower($raw);
+        if(preg_match('/^([a-z_]+?)([0-9]+)$/i', $raw, $matches)){
             $base = $matches[1]; $suffix = $matches[2];
         }else{
-            $base = $raw; $suffix = '';
+            $base = $lower; $suffix = '';
+            foreach(array('linked_from','linked_to','related_from','related_to','field','file','geo','relf','fc','lf','lt','rf','rt','f','r') as $prefix){
+                if(strpos($lower, $prefix) === 0 && strlen($raw)>strlen($prefix)){
+                    $base = $prefix; $suffix = substr($raw, strlen($prefix)); break;
+                }
+            }
         }
+        $base = strtolower($base);
         if(!isset(self::KEYWORD_ALIASES[$base])){ return array(null, ''); }
         return array(self::KEYWORD_ALIASES[$base], $suffix);
     }
@@ -367,7 +374,11 @@ final class RecordQueryParser
 
     private function isValidFieldSuffix(string $suffix): bool
     {
-        return preg_match('/^[1-9]\d*(?::(?:term|label|concept|conceptid|desc|code))?$/',$suffix)===1;
+        return $this->isResolvableFieldSuffix($suffix);
+    }
+    private function isResolvableFieldSuffix(string $suffix): bool
+    {
+        return preg_match('/^(?:[1-9]\d*|[^:]+)(?::(?:term|label|concept|conceptid|desc|code))?$/u',$suffix)===1;
     }
 
     private function splitRelationshipQuery(array $query): array

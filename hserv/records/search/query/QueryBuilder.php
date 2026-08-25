@@ -18,6 +18,7 @@ namespace hserv\records\search\query;
 require_once dirname(__FILE__, 2).'/SearchTypes.php';
 require_once dirname(__FILE__).'/SqlBuildContext.php';
 require_once dirname(__FILE__).'/RecordQueryParser.php';
+require_once dirname(__FILE__).'/QueryValueResolver.php';
 require_once dirname(__FILE__).'/FieldPredicateCompiler.php';
 require_once dirname(__FILE__).'/RecordPredicateCompiler.php';
 require_once dirname(__FILE__).'/SortCompiler.php';
@@ -31,17 +32,18 @@ final class QueryBuilder
 {
     private const DEFAULT_LIMIT=300000;
     private const MAX_LIMIT=300000;
-    private $parser; private $fields; private $records; private $sort;
+    private $parser; private $resolver; private $fields; private $records; private $sort;
 
     public function __construct($mysqli=null)
     {
         $this->parser=new RecordQueryParser();
+        $this->resolver=new QueryValueResolver($mysqli,$this->parser);
         $this->fields=new FieldPredicateCompiler($mysqli);
         $this->records=new RecordPredicateCompiler($mysqli,$this->fields);
         $this->sort=new SortCompiler($this->fields,$this->parser);
     }
 
-    public function normalize($query): array{return $this->parser->normalize($query);}
+    public function normalize($query): array{return $this->resolver->resolve($this->parser->normalize($query));}
     public function textToJson(string $query): array{return $this->parser->textToJson($query);}
     public function validate(array $query): void{$this->parser->validate($query);}
     public function supportsFlatExecution($query): bool{return $this->parser->supportsFlatExecution($query);}
