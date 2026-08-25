@@ -21,6 +21,7 @@ require_once dirname(__FILE__).'/SqlBuildContext.php';
 
 use hserv\records\search\QueryValidationException;
 use hserv\records\search\SearchExecutionException;
+use hserv\utilities\Temporal;
 
 /** Compiles typed detail, file, date, enum, geo, and text predicates. */
 final class FieldPredicateCompiler
@@ -109,35 +110,41 @@ final class FieldPredicateCompiler
     {
         if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
         $text = (string)$value;
-        $conditions = array();
-
-        $conditions[] = $this->textCondition($recordAlias.'.rec_Title', $text, $state);
+        $exclude = strpos($text, '@-') === 0;
+        if($exclude){ $text = '@'.substr($text, 2); }
+        $queries = array();
+        $isDbOwner = !empty(($state['context'] ?? array())['isDbOwner']);
+        $detailSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records asrc ON asrc.rec_ID=ad.dtl_RecID ';
+        $enumSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records esrc ON esrc.rec_ID=ae.dtl_RecID ';
+        $linkSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records lsrc ON lsrc.rec_ID=al.rl_SourceID ';
 
         $detailCondition = $this->textCondition('ad.dtl_Value', $text, $state);
-        $conditions[] = 'EXISTS (SELECT 1 FROM recDetails ad '
+        $queries[] = 'SELECT ad.dtl_RecID AS rec_ID FROM recDetails ad '
             .'INNER JOIN defDetailTypes adt ON adt.dty_ID=ad.dtl_DetailTypeID '
-            .'WHERE ad.dtl_RecID='.$recordAlias.'.rec_ID '
-            .'AND adt.dty_Type<>"resource" AND adt.dty_Type<>"enum" '
-            .'AND '.$detailCondition.$this->detailVisibilityCondition('ad', $recordAlias, $state).')';
+            .$detailSourceJoin
+            .'WHERE adt.dty_Type<>"resource" AND adt.dty_Type<>"enum" '
+            .'AND '.$detailCondition.$this->detailVisibilityCondition('ad', 'asrc', $state);
 
         $termText = $text;
         if(strpos($termText, '@+') === 0 || strpos($termText, '@-') === 0){ $termText = substr($termText, 2); }
         elseif(strpos($termText, '@') === 0){ $termText = substr($termText, 1); }
         $termCondition = $this->termCondition('ae.dtl_Value', $termText, $state);
-        $conditions[] = 'EXISTS (SELECT 1 FROM recDetails ae '
+        $queries[] = 'SELECT ae.dtl_RecID AS rec_ID FROM recDetails ae '
             .'INNER JOIN defDetailTypes aet ON aet.dty_ID=ae.dtl_DetailTypeID '
-            .'WHERE ae.dtl_RecID='.$recordAlias.'.rec_ID AND aet.dty_Type="enum" '
-            .'AND '.$termCondition.$this->detailVisibilityCondition('ae', $recordAlias, $state).')';
+            .$enumSourceJoin
+            .'WHERE aet.dty_Type="enum" '
+            .'AND '.$termCondition.$this->detailVisibilityCondition('ae', 'esrc', $state);
 
         $linkedTitleCondition = $this->textCondition('alr.rec_Title', $text, $state);
-        $conditions[] = 'EXISTS (SELECT 1 FROM recLinks al '
+        $queries[] = 'SELECT al.rl_SourceID AS rec_ID FROM recLinks al '
             .'INNER JOIN Records alr ON alr.rec_ID=al.rl_TargetID '
+            .$linkSourceJoin
             .'INNER JOIN recDetails ald ON ald.dtl_ID=al.rl_DetailID '
-            .'WHERE al.rl_SourceID='.$recordAlias.'.rec_ID '
-            .'AND al.rl_RelationID IS NULL AND al.rl_DetailTypeID>0 '
-            .'AND '.$linkedTitleCondition.$this->detailVisibilityCondition('ald', $recordAlias, $state).')';
+            .'WHERE al.rl_RelationID IS NULL AND al.rl_DetailTypeID>0 '
+            .'AND '.$linkedTitleCondition.$this->detailVisibilityCondition('ald', 'lsrc', $state);
 
-        return '('.implode(' OR ', $conditions).')';
+        $candidates = 'SELECT anyfield.rec_ID FROM ('.implode(' UNION ALL ', $queries).') anyfield';
+        return $recordAlias.'.rec_ID '.($exclude ? 'NOT IN' : 'IN').' ('.$candidates.')';
     }
 
     /** Apply defRecStructure and per-detail visibility for non-owner searches. */
@@ -412,7 +419,8 @@ final class FieldPredicateCompiler
     public function numericCondition(string $column, $value, SqlBuildContext $state): string
     {
         $text = trim((string)$value);
-        if(($range = $this->splitRange($text, '<>')) !== null){
+        $range = $this->numericRange($text);
+        if($range !== null){
             if(!is_numeric($range[0]) || !is_numeric($range[1])){
                 throw new QueryValidationException('Numeric range requires two numeric values');
             }
@@ -425,6 +433,18 @@ final class FieldPredicateCompiler
         if($operator === 'NOT LIKE'){ $operator = '<>'; }
         $state->bind((float)$cleanValue, 'd');
         return $column.' '.$operator.' ?';
+    }
+
+    /** Parse both low<>high and leading <>low/high or ><low/high forms. */
+    private function numericRange(string $text): ?array
+    {
+        if(preg_match('/^\s*(?:<>|><)\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(?:\/|,|\bto\b)\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*$/iu', $text, $matches)){
+            return array($matches[1], $matches[2]);
+        }
+        foreach(array('<>','><') as $separator){
+            if(($range = $this->splitRange($text, $separator)) !== null){ return $range; }
+        }
+        return null;
     }
 
     /** Enum IDs include descendants unless an exact (=) match was requested. */
@@ -509,12 +529,12 @@ final class FieldPredicateCompiler
         }
         $range = $this->splitRange($text, '<>') ?? $this->splitRange($text, '/');
         if($range !== null){
-            $from = \Temporal::dateToISO($range[0]); $to = \Temporal::dateToISO($range[1]);
+            $from = Temporal::dateToISO($range[0]); $to = Temporal::dateToISO($range[1]);
             if($from === null || $to === null){ throw new QueryValidationException('Invalid date range'); }
             $state->bind($from, 's'); $state->bind($to, 's');
             return $column.' BETWEEN ? AND ?';
         }
-        $iso = \Temporal::dateToISO($text);
+        $iso = Temporal::dateToISO($text);
         if($iso === null){ throw new QueryValidationException('Invalid date value: '.$text); }
         if($operator !== null){ $state->bind($iso, 's'); return $column.' '.$operator.' ?'; }
         $pattern = preg_match('/^\d{4}[-\/]\d{2}$/', $text) ? str_replace('/', '-', $text).'%' : $iso.'%';
@@ -526,11 +546,14 @@ final class FieldPredicateCompiler
     public function detailDateCondition($value, SqlBuildContext $state): string
     {
         $text = trim((string)$value); $operator = null;
-        foreach(array('>=','<=','>','<','=') as $candidate){
-            if(strpos($text, $candidate) === 0){ $operator = $candidate; $text = trim(substr($text, strlen($candidate))); break; }
-        }
         $within = strpos($text, '><') !== false;
-        $temporal = new \Temporal($text, !$within);
+        $overlap = strpos($text, '<>') !== false;
+        if(!$within && !$overlap){
+            foreach(array('>=','<=','>','<','=') as $candidate){
+                if(strpos($text, $candidate) === 0){ $operator = $candidate; $text = trim(substr($text, strlen($candidate))); break; }
+            }
+        }
+        $temporal = new Temporal($text, !($within || $overlap));
         if(!$temporal->isValid()){ throw new QueryValidationException('Invalid temporal value: '.$text); }
         $timespan = $temporal->getMinMax();
         $min = (float)$timespan[0]; $max = (float)$timespan[1];

@@ -29,8 +29,8 @@ use hserv\records\search\UnsupportedQueryException;
 /** Public facade that composes parameterized IDs and count SQL. */
 final class QueryBuilder
 {
-    private const DEFAULT_LIMIT=1000;
-    private const MAX_LIMIT=5000;
+    private const DEFAULT_LIMIT=300000;
+    private const MAX_LIMIT=300000;
     private $parser; private $fields; private $records; private $sort;
 
     public function __construct($mysqli=null)
