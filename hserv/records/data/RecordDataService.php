@@ -1,0 +1,285 @@
+<?php
+/**
+* RecordDataService.php - Batched retrieval and formatting of record details
+*
+* Retrieves headers and native or linked detail values for record IDs already
+* selected by the search and expansion services. It does not execute searches
+* or traverse record links.
+*
+* @project     Heurist academic knowledge management system
+* @package     Records\Data
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       7.0
+*/
+
+namespace hserv\records\data;
+
+require_once dirname(__FILE__).'/../search/QueryExecutor.php';
+
+use hserv\records\search\QueryExecutor;
+
+/** Loads requested values without knowing how their owner records were found. */
+final class RecordDataService
+{
+    private const BATCH_SIZE = 500;
+
+    /** @var \hserv\System */
+    private $system;
+    /** @var QueryExecutor */
+    private $executor;
+
+    public function __construct($system, ?QueryExecutor $executor = null)
+    {
+        $this->system = $system;
+        $this->executor = $executor ?? new QueryExecutor($system->getMysqli());
+    }
+
+    /** Build standard record objects for the ordered top-query page. */
+    public function loadRecords(array $topIds, array $headers, array $nativeFields): array
+    {
+        $topIds = $this->ids($topIds);
+        $records = array();
+        foreach($topIds as $id){
+            $records[$id] = array('rec_ID'=>(string)$id, 'details'=>array());
+        }
+        if(empty($records)){ return array(); }
+
+        $columns = array_values(array_unique(array_merge(
+            array('rec_ID','rec_RecTypeID'), $headers
+        )));
+        foreach(array_chunk($topIds, self::BATCH_SIZE) as $chunk){
+            $sql = 'SELECT '.implode(',', $columns).' FROM Records WHERE rec_ID IN ('
+                .implode(',', array_fill(0, count($chunk), '?')).')';
+            foreach($this->executor->executeRows($sql, str_repeat('i', count($chunk)), $chunk) as $row){
+                $id = intval($row[0]);
+                if(!isset($records[$id])){ continue; }
+                foreach($columns as $index=>$column){
+                    if($column === 'rec_ID'){ continue; }
+                    $records[$id][$column] = in_array($column, array(
+                        'rec_RecTypeID','rec_OwnerUGrpID','rec_AddedByUGrpID'
+                    ), true) && $row[$index] !== null
+                        ? (string)$row[$index]
+                        : $row[$index];
+                }
+            }
+        }
+
+        $fieldIds = array_values(array_unique(array_map(static function($field){
+            return intval($field['fieldId']);
+        }, $nativeFields)));
+        if(!empty($fieldIds)){
+            $values = $this->loadValues($topIds, $fieldIds);
+            foreach($nativeFields as $field){
+                foreach($topIds as $id){
+                    foreach($values[$id][$field['fieldId']] ?? array() as $value){
+                        $records[$id]['details'][$field['key']][] = $value;
+                    }
+                }
+            }
+        }
+        return array_values($records);
+    }
+
+    /** Attach values reached through a concrete expansion occurrence. */
+    public function attachLinkedValues(array &$records, array $field, array $occurrences, string $pathId): void
+    {
+        $owners = array();
+        foreach($occurrences as $occurrence){
+            $chain = $occurrence['recordIds'] ?? array();
+            if(!empty($chain)){ $owners[intval(end($chain))] = intval(end($chain)); }
+        }
+        $values = $this->loadValues(array_values($owners), array(intval($field['fieldId'])));
+        $recordIndex = array();
+        foreach($records as $index=>$record){ $recordIndex[intval($record['rec_ID'])] = $index; }
+
+        foreach($occurrences as $occurrence){
+            $topId = intval($occurrence['top'] ?? 0);
+            $chain = array_values(array_map('intval', $occurrence['recordIds'] ?? array()));
+            if(!isset($recordIndex[$topId]) || empty($chain)){ continue; }
+            $ownerId = intval(end($chain));
+            foreach($values[$ownerId][$field['fieldId']] ?? array() as $value){
+                $entry = array('value'=>$value, 'path'=>array(
+                    'id'=>$pathId,
+                    'recordIDs'=>array_map('strval', $chain)
+                ));
+                if(is_array($value)){
+                    $entry = $value;
+                    if(!array_key_exists('value', $entry)){
+                        $entry = array('value'=>$value);
+                    }
+                    $entry['path'] = array(
+                        'id'=>$pathId,
+                        'recordIDs'=>array_map('strval', $chain)
+                    );
+                }
+                $records[$recordIndex[$topId]]['details'][$field['key']][] = $entry;
+            }
+        }
+    }
+
+    /** Return OpenAPI field definitions once per requested detail/path. */
+    public function loadFieldMetadata(array $fields): array
+    {
+        if(empty($fields)){ return array(); }
+        $ids = array_values(array_unique(array_map(static function($field){
+            return intval($field['fieldId']);
+        }, $fields)));
+        $sql = 'SELECT dty_ID,dty_Name,dty_Type,dty_OriginatingDBID FROM defDetailTypes WHERE dty_ID IN ('
+            .implode(',', array_fill(0, count($ids), '?')).')';
+        $definitions = array();
+        foreach($this->executor->executeRows($sql, str_repeat('i', count($ids)), $ids) as $row){
+            $definitions[intval($row[0])] = array(
+                'dty_ID'=>(string)$row[0],
+                'dty_Name'=>$row[1],
+                'dty_Type'=>$row[2],
+                'dty_ConceptCode'=>(string)$row[3].'-'.(string)$row[0]
+            );
+        }
+        $result = array();
+        foreach($fields as $field){
+            $definition = $definitions[intval($field['fieldId'])] ?? array(
+                'dty_ID'=>(string)$field['fieldId'],
+                'dty_Name'=>null,
+                'dty_Type'=>null,
+                'dty_ConceptCode'=>null
+            );
+            if($field['pathCode'] !== null){ $definition['dty_PathCode'] = $field['pathCode']; }
+            $result[] = $definition;
+        }
+        return $result;
+    }
+
+    /** Load and enrich requested details, indexed by owner and field ID. */
+    private function loadValues(array $ownerIds, array $fieldIds): array
+    {
+        $ownerIds = $this->ids($ownerIds);
+        $fieldIds = $this->ids($fieldIds);
+        if(empty($ownerIds) || empty($fieldIds)){ return array(); }
+        $values = array();
+        foreach(array_chunk($ownerIds, self::BATCH_SIZE) as $chunk){
+            $sql = 'SELECT d.dtl_ID,d.dtl_RecID,d.dtl_DetailTypeID,d.dtl_Value,'
+                .'ST_AsText(d.dtl_Geo),d.dtl_UploadedFileID,t.dty_Type,'
+                .'rr.rec_ID,rr.rec_RecTypeID,rr.rec_Title,rr.rec_Hash,'
+                .'trm.trm_Label,trm.trm_Code,trm.trm_OriginatingDBID,'
+                .'f.ulf_ID,CONCAT(f.ulf_FilePath,f.ulf_FileName),f.ulf_ExternalFileReference,'
+                .'fxm.fxm_MimeType,f.ulf_PreferredSource,f.ulf_OrigFileName,f.ulf_FileSizeKB,'
+                .'f.ulf_ObfuscatedFileID,f.ulf_Description,f.ulf_Added,f.ulf_MimeExt,'
+                .'f.ulf_Caption,f.ulf_Copyright,f.ulf_Copyowner,f.ulf_Parameters,f.ulf_WhoCanView '
+                .'FROM recDetails d JOIN defDetailTypes t ON t.dty_ID=d.dtl_DetailTypeID '
+                .'LEFT JOIN Records rr ON t.dty_Type="resource" AND rr.rec_ID=d.dtl_Value '
+                .'LEFT JOIN defTerms trm ON t.dty_Type IN ("enum","relationtype") AND trm.trm_ID=d.dtl_Value '
+                .'LEFT JOIN recUploadedFiles f ON t.dty_Type="file" AND f.ulf_ID=d.dtl_UploadedFileID '
+                .'LEFT JOIN defFileExtToMimetype fxm ON fxm.fxm_Extension=f.ulf_MimeExt '
+                .'JOIN Records ro ON ro.rec_ID=d.dtl_RecID '
+                .'LEFT JOIN defRecStructure rst ON rst.rst_RecTypeID=ro.rec_RecTypeID '
+                .'AND rst.rst_DetailTypeID=d.dtl_DetailTypeID '
+                .'WHERE d.dtl_RecID IN ('.implode(',', array_fill(0, count($chunk), '?')).') '
+                .'AND d.dtl_DetailTypeID IN ('.implode(',', array_fill(0, count($fieldIds), '?')).') '
+                .$this->fieldVisibilitySql()
+                .'ORDER BY d.dtl_RecID,d.dtl_DetailTypeID,d.dtl_ID';
+            $parameters = array_merge($chunk, $fieldIds);
+            foreach($this->executor->executeRows(
+                $sql, str_repeat('i', count($parameters)), $parameters
+            ) as $row){
+                $value = $this->formatValue($row);
+                if($value !== null && $value !== ''){
+                    $values[intval($row[1])][intval($row[2])][] = $value;
+                }
+            }
+        }
+        return $values;
+    }
+
+    private function formatValue(array $row)
+    {
+        $raw = $row[3];
+        $type = (string)$row[6];
+        if($type === 'resource'){
+            return array(
+                'value'=>(string)$raw,
+                'id'=>$row[7] === null ? null : (string)$row[7],
+                'type'=>$row[8] === null ? null : (string)$row[8],
+                'title'=>$row[9],
+                'hhash'=>$row[10]
+            );
+        }
+        if($type === 'enum' || $type === 'relationtype'){
+            return array(
+                'value'=>(string)$raw,
+                'code'=>$row[12],
+                'label'=>$row[11],
+                'conceptID'=>$row[13] === null ? null : (string)$row[13].'-'.(string)$raw
+            );
+        }
+        if($type === 'file'){
+            return array(
+                'value'=>$raw,
+                'file'=>array_filter(array(
+                    'ulf_ID'=>$row[14] === null ? null : (string)$row[14],
+                    'fullPath'=>$row[15],
+                    'ulf_ExternalFileReference'=>$row[16],
+                    'fxm_MimeType'=>$row[17],
+                    'ulf_PreferredSource'=>$row[18],
+                    'ulf_OrigFileName'=>$row[19],
+                    'ulf_FileSizeKB'=>$row[20],
+                    'ulf_ObfuscatedFileID'=>$row[21],
+                    'ulf_Description'=>$row[22],
+                    'ulf_Added'=>$row[23],
+                    'ulf_MimeExt'=>$row[24],
+                    'ulf_Caption'=>$row[25],
+                    'ulf_Copyright'=>$row[26],
+                    'ulf_Copyowner'=>$row[27],
+                    'ulf_Parameters'=>$row[28],
+                    'ulf_WhoCanView'=>$row[29]
+                ), static function($item){ return $item !== null; })
+            );
+        }
+        if($type === 'geo'){
+            if($raw === null || $row[4] === null){ return null; }
+            return array('geo'=>array('type'=>$raw, 'wkt'=>$row[4]));
+        }
+        if($type === 'separator' || $type === 'relmarker'){ return null; }
+        return $raw;
+    }
+
+    private function ids(array $ids): array
+    {
+        return array_values(array_unique(array_filter(array_map('intval', $ids), static function($id){
+            return $id>0;
+        })));
+    }
+
+    /** Match the established per-field non-owner visibility rules. */
+    private function fieldVisibilitySql(): string
+    {
+        if(method_exists($this->system, 'isDbOwner') && $this->system->isDbOwner()){
+            return ' AND IFNULL(rst.rst_RequirementType,"")<>"forbidden" ';
+        }
+        $hasAccess = method_exists($this->system, 'hasAccess') && $this->system->hasAccess();
+        $visible = array(
+            'rst.rst_NonOwnerVisibility IS NULL',
+            '((rst.rst_NonOwnerVisibility="public" OR rst.rst_NonOwnerVisibility="pending")'
+                .' AND IFNULL(d.dtl_HideFromPublic,0)<>1)'
+        );
+        if($hasAccess){ $visible[] = 'rst.rst_NonOwnerVisibility="viewable"'; }
+
+        $owner = '';
+        if($hasAccess && method_exists($this->system, 'getUserGroupIds')){
+            $groups = $this->ids((array)$this->system->getUserGroupIds());
+            if(method_exists($this->system, 'getUserId')){
+                $userId = intval($this->system->getUserId());
+                if($userId>0){ $groups[] = $userId; }
+            }
+            $groups = array_values(array_unique($groups));
+            if(!empty($groups)){
+                $owner = 'ro.rec_OwnerUGrpID IN ('.implode(',', $groups).') OR ';
+            }
+        }
+        return ' AND IFNULL(rst.rst_RequirementType,"")<>"forbidden" AND ('
+            .$owner.implode(' OR ', $visible).') ';
+    }
+}

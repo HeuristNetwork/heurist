@@ -92,19 +92,29 @@ final class ExpansionResult
         );
     }
 
+    /** Internal traversal provenance used by record/map presenters. */
+    public function getOccurrences(?string $pathId = null): array
+    {
+        $occurrences = array_values($this->occurrences);
+        if($pathId === null){ return $occurrences; }
+        return array_values(array_filter($occurrences, static function($occurrence) use ($pathId){
+            return ($occurrence['path'] ?? null) === $pathId;
+        }));
+    }
+
+    /** Return compact path definitions without exposing occurrence storage. */
+    public function getPaths(): array
+    {
+        return $this->paths;
+    }
+
     /** Stable controller/presenter representation. */
     public function toArray(): array
     {
-        $associations = array();
-        foreach($this->topNodes as $topId=>$nodes){
-            $associations[(string)$topId] = array_values($nodes);
-        }
         return array(
             'records'=>array_values($this->records),
             'edges'=>array_values($this->edges),
-            'paths'=>$this->paths,
-            'topNodes'=>$associations,
-            'occurrences'=>array_values($this->occurrences)
+            'paths'=>$this->paths
         );
     }
 }

@@ -26,6 +26,10 @@ use hserv\records\search\SearchExecutionException;
 use hserv\records\search\SearchRequest;
 use hserv\records\search\SearchResult;
 use hserv\records\search\UnsupportedQueryException;
+use hserv\records\data\RecordDataService;
+use hserv\records\data\RecordFieldSelector;
+use hserv\records\search\ExpansionEngine;
+use hserv\records\search\ExpansionRequest;
 
 /** Shared request boundary for public and internal modern record searches. */
 final class RecordQueryController
@@ -39,15 +43,30 @@ final class RecordQueryController
     /** @var RecordSearchService|object */
     private $service;
 
+    /** @var RecordDataService|object */
+    private $dataService;
+
+    /** @var RecordFieldSelector */
+    private $fieldSelector;
+
+    /** @var ExpansionEngine|object|null */
+    private $expansionEngine;
+
     /**
      * @param \hserv\System $system Initialised Heurist system.
      * @param object|null $service Optional search service for integration tests.
      */
-    public function __construct($system, $service = null)
+    public function __construct($system, $service = null, $dataService = null, $expansionEngine = null)
     {
+        require_once dirname(__FILE__).'/../records/data/RecordFieldSelector.php';
+        require_once dirname(__FILE__).'/../records/data/RecordDataService.php';
+        require_once dirname(__FILE__).'/../records/search/ExpansionTypes.php';
         $this->system = $system;
         $this->builder = new QueryBuilder($system->getMysqli());
         $this->service = $service ?? new RecordSearchService($system, $this->builder);
+        $this->dataService = $dataService ?? new RecordDataService($system);
+        $this->fieldSelector = new RecordFieldSelector();
+        $this->expansionEngine = $expansionEngine;
     }
 
     /** Convert HTTP-style parameters to a validated modern search request. */
@@ -74,11 +93,104 @@ final class RecordQueryController
     /** Execute a request and return its stable DTO representation. */
     public function execute(array $params): array
     {
-        $result = $this->service->search($this->buildRequest($params));
+        $request = $this->buildRequest($params);
+        $result = $this->service->search($request);
         if(!$result instanceof SearchResult){
             throw new SearchExecutionException('Record search service returned an invalid result');
         }
-        return $result->toArray();
+        if($request->detail === 'graph'){
+            return $result->toArray();
+        }
+        $selection = $this->fieldSelector->parse($request->fields);
+        if($request->detail === 'ids' && empty($selection['headers']) && empty($selection['details'])){
+            return $result->toArray();
+        }
+        return $this->recordsResponse($result, $request, $selection, $params);
+    }
+
+    /** Build the universal records envelope for native and linked fields. */
+    private function recordsResponse(
+        SearchResult $result,
+        SearchRequest $request,
+        array $selection,
+        array $params
+    ): array {
+        $native = array_values(array_filter($selection['details'], static function($field){
+            return $field['pathCode'] === null;
+        }));
+        $linked = array_values(array_filter($selection['details'], static function($field){
+            return $field['pathCode'] !== null;
+        }));
+        $records = $this->dataService->loadRecords($result->ids, $selection['headers'], $native);
+        $paths = array();
+        $linkedByTraversal = array();
+        foreach($linked as $field){ $linkedByTraversal[$field['traversal']][] = $field; }
+        foreach($linkedByTraversal as $traversal=>$pathFields){
+            $engine = $this->expansionEngine;
+            if($engine === null){
+                require_once dirname(__FILE__).'/../records/search/ExpansionEngine.php';
+                $engine = new ExpansionEngine($this->system, $this->service);
+            }
+            $expansion = $engine->expand(new ExpansionRequest($result->ids, $traversal));
+            $terminalPathId = null;
+            foreach($expansion->getPaths() as $pathId=>$code){
+                if($code === $traversal){ $terminalPathId = (string)$pathId; }
+            }
+            if($terminalPathId === null){ continue; }
+            $publicPathId = (string)(count($paths)+1);
+            $paths[$publicPathId] = $traversal;
+            $occurrences = $expansion->getOccurrences($terminalPathId);
+            foreach($pathFields as $field){
+                $this->dataService->attachLinkedValues(
+                    $records, $field, $occurrences, $publicPathId
+                );
+            }
+        }
+
+        $meta = array(
+            'database'=>$params['db'] ?? $this->databaseName(),
+            'entity'=>'records',
+            'fields'=>array(
+                'headers'=>array_values(array_unique(array_merge(
+                    array('rec_ID','rec_RecTypeID'), $selection['headers']
+                ))),
+                'details'=>$this->dataService->loadFieldMetadata($selection['details'])
+            )
+        );
+        if(!empty($paths)){ $meta['paths'] = $paths; }
+        return array(
+            'records'=>$records,
+            'meta'=>$meta,
+            'pagination'=>$this->pagination($result, $params)
+        );
+    }
+
+    private function databaseName(): string
+    {
+        if(method_exists($this->system, 'dbname')){ return (string)$this->system->dbname(); }
+        if(method_exists($this->system, 'getDbName')){ return (string)$this->system->getDbName(); }
+        return '';
+    }
+
+    private function pagination(SearchResult $result, array $params): array
+    {
+        $pagination = array(
+            'total'=>$result->total,
+            'offset'=>$result->offset,
+            'limit'=>$result->limit
+        );
+        $uri = (string)($_SERVER['REQUEST_URI'] ?? '');
+        if($uri !== ''){
+            $pagination['self'] = $uri;
+            if($result->offset+$result->limit < $result->total){
+                $next = $params;
+                $next['offset'] = $result->offset+$result->limit;
+                $next['limit'] = $result->limit;
+                unset($next['query']);
+                $pagination['next'] = strtok($uri, '?').'?'.http_build_query($next);
+            }
+        }
+        return $pagination;
     }
 
     /** Execute and write a public-compatible JSON response. */
@@ -103,4 +215,3 @@ final class RecordQueryController
         }
     }
 }
-

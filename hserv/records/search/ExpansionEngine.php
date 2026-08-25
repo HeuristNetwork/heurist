@@ -53,6 +53,7 @@ final class ExpansionEngine
     /** Execute every rule branch and return records, edges, paths, and top associations. */
     public function expand(ExpansionRequest $request, array $context = array()): ExpansionResult
     {
+        $this->pathSequence = 0;
         $result = new ExpansionResult();
         $origins = array();
         foreach($request->seedIds as $id){
