@@ -1401,11 +1401,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             $('<div style="line-height:2ex;padding-top:4px">'
                     +'<div id="enumVocabulary" style="display:inline-block;">'
                         +'<select id="selVocab" class="sel_width"></select>'
-                        +'<a href="#" id="add_vocabulary_2" style="padding-left:10px">'
-                            +'<span class="ui-icon ui-icon-plus"/>add vocabulary</a>'
+                        +'<span href="#" id="add_vocabulary_2" style="margin-left:10px; padding:2.5px 5px; border:1px black solid; background:transparent;">'
+                            +'<span class="ui-icon ui-icon-plus"></span>add vocabulary</span>'
                         +'<a href="#" id="show_terms_1" style="padding-left:10px">'
                             +'<span class="ui-icon ui-icon-pencil"/>vocabularies editor</a>'
-                        +'<br><span id="termsPreview1" style="display:none;padding:10px 0px">'
+                        +'<br><span style="padding-top:10px;display:block;font-size:11px;">Note: you do not need to define terms in the vocabulary immediately</span>'
+                        +'<span id="termsPreview1" style="display:none;padding:10px 0px">'
                             +'<label style="width:60px;min-width:60px">Preview:&nbsp;</label><select id="selPreview"></select>'
                         +'</span>'
                     +'</div>'
@@ -1425,7 +1426,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 }});
             this._on(this.enum_container.find('#add_vocabulary'),{click: this._onAddVocabOrTerms});
             this._on(this.enum_container.find('#show_terms_1'),{click: this._showOtherTerms}); //manage defTerms
-            this._on(this.enum_container.find('#add_vocabulary_2'),{click: this._onAddVocabulary}); //add vocab via defTerms
+            this._on(this.enum_container.find('#add_vocabulary_2').button(),{click: this._onAddVocabulary}); //add vocab via defTerms
             this._on(this.enum_container.find('#add_terms'),{click: this._onAddVocabOrTerms});
            
             

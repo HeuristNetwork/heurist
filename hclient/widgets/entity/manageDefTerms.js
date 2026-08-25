@@ -1134,20 +1134,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             let sCode = $Db.trm(recID, 'trm_Code');
             let sURI = $Db.trm(recID, 'trm_SemanticReferenceURL');
 
-            sHint = 'title="'+sLabelHint+'<br>'
+            sHint = `title="${sLabelHint}<br>`
             + '__LABELS__'
-            + (sDesc?('<p><i>'+sDesc+'</i></p>'):'')
-            + (sCode?('<p>Code: '+sCode+'</p>'):'')
-            + (sURI?('<p>URI: '+sURI+'</p>'):'')
-            + '<p>ID: '+recID+' ('+$Db.getConceptID('trm',recID)+')</p>';
+            + (sDesc ? `<p><i>${sDesc}</i></p>` : '')
+            + (sCode ? `<p>Code ${sCode}</p>` : '')
+            + (sURI ? `<p>URI: ${sURI}</p>` : '')
+            + `<p>ID: ${recID} (${$Db.getConceptID('trm', recID)})</p>`;
 
             if(ref_lvl!==false){
-
-                sHint = sHint +     
-                '<p>Reference to: <i>'+real_vocab_name+'</i> vocabulary.</p>'
-                +'<p style=&quot;color:orange&quot;>The term can only be edited in that vocabulary.</p>';
+                sHint += `<p>Reference to: <i>${real_vocab_name}</i> vocabulary.</p><p style=&quot;color:orange&quot;>The term can only be edited in that vocabulary.</p>`;
             }
-            sHint = sHint + '"';
+            sHint += '"';
             
             const hasIcon = $Db.trmHasIcon(recID);
 
@@ -1163,12 +1160,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             let html_thumb = '';
             
-            let recThumb = hasIcon?window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', null, null, true):'';
+            let recThumb = hasIcon ? window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', null, null, true) : '';
 
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                     +recThumb+'&quot;);opacity:1;top:45px;"></div>';
                     
-            sPad = lvl==1?0:(lvl==2?(lvl-0.5):lvl);                                                                         
+            sPad = lvl == 1 ? 0 : (lvl == 2 ? (lvl - 0.5) : lvl);                                                                         
             let exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
 
             let sclass = 'white-borderless', sstyle = '';
@@ -1446,6 +1443,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             //change label            
             this._editing.getFieldByName('trm_Label').find('.header').text('Vocabulary Name');
+
+            if(this._currentEditID <= 0 && !this.options.selection_on_init){
+                let extraHelpText = '<br><span style="border:1px black solid;padding:5px;margin-top:5px;display:inline-block;">Note: you do not need to define terms in the vocabulary immediately</span>';
+                this._editing.getFieldByName('trm_Label').find('.heurist-helper1').append(extraHelpText);
+            }
 
             //assign default values
             ele = this._editing.getFieldByName('trm_VocabularyGroupID');
