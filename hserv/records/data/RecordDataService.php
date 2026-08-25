@@ -72,7 +72,7 @@ final class RecordDataService
             return intval($field['fieldId']);
         }, $nativeFields)));
         if(!empty($fieldIds)){
-            $values = $this->loadValues($topIds, $fieldIds);
+            $values = $this->loadFieldValues($topIds, $fieldIds);
             foreach($nativeFields as $field){
                 foreach($topIds as $id){
                     foreach($values[$id][$field['fieldId']] ?? array() as $value){
@@ -92,7 +92,7 @@ final class RecordDataService
             $chain = $occurrence['recordIds'] ?? array();
             if(!empty($chain)){ $owners[intval(end($chain))] = intval(end($chain)); }
         }
-        $values = $this->loadValues(array_values($owners), array(intval($field['fieldId'])));
+        $values = $this->loadFieldValues(array_values($owners), array(intval($field['fieldId'])));
         $recordIndex = array();
         foreach($records as $index=>$record){ $recordIndex[intval($record['rec_ID'])] = $index; }
 
@@ -154,7 +154,7 @@ final class RecordDataService
     }
 
     /** Load and enrich requested details, indexed by owner and field ID. */
-    private function loadValues(array $ownerIds, array $fieldIds): array
+    public function loadFieldValues(array $ownerIds, array $fieldIds): array
     {
         $ownerIds = $this->ids($ownerIds);
         $fieldIds = $this->ids($fieldIds);
@@ -192,6 +192,32 @@ final class RecordDataService
             }
         }
         return $values;
+    }
+
+    /** Discover visible detail fields of a given type used by supplied records. */
+    public function findFieldIdsByType(array $ownerIds, string $fieldType): array
+    {
+        $ownerIds = $this->ids($ownerIds);
+        $fieldType = strtolower(trim($fieldType));
+        if(empty($ownerIds) || !preg_match('/^[a-z]+$/', $fieldType)){ return array(); }
+        $found = array();
+        foreach(array_chunk($ownerIds, self::BATCH_SIZE) as $chunk){
+            $sql = 'SELECT DISTINCT d.dtl_DetailTypeID FROM recDetails d '
+                .'JOIN defDetailTypes t ON t.dty_ID=d.dtl_DetailTypeID '
+                .'JOIN Records ro ON ro.rec_ID=d.dtl_RecID '
+                .'LEFT JOIN defRecStructure rst ON rst.rst_RecTypeID=ro.rec_RecTypeID '
+                .'AND rst.rst_DetailTypeID=d.dtl_DetailTypeID '
+                .'WHERE d.dtl_RecID IN ('.implode(',', array_fill(0, count($chunk), '?')).') '
+                .'AND t.dty_Type=? '.$this->fieldVisibilitySql();
+            $parameters = array_merge($chunk, array($fieldType));
+            foreach($this->executor->executeRows(
+                $sql, str_repeat('i', count($chunk)).'s', $parameters
+            ) as $row){
+                $id = intval($row[0]);
+                if($id>0){ $found[$id] = $id; }
+            }
+        }
+        return array_values($found);
     }
 
     private function formatValue(array $row)
