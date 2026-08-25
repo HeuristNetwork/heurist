@@ -2611,8 +2611,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         if(!imp_session['sequence'][currentSeqIndex]['mapping_flds']){
                             imp_session['sequence'][currentSeqIndex]['mapping_flds'] = {};
                         }
-                        let fld_index = fld_id.replace('sa_dt_', '');
-                        imp_session['sequence'][currentSeqIndex]['mapping_flds'][fld_index] = rst_ID;
 
                         // Cache mapping before refresh
                         let $checked_boxes = $("input[id^='cbsa_dt_']:checked:visible"); // save checked boxes
@@ -2631,9 +2629,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         if(hasMapping){
                             imp_session['sequence'][currentSeqIndex]['mapping_flds'] = fieldMapping;
                         }
+                        // Add new mapping
+                        let fld_index = fld_id.replace('sa_dt_', '');
+                        imp_session['sequence'][currentSeqIndex]['mapping_flds'][fld_index] = rst_ID;
 
-                        _initFieldMapppingSelectors(); // recreate selects
-                        $checked_boxes.prop('checked', true).trigger('change'); // re-check boxes, they get reset by the above recreate
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData('dty,rst', () => {
+                            _initFieldMapppingSelectors(); // recreate selects
+                            $checked_boxes.prop('checked', true).trigger('change'); // re-check boxes, they get reset by the above recreate
+                        });
                     });
                 }
             };
