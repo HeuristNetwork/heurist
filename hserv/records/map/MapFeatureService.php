@@ -18,11 +18,13 @@ require_once dirname(__FILE__).'/MapFieldSelector.php';
 require_once dirname(__FILE__).'/GeoJsonGeometryConverter.php';
 require_once dirname(__FILE__).'/../data/RecordDataService.php';
 require_once dirname(__FILE__).'/../search/ExpansionEngine.php';
+require_once dirname(__FILE__).'/../search/ExpansionRuleParser.php';
 require_once dirname(__FILE__).'/../search/query/QueryBuilder.php';
 
 use hserv\records\data\RecordDataService;
 use hserv\records\search\ExpansionEngine;
 use hserv\records\search\ExpansionRequest;
+use hserv\records\search\ExpansionRuleParser;
 use hserv\records\search\QueryValidationException;
 use hserv\records\search\RecordSearchService;
 use hserv\records\search\SearchRequest;
@@ -86,18 +88,26 @@ final class MapFeatureService
     /** Prepare an iterable GeoJSON feature result for a query page. */
     public function createStream(array $params): MapFeatureStream
     {
+        $selection = $this->selector->parse($params['geofields'] ?? $params['geoFields'] ?? null);
+        $extent = $this->normalizeExtent($params['extent'] ?? null);
         $query = $params['query'] ?? $params['q'] ?? null;
         if(($query === null || $query === '') && isset($params['ids'])){
             $query = array(array('ids'=>$params['ids']));
         }
         if($query === null || $query === ''){ $query = array(array('_all'=>true)); }
-        $request = new SearchRequest($this->builder->normalize($query), array(
+        $normalizedQuery = $this->builder->normalize($query);
+        // A native-only viewport can safely constrain top-record pagination.
+        // Linked geometry constrains its terminal expansion instead, because
+        // the top record commonly has no geometry of its own.
+        if($extent !== null && $extent[0]<=$extent[2] && empty($selection['linked'])){
+            $normalizedQuery[] = array('geo'=>$this->extentObject($extent));
+        }
+        $request = new SearchRequest($normalizedQuery, array(
             'limit'=>$params['limit'] ?? 1000,
             'offset'=>$params['offset'] ?? 0,
             'detail'=>'ids'
         ));
         $searchResult = $this->search->search($request);
-        $selection = $this->selector->parse($params['geofields'] ?? $params['geoFields'] ?? null);
         $this->validateGeoFields(array_merge(
             array_map(static function($id){
                 return array('fieldId'=>$id, 'pathCode'=>null);
@@ -125,7 +135,7 @@ final class MapFeatureService
         }
 
         $features = (function() use (
-            $searchResult, $selection, $mode, $simplify, $pathIds, &$state
+            $searchResult, $selection, $mode, $simplify, $pathIds, $extent, &$state
         ) {
             foreach(array_chunk($searchResult->ids, self::BATCH_SIZE) as $topIds){
                 $topRecords = $this->data->loadRecords($topIds, array('rec_Title'), array());
@@ -140,7 +150,9 @@ final class MapFeatureService
                         $this->data->findFieldIdsByType($topIds, 'geo')
                     )));
                 }
-                $nativeValues = $this->data->loadFieldValues($topIds, $nativeFields);
+                $nativeValues = $this->data->loadFieldValues(
+                    $topIds, $nativeFields, array('extent'=>$extent)
+                );
                 foreach($topIds as $topId){
                     foreach($nativeFields as $fieldId){
                         $index = 0;
@@ -168,7 +180,9 @@ final class MapFeatureService
                 }
                 foreach($linkedByTraversal as $traversal=>$fields){
                     $graph = $this->expansion->expand(new ExpansionRequest(
-                        $topIds, $traversal, array('includeHeaders'=>true)
+                        $topIds,
+                        $this->expansionRules($traversal, $extent),
+                        array('includeHeaders'=>true)
                     ));
                     $graphArray = $graph->toArray();
                     $recordTypes = array();
@@ -194,7 +208,9 @@ final class MapFeatureService
                     }
                     foreach($fields as $field){
                         $values = $this->data->loadFieldValues(
-                            array_values($owners), array($field['fieldId'])
+                            array_values($owners),
+                            array($field['fieldId']),
+                            array('extent'=>$extent)
                         );
                         $occurrenceIndex = 0;
                         foreach($occurrences as $occurrence){
@@ -245,7 +261,7 @@ final class MapFeatureService
             }
         })();
 
-        $meta = function() use ($searchResult, $mode, &$state): array {
+        $meta = function() use ($searchResult, $mode, $extent, &$state): array {
             $result = array(
                 'database'=>$this->databaseName(),
                 'totalRecords'=>$searchResult->total,
@@ -257,6 +273,7 @@ final class MapFeatureService
                     || $searchResult->offset+$state['returnedRecords']<$searchResult->total,
                 'geoOutputMode'=>$mode
             );
+            if($extent !== null){ $result['extent'] = $this->extentObject($extent); }
             if($mode === 'features' && !empty($state['paths'])){
                 $result['records'] = array_values($state['records']);
                 $result['paths'] = $state['paths'];
@@ -310,6 +327,66 @@ final class MapFeatureService
     private function boolean($value): bool
     {
         return in_array(strtolower(trim((string)$value)), array('1','true','yes','on'), true);
+    }
+
+    /** Add a viewport predicate to the terminal linked-record query. */
+    private function expansionRules(string $traversal, ?array $extent)
+    {
+        if($extent === null || $extent[0]>$extent[2]){ return $traversal; }
+        // QueryBuilder's spatial predicate is a single ordinary endpoint
+        // condition, so it composes with any existing rule query.
+        $rules = (new ExpansionRuleParser())->parse($traversal);
+        $level =& $rules;
+        while(!empty($level)){
+            $index = count($level)-1;
+            if(empty($level[$index]['levels'])){
+                $level[$index]['query'][] = array('geo'=>$this->extentObject($extent));
+                break;
+            }
+            $level =& $level[$index]['levels'];
+        }
+        return $rules;
+    }
+
+    /** Normalize JSON/object/CSV viewport bounds to west,south,east,north. */
+    private function normalizeExtent($value): ?array
+    {
+        if($value === null || $value === ''){ return null; }
+        if(is_string($value)){
+            $text = trim($value);
+            if($text === ''){ return null; }
+            $decoded = json_decode($text, true);
+            $value = json_last_error()===JSON_ERROR_NONE ? $decoded : explode(',', $text);
+        }
+        if(is_array($value) && isset($value['west'],$value['south'],$value['east'],$value['north'])){
+            $values = array($value['west'],$value['south'],$value['east'],$value['north']);
+        }elseif(is_array($value) && count($value)===4){
+            $values = array_values($value);
+        }else{
+            throw new QueryValidationException('Map extent must contain west, south, east, and north');
+        }
+        foreach($values as $number){
+            if(!is_numeric($number) || !is_finite(floatval($number))){
+                throw new QueryValidationException('Map extent contains a non-numeric coordinate');
+            }
+        }
+        $values = array_map('floatval', $values);
+        $values[0] = max(-180.0, min(180.0, $values[0]));
+        $values[2] = max(-180.0, min(180.0, $values[2]));
+        $values[1] = max(-90.0, min(90.0, $values[1]));
+        $values[3] = max(-90.0, min(90.0, $values[3]));
+        if($values[1]>$values[3]){
+            throw new QueryValidationException('Map extent south must not exceed north');
+        }
+        return $values;
+    }
+
+    private function extentObject(array $extent): array
+    {
+        return array(
+            'west'=>$extent[0], 'south'=>$extent[1],
+            'east'=>$extent[2], 'north'=>$extent[3]
+        );
     }
 
     private function databaseName(): string

@@ -154,12 +154,13 @@ final class RecordDataService
     }
 
     /** Load and enrich requested details, indexed by owner and field ID. */
-    public function loadFieldValues(array $ownerIds, array $fieldIds): array
+    public function loadFieldValues(array $ownerIds, array $fieldIds, array $options = array()): array
     {
         $ownerIds = $this->ids($ownerIds);
         $fieldIds = $this->ids($fieldIds);
         if(empty($ownerIds) || empty($fieldIds)){ return array(); }
         $values = array();
+        $extentCondition = $this->extentCondition($options['extent'] ?? null);
         foreach(array_chunk($ownerIds, self::BATCH_SIZE) as $chunk){
             $sql = 'SELECT d.dtl_ID,d.dtl_RecID,d.dtl_DetailTypeID,d.dtl_Value,'
                 .'ST_AsText(d.dtl_Geo),d.dtl_UploadedFileID,t.dty_Type,'
@@ -179,11 +180,14 @@ final class RecordDataService
                 .'AND rst.rst_DetailTypeID=d.dtl_DetailTypeID '
                 .'WHERE d.dtl_RecID IN ('.implode(',', array_fill(0, count($chunk), '?')).') '
                 .'AND d.dtl_DetailTypeID IN ('.implode(',', array_fill(0, count($fieldIds), '?')).') '
+                .$extentCondition['sql']
                 .$this->fieldVisibilitySql()
                 .'ORDER BY d.dtl_RecID,d.dtl_DetailTypeID,d.dtl_ID';
-            $parameters = array_merge($chunk, $fieldIds);
+            $parameters = array_merge($chunk, $fieldIds, $extentCondition['values']);
             foreach($this->executor->executeRows(
-                $sql, str_repeat('i', count($parameters)), $parameters
+                $sql,
+                str_repeat('i', count($chunk)+count($fieldIds)).$extentCondition['types'],
+                $parameters
             ) as $row){
                 $value = $this->formatValue($row);
                 if($value !== null && $value !== ''){
@@ -192,6 +196,36 @@ final class RecordDataService
             }
         }
         return $values;
+    }
+
+    /** Build an exact MBR filter for one normal or antimeridian-crossing extent. */
+    private function extentCondition($extent): array
+    {
+        if(!is_array($extent) || count($extent)!==4){
+            return array('sql'=>'', 'types'=>'', 'values'=>array());
+        }
+        list($west,$south,$east,$north) = array_values($extent);
+        if(!($west<=$east)){
+            $left = $this->extentPolygon($west, $south, 180.0, $north);
+            $right = $this->extentPolygon(-180.0, $south, $east, $north);
+            return array(
+                'sql'=>' AND (MBRIntersects(d.dtl_Geo,ST_GeomFromText(?))'
+                    .' OR MBRIntersects(d.dtl_Geo,ST_GeomFromText(?))) ',
+                'types'=>'ss',
+                'values'=>array($left,$right)
+            );
+        }
+        return array(
+            'sql'=>' AND MBRIntersects(d.dtl_Geo,ST_GeomFromText(?)) ',
+            'types'=>'s',
+            'values'=>array($this->extentPolygon($west,$south,$east,$north))
+        );
+    }
+
+    private function extentPolygon(float $west, float $south, float $east, float $north): string
+    {
+        return 'POLYGON(('.$west.' '.$south.','.$east.' '.$south.','.$east.' '.$north.','
+            .$west.' '.$north.','.$west.' '.$south.'))';
     }
 
     /** Discover visible detail fields of a given type used by supplied records. */

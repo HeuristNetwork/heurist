@@ -60,6 +60,16 @@ final class RecordFieldSelector
                 );
                 continue;
             }
+            if(preg_match('/^([0-9]+):([0-9]+)$/', $field, $match)
+                && intval($match[1])>0 && intval($match[2])>0){
+                $details[$field] = array(
+                    'key'=>$field,
+                    'fieldId'=>intval($match[2]),
+                    'pathCode'=>$field,
+                    'traversal'=>null
+                );
+                continue;
+            }
             $details[$field] = $this->parsePath($field);
         }
         return array(

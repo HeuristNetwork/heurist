@@ -14,6 +14,8 @@
 
 namespace hserv\records\map;
 
+require_once dirname(__FILE__,4).'/vendor/autoload.php';//for geoPHP and EasyRdf
+
 /** Stateless converter extracted from the legacy GeoJSON exporter. */
 final class GeoJsonGeometryConverter
 {

@@ -116,10 +116,10 @@ final class RecordQueryController
         array $params
     ): array {
         $native = array_values(array_filter($selection['details'], static function($field){
-            return $field['pathCode'] === null;
+            return $field['traversal'] === null;
         }));
         $linked = array_values(array_filter($selection['details'], static function($field){
-            return $field['pathCode'] !== null;
+            return $field['traversal'] !== null;
         }));
         $records = $this->dataService->loadRecords($result->ids, $selection['headers'], $native);
         $paths = array();
