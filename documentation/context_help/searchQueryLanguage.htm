@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Lang" content="en">
+<meta name="author" content="Heurist Network">
+<meta name="description" content="User guide to the Heurist record query language">
+<meta name="keywords" content="Heurist, record search, query language, JSON query, linked records, relationships, fulltext">
+<title>Heurist Record Query Language</title>
+<link rel="stylesheet" type="text/css" href="../../h4styles.css">
+<style>
+table.query-reference { border-collapse: collapse; width: 100%; margin: 0.8em 0 1.4em; }
+table.query-reference th, table.query-reference td { border: 1px solid #bbb; padding: 0.45em 0.6em; vertical-align: top; }
+table.query-reference th { background: #eee; text-align: left; }
+code, pre { font-family: Consolas, "Courier New", monospace; }
+pre { background: #f5f5f5; border: 1px solid #ccc; padding: 0.8em; overflow: auto; }
+.note { background: #fff8dc; border-left: 4px solid #d6a800; padding: 0.6em 0.8em; }
+.important { background: #eef6ff; border-left: 4px solid #3979ad; padding: 0.6em 0.8em; }
+</style>
+</head>
+<body>
+<div id="content">
+
+<h2>Heurist Record Query Language</h2>
+<hr>
+
+<p>
+The Heurist record query language filters records by record header values, detail fields,
+links, relationships, geographic extent and user data. A query may be written as compact
+plain text or as JSON. Plain text is convenient for interactive searches; JSON is
+recommended for applications, nested paths and logical expressions.
+</p>
+
+<h3>Quick start</h3>
+
+<p>The following examples use Person record type <code>10</code>, Place type
+<code>12</code>, Event type <code>48</code>, and example detail type IDs.</p>
+
+<table class="query-reference">
+<thead><tr><th>Query</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>Johnson</code></td><td>Records whose title contains “Johnson”.</td></tr>
+<tr><td><code>t:10</code></td><td>All Person records.</td></tr>
+<tr><td><code>t:Person</code></td><td>All Person records, resolving the singular record-type name before searching.</td></tr>
+<tr><td><code>t:10 title:Johnson</code></td><td>Person records with “Johnson” in the title.</td></tr>
+<tr><td><code>t:10 f1:Johnson</code></td><td>Persons whose field 1 contains “Johnson”.</td></tr>
+<tr><td><code>t:Person fGender:male</code></td><td>Persons whose Gender field contains the term whose label or code is “male”.</td></tr>
+<tr><td><code>t:10 sortby:title</code></td><td>Persons sorted by title.</td></tr>
+<tr><td><code>{"t":10,"f:20":414}</code></td><td>Persons with term 414 in field 20.</td></tr>
+<tr><td><code>{"t":10,"lt:134":{"t":12,"title":"Baghdad"}}</code></td><td>Persons linked through field 134 to a Place titled Baghdad.</td></tr>
+</tbody>
+</table>
+
+<p class="important">
+The query is supplied in the <code>q</code> or <code>query</code> request parameter.
+The parameters <code>limit</code>, <code>offset</code>, <code>fields</code>,
+<code>detail</code> and <code>rules</code> are request options; they are not query
+predicates.
+</p>
+
+<h3>Plain-text format</h3>
+
+<p>Plain-text queries consist of predicates separated by spaces. A predicate can use
+<code>keyword:value</code> or <code>keyword value</code>. Conditions at the same level
+are combined with AND.</p>
+
+<pre>t:10 title:Johnson
+t 10 f1 Johnson
+t:10 title:"Johnson, John" sortby:title</pre>
+
+<p>A word without a recognised keyword is a title search. Quote values containing spaces.
+A leading <code>-</code> negates many scalar values:</p>
+
+<pre>t:10 -Smith
+t:10 title:-Smith</pre>
+
+<p>Basic linked subqueries can be written with parentheses:</p>
+
+<pre>t:10 linkedto(t:12 title:Baghdad)
+t:10 lt240(t:48 lt134(t:12 title:Berlin))</pre>
+
+<p class="note">Although basic parenthesised links are accepted, use JSON for complex
+nested links, relationship constraints, repeated predicates, or logical combinations.
+Plain text is intended primarily for direct user input.</p>
+
+<h3>Name and value resolution</h3>
+
+<p>Names and semantic values are resolved to local numeric IDs before the main record
+query is composed and executed by the SQL server. The resolved query therefore uses the
+same indexed predicates as a query written with IDs.</p>
+
+<table class="query-reference">
+<thead><tr><th>Input</th><th>Resolution</th></tr></thead>
+<tbody>
+<tr><td><code>t:Person</code> or <code>t:Persons</code></td><td>Matches a record type by its singular <code>rty_Name</code> or plural <code>rty_Plural</code>. Exact matches are preferred; otherwise a unique partial match is accepted.</td></tr>
+<tr><td><code>fGender:male</code></td><td>Resolves the unspaced field name and then resolves an enum label or code. This is equivalent to using the local field and term IDs.</td></tr>
+<tr><td><code>{"t":"Events","f:Date of event":"yesterday"}</code></td><td>JSON permits field names containing spaces.</td></tr>
+<tr><td><code>usr:brandon</code></td><td>Resolves a login name to the user ID before searching bookmarks. Login names are also accepted by <code>ws</code>, <code>owner</code> and <code>addedby</code>.</td></tr>
+<tr><td><code>{"f:20":"-male"}</code></td><td>Resolves an enum label or code while preserving the negation operator.</td></tr>
+<tr><td><code>{"sortby":"f:Population"}</code></td><td>Resolves a named field before applying typed field sorting.</td></tr>
+</tbody>
+</table>
+
+<p>When a query level specifies one or more record types, field-name lookup is restricted
+to fields belonging to those types through <code>defRecStructure</code>. Each nested linked
+query has its own record-type context. Without a type predicate, field names are matched
+against all record structures.</p>
+
+<p class="important">If a partial record-type or field name has several matches, the
+query is rejected and the error lists the matching IDs and names. If a type-scoped field
+is not present in that record type, the query is rejected rather than silently searching
+for a similarly named global field.</p>
+
+<h3>JSON format</h3>
+
+<p>A simple query can be a JSON object. Multiple values of the same predicate, or an
+explicit ordered sequence of predicates, should use an array of one-key objects:</p>
+
+<pre>{"t":10,"title":"Johnson"}
+
+[
+  {"t":10},
+  {"f:240":"-NULL"},
+  {"sortby":"title"}
+]</pre>
+
+<p>Do not repeat the same key within a JSON object because JSON object keys must be
+unique. Use the array form instead.</p>
+
+<h4>Predicates and keywords</h4>
+
+<table class="query-reference">
+<thead><tr><th>Plain-text example</th><th>JSON equivalent</th><th>Explanation</th></tr></thead>
+<tbody>
+<tr><td><code>t:Person</code></td><td><code>{"t":"Persons"}</code></td><td>Record type ID, singular name or plural name. Aliases: <code>type</code>, <code>typeid</code>, <code>typename</code>. Unique partial names are accepted.</td></tr>
+<tr><td><code>ids:152,153</code></td><td><code>{"ids":[152,153]}</code></td><td>Record IDs. Alias: <code>id</code>. Replacement/forwarded record IDs are followed automatically.</td></tr>
+<tr><td><code>title:Johnson</code></td><td><code>{"title":"Johnson"}</code></td><td>Record title contains the value.</td></tr>
+<tr><td><code>url:example.org</code></td><td><code>{"url":"example.org"}</code></td><td>Record URL contains the value.</td></tr>
+<tr><td><code>notes:draft</code></td><td><code>{"notes":"draft"}</code></td><td>Scratchpad/notes contain the value.</td></tr>
+<tr><td><code>added:2026-08</code></td><td><code>{"added":"2026-08"}</code></td><td>Record creation date or date range.</td></tr>
+<tr><td><code>modified:2026-08-24</code></td><td><code>{"modified":"2026-08-24"}</code></td><td>Record modification date.</td></tr>
+<tr><td><code>after:2026-08-01</code></td><td><code>{"after":"2026-08-01"}</code></td><td>Modified after the date. Alias: <code>since</code>.</td></tr>
+<tr><td><code>before:2026-09-01</code></td><td><code>{"before":"2026-09-01"}</code></td><td>Modified on or before the date.</td></tr>
+<tr><td><code>addedby:brandon</code></td><td><code>{"addedby":"brandon"}</code></td><td>Record creator by user ID or exact login name.</td></tr>
+<tr><td><code>owner:editors</code></td><td><code>{"owner":"editors"}</code></td><td>Owner user/workgroup by ID or exact name. Aliases: <code>workgroup</code>, <code>wg</code>.</td></tr>
+<tr><td><code>access:public</code></td><td><code>{"access":"public"}</code></td><td>Non-owner visibility, for example <code>public</code>, <code>viewable</code>, <code>hidden</code> or <code>pending</code>.</td></tr>
+<tr><td><code>usr:brandon</code></td><td><code>{"usr":"brandon"}</code></td><td>Records bookmarked by a user ID, exact login name, or <code>current</code>. Alias: <code>user</code>.</td></tr>
+<tr><td><code>ws:current</code></td><td><code>{"ws":"current"}</code></td><td>Working set by user ID, exact login name, or <code>current</code>. Alias: <code>workset</code>.</td></tr>
+<tr><td><code>tag:key1</code></td><td><code>{"tag":"key1"}</code></td><td>Record tag by text or numeric tag ID. Aliases: <code>keyword</code>, <code>kwd</code>.</td></tr>
+<tr><td><code>fSurname:Johnson</code></td><td><code>{"f:Surname":"Johnson"}</code></td><td>Value in a detail field identified by ID, <code>dty_Name</code>, or record-type-specific <code>rst_DisplayName</code>. Names containing spaces require JSON. Aliases: <code>f</code>, <code>field</code>.</td></tr>
+<tr><td><code>f:Berlin</code></td><td><code>{"f":"Berlin"}</code></td><td>Any searchable detail field, enum label/code, or linked-record title. It does not mean the record’s own title; use <code>title</code> for that.</td></tr>
+<tr><td><code>fc240:&gt;2</code></td><td><code>{"fc:240":"&gt;2"}</code></td><td>Number of occurrences of field 240. Aliases: <code>count</code>, <code>cnt</code>.</td></tr>
+<tr><td><code>file39:Cat7.jpg</code></td><td><code>{"file:39":"Cat7.jpg"}</code></td><td>Registered file name, external URL or description in file field 39.</td></tr>
+<tr><td><code>geo:NULL</code></td><td><code>{"geo":"NULL"}</code></td><td>Records without geometry. An empty value means any geometry; WKT can be supplied as a value.</td></tr>
+<tr><td><code>lt134(t:12)</code></td><td><code>{"lt:134":{"t":12}}</code></td><td>Records linked to matching records through resource field 134. Aliases: <code>linked_to</code>, <code>linkedto</code>.</td></tr>
+<tr><td><code>lf134(t:10)</code></td><td><code>{"lf:134":{"t":10}}</code></td><td>Records linked from matching records through field 134. Aliases: <code>linked_from</code>, <code>linkedfrom</code>.</td></tr>
+<tr><td>Use JSON</td><td><code>{"rt":{"t":10,"r":3115}}</code></td><td>Outgoing relationship to matching records. Aliases: <code>related_to</code>, <code>relatedto</code>.</td></tr>
+<tr><td>Use JSON</td><td><code>{"rf":{"t":10,"r":3115}}</code></td><td>Incoming relationship from matching records. Aliases: <code>related_from</code>, <code>relatedfrom</code>.</td></tr>
+<tr><td>Use JSON</td><td><code>{"related:3115":{"t":10}}</code></td><td>Relationship in either direction, using direct and inverse relationship terms.</td></tr>
+<tr><td><code>sortby:-modified</code></td><td><code>{"sortby":"-modified"}</code></td><td>Sort descending by modification date. Aliases: <code>sort</code>, <code>s</code>.</td></tr>
+</tbody>
+</table>
+
+<h3>Values and comparison operators</h3>
+
+<table class="query-reference">
+<thead><tr><th>Value</th><th>Meaning</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><code>value</code></td><td>Contains/LIKE match for text; normal typed comparison for other fields.</td><td><code>{"f:1":"John"}</code></td></tr>
+<tr><td><code>=value</code></td><td>Exact value using normal database collation.</td><td><code>{"title":"=Johnson, John"}</code></td></tr>
+<tr><td><code>==value</code></td><td>Case-sensitive exact text.</td><td><code>{"f:1":"==Johnson"}</code></td></tr>
+<tr><td><code>-value</code></td><td>Negated text, term, type, tag or ID match where supported.</td><td><code>{"title":"-Draft"}</code></td></tr>
+<tr><td><code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code></td><td>Numeric or date comparison.</td><td><code>{"f:1160":"&gt;5000000"}</code></td></tr>
+<tr><td><code>NULL</code></td><td>Field/tag/geometry is not defined.</td><td><code>{"f:955":"NULL"}</code></td></tr>
+<tr><td><code>-NULL</code></td><td>Field/tag is present.</td><td><code>{"f:10":"-NULL"}</code></td></tr>
+<tr><td><code>%</code>, <code>_</code></td><td>SQL-style text wildcards. If neither appears, Heurist adds surrounding <code>%</code>.</td><td><code>{"title":"John%"}</code></td></tr>
+</tbody>
+</table>
+
+<h4>Numeric ranges</h4>
+
+<pre>{"f:1160":"4000000&lt;&gt;5000000"}
+{"f:1160":"&lt;&gt;4000000/5000000"}
+{"f:1160":"&gt;&lt;4000000/5000000"}</pre>
+
+<p><code>low&lt;&gt;high</code> and the leading forms select scalar numeric values that fall
+within the supplied interval. The leading <code>&lt;&gt;</code> and <code>&gt;&lt;</code> forms
+also accept slash, comma, or “to” as the interval separator.</p>
+
+<h4>Date and temporal values</h4>
+
+<p>Simple dates use ISO forms such as <code>2025</code>, <code>2025-01</code> and
+<code>2025-01-10</code>. Heurist temporal JSON values stored in date fields are
+searched through their estimated minimum and maximum bounds.</p>
+
+<table class="query-reference">
+<thead><tr><th>JSON example</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>{"f:9":"2025-01-10"}</code></td><td>The date falls within/overlaps the stored temporal span.</td></tr>
+<tr><td><code>{"f:9":"=2025-01-10"}</code></td><td>An estimated boundary equals the supplied date.</td></tr>
+<tr><td><code>{"f:9":"&gt;=2020"}</code></td><td>The stored span starts in or after 2020.</td></tr>
+<tr><td><code>{"f:9":"&lt;=2025"}</code></td><td>The stored span ends in or before 2025.</td></tr>
+<tr><td><code>{"f:9":"1400/1500"}</code></td><td>The stored span overlaps the interval; overlap is the default.</td></tr>
+<tr><td><code>{"f:9":"1400&lt;&gt;1500"}</code></td><td>The stored span overlaps the interval.</td></tr>
+<tr><td><code>{"f:9":"&gt;&lt;1400/1500"}</code></td><td>The complete stored span is within the supplied interval.</td></tr>
+<tr><td><code>{"f:9":"today"}</code></td><td>Today’s date.</td></tr>
+<tr><td><code>{"f:9":"yesterday"}</code></td><td>Yesterday’s date. <code>tomorrow</code> is also accepted.</td></tr>
+<tr><td><code>{"f:9":"month"}</code></td><td>The complete current calendar month.</td></tr>
+<tr><td><code>{"f:9":"year"}</code></td><td>The complete current calendar year.</td></tr>
+<tr><td><code>{"f:9":"last month"}</code></td><td>The complete previous calendar month. <code>last year</code> selects the previous calendar year.</td></tr>
+<tr><td><code>{"f:9":"month ago"}</code></td><td>The date one month before today. <code>year ago</code> means one year before today.</td></tr>
+<tr><td><code>{"f:9":"&lt;100 years ago"}</code></td><td>The stored span ends before the date exactly 100 years before today.</td></tr>
+</tbody>
+</table>
+
+<p>Relative quantities accept singular or plural units:</p>
+
+<pre>{"f:9":"3 days ago"}
+{"f:9":"2 weeks ago"}
+{"f:9":"18 months ago"}
+{"modified":"&gt;=year ago"}</pre>
+
+<p>Relative expressions are converted to absolute ISO dates before temporal bounds are
+calculated. A bare <code>month</code> or <code>year</code> denotes a complete period;
+<code>month ago</code> and <code>year ago</code> denote a single relative date.</p>
+
+<h3>Fulltext search</h3>
+
+<p>Fulltext operators use the MySQL/MariaDB fulltext indexes. For an unsuffixed
+<code>f</code> predicate, Heurist searches ordinary searchable details and linked-record
+titles. Enum labels/codes are also considered.</p>
+
+<table class="query-reference">
+<thead><tr><th>Plain text</th><th>JSON</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>f:"@Johnson Berlin"</code></td><td><code>{"f":"@Johnson Berlin"}</code></td><td>Records matching any indexed word.</td></tr>
+<tr><td><code>f:"@+Johnson John"</code></td><td><code>{"f":"@+Johnson John"}</code></td><td>All significant words must match within a searchable indexed value or linked title.</td></tr>
+<tr><td><code>f:"@-Johnson"</code></td><td><code>{"f":"@-Johnson"}</code></td><td>Exclude records found by the positive fulltext search.</td></tr>
+<tr><td><code>f1:"@Johnson"</code></td><td><code>{"f:1":"@Johnson"}</code></td><td>Fulltext search restricted to field 1.</td></tr>
+<tr><td><code>f:"@Johnson -Berlin"</code></td><td><code>{"f":"@Johnson -Berlin"}</code></td><td>Explicit <code>+</code> or <code>-</code> word modifiers select Boolean mode.</td></tr>
+</tbody>
+</table>
+
+<p>For <code>@+</code> and <code>@-</code>, Heurist removes established stop words and
+words shorter than 3 bytes or longer than 84 bytes before issuing the indexed search.
+With <code>@+</code>, every remaining word is marked as required in Boolean mode. With
+<code>@-</code>, Heurist first finds the complete positive candidate set and then excludes
+those records.</p>
+
+<p class="note">If an <code>@+</code> or <code>@-</code> expression contains no indexable
+words after normalization, Heurist falls back to a substring <code>LIKE</code> condition.
+This allows searches containing only short, overlong or stop-listed words to retain useful
+semantics. Fulltext matching is nevertheless not generally equivalent to substring matching.</p>
+
+<h3>Complex JSON queries</h3>
+
+<h4>Nested resource links</h4>
+
+<p><code>lt</code> follows a resource field from the current record to its target.
+<code>lf</code> follows it in reverse. Omitting the field ID searches all ordinary
+resource fields.</p>
+
+<pre>{
+  "t": 10,
+  "lt:240": {
+    "t": 48,
+    "f:237": 6304,
+    "lt:134": {
+      "t": 12,
+      "f:133": 10443
+    }
+  }
+}</pre>
+
+<p>This finds Persons linked through field 240 to Events of type 6304, where the
+Event links through field 134 to Places classified by term 10443.</p>
+
+<p>A direct linked ID can be supplied without a subquery:</p>
+
+<pre>{"t":10,"lt:134":51}</pre>
+
+<h4>Relationship queries</h4>
+
+<p>Relationship records connect a source record and target record and have a
+relationship-type term. Use:</p>
+
+<ul>
+<li><code>rt</code> for an outgoing relationship;</li>
+<li><code>rf</code> for an incoming relationship;</li>
+<li><code>related:TERM</code> for either direction with inverse-term resolution;</li>
+<li><code>r</code> inside the relationship query to restrict relationship type;</li>
+<li><code>relf:FIELD</code> to restrict a field belonging to the Relationship record.</li>
+</ul>
+
+<pre>{
+  "t": 10,
+  "rt": {
+    "t": 10,
+    "r": 3115
+  }
+}</pre>
+
+<pre>{
+  "t": 48,
+  "rt": {
+    "t": 10,
+    "r": 5419,
+    "relf:10": "2024"
+  }
+}</pre>
+
+<p>A suffix on <code>rt</code> or <code>rf</code>, for example <code>rt:245</code>,
+identifies a relationship-marker detail type. Its allowed record types and
+relationship-type constraints are resolved from the field definition.</p>
+
+<h4>Logical groups: all, any and not</h4>
+
+<p>Conditions in a normal object or array are combined with AND. Logical groups can
+be nested at any query level:</p>
+
+<pre>{
+  "t": 10,
+  "any": [
+    {"lt:134": {"ids": 51}},
+    {"ids": 152}
+  ]
+}</pre>
+
+<pre>{
+  "t": 10,
+  "not": [
+    {"lt:240": {"f:237": 6305}}
+  ]
+}</pre>
+
+<table class="query-reference">
+<thead><tr><th>Group</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>all</code></td><td>Every contained condition must match.</td></tr>
+<tr><td><code>any</code></td><td>At least one contained condition must match.</td></tr>
+<tr><td><code>not</code></td><td>Exclude records matching the contained conditions.</td></tr>
+</tbody>
+</table>
+
+<h3>Terms, tags and language values</h3>
+
+<p>Enum and relationship-type fields accept local term IDs. For enum fields, an exact
+term label or code is resolved to its local ID before the main query. Resolution is
+restricted to the field’s configured vocabulary and, when present, its record-type-specific
+filtered term tree. Descendant terms are included unless exact matching is requested with
+<code>=</code>. A label, code or concept ID can also be selected explicitly in JSON by
+extending the field key:</p>
+
+<pre>{"f:133":10443}
+{"f:133":"Administrative.Capital"}
+{"f:133":"capital"}
+{"f:133":"=10443"}
+{"f:133:label":"Administrative.Capital"}
+{"f:133:code":"capital"}
+{"f:133:concept":"2-10443"}</pre>
+
+<p>Translated freetext and term labels can use a two- or three-letter language prefix,
+or <code>all:</code>:</p>
+
+<pre>{"f:1":"eng:London"}
+{"f:133:label":"fre:Capitale"}
+{"f:133:label":"all:Capital"}</pre>
+
+<p>Tags support one tag, any of several tags, all tags, presence and absence:</p>
+
+<pre>{"tag":"key1"}
+{"tag":{"any":[1,2]}}
+{"tag":{"all":[1,2]}}
+{"tag":"NULL"}
+{"tag":"-NULL"}</pre>
+
+<h3>Spatial and viewport search</h3>
+
+<p>A viewport is expressed in JSON using longitude/latitude bounds:</p>
+
+<pre>{
+  "geo": {
+    "west": -16,
+    "south": 32,
+    "east": 40,
+    "north": 72
+  }
+}</pre>
+
+<p>The viewport uses spatial intersection. Longitude must be between −180 and 180,
+latitude between −90 and 90, and <code>south</code> must not exceed <code>north</code>.
+A WKT geometry value uses containment:</p>
+
+<pre>{"geo":"POLYGON((-16 32,40 32,40 72,-16 72,-16 32))"}</pre>
+
+<p>Use <code>geo:FIELD</code> to restrict the search to one geographic detail field.</p>
+
+<h3>Sorting</h3>
+
+<p>A leading <code>-</code> means descending and <code>+</code> means ascending. Multiple
+sort expressions can be supplied as a comma-separated value or JSON array.</p>
+
+<pre>{"sortby":"-modified,title"}
+{"sortby":["f:1160","title"]}
+{"t":"Places","sortby":"-f:Population"}</pre>
+
+<table class="query-reference">
+<thead><tr><th>Sort expression</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><code>id</code></td><td>Record ID</td></tr>
+<tr><td><code>title</code></td><td>Record title</td></tr>
+<tr><td><code>rt</code> or <code>type</code></td><td>Record type ID</td></tr>
+<tr><td><code>modified</code> or <code>m</code></td><td>Modification date</td></tr>
+<tr><td><code>added</code> or <code>a</code></td><td>Creation date</td></tr>
+<tr><td><code>url</code> or <code>u</code></td><td>URL</td></tr>
+<tr><td><code>popularity</code> or <code>p</code></td><td>Popularity</td></tr>
+<tr><td><code>rating</code> or <code>r</code></td><td>Current user’s bookmark rating</td></tr>
+<tr><td><code>f:FIELD</code></td><td>Typed detail value by field ID or name; numeric, date and enum fields use type-aware sorting.</td></tr>
+<tr><td><code>set</code> or <code>fixed</code></td><td>Order from the accompanying <code>ids</code> predicate.</td></tr>
+</tbody>
+</table>
+
+<h3>Filtering, pagination and expansion rules</h3>
+
+<p>The Records endpoint accepts the following principal request parameters:</p>
+
+<table class="query-reference">
+<thead><tr><th>Parameter</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>q</code>, <code>query</code></td><td>Plain-text or JSON record filter.</td></tr>
+<tr><td><code>ids</code></td><td>Request alias for <code>q=ids:&lt;CSV&gt;</code>.</td></tr>
+<tr><td><code>limit</code></td><td>Maximum records returned in the current page.</td></tr>
+<tr><td><code>offset</code></td><td>Zero-based result offset.</td></tr>
+<tr><td><code>fields</code></td><td>Fields requested from the later output/details stage.</td></tr>
+<tr><td><code>detail</code></td><td>Requested output detail level.</td></tr>
+<tr><td><code>rules</code></td><td>Expansion rules applied after the main result set. Historic name for expansion.</td></tr>
+</tbody>
+</table>
+
+<p class="important">Filtering and expansion are different operations. A nested link in
+<code>q</code> filters the top-level result. <code>rules</code> starts with that result and
+retrieves linked records for maps, attributes, graph data or other output. Expanded
+records do not provide reliable top-level pagination and count semantics.</p>
+
+<p>An expansion path may be written as an established JSON ruleset or as a compact path
+such as:</p>
+
+<pre>10:lt240:48:lt134:12</pre>
+
+<p>The compact path is converted to the corresponding JSON ruleset before execution.</p>
+
+<h3>Complete examples</h3>
+
+<h4>Public capital Places with population in a range</h4>
+
+<pre>{
+  "t": 12,
+  "f:133": 10443,
+  "f:1160": "1000000&lt;&gt;5000000",
+  "access": "public",
+  "sortby": "-f:1160"
+}</pre>
+
+<h4>People linked through Birth events to Places in a viewport</h4>
+
+<pre>{
+  "t": 10,
+  "lt:240": {
+    "t": 48,
+    "f:237": 6304,
+    "lt:134": {
+      "t": 12,
+      "geo": {
+        "west": -16,
+        "south": 32,
+        "east": 40,
+        "north": 72
+      }
+    }
+  },
+  "sortby": "title"
+}</pre>
+
+<h4>Current user’s tagged or bookmarked Persons</h4>
+
+<pre>{
+  "t": 10,
+  "any": [
+    {"usr": "current"},
+    {"tag": {"all": [1, 2]}}
+  ]
+}</pre>
+
+<h3>Common errors and limitations</h3>
+
+<ul>
+<li>Record types may use local IDs, singular names or plural names. Fields may use local IDs or names; enum values may use local term IDs, labels or codes.</li>
+<li>Field names containing spaces require JSON. Plain text supports unspaced field names such as <code>fGender</code>.</li>
+<li>Ambiguous partial record-type or field names are rejected and the error lists the matches.</li>
+<li>Do not repeat a key inside one JSON object; use an array of one-key predicates.</li>
+<li>Use JSON for complex nesting and logical groups.</li>
+<li><code>usr:current</code>, <code>ws:current</code>, rating sort and other current-user operations require authentication.</li>
+<li>A relationship-marker suffix such as <code>rt:245</code> is a detail type ID, not a relationship term ID.</li>
+<li>Use <code>r</code> or <code>related:TERM</code> to specify relationship types.</li>
+<li>Fulltext search follows MySQL/MariaDB fulltext indexing rules and is not equivalent to substring matching.</li>
+<li>Very deep linked paths may use the batched compatibility executor rather than one nested SQL expression.</li>
+<li>Viewport coordinates do not add new query syntax: they are the structured value of the existing <code>geo</code> predicate.</li>
+</ul>
+
+</div>
+</body>
+</html>
