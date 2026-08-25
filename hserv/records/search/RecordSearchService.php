@@ -28,6 +28,7 @@ use hserv\records\search\query\QueryBuilder;
 final class RecordSearchService
 {
     private const SQL_CHUNK_SIZE = 500;
+    private const MAX_PRECOMPUTED_CANDIDATES = 5000;
     private const MAX_QUERY_DEPTH = 20;
     private const RESOURCE_TO = array('lt','linked_to','linkedto');
     private const RESOURCE_FROM = array('lf','linked_from','linkedfrom');
@@ -56,6 +57,8 @@ final class RecordSearchService
     {
         $query = $this->builder->normalize($request->query);
         $context = $this->searchContext($request, $context);
+        $candidateCache = array();
+        $query = $this->resolveSelectiveAnyFields($query, $context, $candidateCache);
         if(empty($context['forceChunked']) && $this->builder->supportsSqlExecution($query)){
             $ids = $this->executor->executeIds($this->builder->buildIds($query, $context));
             $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
@@ -68,6 +71,90 @@ final class RecordSearchService
             $request->offset,
             $request->limit
         );
+    }
+
+    /**
+     * Resolve selective any-field predicates before composing the main query.
+     * Probes returning more than the threshold remain unchanged and use the
+     * normal inline SQL path.
+     */
+    private function resolveSelectiveAnyFields(array $group, array $context, array &$cache): array
+    {
+        $group = $this->normalizeGroup($group);
+        $result = array();
+        foreach($group as $predicate){
+            $key = (string)array_keys($predicate)[0];
+            $value = $predicate[$key];
+            list($base, $suffix) = $this->predicateParts($key);
+
+            if(($base === 'f' || $base === 'field') && $suffix === '' && !is_array($value)){
+                $cacheKey = gettype($value).':'.(string)$value;
+                if(!array_key_exists($cacheKey, $cache)){
+                    $probe = $this->builder->buildAnyFieldCandidates(
+                        $value,
+                        $context,
+                        self::MAX_PRECOMPUTED_CANDIDATES+1
+                    );
+                    $ids = $this->executor->executeIds($probe);
+                    $cache[$cacheKey] = count($ids)>self::MAX_PRECOMPUTED_CANDIDATES ? null : $ids;
+                }
+                if($cache[$cacheKey] !== null){
+                    $idsPredicate = array('ids'=>$cache[$cacheKey]);
+                    $result[] = strpos((string)$value, '@-') === 0
+                        ? array('not'=>array($idsPredicate))
+                        : $idsPredicate;
+                    continue;
+                }
+            }elseif(($base === 'f' || $base === 'field')
+                && ctype_digit($suffix) && intval($suffix)>0
+                && !is_array($value) && !$this->isFieldPresenceValue($value)){
+                $fieldId = intval($suffix);
+                $cacheKey = 'numeric:'.$fieldId.':'.gettype($value).':'.(string)$value;
+                if(!array_key_exists($cacheKey, $cache)){
+                    $probe = $this->builder->buildNumericFieldCandidates(
+                        $fieldId,
+                        $value,
+                        $context,
+                        self::MAX_PRECOMPUTED_CANDIDATES+1
+                    );
+                    if($probe === null){
+                        $cache[$cacheKey] = false;
+                    }else{
+                        $ids = $this->executor->executeIds($probe);
+                        $cache[$cacheKey] = count($ids)>self::MAX_PRECOMPUTED_CANDIDATES ? null : $ids;
+                    }
+                }
+                if(is_array($cache[$cacheKey])){
+                    $result[] = array('ids'=>$cache[$cacheKey]);
+                    continue;
+                }
+            }
+
+            if(in_array($base, array('all','any','not'), true) && is_array($value)){
+                $predicate[$key] = $this->resolveSelectiveAnyFields($value, $context, $cache);
+            }elseif($this->isNestedQueryPredicate($base, $value)){
+                $predicate[$key] = $this->resolveSelectiveAnyFields($value, $context, $cache);
+            }
+            $result[] = $predicate;
+        }
+        return $result;
+    }
+
+    /** NULL, -NULL, and empty values retain their established field semantics. */
+    private function isFieldPresenceValue($value): bool
+    {
+        $text = strtoupper(trim((string)$value));
+        return $text === '' || $text === 'NULL' || $text === '-NULL';
+    }
+
+    /** Whether a link/relationship value is a nested query rather than an ID list. */
+    private function isNestedQueryPredicate(string $base, $value): bool
+    {
+        if(!is_array($value) || $this->isIdList($value)){ return false; }
+        return in_array($base, array(
+            'lt','linked_to','linkedto','lf','linked_from','linkedfrom',
+            'rt','related_to','relatedto','rf','related_from','relatedfrom','related'
+        ), true);
     }
 
     /** Evaluate a JSON query group as ordered set algebra. */

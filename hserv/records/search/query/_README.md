@@ -21,6 +21,24 @@ The classes in this directory only interpret queries and compose SQL. They do no
 
 Field metadata and term descendants are resolved internally by `FieldPredicateCompiler` from the existing Heurist definition tables. This information is cached for the lifetime of the compiler instance. The implementation does not depend on legacy query-composer functions.
 
+An unsuffixed `f` (any-field search) is compiled as an indexed candidate-ID
+`UNION ALL` over ordinary details, enum details, and linked-record titles. The
+outer record query applies the resulting ID set. This deliberately avoids
+correlated `EXISTS` branches, allowing MariaDB to start full-text searches from
+their indexes. `@-` uses `NOT IN` around the complete positive candidate set.
+
+Before composing the main SQL, `RecordSearchService` probes an any-field
+candidate query with a limit of 5,001. Results of at most 5,000 IDs replace the
+predicate with the existing IDs predicate; larger results retain the normal
+inline SQL. Identical probes are cached for the duration of one search request.
+This bounded optimization uses neither temporary tables nor a new public query
+predicate.
+
+The same bounded probe is applied to suffixed `integer` and `float` field
+predicates. Numeric probes use the existing comparison/range compiler and are
+replaced with IDs only when they return at most 5,000 candidates. NULL,
+presence, date, enum, resource, and text-field predicates are unaffected.
+
 All user values are added through `SqlBuildContext` as prepared-statement parameters. SQL identifiers and operators are selected only from validated query keywords, field metadata, and internal allowlists.
 
 ## Interaction
@@ -68,4 +86,3 @@ QueryExecutor
 - `RecordDetailsByPath` retrieves details after the record search is complete.
 - Record exporters format already retrieved records and must not implement query parsing.
 - Legacy `composeSql.php`, `composeSqlOld.php`, and `recordSearch.php` remain outside this directory and are not modified by this refactoring.
-

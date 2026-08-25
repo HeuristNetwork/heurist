@@ -70,6 +70,41 @@ final class QueryBuilder
         return new CompiledQuery('SELECT COUNT(DISTINCT r.rec_ID) FROM Records r WHERE '.implode(' AND ',$where),$state->types(),$state->values(),$normalized);
     }
 
+    /** Build a bounded, index-driven probe for an unsuffixed any-field predicate. */
+    public function buildAnyFieldCandidates($value,array $context=array(),int $limit=5001): CompiledQuery
+    {
+        $limit=max(1,$limit);
+        $state=new SqlBuildContext($context);
+        $source=$this->fields->anyFieldCandidateSource($value,$state);
+        $state->bind($limit,'i');
+        return new CompiledQuery(
+            'SELECT DISTINCT candidates.rec_ID FROM ('.$source.') candidates LIMIT ?',
+            $state->types(),
+            $state->values(),
+            array(array('f'=>$value))
+        );
+    }
+
+    /** Build a bounded candidate probe for an integer or float detail field. */
+    public function buildNumericFieldCandidates(
+        int $fieldId,
+        $value,
+        array $context=array(),
+        int $limit=5001
+    ): ?CompiledQuery {
+        if(!$this->fields->isNumericField($fieldId)){return null;}
+        $limit=max(1,$limit);
+        $state=new SqlBuildContext($context);
+        $source=$this->fields->numericFieldCandidateSource($fieldId,$value,$state);
+        $state->bind($limit,'i');
+        return new CompiledQuery(
+            'SELECT DISTINCT candidates.rec_ID FROM ('.$source.') candidates LIMIT ?',
+            $state->types(),
+            $state->values(),
+            array(array('f:'.$fieldId=>$value))
+        );
+    }
+
     public function buildIdSet($query,array $context=array()): CompiledQuery
     {
         $normalized=$this->normalize($query);

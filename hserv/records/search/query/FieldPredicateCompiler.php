@@ -111,7 +111,19 @@ final class FieldPredicateCompiler
         if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
         $text = (string)$value;
         $exclude = strpos($text, '@-') === 0;
-        if($exclude){ $text = '@'.substr($text, 2); }
+        $candidates = $this->anyFieldCandidateSource($text, $state);
+        return $recordAlias.'.rec_ID '.($exclude ? 'NOT IN' : 'IN').' ('.$candidates.')';
+    }
+
+    /**
+     * Build the positive, index-driven candidate-ID UNION for an any-field value.
+     * For @- the caller applies negation to this positive result as a whole.
+     */
+    public function anyFieldCandidateSource($value, SqlBuildContext $state): string
+    {
+        if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
+        $text = (string)$value;
+        if(strpos($text, '@-') === 0){ $text = '@'.substr($text, 2); }
         $queries = array();
         $isDbOwner = !empty(($state['context'] ?? array())['isDbOwner']);
         $detailSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records asrc ON asrc.rec_ID=ad.dtl_RecID ';
@@ -143,8 +155,7 @@ final class FieldPredicateCompiler
             .'WHERE al.rl_RelationID IS NULL AND al.rl_DetailTypeID>0 '
             .'AND '.$linkedTitleCondition.$this->detailVisibilityCondition('ald', 'lsrc', $state);
 
-        $candidates = 'SELECT anyfield.rec_ID FROM ('.implode(' UNION ALL ', $queries).') anyfield';
-        return $recordAlias.'.rec_ID '.($exclude ? 'NOT IN' : 'IN').' ('.$candidates.')';
+        return 'SELECT anyfield.rec_ID FROM ('.implode(' UNION ALL ', $queries).') anyfield';
     }
 
     /** Apply defRecStructure and per-detail visibility for non-owner searches. */
@@ -433,6 +444,35 @@ final class FieldPredicateCompiler
         if($operator === 'NOT LIKE'){ $operator = '<>'; }
         $state->bind((float)$cleanValue, 'd');
         return $column.' '.$operator.' ?';
+    }
+
+    /** Build an index-driven candidate query for one integer or float field. */
+    public function numericFieldCandidateSource(
+        int $fieldId,
+        $value,
+        SqlBuildContext $state
+    ): string {
+        $fieldType = $this->fieldType($fieldId);
+        if(!in_array($fieldType, array('integer','float'), true)){
+            throw new QueryValidationException('Field '.$fieldId.' is not numeric');
+        }
+        $state->bind($fieldId, 'i');
+        $isDbOwner = !empty(($state['context'] ?? array())['isDbOwner']);
+        $sourceJoin = $isDbOwner ? '' : ' INNER JOIN Records nsrc ON nsrc.rec_ID=nd.dtl_RecID';
+        $condition = $this->numericCondition(
+            'CAST(nd.dtl_Value AS DECIMAL(65,20))',
+            $value,
+            $state
+        );
+        return 'SELECT nd.dtl_RecID AS rec_ID FROM recDetails nd'.$sourceJoin
+            .' WHERE nd.dtl_DetailTypeID=? AND '.$condition
+            .$this->detailVisibilityCondition('nd', 'nsrc', $state);
+    }
+
+    /** Whether the detail definition is an integer or float field. */
+    public function isNumericField(int $fieldId): bool
+    {
+        return in_array($this->fieldType($fieldId), array('integer','float'), true);
     }
 
     /** Parse both low<>high and leading <>low/high or ><low/high forms. */
