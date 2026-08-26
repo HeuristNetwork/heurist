@@ -47,6 +47,8 @@
 function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on_change = null ){
 
     const _className = 'editCMS_WidgetCfg';
+    
+    let _heuristMapSettings = {};
 
     const _def_labels = {
         heurist_SearchInput: {
@@ -251,7 +253,19 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
             $dlg.find('input[name="widget_id"]').val(opts.widget_id);    
 
-            if(widget_name=='heurist_Map'){
+            
+            if(widget_name=='heurist_Map2'){
+                
+            // New heurist-map configuration editor. mapViewer is loaded lazily.
+                $dlg.find('#btn_heurist_map_config')
+                    .button()
+                    .on( { click: function(){
+                        _openHeuristMapConfiguration();
+                    }
+                    });
+                
+                
+            }else if(widget_name=='heurist_Map'){
                 //special behaviour for map widget
                 if(!opts.layout_params){
                     opts.layout_params = {};
@@ -1383,6 +1397,38 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         }
     }
     
+    /**
+     * Open the standalone heurist-map configuration editor without displaying a map.
+     *
+     * mapViewer runs in viewerMode "configuration", therefore heurist-map exposes only
+     * MapConfigurationDialog and does not initialise MapApplication/Leaflet. The iframe
+     * host temporarily fills the viewport so the dialog rendered inside the same-origin
+     * iframe has a normal modal viewport; the map itself is never shown.
+     *
+     * @returns {void}
+     */
+    function _openHeuristMapConfiguration(){
+
+        let opts = window.hWin.HEURIST4.util.isJSON(widget_cfg.options);
+        
+        let $button = $dlg.find('#btn_heurist_map_config');
+        $button.prop('disabled', true);
+
+        window.hWin.HEURIST4.ui.showMapConfigurationDialog({
+            mode: 'website',
+            value: opts.heuristMapSettings ?? {},
+            onSave: function(settings){                
+                _heuristMapSettings = settings;
+                on_change();
+            },
+            onError: function(error){
+                window.hWin.HEURIST4.msg.showMsgErr(error && error.message ? error.message : error);
+            }
+        }).finally(function(){
+            $button.prop('disabled', false);
+        });
+    }    
+    
    
     /**
      * Retrieves the current configuration values from the UI input fields for the widget.
@@ -1406,8 +1452,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         let widget_name = widget_cfg.appid;
 
         let opts = {};
+        
+        if(widget_name=='heurist_Map2'){
+            
+            opts.heuristMapSettings = _heuristMapSettings;
 
-        if(widget_name=='heurist_Map'){
+        }else if(widget_name=='heurist_Map'){
 
             let layout_params = {};//special option for leaflet mapping
             //parameters for controls

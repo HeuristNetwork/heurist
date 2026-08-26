@@ -100,6 +100,8 @@ function editCMS_SelectElement( callback ){
                 heurist_emailForm:{name:'Email Us Form', description:'#email_form'}, //Form to send email to addrees specified in home page as site owner email
                 heurist_mediaViewer:{name:'Media Viewer/xImage Gallery', description:'#mediaViewer'}, //Image gallery                  
                 heurist_Graph:{name:'Network graph (old)', description:'#network_graph'}, //Visualization for records links and relationships
+                
+                heurist_Map2:{name:'Map2 (exeprimental)', description:'#map_2'},
           
     };
 
