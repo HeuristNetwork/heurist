@@ -512,7 +512,7 @@ $.widget( "heurist.search", {
             label: 'New',
             title: 'Run this filter with the new search engine'
         })
-        .css({'min-height':'30px','min-width':'42px','margin-left':'3px'})
+        .css({'min-height':'18px','min-width':'18px','margin-left':'3px'})
         .appendTo(this.div_search_as_user)
         .addClass(this.options.button_class)
         .button({showLabel:true});
