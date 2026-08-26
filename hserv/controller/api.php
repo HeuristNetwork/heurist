@@ -326,7 +326,7 @@ if($is_record_query){
     }
     if($http_method === 'POST' && is_array($json)
         && !isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
-        $contractKeys = array('rules','limit','offset','fields','detail');
+        $contractKeys = array('rules','limit','offset','fields','detail','resolveDetails');
         $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
         if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
             $req_params['query'] = $json;
@@ -341,13 +341,6 @@ if($is_record_query){
             unset($req_params['fields']);
         }
     }
-    $method = 'search';
-}
-
-// POST /records/details is also a read-only operation.
-if($resource === 'records'
-    && @$requestUri[4] === 'details'
-    && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'){
     $method = 'search';
 }
 
@@ -603,13 +596,11 @@ else
                 $req_params['fields']['source'] = 'mirador';
             }
         }
-    }elseif(@$requestUri[4]!=null && !isset($definitionResources[$requestedResource])
-        && !($requestedResource === 'records' && $requestUri[4] === 'details')){
+    }elseif(@$requestUri[4]!=null && !isset($definitionResources[$requestedResource])){
       $req_params['recID'] = $requestUri[4];
     }
 
     if($req_params['entity']=='Records'){
-        $isRecordDetailsRequest = (@$requestUri[4] === 'details');
         $isRecordQueryRequest = !isset($requestUri[4]);
 
         if($isRecordQueryRequest){
@@ -628,10 +619,6 @@ else
             exit;
         }
 
-        if($isRecordDetailsRequest && ($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'){
-            exitWithError('Method not allowed', 405, array('Allow' => 'POST'));
-        }
-
         if($method=='search'){
             // Public records API always returns the stable JSON representation.
             // Export-specific options remain available to direct/internal
@@ -639,28 +626,13 @@ else
             $req_params['format'] = 'json';
             unset($req_params['fmt'], $req_params['extended'], $req_params['depth'], $req_params['linkmode']);
 
-            if($isRecordDetailsRequest){
-                // The generic JSON-body handler uses "fields" for entity writes.
-                // Restore the explicit records/details body fields here.
-                if(is_array($json)){
-                    if(array_key_exists('ids', $json)){
-                        $req_params['ids'] = $json['ids'];
-                    }
-                    if(array_key_exists('fields', $json)){
-                        $req_params['fields'] = $json['fields'];
-                    }
-                }
-            }
-
             $apiResponseContext = array(
                 'entity' => 'records',
-                'mode' => $isRecordDetailsRequest
-                    ? 'details'
-                    : (isset($requestUri[4]) && $requestUri[4] !== '' ? 'item' : 'collection')
+                'mode' => isset($requestUri[4]) && $requestUri[4] !== '' ? 'item' : 'collection'
             );
             include_once '../../hserv/controller/record_output.php';
         }else{
-            exitWithError('Method not allowed', 405, array('Allow' => $isRecordDetailsRequest ? 'POST' : 'GET'));
+            exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
         }
     }else{
         include_once '../../hserv/controller/entityScrud.php';

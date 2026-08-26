@@ -15,11 +15,8 @@
 */
 namespace hserv\records\export;
 use hserv\records\export\ExportRecords;
-use hserv\records\search\RecordDetailsByPath;
 use hserv\structure\ConceptCode;
 use hserv\utilities\Temporal;
-
-require_once dirname(__FILE__).'/../search/RecordDetailsByPath.php';
 
 /**
 * Class ExportRecordsGEOJSON
@@ -52,10 +49,6 @@ class ExportRecordsGEOJSON extends ExportRecords {
     private $find_geo_by_pointer_dty = null;
     /** @var array|null Legacy geo-field selectors. Can include direct dty IDs or pre-built {id,q} linked queries. */
     private $find_by_geofields = null;
-    /** @var array|null Canonical Heurist field paths resolved by RecordDetailsByPath. */
-    private $find_by_geofield_paths = null;
-    /** @var RecordDetailsByPath|null Provider for canonical direct/linked field paths. */
-    private $geo_fields_provider = null;
     /** @var bool If true, all geo-fields are searched for geometry; if false, only those specified or linked via `find_geo_by_pointer_rty` are used. */
     private $search_all_geofields = true;
 
@@ -128,8 +121,6 @@ protected function _outputPrepare($data, $params){
 
         $this->find_geo_by_pointer_dty = null;
         $this->find_by_geofields = null;
-        $this->find_by_geofield_paths = null;
-        $this->geo_fields_provider = null;
 
         $this->find_geo_by_pointer_rty =  @$params['geofields'] ||
                ((@$params['suppress_linked_places']!=1)
@@ -158,7 +149,6 @@ protected function _outputPrepare($data, $params){
                 $_geofields = @$params['geofields'];
                 $this->find_geo_by_pointer_dty = array();
                 $this->find_by_geofields = array();
-                $this->find_by_geofield_paths = array();
 
                 if($_geofields){
                     if(is_String($_geofields)){
@@ -179,11 +169,6 @@ protected function _outputPrepare($data, $params){
                                     array_push($this->find_by_geofields,$code);//with query to linked record
                                 }
 
-                            }elseif(strpos((string)$code, ':') !== false){
-                                // Canonical Heurist field path, for example
-                                // 10:28 or 10:lt134:12:28. RecordDetailsByPath owns
-                                // parsing, validation and linked-record traversal.
-                                $this->find_by_geofield_paths[] = trim((string)$code);
                             }else{
                                 // Legacy detail type id / concept code. Preserve the
                                 // existing pointer-to-place behaviour unchanged.
@@ -203,12 +188,6 @@ protected function _outputPrepare($data, $params){
                 if(isEmptyArray($this->find_by_geofields)){
                     $this->find_by_geofields = null;
                 }
-                if(isEmptyArray($this->find_by_geofield_paths)){
-                    $this->find_by_geofield_paths = null;
-                }else{
-                    $this->geo_fields_provider = new RecordDetailsByPath($this->system);
-                }
-
             }
         }
 
@@ -505,8 +484,8 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                     $val = $value['id'];
                 }elseif(@$value['geo']){
 
-                    if(($this->find_by_geofields==null && $this->find_by_geofield_paths==null)
-                        || ($this->find_by_geofields!=null && in_array($dty_ID, $this->find_by_geofields))){
+                    if($this->find_by_geofields==null
+                        || in_array($dty_ID, $this->find_by_geofields)){
 
                         $wkt = $value['geo']['wkt'];
 
@@ -600,62 +579,24 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         unset($res['properties']['details']);
     }
 
-    if(!isEmptyArray($this->find_by_geofields) || !isEmptyArray($this->find_by_geofield_paths)){
-        // Explicit geo fields were requested. Preserve the legacy {id,q} format,
-        // and resolve canonical field paths through RecordDetailsByPath.
-        if(!isEmptyArray($this->find_by_geofields)){
-            foreach ($this->find_by_geofields as $idx => $code){
-                if(is_array($code) && @$code['id'] && @$code['q']){
-                    //@todo group details by same queries
-                    $geodetails = recordSearchLinkedDetails($this->system, $record['rec_ID'], $code['id'], $code['q']);
-                    foreach ($geodetails as $dty_ID=>$field_details) {
-                        foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
-                            if(@$value['geo']){
-                                $wkt = $value['geo']['wkt'];
-                                $json = self::_getJsonFromWkt($wkt, $simplify);
-                                if($json){
-                                   $geovalues[] = $json;
-                                   //$geovalues_dty[] = $value['geo']['pointerDtyID'];
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if(!isEmptyArray($this->find_by_geofield_paths) && $this->geo_fields_provider){
-            $detailsResult = $this->geo_fields_provider->fetch(
-                array($record['rec_ID']),
-                $this->find_by_geofield_paths
-            );
-
-            $fieldDtyIds = array();
-            foreach(($detailsResult['fields'] ?? array()) as $fieldDefinition){
-                if(@$fieldDefinition['code'] !== null && @$fieldDefinition['dty_ID'] !== null){
-                    $fieldDtyIds[(string)$fieldDefinition['code']] = intval($fieldDefinition['dty_ID']);
-                }
-            }
-
-            foreach(($detailsResult['records'] ?? array()) as $pathRecord){
-                if(intval(@$pathRecord['rec_ID']) !== intval($record['rec_ID'])){
-                    continue;
-                }
-                foreach(($pathRecord['details'] ?? array()) as $fieldPath=>$fieldDetails){
-                    foreach($fieldDetails as $dtl_ID=>$value){
+    if(!isEmptyArray($this->find_by_geofields)){
+        // Explicit geo fields were requested in the legacy {id,q} format.
+        foreach ($this->find_by_geofields as $idx => $code){
+            if(is_array($code) && @$code['id'] && @$code['q']){
+                //@todo group details by same queries
+                $geodetails = recordSearchLinkedDetails($this->system, $record['rec_ID'], $code['id'], $code['q']);
+                foreach ($geodetails as $dty_ID=>$field_details) {
+                    foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
                         if(@$value['geo']){
                             $wkt = $value['geo']['wkt'];
                             $json = self::_getJsonFromWkt($wkt, $simplify);
                             if($json){
-                                $geovalues[] = $json;
-                                if(isset($fieldDtyIds[$fieldPath])){
-                                    $geovalues_dty[] = $fieldDtyIds[$fieldPath];
-                                }
+                               $geovalues[] = $json;
+                               //$geovalues_dty[] = $value['geo']['pointerDtyID'];
                             }
                         }
                     }
                 }
-                break;
             }
         }
 
