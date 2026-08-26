@@ -14,6 +14,9 @@
  * @since       7.0
  */
 
+/** Maximum current-result set represented as an explicit ids: query. */
+const MAP_VIEWER_IDS_QUERY_LIMIT = 5000;
+
 /**
  * @widget heurist.mapViewer
  * @description Same-origin iframe wrapper for the standalone heurist-map app.
@@ -41,11 +44,12 @@ $.widget('heurist.mapViewer', {
         mapDocument: null,
 
         query: null,
-        recordset: null,
+        recordset: null, // Compatibility input only; immediately converted and discarded.
         selection: null,
 
         eventbased: true,
         search_realm: null,
+        // LEGACY/UNUSED. Retained only so existing website configurations still load.
         current_search_filter: null,
 
         currentResultsLayer: {
@@ -78,6 +82,16 @@ $.widget('heurist.mapViewer', {
         this._mapBootstrap = null;
         this._mapEventHandlers = {};
         this._events = null;
+
+        // Keep HRecordSet strictly at the wrapper boundary. The map runtime and
+        // the rest of this widget work only with a query or plain record IDs.
+        if (this.options.recordset) {
+            var initialRecordset = this.options.recordset;
+            this.options.recordset = null;
+            if (!this.options.query) {
+                this.options.query = this._recordsetToQuery(initialRecordset);
+            }
+        }
 
         this.element
             .addClass('heurist-map-viewer')
@@ -129,8 +143,7 @@ $.widget('heurist.mapViewer', {
 
         $(this.document).on(this._events, function(event, data) {
             if (event.type === hapi.Event.ON_CREDENTIALS) {
-                if (that.options.recordset != null && !hapi.has_access()) {
-                    that.options.recordset = null;
+                if (that.options.query != null && !hapi.has_access()) {
                     that.options.query = null;
                     that.options.selection = null;
                     that.setQuery(null);
@@ -146,30 +159,12 @@ $.widget('heurist.mapViewer', {
                 }
 
                 var recordset = data && data.recordset ? data.recordset : null;
-
-                if (that.options.current_search_filter && recordset) {
-                    var queryUtil = window.hWin.HEURIST4 &&
-                        window.hWin.HEURIST4.query;
-                    var util = window.hWin.HEURIST4 &&
-                        window.hWin.HEURIST4.util;
-
-                    if (queryUtil && typeof queryUtil.mergeHeuristQuery === 'function') {
-                        var subQuery = queryUtil.mergeHeuristQuery(
-                            recordset.getIds(2000),
-                            that.options.current_search_filter
-                        );
-                        that.setQuery(subQuery);
-                    } else {
-                        that.setRecordSet(recordset);
-                    }
-                } else {
-                    that.setRecordSet(recordset);
-                }
+                var ids = that._recordsetIds(recordset);
+                that.setQuery(that._currentResultsQuery(ids, data && data.query));
 
             } else if (event.type === hapi.Event.ON_REC_SEARCHSTART) {
                 if (!that._isSameRealm(data)) return;
 
-                that.options.recordset = null;
                 that.options.query = null;
                 that.options.selection = null;
                 that.clearSelection();
@@ -481,7 +476,7 @@ $.widget('heurist.mapViewer', {
     /** Apply initial document, current result set, and host selection. */
     _initializeContent: function() {
         var that = this;
-        var query = this.options.query || this._recordsetToQuery(this.options.recordset);
+        var query = this.options.query;
         var operation;
 
         if (this.options.mapDocument != null) {
@@ -685,7 +680,6 @@ $.widget('heurist.mapViewer', {
     /** Set or replace the stable current-results query layer. */
     setQuery: function(query, options) {
         this.options.query = query || null;
-        this.options.recordset = null;
         return this._enqueueOrRun('_setQueryNow', [query, options || {}]);
     },
 
@@ -731,11 +725,9 @@ $.widget('heurist.mapViewer', {
 
     /** Convert and apply an HRecordSet without leaking it into heurist-map. */
     setRecordSet: function(recordset, options) {
-        this.options.recordset = recordset || null;
-        this.options.query = null;
-        return this._enqueueOrRun('_setQueryNow', [
-            this._recordsetToQuery(recordset), options || {}
-        ]);
+        var query = this._recordsetToQuery(recordset);
+        this.options.recordset = null;
+        return this.setQuery(query, options || {});
     },
 
     /** Synchronize a host-side record selection to the current-results layer. */
@@ -893,7 +885,7 @@ $.widget('heurist.mapViewer', {
         return chain;
     },
 
-    /** Recover an original query where possible, otherwise create ids: query. */
+    /** Convert a compatibility HRecordSet to the current-results query contract. */
     _recordsetToQuery: function(recordset) {
         if (!recordset) return null;
 
@@ -902,6 +894,7 @@ $.widget('heurist.mapViewer', {
             return this._normalizeQuery(recordset.q);
         }
 
+        var ids = this._recordsetIds(recordset);
         var request = null;
         var candidates = ['getRequest', 'getRequestParams', 'getSearchRequest'];
         for (var index = 0; index < candidates.length && !request; index++) {
@@ -916,16 +909,29 @@ $.widget('heurist.mapViewer', {
 
         request = request || recordset.request || recordset._request ||
             recordset.searchRequest || null;
-        if (request && request.q != null) return this._normalizeQuery(request.q);
+        var query = request && request.query !== undefined
+            ? request.query : request && request.q;
+        return this._currentResultsQuery(ids, query);
+    },
 
-        if (typeof recordset.getIds === 'function') {
-            var ids = recordset.getIds();
-            if (Array.isArray(ids) && ids.length) {
-                return 'ids:' + this._normalizeRecordIds(ids).join(',');
-            }
+    /** Extract the ordered IDs at the only boundary where HRecordSet is accepted. */
+    _recordsetIds: function(recordset) {
+        if (!recordset) return [];
+        if (Array.isArray(recordset)) return this._normalizeRecordIds(recordset);
+        if (typeof recordset.getOrder === 'function') {
+            return this._normalizeRecordIds(recordset.getOrder());
         }
+        return [];
+    },
 
-        return null;
+    /** Prefer compact explicit IDs; reuse the executed query for large results. */
+    _currentResultsQuery: function(recordIds, executedQuery) {
+        var ids = this._normalizeRecordIds(recordIds);
+        if (!ids.length) return null;
+        if (ids.length <= MAP_VIEWER_IDS_QUERY_LIMIT) {
+            return 'ids:' + ids.join(',');
+        }
+        return this._normalizeQuery(executedQuery) || 'ids:' + ids.join(',');
     },
 
     _normalizeQuery: function(query) {

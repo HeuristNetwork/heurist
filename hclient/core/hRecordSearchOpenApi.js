@@ -28,6 +28,10 @@ function HRecordSearchOpenApi() {
         const eventDocument = window.hWin.HEURIST4.util.isFunction(callback) ? null : callback;
         const queryId = request.id || window.hWin.HEURIST4.util.random();
         request.id = queryId;
+        const originalRequest = window.hWin.HEURIST4.util.cloneJSON(request);
+        const payload = buildPayload(request);
+        const currentQuery = payload.query === undefined
+            ? null : window.hWin.HEURIST4.util.cloneJSON(payload.query);
 
         if(!window.hWin.HEURIST4.util.isFunction(callback)){
             if(eventDocument && !request.increment){
@@ -37,19 +41,29 @@ function HRecordSearchOpenApi() {
                 let recordset = null;
                 if(response.status === window.hWin.ResponseStatus.OK){
                     recordset = new HRecordSet(response.data);
+                    recordset.setRequest(originalRequest);
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
+                    recordset = new HRecordSet({records: [], reccount: 0});
+                    recordset.setRequest(originalRequest);
+                }
+                if(window.hWin.HEURIST4.util.isempty(originalRequest.search_realm)){
+                    window.hWin.HAPI4.currentRecordset = recordset;
                 }
                 if(eventDocument){
                     eventDocument.trigger(
                         window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH,
-                        {resultset: recordset}
+                        {
+                            search_realm: originalRequest.search_realm,
+                            recordset: recordset,
+                            request: originalRequest,
+                            query: currentQuery
+                        }
                     );
                 }
             };
         }
 
-        const payload = buildPayload(request);
         const firstOffset = payload.offset;
         const requestedLimit = Math.min(
             MAX_RESULT_IDS,
