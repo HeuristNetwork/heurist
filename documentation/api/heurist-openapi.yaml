@@ -217,9 +217,10 @@ paths:
       - Records
       operationId: searchRecords
       summary: Search records
-      description: Anonymous requests return only publicly visible records. The response keeps the established records
-        array and record detail structure, and adds metadata and pagination. A missing or inaccessible record returns
-        an empty records array.
+      description: >-
+        Anonymous requests return only publicly visible records. By default each record is an envelope containing
+        rec_ID, rec_RecTypeID and rec_Title. Use fields to add headers or native/linked details, detail=ids for the
+        IDs-only DTO, or detail=graph with rules for explicit graph output.
       security:
       - {}
       - bearerAuth: []
@@ -247,23 +248,78 @@ paths:
         in: query
         schema:
           type: string
-        description: Comma-separated record header fields and/or numeric detail type IDs. rec_ID and rec_RecTypeID
-          are always included in normal object mode. When omitted, rec_Title and all details are also returned.
-          An explicit fields=rec_ID still returns record objects.
+        description: >-
+          Comma-separated header names, numeric detail type IDs, type-qualified direct fields such as 10:237, and
+          linked paths such as 10:lt240:48:237. rec_ID, rec_RecTypeID and rec_Title are mandatory in record mode.
+          When omitted, no detail values are returned.
       - name: detail
         in: query
         schema:
           type: string
           enum:
+          - records
           - ids
-        description: Set to ids for an ID-only records array. This mode takes precedence over and ignores fields.
+          - graph
+          default: records
+        description: ids returns the IDs-only DTO and ignores fields. graph adds explicit expansion graph data.
+      - name: resolveDetails
+        in: query
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Resolve type-specific metadata using standard rec_*, trm_* and ulf_* field names. Linked values retain
+          their path provenance whether this option is true or false.
+      - name: rules
+        in: query
+        schema:
+          type: string
+        description: JSON rules, plain rule query, or compact path used when detail=graph.
       responses:
         '200':
           description: Records response with metadata and pagination
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecordSearchResponse'
+                $ref: '#/components/schemas/RecordQueryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+      - Records
+      operationId: searchRecordsPost
+      summary: Search records using a structured request
+      description: >-
+        Executes the same record search as GET without URL-length restrictions. This is the preferred form for ID
+        arrays, JSON queries, selected native or linked fields, and expansion rules.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordSearchRequest'
+            example:
+              ids: [101, 102]
+              fields: ['10:237', '10:lt240:48:134']
+              resolveDetails: true
+      responses:
+        '200':
+          description: Record envelopes, IDs-only DTO, or explicit graph result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordQueryResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -315,49 +371,6 @@ paths:
       description: Anonymous requests return only publicly visible records. The response keeps the established records
         array and record detail structure, and adds metadata and pagination. A missing or inaccessible record returns
         an empty records array.
-  /{database}/records/details:
-    post:
-      tags:
-      - Records
-      operationId: getRecordDetailsByPath
-      summary: Retrieve selected direct or linked record details
-      description: >-
-        Retrieves selected detail values for an explicit set of source records. Field paths use the existing Heurist
-        short-code notation, for example `10:237` for a direct field or `10:lt240:48:237` for a field reached through
-        linked records. Missing or inaccessible source records are omitted. Record and field visibility follow the same
-        permissions as the normal records API. Values preserve the normal Heurist multi-value structure keyed by detail
-        row ID.
-      security:
-      - {}
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RecordDetailsByPathRequest'
-            example:
-              ids: [101, 102, 103]
-              fields:
-              - '10:237'
-              - '10:lt240:48:237'
-      responses:
-        '200':
-          description: Selected direct and linked record details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RecordDetailsByPathResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '405':
-          $ref: '#/components/responses/MethodNotAllowed'
-        '500':
-          $ref: '#/components/responses/ServerError'
   /{database}/rectypes:
     get:
       tags:
@@ -1875,8 +1888,13 @@ components:
       additionalProperties: false
     Record:
       type: object
-      description: A Heurist record object. By default it contains rec_ID, rec_RecTypeID, rec_Title and all visible
-        details. The fields parameter can reduce the returned properties.
+      description: >-
+        A Heurist record envelope. rec_ID, rec_RecTypeID and rec_Title are mandatory. The details object contains only
+        explicitly requested native or linked fields.
+      required:
+      - rec_ID
+      - rec_RecTypeID
+      - rec_Title
       properties:
         rec_ID:
           type: string
@@ -1898,16 +1916,143 @@ components:
       properties:
         records:
           type: array
-          description: Record objects, or record IDs when detail=ids.
+          description: Record envelopes in top-query order.
           items:
-            oneOf:
-            - $ref: '#/components/schemas/Record'
-            - type: integer
-            - type: string
+            $ref: '#/components/schemas/Record'
         meta:
           $ref: '#/components/schemas/RecordsMeta'
         pagination:
           $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    RecordQueryResponse:
+      description: Response selected by the requested detail mode.
+      oneOf:
+      - $ref: '#/components/schemas/RecordSearchResponse'
+      - $ref: '#/components/schemas/RecordIdsResponse'
+    RecordIdsResponse:
+      type: object
+      required:
+      - ids
+      - total
+      - offset
+      - limit
+      - resultToken
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+        total:
+          type: integer
+          minimum: 0
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+        resultToken:
+          oneOf:
+          - type: string
+          - type: 'null'
+        graph:
+          $ref: '#/components/schemas/RecordExpansionGraph'
+      additionalProperties: false
+    RecordExpansionGraph:
+      type: object
+      required:
+      - records
+      - edges
+      - paths
+      properties:
+        records:
+          type: array
+          items:
+            type: object
+            required: [rec_ID]
+            properties:
+              rec_ID:
+                type: integer
+              rec_RecTypeID:
+                type: integer
+              rec_Title:
+                type: string
+            additionalProperties: false
+        edges:
+          type: array
+          items:
+            type: object
+            required: [source, target]
+            properties:
+              source: {type: integer}
+              target: {type: integer}
+              field: {type: integer}
+              relationship: {type: integer}
+            additionalProperties: false
+        paths:
+          type: object
+          additionalProperties:
+            type: string
+      additionalProperties: false
+    RecordSearchRequest:
+      type: object
+      properties:
+        query:
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        q:
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+          description: Alias for query.
+        ids:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: integer
+              minimum: 1
+        fields:
+          oneOf:
+          - type: string
+          - type: array
+            uniqueItems: true
+            items:
+              type: string
+        detail:
+          type: string
+          enum: [records, ids, graph]
+          default: records
+        resolveDetails:
+          type: boolean
+          default: false
+        rules:
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items: {}
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100000
+          default: 1000
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
       additionalProperties: false
     RecordItemMeta:
       type: object
@@ -1946,114 +2091,6 @@ components:
         meta:
           $ref: '#/components/schemas/RecordItemMeta'
       additionalProperties: false
-    RecordDetailsByPathRequest:
-      type: object
-      required:
-      - ids
-      - fields
-      properties:
-        ids:
-          type: array
-          minItems: 1
-          maxItems: 5000
-          items:
-            type: integer
-            minimum: 1
-          description: Source record identifiers. Missing or inaccessible records are omitted from the response.
-        fields:
-          type: array
-          minItems: 1
-          maxItems: 100
-          uniqueItems: true
-          items:
-            type: string
-            minLength: 1
-          description: >-
-            Heurist detail paths. A numeric detail ID is also accepted for direct fields. Full paths may contain
-            `lt`, `lf`, `rt`, and `rf` link/relation segments, for example `10:lt240:48:237`.
-      additionalProperties: false
-    RecordDetailPathDefinition:
-      type: object
-      required:
-      - code
-      - dty_ID
-      - dty_Name
-      - dty_Type
-      properties:
-        code:
-          type: string
-        dty_ID:
-          type: string
-        dty_Name:
-          type: string
-        dty_Type:
-          type: string
-      additionalProperties: false
-    RecordDetailsByPathRecord:
-      type: object
-      required:
-      - rec_ID
-      - rec_RecTypeID
-      - details
-      properties:
-        rec_ID:
-          type: string
-        rec_RecTypeID:
-          type: string
-        details:
-          type: object
-          description: >-
-            Map keyed by the requested full field path. Each value is the normal Heurist detail-value map keyed by
-            detail row ID. Requested paths with no visible value may be absent.
-          additionalProperties:
-            type: object
-            additionalProperties: {}
-      additionalProperties: false
-    RecordDetailsByPathMeta:
-      type: object
-      required:
-      - database
-      - entity
-      - self
-      - fields
-      properties:
-        database:
-          type: string
-        entity:
-          type: string
-          const: records
-        self:
-          type: string
-          format: uri
-        fields:
-          type: object
-          required:
-          - headers
-          - details
-          properties:
-            headers:
-              type: array
-              items:
-                type: string
-            details:
-              type: array
-              items:
-                $ref: '#/components/schemas/RecordDetailPathDefinition'
-          additionalProperties: false
-      additionalProperties: false
-    RecordDetailsByPathResponse:
-      type: object
-      required:
-      - records
-      - meta
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/RecordDetailsByPathRecord'
-        meta:
-          $ref: '#/components/schemas/RecordDetailsByPathMeta'
-      additionalProperties: false
     SessionLoginRequest:
       type: object
       required:
@@ -2070,10 +2107,40 @@ components:
       additionalProperties: true
     RecordDetails:
       type: object
-      description: Map keyed by detail type ID; each value is a map keyed by detail row ID.
+      description: >-
+        Map keyed by the exact requested detail ID or dty_PathCode. Each field contains an ordered array of stored or
+        resolved values. Linked values always include path provenance.
       additionalProperties:
-        type: object
-        additionalProperties: {}
+        type: array
+        items:
+          $ref: '#/components/schemas/RecordDetailValue'
+    RecordDetailValue:
+      oneOf:
+      - type: string
+      - type: number
+      - type: boolean
+      - type: object
+        description: >-
+          A resolved or structured detail. `value` is the stored value. Type-specific properties use standard
+          rec_*, trm_* or ulf_* names. Linked values additionally contain `path`.
+        properties:
+          value: {}
+          path:
+            $ref: '#/components/schemas/RecordDetailPath'
+        additionalProperties: true
+    RecordDetailPath:
+      type: object
+      required:
+      - id
+      - recordIDs
+      properties:
+        id:
+          type: string
+        recordIDs:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
     RecordDetailField:
       type: object
       required:
@@ -2086,6 +2153,12 @@ components:
         dty_Name:
           type: string
         dty_Type:
+          type: string
+        dty_ConceptCode:
+          oneOf:
+          - type: string
+          - type: 'null'
+        dty_PathCode:
           type: string
       additionalProperties: false
     RecordFieldsMeta:
@@ -2117,6 +2190,11 @@ components:
           const: records
         fields:
           $ref: '#/components/schemas/RecordFieldsMeta'
+        paths:
+          type: object
+          description: Reusable linked traversal definitions keyed by the path ID stored beside linked values.
+          additionalProperties:
+            type: string
       additionalProperties: false
     MapSearchRequest:
       type: object
