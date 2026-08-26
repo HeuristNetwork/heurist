@@ -825,7 +825,7 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
                         delete res[propName];
                     }
                 }
-console.log('>>>', res);                
+
                 if(res['iconType']=='circle'){
                     res['radius'] = (res['iconSize']>0 ? Number(res['iconSize'])/2 : 4);
                 }else if(!res['iconType']){

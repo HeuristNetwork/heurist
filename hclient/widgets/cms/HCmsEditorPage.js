@@ -1480,8 +1480,14 @@ function(value){
           
         }else if(widget_type.indexOf('heurist_')===0 || widget_type.indexOf('HRecord')===0  || widget_type.indexOf('HMenu')===0){
             
+            
+            let _options = {};
+            if(widget_type=='heurist_Map2'){
+                _options = {runtimeMode:"website"};
+            }
+            
             //btn_visible_newrecord, btn_entity_filter, search_button_label, search_input_label
-            new_ele = {appid:widget_type, name:widget_name, css:{}, options:{}};
+            new_ele = {appid:widget_type, name:widget_name, css:{}, options:_options};
             
         }
         else if(widget_type=='group_2'){

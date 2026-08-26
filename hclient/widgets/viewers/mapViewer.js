@@ -28,6 +28,7 @@ $.widget('heurist.mapViewer', {
         presentationMode: 'iframe',
         viewerMode: 'map',              // map | configuration
         configurationMode: 'preferences',  // preferences | website | publish
+        runtimeMode: null,              // main | website | standalone; inferred from configurationMode when omitted
         configurationValue: null,
 
         database: window.hWin.HAPI4.database,
@@ -321,12 +322,22 @@ $.widget('heurist.mapViewer', {
         var hapi = window.hWin && window.hWin.HAPI4;
         var saved = this._getSavedMapSettings();
         var explicit = this._cloneMapSettings(this.options.heuristMapSettings);
+        var runtimeMode = this._getRuntimeMode();
 
         // Preferences are the base. Explicit widget settings override them once,
         // here in the host wrapper. heurist-map performs no second precedence merge.
-        var settings = this._mergeMapSettings(saved, explicit);
+        var settings = this._mergeMapSettings(
+            saved,
+            runtimeMode === 'website' ? this._websiteMapDefaults() : null,
+            explicit
+        );
         if (this.options.viewerMode === 'configuration' && this.options.configurationValue) {
             settings = this._mergeMapSettings(settings, this.options.configurationValue);
+        }
+        if (runtimeMode === 'website') {
+            // Website maps must never expose host-only configuration actions.
+            settings.options.ui.showOptions = false;
+            settings.options.ui.showPublish = false;
         }
 
         var database = this.options.database || (hapi ? hapi.database : null);
@@ -336,6 +347,7 @@ $.widget('heurist.mapViewer', {
             runtime: {
                 viewerMode: this.options.viewerMode === 'configuration' ? 'configuration' : 'map',
                 configurationMode: this.options.configurationMode || 'preferences',
+                runtimeMode: runtimeMode,
                 database: database,
                 apiBaseUrl: apiBaseUrl,
                 accessToken: this.options.accessToken || null,
@@ -346,6 +358,32 @@ $.widget('heurist.mapViewer', {
             },
             settings: settings,
             state: this.options.heuristMapState || null
+        };
+    },
+
+    /** Resolve host environment independently from the settings envelope format. */
+    _getRuntimeMode: function() {
+        var mode = String(this.options.runtimeMode || '').toLowerCase();
+        if (['main', 'website', 'standalone'].indexOf(mode) >= 0) return mode;
+        if (this.options.configurationMode === 'website') return 'website';
+        if (this.options.configurationMode === 'publish') return 'standalone';
+        return 'main';
+    },
+
+    /** Defaults applied after user preferences but before explicit website settings. */
+    _websiteMapDefaults: function() {
+        return {
+            options: {
+                ui: {
+                    showBaseMaps: false,
+                    showOptions: false,
+                    showPublish: false
+                },
+                nativeControls: {
+                    bookmark: false,
+                    print: false
+                }
+            }
         };
     },
 
@@ -1001,6 +1039,16 @@ $.widget('heurist.mapViewer', {
                     settled = true;
                     reject(new Error('Symbology editor returned invalid JSON'));
                     return;
+                }
+
+                // The mode-0 editor used by MapConfigurationDialog may omit an
+                // icon type when "Record type icon" is selected because that
+                // value is identical to its parent/default symbol. Website map
+                // configuration is a complete value rather than a persisted
+                // layer override, so retain the effective type explicitly.
+                if (!persist && !thematic && !Object.prototype.hasOwnProperty.call(parsed, 'iconType')) {
+                    parsed.iconType = parentSymbol && parentSymbol.iconType
+                        ? parentSymbol.iconType : 'rectype';
                 }
 
                 // The ordinary editor returns only the base symbol. Preserve any

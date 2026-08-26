@@ -1417,7 +1417,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         window.hWin.HEURIST4.ui.showMapConfigurationDialog({
             mode: 'website',
             value: opts.heuristMapSettings ?? {},
-            onSave: function(settings){                
+            onSave: function(settings){
                 _heuristMapSettings = settings;
                 on_change();
             },
