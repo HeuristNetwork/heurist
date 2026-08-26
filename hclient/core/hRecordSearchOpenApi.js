@@ -156,13 +156,13 @@ function HRecordSearchOpenApi() {
     function buildPayload(request){
         const payload = {
             query: request.query !== undefined ? request.query : request.q,
+            detail: 'ids',
             limit: Math.min(MAX_PAGE_SIZE, normalizePositiveInt(request.limit, MAX_PAGE_SIZE)),
             offset: Math.max(0, Number(request.offset !== undefined ? request.offset : request.o) || 0)
         };
         if(request.ids !== undefined){ payload.ids = request.ids; }
         if(request.rules !== undefined){ payload.rules = request.rules; }
         if(request.fields !== undefined){ payload.fields = request.fields; }
-        if(request.detail !== undefined){ payload.detail = request.detail; }
 
         // The public API expresses the bookmark domain in the query language.
         if(isBookmarkDomain(request.w)){

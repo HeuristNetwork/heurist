@@ -616,7 +616,9 @@ else
             // POST /records uses a read contract, not the generic entity-write
             // fields object. Restore its explicit query parameters from JSON.
             if(is_array($json)){
-                foreach(array('query','q','ids','fields','detail','rules','limit','offset') as $key){
+                foreach(array(
+                    'query','q','ids','fields','detail','resolveDetails','rules','limit','offset'
+                ) as $key){
                     if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
                 }
             }

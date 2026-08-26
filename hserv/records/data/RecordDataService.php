@@ -39,7 +39,12 @@ final class RecordDataService
     }
 
     /** Build standard record objects for the ordered top-query page. */
-    public function loadRecords(array $topIds, array $headers, array $nativeFields): array
+    public function loadRecords(
+        array $topIds,
+        array $headers,
+        array $nativeFields,
+        array $options = array()
+    ): array
     {
         $topIds = $this->ids($topIds);
         $records = array();
@@ -49,7 +54,7 @@ final class RecordDataService
         if(empty($records)){ return array(); }
 
         $columns = array_values(array_unique(array_merge(
-            array('rec_ID','rec_RecTypeID'), $headers
+            array('rec_ID','rec_RecTypeID','rec_Title'), $headers
         )));
         foreach(array_chunk($topIds, self::BATCH_SIZE) as $chunk){
             $sql = 'SELECT '.implode(',', $columns).' FROM Records WHERE rec_ID IN ('
@@ -72,7 +77,7 @@ final class RecordDataService
             return intval($field['fieldId']);
         }, $nativeFields)));
         if(!empty($fieldIds)){
-            $values = $this->loadFieldValues($topIds, $fieldIds);
+            $values = $this->loadFieldValues($topIds, $fieldIds, $options);
             foreach($nativeFields as $field){
                 foreach($topIds as $id){
                     foreach($values[$id][$field['fieldId']] ?? array() as $value){
@@ -85,14 +90,22 @@ final class RecordDataService
     }
 
     /** Attach values reached through a concrete expansion occurrence. */
-    public function attachLinkedValues(array &$records, array $field, array $occurrences, string $pathId): void
+    public function attachLinkedValues(
+        array &$records,
+        array $field,
+        array $occurrences,
+        string $pathId,
+        array $options = array()
+    ): void
     {
         $owners = array();
         foreach($occurrences as $occurrence){
             $chain = $occurrence['recordIds'] ?? array();
             if(!empty($chain)){ $owners[intval(end($chain))] = intval(end($chain)); }
         }
-        $values = $this->loadFieldValues(array_values($owners), array(intval($field['fieldId'])));
+        $values = $this->loadFieldValues(
+            array_values($owners), array(intval($field['fieldId'])), $options
+        );
         $recordIndex = array();
         foreach($records as $index=>$record){ $recordIndex[intval($record['rec_ID'])] = $index; }
 
@@ -189,7 +202,10 @@ final class RecordDataService
                 str_repeat('i', count($chunk)+count($fieldIds)).$extentCondition['types'],
                 $parameters
             ) as $row){
-                $value = $this->formatValue($row);
+                $value = $this->formatValue(
+                    $row,
+                    filter_var($options['resolveDetails'] ?? false, FILTER_VALIDATE_BOOLEAN)
+                );
                 if($value !== null && $value !== ''){
                     $values[intval($row[1])][intval($row[2])][] = $value;
                 }
@@ -254,30 +270,35 @@ final class RecordDataService
         return array_values($found);
     }
 
-    private function formatValue(array $row)
+    private function formatValue(array $row, bool $resolveDetails = false)
     {
         $raw = $row[3];
         $type = (string)$row[6];
         if($type === 'resource'){
+            if(!$resolveDetails){ return (string)$raw; }
             return array(
                 'value'=>(string)$raw,
-                'id'=>$row[7] === null ? null : (string)$row[7],
-                'type'=>$row[8] === null ? null : (string)$row[8],
-                'title'=>$row[9],
-                'hhash'=>$row[10]
+                'rec_ID'=>$row[7] === null ? null : (string)$row[7],
+                'rec_RecTypeID'=>$row[8] === null ? null : (string)$row[8],
+                'rec_Title'=>$row[9],
+                'rec_Hash'=>$row[10]
             );
         }
         if($type === 'enum' || $type === 'relationtype'){
+            if(!$resolveDetails){ return (string)$raw; }
             return array(
                 'value'=>(string)$raw,
-                'code'=>$row[12],
-                'label'=>$row[11],
-                'conceptID'=>$row[13] === null ? null : (string)$row[13].'-'.(string)$raw
+                'trm_ID'=>(string)$raw,
+                'trm_Label'=>$row[11],
+                'trm_Code'=>$row[12],
+                'trm_ConceptCode'=>$row[13] === null ? null : (string)$row[13]
             );
         }
         if($type === 'file'){
+            $fileId = $row[14] === null ? $row[5] : $row[14];
+            if(!$resolveDetails){ return $fileId === null ? null : (string)$fileId; }
             return array(
-                'value'=>$raw,
+                'value'=>$fileId === null ? $raw : (string)$fileId,
                 'file'=>array_filter(array(
                     'ulf_ID'=>$row[14] === null ? null : (string)$row[14],
                     'fullPath'=>$row[15],

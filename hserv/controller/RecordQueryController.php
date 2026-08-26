@@ -86,7 +86,8 @@ final class RecordQueryController
             'offset' => $params['offset'] ?? 0,
             'rules' => $params['rules'] ?? null,
             'fields' => $params['fields'] ?? null,
-            'detail' => $params['detail'] ?? null
+            'detail' => $params['detail'] ?? null,
+            'resolveDetails' => $params['resolveDetails'] ?? false
         ));
     }
 
@@ -102,7 +103,7 @@ final class RecordQueryController
             return $result->toArray();
         }
         $selection = $this->fieldSelector->parse($request->fields);
-        if($request->detail === 'ids' && empty($selection['headers']) && empty($selection['details'])){
+        if($request->detail === 'ids'){
             return $result->toArray();
         }
         return $this->recordsResponse($result, $request, $selection, $params);
@@ -121,7 +122,10 @@ final class RecordQueryController
         $linked = array_values(array_filter($selection['details'], static function($field){
             return $field['traversal'] !== null;
         }));
-        $records = $this->dataService->loadRecords($result->ids, $selection['headers'], $native);
+        $valueOptions = array('resolveDetails'=>$request->resolveDetails);
+        $records = $this->dataService->loadRecords(
+            $result->ids, $selection['headers'], $native, $valueOptions
+        );
         $paths = array();
         $linkedByTraversal = array();
         foreach($linked as $field){ $linkedByTraversal[$field['traversal']][] = $field; }
@@ -142,7 +146,7 @@ final class RecordQueryController
             $occurrences = $expansion->getOccurrences($terminalPathId);
             foreach($pathFields as $field){
                 $this->dataService->attachLinkedValues(
-                    $records, $field, $occurrences, $publicPathId
+                    $records, $field, $occurrences, $publicPathId, $valueOptions
                 );
             }
         }
@@ -152,7 +156,7 @@ final class RecordQueryController
             'entity'=>'records',
             'fields'=>array(
                 'headers'=>array_values(array_unique(array_merge(
-                    array('rec_ID','rec_RecTypeID'), $selection['headers']
+                    array('rec_ID','rec_RecTypeID','rec_Title'), $selection['headers']
                 ))),
                 'details'=>$this->dataService->loadFieldMetadata($selection['details'])
             )

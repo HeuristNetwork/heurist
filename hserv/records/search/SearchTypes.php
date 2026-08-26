@@ -41,6 +41,9 @@ final class SearchRequest
     /** @var string Requested output detail level. */
     public $detail;
 
+    /** @var bool Resolve type-specific detail metadata such as term labels. */
+    public $resolveDetails;
+
     /**
      * @param array $query Normalized JSON query.
      * @param array $options Request options.
@@ -52,8 +55,12 @@ final class SearchRequest
         $this->offset = max(0, intval($options['offset'] ?? 0));
         $this->rules = $options['rules'] ?? null;
         $this->fields = $options['fields'] ?? null;
-        $detail = strtolower(trim((string)($options['detail'] ?? 'ids')));
-        $this->detail = $detail === '' ? 'ids' : $detail;
+        $detail = strtolower(trim((string)($options['detail'] ?? 'records')));
+        $this->detail = $detail === '' ? 'records' : $detail;
+        $this->resolveDetails = filter_var(
+            $options['resolveDetails'] ?? false,
+            FILTER_VALIDATE_BOOLEAN
+        );
     }
 }
 
