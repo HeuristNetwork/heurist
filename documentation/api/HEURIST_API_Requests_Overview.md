@@ -31,7 +31,7 @@ The generic entity router maps HTTP methods to internal actions:
 | `PUT` / `PATCH` | `save` |
 | `DELETE` | `delete` |
 
-The public definition contract currently documents GET only. Normal record reads and IIIF presentation routes are GET-only, while `POST /records/details`, structured map/timeline searches, login/logout, and annotation writes use POST for their specific operations.
+The public definition contract currently documents GET only. Record collection searches support GET and POST, while structured map/timeline searches, login/logout, and annotation writes use POST for their specific operations.
 
 ## Definition API
 
@@ -78,17 +78,17 @@ The existing `details` projections remain available because the same `DbDefXXX` 
 
 Anonymous requests return only visible public records. Authenticated session or JWT requests may return additional records according to Heurist permissions.
 
-The initial public contract is JSON-only and documents `q`, `w`, `ids`, `detail`, `limit`, and `offset`. Existing alternative export formats remain implemented but are not yet part of the stable OpenAPI contract.
+The public collection contract is JSON-only and documents `query`/`q`, `ids`, `fields`, `detail`, `resolveDetails`, `rules`, `limit`, and `offset`. GET is convenient for compact searches; POST accepts the same search as a JSON body and avoids URL-length restrictions. Existing alternative export formats remain implemented but are not yet part of the stable OpenAPI contract.
 
 Existing visibility behavior is retained: an inaccessible record query may return HTTP 200 with an empty `records` array.
 
 ### Direct and linked record details
 
 ```text
-POST /api/<database>/records/details
+POST /api/<database>/records
 ```
 
-This read-only operation retrieves selected detail values for an explicit set of source records. It accepts the existing Heurist short field-path notation used by facet and thematic-map definitions. For example:
+The records collection operation retrieves selected detail values for either a query or an explicit set of source records. It accepts the existing Heurist short field-path notation used by facet and thematic-map definitions. For example:
 
 ```json
 {
@@ -97,11 +97,12 @@ This read-only operation retrieves selected detail values for an explicit set of
     "10:237",
     "10:lt240:48:237",
     "10:lt240:48:1160"
-  ]
+  ],
+  "resolveDetails": true
 }
 ```
 
-A direct path such as `10:237` reads detail type 237 from each visible source record. A linked path such as `10:lt240:48:237` follows the encoded link path and returns detail type 237 from the matching linked records. Fields sharing the same path are grouped internally so their detail IDs can be retrieved together.
+A direct path such as `10:237` reads detail type 237 from each visible source record. A linked path such as `10:lt240:48:237` follows the encoded link path and returns detail type 237 from the matching linked records. Fields sharing the same path are grouped internally so their linked IDs can be retrieved together.
 
 The operation is available anonymously for public records and also honours the current session or JWT. Missing or inaccessible source records are omitted. Linked records and individual fields are filtered through the same record and field visibility rules as normal record retrieval.
 
@@ -113,27 +114,36 @@ The response follows the Records API envelope but uses full field paths as keys 
     {
       "rec_ID": "101",
       "rec_RecTypeID": "10",
+      "rec_Title": "Source record",
       "details": {
-        "10:237": {"12345": "value"},
-        "10:lt240:48:237": {"22331": "10443"}
+        "10:237": ["value"],
+        "10:lt240:48:237": [{
+          "value": "9463",
+          "trm_ID": "9463",
+          "trm_Label": "Commercial",
+          "trm_Code": "Com",
+          "path": {"id": "1", "recordIDs": ["101", "204874"]}
+        }]
       }
     }
   ],
   "meta": {
     "database": "mydb",
     "entity": "records",
-    "self": "...",
     "fields": {
-      "headers": ["rec_ID", "rec_RecTypeID"],
+      "headers": ["rec_ID", "rec_RecTypeID", "rec_Title"],
       "details": [
-        {"code": "10:237", "dty_ID": "237", "dty_Name": "...", "dty_Type": "..."}
+        {"dty_ID": "237", "dty_PathCode": "10:237", "dty_Name": "...", "dty_Type": "..."},
+        {"dty_ID": "237", "dty_PathCode": "10:lt240:48:237", "dty_Name": "...", "dty_Type": "..."}
       ]
-    }
-  }
+    },
+    "paths": {"1": "10:lt240:48"}
+  },
+  "pagination": {"total": 1, "offset": 0, "limit": 1000, "self": "..."}
 }
 ```
 
-Each path value preserves the normal Heurist multi-value structure keyed by `dtl_ID`. Requested paths with no visible values may be absent. The endpoint does not use pagination because the caller supplies the source record IDs explicitly.
+Each requested field contains an ordered array of values. `resolveDetails=false` is the default and returns stored values without optional type-specific metadata. With `resolveDetails=true`, enum/relation values add `trm_*`, resource values add `rec_*`, and file values retain the existing `ulf_*` information. Every linked value contains `path`; requested fields with no visible value may be absent. Pagination always applies to the top-query records, including an explicit `ids` request.
 
 The legacy `record_search.php?a=links_details` controller action is unchanged and remains a compatibility mechanism for existing internal clients.
 
@@ -278,7 +288,7 @@ The `error` value is one of the existing `HEURIST_*` status values, such as `inv
   "meta": {
     "database": "mydb",
     "entity": "records",
-    "fields": {"headers": [], "details": []}
+    "fields": {"headers": ["rec_ID", "rec_RecTypeID", "rec_Title"], "details": []}
   },
   "pagination": {
     "total": 0,
@@ -290,11 +300,14 @@ The `error` value is one of the existing `HEURIST_*` status values, such as `inv
 }
 ```
 
-The `fields` parameter selects record header fields and numeric detail type IDs. If it
-is omitted, the default headers `rec_ID`, `rec_RecTypeID` and `rec_Title` are returned
-with all details. `detail=ids` overrides `fields` and returns IDs rather than record
-objects. Missing or inaccessible records return HTTP 200 with an empty `records` array.
+The `fields` parameter adds record headers, numeric detail type IDs, type-qualified direct fields and linked field paths. If it is omitted, only `rec_ID`, `rec_RecTypeID` and `rec_Title` are returned. `detail=ids` overrides `fields` and returns the separate IDs DTO rather than record objects:
+
+```json
+{"ids": [101, 102], "total": 2, "offset": 0, "limit": 1000, "resultToken": null}
+```
+
+Missing or inaccessible records return HTTP 200 with an empty result.
 
 ### Records field and item response rules
 
-For normal records object responses, `rec_ID` and `rec_RecTypeID` are always returned. When `fields` is omitted, `rec_Title` and all visible details are also returned. A single-record path is not paginated: its response contains `records` and `meta.self`, but no `pagination` section. Missing or inaccessible records return HTTP 200 with an empty `records` array.
+For collection record responses, `rec_ID`, `rec_RecTypeID` and `rec_Title` are always returned. Details are returned only when requested through `fields`. A single-record path retains its established non-paginated contract. Missing or inaccessible records return HTTP 200 with an empty `records` array.

@@ -1421,7 +1421,9 @@
                   "pm.test('records is an array', function () { pm.expect(body.records).to.be.an('array'); });",
                   "pm.test('meta and pagination exist', function () { pm.expect(body).to.have.property('meta'); pm.expect(body).to.have.property('pagination'); });",
                   "pm.test('default headers reported', function () { pm.expect(body.meta.fields.headers).to.eql(['rec_ID','rec_RecTypeID','rec_Title']); });",
-                  "pm.test('pagination keys exist', function () { pm.expect(body.pagination).to.include.keys('total','offset','limit','self','next'); });"
+                  "pm.test('default record is an envelope', function () { if (body.records.length) { pm.expect(body.records[0]).to.include.keys('rec_ID','rec_RecTypeID','rec_Title'); } });",
+                  "pm.test('no details requested', function () { pm.expect(body.meta.fields.details).to.eql([]); });",
+                  "pm.test('pagination keys exist', function () { pm.expect(body.pagination).to.include.keys('total','offset','limit'); });"
                 ]
               }
             }
@@ -1437,7 +1439,7 @@
           }
         },
         {
-          "name": "fields=rec_ID returns objects",
+          "name": "fields adds fields but preserves mandatory envelope",
           "event": [
             {
               "listen": "test",
@@ -1446,8 +1448,8 @@
                 "exec": [
                   "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
                   "const body = pm.response.json();",
-                  "pm.test('record remains an object', function () { pm.expect(body.records[0]).to.be.an('object'); pm.expect(body.records[0]).to.have.property('rec_ID'); });",
-                  "pm.test('only rec_ID is reported as header', function () { pm.expect(body.meta.fields.headers).to.eql(['rec_ID']); });"
+                  "pm.test('record remains an object', function () { pm.expect(body.records[0]).to.be.an('object'); });",
+                  "pm.test('mandatory headers remain', function () { pm.expect(body.meta.fields.headers).to.eql(['rec_ID','rec_RecTypeID','rec_Title']); });"
                 ]
               }
             }
@@ -1472,8 +1474,8 @@
                 "exec": [
                   "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
                   "const body = pm.response.json();",
-                  "pm.test('records contains IDs', function () { pm.expect(body.records).to.be.an('array'); pm.expect(['number','string']).to.include(typeof body.records[0]); });",
-                  "pm.test('field metadata is empty', function () { pm.expect(body.meta.fields.headers).to.eql([]); pm.expect(body.meta.fields.details).to.eql([]); });"
+                  "pm.test('IDs-only DTO is returned', function () { pm.expect(body.ids).to.be.an('array'); pm.expect(body).to.include.keys('total','offset','limit','resultToken'); });",
+                  "pm.test('record envelope is omitted', function () { pm.expect(body).not.to.have.property('records'); pm.expect(body).not.to.have.property('meta'); });"
                 ]
               }
             }
@@ -1540,7 +1542,7 @@
           }
         },
         {
-          "name": "Record details by direct path",
+          "name": "POST records with direct field",
           "event": [
             {
               "listen": "test",
@@ -1551,8 +1553,8 @@
                   "const body = pm.response.json();",
                   "pm.test('records array exists', function () { pm.expect(body.records).to.be.an('array'); });",
                   "pm.test('public source record is returned', function () { pm.expect(body.records.length).to.eql(1); });",
-                  "pm.test('records metadata identifies records', function () { pm.expect(body.meta.entity).to.eql('records'); });",
-                  "pm.test('path metadata is returned', function () { pm.expect(body.meta.fields.details).to.be.an('array').and.not.empty; });"
+                  "pm.test('mandatory envelope is returned', function () { pm.expect(body.records[0]).to.include.keys('rec_ID','rec_RecTypeID','rec_Title'); });",
+                  "pm.test('direct field metadata uses dty_PathCode', function () { pm.expect(body.meta.fields.details[0].dty_PathCode).to.eql(pm.environment.get('rtyId') + ':' + pm.environment.get('dtyId')); });"
                 ]
               }
             }
@@ -1567,18 +1569,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ids\": [{{publicRecordId}}],\n  \"fields\": [\"{{rtyId}}:{{dtyId}}\"]\n}"
+              "raw": "{\n  \"ids\": [\n    \"{{publicRecordId}}\"\n  ],\n  \"fields\": [\n    \"{{rtyId}}:{{dtyId}}\"\n  ],\n  \"resolveDetails\": true\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records/details",
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "{{apiPrefix}}",
                 "{{db}}",
-                "records",
-                "details"
+                "records"
               ]
             },
             "auth": {
@@ -1587,7 +1588,7 @@
           }
         },
         {
-          "name": "Record details invalid path -> 400",
+          "name": "POST records invalid field path -> 400",
           "event": [
             {
               "listen": "test",
@@ -1614,15 +1615,14 @@
               "raw": "{\n  \"ids\": [{{publicRecordId}}],\n  \"fields\": [\"not-a-field-path\"]\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records/details",
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "{{apiPrefix}}",
                 "{{db}}",
-                "records",
-                "details"
+                "records"
               ]
             },
             "auth": {
@@ -1631,7 +1631,7 @@
           }
         },
         {
-          "name": "Record details by linked path",
+          "name": "POST records with linked field path",
           "event": [
             {
               "listen": "prerequest",
@@ -1652,7 +1652,8 @@
                   "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
                   "const body = pm.response.json();",
                   "pm.test('records array exists', function () { pm.expect(body.records).to.be.an('array'); });",
-                  "pm.test('linked field path metadata is returned', function () { pm.expect(body.meta.fields.details[0].code).to.eql(pm.environment.get('linkedDetailPath')); });"
+                  "pm.test('linked metadata uses dty_PathCode', function () { pm.expect(body.meta.fields.details[0].dty_PathCode).to.eql(pm.environment.get('linkedDetailPath')); });",
+                  "pm.test('linked values preserve path provenance', function () { const code = pm.environment.get('linkedDetailPath'); const values = body.records[0] && body.records[0].details && body.records[0].details[code]; if (values && values.length) { pm.expect(values[0].path).to.include.keys('id','recordIDs'); } });"
                 ]
               }
             }
@@ -1667,18 +1668,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ids\": [{{linkedDetailSourceId}}],\n  \"fields\": [\"{{linkedDetailPath}}\"]\n}"
+              "raw": "{\n  \"ids\": [\n    \"{{linkedDetailSourceId}}\"\n  ],\n  \"fields\": [\n    \"{{linkedDetailPath}}\"\n  ],\n  \"resolveDetails\": true\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records/details",
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/records",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "{{apiPrefix}}",
                 "{{db}}",
-                "records",
-                "details"
+                "records"
               ]
             },
             "auth": {

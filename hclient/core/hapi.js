@@ -17,7 +17,7 @@
  * @since 4.0
  */
  
-/* global ActionHandler, HSystemMgr, HLayoutMgr */ 
+/* global ActionHandler, HSystemMgr, HLayoutMgr, HRecordSearchOpenApi */ 
 
 /**
 * Factory function for the Heurist objects.
@@ -445,6 +445,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     */
     function HRecordMgr() {
 
+        /** @type {HRecordSearchOpenApi|null} Experimental public API adapter. */
+        let openApiSearch = null;
+
         /**
          * @typedef Record
          * Associative array of data about a Heurist record
@@ -620,6 +623,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             */
             search: function (request, callback) {
 
+                request = request || {};
+
                 if (window.hWin.HAPI4.isAdminInterface && request['verify_credentials'] != 'ok') {
                     window.hWin.HAPI4.SystemMgr.verify_credentials(function () {
                         request['verify_credentials'] = 'ok';
@@ -631,6 +636,26 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (request['verify_credentials']) {
                     request['verify_credentials'] = null;
                     delete request['verify_credentials'];
+                }
+
+                if(request.isNewEngine === true || request.isNewEngine == 1){
+                    if(openApiSearch === null){
+                        if(typeof HRecordSearchOpenApi === 'undefined'){
+                            const response = {
+                                status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
+                                message: 'HRecordSearchOpenApi is not loaded',
+                                queryid: request.id
+                            };
+                            if(window.hWin.HEURIST4.util.isFunction(callback)){
+                                callback(response);
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                            return null;
+                        }
+                        openApiSearch = new HRecordSearchOpenApi();
+                    }
+                    return openApiSearch.search(request, callback);
                 }
 
                 if (!window.hWin.HEURIST4.util.isFunction(callback)) {

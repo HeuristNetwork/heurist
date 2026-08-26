@@ -68,6 +68,19 @@ function HRecordSet(initdata) {
         if(Array.isArray(response)){
             response = {entityName:'Records',count:response.length,offset:0,records:response};
         }
+
+        // Modern /api/{db}/records response. It intentionally contains only
+        // the ordered IDs; visible record details are loaded by the viewer.
+        if(response && Array.isArray(response.ids)){
+            response = $.extend({}, response, {
+                entityName: response.entityName || 'Records',
+                count: response.total !== undefined
+                    ? (Number(response.total) || 0)
+                    : response.ids.length,
+                offset: Number(response.offset) || 0,
+                records: response.ids
+            });
+        }
         
         if(response){
 
