@@ -27,7 +27,7 @@ use \hserv\utilities\USystem;
 /** @const string Current Heurist code version. Value sourced from $version in configIni.php. */
 define('HEURIST_VERSION', $version);
 /** @const string Minimal database version required for this code version. */
-define('HEURIST_MIN_DBVERSION', "1.3.18");
+define('HEURIST_MIN_DBVERSION', "1.3.19");
 
 // Heurist Reference Server Configuration
 // The reference server hosts the Heurist Reference Index, Help database, templates, and code updates.

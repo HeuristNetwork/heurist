@@ -112,7 +112,9 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
                         //get registration form fields
                         $usr_owner = array();
                         foreach($req_params as $name=>$val){
-                            if(strpos($name,'ugr_')===0){
+                            if($name === 'ugr_ORCID' && !empty($req_params[$name])){
+                                $usr_owner[$name] = preg_match('/^\d{4}\-\d{4}\-\d{4}\-\d{4}&/', $req_params[$name]) !== false ? $req_params[$name] : null;
+                            }elseif(strpos($name,'ugr_')===0){
                                 $usr_owner[$name] = $mysqli->real_escape_string($req_params[$name]);
                             }
                         }

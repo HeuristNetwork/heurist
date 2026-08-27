@@ -223,7 +223,7 @@ CREATE TABLE defRecStructure (
   rst_RecTypeID smallint unsigned NOT NULL COMMENT 'The record type to which this detail is allocated, 0 = all rectypes',
   rst_DetailTypeID smallint unsigned NOT NULL COMMENT 'Detail type for this field or, if MSB set, FieldSet code + 32767',
   rst_DisplayName varchar(255) NOT NULL default 'Please enter a prompt ...' COMMENT 'Display name for this dtl type in this rectype, autofill with dty_Name',
-  rst_DisplayHelpText varchar(255) default NULL COMMENT 'The user help text to be displayed for this detail type for this record type',
+  rst_DisplayHelpText varchar(5000) default NULL COMMENT 'The user help text to be displayed for this detail type for this record type',
   rst_DisplayExtendedDescription varchar(5000) default NULL COMMENT 'The rollover text to be displayed for this detail type for this record type',
   rst_DisplayOrder smallint unsigned zerofill NOT NULL default '999' COMMENT 'A sort order for display of this detail type in the record edit form',
   rst_DisplayWidth tinyint unsigned NOT NULL default '100' COMMENT 'The field width displayed for this detail type in this record type',
@@ -754,6 +754,7 @@ CREATE TABLE sysUGrps (
   ugr_NavigationTree MEDIUMTEXT default NULL COMMENT 'JSON array that describes treeview for filters',
   ugr_Preferences MEDIUMTEXT default NULL COMMENT 'JSON array with user preferences',
   usr_ExternalAuthentication varchar(1000) default NULL COMMENT 'JSON array with external authentication preferences',
+  ugr_ORCID varchar(19) default NULL COMMENT 'An ORC ID associated with this user account, formatted as: 0000-1111-2222-3333',
   PRIMARY KEY  (ugr_ID),
   UNIQUE KEY ugr_Name (ugr_Name),
   UNIQUE KEY ugr_eMail (ugr_eMail)
@@ -975,7 +976,7 @@ CREATE TABLE usrWorkingSubsets (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior,sys_MediaFolders)
-  VALUES (1,0,1,3,18,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
+  VALUES (1,0,1,3,19,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user

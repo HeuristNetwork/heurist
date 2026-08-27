@@ -1892,7 +1892,7 @@ console.log('onEditFormChange @todo check buttons!!!');
         let $helpText = this._editing.getFieldByName('rst_DisplayHelpText');
         let $helpCounter = $('<div>', {
             style: 'padding: 0.2em 0px;',
-            html: `255 characters allowed, <span class="charCount">${$helpText.find('textarea').val().length}</span> used`
+            html: `5000 characters allowed, <span class="charCount">${$helpText.find('textarea').val().length}</span> used`
         }).insertAfter($helpText.find('.input-div'));
         this._on($helpText.find('textarea'), {
             input: () => $helpCounter.find('.charCount').text($helpText.find('textarea').val().length)
@@ -3866,9 +3866,9 @@ console.log('onEditFormChange @todo check buttons!!!');
         <div>
             <div class="required" style="margin-bottom: 7.5px;">
                 Enter html formatted text here
-                <span style="display: inline-block;color: black;font-weight: normal;float: right;"><span id="explainCharCount">255</span> characters remaining</span>
+                <span style="display: inline-block;color: black;font-weight: normal;float: right;"><span id="explainCharCount">5000</span> characters remaining</span>
             </div>
-            <textarea id="rst_DisplayHelpText" class="text ui-corner-all" style="border:none;" cols="100" rows="10" maxlength="255"></textarea>
+            <textarea id="rst_DisplayHelpText" class="text ui-corner-all" style="border:none;" cols="100" rows="10" maxlength="5000"></textarea>
         </div>`;
 
         const btns = {};
@@ -3904,7 +3904,7 @@ console.log('onEditFormChange @todo check buttons!!!');
         let $textarea = $dlg.find('textarea');
         let $charCounter = $dlg.find('#explainCharCount');
         this._on($textarea, {
-            input: () => $charCounter.text(255 - $textarea.val().length)
+            input: () => $charCounter.text(5000 - $textarea.val().length)
         });
     },
 

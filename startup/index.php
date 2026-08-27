@@ -163,7 +163,6 @@ if (!defined('PDIR')){
                     $('#btnRegisterDo').button().on({click: _validateRegistration});
                     $('#btnRegisterCancel').button().on({click: _showStep});
 
-
                     $("#contactDetails").html('Email to: System Administrator<br>'+
                         '<a style="padding-left: 60px;" href="mailto:'+sysadmin_email+'">'+sysadmin_email+'</a>');
 
@@ -188,11 +187,65 @@ if (!defined('PDIR')){
                     $('#btnTermsOK').button().on({click: function(){ $('#cbAgree').prop('checked',true).trigger('change'); _showStep(2);}});
                     $('#btnTermsCancel').button().on({click: function(){ $('#cbAgree').prop('checked',false).trigger('change'); _showStep(2);}});
 
+                    $('#ugr_ORCID').on({keyup: () => {
+                        const ORCID = $('#ugr_ORCID').val();
+                        const isValid = !window.hWin.HEURIST4.util.isempty(ORCID) && ORCID.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/);
+                        isValid ? $('#orcid-data-link').show() : $('#orcid-data-link').hide();
+                    }});
+                    $('#orcid-data-link').on({click: _getDataFromORCID});
+
                     refreshCaptcha();
                     _showStep(2);
                 });
         }
 
+    }
+
+    function _getDataFromORCID(){
+
+        const ORCID = $('#ugr_ORCID').val();
+        if(window.hWin.HEURIST4.util.isempty(ORCID) && ORCID.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/)){
+            window.hWin.HEURIST4.msg.showMsgFlash('Invalid ORCID...', 3000);
+            return;
+        }
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront($('.center-box.screen2'), null, '<span style="color: white;">Retrieving data from ORCID...</span>');
+
+        const URL = `${baseURL}hserv/controller/LookupController.php`;
+        let request = {
+            serviceType: 'orcid',
+            id: ORCID
+        };
+
+        window.hWin.HEURIST4.util.sendRequest(URL, request, null, (response) => {
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            response = window.hWin.HEURIST4.util.isJSON(response);
+
+            if(!response && Object.hasOwn(response, 'status') && response.status !== window.hWin.ResponseStatus.OK){
+                response = !response ? {status: 'error', message: 'Heurist has failed to retrieve your data from ORCID.<br>Please submit a ticket.'} : response;
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            const ORCID_FIELD_MAPPING = {
+                ugr_FirstName: 'given-names',
+                ugr_LastName: 'family-name',
+                ugr_Name: 'orcid',
+                ugr_Organisation: 'employment',
+                ugr_Interests: 'keywords',
+                ugr_URLs: 'url'
+            };
+
+            for(const field in ORCID_FIELD_MAPPING){
+
+                if(!Object.hasOwn(ORCID_FIELD_MAPPING, field) || !Object.hasOwn(response, ORCID_FIELD_MAPPING[field])){
+                    continue;
+                }
+
+                $(`#${field}`).val(response[ORCID_FIELD_MAPPING[field]]);
+            }
+        });
     }
 
     /**
@@ -300,6 +353,11 @@ if (!defined('PDIR')){
                     err_text = err_text + ', '+ss;
                 }
 
+            }
+
+            let orcid = regform.find('#ugr_ORCID').val();
+            if(!window.hWin.HEURIST4.util.isempty(orcid) && !orcid.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/)){
+                err_text += ', ORCID needs to be in format XXXX-XXXX-XXXX-XXXX';
             }
 
             if(err_text!=''){
@@ -918,7 +976,7 @@ a{
     margin: 3% auto;
 }
 .center-box.screen2{
-    height: 600px;
+    height: 700px;
 }
 .center-box h1, .center-box h3, .center-box .header{
     color: #7B4C98;
@@ -1044,6 +1102,31 @@ a{
 .setup-db-list .list-row:hover {
     background:-moz-linear-gradient(center top, #EFEFEF, #DDDDDD) repeat scroll 0 0 transparent;
     background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
+}
+
+div.coverall-div {
+
+    position: absolute;
+    left:0px;
+    top: 0px;
+    height:100%;
+    width:100%;
+
+    border: 0;
+    padding: 0px;
+    margin: 0px;
+
+    background-color: rgb(0, 0, 0);
+    opacity: 0.6;
+
+    background-image: url(../hclient/assets/loading-animation-white.gif);
+    background-repeat: no-repeat;
+    background-position: center;
+
+    cursor:wait;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 </style>
 
