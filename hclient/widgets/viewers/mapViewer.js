@@ -29,7 +29,7 @@ $.widget('heurist.mapViewer', {
         viewerMode: 'map',              // map | configuration | draw
         configurationMode: 'preferences',  // preferences | website | publish
         runtimeMode: null,              // main | website | standalone; inferred from configurationMode when omitted
-        configurationValue: null,
+        configurationValue: null,       
 
         database: window.hWin.HAPI4.database,
         apiBaseUrl: window.hWin.HAPI4.baseURL + 'api',
@@ -163,9 +163,12 @@ $.widget('heurist.mapViewer', {
                     return;
                 }
 
-                var recordset = data && data.recordset ? data.recordset : null;
-                var ids = that._recordsetIds(recordset);
-                that.setQuery(that._currentResultsQuery(ids, data && data.query));
+                var result = that._searchResult(data);
+                that.setQuery(that._currentResultsQuery(
+                    result.ids,
+                    data && data.query,
+                    result.total
+                ));
 
             } else if (event.type === hapi.Event.ON_REC_SEARCHSTART) {
                 if (!that._isSameRealm(data)) return;
@@ -1076,20 +1079,8 @@ $.widget('heurist.mapViewer', {
         }
 
         var ids = this._recordsetIds(recordset);
-        var request = null;
-        var candidates = ['getRequest', 'getRequestParams', 'getSearchRequest'];
-        for (var index = 0; index < candidates.length && !request; index++) {
-            if (typeof recordset[candidates[index]] === 'function') {
-                try {
-                    request = recordset[candidates[index]]();
-                } catch (ignore) {
-                    request = null;
-                }
-            }
-        }
+        var request = recordset.getRequest();
 
-        request = request || recordset.request || recordset._request ||
-            recordset.searchRequest || null;
         var query = request && request.query !== undefined
             ? request.query : request && request.q;
         return this._currentResultsQuery(ids, query);
@@ -1105,11 +1096,39 @@ $.widget('heurist.mapViewer', {
         return [];
     },
 
+    /** Prefer the plain OpenAPI result and fall back to the legacy HRecordSet. */
+    _searchResult: function(data) {
+        data = data || {};
+        var response = data.response;
+        if (response && Array.isArray(response.ids)) {
+            var responseIds = this._normalizeRecordIds(response.ids);
+            var responseTotal = Number(response.total);
+            return {
+                ids: responseIds,
+                total: Number.isFinite(responseTotal) && responseTotal >= 0
+                    ? responseTotal : responseIds.length
+            };
+        }
+
+        var recordset = data.recordset || null;
+        var ids = this._recordsetIds(recordset);
+        var total = NaN;
+        if (recordset) {
+            total = Number(recordset.count_total());
+        }
+        return {
+            ids: ids,
+            total: Number.isFinite(total) && total >= 0 ? total : ids.length
+        };
+    },
+
     /** Prefer compact explicit IDs; reuse the executed query for large results. */
-    _currentResultsQuery: function(recordIds, executedQuery) {
+    _currentResultsQuery: function(recordIds, executedQuery, total) {
         var ids = this._normalizeRecordIds(recordIds);
         if (!ids.length) return null;
-        if (ids.length <= MAP_VIEWER_IDS_QUERY_LIMIT) {
+        var resultTotal = Number(total);
+        var hasMoreResults = Number.isFinite(resultTotal) && resultTotal > ids.length;
+        if (!hasMoreResults && ids.length <= MAP_VIEWER_IDS_QUERY_LIMIT) {
             return 'ids:' + ids.join(',');
         }
         return this._normalizeQuery(executedQuery) || 'ids:' + ids.join(',');

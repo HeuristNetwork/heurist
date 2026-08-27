@@ -39,13 +39,16 @@ function HRecordSearchOpenApi() {
             }
             callback = function(response){
                 let recordset = null;
+                let openApiResponse = null;
                 if(response.status === window.hWin.ResponseStatus.OK){
                     recordset = new HRecordSet(response.data);
                     recordset.setRequest(originalRequest);
+                    openApiResponse = normalizeOpenApiResponse(response.data);
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     recordset = new HRecordSet({records: [], reccount: 0});
                     recordset.setRequest(originalRequest);
+                    openApiResponse = normalizeOpenApiResponse(null);
                 }
                 if(window.hWin.HEURIST4.util.isempty(originalRequest.search_realm)){
                     window.hWin.HAPI4.currentRecordset = recordset;
@@ -56,6 +59,7 @@ function HRecordSearchOpenApi() {
                         {
                             search_realm: originalRequest.search_realm,
                             recordset: recordset,
+                            response: openApiResponse,
                             request: originalRequest,
                             query: currentQuery
                         }
@@ -217,6 +221,19 @@ function HRecordSearchOpenApi() {
     function normalizePositiveInt(value, fallback){
         value = Number(value);
         return Number.isFinite(value) && value > 0 ? Math.floor(value) : fallback;
+    }
+
+    /** Return the stable IDs-only OpenAPI result carried by search-finish events. */
+    function normalizeOpenApiResponse(data){
+        data = data || {};
+        const ids = normalizeIds(data.ids);
+        return {
+            ids: ids,
+            total: Math.max(0, Number(data.total) || 0),
+            offset: Math.max(0, Number(data.offset) || 0),
+            limit: Math.max(0, Number(data.limit) || ids.length),
+            resultToken: data.resultToken == null ? null : data.resultToken
+        };
     }
 
     function successResponse(request, ids, total, offset){
