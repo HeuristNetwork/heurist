@@ -1172,23 +1172,17 @@ $.widget( "heurist.search_faceted_wiz", {
                 //open map digitizer - returns WKT rectangle 
                 let rect_wkt = $dlg.find('#svs_SpatialFilterInitial').val();
                 
-                let url = window.hWin.HAPI4.baseURL 
-                +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
-
                 let wkt_params = {wkt: rect_wkt, geofilter:true, need_screenshot:false};
 
-                window.hWin.HEURIST4.msg.showDialog(url, {height:'540', width:'600',
-                    window: window.hWin,  //opener is top most heurist window
+                window.hWin.HEURIST4.ui.showMapDrawDialog(wkt_params, {height:'540', width:'800',
                     dialogid: 'map_digitizer_filter_dialog',
-                    params: wkt_params,
                     title: window.hWin.HR('Define initial spatial search'),
-                    class:'ui-heurist-bg-light',
                     callback: function(location){
                         if( !window.hWin.HEURIST4.util.isempty(location) ){
                             $dlg.find('#svs_SpatialFilterInitial').val(location.wkt)
                         }
                     }
-                } );
+                });
                 return false;     
            }});   
 

@@ -311,7 +311,6 @@ $.widget( "heurist.searchInput", {
             request.search_page = this.options.search_page;
             
             this.query_request = request;
-
             window.hWin.HAPI4.RecordSearch.doSearch( this, request );
 
         }

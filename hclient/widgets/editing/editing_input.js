@@ -4086,15 +4086,12 @@ $.widget( "heurist.editing_input", {
                         
                         if(that.is_disabled) return;
                     
-                        let url = window.hWin.HAPI4.baseURL 
-                            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
-                       
                         let wkt_params = {'wkt': that.newvalues[$input.attr('id')] };
                         if(that.options.is_faceted_search){
                             wkt_params['geofilter'] = true;
                         }
 
-                        if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
+                        if(that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
                             let ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
                             let vals = ele.editing_input('getValues');
@@ -4113,10 +4110,10 @@ $.widget( "heurist.editing_input", {
                             }
                         }
 
-                        if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE'] || 
-                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'] || 
-                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] || 
-                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']) {
+                        if(that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] || that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE'] || 
+                        that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE'] || that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'] || 
+                        that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] || that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] || 
+                        that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']) {
                             // assume bounding box, rectangle tool only
                             wkt_params['tool_option'] = 'rectangle';
                         }
@@ -4124,15 +4121,10 @@ $.widget( "heurist.editing_input", {
                         let d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         d_height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95;
 
-                        window.hWin.HEURIST4.msg.showDialog(url, {
+                        window.hWin.HEURIST4.ui.showMapDrawDialog(wkt_params, {
                             height:that.options.is_faceted_search?540:d_height,
-                            width:that.options.is_faceted_search?600:d_width,
-                            window: window.hWin,  //opener is top most heurist window
-                            dialogid: 'map_digitizer_dialog',
-                            default_palette_class: 'ui-heurist-populate',
-                            params: wkt_params,
+                            width:that.options.is_faceted_search?800:d_width,
                             title: window.hWin.HR('Heurist map digitizer'),
-                            //class:'ui-heurist-bg-light',
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
                                     //that.newvalues[$input.attr('id')] = location
@@ -4152,7 +4144,7 @@ $.widget( "heurist.editing_input", {
                                     //$input.val(location.type+' '+location.wkt)
                                 }
                             }
-                        } );
+                        });
                 };
 
                
@@ -4209,9 +4201,6 @@ $.widget( "heurist.editing_input", {
                     let popele = $(pdiv);
 
                     popele.find('input[class="bkm_points"]').on('click', function(e){
-                        let url = window.hWin.HAPI4.baseURL 
-                            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
-
                         let wkt_points = $('input[id="bkm_long"]').val() + ',' + $('input[id="bkm_lat"]').val();
                         let points = wkt_points.split(/[\s,]+/);
 
@@ -4223,13 +4212,9 @@ $.widget( "heurist.editing_input", {
                         let d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         d_height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95;
 
-                        window.hWin.HEURIST4.msg.showDialog(url, {
+                        window.hWin.HEURIST4.ui.showMapDrawDialog(wkt_params, {
                             height:that.options.is_faceted_search?540:d_height,
-                            width:that.options.is_faceted_search?600:d_width,
-                            window: window.hWin,  //opener is top most heurist window
-                            dialogid: 'map_digitizer_dialog',
-                            default_palette_class: 'ui-heurist-populate',
-                            params: wkt_params,
+                            width:that.options.is_faceted_search?800:d_width,
                             title: window.hWin.HR('Heurist map digitizer'),
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
@@ -4246,7 +4231,7 @@ $.widget( "heurist.editing_input", {
                                     $('input[id="bkm_lat"]').val(points[1] + ',' + points[3]).trigger('change');
                                 }
                             }
-                        } );
+                        });
                     });
 
                     popele.find('input[id="bkm_name"]').val(setup_val[0]);

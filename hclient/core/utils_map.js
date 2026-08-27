@@ -328,7 +328,48 @@
         }
 
         function openEditor(){
-            return editSymbology(editorValue, mode_edit, accept, cancelCallback);
+            // mapSymbolEditor opens Spectrum programmatically during dialog
+            // activation. Suppress only those startup `show` calls; normal
+            // user-triggered colour pickers work after the dialog has settled.
+            let spectrum = mode_edit === 2 && $.fn.spectrum ? $.fn.spectrum : null;
+            if(spectrum){
+                $.fn.spectrum = function(command){
+                    if(command === 'show') return this;
+                    return spectrum.apply(this, arguments);
+                };
+            }
+            let result;
+            try{
+                result = editSymbology(editorValue, mode_edit, accept, cancelCallback);
+            }finally{
+                if(spectrum) setTimeout(function(){ $.fn.spectrum = spectrum; }, 150);
+            }
+            if(mode_edit === 2){
+                // The drawing editor is hosted above the map popup. Give it enough
+                // vertical room and remove automatic focus from the colour input;
+                // colour selection must only open after an explicit user action.
+                function settleDrawingStyleDialog(){
+                    let content = $(window.hWin.document).find('.ui-dialog-content:visible').last();
+                    if(content.length){
+                        try{
+                            content.dialog('option', {height:400, minHeight:400});
+                            content.dialog('moveToTop');
+                        }catch(ignore){}
+                        // Focus the dialog frame, not the first Spectrum input.
+                        // jQuery UI otherwise activates a colour picker while
+                        // applying its automatic initial focus.
+                        let frame = content.closest('.ui-dialog').attr('tabindex', '-1');
+                        try{ frame[0].focus({preventScroll:true}); }catch(ignore){}
+                        content.find('input').each(function(){
+                            try{ $(this).spectrum('hide'); }catch(ignore){}
+                        });
+                    }
+                    $(window.hWin.document).find('.sp-container:visible').hide();
+                }
+                setTimeout(settleDrawingStyleDialog, 0);
+                setTimeout(settleDrawingStyleDialog, 50);
+            }
+            return result;
         }
 
         if(typeof editSymbology !== 'undefined' && H.util.isFunction(editSymbology)){
@@ -457,6 +498,129 @@
             });
         }).finally(function(){ ui._heuristMapConfigurationPromise = null; });
         return ui._heuristMapConfigurationPromise;
+    };
+
+    /**
+     * Open or reuse the shared heurist-map drawing dialog.
+     *
+     * @param {Object} params Legacy mapDraw parameters (`wkt`, `geofilter`,
+     * `imageurl`, `tool_option`, `need_screenshot`).
+     * @param {Object} options Popup dimensions/title and result callbacks.
+     * @returns {Promise<jQuery>} Resolves with the persistent dialog.
+     */
+    ui.showMapDrawDialog = function(params, options){
+        params = $.extend(true, {}, params || {});
+        options = options || {};
+        let body = $(window.hWin.document).find('body');
+
+        function loadMapViewer(){
+            if($.heurist && $.heurist.mapViewer) return Promise.resolve();
+            return loadScript(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/mapViewer.js').then(function(){
+                if(!($.heurist && $.heurist.mapViewer)) throw new Error('mapViewer widget was not registered');
+            });
+        }
+
+        if(!ui._heuristMapDrawDialog){
+            // showElementAsDialog requires an attached source element because it
+            // removes the element from its original parent before moving it.
+            let parking = $('<div>').hide().appendTo(body);
+            let shell = $('<div>').addClass('heurist-map-draw-dialog-shell')
+                .css({position:'relative', width:'100%', height:'100%', overflow:'hidden'})
+                .appendTo(parking);
+            let host = $('<div>').addClass('heurist-map-draw-dialog-host')
+                .css({position:'absolute', inset:0, overflow:'hidden'}).appendTo(shell);
+            let state = {
+                parking:parking, shell:shell, host:host, dialog:null,
+                callback:null, onCancel:null, closing:false, initialized:false
+            };
+            state.dialog = H.msg.showElementAsDialog({
+                window:window.hWin,
+                element:shell[0],
+                height:options.height || 540,
+                width:options.width || 800,
+                dialogid:options.dialogid || 'map_digitizer_dialog',
+                default_palette_class:options.default_palette_class || 'ui-heurist-populate',
+                title:options.title || window.hWin.HR('Heurist map digitizer'),
+                resizable:true,
+                close:function(){
+                    if(!state.closing && H.util.isFunction(state.onCancel)) state.onCancel();
+                    state.closing = false;
+                    // Keep the dialog, shell and iframe for the next opening.
+                    return false;
+                }
+            });
+            state.sizeHost = function(){
+                let height = Math.max(100, state.dialog.innerHeight() || 0);
+                state.dialog.css({padding:0, overflow:'hidden'});
+                state.shell.css({position:'relative', width:'100%', height:height, minHeight:height});
+                state.host.css({position:'absolute', top:0, right:0, bottom:0, left:0,
+                    width:'100%', height:'100%', overflow:'hidden'});
+                if(state.initialized) {
+                    try{ state.host.mapViewer('resize'); }catch(ignore){}
+                }
+            };
+            state.dialog.on('dialogopen dialogresize dialogresizestop', state.sizeHost);
+            ui._heuristMapDrawDialog = state;
+        }
+
+        let state = ui._heuristMapDrawDialog;
+        state.callback = options.callback || null;
+        state.onCancel = options.onCancel || null;
+        state.dialog.dialog('option', {
+            height:options.height || 540,
+            width:options.width || 800,
+            title:options.title || window.hWin.HR('Heurist map digitizer')
+        });
+        if(!state.dialog.dialog('isOpen')) state.dialog.dialog('open');
+        state.sizeHost();
+
+        let ready = state.initialized ? Promise.resolve() : loadMapViewer().then(function(){
+            if(state.initialized) return;
+            state.host.mapViewer({
+                viewerMode:'draw', runtimeMode:'main', eventbased:false,
+                ondrawfinish:function(result){
+                    let callback = state.callback;
+                    state.closing = true;
+                    if(H.util.isFunction(callback)) callback(result);
+                    state.dialog.dialog('close');
+                },
+                ondrawcancel:function(){
+                    let onCancel = state.onCancel;
+                    state.closing = true;
+                    if(H.util.isFunction(onCancel)) onCancel();
+                    state.dialog.dialog('close');
+                },
+                onerror:function(error){
+                    H.msg.showMsgErr(error);
+                }
+            });
+            state.initialized = true;
+        });
+
+        return ready.then(function(){
+            return state.host.mapViewer('beginDrawing', params).then(function(){
+                state.sizeHost();
+                return Promise.resolve(state.host.mapViewer('resize')).then(function(){
+                    if(params.wkt || params.geojson){
+                        return state.host.mapViewer('zoomToDrawing');
+                    }
+                }).then(function(){ return state.dialog; });
+            });
+        }).catch(function(error){
+            H.msg.showMsgErr({message:error.message, error_title:'Map digitizer loading failed'});
+            throw error;
+        });
+    };
+
+    /** Explicitly release the shared map drawing iframe and popup. */
+    ui.destroyMapDrawDialog = function(){
+        let state = ui._heuristMapDrawDialog;
+        ui._heuristMapDrawDialog = null;
+        if(!state) return;
+        try{ if(state.host.mapViewer('instance')) state.host.mapViewer('destroy'); }catch(ignore){}
+        try{ state.dialog.dialog('destroy'); }catch(ignore){}
+        state.shell.remove();
+        state.parking.remove();
     };
 
     ui.showImgFilterDialog = function(current_value, callback){

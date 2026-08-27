@@ -26,7 +26,7 @@ $.widget('heurist.mapViewer', {
     
     options: {
         presentationMode: 'iframe',
-        viewerMode: 'map',              // map | configuration
+        viewerMode: 'map',              // map | configuration | draw
         configurationMode: 'preferences',  // preferences | website | publish
         runtimeMode: null,              // main | website | standalone; inferred from configurationMode when omitted
         configurationValue: null,
@@ -43,6 +43,7 @@ $.widget('heurist.mapViewer', {
         heuristMapSettings: null,     // persisted {format,version,options,config}
         heuristMapState: null,        // initial reproducible map state
         mapDocument: null,
+        drawParameters: null,
 
         query: null,
         recordset: null, // Compatibility input only; immediately converted and discarded.
@@ -66,7 +67,10 @@ $.widget('heurist.mapViewer', {
         onselect: null,
         onerror: null,
         oneditdocument: null,
-        oneditlayer: null
+        oneditlayer: null,
+        ondrawchange: null,
+        ondrawfinish: null,
+        ondrawcancel: null
     },
 
     _create: function() {
@@ -329,6 +333,7 @@ $.widget('heurist.mapViewer', {
         var settings = this._mergeMapSettings(
             saved,
             runtimeMode === 'website' ? this._websiteMapDefaults() : null,
+            this.options.viewerMode === 'draw' ? this._drawMapDefaults() : null,
             explicit
         );
         if (this.options.viewerMode === 'configuration' && this.options.configurationValue) {
@@ -339,13 +344,17 @@ $.widget('heurist.mapViewer', {
             settings.options.ui.showOptions = false;
             settings.options.ui.showPublish = false;
         }
+        if (this.options.viewerMode === 'draw') {
+            settings = this._forceDrawMapSettings(settings);
+        }
 
         var database = this.options.database || (hapi ? hapi.database : null);
         var apiBaseUrl = this.options.apiBaseUrl || (hapi ? hapi.baseURL + 'api' : null);
 
         return {
             runtime: {
-                viewerMode: this.options.viewerMode === 'configuration' ? 'configuration' : 'map',
+                viewerMode: ['configuration', 'draw'].indexOf(this.options.viewerMode) >= 0
+                    ? this.options.viewerMode : 'map',
                 configurationMode: this.options.configurationMode || 'preferences',
                 runtimeMode: runtimeMode,
                 database: database,
@@ -357,7 +366,8 @@ $.widget('heurist.mapViewer', {
                 readonly: false
             },
             settings: settings,
-            state: this.options.heuristMapState || null
+            state: this.options.heuristMapState
+                || (this.options.viewerMode === 'draw' ? this._getSavedDrawState() : null)
         };
     },
 
@@ -387,6 +397,37 @@ $.widget('heurist.mapViewer', {
         };
     },
 
+    /** Drawing is an isolated workspace with no result or persisted document. */
+    _drawMapDefaults: function() {
+        return {
+            options: {
+                ui: {
+                    enabled: true,
+                    initiallyExpanded: false,
+                    showCurrentDocument: false,
+                    showMapDocuments: true,
+                    showBaseMaps: true,
+                    showOptions: false,
+                    showPublish: false
+                },
+                nativeControls: {
+                    zoom: true,
+                    scale: true,
+                    bookmark: true,
+                    print: false,
+                    selector: false,
+                    search: true
+                }
+            },
+            config: { dynamicDocument: { enabled: false } }
+        };
+    },
+
+    _forceDrawMapSettings: function(settings) {
+        settings = this._mergeMapSettings(settings, this._drawMapDefaults());
+        return settings;
+    },
+
     /** Read the already-loaded HAPI preference without making another request. */
     _getSavedMapSettings: function() {
         var hapi = window.hWin && window.hWin.HAPI4;
@@ -398,6 +439,39 @@ $.widget('heurist.mapViewer', {
         } catch (error) {
             return null;
         }
+    },
+
+    _getSavedDrawState: function() {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        var state = null;
+        try {
+            if (hapi && typeof hapi.get_prefs_def === 'function') {
+                state = hapi.get_prefs_def('heurist-map-draw-state', null);
+                if (typeof state === 'string' && state) state = JSON.parse(state);
+            }
+            if (!state && window.localStorage) {
+                state = JSON.parse(window.localStorage.getItem(this._drawStateStorageKey()) || 'null');
+            }
+        } catch (ignore) { state = null; }
+        return state && typeof state === 'object' ? state : null;
+    },
+
+    _saveDrawState: function() {
+        if (this.options.viewerMode !== 'draw' || !this._mapApi) return null;
+        var state = this._mapApi.captureState();
+        var hapi = window.hWin && window.hWin.HAPI4;
+        try {
+            if (hapi && typeof hapi.save_pref === 'function') {
+                hapi.save_pref('heurist-map-draw-state', JSON.stringify(state));
+            } else if (window.localStorage) {
+                window.localStorage.setItem(this._drawStateStorageKey(), JSON.stringify(state));
+            }
+        } catch (ignore) { /* State persistence must not block closing the editor. */ }
+        return state;
+    },
+
+    _drawStateStorageKey: function() {
+        return 'heurist-map:draw-state:' + String(this.options.database || 'default');
     },
 
     _cloneMapSettings: function(value) {
@@ -514,6 +588,9 @@ $.widget('heurist.mapViewer', {
     /** Apply initial document, current result set, and host selection. */
     _initializeContent: function() {
         var that = this;
+        if (this.options.viewerMode === 'draw') {
+            return this._beginDrawingNow(this.options.drawParameters || {});
+        }
         var query = this.options.query;
         var operation;
 
@@ -616,6 +693,18 @@ $.widget('heurist.mapViewer', {
             }
         };
 
+        this._mapEventHandlers.drawing = function(event) {
+            that._invokeCallback('ondrawchange', event.detail || {});
+        };
+        this._mapEventHandlers.drawingFinished = function(event) {
+            that._saveDrawState();
+            that._invokeCallback('ondrawfinish', event.detail && event.detail.result, event.detail || {});
+        };
+        this._mapEventHandlers.drawingCancelled = function(event) {
+            that._saveDrawState();
+            that._invokeCallback('ondrawcancel', event.detail || {});
+        };
+
         this._mapApi.addEventListener(
             'heurist-map-selection-changed', this._mapEventHandlers.selection
         );
@@ -636,6 +725,15 @@ $.widget('heurist.mapViewer', {
         );
         this._mapApi.addEventListener(
             'heurist-map-layer-loaded', this._mapEventHandlers.layerLoaded
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-drawing-changed', this._mapEventHandlers.drawing
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-drawing-finished', this._mapEventHandlers.drawingFinished
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-drawing-cancelled', this._mapEventHandlers.drawingCancelled
         );
     },
 
@@ -663,6 +761,15 @@ $.widget('heurist.mapViewer', {
         if (handlers.layerLoaded) this._mapApi.removeEventListener(
             'heurist-map-layer-loaded', handlers.layerLoaded
         );
+        if (handlers.drawing) this._mapApi.removeEventListener(
+            'heurist-map-drawing-changed', handlers.drawing
+        );
+        if (handlers.drawingFinished) this._mapApi.removeEventListener(
+            'heurist-map-drawing-finished', handlers.drawingFinished
+        );
+        if (handlers.drawingCancelled) this._mapApi.removeEventListener(
+            'heurist-map-drawing-cancelled', handlers.drawingCancelled
+        );
         this._mapEventHandlers = {};
         this._events = null;
     },
@@ -671,6 +778,42 @@ $.widget('heurist.mapViewer', {
     openConfiguration: function(options) {
         return this._enqueueOrRun('_openConfigurationNow', [options || {}]);
     },
+
+    beginDrawing: function(options) {
+        this.options.drawParameters = $.extend(true, {}, options || {});
+        return this._enqueueOrRun('_beginDrawingNow', [this.options.drawParameters]);
+    },
+
+    _beginDrawingNow: function(options) {
+        if (!this._mapApi || typeof this._mapApi.beginDrawing !== 'function') {
+            return Promise.reject(new Error('Map drawing API is not available'));
+        }
+        return Promise.resolve(this._mapApi.beginDrawing(options || {}));
+    },
+
+    getDrawing: function() {
+        return this._enqueueOrRun('_getDrawingNow', []);
+    },
+
+    _getDrawingNow: function() { return this._mapApi.getDrawing(); },
+
+    finishDrawing: function() {
+        return this._enqueueOrRun('_finishDrawingNow', []);
+    },
+
+    _finishDrawingNow: function() { return this._mapApi.finishDrawing(); },
+
+    clearDrawing: function() {
+        return this._enqueueOrRun('_clearDrawingNow', []);
+    },
+
+    _clearDrawingNow: function() { return this._mapApi.clearDrawing(); },
+
+    zoomToDrawing: function() {
+        return this._enqueueOrRun('_zoomToDrawingNow', []);
+    },
+
+    _zoomToDrawingNow: function() { return this._mapApi.zoomToDrawing(); },
 
     _openConfigurationNow: function(options) {
         var that = this;
@@ -1111,7 +1254,8 @@ $.widget('heurist.mapViewer', {
                     // symbology has no persisted layer and uses the general mode 0.
                     ui.showEditSymbologyDialog(
                         $.extend(true, {}, current),
-                        recordId > 0 ? 1 : 0,
+                        Number.isInteger(Number(options && options.editorMode))
+                            ? Number(options.editorMode) : (recordId > 0 ? 1 : 0),
                         accept,
                         cancel,
                         parentSymbol
@@ -1258,6 +1402,7 @@ $.widget('heurist.mapViewer', {
 
     _destroy: function() {
         var that = this;
+        this._saveDrawState();
         this._isDestroyed = true;
         this._isReady = false;
 
