@@ -111,8 +111,14 @@ ensure_repository() {
 
     echo "$LOG_PREFIX [$name] Synchronising $BRANCH..."
     git -C "$repo_dir" fetch --prune origin "$BRANCH"
-    git -C "$repo_dir" checkout -B "$BRANCH" "origin/$BRANCH"
+
+    if [[ -n "$(git -C "$repo_dir" status --porcelain)" ]]; then
+        echo "$LOG_PREFIX [$name] Discarding local changes."
+    fi
+
+    git -C "$repo_dir" checkout -f -B "$BRANCH" "origin/$BRANCH"
     git -C "$repo_dir" reset --hard "origin/$BRANCH"
+    git -C "$repo_dir" clean -fd
 
     if [[ ! -f "$repo_dir/package.json" ]]; then
         echo "$LOG_PREFIX [$name] ERROR: package.json not found." >&2
