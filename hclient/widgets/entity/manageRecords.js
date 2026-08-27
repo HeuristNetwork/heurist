@@ -3719,6 +3719,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             if(check_for_errors.length > 0){ // Add extra error details about field values
                 that._editing.displayValueErrors(check_for_errors);
             }
+            if(this.editForm.find('.showAllImages').length > 0){
+
+                let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllRecords', []);
+                showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+
+                if(Array.isArray(showAllImagesPrefs)){
+
+                    for(const keyValue of showAllImagesPrefs){
+
+                        const dtyID = keyValue.split('.')[1];
+                        if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID) || keyValue.indexOf(`${this._currentEditRecTypeID}.`) < 0){
+                            continue;
+                        }
+
+                        this.editForm.find(`div[data-dtid="${dtyID}"] div.image_input`).trigger('click').show();
+                    }
+                }
+            }
 
             if(this.options.fill_in_data){ // force ismodified
                 that._editing.setModified(true);

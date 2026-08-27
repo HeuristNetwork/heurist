@@ -572,7 +572,8 @@ $.widget( "heurist.editing_input", {
                     .appendTo( btn_cont )
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
-                .attr('title', 'Add another ' + window.hWin.HEURIST4.util.stripTags(lblTitle) +(is_translation?' translation':' value' ))       .css(styles);
+                .attr('title', 'Add another ' + window.hWin.HEURIST4.util.stripTags(lblTitle) +(is_translation?' translation':' value' ))
+                .css(styles);
 
                 if(rec_translate){ // add translate icon
 
@@ -744,11 +745,15 @@ $.widget( "heurist.editing_input", {
                 delay: 250,
                 items: '.input-div',
                 axis: 'y',
-                stop:function(event, ui){
+                stop: function(event, ui){
                     
                     let isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
                     if(isparententity){ //remove parent entity flag to avoid autosave
                         that.fset('rst_CreateChildIfRecPtr', 0);
+                    }
+
+                    if(that.isFileForRecord){ // re-order inline images
+                        that._setImageOrder();
                     }
                     
                     //reorganize
@@ -759,7 +764,7 @@ $.widget( "heurist.editing_input", {
                     if(isparententity){//restore parent entity flag
                         that.fset('rst_CreateChildIfRecPtr', 1);
                     }
-                    
+
                 }});            
                 
                 
@@ -3101,546 +3106,9 @@ $.widget( "heurist.editing_input", {
             }
             else 
             if(this.isFileForRecord){ //----------------------------------------------------
-                
-                let $input_img;
-                
-                let select_return_mode = 'recordset';
 
-                // File IDs, needed for processes below
-                let f_id = value.ulf_ID;
-                let f_nonce = value.ulf_ObfuscatedFileID;
-                const dtyID = this.options.dtID ?? this.f('rst_DetailTypeID');;
+                this._setupImageInput($inputdiv, value);
 
-                // urls for downloading and loading the thumbnail
-                let dwnld_link = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&debug=1&download=1&file=${f_nonce}`;
-                let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}&mode=tag&origin=recview`;
-                                let $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
-                
-                $input.css({'padding-left': '30px', 'padding-right': '30px', cursor:'hand'});
-                //folder icon in the begining of field
-                let $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
-                    .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input );
-                $('<span>', {class: 'file-vis ui-icon', style: 'position: absolute; margin: 3px 0px 0px -24px'}).insertAfter( $input );
-
-                $inputdiv.append('<br>');
-
-                // Image and Player (enalrged image) container
-                $input_img = $('<div>', {
-                    class: 'image_input ui-widget-content ui-corner-all thumb_image',
-                    style: 'margin: 5px 0px 1em; border: none; background: transparent; min-height: unset;'
-                }).appendTo($inputdiv).hide();
-
-                if(this.options?.values?.length > 1){
-                    $input_img.css({
-                        'border-bottom': '1px solid darkgrey',
-                        'padding-bottom': '1em'
-                    });
-                }
-
-                // Thumbnail container
-                $('<img>', {
-                    id: `img${dtyID}_${f_id}`,
-                    class: 'image_input',
-                    style: 'max-width: none; position: relative;'
-                }).appendTo($input_img);
-
-                // File 'player' container
-                $('<div>', {
-                    id: `player${dtyID}_${f_id}`,
-                    style: 'min-height: 100px; min-width: 200px; display: none;'
-                }).appendTo($input_img);
-
-                // Controls
-                let $img_controls = $('<div>', {
-                    class: 'preview_controls',
-                    style: 'display: none; font-size: smaller; padding-top: 0.5em;'
-                }).appendTo($input_img);
-
-                // Record Type help text for Record Editor
-                $('<br><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
-                    + 'Click image to freeze in place</div>')
-                .clone()
-                .insertAfter( $clear_container )
-                .hide();
-
-                // Add download, show thumbnail and show in popup links
-                $('<a>', {
-                    href: '#',
-                    class: `mode_switcher`,
-                    style: 'display: inline-block; padding-right: 1.5em; text-decoration: underline; color: blue;',
-                    text: 'click to zoom'
-                }).appendTo($img_controls);
-
-                $('<a>', {
-                    href: dwnld_link,
-                    target: '_surf',
-                    id: `dwn${dtyID}_${f_id}`,
-                    class: 'external-link image_tool',
-                    title: 'Download image',
-                    style: 'display: inline-block; color: blue;',
-                    html: '<span class="ui-icon ui-icon-download" />'
-                }).appendTo($img_controls);
-
-                $('<a>', {
-                    href: '#',
-                    class: 'popup_viewer',
-                    title: 'Full view in a popup',
-                    style: 'display: inline-block; text-decoration: underline; color: blue; padding-left: 5px;',
-                    html: '<span class="ui-icon ui-icon-popup" />popup'
-                }).appendTo($img_controls);
-                
-                // Edit file's metadata
-                let $edit_details = $('<span class="ui-icon ui-icon-pencil edit_metadata" title="Edit image metadata" style="cursor: pointer;padding-left:5px;">')
-                        .insertBefore($clear_container);
-                this._on($edit_details, {
-                    click: function(event){
-
-                        let popup_opts = {
-                            isdialog: true, 
-                            select_mode: 'manager',
-                            edit_mode: 'editonly',
-                            rec_ID: f_id,
-                            default_palette_class: 'ui-heurist-populate',
-                            width: 950,
-                            onClose: function(recordset){
-
-                                // update external reference, if necessary
-                                if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
-
-                                    let record = recordset.getFirstRecord();
-
-                                    let newvalue = {
-                                        ulf_ID: recordset.fld(record,'ulf_ID'),
-                                        ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
-                                        ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
-                                        ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
-                                        ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
-                                        ulf_Caption: recordset.fld(record,'ulf_Caption'),
-                                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
-                                        ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
-                                    };
-
-                                    that.newvalues[$input.attr('id')] = newvalue;
-                                    that._findAndAssignTitle($input, newvalue);
-                                }
-                            }
-                        };
-
-                        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
-                    }
-                }); // edit details click
-                if(!window.hWin.HEURIST4.util.isPositiveInt(f_id)){
-                    $edit_details.hide();
-                }
-
-                // Use camera
-                let $camera = $('<span>', {class: 'ui-icon ui-icon-camera use_camera', title: 'Take a photo with your camera', style: 'cursor: pointer; padding-left: 5px;'})
-                    .insertBefore($clear_container);
-                this._on($camera, {
-                    click: this._photoMode
-                });
-                let check_camera = typeof navigator?.mediaDevices?.enumerateDevices === 'function' && window.self === window.top;
-                if(check_camera){ // check for camera input
-                    navigator.mediaDevices.enumerateDevices()
-                    .then((devices) => {
-                        let show_camera = false;
-                        for(const device of devices){
-                            if(device.kind === 'videoinput'){
-                                show_camera = true;
-                                break;
-                            }
-                        }
-                        if(!show_camera){
-                            $camera.hide();
-                            this._off($camera, 'click');
-                        }
-                    }).catch(() => {
-                        $camera.hide();
-                        this._off($camera, 'click');
-                    });
-                }else{
-                    $camera.hide();
-                    this._off($camera, 'click');
-                }
-
-                // Change Handler
-                this._on($input,{change: 
-                function(event){
-
-                    // new file values
-                    let val = that.newvalues[$input.attr('id')];
-
-                    if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
-                        $input.val('');
-                    }else{
-                        let n_id = val['ulf_ID'];
-                        let n_nonce = val['ulf_ObfuscatedFileID'];
-                        let n_dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&debug=2&download=1&file='+n_nonce;
-                        let n_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+n_nonce+'&mode=tag&origin=recview';
-                    
-                        if(f_id != n_id){// If the image has been changed from original/or has been newly added
-
-                            let $container = $(event.target.parentNode);
-
-                            let $dwnld = $($container.find(`a#dwn${dtyID}_${f_id}`)[0]);
-                            let $player = $($container.find(`div#player${dtyID}_${f_id}`)[0]);
-                            let $thumbnail = $($container.find(`img#img${dtyID}_${f_id}`)[0]);
-                            let $edit_metadata = $($container.find('.edit_metadata')[0]);
-                            $($container.find(`[data-id="${f_id}"]`)).attr('data-id', n_id);
-
-                            $dwnld.attr({id: `dwn${dtyID}_${n_id}`, href: n_dwnld_link});
-                            $player.attr({id: `player${dtyID}_${n_id}`});
-                            $thumbnail.attr({id: `img${dtyID}_${n_id}`});                       
-
-                            f_id = n_id;
-                            f_nonce = n_nonce;
-                            dwnld_link = n_dwnld_link;
-                            url = n_url;
-                            that._applyIiifImagePreviewControls($input, val);
-
-                            if(!n_id || n_id < 1){
-                                $edit_metadata.hide();
-                            }else{
-                                $edit_metadata.show();
-                            }
-                        }
-                        
-                    }
-                    
-                    //clear thumb rollover
-                    if(window.hWin.HEURIST4.util.isempty($input.val())){
-                        $input_img.find('img').attr('src','');
-                    }
-
-                    that.onChange(); 
-                } }); // input change
-                
-                // Handler Variables
-                let hideTimer = 0, showTimer = 0;  //  Time for hiding thumbnail
-                let isClicked = 0;  // Number of image clicks, one = freeze image inline, two = enlarge/srink
-
-                // Input element's hover handler
-                function __showImagePreview(event){
-                    let imgAvailable = !window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'));
-                    let invalidURL = $inputdiv.find('div.smallText').hasClass('invalidImg');
-
-                    if((imgAvailable || invalidURL) && isClicked === 0){
-                        if (hideTimer) {
-                            window.clearTimeout(hideTimer);
-                            hideTimer = 0;
-                        }
-                        
-                        if($input_img.is(':visible')){
-                            $input_img.stop(true, true).show();    
-                        }else{
-                            if(showTimer==0){
-                                showTimer = window.setTimeout(function(){
-                                    $input_img.show();
-                                    $inputdiv.find('div.smallText').show();
-                                    showTimer = 0;
-                                },500);
-                            }
-                        }
-                    }
-                }
-                this._on($input,{mouseover: __showImagePreview});
-                this._on($input_img,{mouseover: __showImagePreview});
-
-                // Input element's mouse out handler, attached and dettached depending on user preferences
-                function __hideImagePreview(event){
-                    if (showTimer) {
-                        window.clearTimeout(showTimer);
-                        showTimer = 0;
-                    }
-
-                    if($input_img.is(':visible')){
-                        
-                        let ele = event.toElement || event.relatedTarget;
-                        ele = $(ele);
-                        if(ele.hasClass('image_input') || ele.parent().hasClass('image_input')){
-                            return;
-                        }
-                                                
-                        hideTimer = window.setTimeout(function(){
-                            if(isClicked === 0){
-                                $input_img.fadeOut(1000);
-                                $inputdiv.find('div.smallText').hide(1000);
-                            }
-                        }, 500);
-                    }
-                }
-                this._on($input, {mouseout:__hideImagePreview});
-                this._on($input_img, {mouseout:__hideImagePreview});
-
-                // Thumbnail's click handler
-                this._on($input_img, {
-                    click: (event) => {
-
-                        let elem = event.target;
-
-                        if(isClicked === 0 && !$inputdiv.find('div.smallText').hasClass('invalidImg')){
-
-                            isClicked = 1;
-                            
-                            that._off($input_img,'mouseout');
-
-                            $inputdiv.find('div.smallText').hide(); // Hide image help text
-
-                            let $controls = $input_img.parent().find('div.preview_controls'); // Find the download anchors
-
-                            that._applyIiifImagePreviewControls($input, that.newvalues[$input.attr('id')]);
-                            $controls.show();
-
-                            if($controls.find(`a#dwn${dtyID}_undefined`)){  // Need to ensure the links are setup
-                                $controls.find(`a#dwn${dtyID}_undefined`).attr({id: `dwn${dtyID}_${f_id}`, href: dwnld_link});
-                            }
-
-                            $input_img.css('cursor', 'zoom-in');
-
-                        }
-                        else if(isClicked === 1){
-
-                            if(that._isIiifImageFileValue(that.newvalues[$input.attr('id')])){
-                                return;
-                            }
-
-                            // Enlarge Image, display player
-                            if($input_img.hasClass('thumb_image') && (elem.tagName !== 'IMG' || elem.classList.contains('image_input'))){
-
-                                $input_img.css('cursor', 'zoom-out');
-
-                                window.hWin.HEURIST4.ui.showPlayer($input_img.find('img')[0], $input_img[0], `${dtyID}_${f_id}`, url);
-                            }
-                            else{  // Srink Image, display thumbnail
-
-                                $input_img.css('cursor', 'zoom-in');
-
-                                if(elem.tagName !== 'IMG'){
-                                    window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
-                                }
-                            }
-
-                            $input_img.find('.mode_switcher').text(!$input_img.hasClass('thumb_image') ? 'show thumbnail' : 'click to zoom');
-                        }
-                    }
-                });
-
-                // for closing inline image when 'frozen'
-                let $hide_thumb = $('<a>', {
-                    href: '#',
-                    class: 'hideTumbnail',
-                    style: 'padding-left: 1.5em; color: blue; cursor: pointer;',
-                    title: 'Hide image thumbnail',
-                    text: 'close'
-                }).appendTo($img_controls).show();
-
-                this._on($hide_thumb, {
-                    click: (event) => {
-
-                        window.hWin.HEURIST4.util.stopEvent(event);
-
-                        isClicked = 0;
-
-                        this._on($input,{mouseover: __showImagePreview});
-                        this._on($input_img,{mouseover: __showImagePreview});
-
-                        this._on($input, {mouseout:__hideImagePreview});
-                        this._on($input_img, {mouseout:__hideImagePreview});
-
-                        $img_controls.hide();
-
-                        if($inputdiv.find('div.smallText').find('div.smallText').hasClass('invalidImg')){
-                            $input_img.hide().css('cursor', '');
-                        }else{
-                            $input_img.hide().css('cursor', 'pointer');
-                        }
-
-                        window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
-                    }
-                });
-
-                // Show Thumbnail handler
-                this._on($input_img.find('.mode_switcher'), {
-                    click: (event) => {
-                        window.hWin.HEURIST4.util.stopEvent(event);
-                        $input_img.trigger('click');
-                    }
-                });
-
-                // 'popup' viewer handler
-                this._on($img_controls.find('.popup_viewer'), {
-                    click: (event) => {
-
-                        window.hWin.HEURIST4.util.stopEvent(event);
-
-                        let filename = $input.val();
-                        let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}`;
-                        let msg = `<img src='${url}' alt='${filename.replace('"', '&quote;').replace("'", '&apos;')}' style='height:99%;width:99%;object-fit:contain' />`;
-                        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                            msg, null, {title: filename}, {default_palette_class: 'ui-heurist-explore', resizable: true, width: 'auto', height: 'auto'}
-                        );
-                        $dlg.css('max-width', 'none');
-                    }
-                });
-                
-                let $mirador_link = $(`<a href="#" data-id="${f_nonce}" class="miradorViewer_link" style="color: blue;" title="Open in Mirador">`
-                    +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
-                    +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
-                    +'"></span>&nbsp;Mirador</a>').insertBefore( $hide_thumb ).hide();
-                    
-                this._on($mirador_link, {
-                    click:function(event){
-
-                        window.hWin.HEURIST4.util.stopEvent(event);
-
-                        let ele = $(event.target)
-
-                        if(!ele.attr('data-id')){
-                            ele = ele.parents('[data-id]');
-                        }
-                        let obf_recID = ele.attr('data-id');
-                        let is_manifest = (ele.attr('data-manifest')==1);
-
-                        let url =  window.hWin.HAPI4.baseURL
-                        + 'hclient/widgets/viewers/miradorViewer.php?db=' 
-                        +  window.hWin.HAPI4.database
-                        + '&' + (is_manifest?('manifest='+that.options.recID):('id='+obf_recID));
-                        //PRE 2026-06-28 + '&recID=' + that.options.recID + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
-
-                        const show_mirador_in_popup = true;
-                        if(show_mirador_in_popup){
-                            //borderless:true, 
-                            window.hWin.HEURIST4.msg.showDialog(url, 
-                                {dialogid:'mirador-viewer',
-                                    //resizable:false, draggable: false, 
-                                    //maximize:true, 
-                                    default_palette_class: 'ui-heurist-explore',
-                                    width:'90%',height:'95%',
-                                    allowfullscreen:true,'padding-content':'0px'});   
-
-                            let $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
-
-                            $dlg.parent().css('top','50px');
-                        }else{
-                            window.open(url, '_blank');        
-                        }                      
-
-                        //data-id
-                    }
-                });
-
-                let $openseadragon_link = $('<a>', {
-                    href: '#', 'data-id': f_id, class: 'openseadragon_link', style: 'color: blue; padding-left: 0.75em;', title: 'Open in OpenSeadragon',
-                    html: '<span class="ui-icon ui-icon-image"></span>&nbsp;OpenSeadragon'
-                }).insertAfter($mirador_link);
-
-                this._on($openseadragon_link, {
-                    click: (event) => {
-
-                        window.hWin.HEURIST4.util.stopEvent(event);
-
-                        let ele = $(event.target)
-
-                        if(!ele.attr('data-id')){
-                            ele = ele.parents('[data-id]');
-                        }
-
-                        let fileID = ele.attr('data-id');
-                        let currentValue = that.newvalues[$input.attr('id')];
-                        let imageUrl = that._isIiifImageFileValue(currentValue) ? that._iiifImageRasterUrlFromValue(currentValue, 'full') : '';
-
-                        let url = `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${window.hWin.HAPI4.database}`
-                            + (imageUrl ? `&image=${encodeURIComponent(imageUrl)}` : `&recID=${fileID}`);
-
-                        window.hWin.HEURIST4.msg.showDialog(url, {
-                            dialogid: 'openseadragon-viewer', default_palette_class: 'ui-heurist-explore',
-                            width: '90%', height: '95%', allowfullscreen: true, 'padding-content': '0px'
-                        });
-                    }
-                });
-
-                // Thumbnail preview is initially closed for all media.
-                // It opens on mouseover only, becomes fixed on thumbnail click,
-                // and closes again via the close link.
-
-                const isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
-                    && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
-                 
-                let popup_options = {
-                    isdialog: true,
-                    select_mode: 'select_single',
-                    additionMode: isTiledImage?'tiled':'any',  //AAAA
-                    edit_addrecordfirst: true, //show editor at once
-                    select_return_mode:select_return_mode, //ids or recordset(for files)
-                    filter_group_selected:null,
-                    filter_groups: this.configMode.filter_group,
-                    default_palette_class: 'ui-heurist-populate',
-                    onselect:function(event, data){
-
-                        if(data && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
-
-                            let recordset = data.selection;
-                            let record = recordset.getFirstRecord();
-
-                            let newvalue = {
-                                ulf_ID: recordset.fld(record,'ulf_ID'),
-                                ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
-                                ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
-                                ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
-                                ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
-                                ulf_Caption: recordset.fld(record,'ulf_Caption'),
-                                ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
-                                ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
-                            };
-
-                            that.newvalues[$input.attr('id')] = newvalue;
-                            that._findAndAssignTitle($input, newvalue);
-
-                        }//data
-
-                    }
-                };//popup_options
-
-                that._findAndAssignTitle($input, value);
-
-                let __show_select_dialog = function(event){
-                    
-                        if(that.is_disabled) return;
-
-                        event.preventDefault();
-                        
-                        let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
-                            {width: null,  //null triggers default width within particular widget
-                            height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-            
-                        popup_options.width = usrPreferences.width;
-                        popup_options.height = usrPreferences.height;
-                        let sels = this.newvalues[$(event.target).attr('id')];
-                        if(!sels && this.options.values && this.options.values[0]){
-                             sels = this.options.values[0];    //take selected value from options
-                        } 
-
-                        if($.isPlainObject(sels)){
-                            popup_options.selection_on_init = sels;
-                        }else if(!window.hWin.HEURIST4.util.isempty(sels)){
-                            popup_options.selection_on_init = sels.split(',');
-                        } else {
-                            popup_options.selection_on_init = null;    
-                        }                                                                                       
-                        //init dialog to select related uploaded files
-                        window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
-                }
-                
-                if(__show_select_dialog!=null){
-                   
-                    this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
-                    this._on( $gicon, { click: __show_select_dialog } );
-                }
-                
-                if(this.isFileForRecord && value){
-                    //assign value at once
-                    this.newvalues[$input.attr('id')] = value;
-                }
             }
             else
             if( this.detailType=='folder' ){ //----------------------------------------------------
@@ -5262,8 +4730,9 @@ $.widget( "heurist.editing_input", {
 
     _applyIiifImagePreviewControls: function(ele, fileValue, checkImageData){
         let isIiifImage = this._isIiifImageFileValue(fileValue, checkImageData);
-        let $preview = ele.parent().find('.image_input').first();
-        let $controls = ele.parent().find('div.preview_controls');
+        let $image_container = this.element.find(`div[image-divid="${ele.attr('id')}"]`);
+        let $preview = $image_container.find('.image_input').first();
+        let $controls = $image_container.find('div.preview_controls');
 
         $controls.find('.mode_switcher').toggle(!isIiifImage);
         $controls.find('.image_tool').toggle(!isIiifImage);
@@ -5292,6 +4761,8 @@ $.widget( "heurist.editing_input", {
 
             if($.isPlainObject(value) && value.ulf_ObfuscatedFileID){
 
+                let $image_container = this.element.find(`div[image-divid="${ele.attr('id')}"]`);
+
                 // Setup file title
                 let rec_Title = value.ulf_Caption;
                 let file = value.ulf_ExternalFileReference ? value.ulf_ExternalFileReference : value.ulf_OrigFileName;
@@ -5316,82 +4787,82 @@ $.widget( "heurist.editing_input", {
 
                     if(youtube_id){
 
-                        ele.parent().find('.image_input > img').attr('src', 'https://img.youtube.com/vi/'+ youtube_id +'/default.jpg');
-                        ele.parent().find('.smallText').text("Click image to freeze in place").css({
-                            "font-size": "smaller", 
-                            "color": "grey", 
-                            "position": "", 
-                            "top": ""
+                        $image_container.find('.image_input > img').attr('src', `https://img.youtube.com/vi/${youtube_id}/default.jpg`);
+                        $image_container.find('.smallText').text('Click image to freeze in place').css({
+                            'font-size': 'smaller',
+                            color: 'grey',
+                            position: '',
+                            top: ''
                         })
                         .removeClass('invalidImg');
 
                         that.newvalues[ele.attr('id')] = value;
                     }else{
 
-                        ele.parent().find('.image_input > img').removeAttr('src');
-                        ele.parent().find('.smallText').text("Unable to retrieve youtube thumbnail").css({
-                            "font-size": "larger", 
-                            "color": "black", 
-                            "position": "relative", 
-                            "top": "60px"
+                        $image_container.find('.image_input > img').removeAttr('src');
+                        $image_container.find('.smallText').text('Unable to retrieve youtube thumbnail').css({
+                            'font-size': 'larger',
+                            color: 'black',
+                            position: 'relative',
+                            top: '60px'
                         })
                         .addClass('invalidImg');
 
-                        ele.parent().find('.hideTumbnail').trigger('click');
+                        $image_container.find('.hideTumbnail').trigger('click');
                     }
 
                     ele.trigger('change');
                 }else{ // check if image that can be rendered
 
-                    window.hWin.HAPI4.checkImage("Records", value["ulf_ObfuscatedFileID"], null, function(response) {
+                    window.hWin.HAPI4.checkImage('Records', value['ulf_ObfuscatedFileID'], null, function(response) {
 
                         if(response.data && response.status == window.hWin.ResponseStatus.OK) {
-                            
+
                             ele.attr('data-mimetype', response.data.mimetype);
-                            
-                            const isMiradorManifest = response.data.original_name=='_iiif';
+
+                            const isMiradorManifest = response.data.original_name == '_iiif';
                             const isIiifImage = that._isIiifImageFileValue(value, response.data);
-                            
+
                             if ((response.data.mimetype && response.data.mimetype.indexOf('image/')===0)
                                 || isMiradorManifest || isIiifImage)
                             {
-                                ele.parent().find('.image_input > img').attr('src',
-                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&offer_download=1&thumb='+
-                                        value.ulf_ObfuscatedFileID);
+                                $image_container.find('.image_input > img')
+                                    .attr('src', `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&offer_download=1&thumb=${value.ulf_ObfuscatedFileID}`);
+
                                 that._applyIiifImagePreviewControls(ele, value, response.data);
                                         
                                 if((response.data.width > 0 && response.data.height > 0) || isMiradorManifest || isIiifImage) {
 
-                                    ele.parent().find('.smallText').text('Click image to freeze in place').css({
-                                        "font-size": "smaller", 
-                                        "color": "grey", 
-                                        "position": "", 
-                                        "top": ""
+                                    $image_container.find('.smallText').text('Click image to freeze in place').css({
+                                        'font-size': 'smaller',
+                                        color: 'grey',
+                                        position: '',
+                                        top: ''
                                     })
                                     .removeClass('invalidImg');
 
                                     that.newvalues[ele.attr('id')] = value;
                                 }else{
 
-                                    ele.parent().find('.image_input > img').removeAttr('src');
-                                    ele.parent().find(".smallText").text("This file cannot be rendered").css({
-                                        "font-size": "larger", 
-                                        "color": "black", 
-                                        "position": "relative", 
-                                        "top": "60px"
+                                    $image_container.find('.image_input > img').removeAttr('src');
+                                    $image_container.find('.smallText').text('This file cannot be rendered').css({
+                                        'font-size': 'larger',
+                                        color: 'black',
+                                        position: 'relative',
+                                        top: '60px'
                                     })
                                     .addClass('invalidImg');
 
-                                    ele.parent().find('.hideTumbnail').trigger('click');
-                                    ele.parent().find('.hideTumbnail').hide();
+                                    $image_container.find('.hideTumbnail').trigger('click');
+                                    $image_container.find('.hideTumbnail').hide();
                                 }
-                                
+
                             }else{
-                                ele.parent().find('.image_input').hide();
-                                ele.parent().find('.hideTumbnail').hide();
+                                $image_container.hide();
+                                $image_container.find('.hideTumbnail').hide();
                             }
-                            
-                            let mirador_link = ele.parent().find('.miradorViewer_link');
+
+                            let mirador_link = $image_container.find('.miradorViewer_link');
                             let mimetype = response.data.mimetype;
                             if(response.data.original_name.indexOf('_iiif')===0 || isIiifImage){
 
@@ -5414,7 +4885,7 @@ $.widget( "heurist.editing_input", {
                                 mirador_link.hide();
                             }
 
-                            let openseadragon_link = ele.parent().find('.openseadragon_link');
+                            let openseadragon_link = $image_container.find('.openseadragon_link');
                             if(mimetype.indexOf('image/') === 0 || isIiifImage){
                                 openseadragon_link.show();
                             }else{
@@ -6168,7 +5639,11 @@ $.widget( "heurist.editing_input", {
             let ele = this.inputs[idx].parents('.input-div');
             ele.insertAfter(ele_after);
             ele_after = ele;
-        }    
+        }
+
+        if(this.isFileForRecord){
+            this._setImageOrder();
+        }
     },
     
     //
@@ -7951,6 +7426,655 @@ $.widget( "heurist.editing_input", {
 
                 $output.text(output);
             }
+        });
+    },
+
+    _setupImageInput: function($inputdiv, value){
+
+        if(!this.isFileForRecord){
+            return;
+        }
+
+        const $input = $inputdiv.find('input');
+
+        // File IDs, needed for processes below
+        let f_id = value.ulf_ID;
+        let f_nonce = value.ulf_ObfuscatedFileID;
+        const dtyID = this.options.dtID ?? this.f('rst_DetailTypeID');
+
+        // urls for downloading and loading the thumbnail
+        let dwnld_link = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&debug=1&download=1&file=${f_nonce}`;
+        let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}&mode=tag&origin=recview`;
+        let $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
+        
+        $input.css({'padding-left': '30px', 'padding-right': '30px', cursor:'hand'});
+        //folder icon in the begining of field
+        let $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
+            .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input );
+        $('<span>', {class: 'file-vis ui-icon', style: 'position: absolute; margin: 3px 0px 0px -24px'}).insertAfter( $input );
+
+        let $imageContainer = this.element.find('.image-containers');
+        if(window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID)
+        && window.hWin.HEURIST4.util.isPositiveInt(dtyID)
+        && $imageContainer.length === 0){
+
+            let $showAllImages = $('<span>', {
+                class: 'showAllImages smallbutton ui-icon ui-icon-eye-open',
+                title: 'Turn on/off display of thumbnail images (applies to this field for all records)',
+                style: 'cursor: pointer;'
+            }).appendTo(this.element.find('.editint-inout-repeat-container'));
+
+            $imageContainer = $('<div>', {class: 'image-containers', style: 'display:grid;grid-template-columns:repeat(3, 1fr);gap:2em;'}).insertAfter(this.error_message);
+
+            if(this.element.find('.editint-inout-repeat-button').length > 0){
+
+                this.element.find('.editint-inout-repeat-button').css({
+                    'margin-left': '0px',
+                    display: 'inline-block'
+                });
+
+                $showAllImages.css('margin', '1px 0px 0px 2px');
+            }
+
+            this._on($showAllImages, {
+                click: () => {
+
+                    let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllRecords', []);
+                    showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+                    if(!Array.isArray(showAllImagesPrefs)){
+                        console.error(`showAllImagesPrefs is not an array, found: ${showAllImagesPrefs}`);
+                        return;
+                    }
+
+                    const recTypeID = Number.parseInt(this.options.rectypeID);
+                    const detailTypeID = Number.parseInt(dtyID);
+                    const valueKey = `${recTypeID}.${detailTypeID}`;
+                    const valueKeyIndex = showAllImagesPrefs.indexOf(valueKey);
+
+                    if(valueKeyIndex >= 0){
+                        this.element.find('div.image_input .hideTumbnail').trigger('click');
+                        showAllImagesPrefs.splice(valueKeyIndex, 1);
+                    }else{
+                        this.element.find('div.image_input').trigger('click').show();
+                        showAllImagesPrefs.push(valueKey);
+                    }
+
+                    window.hWin.HAPI4.save_pref('edit_record_showAllRecords', showAllImagesPrefs);
+                }
+            });
+        }
+
+        let $image_div = $('<div>', {
+            class: 'image-div',
+            'image-divid': $input.attr('id')
+        }).appendTo($imageContainer);
+
+        let $input_img, $img_controls;
+        [$input_img, $img_controls] = this._addImageControls($image_div, f_id, f_nonce, dwnld_link);
+        
+        this._addImageActions($clear_container, f_id);
+
+        // Change Handler
+        this._on($input,{
+            change: (event) => {
+
+                // new file values
+                let val = this.newvalues[$input.attr('id')];
+
+                if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
+                    $input.val('');
+                }else{
+                    let n_id = val['ulf_ID'];
+                    let n_nonce = val['ulf_ObfuscatedFileID'];
+                    let n_dwnld_link = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&debug=2&download=1&file=${n_nonce}`;
+                    let n_url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${n_nonce}&mode=tag&origin=recview`;
+
+                    if(f_id != n_id){// If the image has been changed from original/or has been newly added
+
+                        let $container = this.element.find(`div[image-divid="${event.target.id}"]`);
+
+                        const originalIDStub = f_id === '' ? `${dtyID}_${f_id}` : `${dtyID}_undefined`;
+
+                        let $dwnld = $container.find(`a#dwn${originalIDStub}`);
+                        let $player = $container.find(`div#player${originalIDStub}`);
+                        let $thumbnail = $container.find(`img#img${originalIDStub}`);
+                        let $edit_metadata = $container.find('.edit_metadata');
+                        let $openSeadragon = $container.find('.openseadragon_link');
+                        let $miradorViewer = $container.find('.miradorViewer_link');
+
+                        $($container.find(`[data-id="${f_id}"]`)).attr('data-id', n_id);
+
+                        $dwnld.attr({id: `dwn${dtyID}_${n_id}`, href: n_dwnld_link});
+                        $player.attr('id', `player${dtyID}_${n_id}`);
+                        $thumbnail.attr('id', `img${dtyID}_${n_id}`);
+                        $openSeadragon.attr('data-id', n_id);
+                        $miradorViewer.attr('data-id', n_nonce);
+
+                        f_id = n_id;
+                        f_nonce = n_nonce;
+                        dwnld_link = n_dwnld_link;
+                        url = n_url;
+                        this._applyIiifImagePreviewControls($input, val);
+
+                        if(!n_id || n_id < 1){
+                            $edit_metadata.hide();
+                        }else{
+                            $edit_metadata.show();
+                        }
+
+                        $input_img.show();
+                        $image_div.hide();
+                    }
+                    
+                }
+                
+                //clear thumb rollover
+                if(window.hWin.HEURIST4.util.isempty($input.val())){
+                    $input_img.find('img').attr('src','');
+                }
+
+                this.onChange(); 
+            }
+        }); // input change
+        
+        // Handler Variables
+        let hideTimer = 0, showTimer = 0;  //  Time for hiding thumbnail
+        let isClicked = 0;  // Number of image clicks, one = freeze image inline, two = enlarge/srink
+
+        // Input element's hover handler
+        function __showImagePreview(){
+
+            let imgAvailable = !window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'));
+            let invalidURL = $image_div.find('div.smallText').hasClass('invalidImg');
+
+            if((imgAvailable || invalidURL) && isClicked === 0){
+
+                if (hideTimer) {
+                    window.clearTimeout(hideTimer);
+                    hideTimer = 0;
+                }
+                
+                if($input_img.is(':visible')){
+                    $image_div.stop(true, true).show();    
+                }else if (showTimer == 0){
+                    showTimer = window.setTimeout(() => {
+                        $image_div.show();
+                        $image_div.find('div.smallText').show();
+                        showTimer = 0;
+                    }, 500);
+                }
+            }
+        }
+        this._on($input,{mouseover: __showImagePreview});
+        this._on($input_img,{mouseover: __showImagePreview});
+
+        // Input element's mouse out handler, attached and dettached depending on user preferences
+        function __hideImagePreview(event){
+            if (showTimer) {
+                window.clearTimeout(showTimer);
+                showTimer = 0;
+            }
+
+            if($input_img.is(':visible')){
+                
+                let ele = event.toElement || event.relatedTarget;
+                ele = $(ele);
+                if(ele.hasClass('image_input') || ele.parent().hasClass('image_input')){
+                    return;
+                }
+                                        
+                hideTimer = window.setTimeout(function(){
+                    if(isClicked === 0){
+                        $image_div.fadeOut(1000);
+                        $image_div.find('div.smallText').hide(1000);
+                    }
+                }, 1000);
+            }
+        }
+        this._on($input, {mouseout:__hideImagePreview});
+        this._on($input_img, {mouseout:__hideImagePreview});
+
+        // Thumbnail's click handler
+        this._on($input_img, {
+            click: (event) => {
+
+                let elem = event.target;
+
+                if(isClicked === 0 && !$image_div.find('div.smallText').hasClass('invalidImg')){
+
+                    isClicked = 1;
+                    
+                    this._off($input_img, 'mouseout');
+
+                    $image_div.find('div.smallText').hide(); // Hide image help text
+
+                    let $controls = $input_img.parent().find('div.preview_controls'); // Find the download anchors
+
+                    this._applyIiifImagePreviewControls($input, this.newvalues[$input.attr('id')]);
+                    $controls.show();
+
+                    if($controls.find(`a#dwn${dtyID}_undefined`)){  // Need to ensure the links are setup
+                        $controls.find(`a#dwn${dtyID}_undefined`).attr({id: `dwn${dtyID}_${f_id}`, href: dwnld_link});
+                    }
+
+                    $input_img.css('cursor', 'zoom-in');
+
+                }
+                else if(isClicked === 1){
+
+                    if(this._isIiifImageFileValue(this.newvalues[$input.attr('id')])){
+                        return;
+                    }
+
+                    // Enlarge Image, display player
+                    if($input_img.hasClass('thumb_image') && (elem.tagName !== 'IMG' || elem.classList.contains('image_input'))){
+
+                        $input_img.css('cursor', 'zoom-out');
+
+                        window.hWin.HEURIST4.ui.showPlayer($input_img.find('img')[0], $input_img[0], `${dtyID}_${f_id}`, url);
+                    }
+                    else{  // Srink Image, display thumbnail
+
+                        $input_img.css('cursor', 'zoom-in');
+
+                        if(elem.tagName !== 'IMG'){
+                            window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
+                        }
+                    }
+
+                    $input_img.find('.mode_switcher').text(!$input_img.hasClass('thumb_image') ? 'thumbnail' : 'click to view');
+                }
+            }
+        });
+
+        this._on($img_controls.find('.hideTumbnail'), {
+            click: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                isClicked = 0;
+
+                this._on($input,{mouseover: __showImagePreview});
+                this._on($input_img,{mouseover: __showImagePreview});
+
+                this._on($input, {mouseout:__hideImagePreview});
+                this._on($input_img, {mouseout:__hideImagePreview});
+
+                $img_controls.hide();
+
+                if($image_div.find('div.smallText').find('div.smallText').hasClass('invalidImg')){
+                    $input_img.css('cursor', '');
+                }else{
+                    $input_img.css('cursor', 'pointer');
+                }
+
+                $image_div.hide();
+
+                window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
+            }
+        });
+
+        // Show Thumbnail handler
+        this._on($input_img.find('.mode_switcher'), {
+            click: (event) => {
+                window.hWin.HEURIST4.util.stopEvent(event);
+                $input_img.trigger('click');
+            }
+        });
+
+        // 'popup' viewer handler
+        this._on($img_controls.find('.popup_viewer'), {
+            click: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                let filename = $input.val();
+                let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}`;
+                let msg = `<img src='${url}' alt='${filename.replace('"', '&quote;').replace("'", '&apos;')}' style='height:99%;width:99%;object-fit:contain' />`;
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    msg, null, {title: filename}, {default_palette_class: 'ui-heurist-explore', resizable: true, width: 'auto', height: 'auto'}
+                );
+                $dlg.css('max-width', 'none');
+            }
+        });
+            
+        this._on($img_controls.find('.miradorViewer_link'), {
+            click:function(event){
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                let ele = $(event.target)
+
+                if(!ele.attr('data-id')){
+                    ele = ele.parents('[data-id]');
+                }
+                let obf_recID = ele.attr('data-id');
+                let is_manifest = (ele.attr('data-manifest')==1);
+
+                let url =  `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/miradorViewer.php?db=${window.hWin.HAPI4.database}&${is_manifest ? `manifest=${this.options.recID}` : `id=${obf_recID}`}`;
+
+                const show_mirador_in_popup = true;
+                if(show_mirador_in_popup){
+                    //borderless:true, 
+                    window.hWin.HEURIST4.msg.showDialog(url, 
+                        {dialogid:'mirador-viewer',
+                            //resizable:false, draggable: false, 
+                            //maximize:true, 
+                            default_palette_class: 'ui-heurist-explore',
+                            width:'90%',height:'95%',
+                            allowfullscreen:true,'padding-content':'0px'});   
+
+                    let $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+
+                    $dlg.parent().css('top','50px');
+                }else{
+                    window.open(url, '_blank');        
+                }                      
+
+                //data-id
+            }
+        });
+
+        this._on($img_controls.find('.openseadragon_link'), {
+            click: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                let ele = $(event.target)
+
+                if(!ele.attr('data-id')){
+                    ele = ele.parents('[data-id]');
+                }
+
+                let fileID = ele.attr('data-id');
+                let currentValue = this.newvalues[$input.attr('id')];
+                let imageUrl = this._isIiifImageFileValue(currentValue) ? this._iiifImageRasterUrlFromValue(currentValue, 'full') : '';
+
+                let url = `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${window.hWin.HAPI4.database}`
+                    + (imageUrl ? `&image=${encodeURIComponent(imageUrl)}` : `&recID=${fileID}`);
+
+                window.hWin.HEURIST4.msg.showDialog(url, {
+                    dialogid: 'openseadragon-viewer', default_palette_class: 'ui-heurist-explore',
+                    width: '90%', height: '95%', allowfullscreen: true, 'padding-content': '0px'
+                });
+            }
+        });
+
+        // Thumbnail preview is initially closed for all media.
+        // It opens on mouseover only, becomes fixed on thumbnail click,
+        // and closes again via the close link.
+
+        const isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
+            && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
+            
+        let popup_options = {
+            isdialog: true,
+            select_mode: 'select_single',
+            additionMode: isTiledImage ? 'tiled' : 'any',
+            edit_addrecordfirst: true, //show editor at once
+            select_return_mode: 'recordset',
+            filter_group_selected: null,
+            filter_groups: this.configMode.filter_group,
+            default_palette_class: 'ui-heurist-populate',
+            onselect: (event, data) => {
+
+                if(data && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
+
+                    let recordset = data.selection;
+                    let record = recordset.getFirstRecord();
+
+                    let newvalue = {
+                        ulf_ID: recordset.fld(record,'ulf_ID'),
+                        ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                        ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                        ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
+                        ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
+                        ulf_Caption: recordset.fld(record,'ulf_Caption'),
+                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
+                        ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
+                    };
+
+                    this.newvalues[$input.attr('id')] = newvalue;
+                    this._findAndAssignTitle($input, newvalue);
+
+                }//data
+
+            }
+        };//popup_options
+
+        this._findAndAssignTitle($input, value);
+
+        let __show_select_dialog = (event) => {
+            
+            if(this.is_disabled) return;
+
+            event.preventDefault();
+            
+            let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
+                {width: null,  //null triggers default width within particular widget
+                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
+            popup_options.width = usrPreferences.width;
+            popup_options.height = usrPreferences.height;
+            let sels = this.newvalues[$(event.target).attr('id')];
+            if(!sels && this.options.values && this.options.values[0]){
+                sels = this.options.values[0];    //take selected value from options
+            } 
+
+            if($.isPlainObject(sels)){
+                popup_options.selection_on_init = sels;
+            }else if(!window.hWin.HEURIST4.util.isempty(sels)){
+                popup_options.selection_on_init = sels.split(',');
+            } else {
+                popup_options.selection_on_init = null;    
+            }
+            //init dialog to select related uploaded files
+            window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
+        }
+        
+        if(__show_select_dialog!=null){
+            
+            this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
+            this._on( $gicon, { click: __show_select_dialog } );
+        }
+        
+        if(this.isFileForRecord && value){
+            //assign value at once
+            this.newvalues[$input.attr('id')] = value;
+        }
+    },
+
+    _addImageControls: function($image_div, fileID, fileObfuscatedID, fileDownload){
+
+        const dtyID = this.options.dtID ?? this.f('rst_DetailTypeID');
+
+        // Image and Player (enalrged image) container
+        let $input_img = $('<div>', {
+            class: 'image_input ui-widget-content ui-corner-all thumb_image',
+            style: 'margin: 5px 0px 1em; border: none; background: transparent; min-height: unset;'
+        }).appendTo($image_div).hide();
+
+        // Thumbnail container
+        $('<img>', {
+            id: `img${dtyID}_${fileID}`,
+            class: 'image_input',
+            style: 'max-width: none; position: relative;'
+        }).appendTo($input_img);
+
+        // File 'player' container
+        $('<div>', {
+            id: `player${dtyID}_${fileID}`,
+            style: 'min-height: 100px; min-width: 200px; display: none;'
+        }).appendTo($input_img);
+
+        // Controls
+        let $img_controls = $('<div>', {
+            class: 'preview_controls',
+            style: 'display: none; font-size: smaller; padding-top: 0.5em;'
+        }).appendTo($input_img);
+
+        // Record Type help text for Record Editor
+        $('<div>', {
+            class: 'smallText',
+            style: 'display:block;color:gray;font-size:smaller;',
+            text: 'Click image to freeze in place'
+        }).prependTo($image_div).hide();
+
+        // Add download, show thumbnail and show in popup links
+        $('<a>', {
+            href: '#',
+            class: `mode_switcher`,
+            style: 'display: inline-block; padding-right: 1.5em; text-decoration: underline; color: blue;',
+            text: 'click to view'
+        }).appendTo($img_controls);
+
+        $('<a>', {
+            href: fileDownload,
+            target: '_surf',
+            id: `dwn${dtyID}_${fileID}`,
+            class: 'external-link image_tool',
+            title: 'Download image',
+            style: 'display: inline-block; color: blue;',
+            html: '<span class="ui-icon ui-icon-download" />'
+        }).appendTo($img_controls);
+
+        $('<a>', {
+            href: '#',
+            class: 'popup_viewer',
+            title: 'Full view in a popup',
+            style: 'display: inline-block; text-decoration: underline; color: blue; padding-left: 5px;',
+            html: '<span class="ui-icon ui-icon-popup" />popup'
+        }).appendTo($img_controls);
+
+        // Viewers
+        $('<a>', {
+            href: '#',
+            'data-id': fileObfuscatedID,
+            class: 'miradorViewer_link',
+            style: 'color: blue;',
+            title: 'Open in Mirador',
+            html: '<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);"></span>&nbsp;Mirador'
+        }).appendTo($img_controls).hide();
+
+        $('<a>', {
+            href: '#', 'data-id': fileID,
+            class: 'openseadragon_link',
+            style: 'color: blue; padding-left: 0.75em;',
+            title: 'Open in OpenSeadragon',
+            html: '<span class="ui-icon ui-icon-image"></span>&nbsp;OpenSeadragon'
+        }).appendTo($img_controls);
+
+        // for closing inline image when 'frozen'
+        $('<a>', {
+            href: '#',
+            class: 'hideTumbnail',
+            style: 'padding-left: 1.5em; color: blue; cursor: pointer;',
+            title: 'Hide image thumbnail',
+            text: 'close'
+        }).appendTo($img_controls).show();
+
+        return [$input_img, $img_controls];
+    },
+
+    _addImageActions: function($clear_container, fileID){
+
+        // Edit file's metadata
+        let $edit_details = $('<span>', {
+            class: 'ui-icon ui-icon-pencil edit_metadata',
+            title: 'Edit image metadata',
+            style: 'cursor: pointer;padding-left:5px;'
+        }).insertBefore($clear_container);
+
+        this._on($edit_details, {
+            click: () => {
+
+                let popup_opts = {
+                    isdialog: true, 
+                    select_mode: 'manager',
+                    edit_mode: 'editonly',
+                    rec_ID: fileID,
+                    default_palette_class: 'ui-heurist-populate',
+                    width: 950,
+                    onClose: function(recordset){
+
+                        // update external reference, if necessary
+                        if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
+
+                            let record = recordset.getFirstRecord();
+
+                            let newvalue = {
+                                ulf_ID: recordset.fld(record,'ulf_ID'),
+                                ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                                ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                                ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
+                                ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
+                                ulf_Caption: recordset.fld(record,'ulf_Caption'),
+                                ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
+                                ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
+                            };
+
+                            this.newvalues[$input.attr('id')] = newvalue;
+                            this._findAndAssignTitle($input, newvalue);
+                        }
+                    }
+                };
+
+                window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+            }
+        }); // edit details click
+        if(!window.hWin.HEURIST4.util.isPositiveInt(fileID)){
+            $edit_details.hide();
+        }
+
+        // Use camera
+        let $camera = $('<span>', {
+            class: 'ui-icon ui-icon-camera use_camera',
+            title: 'Take a photo with your camera',
+            style: 'cursor: pointer; padding-left: 5px;'
+        }).insertBefore($clear_container);
+
+        this._on($camera, {
+            click: this._photoMode
+        });
+
+        let check_camera = typeof navigator?.mediaDevices?.enumerateDevices === 'function' && window.self === window.top;
+        if(check_camera){ // check for camera input
+            navigator.mediaDevices.enumerateDevices()
+            .then((devices) => {
+                let show_camera = false;
+                for(const device of devices){
+                    if(device.kind === 'videoinput'){
+                        show_camera = true;
+                        break;
+                    }
+                }
+                if(!show_camera){
+                    $camera.hide();
+                    this._off($camera, 'click');
+                }
+            }).catch(() => {
+                $camera.hide();
+                this._off($camera, 'click');
+            });
+        }else{
+            $camera.hide();
+            this._off($camera, 'click');
+        }
+    },
+
+    _setImageOrder: function(){
+
+        let $image_container = this.element.find('.image-containers');
+        let $lastItem = null;
+
+        this.element.find('input[id]').each((idx, element) => {
+            const ID = element.id;
+            if(!$lastItem){
+                this.element.find(`div[image-divid="${ID}"]`).prependTo($image_container);
+            }else{
+                this.element.find(`div[image-divid="${ID}"]`).insertAfter($lastItem);
+            }
+            $lastItem = this.element.find(`div[image-divid="${ID}"]`);
         });
     }
 });
