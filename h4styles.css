@@ -339,6 +339,14 @@ img.image_input{
     max-width: 200px;
     min-width: 200px;
 }
+.fieldset_search{
+    font-size:1.1em !important;        
+} 
+.fieldset_search h4{
+    font-weight: bold;
+    font-size:1.1em !important;    
+}
+
 
 /* margin-bottom:2px; */
 input.text, select.text {
