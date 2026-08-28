@@ -3779,60 +3779,192 @@ $.widget( "heurist.editing_input", {
             
         }//end if by detailType
 
-        //----------------- DataSource geo field-path selector
+        //----------------- Query Source geo field-path selector / Dataset field-set editor
         if(this.options.dtID > 0 &&
            window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS'] &&
            this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS']){
 
-            // DT_DATA_FIELDS is repeatable: every input stores exactly one coded path.
-            // Keep the stored path hidden and show its human-readable hierarchy title.
-            $input.hide();
+            let RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
 
-            let $geo_field_title = $('<span>')
-                .css({'line-height':'20px','vertical-align':'top','margin-right':'8px'})
-                .insertBefore($input);
+            if(this.options.rectypeID == RT_QUERY_SOURCE){
+                // For RT_QUERY_SOURCE DT_DATA_FIELDS remains a repeatable geo path.
+                // Keep the existing selector and human-readable hierarchy title.
+                $input.hide();
 
-            function __refreshGeoFieldTitle(){
-                let code = $.trim($input.val() || '');
-                let title = '';
+                let $geo_field_title = $('<span>')
+                    .css({'line-height':'20px','vertical-align':'top','margin-right':'8px'})
+                    .insertBefore($input);
 
-                if(code){
-                    let hierarchy = $Db.getHierarchyTitles(code);
-                    if(hierarchy && hierarchy.harchy){
-                        title = hierarchy.harchy.join('');
+                function __refreshGeoFieldTitle(){
+                    let code = $.trim($input.val() || '');
+                    let title = '';
+
+                    if(code){
+                        let hierarchy = $Db.getHierarchyTitles(code);
+                        if(hierarchy && hierarchy.harchy){
+                            title = hierarchy.harchy.join('');
+                        }
+                    }
+
+                    $geo_field_title.html(title || '<i>'+window.hWin.HR('No geo fields selected')+'</i>');
+                }
+
+                $input.on('change.geoFieldPreview input.geoFieldPreview heuristFieldSetRefresh',
+                    __refreshGeoFieldTitle);
+                __refreshGeoFieldTitle();
+
+                let $btn_geo_fields = $('<span>Select geo field</span>',
+                        {title:'Select a geographic field from the query result or linked records'})
+                    .addClass('smallbutton btn_add_term')
+                    .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                          'text-decoration':'underline','margin-left':'6px'})
+                    .appendTo($inputdiv);
+
+                this._on($btn_geo_fields, {click:function(){
+                    let DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+                    let queryField = that.options.editing
+                        ? that.options.editing.getFieldByName(DT_QUERY_STRING)
+                        : null;
+                    let query = null;
+
+                    if(queryField){
+                        let values = queryField.editing_input('getValues');
+                        query = values && values.length ? values[0] : null;
+                    }
+
+                    selectGeoField(query, function(value){
+                        $input.val(value);
+                        __refreshGeoFieldTitle();
+                        that.onChange();
+                    }, that.element.closest('div[role="dialog"]'));
+                }});
+            }else{
+                // Dataset (and future field-set records) store one JSON array.
+                // The textarea is retained as the actual form value but hidden.
+                $input.hide();
+
+                let $field_preview = $('<div class="dataset-fieldset-preview">')
+                    .css({'display':'inline-block','vertical-align':'top','min-width':'24em',
+                          'max-width':'55em','line-height':'1.5em','margin-right':'8px'})
+                    .insertBefore($input);
+
+                function __parseDatasetFields(){
+                    let value = $.trim($input.val() || '');
+                    if(!value){ return []; }
+                    try{
+                        let parsed = JSON.parse(value);
+                        let fields = Array.isArray(parsed) ? parsed : parsed.fields;
+                        return Array.isArray(fields) ? fields : [];
+                    }catch(ignore){
+                        return value.split(',');
                     }
                 }
 
-                $geo_field_title.html(title || '<i>'+window.hWin.HR('No geo field selected')+'</i>');
-            }
-
-            __refreshGeoFieldTitle();
-
-            let $btn_geo_fields = $('<span>Select geo field</span>',
-                    {title:'Select a geographic field from the query result or linked records'})
-                .addClass('smallbutton btn_add_term')
-                .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
-                      'text-decoration':'underline','margin-left':'6px'})
-                .appendTo($inputdiv);
-
-            this._on($btn_geo_fields, {click:function(){
-                let DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
-                let queryField = that.options.editing
-                    ? that.options.editing.getFieldByName(DT_QUERY_STRING)
-                    : null;
-                let query = null;
-
-                if(queryField){
-                    let values = queryField.editing_input('getValues');
-                    query = values && values.length ? values[0] : null;
+                function __fieldTitle(code){
+                    if(String(code).indexOf('rec_')===0){
+                        return String(code).replace(/^rec_/,'').replace(/_/g,' ');
+                    }
+                    let hierarchy = $Db.getHierarchyTitles(code);
+                    if(hierarchy && hierarchy.harchy){
+                        return $('<div>').html(hierarchy.harchy.join('')).text();
+                    }
+                    return code;
                 }
 
-                selectGeoField(query, function(value){
-                    $input.val(value);
-                    __refreshGeoFieldTitle();
-                    that.onChange();
-                }, that.element.closest('div[role="dialog"]'));
-            }});
+                function __refreshFieldSetPreview(){
+                    let fields = __parseDatasetFields();
+                    $field_preview.empty();
+                    if(fields.length===0){
+                        $('<i>').text(window.hWin.HR('No fields selected')).appendTo($field_preview);
+                        return;
+                    }
+                    let $list = $('<ol>').css({'margin':'0','padding-left':'22px'}).appendTo($field_preview);
+                    $.each(fields, function(index, item){
+                        item = typeof item==='string' ? {field:item} : item;
+                        if(!item || !item.field){ return; }
+                        let caption = item.title || __fieldTitle(item.field);
+                        let options = [];
+                        if(item.visible===false){ options.push(window.hWin.HR('hidden')); }
+                        if(item.ext){ options.push(item.ext); }
+                        if(item.aggregation){ options.push(item.aggregation); }
+                        let $li = $('<li>').text(caption).attr('title',item.field).appendTo($list);
+                        if(options.length){
+                            $('<small>').css({'color':'#777','margin-left':'0.5em'})
+                                .text('('+options.join(', ')+')').appendTo($li);
+                        }
+                    });
+                }
+
+                function __inferDatasetRecordType(fields){
+                    for(let idx=0; idx<fields.length; idx++){
+                        let item = typeof fields[idx]==='string' ? fields[idx] : fields[idx].field;
+                        let match = String(item || '').match(/^(\d+):/);
+                        if(match){ return match[1]; }
+                    }
+
+                    let DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+                    let queryField = that.options.editing
+                        ? that.options.editing.getFieldByName(DT_QUERY_STRING)
+                        : null;
+                    if(queryField){
+                        let values = queryField.editing_input('getValues');
+                        let query = values && values.length ? values[0] : '';
+                        try{
+                            let parsed = typeof query==='string' ? JSON.parse(query) : query;
+                            if(Array.isArray(parsed)){
+                                for(let pos=0; pos<parsed.length; pos++){
+                                    if(parsed[pos] && parsed[pos].t){ return String(parsed[pos].t); }
+                                }
+                            }
+                        }catch(ignore){
+                            let match = String(query || '').match(/(?:^|[?&])t=(\d+)/);
+                            if(match){ return match[1]; }
+                        }
+                    }
+                    return null;
+                }
+
+                function __openFieldSetEditor(){
+                    let currentFields = __parseDatasetFields();
+                    $('<div>').appendTo('body').recordFieldSetEditor({
+                        isdialog:true,
+                        value:{fields:currentFields},
+                        recordTypeId:__inferDatasetRecordType(currentFields),
+                        onClose:function(context){
+                            if(context && Array.isArray(context.fields)){
+                                $input.val(JSON.stringify(context.fields));
+                                __refreshFieldSetPreview();
+                                that.onChange();
+                            }
+                        }
+                    });
+                }
+
+                let $btn_fields = $('<span>Define field set</span>',
+                        {title:'Select direct or linked fields and define their table presentation'})
+                    .addClass('smallbutton btn_add_term')
+                    .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                          'text-decoration':'underline','margin-left':'6px'})
+                    .appendTo($inputdiv);
+
+                this._on($btn_fields, {click:function(){
+                    if($.fn.recordFieldSetEditor){
+                        __openFieldSetEditor();
+                    }else{
+                        $.getScript(window.hWin.HAPI4.baseURL+
+                            'hclient/widgets/record/recordFieldSetEditor.js')
+                            .done(__openFieldSetEditor)
+                            .fail(function(){
+                                window.hWin.HEURIST4.msg.showMsgErr(
+                                    'Unable to load the field-set editor');
+                            });
+                    }
+                }});
+
+                $input.on('change.datasetFieldSet input.datasetFieldSet heuristFieldSetRefresh',
+                    __refreshFieldSetPreview);
+                __refreshFieldSetPreview();
+            }
         }
 
         //----------------- color or symbology editor
@@ -4277,6 +4409,7 @@ $.widget( "heurist.editing_input", {
                         }
                         
                         
+                        $input.trigger('heuristFieldSetRefresh');
                         that.onChange(); 
                     }
                 });

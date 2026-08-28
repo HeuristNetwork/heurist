@@ -939,16 +939,14 @@ function selectGeoField(mapQuery, callback, parentDialog){
         let host = parentDialog && parentDialog.length
             ? parentDialog
             : $(window.hWin.document).find('body');
-        let popele = host.find('#divGeoFieldSelector');
-        if(popele.length==0){
-            popele = $('<div id="divGeoFieldSelector"><div class="rtt-tree"/></div>').appendTo(host);
-        }
+
+        // Create a fresh host for every invocation. showElementAsDialog moves and
+        // hides its element on close, so reusing the previous element leaves the
+        // Fancytree inside the closed dialog wrapper on subsequent invocations.
+        let popele = $('<div class="divGeoFieldSelector"><div class="rtt-tree"/></div>')
+            .appendTo(host);
 
         let treediv = popele.find('.rtt-tree');
-        if(treediv.hasClass('fancytree-container')){
-            try{ treediv.fancytree('destroy'); }catch(e){}
-        }
-        treediv.empty();
 
         let $dlg = null;
 
@@ -1034,4 +1032,3 @@ function selectGeoField(mapQuery, callback, parentDialog){
         });
     });
 }
-

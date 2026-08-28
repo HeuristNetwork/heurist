@@ -1,0 +1,71 @@
+<!--
+/**
+* recordFieldSetEditor.html - Dataset field-set editor layout
+*
+* @project     Heurist academic knowledge management system
+* @package     hclient.widgets.record
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson@heuristnetwork.org>
+* @since       7.0
+*/
+-->
+<fieldset class="ent_header" style="height:4.8em"><legend style="display:none"></legend>
+    <div class="input" style="padding:0.2em;width:100%">
+        <div class="header" style="padding:0 16px">
+            <label for="sel_record_scope">Root record type:</label>
+        </div>
+        <select id="sel_record_scope" class="text ui-widget-content ui-corner-all"
+                style="width:24em;max-width:35em"></select>
+    </div>
+</fieldset>
+
+<div class="input ent_content fieldset-editor-content"
+     style="top:5em;bottom:0;overflow:hidden;padding:0">
+    <section style="position:absolute;left:0;top:0;bottom:0;width:38%;border-right:1px solid #bbb">
+        <div class="header fieldset-panel-title"
+             style="height:28px;padding:8px 10px 0;font-size:1.1em;font-weight:bold">
+            <span>Select fields</span>
+            <span style="float:right;font-size:0.86em;font-weight:normal;white-space:nowrap">
+                <span>Sort</span>
+                <label style="margin-left:6px"><input type="radio" name="tree_order" value="0" checked> form</label>
+                <label style="margin-left:6px"><input type="radio" name="tree_order" value="1"> A-Z</label>
+            </span>
+        </div>
+        <div class="rtt-tree" style="position:absolute;left:0;right:0;top:36px;bottom:0;overflow:auto;outline:none"></div>
+    </section>
+
+    <section style="position:absolute;left:38%;right:0;top:0;bottom:0;overflow:hidden">
+        <div style="height:34px;padding:6px 8px 4px;box-sizing:border-box">
+            <span class="header fieldset-panel-title" style="font-size:1.1em;font-weight:bold">Selected fields</span>
+            <label style="margin-left:16px;cursor:pointer;font-size:0.95em">Show field
+                <input type="checkbox" class="fieldset-show-field" style="vertical-align:middle">
+            </label>
+            <span style="float:right;font-size:0.95em;white-space:nowrap">
+                <a class="fieldset-clear-all" style="cursor:pointer;text-decoration:underline">Clear selection</a>
+            </span>
+        </div>
+        <div style="position:absolute;left:0;right:0;top:34px;bottom:0;overflow:auto">
+            <table class="fieldset-fields" style="width:100%;border-collapse:collapse;table-layout:fixed;text-align:left">
+                <thead>
+                    <tr>
+                        <th style="width:25px;text-align:left"></th>
+                        <th style="width:48px;text-align:left">Visible</th>
+                        <th class="field-code-column" style="display:none;width:22%;text-align:left">Field</th>
+                        <th style="text-align:left">Title</th>
+                        <th style="width:72px;text-align:left">Width</th>
+                        <th style="width:100px;text-align:left">Output</th>
+                        <th style="width:95px;text-align:left">Aggregation</th>
+                        <th style="width:28px;text-align:left"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="fieldset-empty" style="padding:18px;color:#777;font-style:italic">
+                Select fields from the tree.
+            </div>
+        </div>
+    </section>
+</div>
