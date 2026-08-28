@@ -75,7 +75,7 @@
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 use hserv\utilities\UJwt;
-use hserv\controller\MapPresentationController;
+use hserv\controller\RecordPresentationController;
 use hserv\controller\MapDataController;
 use hserv\controller\RecordQueryController;
 
@@ -290,6 +290,24 @@ if($method=='save' || $method=='add'){
 // ----------------------------------------------------
 $resource = @$requestUri[3];
 
+// Specialised, read-only representations of record-type-backed entities.
+// These canonical routes are handled before ordinary /records/{id} output.
+$recordPresentationTypes = array('dataset', 'document', 'layer');
+$recordPresentation = ($resource === 'records'
+    && in_array(@$requestUri[4], $recordPresentationTypes, true))
+        ? (string)$requestUri[4]
+        : null;
+$is_record_presentation = ($recordPresentation !== null);
+
+if($is_record_presentation){
+    if($http_method !== 'GET'){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
+    }
+    if(!isset($requestUri[5]) || !is_numeric($requestUri[5]) || intval($requestUri[5]) < 1){
+        exitWithError('Record presentation id is not defined', 400);
+    }
+}
+
 // Map and timeline routes have method rules that differ from generic entities.
 // Presentation definitions and file-backed datasource output are GET-only.
 // POST is accepted only for ordinary map record/query searches and timeline searches.
@@ -412,7 +430,13 @@ if(!$skip_auth_processing){
 }
 // ----------------------------------------------------
 
-if(in_array(@$requestUri[3], array('map', 'time'), true)) {
+if($is_record_presentation){
+
+    $req_params['restapi'] = 1;
+    $controller = new RecordPresentationController($system, $req_params);
+    $controller->handleRequest($recordPresentation, intval($requestUri[5]));
+
+}elseif(in_array(@$requestUri[3], array('map', 'time'), true)) {
 
     $req_params['restapi'] = 1;
 
@@ -422,7 +446,7 @@ if(in_array(@$requestUri[3], array('map', 'time'), true)) {
 
     }elseif(in_array(@$requestUri[4], array('document', 'layer'), true)){
 
-        $controller = new MapPresentationController($system, $req_params);
+        $controller = new RecordPresentationController($system, $req_params);
         $controller->handleRequest((string)$requestUri[4], intval(@$requestUri[5]));
 
     }elseif(@$requestUri[4] === 'data'){
