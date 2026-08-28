@@ -552,9 +552,9 @@ function HMapLayer( _options ) {
                         window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']);
         let layer_default_style = null;
 
-        // DT_GEO_FIELDS is the canonical source of mapping field paths.
+        // DT_DATA_FIELDS is the canonical source of mapping field paths.
         // The field is repeatable: each value is one complete coded path.
-        const geo_fields_dty = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'];
+        const geo_fields_dty = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS'];
         if(geo_fields_dty>0){
             let geo_fields = _recordset.fld(_record, geo_fields_dty);
             if(!window.hWin.HEURIST4.util.isempty(geo_fields)){
@@ -580,7 +580,7 @@ function HMapLayer( _options ) {
             layer_thematic = symbology.thematic;
 
             // Backward compatibility: older MapLayers stored geofield in
-            // DT_SYMBOLOGY. Use it only when DT_GEO_FIELDS is not defined.
+            // DT_SYMBOLOGY. Use it only when DT_DATA_FIELDS is not defined.
             if(layer_geofields.length===0 && layer_default_style && layer_default_style.geofield){
                 let geofields = String(layer_default_style.geofield).split(',');
                 for(let k=0; k<geofields.length; k++){

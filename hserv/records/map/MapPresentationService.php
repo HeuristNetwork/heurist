@@ -255,7 +255,7 @@ class MapPresentationService
             if($query !== null){ $source['query'] = $this->parseQuery($query); }
 
             $geoFields = array_values(array_filter(
-                $this->layers->values($record, 'DT_GEO_FIELDS'),
+                $this->layers->values($record, 'DT_DATA_FIELDS'),
                 static function($value){
                     return $value !== null && trim((string)$value) !== '';
                 }

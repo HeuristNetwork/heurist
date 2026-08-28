@@ -456,7 +456,9 @@ $rtDefines = array(
     
     'RT_IIIF_ANNOTATION' => array(2, 109),
     'RT_IIIF_MANIFEST' => array(2, 110),
-    'RT_IIIF_CANVAS' => array(2, 111)
+    'RT_IIIF_CANVAS' => array(2, 111),
+    
+    'RT_DATASET' => array(2, 1100)
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -479,7 +481,10 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_GENDER' => array(2, 20),
     'DT_EMAIL' => array(2, 23),
     'DT_GEO_OBJECT' => array(2, 28),  //extent
-    'DT_GEO_FIELDS' => array(2, 1161),  //geo fields from linked record to be used to gather mapping data
+    // for MapSource - geo fields from linked record to be used to gather mapping data to be used as geogields parameter to api/map
+    // for Dataset - fields and linked paths to be used as field parameter to api/records    
+    'DT_DATA_FIELDS' => array(2, 1161),
+    
     'DT_GEO_OUTPUTMODE' => array(2, 1162),  //combined map features per record or individual features
     'DT_MIME_TYPE' => array(2, 29),
     'DT_IMAGE_TYPE' => array(2, 30),

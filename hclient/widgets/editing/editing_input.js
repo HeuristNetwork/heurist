@@ -554,7 +554,7 @@ $.widget( "heurist.editing_input", {
                 //translation for text field only    
                 let rec_translate = this._isForRecords && !is_translation
                                     && (this.detailType == 'freetext' || this.detailType == 'blocktext')
-                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS']);
+                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS']);
 
                 let styles = {
                     display:'block', 
@@ -1377,7 +1377,7 @@ $.widget( "heurist.editing_input", {
                     }});
             }else
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
-             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
              && this.options.dtID > 0 || this.options.dtID === 'bug_Description')
             {
@@ -3781,10 +3781,10 @@ $.widget( "heurist.editing_input", {
 
         //----------------- DataSource geo field-path selector
         if(this.options.dtID > 0 &&
-           window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'] &&
-           this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS']){
+           window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS'] &&
+           this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS']){
 
-            // DT_GEO_FIELDS is repeatable: every input stores exactly one coded path.
+            // DT_DATA_FIELDS is repeatable: every input stores exactly one coded path.
             // Keep the stored path hidden and show its human-readable hierarchy title.
             $input.hide();
 
