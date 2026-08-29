@@ -2,7 +2,8 @@
 #
 # build_client_modules.sh - Synchronise, build and deploy independent Heurist client modules.
 #
-# Current modules:
+# Current source repositories:
+#   - heurist-client-core (shared package; checked out but not deployed directly)
 #   - heurist-map
 #   - heurist-mirador4
 #
@@ -24,6 +25,7 @@ GROUP="${HEURIST_CLIENT_GROUP:-heurist}"
 BRANCH="${HEURIST_CLIENT_BRANCH:-main}"
 
 # Override these environment variables if a repository uses a different URL.
+HEURIST_CLIENT_CORE_REPO="${HEURIST_CLIENT_CORE_REPO:-git@github.com:HeuristNetwork/heurist-client-core.git}"
 HEURIST_MAP_REPO="${HEURIST_MAP_REPO:-git@github.com:HeuristNetwork/heurist-map.git}"
 HEURIST_MIRADOR4_REPO="${HEURIST_MIRADOR4_REPO:-git@github.com:HeuristNetwork/heurist-mirador4.git}"
 
@@ -165,13 +167,25 @@ fix_permissions() {
     mkdir -p "$DIST_ROOT"
 
     if id "$OWNER" >/dev/null 2>&1 && getent group "$GROUP" >/dev/null 2>&1; then
-        chown -R "$OWNER:$GROUP" "$HEURIST_ROOT/heurist-map" "$HEURIST_ROOT/heurist-mirador4" "$DIST_ROOT"
+        chown -R "$OWNER:$GROUP" \
+            "$HEURIST_ROOT/heurist-client-core" \
+            "$HEURIST_ROOT/heurist-map" \
+            "$HEURIST_ROOT/heurist-mirador4" \
+            "$DIST_ROOT"
     else
         echo "$LOG_PREFIX WARNING: owner/group $OWNER:$GROUP not found; ownership unchanged."
     fi
 
-    chmod -R ug+rwX "$HEURIST_ROOT/heurist-map" "$HEURIST_ROOT/heurist-mirador4" "$DIST_ROOT"
-    find "$HEURIST_ROOT/heurist-map" "$HEURIST_ROOT/heurist-mirador4" "$DIST_ROOT" \
+    chmod -R ug+rwX \
+        "$HEURIST_ROOT/heurist-client-core" \
+        "$HEURIST_ROOT/heurist-map" \
+        "$HEURIST_ROOT/heurist-mirador4" \
+        "$DIST_ROOT"
+    find \
+        "$HEURIST_ROOT/heurist-client-core" \
+        "$HEURIST_ROOT/heurist-map" \
+        "$HEURIST_ROOT/heurist-mirador4" \
+        "$DIST_ROOT" \
         -type d -exec chmod g+s {} +
     chmod -R a+rX "$DIST_ROOT"
 }
@@ -184,6 +198,7 @@ acquire_lock
 
 mkdir -p "$HEURIST_ROOT" "$DIST_ROOT"
 
+ensure_repository "heurist-client-core" "$HEURIST_CLIENT_CORE_REPO"
 ensure_repository "heurist-map" "$HEURIST_MAP_REPO"
 ensure_repository "heurist-mirador4" "$HEURIST_MIRADOR4_REPO"
 
