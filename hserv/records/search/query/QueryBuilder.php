@@ -55,7 +55,7 @@ final class QueryBuilder
         if(!$this->supportsSqlExecution($normalized)){throw new UnsupportedQueryException('Query requires batched execution');}
         $state=new SqlBuildContext($context);$where=$this->compileGroup($normalized,'AND',$state,'r',0);
         $this->records->appendAccessConditions($where,$state,$context,'r');
-        $sort=$this->sort->compileSort($normalized,$state);
+        $sort=$this->compileEffectiveSort($normalized,$state,$context);
         $limit=intval($context['limit']??self::DEFAULT_LIMIT);if($limit<1){$limit=self::DEFAULT_LIMIT;}$limit=min($limit,self::MAX_LIMIT);
         $offset=max(0,intval($context['offset']??0));
         $sql='SELECT DISTINCT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$sort.' LIMIT ? OFFSET ?';
@@ -113,7 +113,28 @@ final class QueryBuilder
         if(!$this->supportsFlatExecution($normalized)){throw new UnsupportedQueryException('Query requires linked execution');}
         $state=new SqlBuildContext($context);$where=$this->compileGroup($normalized,'AND',$state,'r',0);
         $this->records->appendAccessConditions($where,$state,$context,'r');
-        return new CompiledQuery('SELECT DISTINCT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$this->sort->compileSort($normalized,$state),$state->types(),$state->values(),$normalized);
+        return new CompiledQuery('SELECT DISTINCT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$this->compileEffectiveSort($normalized,$state,$context),$state->types(),$state->values(),$normalized);
+    }
+
+    /** Compile an explicit request sort in preference to the query's top-level sort. */
+    private function compileEffectiveSort(
+        array $normalized,
+        SqlBuildContext $state,
+        array $context
+    ): string {
+        if(empty($context['sortProvided'])){
+            return $this->sort->compileSort($normalized,$state);
+        }
+        $withoutSort=array_values(array_filter($normalized,function($predicate): bool {
+            $key=(string)array_keys($predicate)[0];
+            list($base)=$this->parser->predicateParts($key);
+            return !in_array($base,array('sortby','sort','s'),true);
+        }));
+        $override=$context['sort']??null;
+        if($override!==null && $override!=='' && $override!==array()){
+            $withoutSort[]=array('sort'=>$override);
+        }
+        return $this->sort->compileSort($withoutSort,$state);
     }
 
     private function compileGroup(array $group,string $operator,SqlBuildContext $state,string $recordAlias='r',int $depth=0): array

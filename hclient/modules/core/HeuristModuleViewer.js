@@ -31,7 +31,10 @@ class HeuristModuleViewer {
         var that = this;
         this.element.on('myOnShowEvent.heuristModuleViewer', function(event) {
             if (event.target.id === that.element.attr('id')) {
-                that._ensureIframeWhenVisible();
+                var created = that._ensureIframeWhenVisible();
+                if (typeof that._applyPendingHostQueryWhenVisible === 'function') {
+                    that._applyPendingHostQueryWhenVisible(created);
+                }
                 if (that._getModuleFrame()) that.resize();
             }
         });

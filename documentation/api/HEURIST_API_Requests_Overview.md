@@ -78,7 +78,7 @@ The existing `details` projections remain available because the same `DbDefXXX` 
 
 Anonymous requests return only visible public records. Authenticated session or JWT requests may return additional records according to Heurist permissions.
 
-The public collection contract is JSON-only and documents `query`/`q`, `ids`, `fields`, `detail`, `resolveDetails`, `rules`, `limit`, and `offset`. GET is convenient for compact searches; POST accepts the same search as a JSON body and avoids URL-length restrictions. Existing alternative export formats remain implemented but are not yet part of the stable OpenAPI contract.
+The public collection contract is JSON-only and documents `query`/`q`, `ids`, `fields`, `detail`, `resolveDetails`, `rules`, `sort`, `filter`, `limit`, and `offset`. A supplied `sort` replaces the query's top-level sort. `filter` is an additional predicate or group ANDed with the complete base query. GET is convenient for compact searches; POST accepts the same search as a JSON body and avoids URL-length restrictions. Existing alternative export formats remain implemented but are not yet part of the stable OpenAPI contract.
 
 Existing visibility behavior is retained: an inaccessible record query may return HTTP 200 with an empty `records` array.
 

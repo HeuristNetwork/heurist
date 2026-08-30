@@ -44,6 +44,15 @@ final class SearchRequest
     /** @var bool Resolve type-specific detail metadata such as term labels. */
     public $resolveDetails;
 
+    /** @var mixed|null Request sort overriding a top-level query sort. */
+    public $sort;
+
+    /** @var bool Whether sort was explicitly supplied, including an empty sort. */
+    public $sortProvided;
+
+    /** @var mixed|null Additional query predicate/group ANDed with the base query. */
+    public $filter;
+
     /**
      * @param array $query Normalized JSON query.
      * @param array $options Request options.
@@ -61,6 +70,9 @@ final class SearchRequest
             $options['resolveDetails'] ?? false,
             FILTER_VALIDATE_BOOLEAN
         );
+        $this->sortProvided = array_key_exists('sort', $options);
+        $this->sort = $this->sortProvided ? $options['sort'] : null;
+        $this->filter = $options['filter'] ?? null;
     }
 }
 

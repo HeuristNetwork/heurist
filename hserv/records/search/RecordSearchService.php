@@ -56,7 +56,13 @@ final class RecordSearchService
     public function search(SearchRequest $request, array $context = array()): SearchResult
     {
         $query = $this->builder->normalize($request->query);
+        if($request->filter !== null && $request->filter !== '' && $request->filter !== array()){
+            // A separate top-level group preserves: (base query) AND (filter).
+            $query[] = array('all'=>$this->builder->normalize($request->filter));
+        }
         $context = $this->searchContext($request, $context);
+        $context['sortProvided'] = $request->sortProvided;
+        $context['sort'] = $request->sort;
         $candidateCache = array();
         $query = $this->resolveSelectiveAnyFields($query, $context, $candidateCache);
         if(empty($context['forceChunked']) && $this->builder->supportsSqlExecution($query)){

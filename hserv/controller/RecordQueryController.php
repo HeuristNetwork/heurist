@@ -81,14 +81,29 @@ final class RecordQueryController
         }
 
         $normalized = $this->builder->normalize($query);
-        return new SearchRequest($normalized, array(
+        $options = array(
             'limit' => $params['limit'] ?? 1000,
             'offset' => $params['offset'] ?? 0,
             'rules' => $params['rules'] ?? null,
             'fields' => $params['fields'] ?? null,
             'detail' => $params['detail'] ?? null,
-            'resolveDetails' => $params['resolveDetails'] ?? false
-        ));
+            'resolveDetails' => $params['resolveDetails'] ?? false,
+            'filter' => $this->structuredParameter($params['filter'] ?? null)
+        );
+        if(array_key_exists('sort', $params)){
+            $options['sort'] = $this->structuredParameter($params['sort']);
+        }
+        return new SearchRequest($normalized, $options);
+    }
+
+    /** Decode JSON query/filter values supplied through GET without changing text syntax. */
+    private function structuredParameter($value)
+    {
+        if(!is_string($value)){ return $value; }
+        $text = trim($value);
+        if($text === '' || ($text[0] !== '[' && $text[0] !== '{')){ return $value; }
+        $decoded = json_decode($text, true);
+        return json_last_error() === JSON_ERROR_NONE ? $decoded : $value;
     }
 
     /** Execute a request and return its stable DTO representation. */

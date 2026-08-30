@@ -135,7 +135,7 @@ class HeuristModuleMap extends HeuristModuleRecordset {
                 this._isReady = false;
                 this._waitForMapApi();
             }.bind(this));
-            
+
         this._mapFrame.attr('src', this._buildIframeUrl());
     }
     /** Install the direct parent-to-child bridge on the persistent iframe element. */
@@ -784,8 +784,16 @@ class HeuristModuleMap extends HeuristModuleRecordset {
     }
     /** Activate a persisted MapDocument. */
     setMapDocument(documentId, options) {
+        var that = this;
         this.options.mapDocument = documentId;
-        return this._enqueueOrRun('_setMapDocumentNow', [documentId, options || {}]);
+        return this._enqueueOrRun('_setMapDocumentNow', [documentId, options || {}])
+            .then(function(result) {
+                if ((documentId == null || documentId === '')
+                    && that._hostQueryPending && that._isWidgetVisible()) {
+                    return that._applyPendingHostQueryWhenVisible(false);
+                }
+                return result;
+            });
     }
     _setMapDocumentNow(documentId, options) {
         if (documentId == null || documentId === '') {

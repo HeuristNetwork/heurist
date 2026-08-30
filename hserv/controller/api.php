@@ -344,7 +344,7 @@ if($is_record_query){
     }
     if($http_method === 'POST' && is_array($json)
         && !isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
-        $contractKeys = array('rules','limit','offset','fields','detail','resolveDetails');
+        $contractKeys = array('rules','limit','offset','fields','detail','resolveDetails','sort','filter');
         $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
         if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
             $req_params['query'] = $json;
@@ -632,7 +632,8 @@ else
             // fields object. Restore its explicit query parameters from JSON.
             if(is_array($json)){
                 foreach(array(
-                    'query','q','ids','fields','detail','resolveDetails','rules','limit','offset'
+                    'query','q','ids','fields','detail','resolveDetails','rules','limit','offset',
+                    'sort','filter'
                 ) as $key){
                     if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
                 }

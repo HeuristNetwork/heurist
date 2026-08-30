@@ -114,7 +114,6 @@ class HeuristModuleData extends HeuristModuleRecordset {
             this._isReady = false;
             this._waitForDataApi();
         }.bind(this));
-
         this._moduleFrame.attr('src', this.options.dataApplicationUrl);
     }
 
@@ -237,6 +236,10 @@ class HeuristModuleData extends HeuristModuleRecordset {
     /** Activate a persisted Dataset record, or return to current results with null. */
     setDataset(datasetId, options) {
         this.options.dataset = this._normalizeDatasetId(datasetId);
+        if (this.options.dataset == null && this._hostQueryPending
+            && this._isWidgetVisible()) {
+            return this._applyPendingHostQueryWhenVisible(false);
+        }
         return this._enqueueOrRun('_setDatasetNow', [
             this.options.dataset, options || {}
         ]);

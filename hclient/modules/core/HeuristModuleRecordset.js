@@ -24,6 +24,7 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
         super(element, options);
         this._events = null;
         this._currentQuery = null;
+        this._hostQueryPending = false;
 
         if (this.options.recordset) {
             var recordset = this.options.recordset;
@@ -62,7 +63,7 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
                 if (!((data && data.search_realm === 'mapping_recordset') ||
                     that._isSameRealm(data))) return;
                 var result = that._searchResult(data);
-                that.setQuery(that._currentResultsQuery(
+                that._acceptHostQuery(that._currentResultsQuery(
                     result.ids, data && data.query, result.total
                 ));
             } else if (event.type === hapi.Event.ON_REC_SEARCHSTART) {
@@ -70,7 +71,7 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
                 that.options.query = null;
                 that.options.selection = null;
                 that.clearSelection();
-                if (!(data && !data.reset && data.q !== '')) that.setQuery(null);
+                if (!(data && !data.reset && data.q !== '')) that._acceptHostQuery(null);
             } else if (event.type === hapi.Event.ON_REC_SELECT) {
                 if (!that._isSameRealm(data) ||
                     (data && data.source === that.element.attr('id'))) return;
@@ -85,6 +86,36 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
                 that.refresh();
             }
         });
+    }
+
+    /** Cache a host-result query and execute it only while the viewer is visible. */
+    _acceptHostQuery(query) {
+        this.options.query = this._normalizeQuery(query);
+        this._hostQueryPending = true;
+        if (this._hasActivePersistedSource() || !this._isWidgetVisible()) {
+            return Promise.resolve(false);
+        }
+        return this._applyPendingHostQueryWhenVisible(false);
+    }
+
+    /** Apply the latest deferred host query after the containing panel is shown. */
+    _applyPendingHostQueryWhenVisible(iframeCreated) {
+        if (!this._hostQueryPending || this._hasActivePersistedSource()
+            || !this._isWidgetVisible()) return Promise.resolve(false);
+
+        this._hostQueryPending = false;
+        // A newly created iframe receives options.query in its bootstrap.
+        if (iframeCreated) return Promise.resolve(true);
+        return this.setQuery(this.options.query, {reload: true}).catch(function() {
+            // _enqueueOrRun already reports genuine module errors. Host event
+            // handlers must not create an unhandled rejected promise.
+            return false;
+        });
+    }
+
+    /** Persisted Dataset/MapDocument viewers ignore current-result rendering. */
+    _hasActivePersistedSource() {
+        return this.options.dataset != null || this.options.mapDocument != null;
     }
 
     /** Apply a host selection using the concrete module's selection renderer. */

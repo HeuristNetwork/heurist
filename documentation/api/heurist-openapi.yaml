@@ -275,6 +275,19 @@ paths:
         schema:
           type: string
         description: JSON rules, plain rule query, or compact path used when detail=graph.
+      - name: sort
+        in: query
+        schema:
+          type: string
+        description: >-
+          Request ordering. When supplied, it replaces a top-level sort stored in q/query. An explicitly empty sort
+          selects the default record-ID ordering.
+      - name: filter
+        in: query
+        schema:
+          type: string
+        description: >-
+          Additional Heurist predicate or JSON predicate group combined with the complete base query using AND.
       responses:
         '200':
           description: Records response with metadata and pagination
@@ -2037,6 +2050,23 @@ components:
         resolveDetails:
           type: boolean
           default: false
+        sort:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+          description: Replaces a top-level sort contained in query when supplied.
+        filter:
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+          description: Additional predicate or group ANDed with the complete base query.
         rules:
           oneOf:
           - type: string
