@@ -59,7 +59,9 @@ window.hWin.cfg_widgets = [
     {id:'heurist_Map', name:'Map', title:'Map and timeline',
                 widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js', minh:300, minw:300},  // map in iframe
     {id:'heurist_Map2', name:'Map', title:'Map',
-                widgetname:'mapViewer', script:'hclient/widgets/viewers/mapViewer.js', minh:300, minw:300},  // map in iframe
+                widgetname:'mapViewer', script:'hclient/modules/map/mapViewer.js', minh:300, minw:300},  // map in iframe
+    {id:'heurist_Data', name:'Data', title:'Data',
+                widgetname:'dataViewer', script:'hclient/modules/data/dataViewer.js', minh:300, minw:300},  // dataset in iframe
 
     {id:'heurist_StoryMap', name:'StoryMap', title:'Story Map',
                 widgetname:'app_storymap', script:'hclient/widgets/viewers/app_storymap.js', minh:300, minw:200},
@@ -242,6 +244,7 @@ window.hWin.cfg_layouts = [
                                 css:{overflow:'hidden'}}},
 
                     {appid:'heurist_Map2', name: 'Map2 (test)'}
+                    //{appid:'heurist_Data', name: 'Data (test)'}
             ]}]
         }
     },    

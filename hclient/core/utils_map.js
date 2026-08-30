@@ -446,7 +446,7 @@
 
         function loadMapViewer(){
             if($.heurist && $.heurist.mapViewer) return Promise.resolve();
-            return loadScript(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/mapViewer.js').then(function(){
+            return loadScript(window.hWin.HAPI4.baseURL+'hclient/modules/map/mapViewer.js').then(function(){
                 if(!($.heurist && $.heurist.mapViewer)) throw new Error('mapViewer widget was not registered');
             });
         }
@@ -515,7 +515,7 @@
 
         function loadMapViewer(){
             if($.heurist && $.heurist.mapViewer) return Promise.resolve();
-            return loadScript(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/mapViewer.js').then(function(){
+            return loadScript(window.hWin.HAPI4.baseURL+'hclient/modules/map/mapViewer.js').then(function(){
                 if(!($.heurist && $.heurist.mapViewer)) throw new Error('mapViewer widget was not registered');
             });
         }
