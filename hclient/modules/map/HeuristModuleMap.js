@@ -167,6 +167,12 @@ class HeuristModuleMap extends HeuristModuleRecordset {
             editRecord: function(recordId) {
                 return that._openRecordEdit(recordId);
             },
+            addRecord: function(recordTypeId) {
+                return that._addRecordEdit(recordTypeId);
+            },
+            editExtent: function(bounds, options) {
+                return that._editExtent(bounds, options || {});
+            },
             // Legacy Heurist editors remain entirely in the parent application.
             // heurist-map passes/receives JSON only and never touches HAPI4 directly.
             editSymbology: function(value, options) {
@@ -1034,6 +1040,103 @@ class HeuristModuleMap extends HeuristModuleRecordset {
             }
         });
     }
+    
+    _addRecordEdit(recordTypeId) {
+        var rtID = Number(recordTypeId);
+        if (!(rtID > 0)) {
+            return Promise.reject(new Error('A valid Heurist record type ID is required for creation'));
+        }
+
+        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+        if (!ui || typeof ui.openRecordEdit !== 'function') {
+            return Promise.reject(new Error('Heurist record editor is not available'));
+        }
+
+        return new Promise(function(resolve, reject) {
+            var settled = false;
+            var saved = false;
+
+            function finish(result) {
+                if (settled) return;
+                settled = true;
+                resolve(result);
+            }
+
+            try {
+                ui.openRecordEdit(-1, null, {
+                    selectOnSave: true,
+                    onselect: function(event, data) {
+                        saved = true;
+                        var recordset = data && data.selection;
+                        var record = recordset && recordset.getFirstRecord
+                            ? recordset.getFirstRecord() : null;
+                        var recordId = record && recordset.fld
+                            ? Number(recordset.fld(record, 'rec_ID')) : null;
+                        finish({ saved: true, recordId: recordId });
+                    },
+                    onClose: function() {
+                        if (!saved) finish({ saved: false, recordId: null });
+                    },
+                    new_record_params: { rt: rtID }
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    _editExtent(bounds) {
+        var that = this;
+        var $container = $('<div>')
+            .css({ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' })
+            .appendTo('body');
+        var editor = null;
+        var settled = false;
+
+        return new Promise(function(resolve) {
+            function finish(value) {
+                if (settled) return;
+                settled = true;
+                Promise.resolve(editor && editor.destroy ? editor.destroy() : null).finally(function() {
+                    if ($container.hasClass('ui-dialog-content')) $container.dialog('destroy');
+                    $container.remove();
+                    resolve(value || null);
+                });
+            }
+
+            $container.dialog({
+                title: 'Define map extent',
+                modal: true,
+                width: Math.min(1000, Math.max(700, $(window).width() - 80)),
+                height: Math.min(750, Math.max(520, $(window).height() - 80)),
+                resizable: true,
+                close: function() { finish(null); }
+            });
+
+            editor = new HeuristModuleMap($container, {
+                presentationMode: 'iframe',
+                viewerMode: 'draw',
+                configurationMode: 'preferences',
+                runtimeMode: that._getRuntimeMode(),
+                database: that.options.database,
+                apiBaseUrl: that.options.apiBaseUrl,
+                mapApplicationUrl: that.options.mapApplicationUrl,
+                accessToken: that.options.accessToken,
+                requestHeaders: that.options.requestHeaders,
+                baseMapProviderOptions: that.options.baseMapProviderOptions,
+                heuristMapSettings: that.options.heuristMapSettings,
+                eventbased: false,
+                drawParameters: {
+                    mode: 'rectangle',
+                    geojson: boundsToRectangle(bounds),
+                    allowMultiple: false
+                },
+                ondrawfinish: function(result) { finish(rectangleBounds(result && result.geojson)); },
+                ondrawcancel: function() { finish(null); }
+            });
+        });
+    }
+    
     _destroy() {
         var that = this;
         this._saveDrawState();
@@ -1072,3 +1175,41 @@ class HeuristModuleMap extends HeuristModuleRecordset {
 
 HeuristModuleMap.defaults = $.extend(true, {}, HEURIST_MODULE_MAP_DEFAULTS);
 window.HeuristModuleMap = HeuristModuleMap;
+
+function boundsToRectangle(bounds) {
+    if (!bounds) return null;
+    var west = Number(bounds.west), south = Number(bounds.south);
+    var east = Number(bounds.east), north = Number(bounds.north);
+    if (![west, south, east, north].every(Number.isFinite)) return null;
+    return { type: 'Polygon', coordinates: [[[west, south], [east, south], [east, north], [west, north], [west, south]]] };
+}
+
+function rectangleBounds(geojson) {
+    var points = [];
+    function collect(value) {
+        if (!Array.isArray(value)) return;
+        if (value.length >= 2 && Number.isFinite(Number(value[0])) && Number.isFinite(Number(value[1]))) {
+            points.push([Number(value[0]), Number(value[1])]);
+        } else value.forEach(collect);
+    }
+    function collectGeoJson(value) {
+        if (!value || typeof value !== 'object') return;
+        if (value.type === 'Feature') {
+            collectGeoJson(value.geometry);
+        } else if (value.type === 'FeatureCollection') {
+            (value.features || []).forEach(collectGeoJson);
+        } else if (value.type === 'GeometryCollection') {
+            (value.geometries || []).forEach(collectGeoJson);
+        } else {
+            collect(value.coordinates);
+        }
+    }
+    collectGeoJson(geojson);
+    if (!points.length) return null;
+    return {
+        west: Math.min.apply(null, points.map(function(point) { return point[0]; })),
+        south: Math.min.apply(null, points.map(function(point) { return point[1]; })),
+        east: Math.max.apply(null, points.map(function(point) { return point[0]; })),
+        north: Math.max.apply(null, points.map(function(point) { return point[1]; }))
+    };
+}
