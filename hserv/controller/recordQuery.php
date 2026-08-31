@@ -16,10 +16,14 @@
 * @since       7.0
 */
 
-use hserv\controller\RecordQueryController;
 use hserv\utilities\USanitize;
+use Heurist\Runtime\ServiceFactory;
 
 require_once dirname(__FILE__).'/../../autoload.php';
+$composerAutoload = dirname(__FILE__).'/../../vendor/autoload.php';
+if(is_readable($composerAutoload)){
+    require_once $composerAutoload;
+}
 
 $httpMethod = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 if(!in_array($httpMethod, array('GET','POST'), true)){
@@ -61,7 +65,6 @@ if(!$system->init($req_params['db'] ?? null)){
     $system->errorExitApi();
 }
 
-$controller = new RecordQueryController($system);
+$controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
 $controller->output($req_params);
 $system->dbclose();
-

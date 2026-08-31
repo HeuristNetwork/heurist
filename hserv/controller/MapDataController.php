@@ -2,8 +2,8 @@
 /**
 * MapDataController.php - Spatial map data API controller
 *
-* Handles GeoJSON for Heurist records/queries and file-backed datasource
-* records. File conversion is delegated to MapDataSourceService.
+* Handles legacy timeline output and file-backed datasource records. Ordinary
+* query-to-GeoJSON output is handled by Heurist\Controller\MapDataController.
 *
 * @project     Heurist academic knowledge management system
 * @package     Controller
@@ -17,13 +17,8 @@
 namespace hserv\controller;
 
 use hserv\records\map\MapDataSourceService;
-use hserv\records\map\MapFeatureService;
-use hserv\records\map\GeoJsonStreamWriter;
-use hserv\records\search\QueryValidationException;
 
-/**
- * Single HTTP boundary for map feature data.
- */
+/** Legacy HTTP boundary for timeline and file-backed map data. */
 class MapDataController
 {
     /** @var \hserv\System */
@@ -32,27 +27,14 @@ class MapDataController
     /** @var array */
     private $params;
 
-    /** @var MapFeatureService|object|null */
-    private $featureService;
-
-    /** @var GeoJsonStreamWriter|object|null */
-    private $streamWriter;
-
-    public function __construct(
-        $system,
-        array $params = array(),
-        $featureService = null,
-        $streamWriter = null
-    )
+    public function __construct($system, array $params = array())
     {
         $this->system = $system;
         $this->params = $params;
-        $this->featureService = $featureService;
-        $this->streamWriter = $streamWriter;
     }
 
     /**
-     * Output a file-backed datasource record (shp, kml, ccv, geojson files)
+     * Output a file-backed datasource record (SHP, KML, CSV, or GeoJSON).
      *
      * Route: /api/{db}/map/data/{recID}
      */
@@ -84,50 +66,8 @@ class MapDataController
         }
     }
 
-    /**
-     * Output GeoJSON for ordinary Heurist records or a Heurist query.
-     *
-     * Ordinary map output uses the modern record-search, expansion and record-
-     * data services. The timeline route remains on its legacy exporter until
-     * the separate timeline migration phase.
-     */
-    public function outputRecordGeoJson(?int $recordId = null, bool $timeline = false): void
-    {
-        if($timeline){
-            $this->outputLegacyTimeline($recordId);
-            return;
-        }
-        $req_params = $this->params;
-        if($recordId !== null && $recordId > 0){
-            unset($req_params['q'], $req_params['query']);
-            $req_params['ids'] = array($recordId);
-        }elseif(isset($req_params['query']) && is_array($req_params['query'])){
-            $req_params['q'] = $req_params['query'];
-        }
-
-        try{
-            require_once dirname(__FILE__).'/../records/map/MapFeatureService.php';
-            require_once dirname(__FILE__).'/../records/map/GeoJsonStreamWriter.php';
-            $service = $this->featureService ?? new MapFeatureService($this->system);
-            $stream = $service->createStream($req_params);
-
-            header(HEADER_CORS_POLICY);
-            $this->system->setResponseHeader();
-            header('Content-Type: application/geo+json; charset=utf-8');
-            http_response_code(200);
-            $writer = $this->streamWriter ?? new GeoJsonStreamWriter();
-            $writer->write($stream);
-        }catch(QueryValidationException $e){
-            $this->system->errorExitApi($e->getMessage(), HEURIST_INVALID_REQUEST, true, 400);
-        }catch(\InvalidArgumentException $e){
-            $this->system->errorExitApi($e->getMessage(), HEURIST_INVALID_REQUEST, true, 400);
-        }catch(\Throwable $e){
-            $this->system->errorExitApi('Unable to produce map data', HEURIST_ERROR, true, 500);
-        }
-    }
-
     /** Keep /time behaviour unchanged while map output is migrated independently. */
-    private function outputLegacyTimeline(?int $recordId): void
+    public function outputTimeline(?int $recordId = null): void
     {
         $req_params = $this->params;
         $req_params['format'] = 'geojson';

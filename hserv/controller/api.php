@@ -75,11 +75,14 @@
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 use hserv\utilities\UJwt;
-use hserv\controller\RecordPresentationController;
-use hserv\controller\MapDataController;
-use hserv\controller\RecordQueryController;
+use hserv\controller\MapDataController as LegacyMapDataController;
+use Heurist\Runtime\ServiceFactory;
 
 require_once dirname(__FILE__).'/../../autoload.php';
+$composerAutoload = dirname(__FILE__).'/../../vendor/autoload.php';
+if(is_readable($composerAutoload)){
+    require_once $composerAutoload;
+}
 
 if(@$_REQUEST['method']){
     $method = $_REQUEST['method'];
@@ -433,7 +436,7 @@ if(!$skip_auth_processing){
 if($is_record_presentation){
 
     $req_params['restapi'] = 1;
-    $controller = new RecordPresentationController($system, $req_params);
+    $controller = ServiceFactory::fromLegacySystem($system)->recordPresentationController();
     $controller->handleRequest($recordPresentation, intval($requestUri[5]));
 
 }elseif(in_array(@$requestUri[3], array('map', 'time'), true)) {
@@ -441,27 +444,27 @@ if($is_record_presentation){
     $req_params['restapi'] = 1;
 
     if($requestUri[3]==='time'){
-        $controller = new MapDataController($system, $req_params);
-        $controller->outputRecordGeoJson(null, true);
+        $controller = new LegacyMapDataController($system, $req_params);
+        $controller->outputTimeline();
 
     }elseif(in_array(@$requestUri[4], array('document', 'layer'), true)){
 
-        $controller = new RecordPresentationController($system, $req_params);
+        $controller = ServiceFactory::fromLegacySystem($system)->recordPresentationController();
         $controller->handleRequest((string)$requestUri[4], intval(@$requestUri[5]));
 
     }elseif(@$requestUri[4] === 'data'){
         // File-backed datasource: KML/KMZ/CSV/TSV/GeoJSON/SHP.
         // GET /api/{db}/map/data/{recID}?format=geojson|rawfile|source
-        $controller = new MapDataController($system, $req_params);
+        $controller = new LegacyMapDataController($system, $req_params);
         $controller->outputDataSource(intval(@$requestUri[5]));
 
     }else{
         // Ordinary Heurist record/query GeoJSON.
-        $controller = new MapDataController($system, $req_params);
+        $controller = ServiceFactory::fromLegacySystem($system)->mapDataController();
         $recordId = isset($requestUri[4]) && is_numeric($requestUri[4])
             ? intval($requestUri[4])
             : null;
-        $controller->outputRecordGeoJson($recordId, false);
+        $controller->outputRecordGeoJson($req_params, $recordId);
     }
 
 }elseif (@$requestUri[3]=='iiif') {
@@ -638,7 +641,7 @@ else
                     if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
                 }
             }
-            $controller = new RecordQueryController($system);
+            $controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
             $controller->output($req_params);
             $system->dbclose();
             exit;
