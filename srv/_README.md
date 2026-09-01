@@ -18,6 +18,8 @@ Dependency direction is Controller → Records → Database/Runtime. Classes bel
 - `Controller/RecordQueryController.php` — records HTTP request adapter.
 - `Controller/RecordPresentationController.php` — Dataset, Map Document and
   Map Layer read adapter.
+- `Controller/SystemQueryController.php` — mapped filter/user collection and
+  item reads for the `/sys` API domain.
 - `Controller/MapDataController.php` — query-to-GeoJSON read adapter.
 - `Database/DatabaseInterface.php` — database abstraction.
 - `Database/MysqlDatabase.php` — MySQL implementation for the modern read-only workflow.
@@ -28,3 +30,5 @@ Dependency direction is Controller → Records → Database/Runtime. Classes bel
 - `Records/Data/RecordDataService.php` — batched header/detail retrieval.
 - `Records/Presentation/` — read-only presentation definition services.
 - `Records/Map/MapFeatureService.php` — GeoJSON feature pipeline.
+- `System/Query/` — stable system entity schemas and the shared-query adapter
+  for legacy `usrSavedSearches` and `sysUGrps` storage.

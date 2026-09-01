@@ -39,6 +39,17 @@ final class RecordQueryParser
     private const LINK_PREDICATES = array('lt','linked_to','linkedto','lf','linked_from','linkedfrom',
         'rt','related_to','relatedto','rf','related_from','relatedfrom','related','links','relf','r');
     private $textSubqueries = array();
+    /** @var array<string,bool> Additional logical fields normalized to f:<name>. */
+    private $logicalFields = array();
+
+    /** @param string[] $logicalFields Optional storage-independent field names. */
+    public function __construct(array $logicalFields = array())
+    {
+        foreach($logicalFields as $field){
+            $field = strtolower(trim((string)$field));
+            if($field !== ''){ $this->logicalFields[$field] = true; }
+        }
+    }
 
     public function normalize($query): array
     {
@@ -57,7 +68,7 @@ final class RecordQueryParser
             }
         }
 
-        $normalized = $this->normalizeQueryArray($normalized);
+        $normalized = $this->normalizeLogicalFields($this->normalizeQueryArray($normalized));
         $this->validate($normalized);
         return $normalized;
     }
@@ -322,8 +333,30 @@ final class RecordQueryParser
             }
         }
         $base = strtolower($base);
-        if(!isset(self::KEYWORD_ALIASES[$base])){ return array(null, ''); }
+        if(!isset(self::KEYWORD_ALIASES[$base])){
+            return isset($this->logicalFields[$base]) ? array('f', $base) : array(null, '');
+        }
         return array(self::KEYWORD_ALIASES[$base], $suffix);
+    }
+    /** Normalize schema fields recursively before ordinary query validation. */
+    private function normalizeLogicalFields(array $group): array
+    {
+        $result = array();
+        foreach($group as $predicate){
+            if(!is_array($predicate) || count($predicate) !== 1){
+                $result[] = $predicate;
+                continue;
+            }
+            $key = (string)array_keys($predicate)[0];
+            $value = $predicate[$key];
+            list($base) = $this->predicateParts($key);
+            if(isset($this->logicalFields[$base])){ $key = 'f:'.$base; }
+            if(is_array($value) && in_array($base, array('any','all','not'), true)){
+                $value = $this->normalizeLogicalFields($this->normalizeQueryArray($value));
+            }
+            $result[] = array($key=>$value);
+        }
+        return $result;
     }
     private function resolveTextValue($value)
     {

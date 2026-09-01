@@ -365,6 +365,41 @@ if($is_record_query){
     $method = 'search';
 }
 
+// The modern system collection is also a read contract. The optional entity
+// segment selects a mapped system record type: /sys/filter or /sys/user.
+$is_system_query = ($resource === 'sys');
+if($is_system_query){
+    $hasSystemItem = isset($requestUri[5]) && $requestUri[5] !== '';
+    if($hasSystemItem && (!is_numeric($requestUri[5]) || intval($requestUri[5]) < 1)){
+        exitWithError('System record id is invalid', 400);
+    }
+    $allowedSystemMethods = $hasSystemItem ? array('GET') : array('GET','POST');
+    if(!in_array($http_method, $allowedSystemMethods, true)){
+        exitWithError('Method not allowed', 405, array('Allow'=>implode(', ', $allowedSystemMethods)));
+    }
+    if($http_method === 'POST'
+        && stripos($contentType, 'application/json') === 0
+        && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if($http_method === 'POST' && is_array($json)){
+        foreach(array(
+            'query','q','ids','fields','detail','resolveDetails','rules','limit','offset','sort','filter'
+        ) as $key){
+            if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
+        }
+        if(!array_key_exists('fields', $json)){ unset($req_params['fields']); }
+        if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
+            $contractKeys = array('rules','limit','offset','fields','detail','resolveDetails','sort','filter');
+            $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
+            if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
+                $req_params['query'] = $json;
+            }
+        }
+    }
+    $method = 'search';
+}
+
 // Routes where auth processing is not needed here
 $is_public_annotation_read =
     ($resource === 'annotations'
@@ -433,7 +468,19 @@ if(!$skip_auth_processing){
 }
 // ----------------------------------------------------
 
-if($is_record_presentation){
+if($is_system_query){
+
+    $req_params['restapi'] = 1;
+    $systemType = isset($requestUri[4]) && $requestUri[4] !== ''
+        ? (string)$requestUri[4] : null;
+    $systemId = isset($requestUri[5]) && $requestUri[5] !== ''
+        ? intval($requestUri[5]) : null;
+    $controller = ServiceFactory::fromLegacySystem($system)->systemQueryController();
+    $controller->output($req_params, $systemType, $systemId);
+    $system->dbclose();
+    exit;
+
+}elseif($is_record_presentation){
 
     $req_params['restapi'] = 1;
     $controller = ServiceFactory::fromLegacySystem($system)->recordPresentationController();

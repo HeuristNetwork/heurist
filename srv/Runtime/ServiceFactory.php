@@ -21,12 +21,14 @@ namespace Heurist\Runtime;
 use Heurist\Controller\MapDataController;
 use Heurist\Controller\RecordPresentationController;
 use Heurist\Controller\RecordQueryController;
+use Heurist\Controller\SystemQueryController;
 use Heurist\Database\DatabaseFactory;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Records\Map\MapFeatureService;
 use Heurist\Records\Presentation\DatasetPresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
 use Heurist\Records\Presentation\PresentationRecordRepository;
+use Heurist\System\Query\SystemQueryService;
 
 /** Creates one consistent service graph for an initialized request. */
 final class ServiceFactory
@@ -79,6 +81,15 @@ final class ServiceFactory
     public function recordQueryController(): RecordQueryController
     {
         return new RecordQueryController($this->database, $this->runtime);
+    }
+
+    /** Create the mapped filter/user query and retrieval controller. */
+    public function systemQueryController(): SystemQueryController
+    {
+        return new SystemQueryController(
+            new SystemQueryService($this->database, $this->runtime),
+            $this->runtime
+        );
     }
 
     /** Create the Dataset/Map definition controller. */
