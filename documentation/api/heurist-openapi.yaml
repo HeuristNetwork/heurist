@@ -39,6 +39,8 @@ tags:
   description: List registered databases available on the server
 - name: Records
   description: Search for and retrieve records
+- name: System records
+  description: Search authenticated system records using stable filter and user mappings
 - name: Database structure
   description: Retrieve record types, fields, terms, term links and record structures
 - name: Authentication
@@ -275,19 +277,6 @@ paths:
         schema:
           type: string
         description: JSON rules, plain rule query, or compact path used when detail=graph.
-      - name: sort
-        in: query
-        schema:
-          type: string
-        description: >-
-          Request ordering. When supplied, it replaces a top-level sort stored in q/query. An explicitly empty sort
-          selects the default record-ID ordering.
-      - name: filter
-        in: query
-        schema:
-          type: string
-        description: >-
-          Additional Heurist predicate or JSON predicate group combined with the complete base query using AND.
       responses:
         '200':
           description: Records response with metadata and pagination
@@ -341,6 +330,107 @@ paths:
           $ref: '#/components/responses/MethodNotAllowed'
         '500':
           $ref: '#/components/responses/ServerError'
+  /{database}/sys:
+    get:
+      tags: [System records]
+      operationId: searchSystemRecords
+      summary: Search filters or users
+      description: >-
+        Uses the common Heurist query contract with stable fields mapped to current system tables.
+        The singular t predicate selects filter or user; omission currently defaults to filter.
+        Authentication is required. Filter results are limited to the current user and accessible
+        groups unless the caller is the database owner.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - name: q
+        in: query
+        schema: {type: string}
+        description: 'Heurist query, for example {"t":"filter","title":"All persons"}.'
+      - name: ids
+        in: query
+        schema: {type: string}
+        description: Comma-separated filter or user IDs.
+      - name: fields
+        in: query
+        schema: {type: string}
+        description: >-
+          Comma-separated universal headers and logical fields. Filter supports query;
+          user supports email. The f: prefix is optional.
+      - name: detail
+        in: query
+        schema: {type: string, enum: [records, ids], default: records}
+      responses:
+        '200':
+          description: System record envelopes or the common IDs-only DTO
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SystemQueryResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '500': {$ref: '#/components/responses/ServerError'}
+    post:
+      tags: [System records]
+      operationId: searchSystemRecordsPost
+      summary: Search filters or users using a structured request
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SystemSearchRequest'}
+      responses:
+        '200':
+          description: System record envelopes or the common IDs-only DTO
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SystemQueryResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /{database}/sys/{systemType}/{systemId}:
+    get:
+      tags: [System records]
+      operationId: getSystemRecord
+      summary: Retrieve one filter or user
+      description: >-
+        Returns one ordinary system record with universal rec_* headers and resolved logical fields.
+        No separate presentation or raw format is used.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: systemType
+        in: path
+        required: true
+        schema: {type: string, enum: [filter, user]}
+      - name: systemId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      - name: fields
+        in: query
+        schema: {type: string}
+        description: Optional fields; omission returns every mapped field for the selected type.
+      responses:
+        '200':
+          description: One filter or user record
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SystemRecord'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '500': {$ref: '#/components/responses/ServerError'}
   /{database}/records/{recordId}:
     get:
       tags:
@@ -1899,6 +1989,83 @@ components:
         pagination:
           $ref: '#/components/schemas/Pagination'
       additionalProperties: false
+    SystemRecord:
+      type: object
+      required: [rec_ID, rec_RecTypeID, rec_Title]
+      properties:
+        rec_ID: {type: integer, minimum: 1}
+        rec_RecTypeID: {type: string, enum: [filter, user]}
+        rec_Title: {type: string}
+        rec_Modified: {type: string}
+        rec_OwnerUGrpID: {type: integer}
+        details:
+          type: object
+          description: Resolved logical fields; filter supports query and user supports email.
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              required: [value]
+              properties:
+                value: {}
+              additionalProperties: false
+      additionalProperties: false
+    SystemRecordsMeta:
+      type: object
+      required: [database, entity, type, fields]
+      properties:
+        database: {type: string}
+        entity: {type: string, const: sys}
+        type: {type: string, enum: [filter, user]}
+        fields:
+          type: object
+          required: [headers, details]
+          properties:
+            headers:
+              type: array
+              items: {type: string}
+            details:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+          additionalProperties: false
+      additionalProperties: false
+    SystemSearchResponse:
+      type: object
+      required: [records, meta, pagination]
+      properties:
+        records:
+          type: array
+          items: {$ref: '#/components/schemas/SystemRecord'}
+        meta: {$ref: '#/components/schemas/SystemRecordsMeta'}
+        pagination: {$ref: '#/components/schemas/Pagination'}
+      additionalProperties: false
+    SystemQueryResponse:
+      oneOf:
+      - $ref: '#/components/schemas/SystemSearchResponse'
+      - $ref: '#/components/schemas/RecordIdsResponse'
+    SystemSearchRequest:
+      type: object
+      properties:
+        query: {}
+        q: {}
+        ids:
+          oneOf:
+          - {type: string}
+          - type: array
+            items: {type: integer, minimum: 1}
+        fields:
+          oneOf:
+          - {type: string}
+          - type: array
+            items: {type: string}
+        detail: {type: string, enum: [records, ids], default: records}
+        limit: {type: integer, minimum: 1, maximum: 100000, default: 1000}
+        offset: {type: integer, minimum: 0, default: 0}
+        sort: {}
+        filter: {}
+      additionalProperties: false
     Record:
       type: object
       description: >-
@@ -2050,23 +2217,6 @@ components:
         resolveDetails:
           type: boolean
           default: false
-        sort:
-          oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-          description: Replaces a top-level sort contained in query when supplied.
-        filter:
-          oneOf:
-          - type: string
-          - type: object
-            additionalProperties: true
-          - type: array
-            items:
-              type: object
-              additionalProperties: true
-          description: Additional predicate or group ANDed with the complete base query.
         rules:
           oneOf:
           - type: string

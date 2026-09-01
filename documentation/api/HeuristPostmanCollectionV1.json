@@ -71,6 +71,10 @@
       "value": "2"
     },
     {
+      "key": "filterId",
+      "value": "1"
+    },
+    {
       "key": "groupId",
       "value": "1"
     },
@@ -1689,7 +1693,53 @@
       ]
     },
     {
-      "name": "8. Map and timeline API",
+      "name": "8. System records API",
+      "item": [
+        {
+          "name": "Search accessible filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/sys?q={\"t\":\"filter\"}&fields=query,rec_Modified,rec_OwnerUGrpID",
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{jwtToken}}", "type": "string"}]}
+          },
+          "response": []
+        },
+        {
+          "name": "Retrieve one filter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/sys/filter/{{filterId}}",
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{jwtToken}}", "type": "string"}]}
+          },
+          "response": []
+        },
+        {
+          "name": "Search users by email field",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"query\": {\"t\": \"user\", \"email\": \"example.org\"},\n  \"fields\": [\"email\", \"rec_Modified\"]\n}"},
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/sys",
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{jwtToken}}", "type": "string"}]}
+          },
+          "response": []
+        },
+        {
+          "name": "System IDs-only response",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/sys?q={\"t\":\"user\"}&detail=ids",
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{jwtToken}}", "type": "string"}]}
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9. Map and timeline API",
       "item": [
         {
           "name": "MapDocument by record ID",

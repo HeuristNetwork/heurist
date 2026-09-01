@@ -78,7 +78,7 @@ The existing `details` projections remain available because the same `DbDefXXX` 
 
 Anonymous requests return only visible public records. Authenticated session or JWT requests may return additional records according to Heurist permissions.
 
-The public collection contract is JSON-only and documents `query`/`q`, `ids`, `fields`, `detail`, `resolveDetails`, `rules`, `sort`, `filter`, `limit`, and `offset`. A supplied `sort` replaces the query's top-level sort. `filter` is an additional predicate or group ANDed with the complete base query. GET is convenient for compact searches; POST accepts the same search as a JSON body and avoids URL-length restrictions. Existing alternative export formats remain implemented but are not yet part of the stable OpenAPI contract.
+The public collection contract is JSON-only and documents `query`/`q`, `ids`, `fields`, `detail`, `resolveDetails`, `rules`, `limit`, and `offset`. GET is convenient for compact searches; POST accepts the same search as a JSON body and avoids URL-length restrictions. Existing alternative export formats remain implemented but are not yet part of the stable OpenAPI contract.
 
 Existing visibility behavior is retained: an inaccessible record query may return HTTP 200 with an empty `records` array.
 
@@ -147,6 +147,27 @@ Each requested field contains an ordered array of values. `resolveDetails=false`
 
 The legacy `record_search.php?a=links_details` controller action is unchanged and remains a compatibility mechanism for existing internal clients.
 
+
+## System records
+
+Authenticated clients can search mapped system entities with the same query,
+field-selection, IDs-only and pagination contract used by records:
+
+```text
+GET|POST /api/<database>/sys
+GET      /api/<database>/sys/filter/<id>
+GET      /api/<database>/sys/user/<id>
+```
+
+The singular `t` predicate selects `filter` or `user`; omission currently
+defaults to `filter`. Stable keywords map to the current legacy storage:
+`id`, `title`, `modified`, and (for filters) `owner`. Logical fields are
+`query` for filters and `email` for users; the `f:` prefix is optional.
+
+All returned objects use `rec_ID`, `rec_RecTypeID` and `rec_Title`. Filter
+visibility is limited to the current user and their groups unless the caller
+is the database owner. Item routes return the same resolved record object and
+do not introduce a separate presentation or raw representation.
 
 ## Map and timeline presentation API
 
