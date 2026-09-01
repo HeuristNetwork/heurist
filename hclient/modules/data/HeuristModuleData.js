@@ -138,6 +138,12 @@ class HeuristModuleData extends HeuristModuleRecordset {
             },
             editRecord: function(recordId) {
                 return that._openRecordEdit(recordId);
+            },
+            addRecord: function(recordTypeId) {
+                return that._addRecordEdit(recordTypeId);
+            },
+            editFieldset: function(value, options) {
+                return that._editFieldset(value, options || {});
             }
         };
     }
@@ -145,6 +151,8 @@ class HeuristModuleData extends HeuristModuleRecordset {
     /** Build the serializable launch envelope consumed by heurist-data. */
     _buildBootstrap() {
         var hapi = window.hWin && window.hWin.HAPI4;
+        var lang = hapi && typeof hapi.get_prefs_def === 'function'
+            ? hapi.get_prefs_def('layout_language', 'ENG') : 'ENG';
         var runtimeMode = this.options.runtimeMode;
         if (['main', 'website', 'standalone'].indexOf(runtimeMode) < 0) {
             runtimeMode = this.options.configurationMode === 'website'
@@ -156,6 +164,7 @@ class HeuristModuleData extends HeuristModuleRecordset {
                     ? 'configuration' : 'data',
                 configurationMode: this.options.configurationMode,
                 runtimeMode: runtimeMode,
+                language: lang,
                 database: this.options.database || (hapi && hapi.database),
                 apiBaseUrl: this.options.apiBaseUrl ||
                     (hapi && hapi.baseURL + 'api'),
@@ -420,6 +429,95 @@ class HeuristModuleData extends HeuristModuleRecordset {
                 });
             } catch (error) {
                 reject(error);
+            }
+        });
+    }
+
+    /** Open the legacy Heurist record creator for the requested record type. */
+    _addRecordEdit(recordTypeId) {
+        var rtID = Number(recordTypeId);
+        if (!(rtID > 0)) {
+            return Promise.reject(new Error(
+                'A valid Heurist record type ID is required for creation'
+            ));
+        }
+
+        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+        if (!ui || typeof ui.openRecordEdit !== 'function') {
+            return Promise.reject(new Error('Heurist record editor is not available'));
+        }
+
+        return new Promise(function(resolve, reject) {
+            var settled = false;
+            var saved = false;
+            function finish(result) {
+                if (settled) return;
+                settled = true;
+                resolve(result);
+            }
+            try {
+                ui.openRecordEdit(-1, null, {
+                    selectOnSave: true,
+                    onselect: function(event, data) {
+                        saved = true;
+                        var recordset = data && data.selection;
+                        var record = recordset && recordset.getFirstRecord
+                            ? recordset.getFirstRecord() : null;
+                        var recordId = record && recordset.fld
+                            ? Number(recordset.fld(record, 'rec_ID')) : null;
+                        finish({saved: true, recordId: recordId});
+                    },
+                    onClose: function() {
+                        if (!saved) finish({saved: false, recordId: null});
+                    },
+                    new_record_params: {rt: rtID}
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    /** Open recordFieldSetEditor in the parent and return its JSON field list. */
+    _editFieldset(value, options) {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        var fields = value;
+        if (typeof fields === 'string') {
+            try { fields = JSON.parse(fields); } catch (ignore) { fields = []; }
+        }
+        if ($.isPlainObject(fields) && Array.isArray(fields.fields)) {
+            fields = fields.fields;
+        }
+        if (!Array.isArray(fields)) fields = [];
+        fields = $.extend(true, [], fields);
+
+        return new Promise(function(resolve, reject) {
+            function openEditor() {
+                try {
+                    $('<div>').appendTo('body').recordFieldSetEditor({
+                        isdialog: true,
+                        value: {fields: fields},
+                        recordTypeId: Number(options && options.recordTypeId) || null,
+                        onClose: function(context) {
+                            resolve(context && Array.isArray(context.fields)
+                                ? $.extend(true, [], context.fields) : null);
+                        }
+                    });
+                } catch (error) {
+                    reject(error);
+                }
+            }
+
+            if ($.fn.recordFieldSetEditor) {
+                openEditor();
+            } else if (hapi && hapi.baseURL) {
+                $.getScript(hapi.baseURL + 'hclient/widgets/record/recordFieldSetEditor.js')
+                    .done(openEditor)
+                    .fail(function() {
+                        reject(new Error('Unable to load the Heurist field-set editor'));
+                    });
+            } else {
+                reject(new Error('Heurist field-set editor is not available'));
             }
         });
     }
