@@ -188,17 +188,46 @@ final class QueryValueResolver
         preg_match('/^(<>|><|<=|>=|==|!=|=|<|>|-)?\s*(.*)$/s', $text, $match);
         $operator = $match[1] ?? ''; $label = trim($match[2] ?? $text);
         if($label === '' || ctype_digit($label)){ return $value; }
+        $path = array_values(array_filter(array_map('trim', explode('.', $label)), static function($part){ return $part !== ''; }));
+        $leaf = count($path)>1 ? $path[count($path)-1] : $label;
         $rows = $this->rows(
             'SELECT trm_ID,trm_Label,trm_Code FROM defTerms WHERE LOWER(trm_Label)=LOWER(?) OR LOWER(trm_Code)=LOWER(?) ORDER BY trm_ID',
-            'ss', array($label, $label)
+            'ss', array($leaf, $leaf)
         );
         $roots = $metadata['roots'];
         if(!empty($roots)){
             $allowed = array_fill_keys($this->termDescendants($roots), true);
             $rows = array_values(array_filter($rows, static function($row) use ($allowed){ return isset($allowed[intval($row[0])]); }));
         }
+        if(count($path)>1){
+            $rows = array_values(array_filter($rows, function($row) use ($path){
+                return $this->termMatchesPath(intval($row[0]), $path);
+            }));
+        }
         $row = $this->uniqueMatch($rows, 'term for field '.$fieldId, $label, 0, array(1,2));
         return $operator === '' ? intval($row[0]) : $operator.(string)intval($row[0]);
+    }
+
+    /** Match a dotted hierarchical label, excluding the vocabulary root. */
+    private function termMatchesPath(int $termId, array $path): bool
+    {
+        $labels = array();
+        $seen = array();
+        while($termId>0 && !isset($seen[$termId])){
+            $seen[$termId] = true;
+            $rows = $this->rows(
+                'SELECT trm_Label,IFNULL(trm_ParentTermID,0) FROM defTerms WHERE trm_ID=?',
+                'i', array($termId)
+            );
+            if(empty($rows)){ return false; }
+            $parentId = intval($rows[0][1]);
+            // The top-level row is the vocabulary name and is not part of the
+            // public hierarchical term label used by legacy queries.
+            if($parentId>0){ array_unshift($labels, (string)$rows[0][0]); }
+            $termId = $parentId;
+        }
+        $actual = strtolower(implode('.', $labels));
+        return $actual === strtolower(implode('.', $path));
     }
 
     private function fieldMetadata(int $fieldId, array $recordTypes): array
