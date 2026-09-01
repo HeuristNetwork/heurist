@@ -3456,7 +3456,7 @@ function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null
         //duplicate record header
         $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null);
 
-        $query = 'UPDATE Records set rec_Modified=NOW(), rec_Added=NOW(), rec_AddedByUGrpID='.$currentUserId;
+        $query = "UPDATE Records set rec_Modified=NOW(), rec_Added=NOW(), rec_AddedByUGrpID={$currentUserId}, rec_FlagTemporary=1";
         if(is_numeric($new_owner) && intval($new_owner)>=0){
             $query = $query.', rec_OwnerUGrpID='.$new_owner;
         }

@@ -5767,7 +5767,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         if(this._duplicatedRecord && this._duplicatedRecord > 0){ // add message about being a dupe record
 
-            let $dupe_ele = $('<div>', {style: 'font-size: 12px; color: orange; cursor: default; padding-left: 35px;'})
+            let $dupe_ele = $('<div>', {style: 'font-size: 1.5em; color: red; cursor: default; padding-left: 35px;'})
                 .text(`This is a duplicate of record ${this._duplicatedRecord} - edit as required`);
 
             // Small button to remove dupe message
