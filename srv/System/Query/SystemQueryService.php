@@ -66,6 +66,7 @@ final class SystemQueryService
             $filter = $this->structured($params['filter']);
             $query[] = array('all'=>$builder->normalize($filter));
         }
+        $legacyFilterTypes = $this->extractLegacyFilterTypePredicate($query, $schema);
         $request = new SearchRequest($query, array(
             'limit'=>$recordId === null ? ($params['limit'] ?? 1000) : 1,
             'offset'=>$recordId === null ? ($params['offset'] ?? 0) : 0,
@@ -74,16 +75,9 @@ final class SystemQueryService
             'resolveDetails'=>$params['resolveDetails'] ?? false,
             'sort'=>$params['sort'] ?? null
         ));
-        $compiled = $builder->build(
-            $request->query, $request->limit, $request->offset,
-            $request->sort, array_key_exists('sort', $params)
-        );
-        $total = intval($this->database->fetchValue(
-            $compiled['count']->sql, $compiled['count']->values, 0
-        ));
-        $ids = array_map('intval', $this->database->fetchColumn(
-            $compiled['ids']->sql, $compiled['ids']->values
-        ));
+        list($ids, $total) = empty($legacyFilterTypes)
+            ? $this->executeSqlPage($builder, $request, $params)
+            : $this->executeLegacyFilterTypePage($builder, $request, $params, $schema, $legacyFilterTypes);
         $result = new SearchResult($ids, $total, $request->offset, $request->limit);
 
         if($request->detail === 'ids'){ return $result->toArray(); }
@@ -150,7 +144,9 @@ final class SystemQueryService
             $definition = $schema['headers'][$name];
             $columns[$definition['output']] = $definition['column'];
         }
-        foreach($selection['fields'] as $name){ $columns['field_'.$name] = $schema['fields'][$name]['column']; }
+        foreach($selection['fields'] as $name){
+            $columns['field_'.$name] = $schema['fields'][$name]['column'];
+        }
         $select = array();
         foreach($columns as $output=>$column){ $select[] = 's.'.$column.' AS '.$output; }
         $sql = 'SELECT '.implode(',', $select).' FROM '.$schema['table'].' s WHERE s.'
@@ -173,7 +169,12 @@ final class SystemQueryService
             if(!empty($selection['fields'])){
                 $record['details'] = array();
                 foreach($selection['fields'] as $name){
-                    $record['details'][$name] = array(array('value'=>$row['field_'.$name] ?? null));
+                    $definition = $schema['fields'][$name];
+                    $output = $definition['output'] ?? $name;
+                    $value = !empty($definition['virtual'])
+                        ? $this->legacyVirtualFieldValue($name, $row['field_'.$name] ?? null)
+                        : ($row['field_'.$name] ?? null);
+                    $record['details'][$output] = array(array('value'=>$value));
                 }
             }
             $byId[$record['rec_ID']] = $record;
@@ -188,9 +189,150 @@ final class SystemQueryService
         $result = array();
         foreach($fields as $name){
             $field = $schema['fields'][$name];
-            $result[] = array('code'=>$name, 'name'=>$field['name'], 'type'=>$field['type']);
+            $result[] = array(
+                'code'=>$field['output'] ?? $name,
+                'name'=>$field['name'], 'type'=>$field['type']
+            );
         }
         return $result;
+    }
+
+    /** Execute the ordinary SQL-paginated system query. */
+    private function executeSqlPage(
+        SystemQueryBuilder $builder, SearchRequest $request, array $params
+    ): array {
+        $compiled = $builder->build(
+            $request->query, $request->limit, $request->offset,
+            $request->sort, array_key_exists('sort', $params)
+        );
+        $total = intval($this->database->fetchValue(
+            $compiled['count']->sql, $compiled['count']->values, 0
+        ));
+        $ids = array_map('intval', $this->database->fetchColumn(
+            $compiled['ids']->sql, $compiled['ids']->values
+        ));
+        return array($ids, $total);
+    }
+
+    /*
+     * LEGACY SAVED-FILTER TYPE COMPATIBILITY
+     * --------------------------------------
+     * filterType is not a physical usrSavedSearches column. Until filters move
+     * to sysRecords/sysDetails, remove this virtual predicate before SQL is
+     * compiled, classify every accessible candidate from svs_Query, and apply
+     * offset/limit only after classification. Delete this block when filterType
+     * becomes a normal resolved system field.
+     */
+
+    /** Remove top-level/conjunctive filterType predicates and return their values. */
+    private function extractLegacyFilterTypePredicate(array &$query, array $schema): array
+    {
+        if($schema['type'] !== 'filter'){ return array(); }
+        $types = array();
+        $query = $this->stripLegacyFilterTypePredicates($query, $types, true);
+        return array_values(array_unique($types));
+    }
+
+    private function stripLegacyFilterTypePredicates(array $group, array &$types, bool $conjunctive): array
+    {
+        $result = array();
+        foreach($group as $predicate){
+            $key = (string)array_keys($predicate)[0];
+            $value = $predicate[$key];
+            $normalizedKey = strtolower($key);
+            if(in_array($normalizedKey, array('filtertype','f:filtertype','field:filtertype'), true)){
+                if(!$conjunctive){
+                    throw new QueryValidationException('filterType is supported only as an AND predicate');
+                }
+                foreach($this->normalizeLegacyFilterTypes($value) as $type){ $types[] = $type; }
+                continue;
+            }
+            if(in_array($normalizedKey, array('all','any','not'), true) && is_array($value)){
+                $predicate[$key] = $this->stripLegacyFilterTypePredicates(
+                    $value, $types, $conjunctive && $normalizedKey === 'all'
+                );
+            }
+            $result[] = $predicate;
+        }
+        return $result;
+    }
+
+    private function normalizeLegacyFilterTypes($value): array
+    {
+        $values = is_array($value) ? $value : preg_split('/\s*,\s*/', trim((string)$value));
+        $result = array();
+        foreach($values as $type){
+            $type = strtolower(trim((string)$type));
+            if(!in_array($type, array('faceted','rules','filter'), true)){
+                throw new QueryValidationException('Unknown filterType: '.$type);
+            }
+            $result[] = $type;
+        }
+        if(empty($result)){ throw new QueryValidationException('filterType is not defined'); }
+        return $result;
+    }
+
+    /** Query all ordinary candidates, classify them, then apply API pagination. */
+    private function executeLegacyFilterTypePage(
+        SystemQueryBuilder $builder,
+        SearchRequest $request,
+        array $params,
+        array $schema,
+        array $filterTypes
+    ): array {
+        $countQuery = $builder->build(
+            $request->query, 1, 0, $request->sort, array_key_exists('sort', $params)
+        );
+        $candidateTotal = intval($this->database->fetchValue(
+            $countQuery['count']->sql, $countQuery['count']->values, 0
+        ));
+        if($candidateTotal<1){ return array(array(), 0); }
+        $allQuery = $builder->build(
+            $request->query, $candidateTotal, 0,
+            $request->sort, array_key_exists('sort', $params)
+        );
+        $candidateIds = array_map('intval', $this->database->fetchColumn(
+            $allQuery['ids']->sql, $allQuery['ids']->values
+        ));
+        $filteredIds = $this->filterLegacySavedSearchIds($candidateIds, $schema, $filterTypes);
+        $total = count($filteredIds);
+        return array(array_slice($filteredIds, $request->offset, $request->limit), $total);
+    }
+
+    /** Load only svs_ID/svs_Query and retain the original SQL result order. */
+    private function filterLegacySavedSearchIds(array $ids, array $schema, array $filterTypes): array
+    {
+        if(empty($ids)){ return array(); }
+        $idColumn = $schema['headers']['id']['column'];
+        $queryColumn = $schema['fields']['query']['column'];
+        $sql = 'SELECT '.$idColumn.' AS id,'.$queryColumn.' AS query_value FROM '.$schema['table']
+            .' WHERE '.$idColumn.' IN ('.implode(',', array_fill(0, count($ids), '?')).')';
+        $rows = $this->database->fetchAll($sql, $ids);
+        $typeById = array();
+        foreach($rows as $row){
+            $typeById[intval($row['id'])] = $this->classifyLegacySavedSearch($row['query_value'] ?? null);
+        }
+        return array_values(array_filter($ids, static function($id) use ($typeById, $filterTypes){
+            return isset($typeById[$id]) && in_array($typeById[$id], $filterTypes, true);
+        }));
+    }
+
+    /** Derive the temporary public filterType value from svs_Query JSON. */
+    private function classifyLegacySavedSearch($value): string
+    {
+        $decoded = is_array($value) ? $value : json_decode(trim((string)$value), true);
+        if(!is_array($decoded)){ return 'filter'; }
+        if(array_key_exists('facets', $decoded)){ return 'faceted'; }
+        $query = trim((string)($decoded['q'] ?? ''));
+        $rules = $decoded['rules'] ?? '';
+        $hasRules = is_array($rules) ? !empty($rules) : trim((string)$rules) !== '';
+        return $query === '' && $hasRules ? 'rules' : 'filter';
+    }
+
+    private function legacyVirtualFieldValue(string $name, $source)
+    {
+        if($name === 'filtertype'){ return $this->classifyLegacySavedSearch($source); }
+        return null;
     }
 
     private function pagination(SearchResult $result, array $params): array

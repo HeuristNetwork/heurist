@@ -215,6 +215,9 @@ final class SystemQueryBuilder
         }
         $definition = $this->schema['headers'][$field] ?? $this->schema['fields'][$field] ?? null;
         if(!$definition){ throw new QueryValidationException('Unknown sort field: '.$field); }
+        if(!empty($definition['virtual'])){
+            throw new UnsupportedQueryException('Virtual system field cannot be sorted: '.$field);
+        }
         return ' ORDER BY '.$this->column($definition).' '.($direction === 'DESC' ? 'DESC' : 'ASC');
     }
 

@@ -35,7 +35,14 @@ final class SystemEntitySchemaRegistry
                 'owner'=>array('column'=>'svs_UGrpID', 'output'=>'rec_OwnerUGrpID', 'type'=>'integer')
             ),
             'fields'=>array(
-                'query'=>array('column'=>'svs_Query', 'name'=>'Query', 'type'=>'text')
+                'query'=>array('column'=>'svs_Query', 'name'=>'Query', 'type'=>'text'),
+                // Temporary logical field while saved filters remain encoded in
+                // usrSavedSearches.svs_Query. SystemQueryService removes its
+                // predicate before SQL compilation and derives the value in PHP.
+                'filtertype'=>array(
+                    'column'=>'svs_Query', 'output'=>'filterType',
+                    'name'=>'Filter type', 'type'=>'enum', 'virtual'=>true
+                )
             )
         ),
         'user'=>array(
