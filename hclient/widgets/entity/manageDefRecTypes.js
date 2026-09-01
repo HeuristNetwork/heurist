@@ -1700,7 +1700,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
             this._editing.getFieldByName('rty_Icon').editing_input('showErrorMsg', null);
 
-            if((isNewRecType && window.hWin.HEURIST4.util.isempty(fields['rty_Icon'])) || fields['checkedIcon'] === false){
+            if((isNewRecType || fields['checkedIcon'] === false) && window.hWin.HEURIST4.util.isempty(fields['rty_Icon'])){
                 window.hWin.HEURIST4.msg.showMsgFlash('Please set an icon for the record type', 5000);
                 this._editing.getFieldByName('rty_Icon').editing_input('showErrorMsg', 'An icon is required');
                 return;

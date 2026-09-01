@@ -31,6 +31,7 @@
 require_once dirname(__FILE__).'/../../../autoload.php';
 
 $res = false;
+$new_rt_id = null;
 
 $system = new hserv\System();
 if( $system->init(@$_REQUEST['db']) ){
@@ -60,31 +61,36 @@ if( $system->init(@$_REQUEST['db']) ){
         $res = $mysqli->query($query);
         $new_rt_id = $mysqli->insert_id;
 
-        $dbID = HEURIST_DBID;
-        if(!($dbID>0)){ $dbID = 0;}
+        if($new_rt_id > 0){
 
-        $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
-                    .', rty_NameInOriginatingDB=rty_Name'
-                    .', rty_IDInOriginatingDB='.$new_rt_id.' WHERE rty_ID='.$new_rt_id;
-        $res = $mysqli->query($query);
+            $dbID = HEURIST_DBID;
+            if(!($dbID>0)){ $dbID = 0;}
 
+            $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
+                        .', rty_NameInOriginatingDB=rty_Name'
+                        .', rty_IDInOriginatingDB='.$new_rt_id.' WHERE rty_ID='.$new_rt_id;
+            $res = $mysqli->query($query);
 
-        $query= "INSERT INTO defRecStructure (rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
-        rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue,
-        rst_RecordMatchOrder, rst_CalcFunctionID, rst_RequirementType, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDB,
-        rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
-        rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_OrderForThumbnailGeneration,
-        rst_TermIDTreeNonSelectableIDs, rst_Modified, rst_LocallyModified, rst_SemanticReferenceURL, rst_TermsAsButtons)
-        SELECT $new_rt_id, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
-        rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue,
-        rst_RecordMatchOrder, rst_CalcFunctionID, rst_RequirementType, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDB,
-        rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
-        rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_OrderForThumbnailGeneration,
-        rst_TermIDTreeNonSelectableIDs, rst_Modified, rst_LocallyModified, rst_SemanticReferenceURL, rst_TermsAsButtons
-        from defRecStructure where rst_RecTypeID=$old_rt_id";
+            $query= "INSERT INTO defRecStructure (rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
+            rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue,
+            rst_RecordMatchOrder, rst_CalcFunctionID, rst_RequirementType, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDB,
+            rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
+            rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_OrderForThumbnailGeneration,
+            rst_TermIDTreeNonSelectableIDs, rst_Modified, rst_LocallyModified, rst_SemanticReferenceURL, rst_TermsAsButtons)
+            SELECT $new_rt_id, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
+            rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue,
+            rst_RecordMatchOrder, rst_CalcFunctionID, rst_RequirementType, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDB,
+            rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
+            rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_OrderForThumbnailGeneration,
+            rst_TermIDTreeNonSelectableIDs, rst_Modified, rst_LocallyModified, rst_SemanticReferenceURL, rst_TermsAsButtons
+            from defRecStructure where rst_RecTypeID=$old_rt_id";
 
-        $res = $mysqli->query($query);
+            $res = $mysqli->query($query);
+        }else{
 
+            $res = false;
+            $system->addError(HEURIST_ACTION_BLOCKED, "Failed to create duplicate record type.<br>Error: {$mysqli->error}");
+        }
     }
 }
 
