@@ -459,6 +459,15 @@ span.fancytree-node:hover{
 }
 .ui-heurist-design .ui-heurist-title{color:<?php uout('design_title_color', '#7B4C98');?>}
 
+.ui-heurist-design .ui-button-icon-only{
+    background: none;
+    color:<?php uout('design_bg', CLR_DESIGN_BG)?> !important;
+}
+.ui-heurist-design .ui-dialog-titlebar .ui-button-icon,
+.ui-heurist-design .ui-heurist-header .ui-button-icon{
+    color: white;
+}
+
 .ui-heurist-design .ui-widget-content,
 .ui-heurist-design .ui-dialog-heurist{
     background:<?php uout('design_fade_bg', CLR_DESIGN_BG);?>
@@ -495,10 +504,11 @@ span.fancytree-node:hover{
     background-color: <?php uout('explore_bg', '#305586');?> !important;
     color: white;
 }
-.ui-dialog-titlebar .ui-button-icon,
-.ui-heurist-header .ui-button-icon{
+.ui-heurist-explore .ui-dialog-titlebar .ui-button-icon,
+.ui-heurist-explore .ui-heurist-header .ui-button-icon{
     color: white;
 }
+
 .ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', CLR_EXPLORE_FADE_BG);?> !important;}
 .ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', CLR_EXPLORE_BG);?>}
 .ui-heurist-explore .ui-widget-content{
@@ -557,6 +567,10 @@ span.fancytree-node:hover{
     background: none;
     color:<?php uout('import_bg', CLR_IMPORT_BG)?> !important;
 }
+.ui-heurist-populate .ui-dialog-titlebar .ui-button-icon,
+.ui-heurist-populate .ui-heurist-header .ui-button-icon{
+    color: white;
+}
 .ui-heurist-populate .ui-heurist-header .ui-button-icon-only,
 .ui-heurist-populate .ui-dialog-titlebar .ui-button-icon-only,
 .ui-heurist-populate .ui-fade-color{
@@ -595,6 +609,10 @@ span.fancytree-node:hover{
 .ui-heurist-publish .ui-button-icon-only{
     background: none;
     color:<?php uout('publish_bg', CLR_PUBLISH_BG)?> !important;
+}
+.ui-heurist-publish .ui-dialog-titlebar .ui-button-icon,
+.ui-heurist-publish .ui-heurist-header .ui-button-icon{
+    color: white;
 }
 .ui-heurist-publish .ui-heurist-header .ui-button-icon-only,
 .ui-heurist-publish .ui-dialog-titlebar .ui-button-icon-only,
@@ -638,6 +656,10 @@ span.fancytree-node:hover{
 .ui-heurist-admin .ui-button-icon-only{
     background: none;
     color:<?php uout('admin_bg', CLR_ADMIN_BG)?> !important;
+}
+.ui-heurist-admin .ui-dialog-titlebar .ui-button-icon,
+.ui-heurist-admin .ui-heurist-header .ui-button-icon{
+    color: white;
 }
 .ui-heurist-admin .ui-heurist-header .ui-button-icon-only, .ui-heurist-admin .ui-dialog-titlebar .ui-button-icon-only{
     color:<?php uout('admin_fade_bg', CLR_EXPLORE_FADE_BG)?> !important;
