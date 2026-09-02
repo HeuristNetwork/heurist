@@ -7581,60 +7581,18 @@ $.widget( "heurist.editing_input", {
         let $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
         
         $input.css({'padding-left': '30px', 'padding-right': '30px', cursor:'hand'});
+
         //folder icon in the begining of field
-        let $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
-            .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input );
+        let $gicon = $('<span>', {
+            class: 'ui-icon ui-icon-folder-open',
+            style: 'position: absolute; margin: 5px 0px 0px 8px; cursor: hand;'
+        }).insertBefore( $input );
+
         $('<span>', {class: 'file-vis ui-icon', style: 'position: absolute; margin: 3px 0px 0px -24px'}).insertAfter( $input );
 
-        let $imageContainer = this.element.find('.image-containers');
-        if(window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID)
-        && window.hWin.HEURIST4.util.isPositiveInt(dtyID)
-        && $imageContainer.length === 0){
-
-            let $showAllImages = $('<span>', {
-                class: 'showAllImages smallbutton ui-icon ui-icon-eye-open',
-                title: 'Turn on/off display of thumbnail images (applies to this field for all records)',
-                style: 'cursor: pointer;'
-            }).appendTo(this.element.find('.editint-inout-repeat-container'));
-
-            $imageContainer = $('<div>', {class: 'image-containers', style: 'display:grid;grid-template-columns:repeat(3, 1fr);gap:2em;'}).insertAfter(this.error_message);
-
-            if(this.element.find('.editint-inout-repeat-button').length > 0){
-
-                this.element.find('.editint-inout-repeat-button').css({
-                    'margin-left': '0px',
-                    display: 'inline-block'
-                });
-
-                $showAllImages.css('margin', '1px 0px 0px 2px');
-            }
-
-            this._on($showAllImages, {
-                click: () => {
-
-                    let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllRecords', []);
-                    showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
-                    if(!Array.isArray(showAllImagesPrefs)){
-                        console.error(`showAllImagesPrefs is not an array, found: ${showAllImagesPrefs}`);
-                        return;
-                    }
-
-                    const recTypeID = Number.parseInt(this.options.rectypeID);
-                    const detailTypeID = Number.parseInt(dtyID);
-                    const valueKey = `${recTypeID}.${detailTypeID}`;
-                    const valueKeyIndex = showAllImagesPrefs.indexOf(valueKey);
-
-                    if(valueKeyIndex >= 0){
-                        this.element.find('div.image_input .hideTumbnail').trigger('click');
-                        showAllImagesPrefs.splice(valueKeyIndex, 1);
-                    }else{
-                        this.element.find('div.image_input').trigger('click').show();
-                        showAllImagesPrefs.push(valueKey);
-                    }
-
-                    window.hWin.HAPI4.save_pref('edit_record_showAllRecords', showAllImagesPrefs);
-                }
-            });
+        let $imageContainer = this._getInlineImageContainer();
+        if(!$imageContainer || $imageContainer.length === 0){
+            return;
         }
 
         let $image_div = $('<div>', {
@@ -7644,7 +7602,7 @@ $.widget( "heurist.editing_input", {
 
         let $input_img, $img_controls;
         [$input_img, $img_controls] = this._addImageControls($image_div, f_id, f_nonce, dwnld_link);
-        
+
         this._addImageActions($clear_container, f_id);
 
         // Change Handler
@@ -7728,10 +7686,12 @@ $.widget( "heurist.editing_input", {
                 }
                 
                 if($input_img.is(':visible')){
-                    $image_div.stop(true, true).show();    
+                    $image_div.stop(true, true).show();
+                    $image_div.find('div.image_input').stop(true, true).show();
                 }else if (showTimer == 0){
                     showTimer = window.setTimeout(() => {
                         $image_div.show();
+                        $image_div.find('div.image_input').show();
                         $image_div.find('div.smallText').show();
                         showTimer = 0;
                     }, 500);
@@ -7748,17 +7708,18 @@ $.widget( "heurist.editing_input", {
                 showTimer = 0;
             }
 
-            if($input_img.is(':visible')){
-                
+            if($input_img.is(':visible') || $image_div.find('div.smallText').is(':visible')){
+
                 let ele = event.toElement || event.relatedTarget;
                 ele = $(ele);
                 if(ele.hasClass('image_input') || ele.parent().hasClass('image_input')){
                     return;
                 }
-                                        
+
                 hideTimer = window.setTimeout(function(){
                     if(isClicked === 0){
                         $image_div.fadeOut(1000);
+                        $image_div.find('div.image_input').fadeOut(1000);
                         $image_div.find('div.smallText').hide(1000);
                     }
                 }, 1000);
@@ -8015,6 +7976,89 @@ $.widget( "heurist.editing_input", {
             //assign value at once
             this.newvalues[$input.attr('id')] = value;
         }
+    },
+
+    _getInlineImageContainer: function(){
+
+        let __showAllInlineImages = (event) => {
+
+            const forcedShow = event.isForced;
+
+            let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllRecords', []);
+            showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+            if(!Array.isArray(showAllImagesPrefs)){
+                console.error(`showAllImagesPrefs is not an array, found: ${showAllImagesPrefs}`);
+                return;
+            }
+
+            const valueKey = `${rtyID}.${dtyID}`;
+            const valueKeyIndex = showAllImagesPrefs.indexOf(valueKey);
+
+            if(valueKeyIndex === -1 || forcedShow){
+
+                this.element.find('div.image-div').each((idx, div) => {
+
+                    let $div = $(div);
+                    const hasImage = !window.hWin.HEURIST4.util.isempty($div.find('img').attr('src'));
+                    const isInvalid = $div.find('div.smallText').hasClass('invalidImg');
+
+                    if(!hasImage || isInvalid){
+                        return;
+                    }
+
+                    $div.show();
+                    $div.find('div.image_input').trigger('click').show();
+                });
+
+                if(!forcedShow){
+                    showAllImagesPrefs.push(valueKey);
+                }
+
+            }else{
+
+                this.element.find('div.image_input .hideTumbnail').trigger('click');
+                showAllImagesPrefs.splice(valueKeyIndex, 1);
+            }
+
+            if(!forcedShow){
+                window.hWin.HAPI4.save_pref('edit_record_showAllRecords', showAllImagesPrefs);
+            }
+        };
+
+        let $imageContainer = this.element.find('.image-containers');
+        const rtyID = Number.parseInt(this.options.rectypeID);
+        const dtyID = Number.parseInt(this.options.dtID ?? this.f('rst_DetailTypeID'));
+
+        if($imageContainer.length > 0){
+            return $imageContainer;
+        }
+
+        if(!Number.isNaN(rtyID) && rtyID > 0 && !Number.isNaN(dtyID) && dtyID > 0){
+
+            let $showAllImages = $('<span>', {
+                class: 'showAllImages smallbutton ui-icon ui-icon-eye-open',
+                title: 'Turn on/off display of thumbnail images (applies to this field for all records)',
+                style: 'cursor: pointer;'
+            }).appendTo(this.element.find('.editint-inout-repeat-container'));
+
+            $imageContainer = $('<div>', {class: 'image-containers', style: 'display:grid;grid-template-columns:repeat(3, 1fr);gap:2em;'}).insertAfter(this.error_message);
+
+            if(this.element.find('.editint-inout-repeat-button').length > 0){
+
+                this.element.find('.editint-inout-repeat-button').css({
+                    'margin-left': '0px',
+                    display: 'inline-block'
+                });
+
+                $showAllImages.css('margin', '1px 0px 0px 2px');
+            }
+
+            this._on($showAllImages, {
+                click: __showAllInlineImages
+            });
+        }
+
+        return $imageContainer;
     },
 
     _addImageControls: function($image_div, fileID, fileObfuscatedID, fileDownload){

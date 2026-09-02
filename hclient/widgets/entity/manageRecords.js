@@ -3733,7 +3733,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             continue;
                         }
 
-                        this.editForm.find(`div[data-dtid="${dtyID}"] div.image_input`).trigger('click').show();
+                        setTimeout((dtyID) => {
+
+                            const event = $.Event('click');
+                            event.isForced = true;
+
+                            this.editForm.find(`div[data-dtid="${dtyID}"] .showAllImages`).trigger(event);
+
+                        }, 500, dtyID);
                     }
                 }
             }
