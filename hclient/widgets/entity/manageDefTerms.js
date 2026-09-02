@@ -1126,7 +1126,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
             }
 
-            sWidth = 'display:inline-block;padding-top:4px;max-width:320px;';
+            sWidth = 'display:inline-block;padding-top:4px;max-width:32em;';
 
             sPad = '<span style="font-size:'+(1+lvl * 0.1)+'em">'+('&nbsp;'.repeat(lvl*4))+'</span>';
             sFontSize = 'font-size:'+(1.1 - lvl * 0.1)+'em;';
@@ -2102,6 +2102,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             {  container:'terms-merge-popup',
                 width:500,
                 height:400,
+                default_palette_class: 'ui-heurist-design',
                 close: function(){
                     $dlg.dialog('destroy');       
                     $dlg.remove();
@@ -3263,6 +3264,21 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
      */
     updateTermTranslations: function(){
 
+        let prepareTranslations = (translationString) => {
+
+            let translations = translationString.split('<br>');
+
+            let formattedString = [];
+            for(const translation of translations){
+
+                const [language, text] = translation.split(':');
+
+                formattedString.push(`<span style="font-size: 0.7em;">${language}</span> <span>${text}</span>`);
+            }
+
+            return formattedString.join('&nbsp;&nbsp;&nbsp;');
+        };
+
         let termTranslations = window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation');
 
         if(!termTranslations){
@@ -3281,7 +3297,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 $langs.empty();
                 return;
             }else if(this._cachedLabels[trm_ID]){
-                $langs.html(`<span class="ui-icon ui-icon-translate"></span><span style="font-size: smaller; color: grey;">${this._cachedLabels[trm_ID]['langs']}</span>`).css('margin-left', '5px');
+                let translationString = prepareTranslations(this._cachedLabels[trm_ID]['labels']);
+                let translationTitle = this._cachedLabels[trm_ID]['labels'].replaceAll('"', "&quot;");
+                $langs.html(`<span style="font-size: smaller; color: grey;" title="${translationTitle}">${translationString}</span>`).css('margin-left', '5px');
                 return;
             }
 
@@ -3312,7 +3330,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 labels: translatedLabels
             };
 
-            $langs.html(`<span class="ui-icon ui-icon-translate"></span><span style="font-size: smaller; color: grey;">${languages}</span>`).css('margin-left', '5px');
+            let translationString = prepareTranslations(translatedLabels);
+            let translationTitle = translatedLabels.replaceAll('"', "&quot;");
+            $langs.html(`<span style="font-size: smaller; color: grey;" title="${translationTitle}">${translationString}</span>`).css('margin-left', '5px');
         });
     },
 
@@ -3598,6 +3618,7 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
         {  container:'terms-merge-popup',
             width:500,
             height:280,
+            default_palette_class: 'ui-heurist-design',
             close: function(){
                 $dlg.dialog('destroy');       
                 $dlg.remove();
