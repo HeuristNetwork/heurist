@@ -68,6 +68,20 @@ final class QueryBuilder
         return new CompiledQuery('SELECT COUNT(DISTINCT r.rec_ID) FROM Records r WHERE '.implode(' AND ',$where),$state->types(),$state->values(),$normalized);
     }
 
+    /** Compile counts grouped by record type over the complete filtered query. */
+    public function buildRectypeCounts($query,array $context=array()): CompiledQuery
+    {
+        $normalized=$this->normalize($query);
+        if(!$this->supportsSqlExecution($normalized)){throw new UnsupportedQueryException('Query requires batched execution');}
+        $state=new SqlBuildContext($context);$where=$this->compileGroup($normalized,'AND',$state,'r',0);
+        $this->records->appendAccessConditions($where,$state,$context,'r');
+        return new CompiledQuery(
+            'SELECT r.rec_RecTypeID, COUNT(DISTINCT r.rec_ID) FROM Records r WHERE '
+                .implode(' AND ',$where).' GROUP BY r.rec_RecTypeID ORDER BY r.rec_RecTypeID',
+            $state->types(),$state->values(),$normalized
+        );
+    }
+
     /** Build a bounded, index-driven probe for an unsuffixed any-field predicate. */
     public function buildAnyFieldCandidates($value,array $context=array(),int $limit=5001): CompiledQuery
     {

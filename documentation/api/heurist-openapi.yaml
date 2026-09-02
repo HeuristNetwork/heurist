@@ -222,7 +222,8 @@ paths:
       description: >-
         Anonymous requests return only publicly visible records. By default each record is an envelope containing
         rec_ID, rec_RecTypeID and rec_Title. Use fields to add headers or native/linked details, detail=ids for the
-        IDs-only DTO, or detail=graph with rules for explicit graph output.
+        IDs-only DTO, detail=count for a count-only summary, detail=rectypes for counts grouped by record type,
+        or detail=graph with rules for explicit graph output.
       security:
       - {}
       - bearerAuth: []
@@ -262,8 +263,12 @@ paths:
           - records
           - ids
           - graph
+          - count
+          - rectypes
           default: records
-        description: ids returns the IDs-only DTO and ignores fields. graph adds explicit expansion graph data.
+        description: >-
+          ids returns the IDs-only DTO and ignores fields. count returns only the query and total. rectypes returns
+          the query, total and counts grouped by rec_RecTypeID. graph adds explicit expansion graph data.
       - name: resolveDetails
         in: query
         schema:
@@ -317,7 +322,7 @@ paths:
               resolveDetails: true
       responses:
         '200':
-          description: Record envelopes, IDs-only DTO, or explicit graph result
+          description: Record envelopes, IDs-only DTO, count or record-type summary, or explicit graph result
           content:
             application/json:
               schema:
@@ -2109,6 +2114,57 @@ components:
       oneOf:
       - $ref: '#/components/schemas/RecordSearchResponse'
       - $ref: '#/components/schemas/RecordIdsResponse'
+      - $ref: '#/components/schemas/RecordCountResponse'
+      - $ref: '#/components/schemas/RecordRectypeCountsResponse'
+    RecordCountResponse:
+      type: object
+      required: [query, total]
+      properties:
+        query:
+          description: Query representation supplied by the caller, or the normalized IDs/all query.
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        total:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    RecordRectypeCountsResponse:
+      type: object
+      required: [query, total, rectypes]
+      properties:
+        query:
+          description: Query representation supplied by the caller, or the normalized IDs/all query.
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        total:
+          type: integer
+          minimum: 0
+        rectypes:
+          type: array
+          items:
+            type: object
+            required: [rec_RecTypeID, count]
+            properties:
+              rec_RecTypeID:
+                type: integer
+                minimum: 1
+              count:
+                type: integer
+                minimum: 1
+            additionalProperties: false
+      additionalProperties: false
     RecordIdsResponse:
       type: object
       required:
@@ -2212,7 +2268,7 @@ components:
               type: string
         detail:
           type: string
-          enum: [records, ids, graph]
+          enum: [records, ids, graph, count, rectypes]
           default: records
         resolveDetails:
           type: boolean

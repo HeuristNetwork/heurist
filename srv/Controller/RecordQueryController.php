@@ -130,6 +130,16 @@ final class RecordQueryController
         if(!$result instanceof SearchResult){
             throw new SearchExecutionException('Record search service returned an invalid result');
         }
+        if($request->detail === 'count' || $request->detail === 'rectypes'){
+            $summary = array(
+                'query'=>$this->responseQuery($params, $request),
+                'total'=>$result->total
+            );
+            if($request->detail === 'rectypes'){
+                $summary['rectypes'] = $result->rectypes ?? array();
+            }
+            return $summary;
+        }
         if($request->detail === 'graph'){
             return $result->toArray();
         }
@@ -138,6 +148,14 @@ final class RecordQueryController
             return $result->toArray();
         }
         return $this->recordsResponse($result, $request, $selection, $params);
+    }
+
+    /** Preserve the caller's query representation in compact summary responses. */
+    private function responseQuery(array $params, SearchRequest $request)
+    {
+        if(array_key_exists('query', $params)){ return $this->structuredParameter($params['query']); }
+        if(array_key_exists('q', $params)){ return $this->structuredParameter($params['q']); }
+        return $request->query;
     }
 
     /** Build the universal records envelope for native and linked fields. */

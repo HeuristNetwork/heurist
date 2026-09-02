@@ -45,6 +45,40 @@ class QueryExecutor
         return empty($rows) ? null : $rows[0][0];
     }
 
+    /** Execute a grouped record-type count query. */
+    public function executeRectypeCounts(CompiledQuery $query): array
+    {
+        return array_values(array_map(static function(array $row): array {
+            return array('rec_RecTypeID'=>intval($row[0]), 'count'=>intval($row[1]));
+        }, $this->executeRows($query->sql, $query->types, $query->values)));
+    }
+
+    /** Count record types for an already filtered fallback ID set. */
+    public function executeRectypeCountsForIds(array $ids, int $chunkSize = 1000): array
+    {
+        $counts = array();
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        foreach(array_chunk($ids, max(1, $chunkSize)) as $chunk){
+            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+            $rows = $this->executeRows(
+                'SELECT rec_RecTypeID, COUNT(*) FROM Records WHERE rec_ID IN ('
+                    .$placeholders.') GROUP BY rec_RecTypeID',
+                str_repeat('i', count($chunk)),
+                $chunk
+            );
+            foreach($rows as $row){
+                $typeId = intval($row[0]);
+                $counts[$typeId] = ($counts[$typeId] ?? 0) + intval($row[1]);
+            }
+        }
+        ksort($counts, SORT_NUMERIC);
+        $result = array();
+        foreach($counts as $typeId=>$count){
+            $result[] = array('rec_RecTypeID'=>$typeId, 'count'=>$count);
+        }
+        return $result;
+    }
+
     /**
      * Execute arbitrary parameterized SQL and return numeric rows.
      *

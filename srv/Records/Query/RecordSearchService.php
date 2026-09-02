@@ -71,6 +71,17 @@ final class RecordSearchService
         $candidateCache = array();
         $query = $this->resolveSelectiveAnyFields($query, $context, $candidateCache);
         if(empty($context['forceChunked']) && $this->builder->supportsSqlExecution($query)){
+            if($request->detail === 'count'){
+                $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
+                return new SearchResult(array(), $total, 0, 1);
+            }
+            if($request->detail === 'rectypes'){
+                $rectypes = $this->executor->executeRectypeCounts(
+                    $this->builder->buildRectypeCounts($query, $context)
+                );
+                $total = array_sum(array_column($rectypes, 'count'));
+                return new SearchResult(array(), $total, 0, 1, null, null, $rectypes);
+            }
             $ids = $this->executor->executeIds($this->builder->buildIds($query, $context));
             $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
             return $this->withGraph(
@@ -80,6 +91,15 @@ final class RecordSearchService
             );
         }
         $ids = $this->evaluateGroup($query, null, 'all', $context, 0);
+        if($request->detail === 'count'){
+            return new SearchResult(array(), count($ids), 0, 1);
+        }
+        if($request->detail === 'rectypes'){
+            return new SearchResult(
+                array(), count($ids), 0, 1, null, null,
+                $this->executor->executeRectypeCountsForIds($ids)
+            );
+        }
         return $this->withGraph(new SearchResult(
             array_slice($ids, $request->offset, $request->limit),
             count($ids),

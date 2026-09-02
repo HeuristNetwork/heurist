@@ -29,9 +29,11 @@ final class SearchResult
     public int $limit;
     public ?string $resultToken;
     public ?ExpansionResult $graph;
+    /** @var array<int,array{rec_RecTypeID:int,count:int}>|null */
+    public ?array $rectypes;
 
     /** Initialise a normalized result page. */
-    public function __construct(array $ids, int $total, int $offset, int $limit, ?string $resultToken = null, ?ExpansionResult $graph = null)
+    public function __construct(array $ids, int $total, int $offset, int $limit, ?string $resultToken = null, ?ExpansionResult $graph = null, ?array $rectypes = null)
     {
         $this->ids = array_values(array_map('intval', $ids));
         $this->total = $total;
@@ -39,6 +41,7 @@ final class SearchResult
         $this->limit = max(1, $limit);
         $this->resultToken = $resultToken;
         $this->graph = $graph;
+        $this->rectypes = $rectypes;
     }
 
     /** Return the stable controller representation. */
@@ -47,6 +50,7 @@ final class SearchResult
         $result = array('ids'=>$this->ids, 'total'=>$this->total, 'offset'=>$this->offset,
             'limit'=>$this->limit, 'resultToken'=>$this->resultToken);
         if($this->graph !== null){ $result['graph'] = $this->graph->toArray(); }
+        if($this->rectypes !== null){ $result['rectypes'] = $this->rectypes; }
         return $result;
     }
 }
