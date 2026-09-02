@@ -77,6 +77,8 @@ final class RecordDataService
             }
         }
 
+        $this->attachVirtualHeaders($records, $topIds, $options['virtuals'] ?? array());
+
         $fieldIds = array_values(array_unique(array_map(static function($field){
             return intval($field['fieldId']);
         }, $nativeFields)));
@@ -91,6 +93,46 @@ final class RecordDataService
             }
         }
         return array_values($records);
+    }
+
+    /** Resolve presentation-only fields in one query per page, never per record. */
+    private function attachVirtualHeaders(array &$records, array $topIds, array $virtuals): void
+    {
+        if(empty($virtuals)){ return; }
+        $wanted = array_fill_keys($virtuals, true);
+        $index = array();
+        foreach($records as $id=>$unused){ $index[intval($id)] = $id; }
+        foreach(array_chunk($topIds, self::BATCH_SIZE) as $chunk){
+            $select = array('r.rec_ID');
+            if(isset($wanted['rec_OwnerName'])){ $select[] = 'g.ugr_Name'; }
+            if(isset($wanted['rec_Bookmarked'])){
+                $select[] = '(EXISTS(SELECT 1 FROM usrBookmarks b WHERE b.bkm_RecID=r.rec_ID LIMIT 1) '
+                    .'OR EXISTS(SELECT 1 FROM usrRecTagLinks t WHERE t.rtl_RecID=r.rec_ID LIMIT 1))';
+            }
+            if(isset($wanted['rec_ThumbnailURL'])){
+                $select[] = '(SELECT f.ulf_ObfuscatedFileID FROM recDetails d '
+                    .'JOIN recUploadedFiles f ON f.ulf_ID=d.dtl_UploadedFileID '
+                    .'LEFT JOIN defFileExtToMimetype m ON m.fxm_Extension=f.ulf_MimeExt '
+                    .'WHERE d.dtl_RecID=r.rec_ID AND (m.fxm_MimeType LIKE "image%" '
+                    .'OR m.fxm_MimeType IN ("video/youtube","video/vimeo","audio/soundcloud") '
+                    .'OR f.ulf_PreferredSource LIKE "iiif%") LIMIT 1)';
+            }
+            $sql = 'SELECT '.implode(',', $select).' FROM Records r '
+                .'LEFT JOIN sysUGrps g ON g.ugr_ID=r.rec_OwnerUGrpID WHERE r.rec_ID IN ('
+                .implode(',', array_fill(0, count($chunk), '?')).')';
+            foreach($this->executor->executeRows($sql, str_repeat('i', count($chunk)), $chunk) as $row){
+                $position = 1; $id = intval($row[0]);
+                if(!isset($index[$id])){ continue; }
+                $key = $index[$id];
+                if(isset($wanted['rec_OwnerName'])){ $records[$key]['rec_OwnerName'] = $row[$position++]; }
+                if(isset($wanted['rec_Bookmarked'])){ $records[$key]['rec_Bookmarked'] = (bool)$row[$position++]; }
+                if(isset($wanted['rec_ThumbnailURL'])){
+                    $fileId = preg_replace('/[^a-z0-9]/i', '', (string)$row[$position++]);
+                    $records[$key]['rec_ThumbnailURL'] = $fileId === '' ? null
+                        : HEURIST_BASE_URL.'?db='.rawurlencode($this->runtime->databaseName).'&thumb='.$fileId;
+                }
+            }
+        }
     }
 
     /** Attach values reached through a concrete expansion occurrence. */

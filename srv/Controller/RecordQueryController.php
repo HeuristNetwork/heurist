@@ -171,7 +171,11 @@ final class RecordQueryController
         $linked = array_values(array_filter($selection['details'], static function($field){
             return $field['traversal'] !== null;
         }));
-        $valueOptions = array('resolveDetails'=>$request->resolveDetails);
+        $valueOptions = array(
+            'resolveDetails'=>$request->resolveDetails,
+            // Presentation-only virtual headers are resolved by RecordDataService.
+            'virtuals'=>$selection['virtuals'] ?? array()
+        );
         $records = $this->dataService->loadRecords(
             $result->ids, $selection['headers'], $native, $valueOptions
         );
@@ -204,7 +208,8 @@ final class RecordQueryController
             'entity'=>'records',
             'fields'=>array(
                 'headers'=>array_values(array_unique(array_merge(
-                    array('rec_ID','rec_RecTypeID','rec_Title'), $selection['headers']
+                    array('rec_ID','rec_RecTypeID','rec_Title'),
+                    $selection['headers'], $selection['virtuals'] ?? array()
                 ))),
                 'details'=>$this->dataService->loadFieldMetadata($selection['details'])
             )

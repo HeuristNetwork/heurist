@@ -32,6 +32,11 @@ final class RecordFieldSelector
         'rec_addedbyugrpid'=>'rec_AddedByUGrpID',
         'rec_hash'=>'rec_Hash'
     );
+    private const VIRTUALS = array(
+        'rec_bookmarked'=>'rec_Bookmarked',
+        'rec_ownername'=>'rec_OwnerName',
+        'rec_thumbnailurl'=>'rec_ThumbnailURL'
+    );
 
     /**
      * Parse CSV/array fields.
@@ -44,11 +49,12 @@ final class RecordFieldSelector
     public function parse($fields): array
     {
         if($fields === null || $fields === ''){
-            return array('headers'=>array(), 'details'=>array());
+            return array('headers'=>array(), 'virtuals'=>array(), 'details'=>array());
         }
         $values = is_array($fields) ? $fields : explode(',', (string)$fields);
         $headers = array();
         $details = array();
+        $virtuals = array();
         foreach($values as $value){
             if(is_array($value)){
                 throw new QueryValidationException('Record fields must be names, IDs, or compact path codes');
@@ -58,6 +64,10 @@ final class RecordFieldSelector
             $headerKey = strtolower($field);
             if(isset(self::HEADERS[$headerKey])){
                 $headers[self::HEADERS[$headerKey]] = self::HEADERS[$headerKey];
+                continue;
+            }
+            if(isset(self::VIRTUALS[$headerKey])){
+                $virtuals[self::VIRTUALS[$headerKey]] = self::VIRTUALS[$headerKey];
                 continue;
             }
             if(ctype_digit($field) && intval($field)>0){
@@ -81,6 +91,7 @@ final class RecordFieldSelector
         }
         return array(
             'headers'=>array_values($headers),
+            'virtuals'=>array_values($virtuals),
             'details'=>array_values($details)
         );
     }

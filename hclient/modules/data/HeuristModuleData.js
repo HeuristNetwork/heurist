@@ -139,6 +139,23 @@ class HeuristModuleData extends HeuristModuleRecordset {
             editRecord: function(recordId) {
                 return that._openRecordEdit(recordId);
             },
+            viewRecord: function(recordId) {
+                return that._openRecordView(recordId);
+            },
+            // IMPORTANT: utilsCollection is the canonical validator/store. Keep
+            // its array intact here; a collection can contain many thousands of IDs.
+            getCollection: function() {
+                return that._getCollection();
+            },
+            addToCollection: function(recordIds) {
+                return that._updateCollection('add', recordIds);
+            },
+            removeFromCollection: function(recordIds) {
+                return that._updateCollection('remove', recordIds);
+            },
+            subscribeCollection: function(handler) {
+                return that._subscribeCollection(handler);
+            },
             addRecord: function(recordTypeId) {
                 return that._addRecordEdit(recordTypeId);
             },
@@ -242,9 +259,6 @@ class HeuristModuleData extends HeuristModuleRecordset {
 
     /** Switch the module to an explicit/current-results query. */
     _setQueryNow(query, options) {
-        // HeuristModuleRecordset has already converted either event format to
-        // effectiveQuery. heurist-data now follows its normal server-paged path:
-        // DataApplication -> QueryLoader -> RecordDataProvider.load(/records).
         this._currentQuery = query;
         this.options.dataset = null;
         if (!this._moduleApi || typeof this._moduleApi.setQuery !== 'function') {
@@ -462,6 +476,57 @@ class HeuristModuleData extends HeuristModuleRecordset {
                 reject(error);
             }
         });
+    }
+
+    /** Open the standard read-only record card in the parent application. */
+    _openRecordView(recordId) {
+        var id = Number(recordId);
+        if (!Number.isInteger(id) || id < 1) {
+            return Promise.reject(new Error('A valid Heurist record ID is required'));
+        }
+        var hapi = window.hWin && window.hWin.HAPI4;
+        if (!hapi || !hapi.baseURL) {
+            return Promise.reject(new Error('Heurist record viewer is not available'));
+        }
+        var url = hapi.baseURL + 'viewers/record/renderRecordData.php?db=' +
+            encodeURIComponent(hapi.database) + '&ll=WebSearch&recID=' + id;
+        window.hWin.open(url, '_blank', 'noopener');
+        return Promise.resolve(true);
+    }
+
+    /** Return the already validated collection without copying/normalizing it. */
+    _getCollection() {
+        var collection = window.hWin && window.hWin.HEURIST4 &&
+            window.hWin.HEURIST4.collection;
+        if (!collection) return [];
+        if (!Array.isArray(collection._collection)) {
+            collection.collectionUpdate({db: window.hWin.HAPI4.database, fetch: 1});
+        }
+        return collection._collection || [];
+    }
+
+    _updateCollection(operation, recordIds) {
+        var collection = window.hWin && window.hWin.HEURIST4 &&
+            window.hWin.HEURIST4.collection;
+        if (!collection) throw new Error('Heurist collection is not available');
+        collection.collectionUpdate({
+            db: window.hWin.HAPI4.database,
+            [operation]: recordIds
+        });
+        return collection._collection || [];
+    }
+
+    _subscribeCollection(handler) {
+        if (typeof handler !== 'function') return null;
+        var hapi = window.hWin && window.hWin.HAPI4;
+        if (!hapi || !hapi.Event) return null;
+        var namespace = '.heuristModuleDataCollection' +
+            String(this.element.attr('id') || Math.random()).replace(/[^a-z0-9]/gi, '');
+        var target = $(window.hWin.document);
+        target.on(hapi.Event.ON_REC_COLLECT + namespace, function(event, data) {
+            handler(data && Array.isArray(data.collection) ? data.collection : []);
+        });
+        return function() { target.off(namespace); };
     }
 
     /** Open the legacy Heurist record creator for the requested record type. */
