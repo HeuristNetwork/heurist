@@ -182,7 +182,8 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
         if (!partial && ids.length <= HEURIST_MODULE_IDS_QUERY_LIMIT) {
             return 'ids:' + ids.join(',');
         }
-        return this._normalizeQuery(executedQuery) || 'ids:' + ids.join(',');
+        return this._normalizeQuery(executedQuery) ||
+            'ids:' + ids.slice(0, HEURIST_MODULE_IDS_QUERY_LIMIT).join(',');
     }
 
     _normalizeQuery(query) {

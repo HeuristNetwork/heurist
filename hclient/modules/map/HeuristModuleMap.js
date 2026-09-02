@@ -183,8 +183,11 @@ class HeuristModuleMap extends HeuristModuleRecordset {
     /** Build the single bootstrap contract consumed by heurist-map. */
     _buildHeuristMapBootstrap() {
         var hapi = window.hWin && window.hWin.HAPI4;
-        var lang = hapi && typeof hapi.get_prefs_def === 'function'
-            ? hapi.get_prefs_def('layout_language', 'ENG') : 'ENG';
+            
+        const lang = hapi
+            ? hapi.getLangCode3(hapi.get_prefs_def('layout_language', 'eng'), 'eng')
+            : 'eng';            
+            
         var saved = this._getSavedMapSettings();
         var explicit = this._cloneMapSettings(this.options.heuristMapSettings);
         var runtimeMode = this._getRuntimeMode();

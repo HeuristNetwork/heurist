@@ -144,6 +144,9 @@ class HeuristModuleData extends HeuristModuleRecordset {
             },
             editFieldset: function(value, options) {
                 return that._editFieldset(value, options || {});
+            },
+            doSearch: function(request) {
+                return that._doSearch(request);
             }
         };
     }
@@ -151,8 +154,11 @@ class HeuristModuleData extends HeuristModuleRecordset {
     /** Build the serializable launch envelope consumed by heurist-data. */
     _buildBootstrap() {
         var hapi = window.hWin && window.hWin.HAPI4;
-        var lang = hapi && typeof hapi.get_prefs_def === 'function'
-            ? hapi.get_prefs_def('layout_language', 'ENG') : 'ENG';
+            
+        const lang = hapi
+            ? hapi.getLangCode3(hapi.get_prefs_def('layout_language', 'eng'), 'eng')
+            : 'eng';            
+            
         var runtimeMode = this.options.runtimeMode;
         if (['main', 'website', 'standalone'].indexOf(runtimeMode) < 0) {
             runtimeMode = this.options.configurationMode === 'website'
@@ -170,7 +176,9 @@ class HeuristModuleData extends HeuristModuleRecordset {
                     (hapi && hapi.baseURL + 'api'),
                 accessToken: this.options.accessToken || null,
                 requestHeaders: $.extend({}, this.options.requestHeaders || {}),
-                baseUrl: hapi ? hapi.baseURL : null
+                baseUrl: hapi ? hapi.baseURL : null,
+                searchRealm: this.options.search_realm || null,
+                source: this.element.attr('id') || null
             },
             settings: $.extend(true, {}, this.options.heuristDataSettings ||
                 this.options.configurationValue || {}),
@@ -390,6 +398,26 @@ class HeuristModuleData extends HeuristModuleRecordset {
             if (handlers[key]) this._moduleApi.removeEventListener(events[key], handlers[key]);
         }, this);
         this._dataEventHandlers = {};
+    }
+
+    /** Delegate a saved-filter request to the host application's search engine. */
+    _doSearch(request) {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        if (!hapi || !hapi.RecordSearch ||
+            typeof hapi.RecordSearch.doSearch !== 'function') {
+            return Promise.reject(new Error(
+                'The Heurist record search service is unavailable'
+            ));
+        }
+
+        var searchRequest = $.extend(true, {}, request || {});
+        searchRequest.search_realm = searchRequest.search_realm ||
+            this.options.search_realm || null;
+        searchRequest.source = searchRequest.source || this.element.attr('id');
+
+        this.options.dataset = null;
+        hapi.RecordSearch.doSearch(this, searchRequest);
+        return true;
     }
 
     _openRecordEdit(recordId) {
