@@ -86,18 +86,25 @@ $.widget( "heurist.editTranslations", {
     _container: null,
 
     /**
-     * jQuery object for the "Add language" button.
+     * jQuery object for the "Add with dropdown" button.
      * @private
      * @type {jQuery|null}
      */
     _btn_add: null,
 
     /**
-     * jQuery object for the "Add translation" (automatic translation) button.
+     * jQuery object for the "Add with translation" (automatic translation) button.
      * @private
      * @type {jQuery|null}
      */
     _btn_translate: null,
+
+    /**
+     * jQuery object for the "Type directly" button.
+     * @private
+     * @type {jQuery|null}
+     */
+    _btn_quick_add: null,
 
     /**
      * Initializes the widget. Sets up the main container and dialog if applicable.
@@ -157,24 +164,30 @@ $.widget( "heurist.editTranslations", {
 
         const that = this;
         
-        //create - define new language button
-        /**
-         * @private
-         * @type {jQuery}
-         */
-        this._btn_add = $('<div class="btn_lang_add" style="margin:10px 10px;color:#6A7C99;cursor:pointer;font-size:0.9em;display:inline-block;">'
-        +'<span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 95px;"></span> Add language'
-        +'</div>')
-        .appendTo( this._container );
-        /**
-         * @private
-         * @type {jQuery}
-         */
-        this._btn_translate = $('<div class="btn_translate_add" style="margin:10px 0px;color:#6A7C99;cursor:pointer;font-size:0.9em;display:inline-block;">'
-        +'<span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left:25px;"></span> Add translation'
-        +'</div>')
-        .appendTo( this._container ).hide();
-        
+        //create - define new language links
+        this._btn_quick_add = $('<div>', {
+            class: 'btn_quick_add',
+            style: 'margin: 1em 1em 1em 10.05em;color: #6A7C99;cursor: pointer;font-size: 0.9em;display: inline-block;',
+            html: '<span class="ui-icon ui-icon-plus" style="font-size: 1em;"></span> Type directly'
+        }).appendTo( this._container );
+
+        this._btn_translate = $('<div>', {
+            class: 'btn_translate_add',
+            style: 'margin: 1em 0px 1em 1.5em;color: #6A7C99;cursor: pointer;font-size: 0.9em;display: inline-block;',
+            html: '<span class="ui-icon ui-icon-plus" style="font-size: 1em;"></span> Add with translation'
+        }).appendTo( this._container ).hide();
+
+        this._btn_add = $('<div>', {
+            class: 'btn_lang_add',
+            style: 'margin: 1em 0px 1em 1.5em;color: #6A7C99;cursor: pointer;font-size: 0.9em;display: inline-block;',
+            html: '<span class="ui-icon ui-icon-plus" style="font-size: 1em;"></span> Add with dropdown'
+        }).appendTo( this._container );
+
+        $('<div>', {
+            text: 'To set the list and order of languages in the dropdown, go to Design > Properties > Behaviours',
+            style: 'margin: 1em 9.5em; border: 1px solid black; padding: 0.4em 0.5em; width: fit-content;'
+        }).appendTo(this._container);
+
         for (let i=0; i<this.options.values.length; i++){
             
             this._createEntry( this.options.values[i] , true);
@@ -190,6 +203,13 @@ $.widget( "heurist.editTranslations", {
             this._createEntry(ele.val(), false);
             this._adjustDimension();
         }});
+
+        this._on(this._btn_quick_add, {
+            click: () => {
+                this._createEntry('', false, true);
+                this._adjustDimension();
+            }
+        })
 
         this._on(this._btn_translate, {
             click: function(){
@@ -308,18 +328,24 @@ $.widget( "heurist.editTranslations", {
      * @param {boolean} check_default - If true, determines if this entry is the default language
      *                                  based on the absence of a language prefix in `value`.
      *                                  If false, a language selector is always created.
+     * @param {boolean} hide_dropdown - If true, the language dropdown is hidden (revealed later).
+     *                                  if false, the language dropdown is always visible (default).
      */
-    _createEntry: function(value, check_default){
+    _createEntry: function(value, check_default, hide_dropdown = false){
 
         let sel_container, values_container, input_ele;
         let that = this; 
         
-        let cont = $('<div>').css({margin:'5px'}).insertBefore(this._btn_add);
+        let cont = $('<div>', {class: 'translation-row'}).css({margin:'5px'}).insertBefore(this._btn_quick_add);
         
         // selector container - to select language
         sel_container = $('<div>') 
             .css({'display':'inline-block','vertical-align':'top','padding-top':'3px','min-width':'100px'})
             .appendTo(cont);
+        if(hide_dropdown){
+            sel_container.addClass('hiddenByDefault').css('visibility', 'hidden');
+        }
+
         // values container
         values_container = $( '<div>' )
             .css({'display':'inline-block','padding':'3px'}) //,'margin-bottom': '2px'
@@ -347,8 +373,8 @@ $.widget( "heurist.editTranslations", {
             _is_default = window.hWin.HEURIST4.util.isempty(lang);
         }
         
-        if(this.options.fieldtype=='blocktext')
-        {
+        if(this.options.fieldtype=='blocktext'){
+
             input_ele = $( "<textarea>",{rows:4}) //min number of lines
                     .css({'overflow-x':'hidden'})
                     .on('keydown', function(e){
@@ -359,7 +385,6 @@ $.widget( "heurist.editTranslations", {
 
         }else{
             input_ele = $( "<input>");
-            
         }
         
         input_ele.uniqueId()
@@ -375,15 +400,44 @@ $.widget( "heurist.editTranslations", {
                         }
                     })
                     .on('change', function(){
+
                         that._was_changed=true;
-                        if(!window.hWin.HEURIST4.util.isempty($(this).val()) && window.hWin.HAPI4.sysinfo.api_Translator){
+                        let value = $(this).val();
+                        let $row = $(this).closest('.translation-row');
+                        const isEmpty = window.hWin.HEURIST4.util.isempty(value);
+
+                        if(!isEmpty && window.hWin.HAPI4.sysinfo.api_Translator){
                             that._btn_translate.show();
                         }else{
                             that._btn_translate.hide();
                         }
+
+                        if(!isEmpty && $row.find('.hiddenByDefault').length > 0 && value.length > 3){
+                            // note: .is(':visible') kept returning true
+
+                            let language = null;
+                            [language, value] = that._extractLanguagePrefix(value);
+
+                            if(language !== ''){
+
+                                $(this).val(value);
+
+                                $row.find('select').val(language);
+                                $row.find('.hiddenByDefault').css('visibility', '');
+
+                                $row.find('.heurist-helper2').hide();
+                            }
+                        }
                     })
                     .appendTo( values_container );
-                    
+
+        if(hide_dropdown){
+            $('<div>', {
+                class: 'heurist-helper2',
+                html: 'Proceed text with three letter language code and colon, e.g. FRE:Repoussé<br><strong>Press the <u>ENTER</u> key when done</strong>'
+            }).appendTo(values_container);
+        }
+
         if(_is_default){
             input_ele.attr('data-def',1);
         }
@@ -495,7 +549,37 @@ $.widget( "heurist.editTranslations", {
         this._container.remove();
         this._btn_add.remove();
         this._btn_translate.remove();
+        this._btn_quick_add.remove();
     },
 
+    _extractLanguagePrefix: function(text){
+
+        if(text.length < 3 || text.match(/^\w{2,3}:/) === null){
+            return ['', text];
+        }
+
+        const languagePrefix = text.match(/^\w{2,3}/)[0].toLowerCase();
+        let language = '';
+
+        for(const languageKey in window.hWin.HAPI4.sysinfo.common_languages){
+
+            if(!Object.hasOwn(window.hWin.HAPI4.sysinfo.common_languages, languageKey)){
+                continue;
+            }
+
+            let languageDetails = window.hWin.HAPI4.sysinfo.common_languages[languageKey];
+
+            if(languagePrefix.length === 2 && languageDetails['a2'] === languagePrefix || languageDetails['a3'] === languagePrefix){
+                language = languageKey;
+                break;
+            }
+        }
+
+        if(language !== ''){
+            text = text.replace(/^\w{2,3}:/, '');
+        }
+
+        return [language, text];
+    }
 
 });
