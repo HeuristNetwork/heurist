@@ -24,13 +24,16 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
         super(element, options);
         this._events = null;
         this._currentQuery = null;
+        this._currentSearchResult = null;
         this._hostQueryPending = false;
 
         if (this.options.recordset) {
             var recordset = this.options.recordset;
             this.options.recordset = null;
             if (!this.options.query) {
-                this.options.query = this._recordsetToQuery(recordset);
+                var initialResult = this._prepareRecordsetResult(recordset);
+                this._currentSearchResult = initialResult;
+                this.options.query = initialResult.effectiveQuery;
             }
         }
     }
@@ -62,16 +65,19 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
             } else if (event.type === hapi.Event.ON_REC_SEARCH_FINISH) {
                 if (!((data && data.search_realm === 'mapping_recordset') ||
                     that._isSameRealm(data))) return;
-                var result = that._searchResult(data);
-                that._acceptHostQuery(that._currentResultsQuery(
-                    result.ids, data && data.query, result.total
-                ));
+                // The base class is the only old/new search compatibility boundary.
+                // Concrete modules receive one already prepared effective query.
+                that._acceptHostSearchResult(that._prepareSearchResult(data));
             } else if (event.type === hapi.Event.ON_REC_SEARCHSTART) {
                 if (!that._isSameRealm(data)) return;
                 that.options.query = null;
                 that.options.selection = null;
                 that.clearSelection();
-                if (!(data && !data.reset && data.q !== '')) that._acceptHostQuery(null);
+                var startQuery = data && data.query !== undefined
+                    ? data.query : data && data.q;
+                if (!(data && !data.reset && that._normalizeQuery(startQuery))) {
+                    that._acceptHostSearchResult(that._emptySearchResult());
+                }
             } else if (event.type === hapi.Event.ON_REC_SELECT) {
                 if (!that._isSameRealm(data) ||
                     (data && data.source === that.element.attr('id'))) return;
@@ -86,6 +92,12 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
                 that.refresh();
             }
         });
+    }
+
+    /** Cache one normalized result from either the modern or legacy event. */
+    _acceptHostSearchResult(result) {
+        this._currentSearchResult = result || this._emptySearchResult();
+        return this._acceptHostQuery(this._currentSearchResult.effectiveQuery);
     }
 
     /** Cache a host-result query and execute it only while the viewer is visible. */
@@ -106,7 +118,12 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
         this._hostQueryPending = false;
         // A newly created iframe receives options.query in its bootstrap.
         if (iframeCreated) return Promise.resolve(true);
-        return this.setQuery(this.options.query, {reload: true}).catch(function() {
+        return this.setQuery(this.options.query, {
+            reload: true,
+            // Informational only: modules use effectiveQuery and never reinterpret
+            // the original legacy/modern response.
+            searchResult: this._searchResultOptions()
+        }).catch(function() {
             // _enqueueOrRun already reports genuine module errors. Host event
             // handlers must not create an unhandled rejected promise.
             return false;
@@ -131,59 +148,114 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
 
     /** Accept HRecordSet only at the host boundary and immediately discard it. */
     setRecordSet(recordset, options) {
-        return this.setQuery(this._recordsetToQuery(recordset), options);
+        var result = this._prepareRecordsetResult(recordset);
+        this._currentSearchResult = result;
+        return this.setQuery(result.effectiveQuery, $.extend({}, options || {}, {
+            searchResult: this._searchResultOptions()
+        }));
     }
 
-    /** Convert the stable HRecordSet contract to a query. */
-    _recordsetToQuery(recordset) {
-        if (!recordset) return null;
-        if (typeof recordset === 'string') return this._normalizeQuery(recordset);
-        if ($.isPlainObject(recordset) && recordset.q != null) {
-            return this._normalizeQuery(recordset.q);
+    /** Convert an explicit HRecordSet input to the shared prepared result. */
+    _prepareRecordsetResult(recordset) {
+        if (!recordset) return this._emptySearchResult();
+        if (typeof recordset === 'string') {
+            return this._buildSearchResult(recordset, null, 0, null);
+        }
+        if ($.isPlainObject(recordset)
+            && (recordset.query != null || recordset.q != null)) {
+            return this._buildSearchResult(
+                recordset.query !== undefined ? recordset.query : recordset.q,
+                null, 0, null
+            );
         }
 
         var request = recordset.getRequest();
         var query = request && request.query !== undefined
             ? request.query : request && request.q;
-        return this._currentResultsQuery(
-            this._normalizeRecordIds(recordset.getOrder()),
+        return this._buildSearchResult(
             query,
-            recordset.count_total()
+            recordset.count_total(),
+            recordset.length(),
+            function() { return recordset.getOrder(); }
         );
     }
 
-    /** Read a completed search event using its documented response contracts. */
-    _searchResult(data) {
+    /** Normalize modern count/IDs responses and the legacy HRecordSet event. */
+    _prepareSearchResult(data) {
         data = data || {};
-        if (data.response && Array.isArray(data.response.ids)) {
-            var responseIds = this._normalizeRecordIds(data.response.ids);
+        if (data.response && data.response.total !== undefined) {
+            var responseIds = Array.isArray(data.response.ids)
+                ? data.response.ids : null;
             var responseTotal = Number(data.response.total);
-            return {
-                ids: responseIds,
-                total: Number.isFinite(responseTotal) && responseTotal >= 0
-                    ? responseTotal : responseIds.length
-            };
+            var responseQuery = data.response.query !== undefined
+                ? data.response.query : data.query;
+            return this._buildSearchResult(
+                responseQuery,
+                responseTotal,
+                responseIds ? responseIds.length : 0,
+                function() { return responseIds; }
+            );
         }
 
         var recordset = data.recordset;
-        if (!recordset) return {ids: [], total: 0};
+        if (!recordset) return this._emptySearchResult();
+        var request = typeof recordset.getRequest === 'function'
+            ? recordset.getRequest() : data.request;
+        var query = data.query !== undefined ? data.query
+            : request && request.query !== undefined ? request.query
+            : request && request.q;
+        return this._buildSearchResult(
+            query,
+            recordset.count_total(),
+            recordset.length(),
+            function() { return recordset.getOrder(); }
+        );
+    }
+
+    /**
+     * Build the shared descriptor without touching a potentially huge ID array.
+     * getIds is invoked only for a complete result small enough for ids:query.
+     */
+    _buildSearchResult(query, total, loadedCount, getIds) {
+        var normalizedQuery = this._normalizeQuery(query);
+        var hasTotal = total !== null && total !== undefined
+            && Number.isFinite(Number(total)) && Number(total) >= 0;
+        var resultTotal = hasTotal ? Number(total) : null;
+        var loaded = Number.isFinite(Number(loadedCount))
+            ? Math.max(0, Number(loadedCount)) : 0;
+        var complete = hasTotal && loaded === resultTotal;
+        var effectiveQuery = normalizedQuery;
+        if (hasTotal && resultTotal === 0) {
+            effectiveQuery = null;
+        } else if (complete && loaded <= HEURIST_MODULE_IDS_QUERY_LIMIT) {
+            // Reuse an already available complete small result. Never fetch IDs
+            // for this optimisation, normalize them again, or slice a large set.
+            var ids = typeof getIds === 'function' ? getIds() : null;
+            if (Array.isArray(ids) && ids.length === loaded) {
+                effectiveQuery = 'ids:' + ids.join(',');
+            }
+        }
         return {
-            ids: this._normalizeRecordIds(recordset.getOrder()),
-            total: Number(recordset.count_total())
+            query: normalizedQuery,
+            effectiveQuery: effectiveQuery,
+            total: resultTotal,
+            complete: complete
         };
     }
 
-    /** Prefer explicit IDs for a complete small result; otherwise reuse its query. */
-    _currentResultsQuery(recordIds, executedQuery, total) {
-        var ids = this._normalizeRecordIds(recordIds);
-        if (!ids.length) return null;
-        var resultTotal = Number(total);
-        var partial = Number.isFinite(resultTotal) && resultTotal > ids.length;
-        if (!partial && ids.length <= HEURIST_MODULE_IDS_QUERY_LIMIT) {
-            return 'ids:' + ids.join(',');
-        }
-        return this._normalizeQuery(executedQuery) ||
-            'ids:' + ids.slice(0, HEURIST_MODULE_IDS_QUERY_LIMIT).join(',');
+    _emptySearchResult() {
+        return {query: null, effectiveQuery: null, total: 0, complete: true};
+    }
+
+    /** Serializable summary passed with setQuery for diagnostics and counters. */
+    _searchResultOptions() {
+        var result = this._currentSearchResult || this._emptySearchResult();
+        return {
+            query: result.query,
+            effectiveQuery: result.effectiveQuery,
+            total: result.total,
+            complete: result.complete
+        };
     }
 
     _normalizeQuery(query) {

@@ -242,6 +242,9 @@ class HeuristModuleData extends HeuristModuleRecordset {
 
     /** Switch the module to an explicit/current-results query. */
     _setQueryNow(query, options) {
+        // HeuristModuleRecordset has already converted either event format to
+        // effectiveQuery. heurist-data now follows its normal server-paged path:
+        // DataApplication -> QueryLoader -> RecordDataProvider.load(/records).
         this._currentQuery = query;
         this.options.dataset = null;
         if (!this._moduleApi || typeof this._moduleApi.setQuery !== 'function') {

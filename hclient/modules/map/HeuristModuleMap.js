@@ -699,6 +699,9 @@ class HeuristModuleMap extends HeuristModuleRecordset {
     }
     /** Set or replace the stable current-results query layer. */
     _setQueryNow(query, options) {
+        // HeuristModuleRecordset supplies effectiveQuery. This module does not
+        // inspect HRecordSet/response formats; the current-results layer calls
+        // /api/{db}/map with its feature limit and optional viewport extent.
         var that = this;
         var layerOptions = this.options.currentResultsLayer || {};
         var layerId = String(layerOptions.id || 'current-results');
