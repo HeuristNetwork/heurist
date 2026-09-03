@@ -12,3 +12,4 @@ entry points during migration.
 - `RecordQueryController.php` — records search/retrieval response.
 - `RecordPresentationController.php` — Dataset, Map Document and Map Layer reads.
 - `MapDataController.php` — query-to-GeoJSON output only.
+- `PublicationController.php` — map/data/timeline/graph/crosstabs publication actions.

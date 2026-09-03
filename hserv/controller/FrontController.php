@@ -16,7 +16,7 @@
 namespace hserv\controller;
 
 use hserv\controller\ReportController;
-use hserv\controller\MapPublishedController;
+use Heurist\Controller\PublicationController;
 use hserv\controller\UserController;
 use hserv\records\import\IiifManifestImporter;
 use hserv\System;
@@ -24,6 +24,11 @@ use hserv\utilities\USanitize;
 use hserv\structure\ConceptCode;
 use hserv\web\WebSite;
 use hserv\utilities\UJwt;
+
+$composerAutoload = dirname(__FILE__).'/../../vendor/autoload.php';
+if(is_readable($composerAutoload)){
+    require_once $composerAutoload;
+}
 
 /**
  * Class FrontController
@@ -95,14 +100,17 @@ class FrontController
         }
 
         // Detect controller class
-        if (@$this->req_params['controller'] == 'MapPublishedController' || @$this->req_params['map_id']) {
+        if (@$this->req_params['controller'] == 'PublicationController' || @$this->req_params['publication_id']) {
             
             if(!@$this->req_params['action']){
                 $this->req_params['action'] = 'show';    
             }
 
-            $controller = new MapPublishedController($this->system, $this->req_params);
-            $controller->handleRequest(@$this->req_params['action']);
+            $controller = new PublicationController($this->system, $this->req_params);
+            $controller->handleRequest(
+                @$this->req_params['action'],
+                $this->req_params['type'] ?? 'map'
+            );
 
         }elseif (@$this->req_params['controller'] == 'UserController') {
 
