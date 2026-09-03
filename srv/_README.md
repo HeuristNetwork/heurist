@@ -2,14 +2,15 @@
 
 ## Overview
 
-The `/srv` tree contains the namespaced, read-only replacement for record
-search, expansion, field retrieval, presentation, aggregation and export. It is
+The `/srv` tree contains namespaced replacements for record search, expansion,
+field retrieval, presentation, aggregation, export and publication. It is
 kept separate from `/hserv`; only HTTP entry points may temporarily bridge the
 initialized legacy runtime into these classes.
 
 The initial migration excludes IIIF, record editing, batch/import operations,
 `MapDataSourceService`, and `MapShapefileService`. Module-neutral publication
-storage is provided by `Publication/PublicationService.php`.
+storage is provided by `Publication/PublicationService.php`; its writable
+directory and runtime identity are injected by `Runtime/ServiceFactory.php`.
 
 Dependency direction is Controller → Records → Database/Runtime. Classes below
 `/srv` are loaded by namespace and must not contain `require` or `include`.

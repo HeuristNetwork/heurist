@@ -168,10 +168,16 @@ if( @$_REQUEST['isalive']==1){
     redirectURL('hserv/controller/api.php?'.$query_string);
     return;
     
-}elseif (in_array(@$_REQUEST['controller'], array('ReportController','ImportAnnotations','MapPublishedController','UserController')) || 
-            array_key_exists('map_id', $_REQUEST) ||
+}elseif (in_array(@$_REQUEST['controller'], array('ReportController','ImportAnnotations','PublicationController','UserController')) || 
+            array_key_exists('pub_id', $_REQUEST) ||
             array_key_exists('template', $_REQUEST) || 
             array_key_exists('template_id', $_REQUEST)){
+                
+    if(array_key_exists('pub_id', $_REQUEST)){
+        $_REQUEST['controller'] = 'PublicationController';
+    }elseif(array_key_exists('template', $_REQUEST) || array_key_exists('template_id', $_REQUEST)){
+        $_REQUEST['controller'] = 'ReportController';
+    }
 
     //execute smarty template,  $_REQUEST may be composed in resolver.php
     $controller = new FrontController($_REQUEST);

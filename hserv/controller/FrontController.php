@@ -16,7 +16,7 @@
 namespace hserv\controller;
 
 use hserv\controller\ReportController;
-use Heurist\Controller\PublicationController;
+use Heurist\Runtime\ServiceFactory;
 use hserv\controller\UserController;
 use hserv\records\import\IiifManifestImporter;
 use hserv\System;
@@ -100,16 +100,17 @@ class FrontController
         }
 
         // Detect controller class
-        if (@$this->req_params['controller'] == 'PublicationController' || @$this->req_params['publication_id']) {
+        if (@$this->req_params['controller'] == 'PublicationController' || @$this->req_params['pub_id']) {
             
             if(!@$this->req_params['action']){
                 $this->req_params['action'] = 'show';    
             }
 
-            $controller = new PublicationController($this->system, $this->req_params);
+            $controller = ServiceFactory::fromLegacySystem($this->system)->publicationController();
             $controller->handleRequest(
                 @$this->req_params['action'],
-                $this->req_params['type'] ?? 'map'
+                $this->req_params['type'] ?? 'map',
+                $this->req_params
             );
 
         }elseif (@$this->req_params['controller'] == 'UserController') {

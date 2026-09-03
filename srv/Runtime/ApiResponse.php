@@ -35,4 +35,15 @@ final class ApiResponse
     {
         $this->send(array('status'=>$status, 'error'=>$code, 'message'=>$message), $status);
     }
+
+    /** Emit an HTML document with optional response headers. */
+    public function sendHtml(string $html, int $status = 200, array $headers = array()): void
+    {
+        http_response_code($status);
+        header('Content-Type: text/html; charset=utf-8');
+        foreach($headers as $name=>$value){
+            header((string)$name.': '.(string)$value);
+        }
+        print $html;
+    }
 }

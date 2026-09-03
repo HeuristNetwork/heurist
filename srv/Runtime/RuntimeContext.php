@@ -29,6 +29,7 @@ final class RuntimeContext
     public array $groupIds;
     public bool $isDbOwner;
     public bool $hasAccess;
+    public bool $isAdmin;
 
     /** Initialise the context with already validated runtime values. */
     public function __construct(
@@ -38,7 +39,8 @@ final class RuntimeContext
         string $baseUrl,
         array $groupIds = array(),
         bool $isDbOwner = false,
-        bool $hasAccess = false
+        bool $hasAccess = false,
+        bool $isAdmin = false
     ) {
         $this->databaseName = $databaseName;
         $this->databaseNameFull = $databaseNameFull;
@@ -47,6 +49,7 @@ final class RuntimeContext
         $this->groupIds = array_values(array_unique(array_filter(array_map('intval', $groupIds))));
         $this->isDbOwner = $isDbOwner;
         $this->hasAccess = $hasAccess;
+        $this->isAdmin = $isAdmin;
     }
 
     /**
@@ -67,7 +70,8 @@ final class RuntimeContext
             defined('HEURIST_BASE_URL') ? HEURIST_BASE_URL : '',
             method_exists($system, 'getUserGroupIds') ? (array)$system->getUserGroupIds() : array(),
             method_exists($system, 'isDbOwner') && $system->isDbOwner(),
-            method_exists($system, 'hasAccess') && $system->hasAccess()
+            method_exists($system, 'hasAccess') && $system->hasAccess(),
+            method_exists($system, 'isAdmin') && $system->isAdmin()
         );
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
-* ServiceFactory.php - Modern read-only workflow composition
+* ServiceFactory.php - Modern workflow composition
 *
 * Builds controllers and their shared PDO-backed services at the temporary
 * boundary with an initialized legacy System object.
@@ -19,11 +19,13 @@ declare(strict_types=1);
 namespace Heurist\Runtime;
 
 use Heurist\Controller\MapDataController;
+use Heurist\Controller\PublicationController;
 use Heurist\Controller\RecordPresentationController;
 use Heurist\Controller\RecordQueryController;
 use Heurist\Controller\SystemQueryController;
 use Heurist\Database\DatabaseFactory;
 use Heurist\Database\DatabaseInterface;
+use Heurist\Publication\PublicationService;
 use Heurist\Records\Map\MapFeatureService;
 use Heurist\Records\Presentation\DatasetPresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
@@ -36,6 +38,7 @@ final class ServiceFactory
     private DatabaseInterface $database;
     private RuntimeContext $runtime;
     private PresentationRecordRepository $presentations;
+    private string $publicationDirectory;
 
     /** Build the PDO and runtime boundary from the current legacy initialization. */
     public static function fromLegacySystem($system): self
@@ -65,16 +68,23 @@ final class ServiceFactory
         return new self(
             DatabaseFactory::fromHeuristConfiguration($runtime->databaseNameFull),
             $runtime,
-            new SystemCode($codeIds)
+            new SystemCode($codeIds),
+            (string)$system->getSysDir('generated-pubs')
         );
     }
 
     /** Initialise shared services from explicit modern dependencies. */
-    public function __construct(DatabaseInterface $database, RuntimeContext $runtime, SystemCode $codes)
+    public function __construct(
+        DatabaseInterface $database,
+        RuntimeContext $runtime,
+        SystemCode $codes,
+        string $publicationDirectory = ''
+    )
     {
         $this->database = $database;
         $this->runtime = $runtime;
         $this->presentations = new PresentationRecordRepository($database, $runtime, $codes);
+        $this->publicationDirectory = $publicationDirectory;
     }
 
     /** Create the records query/retrieval controller. */
@@ -108,6 +118,15 @@ final class ServiceFactory
     {
         return new MapDataController(
             new MapFeatureService($this->database, $this->runtime), $this->runtime
+        );
+    }
+
+    /** Create the shared module publication controller. */
+    public function publicationController(): PublicationController
+    {
+        return new PublicationController(
+            new PublicationService($this->runtime, $this->publicationDirectory),
+            $this->runtime
         );
     }
 }
