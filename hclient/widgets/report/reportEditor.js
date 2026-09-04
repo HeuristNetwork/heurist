@@ -1261,15 +1261,11 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         }
 
         let field_name = _nodep.data.name;
-        if(window.hWin.HEURIST4.util.isempty(field_name)){
-            let codes = _nodep.data.code.split(':');
-
-            if(codes.length >= 3){
-                let rtyid = codes[codes.length-3];
-                let dtyid = codes[codes.length-2];
-
-                field_name = $Db.rst(rtyid, dtyid, 'rst_DisplayName');
-            }
+        let codes = _nodep.data.code.split(':');
+        let rtyid = codes.length >= 3 ? codes[codes.length-3] : codes[0];
+        let dtyid = codes.length >= 3 ? codes[codes.length-2] : codes[1];
+        if(window.hWin.HEURIST4.util.isempty(field_name) && codes.length >= 3){
+            field_name = $Db.rst(rtyid, dtyid, 'rst_DisplayName');
         }            
 
         this._closeInsertPopup();
@@ -1303,20 +1299,17 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             {element: this._$('#insert-popup2')[0],
                 modal: true,
                 width:400,
-                height: 300,
+                height: 325,
                 resizable: false,
                 title: 'Inserting fields in repport',  //${field_name}
                 buttons:btns,
                 open: (event, ui)=>{
-                $(event.target).find('#fieldName').html('inserting <h3 style="display: inline-block;margin-top:0px;padding:8px;background:lightgray">'
-                    + window.hWin.HEURIST4.util.stripTags(field_name)+'</h3>');
-                /*
-                let insAll = $(event.target).find('#insAll')
-                insAll.off('click');
-                insAll.on({click:()=>{
-                    const newLabel = insAll.is(':checked')?'Insert All':'Insert';
-                    $(event.target).parent().find('#btnStartInsert').button("option", "label", newLabel);
-                }});*/
+                    $(event.target).find('#fieldName').html('inserting <h3 style="display: inline-block;margin-top:0px;padding:8px;background:lightgray">'
+                        + window.hWin.HEURIST4.util.stripTags(field_name)+'</h3>');
+
+                    let isRepeatable = this._isRepeatableField(rtyid, dtyid);
+                    $(event.target).find('#insRepeat').prop('checked', isRepeatable);
+                    window.hWin.HEURIST4.util.setDisabled($(event.target).find('#insRepeat'), isRepeatable);
                 },
                 beforeClose:null,
                 close:function(){
@@ -1334,7 +1327,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 
         //const insertAll = this._addVariableDlg.find('#insAll').is(':checked');
 
-        const addLoop = false; //this._addVariableDlg.find('#insRepeat').is(':checked');
+        const addLoop = this._addVariableDlg.find('#insRepeat').is(':checked');
         const ifnull = this._addVariableDlg.find('#insIfNull').is(':checked');
         const addCaption = this._addVariableDlg.find('#insCaption').is(':checked');
         const addRemark = this._addVariableDlg.find('#insRemark').is(':checked');
@@ -1565,7 +1558,7 @@ _buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRem
             const loopVar = 'f' + fieldId;
             const loopName = 'valueloop' + (loopDepth ? (loopDepth + 1) : '');
 
-            if(isRepeatable){ //addLoop && 
+            if(isRepeatable || addLoop){
                 snippet += pad + '{foreach $' + currentVar + '.f' + fieldId + 's as $' + loopVar + ' name=' + loopName + '}';
                 if(addRemark){
                     const remark = this._getRemarkForResource(seg, linkedRectypeId, true);
@@ -1754,7 +1747,7 @@ _renderSelectionTree: function(tree, opts){
             const pad = this._indent(indent);
             let openedLoop = false;
 
-            if(isRepeatable){ //addLoop && 
+            if(isRepeatable || addLoop){ 
                 const loopName = 'valueloop' + (loopDepth ? (loopDepth + 1) : '');
                 res += pad + '{foreach $' + parentVar + '.f' + fieldId + 's as $' + varname + ' name=' + loopName + '}';
                 if(addRemark){
@@ -1854,7 +1847,7 @@ _renderSelectionTree: function(tree, opts){
                 child.nodeRef?.parent?.data?.name ||
                 '';
 
-            if(isRepeatable){ //addLoop && 
+            if(isRepeatable || addLoop){ 
                 const loopName = 'valueloop' + (loopDepth ? (loopDepth + 1) : '');
 
                 res += pad + '{foreach $' + parentVar + '.f' + fieldId + 's as $' + varname + ' name=' + loopName + '}';
@@ -1959,7 +1952,7 @@ _renderLeafExpression: function(cfg){
     }else if(leaf.kind === 'field'){
         const isRepeatable = this._isRepeatableField(currentRectype, leaf.fieldId);
 
-        if(isRepeatable){ //addLoop && 
+        if(isRepeatable || addLoop){ 
             localVar = 'f' + leaf.fieldId;
             const loopName = 'valueloop' + ((indent > 0) ? (indent + 1) : '');
             res += pad + '{foreach $' + currentVar + '.f' + leaf.fieldId + 's as $' + localVar + ' name=' + loopName + '}';
@@ -1979,7 +1972,7 @@ _renderLeafExpression: function(cfg){
     }else if(leaf.kind === 'term'){
         const isRepeatable = this._isRepeatableField(currentRectype, leaf.fieldId);
 
-        if(isRepeatable){ //addLoop && 
+        if(isRepeatable || addLoop){ 
             localVar = 'f' + leaf.fieldId;
             const loopName = 'valueloop' + ((indent > 0) ? (indent + 1) : '');
             res += pad + '{foreach $' + currentVar + '.f' + leaf.fieldId + 's as $' + localVar + ' name=' + loopName + '}';
@@ -2233,6 +2226,9 @@ _headerSmartyName: function(headerKey){
 },
 
 _isRepeatableField: function(rectypeId, fieldId){
+    if(window.hWin.HAPI4.sysinfo.dbconst.DT_PARENT_ENTITY == fieldId && !$Db.rst(rectypeId, fieldId)){
+        return false;
+    }
     return Number.parseInt($Db.rst(rectypeId, fieldId, 'rst_MaxValues')) !== 1;
 },
 
