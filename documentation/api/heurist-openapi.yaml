@@ -222,8 +222,8 @@ paths:
       description: >-
         Anonymous requests return only publicly visible records. By default each record is an envelope containing
         rec_ID, rec_RecTypeID and rec_Title. Use fields to add headers or native/linked details, detail=ids for the
-        IDs-only DTO, detail=count for a count-only summary, detail=rectypes for counts grouped by record type,
-        or detail=graph with rules for explicit graph output.
+        IDs-only DTO, detail=count for a count-only summary, or detail=rectypes for counts grouped by record type.
+        Graph documents are served by the separate /{database}/graph endpoint.
       security:
       - {}
       - bearerAuth: []
@@ -262,13 +262,12 @@ paths:
           enum:
           - records
           - ids
-          - graph
           - count
           - rectypes
           default: records
         description: >-
           ids returns the IDs-only DTO and ignores fields. count returns only the query and total. rectypes returns
-          the query, total and counts grouped by rec_RecTypeID. graph adds explicit expansion graph data.
+          the query, total and counts grouped by rec_RecTypeID.
       - name: resolveDetails
         in: query
         schema:
@@ -277,11 +276,6 @@ paths:
         description: >-
           Resolve type-specific metadata using standard rec_*, trm_* and ulf_* field names. Linked values retain
           their path provenance whether this option is true or false.
-      - name: rules
-        in: query
-        schema:
-          type: string
-        description: JSON rules, plain rule query, or compact path used when detail=graph.
       responses:
         '200':
           description: Records response with metadata and pagination
@@ -304,7 +298,7 @@ paths:
       summary: Search records using a structured request
       description: >-
         Executes the same record search as GET without URL-length restrictions. This is the preferred form for ID
-        arrays, JSON queries, selected native or linked fields, and expansion rules.
+        arrays, JSON queries, and selected native or linked fields.
       security:
       - {}
       - bearerAuth: []
@@ -322,11 +316,111 @@ paths:
               resolveDetails: true
       responses:
         '200':
-          description: Record envelopes, IDs-only DTO, count or record-type summary, or explicit graph result
+          description: Record envelopes, IDs-only DTO, count or record-type summary
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RecordQueryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/graph:
+    get:
+      tags:
+      - Records
+      operationId: buildGraph
+      summary: Build a graph document
+      description: >-
+        Runs a top-level query and returns a renderer-neutral graph document for the heurist-graph client. Graph
+        records always carry exactly rec_ID, rec_Title and rec_RecTypeID; the fields parameter is not accepted.
+        Provide links as a comma list of compact specs such as 10:lt240:48 (direct field link) or 10:rt3260:10
+        (relationship link) to discover edges whose two endpoints are both in the result set, or links=all for every
+        internal edge. Initial links never add external records. maxNodes, maxEdges and maxDepth may lower the
+        server budget but never raise it; the response reports nodesReturned, edgesReturned and truncated.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - name: q
+        in: query
+        schema: {type: string}
+        description: Heurist search expression for the seed record set.
+      - name: ids
+        in: query
+        schema: {type: string}
+        example: 123,456
+        description: Comma-separated seed record identifiers.
+      - name: links
+        in: query
+        schema: {type: string}
+        description: >-
+          all, or a comma-separated list of compact link specs (source:operator:target, operator one of
+          lt|lf|rt|rf followed by a field or relation type ID). Omitted means no edge discovery.
+      - name: maxNodes
+        in: query
+        schema: {type: integer, minimum: 1, maximum: 5000}
+        description: Client node budget. Capped at the server maximum of 5000.
+      - name: maxEdges
+        in: query
+        schema: {type: integer, minimum: 1, maximum: 10000}
+        description: Client edge budget. Capped at the server maximum of 10000.
+      - name: maxDepth
+        in: query
+        schema: {type: integer, minimum: 1, maximum: 10}
+        description: Client expansion-depth budget. Capped at the server maximum of 10.
+      responses:
+        '200':
+          description: Graph document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDocument'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+      - Records
+      operationId: buildGraphPost
+      summary: Build a graph document using a structured request
+      description: >-
+        Executes the same graph build as GET without URL-length restrictions. This is the preferred form for ID
+        arrays, JSON queries and an array of link specs.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GraphRequest'
+            example:
+              query: 't:10'
+              links: ['10:lt240:48', '10:rt3260:10']
+              limits: {maxNodes: 5000, maxEdges: 10000, maxDepth: 5}
+      responses:
+        '200':
+          description: Graph document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDocument'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2191,44 +2285,6 @@ components:
           oneOf:
           - type: string
           - type: 'null'
-        graph:
-          $ref: '#/components/schemas/RecordExpansionGraph'
-      additionalProperties: false
-    RecordExpansionGraph:
-      type: object
-      required:
-      - records
-      - edges
-      - paths
-      properties:
-        records:
-          type: array
-          items:
-            type: object
-            required: [rec_ID]
-            properties:
-              rec_ID:
-                type: integer
-              rec_RecTypeID:
-                type: integer
-              rec_Title:
-                type: string
-            additionalProperties: false
-        edges:
-          type: array
-          items:
-            type: object
-            required: [source, target]
-            properties:
-              source: {type: integer}
-              target: {type: integer}
-              field: {type: integer}
-              relationship: {type: integer}
-            additionalProperties: false
-        paths:
-          type: object
-          additionalProperties:
-            type: string
       additionalProperties: false
     RecordSearchRequest:
       type: object
@@ -2268,18 +2324,11 @@ components:
               type: string
         detail:
           type: string
-          enum: [records, ids, graph, count, rectypes]
+          enum: [records, ids, count, rectypes]
           default: records
         resolveDetails:
           type: boolean
           default: false
-        rules:
-          oneOf:
-          - type: string
-          - type: object
-            additionalProperties: true
-          - type: array
-            items: {}
         limit:
           type: integer
           minimum: 1
@@ -2289,6 +2338,142 @@ components:
           type: integer
           minimum: 0
           default: 0
+      additionalProperties: false
+    GraphRequest:
+      type: object
+      properties:
+        query:
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        q:
+          description: Alias for query.
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        ids:
+          oneOf:
+          - type: string
+          - type: array
+            items: {type: integer, minimum: 1}
+        links:
+          description: >-
+            "all", or an array of compact link specs. Omitted means no edge discovery. Initial links return only
+            edges whose two endpoints are both in the seed result set.
+          oneOf:
+          - type: string
+            enum: [all]
+          - type: array
+            items: {type: string}
+        rule:
+          description: One optional interactive expansion rule (executed from a later stage).
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          default: 1000
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+        limits:
+          type: object
+          properties:
+            maxNodes: {type: integer, minimum: 1, maximum: 5000}
+            maxEdges: {type: integer, minimum: 1, maximum: 10000}
+            maxDepth: {type: integer, minimum: 1, maximum: 10}
+          additionalProperties: false
+      additionalProperties: false
+    GraphDocument:
+      type: object
+      required: [query, total, offset, limit, graph]
+      properties:
+        query:
+          description: The caller's original query representation.
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              additionalProperties: true
+        total:
+          type: integer
+          minimum: 0
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+        graph:
+          type: object
+          required: [records, edges, links, paths, limits]
+          properties:
+            records:
+              type: array
+              items:
+                type: object
+                required: [rec_ID, rec_Title, rec_RecTypeID]
+                properties:
+                  rec_ID: {type: integer}
+                  rec_Title: {type: string}
+                  rec_RecTypeID: {type: integer}
+                additionalProperties: false
+            edges:
+              type: array
+              items:
+                type: object
+                required: [id, source, target, field, relationship, link, path]
+                properties:
+                  id: {type: string}
+                  source: {type: integer}
+                  target: {type: integer}
+                  field:
+                    oneOf: [{type: integer}, {type: 'null'}]
+                  relationship:
+                    oneOf: [{type: integer}, {type: 'null'}]
+                  link:
+                    description: Key into the links map for an initial link edge, else null.
+                    oneOf: [{type: string}, {type: 'null'}]
+                  path:
+                    description: Key into the paths map for an expansion edge, else null.
+                    oneOf: [{type: string}, {type: 'null'}]
+                additionalProperties: false
+            links:
+              type: object
+              description: Link key to compact link spec. Empty for links=all.
+              additionalProperties: {type: string}
+            paths:
+              type: object
+              description: Path key to compact traversal expression.
+              additionalProperties: {type: string}
+            limits:
+              type: object
+              required: [maxNodes, maxEdges, maxDepth, nodesReturned, edgesReturned, truncated]
+              properties:
+                maxNodes: {type: integer}
+                maxEdges: {type: integer}
+                maxDepth: {type: integer}
+                nodesReturned: {type: integer}
+                edgesReturned: {type: integer}
+                truncated: {type: boolean}
+              additionalProperties: false
+          additionalProperties: false
       additionalProperties: false
     RecordItemMeta:
       type: object

@@ -100,7 +100,6 @@ final class RecordQueryController
         $options = array(
             'limit' => $params['limit'] ?? 1000,
             'offset' => $params['offset'] ?? 0,
-            'rules' => $params['rules'] ?? null,
             'fields' => $params['fields'] ?? null,
             'detail' => $params['detail'] ?? null,
             'resolveDetails' => $params['resolveDetails'] ?? false,
@@ -126,6 +125,11 @@ final class RecordQueryController
     public function execute(array $params): array
     {
         $request = $this->buildRequest($params);
+        if($request->detail === 'graph'){
+            throw new QueryValidationException(
+                'detail=graph is not supported by /records; use the /graph endpoint'
+            );
+        }
         $result = $this->service->search($request);
         if(!$result instanceof SearchResult){
             throw new SearchExecutionException('Record search service returned an invalid result');
@@ -139,9 +143,6 @@ final class RecordQueryController
                 $summary['rectypes'] = $result->rectypes ?? array();
             }
             return $summary;
-        }
-        if($request->detail === 'graph'){
-            return $result->toArray();
         }
         $selection = $this->fieldSelector->parse($request->fields);
         if($request->detail === 'ids'){

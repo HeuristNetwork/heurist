@@ -347,7 +347,7 @@ if($is_record_query){
     }
     if($http_method === 'POST' && is_array($json)
         && !isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
-        $contractKeys = array('rules','limit','offset','fields','detail','resolveDetails','sort','filter');
+        $contractKeys = array('limit','offset','fields','detail','resolveDetails','sort','filter');
         $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
         if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
             $req_params['query'] = $json;
@@ -361,6 +361,36 @@ if($is_record_query){
             // in fields; that is not the records search output-field option.
             unset($req_params['fields']);
         }
+    }
+    $method = 'search';
+}
+
+// The modern graph collection returns renderer-neutral graph documents for the
+// heurist-graph client. It is read-only for both GET and POST and has its own
+// request contract (query, links, rule, limits) separate from /records.
+$is_graph_query = ($resource === 'graph' && !isset($requestUri[4]));
+if($is_graph_query){
+    if(!in_array($http_method, array('GET','POST'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+    }
+    if($http_method === 'POST'
+        && stripos($contentType, 'application/json') === 0
+        && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if($http_method === 'POST' && is_array($json)){
+        $graphContractKeys = array('query','q','ids','links','rule','rules','limit','offset','limits');
+        if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
+            $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
+            if($isList || empty(array_intersect(array_keys($json), $graphContractKeys))){
+                $req_params['query'] = $json;
+            }
+        }
+        foreach($graphContractKeys as $key){
+            if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
+        }
+        // api.php's generic JSON handler temporarily places the whole body in fields.
+        unset($req_params['fields']);
     }
     $method = 'search';
 }
@@ -436,7 +466,7 @@ $skip_auth_processing =
 $allow_anonymous = false;
 if($method === 'search'){
     $publicSearchResources = array(
-        'records', 'groups', 'users', 'dbs', 'databases',
+        'records', 'graph', 'groups', 'users', 'dbs', 'databases',
         'rty', 'rectypes',
         'dty', 'fields',
         'trm', 'terms', 'trl', 'termlinks',
@@ -477,6 +507,14 @@ if($is_system_query){
         ? intval($requestUri[5]) : null;
     $controller = ServiceFactory::fromLegacySystem($system)->systemQueryController();
     $controller->output($req_params, $systemType, $systemId);
+    $system->dbclose();
+    exit;
+
+}elseif($is_graph_query){
+
+    $req_params['restapi'] = 1;
+    $controller = ServiceFactory::fromLegacySystem($system)->graphController();
+    $controller->output($req_params);
     $system->dbclose();
     exit;
 
@@ -682,7 +720,7 @@ else
             // fields object. Restore its explicit query parameters from JSON.
             if(is_array($json)){
                 foreach(array(
-                    'query','q','ids','fields','detail','resolveDetails','rules','limit','offset',
+                    'query','q','ids','fields','detail','resolveDetails','limit','offset',
                     'sort','filter'
                 ) as $key){
                     if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }

@@ -18,6 +18,7 @@
 declare(strict_types=1);
 namespace Heurist\Runtime;
 
+use Heurist\Controller\GraphController;
 use Heurist\Controller\MapDataController;
 use Heurist\Controller\PublicationController;
 use Heurist\Controller\RecordPresentationController;
@@ -91,6 +92,12 @@ final class ServiceFactory
     public function recordQueryController(): RecordQueryController
     {
         return new RecordQueryController($this->database, $this->runtime);
+    }
+
+    /** Create the graph-document controller for the heurist-graph client. */
+    public function graphController(): GraphController
+    {
+        return new GraphController($this->database, $this->runtime);
     }
 
     /** Create the mapped filter/user query and retrieval controller. */

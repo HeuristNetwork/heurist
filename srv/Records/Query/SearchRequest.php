@@ -2,8 +2,8 @@
 /**
 * SearchRequest.php - Normalized record search request
 *
-* Carries query, pagination, expansion and output options from the controller to
-* the modern record search workflow.
+* Carries query, pagination and output options from the controller to the
+* modern record search workflow.
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Query
@@ -24,7 +24,6 @@ final class SearchRequest
     public array $query;
     public int $limit;
     public int $offset;
-    public $rules;
     public $fields;
     public string $detail;
     public bool $resolveDetails;
@@ -41,7 +40,6 @@ final class SearchRequest
         $this->query = $query;
         $this->limit = min(100000, max(1, intval($options['limit'] ?? 1000)));
         $this->offset = max(0, intval($options['offset'] ?? 0));
-        $this->rules = $options['rules'] ?? null;
         $this->fields = $options['fields'] ?? null;
         $detail = strtolower(trim((string)($options['detail'] ?? 'records')));
         $this->detail = $detail === '' ? 'records' : $detail;

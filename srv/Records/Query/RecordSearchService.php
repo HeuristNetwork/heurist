@@ -22,8 +22,6 @@ namespace Heurist\Records\Query;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Records\Query\Compiler\QueryBuilder;
-use Heurist\Records\Expansion\ExpansionEngine;
-use Heurist\Records\Expansion\ExpansionRequest;
 
 /** Executes flat, logical, resource-link, and relationship record searches. */
 final class RecordSearchService
@@ -80,15 +78,11 @@ final class RecordSearchService
                     $this->builder->buildRectypeCounts($query, $context)
                 );
                 $total = array_sum(array_column($rectypes, 'count'));
-                return new SearchResult(array(), $total, 0, 1, null, null, $rectypes);
+                return new SearchResult(array(), $total, 0, 1, null, $rectypes);
             }
             $ids = $this->executor->executeIds($this->builder->buildIds($query, $context));
             $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
-            return $this->withGraph(
-                new SearchResult($ids, $total, $request->offset, $request->limit),
-                $request,
-                $context
-            );
+            return new SearchResult($ids, $total, $request->offset, $request->limit);
         }
         $ids = $this->evaluateGroup($query, null, 'all', $context, 0);
         if($request->detail === 'count'){
@@ -96,50 +90,16 @@ final class RecordSearchService
         }
         if($request->detail === 'rectypes'){
             return new SearchResult(
-                array(), count($ids), 0, 1, null, null,
+                array(), count($ids), 0, 1, null,
                 $this->executor->executeRectypeCountsForIds($ids)
             );
         }
-        return $this->withGraph(new SearchResult(
+        return new SearchResult(
             array_slice($ids, $request->offset, $request->limit),
             count($ids),
             $request->offset,
             $request->limit
-        ), $request, $context);
-    }
-
-    /** Add graph output only when it was requested explicitly. */
-    private function withGraph(
-        SearchResult $result,
-        SearchRequest $request,
-        array $context
-    ): SearchResult {
-        if($request->detail !== 'graph'){
-            return $result;
-        }
-        $engine = new ExpansionEngine($this->executor, $this);
-        $result->graph = $engine->expand(
-            new ExpansionRequest($result->ids, $request->rules ?: array(), array(
-                'includeHeaders'=>$this->graphHeadersRequested($request->fields)
-            )),
-            $context
         );
-        return $result;
-    }
-
-    /** Standard graph headers are optional and never loaded for a bare graph. */
-    private function graphHeadersRequested($fields): bool
-    {
-        if($fields === null || $fields === ''){ return false; }
-        $values = is_array($fields) ? $fields : explode(',', (string)$fields);
-        foreach($values as $value){
-            if(is_array($value)){ continue; }
-            $field = strtolower(trim((string)$value));
-            if(in_array($field, array('rec_title','rec_rectypeid'), true)){
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
