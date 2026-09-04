@@ -19,7 +19,8 @@ Current structure:
 - `core` — generic iframe lifecycle and record-result/selection integration;
 - `map` — working host integration for `heurist-map`;
 - `data` — working host adapter, jQuery wrapper and bundle-loading page for `heurist-data`;
-- `timeline`, `graph`, `chart` — reserved for future module adapters.
+- `graph` — working host adapter for the independent `heurist-graph` module;
+- `timeline`, `chart` — reserved for future module adapters.
 
 Shared code used *inside* Vite applications belongs in the separate future
 `@heurist/client-core` package, not in this directory.

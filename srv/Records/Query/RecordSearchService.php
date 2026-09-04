@@ -114,13 +114,12 @@ final class RecordSearchService
         SearchRequest $request,
         array $context
     ): SearchResult {
-        if($request->detail !== 'graph'
-            || $request->rules === null || $request->rules === '' || $request->rules === array()){
+        if($request->detail !== 'graph'){
             return $result;
         }
         $engine = new ExpansionEngine($this->executor, $this);
         $result->graph = $engine->expand(
-            new ExpansionRequest($result->ids, $request->rules, array(
+            new ExpansionRequest($result->ids, $request->rules ?: array(), array(
                 'includeHeaders'=>$this->graphHeadersRequested($request->fields)
             )),
             $context

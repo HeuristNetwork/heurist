@@ -62,6 +62,8 @@ window.hWin.cfg_widgets = [
                 widgetname:'mapViewer', script:'hclient/modules/map/mapViewer.js', minh:300, minw:300},  // map in iframe
     {id:'heurist_Data', name:'Data', title:'Data',
                 widgetname:'dataViewer', script:'hclient/modules/data/dataViewer.js', minh:300, minw:300},  // dataset in iframe
+    {id:'heurist_Graph2', name:'Graph', title:'Network',
+                widgetname:'graphViewer', script:'hclient/modules/graph/graphViewer.js', minh:300, minw:300},  // vis.network in iframe
 
     {id:'heurist_StoryMap', name:'StoryMap', title:'Story Map',
                 widgetname:'app_storymap', script:'hclient/widgets/viewers/app_storymap.js', minh:300, minw:200},
@@ -243,8 +245,9 @@ window.hWin.cfg_layouts = [
                                 url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs', showProgress:false,
                                 css:{overflow:'hidden'}}},
 
-                    {appid:'heurist_Map2', name: 'Map2 (test)'},
-                    {appid:'heurist_Data', name: 'Data (test)'}
+                    {appid:'heurist_Map2', name: 'Map2 (test)'}
+                    //,{appid:'heurist_Data', name: 'Data (test)'},
+                    //{appid:'heurist_Graph2', name: 'Network2 (test)'}
             ]}]
         }
     },    

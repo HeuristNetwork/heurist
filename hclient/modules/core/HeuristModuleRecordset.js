@@ -93,6 +93,11 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
             }
         });
     }
+    
+    clearSelection(){
+        if (typeof this.setSelection !== 'function') return Promise.resolve([]);
+        return this.setSelection([]);
+    }
 
     /** Cache one normalized result from either the modern or legacy event. */
     _acceptHostSearchResult(result) {
