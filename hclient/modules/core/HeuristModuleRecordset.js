@@ -270,6 +270,137 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
         return query;
     }
 
+    /**
+     * Generic iframe-bridge record/search operations shared by every concrete
+     * module (heurist-data, heurist-map, heurist-graph). A module overrides one
+     * of these only when it needs extra behaviour around the shared editor -
+     * e.g. HeuristModuleData vetoing the edit through its oneditrecord option.
+     */
+
+    /** Open the standard Heurist record editor for an existing record. */
+    _openRecordEdit(recordId) {
+        var id = Number(recordId);
+        if (!Number.isInteger(id) || id < 1) {
+            return Promise.reject(new Error(
+                'A valid Heurist record ID is required for editing'
+            ));
+        }
+
+        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+        if (!ui || typeof ui.openRecordEdit !== 'function') {
+            return Promise.reject(new Error('Heurist record editor is not available'));
+        }
+
+        return new Promise(function(resolve, reject) {
+            var settled = false;
+            var saved = false;
+            function finish(result) {
+                if (settled) return;
+                settled = true;
+                resolve(result);
+            }
+            try {
+                ui.openRecordEdit(id, null, {
+                    selectOnSave: true,
+                    onselect: function() {
+                        saved = true;
+                        finish({saved: true, recordId: id});
+                    },
+                    onClose: function() {
+                        if (!saved) finish({saved: false, recordId: id});
+                    }
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    /** Open the legacy Heurist record creator for the requested record type. */
+    _addRecordEdit(recordTypeId) {
+        var rtID = Number(recordTypeId);
+        if (!(rtID > 0)) {
+            return Promise.reject(new Error(
+                'A valid Heurist record type ID is required for creation'
+            ));
+        }
+
+        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+        if (!ui || typeof ui.openRecordEdit !== 'function') {
+            return Promise.reject(new Error('Heurist record editor is not available'));
+        }
+
+        return new Promise(function(resolve, reject) {
+            var settled = false;
+            var saved = false;
+            function finish(result) {
+                if (settled) return;
+                settled = true;
+                resolve(result);
+            }
+            try {
+                ui.openRecordEdit(-1, null, {
+                    selectOnSave: true,
+                    onselect: function(event, data) {
+                        saved = true;
+                        var recordset = data && data.selection;
+                        var record = recordset && recordset.getFirstRecord
+                            ? recordset.getFirstRecord() : null;
+                        var recordId = record && recordset.fld
+                            ? Number(recordset.fld(record, 'rec_ID')) : null;
+                        finish({saved: true, recordId: recordId});
+                    },
+                    onClose: function() {
+                        if (!saved) finish({saved: false, recordId: null});
+                    },
+                    new_record_params: {rt: rtID}
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    /** Open the standard read-only record card in the parent application. */
+    _openRecordView(recordId) {
+        var id = Number(recordId);
+        if (!Number.isInteger(id) || id < 1) {
+            return Promise.reject(new Error('A valid Heurist record ID is required'));
+        }
+        var hapi = window.hWin && window.hWin.HAPI4;
+        if (!hapi || !hapi.baseURL) {
+            return Promise.reject(new Error('Heurist record viewer is not available'));
+        }
+        var url = hapi.baseURL + 'viewers/record/renderRecordData.php?db=' +
+            encodeURIComponent(hapi.database) + '&ll=WebSearch&recID=' + id;
+        window.hWin.open(url, '_blank', 'noopener');
+        return Promise.resolve(true);
+    }
+
+    /** Delegate a saved-filter/search request from the child iframe to the host search engine. */
+    _doSearch(request) {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        if (!hapi || !hapi.RecordSearch ||
+            typeof hapi.RecordSearch.doSearch !== 'function') {
+            return Promise.reject(new Error(
+                'The Heurist record search service is unavailable'
+            ));
+        }
+
+        var searchRequest = $.extend(true, {}, request || {});
+        searchRequest.search_realm = searchRequest.search_realm ||
+            this.options.search_realm || null;
+        searchRequest.source = searchRequest.source || this.element.attr('id');
+
+        // A fresh search supersedes any persisted single-record source (Dataset,
+        // MapDocument, ...) the concrete module may currently be displaying.
+        this.options.dataset = null;
+        this.options.mapDocument = null;
+
+        hapi.RecordSearch.doSearch(this, searchRequest);
+        return true;
+    }
+
     /** Unbind shared host events. Called by concrete module destruction. */
     _unbindHostEvents() {
         if (this._events) $(this.document).off(this._events);

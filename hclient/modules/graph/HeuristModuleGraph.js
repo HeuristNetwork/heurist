@@ -83,7 +83,10 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
         frame.heuristGraphHost = {
             getConfiguration: function() { return $.extend(true, {}, that._graphBootstrap || that._buildBootstrap()); },
             updateState: function(state) { that.options.state = state == null ? null : $.extend(true, {}, state); },
-            doSearch: function(request) { return that._invokeCallback('onsearch', request); },
+            editRecord: function(recordId) { return that._openRecordEdit(recordId); },
+            viewRecord: function(recordId) { return that._openRecordView(recordId); },
+            addRecord: function(recordTypeId) { return that._addRecordEdit(recordTypeId); },
+            doSearch: function(request) { return that._doSearch(request); },
             onSelection: function(recordIds) { return that._invokeCallback('onselect', recordIds); }
         };
     }

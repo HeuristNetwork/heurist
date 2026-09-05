@@ -167,8 +167,14 @@ class HeuristModuleMap extends HeuristModuleRecordset {
             editRecord: function(recordId) {
                 return that._openRecordEdit(recordId);
             },
+            viewRecord: function(recordId) {
+                return that._openRecordView(recordId);
+            },
             addRecord: function(recordTypeId) {
                 return that._addRecordEdit(recordTypeId);
+            },
+            doSearch: function(request) {
+                return that._doSearch(request);
             },
             editExtent: function(bounds, options) {
                 return that._editExtent(bounds, options || {});
@@ -1012,87 +1018,8 @@ class HeuristModuleMap extends HeuristModuleRecordset {
             });
         });
     }
-    _openRecordEdit(recordId) {
-        var id = Number(recordId);
-        if (!(id > 0)) {
-            return Promise.reject(new Error('A valid Heurist record ID is required for editing'));
-        }
-
-        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
-        if (!ui || typeof ui.openRecordEdit !== 'function') {
-            return Promise.reject(new Error('Heurist record editor is not available'));
-        }
-
-        return new Promise(function(resolve, reject) {
-            var settled = false;
-            var saved = false;
-
-            function finish(result) {
-                if (settled) return;
-                settled = true;
-                resolve(result);
-            }
-
-            try {
-                ui.openRecordEdit(id, null, {
-                    selectOnSave: true,
-                    onselect: function() {
-                        saved = true;
-                        finish({ saved: true, recordId: id });
-                    },
-                    onClose: function() {
-                        if (!saved) finish({ saved: false, recordId: id });
-                    }
-                });
-            } catch (error) {
-                reject(error);
-            }
-        });
-    }
-    
-    _addRecordEdit(recordTypeId) {
-        var rtID = Number(recordTypeId);
-        if (!(rtID > 0)) {
-            return Promise.reject(new Error('A valid Heurist record type ID is required for creation'));
-        }
-
-        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
-        if (!ui || typeof ui.openRecordEdit !== 'function') {
-            return Promise.reject(new Error('Heurist record editor is not available'));
-        }
-
-        return new Promise(function(resolve, reject) {
-            var settled = false;
-            var saved = false;
-
-            function finish(result) {
-                if (settled) return;
-                settled = true;
-                resolve(result);
-            }
-
-            try {
-                ui.openRecordEdit(-1, null, {
-                    selectOnSave: true,
-                    onselect: function(event, data) {
-                        saved = true;
-                        var recordset = data && data.selection;
-                        var record = recordset && recordset.getFirstRecord
-                            ? recordset.getFirstRecord() : null;
-                        var recordId = record && recordset.fld
-                            ? Number(recordset.fld(record, 'rec_ID')) : null;
-                        finish({ saved: true, recordId: recordId });
-                    },
-                    onClose: function() {
-                        if (!saved) finish({ saved: false, recordId: null });
-                    },
-                    new_record_params: { rt: rtID }
-                });
-            } catch (error) {
-                reject(error);
-            }
-        });
-    }
+    // _openRecordEdit and _addRecordEdit are inherited unchanged from
+    // HeuristModuleRecordset; MapDocument/MapLayer are ordinary Heurist records.
 
     _editExtent(bounds) {
         var that = this;
