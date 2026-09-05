@@ -271,6 +271,35 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
     }
 
     /**
+     * Generic iframe-bridge configuration bootstrap shared by every concrete
+     * module. Each module still implements its own _buildBootstrap() - the
+     * launch envelope shape differs too much to share - but caches the result
+     * on the common _moduleBootstrap field and exposes it through these three
+     * operations. A module overrides one only when it needs extra behaviour,
+     * e.g. HeuristModuleMap merging settings against saved preferences instead
+     * of a plain overwrite.
+     */
+
+    /** Return a fresh copy of the cached bootstrap, building it lazily on first access. */
+    _getConfiguration() {
+        return $.extend(true, {}, this._moduleBootstrap || this._buildBootstrap());
+    }
+
+    /** Persist new settings, refresh the cached bootstrap and echo back the normalized value. */
+    _updateSettings(settings) {
+        var normalized = $.extend(true, {}, settings || {});
+        this.options.heuristModuleSettings = normalized;
+        this._moduleBootstrap = this._buildBootstrap();
+        return $.extend(true, {}, normalized);
+    }
+
+    /** Persist a new reproducible state snapshot and refresh the cached bootstrap. */
+    _updateState(state) {
+        this.options.heuristModuleState = state == null ? null : $.extend(true, {}, state);
+        this._moduleBootstrap = this._buildBootstrap();
+    }
+
+    /**
      * Generic iframe-bridge record/search operations shared by every concrete
      * module (heurist-data, heurist-map, heurist-graph). A module overrides one
      * of these only when it needs extra behaviour around the shared editor -

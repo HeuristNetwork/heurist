@@ -31,8 +31,8 @@ const HEURIST_MODULE_DATA_DEFAULTS = {
     accessToken: null,
     requestHeaders: null,
 
-    heuristDataSettings: null,
-    heuristDataState: null,
+    heuristModuleSettings: null,
+    heuristModuleState: null,
     dataset: null,
     fields: null,
     query: null,
@@ -67,7 +67,7 @@ class HeuristModuleData extends HeuristModuleRecordset {
         this._readyTimer = 0;
         this._resizeTimer = 0;
         this._resizeObserver = null;
-        this._dataBootstrap = null;
+        this._moduleBootstrap = null;
         this._dataEventHandlers = {};
         this._suppressSelectionSync = false;
 
@@ -100,7 +100,7 @@ class HeuristModuleData extends HeuristModuleRecordset {
             return;
         }
 
-        this._dataBootstrap = this._buildBootstrap();
+        this._moduleBootstrap = this._buildBootstrap();
         this._moduleFrame = $('<iframe>')
             .addClass('heurist-data-viewer-frame')
             .attr({title: 'Heurist data', frameborder: '0'})
@@ -124,17 +124,13 @@ class HeuristModuleData extends HeuristModuleRecordset {
         var that = this;
         frame.heuristDataHost = {
             getConfiguration: function() {
-                return $.extend(true, {}, that._dataBootstrap || that._buildBootstrap());
+                return that._getConfiguration();
             },
             updateSettings: function(settings) {
-                that.options.heuristDataSettings = $.extend(true, {}, settings || {});
-                that._dataBootstrap = that._buildBootstrap();
-                return $.extend(true, {}, that.options.heuristDataSettings);
+                return that._updateSettings(settings);
             },
             updateState: function(state) {
-                that.options.heuristDataState = state == null
-                    ? null : $.extend(true, {}, state);
-                that._dataBootstrap = that._buildBootstrap();
+                return that._updateState(state);
             },
             editRecord: function(recordId) {
                 return that._openRecordEdit(recordId);
@@ -197,10 +193,10 @@ class HeuristModuleData extends HeuristModuleRecordset {
                 searchRealm: this.options.search_realm || null,
                 source: this.element.attr('id') || null
             },
-            settings: $.extend(true, {}, this.options.heuristDataSettings ||
+            settings: $.extend(true, {}, this.options.heuristModuleSettings ||
                 this.options.configurationValue || {}),
-            state: this.options.heuristDataState == null ? null
-                : $.extend(true, {}, this.options.heuristDataState),
+            state: this.options.heuristModuleState == null ? null
+                : $.extend(true, {}, this.options.heuristModuleState),
             source: {
                 datasetId: this._normalizeDatasetId(this.options.dataset),
                 query: this._normalizeQuery(this.options.query),

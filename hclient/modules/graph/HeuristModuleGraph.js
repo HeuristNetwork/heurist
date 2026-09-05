@@ -20,6 +20,8 @@ const HEURIST_MODULE_GRAPH_DEFAULTS = {
     fields: ['rec_Title', 'rec_RecTypeID'],
     query: null,
     selection: null,
+    heuristModuleSettings: null,
+    heuristModuleState: null,
     eventbased: true,
     search_realm: null,
     onready: null,
@@ -43,7 +45,7 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
         this._readyTimer = 0;
         this._resizeTimer = 0;
         this._resizeObserver = null;
-        this._graphBootstrap = null;
+        this._moduleBootstrap = null;
         this._bindHostEvents();
         this._bindShowEvent();
         this._observeResize();
@@ -57,7 +59,7 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
             this._reportError(new Error('graphApplicationUrl is not defined'), 'initialize');
             return;
         }
-        this._graphBootstrap = this._buildBootstrap();
+        this._moduleBootstrap = this._buildBootstrap();
         this._moduleFrame = $('<iframe>').attr({
             title: 'Heurist graph', frameborder: '0'
         }).css({width: '100%', height: '100%', border: 0, display: 'block'}).appendTo(this.element);
@@ -81,8 +83,9 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
         if (!frame) return;
         const that = this;
         frame.heuristGraphHost = {
-            getConfiguration: function() { return $.extend(true, {}, that._graphBootstrap || that._buildBootstrap()); },
-            updateState: function(state) { that.options.state = state == null ? null : $.extend(true, {}, state); },
+            getConfiguration: function() { return that._getConfiguration(); },
+            updateSettings: function(settings) { return that._updateSettings(settings); },
+            updateState: function(state) { return that._updateState(state); },
             editRecord: function(recordId) { return that._openRecordEdit(recordId); },
             viewRecord: function(recordId) { return that._openRecordView(recordId); },
             addRecord: function(recordTypeId) { return that._addRecordEdit(recordTypeId); },
@@ -101,7 +104,10 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
                 source: this.element.attr('id') || null,
                 searchRealm: this.options.search_realm || null
             },
-            settings: {rules: this.options.rules, fields: this.options.fields},
+            settings: $.extend(true, {rules: this.options.rules, fields: this.options.fields},
+                this.options.heuristModuleSettings || {}),
+            state: this.options.heuristModuleState == null ? null
+                : $.extend(true, {}, this.options.heuristModuleState),
             source: {
                 query: this._normalizeQuery(this.options.query),
                 selection: this._normalizeRecordIds(this.options.selection)

@@ -33,8 +33,8 @@ const HEURIST_MODULE_MAP_DEFAULTS = {
         requestHeaders: null,
         baseMapProviderOptions: null, // e.g. {MapTilesAPI:{apikey:'...'}}
 
-        heuristMapSettings: null,     // persisted {format,version,options,config}
-        heuristMapState: null,        // initial reproducible map state
+        heuristModuleSettings: null,  // persisted {format,version,options,config}
+        heuristModuleState: null,     // initial reproducible map state
         mapDocument: null,
         drawParameters: null,
 
@@ -85,7 +85,7 @@ class HeuristModuleMap extends HeuristModuleRecordset {
         this._readyTimer = 0;
         this._resizeTimer = 0;
         this._resizeObserver = null;
-        this._mapBootstrap = null;
+        this._moduleBootstrap = null;
         this._mapEventHandlers = {};
         this._events = null;
 
@@ -113,7 +113,7 @@ class HeuristModuleMap extends HeuristModuleRecordset {
     /** Initialize the iframe when the Heurist host makes this widget visible. */
     _createIframe() {
         if (this._mapFrame || this._isDestroyed) return;
-        this._mapBootstrap = this._buildHeuristMapBootstrap();
+        this._moduleBootstrap = this._buildBootstrap();
 
         this._mapFrame = $('<iframe>')
             .addClass('heurist-map-viewer-frame')
@@ -145,22 +145,13 @@ class HeuristModuleMap extends HeuristModuleRecordset {
         var that = this;
         frame.heuristMapHost = {
             getConfiguration: function() {
-                return $.extend(true, {}, that._mapBootstrap || that._buildHeuristMapBootstrap());
+                return that._getConfiguration();
             },
             updateSettings: function(settings) {
-                var normalized = that._cloneMapSettings(settings);
-                that._mapBootstrap = that._mapBootstrap || that._buildHeuristMapBootstrap();
-                that._mapBootstrap.settings = normalized;
-                that.options.heuristMapSettings = $.extend(true, {}, normalized);
-                if (that.options.viewerMode === 'configuration') {
-                    that.options.configurationValue = $.extend(true, {}, normalized);
-                }
-                return $.extend(true, {}, normalized);
+                return that._updateSettings(settings);
             },
             updateState: function(state) {
-                that._mapBootstrap = that._mapBootstrap || that._buildHeuristMapBootstrap();
-                that._mapBootstrap.state = state == null ? null : $.extend(true, {}, state);
-                that.options.heuristMapState = state == null ? null : $.extend(true, {}, state);
+                return that._updateState(state);
             },
             // Generic host editing bridge. MapDocument and MapLayer are both ordinary
             // Heurist records, so the child only needs to provide the persisted record ID.
@@ -187,7 +178,7 @@ class HeuristModuleMap extends HeuristModuleRecordset {
         };
     }
     /** Build the single bootstrap contract consumed by heurist-map. */
-    _buildHeuristMapBootstrap() {
+    _buildBootstrap() {
         var hapi = window.hWin && window.hWin.HAPI4;
             
         const lang = hapi
@@ -195,7 +186,7 @@ class HeuristModuleMap extends HeuristModuleRecordset {
             : 'eng';            
             
         var saved = this._getSavedMapSettings();
-        var explicit = this._cloneMapSettings(this.options.heuristMapSettings);
+        var explicit = this._cloneMapSettings(this.options.heuristModuleSettings);
         var runtimeMode = this._getRuntimeMode();
 
         // Preferences are the base. Explicit widget settings override them once,
@@ -237,10 +228,34 @@ class HeuristModuleMap extends HeuristModuleRecordset {
                 readonly: false
             },
             settings: settings,
-            state: this.options.heuristMapState
+            state: this.options.heuristModuleState
                 || (this.options.viewerMode === 'draw' ? this._getSavedDrawState() : null)
         };
     }
+
+    /**
+     * Merge new settings against saved preferences/website/draw defaults instead
+     * of the base class's plain overwrite, and patch the cached bootstrap in
+     * place rather than rebuilding it through the full preference-merge pipeline.
+     */
+    _updateSettings(settings) {
+        var normalized = this._cloneMapSettings(settings);
+        this._moduleBootstrap = this._moduleBootstrap || this._buildBootstrap();
+        this._moduleBootstrap.settings = normalized;
+        this.options.heuristModuleSettings = $.extend(true, {}, normalized);
+        if (this.options.viewerMode === 'configuration') {
+            this.options.configurationValue = $.extend(true, {}, normalized);
+        }
+        return $.extend(true, {}, normalized);
+    }
+
+    /** Patch the cached bootstrap's state in place. */
+    _updateState(state) {
+        this._moduleBootstrap = this._moduleBootstrap || this._buildBootstrap();
+        this._moduleBootstrap.state = state == null ? null : $.extend(true, {}, state);
+        this.options.heuristModuleState = state == null ? null : $.extend(true, {}, state);
+    }
+
     /** Resolve host environment independently from the settings envelope format. */
     _getRuntimeMode() {
         var mode = String(this.options.runtimeMode || '').toLowerCase();
@@ -416,7 +431,7 @@ class HeuristModuleMap extends HeuristModuleRecordset {
                 if (that.options.viewerMode === 'configuration') {
                     that._openConfigurationNow({
                         mode: that.options.configurationMode,
-                        value: that.options.configurationValue || that._mapBootstrap?.settings || null
+                        value: that.options.configurationValue || that._moduleBootstrap?.settings || null
                     }).catch(function(error) {
                         that._reportError(error, 'open-configuration');
                     });
@@ -862,9 +877,9 @@ class HeuristModuleMap extends HeuristModuleRecordset {
         var persist = options && options.persist === true;
         var thematic = options && options.thematic === true;
         var mapUtil = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.map;
-        var configuredDefault = that._mapBootstrap && that._mapBootstrap.settings
-            && that._mapBootstrap.settings.config && that._mapBootstrap.settings.config.defaults
-            ? that._mapBootstrap.settings.config.defaults.symbology : null;
+        var configuredDefault = that._moduleBootstrap && that._moduleBootstrap.settings
+            && that._moduleBootstrap.settings.config && that._moduleBootstrap.settings.config.defaults
+            ? that._moduleBootstrap.settings.config.defaults.symbology : null;
         var parentSymbol = options && $.isPlainObject(options.parentSymbol)
             ? $.extend(true, {}, options.parentSymbol)
             : (recordId > 0 && mapUtil
@@ -1060,7 +1075,7 @@ class HeuristModuleMap extends HeuristModuleRecordset {
                 accessToken: that.options.accessToken,
                 requestHeaders: that.options.requestHeaders,
                 baseMapProviderOptions: that.options.baseMapProviderOptions,
-                heuristMapSettings: that.options.heuristMapSettings,
+                heuristModuleSettings: that.options.heuristModuleSettings,
                 eventbased: false,
                 drawParameters: {
                     mode: 'rectangle',
