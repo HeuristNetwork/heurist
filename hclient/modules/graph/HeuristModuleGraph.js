@@ -26,6 +26,7 @@ const HEURIST_MODULE_GRAPH_DEFAULTS = {
     search_realm: null,
     onready: null,
     onselect: null,
+    onconfiguration: null,
     onerror: null
 };
 
@@ -37,6 +38,8 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
     }
 
     _create() {
+        this._dataEventHandlers = {};
+        this._suppressSelectionSync = false;
         this._moduleApi = null;
         this._moduleFrame = null;
         this._isReady = false;
@@ -66,6 +69,7 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
         this._installIframeBridge();
         this._moduleFrame.on('load.heuristModuleGraph', function() {
             this._installIframeBridge();
+            this._unbindDataEvents();
             this._moduleApi = null;
             this._isReady = false;
             this._waitForGraphApi();
@@ -89,8 +93,7 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
             editRecord: function(recordId) { return that._openRecordEdit(recordId); },
             viewRecord: function(recordId) { return that._openRecordView(recordId); },
             addRecord: function(recordTypeId) { return that._addRecordEdit(recordTypeId); },
-            doSearch: function(request) { return that._doSearch(request); },
-            onSelection: function(recordIds) { return that._invokeCallback('onselect', recordIds); }
+            doSearch: function(request) { return that._doSearch(request); }
         };
     }
 
@@ -140,14 +143,70 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
         const that = this;
         Promise.resolve(api.ready ? api.ready() : api).then(function() {
             if (that._isDestroyed) return;
+            that._unbindDataEvents();
             that._moduleApi = api;
             that._isReady = true;
-            api.addEventListener?.('heurist-graph-selection-changed', function(event) {
-                that._invokeCallback('onselect', event.detail.recordIds);
-            });
+            that._bindDataEvents();
             that._invokeCallback('onready', api);
             return that._flushPendingOperations();
         }).catch(function(error) { that._reportError(error, 'initialize'); });
+    }
+
+    /** Subscribe to engine-neutral events emitted by the public graph API. */
+    _bindDataEvents() {
+        if (!this._moduleApi || typeof this._moduleApi.addEventListener !== 'function') return;
+        var that = this;
+        this._dataEventHandlers.selection = function(event) {
+            if (that._suppressSelectionSync) return;
+            var ids = that._normalizeRecordIds(
+                event.detail && (event.detail.recordIds || event.detail.selection)
+            );
+            that.options.selection = ids;
+            var hapi = window.hWin && window.hWin.HAPI4;
+            if (that.options.eventbased && hapi && hapi.Event) {
+                $(that.document).trigger(hapi.Event.ON_REC_SELECT, {
+                    selection: ids,
+                    source: that.element.attr('id'),
+                    search_realm: that.options.search_realm,
+                    reset: ids.length === 0
+                });
+            }
+            that._invokeCallback('onselect', ids, event.detail || {});
+        };
+        this._dataEventHandlers.error = function(event) {
+            var detail = event.detail || {};
+            that._reportError(detail.error || detail, detail.operation || 'graph-event', detail);
+        };
+        this._dataEventHandlers.configuration = function(event) {
+            that._invokeCallback('onconfiguration', event.detail || {});
+        };
+        this._dataEventHandlers.editRecord = function(event) {
+            that._openRecordEdit(event.detail && event.detail.recordId);
+        };
+
+        this._moduleApi.addEventListener(
+            'heurist-graph-selection-changed', this._dataEventHandlers.selection);
+        this._moduleApi.addEventListener(
+            'heurist-graph-error', this._dataEventHandlers.error);
+        this._moduleApi.addEventListener(
+            'heurist-graph-configuration-requested', this._dataEventHandlers.configuration);
+        this._moduleApi.addEventListener(
+            'heurist-graph-edit-record-requested', this._dataEventHandlers.editRecord);
+    }
+
+    _unbindDataEvents() {
+        if (!this._moduleApi || typeof this._moduleApi.removeEventListener !== 'function') return;
+        var handlers = this._dataEventHandlers;
+        var events = {
+            selection: 'heurist-graph-selection-changed',
+            error: 'heurist-graph-error',
+            configuration: 'heurist-graph-configuration-requested',
+            editRecord: 'heurist-graph-edit-record-requested'
+        };
+        Object.keys(events).forEach(function(key) {
+            if (handlers[key]) this._moduleApi.removeEventListener(events[key], handlers[key]);
+        }, this);
+        this._dataEventHandlers = {};
     }
 
     setQuery(query, options) {
@@ -164,8 +223,13 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
         return this._enqueueOrRun('_setSelectionNow', [this.options.selection, options || {}]);
     }
 
-    _setSelectionNow(recordIds) {
-        return this._moduleApi.setSelection(recordIds);
+    async _setSelectionNow(recordIds, options) {
+        this._suppressSelectionSync = true;
+        try {
+            return await this._moduleApi.setSelection(recordIds, options || {});
+        } finally {
+            this._suppressSelectionSync = false;
+        }
     }
 
     expandNode(recordId) {
@@ -190,6 +254,7 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
         if (this._resizeTimer) clearTimeout(this._resizeTimer);
         this._resizeObserver?.disconnect();
         this._unbindHostEvents();
+        this._unbindDataEvents();
         const api = this._moduleApi;
         this._moduleApi = null;
         return api ? api.destroy() : Promise.resolve();
