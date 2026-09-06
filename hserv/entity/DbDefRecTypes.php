@@ -38,6 +38,9 @@ class DbDefRecTypes extends DbEntityBase
         if($this->isvalid()){
            if(is_string(@$this->data[$this->primaryField]) && strpos($this->data[$this->primaryField],'-')>0){
                $this->data[$this->primaryField] = ConceptCode::getRecTypeLocalID($this->data[$this->primaryField]);
+               if(!$this->data[$this->primaryField]){ //conept id not found
+                   $this->data[$this->primaryField] = PHP_INT_MAX;
+               }
            }
         }        
     }    

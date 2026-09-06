@@ -26,7 +26,8 @@ class DbDefTermsLinks extends DbEntityBase
 {
     /**
      * Returns term-link pairs with optional parent and/or term filtering.
-     * Only limit and offset are supported in addition to these two filters.
+     * tree=true returns labeled ancestor forests or full parent subtrees;
+     * otherwise the existing direct-link pairs and pagination are unchanged.
      *
      * @return array|false Standard internal entity-search result.
      */
@@ -34,6 +35,15 @@ class DbDefTermsLinks extends DbEntityBase
 
         if(parent::search()===false){
             return false;
+        }
+
+        if(isset($this->data['tree'])){
+            $tree = filter_var($this->data['tree'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if($tree === null){
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'tree must be a boolean');
+                return false;
+            }
+            if($tree){ return $this->searchTree(); }
         }
 
         $where = array();
@@ -90,6 +100,62 @@ class DbDefTermsLinks extends DbEntityBase
             'records' => $records,
             'order' => $order,
             'fields' => array('trl_ParentID', 'trl_TermID')
+        );
+    }
+
+    /** Return complete trees, paginating vocabulary roots rather than their nodes. */
+    private function searchTree(){
+        require_once __DIR__.'/TermLinkTree.php';
+        $parent = $this->data['trl_ParentID'] ?? null;
+        $term = $this->data['trl_TermID'] ?? null;
+        try{
+            if(($parent === null) === ($term === null)){
+                throw new \InvalidArgumentException('tree requires exactly one of termId or parentId');
+            }
+            $ids = TermLinkTree::ids($parent ?? $term);
+            if($parent !== null && count($ids)!==1){
+                throw new \InvalidArgumentException('parentId must be a single positive integer');
+            }
+        }catch(\InvalidArgumentException $e){
+            $this->system->addError(HEURIST_INVALID_REQUEST, $e->getMessage());
+            return false;
+        }
+        $mysqli = $this->system->getMysqli();
+        $result = $mysqli->query('SELECT trm_ID, trm_Label, trm_ParentTermID FROM defTerms');
+        if(!$result){
+            $this->system->addError(HEURIST_DB_ERROR, 'Term tree search error', $mysqli->error);
+            return false;
+        }
+        $terms = $result->fetch_all(MYSQLI_ASSOC);
+        $result->close();
+        $links = array();
+        if($parent !== null){
+            $result = $mysqli->query('SELECT trl_ParentID, trl_TermID FROM defTermsLinks');
+            if(!$result){
+                $this->system->addError(HEURIST_DB_ERROR, 'Term tree search error', $mysqli->error);
+                return false;
+            }
+            $links = $result->fetch_all(MYSQLI_ASSOC);
+            $result->close();
+        }
+        try{
+            $trees = TermLinkTree::build($terms, $ids, $parent !== null, $links);
+        }catch(\RuntimeException $e){
+            $this->system->addError(HEURIST_DB_ERROR, $e->getMessage());
+            return false;
+        }
+        $total = count($trees);
+        $offset = max(0, intval($this->data['offset'] ?? 0));
+        $limit = max(1, intval($this->data['limit'] ?? 1000));
+        $records = array_map(function($tree){
+            return array($tree['id'], $tree['label'], $tree['parentId'], $tree['children']);
+        }, array_slice($trees, $offset, $limit));
+        return array(
+            'queryid'=>$this->data['request_id'] ?? null,
+            'entityName'=>$this->config['entityName'],
+            'offset'=>$offset, 'count'=>$total, 'reccount'=>count($records),
+            'records'=>$records, 'order'=>array_keys($records),
+            'fields'=>array('id', 'label', 'parentId', 'children')
         );
     }
 

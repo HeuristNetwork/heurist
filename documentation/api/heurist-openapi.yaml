@@ -332,50 +332,95 @@ paths:
   /{database}/graph:
     get:
       tags:
-      - Records
+        - Records
       operationId: buildGraph
       summary: Build a graph document
       description: >-
         Runs a top-level query and returns a renderer-neutral graph document for the heurist-graph client. Graph
         records always carry exactly rec_ID, rec_Title and rec_RecTypeID; the fields parameter is not accepted.
         Provide links as a comma list of compact specs such as 10:lt240:48 (direct field link) or 10:rt3260:10
-        (relationship link) to discover edges whose two endpoints are both in the result set, or links=all for every
-        internal edge. Initial links never add external records. maxNodes, maxEdges and maxDepth may lower the
-        server budget but never raise it; the response reports nodesReturned, edgesReturned and truncated.
+        (relationship link) to discover edges whose two endpoints are both in the result set, or links=all for
+        every internal edge. Initial links never add external records. maxNodes, maxEdges and maxDepth may lower
+        the server budget but never raise it; the response reports nodesReturned, edgesReturned and truncated.
+        The seed-page limit defaults to 1000 and is clamped to maxNodes; set limit explicitly to load a larger
+        seed page. Server ceilings are 10000 nodes, 10000 edges and depth 10. Omission of query/q/ids searches
+        all visible records. Current implementation discovers internal edges only: rule/rules are accepted and
+        validated but expansion is not executed and paths is empty.
       security:
-      - {}
-      - bearerAuth: []
+        - {}
+        - bearerAuth: []
       parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/Limit'
-      - $ref: '#/components/parameters/Offset'
-      - name: q
-        in: query
-        schema: {type: string}
-        description: Heurist search expression for the seed record set.
-      - name: ids
-        in: query
-        schema: {type: string}
-        example: 123,456
-        description: Comma-separated seed record identifiers.
-      - name: links
-        in: query
-        schema: {type: string}
-        description: >-
-          all, or a comma-separated list of compact link specs (source:operator:target, operator one of
-          lt|lf|rt|rf followed by a field or relation type ID). Omitted means no edge discovery.
-      - name: maxNodes
-        in: query
-        schema: {type: integer, minimum: 1, maximum: 5000}
-        description: Client node budget. Capped at the server maximum of 5000.
-      - name: maxEdges
-        in: query
-        schema: {type: integer, minimum: 1, maximum: 10000}
-        description: Client edge budget. Capped at the server maximum of 10000.
-      - name: maxDepth
-        in: query
-        schema: {type: integer, minimum: 1, maximum: 10}
-        description: Client expansion-depth budget. Capped at the server maximum of 10.
+        - $ref: '#/components/parameters/Database'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+            default: 1000
+          description: Seed page size, also capped by the effective node budget.
+        - $ref: '#/components/parameters/Offset'
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Heurist search expression for the seed record set.
+        - name: ids
+          in: query
+          schema:
+            type: string
+          example: 123,456
+          description: Comma-separated seed record identifiers.
+        - name: links
+          in: query
+          schema:
+            type: string
+          description: >-
+            all, or a comma-separated list of compact link specs (source:operator:target, operator one of
+            lt|lf|rt|rf followed by a field or relation type ID). Omitted means no edge discovery.
+        - name: maxNodes
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+          description: Client node budget, capped at 10000. Does not raise the seed-page limit.
+        - name: maxEdges
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+          description: Client edge budget. Capped at the server maximum of 10000.
+        - name: maxDepth
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+          description: Client expansion-depth budget. Capped at the server maximum of 10.
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Preferred alias for q; a Heurist expression or JSON-encoded query object/array.
+        - name: limits
+          in: query
+          schema:
+            type: string
+          description: >-
+            JSON object containing maxNodes, maxEdges and maxDepth. Nested values take precedence over flat
+            parameters.
+        - name: rule
+          in: query
+          schema:
+            type: string
+          description: Compact path or JSON rule. Accepted and validated, but not currently executed.
+        - name: rules
+          in: query
+          schema:
+            type: string
+          description: Legacy alias for rule; at most one rule. Accepted but not currently executed.
       responses:
         '200':
           description: Graph document
@@ -389,21 +434,25 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '405':
           $ref: '#/components/responses/MethodNotAllowed'
+        '422':
+          description: Query uses an unsupported feature.
         '500':
           $ref: '#/components/responses/ServerError'
     post:
       tags:
-      - Records
+        - Records
       operationId: buildGraphPost
       summary: Build a graph document using a structured request
       description: >-
         Executes the same graph build as GET without URL-length restrictions. This is the preferred form for ID
-        arrays, JSON queries and an array of link specs.
+        arrays, JSON queries and an array of link specs. Seed limit defaults to 1000 independently of
+        limits.maxNodes; set both for larger pages. Server ceilings: 10000 nodes, 10000 edges, depth 10.
+        rule/rules are validated but expansion is not currently executed.
       security:
-      - {}
-      - bearerAuth: []
+        - {}
+        - bearerAuth: []
       parameters:
-      - $ref: '#/components/parameters/Database'
+        - $ref: '#/components/parameters/Database'
       requestBody:
         required: true
         content:
@@ -411,9 +460,15 @@ paths:
             schema:
               $ref: '#/components/schemas/GraphRequest'
             example:
-              query: 't:10'
-              links: ['10:lt240:48', '10:rt3260:10']
-              limits: {maxNodes: 5000, maxEdges: 10000, maxDepth: 5}
+              query: t:10
+              links:
+                - 10:lt240:48
+                - 10:rt3260:10
+              limits:
+                maxNodes: 5000
+                maxEdges: 10000
+                maxDepth: 5
+              limit: 5000
       responses:
         '200':
           description: Graph document
@@ -427,6 +482,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '405':
           $ref: '#/components/responses/MethodNotAllowed'
+        '422':
+          description: Query uses an unsupported feature.
         '500':
           $ref: '#/components/responses/ServerError'
   /{database}/sys:
@@ -800,35 +857,62 @@ paths:
   /{database}/termlinks:
     get:
       tags:
-      - Database structure
+        - Database structure
       operationId: listTermLinks
       summary: Retrieve term parent-link relationships
-      description: Returns rows from `defTermsLinks`. Each item preserves the parent and term IDs. Links may represent
-        either the explicit `trm_ParentTermID` hierarchy or an additional implicit vocabulary/parent association.
+      description: >-
+        Returns rows from `defTermsLinks`. Each item preserves the parent and term IDs. Links may represent
+        either the explicit `trm_ParentTermID` hierarchy or an additional implicit vocabulary/parent
+        association.
+
+
+        With tree=true (or 1), supply exactly one of termId or parentId. termId accepts one ID or up to 1000
+        unique comma-separated IDs and returns only the requested terms and their real ancestor paths, grouped
+        by vocabulary. Real parents follow defTerms.trm_ParentTermID, excluding reference-only ancestors.
+        parentId accepts one ID and returns its full subtree, including defTermsLinks references. Each node
+        contains id, label, parentId (the real parent, null for a vocabulary), and children. Missing IDs are
+        omitted. A missing parent definition makes the highest available ancestor a partial root. Reference
+        cycles are skipped; corrupt real-parent cycles or trees exceeding 128 levels or 100000 node occurrences
+        return an error, never a silently truncated tree. limit and offset paginate root trees only; descendants
+        are never paginated. Siblings and roots are sorted by label. Without tree, existing direct-link behavior
+        is unchanged.
       security: []
       parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/Limit'
-      - $ref: '#/components/parameters/Offset'
-      - name: parentId
-        in: query
-        description: Return links whose `trl_ParentID` equals this term ID.
-        schema:
-          type: integer
-          minimum: 1
-      - name: termId
-        in: query
-        description: Return links whose `trl_TermID` equals this term ID.
-        schema:
-          type: integer
-          minimum: 1
+        - $ref: '#/components/parameters/Database'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: parentId
+          in: query
+          description: Direct parent filter, or subtree root when tree=true.
+          schema:
+            type: integer
+            minimum: 1
+        - name: termId
+          in: query
+          description: >-
+            Single term ID in direct-link mode. With tree=true, one ID or a comma-separated list of IDs;
+            repeated termId[] query parameters are also accepted.
+          schema:
+            oneOf:
+              - type: integer
+                minimum: 1
+              - type: string
+                pattern: ^[1-9][0-9]*(,[1-9][0-9]*)*$
+        - name: tree
+          in: query
+          description: Return labeled hierarchy trees instead of direct term-link pairs. Accepts true/false or 1/0.
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Term links
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TermLinkSearchResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/TermLinkSearchResponse'
+                  - $ref: '#/components/schemas/TermTreeSearchResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -1053,34 +1137,60 @@ paths:
   /{database}/trl:
     get:
       tags:
-      - Database structure
+        - Database structure
       operationId: listTermLinksShort
       summary: Compact alias for `termlinks`
-      description: Equivalent alias of `/{database}/termlinks`.
+      description: >-
+        Equivalent alias of `/{database}/termlinks`.
+
+
+        With tree=true (or 1), supply exactly one of termId or parentId. termId accepts one ID or up to 1000
+        unique comma-separated IDs and returns only the requested terms and their real ancestor paths, grouped
+        by vocabulary. Real parents follow defTerms.trm_ParentTermID, excluding reference-only ancestors.
+        parentId accepts one ID and returns its full subtree, including defTermsLinks references. Each node
+        contains id, label, parentId (the real parent, null for a vocabulary), and children. Missing IDs are
+        omitted. A missing parent definition makes the highest available ancestor a partial root. Reference
+        cycles are skipped; corrupt real-parent cycles or trees exceeding 128 levels or 100000 node occurrences
+        return an error, never a silently truncated tree. limit and offset paginate root trees only; descendants
+        are never paginated. Siblings and roots are sorted by label. Without tree, existing direct-link behavior
+        is unchanged.
       security: []
       parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/Limit'
-      - $ref: '#/components/parameters/Offset'
-      - name: parentId
-        in: query
-        description: Return links whose `trl_ParentID` equals this term ID.
-        schema:
-          type: integer
-          minimum: 1
-      - name: termId
-        in: query
-        description: Return links whose `trl_TermID` equals this term ID.
-        schema:
-          type: integer
-          minimum: 1
+        - $ref: '#/components/parameters/Database'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: parentId
+          in: query
+          description: Direct parent filter, or subtree root when tree=true.
+          schema:
+            type: integer
+            minimum: 1
+        - name: termId
+          in: query
+          description: >-
+            Single term ID in direct-link mode. With tree=true, one ID or a comma-separated list of IDs;
+            repeated termId[] query parameters are also accepted.
+          schema:
+            oneOf:
+              - type: integer
+                minimum: 1
+              - type: string
+                pattern: ^[1-9][0-9]*(,[1-9][0-9]*)*$
+        - name: tree
+          in: query
+          description: Return labeled hierarchy trees instead of direct term-link pairs. Accepts true/false or 1/0.
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Term links
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TermLinkSearchResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/TermLinkSearchResponse'
+                  - $ref: '#/components/schemas/TermTreeSearchResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -2060,6 +2170,46 @@ components:
           minimum: 1
           description: Linked term ID stored in `defTermsLinks`.
       additionalProperties: false
+    TermTreeNode:
+      type: object
+      required:
+        - id
+        - label
+        - parentId
+        - children
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        label:
+          type: string
+        parentId:
+          oneOf:
+            - type: integer
+              minimum: 1
+            - type: 'null'
+          description: Real parent ID, even when this node is included by reference under another parent.
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermTreeNode'
+      additionalProperties: false
+    TermTreeSearchResponse:
+      type: object
+      required:
+        - items
+        - meta
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermTreeNode'
+        meta:
+          $ref: '#/components/schemas/TermLinkMeta'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
     TermLinkMeta:
       type: object
       required:
@@ -2344,47 +2494,51 @@ components:
       properties:
         query:
           oneOf:
-          - type: string
-          - type: object
-            additionalProperties: true
-          - type: array
-            items:
-              type: object
+            - type: string
+            - type: object
               additionalProperties: true
+            - type: array
+              items:
+                type: object
+                additionalProperties: true
         q:
           description: Alias for query.
           oneOf:
-          - type: string
-          - type: object
-            additionalProperties: true
-          - type: array
-            items:
-              type: object
+            - type: string
+            - type: object
               additionalProperties: true
+            - type: array
+              items:
+                type: object
+                additionalProperties: true
         ids:
           oneOf:
-          - type: string
-          - type: array
-            items: {type: integer, minimum: 1}
+            - type: string
+            - type: array
+              items:
+                type: integer
+                minimum: 1
         links:
           description: >-
-            "all", or an array of compact link specs. Omitted means no edge discovery. Initial links return only
-            edges whose two endpoints are both in the seed result set.
+            "all", a comma-separated list, or an array of compact link specs. Edges connect only records within
+            the seed set. Omission returns nodes without edges.
           oneOf:
-          - type: string
-            enum: [all]
-          - type: array
-            items: {type: string}
+            - type: string
+            - type: array
+              items:
+                type: string
         rule:
-          description: One optional interactive expansion rule (executed from a later stage).
+          description: >-
+            One optional compact path or JSON rule; accepted and validated, but expansion is not currently
+            executed.
           oneOf:
-          - type: string
-          - type: object
-            additionalProperties: true
+            - type: string
+            - type: object
+              additionalProperties: true
         limit:
           type: integer
           minimum: 1
-          maximum: 5000
+          maximum: 10000
           default: 1000
         offset:
           type: integer
@@ -2393,10 +2547,32 @@ components:
         limits:
           type: object
           properties:
-            maxNodes: {type: integer, minimum: 1, maximum: 5000}
-            maxEdges: {type: integer, minimum: 1, maximum: 10000}
-            maxDepth: {type: integer, minimum: 1, maximum: 10}
+            maxNodes:
+              type: integer
+              minimum: 1
+              maximum: 10000
+            maxEdges:
+              type: integer
+              minimum: 1
+              maximum: 10000
+            maxDepth:
+              type: integer
+              minimum: 1
+              maximum: 10
           additionalProperties: false
+        rules:
+          description: Legacy alias for rule; arrays may contain at most one rule. Not currently executed.
+          oneOf:
+            - type: string
+            - type: object
+              additionalProperties: true
+            - type: array
+              maxItems: 1
+              items:
+                oneOf:
+                  - type: string
+                  - type: object
+                    additionalProperties: true
       additionalProperties: false
     GraphDocument:
       type: object

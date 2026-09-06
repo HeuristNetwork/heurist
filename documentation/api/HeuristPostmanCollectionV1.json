@@ -2,7 +2,7 @@
   "info": {
     "name": "Heurist API - Verified Test Suite",
     "_postman_id": "heurist-api-verified-suite-v1",
-    "description": "Verified Heurist API beta test suite for routing, public access, authentication, definitions, records, map presentation, GeoJSON, timeline data, IIIF, and annotations.",
+    "description": "Verified Heurist API beta test suite for routing, public access, authentication, definitions, records, map presentation, GeoJSON, timeline data, IIIF, and annotations. Includes graph documents and batched labeled term hierarchy trees.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -1701,7 +1701,16 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/sys?q={\"t\":\"filter\"}&fields=query,rec_Modified,rec_OwnerUGrpID",
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{jwtToken}}", "type": "string"}]}
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            }
           },
           "response": []
         },
@@ -1711,7 +1720,16 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/sys/filter/{{filterId}}",
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{jwtToken}}", "type": "string"}]}
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            }
           },
           "response": []
         },
@@ -1719,10 +1737,27 @@
           "name": "Search users by email field",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"query\": {\"t\": \"user\", \"email\": \"example.org\"},\n  \"fields\": [\"email\", \"rec_Modified\"]\n}"},
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": {\"t\": \"user\", \"email\": \"example.org\"},\n  \"fields\": [\"email\", \"rec_Modified\"]\n}"
+            },
             "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/sys",
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{jwtToken}}", "type": "string"}]}
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            }
           },
           "response": []
         },
@@ -1732,7 +1767,16 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}{{apiPrefix}}/{{db}}/sys?q={\"t\":\"user\"}&detail=ids",
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{jwtToken}}", "type": "string"}]}
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwtToken}}",
+                  "type": "string"
+                }
+              ]
+            }
           },
           "response": []
         }
@@ -2002,6 +2046,405 @@
         }
       ],
       "description": "Public MapDocument/MapLayer presentation, Heurist record/query GeoJSON, file-backed datasource, and timeline endpoints. MapDocument/MapLayer/data routes are GET-only; POST is supported for ordinary map and timeline queries. Configure the map-related environment values before running."
+    },
+    {
+      "name": "Term hierarchy trees",
+      "description": "tree=1: termId batches real ancestor paths across vocabularies; parentId returns full descendants including references. Pagination counts roots. Configure the term variables for your database.",
+      "item": [
+        {
+          "name": "Ancestor tree",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Tree collection', () => { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta.entity).to.eql('termlinks'); pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('Labeled hierarchy', () => { const walk = (node, path) => { pm.expect(node).to.have.all.keys('id','label','parentId','children'); pm.expect(node.id).to.be.a('number'); pm.expect(node.label).to.be.a('string'); pm.expect(node.children).to.be.an('array'); pm.expect(path).not.to.include(node.id); node.children.forEach(child => walk(child, path.concat(node.id))); }; body.items.forEach(root => walk(root, [])); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/termlinks?termId={{trlTermId}}&tree=1",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Batch ancestor forest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Tree collection', () => { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta.entity).to.eql('termlinks'); pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('Labeled hierarchy', () => { const walk = (node, path) => { pm.expect(node).to.have.all.keys('id','label','parentId','children'); pm.expect(node.id).to.be.a('number'); pm.expect(node.label).to.be.a('string'); pm.expect(node.children).to.be.an('array'); pm.expect(path).not.to.include(node.id); node.children.forEach(child => walk(child, path.concat(node.id))); }; body.items.forEach(root => walk(root, [])); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/termlinks?termId={{trlTermId}},{{trmId}}&tree=true",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Full subtree",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Tree collection', () => { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta.entity).to.eql('termlinks'); pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('Labeled hierarchy', () => { const walk = (node, path) => { pm.expect(node).to.have.all.keys('id','label','parentId','children'); pm.expect(node.id).to.be.a('number'); pm.expect(node.label).to.be.a('string'); pm.expect(node.children).to.be.an('array'); pm.expect(path).not.to.include(node.id); node.children.forEach(child => walk(child, path.concat(node.id))); }; body.items.forEach(root => walk(root, [])); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/termlinks?parentId={{trlParentId}}&tree=1",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Short alias tree",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Tree collection', () => { pm.expect(body.items).to.be.an('array'); pm.expect(body.meta.entity).to.eql('termlinks'); pm.expect(body.pagination).to.have.all.keys('total','offset','limit','self','next'); });",
+                  "pm.test('Labeled hierarchy', () => { const walk = (node, path) => { pm.expect(node).to.have.all.keys('id','label','parentId','children'); pm.expect(node.id).to.be.a('number'); pm.expect(node.label).to.be.a('string'); pm.expect(node.children).to.be.an('array'); pm.expect(path).not.to.include(node.id); node.children.forEach(child => walk(child, path.concat(node.id))); }; body.items.forEach(root => walk(root, [])); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/trl?termId={{trlTermId}}&tree=1",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject ambiguous direction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/termlinks?termId={{trlTermId}}&parentId={{trlParentId}}&tree=1",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject malformed IDs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/termlinks?termId=1,invalid&tree=1",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject missing IDs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/termlinks?tree=1",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Graph documents",
+      "description": "GET/POST /graph return visible seed records and internal edges. limit defaults to 1000 independently of maxNodes. Ceilings: 10000 nodes, 10000 edges, depth 10. rule/rules are validated but not executed; paths remains empty.",
+      "item": [
+        {
+          "name": "GET nodes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Graph envelope', () => { pm.expect(body).to.have.all.keys('query','total','offset','limit','graph'); pm.expect(body.graph).to.have.all.keys('records','edges','links','paths','limits'); });",
+                  "pm.test('Fixed record headers', () => body.graph.records.forEach(record => pm.expect(record).to.have.all.keys('rec_ID','rec_Title','rec_RecTypeID')));",
+                  "pm.test('Budgets and internal edges', () => { const graph = body.graph, ids = graph.records.map(record => record.rec_ID); pm.expect(graph.records.length).to.be.at.most(graph.limits.maxNodes); pm.expect(graph.edges.length).to.be.at.most(graph.limits.maxEdges); pm.expect(body.limit).to.be.at.most(graph.limits.maxNodes); graph.edges.forEach(edge => { pm.expect(edge).to.have.all.keys('id','source','target','field','relationship','link','path'); pm.expect(ids).to.include(edge.source); pm.expect(ids).to.include(edge.target); }); });",
+                  "pm.test('No edges requested', () => pm.expect(body.graph.edges).to.have.lengthOf(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/graph?ids={{publicRecordId}}&limit=100",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET internal edges",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Graph envelope', () => { pm.expect(body).to.have.all.keys('query','total','offset','limit','graph'); pm.expect(body.graph).to.have.all.keys('records','edges','links','paths','limits'); });",
+                  "pm.test('Fixed record headers', () => body.graph.records.forEach(record => pm.expect(record).to.have.all.keys('rec_ID','rec_Title','rec_RecTypeID')));",
+                  "pm.test('Budgets and internal edges', () => { const graph = body.graph, ids = graph.records.map(record => record.rec_ID); pm.expect(graph.records.length).to.be.at.most(graph.limits.maxNodes); pm.expect(graph.edges.length).to.be.at.most(graph.limits.maxEdges); pm.expect(body.limit).to.be.at.most(graph.limits.maxNodes); graph.edges.forEach(edge => { pm.expect(edge).to.have.all.keys('id','source','target','field','relationship','link','path'); pm.expect(ids).to.include(edge.source); pm.expect(ids).to.include(edge.target); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/graph?q=t:{{rtyId}}&links=all&limit=100&maxNodes=100&maxEdges=200",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST explicit seed limit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Graph envelope', () => { pm.expect(body).to.have.all.keys('query','total','offset','limit','graph'); pm.expect(body.graph).to.have.all.keys('records','edges','links','paths','limits'); });",
+                  "pm.test('Fixed record headers', () => body.graph.records.forEach(record => pm.expect(record).to.have.all.keys('rec_ID','rec_Title','rec_RecTypeID')));",
+                  "pm.test('Budgets and internal edges', () => { const graph = body.graph, ids = graph.records.map(record => record.rec_ID); pm.expect(graph.records.length).to.be.at.most(graph.limits.maxNodes); pm.expect(graph.edges.length).to.be.at.most(graph.limits.maxEdges); pm.expect(body.limit).to.be.at.most(graph.limits.maxNodes); graph.edges.forEach(edge => { pm.expect(edge).to.have.all.keys('id','source','target','field','relationship','link','path'); pm.expect(ids).to.include(edge.source); pm.expect(ids).to.include(edge.target); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/graph",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"t:{{rtyId}}\",\n  \"links\": \"all\",\n  \"limit\": 5000,\n  \"limits\": {\n    \"maxNodes\": 5000,\n    \"maxEdges\": 10000,\n    \"maxDepth\": 10\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST server ceilings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Graph envelope', () => { pm.expect(body).to.have.all.keys('query','total','offset','limit','graph'); pm.expect(body.graph).to.have.all.keys('records','edges','links','paths','limits'); });",
+                  "pm.test('Fixed record headers', () => body.graph.records.forEach(record => pm.expect(record).to.have.all.keys('rec_ID','rec_Title','rec_RecTypeID')));",
+                  "pm.test('Budgets and internal edges', () => { const graph = body.graph, ids = graph.records.map(record => record.rec_ID); pm.expect(graph.records.length).to.be.at.most(graph.limits.maxNodes); pm.expect(graph.edges.length).to.be.at.most(graph.limits.maxEdges); pm.expect(body.limit).to.be.at.most(graph.limits.maxNodes); graph.edges.forEach(edge => { pm.expect(edge).to.have.all.keys('id','source','target','field','relationship','link','path'); pm.expect(ids).to.include(edge.source); pm.expect(ids).to.include(edge.target); }); });",
+                  "pm.test('Server ceilings', () => { pm.expect(body.graph.limits.maxNodes).to.eql(10000); pm.expect(body.graph.limits.maxEdges).to.eql(10000); pm.expect(body.graph.limits.maxDepth).to.eql(10); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/graph",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": {\n    \"ids\": [\n      \"{{publicRecordId}}\"\n    ]\n  },\n  \"limit\": 1,\n  \"limits\": {\n    \"maxNodes\": 25000,\n    \"maxEdges\": 25000,\n    \"maxDepth\": 20\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reject multiple expansion rules",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/graph",
+              "host": [
+                "{{baseUrl}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"t:{{rtyId}}\",\n  \"rules\": [\n    {\n      \"query\": \"t:10\"\n    },\n    {\n      \"query\": \"t:48\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ]
 }

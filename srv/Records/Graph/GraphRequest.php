@@ -24,7 +24,7 @@ namespace Heurist\Records\Graph;
 final class GraphRequest
 {
     /** Hard server ceilings - the last line of defence against dense graphs. */
-    public const SERVER_MAX_NODES = 5000;
+    public const SERVER_MAX_NODES = 10000;
     public const SERVER_MAX_EDGES = 10000;
     public const SERVER_MAX_DEPTH = 10;
 
