@@ -105,7 +105,7 @@ final class GraphEdgeDiscovery
             }
 
             $sql = 'SELECT rl.rl_SourceID,rl.rl_TargetID,COALESCE(rl.rl_DetailTypeID,0),'
-                .'COALESCE(rl.rl_RelationID,0) FROM recLinks rl WHERE '.implode(' AND ', $conditions);
+                .'COALESCE(rl.rl_RelationTypeID,0) FROM recLinks rl WHERE '.implode(' AND ', $conditions);
 
             foreach($this->executor->executeRows($sql, $types, $values) as $row){
                 $source = intval($row[0]);
