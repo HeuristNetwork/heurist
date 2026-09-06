@@ -3526,7 +3526,7 @@ QUERY;
      *         Checks/creates full-text index via `checkFullTextIndex()`. Handles `++` / `--` word modifiers.
      *       - **Standard LIKE/Exact**:
      *         `LIKE '%value%'` (default) or `= 'value'` (if `$this->exact`).
-     *         Handles negation (`NOT LIKE`, `!=`). Handles case sensitivity (`COLLATE utf8_bin`).
+     *         Handles negation (`NOT LIKE`, `!=`). Handles case sensitivity with a binary comparison.
      *         Handles language filtering for freetext/blocktext fields based on `dtl_Value` prefixes (e.g., "en:").
      * 4.  **User ID Resolution**: For 'addedby'/'owner' predicates, resolves usernames in value to IDs using `getUserIds()`.
      * 5.  **Comma-Separated IDs**: If value is a list of IDs (after other processing), generates `IN (id_list)`.
@@ -3591,10 +3591,9 @@ QUERY;
 
             if(strpos($this->value, '==')===0){
                 $this->case_sensitive = true;
+                $this->exact = true;
                 $this->value = substr($this->value, 2);
-            }
-
-            if(strpos($this->value, '=')===0){
+            }elseif(strpos($this->value, '=')===0){
                 $this->exact = true;
                 $this->value = substr($this->value, 1);
             }elseif(strpos($this->value, '@')===0){ //full text search
@@ -3926,7 +3925,8 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                         $eq = ($this->negate?'!=':'=');
                     }
                     if($this->case_sensitive){
-                            $eq = 'COLLATE utf8_bin '.$eq;
+                        // Do not impose a utf8 collation on utf8mb4 detail columns.
+                        $eq .= ' BINARY';
                     }
                     
                     if($this->exact){
@@ -3943,7 +3943,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
 
                     if(empty($lang)){ // default only
                         //$res = $res . " AND NOT REGEXP_LIKE(dtl_Value, '^[A-Za-z]{2,3}:') "; //since mysql v8
-                        $res = $res . " AND dtl_Value NOT RLIKE '^[A-Za-z]{2,3}:' "; 
+                        $res = $res . " AND dtl_Value NOT RLIKE '^[A-Za-z]{2,3}:' ";
                     }elseif($lang == 'ALL' && $this->exact && !$this->fulltext){ // any language, exact and not a fulltext search
                         $res = $res . " OR SUBSTRING(dtl_Value, 0, 4) = '" . $mysqli->real_escape_string($this->value) . "'";
                         $res = $res . " OR SUBSTRING(dtl_Value, 0, 3) = '" . $mysqli->real_escape_string($this->value) . "'";
