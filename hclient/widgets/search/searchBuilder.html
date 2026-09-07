@@ -13,101 +13,128 @@
  * @since 6.0
  */
 -->
-<div id="pnl_Rectype" class="selectmenu-parent" style="position:absolute;left:0px;right:0px;top:0px;height:30px;border-bottom:1px gray solid;padding:20px 10px;">
+<style>
+    /* main record type selector (native select + its generated hSelect button) is hidden
+       while multi-rectype search is active - driven by a class so it survives any
+       hSelect refresh/re-render, instead of an inline style that a refresh can undo */
+    #pnl_Rectype.is-multi-mode .main-rectype > .header_narrow,
+    #pnl_Rectype.is-multi-mode .main-rectype > .sb-main-rectype-select {
+        display:none;
+    }
+</style>
+<div id="pnl_Rectype" class="selectmenu-parent" style="flex:0 0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:1px gray solid;padding:10px">
 
-    <div class="main-rectype" style="display: inline-block;padding:0 20px;">
-            <div class="header_narrow" style="min-width:72px;display:inline-block"><label for="opt_rectypes">Record type</label></div>
+    <div class="main-rectype" style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div class="header_narrow" style="min-width:53px;"><label for="opt_rectypes">Record type</label></div>
             <select id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
-    </div>
-        
-    
-    <button id="btn-clear" style="float:right">Clear All</button>
-
-    <div class="filter-language" style="float: right;padding-right:40px;">
-        <div class="header_narrow" style="min-width:72px;display:inline-block"><label for="opt_rectypes">Language</label></div>
-        <select id="opt_language" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
-    </div>
-</div>
-<!--
-            <div class="rty-selected" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <span class="multi-rectype-toggle" style="font-size:smaller;">
                     <label>search for more than one record types
                         <input name="svs_MultiRtSearch" id="svs_MultiRtSearch" class="text ui-widget-content ui-corner-all" type="checkbox"
                         style="display:inline-block;margin:0"/>
                     </label>
-            </div>
+            </span>
+    </div>
 
+    <div class="filter-language" style="display:flex;align-items:center;gap:8px;">
+        <div class="header_narrow" style="min-width:53px;"><label for="opt_rectypes">Language</label></div>
+        <select id="opt_language" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
+    </div>
+
+    <button id="btn-clear" style="margin-left:auto;">Clear All</button>
+</div>
+<!--
     <div id="field_all_list" class="rty-not-selected ui-selectmenu-menu"
          style="display:none; position: absolute;overflow:hidden;bottom: 0;top: 156px;width: 100%;">
         <select id="field_selector"></select>
     </div>
 -->
 
+<div id="pnl_ItemsWrap" style="position:relative;flex:1 1 auto;min-height:0;">
 
-<fieldset id="pnl_Items" style="position:absolute;left:0px;right:0;top:106px;bottom:0px;padding:10px 0px 5px;margin: 0px;overflow-y: auto;">
-    <legend style="display:none"></legend>
-    <div class="btn_field_add search_conjunction" style="visibility:hidden;position: absolute;top: 52px;">
-        <span style="margin-left: 43px;color:#6A7C99;font-size:0.8em;">
-            <select style="border:none">
-                <option value="all">AND</option>
-                <option value="any">OR</option>
-            </select>
-        </span>
-    </div>
+    <fieldset id="pnl_Items" style="position:absolute;left:0px;right:0;top:0px;bottom:0px;padding:10px 0px 5px;margin: 0px;overflow-y: auto;">
+        <legend style="display:none"></legend>
+        <div class="btn_field_add search_conjunction" style="visibility:hidden;position: absolute;top: 52px;">
+            <span style="margin-left: 43px;color:#6A7C99;font-size:0.8em;">
+                <select style="border:none">
+                    <option value="all">AND</option>
+                    <option value="any">OR</option>
+                </select>
+            </span>
+        </div>
 
-    <div class="btn_field_add search_field_add" style="margin-left: 85px;color:#6A7C99;cursor:pointer;font-size:0.8em">
-        <span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 95px;"/> add field
-    </div>
+        <div class="btn_field_add search_field_add" style="margin-left: 85px;color:#6A7C99;cursor:pointer;font-size:0.8em">
+            <span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 95px;"/> add field
+        </div>
 
-    <hr>
-    <!-- Sortby section -->
-    <div id="sortby_accordion" style="font-size: unset;">
-        <h3 id="sortby_header" style="margin-left: 40px;">Sorted by: <span id="sortby_values">record title</span></h3>
+        <hr>
+        <!-- Sortby section -->
+        <div id="sortby_accordion" style="font-size: unset;">
+            <h3 id="sortby_header" style="margin-left: 40px;">Sorted by: <span id="sortby_values">record title</span></h3>
 
-        <div id="sortby_body" style="width: 765px;background: none;border: none;">
-            <div class="btn_field_add sort_field_add" style="color:#6A7C99;cursor:pointer;font-size:0.8em">
-                <br><span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 95px;"/> add sort
+            <div id="sortby_body" style="width: 765px;background: none;border: none;">
+                <div class="btn_field_add sort_field_add" style="color:#6A7C99;cursor:pointer;font-size:0.8em">
+                    <br><span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 95px;"/> add sort
+                </div>
             </div>
         </div>
-    </div>
 
-    <hr>
-    <!-- Ruleset section -->
-    <div id="ruleset_accordion" style="font-size: unset;">
-        <h3 id="ruleset_header" style="margin-left: 40px;">Ruleset:</h3>
+        <hr>
+        <!-- Ruleset section -->
+        <div id="ruleset_accordion" style="font-size: unset;">
+            <h3 id="ruleset_header" style="margin-left: 40px;">Ruleset:</h3>
 
-        <div id="ruleset_body" style="width: 55em;margin-left: 65px;background: none;border: none;">
-            <div class="header" ><label for="svs_RulesOnly">Show expansion only</label></div>
-            <input type="checkbox" id="svs_RulesOnly" class="text ui-widget-content ui-corner-all" style="margin:0 4px 4px 0"/>
-            <label style="font-size: smaller; margin-top: 2px;" for="svs_RulesOnly">
-                Exclude results from the initial filter, only show results from expansion rules
-            </label><br>
+            <div id="ruleset_body" style="width: 55em;margin-left: 65px;background: none;border: none;">
+                <div class="header" ><label for="svs_RulesOnly">Show expansion only</label></div>
+                <input type="checkbox" id="svs_RulesOnly" class="text ui-widget-content ui-corner-all" style="margin:0 4px 4px 0"/>
+                <label style="font-size: smaller; margin-top: 2px;" for="svs_RulesOnly">
+                    Exclude results from the initial filter, only show results from expansion rules
+                </label><br>
 
-            <div id="divRulesOnly" style="display:none;padding-left: 25px;height: 20px;">
-                <label style="font-size: smaller"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly1" checked value="1" style="margin:0 0 20px 0"/>&nbsp;return all expansion results</label>
-                <label style="font-size: smaller;padding-left: 10px;"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly2" value="2" style="margin:0 0 20px 0"/>&nbsp;only return last level of expansion</label>
-                <label style="font-size: smaller;padding-left: 10px;"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly3" value="3" style="margin:0 0 20px 0"/>&nbsp;return original resultset plus last level of expansion</label>
-            </div>
+                <div id="divRulesOnly" style="display:none;padding-left: 25px;height: 20px;">
+                    <label style="font-size: smaller"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly1" checked value="1" style="margin:0 0 20px 0"/>&nbsp;return all expansion results</label>
+                    <label style="font-size: smaller;padding-left: 10px;"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly2" value="2" style="margin:0 0 20px 0"/>&nbsp;only return last level of expansion</label>
+                    <label style="font-size: smaller;padding-left: 10px;"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly3" value="3" style="margin:0 0 20px 0"/>&nbsp;return original resultset plus last level of expansion</label>
+                </div>
 
-            <textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all" 
-                style="margin-top:0.4em;width:50em" readonly="readonly">
-            </textarea>
+                <textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all"
+                    style="margin-top:0.4em;width:50em" readonly="readonly">
+                </textarea>
 
-            <div id="svs_btnset" style="float:right;padding-left:0.4em">
-                <div id="svs_Rules_edit"  style="margin-top:0.4em;display:block"></div>
-                <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+                <div id="svs_btnset" style="float:right;padding-left:0.4em">
+                    <div id="svs_Rules_edit"  style="margin-top:0.4em;display:block"></div>
+                    <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+                </div>
             </div>
         </div>
+
+    </fieldset>
+
+    <div id="pnl_CoverAll" style="display:block;position:absolute;left:0px;right:0;top:0px;bottom:0px;background:gray;opacity:0.2"></div>
+
+    <div id="pnl_Tree" class="ui-widget-content" style="position:absolute;left:0;width:350px;top:0;bottom:0px;border-right:1px gray solid;display:none;">
+
+        <div  class="rty-selected heurist-helper2"
+            style="background:inherit;position: absolute;height: 50px;z-index:999">
+                <label  for="fsw_showreverse"><input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
+                Show linked-from record types (reverse pointers, indicated as &lt;&lt;</label><br><br>
+
+                <span> Tree: </span>
+                <label for="order_alphabetic"><input type="radio" name="tree_order" id="order_alphabetic" style="vertical-align: middle;" value="1" />&nbsp;
+                    Alphabetic</label>
+                <label for="order_default"><input type="radio" name="tree_order" id="order_default" style="vertical-align: middle;" value="0" checked />&nbsp;
+                    Form order</label>
+        </div>
+
+        <div id="field_treeview" class="rty-selected" style="position: absolute;overflow-y: auto;bottom: 0;top: 50px;width: 100%;"></div>
     </div>
-
-</fieldset>
-
-<div id="pnl_CoverAll" style="display:block;position:absolute;left:0px;right:0;top:80px;bottom:0px;background:gray;opacity:0.2"></div>
-
-<div id="pnl_Result" style="position:absolute;height:40px;left:0;right:0;bottom:0px;border-top:1px gray solid;padding:4px;display:none">
 
 </div>
 
-<div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="display:none;padding:13px">
+<div id="pnl_Result" style="flex:0 0 auto;height:40px;border-top:1px gray solid;padding:4px;display:none;overflow:auto;">
+
+</div>
+
+<div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="flex:0 0 auto;display:none;padding:13px;text-align:right">
 
     <div class="ui-dialog-buttonset">
         <label><input type="checkbox" class="btn-preview"/>preview filter</label>
@@ -116,21 +143,4 @@
         <div style="margin-left: 10px" class="btn-search ui-button-action">Filter</div>
         <div class="btn-save">Preview</div>
     </div>
-</div>
-
-<div id="pnl_Tree" class="ui-widget-content" style="position:absolute;left:0;width:350px;top:0;bottom:0px;border-right:1px gray solid;display:none;">
-
-    <div  class="rty-selected heurist-helper2" 
-        style="background:inherit;position: absolute;height: 50px;z-index:999">
-            <label  for="fsw_showreverse"><input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
-            Show linked-from record types (reverse pointers, indicated as &lt;&lt;</label><br><br>
-
-            <span> Tree: </span>
-            <label for="order_alphabetic"><input type="radio" name="tree_order" id="order_alphabetic" style="vertical-align: middle;" value="1" />&nbsp;
-                Alphabetic</label>
-            <label for="order_default"><input type="radio" name="tree_order" id="order_default" style="vertical-align: middle;" value="0" checked />&nbsp;
-                Form order</label>
-    </div>
-
-    <div id="field_treeview" class="rty-selected" style="position: absolute;overflow-y: auto;bottom: 0;top: 50px;width: 100%;"></div>
 </div>

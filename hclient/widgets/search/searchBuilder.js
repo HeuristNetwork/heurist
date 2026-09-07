@@ -58,7 +58,8 @@ $.widget( "heurist.searchBuilder", {
         
         rty_ID: null, //init with specified record type
         input_element: null,  //fill result to this element, instead of search
-        is_for_rules: false
+        is_for_rules: false,
+        isForEdit: false
     },
 
     /**
@@ -142,6 +143,8 @@ $.widget( "heurist.searchBuilder", {
      * @private
      * @property {Object} group_items - Object to store group items (not fully implemented).
      */
+    //NOTE: group_items/field_array/sort_array are re-initialized per-instance in _create() -
+    //these prototype defaults would otherwise be shared by reference across every instance
     group_items:{}, //groups - to be implemented
     /**
      * @memberof heurist.searchBuilder
@@ -192,14 +195,30 @@ $.widget( "heurist.searchBuilder", {
     _create: function() {
 
         // prevent double click to select text
-       
+
 
         // Sets up element to apply the ui-state-focus class on focus.
-       
+
 
         let that = this;
 
-        this.element.css({overflow: 'hidden !important'}).addClass('ui-heurist-bg-light');
+        // field_array/sort_array/group_items are declared as array/object literals on the
+        // widget prototype, so without this they'd be shared BY REFERENCE across every
+        // searchBuilder instance (e.g. slidersMenu.js's inline instance and the
+        // #heurist-searchBuilder dialog singleton used by editing_input.js/ruleBuilder.js) -
+        // one instance's rows would leak into another's array and crash _doCompose() on
+        // stale (removed) elements. Give each instance its own.
+        this.field_array = [];
+        this.sort_array = [];
+        this.group_items = {};
+
+        this.element.css({
+            overflow: 'hidden !important',
+            display: 'flex',
+            'flex-direction': 'column',
+            height: '100%',
+            'box-sizing': 'border-box'
+        }).addClass('ui-heurist-bg-light');
 
         let ht = $(window).height();
         if(ht>700) ht = 700;
@@ -225,7 +244,7 @@ $.widget( "heurist.searchBuilder", {
          
                 buttons: [
 
-                    {text:window.hWin.HR(this.options.is_for_rules?'Apply':'Filter'), id:'btnSearch',
+                    {text:window.hWin.HR(this.options.is_for_rules||this.options.isForEdit?'Apply':'Filter'), id:'btnSearch',
                         class:'ui-button-action', 
                         click: function() {
                             that._doSearch()
@@ -342,7 +361,7 @@ $.widget( "heurist.searchBuilder", {
             this.pnl_Items.find('.search_conjunction').css('visibility','hidden');    
         }
         
-        if(this.options.is_for_rules){
+        if(this.options.is_for_rules || this.options.isForEdit){
             let sele = this.element.find('#sortby_accordion');
             sele.hide();
             sele.prev().hide(); //hide <hr>
@@ -395,8 +414,8 @@ $.widget( "heurist.searchBuilder", {
      * @param {string} ele_id - The ID of the `searchBuilderItem` element that requires field selection.
      */
     ,showFieldSelector: function( ele_id ){
-        
-        if(this.select_main_rectype.val() <= 0 && this.select_main_rectype.val() !== ''){
+
+        if(this._getSelectedRectypeIdsArray().length===0){
             this.pnl_Tree.hide();
         }else{
             this.select_field_for_id = ele_id;
@@ -455,11 +474,15 @@ $.widget( "heurist.searchBuilder", {
         }
 
         if(this.select_main_rectype!=null && this.options.rty_ID>0){
-            this.refreshRectypeMenu();       
+            this.refreshRectypeMenu();
+        }else{
+            //options (rty_ID/is_for_rules) may have changed since this cached instance was last
+            //shown for a different caller - refreshRectypeMenu() above already covers this check
+            //for the rty_ID>0 branch
+            this._applyRectypeSelectorLock();
         }
-        
-        
-        //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
+
+        //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg);
     }
 
     /**
@@ -469,9 +492,12 @@ $.widget( "heurist.searchBuilder", {
      *              Initializes a `searchBuilderSort` widget for the new item.
      */
     , addSortItem: function(){
-        
-        let rty_ID = this.select_main_rectype.val();
-                                                   
+
+        //sort-by field selector only supports a single record type - use the first selected one
+        let selected_ids = this._getSelectedRectypeIdsArray();
+        let rty_ID = selected_ids.length>0 ? selected_ids[0] : '';
+
+
         let ele = $('<div>').uniqueId().insertBefore(this.btnAddSortItem);
         this.sort_array.push(ele);
         
@@ -642,37 +668,13 @@ $.widget( "heurist.searchBuilder", {
         //
         //
         function __onRectypeChange(){
-            if(that.select_additional_rectypes){
-                //reset
+            if(that.select_additional_rectypes && that.select_additional_rectypes.editing_input('instance')){
+                //reset - main selector changed, additional (multi-mode) selection is no longer relevant
                 that.select_additional_rectypes.editing_input('setValue', '');
             }
+            that._onRectypeSelectionChange();
+        }
 
-            if(that.select_main_rectype.val()<0){
-               
-                that.pnl_CoverAll 
-                .css({ top:that.pnl_Items.css('top'),bottom:that.pnl_Items.css('bottom') })
-                .show();
-            }else{
-               
-                that.pnl_CoverAll.hide();
-                //load list of field types
-               
-                that._initTreeView([that.select_main_rectype.val()]);
-            }
-
-            if(that.select_main_rectype.val() > 0){
-                that.element.find('.rty-selected.heurist-helper2').show();
-                that.element.find('#pnl_Tree').css('width', '350px');
-                that.element.find('#field_treeview').css('top', '50px');
-            }else{
-                that.element.find('.rty-selected.heurist-helper2').hide();
-                that.element.find('#pnl_Tree').css('width', '40em');
-                that.element.find('#field_treeview').css('top', '5px');
-            }
-
-            that.clearAll();
-        }     
-        
         this._on(this.element.find("#opt_rectypes"), {change: __onRectypeChange});
         
         this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( this.element.find("#opt_rectypes").get(0),
@@ -686,7 +688,13 @@ $.widget( "heurist.searchBuilder", {
                 eventHandlers: {onSelectMenu:__onRectypeChange}
         });
 
-        
+        if(this.select_main_rectype.hSelect('instance')!=undefined){
+            //stable class so the multi-rectype-mode CSS rule keeps hiding this button
+            //across any later hSelect('refresh') - an inline .hide() would not survive that
+            this.select_main_rectype.hSelect('widget').addClass('sb-main-rectype-select');
+        }
+
+        this._applyRectypeSelectorLock();
 
         if(this.options.rty_ID>0){
             selected = this.options.rty_ID;
@@ -700,10 +708,87 @@ $.widget( "heurist.searchBuilder", {
                 if(this.options.rty_ID>0) __onRectypeChange();
             }
         }else{
-            this.pnl_CoverAll 
-            .css({ top:this.pnl_Items.css('top'),bottom:this.pnl_Items.css('bottom') })
-            .show();
+            this.pnl_CoverAll.show();
         }
+    }
+
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Shows/hides the multi-rectype checkbox and forces it off when the caller has
+     *              locked the search to one record type (`rty_ID`) or is building a rule filter
+     *              (`is_for_rules`) - multi-rectype search doesn't make sense in either case.
+     *              Called on every `show()` (not just when the selector is (re)built) so a
+     *              cached widget instance reused for a different caller/purpose stays correct.
+     */
+    , _applyRectypeSelectorLock: function(){
+        if(!(this.svs_MultiRtSearch && this.svs_MultiRtSearch.length>0)){ return; }
+
+        let allow_multi = !(this.options.rty_ID>0) && !this.options.is_for_rules;
+        this.element.find('.main-rectype > .multi-rectype-toggle').toggle(allow_multi);
+        if(!allow_multi && this.svs_MultiRtSearch.is(':checked')){
+            this.svs_MultiRtSearch.prop('checked', false).trigger('change');
+        }
+    }
+
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Returns the record type ids currently in effect for the field tree/query -
+     *              from the multi-rectype selector when multi-rectype search is enabled,
+     *              otherwise from the main record type selector.
+     * @returns {string[]} Array of record type id strings. `['']` means "any record type".
+     *                      `[]` means nothing has been selected yet.
+     */
+    , _getSelectedRectypeIdsArray: function(){
+
+        if(this.svs_MultiRtSearch && this.svs_MultiRtSearch.length>0 && this.svs_MultiRtSearch.is(':checked')){
+            let val = (this.select_additional_rectypes && this.select_additional_rectypes.editing_input('instance'))
+                ? this.select_additional_rectypes.editing_input('getValues')[0] : '';
+            return window.hWin.HEURIST4.util.isempty(val) ? [] : String(val).split(',');
+        }
+
+        let val = this.select_main_rectype ? this.select_main_rectype.val() : '-1';
+        if(val===''){ return ['']; } //any record type
+        if(Number(val)>0){ return [String(val)]; }
+        return []; //nothing selected ('-1' placeholder)
+    }
+
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Refreshes the field tree, cover panel and reverse-links controls to match
+     *              the record type(s) currently selected (see `_getSelectedRectypeIdsArray`).
+     *              Called whenever the main selector, the multi-rectype selector, or the
+     *              multi-rectype checkbox changes.
+     */
+    , _onRectypeSelectionChange: function(){
+
+        let that = this;
+        let ids = this._getSelectedRectypeIdsArray();
+        let hasConcreteType = ids.length>0 && ids[0]!=='';
+
+        if(ids.length===0){
+            that.pnl_CoverAll.show();
+        }else{
+            that.pnl_CoverAll.hide();
+            that._initTreeView(ids);
+        }
+
+        if(hasConcreteType){
+            that.element.find('.rty-selected.heurist-helper2').show();
+            that.element.find('#pnl_Tree').css('width', '350px');
+            that.element.find('#field_treeview').css('top', '50px');
+        }else{
+            that.element.find('.rty-selected.heurist-helper2').hide();
+            that.element.find('#pnl_Tree').css('width', '40em');
+            that.element.find('#field_treeview').css('top', '5px');
+        }
+
+        that.clearAll();
     }
 
     /**
@@ -725,18 +810,26 @@ $.widget( "heurist.searchBuilder", {
             this.select_additional_rectypes.hide();
             
             this.svs_MultiRtSearch = this.element.find('#svs_MultiRtSearch');
-            
+
             this._on(this.svs_MultiRtSearch, {change:function(event){
                 if(this.select_additional_rectypes.editing_input('instance')){
-                    if(this.svs_MultiRtSearch.is(':checked')){
+
+                    let is_multi = this.svs_MultiRtSearch.is(':checked');
+
+                    //hide/show the single-rectype selector (label + hSelect button) and swap in
+                    //the multi-rectype one. Driven by a class (see searchBuilder.html <style>) so
+                    //it survives any later hSelect('refresh') on the main selector.
+                    this.element.find('#pnl_Rectype').toggleClass('is-multi-mode', is_multi);
+
+                    if(is_multi){
                         this.select_additional_rectypes.show();
                     }else{
-                        
                         //reset flag - facet was changed - need to proceed all steps of wizard
                         this.select_additional_rectypes.editing_input('setValue', '');
                         this.select_additional_rectypes.hide();
                     }
-                    
+
+                    this._onRectypeSelectionChange();
                 }}});
         
             this.pnl_Rectype  = this.element.find('#pnl_Rectype');
@@ -748,8 +841,9 @@ $.widget( "heurist.searchBuilder", {
             this.btnAddFieldItem = this.pnl_Items.find('.search_field_add');
 
             this._on(this.btnAddFieldItem, {click:function(event){
-                
-                let rty_ID = that.select_main_rectype.val();
+
+                let selected_ids = that._getSelectedRectypeIdsArray();
+                let rty_ID = selected_ids.length>0 ? selected_ids[0] : '';
                 that.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
             }});
             
@@ -837,17 +931,11 @@ $.widget( "heurist.searchBuilder", {
         
         if(!this.options.is_dialog && this.pnl_Rectype){
             //add header and button set for inline mode
-            let h = this.element.find('.btn-preview').is(':checked') ?'88px':'50px';
-
             this.element.css({'font-size':'0.9em'});
-            this.pnl_Rectype.css({top:'35px'}); //,height:'30px'
-            this.pnl_Tree.css({top:35}); //, bottom:h
-            this.pnl_Items.css({bottom:h});
-            this.pnl_CoverAll.css({top:'85px', bottom:h});
-            this.pnl_Result.css({bottom:'40px'});
-            let _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
+            let _innerTitle = $('<div class="ui-dialog-titlebar" style="line-height:28px;padding-left:10px;text-align:left;min-height:30px;font-weight:bold">Filter builder</div>')
+                .css({'flex':'0 0 auto'})
                 .insertBefore(this.pnl_Rectype);
-            
+
             this._on(    
             $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
                     .css({'position':'absolute', 'right':'4px', 'top':'6px', height:20, width:20})
@@ -858,7 +946,7 @@ $.widget( "heurist.searchBuilder", {
                 
                 
             //button panel on the botom                        
-            let ele = this.element.find('.popup_buttons_div').show();
+            let ele = this.element.find('.ui-dialog-buttonpane').show();
         
             ele.find('.btn-search').button({icon:'ui-icon-filter'});
             this._on(ele.find('.btn-search'),{click:this._doSearch});
@@ -867,19 +955,15 @@ $.widget( "heurist.searchBuilder", {
             this._on(ele.find('.btn-save'),{click:this._doSaveSearch});
             
             this._on(ele.find('.btn-preview'),{change:function(e){
-                
-                let h;
+
+                //pnl_Result is now a normal flex child - showing/hiding it reserves/frees
+                //its space automatically, pnl_ItemsWrap (flex:1 1 auto) fills the rest
                 if(this.element.find('.btn-preview').is(':checked')){
-                    h = this.options.is_dialog ? '50px':'88px';                       
                     this.pnl_Result.show();
                     this._doCompose();
                 }else{
-                    h = this.options.is_dialog ? '0px':'50px';                       
                     this.pnl_Result.hide();
                 }
-
-                this.pnl_Items.css('bottom',h);
-                this.pnl_CoverAll.css('bottom',h);                       
             }});
 
             this._on(ele.find('.btn-copy'),{click:function(e){
@@ -947,18 +1031,25 @@ $.widget( "heurist.searchBuilder", {
             dtID: "dty_PtrTargetRectypeIDs",
             dtFields:{
                 "dty_Type":"resource",
-                "rst_DisplayName":"Also search for:",
-                "rst_DisplayHelpText": "", 
-//This determines the record type which will be retrieved by the search. The facets can, however, be based on attributes of other record types linked from this type                
+                "rst_DisplayName":"Search for record types:",
+                "rst_DisplayHelpText": "",
+//This determines the record type which will be retrieved by the search. The facets can, however, be based on attributes of other record types linked from this type
                 "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
             },
             change: function(){
-                    let val = this.getValues();
-                    val = val[0].split(',');
-            }    
+                that._onRectypeSelectionChange();
+            }
         };
 
-        return $("<div>").editing_input(ed_options).insertAfter( this.element.find('.main-rectype') );
+        
+        let $input = $("<div>").css({'display':'table-row'}).editing_input(ed_options);
+
+        $("<div>").css({'display':'inline-block'}).append($input)
+            .insertBefore( this.element.find('.main-rectype') );
+
+        // return the element the editing_input widget is actually attached to -
+        // everything else in this file calls .editing_input(...) on this reference
+        return $input;
     },
   
 
@@ -1409,12 +1500,15 @@ $.widget( "heurist.searchBuilder", {
             
             if(this.options.input_element){
                 
-                if(this.options.is_for_rules){
-                    //remove main t: and sortby:
+                if(this.options.is_for_rules || this.options.isForEdit){
+                    
                     let filter = window.hWin.HEURIST4.util.isJSON(query);
                     let res = [];
 
-                    for (let i=1; i<filter.length; i++){
+                    //remove main t: and sortby:
+                    const fromIndex = this.options.is_for_rules?1:0;
+                    
+                    for (let i=fromIndex; i<filter.length; i++){
                         if(!filter[i]['sortby']){
                             res.push(filter[i])    
                         }
@@ -1469,15 +1563,15 @@ $.widget( "heurist.searchBuilder", {
     ,_doCompose: function(){
         
         this.pnl_Result.empty()
-        
+
         let mainquery = [];
-        
-        let rty_IDs = this.select_main_rectype.val();
-        
-        if(rty_IDs<0){
+
+        let selected_rectype_ids = this._getSelectedRectypeIdsArray();
+        if(selected_rectype_ids.length===0){
             return '';
         }
-        
+        let rty_IDs = selected_rectype_ids.join(',');
+
 
         //sort by code
         this.field_array.sort( function(a, b){
@@ -1686,25 +1780,16 @@ $.widget( "heurist.searchBuilder", {
             }
         }
 
-        if(mainquery.length>0 || existing_records || !window.hWin.HEURIST4.util.isempty(that.rulesetSection.find('#svs_Rules').val())){
+        //a selected record type alone (with no field criteria) is a valid, closeable query
+        let has_rectype = (rty_IDs!=='');
 
-        
-            if(rty_IDs>0){
-                
-                if(this.svs_MultiRtSearch.is(':checked')){
-                    let s = this.select_additional_rectypes.editing_input('getValues')[0];
-                    if(s){
-                        if(s.split(',').indexOf(rty_IDs)<0){
-                            rty_IDs = rty_IDs+','+s;    
-                        }else{
-                            rty_IDs = s;    
-                        }
-                    }
-                }
-                
+        if(mainquery.length>0 || existing_records || has_rectype
+            || !window.hWin.HEURIST4.util.isempty(that.rulesetSection.find('#svs_Rules').val())){
+
+            if(has_rectype){
                 mainquery.unshift({t:rty_IDs});
-            }            
-            
+            }
+
             $.each(this.sort_array, function(i, ele){
                 let val = ele.searchBuilderSort('getValue');
                 if(val){

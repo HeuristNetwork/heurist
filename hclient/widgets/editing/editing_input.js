@@ -3802,7 +3802,7 @@ $.widget( "heurist.editing_input", {
             this._on(queryButton, {click:function(){
                 const openBuilder = function(){
                     const originalValue = $input.val();
-                    showSearchBuilder({is_modal:true, is_for_rules:true, rty_ID:null,
+                    showSearchBuilder({is_modal:true, isForEdit:true, rty_ID:null,
                         input_element:$input, menu_locked:null, onClose:null, beforeClose:null});
                     $('#heurist-searchBuilder').one('dialogclose.buildQuery', function(){
                         $(this).searchBuilder('option', 'input_element', null);
