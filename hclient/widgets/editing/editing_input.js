@@ -1381,6 +1381,7 @@ $.widget( "heurist.editing_input", {
             }else
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
              && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
              && this.options.dtID > 0 || this.options.dtID === 'bug_Description')
             {
@@ -3782,10 +3783,52 @@ $.widget( "heurist.editing_input", {
             
         }//end if by detailType
 
+        // Read the query this field's sibling DT_QUERY_STRING field currently holds (if any).
+        // Used to scope rule-builder / field-set / geo-field pickers to the record types the query returns.
+        function __getSiblingQueryString(){
+            const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+            const queryField = that.options.editing
+                ? that.options.editing.getFieldByName(DT_QUERY_STRING)
+                : null;
+            if(!queryField){ return null; }
+            const values = queryField.editing_input('getValues');
+            return values && values.length ? values[0] : null;
+        }
+
+        // Populate the query field with the builder result; do not execute a search.
+        if(this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo.dbconst.DT_QUERY_STRING){
+            const queryButton = $('<button type="button">').text(window.hWin.HR('Build query'))
+                .css({'vertical-align':'top','margin-left':'6px'}).insertAfter($input).button();
+            this._on(queryButton, {click:function(){
+                const openBuilder = function(){
+                    const originalValue = $input.val();
+                    showSearchBuilder({is_modal:true, is_for_rules:true, rty_ID:null,
+                        input_element:$input, menu_locked:null, onClose:null, beforeClose:null});
+                    $('#heurist-searchBuilder').one('dialogclose.buildQuery', function(){
+                        $(this).searchBuilder('option', 'input_element', null);
+                        if($input.val() !== originalValue) that.onChange();
+                    });
+                };
+                if(typeof showSearchBuilder === 'function'){
+                    openBuilder();
+                }else{
+                    const path = window.hWin.HAPI4.baseURL+'hclient/widgets/search/';
+                    queryButton.button('disable');
+                    $.getMultiScripts([path+'searchBuilder.js', path+'searchBuilderItem.js', path+'searchBuilderSort.js'])
+                        .done(openBuilder)
+                        .fail(function(){ window.hWin.HEURIST4.msg.showMsg_ScriptFail(); })
+                        .always(function(){ queryButton.button('enable'); });
+                }
+            }});
+        }
+
         // Dataset rules are edited as one ruleset; normal form saving persists it.
         if(this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo.dbconst.DT_EXPANSION_RULES){
             $input.hide();
-            const preview = $('<div class="dataset-expansion-preview">').insertBefore($input);
+            const expansionRow = $('<div>').css({'display':'flex','align-items':'flex-start','gap':'6px'})
+                .insertBefore($input);
+            const preview = $('<div class="dataset-expansion-preview">')
+                .css({'flex':'1','min-width':0}).appendTo(expansionRow);
             const refresh = function(){
                 preview.empty();
                 try{
@@ -3800,10 +3843,19 @@ $.widget( "heurist.editing_input", {
             };
             $input.on('change.expansionPreview input.expansionPreview heuristFieldSetRefresh', refresh);
             refresh();
-            const button = $('<button type="button">').text(window.hWin.HR('Define expansions')).appendTo($inputdiv);
+            const button = $('<span role="button" tabindex="0">').text(window.hWin.HR('Define expansions'))
+                .addClass('smallbutton btn_add_term')
+                .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                    'text-decoration':'underline','margin-left':'6px','white-space':'nowrap','flex-shrink':0})
+                .appendTo(expansionRow);
+            this._on(button, {keydown:function(event){
+                if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); button.trigger('click'); }
+            }});
             this._on(button, {click:async function(){
                 try{
-                    const result = await window.hWin.HEURIST4.ui.showRulesBuilderDialog($input.val());
+                    const query = __getSiblingQueryString();
+                    const result = await window.hWin.HEURIST4.ui.showRulesBuilderDialog(
+                        $input.val(), {query: query});
                     if(result){ $input.val(JSON.stringify(result.rules)); refresh(); that.onChange(); }
                 }catch(error){ window.hWin.HEURIST4.msg.showMsgErr(error.message); }
             }});
@@ -3925,20 +3977,14 @@ $.widget( "heurist.editing_input", {
                     });
                 }
 
-                function __inferDatasetRecordType(fields){
+                function __inferDatasetRecordType(fields, query){
                     for(let idx=0; idx<fields.length; idx++){
                         let item = typeof fields[idx]==='string' ? fields[idx] : fields[idx].field;
                         let match = String(item || '').match(/^(\d+):/);
                         if(match){ return match[1]; }
                     }
 
-                    let DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
-                    let queryField = that.options.editing
-                        ? that.options.editing.getFieldByName(DT_QUERY_STRING)
-                        : null;
-                    if(queryField){
-                        let values = queryField.editing_input('getValues');
-                        let query = values && values.length ? values[0] : '';
+                    if(query){
                         try{
                             let parsed = typeof query==='string' ? JSON.parse(query) : query;
                             if(Array.isArray(parsed)){
@@ -3954,12 +4000,13 @@ $.widget( "heurist.editing_input", {
                     return null;
                 }
 
-                function __openFieldSetEditor(){
+                function __openFieldSetEditor(recordTypeIds){
                     let currentFields = __parseDatasetFields();
                     $('<div>').appendTo('body').recordFieldSetEditor({
                         isdialog:true,
                         value:{fields:currentFields},
-                        recordTypeId:__inferDatasetRecordType(currentFields),
+                        recordTypeId:__inferDatasetRecordType(currentFields, __getSiblingQueryString()),
+                        recordTypeIds:recordTypeIds,
                         onClose:function(context){
                             if(context && Array.isArray(context.fields)){
                                 $input.val(JSON.stringify(context.fields));
@@ -3968,6 +4015,20 @@ $.widget( "heurist.editing_input", {
                             }
                         }
                     });
+                }
+
+                // Find the record types actually present in the source query's results
+                // (legacy count_by_rty search - see selectGeoField for the same pattern),
+                // then restrict the field-set editor's record type selector to those.
+                function __openFieldSetEditorForCurrentQuery(){
+                    let query = __getSiblingQueryString();
+                    if(query){
+                        window.hWin.HEURIST4.dbs.getRectypeCountsForQuery(query, function(rectypeIds){
+                            __openFieldSetEditor(rectypeIds);
+                        });
+                    }else{
+                        __openFieldSetEditor(null);
+                    }
                 }
 
                 let $btn_fields = $('<span>Define field set</span>',
@@ -3979,11 +4040,11 @@ $.widget( "heurist.editing_input", {
 
                 this._on($btn_fields, {click:function(){
                     if($.fn.recordFieldSetEditor){
-                        __openFieldSetEditor();
+                        __openFieldSetEditorForCurrentQuery();
                     }else{
                         $.getScript(window.hWin.HAPI4.baseURL+
                             'hclient/widgets/record/recordFieldSetEditor.js')
-                            .done(__openFieldSetEditor)
+                            .done(__openFieldSetEditorForCurrentQuery)
                             .fail(function(){
                                 window.hWin.HEURIST4.msg.showMsgErr(
                                     'Unable to load the field-set editor');

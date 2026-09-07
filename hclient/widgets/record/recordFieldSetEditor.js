@@ -24,6 +24,7 @@ $.widget('heurist.recordFieldSetEditor', $.heurist.recordAction, {
         htmlContent: 'recordFieldSetEditor.html',
         scope_types: 'none',
         recordTypeId: null,
+        recordTypeIds: null, //preferred record types (eg. from the source query) - restricts the record type selector
         value: null,
         maxLinkDepth: 3,
         helpContent: false
@@ -38,6 +39,9 @@ $.widget('heurist.recordFieldSetEditor', $.heurist.recordAction, {
         this._initialFields = this._parseValue(this.options.value);
         if(!this.options.recordTypeId){
             this.options.recordTypeId = this._inferRecordType(this._initialFields);
+        }
+        if(!this.options.recordTypeId && this.options.recordTypeIds && this.options.recordTypeIds.length){
+            this.options.recordTypeId = this.options.recordTypeIds[0];
         }
         this._super();
     },
@@ -103,8 +107,10 @@ $.widget('heurist.recordFieldSetEditor', $.heurist.recordAction, {
 
     _fillSelectRecordScope: function(){
         const select = this.selectRecordScope.empty().get(0);
+        const rectypeList = (this.options.recordTypeIds && this.options.recordTypeIds.length)
+            ? this.options.recordTypeIds : null;
         window.hWin.HEURIST4.ui.createRectypeSelect(
-            select, null, 'select record type …', true
+            select, rectypeList, 'select record type …', true
         );
         this._on(this.selectRecordScope, {change:this._onRecordScopeChange});
         if(this.options.recordTypeId){ this.selectRecordScope.val(String(this.options.recordTypeId)); }

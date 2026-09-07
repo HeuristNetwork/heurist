@@ -322,7 +322,48 @@ window.hWin.HEURIST4.dbs = {
     },
 
     //========================================================================
-    
+
+    /**
+     * Finds the record types present in the results of a query, with their record counts,
+     * using the legacy record_search 'count_by_rty' detail (same call used by selectGeoField).
+     * The new /api/{db}/records endpoint has no client-side support for a rectype-counts
+     * response yet, so this deliberately reuses the proven legacy path.
+     *
+     * @function getRectypeCountsForQuery
+     * @memberof HEURIST4.dbs
+     * @param {string} query - Heurist search query string. If empty, callback is invoked with an empty array.
+     * @param {function(number[], Object<string,number>)} callback - Receives (rectypeIds sorted by count desc, raw counts map).
+     */
+    getRectypeCountsForQuery: function(query, callback){
+
+        if(window.hWin.HEURIST4.util.isempty(query)){
+            callback([], {});
+            return;
+        }
+
+        let request = {
+            q: query,
+            w: 'a',
+            detail: 'count_by_rty'
+        };
+
+        window.HAPI4.RecordMgr.search(request, function(response){
+
+            if(response.status != window.hWin.ResponseStatus.OK){
+                callback([], {});
+                return;
+            }
+
+            let counts = (response.data && $.isPlainObject(response.data.recordtypes))
+                ? response.data.recordtypes : {};
+
+            let rectypeIds = Object.keys(counts).sort(function(a,b){
+                return (Number(counts[b])||0) - (Number(counts[a])||0);
+            });
+
+            callback(rectypeIds, counts);
+        });
+    },
 
     /**
      * Legacy wrapper for `createRectypeStructureTree_new`.

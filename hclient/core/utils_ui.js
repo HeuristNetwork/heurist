@@ -75,6 +75,10 @@ createRecordLinkInfo - return ui for link and relationship
 onInactive invokes cb after ms user inactivity
 
 initGalleryContainer
+
+
+showRulesBuilderDialog
+describeExpansionRule
 */
 
 if (!window.hWin.HEURIST4){
@@ -91,25 +95,43 @@ window.hWin.HEURIST4.ui = {
         options = options || {};
         let rules = typeof value === 'string' ? JSON.parse(value || '[]') : (value || []);
         if(!Array.isArray(rules)) throw new Error('Expansion rules must be an array');
-        let url = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/ruleBuilderDialog.php?db='
-            + encodeURIComponent(window.hWin.HAPI4.database) + '&allowEmpty=1&rules='
-            + encodeURIComponent(JSON.stringify(rules));
-        return new Promise(function(resolve){
-            let settled = false;
-            window.hWin.HEURIST4.msg.showDialog(url, {
-                isPopupDlg:true, closeOnEscape:true, width:1200, height:600,
-                title: options.title || 'Define expansions',
-                callback:function(result){
-                    if(settled) return;
-                    settled = true;
-                    resolve(result && Array.isArray(result.rules) ? result : null);
-                },
-                afterclose:function(){
-                    // showDialog may invoke the result callback during close.
-                    setTimeout(function(){ if(!settled){ settled=true; resolve(null); } }, 0);
-                }
+
+        const openDialog = function(rectypeIds){
+            let url = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/ruleBuilderDialog.php?db='
+                + encodeURIComponent(window.hWin.HAPI4.database) + '&allowEmpty=1&rules='
+                + encodeURIComponent(JSON.stringify(rules));
+            if(rectypeIds && rectypeIds.length){
+                url += '&rty_ID=' + encodeURIComponent(rectypeIds.join(','));
+            }
+            return new Promise(function(resolve){
+                let settled = false;
+                window.hWin.HEURIST4.msg.showDialog(url, {
+                    isPopupDlg:true, closeOnEscape:true, width:1200, height:600,
+                    title: options.title || 'Define expansions',
+                    callback:function(result){
+                        if(settled) return;
+                        settled = true;
+                        resolve(result && Array.isArray(result.rules) ? result : null);
+                    },
+                    afterclose:function(){
+                        // showDialog may invoke the result callback during close.
+                        setTimeout(function(){ if(!settled){ settled=true; resolve(null); } }, 0);
+                    }
+                });
             });
-        });
+        };
+
+        // Preferred rectypes only matter when starting a fresh (empty) ruleset -
+        // an existing ruleset already carries its own starting type per rule.
+        if(options.query && rules.length===0){
+            return new Promise(function(resolve){
+                window.hWin.HEURIST4.dbs.getRectypeCountsForQuery(options.query, function(rectypeIds){
+                    openDialog(rectypeIds).then(resolve);
+                });
+            });
+        }
+
+        return openDialog(null);
     },
 
     /** Generate reusable labels while keeping the executable query untouched. */

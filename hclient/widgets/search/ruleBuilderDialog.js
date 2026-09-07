@@ -28,10 +28,11 @@
 
 */
 /**
- * @type {?number}
- * @description Stores the record type ID for the first level rule, if provided as a URL parameter.
+ * @type {?string}
+ * @description Stores the record type ID(s) for the first level rule, if provided as a URL
+ *              parameter (`rty_ID`, comma-separated when there is more than one).
  */
-let first_level_rty_ID = null;
+let first_level_rty_IDs = null;
 
 /**
  * @function onPageInit
@@ -48,12 +49,19 @@ function onPageInit(success) //callback function of hAPI initialization
         let rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.location.search);
         if(!rules){
             rules = '[]';
-            first_level_rty_ID = window.hWin.HEURIST4.util.getUrlParameter('rty_ID', window.location.search);  
-        } 
+        }
         else if(window.hWin.HEURIST4.util.getUrlParameter('allowEmpty', window.location.search)!=='1') rules = decodeURIComponent(rules);
-        
-        if(!(first_level_rty_ID>0)) first_level_rty_ID = null;
-        
+
+        rules = window.hWin.HEURIST4.util.isJSON(rules);
+        if(rules===false || !Array.isArray(rules)) rules = [];
+
+        // Preferred/starting record type(s) only apply when there is no existing rule to restore -
+        // each existing rule already carries its own starting type.
+        if(rules.length===0){
+            first_level_rty_IDs = window.hWin.HEURIST4.util.getUrlParameter('rty_ID', window.location.search);
+        }
+        if(window.hWin.HEURIST4.util.isempty(first_level_rty_IDs)) first_level_rty_IDs = null;
+
         //init toolbar buttons
         $('#btn_add_level1').attr('title', 'explanatory rollover' ).button().on('click', null, addLevel );
 
@@ -78,30 +86,26 @@ function onPageInit(success) //callback function of hAPI initialization
         });
 
         //create RuleSets builders in case there is parameter 'rules'
-        if(!window.hWin.HEURIST4.util.isempty(rules)){
+        if(rules.length>0){
 
-            rules = window.hWin.HEURIST4.util.isJSON(rules);
+            let i;
+            for(i=0; i<rules.length; i++){
 
-            if(rules!==false && rules.length>0){
-                let i;
-                for(i=0; i<rules.length; i++){
+                let ele = $("<div>").addClass('level1')
+                        .uniqueId().insertBefore($('#div_add_level'));
 
-                    let ele = $("<div>").addClass('level1')
-                            .uniqueId().insertBefore($('#div_add_level'));
-                    
-                    ele.ruleBuilder({level:1,     //add RuleSets builder for level 1
-                        rules: rules[i],
-                        onremove: function(event, data){
-                            $('#'+data.id).remove();    //remove this RuleSets builder
+                ele.ruleBuilder({level:1,     //add RuleSets builder for level 1
+                    rules: rules[i],
+                    onremove: function(event, data){
+                        $('#'+data.id).remove();    //remove this RuleSets builder
 
-                        }
-                    })
+                    }
+                })
 
-                }
-                return;
             }
+            return;
         }
-        
+
         //add first level by default
         addLevel();
     }
@@ -120,7 +124,7 @@ function addLevel(){
             .uniqueId().insertBefore($('#div_add_level'));
     
     ele.ruleBuilder({level:1,
-            recordtypes: first_level_rty_ID,
+            recordtypes: first_level_rty_IDs,
             onremove: function(event, data){
                 $('#'+data.id).remove();
             }
