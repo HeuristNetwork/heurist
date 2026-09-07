@@ -340,8 +340,10 @@ paths:
         records always carry exactly rec_ID, rec_Title and rec_RecTypeID; the fields parameter is not accepted.
         Provide links as a comma list of compact specs such as 10:lt240:48 (direct field link) or 10:rt3260:10
         (relationship link) to discover edges whose two endpoints are both in the result set, or links=all for
-        every internal edge. Initial links never add external records. maxNodes, maxEdges and maxDepth may lower
-        the server budget but never raise it; the response reports nodesReturned, edgesReturned and truncated.
+        every internal edge. Initial links never add external records. The canonical budget parameter is limits,
+        a JSON object containing maxNodes, maxEdges and maxDepth. GET also accepts maxNodes, maxEdges and maxDepth
+        as flat compatibility aliases; all values may lower the server budget but never raise it. The response reports
+        nodesReturned, edgesReturned and truncated.
         The seed-page limit defaults to 1000 and is clamped to maxNodes; set limit explicitly to load a larger
         seed page. Server ceilings are 10000 nodes, 10000 edges and depth 10. Omission of query/q/ids searches
         all visible records. Current implementation discovers internal edges only: rule/rules are accepted and
@@ -384,21 +386,21 @@ paths:
             type: integer
             minimum: 1
             maximum: 10000
-          description: Client node budget, capped at 10000. Does not raise the seed-page limit.
+          description: GET compatibility alias for limits.maxNodes. Capped at 10000; does not raise the seed-page limit.
         - name: maxEdges
           in: query
           schema:
             type: integer
             minimum: 1
             maximum: 10000
-          description: Client edge budget. Capped at the server maximum of 10000.
+          description: GET compatibility alias for limits.maxEdges. Capped at the server maximum of 10000.
         - name: maxDepth
           in: query
           schema:
             type: integer
             minimum: 1
             maximum: 10
-          description: Client expansion-depth budget. Capped at the server maximum of 10.
+          description: GET compatibility alias for limits.maxDepth. Capped at the server maximum of 10.
         - name: query
           in: query
           schema:
@@ -409,8 +411,8 @@ paths:
           schema:
             type: string
           description: >-
-            JSON object containing maxNodes, maxEdges and maxDepth. Nested values take precedence over flat
-            parameters.
+            Canonical graph budget: JSON object containing maxNodes, maxEdges and maxDepth. Values take precedence
+            over the flat GET compatibility aliases.
         - name: rule
           in: query
           schema:
@@ -1601,6 +1603,25 @@ paths:
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/RecordId'
+      - name: geofields
+        in: query
+        description: >-
+          Geographic detail fields to extract from this record, including explicit linked path codes. If omitted,
+          all native geo fields present on the record are used.
+        schema:
+          type: string
+      - name: extent
+        in: query
+        description: Optional viewport as west,south,east,north or a JSON array/object.
+        schema:
+          type: string
+      - name: geoOutputMode
+        in: query
+        description: records combines geometry for the record; features emits individual geo occurrences.
+        schema:
+          type: string
+          enum: [records, features]
+          default: records
       - name: simplify
         in: query
         description: Simplify complex geometries when supported.
@@ -1630,8 +1651,11 @@ paths:
       - Maps
       operationId: searchMapGeoJson
       summary: Search geographic data
-      description: Runs a Heurist query and returns visible geographic records as a GeoJSON FeatureCollection. GET
-        is intended for simple or encoded query strings.
+      description: >-
+        Runs a Heurist record query and returns a GeoJSON FeatureCollection. Supply q/query, ids, or neither; when
+        none is supplied all visible records are searched. geofields selects direct or linked geo fields. If omitted,
+        all native geo fields present on the top records are used; linked records are traversed only for explicit
+        linked paths. extent can constrain native geo searches or the terminal records of linked paths.
       security:
       - {}
       - bearerAuth: []
@@ -1639,10 +1663,41 @@ paths:
       - $ref: '#/components/parameters/Database'
       - name: q
         in: query
-        required: true
-        description: Encoded Heurist search expression or serialised query object.
+        description: Heurist search expression or JSON-encoded query object/array.
         schema:
           type: string
+      - name: query
+        in: query
+        description: Preferred alias for q; a Heurist expression or JSON-encoded query object/array.
+        schema:
+          type: string
+      - name: ids
+        in: query
+        description: Comma-separated seed record identifiers. Used when q/query is omitted.
+        schema:
+          type: string
+        example: 123,456
+      - name: geofields
+        in: query
+        description: >-
+          Geographic detail fields to extract. Accepts a field ID, comma-separated field IDs, linked path codes such
+          as 10:lt240:48:134, or all. If omitted, all native geo fields present on the top records are used.
+        schema:
+          type: string
+      - name: extent
+        in: query
+        description: >-
+          Optional viewport as west,south,east,north or a JSON array/object. Native-only searches are constrained at
+          the top query; linked geo paths apply the extent to their terminal expansion query.
+        schema:
+          type: string
+      - name: geoOutputMode
+        in: query
+        description: records combines all geometry for each top record; features emits individual geo occurrences.
+        schema:
+          type: string
+          enum: [records, features]
+          default: records
       - $ref: '#/components/parameters/Limit'
       - $ref: '#/components/parameters/Offset'
       - name: simplify
@@ -1655,6 +1710,9 @@ paths:
         '200':
           description: GeoJSON search result
           content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/MapGeoJsonResponse'
             application/json:
               schema:
                 $ref: '#/components/schemas/MapGeoJsonResponse'
@@ -1673,7 +1731,9 @@ paths:
       - Maps
       operationId: searchMapGeoJsonPost
       summary: Search geographic data using a structured query
-      description: POST form for large or structured Heurist queries that are unsuitable for URL query parameters.
+      description: >-
+        POST form of the same map projection. Structured query, ids, geofields and extent values avoid URL-length
+        restrictions. q/query/ids may be omitted to search all visible records.
       security:
       - {}
       - bearerAuth: []
@@ -1689,6 +1749,9 @@ paths:
         '200':
           description: GeoJSON search result
           content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/MapGeoJsonResponse'
             application/json:
               schema:
                 $ref: '#/components/schemas/MapGeoJsonResponse'
@@ -1843,9 +1906,13 @@ paths:
       tags:
       - Timeline
       operationId: searchTimeline
-      summary: Search timeline data
-      description: Returns timeline items extracted from temporal fields of visible records. GET is intended for
-        simple or encoded queries.
+      summary: Search records with temporal spans
+      description: >-
+        Runs the ordinary records query pipeline and adds a when array to each returned record. Supply q/query, ids,
+        or neither; when none is supplied all visible records are searched. timefields selects direct or linked
+        date/year fields. If omitted, all native date and year fields present on the returned top records are used;
+        linked records are traversed only for explicit linked paths. detail is not accepted because /time always
+        returns record envelopes.
       security:
       - {}
       - bearerAuth: []
@@ -1853,15 +1920,52 @@ paths:
       - $ref: '#/components/parameters/Database'
       - name: q
         in: query
-        required: true
-        description: Encoded Heurist search expression or serialised query object.
+        description: Heurist search expression or JSON-encoded query object/array.
         schema:
           type: string
+      - name: query
+        in: query
+        description: Preferred alias for q; a Heurist expression or JSON-encoded query object/array.
+        schema:
+          type: string
+      - name: ids
+        in: query
+        description: Comma-separated seed record identifiers. Used when q/query is omitted.
+        schema:
+          type: string
+        example: 123,456
+      - name: timefields
+        in: query
+        description: >-
+          Temporal fields to extract. Accepts a field ID, comma-separated field IDs, or linked path codes such as
+          10:lt240:48:134. Requested terminal fields must be date or year fields. If omitted, all native date/year
+          fields present on the returned top records are used.
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Optional /records field selection for the ordinary headers/details returned with each record.
+        schema:
+          type: string
+      - name: resolveDetails
+        in: query
+        description: Resolve enum/file/geo and other supported detail values in the ordinary record details output.
+        schema:
+          type: boolean
+          default: false
       - $ref: '#/components/parameters/Limit'
       - $ref: '#/components/parameters/Offset'
+      - name: sort
+        in: query
+        description: Sort expression using the same contract as /records.
+        schema: {}
+      - name: filter
+        in: query
+        description: Additional query predicate/group ANDed with the base query, using the /records contract.
+        schema: {}
       responses:
         '200':
-          description: Timeline search result
+          description: Records response with timeline-compatible when arrays
           content:
             application/json:
               schema:
@@ -1870,18 +1974,20 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '405':
           $ref: '#/components/responses/MethodNotAllowed'
+        '422':
+          description: Query uses an unsupported feature.
         '500':
           $ref: '#/components/responses/ServerError'
     post:
       tags:
       - Timeline
       operationId: searchTimelinePost
-      summary: Search timeline data using a structured query
-      description: POST form for large or structured Heurist queries that are unsuitable for URL query parameters.
+      summary: Search records with temporal spans using a structured request
+      description: >-
+        POST form of the same /records temporal projection, suitable for JSON queries, field arrays, linked
+        timefields, sort and filter structures. q/query/ids may be omitted to search all visible records.
       security:
       - {}
       - bearerAuth: []
@@ -1895,7 +2001,7 @@ paths:
               $ref: '#/components/schemas/TimelineSearchRequest'
       responses:
         '200':
-          description: Timeline search result
+          description: Records response with timeline-compatible when arrays
           content:
             application/json:
               schema:
@@ -1904,10 +2010,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '405':
           $ref: '#/components/responses/MethodNotAllowed'
+        '422':
+          description: Query uses an unsupported feature.
         '500':
           $ref: '#/components/responses/ServerError'
 components:
@@ -2805,19 +2911,69 @@ components:
       additionalProperties: false
     MapSearchRequest:
       type: object
-      required:
-      - query
       properties:
         query:
           oneOf:
           - type: object
             additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
           - type: string
-          description: Serialisable Heurist query.
+          description: Serialisable Heurist query. Omit with q/ids to search all visible records.
+        q:
+          oneOf:
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+          - type: string
+          description: Alias for query.
+        ids:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: integer
+              minimum: 1
+        geofields:
+          description: >-
+            Geo field IDs/path codes, all, a comma-separated string, or an array. Omission means all native geo
+            fields found on the top records.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              oneOf:
+              - type: string
+              - type: integer
+        extent:
+          description: west,south,east,north as a string, four-item array, or object with west/south/east/north.
+          oneOf:
+          - type: string
+          - type: array
+            minItems: 4
+            maxItems: 4
+            items: {type: number}
+          - type: object
+            required: [west, south, east, north]
+            properties:
+              west: {type: number}
+              south: {type: number}
+              east: {type: number}
+              north: {type: number}
+            additionalProperties: false
+        geoOutputMode:
+          type: string
+          enum: [records, features]
+          default: records
         limit:
           type: integer
           minimum: 1
-          maximum: 1000
+          maximum: 100000
           default: 1000
         offset:
           type: integer
@@ -2829,24 +2985,66 @@ components:
       additionalProperties: false
     TimelineSearchRequest:
       type: object
-      required:
-      - query
       properties:
         query:
           oneOf:
+          - type: string
           - type: object
             additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        q:
+          description: Alias for query.
+          oneOf:
           - type: string
-          description: Serialisable Heurist query.
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        ids:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: integer
+              minimum: 1
+        timefields:
+          description: >-
+            Date/year field IDs or linked path codes. Accepts a comma-separated string or an array. Omission means
+            all native date/year fields found on the returned top records.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              oneOf:
+              - type: string
+              - type: integer
+        fields:
+          description: Ordinary /records output-field selection.
+          oneOf:
+          - type: string
+          - type: array
+            uniqueItems: true
+            items:
+              type: string
+        resolveDetails:
+          type: boolean
+          default: false
         limit:
           type: integer
           minimum: 1
-          maximum: 1000
+          maximum: 100000
           default: 1000
         offset:
           type: integer
           minimum: 0
           default: 0
+        sort: {}
+        filter: {}
       additionalProperties: false
     TermDescriptor:
       type:
@@ -3200,68 +3398,56 @@ components:
         meta:
           $ref: '#/components/schemas/MapResponseMeta'
       additionalProperties: false
-    TimelineItem:
-      type: object
-      required:
-      - recordId
-      - title
-      - start
-      - end
-      - group
-      properties:
-        recordId:
-          type: integer
-          minimum: 1
-        title:
-          type: string
-        start:
-          type:
-          - string
-          - 'null'
-        end:
-          type:
-          - string
-          - 'null'
-        group: {}
-      additionalProperties: false
-    TimelineMeta:
-      type: object
-      required:
-      - total
-      - offset
-      - limit
-      properties:
-        total:
-          type: integer
-          minimum: 0
-          description: Number of returned timeline items in the initial implementation.
-        offset:
-          type: integer
-          minimum: 0
-        limit:
-          type: integer
-          minimum: 1
-      additionalProperties: false
+    TimelineTimespan:
+      type: array
+      description: >-
+        Timeline span in legacy Heurist order: start, latest-start, earliest-end, end, label, profile-start,
+        profile-end, determination, source detail-type ID.
+      minItems: 9
+      maxItems: 9
+      prefixItems:
+      - type: string
+        description: Earliest/start boundary in Heurist ISO-compatible form.
+      - type: string
+        description: Latest possible start; empty for a simple date.
+      - type: string
+        description: Earliest possible end; empty for a simple date.
+      - type: string
+        description: End/latest boundary in Heurist ISO-compatible form.
+      - type: string
+        description: Human-readable temporal label.
+      - oneOf: [{type: integer}, {type: string}]
+        description: Start profile; normally 0 flat, 1 central/circa, 2 slow start/before, 3 slow finish/after.
+      - oneOf: [{type: integer}, {type: string}]
+        description: End profile; normally 0-3.
+      - oneOf: [{type: integer}, {type: string}]
+        description: Determination code; 0 unknown, 1 attested, 2 conjecture, 3 measurement.
+      - type: integer
+        minimum: 1
+        description: Source detail-type ID.
+    TimelineRecord:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - type: object
+        required: [when]
+        properties:
+          when:
+            type: array
+            items:
+              $ref: '#/components/schemas/TimelineTimespan'
     TimelineResponse:
       type: object
-      required:
-      - format
-      - version
-      - items
-      - meta
+      required: [records, meta, pagination]
       properties:
-        format:
-          type: string
-          const: heurist-timeline
-        version:
-          type: integer
-          const: 1
-        items:
+        records:
           type: array
+          description: Ordinary record envelopes in top-query order, each augmented with when.
           items:
-            $ref: '#/components/schemas/TimelineItem'
+            $ref: '#/components/schemas/TimelineRecord'
         meta:
-          $ref: '#/components/schemas/TimelineMeta'
+          $ref: '#/components/schemas/RecordsMeta'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
       additionalProperties: false
   responses:
     BadRequest:
