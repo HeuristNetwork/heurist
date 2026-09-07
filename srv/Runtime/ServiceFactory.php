@@ -24,6 +24,7 @@ use Heurist\Controller\PublicationController;
 use Heurist\Controller\RecordPresentationController;
 use Heurist\Controller\RecordQueryController;
 use Heurist\Controller\SystemQueryController;
+use Heurist\Controller\TimeDataController;
 use Heurist\Database\DatabaseFactory;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Publication\PublicationService;
@@ -31,6 +32,7 @@ use Heurist\Records\Map\MapFeatureService;
 use Heurist\Records\Presentation\DatasetPresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
 use Heurist\Records\Presentation\PresentationRecordRepository;
+use Heurist\Records\Time\TimeDataService;
 use Heurist\System\Query\SystemQueryService;
 
 /** Creates one consistent service graph for an initialized request. */
@@ -39,6 +41,7 @@ final class ServiceFactory
     private DatabaseInterface $database;
     private RuntimeContext $runtime;
     private PresentationRecordRepository $presentations;
+    private SystemCode $codes;
     private string $publicationDirectory;
 
     /** Build the PDO and runtime boundary from the current legacy initialization. */
@@ -58,7 +61,7 @@ final class ServiceFactory
             'DT_MAXIMUM_ZOOM_LEVEL', 'DT_MIME_TYPE', 'DT_MINIMUM_ZOOM',
             'DT_MINIMUM_ZOOM_LEVEL', 'DT_SERVICE_URL', 'DT_SMARTY_TEMPLATE',
             'DT_SYMBOLOGY', 'DT_TIMELINE_FIELDS', 'DT_WORLD_BASEMAP',
-            'DT_ZOOM_KM_POINT'
+            'DT_ZOOM_KM_POINT', 'DT_START_DATE', 'DT_END_DATE'
         );
         $codeIds = array();
         foreach($codeNames as $codeName){
@@ -84,6 +87,7 @@ final class ServiceFactory
     {
         $this->database = $database;
         $this->runtime = $runtime;
+        $this->codes = $codes;
         $this->presentations = new PresentationRecordRepository($database, $runtime, $codes);
         $this->publicationDirectory = $publicationDirectory;
     }
@@ -125,6 +129,17 @@ final class ServiceFactory
     {
         return new MapDataController(
             new MapFeatureService($this->database, $this->runtime), $this->runtime
+        );
+    }
+
+
+    /** Create the record-to-temporal projection controller. */
+    public function timeDataController(): TimeDataController
+    {
+        return new TimeDataController(
+            new RecordQueryController($this->database, $this->runtime),
+            new TimeDataService($this->database, $this->runtime, $this->codes),
+            $this->runtime
         );
     }
 

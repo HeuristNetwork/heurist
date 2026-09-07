@@ -330,6 +330,30 @@ if($resource === 'map'){
     exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
 }
 
+if($is_timeline_query && $http_method === 'POST'){
+    if(stripos($contentType, 'application/json') === 0 && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if(is_array($json)){
+        foreach(array(
+            'query','q','ids','timefields','timeFields','fields','resolveDetails',
+            'rules','limit','offset','sort','filter'
+        ) as $key){
+            if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
+        }
+        if(!array_key_exists('fields', $json)){ unset($req_params['fields']); }
+        if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
+            $contractKeys = array(
+                'timefields','timeFields','fields','resolveDetails','rules','limit','offset','sort','filter'
+            );
+            $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
+            if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
+                $req_params['query'] = $json;
+            }
+        }
+    }
+}
+
 if(($is_map_record_query || $is_timeline_query) && $http_method === 'POST'){
     $method = 'search';
 }
@@ -529,8 +553,8 @@ if($is_system_query){
     $req_params['restapi'] = 1;
 
     if($requestUri[3]==='time'){
-        $controller = new LegacyMapDataController($system, $req_params);
-        $controller->outputTimeline();
+        $controller = ServiceFactory::fromLegacySystem($system)->timeDataController();
+        $controller->output($req_params);
 
     }elseif(in_array(@$requestUri[4], array('document', 'layer'), true)){
 
