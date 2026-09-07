@@ -415,12 +415,12 @@ paths:
           in: query
           schema:
             type: string
-          description: Compact path or JSON rule. Accepted and validated, but not currently executed.
+          description: One compact traversal step or JSON rule with query and no nested levels. Returns expansion.targetIds.
         - name: rules
           in: query
           schema:
             type: string
-          description: Legacy alias for rule; at most one rule. Accepted but not currently executed.
+          description: Legacy alias for rule; at most one traversal step.
       responses:
         '200':
           description: Graph document
@@ -447,7 +447,7 @@ paths:
         Executes the same graph build as GET without URL-length restrictions. This is the preferred form for ID
         arrays, JSON queries and an array of link specs. Seed limit defaults to 1000 independently of
         limits.maxNodes; set both for larger pages. Server ceilings: 10000 nodes, 10000 edges, depth 10.
-        rule/rules are validated but expansion is not currently executed.
+        rule/rules execute one tree step and return expansion.targetIds for subsequent branch requests.
       security:
         - {}
         - bearerAuth: []
@@ -2529,8 +2529,8 @@ components:
                 type: string
         rule:
           description: >-
-            One optional compact path or JSON rule; accepted and validated, but expansion is not currently
-            executed.
+            One optional compact traversal step or JSON rule with query and no nested levels.
+            Execute against the query's seed IDs; the response's expansion.targetIds is the next frontier.
           oneOf:
             - type: string
             - type: object
@@ -2578,6 +2578,16 @@ components:
       type: object
       required: [query, total, offset, limit, graph]
       properties:
+        expansion:
+          description: Present for a rule request; null for an initial graph. Contains only matched target IDs, including targets also present in the seed set.
+          oneOf:
+            - type: 'null'
+            - type: object
+              required: [targetIds]
+              properties:
+                targetIds:
+                  type: array
+                  items: {type: integer}
         query:
           description: The caller's original query representation.
           oneOf:

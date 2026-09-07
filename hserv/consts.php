@@ -484,6 +484,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     // for MapSource - geo fields from linked record to be used to gather mapping data to be used as geogields parameter to api/map
     // for Dataset - fields and linked paths to be used as field parameter to api/records    
     'DT_DATA_FIELDS' => array(2, 1161),
+    'DT_EXPANSION_RULES' => array(2, 1163),
     
     'DT_GEO_OUTPUTMODE' => array(2, 1162),  //combined map features per record or individual features
     'DT_MIME_TYPE' => array(2, 29),

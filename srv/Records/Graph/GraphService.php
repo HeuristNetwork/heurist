@@ -4,8 +4,8 @@
 *
 * Runs the top-level query for seed records, discovers internal edges for the
 * requested links, loads the fixed graph header set, and reports the effective
-* node/edge budget. Interactive single-rule expansion is added in a later
-* stage; this service currently produces the initial graph only.
+* node/edge budget. Interactive expansion executes one rule-tree step and
+* returns its target IDs so the client can schedule branches independently.
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Graph
@@ -78,6 +78,25 @@ final class GraphService
         // Nodes are truncated whenever the query matched more records than the
         // seed page returned - the node budget or ordinary pagination limit.
         $nodesTruncated = $total > count($seedIds);
+
+        if($request->rule !== null){
+            $rules = (new \Heurist\Records\Expansion\ExpansionRuleParser())->parse($request->rule);
+            if(count($rules)!==1 || !empty($rules[0]['levels'])){
+                throw new \InvalidArgumentException('Graph expansion executes one tree step per request; omit nested levels');
+            }
+            $step = empty($seedIds) || $rules[0]['ignore']
+                ? array('targetIds'=>array(), 'edges'=>array(), 'truncated'=>false)
+                : $this->search->expandGraphStep($seedIds, $rules[0]['query'], $request->maxNodes, $request->maxEdges);
+            $ids = array_values(array_unique(array_merge($seedIds, $step['targetIds'])));
+            $result = new GraphResult($request->displayQuery, $total, $request->offset, $request->limit);
+            $result->setRecords($this->loadHeaders($ids));
+            $result->setEdges($step['edges']);
+            $result->setExpansion(array('targetIds'=>$step['targetIds']));
+            $result->setLimits(array('maxNodes'=>$request->maxNodes, 'maxEdges'=>$request->maxEdges,
+                'maxDepth'=>$request->maxDepth, 'nodesReturned'=>count($ids), 'edgesReturned'=>count($step['edges']),
+                'truncated'=>$nodesTruncated || $step['truncated']));
+            return $result;
+        }
 
         list($edges, $links, $edgesTruncated) = $this->discoverEdges($seedIds, $request);
         $records = $this->loadHeaders($seedIds);

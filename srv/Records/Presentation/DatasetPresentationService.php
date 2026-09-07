@@ -65,8 +65,20 @@ class DatasetPresentationService
                 'title'=>(string)($source['rec_Title'] ?? ''),
                 'query'=>$this->parseQuery($queryValue)
             ),
-            'fields'=>$fields
+            'fields'=>$fields,
+            'rules'=>$this->parseRules($this->datasets->value($dataset, 'DT_EXPANSION_RULES'))
         );
+    }
+
+    private function parseRules($value): array
+    {
+        if($value === null || trim((string)$value) === '') return array();
+        $rules = json_decode((string)$value, true);
+        if(!is_array($rules) || (!empty($rules) && array_keys($rules)!==range(0, count($rules)-1))){
+            throw new QueryValidationException('Dataset expansion rules must be a JSON array');
+        }
+        (new \Heurist\Records\Expansion\ExpansionRuleParser())->parse($rules);
+        return $rules; // Preserve generated names and descriptions.
     }
 
     /** Parse JSON or comma-separated DT_DATA_FIELDS into ordered definitions. */

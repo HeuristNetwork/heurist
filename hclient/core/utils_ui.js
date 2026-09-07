@@ -85,6 +85,66 @@ if (!window.hWin.HEURIST4.ui)
 {
 
 window.hWin.HEURIST4.ui = {
+
+    /** Edit a ruleset without persisting it. Existing _editRules callers are unchanged. */
+    showRulesBuilderDialog: function(value, options){
+        options = options || {};
+        let rules = typeof value === 'string' ? JSON.parse(value || '[]') : (value || []);
+        if(!Array.isArray(rules)) throw new Error('Expansion rules must be an array');
+        let url = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/ruleBuilderDialog.php?db='
+            + encodeURIComponent(window.hWin.HAPI4.database) + '&allowEmpty=1&rules='
+            + encodeURIComponent(JSON.stringify(rules));
+        return new Promise(function(resolve){
+            let settled = false;
+            window.hWin.HEURIST4.msg.showDialog(url, {
+                isPopupDlg:true, closeOnEscape:true, width:1200, height:600,
+                title: options.title || 'Define expansions',
+                callback:function(result){
+                    if(settled) return;
+                    settled = true;
+                    resolve(result && Array.isArray(result.rules) ? result : null);
+                },
+                afterclose:function(){
+                    // showDialog may invoke the result callback during close.
+                    setTimeout(function(){ if(!settled){ settled=true; resolve(null); } }, 0);
+                }
+            });
+        });
+    },
+
+    /** Generate reusable labels while keeping the executable query untouched. */
+    describeExpansionRule: function(rule){
+        const db = window.hWin.HEURIST4.dbs;
+        const predicates = value => Array.isArray(value) ? Object.assign({}, ...value) : (value || {});
+        const typeName = id => id ? (db.rty(id, 'rty_Name') || 'Record type '+id) : 'Records';
+        const step = value => {
+            const q = predicates(value.query);
+            const key = Object.keys(q).find(k => /^(lf|lt|rf|rt|links|related)(:|$)/.test(k));
+            const parent = predicates(q[key]);
+            const arrow = /^(lf|rf)(:|$)/.test(key) ? ' → ' : /^(lt|rt)(:|$)/.test(key) ? ' ← ' : ' ↔ ';
+            const fieldId = key && key.split(':')[1];
+            const field = fieldId ? (db.dty(fieldId, 'dty_Name') || 'Field '+fieldId) : 'Links';
+            return { source:typeName(parent.t), target:typeName(q.t), arrow, field };
+        };
+        const continuation = value => {
+            const s = step(value), children = value.levels || [];
+            let tail = '';
+            if(children.length === 1) tail = continuation(children[0]);
+            else if(children.length > 1){
+                const parts = children.map(continuation), arrows = children.map(c => step(c).arrow);
+                tail = arrows.every(a => a === arrows[0])
+                    ? arrows[0]+'('+parts.map(p => p.slice(arrows[0].length)).join(', ')+')'
+                    : ' ('+parts.map(p => p.trim()).join(', ')+')';
+            }
+            return s.arrow+s.target+tail;
+        };
+        const paths = (value, prefix) => {
+            const s = step(value), text = prefix+s.arrow+s.field+s.arrow+s.target;
+            return value.levels && value.levels.length ? value.levels.flatMap(c => paths(c, text)) : [text];
+        };
+        return { name:step(rule).source+continuation(rule),
+            description:paths(rule, step(rule).source).join('\n') };
+    },
     
     isVisible: function(ele){
         return ele && $(ele).is(':visible');

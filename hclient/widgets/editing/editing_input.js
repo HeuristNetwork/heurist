@@ -3782,6 +3782,33 @@ $.widget( "heurist.editing_input", {
             
         }//end if by detailType
 
+        // Dataset rules are edited as one ruleset; normal form saving persists it.
+        if(this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo.dbconst.DT_EXPANSION_RULES){
+            $input.hide();
+            const preview = $('<div class="dataset-expansion-preview">').insertBefore($input);
+            const refresh = function(){
+                preview.empty();
+                try{
+                    const rules = JSON.parse($input.val() || '[]');
+                    if(!Array.isArray(rules)) throw new Error('Expansion rules must be an array');
+                    rules.forEach(function(rule){
+                        const labels = rule.name ? rule : window.hWin.HEURIST4.ui.describeExpansionRule(rule);
+                        $('<div>').text(labels.name).attr('title', labels.description || '').appendTo(preview);
+                    });
+                    if(!rules.length) preview.text(window.hWin.HR('No expansion rules'));
+                }catch(error){ preview.text(error.message); }
+            };
+            $input.on('change.expansionPreview input.expansionPreview heuristFieldSetRefresh', refresh);
+            refresh();
+            const button = $('<button type="button">').text(window.hWin.HR('Define expansions')).appendTo($inputdiv);
+            this._on(button, {click:async function(){
+                try{
+                    const result = await window.hWin.HEURIST4.ui.showRulesBuilderDialog($input.val());
+                    if(result){ $input.val(JSON.stringify(result.rules)); refresh(); that.onChange(); }
+                }catch(error){ window.hWin.HEURIST4.msg.showMsgErr(error.message); }
+            }});
+        }
+
         //----------------- Query Source geo field-path selector / Dataset field-set editor
         if(this.options.dtID > 0 &&
            window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS'] &&

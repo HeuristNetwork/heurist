@@ -50,7 +50,7 @@ function onPageInit(success) //callback function of hAPI initialization
             rules = '[]';
             first_level_rty_ID = window.hWin.HEURIST4.util.getUrlParameter('rty_ID', window.location.search);  
         } 
-        else rules = decodeURIComponent(rules);
+        else if(window.hWin.HEURIST4.util.getUrlParameter('allowEmpty', window.location.search)!=='1') rules = decodeURIComponent(rules);
         
         if(!(first_level_rty_ID>0)) first_level_rty_ID = null;
         
@@ -197,7 +197,7 @@ function getRulesArray(){
 */
 function applyRules(){
     let res = getRulesArray();
-    if(res.length>0){
+    if(res.length>0 || window.hWin.HEURIST4.util.getUrlParameter('allowEmpty', window.location.search)==='1'){
         res = {mode:'apply', rules:res};
         window.close(res);
     }
@@ -211,7 +211,7 @@ function applyRules(){
 */
 function saveRules(){
     let res = getRulesArray();
-    if(res.length>0){
+    if(res.length>0 || window.hWin.HEURIST4.util.getUrlParameter('allowEmpty', window.location.search)==='1'){
         res = {mode:'save', rules:res};
         window.close(res);
     }

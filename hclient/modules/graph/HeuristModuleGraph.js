@@ -93,6 +93,14 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
             editRecord: function(recordId) { return that._openRecordEdit(recordId); },
             viewRecord: function(recordId) { return that._openRecordView(recordId); },
             addRecord: function(recordTypeId) { return that._addRecordEdit(recordTypeId); },
+            editRules: function(value) {
+                return window.hWin.HEURIST4.ui.showRulesBuilderDialog(value);
+            },
+            describeRules: function(rules) {
+                return rules.map(function(rule){
+                    return Object.assign({}, rule, window.hWin.HEURIST4.ui.describeExpansionRule(rule));
+                });
+            },
             doSearch: function(request) { return that._doSearch(request); }
         };
     }

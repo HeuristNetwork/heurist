@@ -55,6 +55,97 @@ final class RecordSearchService
         $this->builder = $builder ?? new QueryBuilder($database);
     }
 
+    /** Execute one graph traversal using the same access, marker and term
+     * semantics as record search. Tree scheduling belongs to the graph client.
+     * Candidate reads are capped as well as the final graph; report partial
+     * results explicitly when a dense branch exhausts the candidate budget. */
+    public function expandGraphStep(array $seeds, array $query, int $maxNodes, int $maxEdges): array
+    {
+        $anchor = null; $targetQuery = array();
+        foreach($this->builder->normalize($query) as $predicate){
+            $key = (string)array_keys($predicate)[0];
+            list($base, $suffix) = $this->predicateParts($key);
+            if(in_array($base, array('lt','lf','rt','rf','links','related'), true)){
+                if($anchor !== null){ throw new QueryValidationException('Exactly one traversal is required per expansion step'); }
+                $anchor = array($base, $suffix, $predicate[$key]);
+            }else{ $targetQuery[] = $predicate; }
+        }
+        if($anchor === null){ throw new QueryValidationException('Expansion rule has no traversal'); }
+        list($base, $suffix, $value) = $anchor;
+        $relation = in_array($base, array('rt','rf','related'), true);
+        $directions = in_array($base, array('links','related'), true) ? array('to','from')
+            : array(in_array($base, array('lf','rf'), true) ? 'to' : 'from');
+        $requestedTypes = null; $markerTypes = null; $relationshipQuery = array();
+        if($relation){
+            list($parentQuery, $relationshipQuery, $requestedTypes) = $this->splitRelationshipValue($value);
+            if($requestedTypes !== null) $requestedTypes = $this->expandTermIds($requestedTypes);
+            if($suffix !== ''){
+                if($base === 'related'){
+                    $types = $this->expandTermIds($this->normalizeIds($suffix, 'relationship type'));
+                    $requestedTypes = $requestedTypes === null ? $types : array_values(array_intersect($types, $requestedTypes));
+                }else{
+                    $marker = $this->relationMarkerConstraints($this->positiveSuffix($suffix, 'Relation-marker field ID'));
+                    $markerTypes = $marker['types'];
+                    if(!empty($marker['recordTypes'])) $parentQuery[] = array('t'=>$marker['recordTypes']);
+                }
+            }
+        }else{ $parentQuery = $this->normaliseLinkedValue($value); }
+        $parentQuery[] = array('ids'=>$seeds);
+        $parents = $this->search(new SearchRequest($parentQuery, array('limit'=>10000)))->ids;
+        $rows = array(); $truncated = false;
+        foreach($directions as $direction){
+            $types = $requestedTypes;
+            // 'related' is expressed from the target's perspective.
+            if($base === 'related' && $direction === 'to' && $types !== null) $types = $this->inverseTermIds($types);
+            if($markerTypes !== null) $types = $types === null ? $markerTypes : array_values(array_intersect($types, $markerTypes));
+            if($relation && $types === array()) continue;
+            foreach(array_chunk($parents, self::SQL_CHUNK_SIZE) as $chunk){
+                $parentColumn = $direction === 'to' ? 'rl_SourceID' : 'rl_TargetID';
+                $childColumn = $direction === 'to' ? 'rl_TargetID' : 'rl_SourceID';
+                $values = $chunk;
+                $conditions = array('rl.'.$parentColumn.' IN ('.implode(',', array_fill(0, count($chunk), '?')).')',
+                    'rl.rl_RelationID IS '.($relation ? 'NOT NULL' : 'NULL'));
+                if($relation && $types !== null){
+                    $conditions[] = 'rl.rl_RelationTypeID IN ('.implode(',', array_fill(0, count($types), '?')).')';
+                    $values = array_merge($values, $types);
+                }elseif(!$relation && $suffix !== ''){
+                    $conditions[] = 'rl.rl_DetailTypeID=?';
+                    $values[] = $this->positiveSuffix($suffix, 'Resource-link field ID');
+                }
+                $remaining = 10001 - count($rows);
+                if($remaining < 1){ $truncated = true; break 2; }
+                $sql = 'SELECT DISTINCT rl.'.$parentColumn.',rl.'.$childColumn
+                    .',rl.rl_SourceID,rl.rl_TargetID,COALESCE(rl.rl_DetailTypeID,0),'
+                    .'COALESCE(rl.rl_RelationTypeID,0),COALESCE(rl.rl_RelationID,0) FROM recLinks rl WHERE '
+                    .implode(' AND ', $conditions).' ORDER BY rl.'.$parentColumn.',rl.'.$childColumn.' LIMIT '.$remaining;
+                $rows = array_merge($rows, $this->executor->executeRows($sql, str_repeat('i', count($values)), $values));
+            }
+        }
+        if(count($rows)>10000){ $truncated = true; $rows = array_slice($rows, 0, 10000); }
+        $candidateIds = $this->uniqueIds(array_column($rows, 1));
+        if(empty($candidateIds)) return array('targetIds'=>array(), 'edges'=>array(), 'truncated'=>$truncated);
+        $targetQuery[] = array('ids'=>$candidateIds);
+        $targets = $this->search(new SearchRequest($targetQuery, array('limit'=>10000)))->ids;
+        $allowed = array_fill_keys($targets, true);
+        $relationships = array();
+        if($relation){
+            $relationshipQuery[] = array('ids'=>$this->uniqueIds(array_column($rows, 6)));
+            $relationships = array_fill_keys($this->search(new SearchRequest($relationshipQuery, array('limit'=>10000)))->ids, true);
+        }
+        $nodes = array_fill_keys($seeds, true); $edges = array(); $returned = array();
+        foreach($rows as $row){
+            list($parent, $child, $source, $target, $field, $term, $relationId) = array_map('intval', $row);
+            if(!isset($allowed[$child]) || ($relation && !isset($relationships[$relationId]))) continue;
+            $id = $source.':'.$target.':'.$field.':'.$term;
+            if(isset($edges[$id])) continue;
+            if((!isset($nodes[$child]) && count($nodes)>=$maxNodes) || count($edges)>=$maxEdges){ $truncated = true; continue; }
+            $nodes[$child] = true; $returned[$child] = $child;
+            $edges[$id] = array('id'=>$id, 'source'=>$source, 'target'=>$target, 'field'=>$field ?: null, 'relationship'=>$term ?: null,
+                'link'=>null, 'path'=>null);
+        }
+        return array('targetIds'=>array_values($returned), 'edges'=>array_values($edges), 'truncated'=>$truncated);
+    }
+
     /** Execute a search and always return the requested page and full count. */
     public function search(SearchRequest $request, array $context = array()): SearchResult
     {

@@ -33,6 +33,9 @@ final class GraphResult
     private array $links = array();
     private array $paths = array();
     private array $limits = array();
+    private ?array $expansion = null;
+
+    public function setExpansion(array $value): void { $this->expansion = $value; }
 
     public function __construct($query, int $total, int $offset, int $limit)
     {
@@ -65,6 +68,7 @@ final class GraphResult
             'total' => $this->total,
             'offset' => $this->offset,
             'limit' => $this->limit,
+            'expansion' => $this->expansion,
             'graph' => array(
                 'records' => $this->records,
                 'edges' => $this->edges,
