@@ -140,6 +140,8 @@ if(@$_REQUEST['multifile']){ // output manifest + files ??
 
 $output_file = null;
 $output_file_fd = null;
+$package_uploaded_files = (@$_REQUEST['include_uploaded_files'] == '1');
+$hml_exported_file_ids = array();
 
 $hunifile = null; //name of file-per-record for HuNI mode
 
@@ -161,6 +163,17 @@ if(@$_REQUEST['filename']==1 && file_exists(HEURIST_FILESTORE_DIR.DIR_BACKUP)){
 
     $output_file_fd = fopen($output_file, 'w');
 
+    $_REQUEST['mode'] = 1;
+}
+
+if ($package_uploaded_files && !$intofile) {
+    require_once dirname(__FILE__).'/hmlFilePackage.php';
+    $output_file = tempnam(HEURIST_SCRATCHSPACE_DIR, 'hml');
+    $output_file_fd = $output_file === false ? false : fopen($output_file, 'w');
+    if ($output_file_fd === false) {
+        header('HTTP/1.1 500 Internal Server Error');
+        exit('Unable to create a temporary HML export file.');
+    }
     $_REQUEST['mode'] = 1;
 }
 
@@ -1623,6 +1636,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
     global $system,$DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT,
     $rectype_templates, $human_readable_names;
+    global $hml_exported_file_ids;
 
     $attrs = array('conceptID' => ConceptCode::getDetailTypeConceptID($dt));
 
@@ -1663,6 +1677,9 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             }
         } elseif (array_key_exists('file', $value)) {
             $file = $value['file'];
+            if (!empty($file['ulf_ID'])) {
+                $hml_exported_file_ids[intval($file['ulf_ID'])] = 1;
+            }
 
             $external_url = @$file['ulf_ExternalFileReference'];//ulf_ExternalFileReference
             $file_nonce = @$file['ulf_ObfuscatedFileID'];
@@ -2364,6 +2381,22 @@ else{ // single output stream
 
     if($output_file_fd){
         fclose ($output_file_fd);
+        if ($package_uploaded_files) {
+            $zip_file = createHmlFilePackage($system, $output_file, $hml_exported_file_ids);
+            unlink($output_file);
+            if ($zip_file === false) {
+                header('HTTP/1.1 500 Internal Server Error');
+                print 'Unable to create the HML and uploaded files package.';
+            } else {
+                $download_name = 'Export_'.$system->dbname().'_'.date('YmdHis').'.zip';
+                header('Content-Type: application/zip');
+                header('Content-Disposition: attachment; filename='.$download_name);
+                header('Content-Length: '.filesize($zip_file));
+                readfile($zip_file);
+                unlink($zip_file);
+            }
+            exit;
+        }
         $output_file_name = HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().".xml";
         rename($output_file, $output_file_name);
     }
