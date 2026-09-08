@@ -2792,6 +2792,10 @@ li.edit-form-tab > a{
     min-width: 115px !important;
 
     text-align: right;
+
+    line-height: 1.5;
+
+    padding-top: 5px;
 }
 .cms-widget-config .header.header_narrow{
     width: 100px !important;

@@ -1104,8 +1104,26 @@ $.widget( "heurist.svs_list", {
                                 that.svs_order = response.data.order;
                                 that.loaded_saved_searches = response.data.svs; //svs_id=>array()
                             }else{
+
                                 that.loaded_saved_searches = response.data; //svs_id=>array()
                                 that.svs_order = Object.keys(that.loaded_saved_searches);
+
+                                if(that.options.allowed_svsIDs){
+
+                                    that.svs_order.sort((a, b) => {
+
+                                        let aIndex = that.options.allowed_svsIDs.indexOf(a);
+                                        let bIndex = that.options.allowed_svsIDs.indexOf(b);
+
+                                        if(aIndex < 0 && bIndex < 0){
+                                            return 0;
+                                        }else if(aIndex < 0 || bIndex < 0){
+                                            return aIndex < 0 ? 1 : -1;
+                                        }
+
+                                        return aIndex - bIndex;
+                                    })
+                                }
                             }
                             
                             let svsID = Object.keys(that.loaded_saved_searches);

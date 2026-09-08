@@ -162,5 +162,38 @@ class DbUsrSavedSearches extends DbEntityBase
 
     }
 
+    /**
+     * Searches for saved searches and returns only their names.
+     *
+     * Sets the 'details' parameter to 'name' and calls the main `search()` method.
+     * It then extracts the second column (assumed to be the search names) from each result.
+     *
+     * @return array|false An array of saved search names, or false if the search fails.
+     */
+    public function search_title(){
+
+        $this->data['details'] = 'name';
+        $ret = $this->search();
+
+        $res = [];
+        if($ret !== false){
+
+            $svsIDs = prepareIds($this->data['recID']);
+
+            foreach($svsIDs as $svsID){
+
+                if(!\array_key_exists($svsID, $ret['records'])){
+                    continue;
+                }
+
+                $res[] = $ret['records'][$svsID][1];
+            }
+
+        }else{
+            $res = false;
+        }
+
+        return $res;
+    }
 }
 ?>

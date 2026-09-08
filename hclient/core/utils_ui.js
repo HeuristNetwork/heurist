@@ -3737,37 +3737,154 @@ window.hWin.HEURIST4.ui = {
         };
         
         ele.editing_input(ed_options);
-  },
-  
-  /*
-  *  IntersectionObserver should be used instead of this method 
-  *  see HRecordList for example
-  */
-  isElementInViewport: function(element, container) {
+    },
 
-      const elRect = element.getBoundingClientRect();
-      let conRect;
-      if(container){
-          conRect = container.getBoundingClientRect();    
-      }else{
-          conRect = {x:0, y:0, 
-                    width: window.innerWidth || document.documentElement.clientWidth,
-                    height: window.innerHeight || document.documentElement.clientHeight};
-      }
+    /*
+    *  IntersectionObserver should be used instead of this method 
+    *  see HRecordList for example
+    */
+    isElementInViewport: function(element, container) {
 
-      let result = false;
+        const elRect = element.getBoundingClientRect();
+        let conRect;
+        if(container){
+            conRect = container.getBoundingClientRect();    
+        }else{
+            conRect = {
+                x:0, y:0,
+                width: window.innerWidth || document.documentElement.clientWidth,
+                height: window.innerHeight || document.documentElement.clientHeight
+            };
+        }
 
-      if(elRect.x >= conRect.x && elRect.y >= conRect.y
+        let result = false;
+
+        if(elRect.x >= conRect.x && elRect.y >= conRect.y
           && elRect.x + elRect.width <= conRect.x + conRect.width 
           && elRect.y + elRect.height <= conRect.y + conRect.height)
-      {
-          result = true
-      }
+        {
+            result = true
+        }
 
-      return result;
-  },
+        return result;
+    },
 
-    
+    popupSortableList: function(itemMap, dialogSettings, callback){
+
+        if(!itemMap instanceof Map){
+            //console.error(`Items map is invalid, got ${itemsMap.constructor.name} expected a Map`);
+            throw new Error(`Items map is invalid, got ${itemMap.constructor.name} expected a Map`);
+        }else if(window.hWin.HEURIST4.util.isempty(callback) || typeof callback !== 'function'){
+            throw new Error('Invalid callback provided');
+        }
+
+        let $dialog, dialogContent = '', dialogButtons = {};
+
+        const hasSettings = window.hWin.HEURIST4.util.isObject(dialogSettings);
+
+        const useDefaultText = !hasSettings || !Object.hasOwn(dialogSettings, 'text');
+        const helpText = useDefaultText || !Object.hasOwn(dialogSettings.text, 'help') ? 'drag and drop items to re-arrange them' : dialogSettings.text.help;
+        const titleText = useDefaultText || !Object.hasOwn(dialogSettings.text, 'title') ? 'Re-arrange items' : dialogSettings.text.title;
+        const saveBtnText = useDefaultText || !Object.hasOwn(dialogSettings.text, 'save') ? 'Save order' : dialogSettings.text.save;
+
+        const dialogWidth = hasSettings && Object.hasOwn(dialogSettings, 'width') ? dialogSettings.width : '450px';
+        const dialogTheme = hasSettings && Object.hasOwn(dialogSettings, 'palette') ? dialogSettings.palette : 'ui-heurist-design';
+
+        /*
+        const sortingButtons = hasSettings && Object.hasOwn('sorting', dialogSettings) ? dialogSettings.sorting : null;
+        {
+            'label': 'Alphabetic',
+            'function': () => { return items.sort(); }
+        }
+        $btn.button({label: button['label']}).on('click', () => { let sorted = button['function'](); $__fillInList(sorted); })
+        */
+
+        const buttonStyle = 'margin-left: 10px;padding: 1px 10px;';
+        dialogContent = `<div style="padding-bottom: 5px">
+            <div class="btn-plane" style="margin-bottom: 10px;">Apply order:
+                <button id="reoder-id" style="${buttonStyle}">ID</button>
+                <button id="reoder-alphabetic" style="${buttonStyle}">Alphabetic</button>
+                <button id="reoder-reset" title="Reset the item order to it's original order" style="${buttonStyle}display: none;">Original</button>
+            </div>
+            <span class="heurist-helper3">${helpText}</span><br>
+            <div class="div-result-list-content list" style="font-size: larger; max-height: 500px; overflow: hidden auto; margin: 10px 0;">
+            </div>
+        </div>`;
+
+        let $__fillInList = (map) => {
+
+            let $list = $dialog.find('.list');
+            $list.empty();
+
+            for(const [id, title] of map){
+                $('<div>', {
+                    class: 'recordDiv truncate',
+                    'data-id': id,
+                    title: title,
+                    text: title
+                }).appendTo($list);
+            }
+
+            $dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window});
+        };
+
+        dialogButtons[saveBtnText] = () => {
+
+            let $items = $dialog.find('.recordDiv');
+            let returningOrder = [];
+
+            $items.each((idx, item) => {
+                returningOrder.push(item.getAttribute('data-id'));
+            });
+
+            callback.call(this, returningOrder, (closeDialog) => {
+                if(closeDialog){
+                    $dialog.dialog('close');
+                }
+            });
+        };
+
+        dialogButtons[window.hWin.HR('Close')] = () => {
+            $dialog.dialog('close');
+        };
+
+        $dialog = window.hWin.HEURIST4.msg.showMsgDlg(dialogContent, dialogButtons, {title: titleText}, {default_palette_class: dialogTheme, width: dialogWidth, dialogId: 'reorder-items-popup'});
+
+        $__fillInList(itemMap);
+
+        let $resetBtn = $dialog.find('#reoder-reset');
+
+        $dialog.find('div.list').sortable({
+            axis: 'y',
+            containment: $dialog.find('div.list').parent(),
+            forcePlaceholderSize: true,
+            placeholder: 'ui-drag-drop',
+            cursor: 'grabbing',
+            update: () => {
+                $resetBtn.show();
+            }
+        });
+
+        const originalMap = new Map(itemMap);
+        $dialog.find('#reoder-id').button().on('click', () => {
+            $resetBtn.show();
+            const newMap = new Map([...itemMap].sort((a, b) => a[0] - b[0]));
+            $__fillInList(newMap);
+        });
+        $dialog.find('#reoder-alphabetic').button().on('click', () => {
+            $resetBtn.show();
+            const newMap = new Map([...itemMap].sort((a, b) => {
+                const nameA = a[1].toLocaleUpperCase();
+                const nameB = b[1].toLocaleUpperCase();
+                return nameA.localeCompare(nameB);
+            }));
+            $__fillInList(newMap);
+        });
+        $dialog.find('#reoder-reset').button().on('click', () => {
+            $resetBtn.hide();
+            $__fillInList(originalMap);
+        });
+    }
 }//end ui
 
 }

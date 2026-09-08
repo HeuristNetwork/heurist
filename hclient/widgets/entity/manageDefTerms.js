@@ -3350,39 +3350,39 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
 
         let that = this;
-        let $dlg, content;
-        let btns = {};
 
-        // Popup content - Draggable list of branch terms
-        content = '<div style="padding-bottom: 5px"><span class="heurist-helper3">drag and drop terms to re-arrange the branch<br></span>' //'any child terms will remain with its parent term'
-            + '<div class="div-result-list-content list" style="font-size: larger; max-height: 500px; overflow: hidden auto; margin: 10px 0;">';
-
+        let itemMap = new Map();
         for (let i = 0; i < term_ids.length; i++) {
 
             let trm_id = term_ids[i];
             let trm_name = $Db.trm(trm_id, 'trm_Label');
 
-            content += '<div class="recordDiv" data-id="' + trm_id + '" title="' + trm_name + '">' + trm_name + '</div>';
+            itemMap.set(trm_id, trm_name);
         }
 
-        content += '</div></div>';
-        // Popup buttons
-        btns['Save order'] = () => {
-            // Set + Save trm_OrderInBranch from 1 up
-            let terms = $dlg.find('div.recordDiv');
+        let opts = {
+            text: {
+                help: 'drag and drop terms to re-arrange the branch',
+                title: 'Reodering Term Branch',
+                save: 'Save order'
+            },
+            palette: 'ui-heurist-design',
+            width: '450px'
+        };
+        window.hWin.HEURIST4.ui.popupSortableList(itemMap, opts, (newOrder, closeCallback) => {
+
             let records = [];
-            let ordering = 1;
+            let order = 1;
+            for(const trmID of newOrder){
 
-            $.each(terms, (idx, term) => {
+                let record = {
+                    trm_ID: trmID,
+                    trm_OrderInBranch: order
+                };
 
-                term = $(term);
-                let record = {};
-                record['trm_ID'] = term.attr('data-id');
-                record['trm_OrderInBranch'] = ordering;
-
-                ordering ++;
+                order ++;
                 records.push(record);
-            });
+            }
 
             let request = {
                 'a': 'save',
@@ -3394,7 +3394,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
-                    $dlg.dialog('close');
+                    closeCallback.call(this, true);
                     if(response.status == window.hWin.ResponseStatus.OK){
                         for (let i = 0; i < records.length; i++) {
                             $Db.trm(records[i]['trm_ID'], 'trm_OrderInBranch', records[i]['trm_OrderInBranch']);
@@ -3406,57 +3406,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     }
                 }
             );
-        };
-        btns['Alphabetic'] = () => {
-            // Set + Save trm_OrderInBranch to NULL
-            let terms = $dlg.find('div.recordDiv');
-            let records = [];
-
-            $.each(terms, (idx, term) => {
-
-                term = $(term);
-                let record = {};
-                record['trm_ID'] = term.attr('data-id');
-                record['trm_OrderInBranch'] = null;
-
-                records.push(record);
-            });
-
-            let request = {
-                'a': 'save',
-                'entity': 'defTerms',
-                'fields': JSON.stringify(records),
-                'isfull': 0,
-                'request_id': window.hWin.HEURIST4.util.random()
-            };
-
-            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                function(response){
-                    $dlg.dialog('close');
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        for (let i = 0; i < records.length; i++) {
-                            $Db.trm(records[i]['trm_ID'], 'trm_OrderInBranch', null);
-                        }
-                       
-                        that._triggerRefresh(that.options.auxilary);
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                }
-            );
-        };
-        btns['Cancel'] = () => {
-            $dlg.dialog('close');
-        };
-
-        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Reodering Term Branch'}, {default_palette_class: 'ui-heurist-design', width: '450px'});
-
-        $dlg.find('div.list').sortable({
-            axis: 'y',
-            containment: $dlg.find('div.list').parent(),
-            forcePlaceholderSize: true,
-            placeholder: 'ui-drag-drop',
-            cursor: 'grabbing'
         });
     },
     

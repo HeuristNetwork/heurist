@@ -923,13 +923,16 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }
 
                 //visible for buttons mode only
-                ele = $dlg.find('#allowed_svsIDs');
-                if(!ele.editing_input('instance')){
+                let $svsElement = $dlg.find('#allowed_svsIDs');
+                if(!$svsElement.editing_input('instance')){
+
+                    let $btnSort;
+                    const originalSavedSearches = $dlg.find('input[name="allowed_svsIDs"]').val();
 
                     const ed_options = {
                         recID: -1,
-                        dtID: ele.attr('id'), 
-                        values: [$dlg.find('input[name="allowed_svsIDs"]').val()],
+                        dtID: $svsElement.attr('id'), 
+                        values: [originalSavedSearches],
                         readonly: false,
                         showclear_button: true,
                         dtFields:{
@@ -942,12 +945,79 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             $dlg.find('#init_svsID').editing_input('setValue','');
                             __restFilterForInitSearch();
                             on_change();
+
+                            let svsIDs = $svsElement.editing_input('getValues');
+                            svsIDs[0] !== '' ? $btnSort.show() : $btnSort.hide();
                         }
                     };
 
-                    ele.editing_input(ed_options);
-                    ele.parent().css('display','block');
-                    ele.find('.header').addClass('header_wide');
+                    $svsElement.editing_input(ed_options);
+                    $svsElement.parent().css('display','block');
+                    $svsElement.find('.header').addClass('header_wide');
+
+                    let $repeaterBtn = $svsElement.find('.editint-inout-repeat-container');
+                    $btnSort = $('<button>', {
+                        text: 'Order searches',
+                        style: 'position: absolute; top: 14em; left: 17em;padding: 0.1em 0.4em;vertical-align: -0.6em;'
+                    }).insertAfter($repeaterBtn).button();
+
+                    if(window.hWin.HEURIST4.util.isempty(originalSavedSearches)){
+                        $btnSort.hide();
+                    }
+
+                    $btnSort.on('click', () => {
+
+                        let svsIDs = $svsElement.editing_input('getValues');
+                        svsIDs = svsIDs[0].split(',');
+
+                        let searches = new Map();
+                        $svsElement.find('.link-div').each((idx, element) => {
+                            searches.set(svsIDs[idx], element.innerText);
+                        });
+
+                        let opts = {
+                            text: {
+                                help: 'drag and drop the searches to re-arrange them',
+                                title: 'Reodering Searches'
+                            },
+                            palette: 'ui-heurist-publish',
+                            width: '500px'
+                        };
+                        window.hWin.HEURIST4.ui.popupSortableList(searches, opts, (svsIDs, closeCallback) => {
+                            closeCallback.call(this, true);
+                            $svsElement.editing_input('setValue', svsIDs.join(','));
+                            on_change();
+                        });
+                    });
+
+                    $repeaterBtn.hide();
+                    $svsElement.find('.input-cell').css('margin-top', '10px');
+                    $svsElement.find('.entity_selector').css('max-width', '25em');
+
+                    let observerCallback = (mutations, observer) => {
+
+                        for(const mutation of mutations){
+
+                            if(mutation.type !== 'childList' || mutation.addedNodes <= 0){
+                                continue;
+                            }
+
+                            for(const node of mutation.addedNodes){
+
+                                if(node.nodeType !== Node.ELEMENT_NODE || $(node).hasClass('truncate')){
+                                    continue;
+                                }
+
+                                $(node).addClass('truncate');
+                            }
+                        }
+                    };
+                    let observer = new MutationObserver(observerCallback);
+
+                    observer.observe($svsElement.find('.entity_selector')[0], {
+                        childList: true,
+                        subtree: false
+                    });
                 }
 
                 ele = $dlg.find('#init_svsID');
