@@ -701,8 +701,9 @@ public static function assignRecordIds($params){
     }
     $index = array_search($id_fieldname, $imp_session['columns']);//find it among existing columns
     if($index!==false){ //this is existing field
-        $id_field  = "field_".$index;
-        $imp_session['uniqcnt'][$index] = (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'];
+        $id_field  = "field_{$index}";
+        $imp_session['uniqcnt'][$index] = !isEmptyArray(@$pairs) ? count($pairs) : $imp_session['reccount'];
+        $imp_session['column_counts'][$index] = $imp_session['reccount'];
     }
 
     //add new field into import table
@@ -738,8 +739,9 @@ public static function assignRecordIds($params){
             return false;
         }*/
 
-        array_push($imp_session['columns'], $id_fieldname );
-        array_push($imp_session['uniqcnt'], (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'] );
+        $imp_session['columns'][] = $id_fieldname;
+        $imp_session['uniqcnt'][] = !isEmptyArray(@$pairs) ? count($pairs) : $imp_session['reccount'] ;
+        $imp_session['column_counts'][] = $imp_session['reccount'];
 
         if(@$params['idfield']){
             array_push($imp_session['multivals'], $field_count );//!!!!
@@ -3581,7 +3583,8 @@ public static function performImport($params, $mode_output){
 
 
         if(!$id_field){
-            array_push($imp_session['uniqcnt'], self::$rep_added);
+            $imp_session['uniqcnt'][] = self::$rep_added;
+            $imp_session['column_counts'][] = self::$rep_added;
         }
 
         //reassign record ids to keep in session
@@ -3899,6 +3902,7 @@ public static function insertNewColumns($params){
 
     $imp_session['columns'][] = $col_name;
     $imp_session['uniqcnt'][] = "1";
+    $imp_session['column_counts'][] = "1";
 
     $column_size = mb_strlen($col_data) + 5;
 
@@ -3999,6 +4003,42 @@ private static function _isRecordUpdating($rec_ID, $record){
     }
 
     return $rtn;
+}
+
+public static function seekNextValue(array $params){
+
+    self::initialize();
+
+    $imp_session = ImportSession::load(@$params['imp_ID']);
+    if($imp_session==false){
+        return false;
+    }
+
+    $currentID = prepareIds(@$params['currentID']);
+    $importTable = $imp_session['import_table'];
+    $seekDirection = @$params['direction'] === 'prev' ? '<' : '';
+    $seekDirection = @$params['direction'] === 'next' ? '>' : $seekDirection;
+    $fieldIndex = prepareIds(@$params['field'], true);
+
+    if(empty($importTable) || $seekDirection === ''){
+        self::$system->addError(HEURIST_INVALID_REQUEST, $seekDirection === '' ? 'Missing seek direction' : 'Missing import table');
+        return false;
+    }elseif($currentID === [] || $fieldIndex === []){
+        self::$system->addError(HEURIST_ACTION_BLOCKED, $currentID === [] ? 'Invalid current row provided' : 'Invalid field index provided');
+        return false;
+    }
+    $currentID = $currentID[0];
+    $fieldIndex = $fieldIndex[0];
+
+    $orderBy = $seekDirection === '<' ? " ORDER BY imp_ID DESC" : '';
+    $seekQuery = "SELECT imp_ID FROM {$importTable} WHERE field_{$fieldIndex} != '' AND imp_ID {$seekDirection} {$currentID}{$orderBy} LIMIT 1";
+    $nextID = mysql__select_value(self::$mysqli, $seekQuery);
+
+    if(!$nextID){
+        $nextID = -1;
+    }
+
+    return $nextID;
 }
 } //end class
 ?>
