@@ -3945,6 +3945,328 @@ public static function insertNewColumns($params){
  * @return bool True if differences are found (i.e., an update would occur), false otherwise.
  *              Returns true if the existing record has no details (implying any new details are an update).
  */
+/**
+ * verifyDBAgainstSource: compare mapped source values with records assigned by
+ * the standard CSV matching step.  This method is read-only.
+ *
+ * The returned value is a complete CSV document because importController's
+ * established output=csv path already supplies the download headers.
+ *
+ * @param array $params Import session, record type, ID field and mapping.
+ * @return string|false CSV report, or false after setting a system error.
+ */
+public static function verifyDatabaseAgainstSource($params){
+
+    self::initialize();
+
+    $imp_session = ImportSession::load(intval(@$params['imp_ID']));
+    if($imp_session===false){
+        return false;
+    }
+
+    $mapping = @$params['mapping'];
+    if(!is_array($mapping)){
+        $mapping = json_decode((string)$mapping, true);
+    }
+    if(!is_array($mapping) || empty($mapping)){
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Verification field mapping is not defined');
+        return false;
+    }
+
+    $recordType = intval(@$params['sa_rectype']);
+    $id_field = preg_replace(REGEX_ALPHANUM, '', (string)@$params['recid_field']);
+    $import_table = (string)@$imp_session['import_table'];
+    if($recordType<1 || !preg_match('/^import[0-9]+$/', $import_table)
+       || !preg_match('/^field_[0-9]+$/', $id_field)){
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Invalid verification session, record type or identifier field');
+        return false;
+    }
+
+    $column_names = @$imp_session['columns'];
+    $csv_mvsep = @$imp_session['csv_mvsep'];
+    if(!$csv_mvsep || $csv_mvsep==='none'){
+        $csv_mvsep = null;
+    }
+
+    $groups = array();
+    $select_fields = array($id_field);
+    foreach($mapping as $index=>$field_type){
+        if(!ctype_digit((string)$index)){
+            continue;
+        }
+        $field_name = 'field_'.intval($index);
+        if($field_type!=='url' && $field_type!=='scratchpad'
+           && !preg_match('/^[0-9]+(?:_(?:lat|long))?$/', (string)$field_type)){
+            continue;
+        }
+        $base_type = preg_replace('/_(?:lat|long)$/', '', (string)$field_type);
+        if(!isset($groups[$base_type])){
+            $groups[$base_type] = array('columns'=>array(), 'fields'=>array());
+        }
+        $groups[$base_type]['columns'][] = @$column_names[$index] ?: $field_name;
+        $groups[$base_type]['fields'][$field_name] = (string)$field_type;
+        $select_fields[] = $field_name;
+    }
+    if(empty($groups)){
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Verification field mapping contains no valid fields');
+        return false;
+    }
+
+    $detail_ids = array();
+    foreach(array_keys($groups) as $group_type){
+        if(is_numeric($group_type)){
+            $detail_ids[] = intval($group_type);
+        }
+    }
+    $definitions = array();
+    if(!empty($detail_ids)){
+        $defs_query = 'SELECT dty_ID,dty_Name,dty_Type FROM defDetailTypes WHERE dty_ID IN ('
+                    .implode(',', array_map('intval', $detail_ids)).')';
+        $defs_result = self::$mysqli->query($defs_query);
+        if($defs_result){
+            while($definition = $defs_result->fetch_assoc()){
+                $definitions[$definition['dty_ID']] = $definition;
+            }
+            $defs_result->close();
+        }
+    }
+
+    // verifyDBAgainstSource: use the selected record type's term constraints,
+    // and the same term-resolution methods used by the normal import workflow.
+    $term_constraints = array();
+    if(!empty($detail_ids)){
+        $rec_structure = dbs_GetRectypeStructures(self::$system, array($recordType), 2);
+        $rec_structure = $rec_structure['typedefs'];
+        $idx_term_tree = $rec_structure['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+        $idx_term_nosel = $rec_structure['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+        $record_fields = @$rec_structure[$recordType]['dtFields'];
+        foreach($detail_ids as $detail_id){
+            if(isset($record_fields[$detail_id])){
+                $term_constraints[$detail_id] = array(
+                    'tree'=>$record_fields[$detail_id][$idx_term_tree],
+                    'nonselectable'=>$record_fields[$detail_id][$idx_term_nosel]
+                );
+            }
+        }
+    }
+
+    $select_fields = array_values(array_unique($select_fields));
+    $source_query = 'SELECT imp_id,`'.implode('`,`', $select_fields).'` FROM `'.$import_table.'` ORDER BY imp_id';
+    $source_result = self::$mysqli->query($source_query);
+    if(!$source_result){
+        self::$system->addError(HEURIST_DB_ERROR, 'Cannot read verification source table', self::$mysqli->error);
+        return false;
+    }
+
+    $fp = fopen('php://temp', 'r+');
+    // MODIFIED for verifyDBAgainstSource: TSV output and Field type column.
+    fputcsv($fp, array('Source row','Heurist record ID','Status','Dupes','Source column(s)',
+                       'Heurist field','Field type','Source value(s)','Database value(s)'), "\t", '"');
+    $record_cache = array();
+    $term_cache = array();
+    $term_label_cache = array();
+    $file_cache = array();
+    $last_reported_source = null;
+
+    // verifyDBAgainstSource: add a blank line whenever the report moves to a
+    // different source row, while allowing several field differences per row.
+    $write_report_row = function($source_id, $row) use ($fp, &$last_reported_source){
+        if($last_reported_source!==null && $last_reported_source!==$source_id){
+            fwrite($fp, PHP_EOL);
+        }
+        fputcsv($fp, $row, "\t", '"');
+        $last_reported_source = $source_id;
+    };
+
+    while($source_row = $source_result->fetch_assoc()){
+        $imp_id = intval($source_row['imp_id']);
+        $record_id_text = trim((string)@$source_row[$id_field]);
+        $record_ids = $record_id_text==='' ? array() : preg_split('/\s*'.preg_quote($csv_mvsep ?: '|', '/').'\s*/', $record_id_text);
+        $record_ids = array_values(array_filter(array_map('intval', $record_ids), function($id){return $id>0;}));
+
+        if(count($record_ids)!==1){
+            // MODIFIED for verifyDBAgainstSource: common TSV writer and new Field type column.
+            $write_report_row($imp_id, array($imp_id, $record_id_text,
+                empty($record_ids)?'NO_MATCH':'MULTIPLE_MATCH', '', '', '', '', '', ''));
+            continue;
+        }
+        $record_id = $record_ids[0];
+
+        if(!array_key_exists($record_id, $record_cache)){
+            $header = mysql__select_row(self::$mysqli,
+                'SELECT rec_RecTypeID,rec_URL,rec_ScratchPad FROM Records WHERE rec_ID='.$record_id);
+            if(!$header || intval($header[0])!==$recordType){
+                $record_cache[$record_id] = false;
+            }else{
+                $record_data = array('url'=>array((string)$header[1]), 'scratchpad'=>array((string)$header[2]), 'details'=>array());
+                if(!empty($detail_ids)){
+                    $details_query = 'SELECT dtl_DetailTypeID,dtl_Value,ST_AsText(dtl_Geo),dtl_UploadedFileID '
+                                   .'FROM recDetails WHERE dtl_RecID='.$record_id.' AND dtl_DetailTypeID IN ('
+                                   .implode(',', array_map('intval', $detail_ids)).') ORDER BY dtl_ID';
+                    $details_result = self::$mysqli->query($details_query);
+                    if($details_result){
+                        while($detail = $details_result->fetch_row()){
+                            $value = $detail[3] ?: ($detail[2] ? trim($detail[1].' '.$detail[2]) : $detail[1]);
+                            $record_data['details'][$detail[0]][] = (string)$value;
+                        }
+                        $details_result->close();
+                    }
+                }
+                $record_cache[$record_id] = $record_data;
+            }
+        }
+        if($record_cache[$record_id]===false){
+            // MODIFIED for verifyDBAgainstSource: common TSV writer and new Field type column.
+            $write_report_row($imp_id, array($imp_id, $record_id, 'RECORD_NOT_FOUND_OR_WRONG_TYPE', '', '', '', '', '', ''));
+            continue;
+        }
+
+        foreach($groups as $base_type=>$group){
+            $source_values = array();
+            $latitude = null;
+            $longitude = null;
+            foreach($group['fields'] as $field_name=>$mapped_type){
+                // MODIFIED for verifyDBAgainstSource: explicitly split pipe
+                // repeats even when an older session did not retain csv_mvsep.
+                $comparison_mvsep = $csv_mvsep ?: '|';
+                $raw_values = self::getMultiValues((string)@$source_row[$field_name],
+                    @$imp_session['csv_enclosure'], $comparison_mvsep);
+                if(substr($mapped_type, -4)==='_lat'){
+                    $latitude = trim((string)reset($raw_values));
+                }elseif(substr($mapped_type, -5)==='_long'){
+                    $longitude = trim((string)reset($raw_values));
+                }else{
+                    $source_values = array_merge($source_values, $raw_values);
+                }
+            }
+            if($latitude!==null && $longitude!==null && $latitude!=='' && $longitude!==''){
+                $source_values[] = 'p POINT ('.$longitude.' '.$latitude.')';
+            }
+
+            $database_values = $base_type==='url' || $base_type==='scratchpad'
+                ? $record_cache[$record_id][$base_type]
+                : (@$record_cache[$record_id]['details'][$base_type] ?: array());
+            $field_kind = @$definitions[$base_type]['dty_Type'];
+
+            // MODIFIED for verifyDBAgainstSource: term labels and codes are
+            // resolved with the record field's permitted vocabulary.
+            $normalise = function($value) use ($field_kind, $base_type, &$term_cache, &$file_cache, $term_constraints){
+                $value = super_trim((string)$value);
+                // verifyDBAgainstSource: language-tagged repeat values such as
+                // IND:value and FRE: value compare by their value, regardless
+                // of source-column or repeat-value order.
+                $value = preg_replace('/^[A-Z]{3}:\s*/', '', $value);
+                // verifyDBAgainstSource: normalise regular, non-breaking and
+                // other Unicode spacing, then trim again after prefix removal.
+                $value = preg_replace('/[\p{Z}\s]+/u', ' ', $value);
+                $value = trim($value);
+                if($value==='' || strcasecmp($value, 'NULL')===0){
+                    return null;
+                }
+                if($field_kind==='enum' || $field_kind==='relationtype'){
+                    if(ctype_digit($value)){
+                        return 'term:'.intval($value);
+                    }
+                    $cache_key = $base_type.'|'.$value;
+                    if(!array_key_exists($cache_key, $term_cache)){
+                        $constraint = @$term_constraints[$base_type];
+                        $term_id = null;
+                        if($constraint){
+                            $term_lookup_value = trim_lower_accent($value);
+                            $term_id = VerifyValue::isValidTermLabel(
+                                $constraint['tree'], $constraint['nonselectable'], $term_lookup_value, $base_type, true);
+                            if(!($term_id>0)){
+                                $term_id = VerifyValue::isValidTermCode(
+                                    $constraint['tree'], $constraint['nonselectable'], $term_lookup_value, $base_type);
+                            }
+                        }
+                        if(!($term_id>0)){
+                            $escaped = self::$mysqli->real_escape_string($value);
+                            $term_id = mysql__select_value(self::$mysqli,
+                                'SELECT trm_ID FROM defTerms WHERE trm_Label="'.$escaped.'" OR trm_Code="'.$escaped.'" LIMIT 1');
+                        }
+                        $term_cache[$cache_key] = $term_id;
+                    }
+                    return $term_cache[$cache_key] ? 'term:'.$term_cache[$cache_key] : 'unrecognised-term:'.trim_lower_accent($value);
+                }
+                if($field_kind==='file' && !ctype_digit($value)){
+                    if(!array_key_exists($value, $file_cache)){
+                        $escaped = self::$mysqli->real_escape_string($value);
+                        $file_cache[$value] = mysql__select_value(self::$mysqli,
+                            'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ObfuscatedFileID="'.$escaped.'"'
+                            .' OR ulf_ExternalFileReference="'.$escaped.'" LIMIT 1');
+                    }
+                    return $file_cache[$value] ? 'file:'.$file_cache[$value] : 'file-reference:'.$value;
+                }
+                if($field_kind==='file'){
+                    return 'file:'.intval($value);
+                }
+                if($field_kind==='geo'){
+                    $value = preg_replace('/^(?:pl|p|l|m)\s+(?=(?:POINT|LINESTRING|POLYGON|MULTI|GEOMETRYCOLLECTION))/i', '', $value);
+                    return strtoupper(preg_replace('/\s+/', '', $value));
+                }
+                return $value;
+            };
+
+            $source_normal = array_values(array_filter(array_map($normalise, $source_values), function($value){return $value!==null;}));
+            $database_normal = array_values(array_filter(array_map($normalise, $database_values), function($value){return $value!==null;}));
+            // MODIFIED for verifyDBAgainstSource: frequency maps provide an
+            // explicit all-orders comparison and simultaneously detect dupes.
+            $source_frequency = array_count_values($source_normal);
+            $database_frequency = array_count_values($database_normal);
+            ksort($source_frequency, SORT_STRING);
+            ksort($database_frequency, SORT_STRING);
+            $has_duplicates = max(array_merge(array(0), array_values($source_frequency),
+                                               array_values($database_frequency))) > 1;
+
+            if($source_frequency!==$database_frequency){
+                $field_label = $base_type==='url' ? 'Record URL'
+                    : ($base_type==='scratchpad' ? 'Record Notes'
+                    : ((@$definitions[$base_type]['dty_Name'] ?: 'Detail').' ['.$base_type.']'));
+                // verifyDBAgainstSource: show term labels rather than internal IDs.
+                $database_display_values = $database_values;
+                if($field_kind==='enum' || $field_kind==='relationtype'){
+                    foreach($database_display_values as $display_idx=>$term_id){
+                        if(ctype_digit((string)$term_id)){
+                            if(!array_key_exists($term_id, $term_label_cache)){
+                                $term_label_cache[$term_id] = mysql__select_value(self::$mysqli,
+                                    'SELECT trm_Label FROM defTerms WHERE trm_ID='.intval($term_id));
+                            }
+                            if($term_label_cache[$term_id]){
+                                $database_display_values[$display_idx] = $term_label_cache[$term_id];
+                            }
+                        }
+                    }
+                }
+                // verifyDBAgainstSource: do not render empty cells as " | ".
+                $source_display_values = array_values(array_filter($source_values, function($value){
+                    return trim((string)$value)!=='' && strcasecmp(trim((string)$value), 'NULL')!==0;
+                }));
+                $database_display_values = array_values(array_filter($database_display_values, function($value){
+                    return trim((string)$value)!=='';
+                }));
+                // MODIFIED for verifyDBAgainstSource: distinguish missing values from unequal values.
+                if(empty($source_normal) && !empty($database_normal)){
+                    $difference_status = 'NoSourceValue';
+                }elseif(!empty($source_normal) && empty($database_normal)){
+                    $difference_status = 'NoDBValue';
+                }else{
+                    $difference_status = 'DIFF';
+                }
+                // MODIFIED for verifyDBAgainstSource: requested status, Field type and TSV writer.
+                $write_report_row($imp_id, array($imp_id, $record_id, $difference_status, $has_duplicates?'Dupes':'', implode(' + ', $group['columns']),
+                    $field_label, ($field_kind ?: $base_type), implode(' | ', $source_display_values),
+                    implode(' | ', $database_display_values)));
+            }
+        }
+    }
+    $source_result->close();
+    rewind($fp);
+    $csv = stream_get_contents($fp);
+    fclose($fp);
+    return $csv;
+}
+
 private static function _isRecordUpdating($rec_ID, $record){
 
     $existing_record = recordSearchByID(self::$system, $rec_ID, false);

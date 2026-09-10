@@ -1284,7 +1284,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog, null, helpURL, false);    
                 }
         
-                this._toolbar = this._edit_dialog.parent().find('.ui-dialog-buttonpane');
+                this._toolbar = this._edit_dialog.dialog('buttonpane');
         
             }//popup
             else { //initialize action buttons
@@ -4924,47 +4924,20 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         if(this._as_dialog && this._as_dialog.dialog('instance')){
 
             let $dlg = this._as_dialog.dialog('widget');
-            let dlg_header = $dlg.find('.ui-dialog-titlebar');
+            let dlg_header = this._as_dialog.dialog('titlebar');
             
             if(!this._autoResizeCheckbox){
 
-                $('<span>', {
-                    class: 'btn_Fullscreen',
-                    style: 'margin: -0.9em 0px 0px;right: 26.5em;top: 45%;position: absolute;background: none;color: white;'
-                })
-                .button({label:window.hWin.HR('Fullscreen')})
-                .appendTo(dlg_header);
+                this._as_dialog.dialog('option', 'showResizeButtons', true);
+                this._as_dialog.dialog('option', 'resizeCallback', () => this.editFormPopup.layout().resizeAll());
 
-                $('<span>', {
-                    class: 'btn_Standard',
-                    style: 'margin: -0.9em 0px 0px;right: 18.5em;top: 45%;position: absolute;background: none;color: white;'
-                })
-                .button({label:window.hWin.HR('Standard')})
-                .appendTo(dlg_header);
-
-                $('<span>', {
-                    class: 'btn_Small',
-                    style: 'margin: -0.9em 0px 0px;right: 12.25em;top: 45%;position: absolute;background: none;color: white;'
-                })
-                .button({label:window.hWin.HR('Small')})
-                .appendTo(dlg_header);
-
-                this._on(dlg_header.find('.btn_Fullscreen'), {
-                    click: () => {
-                        this._setDialogSize(false, 'full');
-                    }
+                dlg_header.find('.ui-dialog-resize-container').css({
+                    position: 'absolute',
+                    right: '11em'
                 });
-
-                this._on(dlg_header.find('.btn_Standard'), {
-                    click: () => {
-                        this._setDialogSize(false, 'standard');
-                    }
-                });
-
-                this._on(dlg_header.find('.btn_Small'), {
-                    click: () => {
-                        this._setDialogSize(false, 'small');
-                    }
+                dlg_header.find('.ui-dialog-resize-container button').css({
+                    background: 'none',
+                    color: 'white'
                 });
 
                 let autoResizePopup = this.usrPreferences.autoResizePopup;
@@ -5035,8 +5008,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         if(this._as_dialog){
                 
-            let ele = this._as_dialog.parent().find('.ui-dialog-titlebar')
-                .addClass('ui-heurist-header');
+            let ele = this._as_dialog.dialog('titlebar').addClass('ui-heurist-header');
 
             if(this.options.edit_structure){
                 this._as_dialog.parent().addClass('ui-heurist-design');
@@ -6111,12 +6083,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             $stage_selector.trigger('change');
         });
 
-        $dlg.parent().find('.ui-dialog-buttonpane .ui-button').css('margin-right', '20px');
+        $dlg.dialog('buttonpane').find('.ui-button').css('margin-right', '20px');
 
         // Change "Continue" button label to "Save change" if a stage or mode is actually changed
         let initial_popup_mode = $swf_popup_mode_selector.val();
         let initial_stage = $stage_selector.val();
-        let $save_btn = $($dlg.parent().find('.ui-dialog-buttonpane .ui-button')[0]); // The "Continue" button
+        let $save_btn = $($dlg.dialog('buttonpane').find('.ui-button')[0]); // The "Continue" button
 
         $dlg.find('select').on('change', () => {
             let changed = $stage_selector.val() != initial_stage || $swf_popup_mode_selector.val() != initial_popup_mode;

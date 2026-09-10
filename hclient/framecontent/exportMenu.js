@@ -438,7 +438,7 @@ function hexportMenu( container ) {
 
         if(showOptionsDialog){
 
-            if(isEntireDb){
+            if(isEntireDb && opts.format!='hml'){
                 depthValue = '0';
                 opts.linksMode = 'none';
             }else {
@@ -451,6 +451,7 @@ function hexportMenu( container ) {
     +'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
     +'<br><br><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" />Follow pointers and relationship markers in records<br><em>(recommended for XML/JSON export)</em></label>'
     +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers"<br><em>(warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</em></label></p>'
+    +(opts.format=='hml'?'<p style="margin-bottom:8px"><label><input type="checkbox" name="include_uploaded_files"/>Include uploaded files and deliver as a single zip file for download</label></p>':'')
     +(opts.format=='hml'?'<p><input type="checkbox" name="human_readable_names"/>Include human-readable names and local IDs for everything '
     +'<div class="heurist-helper3">(NOT RECOMMENDED except for small subset troubleshooting.If checked this will result in a VERY large file and VERY long export time)</div>':'')
     +(opts.format=='rdf'?'<p>Since, RDF export is experimental please specify the access word: <input type="password" name="rdfpwd"/>':'')
@@ -466,6 +467,7 @@ function hexportMenu( container ) {
                         opts.questionResolved=true;
 
                         opts.showHumanReadableNames = $expdlg.find('input[name="human_readable_names"]').is(':checked');
+                        opts.includeUploadedFiles = $expdlg.find('input[name="include_uploaded_files"]').is(':checked');
 
                         _exportRecords( opts );
                     },
@@ -536,6 +538,7 @@ function hexportMenu( container ) {
         if(opts.format=='hml'){
 
             script = 'export/xml/flathml.php';
+            if (opts.includeUploadedFiles) script = 'export/xml/hmlWithFiles.php';
 
             // multifile is for HuNI
             if (opts.multifile) newURLParams.set('multifile', '1');
@@ -771,4 +774,3 @@ function hexportMenu( container ) {
     _init( container );
     return that;  //returns object
 }
-    

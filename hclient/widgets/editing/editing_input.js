@@ -693,7 +693,7 @@ $.widget( "heurist.editing_input", {
 
                             window.hWin.HEURIST4.ui.createLanguageSelect($dlg.find('#selLang'), null, null, true);
 
-                            $dlg.parent().find('.ui-dialog-buttonpane button').css({
+                            $dlg.dialog('buttonpane').css({
                                 'margin-left': '10px', 'margin-right': '10px'
                             });
 
@@ -904,9 +904,9 @@ $.widget( "heurist.editing_input", {
 
                 }, {title: 'Editing is discouraged', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-populate'});
 
-                window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), true);
+                window.hWin.HEURIST4.util.setDisabled($dlg.dialog('buttonpane').find('button:first-child'), true);
                 $dlg.find('#allow_edit').on('change', function(){
-                    window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), !$dlg.find('#allow_edit').is(':checked'));
+                    window.hWin.HEURIST4.util.setDisabled($dlg.dialog('buttonpane').find('button:first-child'), !$dlg.find('#allow_edit').is(':checked'));
                 });
             };
 
@@ -3338,10 +3338,10 @@ $.widget( "heurist.editing_input", {
             modal: true,
             closeOnEscape: false,
             resizable: false,
-            buttons: []
+            buttons: [],
+            showTitlebar: false
           });                        
-        $progress_dlg.dialog('open'); 
-        $progress_dlg.parent().find('.ui-dialog-titlebar-close').hide();
+        $progress_dlg.dialog('open');
     },
     done: function (e, response) {
 
@@ -7867,7 +7867,7 @@ $.widget( "heurist.editing_input", {
                         }
                     }
 
-                    $input_img.find('.mode_switcher').text(!$input_img.hasClass('thumb_image') ? 'thumbnail' : 'click to view');
+                    $input_img.find('.mode_switcher').text(!$input_img.hasClass('thumb_image') ? 'thumbnail' : 'larger');
                 }
             }
         });
@@ -8188,13 +8188,33 @@ $.widget( "heurist.editing_input", {
             text: 'Click image to freeze in place'
         }).prependTo($image_div).hide();
 
-        // Add download, show thumbnail and show in popup links
+        // Viewers
+        
         $('<a>', {
             href: '#',
             class: `mode_switcher`,
-            style: 'display: inline-block; padding-right: 1.5em; text-decoration: underline; color: blue;',
-            text: 'click to view'
+            style: 'display: inline-block; padding-right: 0.5em; text-decoration: underline; color: blue;',
+            text: 'larger'
         }).appendTo($img_controls);
+
+        $('<a>', {
+            href: '#', 'data-id': fileID,
+            class: 'openseadragon_link',
+            style: 'color: blue; padding-left: 0.75em; padding-right: 1.0em;',
+            title: 'Open in OpenSeadragon (simple IIIF viewer))',
+            html: '<span class="ui-icon ui-icon-image"></span>&nbsp;OSD viewer'
+        }).appendTo($img_controls);
+
+        $('<a>', {
+            href: '#',
+            'data-id': fileObfuscatedID,
+            class: 'miradorViewer_link',
+            style: 'color: blue;',
+            title: 'Open in Mirador (multi-image IIIF viewer and annotator))',
+            html: '<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);"></span>&nbsp;Mirador'
+        }).appendTo($img_controls).hide();
+
+
 
         $('<a>', {
             href: fileDownload,
@@ -8202,36 +8222,11 @@ $.widget( "heurist.editing_input", {
             id: `dwn${dtyID}_${fileID}`,
             class: 'external-link image_tool',
             title: 'Download image',
-            style: 'display: inline-block; color: blue;',
+            style: 'display: inline-block; color: blue; padding-left: 0.75em;',
             html: '<span class="ui-icon ui-icon-download" />'
         }).appendTo($img_controls);
 
-        $('<a>', {
-            href: '#',
-            class: 'popup_viewer',
-            title: 'Full view in a popup',
-            style: 'display: inline-block; text-decoration: underline; color: blue; padding-left: 5px;',
-            html: '<span class="ui-icon ui-icon-popup" />popup'
-        }).appendTo($img_controls);
-
-        // Viewers
-        $('<a>', {
-            href: '#',
-            'data-id': fileObfuscatedID,
-            class: 'miradorViewer_link',
-            style: 'color: blue;',
-            title: 'Open in Mirador',
-            html: '<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);"></span>&nbsp;Mirador'
-        }).appendTo($img_controls).hide();
-
-        $('<a>', {
-            href: '#', 'data-id': fileID,
-            class: 'openseadragon_link',
-            style: 'color: blue; padding-left: 0.75em;',
-            title: 'Open in OpenSeadragon',
-            html: '<span class="ui-icon ui-icon-image"></span>&nbsp;OpenSeadragon'
-        }).appendTo($img_controls);
-
+        
         // for closing inline image when 'frozen'
         $('<a>', {
             href: '#',

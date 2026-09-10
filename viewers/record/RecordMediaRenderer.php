@@ -240,13 +240,9 @@ class RecordMediaRenderer
             return implode('', $html);
         }
 
-        if (!$this->isAudioVideo($thumb) && !$this->isIiifImage($thumb)) {
-            $viewerUrl = $this->mediaViewerUrl($thumb);
-            $dataUrl = $viewerUrl !== '' ? ' data-url="'.$this->h($viewerUrl).'"' : '';
-            $html[] = '<a href="#" data-id="'.$this->h($thumb['nonce'] ?? '').'"'.$dataUrl.' class="mediaViewer_link">'
-                .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align:middle;"></span>&nbsp;full screen</a>';
-            $html[] = '<a href="#" data-id="'.$this->h($thumb['nonce'] ?? '').'"'.$dataUrl.' class="popupMedia_link">'
-                .'<span class="ui-icon ui-icon-popup" style="font-size:1.2em;display:inline-block;vertical-align:middle;"></span>&nbsp;view in popup</a>';
+        if ($this->canOpenInOpenSeadragon($thumb)) {
+            $html[] = '<a href="'.$this->h($this->openSeadragonUrl($thumb)).'" target="_blank" rel="noopener">'
+                .'<span class="ui-icon ui-icon-image" style="display:inline-block;"></span>&nbsp;OSD viewer</a>';
         }
 
         if ($this->canOpenInMirador($thumb)) {
@@ -254,11 +250,16 @@ class RecordMediaRenderer
                 .$this->miradorIcon().'&nbsp;Mirador</a>';
         }
 
-        if ($this->canOpenInOpenSeadragon($thumb)) {
-            $html[] = '<a href="'.$this->h($this->openSeadragonUrl($thumb)).'" target="_blank" rel="noopener">'
-                .'<span class="ui-icon ui-icon-image" style="display:inline-block;"></span>&nbsp;OpenSeadragon</a>';
+        if (!$this->isAudioVideo($thumb) && !$this->isIiifImage($thumb)) {
+            $viewerUrl = $this->mediaViewerUrl($thumb);
+            $dataUrl = $viewerUrl !== '' ? ' data-url="'.$this->h($viewerUrl).'"' : '';
+            $html[] = '<a href="#" data-id="'.$this->h($thumb['nonce'] ?? '').'"'.$dataUrl.' class="mediaViewer_link">'
+                .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align:middle;"></span>&nbsp;full screen</a>';
+            $html[] = '<a href="#" data-id="'.$this->h($thumb['nonce'] ?? '').'"'.$dataUrl.' class="popupMedia_link">'
+                .'<span class="ui-icon ui-icon-popup" style="font-size:1.2em;display:inline-block;vertical-align:middle;"></span>&nbsp;popup</a>';
         }
 
+        
         if (!empty($thumb['external_url'])) {
             $html[] = '<a href="'.$this->h($this->openInNewTabUrl($thumb)).'" class="external-link" target="_blank" rel="noopener">open in new tab'.(!empty($thumb['linked']) ? '<br>(linked media)' : '').'</a>';
             if ($this->system->hasAccess()) {

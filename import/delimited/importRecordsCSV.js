@@ -27,6 +27,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     const _className = "ImportRecordsCSV";
     const _version   = "0.4";
 
+    // verifyDBAgainstSource: additions only
+    const verifyDBAgainstSource = window.hWin.HEURIST4.util.getUrlParameter(
+        'verifyDBAgainstSource', window.location.search
+    ) == '1';
+
     let imp_ID,   //import session
     imp_session,  //json with session parameters
     
@@ -60,6 +65,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     function _init(_imp_ID, _max_upload_size, format){
     
         imp_ID = _imp_ID;
+
+        // verifyDBAgainstSource: additions only
+        if(verifyDBAgainstSource){
+            $('body').addClass('verification-mode');
+            $('#divStep1 h2').first().text('PREVIOUSLY UPLOADED SOURCE FILE');
+            $('#lblUploadFile').text('Upload source file (CSV/TSV)');
+            $('#divStep1 .heurist-helper2').first().text(
+                'The first line must contain column names; the database will not be modified.'
+            );
+        }
         
         let is_h6style = window.hWin.HAPI4.sysinfo['layout']=='H6Default';
         
@@ -444,6 +459,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     .on('click', function(e) {
                             _doImport();
                         });
+
+        // verifyDBAgainstSource: additions only
+        $('#btnVerifyDatabase')
+                    .button({label: window.hWin.HR('Download verification report'), iconPosition:'end', icon:'ui-icon-arrowthickstop-1-s'})
+                    .on('click', _doVerifyDatabaseAgainstSource);
 
 /* repalced to help text                        
         $('#btnNextRecType1')
@@ -4340,6 +4360,70 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
         }
 
+    }
+
+    /**
+     * verifyDBAgainstSource: downloads a read-only comparison of mapped source
+     * columns and records identified by the normal matching workflow.
+     * This deliberately bypasses step4/step5, neither of which is run.
+     * @return {void}
+     */
+    function _doVerifyDatabaseAgainstSource(){
+
+        currentSeqIndex = Number(currentSeqIndex);
+        if(!(currentSeqIndex >= 0)){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to select record type'),
+                error_title: 'Missing record type'
+            });
+            return;
+        }
+
+        const rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
+        const key_idx = _getFieldIndexForIdentifier(currentSeqIndex);
+        const field_mapping = {};
+
+        $("input[id^='cbsa_dt_']").each(function(){
+            const item = $(this);
+            if(item.is(':checked')){
+                const field_type_id = $('#sa_dt_'+item.val()).val();
+                if(field_type_id && item.val()!=key_idx){
+                    field_mapping[item.val()] = field_type_id;
+                }
+            }
+        });
+
+        if(!(key_idx >= 0)){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Run matching before verification so that each source row has a Heurist record ID.',
+                error_title: 'Matching has not been completed'
+            });
+            return;
+        }
+        if(Object.keys(field_mapping).length === 0){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Select at least one source column and corresponding Heurist field to compare.',
+                error_title: 'No fields selected for verification'
+            });
+            return;
+        }
+
+        const params = new URLSearchParams({
+            db: window.hWin.HAPI4.database,
+            action: 'verify_database_against_source',
+            output: 'csv',
+            imp_ID: imp_ID,
+            sa_rectype: rtyID,
+            seq_index: currentSeqIndex,
+            recid_field: 'field_'+key_idx,
+            mapping: JSON.stringify(field_mapping)
+        });
+        // verifyDBAgainstSource: pass the exact filename/date/time description
+        // held by the UI; the server cannot reliably reconstruct this later.
+        params.set('report_name', imp_session['import_name'] || $('.curr_file_name').first().text() || upload_file_name || 'source');
+        window.hWin.HEURIST4.util.downloadURL(
+            window.hWin.HAPI4.baseURL+'hserv/controller/importController.php?'+params.toString()
+        );
     }
     
     //

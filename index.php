@@ -474,8 +474,9 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                 modal: true,
                 resizable: false,
                 draggable: false,
-                create:function(){
-                    $(this).parent().find('.ui-dialog-titlebar').addClass('fullmode').hide();
+                showTitlebar: false,
+                classes: {
+                    'ui-dialog-titlebar': 'ui-corner-all fullmode'
                 }
                 /*hide: {
                 effect: "puff",
