@@ -251,6 +251,10 @@ if(!$system->init(@$_REQUEST['db'])){
 
             $res = ImportAction::insertNewColumns(@$_REQUEST);
 
+        }else if($action === 'next_value'){
+
+            $res = ImportAction::seekNextValue(@$_REQUEST);
+
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");
             $res = false;

@@ -997,7 +997,7 @@ function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
 function setupCapsLockWarning($container){
 
     let $inputs = $container.find('input.text');
-    let $capsLockWarning = $container.find('#capslock-warning');console.log($container, $inputs, $capsLockWarning);
+    let $capsLockWarning = $container.find('#capslock-warning');
     if($inputs.length === 0 || $capsLockWarning.length === 0){
         return;
     }

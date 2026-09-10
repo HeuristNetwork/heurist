@@ -563,7 +563,7 @@ $.widget( "heurist.connections", {
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Exceeding limit set'}, {dialogId: 'visualiser-node-limit'});
 
-            let $btnContinue = $dlg.parent().find('.ui-dialog-buttonpane button').first();
+            let $btnContinue = $dlg.dialog('buttonpane').find('button').first();
             this._on($dlg.find('#enableContinue'), {
                 change: () => {
                     window.hWin.HEURIST4.util.setDisabled($btnContinue, !$dlg.find('#enableContinue').is(':checked'));

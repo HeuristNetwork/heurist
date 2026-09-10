@@ -1422,7 +1422,7 @@ window.hWin.HEURIST4.ui = {
         let hasContextHelp =  !window.hWin.HEURIST4.util.isempty(helpcontent_url);
         hideExpLevelButton = true; //always hide
         
-        let titlebar = $dialog.parent().find('.ui-dialog-titlebar');
+        let titlebar = $dialog.dialog('instance') ? $dialog.dialog('titlebar') : $dialog.parent().find('.ui-dialog-titlebar');
         if(titlebar.length==0){
             titlebar = $dialog.find(button_container_id);
         } 

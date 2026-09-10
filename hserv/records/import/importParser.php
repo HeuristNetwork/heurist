@@ -1286,8 +1286,8 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
 
         $query = $query."`field_".$i."` ".$fieldtype.', ' ;
 
-        $columns = $columns."field_".$i.",";
-        $counts = $counts."count(distinct field_".$i."),";
+        $columns .= "field_{$i},";
+        $counts .= "count(distinct field_{$i}),count(field_{$i}),";
         //array_push($mapping,0);
     }
 
@@ -1301,7 +1301,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
     $query = $query." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";//was utf8 this is alias utf8mb3
 
     $columns = substr($columns,0,-1);
-    $counts = $counts." count(*) ";
+    $counts .= " count(*) ";
 
     $mysqli = self::$system->getMysqli();
 
@@ -1374,6 +1374,20 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
 
     $uniqcnt = $res->fetch_row();
     $reccount = array_pop ( $uniqcnt );
+    $columnCounts = [];
+
+    $uniqcnt = array_filter($uniqcnt, function($count, $key) use (&$columnCounts){
+
+        if($key % 2 === 0){
+            return true;
+        }
+
+        $columnCounts[] = $count;
+        return false;
+
+    }, ARRAY_FILTER_USE_BOTH);
+
+    $uniqcnt = array_values($uniqcnt); // reset indexes, just in case
 
     //add record to import_log
     $session = array("reccount"=>$reccount,
@@ -1385,6 +1399,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
         "csv_enclosure"=>$preproc['csv_enclosure'],
         "csv_mvsep"=>$preproc['csv_mvsep'],
         "uniqcnt"=>$uniqcnt,   //count of uniq values per column
+        "column_counts"=>$columnCounts,
         "indexes"=>$preproc['keyfields'] );//names of columns in import table that contains record_ID
 
     //new parameters to replace mapping and indexes_keyfields

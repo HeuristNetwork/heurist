@@ -3899,7 +3899,7 @@ console.log('onEditFormChange @todo check buttons!!!');
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Adding new explanation'}, {dialogId: 'new-explanation', default_palette_class: 'ui-heurist-design'});
 
-        $dlg.parent().find('.ui-dialog-buttonpane button').first().addClass('ui-button-action');
+        $dlg.dialog('buttonpane').find('button').first().addClass('ui-button-action');
 
         let $textarea = $dlg.find('textarea');
         let $charCounter = $dlg.find('#explainCharCount');
