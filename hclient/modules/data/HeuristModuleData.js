@@ -47,7 +47,15 @@ const HEURIST_MODULE_DATA_DEFAULTS = {
     oncancelconfiguration: null,
     onselect: null,
     onerror: null,
-    oneditrecord: null
+    oneditrecord: null,
+
+    // Optional parent-owned UI/services. They are exposed to the iframe only
+    // when supplied, allowing heurist-data to fall back to its local UI.
+    openPreferencesDialog: null,
+    openPublishDialog: null,
+    openHelp: null,
+    addToPinList: null,
+    removeFromPinList: null
 };
 
 /** Host-side class for the independent heurist-data application. */
@@ -122,7 +130,7 @@ class HeuristModuleData extends HeuristModuleRecordset {
         var frame = this._moduleFrame && this._moduleFrame[0];
         if (!frame) return;
         var that = this;
-        frame.heuristDataHost = {
+        var bridge = {
             getConfiguration: function() {
                 return that._getConfiguration();
             },
@@ -162,6 +170,20 @@ class HeuristModuleData extends HeuristModuleRecordset {
                 return that._doSearch(request);
             }
         };
+        [
+            'openPreferencesDialog',
+            'openPublishDialog',
+            'openHelp',
+            'addToPinList',
+            'removeFromPinList'
+        ].forEach(function(name) {
+            if (typeof that.options[name] === 'function') {
+                bridge[name] = function() {
+                    return that.options[name].apply(that, arguments);
+                };
+            }
+        });
+        frame.heuristDataHost = bridge;
     }
 
     /** Build the serializable launch envelope consumed by heurist-data. */
