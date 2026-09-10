@@ -325,7 +325,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         });
 
         // Disable the 'X' button, located top-right corner
-        this.element.dialog('widget').find('.ui-dialog-titlebar-close').button().hide();
+        this.element.dialog('option', 'showCloseButton', false);
 
         // Detects the popup being resized, disable the mouseup as resize fires constantly
         this.element.parent().on('onresize',function() {

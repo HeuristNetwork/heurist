@@ -1080,7 +1080,7 @@ $.widget( "heurist.controlPanel", {
         let $minimise = $('<span>', {class: 'ui-icon ui-icon-window-minimize', title: 'Minimise dialog', style: 'padding: 0px 5px; top: 0.5em; position: absolute; font-size: 1.3em;'});
 
         let $popup = $dlg.dialog('widget');
-        $minimise.appendTo($popup.find('.ui-dialog-titlebar'));
+        $minimise.appendTo($popup.dialog('titlebar'));
 
         this._on($minimise.button(), {
             click: () => {

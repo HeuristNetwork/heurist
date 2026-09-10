@@ -516,6 +516,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         options.position.collision = 'none'; //FF fix
 
+        options.showTitlebar = !hideTitle;
+
         $dlg.dialog(options);
         
         if(!(options.height>0)){
@@ -523,14 +525,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
            
             $dlg.dialog({height:height});
         }
-           
-        
+
         content.position({ my: "center center", at: "center center", of: $dlg });
-        
-        if(hideTitle){
-            $dlg.parent().find('.ui-dialog-titlebar').hide();
-        }
-    
+
         $dlg.parent().css({background: '#95A7B7', 'border-radius': '6px',   //#7092BE
                     'outline-style':'none', outline:'none'})
         $dlg.css({color:'white', border:'none !important', overflow:'hidden' });
@@ -558,8 +555,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(window.hWin.HEURIST4.msg.coverallKeep===true) return;
         
         let $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
-        if($dlg.dialog('instance')) $dlg.dialog('close');
-        $dlg.parent().find('.ui-dialog-titlebar').show(); // Ensure title bar is visible for next time
+        if($dlg.dialog('instance')){
+            $dlg.dialog('option', 'showTitlebar', true); // Ensure title bar is visible for next time
+            $dlg.dialog('close');
+        }
     },
 
     /**
@@ -2166,3 +2165,170 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         return $dlg;
     }
 };
+
+$.widget('ui.dialog', $.ui.dialog, {
+
+    options: {
+        showTitlebar: true,
+        showCloseButton: true,
+        showResizeButtons: false,
+        showWindowButtons: false,
+        resizeButtons: {
+            full: {text: 'Fullscreen', icon: '', style: 'margin-right: 0.5em;'},
+            medium: {text: 'Standard', icon: '', style: 'margin-right: 0.5em;'},
+            small: {text: 'Small', icon: '', style: 'margin-right: 0.5em;'}
+        },
+        resizeCallback: () => {}
+    },
+
+    titlebar: function(){
+        return this.uiDialogTitlebar;
+    },
+    buttonpane: function(){
+        return this.uiDialogButtonPane;
+    },
+
+    _setOption: function(key, value){
+
+        this._super(key, value);
+
+        if(key === 'resizeButtons'){
+            this._updateResizeButtons();
+        }
+        if(key === 'showTitlebar'){
+            this._handleTitlebarDisplay();
+        }
+        if(key === 'showCloseButton'){
+            this._handleCloseButtonDisplay();
+        }
+        if(key === 'showResizeButtons'){
+            this._handleResizeButtonsDisplay();
+        }
+    },
+
+    _createTitlebar: function(){
+
+        this._super();
+
+        this._handleCloseButtonDisplay();
+
+        this._handleResizeButtonsDisplay();
+
+        this._handleTitlebarDisplay();
+    },
+
+    _handleTitlebarDisplay: function(){
+
+        if(!this.uiDialogTitlebar || this.uiDialogTitlebar.length === 0){
+            return;
+        }
+
+        this.options.showTitlebar ? this.uiDialogTitlebar.show() : this.uiDialogTitlebar.hide();
+    },
+
+    _handleCloseButtonDisplay: function(){
+
+        if(!this.uiDialogTitlebarClose || this.uiDialogTitlebarClose.length === 0){
+            return;
+        }
+
+        this.options.showCloseButton ? this.uiDialogTitlebarClose.show() : this.uiDialogTitlebarClose.hide();
+    },
+
+    uiDialogResizingContainer: null,
+    uiDialogResizingButtons: {
+        full: null,
+        medium: null,
+        small: null
+    },
+    defaultResizeButtons: {
+        full: {text: 'Fullscreen', icon: '', style: 'margin-right: 0.5em;'},
+        medium: {text: 'Standard', icon: '', style: 'margin-right: 0.5em;'},
+        small: {text: 'Small', icon: '', style: 'margin-right: 0.5em;'}
+    },
+
+    _createResizingButtons: function(){
+
+        if(this.uiDialogResizingContainer && this.uiDialogResizingContainer.length > 0){
+            return;
+        }
+
+        this.uiDialogResizingContainer = $('<span>', {
+            class: 'ui-dialog-resize-container',
+            style: 'flex: 1 0 21em'
+        }).appendTo(this.uiDialogTitlebar).uniqueId();
+
+        this.uiDialogTitlebar.css({
+            display: 'flex',
+            'flex-direction': 'row',
+            'align-items': 'center'
+        });
+
+        for(const type in this.uiDialogResizingButtons){
+
+            this.uiDialogResizingButtons[type] = $('<button>', {
+                class: 'ui-dialog-resize-button',
+                style: this.options.resizeButtons[type].style ?? this.defaultResizeButtons[type].style
+            }).button({
+                label: this.options.resizeButtons[type].text ?? this.defaultResizeButtons[type].text,
+                icon: this.options.resizeButtons[type].icon ?? this.defaultResizeButtons[type].icon
+            }).appendTo(this.uiDialogResizingContainer);
+
+            this._on(this.uiDialogResizingButtons[type], {
+                click: () => this._resizeDialog(type)
+            });
+        }
+    },
+
+    _updateResizeButtons: function(){
+
+        for(const type in this.uiDialogResizingButtons){
+
+            this.uiDialogResizingButtons[type].attr('style', this.options.resizeButtons[type].style ?? this.defaultResizeButtons[type].style);
+
+            this.uiDialogResizingButtons[type].button({
+                label: this.options.resizeButtons[type].text ?? this.defaultResizeButtons[type].text,
+                icon: this.options.resizeButtons[type].icon ?? this.defaultResizeButtons[type].icon
+            });
+        }
+    },
+
+    _resizeDialog: function(size){
+
+        if(!Object.hasOwn(this.uiDialogResizingButtons, size)){
+            return;
+        }
+
+        let resizeAmount = size === 'full' ? 0.95 : 0.8;
+        resizeAmount = size === 'small' ? 0.75 : resizeAmount;
+
+        const width = window.innerWidth * resizeAmount;
+        const height = window.innerHeight * resizeAmount;
+
+        if(width <= 0 || height <= 0){
+            return;
+        }
+
+        this._setOptions({width: width, height: height});
+        this._position();
+
+        if(typeof this.options.resizeCallback === 'function'){
+            this.options.resizeCallback.call(this, {width: width, height: height});
+        }
+    },
+
+    _handleResizeButtonsDisplay: function(){
+
+        let missingResizingContainer = !this.uiDialogResizingContainer || this.uiDialogResizingContainer.length === 0;
+        if(missingResizingContainer && this.options.showResizeButtons){
+            this._createResizingButtons();
+            missingResizingContainer = !this.uiDialogResizingContainer || this.uiDialogResizingContainer.length === 0;
+        }
+
+        if(missingResizingContainer){
+            return;
+        }
+
+        this.options.showResizeButtons ? this.uiDialogResizingContainer.show() : this.uiDialogResizingContainer.hide();
+    }
+});

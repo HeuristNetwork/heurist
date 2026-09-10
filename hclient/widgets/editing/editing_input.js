@@ -693,7 +693,7 @@ $.widget( "heurist.editing_input", {
 
                             window.hWin.HEURIST4.ui.createLanguageSelect($dlg.find('#selLang'), null, null, true);
 
-                            $dlg.parent().find('.ui-dialog-buttonpane button').css({
+                            $dlg.dialog('buttonpane').css({
                                 'margin-left': '10px', 'margin-right': '10px'
                             });
 
@@ -904,9 +904,9 @@ $.widget( "heurist.editing_input", {
 
                 }, {title: 'Editing is discouraged', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-populate'});
 
-                window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), true);
+                window.hWin.HEURIST4.util.setDisabled($dlg.dialog('buttonpane').find('button:first-child'), true);
                 $dlg.find('#allow_edit').on('change', function(){
-                    window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), !$dlg.find('#allow_edit').is(':checked'));
+                    window.hWin.HEURIST4.util.setDisabled($dlg.dialog('buttonpane').find('button:first-child'), !$dlg.find('#allow_edit').is(':checked'));
                 });
             };
 
@@ -3338,10 +3338,10 @@ $.widget( "heurist.editing_input", {
             modal: true,
             closeOnEscape: false,
             resizable: false,
-            buttons: []
+            buttons: [],
+            showTitlebar: false
           });                        
-        $progress_dlg.dialog('open'); 
-        $progress_dlg.parent().find('.ui-dialog-titlebar-close').hide();
+        $progress_dlg.dialog('open');
     },
     done: function (e, response) {
 

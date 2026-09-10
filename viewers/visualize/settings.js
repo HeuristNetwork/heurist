@@ -466,7 +466,7 @@ function initialiseMiniToolbar(){
 
                 let $dialog = $(this);
                 let $dialogContainer = $dialog.parent();
-                let $toolbar = $dialogContainer.find('.ui-dialog-titlebar');
+                let $toolbar = $dialog.dialog('titlebar');
 
                 let $btnFullscreen = $('<button>', {
                     class: 'ui-dialog-titlebar-close',

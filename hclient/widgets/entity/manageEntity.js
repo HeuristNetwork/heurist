@@ -1103,7 +1103,7 @@ $.widget( "heurist.manageEntity", {
             if (options.edit_mode == 'editonly' || options.edit_mode == 'inline')
             {
                 
-                this._toolbar = this._as_dialog.parent().find('.ui-dialog-buttonpane');
+                this._toolbar = this._as_dialog.dialog('buttonpane');
                 //assign unique identificator to get proper position of child edit dialogs
                 this._toolbar.attr('posid','edit'+this._entityName+'-'+(new Date()).getTime());
                 
@@ -1869,7 +1869,7 @@ $.widget( "heurist.manageEntity", {
                      helpURL, false);
                 }
                      
-                this._toolbar = this._edit_dialog.parent().find('.ui-dialog-buttonpane');
+                this._toolbar = this._edit_dialog.dialog('buttonpane');
                      
             }else if(this.editFormToolbar.length>0){ //initialize action buttons
                 
