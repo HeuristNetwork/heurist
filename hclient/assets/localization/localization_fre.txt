@@ -293,6 +293,8 @@
 #menu-manage-structure-assql-hint#Liste les types d'enregistrements et les définitions de champs dans un format SQL plein texte (non maintenu depuis 2014)
 #Upload Files#
 #menu-import-csv#Données tabulaires / CSV
+#menu-import-verify-csv#Vérifier la base par rapport à un CSV/TSV
+#menu-import-verify-csv-hint#Comparer un fichier source délimité aux notices correspondantes sans modifier la base
 #menu-import-zotero#Synchronisation Zotero
 #menu-import-xml#XML Heurist (HML) / JSon
 #menu-import-kml#KML

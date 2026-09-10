@@ -152,6 +152,11 @@ if(!$system->init(@$_REQUEST['db'])){
 
             $res = ImportAction::performImport($_REQUEST, 'json');
 
+        // verifyDBAgainstSource: additions only
+        }elseif($action=='verify_database_against_source'){
+
+            $res = ImportAction::verifyDatabaseAgainstSource($_REQUEST);
+
         }elseif(@$_REQUEST['content']){ //for import terms
 
             $res = ImportParser::simpleCsvParser($_REQUEST);
@@ -282,7 +287,39 @@ if(@$_REQUEST['output']=='csv'){
     if($_REQUEST['output']=='csv'){
         header('Content-Type: text/plain;charset=UTF-8');
         header('Pragma: public');
-        header('Content-Disposition: attachment; filename="import.csv"');//import_name
+        // MODIFIED for verifyDBAgainstSource: determine one filename first and
+        // emit only one Content-Disposition header.
+        $download_filename = 'import.csv';
+        // verifyDBAgainstSource: override the generic import filename with the
+        // same source filename/date/time shown in the uploaded-files list.
+        if(@$_REQUEST['action']=='verify_database_against_source'){
+            header('Content-Type: text/tab-separated-values;charset=UTF-8');
+            $verification_session = ImportSession::load(intval(@$_REQUEST['imp_ID']));
+            // verifyDBAgainstSource: sif_TempDataTable is the authoritative
+            // filename/date/time string displayed in the uploaded-files list.
+            $verification_name = mysql__select_value($system->getMysqli(),
+                'SELECT sif_TempDataTable FROM sysImportFiles WHERE sif_ID='.intval(@$_REQUEST['imp_ID']));
+            // MODIFIED for verifyDBAgainstSource: prefer the exact description
+            // displayed by the client, with session values retained as fallbacks.
+            $verification_name = trim((string)$verification_name);
+            if($verification_name===''){
+                $verification_name = trim((string)@$_REQUEST['report_name']);
+            }
+            if($verification_name===''){
+                $verification_name = @$verification_session['import_name'] ?: @$verification_session['import_file'];
+            }
+            if(trim((string)$verification_name)===''){
+                $verification_name = 'source';
+            }
+            $verification_name = preg_replace('/\s{2,}/', '_', trim((string)$verification_name));
+            $verification_name = str_replace(':', '-', $verification_name);
+            $verification_name = preg_replace('/[\\\/\"\r\n]+/', '_', $verification_name);
+            // MODIFIED for verifyDBAgainstSource: CSV extension requested for
+            // automatic spreadsheet association; content remains tab-delimited.
+            $download_filename = 'Checking_'.$verification_name.'.csv';
+        }
+        // verifyDBAgainstSource: the single definitive download filename.
+        header('Content-Disposition: attachment; filename="'.$download_filename.'"');
     }
 
     if($response['status']==HEURIST_OK){

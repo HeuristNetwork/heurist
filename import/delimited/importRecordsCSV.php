@@ -130,6 +130,15 @@ if(!$format){ $format='csv';}
                 cursor: pointer;
                 color: #0070E0;
             }
+
+            /* verifyDBAgainstSource: additions only */
+            body:not(.verification-mode) .verification-only,
+            body.verification-mode #btnPrepareStart,
+            body.verification-mode #btnImportStart,
+            body.verification-mode #divInsertUpdateSetting,
+            body.verification-mode .importIgnoreErrors {
+                display:none !important;
+            }
         </style>
     </head>
 
@@ -447,6 +456,11 @@ if(!$format){ $format='csv';}
                 <div id="btnImportStart" class="step4 step5"
                     title="Start real import data into Heurist database">
                     Start Insert/Update</div>
+
+                <!-- verifyDBAgainstSource: additions only -->
+                <div id="btnVerifyDatabase" class="step4 step5 verification-only"
+                    title="Compare the mapped source values with the matched Heurist records and download all differences">
+                    Download verification report</div>
 
                 <div style="display:none" class="skip_step prompt">
                     Click on list of record types to skip steps

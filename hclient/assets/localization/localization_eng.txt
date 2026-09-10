@@ -142,6 +142,8 @@
 #menu-manage-structure-assql-hint#Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)
 #Upload Files#
 #menu-import-csv#Delimited text / CSV
+#menu-import-verify-csv#Verify db against CSV/TSV
+#menu-import-verify-csv-hint#Compare a delimited source file with matching records without modifying the database
 #menu-import-zotero#Zotero bibliography sync
 #menu-import-xml#Heurist XML/JSon
 #menu-import-kml#KML
