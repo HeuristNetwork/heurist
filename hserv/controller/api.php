@@ -454,6 +454,21 @@ if($is_system_query){
     $method = 'search';
 }
 
+// The modern definitions collection returns one cached database-structure
+// snapshot for client query builders and the query-language describer.
+// GET /api/{db}/def/snapshot  (read-only; will supersede /rty|/dty|/trm|/rst|/trl)
+$is_def_query = ($resource === 'def');
+if($is_def_query){
+    if($http_method !== 'GET'){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
+    }
+    $defType = isset($requestUri[4]) && $requestUri[4] !== '' ? (string)$requestUri[4] : 'snapshot';
+    if($defType !== 'snapshot'){
+        exitWithError('Unknown definition resource: '.$defType, 404);
+    }
+    $method = 'search';
+}
+
 // Routes where auth processing is not needed here
 $is_public_annotation_read =
     ($resource === 'annotations'
@@ -495,6 +510,7 @@ if($method === 'search'){
         'dty', 'fields',
         'trm', 'terms', 'trl', 'termlinks',
         'rst', 'recstructure',
+        'def',
         'map', 'time'
     );
     $allow_anonymous = in_array($resource, $publicSearchResources, true);    
@@ -522,7 +538,17 @@ if(!$skip_auth_processing){
 }
 // ----------------------------------------------------
 
-if($is_system_query){
+if($is_def_query){
+
+    $req_params['restapi'] = 1;
+    $defType = isset($requestUri[4]) && $requestUri[4] !== ''
+        ? (string)$requestUri[4] : 'snapshot';
+    $controller = ServiceFactory::fromLegacySystem($system)->definitionController();
+    $controller->output($req_params, $defType);
+    $system->dbclose();
+    exit;
+
+}elseif($is_system_query){
 
     $req_params['restapi'] = 1;
     $systemType = isset($requestUri[4]) && $requestUri[4] !== ''

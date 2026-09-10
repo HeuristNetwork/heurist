@@ -1984,7 +1984,8 @@ EXP;
 
     /**
      * Removes database definition cache files.
-     * Deletes `db.json` (old name) and `dbdef_cache.json` from the database's 'entity' system directory.
+     * Deletes `db.json` (old name), `dbdef_cache.json` and any `def-snapshot*.json`
+     * (modern /api/{db}/def/snapshot cache) from the database's 'entity' system directory.
      * It checks if the entity directory path can be resolved before attempting deletion.
      *
      * @return void
@@ -1995,6 +1996,13 @@ EXP;
             // fileDelete is assumed to be a global helper function that safely attempts to delete a file.
             fileDelete($entityDir . 'db.json'); //old version
             fileDelete($entityDir . 'dbdef_cache.json');
+            // Modern /api/{db}/def/snapshot cache - regenerated on next request.
+            $defSnapshots = glob($entityDir . 'def-snapshot*.json');
+            if (is_array($defSnapshots)) {
+                foreach ($defSnapshots as $defSnapshotFile) {
+                    fileDelete($defSnapshotFile);
+                }
+            }
         } else {
             // Log error: could not determine entity directory
             error_log("cleanDefCache: Could not determine 'entity' system directory for database " . ($this->dbname() ?? 'unknown'));

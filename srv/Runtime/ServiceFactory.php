@@ -18,6 +18,7 @@
 declare(strict_types=1);
 namespace Heurist\Runtime;
 
+use Heurist\Controller\DefinitionController;
 use Heurist\Controller\GraphController;
 use Heurist\Controller\MapDataController;
 use Heurist\Controller\PublicationController;
@@ -32,6 +33,7 @@ use Heurist\Records\Map\MapFeatureService;
 use Heurist\Records\Presentation\DatasetPresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
 use Heurist\Records\Presentation\PresentationRecordRepository;
+use Heurist\Definitions\DefinitionSnapshotService;
 use Heurist\Records\Time\TimeDataService;
 use Heurist\System\Query\SystemQueryService;
 
@@ -43,6 +45,7 @@ final class ServiceFactory
     private PresentationRecordRepository $presentations;
     private SystemCode $codes;
     private string $publicationDirectory;
+    private string $entityDirectory;
 
     /** Build the PDO and runtime boundary from the current legacy initialization. */
     public static function fromLegacySystem($system): self
@@ -73,7 +76,8 @@ final class ServiceFactory
             DatabaseFactory::fromHeuristConfiguration($runtime->databaseNameFull),
             $runtime,
             new SystemCode($codeIds),
-            (string)$system->getSysDir('generated-pubs')
+            (string)$system->getSysDir('generated-pubs'),
+            (string)$system->getSysDir('entity')
         );
     }
 
@@ -82,7 +86,8 @@ final class ServiceFactory
         DatabaseInterface $database,
         RuntimeContext $runtime,
         SystemCode $codes,
-        string $publicationDirectory = ''
+        string $publicationDirectory = '',
+        string $entityDirectory = ''
     )
     {
         $this->database = $database;
@@ -90,6 +95,7 @@ final class ServiceFactory
         $this->codes = $codes;
         $this->presentations = new PresentationRecordRepository($database, $runtime, $codes);
         $this->publicationDirectory = $publicationDirectory;
+        $this->entityDirectory = $entityDirectory;
     }
 
     /** Create the records query/retrieval controller. */
@@ -102,6 +108,15 @@ final class ServiceFactory
     public function graphController(): GraphController
     {
         return new GraphController($this->database, $this->runtime);
+    }
+
+    /** Create the database-definitions snapshot controller (/api/{db}/def). */
+    public function definitionController(): DefinitionController
+    {
+        return new DefinitionController(
+            new DefinitionSnapshotService($this->database, $this->runtime, $this->entityDirectory),
+            $this->runtime
+        );
     }
 
     /** Create the mapped filter/user query and retrieval controller. */

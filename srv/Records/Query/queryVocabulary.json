@@ -1,0 +1,170 @@
+{
+  "_about": "Shared vocabulary for the Filter Builder and the query-language describer (Tasks A/C). Operators + phrase templates ONLY - the predicate keyword list (KEYWORD_ALIASES / LINK_PREDICATES) is hard-copied on the client from srv/Records/Query/Parser/RecordQueryParser.php. i18nKey values are resolved through heurist-explorer's $HR() against assets/localization/localization_<lang>.txt (#key#value). Canonical copy lives here; heurist-explorer keeps an identical copy. See documentation/development/query-language-filter-builder-plan.md sections 4.1 and 6.",
+  "version": "1",
+
+  "fieldKinds": {
+    "freetext": "text",
+    "blocktext": "text",
+    "calculated": "text",
+    "urlinclude": "text",
+    "integer": "number",
+    "float": "number",
+    "date": "date",
+    "year": "date",
+    "enum": "enum",
+    "relationtype": "term",
+    "relmarker": "term",
+    "resource": "record",
+    "file": "file",
+    "geo": "geo",
+    "boolean": "bool"
+  },
+
+  "headerKinds": {
+    "title": "text",
+    "url": "text",
+    "notes": "text",
+    "added": "date",
+    "modified": "date",
+    "id": "number",
+    "type": "record",
+    "tag": "tag"
+  },
+
+  "operators": {
+    "text": [
+      { "token": "",   "input": "text", "i18nKey": "op.contains" },
+      { "token": "=",  "input": "text", "i18nKey": "op.exact" },
+      { "token": "==", "input": "text", "i18nKey": "op.exact_cs" },
+      { "token": "",   "input": "text", "pattern": "{v}%", "i18nKey": "op.starts_with" },
+      { "token": "",   "input": "text", "pattern": "%{v}", "i18nKey": "op.ends_with" },
+      { "token": "@+", "input": "text", "i18nKey": "op.all_words" },
+      { "token": "@",  "input": "text", "i18nKey": "op.any_word" },
+      { "token": "@-", "input": "text", "i18nKey": "op.no_words" },
+      { "token": "-",  "input": "text", "i18nKey": "op.not_contains" }
+    ],
+    "number": [
+      { "token": "",   "input": "number", "i18nKey": "op.equals" },
+      { "token": "-",  "input": "number", "i18nKey": "op.not_equals" },
+      { "token": ">",  "input": "number", "i18nKey": "op.gt" },
+      { "token": ">=", "input": "number", "i18nKey": "op.gte" },
+      { "token": "<",  "input": "number", "i18nKey": "op.lt" },
+      { "token": "<=", "input": "number", "i18nKey": "op.lte" },
+      { "token": "<>", "input": "range",  "pattern": "{a}<>{b}", "i18nKey": "op.between" }
+    ],
+    "date": [
+      { "token": "<>", "input": "range", "pattern": "{a}<>{b}", "i18nKey": "op.overlaps" },
+      { "token": "><", "input": "range", "pattern": "><{a}/{b}", "i18nKey": "op.within_range" },
+      { "token": "=",  "input": "date",  "i18nKey": "op.on" },
+      { "token": ">=", "input": "date",  "i18nKey": "op.on_or_after" },
+      { "token": "<=", "input": "date",  "i18nKey": "op.on_or_before" }
+    ],
+    "enum": [
+      { "token": "",  "input": "term", "i18nKey": "op.is" },
+      { "token": "=", "input": "term", "i18nKey": "op.is_exactly" },
+      { "token": "-", "input": "term", "i18nKey": "op.is_not" }
+    ],
+    "term": [
+      { "token": "",  "input": "term", "i18nKey": "op.is" },
+      { "token": "-", "input": "term", "i18nKey": "op.is_not" }
+    ],
+    "record": [
+      { "token": "",  "input": "record", "i18nKey": "op.is" },
+      { "token": "-", "input": "record", "i18nKey": "op.is_not" }
+    ],
+    "file": [
+      { "token": "",  "input": "text", "i18nKey": "op.contains" },
+      { "token": "=", "input": "text", "i18nKey": "op.exact" }
+    ],
+    "geo": [
+      { "token": "", "input": "wkt", "i18nKey": "op.within" }
+    ],
+    "bool": [
+      { "token": "", "input": "bool", "i18nKey": "op.is" }
+    ],
+    "tag": [
+      { "token": "",     "input": "tag",  "i18nKey": "op.is" },
+      { "token": "-",    "input": "tag",  "i18nKey": "op.is_not" },
+      { "token": "any",  "input": "tags", "i18nKey": "op.any_of" },
+      { "token": "all",  "input": "tags", "i18nKey": "op.all_of" }
+    ]
+  },
+
+  "common": [
+    { "token": "-NULL", "input": "none", "whole": true, "i18nKey": "op.is_set" },
+    { "token": "NULL",  "input": "none", "whole": true, "i18nKey": "op.is_empty" }
+  ],
+  "commonAppliesTo": ["text", "number", "date", "enum", "term", "record", "file"],
+
+  "phrases": {
+    "find":         "phrase.find",
+    "any_type":     "phrase.any_type",
+    "where":        "phrase.where",
+    "and":          "phrase.and",
+    "or":           "phrase.or",
+    "not":          "phrase.not",
+    "any_of":       "phrase.any_of",
+    "all_of":       "phrase.all_of",
+    "field_cond":   "phrase.field_cond",
+    "header_cond":  "phrase.header_cond",
+    "linked_to":    "phrase.linked_to",
+    "linked_from":  "phrase.linked_from",
+    "related_to":   "phrase.related_to",
+    "related_from": "phrase.related_from",
+    "related":      "phrase.related",
+    "sort_by":      "phrase.sort_by",
+    "value_list":   "phrase.value_list"
+  },
+
+  "strings": {
+    "eng": {
+      "op.contains": "contains",
+      "op.not_contains": "does not contain",
+      "op.exact": "is",
+      "op.exact_cs": "is exactly (case-sensitive)",
+      "op.starts_with": "starts with",
+      "op.ends_with": "ends with",
+      "op.all_words": "contains all of the words",
+      "op.any_word": "contains any of the words",
+      "op.no_words": "contains none of the words",
+      "op.equals": "is",
+      "op.not_equals": "is not",
+      "op.gt": "is greater than",
+      "op.gte": "is at least",
+      "op.lt": "is less than",
+      "op.lte": "is at most",
+      "op.between": "is between",
+      "op.overlaps": "falls in or overlaps",
+      "op.within_range": "falls entirely within",
+      "op.on": "is on",
+      "op.on_or_after": "is on or after",
+      "op.on_or_before": "is on or before",
+      "op.is": "is",
+      "op.is_not": "is not",
+      "op.is_exactly": "is exactly",
+      "op.within": "is within",
+      "op.any_of": "is any of",
+      "op.all_of": "is all of",
+      "op.is_set": "has a value",
+      "op.is_empty": "has no value",
+
+      "phrase.find": "Find {rectype}",
+      "phrase.any_type": "records",
+      "phrase.where": "where {conditions}",
+      "phrase.and": " and ",
+      "phrase.or": " or ",
+      "phrase.not": "not ({conditions})",
+      "phrase.any_of": "any of ({conditions})",
+      "phrase.all_of": "all of ({conditions})",
+      "phrase.field_cond": "{field} {op} {value}",
+      "phrase.header_cond": "{field} {op} {value}",
+      "phrase.linked_to": "linked to {subquery}",
+      "phrase.linked_from": "linked from {subquery}",
+      "phrase.related_to": "related to {subquery}",
+      "phrase.related_from": "related from {subquery}",
+      "phrase.related": "related to {subquery}",
+      "phrase.sort_by": "sorted by {fields}",
+      "phrase.value_list": "{values}"
+    }
+  }
+}
