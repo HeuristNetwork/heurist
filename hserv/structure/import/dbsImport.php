@@ -899,8 +899,6 @@ foreach ($this->imp_fieldtypes as $ftId){
         $def_field[$idx_name-1] = $this->doDisambiguate($def_field[$idx_name-1], $trg_detailtypes['names']);
         $res = createDetailTypes($columnNames, array("common"=>$def_field));
     }
-    
-    
 
     if(is_numeric($res)){
         $new_dtyID = abs($res);
@@ -920,7 +918,7 @@ foreach ($this->imp_fieldtypes as $ftId){
         //$ftId
         $this->error_exit2('Can\'t add base field "'.$def_field[$idx_name-1]
             .'" (global code '.$def_field[$idx_ccode-1]
-            .') defined in  template. This may be due to a name conflict caused by unrecognised accents on similar names. <br><br>'
+            .') defined in template. This may be due to a name conflict caused by unrecognised accents on similar names. <br><br>'
             .CONTACT_HEURIST_TEAM_PLEASE.' for advice'
             .'<br><br>MySQL message:'.$res);
         return false;

@@ -169,12 +169,152 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
      * @function _onRecordScopeChange
      * @memberof Widgets.Records.recordAddLinkMatch
      * @private
-     * @description Handles changes in the source record scope. Calls `_fillSelectFieldTypes` for the source.
+     * @description Handles changes in the source record scope. Resets all fields and clears all selections.
      * This is an override of the parent widget's method.
      */
-    _onRecordScopeChange: function () 
-    {
-        this._fillSelectFieldTypes('source', this.source_RecTypeID);
+    _onRecordScopeChange: function (){
+
+        if(this._$('.fieldtype_sources').find('.input-div').length > 0){
+            this._clearAllSelectFieldTypes('source');
+            this._clearAllSelectFieldTypes('target');
+        }else{
+
+            this._on(this._$('#repeat_source_input'), {
+                click: () => this._addInputDiv('source')
+            });
+
+            this._$('.fieldtype_sources').sortable({
+                axis: 'y',
+                update: () => {
+                    this._findMatchesCount();
+                }
+            });
+        }
+
+        this._$('#sel_pointer_field').attr('data-init', 0);
+
+        this._addInputDiv('source');
+    },
+
+    _addInputDiv: function(party){
+
+        let $container = this._$(`.fieldtype_${party}s`);
+
+        const randomID = crypto.getRandomValues(new Uint16Array(1));
+        const elementID = `${party}_${randomID}`;
+
+        let countEle = party === 'target' && $container.find('.input-div').length === 0 ? `<span id="count_target_matches" style="padding-left:5px;font-weight:bold"></span>` : '';
+        countEle = party === 'source' ? `<span id="count_${elementID}" style="padding-left:5px;font-weight:bold"></span>` : countEle;
+
+        let $div = $('<div>', {
+            class: 'input-div',
+            'data-id': randomID,
+            html: `<select id="select_fieldtype_${elementID}" class="ui-widget-content ui-corner-all" style="min-height: 24px;"></select>
+            ${countEle}
+            <span id="clear_${elementID}" style="cursor: pointer;" class="smallbutton ui-icon ui-icon-circlesmall-close show-onhover"></span>
+            <span id="move_${elementID}" class="smallbutton ui-icon ui-icon-arrow-2-n-s show-onhover"></span>`
+        }).appendTo($container);
+
+        this._on($div.find(`#clear_${elementID}`), {
+            click: () => this._removeInputDiv(party, randomID)
+        });
+
+        this._fillSelectFieldTypes(party, randomID, party === 'source' ? this.source_RecTypeID : this.target_RecTypeID);
+
+        if(party === 'source'){ // for each source there is a target
+            this._addInputDiv('target');
+        }
+    },
+
+    _removeInputDiv: function(party, elementID){
+
+        let $sourceContainer = this._$(`.fieldtype_sources`);
+        let $targetContainer = this._$(`.fieldtype_targets`);
+
+        let $originalContainer = party === 'source' ? $sourceContainer : $targetContainer;
+
+        if($originalContainer.find('.input-div').length === 0){
+            return;
+        }else if($sourceContainer.find('.input-div').length === 1){
+
+            let $sourceSelect = $sourceContainer.find('select');
+            let $targetSelect = $targetContainer.find('select');
+
+            if(party === 'source'){
+                $sourceSelect.val('').trigger('change');
+            }
+            $targetSelect.val('').trigger('change');
+
+            if($sourceSelect.hSelect('instance') !== undefined){
+                $sourceSelect.hSelect('refresh');
+            }
+
+            if($targetSelect.hSelect('instance') !== undefined){
+                $targetSelect.hSelect('refresh');
+            }
+
+            $sourceContainer.find('span[id^="count_"]').text('');
+            $targetContainer.find('#target_match_count').text('');
+
+            return;
+        }
+
+        let inputIDX = -1;
+        $originalContainer.find('.input-div').each((idx, ele) => {
+            if(ele.getAttribute('data-id') == elementID){
+                inputIDX = idx;
+                return false;
+            }
+        });
+
+        if(inputIDX === -1){
+            return;
+        }
+
+        let $sourceInputDiv = this._$($sourceContainer.find('.input-div')[inputIDX]);
+        let $targetInputDiv = this._$($targetContainer.find('.input-div')[inputIDX]);
+
+        let $sourceSelect = $sourceInputDiv.find('.select_fieldtype');
+        $sourceSelect.empty();
+        if($sourceSelect.hSelect("instance") != undefined){
+            $sourceSelect.hSelect("destroy"); 
+        }
+
+        let $targetSelect = $targetInputDiv.find('.select_fieldtype');
+        $targetSelect.empty();
+        if($targetSelect.hSelect("instance") != undefined){
+            $targetSelect.hSelect("destroy"); 
+        }
+
+        if($targetInputDiv.find('#count_target_matches').length > 0 && $targetContainer.find('.input-div').length > 1){
+            $targetInputDiv.find('#count_target_matches').insertBefore($($targetContainer.find('.input-div')[1]).find('[id^="clear_target_"]'));
+        }
+
+        $sourceInputDiv.remove();
+        $targetInputDiv.remove();
+
+        this._findMatchesCount();
+    },
+
+    _clearAllSelectFieldTypes: function(party, removeAll = false){
+
+        let $container = this._$(`.fieldtype_${party}s`);
+
+        $container.find('.input-div').each((idx, ele) => {
+
+            let $select = $(ele).find('.select_fieldtype');
+
+            $select.empty();
+            if($select.hSelect("instance")!=undefined){
+                $select.hSelect("destroy"); 
+            }
+
+            if(idx > 0 || removeAll){
+                ele.remove();
+            }
+        });
+
+        this._findMatchesCount();
     },
  
     /**
@@ -190,19 +330,25 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
      * @param {string} party - 'source' or 'target'.
      * @param {number} recRecTypeID - The record type ID for which to list fields.
      */
-    _fillSelectFieldTypes: function (party, recRecTypeID) {
+    _fillSelectFieldTypes: function (party, inputID, recRecTypeID) {
 
         // create matching field
-        let fieldSelect = $('#sel_fieldtype_'+party);
+        let $container = this._$(`.fieldtype_${party}s`);
+        let fieldSelect = $container.find(`#select_fieldtype_${party}_${inputID}`);
         
         let details = $Db.rst(recRecTypeID);
-        if(details)
-        {   
 
-        if(party=='source')
-        {
-            
-            let fieldPointerSel = this._$('#sel_pointer_field');
+        if(!details){
+
+            this._clearAllSelectFieldTypes(party);
+
+            return;
+        }
+
+        let fieldPointerSel = this._$('#sel_pointer_field');
+        if(party == 'source' && fieldPointerSel.attr('data-init') != 1){
+
+            fieldPointerSel.attr('data-init', 1);
             fieldPointerSel.empty();
 
             let that = this;
@@ -236,27 +382,22 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             this._on( fieldPointerSel, { change: that._fillTargetRecordTypes} );        
             window.hWin.HEURIST4.ui.initHSelect(fieldPointerSel, false);
             fieldPointerSel.trigger('change');
-            
+
         }//for source 
-        
+
         window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect.get(0), recRecTypeID, 
                                     ['freetext','blocktext'], window.hWin.HR('select'));
                     
         if(fieldSelect.find('option').length==1){
             fieldSelect.empty();
             window.hWin.HEURIST4.ui.addoption(fieldSelect.get(0), 0, 'There are no text fields');
+            //$('.fieldtype_sources .')
         }
                      
         window.hWin.HEURIST4.ui.initHSelect(fieldSelect, false);
-        this._on(fieldSelect,{change:this._findMatchesCount});
+        this._on(fieldSelect, {change: this._findMatchesCount});
         fieldSelect.trigger('change');
-        
-        }else{
-            fieldSelect.empty();
-            if(fieldSelect.hSelect("instance")!=undefined){
-                fieldSelect.hSelect("destroy"); 
-            }
-        }
+
     },  
 
     /**
@@ -272,16 +413,18 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
      */
     _findMatchesCount: function(event){
         
-        let fieldSelect = $(event.target);
+        let fieldSelect = event ? $(event.target) : null;
+        const ID = fieldSelect ? fieldSelect.attr('id') : '';
         
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('.btnDoAction'), true);
-        
-        if(fieldSelect.attr('id')=='sel_fieldtype_source'){
 
-            let cnt_info = this._$('#count_source_unique').text('');
-            
-            if(fieldSelect.val()>0){
-                cnt_info.addClass('ui-icon ui-icon-loading-status-balls rotate')
+        if(ID.startsWith('select_fieldtype_source_')){
+
+            let $countSource = this._$(`#${ID.replace('select_fieldtype', 'count')}`).text('');
+
+            if(fieldSelect.val() > 0){
+
+                $countSource.addClass('ui-icon ui-icon-loading-status-balls rotate')
             
                 //search all and unique detail values
                 window.HAPI4.RecordMgr.get_aggregations({a:'count_details',
@@ -289,45 +432,48 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
                     rty_ID:this.source_RecTypeID, 
                     dty_ID:fieldSelect.val()}, 
                 function(response){     
-                    cnt_info.removeClass('ui-icon ui-icon-loading-status-balls rotate')
+                    $countSource.removeClass('ui-icon ui-icon-loading-status-balls rotate')
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        cnt_info.text(response.data.total+' values ('+response.data.unique+' unique)');                
+                        $countSource.text(response.data.total+' values ('+response.data.unique+' unique)');                
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
             }
         }
+
+        if(this.target_RecTypeID <= 0){
+            return;
+        }
+
+        let [fieldSources, fieldTargets] = this._getSelectedDetailFields();
+
+        let cnt_info2 = this._$('#count_target_matches').text('');
+
+        if(fieldSources && fieldTargets){
+            
+            cnt_info2.addClass('ui-icon ui-icon-loading-status-balls rotate')
+            
+            let that = this;
         
-        if(this.target_RecTypeID>0){
+            window.HAPI4.RecordMgr.get_aggregations({
+                a:'count_matches',
+                rec_IDs: this._getRecordsScope().join(','),
+                rty_src: this.source_RecTypeID, 
+                dty_src: fieldSources,
+                rty_trg: this.target_RecTypeID, 
+                dty_trg: fieldTargets
+            }, 
+            function(response){     
+                cnt_info2.removeClass('ui-icon ui-icon-loading-status-balls rotate')
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    cnt_info2.text(response.data+' matches');                
+                    that._enableActionButton();
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
 
-            let fieldSelectTrg = this._$('#sel_fieldtype_target');
-            let fieldSelectSrc = this._$('#sel_fieldtype_source');
-
-            let cnt_info2 = this._$('#count_target_matches').text('');
-            
-            if(fieldSelectSrc.val()>0 && fieldSelectTrg.val()>0){
-                cnt_info2.addClass('ui-icon ui-icon-loading-status-balls rotate')
-                
-                let that = this;
-            
-                window.HAPI4.RecordMgr.get_aggregations({a:'count_matches',
-                                rec_IDs: this._getRecordsScope().join(','),
-                                rty_src:this.source_RecTypeID, 
-                                dty_src:fieldSelectSrc.val(),
-                                rty_trg:this.target_RecTypeID, 
-                                dty_trg:fieldSelectTrg.val()
-                                                        }, 
-                function(response){     
-                    cnt_info2.removeClass('ui-icon ui-icon-loading-status-balls rotate')
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        cnt_info2.text(response.data+' matches');                
-                        that._enableActionButton();
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-            }
         }
         
     },
@@ -375,26 +521,36 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
      * @memberof Widgets.Records.recordAddLinkMatch
      * @private
      * @description Event handler for when the target record type selector (`#target_record_type`) changes.
-     * Updates `this.target_RecTypeID`, displays the count of records for the selected target type,
-     * and calls `_fillSelectFieldTypes` to populate the target matching field selector.
+     * Updates `this.target_RecTypeID`, displays the count of records for the selected target type.
      * Clears target field selectors if no records exist for the selected type.
      */
     _onTargetRtySelectChange: function(){
+
         this._$('#count_target_rty').text('');
         this.target_RecTypeID = this.targetRtySelect.val();
-        if(this.target_RecTypeID>0){
+
+        let hasUsage = false;
+        if(this.target_RecTypeID > 0){
             let rty_usage_cnt = $Db.rty(this.target_RecTypeID,'rty_RecCount');
-            if(rty_usage_cnt>0){
+            if(rty_usage_cnt > 0){
                 this._$('#count_target_rty').text( rty_usage_cnt + ' records' );
+                hasUsage = true;
             }
         }
-        this._fillSelectFieldTypes('target', this.target_RecTypeID);
-        if(this._$('#count_target_rty').text()==''){
-            this._$('#sel_fieldtype_target').empty();
-            this._$('#count_target_matches').empty();
-            this._enableActionButton();
+
+        this._clearAllSelectFieldTypes('target', true);
+        this._enableActionButton();
+
+        if(!hasUsage){
+            this._$('.fieldtype_targets').text('Record type is not used');
+            return;
         }
 
+        let inputCount = this._$('.fieldtype_sources .input-div').length;
+        while(inputCount > 0){
+            this._addInputDiv('target');
+            inputCount--;
+        }
     },
 
     /**
@@ -495,16 +651,22 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         let div_res = this._$('#div_result');
         div_res.empty();
         let that = this;
-        
+        let [fieldSources, fieldTargets] = this._getSelectedDetailFields();
+
+        if(!fieldSources || !fieldTargets){
+            return;
+        }
+
         if ($('input[name="to_replace"]:checked').val()=='nonmatch') {
-                window.HAPI4.RecordMgr.get_aggregations({a:'count_matches',
-                                nonmatch: 1,
-                                rec_IDs: this._getRecordsScope().join(','),
-                                rty_src:this.source_RecTypeID, 
-                                dty_src:$('#sel_fieldtype_source').val(),
-                                rty_trg:this.target_RecTypeID, 
-                                dty_trg:$('#sel_fieldtype_target').val()
-                                                        }, 
+                window.HAPI4.RecordMgr.get_aggregations({
+                    a:'count_matches',
+                    nonmatch: 1,
+                    rec_IDs: this._getRecordsScope().join(','),
+                    rty_src: this.source_RecTypeID,
+                    dty_src: fieldSources,
+                    rty_trg: this.target_RecTypeID,
+                    dty_trg: fieldTargets
+                }, 
                 function(response){     
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that.element.find('#div_fieldset').hide();
@@ -526,17 +688,18 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             
             let session_id = Math.round((new Date()).getTime()/1000);
         
-            let request = {a: 'add_links_by_matching',
-                                session: session_id,
-                                dty_ID:  dty_ID,
-                                //trm_ID: trm_ID,
-                                rec_IDs: currentScope.join(','),
-                                rty_src:  this.source_RecTypeID,
-                                dty_src: $('#sel_fieldtype_source').val(),
-                                rty_trg: this.target_RecTypeID,
-                                dty_trg: $('#sel_fieldtype_target').val(),
-                                replace: ($('input[name="to_replace"]:checked').val()=='replace'?1:0)
-                        };
+            let request = {
+                a: 'add_links_by_matching',
+                session: session_id,
+                dty_ID:  dty_ID,
+                //trm_ID: trm_ID,
+                rec_IDs: currentScope.join(','),
+                rty_src:  this.source_RecTypeID,
+                dty_src: fieldSources,
+                rty_trg: this.target_RecTypeID,
+                dty_trg: fieldTargets,
+                replace: ($('input[name="to_replace"]:checked').val()=='replace'?1:0)
+            };
 
             this._showProgress( session_id, false, 1000 );
             
@@ -585,6 +748,36 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }
         this.element.parents('.ui-dialog').find('.btnDoAction').button({label:window.hWin.HR(lab1)});
         this.element.parents('.ui-dialog').find('.btnCancel').button({label:window.hWin.HR(lab2)});
+    },
+
+    _getSelectedDetailFields: function(){
+
+        let $sourceContainer = this._$(`.fieldtype_sources`);
+        let $targetContainer = this._$(`.fieldtype_targets`);
+        let $sourceFields = $sourceContainer.find('[id^="select_fieldtype_"]');
+        let $targetFields = $targetContainer.find('[id^="select_fieldtype_"]');
+
+        let sources = [];
+        let targets = [];
+
+        for(let idx = 0; idx < $sourceFields.length; idx++){
+
+            let $source = $($sourceFields[idx]);
+            let $target = $($targetFields[idx]);
+            const source = $source.val();
+            const target = $target.val();
+
+            if(source === '' && target === ''){
+                continue;
+            }else if(source === '' || target === ''){
+                return [false, false];
+            }
+
+            sources.push(source);
+            targets.push(target);
+        }
+
+        return [sources, targets];
     }
         
 });
