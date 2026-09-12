@@ -701,9 +701,8 @@ public static function assignRecordIds($params){
     }
     $index = array_search($id_fieldname, $imp_session['columns']);//find it among existing columns
     if($index!==false){ //this is existing field
-        $id_field  = "field_{$index}";
-        $imp_session['uniqcnt'][$index] = !isEmptyArray(@$pairs) ? count($pairs) : $imp_session['reccount'];
-        $imp_session['column_counts'][$index] = $imp_session['reccount'];
+        $id_field  = "field_".$index;
+        $imp_session['uniqcnt'][$index] = (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'];
     }
 
     //add new field into import table
@@ -739,9 +738,8 @@ public static function assignRecordIds($params){
             return false;
         }*/
 
-        $imp_session['columns'][] = $id_fieldname;
-        $imp_session['uniqcnt'][] = !isEmptyArray(@$pairs) ? count($pairs) : $imp_session['reccount'] ;
-        $imp_session['column_counts'][] = $imp_session['reccount'];
+        array_push($imp_session['columns'], $id_fieldname );
+        array_push($imp_session['uniqcnt'], (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'] );
 
         if(@$params['idfield']){
             array_push($imp_session['multivals'], $field_count );//!!!!
@@ -3583,8 +3581,7 @@ public static function performImport($params, $mode_output){
 
 
         if(!$id_field){
-            $imp_session['uniqcnt'][] = self::$rep_added;
-            $imp_session['column_counts'][] = self::$rep_added;
+            array_push($imp_session['uniqcnt'], self::$rep_added);
         }
 
         //reassign record ids to keep in session
@@ -3902,7 +3899,6 @@ public static function insertNewColumns($params){
 
     $imp_session['columns'][] = $col_name;
     $imp_session['uniqcnt'][] = "1";
-    $imp_session['column_counts'][] = "1";
 
     $column_size = mb_strlen($col_data) + 5;
 
@@ -3983,6 +3979,15 @@ public static function verifyDatabaseAgainstSource($params){
     }
 
     $column_names = @$imp_session['columns'];
+    // verifyDBAgainstSource: locate an optional Batch, Batch #, Batch No or
+    // Batch Number source column and carry it into every report row.
+    $batch_field = null;
+    foreach((array)$column_names as $batch_index=>$batch_column_name){
+        if(preg_match('/^\s*batch(?:\s*(?:#|no\.?|number))?\s*$/i', (string)$batch_column_name)){
+            $batch_field = 'field_'.intval($batch_index);
+            break;
+        }
+    }
     $csv_mvsep = @$imp_session['csv_mvsep'];
     if(!$csv_mvsep || $csv_mvsep==='none'){
         $csv_mvsep = null;
@@ -3990,6 +3995,9 @@ public static function verifyDatabaseAgainstSource($params){
 
     $groups = array();
     $select_fields = array($id_field);
+    if($batch_field!==null){
+        $select_fields[] = $batch_field;
+    }
     foreach($mapping as $index=>$field_type){
         if(!ctype_digit((string)$index)){
             continue;
@@ -4060,34 +4068,46 @@ public static function verifyDatabaseAgainstSource($params){
 
     $fp = fopen('php://temp', 'r+');
     // MODIFIED for verifyDBAgainstSource: TSV output and Field type column.
-    fputcsv($fp, array('Source row','Heurist record ID','Status','Dupes','Source column(s)',
-                       'Heurist field','Field type','Source value(s)','Database value(s)'), "\t", '"');
+    // MODIFIED for verifyDBAgainstSource: requested output column order; duplicate reporting removed.
+    $report_header = array('Source row','Heurist record ID','Status','Fieldtype','Source column(s)',
+                           'Heurist field','Source value(s)','Database value(s)');
+    if($batch_field!==null){
+        array_splice($report_header, 2, 0, array('Batch'));
+    }
+    fputcsv($fp, $report_header, "\t", '"');
     $record_cache = array();
     $term_cache = array();
     $term_label_cache = array();
     $file_cache = array();
-    $last_reported_source = null;
+    $report_rows = array();
 
-    // verifyDBAgainstSource: add a blank line whenever the report moves to a
-    // different source row, while allowing several field differences per row.
-    $write_report_row = function($source_id, $row) use ($fp, &$last_reported_source){
-        if($last_reported_source!==null && $last_reported_source!==$source_id){
-            fwrite($fp, PHP_EOL);
+    // MODIFIED for verifyDBAgainstSource: retain rows until they can be sorted.
+    $write_report_row = function($source_id, $row) use (&$report_rows){
+        $report_rows[] = array('source_id'=>$source_id, 'row'=>$row);
+    };
+    // verifyDBAgainstSource: insert Batch immediately before Status only when
+    // a suitably named source column exists.
+    $make_report_row = function($source_id, $record_id, $batch_value, $status, $fieldtype='',
+                                $source_columns='', $heurist_field='', $source_values='', $database_values='') use ($batch_field){
+        $row = array($source_id, $record_id);
+        if($batch_field!==null){
+            $row[] = $batch_value;
         }
-        fputcsv($fp, $row, "\t", '"');
-        $last_reported_source = $source_id;
+        return array_merge($row, array($status, $fieldtype, $source_columns, $heurist_field,
+                                      $source_values, $database_values));
     };
 
     while($source_row = $source_result->fetch_assoc()){
         $imp_id = intval($source_row['imp_id']);
+        $batch_value = $batch_field===null ? '' : trim((string)@$source_row[$batch_field]);
         $record_id_text = trim((string)@$source_row[$id_field]);
         $record_ids = $record_id_text==='' ? array() : preg_split('/\s*'.preg_quote($csv_mvsep ?: '|', '/').'\s*/', $record_id_text);
         $record_ids = array_values(array_filter(array_map('intval', $record_ids), function($id){return $id>0;}));
 
         if(count($record_ids)!==1){
             // MODIFIED for verifyDBAgainstSource: common TSV writer and new Field type column.
-            $write_report_row($imp_id, array($imp_id, $record_id_text,
-                empty($record_ids)?'NO_MATCH':'MULTIPLE_MATCH', '', '', '', '', '', ''));
+            $write_report_row($imp_id, $make_report_row($imp_id, $record_id_text, $batch_value,
+                empty($record_ids)?'NO_MATCH':'MULTIPLE_MATCH'));
             continue;
         }
         $record_id = $record_ids[0];
@@ -4117,7 +4137,8 @@ public static function verifyDatabaseAgainstSource($params){
         }
         if($record_cache[$record_id]===false){
             // MODIFIED for verifyDBAgainstSource: common TSV writer and new Field type column.
-            $write_report_row($imp_id, array($imp_id, $record_id, 'RECORD_NOT_FOUND_OR_WRONG_TYPE', '', '', '', '', '', ''));
+            $write_report_row($imp_id, $make_report_row($imp_id, $record_id, $batch_value,
+                'RECORD_NOT_FOUND_OR_WRONG_TYPE'));
             continue;
         }
 
@@ -4126,11 +4147,12 @@ public static function verifyDatabaseAgainstSource($params){
             $latitude = null;
             $longitude = null;
             foreach($group['fields'] as $field_name=>$mapped_type){
-                // MODIFIED for verifyDBAgainstSource: explicitly split pipe
-                // repeats even when an older session did not retain csv_mvsep.
-                $comparison_mvsep = $csv_mvsep ?: '|';
-                $raw_values = self::getMultiValues((string)@$source_row[$field_name],
-                    @$imp_session['csv_enclosure'], $comparison_mvsep);
+                // MODIFIED for verifyDBAgainstSource: pipe and dollar signs
+                // are equivalent source repeat-value separators, irrespective
+                // of the separator retained by an older import session.
+                $source_cell = (string)@$source_row[$field_name];
+                $raw_values = preg_split('/\s*[|$]\s*/', $source_cell);
+                $raw_values = array_map('super_trim', $raw_values);
                 if(substr($mapped_type, -4)==='_lat'){
                     $latitude = trim((string)reset($raw_values));
                 }elseif(substr($mapped_type, -5)==='_long'){
@@ -4162,6 +4184,15 @@ public static function verifyDatabaseAgainstSource($params){
                 $value = trim($value);
                 if($value==='' || strcasecmp($value, 'NULL')===0){
                     return null;
+                }
+                // verifyDBAgainstSource: leading zeroes are insignificant for
+                // numeric-looking values, including values held in text fields.
+                if(preg_match('/^([+-]?)(0*)([0-9]+)(\.[0-9]+)?$/', $value, $numeric_parts)){
+                    $integer_part = ltrim($numeric_parts[3], '0');
+                    if($integer_part===''){
+                        $integer_part = '0';
+                    }
+                    $value = $numeric_parts[1].$integer_part.(@$numeric_parts[4] ?: '');
                 }
                 if($field_kind==='enum' || $field_kind==='relationtype'){
                     if(ctype_digit($value)){
@@ -4210,16 +4241,20 @@ public static function verifyDatabaseAgainstSource($params){
 
             $source_normal = array_values(array_filter(array_map($normalise, $source_values), function($value){return $value!==null;}));
             $database_normal = array_values(array_filter(array_map($normalise, $database_values), function($value){return $value!==null;}));
-            // MODIFIED for verifyDBAgainstSource: frequency maps provide an
-            // explicit all-orders comparison and simultaneously detect dupes.
-            $source_frequency = array_count_values($source_normal);
-            $database_frequency = array_count_values($database_normal);
-            ksort($source_frequency, SORT_STRING);
-            ksort($database_frequency, SORT_STRING);
-            $has_duplicates = max(array_merge(array(0), array_values($source_frequency),
-                                               array_values($database_frequency))) > 1;
+            // MODIFIED for verifyDBAgainstSource: compare sets only; order and
+            // duplicate counts on either side are deliberately ignored.
+            $source_normal = array_values(array_unique($source_normal, SORT_STRING));
+            $database_normal = array_values(array_unique($database_normal, SORT_STRING));
+            sort($source_normal, SORT_STRING);
+            sort($database_normal, SORT_STRING);
 
-            if($source_frequency!==$database_frequency){
+            // verifyDBAgainstSource: two missing values are equal and must
+            // never create an error/report row.
+            if(empty($source_normal) && empty($database_normal)){
+                continue;
+            }
+
+            if($source_normal!==$database_normal){
                 $field_label = $base_type==='url' ? 'Record URL'
                     : ($base_type==='scratchpad' ? 'Record Notes'
                     : ((@$definitions[$base_type]['dty_Name'] ?: 'Detail').' ['.$base_type.']'));
@@ -4245,6 +4280,22 @@ public static function verifyDatabaseAgainstSource($params){
                 $database_display_values = array_values(array_filter($database_display_values, function($value){
                     return trim((string)$value)!=='';
                 }));
+                // verifyDBAgainstSource: remove duplicates from displayed values
+                // using the same canonical comparison applied above.
+                $unique_display_values = function($values) use ($normalise){
+                    $seen = array();
+                    $unique = array();
+                    foreach($values as $display_value){
+                        $canonical_value = $normalise($display_value);
+                        if($canonical_value!==null && !isset($seen[$canonical_value])){
+                            $seen[$canonical_value] = true;
+                            $unique[] = $display_value;
+                        }
+                    }
+                    return $unique;
+                };
+                $source_display_values = $unique_display_values($source_display_values);
+                $database_display_values = $unique_display_values($database_display_values);
                 // MODIFIED for verifyDBAgainstSource: distinguish missing values from unequal values.
                 if(empty($source_normal) && !empty($database_normal)){
                     $difference_status = 'NoSourceValue';
@@ -4253,14 +4304,52 @@ public static function verifyDatabaseAgainstSource($params){
                 }else{
                     $difference_status = 'DIFF';
                 }
-                // MODIFIED for verifyDBAgainstSource: requested status, Field type and TSV writer.
-                $write_report_row($imp_id, array($imp_id, $record_id, $difference_status, $has_duplicates?'Dupes':'', implode(' + ', $group['columns']),
-                    $field_label, ($field_kind ?: $base_type), implode(' | ', $source_display_values),
+                // verifyDBAgainstSource: consolidate identically named source columns.
+                $source_column_counts = array_count_values($group['columns']);
+                $source_column_labels = array();
+                foreach($source_column_counts as $source_column_name=>$source_column_count){
+                    $source_column_labels[] = $source_column_name
+                        .($source_column_count>1 ? ' ('.$source_column_count.' cols)' : '');
+                }
+                // MODIFIED for verifyDBAgainstSource: requested column order and TSV writer.
+                $write_report_row($imp_id, $make_report_row($imp_id, $record_id, $batch_value,
+                    $difference_status, ($field_kind ?: $base_type), implode(' + ', $source_column_labels),
+                    $field_label, implode(' | ', $source_display_values),
                     implode(' | ', $database_display_values)));
             }
         }
     }
     $source_result->close();
+    // verifyDBAgainstSource: Batch ascending (when present), Status descending,
+    // then Source column ascending, with source row as a deterministic final key.
+    $status_index = $batch_field===null ? 2 : 3;
+    $source_column_index = $batch_field===null ? 4 : 5;
+    usort($report_rows, function($a, $b) use ($batch_field, $status_index, $source_column_index){
+        // verifyDBAgainstSource: Batch is the primary ascending sort key when present.
+        if($batch_field!==null){
+            $batch_order = strnatcasecmp((string)$a['row'][2], (string)$b['row'][2]);
+            if($batch_order!==0){
+                return $batch_order;
+            }
+        }
+        $status_order = strcasecmp($b['row'][$status_index], $a['row'][$status_index]);
+        if($status_order!==0){
+            return $status_order;
+        }
+        $column_order = strcasecmp((string)$a['row'][$source_column_index], (string)$b['row'][$source_column_index]);
+        if($column_order!==0){
+            return $column_order;
+        }
+        return intval($a['source_id']) <=> intval($b['source_id']);
+    });
+    $last_reported_source = null;
+    foreach($report_rows as $report_item){
+        if($last_reported_source!==null && $last_reported_source!==$report_item['source_id']){
+            fwrite($fp, PHP_EOL);
+        }
+        fputcsv($fp, $report_item['row'], "\t", '"');
+        $last_reported_source = $report_item['source_id'];
+    }
     rewind($fp);
     $csv = stream_get_contents($fp);
     fclose($fp);
@@ -4325,42 +4414,6 @@ private static function _isRecordUpdating($rec_ID, $record){
     }
 
     return $rtn;
-}
-
-public static function seekNextValue(array $params){
-
-    self::initialize();
-
-    $imp_session = ImportSession::load(@$params['imp_ID']);
-    if($imp_session==false){
-        return false;
-    }
-
-    $currentID = prepareIds(@$params['currentID']);
-    $importTable = $imp_session['import_table'];
-    $seekDirection = @$params['direction'] === 'prev' ? '<' : '';
-    $seekDirection = @$params['direction'] === 'next' ? '>' : $seekDirection;
-    $fieldIndex = prepareIds(@$params['field'], true);
-
-    if(empty($importTable) || $seekDirection === ''){
-        self::$system->addError(HEURIST_INVALID_REQUEST, $seekDirection === '' ? 'Missing seek direction' : 'Missing import table');
-        return false;
-    }elseif($currentID === [] || $fieldIndex === []){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, $currentID === [] ? 'Invalid current row provided' : 'Invalid field index provided');
-        return false;
-    }
-    $currentID = $currentID[0];
-    $fieldIndex = $fieldIndex[0];
-
-    $orderBy = $seekDirection === '<' ? " ORDER BY imp_ID DESC" : '';
-    $seekQuery = "SELECT imp_ID FROM {$importTable} WHERE field_{$fieldIndex} != '' AND imp_ID {$seekDirection} {$currentID}{$orderBy} LIMIT 1";
-    $nextID = mysql__select_value(self::$mysqli, $seekQuery);
-
-    if(!$nextID){
-        $nextID = -1;
-    }
-
-    return $nextID;
 }
 } //end class
 ?>

@@ -135,6 +135,7 @@ if(!$format){ $format='csv';}
             body:not(.verification-mode) .verification-only,
             body.verification-mode #btnPrepareStart,
             body.verification-mode #btnImportStart,
+            body.verification-mode #btnNextRecType2,
             body.verification-mode #divInsertUpdateSetting,
             body.verification-mode .importIgnoreErrors {
                 display:none !important;
@@ -618,11 +619,9 @@ if(!$format){ $format='csv';}
             <caption></caption>
             <thead><tr>
                 <th style="width:75px;">Use value<br><a href="#" class="lnk_SelectAll link_styling">Select all</a></th>
-                <th style="width:75px;">Total&nbsp;<br>values</th>
                 <th style="width:75px;">Unique&nbsp;<br>values</th>
                 <th style="width:300px;">Column</th>
                 <th style="width:300px;" id="mapping_column_header">Column to Field Mapping</th>
-                <th style="width:50px;">Seek&nbsp;<br>values</th>
                 <!-- last column allows step through imported data records-->
                 <th style="text-align: left;padding-left: 16px;">
                     <a href="#" class="navigation" style="display: inline-block;"><span data-dest="0" class="ui-icon ui-icon-seek-first"></span></a>
