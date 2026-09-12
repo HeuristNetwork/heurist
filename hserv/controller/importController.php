@@ -256,10 +256,6 @@ if(!$system->init(@$_REQUEST['db'])){
 
             $res = ImportAction::insertNewColumns(@$_REQUEST);
 
-        }else if($action === 'next_value'){
-
-            $res = ImportAction::seekNextValue(@$_REQUEST);
-
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");
             $res = false;
@@ -317,6 +313,9 @@ if(@$_REQUEST['output']=='csv'){
             // MODIFIED for verifyDBAgainstSource: CSV extension requested for
             // automatic spreadsheet association; content remains tab-delimited.
             $download_filename = 'Checking_'.$verification_name.'.csv';
+            // verifyDBAgainstSource: expose the authoritative filename to the
+            // fetch/Blob download path; URL encoding keeps this header ASCII-safe.
+            header('X-Heurist-Report-Filename: '.rawurlencode($download_filename));
         }
         // verifyDBAgainstSource: the single definitive download filename.
         header('Content-Disposition: attachment; filename="'.$download_filename.'"');

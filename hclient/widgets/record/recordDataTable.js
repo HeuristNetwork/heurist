@@ -260,7 +260,34 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             cont.find('div').sort(function(a,b){
                 return $(a).attr('data-order')<$(b).attr('data-order')?-1:1;
             }).appendTo(cont);
+
+            this._syncSelectedColumnList();
         }
+    },
+
+    /**
+     * Keep the column list in step with the tree.  In particular, this removes
+     * fields left behind by an older saved configuration after they have been
+     * unchecked in the tree.
+     */
+    _syncSelectedColumnList: function(){
+
+        let tree = $.ui.fancytree.getTree(this._$('div.rtt-tree'));
+        if(!tree) return;
+
+        let selectedCodes = {};
+        tree.getSelectedNodes(false).forEach(function(node){
+            if(node.data.code){
+                selectedCodes[node.data.code] = true;
+            }
+        });
+
+        this._$('div.rtt-list > div').each(function(idx, item){
+            let code = $(item).attr('data-code');
+            if(!selectedCodes[code]){
+                $(item).remove();
+            }
+        });
     },
 
     /**
@@ -270,31 +297,16 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
      * @description Adds a field (column) to the sortable list of selected columns on the right.
      * This is typically called when a field is selected in the Fancytree.
      * It handles creating the UI element for the column, including visibility checkbox and width selector.
-     * It also handles adding parent pointer fields if a field from a linked record is selected.
      * @param {string} code - The unique code of the field from Fancytree node data (e.g., '3:lt134:12:id').
      * @param {string} title - The display title of the field.
+     * @param {string} type - The Heurist field type supplied by the tree node.
      */
-    _addSelectedColumn: function(code, title){
+    _addSelectedColumn: function(code, title, type){
         
             let ids = code.split(':');
             let rtid = ids[ids.length-2];
             let dtid = ids[ids.length-1];
-            let parentcode = '';
-            
             if(ids.length==4){
-                //include parent resource (record pointer) field
-                let parent_rtid = ids[0];
-                let parent_dtid = ids[1];
-                let linktype = parent_dtid.slice(0,2); //remove link type lt ot rt  10:lt34
-                if(isNaN(Number(linktype))){
-                    parent_dtid = parent_dtid.slice(2);
-                }
-                parentcode = parent_rtid+':'+parent_dtid;
-                
-                let fieldtitle = $Db.rst(parent_rtid, parent_dtid, 'rst_DisplayName');
-                
-                this._addSelectedColumn(parentcode, fieldtitle);    
-                
                 title = $Db.rty(rtid,'rty_Name') +'.'+ title;        
             }
 
@@ -309,27 +321,30 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             let container = this._$('div.rtt-list');
             
             if(container.find('div[data-key="'+dtid+'"]').length==0){ //avoid duplication
-                $('<div data-code="'+code+'" data-key="'+dtid+'"'+(parentcode?(' data-parent="'+parentcode+'"'):'')+'>'
+                $('<div data-code="'+code+'" data-key="'+dtid+'">'
                     +'<input type="checkbox" class="columnVisibility" title="Visibility in DataTable" checked>&nbsp;<span style="cursor:ns-resize">'
                     +title+'</span>'
                     +'<select class="columnWidth" title="Column width" style="width:50px;margin-left:10px;font-size:smaller;">'
-                    +'<option></option><option>5</option><option>10</option><option selected>20</option><option>50</option><option>100</option>'
+                    +'<option></option><option>5</option><option>10</option><option selected>20</option><option>30</option><option>50</option><option>100</option>'
                     +'<option>200</option><option>300</option><option>400</option><option>500</option></select>'
                     +'</div>').appendTo(container);
                 container.sortable();
 
                 let $select = container.find('div[data-key="'+dtid+'"] select');
 
-                let type = $Db.dty(dtid, 'dty_Type');
-                let is_number = dtid == 'ids' || dtid == 'typeid' || type == 'float';
+                let is_number = dtid == 'ids' || dtid == 'typeid' || type == 'float' || type == 'integer';
                 let is_date = dtid == 'added' || dtid == 'modified' || type == 'date';
-                let is_term = dtid == 'access' || dtid == 'tag' || type == 'enum';
+                let is_text = type == 'freetext';
+                let is_memo = type == 'blocktext';
+                let is_constructed_title = dtid == 'rec_Title' || dtid == 'title';
+
                 if(is_number || is_date){
                     $select.val(10);
-                }else if(is_term){
-                    $select.val(20);
-                }else{
+                }else if(is_text || is_memo || is_constructed_title){
                     $select.val(30);
+                }else{
+                    // Terms, geometry, record pointers and every other type.
+                    $select.val(20);
                 }
             }
     },
@@ -451,6 +466,8 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
      */
     getSettings: function( mode_action ){
 
+        this._syncSelectedColumnList();
+
         //get selected fields from treeview
         let selectedFields = [];
         let tree = $.ui.fancytree.getTree( this._$('.rtt-tree') );
@@ -472,6 +489,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         }
 
         let selectedCols = [];
+        let selectedColNames = {};
         let need_id = true, need_type = true;
 
         this._$('div.rtt-list > div').each(function(idx,item){
@@ -505,8 +523,26 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             }
 
             selectedCols.push(colopts);
+            selectedColNames[colName] = true;
             if(need_id && colName == 'rec_ID') need_id = false;
             if(need_type && (colName=='rec_RecTypeID' || colName=='typename')) need_type = false;
+        });
+
+        // Linked-record values still require their parent pointer to be fetched
+        // by the server. Keep that implementation detail hidden: it must not
+        // reappear as an unchecked field in the user's right-hand column list.
+        selectedFields.forEach(function(code){
+            let parts = code.split(':');
+            if(parts.length != 4) return;
+
+            let parentField = parts[1];
+            if(parentField.slice(0, 2) == 'lt' || parentField.slice(0, 2) == 'rt'){
+                parentField = parentField.slice(2);
+            }
+            if(!selectedColNames[parentField]){
+                selectedCols.push({data:parentField, title:'Linked record', visible:false});
+                selectedColNames[parentField] = true;
+            }
         });
 
         if(need_id){
@@ -653,20 +689,18 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 select: function(e, data) {
                         
                         if(data.node.isSelected()){
-                            that._addSelectedColumn(data.node.data.code, data.node.data.name);
+                            that._addSelectedColumn(
+                                data.node.data.code,
+                                data.node.data.name,
+                                data.node.data.type || data.node.type
+                            );
                         }else{
                             let cont = that.element.find('div.rtt-list');
                             let ele= cont.find('div[data-code="'+data.node.data.code+'"]');
-                            
-                            //remove parent link field
-                            let parent_code = ele.attr('data-parent');
-                            if(parent_code){
-                                let parent_ele = cont.find('div[data-code="'+parent_code+'"]');
-                                let same_level_ele = cont.find('div[data-parent="'+parent_code+'"]');
-                                if(same_level_ele.length==1) parent_ele.remove();
-                            }
                             ele.remove();    
                         }
+
+                        that._syncSelectedColumnList();
                 },
                 click: function(e, data){
 
@@ -699,6 +733,19 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                     }
                 }
             });
+
+            // A new field list starts with the H-ID visible and first. Saved
+            // configurations retain their existing selection and order.
+            if(!this.options.initial_cfg){
+                let tree = $.ui.fancytree.getTree(treediv);
+                let idCode = rtyID + ':ids';
+                tree.visit(function(node){
+                    if(node.data.code == idCode){
+                        node.setSelected(true);
+                        return false;
+                    }
+                });
+            }
         }   
     },
     

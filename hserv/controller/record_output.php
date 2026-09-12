@@ -240,6 +240,31 @@
                 if(@$params['search']['value']!=''){
                       $search_by_field = '{"f":"'.addslashes($params['search']['value']).'"},';
                 }
+
+                // DataTables supplies the clicked column and direction. Convert
+                // supported main-record columns to Heurist's server-side sort
+                // syntax so sorting applies to the complete result set, not just
+                // the current page.
+                if(is_array(@$params['order']) && is_array(@$params['columns'])){
+                    $order = reset($params['order']);
+                    $column_idx = intval(@$order['column']);
+                    $column = @$params['columns'][$column_idx]['data'];
+                    $direction = strtolower(@$order['dir']) === 'desc' ? '-' : '';
+                    $sort_fields = array(
+                        'rec_ID'=>'id', 'ids'=>'id',
+                        'rec_Title'=>'t', 'title'=>'t',
+                        'rec_Modified'=>'m', 'modified'=>'m',
+                        'rec_Added'=>'a', 'added'=>'a',
+                        'rec_URL'=>'u', 'url'=>'u',
+                        'rec_RecTypeID'=>'rt', 'typeid'=>'rt', 'typename'=>'rt'
+                    );
+
+                    if(isset($sort_fields[$column])){
+                        $search_params['sortby'] = $direction.$sort_fields[$column];
+                    }elseif(is_string($column) && ctype_digit($column) && intval($column)>0){
+                        $search_params['sortby'] = $direction.'f:'.intval($column);
+                    }
+                }
                 if($search_by_type!='' || $search_by_field!=''){
                     $search_params['q'] = '['.$search_by_type.$search_by_field.$search_params['q'].']';
 

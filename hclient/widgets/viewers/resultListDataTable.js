@@ -478,6 +478,9 @@ that._dout('myOnShowEvent');
                         this.options.dataTableParams['pageLength'] = window.hWin.HAPI4.get_prefs('search_result_pagesize');
                     }
                     
+                    // The result table is server-paged. Disable DataTables'
+                    // heading sort controls because they cannot reliably reorder
+                    // the complete Heurist result set.
                     this.options.dataTableParams['ordering'] = false;
                     
                     if(window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['columns'])){
@@ -486,11 +489,11 @@ that._dout('myOnShowEvent');
                         
                         if(settings){
                             this.options.initial_cfg = settings;
-                            this.options.dataTableParams['columns'] = settings.columns;
+                            this.options.dataTableParams['columns'] = $.extend(true, [], settings.columns);
                         }else{
                             this.options.dataTableParams['columns'] = [
-                                { data: 'rec_ID', title:'ID' },
-                                { data: 'rec_Title', title:'Title' },
+                                { data: 'rec_ID', title:'ID', width:10 },
+                                { data: 'rec_Title', title:'Title', width:30 },
                                 { data: 'rec_RecTypeID', title:'Type', visible:false }
                             ];
                         }
@@ -505,6 +508,7 @@ that._dout('myOnShowEvent');
                         access: 'rec_NonOwnerVisibility'
                     };
                     let cols = this.options.dataTableParams['columns'];
+                    this._setProportionalColumnWidths(cols);
                     this.hidden_cols = [];
                     for(let i=0;i<cols.length;i++){
 
@@ -590,7 +594,66 @@ this._dout('reload datatable '+this.options.serverSide);
         }
 
     },
-    
+
+    /**
+     * DataTables treats bare numeric widths as pixels and assigns spare space
+     * to an arbitrary column.  The saved values are character estimates, so
+     * convert visible columns to proportional percentages for display while
+     * retaining the original values in the saved field-list preference.
+     */
+    _setProportionalColumnWidths: function(columns){
+
+        let totalWidth = 0;
+        this._visibleColumnWidths = [];
+        columns.forEach(function(column){
+            if(column.visible !== false && column.visible !== 'false'){
+                let width = parseFloat(column.width);
+                totalWidth += width > 0 ? width : 20;
+            }
+        });
+
+        if(totalWidth <= 0) return;
+
+        columns.forEach(function(column){
+            if(column.visible !== false && column.visible !== 'false'){
+                let width = parseFloat(column.width);
+                width = width > 0 ? width : 20;
+                let percentage = (width / totalWidth) * 100;
+                column.width = percentage.toFixed(3) + '%';
+                this._visibleColumnWidths.push(percentage);
+            }
+        }, this);
+    },
+
+    /**
+     * DataTables with scrollX measures its cloned header from cell contents and
+     * may overwrite configured percentages. Apply the proportions to both its
+     * header and body colgroups after every draw.
+     */
+    _applyRenderedColumnWidths: function(){
+
+        if(!this._visibleColumnWidths || this._visibleColumnWidths.length == 0){
+            return;
+        }
+
+        let widths = this._visibleColumnWidths;
+        let tables = this.div_content.find(
+            '.dt-scroll-head table.dataTable, .dt-scroll-body table.dataTable, '
+            +'.dataTables_scrollHead table.dataTable, .dataTables_scrollBody table.dataTable'
+        );
+
+        tables.css({'table-layout':'fixed', width:'100%'});
+        tables.each(function(idx, table){
+            let cols = $(table).find('colgroup > col');
+            if(cols.length != widths.length) return;
+
+            cols.each(function(colIdx, col){
+                let width = widths[colIdx].toFixed(3) + '%';
+                $(col).css({width:width, 'min-width':width, 'max-width':width});
+            });
+        });
+    },
+
     /**
      * @function _onDataTableInitComplete
      * @memberof heurist.resultListDataTable
@@ -631,6 +694,14 @@ this._dout('reload datatable '+this.options.serverSide);
         if(this.hidden_cols.length > 0){
             this._dataTable.columns(this.hidden_cols).visible(false);
         }
+
+        this.div_datatable.off('draw.dt.heuristWidths')
+            .on('draw.dt.heuristWidths', function(){
+                that._applyRenderedColumnWidths();
+            });
+        setTimeout(function(){
+            that._applyRenderedColumnWidths();
+        }, 0);
         
         // Add title to elements that will truncate
         let cells = this.div_content.find('div.dataTables_scroll td.truncate, div.dataTables_scroll th.truncate');
@@ -694,12 +765,13 @@ this._dout('reload datatable '+this.options.serverSide);
 
                         divSaveSettings: null,
                         showButtons: true,
-                        buttons: {rename:'save as', openedit:'select fields for display', remove:'delete'},
+                        buttons: {rename:'save as', openedit:'Select fields for display', remove:'delete'},
                         openEditAction: function(is_new){ //overwrite default behaviour - open configuration popup
                                 that._openColumnDefinition( is_new );
                         }
                     });
                     
+                    this.selConfigs.find('.btn-openedit').addClass('ui-heurist-btn-header1 ui-button-action');
                     this.selConfigs.find('div.header').css({padding: '7px 16px 3px 0', float: 'left'});
                     this.selConfigs.find('span.btn-action-div').css({display: 'inline-block','padding-top':'10px'});
                     this.selConfigs.configEntity('updateList', 'all', 
@@ -804,8 +876,8 @@ this._dout('reload datatable '+this.options.serverSide);
         
        window.hWin.HAPI4.save_pref('columns_datatable', config);        
        
-       this.options.dataTableParams['columns'] = config.columns;
-       this.options.initial_cfg = config;
+       this.options.dataTableParams['columns'] = $.extend(true, [], config.columns);
+       this.options.initial_cfg = $.extend(true, {}, config);
        this._current_url = null; //to force reset datatable
        this._refresh();
     },
