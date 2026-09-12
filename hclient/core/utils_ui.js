@@ -90,6 +90,72 @@ if (!window.hWin.HEURIST4.ui)
 
 window.hWin.HEURIST4.ui = {
 
+    /**
+     * Opens the legacy saved-filter editor without requiring an svs_list widget.
+     * @param {?number} svsID Existing saved-filter id, or null to create one.
+     * @param {string|Object} [squery] Initial executable query for a new filter.
+     * @returns {Promise<{saved:boolean, id:?number, request:?Object}>}
+     */
+    editSavedFilter: function(svsID, squery){
+        let id = Number(svsID);
+        id = Number.isInteger(id) && id > 0 ? id : null;
+        const hapi = window.hWin && window.hWin.HAPI4;
+        if(!hapi || !hapi.baseURL){
+            return Promise.reject(new Error('Saved Filter editor is not available'));
+        }
+
+        return new Promise(function(resolve, reject){
+            let settled = false;
+            const finish = function(result){
+                if(!settled){
+                    settled = true;
+                    resolve(result);
+                }
+            };
+            const open = function(){
+                if(typeof HSvsEdit !== 'function'){
+                    reject(new Error('Saved Filter editor did not load'));
+                    return;
+                }
+                try{
+                    const editor = new HSvsEdit();
+                    const position = {my:'center', at:'center', of:window, collision:'fit'};
+                    const dialog = editor.showSavedFilterEditDialog(
+                        'saved', null, id, id ? null : squery, true, position,
+                        function(error, request){
+                            if(error){
+                                if(!settled){ settled = true; reject(error); }
+                                return;
+                            }
+                            const savedID = Number(request && (request.new_svs_ID || request.svs_ID || id)) || null;
+                            finish({saved:true, id:savedID, request:request || null});
+                        },
+                        true
+                    );
+                    if(dialog && typeof dialog.one === 'function'){
+                        dialog.one('dialogclose.heuristEditSavedFilter', function(){
+                            setTimeout(function(){ finish({saved:false, id:id, request:null}); }, 0);
+                        });
+                    }
+                }catch(error){
+                    reject(error);
+                }
+            };
+
+            if(typeof HSvsEdit === 'function'){
+                open();
+            }else if(typeof $.getScript === 'function'){
+                $.getScript(hapi.baseURL+'hclient/widgets/search/svsEdit.js')
+                    .done(open)
+                    .fail(function(_xhr, _status, error){
+                        reject(error instanceof Error ? error : new Error('Cannot load Saved Filter editor'));
+                    });
+            }else{
+                reject(new Error('Saved Filter editor loader is not available'));
+            }
+        });
+    },
+
     /** Edit a ruleset without persisting it. Existing _editRules callers are unchanged. */
     showRulesBuilderDialog: function(value, options){
         options = options || {};

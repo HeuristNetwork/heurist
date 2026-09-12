@@ -97,6 +97,7 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
             editRules: function(value, options) { return that._editRules(value, options || {}); },
             describeRules: function(rules) { return that._describeRules(rules); },
             selectFieldset: function(value, options) { return that._selectFieldset(value, options || {}); },
+            editSavedFilter: function(svsID, squery) { return that._editSavedFilter(svsID, squery); },
             openSearchBuilder: function(options) { return that._openSearchBuilder(options || {}); }
         };
     }
@@ -209,6 +210,14 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
         var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
         if (!ui || typeof ui.showRulesBuilderDialog !== 'function') return Promise.reject(new Error('Rule Builder is not available'));
         return Promise.resolve(ui.showRulesBuilderDialog(value, options));
+    }
+
+    _editSavedFilter(svsID, squery) {
+        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+        if (!ui || typeof ui.editSavedFilter !== 'function') {
+            return Promise.reject(new Error('Saved Filter editor is not available'));
+        }
+        return Promise.resolve(ui.editSavedFilter(svsID, squery));
     }
 
     _describeRules(rules) {
