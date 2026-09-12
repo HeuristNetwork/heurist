@@ -58,12 +58,6 @@ window.hWin.cfg_widgets = [
     
     {id:'heurist_Map', name:'Map', title:'Map and timeline',
                 widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js', minh:300, minw:300},  // map in iframe
-    {id:'heurist_Map2', name:'Map', title:'Map',
-                widgetname:'mapViewer', script:'hclient/modules/map/mapViewer.js', minh:300, minw:300},  // map in iframe
-    {id:'heurist_Data', name:'Data', title:'Data',
-                widgetname:'dataViewer', script:'hclient/modules/data/dataViewer.js', minh:300, minw:300},  // dataset in iframe
-    {id:'heurist_Graph2', name:'Graph', title:'Network',
-                widgetname:'graphViewer', script:'hclient/modules/graph/graphViewer.js', minh:300, minw:300},  // vis.network in iframe
 
     {id:'heurist_StoryMap', name:'StoryMap', title:'Story Map',
                 widgetname:'app_storymap', script:'hclient/widgets/viewers/app_storymap.js', minh:300, minw:200},
@@ -75,6 +69,20 @@ window.hWin.cfg_widgets = [
     {id:'heurist_recordAddButton', name:'Add Record', widgetname:'recordAddButton', script:'hclient/widgets/record/recordAddButton.js'},
     {id:'heurist_emailForm', name:'Email Us Form', widgetname:'emailForm', script:'hclient/widgets/admin/emailForm.js'},
     {id:'heurist_mediaViewer', name:'Media Viewer', widgetname:'mediaViewer', script:'hclient/widgets/viewers/mediaViewer.js', minh:200, minw:200, options:{slideshowShow: true}},
+    
+    
+    
+    {id:'heurist_Explorer', name:'Explorer', title:'Explorer',
+                widgetname:'explorerViewer', script:'hclient/modules/explorer/explorerViewer.js', minh:300, minw:300},
+    {id:'heurist_Map2', name:'Map', title:'Map',
+                widgetname:'mapViewer', script:'hclient/modules/map/mapViewer.js', minh:300, minw:300},  // map in iframe
+    {id:'heurist_Data', name:'Data', title:'Data',
+                widgetname:'dataViewer', script:'hclient/modules/data/dataViewer.js', minh:300, minw:300},  // dataset in iframe
+    {id:'heurist_Graph2', name:'Graph', title:'Network',
+                widgetname:'graphViewer', script:'hclient/modules/graph/graphViewer.js', minh:300, minw:300},  // vis.network in iframe
+    {id:'heurist_Timeline', name:'Timeline', title:'Timeline',
+                widgetname:'timelineViewer', script:'hclient/modules/timeline/timelineViewer.js', minh:300, minw:300},  // vis.timeline in iframe
+    
         
     //fake app - reference to another layout to include
     {id:'include_layout',name:'Inner Layout', widgetname:'include_layout'}
@@ -243,14 +251,23 @@ window.hWin.cfg_layouts = [
  
                     {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
                                 url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs', showProgress:false,
-                                css:{overflow:'hidden'}}},
-
-                    {appid:'heurist_Map2', name: 'Map2 (test)'}
-                    //,{appid:'heurist_Data', name: 'Data (test)'},
-                    //{appid:'heurist_Graph2', name: 'Network2 (test)'}
+                                css:{overflow:'hidden'}}}
+/*
+                    {appid:'heurist_Map2', name: 'Map2 (test)'},
+                    {appid:'heurist_Data', name: 'Data (test)'},
+                    {appid:'heurist_Graph2', name: 'Network2 (test)'},
+                    {appid:'heurist_Timeline', name: 'Timeline (test)'}
+*/                    
             ]}]
         }
-    },    
+    },   
+    
+    {id:'Heurist8', name:'Heurist8', theme:'heurist', type:'free',
+        content_pane:{ dockable:false, dropable:false, dragable:false, 
+                css:{height:'100%',width:'100%'},
+            apps:[ {appid:'heurist_Explorer', name: 'Heurist8', css:{height:'100%',width:'100%'}} ]
+        }    
+    },
     
     
     {id:'H6Default2', name:'Heurist Def v6', theme:'heurist', type:'group', children:[

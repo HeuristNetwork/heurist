@@ -168,6 +168,7 @@ class MapPresentationService
     {
         $rty = intval($record['rec_RecTypeID'] ?? 0);
         $type = 'record';
+        $sourceCode = null;
         $map = array(
             'RT_QUERY_SOURCE' => 'heurist-query',
             'RT_MAP_LAYER' => 'heurist-query',
@@ -181,7 +182,11 @@ class MapPresentationService
         );
         foreach($map as $constant=>$candidate){
             
-            if($this->layers->codeId($constant) === $rty){ $type = $candidate; break; }
+            if($this->layers->codeId($constant) === $rty){
+                $type = $candidate;
+                $sourceCode = $constant;
+                break;
+            }
         }
 
         $source = array(
@@ -189,6 +194,12 @@ class MapPresentationService
             'recordId' => intval($record['rec_ID'] ?? 0),
             'title' => (string)($record['rec_Title'] ?? '')
         );
+        if($sourceCode === 'RT_QUERY_SOURCE'){
+            $source['dataSourceReference'] = array(
+                'type' => 'source',
+                'id' => intval($record['rec_ID'] ?? 0)
+            );
+        }
         
         $file = $this->layers->value($record, 'DT_FILE_RESOURCE');        
 

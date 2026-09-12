@@ -74,8 +74,36 @@ class DatasetPresentationService
             'fields'=>$fields,
             'geofields'=>$geofields,
             'timefields'=>$timefields,
+            'map'=>array(
+                'geoFields'=>$geofields,
+                'dynamicRequests'=>$this->termBoolean(
+                    $this->datasets->value($dataset, 'DT_IS_LOADED_BY_EXTENT'), false
+                ),
+                'minZoom'=>$this->numberOrNull(
+                    $this->datasets->value($dataset, 'DT_MINIMUM_ZOOM_LEVEL')
+                ),
+                'maxZoom'=>$this->numberOrNull(
+                    $this->datasets->value($dataset, 'DT_MAXIMUM_ZOOM_LEVEL')
+                )
+            ),
             'rules'=>$this->parseRules($this->datasets->value($dataset, 'DT_EXPANSION_RULES'))
         );
+    }
+
+    private function termBoolean($value, bool $default): bool
+    {
+        if($value === null || $value === ''){ return $default; }
+        if($value === false || $value === 0 || $value === '0'){ return false; }
+        if($value === true || $value === 1 || $value === '1'){ return true; }
+        $code = strtolower((string)$this->datasets->getTermCode(intval($value)));
+        $label = strtolower((string)$this->datasets->getTermLabel(intval($value)));
+        return !in_array($code, array('no','false','0'), true)
+            && !in_array($label, array('no','false'), true);
+    }
+
+    private function numberOrNull($value)
+    {
+        return is_numeric($value) ? 0 + $value : null;
     }
 
     private function parseRules($value): array

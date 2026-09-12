@@ -44,7 +44,7 @@ $.widget( "heurist.slidersMenu", {
     options: {
     },
     
-    sections: ['design','populate','explore','publish','admin'],
+    sections: ['design','populate','explore','publish','admin','heurist8'],
     
     menues:{}, //section menu - div with menu actions
     containers:{}, //operation containers (next to section menu)
@@ -1720,6 +1720,13 @@ $.widget( "heurist.slidersMenu", {
             .addClass('ui-menu6-widgets ui-menu6-container ui-heurist-'+section) //ui-menu6-widgets to distinguish with introduction
             .appendTo( this.element );
             
+        if(section=='heurist8'){
+            this.containers[section].css({'left':this._left_position+'px'});
+            this.menues[section].css({width:0}).hide();
+            window.hWin.HAPI4.LayoutMgr.appInitAll('Heurist8', this.containers[section] );
+            return;
+        }
+        
         this.containers[section].css('left',(this._left_position+211)+'px');
             
         if(section=='explore'){
