@@ -2,7 +2,7 @@
 /**
 * DatasetPresentationService.php - Public Dataset response builder
 *
-* Converts RT_DATASET records and their optional RT_QUERY_SOURCE into the
+* Converts RT_QUERY_SOURCE into the
 * stable, engine-neutral definition consumed by heurist-data.
 *
 * @project     Heurist academic knowledge management system
@@ -33,12 +33,12 @@ class DatasetPresentationService
     /**
      * Build the public Dataset definition.
      *
-     * @param int $recordId RT_DATASET record ID.
+     * @param int $recordId RT_QUERY_SOURCE record ID.
      * @return array|null Public Dataset response, or null when unavailable.
      */
     public function getDataset(int $recordId): ?array
     {
-        $dataset = $this->datasets->getPublicRecord($recordId, 'RT_DATASET');
+        $dataset = $this->datasets->getPublicRecord($recordId, 'RT_QUERY_SOURCE');
         if(!$dataset){ return null; }
 
         $source = $this->datasets->getQuerySource($dataset);
@@ -50,7 +50,13 @@ class DatasetPresentationService
         }
 
         $fields = $this->parseFields(
-            $this->datasets->value($dataset, 'DT_DATA_FIELDS')
+            $this->datasets->value($dataset, 'DT_TABLE_FIELDS')
+        );
+        $geofields = $this->parseFields(
+            $this->datasets->value($dataset, 'DT_GEO_FIELDS')
+        );
+        $timefields = $this->parseFields(
+            $this->datasets->value($dataset, 'DT_TIMELINE_FIELDS')
         );
 
         return array(
@@ -66,6 +72,8 @@ class DatasetPresentationService
                 'query'=>$this->parseQuery($queryValue)
             ),
             'fields'=>$fields,
+            'geofields'=>$geofields,
+            'timefields'=>$timefields,
             'rules'=>$this->parseRules($this->datasets->value($dataset, 'DT_EXPANSION_RULES'))
         );
     }
@@ -81,7 +89,7 @@ class DatasetPresentationService
         return $rules; // Preserve generated names and descriptions.
     }
 
-    /** Parse JSON or comma-separated DT_DATA_FIELDS into ordered definitions. */
+    /** Parse JSON or comma-separated DT_TABLE_FIELDS, DT_GEO_FIELDS, DT_TIMELINE_FIELDS into ordered definitions. */
     private function parseFields($value): array
     {
         if($value === null || trim((string)$value) === ''){ return array(); }
@@ -89,7 +97,7 @@ class DatasetPresentationService
         $text = trim((string)$value);
         $decoded = json_decode($text, true);
         $values = is_array($decoded) ? $decoded : explode(',', $text);
-        // Accept both the DT_DATA_FIELDS array and the public {fields:[...]} wrapper.
+        // Accept both the array and the public {fields:[...]} wrapper.
         if(isset($values['fields']) && is_array($values['fields'])){
             $values = $values['fields'];
         }

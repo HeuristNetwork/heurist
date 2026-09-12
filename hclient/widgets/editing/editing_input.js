@@ -17,7 +17,7 @@
  */
 
 /*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinyMCE, EditorCodeMirror,
-translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile, selectGeoField */
+translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile, selectGeoOrTimeField */
 
 /**
  * @namespace heurist.editing_input
@@ -421,8 +421,10 @@ $.widget( "heurist.editing_input", {
 
         }
 
-        if(window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'] &&
-           this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']){
+        if( window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'] &&
+            this.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'] &&
+            window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'] &&
+            this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'] ){
 
             this.options.detailtype = 'resource';
             this.options['dtFields']['rst_FieldConfig']= {entity:'DefDetailTypes',csv:true};
@@ -554,7 +556,9 @@ $.widget( "heurist.editing_input", {
                 //translation for text field only    
                 let rec_translate = this._isForRecords && !is_translation
                                     && (this.detailType == 'freetext' || this.detailType == 'blocktext')
-                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS']);
+                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_TABLE_FIELDS'])
+                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'])
+                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']);
 
                 let styles = {
                     display:'block', 
@@ -1380,7 +1384,9 @@ $.widget( "heurist.editing_input", {
                     }});
             }else
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
-             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_TABLE_FIELDS']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']
              && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
              && this.options.dtID > 0 || this.options.dtID === 'bug_Description')
@@ -3861,23 +3867,29 @@ $.widget( "heurist.editing_input", {
             }});
         }
 
-        //----------------- Query Source geo field-path selector / Dataset field-set editor
-        if(this.options.dtID > 0 &&
-           window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS'] &&
-           this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_FIELDS']){
+        //----------------- Query Source geo field-path selector / Dataset field-set editor / Timeline fields selector
+        if(this.options.dtID > 0){
+            
+           let RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
 
-            let RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
+           if((window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'] &&
+              this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'])
+              ||
+              (window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'] &&
+              this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']) )
+           {
 
-            if(this.options.rectypeID == RT_QUERY_SOURCE){
-                // For RT_QUERY_SOURCE DT_DATA_FIELDS remains a repeatable geo path.
+               const fieldType = (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'])?'temporal':'geo';
+               
+                // For RT_QUERY_SOURCE DT_GEO_FIELDS, DT_TIMELINE_FIELDS remains a repeatable geo path.
                 // Keep the existing selector and human-readable hierarchy title.
                 $input.hide();
 
-                let $geo_field_title = $('<span>')
+                let $field_titles = $('<span>')
                     .css({'line-height':'20px','vertical-align':'top','margin-right':'8px'})
                     .insertBefore($input);
 
-                function __refreshGeoFieldTitle(){
+                function __refreshFieldTitle(){
                     let code = $.trim($input.val() || '');
                     let title = '';
 
@@ -3888,21 +3900,21 @@ $.widget( "heurist.editing_input", {
                         }
                     }
 
-                    $geo_field_title.html(title || '<i>'+window.hWin.HR('No geo fields selected')+'</i>');
+                    $field_titles.html(title || '<i>'+window.hWin.HR(`No ${fieldType} fields selected`)+'</i>');
                 }
 
                 $input.on('change.geoFieldPreview input.geoFieldPreview heuristFieldSetRefresh',
-                    __refreshGeoFieldTitle);
-                __refreshGeoFieldTitle();
+                    __refreshFieldTitle);
+                __refreshFieldTitle();
 
-                let $btn_geo_fields = $('<span>Select geo field</span>',
-                        {title:'Select a geographic field from the query result or linked records'})
+                let $btn_select_fields = $(`<span>Select ${fieldType} field</span>`,
+                        {title:`Select a ${fieldType} field from the query result or linked records`})
                     .addClass('smallbutton btn_add_term')
                     .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
                           'text-decoration':'underline','margin-left':'6px'})
                     .appendTo($inputdiv);
 
-                this._on($btn_geo_fields, {click:function(){
+                this._on($btn_select_fields, {click:function(){
                     let DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
                     let queryField = that.options.editing
                         ? that.options.editing.getFieldByName(DT_QUERY_STRING)
@@ -3914,14 +3926,19 @@ $.widget( "heurist.editing_input", {
                         query = values && values.length ? values[0] : null;
                     }
 
-                    selectGeoField(query, function(value){
+                    selectGeoOrTimeField(query, fieldType, function(value){
                         $input.val(value);
-                        __refreshGeoFieldTitle();
+                        __refreshFieldTitle();
                         that.onChange();
                     }, that.element.closest('div[role="dialog"]'));
                 }});
-            }else{
-                // Dataset (and future field-set records) store one JSON array.
+
+                  
+           }
+
+           if(window.hWin.HAPI4.sysinfo['dbconst']['DT_TABLE_FIELDS'] &&
+              this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_TABLE_FIELDS']){
+                  
                 // The textarea is retained as the actual form value but hidden.
                 $input.hide();
 
@@ -4018,7 +4035,7 @@ $.widget( "heurist.editing_input", {
                 }
 
                 // Find the record types actually present in the source query's results
-                // (legacy count_by_rty search - see selectGeoField for the same pattern),
+                // (legacy count_by_rty search - see selectGeoOrTimeField for the same pattern),
                 // then restrict the field-set editor's record type selector to those.
                 function __openFieldSetEditorForCurrentQuery(){
                     let query = __getSiblingQueryString();
@@ -4055,7 +4072,8 @@ $.widget( "heurist.editing_input", {
                 $input.on('change.datasetFieldSet input.datasetFieldSet heuristFieldSetRefresh',
                     __refreshFieldSetPreview);
                 __refreshFieldSetPreview();
-            }
+           }
+
         }
 
         //----------------- color or symbology editor

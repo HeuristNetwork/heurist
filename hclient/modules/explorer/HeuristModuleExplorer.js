@@ -98,6 +98,9 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
             describeRules: function(rules) { return that._describeRules(rules); },
             selectFieldset: function(value, options) { return that._selectFieldset(value, options || {}); },
             editSavedFilter: function(svsID, squery) { return that._editSavedFilter(svsID, squery); },
+            saveDatasourceAsSource: function(source, options) {
+                return that._saveDatasourceAsSource(source, options || {});
+            },
             openSearchBuilder: function(options) { return that._openSearchBuilder(options || {}); }
         };
     }
@@ -218,6 +221,73 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
             return Promise.reject(new Error('Saved Filter editor is not available'));
         }
         return Promise.resolve(ui.editSavedFilter(svsID, squery));
+    }
+
+    _saveDatasourceAsSource(source, options) {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+        var constants = hapi && hapi.sysinfo && hapi.sysinfo.dbconst;
+        var rtID = Number(constants && constants.RT_QUERY_SOURCE);
+        if (!(rtID > 0) || !ui || typeof ui.openRecordEdit !== 'function') {
+            return Promise.reject(new Error('Source editor is not available'));
+        }
+
+        var request = source && source.request || {};
+        var presentation = source && source.presentation || {};
+        var details = {};
+        var queryField = Number(constants.DT_QUERY_STRING);
+        var rulesField = Number(constants.DT_EXPANSION_RULES);
+        var tableFieldsField = Number(constants.DT_TABLE_FIELDS);
+        if (queryField > 0 && request.q != null) {
+            details[queryField] = typeof request.q === 'string'
+                ? request.q : JSON.stringify(request.q);
+        }
+        if (rulesField > 0 && request.rules != null) {
+            details[rulesField] = typeof request.rules === 'string'
+                ? request.rules : JSON.stringify(request.rules);
+        }
+        if (tableFieldsField > 0 && Array.isArray(presentation.data && presentation.data.fields)) {
+            details[tableFieldsField] = JSON.stringify(presentation.data.fields);
+        }
+        
+        // DT_GEO_FIELDS remains the Query Source geofield. Only use
+        // the unambiguous table-profile field introduced by the merged Source.
+        let geoFieldsField = Number(constants.DT_GEO_FIELDS);
+
+        var title = String(source && source.title || 'New Source');
+        return new Promise(function(resolve, reject) {
+            var settled = false;
+            var saved = false;
+            function finish(result) {
+                if (settled) return;
+                settled = true;
+                resolve(result);
+            }
+            try {
+                ui.openRecordEdit(-1, null, {
+                    selectOnSave: false,
+                    onselect: function(event, data) {
+                        saved = true;
+                        var recordset = data && data.selection;
+                        var record = recordset && recordset.getFirstRecord
+                            ? recordset.getFirstRecord() : null;
+                        var recordId = record && recordset.fld
+                            ? Number(recordset.fld(record, 'rec_ID')) : null;
+                        finish({ saved: true, recordId: recordId });
+                    },
+                    onClose: function() {
+                        if (!saved) finish({ saved: false, recordId: null });
+                    },
+                    new_record_params: {
+                        rt: rtID,
+                        Title: title,
+                        details: details
+                    }
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 
     _describeRules(rules) {

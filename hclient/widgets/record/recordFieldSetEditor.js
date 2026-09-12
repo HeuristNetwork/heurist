@@ -2,7 +2,7 @@
 * recordFieldSetEditor.js - Dataset field-set editor
 *
 * Selects direct and linked record fields and edits their ordered presentation
-* options using the common Dataset DT_DATA_FIELDS JSON contract.
+* options using the common Dataset DT_TABLE_FIELDS JSON contract.
 *
 * @project     Heurist academic knowledge management system
 * @package     hclient.widgets.record

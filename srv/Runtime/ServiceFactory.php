@@ -52,11 +52,13 @@ final class ServiceFactory
     {
         $runtime = RuntimeContext::fromLegacySystem($system);
         $codeNames = array(
-            'RT_DATASET', 'RT_QUERY_SOURCE', 'RT_MAP_DOCUMENT', 'RT_MAP_LAYER',
+            'RT_QUERY_SOURCE', 'RT_MAP_DOCUMENT', 'RT_MAP_LAYER',
             'RT_FILE_SOURCE', 'RT_GEOTIFF_SOURCE', 'RT_IMAGE_SOURCE',
             'RT_KML_SOURCE', 'RT_SHP_SOURCE', 'RT_TILED_IMAGE_SOURCE',
             'RT_TLCMAP_DATASET',
-            'DT_DATA_SOURCE', 'DT_QUERY_STRING', 'DT_DATA_FIELDS', 'DT_EXPANSION_RULES',
+            'DT_DATA_SOURCE', 'DT_QUERY_STRING', 
+            'DT_GEO_FIELDS', 'DT_TABLE_FIELDS', 'DT_TIMELINE_FIELDS', 
+            'DT_EXPANSION_RULES',
             'DT_SHORT_SUMMARY', 'DT_CRS', 'DT_FILE_RESOURCE', 'DT_GEO_OBJECT',
             'DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'DT_IS_VISIBLE',
             'DT_MAP_BOOKMARK', 'DT_MAP_IMAGE_LAYER_SCHEMA',

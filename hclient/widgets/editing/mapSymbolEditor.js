@@ -886,7 +886,7 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
 }//end editSymbology
 
 /**
- * Opens a selector for one geographic field path available from a Heurist query.
+ * Opens a selector for one geographic or temporal field path available from a Heurist query.
  *
  * The selected value is returned as one Heurist field-path code, for example
  * "10:lt134:12:28". Resource fields may be followed through linked records;
@@ -898,7 +898,7 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
  * @param {function} callback Receives the selected field-path code.
  * @param {jQuery|null} parentDialog Optional parent dialog used to host the selector element.
  */
-function selectGeoField(mapQuery, callback, parentDialog){
+function selectGeoOrTimeField(mapQuery, fieldType, callback, parentDialog){
 
     if(window.hWin.HEURIST4.util.isempty(mapQuery)){
         window.hWin.HEURIST4.msg.showMsgFlash('A query is required to select a geo field', 2000);
@@ -926,9 +926,11 @@ function selectGeoField(mapQuery, callback, parentDialog){
             window.hWin.HEURIST4.msg.showMsgFlash('No record types found for this query', 2000);
             return;
         }
+        
+        fieldType = fieldType=='geo'?'geo':'date';
 
         let treeData = window.hWin.HEURIST4.dbs.createRectypeStructureTree(
-            null, 6, recordTypes, ['geo','resource']);
+            null, 6, recordTypes, [fieldType,'resource']);
 
         if(!treeData || treeData.length==0){
             window.hWin.HEURIST4.msg.showMsgFlash('No geographic fields found for this query', 2000);
@@ -943,7 +945,7 @@ function selectGeoField(mapQuery, callback, parentDialog){
         // Create a fresh host for every invocation. showElementAsDialog moves and
         // hides its element on close, so reusing the previous element leaves the
         // Fancytree inside the closed dialog wrapper on subsequent invocations.
-        let popele = $('<div class="divGeoFieldSelector"><div class="rtt-tree"/></div>')
+        let popele = $('<div class="div'+fieldType+'FieldSelector"><div class="rtt-tree"/></div>')
             .appendTo(host);
 
         let treediv = popele.find('.rtt-tree');
@@ -980,7 +982,7 @@ function selectGeoField(mapQuery, callback, parentDialog){
                 if(parentcode.split(':').length<5){
                     let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree(
                         null, 6, rectypes,
-                        (parentcode.split(':').length<3 ? ['geo','resource'] : ['geo']),
+                        (parentcode.split(':').length<3 ? [fieldType,'resource'] : [fieldType]),
                         parentcode);
                     data.result = res.length>1 ? res : res[0].children;
                 }else{
@@ -1020,7 +1022,7 @@ function selectGeoField(mapQuery, callback, parentDialog){
 
         $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
             window: window.hWin,
-            title: window.hWin.HR('Select geo field'),
+            title: window.hWin.HR(`Select ${fieldType} field`),
             width: 400,
             height: 600,
             element: popele[0],

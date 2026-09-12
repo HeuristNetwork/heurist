@@ -325,7 +325,7 @@ window.hWin.HEURIST4.dbs = {
 
     /**
      * Finds the record types present in the results of a query, with their record counts,
-     * using the legacy record_search 'count_by_rty' detail (same call used by selectGeoField).
+     * using the legacy record_search 'count_by_rty' detail (same call used by selectGeoOrTimeField).
      * The new /api/{db}/records endpoint has no client-side support for a rectype-counts
      * response yet, so this deliberately reuses the proven legacy path.
      *

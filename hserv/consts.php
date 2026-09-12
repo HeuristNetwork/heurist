@@ -439,7 +439,7 @@ $rtDefines = array(
     'RT_KML_SOURCE' => array(3, 1014),
     'RT_FILE_SOURCE' => array(2, 53), //csv tsv or dbf source
     'RT_SHP_SOURCE' => array(3, 1017),
-    'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
+    'RT_QUERY_SOURCE' => array(3, 1021),
     'RT_TLCMAP_DATASET' => array(1271, 54),
 
     'RT_IMAGE_SOURCE' => array(3, 1018),
@@ -456,9 +456,8 @@ $rtDefines = array(
     
     'RT_IIIF_ANNOTATION' => array(2, 109),
     'RT_IIIF_MANIFEST' => array(2, 110),
-    'RT_IIIF_CANVAS' => array(2, 111),
+    'RT_IIIF_CANVAS' => array(2, 111)
     
-    'RT_DATASET' => array(2, 1100)
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -483,10 +482,12 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_GEO_OBJECT' => array(2, 28),  //extent
     // for MapSource - geo fields from linked record to be used to gather mapping data to be used as geogields parameter to api/map
     // for Dataset - fields and linked paths to be used as field parameter to api/records    
-    'DT_DATA_FIELDS' => array(2, 1161),
-    'DT_EXPANSION_RULES' => array(2, 1163),
-    
+    'DT_GEO_FIELDS' => array(2, 1161),
     'DT_GEO_OUTPUTMODE' => array(2, 1162),  //combined map features per record or individual features
+    'DT_EXPANSION_RULES' => array(2, 1163),
+    'DT_TABLE_FIELDS' => array(2, 1164),
+    'DT_TIMELINE_FIELDS' => array(2, 1105),
+    
     'DT_MIME_TYPE' => array(2, 29),
     'DT_IMAGE_TYPE' => array(2, 30),
     'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2, 31),
@@ -565,7 +566,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3, 1043),
     'DT_MAP_IMAGE_WORLDFILE' => array(3, 1095),
     'DT_ALTERNATE_NAME' => array(3, 1009),
-    'DT_TIMELINE_FIELDS' => array(2, 1105),
     // Map document
     'DT_MAP_LAYER' => array(3, 1081),
     'DT_MAP_BOOKMARK' => array(3, 1082),
