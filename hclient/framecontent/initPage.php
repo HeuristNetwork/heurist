@@ -80,9 +80,13 @@ if (defined('IS_INDEX_PAGE')) {
     }
 
     if (version_compare(HEURIST_MIN_DBVERSION, $current_db_version) > 0) {
-        //older then minimal - force update
-        include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
-        exit;
+        //is auto update allowed
+        include_once 'admin/setup/dbupgrade/DBUpgrade_1.3.0_to_1.3.14.php';
+        if(tryAutoDatabaseUpdateAllowed($system)){
+            //older then minimal - force update
+            include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
+            exit;
+        }
     }
 
     //check for missed tables

@@ -29,6 +29,19 @@
 use hserv\structure\ConceptCode;
 
 
+    // return true if need manual update
+    function tryAutoDatabaseUpdateAllowed($system){
+        $src_maj = intval( $system->settings->get('sys_dbVersion') );
+        $src_min = intval( $system->settings->get('sys_dbSubVersion') );
+        $src_sub = intval( $system->settings->get('sys_dbSubSubVersion') );
+        $rep = false;
+        if($src_maj==1 && $src_min==3 && $src_sub<19 && $src_sub>15){
+            $rep = updateDatabseTo_v1_3_19($system);
+        }
+        return ($rep===false);
+    }
+
+
     function updateDatabseTo_v1_3_19($system, $dbname=null){
 
         $mysqli = $system->getMysqli();
