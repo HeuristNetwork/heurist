@@ -127,11 +127,17 @@ final class DefinitionSnapshotService
     /** Local IDs of the relationship record type and the relationship marker fields. */
     private function dbconst(): array
     {
+//@tbd it duplicates        
+        
         return array(
             'RT_RELATION'         => $this->localByConcept('defRecTypes', 'rty', 2, 1),
             'DT_PRIMARY_RESOURCE' => $this->localByConcept('defDetailTypes', 'dty', 2, 7),
             'DT_TARGET_RESOURCE'  => $this->localByConcept('defDetailTypes', 'dty', 2, 5),
-            'DT_RELATION_TYPE'    => $this->localByConcept('defDetailTypes', 'dty', 2, 6)
+            'DT_RELATION_TYPE'    => $this->localByConcept('defDetailTypes', 'dty', 2, 6),
+            
+            'RT_MAP_DOCUMENT'    => $this->localByConcept('defRecTypes', 'rty', 3, 1019),
+            'RT_MAP_LAYER'    => $this->localByConcept('defRecTypes', 'rty', 3, 1020),
+            'RT_QUERY_SOURCE'    => $this->localByConcept('defRecTypes', 'rty', 3, 1021)
         );
     }
 

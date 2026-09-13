@@ -53,9 +53,7 @@ const HEURIST_MODULE_DATA_DEFAULTS = {
     // when supplied, allowing heurist-data to fall back to its local UI.
     openPreferencesDialog: null,
     openPublishDialog: null,
-    openHelp: null,
-    addToPinList: null,
-    removeFromPinList: null
+    openHelp: null
 };
 
 /** Host-side class for the independent heurist-data application. */
@@ -173,9 +171,7 @@ class HeuristModuleData extends HeuristModuleRecordset {
         [
             'openPreferencesDialog',
             'openPublishDialog',
-            'openHelp',
-            'addToPinList',
-            'removeFromPinList'
+            'openHelp'
         ].forEach(function(name) {
             if (typeof that.options[name] === 'function') {
                 bridge[name] = function() {
