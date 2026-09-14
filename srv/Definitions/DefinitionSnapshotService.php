@@ -127,7 +127,7 @@ final class DefinitionSnapshotService
     /** Local IDs of the relationship record type and the relationship marker fields. */
     private function dbconst(): array
     {
-//@tbd it duplicates        
+//@tbd  MOVE TO Runtime\ConceptCode
         
         return array(
             'RT_RELATION'         => $this->localByConcept('defRecTypes', 'rty', 2, 1),

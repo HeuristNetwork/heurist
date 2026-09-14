@@ -14,8 +14,11 @@
 const HEURIST_MODULE_GRAPH_DEFAULTS = {
     presentationMode: 'iframe',
     graphApplicationUrl: null,
+    runtimeMode: null,              // main | website | standalone; defaults to 'main'
     database: window.hWin && window.hWin.HAPI4 ? window.hWin.HAPI4.database : null,
     apiBaseUrl: window.hWin && window.hWin.HAPI4 ? window.hWin.HAPI4.baseURL + 'api' : null,
+    accessToken: null,
+    requestHeaders: null,
     rules: [],
     fields: ['rec_Title', 'rec_RecTypeID'],
     query: null,
@@ -107,10 +110,23 @@ class HeuristModuleGraph extends HeuristModuleRecordset {
 
     _buildBootstrap() {
         const hapi = window.hWin && window.hWin.HAPI4;
+        const lang = hapi
+            ? hapi.getLangCode3(hapi.get_prefs_def('layout_language', 'eng'), 'eng')
+            : 'eng';
+        // heurist-graph's own loadPreferencesOnInit self-heal (graphConfig.js)
+        // only fires for a live "main" session; it treats a missing/invalid
+        // runtimeMode as 'standalone' (a frozen publication) and skips fetching
+        // the user's saved preference. This must always resolve to a real value.
+        const runtimeMode = ['main', 'website', 'standalone'].indexOf(this.options.runtimeMode) >= 0
+            ? this.options.runtimeMode : 'main';
         return {
             runtime: {
+                runtimeMode: runtimeMode,
+                language: lang,
                 database: this.options.database || (hapi && hapi.database),
                 apiBaseUrl: this.options.apiBaseUrl || (hapi && hapi.baseURL + 'api'),
+                accessToken: this.options.accessToken || null,
+                requestHeaders: $.extend({}, this.options.requestHeaders || {}),
                 baseUrl: hapi ? hapi.baseURL : null,
                 source: this.element.attr('id') || null,
                 searchRealm: this.options.search_realm || null

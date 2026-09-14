@@ -82,9 +82,9 @@ class HeuristModuleTimeline extends HeuristModuleRecordset {
         var frame=this._moduleFrame && this._moduleFrame[0]; if(!frame) return;
         var that=this;
         frame.heuristTimelineHost = {
-            getConfiguration:function(){ return that._getConfiguration ? that._getConfiguration() : that.options.heuristModuleSettings || {}; },
-            updateSettings:function(settings){ that.options.heuristModuleSettings=$.extend(true,{},settings||{}); return true; },
-            updateState:function(state){ that.options.heuristModuleState=$.extend(true,{},state||{}); return true; }
+            getConfiguration:function(){ return that._getConfiguration(); },
+            updateSettings:function(settings){ return that._updateSettings(settings); },
+            updateState:function(state){ return that._updateState(state); }
         };
     }
 

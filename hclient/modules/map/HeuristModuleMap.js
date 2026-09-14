@@ -185,14 +185,17 @@ class HeuristModuleMap extends HeuristModuleRecordset {
             ? hapi.getLangCode3(hapi.get_prefs_def('layout_language', 'eng'), 'eng')
             : 'eng';            
             
-        var saved = this._getSavedMapSettings();
         var explicit = this._cloneMapSettings(this.options.heuristModuleSettings);
         var runtimeMode = this._getRuntimeMode();
 
-        // Preferences are the base. Explicit widget settings override them once,
-        // here in the host wrapper. heurist-map performs no second precedence merge.
+        // The host no longer reads the "heurist-map" preference itself (that used
+        // to go through HAPI4.get_prefs(), an in-memory cache that heurist-map's
+        // own HostAdapter.savePreferences() never refreshes, since it saves via a
+        // direct FrontController request rather than HAPI4.save_pref()). Forward
+        // only explicit widget settings and the website/draw restrictions below;
+        // heurist-map fetches its own preference itself (loadPreferencesOnInit)
+        // whenever nothing is supplied here, always from the live server value.
         var settings = this._mergeMapSettings(
-            saved,
             runtimeMode === 'website' ? this._websiteMapDefaults() : null,
             this.options.viewerMode === 'draw' ? this._drawMapDefaults() : null,
             explicit
@@ -231,22 +234,6 @@ class HeuristModuleMap extends HeuristModuleRecordset {
             state: this.options.heuristModuleState
                 || (this.options.viewerMode === 'draw' ? this._getSavedDrawState() : null)
         };
-    }
-
-    /**
-     * Merge new settings against saved preferences/website/draw defaults instead
-     * of the base class's plain overwrite, and patch the cached bootstrap in
-     * place rather than rebuilding it through the full preference-merge pipeline.
-     */
-    _updateSettings(settings) {
-        var normalized = this._cloneMapSettings(settings);
-        this._moduleBootstrap = this._moduleBootstrap || this._buildBootstrap();
-        this._moduleBootstrap.settings = normalized;
-        this.options.heuristModuleSettings = $.extend(true, {}, normalized);
-        if (this.options.viewerMode === 'configuration') {
-            this.options.configurationValue = $.extend(true, {}, normalized);
-        }
-        return $.extend(true, {}, normalized);
     }
 
     /** Patch the cached bootstrap's state in place. */
@@ -309,18 +296,6 @@ class HeuristModuleMap extends HeuristModuleRecordset {
         settings = this._mergeMapSettings(settings, this._drawMapDefaults());
         return settings;
     }
-    /** Read the already-loaded HAPI preference without making another request. */
-    _getSavedMapSettings() {
-        var hapi = window.hWin && window.hWin.HAPI4;
-        if (!hapi || typeof hapi.get_prefs !== 'function') return null;
-        try {
-            var value = hapi.get_prefs('heurist-map');
-            if (typeof value === 'string' && value) value = JSON.parse(value);
-            return value && typeof value === 'object' ? value : null;
-        } catch (error) {
-            return null;
-        }
-    }
     _getSavedDrawState() {
         var hapi = window.hWin && window.hWin.HAPI4;
         var state = null;
@@ -361,9 +336,17 @@ class HeuristModuleMap extends HeuristModuleRecordset {
         };
     }
     _mergeMapSettings() {
+        var provided = Array.prototype.slice.call(arguments).filter(function(value) {
+            return value && typeof value === 'object';
+        });
+        // Return nothing rather than a synthetic "empty" envelope when there is
+        // nothing real to merge, so heurist-map's own bootstrap normalizer sees
+        // a genuinely empty settings object and knows to fetch its own saved
+        // preference (loadPreferencesOnInit) instead of treating this shape as
+        // an authoritative-but-blank host-supplied configuration.
+        if (!provided.length) return null;
         var result = { format: 'heurist-map-settings', version: 1, options: {}, config: {} };
-        Array.prototype.slice.call(arguments).forEach(function(value) {
-            if (!value || typeof value !== 'object') return;
+        provided.forEach(function(value) {
             if (value.options) result.options = $.extend(true, result.options, value.options);
             if (value.config) result.config = $.extend(true, result.config, value.config);
         });
