@@ -4977,7 +4977,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
         this.editHeader = this.element.find('.editHeader');
 
-        let sheader = '<div style="text-align:left;min-height:25px;display:inline-flex;align-items:center;" class="edit-record-title">';  ///class="ui-heurist-header2" 
+        let sheader = '<div style="text-align:left;min-height:25px;display:inline-flex;align-items:center;width:calc(100% - 350px);overflow:hidden;" class="edit-record-title">';
         
         if(this.options.edit_structure){
             
