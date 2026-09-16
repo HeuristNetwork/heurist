@@ -5140,6 +5140,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // add '+' button to end of tabs, creates new tab header
             this._addNewTabButton();
 
+            // add handling for moving separator gear icons
+            this._handleSeparatorRtsIcons();
+
             // Hide 'toggle record visibility'
             if(this.element.find('#rec_visibility').length > 0){
                 this.element.find('#rec_visibility').hide();
@@ -5562,7 +5565,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         this.editFormPopup.layout().resizeAll(); // resize layout
     },
 
-    //
     /**
      * @brief Adds a "+" button to tab groups for creating new tabs.
      * @memberof heurist.manageRecords
@@ -5586,6 +5588,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             $tabs.each(function(idx, group){
 
                 let $group = $(group);
+                if($group.tabs('instance') === undefined){
+                    return;
+                }
+
                 let $tabs = $group.find('ul[role="tablist"]');
                 let last_dtid = $group.find('fieldset.ui-tabs-panel:last-child div[data-dtid]').last().attr('data-dtid');
 
@@ -5623,8 +5629,182 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             });
         }
     },
-	
-    //
+
+    /**
+     * @brief Moves the rts icon (gear) for separators closer
+     * @memberof heurist.manageRecords
+     * This function is active when the RTS (Record Type Structure) editor is enabled.
+     * It attempts to move the various rts icons (gears) closer to their corresponding separator,
+     *  to be inline with other fields and avoid confusion over what field is controlled by the icon.
+     */
+    _handleSeparatorRtsIcons: function(){
+
+        let hiddenGroups = {};
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+
+                if(!entry.isIntersecting){
+                    return;
+                }
+
+                const dtyID = entry.target.getAttribute('data-dtid');
+
+                if(Object.hasOwn(hiddenGroups, dtyID)){
+
+                    let $group = hiddenGroups[dtyID];
+
+                    $group['icon'].position({
+                        my: $group.my ?? 'right center',
+                        at: 'left center',
+                        of: $group['header']
+                    });
+                }
+
+                observer.unobserve(entry.target);
+            });
+        });
+
+        // Tabs
+        let $tabs = this.editForm.find('div.ui-tabs[data-group-dtid]');
+        if($tabs.length > 0){
+
+            $tabs.each((idx, group) => {
+
+                let $group = $(group);
+                if($group.tabs('instance') === undefined){
+                    return;
+                }
+
+                this._on($group, {
+                    'tabsactivate': function(event, ui){
+
+                        // Move gear icon next to tab header
+                        ui.oldTab.find('a').css('margin-left', '');
+                        let $tab = ui.newTab.find('a');
+                        $tab.css('margin-left', '2em');
+
+                        const dtyID = ui.newPanel.attr('data-dtid');
+                        const $gearIcon = ui.newPanel.find(`div[data-dtid="${dtyID}"] span.ui-icon-gear`);
+                        $gearIcon.css('position', 'absolute');
+                        $gearIcon.position({
+                            my: 'right center',
+                            at: 'left center',
+                            of: $tab
+                        });
+                    }
+                });
+
+                let currentTabIndex = $group.tabs('option', 'active');
+                let $currentTab = $group.find('.ui-tabs-nav li').eq(currentTabIndex).find('a').css('margin-left', '2em');
+                let $currentPanel = $group.find('.ui-tabs-panel').eq(currentTabIndex);
+                const dtyID = $currentPanel.attr('data-dtid');
+                const $gearIcon = $currentPanel.find(`div[data-dtid="${dtyID}"] span.ui-icon-gear`).css('position', 'absolute');
+
+                observer.observe($currentPanel[0]);
+                hiddenGroups[dtyID] = {header: $currentTab.parent(), icon: $gearIcon, my: 'left center'};
+            });
+        }
+
+        // Accordion
+        let $accordions = this.editForm.find('.ui-accordion');
+        if($accordions.length > 0){
+
+            $accordions.each((idx, group) => {
+
+                let $group = $(group);
+                if($group.accordion('instance') === undefined){
+                    return;
+                }
+
+                let $header = $group.find('.ui-accordion-header');
+                let $content = $group.find('.ui-accordion-content');
+                const dtyID = $content.children().attr('data-dtid');
+                const $gearIcon = $content.find(`div[data-dtid="${dtyID}"] span.ui-icon-gear`);
+                $gearIcon.css('position', 'absolute');
+
+                if(!$content.is(':visible')){
+                    observer.observe($content.children()[0]);
+                    hiddenGroups[dtyID] = {header: $header.find('.ui-accordion-header-icon'), icon: $gearIcon};
+                    return;
+                }
+
+                $gearIcon.position({
+                    my: 'right center',
+                    at: 'left center',
+                    of: $header.find('.ui-accordion-header-icon')
+                });
+            });
+        }
+
+        // Group, break
+        let $headers = this.editForm.find('.group_break-separator-header');
+        if($headers.length > 0){
+
+            $headers.each((idx, header) => {
+
+                let $header = $(header);
+                let $fieldset = $header.next();
+                let $rtsContainer = $header.prev()
+                let $gearIcon = $rtsContainer.find('span.ui-icon-gear');
+                const dtyID = $rtsContainer.attr('data-dtid');
+
+                if($header.length === 0 || $fieldset.length === 0 || $gearIcon.length === 0){
+                    return;
+                }
+
+                $header.css('padding-left', '2em');
+
+                if(!$header.is(':visible')){
+                    observer.observe($rtsContainer[0]);
+                    hiddenGroups[dtyID] = {header: $header, icon: $gearIcon, my: 'right+15 center'};
+                    return;
+                }
+
+                $gearIcon.position({
+                    my: 'right+15 center+5',
+                    at: 'left center',
+                    of: $header
+                });
+            });
+        }
+
+        // Group & Explanation, non-break
+        $headers = this.editForm.find('.group-separator-header, .explanation-separator-header');
+        if($headers.length > 0){
+
+            $headers.each((idx, header) => {
+
+                let $header = $(header);
+                let $rtsContainer = $header.next().next();
+                let $gearIcon = $rtsContainer.find('span.ui-icon-gear');
+                const dtyID = $rtsContainer.attr('data-dtid');
+
+                if($header.length === 0 || $gearIcon.length === 0){
+                    return;
+                }
+
+                $header.css('padding-left', '2em');
+
+                if(!$header.is(':visible')){
+                    observer.observe($rtsContainer[0]);
+                    hiddenGroups[dtyID] = {header: $header, icon: $gearIcon, my: 'right+15 center'};
+                    return;
+                }
+
+                $gearIcon.position({
+                    my: 'right+15 center',
+                    at: 'left center',
+                    of: $header
+                });
+            });
+        }
+
+        if(Object.keys(hiddenGroups).length === 0){
+            observer.disconnect();
+        }
+
+    },
+
 	/**
 	 * @brief Displays extra record information at the top and bottom of the record editor form.
 	 * @memberof heurist.manageRecords
