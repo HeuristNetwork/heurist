@@ -7,8 +7,8 @@
 * @project     Heurist academic knowledge management system
 * @package     Utilities
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2026 Heurist Network Association
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @copyright   (C) 2026 Heurist Network Association. All rights reserved.
+* @license     This software may be installed and operated only on servers operated by Heurist Network, or with the prior written permission of Heurist Network. No right is granted to copy, distribute, modify, install or operate this software elsewhere.
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Stephen White

@@ -9,7 +9,7 @@
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Time
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @license     This software may be installed and operated only on servers operated by Heurist Network, or with the prior written permission of Heurist Network. No right is granted to copy, distribute, modify, install or operate this software elsewhere.
 * @since       8.0
 */
 
