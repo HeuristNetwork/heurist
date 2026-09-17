@@ -118,7 +118,7 @@ How much work a code update requires depends on *what* changed:
 | What changed upstream | What you need to do |
 |---|---|
 | PHP, JS, CSS, templates (anything under the repo) | Nothing — the bind mount picks it up on the next page load |
-| `composer.json` / `composer.lock` | Re-resolve dependencies (see below) |
+| `composer.json` / `composer.lock` | Install the locked dependencies (see below) |
 | `Dockerfile`, anything under `docker/`, `docker-compose.yml` | Rebuild the image: `docker compose up -d --build` |
 | Support-bundle libraries (`external_h5`, `help`) | Refresh the `heurist_heurist_support` volume (see below) |
 
@@ -139,13 +139,13 @@ replays instantly); it is required when the `Dockerfile`, `docker/*` files or
 runtime the repo's `vendor/` directory is bind-mounted over it, and the
 entrypoint only copies the baked-in tree when `vendor/autoload.php` is
 *missing*. A rebuild alone therefore does **not** update an existing `vendor/`.
-After a `composer.json` change, either:
+After a dependency change, update and commit `composer.lock` on the host, then
+either:
 
 ```bash
-# Option A: resolve inside the running container (uses the live repo)
+# Option A: install the committed lock file inside the running container
 docker compose exec web sh -c 'cd /var/www/html/HEURIST/heurist &&
-    composer config policy.advisories.block false &&
-    composer update --no-interaction --prefer-dist --no-progress'
+    composer install --no-dev --no-interaction --prefer-dist --no-progress'
 
 # Option B: start fresh — delete the local vendor tree, then rebuild;
 # the entrypoint reinstalls it from the image
@@ -153,8 +153,8 @@ rm -rf vendor
 docker compose up -d --build
 ```
 
-(The `policy.advisories.block false` matches the build-time override for the
-pinned smarty versions; see the Dockerfile comment.)
+Do not disable Composer's advisory checks. Run `composer audit` when updating
+the lock file and upgrade affected packages before rebuilding the image.
 
 **Support bundles.** `external_h5`/`help` live in the `heurist_support`
 volume, which persists across rebuilds by design, and the entrypoint only

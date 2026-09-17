@@ -14,8 +14,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Note: mbstring requires libonig-dev (oniguruma); json/session/dom/simplexml/xml
 # are already compiled into PHP 8.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev libonig-dev \
-        bzip2 unzip git default-mysql-client \
+        bzip2 \
+        default-mysql-client \
+        git \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libonig-dev \
+        libpng-dev \
+        libzip-dev \
+        unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" gd mbstring mysqli pdo_mysql zip \
     && a2enmod rewrite headers \
@@ -28,41 +35,60 @@ COPY docker/heurist-php.ini /usr/local/etc/php/conf.d/heurist.ini
 # AllowOverride All so the codebase .htaccess rules apply.
 COPY docker/apache-heurist.conf /etc/apache2/sites-available/000-default.conf
 
-# Composer (the repo ships no composer.lock, so we resolve at build time)
+# Composer binary used to install the repository's locked dependencies.
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Codebase at the canonical location
-COPY . /var/www/html/HEURIST/heurist
+# Codebase at the canonical location. Keep this allowlist explicit so local
+# credentials and development artefacts can never become part of the image.
+WORKDIR /var/www/html/HEURIST/heurist
+COPY admin admin
+COPY export export
+COPY hclient hclient
+COPY hserv hserv
+COPY import import
+COPY movetoparent movetoparent
+COPY redirects redirects
+COPY scripts scripts
+COPY server_management server_management
+COPY srv srv
+COPY startup startup
+COPY viewers viewers
+COPY .htaccess LICENSE_gnuGPL3.txt README.md autoload.php composer.json composer.lock configIni.php favicon.ico h4styles.css h6styles.css index.php layout_default.js mbtiles.php ./
 
 # Bake composer dependencies into the image. At runtime the repo is
 # bind-mounted over this directory, so the entrypoint copies this vendor
 # tree into the mount if the checked-out repo does not have vendor/ yet.
-# NOTE: Heurist pins smarty/smarty ~5.4.1, whose versions all carry known
-# security advisories; Composer 2.7+ blocks those by default. We disable the
-# block for this local dev build instead of altering upstream constraints.
-RUN cd /var/www/html/HEURIST/heurist \
-    && composer config policy.advisories.block false \
-    && composer update --no-interaction --prefer-dist --no-progress \
+# composer.lock makes the installed dependency set reproducible.
+RUN composer install --no-dev --no-interaction --prefer-dist --no-progress \
     && cp -a vendor /opt/heurist_vendor
 
 # Support bundles (external JS libs + help system) from the Heurist
 # distribution server, same as install_heurist.sh does. Best-effort:
 # each download may fail without breaking the build.
-RUN mkdir -p /var/www/html/HEURIST/HEURIST_SUPPORT \
-    && cd /var/www/html/HEURIST/HEURIST_SUPPORT \
-    && { curl -fsSL --retry 3 --retry-delay 3 -o ext.tar.bz2 https://heuristref.net/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2 \
+WORKDIR /var/www/html/HEURIST/HEURIST_SUPPORT
+RUN { curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 --retry-delay 3 -o ext.tar.bz2 https://heuristref.net/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2 \
          && tar -xjf ext.tar.bz2 && rm -f ext.tar.bz2 \
          || echo "WARNING: external_h5 bundle not downloaded"; } \
-    && { curl -fsSL --retry 3 --retry-delay 3 -o help.tar.bz2 https://heuristref.net/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 \
+    && { curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 --retry-delay 3 -o help.tar.bz2 https://heuristref.net/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 \
          && tar -xjf help.tar.bz2 && rm -f help.tar.bz2 \
          || echo "WARNING: help bundle not downloaded"; }
 
 COPY docker/apache-servername.conf /etc/apache2/conf-available/servername.conf
-RUN a2enconf servername
-
 COPY docker/entrypoint.sh /usr/local/bin/heurist-entrypoint.sh
-RUN chmod +x /usr/local/bin/heurist-entrypoint.sh
+RUN a2enconf servername \
+    && sed -i 's/^Listen 80$/Listen 8080/' /etc/apache2/ports.conf \
+    && chmod +x /usr/local/bin/heurist-entrypoint.sh \
+    && mkdir -p /var/run/apache2 /var/lock/apache2 /var/log/apache2 \
+        /var/www/html/HEURIST/HEURIST_FILESTORE \
+    && find /var/www/html/HEURIST/heurist/movetoparent -maxdepth 1 -type f ! -name 'heuristConfigIni.php' \
+        -exec cp -n {} /var/www/html/HEURIST/ \; \
+    && ln -s ../HEURIST_SUPPORT/external_h5 /var/www/html/HEURIST/heurist/external \
+    && ln -s ../HEURIST_SUPPORT/help /var/www/html/HEURIST/heurist/help \
+    && chown -R www-data:www-data /var/run/apache2 /var/lock/apache2 /var/log/apache2 \
+        /var/www/html/HEURIST/HEURIST_FILESTORE /var/www/html/HEURIST/HEURIST_SUPPORT
 
-EXPOSE 80
+WORKDIR /var/www/html/HEURIST/heurist
+USER www-data
+EXPOSE 8080
 ENTRYPOINT ["heurist-entrypoint.sh"]
 CMD ["apache2-foreground"]

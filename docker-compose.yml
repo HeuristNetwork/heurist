@@ -31,7 +31,7 @@ services:
     ports:
       # Public access is provided by the host Apache HTTPS reverse proxy.
       # Keep the container web port unreachable from the network directly.
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:8080:8080"
     depends_on:
       db:
         condition: service_healthy

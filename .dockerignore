@@ -1,2 +1,8 @@
 .git
 .gitattributes
+.env
+.env.*
+Vault
+data
+node_modules
+vendor

@@ -12,7 +12,7 @@
  * Keep this file in sync with movetoparent/heuristConfigIni.php upstream.
  */
 
-require dirname(__FILE__) . '/heurist/movetoparent/heuristConfigIni.php';
+require_once dirname(__FILE__) . '/heurist/movetoparent/heuristConfigIni.php';
 
 // --- [DATABASE] -------------------------------------------------------------
 // The 'db' service defined in docker-compose.yml (MySQL 8.0).
