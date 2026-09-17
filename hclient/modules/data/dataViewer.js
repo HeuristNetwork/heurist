@@ -6,6 +6,7 @@
  *
  * @project     Heurist academic knowledge management system
  * @package     hclient.modules.data
+ * @copyright   (C) 2026 Heurist Network Association
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  */
 (function() {

@@ -8,10 +8,10 @@
  * @project     Heurist academic knowledge management system
  * @package     hclient.modules
  * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @copyright   (C) 2026 Heurist Network Association
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov <osmakov@gmail.com>
- * @since       7.0
+ * @since       8.0
  */
 
 const HEURIST_MODULE_DATA_DEFAULTS = {
