@@ -7,6 +7,10 @@ set -euo pipefail
 BASE=/var/www/html/HEURIST
 APP="$BASE/heurist"
 
+download_https() {
+    curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 "$@"
+}
+
 # 1. Filestore: create if missing and deny direct web access
 mkdir -p "$BASE/HEURIST_FILESTORE"
 if [[ ! -f "$BASE/HEURIST_FILESTORE/.htaccess" ]]; then
@@ -44,19 +48,19 @@ EXT="$BASE/HEURIST_SUPPORT/external_h5"
 if [[ -d "$EXT" && ! -f "$EXT/jquery/jquery-3.7.1.js" ]]; then
     echo "==> Downloading missing external libraries (jquery, jquery-ui, bootstrap)..."
     mkdir -p "$EXT/jquery" "$EXT/bootstrap"
-    curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 -o "$EXT/jquery/jquery-3.7.1.js" \
+    download_https -o "$EXT/jquery/jquery-3.7.1.js" \
         https://code.jquery.com/jquery-3.7.1.js || true
-    curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 -o "$EXT/jquery/jquery-ui.js" \
+    download_https -o "$EXT/jquery/jquery-ui.js" \
         https://code.jquery.com/ui/1.14.0/jquery-ui.js || true
-    curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 -o "$EXT/jquery/jquery-ui.css" \
+    download_https -o "$EXT/jquery/jquery-ui.css" \
         https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css || true
-    curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 -o "$EXT/bootstrap/bootstrap.bundle.min.js" \
+    download_https -o "$EXT/bootstrap/bootstrap.bundle.min.js" \
         https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js || true
-    curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 -o "$EXT/bootstrap/bootstrap.min.css" \
+    download_https -o "$EXT/bootstrap/bootstrap.min.css" \
         https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css || true
 fi
 if [[ -d "$EXT" && ! -f "$EXT/jquery.widgets/jquery.fancytree/jquery.fancytree-all.js" ]]; then
-    curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 -o "$EXT/jquery.widgets/jquery.fancytree/jquery.fancytree-all.js" \
+    download_https -o "$EXT/jquery.widgets/jquery.fancytree/jquery.fancytree-all.js" \
         https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.4/jquery.fancytree-all.js || true
 fi
 
@@ -65,9 +69,9 @@ fi
 #     loaded separately by includeJQuery(), so the standalone build is enough.
 if [[ -d "$EXT" && ! -f "$EXT/js/datatable/datatables.min.js" ]]; then
     mkdir -p "$EXT/js/datatable"
-    curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 -o "$EXT/js/datatable/datatables.min.js" \
+    download_https -o "$EXT/js/datatable/datatables.min.js" \
         https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js || true
-    curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 -o "$EXT/js/datatable/datatables.min.css" \
+    download_https -o "$EXT/js/datatable/datatables.min.css" \
         https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css || true
 fi
 
