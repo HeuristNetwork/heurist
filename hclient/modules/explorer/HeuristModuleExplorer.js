@@ -4,6 +4,13 @@
  * Explorer deliberately does NOT inherit HeuristModuleRecordset: legacy search
  * and selection events stop at the old UI. The bridge exposes only record edit
  * operations and explicit legacy designer services still needed by new modules.
+ * 
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       8.0
  */
 class HeuristModuleExplorer extends HeuristModuleViewer {
 
