@@ -112,84 +112,33 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 $('.save-button').button().on({click:getWktAndClose});
 
                 $('#view-button').button().on('click', function(){
-                       mapping.mapping('getSetMapBounds', true);
+                    mapping.mapping('getSetMapBounds', true);
                 });
                 $('#style-button').button().on({click:function(){
-                        mapping.mapping( 'drawSetStyle');
+                    mapping.mapping( 'drawSetStyle');
                 }});
                 $('#delete-all-button').button().on({click:function(){
-                       mapping.mapping( 'drawClearAll' );
+                    mapping.mapping( 'drawClearAll' );
                 }});
                 $('.cancel-button').button().on({click:function(){
-                       window.close();
+                    window.close();
                 }});
-                // paste geojson -> map
-                $('#load-geometry-button').button().on('click', function(){
 
-                    var titleYes = window.hWin.HR('Yes'),
-                    titleNo = window.hWin.HR('No'),
-                    buttons = {};
+                $('#handle-geometry-button').button().on('click', () => {
 
-                    var $dlg;
-
-                    buttons[titleYes] = function() {
-
-                        let geodata = $dlg.find('#geodata_textarea').val();
-
-                        if(!window.hWin.HEURIST4.util.isJSON(geodata)){
-
-                            geodata = geodata.toUpperCase();// ensure captialised
-                            geodata = geodata.replace(/\s\s+/g, ' ').trim();// remove double spacing
-                            geodata = geodata.replace(/\s*\(\s*/g, '(');// remove space before+after left bracket
-                            geodata = geodata.replace(/\s*\)/g, ')');// remove space before right bracket
-
-                            if(geodata.indexOf('POINT') >= 0){
-                                geodata = geodata.replace(/\,\s*/g, ' ');// replace comma | comma+space with a single space
-                            }
-
-                            $dlg.find('#geodata_textarea').val(geodata);
-                        }
-
-                        mapping.mapping( 'drawLoadGeometry', geodata);
-                        $dlg.dialog( "close" );
-                    };
-                    buttons[titleNo] = function() {
-                        $dlg.dialog( "close" );
-                    };
-                    $('#get-coordinates-helper').hide();
-                    $('#set-coordinates-helper').show();
-                    $('#geodata_textarea').css({top:'8.5em'});
-
-                    $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top,
-                        element: document.getElementById( "get-set-coordinates" ),
-                        resizable:false,
-                        width:690, height:400,
-                        title:window.hWin.HR('Paste or upload geo data'),
-                        buttons:buttons
-                    });
-
-                });
-
-                $("#fix-x-coords").button().on('click', function(){
-
-                });
-                // load from map -> geojson
-                $('#get-geometry-button').button().on('click', function(){
-
-                    $('#get-coordinates-helper').show();
-                    $('#set-coordinates-helper').hide();
-                    $('#geodata_textarea').css({top:'4em'});
+                    let labelSet = window.hWin.HR('Set geometry'),
+                        labelCancel = window.hWin.HR('Cancel');
+                    let buttons = {};
+                    let $dlg;
 
                     $('#get-coord-wkt').trigger('change');
+                    $('#geodata_textarea').trigger('keyup');
 
-                    var $dlg;
-
-                    var titleYes = window.hWin.HR('[Add to Map]');
-                    var button={};
-                    button[titleYes] = function() {
+                    buttons[labelSet] = () => {
 
                         let geodata = $dlg.find('#geodata_textarea').val();
-                        if(!window.hWin.HEURIST4.util.isJSON(geodata)){
+
+                        if(!window.hWin.HEURIST4.util.isJSON(geodata) && geodata !== ''){
 
                             geodata = geodata.toUpperCase();// ensure captialised
                             geodata = geodata.replace(/\s\s+/g, ' ').trim();// remove double spacing
@@ -204,40 +153,79 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                         }
 
                         mapping.mapping( 'drawLoadGeometry', geodata);
-                        $dlg.dialog( "close" );
+                        $dlg.dialog('close');
+                    };
+                    buttons[labelCancel] = () => {
+                        $dlg.dialog('close');
                     };
 
-                    $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top,
+                    $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
+                        window:top,
                         element: document.getElementById( "get-set-coordinates" ),
                         resizable: false,
-                        width:690, height:400,
-                        title:window.hWin.HR('Copy the result'),
-                        buttons:button
-
+                        width: 690, height: 400,
+                        title: window.hWin.HR('Manage map geometric data'),
+                        buttons:buttons,
+                        default_palette_class: 'ui-heurist-populate'
                     });
                 });
+
+                $('#btn-reset-geometry').button().on({
+                    click: (e) => {
+
+                        let $textarea = $(e.target).parents('#get-set-coordinates').find('#geodata_textarea');
+                        let $checkbox = $(e.target).parents('#get-set-coordinates').find('#get-coord-wkt');
+
+                        let originalGeo = getGeometryFromMap($checkbox.attr('id') === 'get-coord-wkt' ? 'wkt' : 'geojson');
+                        if(!window.hWin.HEURIST4.util.isempty(originalGeo)){
+                            $textarea.val(originalGeo);
+                            $(e.target).hide();
+                        }
+                    }
+                });
+
+                $('#geodata_textarea').on({
+                    keyup: (e) => {
+
+                        let $resetBtn = $(e.target).parents('#get-set-coordinates').find('#btn-reset-geometry');
+                        const originalWKT = getGeometryFromMap('wkt');
+                        const originalGeoJSON = getGeometryFromMap('geojson');
+
+                        const hasOriginalGeo = !window.hWin.HEURIST4.util.isempty(originalWKT) && !window.hWin.HEURIST4.util.isempty(originalGeoJSON);
+                        const changedValue = $(e.target).val() !== originalWKT && $(e.target).val() !==originalGeoJSON;
+
+                        if(hasOriginalGeo && changedValue){
+                            $resetBtn.show();
+                        }else{
+                            $resetBtn.hide();
+                        }
+                    }
+                })
 
                 $('input[name="get-coord-format"]').on({change:function(e){
 
-                       var is_checked = $(e.target).is(':checked');
-                       var el_name = $(e.target).attr('id');
-                       var el_text = $(e.target).parents('#get-set-coordinates').find('#geodata_textarea');
+                    var is_checked = $(e.target).is(':checked');
+                    var el_name = $(e.target).attr('id');
+                    var el_text = $(e.target).parents('#get-set-coordinates').find('#geodata_textarea');
 
-                       if(el_name=='get-coord-wkt' && is_checked){
-
-                            var res = mapping.mapping( 'drawGetWkt', 'messsage');
-                            el_text.val(res);
-
-                       }else{
-                            var res = mapping.mapping( 'drawGetJson' );
-                            if(window.hWin.HEURIST4.util.isGeoJSON(res)){
-                                el_text.val(JSON.stringify(res));
-                            }else{
-                                el_text.val('');
-                            }
-                       }
+                    el_text.val(getGeometryFromMap(el_name == 'get-coord-wkt' ? 'wkt' : 'geojson'));
                 }});
 
+            }
+
+            function getGeometryFromMap(type){
+
+                if(type !== 'wkt' && type !== 'geojson'){
+                    return '';
+                }
+
+                if(type === 'wkt'){
+                    let wkt = mapping.mapping('drawGetWkt', 'message');
+                    return wkt === 'You have to draw a shape' ? '' : wkt;
+                }else{
+                    let geojson = mapping.mapping('drawGetJson');
+                    return window.hWin.HEURIST4.util.isGeoJSON(geojson) ? JSON.stringify(geojson) : '';
+                }
             }
 
             //
@@ -635,10 +623,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                     <button id="style-button">Set style</button>
                 </div>
                 <div>
-                    <button id="load-geometry-button">Add Geometry</button>
-                </div>
-                <div>
-                    <button id="get-geometry-button">Get Geometry</button>
+                    <button id="handle-geometry-button">Map geometry</button>
                 </div>
 
                 <div style="padding-top:20px">
@@ -685,28 +670,29 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         </div>
 
         <div id="get-set-coordinates" style="display: none;">
-            <!--
-            -->
+
             <div>
-            <div id="set-coordinates-helper" style="display:inline-block;width:80%">
-                <span>Paste geo data as Simple points (X,Y or X Y), GeoJSON or WKT</span>
-                <div class="heurist-helper1" style="padding:5px 0">
-                    WKT:  POINT(x y)   LINESTRING(x1 y1, x2 y2, x3 y3)   POLYGON((x1 y1, x2 y2, x3 y3)) see
-                    <a href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry" target="_blank" rel="noopener">wikipedia</a> for more.<br>
-                    Coordinates in decimal lat/long or UTM (x/easting then y/northing). Easting in W hemisphere starts at -180, northing in S Hemisphere starts at -90.<br>
+                <div id="set-coordinates-helper" style="display:inline-block;">
+                    <span style="top: -0.75em;position: relative;">Enter geo data as Simple points (X,Y or X Y), GeoJSON or WKT</span>
+                    <div class="heurist-helper1" style="padding: 0px 0px 1em;line-height: 1.3em;">
+                        WKT:  POINT(x y)   LINESTRING(x1 y1, x2 y2, x3 y3)   POLYGON((x1 y1, x2 y2, x3 y3)) see
+                        <a href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry" target="_blank" rel="noopener">wikipedia</a> for more.<br>
+                        Coordinates in decimal lat/long or UTM (x/easting then y/northing). Easting in W hemisphere starts at -180, northing in S Hemisphere starts at -90.<br>
+                    </div>
+                </div>
+                <div style="display: flex;align-items: center;">
+                    <span style="width: 7.5em;">Select format: </span>
+                    <label style="width: 7.5em;"><input type="radio" name="get-coord-format" id="get-coord-json" checked="true">GeoJSON</label>
+                    <label style="width: 5em;"><input type="radio" name="get-coord-format" id="get-coord-wkt">WKT</label>
+                    <button id="btn-reset-geometry" style="display: none;">Reset geometry</button>
+                </div>
+                <div style="float:right;width:140px;display:none;">
+                    <input value="360" type="number" size="4" style="width:4em"/>&nbsp;<button id="fix-x-coords">Fix Long</button>
                 </div>
             </div>
-            <div id="get-coordinates-helper" style="display:inline-block;width:80%">
-                <span>Select format: </span>
-                <label><input type="radio" name="get-coord-format" id="get-coord-json" checked="true">GeoJSON</label>
-                <label><input type="radio" name="get-coord-format" id="get-coord-wkt">WKT</label>
-            </div>
-            <div style="float:right;width:140px;display:none;">
-                <input value="360" type="number" size="4" style="width:4em"/>&nbsp;<button id="fix-x-coords">Fix Long</button>
-            </div>
-            </div>
-            <textarea cols="" rows="" id="geodata_textarea"
-                style="position:absolute;top:4em;bottom:0;width:97%;resize:none"></textarea>
+
+            <textarea cols="" rows="" id="geodata_textarea" style="position: absolute;top: 9em;bottom: 1em;left: 1em;right: 1em;resize: none;"></textarea>
+
         </div>
 
     </body>
