@@ -295,7 +295,7 @@ $resource = @$requestUri[3];
 
 // Specialised, read-only representations of record-type-backed entities.
 // These canonical routes are handled before ordinary /records/{id} output.
-$recordPresentationTypes = array('dataset', 'document', 'layer');
+$recordPresentationTypes = array('querysource', 'document', 'layer');
 $recordPresentation = ($resource === 'records'
     && in_array(@$requestUri[4], $recordPresentationTypes, true))
         ? (string)$requestUri[4]

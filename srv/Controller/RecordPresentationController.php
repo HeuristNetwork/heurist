@@ -2,46 +2,46 @@
 /**
 * RecordPresentationController.php - Specialised record presentation dispatcher
 *
-* Routes record-type-backed presentation requests to Dataset and Map services
+* Routes record-type-backed presentation requests to Query Source and Map services
 * and emits their stable JSON response.
 *
 * @project     Heurist academic knowledge management system
 * @package     Controller
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @copyright   (C) 2026 Heurist Network Association. All rights reserved.
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson@heuristnetwork.org>
-* @since       7.0
+* @since       8.0
 */
 namespace Heurist\Controller;
 
 use Heurist\Runtime\ApiResponse;
-use Heurist\Records\Presentation\DatasetPresentationService;
+use Heurist\Records\Presentation\QuerySourcePresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
 use Heurist\Records\Query\QueryValidationException;
 
 /** Dispatches public specialised representations of Heurist records. */
 class RecordPresentationController
 {
-    private DatasetPresentationService $datasets;
+    private QuerySourcePresentationService $querySources;
     private MapPresentationService $maps;
     private ApiResponse $response;
 
     /** Initialise the controller for the current database. */
     public function __construct(
-        DatasetPresentationService $datasets,
+        QuerySourcePresentationService $querySources,
         MapPresentationService $maps,
         ?ApiResponse $response = null
     )
     {
-        $this->datasets = $datasets;
+        $this->querySources = $querySources;
         $this->maps = $maps;
         $this->response = $response ?? new ApiResponse();
     }
 
     /**
-     * Output one Dataset, Map Document, or Map Layer presentation.
+     * Output one QuerySource, Map Document, or Map Layer presentation.
      *
      * @param string $presentation Presentation name.
      * @param int $recordId Heurist record ID.
@@ -56,8 +56,8 @@ class RecordPresentationController
 
         try{
             switch($presentation){
-                case 'dataset':
-                    $result = $this->datasets->getDataset($recordId);
+                case 'querysource':
+                    $result = $this->querySources->getQuerySource($recordId);
                     break;
                 case 'document':
                     $result = $this->maps->getDocument($recordId);

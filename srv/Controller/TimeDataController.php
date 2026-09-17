@@ -9,7 +9,7 @@
 * @project     Heurist academic knowledge management system
 * @package     Controller
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @since       7.0
+* @since       8.0
 */
 
 declare(strict_types=1);

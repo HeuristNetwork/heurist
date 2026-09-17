@@ -8,11 +8,11 @@
 * @project     Heurist academic knowledge management system
 * @package     Runtime
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @copyright   (C) 2026 Heurist Network Association. All rights reserved.
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @since       7.0
+* @since       8.0
 */
 
 declare(strict_types=1);
@@ -30,7 +30,7 @@ use Heurist\Database\DatabaseFactory;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Publication\PublicationService;
 use Heurist\Records\Map\MapFeatureService;
-use Heurist\Records\Presentation\DatasetPresentationService;
+use Heurist\Records\Presentation\QuerySourcePresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
 use Heurist\Records\Presentation\PresentationRecordRepository;
 use Heurist\Definitions\DefinitionSnapshotService;
@@ -130,14 +130,14 @@ final class ServiceFactory
         );
     }
 
-    /** Create the Dataset/Map definition controller. */
+    /** Create the QuerySource/Map definition controller. */
     public function recordPresentationController(): RecordPresentationController
     {
         $maps = new MapPresentationService(
             $this->presentations, $this->runtime, new ConceptCode($this->database)
         );
         return new RecordPresentationController(
-            new DatasetPresentationService($this->presentations), $maps
+            new QuerySourcePresentationService($this->presentations), $maps
         );
     }
 

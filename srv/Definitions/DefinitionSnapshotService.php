@@ -10,11 +10,11 @@
 * @project     Heurist academic knowledge management system
 * @package     Definitions
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @copyright   (C) 2026 Heurist Network Association. All rights reserved.
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @since       7.0
+* @author      Ian Johnson     <ian.johnson@heuristnetwork.org>
+* @since       8.0
 */
 
 declare(strict_types=1);
@@ -49,7 +49,7 @@ final class DefinitionSnapshotService
         $file = $this->cacheFile();
         if($file !== '' && is_readable($file)){
             $cached = json_decode((string)file_get_contents($file), true);
-            if(is_array($cached) && isset($cached['meta'])){
+            if(is_array($cached) && isset($cached['meta']) && $this->hasCurrentDbconst($cached['meta'])){
                 $mtime = @filemtime($file);
                 if($mtime !== false){ $cached['meta']['version'] = (string)$mtime; }
                 return $cached;
@@ -124,20 +124,37 @@ final class DefinitionSnapshotService
         );
     }
 
-    /** Local IDs of the relationship record type and the relationship marker fields. */
+    /** Whether a cached snapshot contains constants required by the current client contract. */
+    private function hasCurrentDbconst(array $meta): bool
+    {
+        $dbconst = $meta['dbconst'] ?? null;
+        if(!is_array($dbconst)){ return false; }
+        foreach(array('DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'TRM_NO', 'TRM_YES') as $name){
+            if(!array_key_exists($name, $dbconst)){ return false; }
+        }
+        return true;
+    }
+
+    /** Local IDs of reserved definitions/terms needed by definition-driven clients. */
     private function dbconst(): array
     {
-//@tbd  MOVE TO Runtime\ConceptCode
-        
         return array(
-            'RT_RELATION'         => $this->localByConcept('defRecTypes', 'rty', 2, 1),
-            'DT_PRIMARY_RESOURCE' => $this->localByConcept('defDetailTypes', 'dty', 2, 7),
-            'DT_TARGET_RESOURCE'  => $this->localByConcept('defDetailTypes', 'dty', 2, 5),
-            'DT_RELATION_TYPE'    => $this->localByConcept('defDetailTypes', 'dty', 2, 6),
+            'RT_RELATION'              => $this->localByConcept('defRecTypes', 'rty', 2, 1),
+            'DT_PRIMARY_RESOURCE'      => $this->localByConcept('defDetailTypes', 'dty', 2, 7),
+            'DT_TARGET_RESOURCE'       => $this->localByConcept('defDetailTypes', 'dty', 2, 5),
+            'DT_RELATION_TYPE'         => $this->localByConcept('defDetailTypes', 'dty', 2, 6),
+            
             
             'RT_MAP_DOCUMENT'    => $this->localByConcept('defRecTypes', 'rty', 3, 1019),
             'RT_MAP_LAYER'    => $this->localByConcept('defRecTypes', 'rty', 3, 1020),
-            'RT_QUERY_SOURCE'    => $this->localByConcept('defRecTypes', 'rty', 3, 1021)
+            'RT_QUERY_SOURCE'    => $this->localByConcept('defRecTypes', 'rty', 3, 1021),
+            
+            // Query Source map settings. These are Terms-list fields, so the
+            // client must save local term ids rather than raw 0/1 values.
+            'DT_GEO_OUTPUTMODE'        => $this->localByConcept('defDetailTypes', 'dty', 2, 1162),
+            'DT_IS_LOADED_BY_EXTENT'   => $this->localByConcept('defDetailTypes', 'dty', 2, 1164),
+            'TRM_NO'                   => $this->localByConcept('defTerms', 'trm', 2, 531),
+            'TRM_YES'                  => $this->localByConcept('defTerms', 'trm', 2, 532)
         );
     }
 

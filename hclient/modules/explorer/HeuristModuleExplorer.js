@@ -4,6 +4,13 @@
  * Explorer deliberately does NOT inherit HeuristModuleRecordset: legacy search
  * and selection events stop at the old UI. The bridge exposes only record edit
  * operations and explicit legacy designer services still needed by new modules.
+ * 
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       8.0
  */
 class HeuristModuleExplorer extends HeuristModuleViewer {
 
@@ -225,63 +232,80 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
 
     _saveDatasourceAsSource(source, options) {
         var hapi = window.hWin && window.hWin.HAPI4;
-        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
         var constants = hapi && hapi.sysinfo && hapi.sysinfo.dbconst;
+        var snapshotConstants = options && options.dbconst || {};
         var rtID = Number(constants && constants.RT_QUERY_SOURCE);
-        if (!(rtID > 0) || !ui || typeof ui.openRecordEdit !== 'function') {
-            return Promise.reject(new Error('Source editor is not available'));
+        if (!(rtID > 0) || !hapi || !hapi.RecordMgr || typeof hapi.RecordMgr.saveRecord !== 'function') {
+            return Promise.reject(new Error('Source saving is not available'));
         }
 
-        var request = source && source.request || {};
-        var presentation = source && source.presentation || {};
+        source = source || {};
+        options = options || {};
+        var requestSource = source.request || {};
+        var presentation = source.presentation || {};
         var details = {};
-        var queryField = Number(constants.DT_QUERY_STRING);
-        var rulesField = Number(constants.DT_EXPANSION_RULES);
-        var tableFieldsField = Number(constants.DT_TABLE_FIELDS);
-        if (queryField > 0 && request.q != null) {
-            details[queryField] = typeof request.q === 'string'
-                ? request.q : JSON.stringify(request.q);
-        }
-        if (rulesField > 0 && request.rules != null) {
-            details[rulesField] = typeof request.rules === 'string'
-                ? request.rules : JSON.stringify(request.rules);
-        }
-        if (tableFieldsField > 0 && Array.isArray(presentation.data && presentation.data.fields)) {
-            details[tableFieldsField] = JSON.stringify(presentation.data.fields);
-        }
-        
-        // DT_GEO_FIELDS remains the Query Source geofield. Only use
-        // the unambiguous table-profile field introduced by the merged Source.
-        let geoFieldsField = Number(constants.DT_GEO_FIELDS);
 
-        var title = String(source && source.title || 'New Source');
+        function definitionId(name) {
+            var id = Number(snapshotConstants && snapshotConstants[name]);
+            if (!(id > 0)) id = Number(constants && constants[name]);
+            return id > 0 ? id : 0;
+        }
+        function put(fieldName, value) {
+            var id = definitionId(fieldName);
+            if (id > 0 && value !== undefined && value !== null) details[id] = value;
+        }
+        function json(value) {
+            return typeof value === 'string' ? value : JSON.stringify(value == null ? [] : value);
+        }
+        function fieldCodes(value) {
+            return (Array.isArray(value) ? value : []).map(function(item) {
+                return typeof item === 'string' || typeof item === 'number'
+                    ? String(item) : String(item && (item.field || item.code) || '');
+            }).filter(Boolean);
+        }
+
+        if (requestSource.q != null) put('DT_QUERY_STRING', json(requestSource.q));
+        if (requestSource.rules != null) put('DT_EXPANSION_RULES', json(requestSource.rules));
+        if (Array.isArray(presentation.data && presentation.data.fields)) {
+            put('DT_TABLE_FIELDS', json(presentation.data.fields));
+        }
+
+        var map = presentation.map || {};
+        var geoFields = fieldCodes(map.geoFields);
+        if (geoFields.length) put('DT_GEO_FIELDS', geoFields);
+        else if (definitionId('DT_GEO_FIELDS') > 0) put('DT_GEO_FIELDS', '');
+        var yesTerm = Number(snapshotConstants.TRM_YES);
+        var noTerm = Number(snapshotConstants.TRM_NO);
+        if (!(yesTerm > 0) || !(noTerm > 0)) {
+            return Promise.reject(new Error('Query Source Yes/No term definitions are not available in the definition snapshot'));
+        }
+        put('DT_IS_LOADED_BY_EXTENT', map.dynamicRequests === true ? yesTerm : noTerm);
+        put('DT_GEO_OUTPUTMODE', map.geoOutputMode === 'features' ? yesTerm : noTerm);
+        if (map.minZoom != null && map.minZoom !== '') put('DT_MINIMUM_ZOOM_LEVEL', Number(map.minZoom));
+        if (map.maxZoom != null && map.maxZoom !== '') put('DT_MAXIMUM_ZOOM_LEVEL', Number(map.maxZoom));
+
+        var timeFields = fieldCodes(presentation.timeline && presentation.timeline.fields);
+        if (timeFields.length) put('DT_TIMELINE_FIELDS', timeFields);
+        else if (definitionId('DT_TIMELINE_FIELDS') > 0) put('DT_TIMELINE_FIELDS', '');
+
+        var recordId = Number(options.id || (source.reference && source.reference.type === 'source' && source.reference.id));
+        var request = {
+            ID: recordId > 0 ? recordId : 0,
+            RecTypeID: rtID,
+            Title: String(source.title || 'New Query Source'),
+            details: details
+        };
+
         return new Promise(function(resolve, reject) {
-            var settled = false;
-            var saved = false;
-            function finish(result) {
-                if (settled) return;
-                settled = true;
-                resolve(result);
-            }
             try {
-                ui.openRecordEdit(-1, null, {
-                    selectOnSave: false,
-                    onselect: function(event, data) {
-                        saved = true;
-                        var recordset = data && data.selection;
-                        var record = recordset && recordset.getFirstRecord
-                            ? recordset.getFirstRecord() : null;
-                        var recordId = record && recordset.fld
-                            ? Number(recordset.fld(record, 'rec_ID')) : null;
-                        finish({ saved: true, recordId: recordId });
-                    },
-                    onClose: function() {
-                        if (!saved) finish({ saved: false, recordId: null });
-                    },
-                    new_record_params: {
-                        rt: rtID,
-                        Title: title,
-                        details: details
+                hapi.RecordMgr.saveRecord(request, function(response) {
+                    if (response && response.status == window.hWin.ResponseStatus.OK) {
+                        var id = recordId > 0 ? recordId : Number(
+                            response.data || response.recordId || response.rec_ID || response.ID
+                        );
+                        resolve({ saved: true, recordId: id > 0 ? id : null, response: response });
+                    } else {
+                        reject(new Error((response && (response.message || response.error)) || 'Unable to save Query Source'));
                     }
                 });
             } catch (error) {

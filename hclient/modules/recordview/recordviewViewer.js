@@ -1,13 +1,12 @@
 /**
- * @file graphViewer.js
- * @brief Legacy jQuery adapter for the heurist-graph iframe module.
+ * @file recordviewViewer.js
+ * @brief Legacy jQuery adapter for the heurist-recordview iframe module.
  * @project     Heurist academic knowledge management system
- * @package     hclient.modules.graph
+ * @package     hclient.modules.recordview
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov <osmakov@gmail.com>
- * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
  * @since       8.0
  */
 
@@ -36,19 +35,21 @@
         return window.heuristModuleScriptPromises[url];
     }
 
-    $.widget('heurist.graphViewer', {
+    $.widget('heurist.recordviewViewer', {
         options: {},
 
         _create: function() {
             const that = this;
             this._module = null;
             this._destroyed = false;
+            // RecordView extends HeuristModuleViewer directly (it never
+            // consumes a query/search), so unlike Data/Map/Graph/Timeline it
+            // does not need core/HeuristModuleRecordset.js.
             this._modulePromise = loadScript('core/HeuristModuleViewer.js', 'HeuristModuleViewer')
-                .then(function() { return loadScript('core/HeuristModuleRecordset.js', 'HeuristModuleRecordset'); })
-                .then(function() { return loadScript('graph/HeuristModuleGraph.js', 'HeuristModuleGraph'); })
+                .then(function() { return loadScript('recordview/HeuristModuleRecordView.js', 'HeuristModuleRecordView'); })
                 .then(function() {
                     if (that._destroyed) return null;
-                    that._module = new window.HeuristModuleGraph(that.element, that.options);
+                    that._module = new window.HeuristModuleRecordView(that.element, that.options);
                     return that._module;
                 })
                 .catch(function(error) {
@@ -59,17 +60,19 @@
 
         _callModule: function(method, args) {
             return this._modulePromise.then(function(module) {
-                if (!module) throw new Error('graphViewer was destroyed');
+                if (!module) throw new Error('recordviewViewer was destroyed');
                 return module[method].apply(module, args || []);
             });
         },
 
-        setQuery: function(query, options) { return this._callModule('setQuery', [query, options]); },
+        setRecord: function(recordId) { return this._callModule('setRecord', [recordId]); },
         setSelection: function(ids, options) { return this._callModule('setSelection', [ids, options]); },
-        expandNode: function(id) { return this._callModule('expandNode', [id]); },
-        refresh: function() { return this._callModule('refresh'); },
+        clear: function() { return this._callModule('clear'); },
+        setOptions: function(options) { return this._callModule('setOptions', [options]); },
+        getState: function() { return this._callModule('getState'); },
+        refresh: function() { return this._callModule('resize'); },
         resize: function() { return this._callModule('resize'); },
-        getGraphApi: function() { return this._module ? this._module.getGraphApi() : null; },
+        getRecordViewApi: function() { return this._module ? this._module.getRecordViewApi() : null; },
         getModuleApi: function() { return this._module ? this._module.getModuleApi() : null; },
         isReady: function() { return this._module ? this._module.isReady() : false; },
 
@@ -77,7 +80,7 @@
             const message = error && error.message ? error.message : String(error);
             const hostMessage = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.msg;
             if (hostMessage && typeof hostMessage.showMsgErr === 'function') hostMessage.showMsgErr(message);
-            else if (window.console) console.error('graphViewer:', error);
+            else if (window.console) console.error('recordviewViewer:', error);
         },
 
         _destroy: function() {
