@@ -22,8 +22,14 @@ $dbPort          = 3306;
 $dbAdminUsername = getenv('HEURIST_DB_ADMIN_USERNAME') ?: 'heurist';
 $dbAdminPassword = getenv('HEURIST_DB_ADMIN_PASSWORD') ?: 'heurist';
 
+// Set these environment variables when the container is published behind a
+// reverse proxy or URL subpath. Leave them unset for automatic detection.
+$serverName        = getenv('HEURIST_SERVER_NAME') ?: null;
+$heuristBaseURL    = getenv('HEURIST_BASE_URL') ?: null;
+$heuristPublicPath = getenv('HEURIST_PUBLIC_PATH') ?: null;
+
 // --- [FOLDERS] --------------------------------------------------------------
-// Filestore inside the container (named volume 'heurist_filestore').
+// Filestore inside the container (provided by the Compose data mount).
 // NOTE: DocumentRoot is /var/www/html/HEURIST/, so the URL path of the
 // filestore is /HEURIST_FILESTORE/ (the upstream template default assumes a
 // DocumentRoot of /var/www/html/ and would produce a doubled /HEURIST/HEURIST/

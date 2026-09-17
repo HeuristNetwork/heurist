@@ -74,7 +74,10 @@ if (!array_key_exists('embed', $_REQUEST)) {
         $version = $defaultVersion;
     }
     if(!defined('PDIR')){
-        define('PDIR', '/' . $version . '/');    
+        // A reverse-proxied deployment may expose this code beneath a path
+        // different from the internal Heurist version directory.
+        global $heuristPublicPath;
+        define('PDIR', !empty($heuristPublicPath) ? $heuristPublicPath : '/' . $version . '/');
     }
 }
 
