@@ -5,11 +5,11 @@
 * @project     Heurist academic knowledge management system
 * @package     Records\Data
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @copyright   (C) 2026 Heurist Network Association. All rights reserved.
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @since       7.0
+* @since       8.0
 */
 
 namespace Heurist\Records\Data;
@@ -49,18 +49,27 @@ final class RecordFieldSelector
     public function parse($fields): array
     {
         if($fields === null || $fields === ''){
-            return array('headers'=>array(), 'virtuals'=>array(), 'details'=>array());
+            return array('headers'=>array(), 'virtuals'=>array(), 'details'=>array(), 'all'=>false);
         }
         $values = is_array($fields) ? $fields : explode(',', (string)$fields);
         $headers = array();
         $details = array();
         $virtuals = array();
+        $wantsAllDetails = false;
         foreach($values as $value){
             if(is_array($value)){
                 throw new QueryValidationException('Record fields must be names, IDs, or compact path codes');
             }
             $field = trim((string)$value);
             if($field === ''){ continue; }
+            if($field === '_all'){
+                // Every populated detail value, fully resolved - alongside
+                // whatever headers are also listed. Real Records columns
+                // only; virtuals stay opt-in (extra join cost).
+                $wantsAllDetails = true;
+                foreach(self::HEADERS as $header){ $headers[$header] = $header; }
+                continue;
+            }
             $headerKey = strtolower($field);
             if(isset(self::HEADERS[$headerKey])){
                 $headers[self::HEADERS[$headerKey]] = self::HEADERS[$headerKey];
@@ -92,7 +101,8 @@ final class RecordFieldSelector
         return array(
             'headers'=>array_values($headers),
             'virtuals'=>array_values($virtuals),
-            'details'=>array_values($details)
+            'details'=>array_values($details),
+            'all'=>$wantsAllDetails
         );
     }
 

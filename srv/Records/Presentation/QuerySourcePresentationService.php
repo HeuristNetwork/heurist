@@ -1,6 +1,6 @@
 <?php
 /**
-* DatasetPresentationService.php - Public Dataset response builder
+* QuerySourcePresentationService.php - Public QuerySource response builder
 *
 * Converts RT_QUERY_SOURCE into the
 * stable, engine-neutral definition consumed by heurist-data.
@@ -8,63 +8,63 @@
 * @project     Heurist academic knowledge management system
 * @package     Records\Presentation
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @copyright   (C) 2026 Heurist Network Association. All rights reserved.
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson@heuristnetwork.org>
-* @since       7.0
+* @since       8.0
 */
 namespace Heurist\Records\Presentation;
 
 use Heurist\Records\Data\RecordFieldSelector;
 use Heurist\Records\Query\QueryValidationException;
 
-/** Builds the public representation of one Dataset record. */
-class DatasetPresentationService
+/** Builds the public representation of one QuerySource record. */
+class QuerySourcePresentationService
 {
-    private PresentationRecordRepository $datasets;
+    private PresentationRecordRepository $querySources;
 
     /** Initialise the service for the current database. */
     public function __construct(PresentationRecordRepository $records)
     {
-        $this->datasets = $records;
+        $this->querySources = $records;
     }
 
     /**
-     * Build the public Dataset definition.
+     * Build the public QuerySource definition.
      *
      * @param int $recordId RT_QUERY_SOURCE record ID.
-     * @return array|null Public Dataset response, or null when unavailable.
+     * @return array|null Public QuerySource response, or null when unavailable.
      */
-    public function getDataset(int $recordId): ?array
+    public function getQuerySource(int $recordId): ?array
     {
-        $dataset = $this->datasets->getPublicRecord($recordId, 'RT_QUERY_SOURCE');
-        if(!$dataset){ return null; }
+        $querySource = $this->querySources->getPublicRecord($recordId, 'RT_QUERY_SOURCE');
+        if(!$querySource){ return null; }
 
-        $source = $this->datasets->getQuerySource($dataset);
+        $source = $this->querySources->getQuerySource($querySource);
         if(!$source){ return null; }
 
-        $queryValue = $this->datasets->value($source, 'DT_QUERY_STRING');
+        $queryValue = $this->querySources->value($source, 'DT_QUERY_STRING');
         if($queryValue === null || trim((string)$queryValue) === ''){
-            throw new QueryValidationException('Dataset query is not defined');
+            throw new QueryValidationException('QuerySource query is not defined');
         }
 
         $fields = $this->parseFields(
-            $this->datasets->value($dataset, 'DT_TABLE_FIELDS')
+            $this->querySources->value($querySource, 'DT_TABLE_FIELDS')
         );
         $geofields = $this->parseFields(
-            $this->datasets->value($dataset, 'DT_GEO_FIELDS')
+            $this->querySources->value($querySource, 'DT_GEO_FIELDS')
         );
         $timefields = $this->parseFields(
-            $this->datasets->value($dataset, 'DT_TIMELINE_FIELDS')
+            $this->querySources->value($querySource, 'DT_TIMELINE_FIELDS')
         );
 
         return array(
-            'format'=>'heurist-dataset',
+            'format'=>'heurist-query-source',
             'version'=>1,
-            'id'=>intval($dataset['rec_ID']),
-            'title'=>(string)($dataset['rec_Title'] ?? ''),
-            'description'=>(string)($this->datasets->value($dataset, 'DT_SHORT_SUMMARY') ?? ''),
+            'id'=>intval($querySource['rec_ID']),
+            'title'=>(string)($querySource['rec_Title'] ?? ''),
+            'description'=>(string)($this->querySources->value($querySource, 'DT_SHORT_SUMMARY') ?? ''),
             'source'=>array(
                 'type'=>'heurist-query',
                 'recordId'=>intval($source['rec_ID'] ?? 0),
@@ -72,21 +72,20 @@ class DatasetPresentationService
                 'query'=>$this->parseQuery($queryValue)
             ),
             'fields'=>$fields,
-            'geofields'=>$geofields,
             'timefields'=>$timefields,
             'map'=>array(
                 'geoFields'=>$geofields,
                 'dynamicRequests'=>$this->termBoolean(
-                    $this->datasets->value($dataset, 'DT_IS_LOADED_BY_EXTENT'), false
+                    $this->querySources->value($querySource, 'DT_IS_LOADED_BY_EXTENT'), false
                 ),
                 'minZoom'=>$this->numberOrNull(
-                    $this->datasets->value($dataset, 'DT_MINIMUM_ZOOM_LEVEL')
+                    $this->querySources->value($querySource, 'DT_MINIMUM_ZOOM_LEVEL')
                 ),
                 'maxZoom'=>$this->numberOrNull(
-                    $this->datasets->value($dataset, 'DT_MAXIMUM_ZOOM_LEVEL')
+                    $this->querySources->value($querySource, 'DT_MAXIMUM_ZOOM_LEVEL')
                 )
             ),
-            'rules'=>$this->parseRules($this->datasets->value($dataset, 'DT_EXPANSION_RULES'))
+            'rules'=>$this->parseRules($this->querySources->value($querySource, 'DT_EXPANSION_RULES'))
         );
     }
 
@@ -95,8 +94,8 @@ class DatasetPresentationService
         if($value === null || $value === ''){ return $default; }
         if($value === false || $value === 0 || $value === '0'){ return false; }
         if($value === true || $value === 1 || $value === '1'){ return true; }
-        $code = strtolower((string)$this->datasets->getTermCode(intval($value)));
-        $label = strtolower((string)$this->datasets->getTermLabel(intval($value)));
+        $code = strtolower((string)$this->querySources->getTermCode(intval($value)));
+        $label = strtolower((string)$this->querySources->getTermLabel(intval($value)));
         return !in_array($code, array('no','false','0'), true)
             && !in_array($label, array('no','false'), true);
     }
@@ -111,7 +110,7 @@ class DatasetPresentationService
         if($value === null || trim((string)$value) === '') return array();
         $rules = json_decode((string)$value, true);
         if(!is_array($rules) || (!empty($rules) && array_keys($rules)!==range(0, count($rules)-1))){
-            throw new QueryValidationException('Dataset expansion rules must be a JSON array');
+            throw new QueryValidationException('QuerySource expansion rules must be a JSON array');
         }
         (new \Heurist\Records\Expansion\ExpansionRuleParser())->parse($rules);
         return $rules; // Preserve generated names and descriptions.
@@ -151,11 +150,11 @@ class DatasetPresentationService
                     $definition['width'] = (string)$item['width'];
                 }
             }else{
-                throw new QueryValidationException('Dataset fields must be strings or objects');
+                throw new QueryValidationException('QuerySource fields must be strings or objects');
             }
 
             if($definition['field'] === ''){
-                throw new QueryValidationException('Dataset field is not defined');
+                throw new QueryValidationException('QuerySource field is not defined');
             }
             $this->validateOptions($definition);
             $fieldCodes[] = $definition['field'];
@@ -167,13 +166,13 @@ class DatasetPresentationService
         return $result;
     }
 
-    /** Validate optional Dataset column instructions. */
+    /** Validate optional QuerySource column instructions. */
     private function validateOptions(array $field): void
     {
         if(isset($field['aggregation']) && !in_array(
             $field['aggregation'], array('count', 'sum', 'avg', 'min', 'max'), true
         )){
-            throw new QueryValidationException('Invalid Dataset field aggregation');
+            throw new QueryValidationException('Invalid QuerySource field aggregation');
         }
         if(isset($field['ext']) && !in_array(
             $field['ext'], array(
@@ -183,10 +182,10 @@ class DatasetPresentationService
                 'iso', 'human', 'raw'
             ), true
         )){
-            throw new QueryValidationException('Invalid Dataset field extension');
+            throw new QueryValidationException('Invalid QuerySource field extension');
         }
         if(isset($field['width']) && !preg_match('/^\d+(?:\.\d+)?(?:px|%|em|rem)?$/', $field['width'])){
-            throw new QueryValidationException('Invalid Dataset field width');
+            throw new QueryValidationException('Invalid QuerySource field width');
         }
     }
 

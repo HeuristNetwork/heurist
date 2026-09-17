@@ -565,9 +565,26 @@ class USystem {
      */
     public static function sessionCheckFolder(){
 
-        if(!ini_get('session.save_handler')=='files') { return true; }
+        if(ini_get('session.save_handler') != 'files') { return true; }
 
         $folder = session_save_path();
+
+        // Empty session.save_path is valid configuration: PHP then stores
+        // sessions in the system temporary directory (sys_get_temp_dir).
+        // Previously an empty path failed this check unconditionally, which
+        // made every session-dependent page (incl. opening a database)
+        // fail with "sessions folder has become inaccessible".
+        if($folder===null || trim($folder)===''){
+            $folder = sys_get_temp_dir();
+        }else{
+            // Path may carry an argument part, eg "5;/tmp" (N;mode;/path) -
+            // the writable location is only the final segment.
+            if(strpos($folder, ';')!==false){
+                $parts = explode(';', $folder);
+                $folder = array_pop($parts);
+            }
+        }
+
         if(file_exists($folder) && is_writeable($folder)){ return true; }
 
         sendEmailToAdmin('Session folder access', 'The sessions folder has become inaccessible', true);

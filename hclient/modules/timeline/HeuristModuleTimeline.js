@@ -3,6 +3,15 @@
  *
  * Hosts heurist-timeline in an iframe and translates Heurist current-result,
  * record selection and multi-context state to its serializable public API.
+ * 
+ * @project     Heurist academic knowledge management system
+ * @package     hclient.modules.timeline
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       8.0
  */
 const HEURIST_MODULE_TIMELINE_DEFAULTS = {
     presentationMode: 'iframe',

@@ -8,10 +8,11 @@
  * @project     Heurist academic knowledge management system
  * @package     hclient.modules
  * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov <osmakov@gmail.com>
- * @since       7.0
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       8.0
  */
 
 const HEURIST_MODULE_DATA_DEFAULTS = {
@@ -279,28 +280,6 @@ class HeuristModuleData extends HeuristModuleRecordset {
             return Promise.reject(new Error('heurist-data does not implement setQuery'));
         }
         return Promise.resolve(this._moduleApi.setQuery(query, options || {}));
-    }
-
-    /** Activate a persisted Dataset record, or return to current results with null. */
-    setDataset(datasetId, options) {
-        this.options.dataset = this._normalizeDatasetId(datasetId);
-        if (this.options.dataset == null && this._hostQueryPending
-            && this._isWidgetVisible()) {
-            return this._applyPendingHostQueryWhenVisible(false);
-        }
-        return this._enqueueOrRun('_setDatasetNow', [
-            this.options.dataset, options || {}
-        ]);
-    }
-
-    _setDatasetNow(datasetId, options) {
-        if (datasetId == null) {
-            return this._setQueryNow(this.options.query, options);
-        }
-        if (!this._moduleApi || typeof this._moduleApi.setDataset !== 'function') {
-            return Promise.reject(new Error('heurist-data does not implement setDataset'));
-        }
-        return Promise.resolve(this._moduleApi.setDataset(datasetId, options || {}));
     }
 
     _normalizeDatasetId(datasetId) {

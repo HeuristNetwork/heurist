@@ -253,6 +253,7 @@ window.hWin.cfg_layouts = [
                                 url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs', showProgress:false,
                                 css:{overflow:'hidden'}}}
 /*
+                    {appid:'heurist_Data', name: 'Data (test)'},
                     {appid:'heurist_Map2', name: 'Map2 (test)'},
                     {appid:'heurist_Data', name: 'Data (test)'},
                     {appid:'heurist_Graph2', name: 'Network2 (test)'},
