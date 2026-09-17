@@ -175,7 +175,9 @@ final class RecordQueryController
         $valueOptions = array(
             'resolveDetails'=>$request->resolveDetails,
             // Presentation-only virtual headers are resolved by RecordDataService.
-            'virtuals'=>$selection['virtuals'] ?? array()
+            'virtuals'=>$selection['virtuals'] ?? array(),
+            // fields=_all - every populated detail value, regardless of type.
+            'allDetails'=>$selection['all'] ?? false
         );
         $records = $this->dataService->loadRecords(
             $result->ids, $selection['headers'], $native, $valueOptions

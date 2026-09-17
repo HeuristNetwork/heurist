@@ -79,6 +79,21 @@ final class RecordDataService
 
         $this->attachVirtualHeaders($records, $topIds, $options['virtuals'] ?? array());
 
+        if(!empty($options['allDetails'])){
+            // fields=_all - every populated detail value for these records,
+            // regardless of type, keyed by the raw detail-type id (there is
+            // no caller-supplied field list to key by).
+            $values = $this->loadFieldValues($topIds, null, $options);
+            foreach($topIds as $id){
+                foreach($values[$id] ?? array() as $dtyId=>$fieldValues){
+                    foreach($fieldValues as $value){
+                        $records[$id]['details'][(string)$dtyId][] = $value;
+                    }
+                }
+            }
+            return array_values($records);
+        }
+
         $fieldIds = array_values(array_unique(array_map(static function($field){
             return intval($field['fieldId']);
         }, $nativeFields)));
@@ -212,12 +227,20 @@ final class RecordDataService
         return $result;
     }
 
-    /** Load and enrich requested details, indexed by owner and field ID. */
-    public function loadFieldValues(array $ownerIds, array $fieldIds, array $options = array()): array
+    /**
+     * Load and enrich requested details, indexed by owner and field ID.
+     *
+     * @param array $ownerIds Owning record ids.
+     * @param array|null $fieldIds Detail-type ids to restrict to, or `null`
+     *        for every populated detail value regardless of type
+     *        (`fields=_all`).
+     */
+    public function loadFieldValues(array $ownerIds, ?array $fieldIds, array $options = array()): array
     {
         $ownerIds = $this->ids($ownerIds);
-        $fieldIds = $this->ids($fieldIds);
-        if(empty($ownerIds) || empty($fieldIds)){ return array(); }
+        $hasFieldFilter = $fieldIds !== null;
+        if($hasFieldFilter){ $fieldIds = $this->ids($fieldIds); }
+        if(empty($ownerIds) || ($hasFieldFilter && empty($fieldIds))){ return array(); }
         $values = array();
         $extentCondition = $this->extentCondition($options['extent'] ?? null);
         foreach(array_chunk($ownerIds, self::BATCH_SIZE) as $chunk){
@@ -238,16 +261,19 @@ final class RecordDataService
                 .'LEFT JOIN defRecStructure rst ON rst.rst_RecTypeID=ro.rec_RecTypeID '
                 .'AND rst.rst_DetailTypeID=d.dtl_DetailTypeID '
                 .'WHERE d.dtl_RecID IN ('.implode(',', array_fill(0, count($chunk), '?')).') '
-                .'AND d.dtl_DetailTypeID IN ('.implode(',', array_fill(0, count($fieldIds), '?')).') '
+                .($hasFieldFilter
+                    ? 'AND d.dtl_DetailTypeID IN ('.implode(',', array_fill(0, count($fieldIds), '?')).') '
+                    : '')
                 .$extentCondition['sql']
                 .$this->fieldVisibilitySql()
                 .'ORDER BY d.dtl_RecID,d.dtl_DetailTypeID,d.dtl_ID';
-            $parameters = array_merge($chunk, $fieldIds, $extentCondition['values']);
-            foreach($this->executor->executeRows(
-                $sql,
-                str_repeat('i', count($chunk)+count($fieldIds)).$extentCondition['types'],
-                $parameters
-            ) as $row){
+            $parameters = $hasFieldFilter
+                ? array_merge($chunk, $fieldIds, $extentCondition['values'])
+                : array_merge($chunk, $extentCondition['values']);
+            $types = str_repeat('i', count($chunk))
+                .($hasFieldFilter ? str_repeat('i', count($fieldIds)) : '')
+                .$extentCondition['types'];
+            foreach($this->executor->executeRows($sql, $types, $parameters) as $row){
                 $value = $this->formatValue(
                     $row,
                     filter_var($options['resolveDetails'] ?? false, FILTER_VALIDATE_BOOLEAN)

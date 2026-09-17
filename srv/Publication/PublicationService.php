@@ -27,7 +27,7 @@ use RuntimeException;
 /** Storage and validation logic shared by published Heurist modules. */
 final class PublicationService
 {
-    public const TYPES = array('map', 'data', 'timeline', 'graph', 'crosstabs');
+    public const TYPES = array('map', 'data', 'timeline', 'graph', 'crosstabs', 'recordview');
 
     private RuntimeContext $runtime;
     private string $directory;
