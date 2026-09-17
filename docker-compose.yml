@@ -1,0 +1,51 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${HEURIST_MYSQL_ROOT_PASSWORD:-heurist_root}
+      MYSQL_USER: heurist
+      MYSQL_PASSWORD: ${HEURIST_DB_ADMIN_PASSWORD:-heurist}
+    command:
+      # Heurist creates stored functions/triggers in its databases;
+      # without this flag MySQL 8 binary logging blocks that for non-SUPER users.
+      - --log_bin_trust_function_creators=1
+      # Heurist's legacy search SQL (e.g. SELECT DISTINCT rec_ID ... ORDER BY
+      # rec_Title) is incompatible with ONLY_FULL_GROUP_BY, which is in MySQL 8's
+      # default sql_mode. The app tries to relax it at runtime via
+      # "SET GLOBAL sql_mode" (hserv/System.php), but the restricted 'heurist'
+      # user lacks the SUPER/SYSTEM_VARIABLES_ADMIN privilege, so set it here.
+      - --sql-mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HEURIST_DB_ADMIN_USERNAME: heurist
+      HEURIST_DB_ADMIN_PASSWORD: ${HEURIST_DB_ADMIN_PASSWORD:-heurist}
+      HEURIST_JWT_SECRET: ${HEURIST_JWT_SECRET:-dev-only-secret-change-me}
+    volumes:
+      # Live codebase (local dev: edits in the repo show up immediately)
+      - .:/var/www/html/HEURIST/heurist
+      # Parent-level configuration (mounted read-only, kept out of the repo root)
+      - ./docker/heuristConfigIni.php:/var/www/html/HEURIST/heuristConfigIni.php:ro
+      # Uploaded files survive container rebuilds
+      - heurist_filestore:/var/www/html/HEURIST/HEURIST_FILESTORE
+      # Downloaded support bundles survive container rebuilds
+      - heurist_support:/var/www/html/HEURIST/HEURIST_SUPPORT
+
+volumes:
+  db_data:
+  heurist_filestore:
+  heurist_support:
