@@ -30,7 +30,7 @@ use Heurist\Database\DatabaseFactory;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Publication\PublicationService;
 use Heurist\Records\Map\MapFeatureService;
-use Heurist\Records\Presentation\DatasetPresentationService;
+use Heurist\Records\Presentation\QuerySourcePresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
 use Heurist\Records\Presentation\PresentationRecordRepository;
 use Heurist\Definitions\DefinitionSnapshotService;
@@ -130,14 +130,14 @@ final class ServiceFactory
         );
     }
 
-    /** Create the Dataset/Map definition controller. */
+    /** Create the QuerySource/Map definition controller. */
     public function recordPresentationController(): RecordPresentationController
     {
         $maps = new MapPresentationService(
             $this->presentations, $this->runtime, new ConceptCode($this->database)
         );
         return new RecordPresentationController(
-            new DatasetPresentationService($this->presentations), $maps
+            new QuerySourcePresentationService($this->presentations), $maps
         );
     }
 

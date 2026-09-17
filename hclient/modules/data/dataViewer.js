@@ -94,9 +94,6 @@
         openConfiguration: function(options) {
             return this._callModule('openConfiguration', [options]);
         },
-        setDataset: function(datasetId, options) {
-            return this._callModule('setDataset', [datasetId, options]);
-        },
         refresh: function() { return this._callModule('refresh'); },
         resize: function() { return this._callModule('resize'); },
         getDataApi: function() {

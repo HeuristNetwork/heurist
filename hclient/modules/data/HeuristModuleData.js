@@ -281,28 +281,6 @@ class HeuristModuleData extends HeuristModuleRecordset {
         return Promise.resolve(this._moduleApi.setQuery(query, options || {}));
     }
 
-    /** Activate a persisted Dataset record, or return to current results with null. */
-    setDataset(datasetId, options) {
-        this.options.dataset = this._normalizeDatasetId(datasetId);
-        if (this.options.dataset == null && this._hostQueryPending
-            && this._isWidgetVisible()) {
-            return this._applyPendingHostQueryWhenVisible(false);
-        }
-        return this._enqueueOrRun('_setDatasetNow', [
-            this.options.dataset, options || {}
-        ]);
-    }
-
-    _setDatasetNow(datasetId, options) {
-        if (datasetId == null) {
-            return this._setQueryNow(this.options.query, options);
-        }
-        if (!this._moduleApi || typeof this._moduleApi.setDataset !== 'function') {
-            return Promise.reject(new Error('heurist-data does not implement setDataset'));
-        }
-        return Promise.resolve(this._moduleApi.setDataset(datasetId, options || {}));
-    }
-
     _normalizeDatasetId(datasetId) {
         if (datasetId == null || datasetId === '') return null;
         var id = Number(datasetId);

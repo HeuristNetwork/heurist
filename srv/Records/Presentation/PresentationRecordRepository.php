@@ -2,7 +2,7 @@
 /**
 * PresentationRecordRepository.php - Read-only presentation record access
 *
-* Loads Dataset, Map Document, Map Layer and linked source records directly
+* Loads Query source, Map Document, Map Layer and linked source records directly
 * from Records and recDetails without DbEntityBase inheritance.
 *
 * @project     Heurist academic knowledge management system
@@ -86,11 +86,11 @@ final class PresentationRecordRepository
         return $record;
     }
 
-    /** Resolve a Dataset query source or return the Dataset itself. */
-    public function getQuerySource(array $dataset): ?array
+    /** Resolve a Query source. */
+    public function getQuerySource(array $querySource): ?array
     {
-        $sourceId = intval($this->value($dataset, 'DT_DATA_SOURCE'));
-        return $sourceId < 1 ? $dataset : $this->getPublicRecord($sourceId, 'RT_QUERY_SOURCE');
+        $sourceId = intval($this->value($querySource, 'DT_DATA_SOURCE'));
+        return $sourceId < 1 ? $querySource : $this->getPublicRecord($sourceId, 'RT_QUERY_SOURCE');
     }
 
     /** Resolve a Map Layer data source or return the layer itself. */
