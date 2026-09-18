@@ -83,7 +83,10 @@ class QuerySourcePresentationService
                 ),
                 'maxZoom'=>$this->numberOrNull(
                     $this->querySources->value($querySource, 'DT_MAXIMUM_ZOOM_LEVEL')
-                )
+                ),
+                'geoOutputMode'=>$this->termBoolean(
+                    $this->querySources->value($querySource, 'DT_GEO_OUTPUTMODE'), false
+                ) ? 'features' : 'records'
             ),
             'rules'=>$this->parseRules($this->querySources->value($querySource, 'DT_EXPANSION_RULES'))
         );

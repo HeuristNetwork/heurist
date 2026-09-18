@@ -13,7 +13,7 @@
 * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson@heuristnetwork.org>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       8.0
 */
 
@@ -144,7 +144,6 @@ final class DefinitionSnapshotService
             'DT_TARGET_RESOURCE'       => $this->localByConcept('defDetailTypes', 'dty', 2, 5),
             'DT_RELATION_TYPE'         => $this->localByConcept('defDetailTypes', 'dty', 2, 6),
             
-            
             'RT_MAP_DOCUMENT'    => $this->localByConcept('defRecTypes', 'rty', 3, 1019),
             'RT_MAP_LAYER'    => $this->localByConcept('defRecTypes', 'rty', 3, 1020),
             'RT_QUERY_SOURCE'    => $this->localByConcept('defRecTypes', 'rty', 3, 1021),
@@ -152,7 +151,7 @@ final class DefinitionSnapshotService
             // Query Source map settings. These are Terms-list fields, so the
             // client must save local term ids rather than raw 0/1 values.
             'DT_GEO_OUTPUTMODE'        => $this->localByConcept('defDetailTypes', 'dty', 2, 1162),
-            'DT_IS_LOADED_BY_EXTENT'   => $this->localByConcept('defDetailTypes', 'dty', 2, 1164),
+            'DT_IS_LOADED_BY_EXTENT'   => $this->localByConcept('defDetailTypes', 'dty', 2, 1160),
             'TRM_NO'                   => $this->localByConcept('defTerms', 'trm', 2, 531),
             'TRM_YES'                  => $this->localByConcept('defTerms', 'trm', 2, 532)
         );

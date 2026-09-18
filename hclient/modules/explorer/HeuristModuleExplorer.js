@@ -5,12 +5,14 @@
  * and selection events stop at the old UI. The bridge exposes only record edit
  * operations and explicit legacy designer services still needed by new modules.
  * 
+ * @project     Heurist academic knowledge management system
+ * @package     hclient.modules
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov <osmakov@gmail.com>
  * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since       8.0
+ * @since       8.0 
  */
 class HeuristModuleExplorer extends HeuristModuleViewer {
 
@@ -264,6 +266,8 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
             }).filter(Boolean);
         }
 
+        var sourceTitle = String(source.title || 'New Query Source').trim() || 'New Query Source';
+        put('DT_NAME', sourceTitle);
         if (requestSource.q != null) put('DT_QUERY_STRING', json(requestSource.q));
         if (requestSource.rules != null) put('DT_EXPANSION_RULES', json(requestSource.rules));
         if (Array.isArray(presentation.data && presentation.data.fields)) {
@@ -292,9 +296,16 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
         var request = {
             ID: recordId > 0 ? recordId : 0,
             RecTypeID: rtID,
-            Title: String(source.title || 'New Query Source'),
+            Title: sourceTitle,
             details: details
         };
+        
+//1105   DT_TIMELINE_FIELDS      2, 1105
+//1164   DT_IS_LOADED_BY_EXTENT  2, 
+//1169   DT_GEO_FIELDS           2, 1161 
+//1171   DT_GEO_OUTPUTMODE      2, 1162
+//1172   DT_EXPANSION_RULES     2, 1163 
+//1173   DT_TABLE_FIELDS        2, 1164
 
         return new Promise(function(resolve, reject) {
             try {
