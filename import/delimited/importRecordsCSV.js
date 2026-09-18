@@ -1762,10 +1762,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             s += `<td style="width:${column_width}ch;max-width:${column_width}ch;${(isIndex?'color:#b36ae2;"':'')}" class="truncate">${imp_session['columns'][i]}</td>`;
 
             // mapping selector
-            s = s + '<td style="width:300px;">'
+            s = s + '<td style="width:430px;">'
                 + (isIDfield && !mode_display_separate?'<span style="padding:4px 0px">&lt; Heurist IDs for records being added/updated &gt;</span>':'')
                 + '&nbsp;<span style="display:none;">'
-                + '<select id="sa_dt_'+i+'" style="width:17.5em;max-width:17.5em;font-size:1em;" data-field="'+i+'" '
+                + '<select id="sa_dt_'+i+'" style="width:30em;max-width:30em;font-size:1em;" data-field="'+i+'" '
                 //+ ' title="Only matchable fields - text, numeric, date, terms - are shown" '
                 + (isIndex||isIDfield?'class="indexes"':'')+'></select>';
             
@@ -5554,4 +5554,3 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     _init(_imp_ID, _max_upload_size, _format);
     return that;  //returns object
 }
-
