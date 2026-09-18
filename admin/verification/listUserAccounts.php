@@ -35,7 +35,8 @@ if(!$system->init(null, false, false)){
 $mysqli = $system->getMysqli();
 $databases = mysql__getdatabases4($mysqli, false);
 
-$user_list = []; // 0 => DB Name, 1 => User ID, 2 => Record Owner Count, 3 => Is DB Admin, 4 => Is DB Owner, {key} => User Email
+$user_list = []; // 0 DB, 1 user ID, 2 total records, 3 owned records, 4 owner, 5 admin,
+                 // 6 last login, 7 full name, 8 organisation, 9 interests; keyed by email
 
 /*
 IF $_REQUEST HAS to_remove:
@@ -55,9 +56,16 @@ foreach($databases as $database){
 
     $database = htmlspecialchars($database);
 
-    $db_users = mysql__select_assoc2($mysqli, "SELECT ugr_ID, ugr_eMail FROM sysUGrps WHERE ugr_Type = 'user'");
+    $database_record_count = intval(mysql__select_value($mysqli, "SELECT COUNT(rec_ID) FROM Records"));
 
-    foreach($db_users as $usr_ID => $usr_email){
+    $db_users = mysql__select_all($mysqli,
+        "SELECT ugr_ID, ugr_eMail, CONCAT(ugr_FirstName, ' ', ugr_LastName), "
+        ."ugr_Organisation, ugr_Interests, ugr_LastLoginTime "
+        ."FROM sysUGrps WHERE ugr_Type = 'user'");
+
+    foreach($db_users as $db_user){
+
+        [$usr_ID, $usr_email, $user_fullname, $organisation, $interests, $last_login] = $db_user;
 
         $usr_ID = intval($usr_ID);
         
@@ -67,18 +75,19 @@ foreach($databases as $database){
 
         $rec_count = mysql__select_value($mysqli, "SELECT COUNT(rec_ID) FROM Records WHERE rec_OwnerUGrpID = ?", ['i', $usr_ID]);
         $is_admin = mysql__select_value($mysqli, "SELECT ugl_ID FROM sysUsrGrpLinks WHERE ugl_GroupID = 1 AND ugl_Role = 'admin' AND ugl_UserID = ?", ['i', $usr_ID]);
-        $last_login = mysql__select_value($mysqli, "SELECT ugr_LastLoginTime FROM sysUGrps WHERE ugr_ID = ?", ['i', $usr_ID]);
         $last_login = empty($last_login) ? 'Never' : date_format(date_create($last_login), 'Y-m-d');
-        $user_fullname = mysql__select_value($mysqli, "SELECT CONCAT(ugr_FirstName, ' ', ugr_LastName) FROM sysUGrps WHERE ugr_ID = ?", ['i', $usr_ID]);
 
         $user_list[$usr_email][] = [
             $database,
             $usr_ID,
+            $database_record_count,
             intval($rec_count),
             $usr_ID == 2 ? 1 : 0,
             intval($is_admin) > 0 ? 1 : 0,
             $last_login,
-            $user_fullname
+            trim($user_fullname),
+            trim((string)$organisation),
+            trim((string)$interests)
         ];
     }
 }
@@ -114,9 +123,9 @@ ksort($user_list, SORT_FLAG_CASE);
                     let hideLoggedIn = neverLoggedInOnly && !element.querySelector('[data-lastlogin="Never"]');
 
                     if(hideAsOwner || hideAsAdmin || hideLoggedIn){
-                        element.display.style = 'none';
+                        element.style.display = 'none';
                     }else{
-                        element.display.style = 'block';
+                        element.style.display = 'block';
                     }
                 });
             }
@@ -212,33 +221,46 @@ ksort($user_list, SORT_FLAG_CASE);
 
             $list_items = '';
             $names = [];
+            $organisations = [];
+            $interests = [];
 
             foreach($user_accounts as $details){
 
-                $owner = $details[3] == 1 ? 'Yes' : 'No';
-                $admin = $details[4] == 1 ? 'Yes' : 'No';
+                $owner = $details[4] == 1 ? 'Yes' : 'No';
+                $admin = $details[5] == 1 ? 'Yes' : 'No';
                 $url = HEURIST_BASE_URL . "?db={$details[0]}";
                 $recs_url = HEURIST_BASE_URL . "?db={$details[0]}&q=owner:{$details[1]}";
-                if(!in_array($details[6], $names)){
-                    $names[] = $details[6];
+                if($details[7] !== '' && !in_array($details[7], $names, true)){
+                    $names[] = $details[7];
+                }
+                if($details[8] !== '' && !in_array($details[8], $organisations, true)){
+                    $organisations[] = $details[8];
+                }
+                if($details[9] !== '' && !in_array($details[9], $interests, true)){
+                    $interests[] = $details[9];
                 }
 
                 $list_items .= '<tr class="user-row">'
                     . "<td><a href='{$url}' target='_blank' rel='noopener'>Database link</a></td><td>{$details[0]}</td>"
-                    . "<td data-reccount='{$details[2]}' title='Click to search for records'><a href='{$recs_url}' target='_blank' rel='noopener'>{$details[2]}</a></td>"
-                    . "<td data-owner='{$details[3]}'>{$owner}</td><td data-admin='{$details[4]}'>{$admin}</td>"
-                    . "<td data-lastlogin='{$details[5]}'>{$details[5]}</td>"
+                    . "<td>{$details[2]}</td>"
+                    . "<td data-reccount='{$details[3]}' title='Click to search for records'><a href='{$recs_url}' target='_blank' rel='noopener'>{$details[3]}</a></td>"
+                    . "<td data-owner='{$details[4]}'>{$owner}</td><td data-admin='{$details[5]}'>{$admin}</td>"
+                    . "<td data-lastlogin='{$details[6]}'>{$details[6]}</td>"
                 . '</tr>';
             }
 
             $names = implode(', ', $names);
-            print "<div data-idx='{$idx}' class='user-section'>"
-                    . "<h3>{$email}</h3>"
-                    . "<span>Name(s): <h5>{$names}</h5></span>"
+            $organisations = implode('; ', $organisations);
+            $interests = implode('; ', $interests);
+            print "<div class='user-section'>"
+                    . "<h3>{$names}</h3>"
+                    . "<span>&nbsp;&nbsp;&nbsp;{$email}</span>"
                     . '<table role="presentation">'
-                        . '<thead><tr><th></th><th>Database</th><th>Owned records</th><th>Is owner?</th><th>Is admin?</th><th>Last login (Y-m-d)</th></tr></thead>'
+                        . '<thead><tr><th></th><th>Database</th><th>Total records</th><th>Owned records</th><th>Is owner?</th><th>Is admin?</th><th>Last login (Y-m-d)</th></tr></thead>'
                         . "<tbody>{$list_items}</tbody>"
                     . '</table>'
+                    . "<div><strong>&nbsp;&nbsp;&nbsp;&nbsp;Research interests:</strong> {$interests}</div>"
+                    . "<div><br>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Organisation(s):</strong> {$organisations}</div>"
                 . '</div>';
 
         }
