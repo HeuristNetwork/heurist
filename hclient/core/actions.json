@@ -802,6 +802,32 @@
       "text": "Download template (XML)"
     },
     {
+      "href": "import/synchronisation/configureSatellites.php",
+      "id": "menu-sync-configure",
+      "text": "Configure satellites",
+      "title": "Configure this database as a synchronisation master or satellite",
+      "data": {
+        "user_admin_status": "1",
+        "size": "large",
+        "header": "Populate > Configure satellites",
+        "icon": "ui-icon-gear",
+        "container": "populate"
+      }
+    },
+    {
+      "href": "import/synchronisation/synchroniseWithMaster.php",
+      "id": "menu-sync-master",
+      "text": "Synchronise with master",
+      "title": "Synchronise this satellite database with its configured master",
+      "data": {
+        "user_admin_status": "1",
+        "size": "large",
+        "header": "Populate > Synchronise with master",
+        "icon": "ui-icon-transferthick-e-w",
+        "container": "populate"
+      }
+    },
+    {
       "href": "import/utilities/manageFilesUpload.php",
       "id": "menu-files-upload",
       "text": "Upload files from local",

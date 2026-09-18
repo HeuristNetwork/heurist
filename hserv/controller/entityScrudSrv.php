@@ -26,7 +26,27 @@ function entityExecute($system, $params){
     $entity = null;
 
     $entity_name = entityResolveName(@$params['entity']);
+    
 
+    // Code by ChatGPT added 18 sep 26 for master-satellite synchronisation
+    $structureEntities = [
+        'defRecTypes', 'defDetailTypes', 'defRecStructure', 'defRecTypeGroups',
+        'defDetailTypeGroups', 'defVocabularyGroups', 'defRelationshipConstraints',
+        'sysWorkflowRules'
+    ];
+    $writeActions = ['add', 'save', 'delete', 'batch', 'action', 'files'];
+    if (in_array($entity_name, $structureEntities, true)
+        && in_array((string)($params['a'] ?? ''), $writeActions, true)
+        && \hserv\synchronisation\SyncFeature::isStructureLocked($system)) {
+        $system->addError(
+            HEURIST_ACTION_BLOCKED,
+            'Database structure is controlled by the master and cannot be changed on a satellite.'
+        );
+        return false;
+    }
+    // end of code added 18 sep 26 for master-satellite synchronisation
+    
+    
     if($entity_name!=null){
         $classname = 'hserv\entity\Db'.ucfirst($entity_name);
         if($classname=='hserv\entity\DbRecords'){

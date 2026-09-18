@@ -64,7 +64,9 @@ class SystemSettings {
         'Invalid URLs' => 'invalid_urls.json',
         'Notifications' => 'user_notifications.json',
         'Languages' => 'db_languages.json',
-        'External IDs' => 'external_IDs.json'
+        'External IDs' => 'external_IDs.json',
+        // added 18/9/26 for master-satellite synchronisation
+        'Synchronisation' => 'synchronisation.json' 
     ];
 
     /**

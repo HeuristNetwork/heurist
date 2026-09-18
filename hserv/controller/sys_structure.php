@@ -99,6 +99,15 @@
     }else{
 
         if(@$req_params["import"]){ //this is import
+        
+            // added 18/9/2026 for master-satellite synchronisation
+            if(\hserv\synchronisation\SyncFeature::isStructureLocked($system)){
+                $system->errorExit(
+                    'Database structure is controlled by the master and cannot be imported manually on a satellite.',
+                    HEURIST_ACTION_BLOCKED
+                );
+            }
+            
             if(!$system->isAdmin()){
                 $system->errorExit('To perform this action you must be logged in as '
                         .'Administrator of group \'Database Managers\'',
