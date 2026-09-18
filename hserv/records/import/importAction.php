@@ -1759,8 +1759,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                 }
             }else{ //lat long fields
                 while ($row = $res->fetch_row()){
-                    $northing = (float)$row[0];
-                    $easting = (float)$row[1];
+                    $northing = (float)self::normaliseCoordinateDecimalComma($row[0]);
+                    $easting = (float)self::normaliseCoordinateDecimalComma($row[1]);
 
                     $allInteger = $allInteger && ($northing==round($northing)) && ($easting==round($easting));
                     $allOutWGS = $allOutWGS && (abs($easting)>180) && (abs($northing)>90);
@@ -2283,29 +2283,44 @@ private static function validateDateField($query, $imp_session, $fields_checked,
 }
 
 /**
-* Check whether value is valid, attempts to correct into POINT
-*
-* @param mixed $wkt - Geo value to validate
-* @param int $rec_id - Record id within import table
-* @param string $table Name of the import table.
-* @param string $field Name of the geo field in the import table.
-* @return string|false The corrected WKT string (e.g., "POINT (x y)") if validation and correction were successful,
-*                      or `false` if the value could not be validated or corrected to a simple point.
-*/
-    /**
-     * Validates and potentially corrects a geographic WKT value.
-     *
-     * Attempts to parse a WKT string. If it fails or the WKT is simple comma/space separated coordinates,
-     * it tries to interpret it as a pair of coordinates (x, y) and constructs a "POINT (x y)" WKT string.
-     * If successful and the original field value in the import table was different, it updates
-     * the import table with the corrected WKT string.
-     *
-     * @param string $wkt The geographic value (potentially WKT) from the import table.
-     * @param int $rec_id The `imp_id` of the row in the import table.
-     * @param string $table The name of the import table.
-     * @param string $field The name of the column in the import table containing the geo value.
-     * @return string|false The corrected "POINT (x y)" WKT string if successful, or `false`.
-     */
+ * Converts an unambiguous decimal comma in a coordinate to a decimal point.
+ * Commas three or six digits from the right are retained as thousands separators;
+ * values containing more than one comma are left unchanged.
+ *
+ * @param mixed $value Coordinate value from the import table.
+ * @return string Normalised coordinate value.
+ */
+private static function normaliseCoordinateDecimalComma($value){
+
+    $value = trim((string)$value);
+    if(substr_count($value, ',') !== 1){
+        return $value;
+    }
+
+    $comma_from_right = strlen($value) - strrpos($value, ',');
+    if($comma_from_right !== 4 && $comma_from_right !== 7){
+        return str_replace(',', '.', $value);
+    }
+
+    return $value;
+}
+
+/**
+ * Validates and potentially corrects a geographic value.
+ *
+ * Called when normal WKT parsing fails. It attempts to interpret simple
+ * comma- or space-separated coordinates as a pair (x, y) and constructs
+ * a "POINT (x y)" WKT value.
+ *
+ * If successful, it updates the original field value in the import table
+ * with the corrected WKT string.
+ *
+ * @param string $wkt The geographic value from the import table.
+ * @param int $rec_id The `imp_id` of the row in the import table.
+ * @param string $table The name of the import table.
+ * @param string $field The column containing the geographic value.
+ * @return string|false The corrected "POINT (x y)" WKT string, or false.
+ */
 private static function validateGeoField($wkt, $rec_id, $table, $field){
 
     $res = false;
@@ -3328,10 +3343,10 @@ public static function performImport($params, $mode_output){
 
                             }
                             elseif($fieldtype_type == "lat") {
-                                $lat = $r_value;
+                                $lat = self::normaliseCoordinateDecimalComma($r_value);
                             }elseif($fieldtype_type == "long"){
                                 //WARNING MILTIVALUE IS NOT SUPPORTED
-                                $long = $r_value;
+                                $long = self::normaliseCoordinateDecimalComma($r_value);
 
                             }elseif($fieldtype_type=="file"){
                                 //value can be remote url
@@ -3464,13 +3479,17 @@ public static function performImport($params, $mode_output){
                                 }
 
                                 if($need_add){
-                                    //always prevent duplications
+                                    //prevent duplications unless "add all values" mode is selected
                                     if(@$details["t:".$field_type]){
-                                        if(strlen($value)<200){
+                                        // Calculate the next repeat index for every value.
+                                        // JT#3248: Previously this happened only for values shorter than 200 characters,
+                                        // so a long value reused the preceding index and overwrote an earlier value.
+                                        // Fixed. Duplication is now checked for any field length.
+                                        $cnt = count($details["t:".$field_type]) + 1;
+                                        if($params['sa_upd'] != 3){
                                             $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
                                             //duplications not found - can be added
-                                            $need_add = (array_search(trim_lower_accent($value), $details_lc, true)===false || $params['sa_upd'] == 3);
-                                            $cnt = count(@$details["t:".$field_type])+1;
+                                            $need_add = array_search(trim_lower_accent($value), $details_lc, true) === false;
                                         }
                                     }else{
                                         $cnt = 1;
