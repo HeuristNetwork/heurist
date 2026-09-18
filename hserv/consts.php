@@ -482,6 +482,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_GEO_OBJECT' => array(2, 28),  //extent
     // for MapSource - geo fields from linked record to be used to gather mapping data to be used as geogields parameter to api/map
     // for Dataset - fields and linked paths to be used as field parameter to api/records    
+    'DT_IS_LOADED_BY_EXTENT' => array(2, 1160),   //is layer loads features for current extent only
     'DT_GEO_FIELDS' => array(2, 1161),
     'DT_GEO_OUTPUTMODE' => array(2, 1162),  //combined map features per record or individual features
     'DT_EXPANSION_RULES' => array(2, 1163),
@@ -499,7 +500,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MINIMUM_ZOOM' => array(3, 1086), //in UI this field acts as maximum zoom out km
     'DT_LEGEND_OUT_ZOOM' => array(3, 1087), //hide or disable layer in legend if layer is out of zoom range
     'DT_IS_VISIBLE' => array(2, 1100),   //is layer initially visible on mapdocument initialization
-    'DT_IS_LOADED_BY_EXTENT' => array(2, 1160),   //is layer loads features for current extent only
 
     'DT_SERVICE_URL' => array(2, 34),
     'DT_URL' => array(3, 1058),
