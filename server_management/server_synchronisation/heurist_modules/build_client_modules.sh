@@ -3,13 +3,10 @@
 # build_client_modules.sh - Synchronise, build and deploy independent Heurist client modules.
 #
 # Current source repositories:
-#   - heurist-client-core (shared package; checked out but not deployed directly)
-#   - heurist-data
-#   - heurist-explorer
-#   - heurist-graph
-#   - heurist-map
-#   - heurist-mirador4
-#   - heurist-timeline
+#   - heurist-explorer (monorepo; builds and deploys six bundles in one pass:
+#     heurist-explorer, heurist-data, heurist-graph, heurist-map, heurist-timeline,
+#     heurist-recordview)
+#   - heurist-mirador4 (standalone repo with its own deploy:heurist script)
 #
 # Dedicated source checkouts live under /var/www/html/HEURIST.
 # Built distributions are published under:
@@ -28,14 +25,13 @@ OWNER="${HEURIST_CLIENT_OWNER:-osmakov}"
 GROUP="${HEURIST_CLIENT_GROUP:-heurist}"
 BRANCH="${HEURIST_CLIENT_BRANCH:-main}"
 
+# Independent distributions produced by the heurist-explorer monorepo's
+# `npm run build:all` / `npm run deploy:all`.
+EXPLORER_BUNDLES=(heurist-explorer heurist-data heurist-graph heurist-map heurist-timeline heurist-recordview)
+
 # Override these environment variables if a repository uses a different URL.
-HEURIST_CLIENT_CORE_REPO="${HEURIST_CLIENT_CORE_REPO:-git@github.com:HeuristNetwork/heurist-client-core.git}"
-HEURIST_DATA_REPO="${HEURIST_DATA_REPO:-git@github.com:HeuristNetwork/heurist-data.git}"
 HEURIST_EXPLORER_REPO="${HEURIST_EXPLORER_REPO:-git@github.com:HeuristNetwork/heurist-explorer.git}"
-HEURIST_GRAPH_REPO="${HEURIST_GRAPH_REPO:-git@github.com:HeuristNetwork/heurist-graph.git}"
-HEURIST_MAP_REPO="${HEURIST_MAP_REPO:-git@github.com:HeuristNetwork/heurist-map.git}"
 HEURIST_MIRADOR4_REPO="${HEURIST_MIRADOR4_REPO:-git@github.com:HeuristNetwork/heurist-mirador4.git}"
-HEURIST_TIMELINE_REPO="${HEURIST_TIMELINE_REPO:-git@github.com:HeuristNetwork/heurist-timeline.git}"
 
 RUN_LOG="$(mktemp /tmp/heurist-client-modules.XXXXXX.log)"
 TEE_PID=""
@@ -140,8 +136,42 @@ ensure_repository() {
     fi
 }
 
-build_and_deploy() {
-    local name="$1"
+# heurist-explorer is a monorepo: one `npm ci`, one `build:all` (builds and
+# verifies all six bundles), one `deploy:all` (publishes all six).
+build_and_deploy_explorer() {
+    local name="heurist-explorer"
+    local repo_dir="$HEURIST_ROOT/$name"
+
+    echo "$LOG_PREFIX [$name] Installing locked dependencies..."
+    (
+        cd "$repo_dir"
+        npm ci --no-audit --no-fund
+
+        # Vite is intentionally project-local. Do not require/install a global Vite.
+        if [[ -x node_modules/.bin/vite ]]; then
+            echo "$LOG_PREFIX [$name] Vite: $(node_modules/.bin/vite --version)"
+        fi
+
+        echo "$LOG_PREFIX [$name] Building all bundles..."
+        npm run build:all
+
+        echo "$LOG_PREFIX [$name] Deploying all bundles..."
+        HEURIST_CLIENT_DIST_ROOT="$DIST_ROOT" npm run deploy:all
+    )
+
+    local bundle
+    for bundle in "${EXPLORER_BUNDLES[@]}"; do
+        if [[ ! -d "$DIST_ROOT/$bundle" ]]; then
+            echo "$LOG_PREFIX [$name] ERROR: deployment directory was not created: $DIST_ROOT/$bundle" >&2
+            return 1
+        fi
+        echo "$LOG_PREFIX [$name] Deployed to $DIST_ROOT/$bundle"
+    done
+}
+
+# heurist-mirador4 remains a standalone repo with its own deploy:heurist script.
+build_and_deploy_mirador4() {
+    local name="heurist-mirador4"
     local repo_dir="$HEURIST_ROOT/$name"
 
     echo "$LOG_PREFIX [$name] Installing locked dependencies..."
@@ -176,35 +206,20 @@ fix_permissions() {
 
     if id "$OWNER" >/dev/null 2>&1 && getent group "$GROUP" >/dev/null 2>&1; then
         chown -R "$OWNER:$GROUP" \
-            "$HEURIST_ROOT/heurist-client-core" \
-            "$HEURIST_ROOT/heurist-data" \
             "$HEURIST_ROOT/heurist-explorer" \
-            "$HEURIST_ROOT/heurist-graph" \
-            "$HEURIST_ROOT/heurist-map" \
             "$HEURIST_ROOT/heurist-mirador4" \
-            "$HEURIST_ROOT/heurist-timeline" \
             "$DIST_ROOT"
     else
         echo "$LOG_PREFIX WARNING: owner/group $OWNER:$GROUP not found; ownership unchanged."
     fi
 
     chmod -R ug+rwX \
-        "$HEURIST_ROOT/heurist-client-core" \
-        "$HEURIST_ROOT/heurist-data" \
         "$HEURIST_ROOT/heurist-explorer" \
-        "$HEURIST_ROOT/heurist-graph" \
-        "$HEURIST_ROOT/heurist-map" \
         "$HEURIST_ROOT/heurist-mirador4" \
-        "$HEURIST_ROOT/heurist-timeline" \
         "$DIST_ROOT"
     find \
-        "$HEURIST_ROOT/heurist-client-core" \
-        "$HEURIST_ROOT/heurist-data" \
         "$HEURIST_ROOT/heurist-explorer" \
-        "$HEURIST_ROOT/heurist-graph" \
-        "$HEURIST_ROOT/heurist-map" \
         "$HEURIST_ROOT/heurist-mirador4" \
-        "$HEURIST_ROOT/heurist-timeline" \
         "$DIST_ROOT" \
         -type d -exec chmod g+s {} +
     chmod -R a+rX "$DIST_ROOT"
@@ -218,20 +233,11 @@ acquire_lock
 
 mkdir -p "$HEURIST_ROOT" "$DIST_ROOT"
 
-ensure_repository "heurist-client-core" "$HEURIST_CLIENT_CORE_REPO"
-ensure_repository "heurist-data" "$HEURIST_DATA_REPO"
 ensure_repository "heurist-explorer" "$HEURIST_EXPLORER_REPO"
-ensure_repository "heurist-graph" "$HEURIST_GRAPH_REPO"
-ensure_repository "heurist-map" "$HEURIST_MAP_REPO"
 ensure_repository "heurist-mirador4" "$HEURIST_MIRADOR4_REPO"
-ensure_repository "heurist-timeline" "$HEURIST_TIMELINE_REPO"
 
-build_and_deploy "heurist-data"
-build_and_deploy "heurist-explorer"
-build_and_deploy "heurist-graph"
-build_and_deploy "heurist-map"
-build_and_deploy "heurist-mirador4"
-build_and_deploy "heurist-timeline"
+build_and_deploy_explorer
+build_and_deploy_mirador4
 
 fix_permissions
 
