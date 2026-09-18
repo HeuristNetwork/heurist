@@ -254,13 +254,13 @@ ksort($user_list, SORT_FLAG_CASE);
             $interests = implode('; ', $interests);
             print "<div class='user-section'>"
                     . "<h3>{$names}</h3>"
-                    . "<span>&nbsp;&nbsp;&nbsp;{$email}</span>"
+                    . "<span><br>&nbsp;&nbsp;&nbsp;{$email}</span>"
                     . '<table role="presentation">'
                         . '<thead><tr><th></th><th>Database</th><th>Total records</th><th>Owned records</th><th>Is owner?</th><th>Is admin?</th><th>Last login (Y-m-d)</th></tr></thead>'
                         . "<tbody>{$list_items}</tbody>"
                     . '</table>'
-                    . "<div><strong>&nbsp;&nbsp;&nbsp;&nbsp;Research interests:</strong> {$interests}</div>"
-                    . "<div><br>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Organisation(s):</strong> {$organisations}</div>"
+                    . "<div><br><strong>&nbsp;&nbsp;&nbsp;&nbsp;Research interests:</strong> {$interests}</div>"
+                    . "<div>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Organisation(s):</strong> {$organisations}</div>"
                 . '</div>';
 
         }
