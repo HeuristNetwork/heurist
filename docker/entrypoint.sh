@@ -11,6 +11,21 @@ download_https() {
     curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 "$@"
 }
 
+download_bundle() {
+    local name="$1"
+    local target="$BASE/HEURIST_SUPPORT/$name"
+    local archive="/tmp/heurist-$name.tar.bz2"
+
+    if [[ ! -d "$target" ]]; then
+        echo "==> Downloading missing Heurist support bundle: $name"
+        download_https -o "$archive" \
+            "https://heuristref.net/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/$name.tar.bz2"
+        mkdir -p "$target"
+        tar -xjf "$archive" -C "$target" --strip-components=1
+        rm -f "$archive"
+    fi
+}
+
 # 1. Filestore: create if missing and deny direct web access
 mkdir -p "$BASE/HEURIST_FILESTORE"
 if [[ ! -f "$BASE/HEURIST_FILESTORE/.htaccess" ]]; then
@@ -24,6 +39,12 @@ if [[ -d "$APP/movetoparent" ]]; then
     find "$APP/movetoparent" -maxdepth 1 -type f ! -name 'heuristConfigIni.php' \
         -exec cp -n {} "$BASE/" \; || true
 fi
+
+# Bind-mounted support storage hides the copy baked into the image. Restore
+# missing bundles before creating the application symlinks below.
+mkdir -p "$BASE/HEURIST_SUPPORT"
+download_bundle external_h5
+download_bundle help
 
 # 3. Support-bundle symlinks (skip if the repo already has real directories)
 for pair in "external:external_h5" "help:help"; do
@@ -74,10 +95,5 @@ if [[ -d "$EXT" && ! -f "$EXT/js/datatable/datatables.min.js" ]]; then
     download_https -o "$EXT/js/datatable/datatables.min.css" \
         https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css || true
 fi
-
-# 5. Permissions: Apache (www-data) must be able to write the filestore.
-#    NOTE: the codebase itself stays read-only (the bind mount keeps host
-#    ownership) - Heurist writes uploads/databases to HEURIST_FILESTORE and MySQL.
-chown -R www-data:www-data "$BASE/HEURIST_FILESTORE" 2>/dev/null || true
 
 exec "$@"

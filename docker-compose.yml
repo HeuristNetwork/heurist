@@ -1,4 +1,22 @@
 services:
+  # Bind mounts are created by Docker as root when they do not already exist.
+  # Initialize only the application-managed writable directories before the
+  # non-root web container starts. The database has its own image-managed
+  # ownership and is intentionally not included here.
+  data-permissions:
+    image: alpine:3.20
+    user: "0:0"
+    restart: "no"
+    volumes:
+      - ${HEURIST_DATA_ROOT:-./data}/filestore:/mnt/filestore
+      - ${HEURIST_DATA_ROOT:-./data}/support:/mnt/support
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        mkdir -p /mnt/filestore /mnt/support
+        chown -R 33:33 /mnt/filestore /mnt/support
+
   db:
     image: mysql:8.0
     restart: unless-stopped
@@ -33,6 +51,8 @@ services:
       # Keep the container web port unreachable from the network directly.
       - "127.0.0.1:8080:8080"
     depends_on:
+      data-permissions:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
     environment:
