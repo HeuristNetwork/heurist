@@ -186,6 +186,136 @@ final class SyncSessionService
             : $this->system->getError();
     }
 
+    /** Validates and applies a retry-safe portable record batch to its reserved master records. */
+    public function uploadRecords(string $sessionID, int $satelliteDBID, array $payload): array
+    {
+        if (!$this->ensureSchema()) return $this->system->getError();
+        $session = $this->getSession($sessionID, $satelliteDBID);
+        if (!$session) return $this->system->addError(HEURIST_INVALID_REQUEST, 'Unknown synchronisation session.');
+        if (($payload['format'] ?? '') !== 'heurist-hml-sync-1' || !is_array($payload['records'] ?? null)) {
+            return $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid record-content payload.');
+        }
+        $records = $payload['records'];
+        if (count($records) > 1000) {
+            return $this->system->addError(HEURIST_INVALID_REQUEST, 'A single content batch is limited to 1,000 records.');
+        }
+        $hash = hash('sha256', json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        $prior = mysql__select_value($this->mysqli,
+            "SELECT spl_State FROM sysSyncPayloads WHERE spl_Hash=? AND spl_SessionID=? AND spl_SatelliteDBID=?",
+            ['ssi', $hash, $sessionID, $satelliteDBID]);
+        if ($prior === 'APPLIED') {
+            return ['status' => HEURIST_OK, 'data' => ['recordsApplied' => count($records), 'payloadHash' => $hash, 'replayed' => true]];
+        }
+
+        ConceptCode::setSystem($this->system);
+        $resolved = [];
+        foreach ($records as $record) {
+            $recordID = (int)($record['rec_ID'] ?? 0);
+            $mapped = mysql__select_value($this->mysqli,
+                'SELECT srm_MasterRecID FROM sysSyncRecordMap WHERE srm_SatelliteDBID=? AND srm_MasterRecID=? AND srm_SessionID=?',
+                ['iis', $satelliteDBID, $recordID, $sessionID]);
+            if (!$mapped) return $this->system->addError(HEURIST_INVALID_REQUEST, "Record $recordID was not reserved by this session.");
+            $masterTypeID = (int)ConceptCode::getRecTypeLocalID((string)($record['recordTypeConceptID'] ?? ''));
+            $reservedTypeID = (int)mysql__select_value($this->mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID=?', ['i', $recordID]);
+            if ($masterTypeID < 1 && (int)($record['rec_RecTypeID'] ?? 0) > 0) {
+                $candidateID = (int)$record['rec_RecTypeID'];
+                $candidateName = mysql__select_value($this->mysqli, 'SELECT rty_Name FROM defRecTypes WHERE rty_ID=?', ['i', $candidateID]);
+                if (is_string($candidateName) && hash_equals($candidateName, (string)($record['recordTypeName'] ?? ''))) $masterTypeID = $candidateID;
+            }
+            if ($masterTypeID < 1 || $masterTypeID !== $reservedTypeID) {
+                return $this->system->addError(HEURIST_INVALID_REQUEST, "The structure for record $recordID does not match the master reservation.");
+            }
+            $details = [];
+            foreach (($record['details'] ?? []) as $detail) {
+                if (!empty($detail['dtl_UploadedFileID']) || ($detail['dty_Type'] ?? '') === 'file') {
+                    return $this->system->addError(HEURIST_ACTION_BLOCKED, "Record $recordID contains a file; file transfer is not enabled in this stage.");
+                }
+                $dtyID = (int)ConceptCode::getDetailTypeLocalID((string)($detail['detailTypeConceptID'] ?? ''));
+                if ($dtyID < 1 && (int)($detail['dtl_DetailTypeID'] ?? 0) > 0) {
+                    $candidateID = (int)$detail['dtl_DetailTypeID'];
+                    $candidateName = mysql__select_value($this->mysqli, 'SELECT dty_Name FROM defDetailTypes WHERE dty_ID=?', ['i', $candidateID]);
+                    if (is_string($candidateName) && hash_equals($candidateName, (string)($detail['dty_Name'] ?? ''))) $dtyID = $candidateID;
+                }
+                $masterDtyType = $dtyID > 0 ? mysql__select_value($this->mysqli,
+                    'SELECT dty_Type FROM defDetailTypes WHERE dty_ID=?', ['i', $dtyID]) : null;
+                if (!$masterDtyType || $masterDtyType !== ($detail['dty_Type'] ?? '')) {
+                    return $this->system->addError(HEURIST_INVALID_REQUEST,
+                        'The master does not recognise field '.($detail['dty_Name'] ?? $detail['detailTypeConceptID'] ?? '')." for record $recordID.");
+                }
+                if (!mysql__select_value($this->mysqli,
+                    'SELECT rst_ID FROM defRecStructure WHERE rst_RecTypeID=? AND rst_DetailTypeID=? LIMIT 1',
+                    ['ii', $masterTypeID, $dtyID])) {
+                    return $this->system->addError(HEURIST_INVALID_REQUEST,
+                        'Field '.($detail['dty_Name'] ?? $dtyID)." is not present in the master structure for record $recordID.");
+                }
+                $value = $detail['dtl_Value'] ?? null;
+                if (in_array($masterDtyType, ['enum', 'relationtype'], true) && !empty($detail['termConceptID'])) {
+                    $termID = (int)ConceptCode::getTermLocalID((string)$detail['termConceptID']);
+                    if ($termID < 1 && (int)($detail['dtl_Value'] ?? 0) > 0) {
+                        $candidateID = (int)$detail['dtl_Value'];
+                        $candidateLabel = mysql__select_value($this->mysqli, 'SELECT trm_Label FROM defTerms WHERE trm_ID=?', ['i', $candidateID]);
+                        if (is_string($candidateLabel) && hash_equals($candidateLabel, (string)($detail['termLabel'] ?? ''))) $termID = $candidateID;
+                    }
+                    if ($termID < 1) return $this->system->addError(HEURIST_ACTION_BLOCKED,
+                        'The master does not yet contain term '.($detail['termLabel'] ?? $detail['termConceptID']).'. Synchronise terms first.');
+                    $value = (string)$termID;
+                }
+                if ($masterDtyType === 'resource' && (int)$value > 0
+                    && !mysql__select_value($this->mysqli, 'SELECT rec_ID FROM Records WHERE rec_ID=?', ['i', (int)$value])) {
+                    return $this->system->addError(HEURIST_INVALID_REQUEST, "Record $recordID points to missing master record $value.");
+                }
+                $detail['_masterDtyID'] = $dtyID;
+                $detail['_masterValue'] = $value;
+                $details[] = $detail;
+            }
+            $record['_details'] = $details;
+            $resolved[] = $record;
+        }
+
+        $this->mysqli->query("INSERT INTO sysSyncPayloads (spl_Hash,spl_SessionID,spl_SatelliteDBID,spl_RecordCount,spl_State) VALUES ('".
+            $this->mysqli->real_escape_string($hash)."','".$this->mysqli->real_escape_string($sessionID)."',$satelliteDBID,".count($records).",'RECEIVED') "
+            ."ON DUPLICATE KEY UPDATE spl_State='RECEIVED',spl_Error=NULL");
+        $keepAutocommit = mysql__begin_transaction($this->mysqli);
+        $ok = true;
+        foreach ($resolved as $record) {
+            $recordID = (int)$record['rec_ID'];
+            $stmt = $this->mysqli->prepare('UPDATE Records SET rec_URL=?,rec_Added=?,rec_Title=?,rec_ScratchPad=?,rec_AddedByImport=?,'
+                .'rec_NonOwnerVisibility=?,rec_FlagTemporary=0,rec_Modified=UTC_TIMESTAMP() WHERE rec_ID=?');
+            $url = $record['rec_URL']; $added = $record['rec_Added']; $title = (string)$record['rec_Title'];
+            $scratch = $record['rec_ScratchPad']; $byImport = (int)$record['rec_AddedByImport'];
+            $visibility = (string)$record['rec_NonOwnerVisibility'];
+            $stmt->bind_param('ssssisi', $url, $added, $title, $scratch, $byImport, $visibility, $recordID);
+            $ok = $stmt->execute();
+            if (!$ok) $this->system->addError(HEURIST_DB_ERROR, "Unable to update master record $recordID.", $stmt->error);
+            $stmt->close();
+            if (!$ok || !$this->mysqli->query('DELETE FROM recDetails WHERE dtl_RecID='.$recordID)) { $ok = false; break; }
+            foreach ($record['_details'] as $detail) {
+                $stmt = $this->mysqli->prepare('INSERT INTO recDetails '
+                    .'(dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_Geo,dtl_Certainty,dtl_Annotation,dtl_HideFromPublic,dtl_AddedByImport) '
+                    .'VALUES (?,?,?,IF(? IS NULL,NULL,ST_GeomFromText(?)),?,?,?,1)');
+                $dtyID = (int)$detail['_masterDtyID']; $value = $detail['_masterValue']; $geo = $detail['dtl_Geo'] ?? null;
+                $certainty = (float)($detail['dtl_Certainty'] ?? 1); $annotation = $detail['dtl_Annotation'] ?? null;
+                $hidden = isset($detail['dtl_HideFromPublic']) ? (int)$detail['dtl_HideFromPublic'] : null;
+                $stmt->bind_param('iisssdsi', $recordID, $dtyID, $value, $geo, $geo, $certainty, $annotation, $hidden);
+                $ok = $stmt->execute();
+                if (!$ok) $this->system->addError(HEURIST_DB_ERROR, "Unable to add a field to master record $recordID.", $stmt->error);
+                $stmt->close();
+                if (!$ok) break 2;
+            }
+        }
+        if ($ok) {
+            $stmt = $this->mysqli->prepare("UPDATE sysSyncPayloads SET spl_State='APPLIED',spl_Applied=UTC_TIMESTAMP() WHERE spl_Hash=?");
+            $stmt->bind_param('s', $hash); $ok = $stmt->execute(); $stmt->close();
+        }
+        if ($ok) {
+            $stmt = $this->mysqli->prepare("UPDATE sysSyncSessions SET ssy_State='RECORDS_UPLOADED',ssy_Error=NULL WHERE ssy_ID=?");
+            $stmt->bind_param('s', $sessionID); $ok = $stmt->execute(); $stmt->close();
+        }
+        mysql__end_transaction($this->mysqli, $ok, $keepAutocommit);
+        if (!$ok) return $this->system->getError();
+        return ['status' => HEURIST_OK, 'data' => ['recordsApplied' => count($records), 'payloadHash' => $hash, 'replayed' => false]];
+    }
+
     public function listSessions(int $limit = 100): array
     {
         if (!$this->ensureSchema()) {

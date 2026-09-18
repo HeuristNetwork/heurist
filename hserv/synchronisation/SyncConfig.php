@@ -71,7 +71,10 @@ final class SyncConfig
             $master = is_array($config['master'] ?? null) ? $config['master'] : [];
             $masterID = (int)($master['databaseID'] ?? 0);
             $database = trim((string)($master['database'] ?? ''));
-            $url = rtrim(trim((string)($master['url'] ?? '')), '/');
+            [$url, $databaseFromUrl] = $this->normaliseHeuristUrl((string)($master['url'] ?? ''));
+            if ($database === '' && $databaseFromUrl !== '') {
+                $database = $databaseFromUrl;
+            }
             if ($masterID < 1 || !preg_match('/^[A-Za-z0-9_$]+$/', $database)
                 || !filter_var($url, FILTER_VALIDATE_URL)) {
                 $this->system->addError(
@@ -99,6 +102,7 @@ final class SyncConfig
             $result['lastCompletedSession'] = $existing['lastCompletedSession'] ?? null;
             $result['lastMasterChangeReceived'] = (int)($existing['lastMasterChangeReceived'] ?? 0);
             $result['lastNewRecordScanChangeID'] = (int)($existing['lastNewRecordScanChangeID'] ?? 0);
+            $result['initialInventorySeeded'] = !empty($existing['initialInventorySeeded']);
         }
         return $result;
     }
@@ -130,7 +134,7 @@ final class SyncConfig
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Satellite $id requires a shared secret.");
                 return false;
             }
-            $url = rtrim(trim((string)($satellite['url'] ?? '')), '/');
+            [$url] = $this->normaliseHeuristUrl((string)($satellite['url'] ?? ''));
             if ($url !== '' && (!filter_var($url, FILTER_VALIDATE_URL)
                 || strtolower((string)parse_url($url, PHP_URL_SCHEME)) !== 'https')) {
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Satellite $id has an invalid HTTPS URL.");
@@ -155,10 +159,12 @@ final class SyncConfig
     private function redact(array $config): array
     {
         if (isset($config['master']['sharedKey'])) {
+            $config['master']['hasSharedSecret'] = $config['master']['sharedKey'] !== '';
             unset($config['master']['sharedKey']);
             $config['master']['sharedSecret'] = '';
         }
         foreach ($config['satellites'] ?? [] as &$satellite) {
+            $satellite['hasSharedSecret'] = !empty($satellite['sharedKey']);
             unset($satellite['sharedKey']);
             $satellite['sharedSecret'] = '';
         }
@@ -166,9 +172,46 @@ final class SyncConfig
         return $config;
     }
 
+    /**
+     * Convert a pasted Heurist database or controller URL to the codebase URL.
+     * The database query parameter is returned separately when present.
+     */
+    private function normaliseHeuristUrl(string $value): array
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return ['', ''];
+        }
+        $parts = parse_url($value);
+        if (!is_array($parts) || empty($parts['scheme']) || empty($parts['host'])) {
+            return [$value, ''];
+        }
+        $database = '';
+        if (!empty($parts['query'])) {
+            parse_str($parts['query'], $query);
+            $database = trim((string)($query['db'] ?? ''));
+        }
+        $path = (string)($parts['path'] ?? '/');
+        $controllerAt = strpos($path, '/hserv/');
+        if ($controllerAt !== false) {
+            $path = substr($path, 0, $controllerAt + 1);
+        }
+        $authority = $parts['scheme'].'://';
+        if (!empty($parts['user'])) {
+            $authority .= $parts['user'].(!empty($parts['pass']) ? ':'.$parts['pass'] : '').'@';
+        }
+        $authority .= $parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '');
+        return [rtrim($authority.'/'.ltrim($path, '/'), '/'), $database];
+    }
+
     public function updateRuntime(array $values): bool
     {
-        $allowed = ['lastCompletedSession', 'lastMasterChangeReceived', 'lastNewRecordScanChangeID'];
+        $allowed = [
+            'lastCompletedSession',
+            'lastMasterChangeReceived',
+            'lastNewRecordScanChangeID',
+            'initialInventorySeeded'
+        ];
         $values = array_intersect_key($values, array_flip($allowed));
         if (!$values) {
             return true;

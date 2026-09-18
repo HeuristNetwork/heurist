@@ -91,6 +91,33 @@ final class SyncChangeJournal
         return (int)mysql__select_value($this->mysqli, 'SELECT COALESCE(MAX(sch_ID),0) FROM sysSyncChanges');
     }
 
+    /**
+     * On a satellite's first sync, journal records which pre-date trigger
+     * installation. Existing create events and previously allocated records
+     * are excluded, making this safe to repeat after an interruption.
+     */
+    public function seedExistingRecords()
+    {
+        if (!$this->ensureInstalled()) {
+            return false;
+        }
+        $sql = "INSERT INTO sysSyncChanges(sch_Entity,sch_Action,sch_RecID) "
+            ."SELECT 'record','create',r.rec_ID FROM Records r "
+            ."LEFT JOIN sysSyncOutboundRecords o ON o.sor_CurrentRecID=r.rec_ID "
+            ."LEFT JOIN sysSyncChanges c ON c.sch_RecID=r.rec_ID "
+                ."AND c.sch_Entity='record' AND c.sch_Action='create' "
+            ."WHERE r.rec_FlagTemporary=0 AND o.sor_CurrentRecID IS NULL AND c.sch_ID IS NULL";
+        if (!$this->mysqli->query($sql)) {
+            $this->system->addError(
+                HEURIST_ACTION_BLOCKED,
+                'Unable to inventory records which existed before satellite synchronisation was configured.',
+                $this->mysqli->error
+            );
+            return false;
+        }
+        return $this->mysqli->affected_rows;
+    }
+
     private function triggerDefinitions(): array
     {
         $guard = 'COALESCE(@HEURIST_SYNC_APPLY,0)=0';

@@ -85,6 +85,12 @@ if (!$system->init($_REQUEST['db'] ?? null)) {
                         $satelliteID,
                         is_array($params['records'] ?? null) ? $params['records'] : []
                     );
+                } elseif ($action === 'upload_records') {
+                    $response = $service->uploadRecords(
+                        (string)($params['sessionID'] ?? ''),
+                        $satelliteID,
+                        is_array($params['payload'] ?? null) ? $params['payload'] : []
+                    );
                 } else {
                     $response = $system->addError(HEURIST_INVALID_REQUEST, 'Unknown synchronisation action.');
                 }

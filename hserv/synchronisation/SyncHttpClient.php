@@ -28,6 +28,11 @@ final class SyncHttpClient
         return $this->request('allocate_ids', ['sessionID' => $sessionID, 'records' => $records]);
     }
 
+    public function uploadRecords(string $sessionID, array $payload): array
+    {
+        return $this->request('upload_records', ['sessionID' => $sessionID, 'payload' => $payload]);
+    }
+
     private function request(string $action, array $payload): array
     {
         $master = $this->config['master'] ?? [];
@@ -63,19 +68,47 @@ final class SyncHttpClient
         ]);
         $bodyResult = curl_exec($curl);
         $status = (int)curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $contentType = (string)curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+        $curlErrno = curl_errno($curl);
         $error = curl_error($curl);
         curl_close($curl);
-        if ($bodyResult === false || $status < 200 || $status >= 300) {
-            return $this->system->addError(
-                HEURIST_ERROR,
-                'The master database could not be contacted.',
-                $error !== '' ? $error : 'HTTP '.$status
+        if ($bodyResult === false) {
+            return $this->diagnosticError(
+                'connection_failed',
+                'The satellite could not connect to the master Heurist server.',
+                'cURL '.$curlErrno.($error !== '' ? ': '.$error : '').' Endpoint: '.$url
             );
         }
         $response = json_decode($bodyResult, true);
+        if ($status < 200 || $status >= 300) {
+            $remoteMessage = is_array($response)
+                ? trim(strip_tags((string)($response['message'] ?? $response['msg'] ?? '')))
+                : '';
+            return $this->diagnosticError(
+                'http_error',
+                'The master endpoint returned HTTP '.$status.'.'.($remoteMessage !== '' ? ' '.$remoteMessage : ''),
+                'Endpoint: '.$url.'; content type: '.($contentType ?: 'not supplied')
+            );
+        }
         if (!is_array($response)) {
-            return $this->system->addError(HEURIST_ERROR, 'The master returned an invalid synchronisation response.');
+            $preview = trim(preg_replace('/\s+/', ' ', strip_tags((string)$bodyResult)));
+            return $this->diagnosticError(
+                'invalid_response',
+                'The master endpoint was reached, but it did not return a valid synchronisation response.',
+                'Endpoint: '.$url.'; HTTP '.$status.'; content type: '.($contentType ?: 'not supplied')
+                    .'; response begins: '.substr($preview, 0, 500)
+            );
         }
         return $response;
+    }
+
+    private function diagnosticError(string $code, string $message, string $detail): array
+    {
+        return [
+            'status' => HEURIST_ACTION_BLOCKED,
+            'message' => $message,
+            'sysmsg' => $detail,
+            'diagnosticCode' => $code
+        ];
     }
 }

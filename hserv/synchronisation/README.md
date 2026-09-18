@@ -16,8 +16,14 @@ server's parent `heuristConfigIni.php`.
   when a database is explicitly configured for synchronisation;
 - discovery of newly completed satellite records, record-type resolution by
   concept code, remote ID allocation and resumable local remapping;
+- a one-time first-sync inventory which journals non-temporary satellite
+  records created before the synchronisation triggers were installed;
 - transactional, two-stage satellite ID remapping with an audited list of
   record-ID-bearing tables and record-pointer detail values;
+- validated record-content upload into the reserved master records, including
+  concept-code mapping for record types, fields and existing terms;
+- retry-safe, hashed payload batches (500 records per satellite request) with
+  transactional application on the master;
 - normal structure editing blocked on satellites while term editing remains available.
 
 Tables beginning `sysSync` are created on first operational use. They are kept
@@ -26,10 +32,11 @@ out of the core schema while the feature is experimental.
 ## Deliberately not yet enabled
 
 - structure and term exchange;
-- HML record and attachment transfer;
+- uploaded-file transfer and satellite-created term transfer;
 - three-way merge, deletion and priority conflict resolution;
 - master-to-satellite change delivery and completion cursors.
 
-The UI therefore performs a real authenticated start/resume handshake but does
-not yet offer a control that changes record data. These later phases should use
-the existing session states and must remain idempotent.
+The UI performs a real authenticated start/resume handshake, permanent-ID
+remapping and record-content upload. A record containing an uploaded file or a
+term absent from the master is left pending with an explicit message; no partial
+master record is committed.

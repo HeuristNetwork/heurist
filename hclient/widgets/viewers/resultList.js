@@ -637,7 +637,10 @@ $.widget( "heurist.resultList", {
 
         //------------------------------------------       
 
-        this.div_header =  $( "<div>" ).css({'height':'auto'}).appendTo( this.element ); //41px
+        this.div_header =  $( "<div>" )
+        .addClass('result-list-head')
+        .css({'height':'auto'})
+        .appendTo( this.element ); //41px
         
         if(this.options.is_h6style){
 
@@ -895,8 +898,9 @@ $.widget( "heurist.resultList", {
                     btn_visible_newrecord: false,
                     search_button_label: window.hWin.HR('Filter'),
                     btn_entity_filter: false})
+                .addClass('result-filter-panel')
                 .css({  //display:'block','max-height':'55px','height':'55px',
-                        padding:'15px 10px 35px 4px','border-bottom':'1px solid gray'}) //,width:'100%'
+                        padding:'15px 10px 35px 4px'}) //,width:'100%'
                 .appendTo(this.div_header);
         
         }

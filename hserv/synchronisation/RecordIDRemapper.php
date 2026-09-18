@@ -189,14 +189,27 @@ final class RecordIDRemapper
                 "UPDATE recDetails d JOIN defDetailTypes t ON t.dty_ID=d.dtl_DetailTypeID "
                 ."SET d.dtl_Value=? WHERE t.dty_Type='resource' AND d.dtl_Value=?"
             );
+            if (!$stmt) {
+                return $this->remapSqlError('preparing the record-pointer update');
+            }
             $newText = (string)$new;
             $oldText = (string)$old;
             $stmt->bind_param('ss', $newText, $oldText);
             if (!$stmt->execute()) {
+                $detail = 'MySQL '.$stmt->errno.': '.$stmt->error;
                 $stmt->close();
-                return false;
+                return $this->remapSqlError('updating record-pointer values', $detail);
             }
             $stmt->close();
+
+            // Change the parent key first. Heurist's foreign keys, notably
+            // recDetails.dtl_RecID -> Records.rec_ID, use ON UPDATE CASCADE.
+            // Updating those child columns first fails because the new parent
+            // ID does not yet exist. The subsequent explicit updates cover
+            // caches and other references which have no foreign key.
+            if (!$this->mysqli->query("UPDATE Records SET rec_ID=$new WHERE rec_ID=$old")) {
+                return $this->remapSqlError('updating Records.rec_ID');
+            }
 
             foreach (self::REFERENCE_COLUMNS as $table => $columns) {
                 if (!$this->tableExists($table)) {
@@ -205,15 +218,22 @@ final class RecordIDRemapper
                 foreach ($columns as $column) {
                     $query = "UPDATE `$table` SET `$column`=$new WHERE `$column`=$old";
                     if (!$this->mysqli->query($query)) {
-                        return false;
+                        return $this->remapSqlError("updating $table.$column");
                     }
                 }
             }
-            if (!$this->mysqli->query("UPDATE Records SET rec_ID=$new WHERE rec_ID=$old")) {
-                return false;
-            }
         }
         return true;
+    }
+
+    private function remapSqlError(string $operation, ?string $detail = null): bool
+    {
+        $this->system->addError(
+            HEURIST_ACTION_BLOCKED,
+            "Record-ID remapping failed while $operation and was rolled back.",
+            $detail ?? 'MySQL '.$this->mysqli->errno.': '.$this->mysqli->error
+        );
+        return false;
     }
 
     private function tableExists(string $table): bool

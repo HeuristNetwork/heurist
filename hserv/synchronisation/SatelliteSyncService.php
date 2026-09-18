@@ -33,6 +33,17 @@ final class SatelliteSyncService
         }
 
         try {
+            $initialRecordsSeeded = 0;
+            if (empty($this->config['initialInventorySeeded'])) {
+                $initialRecordsSeeded = (new SyncChangeJournal($this->system))->seedExistingRecords();
+                if ($initialRecordsSeeded === false) {
+                    return $this->system->getError();
+                }
+                if (!$this->configService->updateRuntime(['initialInventorySeeded' => true])) {
+                    return $this->system->getError();
+                }
+                $this->config['initialInventorySeeded'] = true;
+            }
             $client = new SyncHttpClient($this->system, $this->config);
             $sessionResponse = $client->startSession();
             if (($sessionResponse['status'] ?? null) !== HEURIST_OK) {
@@ -81,6 +92,10 @@ final class SatelliteSyncService
                 $allocatedCount = $completed;
             }
 
+            $uploadedCount = $this->uploadAllocatedRecords($client, $sessionID);
+            if ($uploadedCount === false) {
+                return $this->system->getError();
+            }
             if (!$this->configService->updateRuntime(['lastNewRecordScanChangeID' => $through])) {
                 return $this->system->getError();
             }
@@ -88,16 +103,48 @@ final class SatelliteSyncService
                 'status' => HEURIST_OK,
                 'data' => [
                     'sessionID' => $sessionID,
-                    'state' => $newRecords || $resumedCount ? 'IDS_ALLOCATED' : 'NO_NEW_RECORDS',
+                    'state' => $uploadedCount ? 'RECORDS_UPLOADED' : 'NO_NEW_RECORDS',
                     'resumedMappings' => (int)$resumedCount,
                     'newRecordsAllocated' => (int)$allocatedCount,
+                    'newRecordsUploaded' => (int)$uploadedCount,
                     'journalScannedThrough' => $through,
+                    'initialRecordsInventoried' => (int)$initialRecordsSeeded,
                     'masterSessionResumed' => !empty($sessionResponse['resumed'])
                 ]
             ];
         } finally {
             mysql__select_value($this->mysqli, 'SELECT RELEASE_LOCK(?)', ['s', $lockName]);
         }
+    }
+
+    private function uploadAllocatedRecords(SyncHttpClient $client, string $sessionID)
+    {
+        $recordIDs = mysql__select_list2($this->mysqli,
+            "SELECT sor_CurrentRecID FROM sysSyncOutboundRecords WHERE sor_SessionID='".
+            $this->mysqli->real_escape_string($sessionID)."' AND sor_Status='ALLOCATED' ORDER BY sor_CurrentRecID");
+        if (!$recordIDs) return 0;
+        $uploaded = 0;
+        foreach (array_chunk($recordIDs, 500) as $batchIDs) {
+            try {
+                $payload = SyncRecordPayload::export($this->system, $batchIDs);
+            } catch (\RuntimeException $e) {
+                $this->system->addError(HEURIST_ACTION_BLOCKED, $e->getMessage());
+                return false;
+            }
+            $response = $client->uploadRecords($sessionID, $payload);
+            if (($response['status'] ?? null) !== HEURIST_OK) {
+                if (!isset($response['message']) && isset($response['msg'])) $response['message'] = $response['msg'];
+                $this->system->addErrorArr($response);
+                return false;
+            }
+            $idList = implode(',', array_map('intval', $batchIDs));
+            if (!$this->mysqli->query("UPDATE sysSyncOutboundRecords SET sor_Status='UPLOADED' WHERE sor_CurrentRecID IN ($idList)")) {
+                $this->system->addError(HEURIST_DB_ERROR, 'The records were uploaded but local completion state could not be saved.', $this->mysqli->error);
+                return false;
+            }
+            $uploaded += count($batchIDs);
+        }
+        return $uploaded;
     }
 
     private function completeReservedMappings()

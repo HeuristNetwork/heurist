@@ -807,7 +807,7 @@
       "text": "Configure satellites",
       "title": "Configure this database as a synchronisation master or satellite",
       "data": {
-        "user_admin_status": "1",
+        "user-admin-status": "1",
         "size": "large",
         "header": "Populate > Configure satellites",
         "icon": "ui-icon-gear",
@@ -820,7 +820,7 @@
       "text": "Synchronise with master",
       "title": "Synchronise this satellite database with its configured master",
       "data": {
-        "user_admin_status": "1",
+        "user-admin-status": "1",
         "size": "large",
         "header": "Populate > Synchronise with master",
         "icon": "ui-icon-transferthick-e-w",

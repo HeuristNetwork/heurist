@@ -53,7 +53,19 @@ final class SyncSchema
                 UNIQUE KEY sor_CurrentRecID (sor_CurrentRecID),
                 UNIQUE KEY sor_MasterRecID (sor_MasterRecID),
                 KEY sor_SessionStatus (sor_SessionID,sor_Status)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Persistent satellite-side outbound record allocation state'"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Persistent satellite-side outbound record allocation state'",
+            "CREATE TABLE IF NOT EXISTS sysSyncPayloads (
+                spl_Hash char(64) NOT NULL,
+                spl_SessionID char(36) NOT NULL,
+                spl_SatelliteDBID int unsigned NOT NULL,
+                spl_RecordCount int unsigned NOT NULL,
+                spl_State enum('RECEIVED','APPLIED','FAILED') NOT NULL default 'RECEIVED',
+                spl_Error text default NULL,
+                spl_Created timestamp NOT NULL default CURRENT_TIMESTAMP,
+                spl_Applied datetime default NULL,
+                PRIMARY KEY (spl_SessionID,spl_Hash),
+                KEY spl_Session (spl_SessionID,spl_State)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Idempotency log for inbound synchronisation payloads'"
         ];
         foreach ($queries as $query) {
             if (!$mysqli->query($query)) {
