@@ -63,7 +63,7 @@ class QuerySourcePresentationService
             'format'=>'heurist-query-source',
             'version'=>1,
             'id'=>intval($querySource['rec_ID']),
-            'title'=>(string)($querySource['rec_Title'] ?? ''),
+            'title'=>(string)($this->querySources->value($querySource, 'DT_NAME') ?? $querySource['rec_Title'] ?? ''),
             'description'=>(string)($this->querySources->value($querySource, 'DT_SHORT_SUMMARY') ?? ''),
             'source'=>array(
                 'type'=>'heurist-query',
