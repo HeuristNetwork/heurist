@@ -4074,231 +4074,230 @@ $.widget( "heurist.editing_input", {
                 __refreshFieldSetPreview();
            }
 
-        }
+           //----------------- color or symbology editor
+           else if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
 
-        //----------------- color or symbology editor
-        else if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
-
-                if(that.options.rectypeID!=window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
-                    $input.attr('readonly','readonly');
-                }
-                
-                if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){
+                    if(that.options.rectypeID!=window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
+                        $input.attr('readonly','readonly');
+                    }
                     
-                        //custom/user heurist theme
-                        let $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open color sheme editor'})
-                            .addClass('smallbutton btn_add_term')
-                            .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                            .appendTo( $inputdiv );
-
-                        let $btn_edit_clear2 = $( '<span>reset colors</span>', {title: 'Reset default color settings'})
-                            .addClass('smallbutton btn_add_term')
-                            .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                            .appendTo($inputdiv )
-                            .on( { click: function(){ $input.val('');that.onChange(); } });
-                            
-                        function __openThemeDialog(){
-                                let current_val = window.hWin.HEURIST4.util.isJSON( $input.val() );
-                                if(!current_val) current_val = {};
-                                window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
-                                    $input.val(JSON.stringify(new_value));
-                                    that.onChange();
-                                });
-                        }                
+                    if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){
                         
-                        $input.css({'max-width':'400px'}).on({ click: __openThemeDialog });
-                        $btn_edit_switcher2.on( { click: __openThemeDialog });
-                    
-                }else{
+                            //custom/user heurist theme
+                            let $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open color sheme editor'})
+                                .addClass('smallbutton btn_add_term')
+                                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                                .appendTo( $inputdiv );
 
-                    const isMapLayer =
-                        that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
+                            let $btn_edit_clear2 = $( '<span>reset colors</span>', {title: 'Reset default color settings'})
+                                .addClass('smallbutton btn_add_term')
+                                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                                .appendTo($inputdiv )
+                                .on( { click: function(){ $input.val('');that.onChange(); } });
+                                
+                            function __openThemeDialog(){
+                                    let current_val = window.hWin.HEURIST4.util.isJSON( $input.val() );
+                                    if(!current_val) current_val = {};
+                                    window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
+                                        $input.val(JSON.stringify(new_value));
+                                        that.onChange();
+                                    });
+                            }                
+                            
+                            $input.css({'max-width':'400px'}).on({ click: __openThemeDialog });
+                            $btn_edit_switcher2.on( { click: __openThemeDialog });
+                        
+                    }else{
 
-                    // For Map Layer records the raw DT_SYMBOLOGY JSON is an advanced
-                    // editing option. Hide it initially and keep all editor controls in
-                    // a separate row below the textarea so the layout remains stable
-                    // when raw JSON is shown.
-                    let $symbology_controls = $inputdiv;
-                    if(isMapLayer){
-                        $input.hide();
-                        $symbology_controls = $('<span>')
-                            .css({display:'inline-block','white-space':'nowrap','margin-left':'4px'})
-                            .insertAfter($input);
-                    }
+                        const isMapLayer =
+                            that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
 
-                    /**
-                     * Resolve the datasource currently selected in the Map Layer editor.
-                     * This must be evaluated on every action because the user may change
-                     * DT_DATA_SOURCE while the record edit form remains open.
-                     */
-                    function __getMapLayerDataSource(callback){
-                        if(!isMapLayer){
-                            callback(null);
-                            return;
+                        // For Map Layer records the raw DT_SYMBOLOGY JSON is an advanced
+                        // editing option. Hide it initially and keep all editor controls in
+                        // a separate row below the textarea so the layout remains stable
+                        // when raw JSON is shown.
+                        let $symbology_controls = $inputdiv;
+                        if(isMapLayer){
+                            $input.hide();
+                            $symbology_controls = $('<span>')
+                                .css({display:'inline-block','white-space':'nowrap','margin-left':'4px'})
+                                .insertAfter($input);
                         }
 
-                        let ele = that.options.editing.getFieldByName(
-                            window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']);
-                        if(!ele){
-                            callback(null);
-                            return;
-                        }
-
-                        let vals = ele.editing_input('getValues');
-                        let dataset_record_id = vals ? vals[0] : null;
-                        if(!(dataset_record_id>0)){
-                            callback(null);
-                            return;
-                        }
-
-                        const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
-                        let server_request = {
-                            q: 'ids:'+dataset_record_id,
-                            restapi: 1,
-                            columns: ['rec_ID', 'rec_RecTypeID', DT_QUERY_STRING],
-                            zip: 1,
-                            format:'json'
-                        };
-
-                        window.hWin.HAPI4.RecordMgr.search_new(server_request, function(response){
-                            let source = {recordId:dataset_record_id, recTypeId:null, query:null};
-
-                            if(window.hWin.HEURIST4.util.isJSON(response) &&
-                               response['records'] && response['records'].length>0){
-                                let record = response['records'][0];
-                                source.recTypeId = record['rec_RecTypeID'];
-
-                                if(source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
-                                    let details = record['details'];
-                                    if(details && details[DT_QUERY_STRING]){
-                                        source.query = details[DT_QUERY_STRING][Object.keys(details[DT_QUERY_STRING])[0]];
-                                    }
-                                }
-                            }
-
-                            callback(source);
-                        });
-                    }
-
-                    function __currentSymbology(){
-                        let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
-                        return current_val || {};
-                    }
-
-                    function __storeSymbology(new_value){
-                        $input.val(JSON.stringify(new_value));
-                        that.onChange();
-                    }
-
-                    let $btn_edit_switcher = $('<span>style editor</span>',
-                            {title:'Open symbology editor'})
-                        .addClass('smallbutton btn_add_term')
-                        .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
-                              'text-decoration':'underline'})
-                        .appendTo($symbology_controls);
-
-                    this._on($btn_edit_switcher, {click:function(){
-                        let current_val = __currentSymbology();
-
-                        if(!isMapLayer){
-                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, __storeSymbology);
-                            return;
-                        }
-
-                        __getMapLayerDataSource(function(source){
-                            if(source &&
-                               (source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE'] ||
-                                source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'])){
-                                window.hWin.HEURIST4.ui.showImgFilterDialog(current_val, __storeSymbology);
+                        /**
+                         * Resolve the datasource currently selected in the Map Layer editor.
+                         * This must be evaluated on every action because the user may change
+                         * DT_DATA_SOURCE while the record edit form remains open.
+                         */
+                        function __getMapLayerDataSource(callback){
+                            if(!isMapLayer){
+                                callback(null);
                                 return;
                             }
 
-                            let mode_edit = source ? 1 : 0;
-                            let hquery = source ? source.query : null;
-                            if(hquery) mode_edit = 3;
+                            let ele = that.options.editing.getFieldByName(
+                                window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']);
+                            if(!ele){
+                                callback(null);
+                                return;
+                            }
 
-                            current_val.maplayer_query = hquery;
-                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, __storeSymbology, null,
-                                window.hWin.HEURIST4.map.getDefaultMapSymbol());
-                        });
-                    }});
+                            let vals = ele.editing_input('getValues');
+                            let dataset_record_id = vals ? vals[0] : null;
+                            if(!(dataset_record_id>0)){
+                                callback(null);
+                                return;
+                            }
 
-                    // Direct access from a Map Layer record. Availability cannot be
-                    // determined when the form is created because DT_DATA_SOURCE may be
-                    // changed by the user, so validate it on click.
-                    if(isMapLayer){
-                        let $btn_thematic = $('<span>thematic maps</span>',
-                                {title:'Open thematic maps editor'})
+                            const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+                            let server_request = {
+                                q: 'ids:'+dataset_record_id,
+                                restapi: 1,
+                                columns: ['rec_ID', 'rec_RecTypeID', DT_QUERY_STRING],
+                                zip: 1,
+                                format:'json'
+                            };
+
+                            window.hWin.HAPI4.RecordMgr.search_new(server_request, function(response){
+                                let source = {recordId:dataset_record_id, recTypeId:null, query:null};
+
+                                if(window.hWin.HEURIST4.util.isJSON(response) &&
+                                   response['records'] && response['records'].length>0){
+                                    let record = response['records'][0];
+                                    source.recTypeId = record['rec_RecTypeID'];
+
+                                    if(source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
+                                        let details = record['details'];
+                                        if(details && details[DT_QUERY_STRING]){
+                                            source.query = details[DT_QUERY_STRING][Object.keys(details[DT_QUERY_STRING])[0]];
+                                        }
+                                    }
+                                }
+
+                                callback(source);
+                            });
+                        }
+
+                        function __currentSymbology(){
+                            let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                            return current_val || {};
+                        }
+
+                        function __storeSymbology(new_value){
+                            $input.val(JSON.stringify(new_value));
+                            that.onChange();
+                        }
+
+                        let $btn_edit_switcher = $('<span>style editor</span>',
+                                {title:'Open symbology editor'})
                             .addClass('smallbutton btn_add_term')
                             .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
-                                  'text-decoration':'underline','margin-left':'10px'})
+                                  'text-decoration':'underline'})
                             .appendTo($symbology_controls);
 
-                        this._on($btn_thematic, {click:function(){
+                        this._on($btn_edit_switcher, {click:function(){
+                            let current_val = __currentSymbology();
+
+                            if(!isMapLayer){
+                                window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, __storeSymbology);
+                                return;
+                            }
+
                             __getMapLayerDataSource(function(source){
-                                if(!source ||
-                                   source.recTypeId!=window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] ||
-                                   !source.query){
-                                    window.hWin.HEURIST4.msg.showMsgFlash(
-                                        'Not supported for current data source', 2000);
+                                if(source &&
+                                   (source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE'] ||
+                                    source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'])){
+                                    window.hWin.HEURIST4.ui.showImgFilterDialog(current_val, __storeSymbology);
                                     return;
                                 }
 
-                                let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
-                                if(!current_val) current_val = [];
+                                let mode_edit = source ? 1 : 0;
+                                let hquery = source ? source.query : null;
+                                if(hquery) mode_edit = 3;
 
-                                window.hWin.HEURIST4.ui.showThematicMappingDialog(
-                                    {
-                                        maplayer_query: source.query,
-                                        symbology: current_val,
-                                        parentSymbol: window.hWin.HEURIST4.map.getDefaultMapSymbol(),
-                                        onClose: function(context){
-                                            if(context!==null && context!==undefined){
-                                                let newval = window.hWin.HEURIST4.util.isJSON(context);
-                                                newval = (!newval)?'':JSON.stringify(newval);
-                                                $input.val(newval);
-                                                that.onChange();
-                                            }
-                                        }
-                                    }
-                                );
+                                current_val.maplayer_query = hquery;
+                                window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, __storeSymbology, null,
+                                    window.hWin.HEURIST4.map.getDefaultMapSymbol());
                             });
                         }});
 
-                        let $btn_raw_symbology = $('<span>show raw</span>',
-                                {title:'Show/hide raw symbology JSON'})
-                            .addClass('smallbutton btn_add_term')
-                            .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
-                                  'text-decoration':'underline','margin-left':'10px'})
-                            .appendTo($symbology_controls);
+                        // Direct access from a Map Layer record. Availability cannot be
+                        // determined when the form is created because DT_DATA_SOURCE may be
+                        // changed by the user, so validate it on click.
+                        if(isMapLayer){
+                            let $btn_thematic = $('<span>thematic maps</span>',
+                                    {title:'Open thematic maps editor'})
+                                .addClass('smallbutton btn_add_term')
+                                .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                                      'text-decoration':'underline','margin-left':'10px'})
+                                .appendTo($symbology_controls);
 
-                        this._on($btn_raw_symbology, {click:function(){
-                            if($input.is(':visible')){
-                                $input.hide();
-                                $btn_raw_symbology.text('show raw');
-                            }else{
-                                $input.show();
-                                $btn_raw_symbology.text('hide raw');
-                                __adjustTextareaHeight();
-                            }
-                        }});
-                    }
-                }             
-        }//end color/symbol editor
-        
-        else if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
+                            this._on($btn_thematic, {click:function(){
+                                __getMapLayerDataSource(function(source){
+                                    if(!source ||
+                                       source.recTypeId!=window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] ||
+                                       !source.query){
+                                        window.hWin.HEURIST4.msg.showMsgFlash(
+                                            'Not supported for current data source', 2000);
+                                        return;
+                                    }
 
-            let $btn_edit_switcher = $( '<span>calculate extent</span>', 
-                {title: 'Get image extent based on worldfile parameters and image width and height'})
-                    .addClass('smallbutton btn_add_term')
-                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                    .appendTo( $inputdiv );
+                                    let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                                    if(!current_val) current_val = [];
 
-            this._on( $btn_edit_switcher, { click: function(){
-                calculateImageExtentFromWorldFile( that.options.editing );
-            }});
+                                    window.hWin.HEURIST4.ui.showThematicMappingDialog(
+                                        {
+                                            maplayer_query: source.query,
+                                            symbology: current_val,
+                                            parentSymbol: window.hWin.HEURIST4.map.getDefaultMapSymbol(),
+                                            onClose: function(context){
+                                                if(context!==null && context!==undefined){
+                                                    let newval = window.hWin.HEURIST4.util.isJSON(context);
+                                                    newval = (!newval)?'':JSON.stringify(newval);
+                                                    $input.val(newval);
+                                                    that.onChange();
+                                                }
+                                            }
+                                        }
+                                    );
+                                });
+                            }});
+
+                            let $btn_raw_symbology = $('<span>show raw</span>',
+                                    {title:'Show/hide raw symbology JSON'})
+                                .addClass('smallbutton btn_add_term')
+                                .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                                      'text-decoration':'underline','margin-left':'10px'})
+                                .appendTo($symbology_controls);
+
+                            this._on($btn_raw_symbology, {click:function(){
+                                if($input.is(':visible')){
+                                    $input.hide();
+                                    $btn_raw_symbology.text('show raw');
+                                }else{
+                                    $input.show();
+                                    $btn_raw_symbology.text('hide raw');
+                                    __adjustTextareaHeight();
+                                }
+                            }});
+                        }
+                    }             
+           }//end color/symbol editor
+           else if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
+
+                let $btn_edit_switcher = $( '<span>calculate extent</span>', 
+                    {title: 'Get image extent based on worldfile parameters and image width and height'})
+                        .addClass('smallbutton btn_add_term')
+                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                        .appendTo( $inputdiv );
+
+                this._on( $btn_edit_switcher, { click: function(){
+                    calculateImageExtentFromWorldFile( that.options.editing );
+                }});
+            }
+
         }
-
+        
         // Freetext value that is a url
         let freetext_url = this.detailType=="freetext" && $input.val().match(/^https?:\/\//) !== null;
         // Semantic url links, separated by semi-colons, for RecTypes, Vocab+Terms, DetailTypes
