@@ -1,0 +1,940 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map>
+<zoteroVersion value="3.0.11.SOURCE"/>
+<date value="Mon, 14 Jan 2013 01:27:38 GMT"/>
+<zTypes>
+<typeMap zType="webpage" cslType="webpage" h-id="2-2">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="2-3"/>
+<field label="Website Title" value="websiteTitle" baseField="publicationTitle"/>
+<field label="Website Type" value="websiteType" baseField="type"/>
+<field label="Date" value="date"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah -->
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field label="Version" value="version" h-id="2-49"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Date Added" value="dateAdded" h-id="2-10"/>
+<!--  line added by Jarrah  -->
+<field label="Date Modified" value="dateModified" h-id="2-11"/>
+<!--  line added by Jarrah  -->
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
+</field>
+</typeMap>
+<typeMap zType="book" cslType="book" h-id="3-102">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
+<field label="Series" value="series" h-id="3-1018.3-104.2-1"/>
+<!--  pub series  -->
+<field label="Series Number" value="seriesNumber" h-id="3-1018.3-104.3-1003"/>
+<!--  pub series  -->
+<field label="Volume" value="volume"/>
+<field label="# of Volumes" value="numberOfVolumes" h-id="3-1002"/>
+<field label="Edition" value="edition" h-id="2-49"/>
+<field label="Place" value="place" h-id="3-1018.3-104.2-27"/>
+<field label="Publisher" value="publisher" h-id="3-1018.3-104.2-21.2-4.2-1"/><!-- h-id corrected by Jarrah 18.01.2022 -->
+<!-- pubref.pubseries.organization.title  -->
+<field label="Date" value="date" h-id="2-9"/>
+<field label="# of Pages" value="numPages" h-id="3-1001"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
+<!--  h-id added by Jarrah  -->
+<field label="ISBN" value="ISBN" h-id="3-1011"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog" h-id="1135-485"/>
+<!--  h-id added by Jarrah  -->
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Version" value="version" h-id="2-49"/>
+<!--
+ line added by Jarrah, NB: this field is called Edition in the Book record, base field name Version Number
+-->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Date Added" value="dateAdded" h-id="2-10"/>
+<!--  line added by Jarrah  -->
+<field label="Date Modified" value="dateModified" h-id="2-11"/>
+<!--
+ line added by Jarrah, NB: this Heurist field was co-opted from the previous 'End date - for date ranges' field (2-11) 
+-->
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Editor" value="editor" h-id="3-1013"/>
+<creatorType label="Series Editor" value="seriesEditor" h-id="3-1018.3-104.3-1013.2-10.2-1"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
+</field>
+</typeMap>
+<typeMap zType="bookSection" cslType="chapter" h-id="3-108">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
+<field label="Book Title" value="bookTitle" baseField="publicationTitle" h-id="3-1028.3-102.2-1"/>
+<field label="Series" value="series" h-id="3-1028.3-102.3-1018.3-104.2-1"/>
+<field label="Series Number" value="seriesNumber" h-id="3-1028.3-102.3-1018.3-104.3-1003"/>
+<field label="Volume" value="volume"/>
+<field label="# of Volumes" value="numberOfVolumes" h-id="3-1028.3-102.3-1002"/>
+<field label="Edition" value="edition" h-id="3-1028.3-102.2-49"/>
+<field label="Place" value="place" h-id="3-1028.3-102.3-1018.3-104.2-27"/>
+<field label="Publisher" value="publisher" h-id="3-1028.3-102.3-1018.3-104.2-21.2-4.2-1"/>
+<field label="Date" value="date" h-id="3-1028.3-102.2-9"/>
+<field label="Pages" value="pages" h-id="3-1026"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
+<!--  h-id added by Jarrah  -->
+<field label="ISBN" value="ISBN" h-id="3-1028.3-102.3-1011"/>
+<field label="DOI" value="DOI" h-id="3-1003"/>
+<!--  line added by Jarrah  -->
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog" h-id="1135-485"/>
+<!--  h-id added by Jarrah  -->
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Version" value="version" h-id="2-49"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Date Added" value="dateAdded" h-id="2-10"/>
+<!--  line added by Jarrah  -->
+<field label="Date Modified" value="dateModified" h-id="2-11"/>
+<!--  line added by Jarrah  -->
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Book Author" value="bookAuthor" h-id="3-1028.3-102.2-15.2-10.2-1"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Editor" value="editor" h-id="3-1028.3-102.2-15.2-10.2-1"/>
+<creatorType label="Series Editor" value="seriesEditor" h-id="3-1028.3-102.3-1018.3-104.3-1013.2-10.2-1"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
+<!--  h-id changed by Jarrah  -->
+</field>
+</typeMap>
+<typeMap zType="conferencePaper" cslType="book_chapter" h-id="3-108">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<!--  line added by Jarrah  -->
+<field label="Abstract" value="abstract" h-id="3-1010"/>
+<field label="Date" value="date" h-id="3-1028.3-102.2-9"/>
+<!--  h-id added by Jarrah  -->
+<field label="Proceedings Title" value="proceedingsTitle" h-id="3-1028.3-102.2-1"/>
+<!--  h-id added by Jarrah  -->
+<field label="Conference name" value="conferenceName" h-id="3-1028.3-102.3-1018.3-104.3-1003"/>
+<!--  h-id added by Jarrah  -->
+<field label="Place" value="place" h-id="3-1028.3-102.3-1018.3-104.2-27"/>
+<!--  h-id changed by Jarrah  -->
+<field label="Volume" value="volume" h-id="3-1002"/>
+<!--  h-id added by Jarrah  -->
+<field label="Pages" value="pages" h-id="3-1001"/>
+<field label="Series" value="titleSeries"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
+<!--  h-id added by Jarrah  -->
+<field label="DOI" value="DOI" h-id="3-1003"/>
+<!--  h-id added by Jarrah  -->
+<field label="ISBN" value="ISBN" h-id="3-1028.3-102.3-1011"/>
+<!--  line added by Jarrah  -->
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog" h-id="1135-485"/>
+<!--  h-id added by Jarrah  -->
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Rights" value="url"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Version" value="version" h-id="2-49"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Date Added" value="dateAdded" h-id="2-10"/>
+<!--  line added by Jarrah  -->
+<field label="Date Modified" value="dateModified" h-id="2-11"/>
+<!--  line added by Jarrah  -->
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Publisher" value="publisher" h-id="2-15"/>
+</field>
+</typeMap>
+<!--
+
+        The Mapping works likes this: for example, the H3id for Volume in JournalArticle is
+        "3-1035.3-113.3-1002". This means volume in journal Article(3-1035) points to
+        Journal Volume(3-113), and Journal voulme points to the actual volume(3-1002)
+        
+-->
+<typeMap zType="journalArticle" cslType="article-journal" h-id="3-112">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
+<field label="Publication" value="publicationTitle" h-id="3-1035.3-113.3-1034.3-111.2-1"/>
+<field label="Volume" value="volume" h-id="3-1035.3-113.3-1002"/>
+<field label="Issue" value="issue" h-id="3-1035.3-113.3-1033"/>
+<field label="Pages" value="pages" h-id="3-1026"/>
+<field label="Date" value="date" h-id="3-1035.3-113.2-9"/>
+<field label="Series" value="series" h-id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-1"/>
+<field label="Series Title" value="seriesTitle" h-id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-2"/>
+<field label="Series Text" value="seriesText" h-id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-3"/>
+<field label="Journal Abbr" value="journalAbbreviation" h-id="3-1035.3-113.3-1034.3-111.2-2"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
+<!--  h-id added by Jarrah  -->
+<field label="DOI" value="DOI" h-id="3-1003"/>
+<field label="ISSN" value="ISSN" h-id="3-1035.3-113.3-1034.3-111.3-1032"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog" h-id="1135-485"/>
+<!--  h-id added by Jarrah  -->
+<field label="Call Number" value="callNumber" h-id="3-1035.3-113.3-1034.3-111.3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Version" value="version" h-id="2-49"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Date Added" value="dateAdded" h-id="2-10"/>
+<!--  line added by Jarrah  -->
+<field label="Date Modified" value="dateModified" h-id="2-11"/>
+<!--  line added by Jarrah  -->
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Editor" value="editor" h-id="3-1035.3-113.3-1013.2-10.2-1"/>
+<creatorType label="Reviewed Author" value="reviewedAuthor" h-id="2-15"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
+<!--  h-id changed by Jarrah  -->
+</field>
+</typeMap>
+<typeMap zType="magazineArticle" cslType="article-magazine" h-id="3-123">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
+<field label="Publication" value="publicationTitle" h-id="3-1064.3-125.3-1066.3-124.2-1"/>
+<field label="Volume" value="volume" h-id="3-1064.3-125.3-1002"/>
+<field label="Issue" value="issue" h-id="3-1064.3-125.3-1033"/>
+<field label="Date" value="date" h-id="3-1064.3-125.2-9"/>
+<field label="Pages" value="pages" h-id="3-1026"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
+<field label="ISSN" value="ISSN" h-id="3-1064.3-125.3-1066.3-124.3-1032"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1064.3-125.3-1066.3-124.3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Version" value="version" h-id="2-49"/>
+<!--  line added by Jarrah  -->
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Date Added" value="dateAdded" h-id="2-10"/>
+<!--  line added by Jarrah  -->
+<field label="Date Modified" value="dateModified" h-id="2-11"/>
+<!--
+ line added by Jarrah, NB: this Heurist field was co-opted from the previous 'End date - for date ranges' field (2-11) 
+-->
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Reviewed Author" value="reviewedAuthor" h-id="2-15"/>
+<creatorType label="Translator" value="translator" h-id="2-15"/>
+</field>
+</typeMap>
+<typeMap zType="newspaperArticle" cslType="article-newspaper" h-id="3-128">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
+<field label="Publication" value="publicationTitle" h-id="3-1065.3-127.3-1067.3-126.2-1"/>
+<field label="Place" value="place" h-id="3-1065.3-127.3-1067.3-126.2-27"/>
+<field label="Edition" value="edition"/>
+<field label="Date" value="date" h-id="3-1065.3-127.2-9"/>
+<field label="Section" value="section" h-id="3-1065.3-127.3-1033"/>
+<field label="Pages" value="pages" h-id="3-1026"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
+<!--  h-id added by Jarrah  -->
+<field label="ISSN" value="ISSN" h-id="3-1065.3-127.3-1067.3-126.3-1032"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1065.3-127.3-1067.3-126.3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Reviewed Author" value="reviewedAuthor" h-id="2-15"/>
+<creatorType label="Translator" value="translator" h-id="2-15"/>
+</field>
+</typeMap>
+<typeMap zType="thesis" cslType="thesis" h-id="3-120">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
+<field label="Type" value="thesisType" baseField="type" h-id="3-1048"/>
+<field label="University" value="university" baseField="publisher" h-id="2-21.2-4.2-1"/>
+<field label="Place" value="place" h-id="2-21.2-4.2-27"/>
+<field label="Date" value="date" h-id="2-9"/>
+<field label="# of Pages" value="numPages" h-id="3-1001"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field label="Version" value="version" h-id="2-49"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Date Added" value="dateAdded" h-id="2-10"/>
+<!--  line added by Jarrah  -->
+<field label="Date Modified" value="dateModified" h-id="2-11"/>
+<!--
+ line added by Jarrah, NB: this Heurist field was co-opted from the previous 'End date - for date ranges' field (2-11) 
+-->
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+</field>
+</typeMap>
+<typeMap zType="report" cslType="report" h-id="3-119">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
+<field label="Report Number" value="reportNumber" baseField="number"/>
+<field label="Report Type" value="reportType" baseField="type"/>
+<field label="Series Title" value="seriesTitle" h-id="3-1018.3-104.2-1"/>
+<field label="Place" value="place" h-id="3-1018.3-104.2-27"/>
+<field label="Institution" value="institution" baseField="publisher" h-id="3-1018.3-104.2-21.2-4.2-1"/>
+<field label="Date" value="date" h-id="2-9"/>
+<field label="Pages" value="pages" h-id="3-1001"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Version" value="version" h-id="2-49"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Date Added" value="dateAdded" h-id="2-10"/>
+<!--  line added by Jarrah  -->
+<field label="Date Modified" value="dateModified" h-id="2-11"/>
+<!--
+ line added by Jarrah, NB: this Heurist field was co-opted from the previous 'End date - for date ranges' field (2-11) 
+-->
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Series Editor" value="seriesEditor" h-id="3-1018.3-104.3-1013.2-10.2-1"/>
+<creatorType label="Translator" value="translator" h-id="2-15"/>
+</field>
+</typeMap>
+<typeMap zType="artwork" cslType="artwork" h-id="3-122">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="Abstract"/>
+<field label="Medium" value="medium"/>
+<field label="Artwork Size" value="artworkSize"/>
+<field label="Date" value="date" h-id="2-9"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="library Catalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Rights" value="url" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Artist" value="artist" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Organisation" value="organisation" h-id="2-15"/>
+</field>
+</typeMap>
+<typeMap zType="document" cslType="document" h-id="3-117">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="2-3"/>
+<field label="Date" value="date" h-id="2-9"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Rights" value="rights" h-id="2-35"/> <!-- Jarrah corrected value to "rights" 04.02.2022 -->
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Publisher" value="publisher" h-id="2-15"/>
+</field>
+</typeMap>
+<typeMap zType="email" cslType="personal_communication" h-id="3-121">
+<field label="Subject" value="subject"/>
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstract"/>
+<field label="Date" value="date" h-id="2-9"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Accesssed" value="accessDate"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field label="Version" value="version" h-id="2-49"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Tags" value="tags" h-id="2-1084"/>
+<!--  line added by Jarrah  -->
+<field label="Item Type" value="itemType" h-id="3-1000"/>
+<!--  line added by Jarrah  -->
+<field label="Date Added" value="dateAdded" h-id="2-10"/>
+<!--  line added by Jarrah  -->
+<field label="Date Modified" value="dateModified" h-id="2-11"/>
+<!--
+ line added by Jarrah, NB: this Heurist field was co-opted from the previous 'End date - for date ranges' field (2-11) 
+-->
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Recipient" value="recipient" h-id="3-1047"/>
+</field>
+</typeMap>
+<typeMap zType="letter" cslType="personal_communication" h-id="3-121">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote"/>
+<field label="Type" value="letterType" baseField="type"/>
+<field label="Date" value="date" h-id="2-9"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
+<creatorType label="Editor" value="editor" h-id="3-1013"/>
+</field>
+</typeMap>
+<typeMap zType="manuscript" cslType="manuscript" h-id="1254-60">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
+<field label="Type" value="manuscriptType" baseField="type"/>
+<field label="Place" value="place" h-id="3-1018.3-104.2-27"/>
+<field label="Date" value="date" h-id="2-9"/>
+<field label="# of Pages" value="numPages" h-id="3-1001"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
+<creatorType label="Editor" value="editor" h-id="3-1013"/>
+</field>
+</typeMap>
+<typeMap zType="encyclopediaArticle" cslType="entry-encyclopedia" h-id="xxx-xxxx">
+<field label="Title" value="title" h-id="xxx-xxxx"/>
+<field label="Abstract" value="abstractNote" h-id="xxx-xxxx"/>
+<field label="Encyclopaedia Title" value="encyclopediaTitle" h-id="xxx-xxxx"/>
+<field label="Series" value="series" h-id="xxx-xxxx"/>
+<field label="Series Number" value="seriesNumber" h-id="xxx-xxxx"/>
+<field label="Volume" value="volume" h-id="xxx-xxxx"/>
+<field label="# of Volumes" value="numberOfVolumes" h-id="xxx-xxxx"/>
+<field label="Edition" value="edition" h-id="xxx-xxxx"/>
+<field label="Date" value="date" h-id="xxx-xxxx"/>
+<field label="Publisher" value="publisher" h-id="xxx-xxxx"/>
+<field label="Place" value="place" h-id="xxx-xxxx"/>
+<field label="Pages" value="pages" h-id="xxx-xxxx"/>
+<field label="ISBN" value="ISBN" h-id="xxx-xxxx"/>
+<field label="DOI" value="DOI" h-id="xxx-xxxx"/>
+<field label="Citation Key" value="citationKey" h-id="xxx-xxxx"/>
+<field label="URL" value="url" h-id="xxx-xxxx"/>
+<field label="Accessed" value="accessDate" h-id="xxx-xxxx"/>
+<field label="Archive" value="archive" h-id="xxx-xxxx"/>
+<field label="Loc. in Archive" value="archiveLocation" h-id="xxx-xxxx"/>
+<field label="Short Title" value="shortTitle" h-id="xxx-xxxx"/>
+<field label="Language" value="language" h-id="xxx-xxxx"/>
+<field label="Library Catalog" value="libraryCatalog" h-id="xxx-xxxx"/>
+<field label="Call Number" value="callNumber" h-id="xxx-xxxx"/>
+<field label="Rights" value="rights" h-id="xxx-xxxx"/>
+<field label="Extra" value="extra" h-id="xxx-xxxx"/>
+<field value="creator">
+<creatorType label="Author" value="author" h-id="xxx-xxxx"/>
+<creatorType label="Contributor" value="contributor" h-id="xxx-xxxx"/>
+<creatorType label="Editor" value="editor" h-id="xxx-xxxx"/>
+<creatorType label="Series Editor" value="seriesEditor" h-id="xxx-xxxx"/>
+<creatorType label="Translator" value="translator" h-id="xxx-xxxx"/>
+</field>
+</typeMap>
+</zTypes>
+</map>
+<!--
+    *OTHER ZOTERO TYPES THAT ARE NOT IN HEURIST
+
+<typeMap zType="note" cslType="">
+</typeMap>
+<typeMap zType="letter" cslType="personal_communication">
+<field label="Title" value="title" />
+<field label="Abstract" value="abstractNote" />
+<field label="Type" value="letterType" baseField="type" />
+<field label="Date" value="date" />
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+
+<field label="Accessed" value="accessDate" h-id="2-9"/> 
+<field label="Archive" value="archive" />
+<field label="Loc. in Archive" value="archiveLocation" />
+<field label="Library Catalog" value="libraryCatalog" />
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator">
+<creatorType label="Author" value="author" />
+<creatorType label="Contributor" value="contributor" />
+<creatorType label="Recipient" value="recipient" />
+</field>
+</typeMap>
+
+
+<typeMap zType="computerProgram" cslType="computerProgram">
+<field label="Title" value="title"/>
+<field label="Programmer" value="programmer"/>
+<field label="Abstract" value="abstract"/>
+<field label="Series Title" value="seriesTitle"/>
+<field label="Version" value="version"/>
+<field label="Date" value="date"/>
+<field label="System" value="system"/>
+<field label="Place" value="place"/>
+<field label="Company" value="company"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="ISBN" value="isbn"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Rights" value="rights">
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+</typeMap>
+
+
+<typeMap zType="dictionaryEntry" cslType="dictionaryEntry">
+<field label="Title" value="title"/>
+<field label="Abstract" value="abstract"/>
+<field label="Dictionary Title" value="dictionaryTitle"/>
+<field label="Series" value="series" />
+<field label="Series Number" value="seriesNmber"/>
+<field label="Volume" value="volume"/>
+<field label="<# of Volumes" value="#of volumes"/>
+<field label="Edition" value="edition"/>
+<field label="Place" value="place"/>
+<field label="Publisher" value="publisher"/>
+<field label="Date" value="date"/>
+<field label="Pages" value="pages"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="ISBN" value="isbn"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Rights" value="url"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Author" value="author"/>
+<creatorType label="Contributor" value="contributor"/>
+</field>
+
+</typeMap>
+
+
+
+
+
+
+
+
+
+<typeMap zType="film" cslType="film">
+<field label="Title" value="title"/>
+<field label="Abstract" value="abstract"/>
+<field label="Distributor" value="distributor" />
+<field label="Date" value="date"/>
+<field label="Genre" value="genre"/>
+<field label="Format" value="format"/>
+<field label="Running Time" value="runningTime"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="urls"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Director" value="director"/>
+<creatorType label="Contributor" value="contributor"/>
+</field>
+</typeMap>
+
+<typeMap zType="forum Post" cslType="forumPost" h-id ="3-121">
+<field label="Title" value="title" h-id = "2-1"/>
+<field label="Abstract" value="abstract"/>
+<field label="Forum/Listserv Title" value="forum/listservTitle" />
+<field label="Post Type" value="postType"/>
+<field label="Date" value="date" h-id = "2-9"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Pages" value="pages"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="urls" h-id ="3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Author" value="author" h-id= "2-15"/>
+<creatorType label="Recipient" value="recipient" h-id ="3-1047"/>
+</field>
+</typeMap>
+
+
+<typeMap zType="Hearing" cslType="hearing">
+<field label="Title" value="title"/>
+<field label="Abstract" value="abstract"/>
+<field label="Committee" value="committee" />
+<field label="Place" value="place"/>
+<field label="Publisher" value="publisher"/>
+<field label="# of Volumes" value="# no of volumes"/>
+<field label="Document Number" value="documentNumber"/>
+<field label="Pages" value="pages"/>
+<field label="Legislative Body" value="legislativeBody"/>
+<field label="Session" value="session"/>
+<field label="History" value="history"/>
+<field label="Date" value="date"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="urls"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Contributor" value="contributor"/>
+</field>
+</typeMap>
+
+
+<typeMap zType="Instant Message" cslType="instantMessage" h-id = "3-121" >
+<field label="Title" value="title" h-id ="2-1"/>
+<field label="Abstract" value="abstract"/>
+<field label="Date" value="date" h-id = "2-9"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id = "3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Author" value="author" h-id ="2-15" />
+<creatorType label="Contributor" value="contributor"/>
+<creatorType label="Recipient" value="recipient" h-id = "3-1047"/>
+</field>
+</typeMap>
+
+
+<typeMap zType="patent" cslType="patent">
+<field label="Title" value="title"/>
+<field label="Abstract" value="abstract"/>
+<field label="Place" value="place"/>
+<field label="Country" value="country"/>
+<field label="Assignee" value="assignee"/>
+<field label="Issuing Authority" value="issuingAuthority"/>
+<field label="Patent Number" value="patentNumber"/>
+<field label="Filling Date" value="fillingDate"/>
+<field label="Pages" value="pages"/>
+<field label="Application Number" value="applicationNumber"/>
+<field label="Priority Numbers" value="priorityNumbers"/>
+<field label="Issue Date" value="Issue date"/>
+<field label="References" value="references"/>
+<field label="Legal Status" value="legalStatus"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+        <field label="Accessed" value="accessDate" h-id="2-9"/> 
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Inventor" value="inventor"/>
+<creatorType label="Contributor" value="contributor"/>
+</field>
+</typeMap>
+
+
+
+<typeMap zType="podcast" cslType="podcast">
+<field label="Title" value="title"/>
+<field label="Abstract" value="abstract"/>
+<field label="Series Title" value="seriesTitle" />
+<field label="Episode Number" value="episodeNumber" />
+<field label="File Type" value="fileType" />
+<field label="Running Time" value="runningTime" />
+<field label="URL" value="urls"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Podcaster" value="podcaster"/>
+</field>
+</typeMap>
+
+
+<typeMap zType="presentation" cslType="presentation">
+<field label="Title" value="title"/>
+<field label="Abstract" value="abstract"/>
+<field label="Type" value="type" />
+<field label="Date" value="date"/>
+<field label="Place" value="place"/>
+<field label="Meeting Name" value="meetingName"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Presenter" value="presenter"/>
+</field>
+</typeMap>
+
+
+<typeMap zType="radio broadcast" cslType="radioBroadcast">
+<field label="Title" value="title"/>
+<field label="Abstract" value="abstract"/>
+<field label="Program Title" value="programTitle" />
+<field label="Episode Number" value="episodeNumber" />
+<field label="Format" value="format" />
+<field label="Place" value="place"/>
+<field label="Network" value="network"/>
+<field label="Date" value="date"/>
+<field label="Running Time" value="runningTime"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Director" value="director"/>
+</field>
+</typeMap>
+
+<typeMap zType="statute" cslType="statute">
+<field label="Name of Act" value="nameOfAct"/>
+<field label="Abstract" value="abstract"/>
+<field label="Code" value="code"/>
+<field label="Code Number" value="codeNumber"/>
+<field label="Public Law Number" value="publicLawNumber"/>
+<field label="Date Enacted" value="dateEnacted"/>
+<field label="Pages" value="pages"/>
+<field label="Section" value="section"/>
+<field label="Session" value="session"/>
+<field label="History" value="history"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+      <field label="Accessed" value="accessDate" h-id="2-9"/> 
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Author" value="author"/>
+<creatorType label="Contributor" value="contributor"/>
+</field>
+</typeMap>
+
+
+<typeMap zType="tv broadcast" cslType="tvBroadcast">
+<field label="Title" value="title"/>
+<field label="Abstract" value="abstract"/>
+<field label="Program Title" value="programTitle" />
+<field label="Episode Number" value="episodeNumber"/>
+<field label="Format" value="format"/>
+<field label="Place" value="place"/>
+<field label="Network" value="network"/>
+<field label="Date" value="date"/>]
+<field label="Running Time" value="runningTime"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Director" value="director"/>
+</field>
+</typeMap>
+
+
+
+
+
+<typeMap zType="generic" cslType="generic" h-id="2-48">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
+<field label="Report Number" value="reportNumber" baseField="number"/>
+<field label="Report Type" value="reportType" baseField="type"/>
+<field label="Series Title" value="seriesTitle" h-id="3-1018.3-104.2-1"/>
+<field label="Place" value="place" h-id="3-1018.3-104.2-27"/>
+<field label="Institution" value="institution" baseField="publisher" h-id="3-1018.3-104.2-21.2-4.2-1"/>
+<field label="Date" value="date" h-id="2-9"/>
+<field label="Cast Member" value="castMember"/>
+<field label="DOI" value="doi"/>
+<field label="Edition" value="edition" />
+<field label="Episode Number" value="episodeNumber"/>
+<field label="Format" value="format"/>
+<field label="History" value="history"/>
+<field label="ISBN" value="isbn"/>
+<field label="ISSN" value="issn"/>
+<field label="Issue" value="issue"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Legislative Body" value="legislativeBody"/>
+<field label="Network" value="network"/>
+<field label="Place" value="place"/>
+<field label="Program Title" value="programTitle"/>
+<field label="Publication" value="publisher"/>
+<field label="Running TIme" value="runningTime"/>
+<field label="Section" value="section"/>
+<field label="Series Number" value="seriesNumber"/>
+<field label="Series" value="series"/>
+<field label="Session" value="session"/>
+<field label="Type" value="type"/>
+<field label="Volume" value="volume"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="Pages" value="pages" h-id="3-1001"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+     <field label="Accessed" value="accessDate" h-id="2-9"/>
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Series Editor" value="seriesEditor" h-id="3-1018.3-104.3-1013.2-10.2-1"/>
+<creatorType label="Translator" value="translator" h-id="2-15"/>
+</field>
+</typeMap>
+
+
+
+<typeMap zType="video recording" cslType="videorecording">
+<field label="Title" value="title"/>
+<field label="Abstract" value="abstract"/>
+<field label="Format" value="format" />
+<field label="Series Title" value="seriesTitle"/>
+<field label="Volume" value="volume"/>
+<field label="# of Volumes" value="# no of volumes"/>
+<field label="Place" value="place"/>
+<field label="Studio" value="studio"/>
+<field label="Date" value="date"/>
+<field label="Running Time" value="runningTIme"/>
+<field label="Language" value="language" h-id="2-965"/>
+<field label="ISBN" value="isbn"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
+<field label="Accesssed" value="accessed"/>
+<field label="Archive" value="archive"/>
+<field label="Loc. in Archive" value="archiveLocation"/>
+<field label="Library Catalog" value="libraryCatalog"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
+<field value="creator" >
+<creatorType label="Director" value="director"/>
+</field>
+</typeMap>
+-->
