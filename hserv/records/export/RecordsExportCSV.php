@@ -1461,11 +1461,15 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
 
             if(!$save_to_file || empty($temp_name)){
 
-                $csv_filename = basename($temp_name);
+                $database_name = mb_substr(self::$system->dbname(), 0, 20);
+                $database_name = str_replace('_', '-', $database_name);
+                $csv_filename = USanitize::sanitizeFileName($database_name);
                 if($rty_ID>0){
-                    $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
-                    $csv_filename = basename(USanitize::sanitizeFileName($csv_filename.'_t'.$rty_ID.'_'.$rty_Name));
+                    $rty_Name = mb_substr(self::$defRecTypes['names'][$rty_ID], 0, 20);
+                    $rty_Name = mb_ereg_replace('\s+', '-', trim($rty_Name));
+                    $csv_filename .= '-t'.$rty_ID.'-'.USanitize::sanitizeFileName($rty_Name);
                 }
+                $csv_filename .= '-'.date('Y-m-d_H-i');
             }
             
             $ext = pathinfo($csv_filename, PATHINFO_EXTENSION);
