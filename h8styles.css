@@ -1,0 +1,230 @@
+/**
+ * H8 visual refresh for the main Heurist application.
+ *
+ * This layer intentionally follows h4styles.css and h6styles.css.  All rules
+ * are scoped to body.heurist-modern so that record-edit popups, utilities and
+ * published websites retain their established appearance.
+ */
+
+body.heurist-modern {
+    --h8-navy: #17375f;
+    --h8-blue: #1769c2;
+    --h8-blue-soft: #edf5ff;
+    --h8-filter-bg: #f1f6fc;
+    --h8-filter-head: #e4eef9;
+    --h8-green: #2ca447;
+    --h8-text: #18324f;
+    --h8-muted: #68778a;
+    --h8-line: #d8e0e9;
+    --h8-line-strong: #b7c9dc;
+    --h8-surface: #ffffff;
+    color: var(--h8-text);
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 14px;
+}
+
+/* The H8 selector remains visible in the legacy interface, but only activates
+   this stylesheet after it is clicked. */
+.h8-interface-link {
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: .04em;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.h8-interface-link:hover,
+.h8-interface-link:focus-visible {
+    color: #17375f;
+    background: #edf5ff;
+}
+
+.h8-interface-link.active {
+    color: #ffffff;
+    background: #1769c2;
+}
+
+/* Flatter application surfaces and restrained separators. */
+.heurist-modern .ui-menu6 .ui-menu6-section,
+.heurist-modern .ui-menu6 .ui-menu6-container {
+    background: var(--h8-surface);
+    border: 1px solid var(--h8-line);
+    border-radius: 4px;
+    box-shadow: none;
+}
+
+.heurist-modern .ui-layout-resizer {
+    background: #eef2f6 !important;
+    border-color: var(--h8-line) !important;
+}
+
+/* Explore navigation: retain its structure while improving scanability. */
+.heurist-modern .ui-menu6-section > div > ul {
+    margin: 0 12px !important;
+    padding: 12px 0 !important;
+}
+
+.heurist-modern .ui-menu6-section .ui-heurist-title {
+    color: var(--h8-blue) !important;
+    font-size: 14px !important;
+    font-weight: 600;
+    line-height: 20px;
+    padding-left: 8px !important;
+}
+
+.heurist-modern .ui-menu6-section li.fancytree-node {
+    min-height: 32px;
+    padding: 6px 8px !important;
+    border-radius: 4px;
+}
+
+.heurist-modern .ui-menu6-section li.fancytree-node:hover {
+    background: var(--h8-blue-soft);
+    box-shadow: none;
+}
+
+/* Non-functional placeholder requested for the future Workspace feature. */
+.heurist-modern .workspace-stub {
+    cursor: default !important;
+    color: var(--h8-muted);
+    opacity: .78;
+}
+
+.heurist-modern .workspace-stub:hover {
+    background: transparent !important;
+}
+
+.heurist-modern .workspace-stub-badge {
+    display: inline-block;
+    margin-left: 7px;
+    padding: 1px 6px 2px;
+    border: 1px solid #aab6c4;
+    border-radius: 9px;
+    color: var(--h8-muted);
+    font-size: 10px;
+    line-height: 14px;
+    white-space: nowrap;
+}
+
+/* Keep the filter visually self-contained and separate from result actions. */
+.heurist-modern .result-list-head {
+    background: var(--h8-surface);
+}
+
+.heurist-modern .result-filter-panel {
+    margin: 0 8px 12px;
+    overflow: hidden;
+    background: var(--h8-filter-bg) !important;
+    border: 1px solid var(--h8-line-strong) !important;
+    border-radius: 4px;
+    box-shadow: none !important;
+}
+
+.heurist-modern .result-filter-panel::before {
+    content: "Filter";
+    display: block;
+    margin: -15px -10px 10px -4px;
+    padding: 8px 12px;
+    background: var(--h8-filter-head);
+    border-bottom: 1px solid var(--h8-line-strong);
+    color: var(--h8-text);
+    font-weight: 600;
+}
+
+.heurist-modern .div-result-list-toolbar {
+    min-height: 40px !important;
+    padding: 5px 8px !important;
+    background: var(--h8-surface) !important;
+    border-top: 1px solid var(--h8-line) !important;
+    border-bottom: 1px solid var(--h8-line) !important;
+}
+
+/* Consistent compact controls. */
+.heurist-modern .ui-button,
+.heurist-modern button,
+.heurist-modern select,
+.heurist-modern .ui-selectmenu-button {
+    min-height: 32px;
+    border: 1px solid var(--h8-line-strong);
+    border-radius: 4px;
+    background: var(--h8-surface);
+    box-shadow: none;
+    font-family: inherit;
+}
+
+.heurist-modern .ui-button:hover,
+.heurist-modern button:hover {
+    background: var(--h8-blue-soft);
+    border-color: #8eafd0;
+}
+
+.heurist-modern .result-filter-panel .ui-button-action {
+    color: #fff !important;
+    background: var(--h8-green) !important;
+    border-color: #22883a !important;
+    text-transform: none;
+}
+
+.heurist-modern .result-filter-panel .ui-button-action:hover {
+    background: #248f3d !important;
+}
+
+/* Result rows use rules rather than gradients and shadows. */
+.heurist-modern .list .recordDiv,
+.heurist-modern .list .recordDiv:hover {
+    background: var(--h8-surface) !important;
+    border-bottom: 1px solid var(--h8-line);
+    box-shadow: none;
+}
+
+.heurist-modern .list .recordDiv:hover {
+    background: #f7faff !important;
+}
+
+.heurist-modern .list .recordDiv.selected,
+.heurist-modern .list .recordDiv.selected:hover {
+    background: #dcecff !important;
+}
+
+.heurist-modern .record-expand-info {
+    margin-left: 24px;
+    background: #f4f7fa !important;
+    border-left: 2px solid #9abadd;
+}
+
+/* Flat tabs with a clear active underline. */
+.heurist-modern .ui-tabs .ui-tabs-nav {
+    background: var(--h8-surface) !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--h8-line) !important;
+}
+
+.heurist-modern .ui-tabs .ui-tabs-nav li {
+    margin: 0 2px 0 0;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 3px solid transparent !important;
+    border-radius: 0;
+}
+
+.heurist-modern .ui-tabs .ui-tabs-nav li a {
+    padding: 10px 14px !important;
+    color: var(--h8-text);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.heurist-modern .ui-tabs .ui-tabs-nav li.ui-state-active {
+    border-bottom-color: var(--h8-blue) !important;
+}
+
+.heurist-modern .ui-tabs .ui-tabs-nav li.ui-state-active a {
+    color: var(--h8-blue) !important;
+    font-weight: 600;
+}
+
+/* Keyboard focus must remain conspicuous after removing heavy borders. */
+.heurist-modern :focus-visible {
+    outline: 2px solid var(--h8-blue) !important;
+    outline-offset: 2px;
+}
