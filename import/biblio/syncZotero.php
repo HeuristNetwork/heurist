@@ -396,7 +396,7 @@ if($step == 1){  // info about current status
             print '<br><br>' . implode('<br>', $mapping_rt_errors2) . '</p>';
         }
 
-        print "<p style='color: red;margin-top: 0px;'>Please import them from the Heurist_Bibliographic database (# 6) using Design > Browse templates</p>";
+        print "<p style='color: red;margin-top: 0px;'>You may be able to find missing fields in the Heurist_Core_Definitions database (# 2) using Design > Browse templates, however the bibliographic definitions are normally integral to all new databases.</p>";
     }
 
     if(!empty($successful_rows)){
@@ -914,7 +914,11 @@ if($step == 1){  //first step - info about current status
 
     updateLastSync($api_Key, $group_ID, $user_ID, $syncID, $syncIndex);
 
-    exitServerCall(implode('', $outputLines), HEURIST_OK);
+    $report = '<div class="zotero-sync-report" '
+        .'style="box-sizing:border-box;max-height:70vh;overflow:auto;padding:10px;word-break:break-word">'
+        .implode('', $outputLines)
+        .'</div>';
+    exitServerCall($report, HEURIST_OK);
 }
 
 /**
@@ -1582,7 +1586,7 @@ function prepareErrors(){
             $outputLines[] = '<br>You should obtain the record types from one of the curated templates using Design > Browse templates or ask the' 
                  .'<br>Heurist team to define and map them if they are not available, by submitting a bug/improvement ticket (top of page).';
             foreach($arr_ignored_by_type as $itemtype => $cnt){
-                print TR_S.htmlspecialchars($itemtype).TD.intval($cnt).TR_E;
+                $outputLines[] = TR_S.htmlspecialchars($itemtype).TD.intval($cnt).TR_E;
             }
             $outputLines[] = '</table>';
 
