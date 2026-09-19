@@ -237,7 +237,10 @@ function recordSearchMatchedValues($system, $params){
 
     $offset = 0;
     $iteration = 1;
-    $finalResults = $need_nonmatches || $need_ids ? [] : 0;
+
+    $finalResults = $need_ids ? [] : 0;
+    $finalResults = $need_nonmatches ? array_fill_keys($dtySources, []) : $finalResults;
+
     $error = ['mysql' => '', 'query' => ''];
 
     $__getRecordResults = function(array $recIDs, int $dtyIDSource, int $dtyIDTarget, bool $needIDs, bool $needNoMatch) use ($system, $rtyTarget, &$error){
@@ -290,16 +293,22 @@ function recordSearchMatchedValues($system, $params){
 
         $rec_IDs_chunk = array_slice($rec_IDs, $offset, 500);
 
-        $recordResults = $need_nonmatches || $need_ids ? [] : 0;
+        $recordResults = $need_ids ? [] : 0;
+        $recordResults = $need_nonmatches ? array_fill_keys($dtySources, []) : $recordResults;
+
         if(count($dtySources) === 1){
+
             $recordResults = $__getRecordResults($rec_IDs_chunk, $dtySources[0], $dtyTargets[0], $need_ids, $need_nonmatches);
+
+            if($need_nonmatches && $recordResults){
+                $recordResults = [$dtySources[0] => $recordResults];
+            }
+
         }else{
 
             $fieldCount = count($dtySources);
             $originalNeedIDs = $need_ids;
-            $originalNeedNoMatches = $need_nonmatches;
-            $need_ids = true;
-            $need_nonmatches = false;
+            $need_ids |= !$need_nonmatches;
             $recIDsList = $rec_IDs_chunk;
 
             for($idx = 0; $idx < $fieldCount; $idx++){
@@ -307,20 +316,27 @@ function recordSearchMatchedValues($system, $params){
                 $lastRun = $idx + 1 === $fieldCount;
                 if($lastRun){
                     $need_ids = $originalNeedIDs;
-                    $need_nonmatches = $originalNeedNoMatches;
                 }
 
-                $currentResults = $__getRecordResults($recIDsList, $dtySources[$idx], $dtyTargets[$idx], $need_ids, $need_nonmatches);
+                $dtySource = $dtySources[$idx];
+                $currentResults = $__getRecordResults($recIDsList, $dtySource, $dtyTargets[$idx], $need_ids, $need_nonmatches);
 
                 if($currentResults === false){
                     $recIDsList = false;
                     break;
                 }
 
-                $recIDsList = $lastRun ? $currentResults : array_column($currentResults, 0);
+                if($need_nonmatches){
+                    $recordResults[$dtySource] = array_merge($recordResults[$dtySource], $currentResults);
+                }else{
+                    $recIDsList = $lastRun ? $currentResults : array_column($currentResults, 0);
+                }
+
             }
 
-            $recordResults = $recIDsList;
+            if(!$need_nonmatches){
+                $recordResults = $recIDsList;
+            }
         }
 
         if ($recordResults === false) {
@@ -337,7 +353,14 @@ function recordSearchMatchedValues($system, $params){
 
             if($need_nonmatches || $need_ids){
                 if(!empty($recordResults)){
-                    $finalResults = array_merge($finalResults, $recordResults);
+
+                    if($need_nonmatches){
+                        foreach($recordResults as $dtyID => $results){
+                            $finalResults[$dtyID] = array_merge($finalResults[$dtyID], $results);
+                        }
+                    }else{
+                        $finalResults = array_merge($finalResults, $recordResults);
+                    }
                 }
             }else{
                 $finalResults += $recordResults;

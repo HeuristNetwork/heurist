@@ -89,7 +89,34 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
      * @description jQuery object for the target record type selector dropdown.
      */
     targetRtySelect: null,
-    
+    /**
+     * @member {?Object} _lastNoMatchResults
+     * @memberof Widgets.Records.recordAddLinkMatch
+     * @description JSON object containing the last report for unmatched values.
+     */
+    _lastNoMatchResults: null,
+
+    /**
+     * @function _initControls
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Calls the parent widget's `_initControls` method.
+     * Then adds an onchange handler to the behaviour checkboxes to alter the dialog action button.
+     */
+    _initControls: function(){
+
+        if(!this._super()){
+            return;
+        }
+
+        this._on(this._$('[name="to_replace"]'), {
+            change: () => {
+                let currentMethod = this._$('[name="to_replace"]:checked').val();
+                this._setBtnLabels(currentMethod === 'nonmatch' ? 2 : 1);
+            }
+        });
+    },
+
     /**
      * @function _getActionButtons
      * @memberof Widgets.Records.recordAddLinkMatch
@@ -196,6 +223,14 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         this._addInputDiv('source');
     },
 
+    /**
+     * @function _addInputDiv
+     * @memberof Widgets.Records.recordAddLinkMatch
+     * @private
+     * @description Creates a set of field dropdown + count containers (if required) for the requested container.
+     * For 'source', it also creates the corresponding 'target' input div.
+     * @param {String} party - Which of 'source' or 'target' this input div if for
+     */
     _addInputDiv: function(party){
 
         let $container = this._$(`.fieldtype_${party}s`);
@@ -204,7 +239,8 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         const elementID = `${party}_${randomID}`;
 
         let countEle = party === 'target' && $container.find('.input-div').length === 0 ? `<span id="count_target_matches" style="padding-left:5px;font-weight:bold"></span>` : '';
-        countEle = party === 'source' ? `<span id="count_${elementID}" style="padding-left:5px;font-weight:bold"></span>` : countEle;
+
+        countEle = party === 'source' ? `<span style="padding-left:5px;font-weight:bold"><span id="count_${elementID}"></span><span id="nomatch_${elementID}"></span></span>` : countEle;
 
         let $div = $('<div>', {
             class: 'input-div',
@@ -219,6 +255,13 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             click: () => this._removeInputDiv(party, randomID)
         });
 
+        this._on($div.find('span[id^="nomatch_"]'), {
+            click: (event) => {
+                let $parent = $(event.target).parents('.input-div');
+                this._displayNoMatchReport($parent.find('select').val());
+            }
+        });
+
         this._fillSelectFieldTypes(party, randomID, party === 'source' ? this.source_RecTypeID : this.target_RecTypeID);
 
         if(party === 'source'){ // for each source there is a target
@@ -226,6 +269,16 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }
     },
 
+    /**
+     * @function _removeInputDiv
+     * @memberof Widgets.Records.recordAddLinkMatch
+     * @private
+     * @description Removes the requested input div and it's corresponding input in the other party.
+     * Also ensures that their is always: one source input, and that the target containers have one count container.
+     * It then refreshes the field value counts, as required.
+     * @param {String} party - Which of 'source' or 'target' started this removal
+     * @param {String} elementID - Input div ID
+     */
     _removeInputDiv: function(party, elementID){
 
         let $sourceContainer = this._$(`.fieldtype_sources`);
@@ -296,6 +349,15 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         this._findMatchesCount();
     },
 
+    /**
+     * @function _clearAllSelectFieldTypes
+     * @memberof Widgets.Records.recordAddLinkMatch
+     * @private
+     * @description Completely removes individual input divs from the party container.
+     * It then refreshes the field value counts, as required.
+     * @param {String} party - Which of 'source' or 'target' started this removal
+     * @param {boolean} removeAll - Whether to remove all input divs from the party container (currently for 'target' only)
+     */
     _clearAllSelectFieldTypes: function(party, removeAll = false){
 
         let $container = this._$(`.fieldtype_${party}s`);
@@ -442,6 +504,8 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             }
         }
 
+        let nomatch_counts = this._$('span[id^="nomatch_"]').text('');
+
         if(this.target_RecTypeID <= 0){
             return;
         }
@@ -452,7 +516,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
 
         if(fieldSources && fieldTargets){
             
-            cnt_info2.addClass('ui-icon ui-icon-loading-status-balls rotate')
+            cnt_info2.addClass('ui-icon ui-icon-loading-status-balls rotate');
             
             let that = this;
         
@@ -474,6 +538,36 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
                 }
             });
 
+            window.HAPI4.RecordMgr.get_aggregations({
+                a:'count_matches',
+                nonmatch: 1,
+                rec_IDs: this._getRecordsScope().join(','),
+                rty_src: this.source_RecTypeID,
+                dty_src: fieldSources,
+                rty_trg: this.target_RecTypeID,
+                dty_trg: fieldTargets
+            }, 
+            function(response){
+
+                if(response.status !== window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                that._lastNoMatchResults = response.data;
+
+                nomatch_counts.each((idx, element) => {
+
+                    let $element = $(element);
+                    let dtyID = $element.parents('.input-div').find('select').val();
+
+                    if(Object.hasOwn(that._lastNoMatchResults, dtyID)){
+                        $element.html(`<span class="fake_link" style="margin-left: 1em;">(${that._lastNoMatchResults[dtyID].length} missing matches)</span>`);
+                        $element.attr('data-dtyid', dtyID);
+                    }
+                });
+
+            });
         }
         
     },
@@ -629,27 +723,23 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     doAction: function(){
         
         if(this._$('#div_result').is(':visible')){
-            this._setBtnLabels(false);
+
+            let currentMethod = this._$('[name="to_replace"]:checked').val();
+            this._setBtnLabels(currentMethod === 'nonmatch' ? 2 : 1);
+
             this._$('#div_result').hide();
             this._$('#div_fieldset').show();
+
             return;
         }
 
         let dty_ID = this._$('#sel_pointer_field').val();
-        /*
-        let ele = this._$('input[type="radio"][name="link_field"]:checked');
-        let dty_ID = ele.val();
-        let trm_ID = 0;
-        let data_type = ele.attr('data-type');   //resource (record pointer) or relmarker
-        if(data_type!='resource'){
-            trm_ID = this.getFieldValue('rt_source_sel_'+dty_ID);
-        }*/
-        
+
         let currentScope = this._getRecordsScope();
-        
-        
+
         let div_res = this._$('#div_result');
         div_res.empty();
+
         let that = this;
         let [fieldSources, fieldTargets] = this._getSelectedDetailFields();
 
@@ -667,22 +757,17 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
                     rty_trg: this.target_RecTypeID,
                     dty_trg: fieldTargets
                 }, 
-                function(response){     
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that.element.find('#div_fieldset').hide();
-                        let csv_res = '<div style="padding:10px;height:100%;overflow:auto;">UNMATCHED VALUES<br><pre>H-ID&#9;Value&#9;Record title<br>';
-                        for(let idx in response.data){
-                            let row = response.data[idx];
-                            for(let idx2 in row){
-                                row[idx2] = window.hWin.HEURIST4.util.stripTags(row[idx2]).trim();
-                            }
-                            csv_res = csv_res + row.join("&#9;")+"<br>";
-                        }
-                        div_res.html(csv_res+'</pre></div>').show();
-                        that._setBtnLabels(true);
-                    }else{
+                function(response){
+
+                    if(response.status !== window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.msg.showMsgErr(response);
+                        return;
                     }
+
+                    that.element.find('#div_fieldset').hide();
+                    that._generateNoMatchesReport(div_res, response.data);
+
+                    that._setBtnLabels(3);
                 });
         }else{
             
@@ -718,7 +803,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     +`<span class="table-cell">Links already exist</span><span class="table-cell">&nbsp;&nbsp;${response.data['exist']}</span></div>`)
                     .show();
                     
-                    that._setBtnLabels(true);
+                    that._setBtnLabels(0);
                     
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response); 
@@ -734,22 +819,34 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
      * @private
      * @description Sets the labels of the main action button and the cancel button
      * depending on whether the action is done or pending.
-     * @param {boolean} is_done - If true, sets labels to 'New Action' and 'Done'.
-     *                           If false, sets labels to 'Create links' and 'Cancel'.
+     * @param {Number} mode - If 0, sets labels to 'New Action' and 'Done'.
+     *                        If 1, sets labels to 'Create links' and 'Cancel'.
+     *                        If 2, sets labels to 'Get report' and 'Cancel'.
      */
-    _setBtnLabels: function(is_done){
-        let lab1, lab2;
-        if(is_done){
+    _setBtnLabels: function(mode){
+        let lab1,
+        lab2 = mode === 0 ? 'Done' : 'Cancel';
+        if(mode === 0){
             lab1 = 'New Action';
-            lab2 = 'Done';
-        }else{
+        }else if(mode === 1){
             lab1 = 'Create links';
-            lab2 = 'Cancel';
+        }else if(mode === 2){
+            lab1 = 'Get report';
+        }else if(mode === 3){
+            lab1 = 'Back to matching';
         }
         this.element.parents('.ui-dialog').find('.btnDoAction').button({label:window.hWin.HR(lab1)});
         this.element.parents('.ui-dialog').find('.btnCancel').button({label:window.hWin.HR(lab2)});
     },
 
+    /**
+     * @function _getSelectedDetailFields
+     * @memberof Widgets.Records.recordAddLinkMatch
+     * @private
+     * @description Gets the source fields and their corresponding target fields.
+     * If their isn't a one to one matching, double false is returned.
+     * @returns {Array} One to one field mapping, otherwise [false, false] with incomplete mapping
+     */
     _getSelectedDetailFields: function(){
 
         let $sourceContainer = this._$(`.fieldtype_sources`);
@@ -778,6 +875,197 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }
 
         return [sources, targets];
+    },
+
+    /**
+     * @function _generateNoMatchesReport
+     * @memberof Widgets.Records.recordAddLinkMatch
+     * @private
+     * @description Creates the unmatched values report in HTML format and then injects it
+     * into the provided DOM element.
+     * Also provides controls to download the report in several formats.
+     * @param {jQuery} $container - Container to place the generated report into
+     * @param {Object} data - Unmatched values report data {field ID => [[Record ID, Record Title, Value], ...], ...}
+     */
+    _generateNoMatchesReport: function($container, data){
+
+        // Base HTML + Export controls
+        let html = '<div style="padding:0px 1em 1em;height:100%;overflow:auto;">';
+        html += `<div class="export-buttons" style="margin: 1em 0px 2em;">
+            Export report as: 
+            <span class="fake_link" data-type="csv" style="display: inline-block; margin-right: 1em;">CSV</span>
+            <span class="fake_link" data-type="json" style="display: inline-block; margin-right: 1em;">JSON</span>
+            <span class="fake_link" data-type="html">HTML</span>
+        </div>`;
+
+        html += 'UNMATCHED VALUES<br>';
+
+        // Add report details
+        for(const dtyID in data){
+
+            if(!Object.hasOwn(data, dtyID) || !$Db.rst(this.source_RecTypeID, dtyID)){
+                continue;
+            }
+
+            html += `<br><strong>${$Db.rst(this.source_RecTypeID, dtyID, 'rst_DisplayName')}</strong><pre>H-ID&#9;Record title&#9;Value<br>`;
+
+            let rows = data[dtyID];
+            for(let idx in rows){
+
+                let row = rows[idx];
+
+                for(let idx2 in row){
+                    row[idx2] = window.hWin.HEURIST4.util.stripTags(row[idx2]).trim();
+                }
+
+                html += `${row.join("&#9;")}<br>`;
+            }
+
+            html += '</pre><hr>';
+        }
+
+        // Add to HTML container
+        $container.html(html + '</div>').show();
+
+        // Handlers for export controls
+        let dtyID = Object.keys(data);
+        dtyID = dtyID.length === 1 ? dtyID.pop() : null;
+        this._on($container.find('.export-buttons span.fake_link'), {
+            click: (event) => this._downloadNoMatchReport(event.target.getAttribute('data-type'), dtyID)
+        })
+    },
+
+    /**
+     * @function _displayNoMatchReport
+     * @memberof Widgets.Records.recordAddLinkMatch
+     * @private
+     * @description Displays in a popup the unmatched values report for a specific field, or all fields, formatted by `_generateNoMatchesReport`
+     * @param {Number} dtyID - Specific Field ID, on null it shows the complete report
+     */
+    _displayNoMatchReport: function(dtyID){
+
+        let details = this._lastNoMatchResults;
+        if(window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+            if(Object.hasOwn(details, dtyID)){
+                details = {[dtyID]: details[dtyID]};
+            }else{
+                details = null;
+            }
+        }
+
+        if(!details){
+            window.hWin.HEURIST4.msg.showMsgFlash('No unmatched values report to display...', 3000);
+            return;
+        }
+
+        let $dlg, content = '', btn = {};
+
+        btn[window.hWin.HR('Close')] = () => $dlg.dialog('close');
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btn, {title: 'Unmatched Values Report'}, {default_palette_class: 'ui-heurist-explore', dialogId: 'links-unmatched-values-report'});
+
+        // Add report content
+        this._generateNoMatchesReport($dlg, details);
+
+        // Reset position to center
+        let position = $dlg.dialog('option', 'position');
+        $dlg.dialog('option', 'position', position);
+
+    },
+
+    /**
+     * @function _downloadNoMatchReport
+     * @memberof Widgets.Records.recordAddLinkMatch
+     * @private
+     * @description Downloads the unmatched values report, for the specified field or the complete report, in the given format.
+     * @param {String} format - The output's format, ['csv', 'html', 'json']
+     * @param {Number} dtyID - Specific Field ID, on null it uses the complete report
+     */
+    _downloadNoMatchReport: function(format, dtyID){
+
+        let details = this._lastNoMatchResults;
+        if(window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+            if(Object.hasOwn(details, dtyID)){
+                details = {[dtyID]: details[dtyID]};
+            }else{
+                details = null;
+            }
+        }
+
+        if(!details){
+            window.hWin.HEURIST4.msg.showMsgFlash('No unmatched values report to export...', 3000);
+            return;
+        }
+
+        // Prepare data and create blob data
+        let blob = null;
+        if(format === 'html'){
+
+            const $div = $('<div>');
+
+            this._generateNoMatchesReport($div, details);
+            $div.find('.export-buttons').remove();
+
+            const html = $div.html();
+
+            blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+
+        }else if(format === 'json'){
+
+            details = Object.keys(details).reduce((newDetails, dtyID) => {
+
+                const newKey = $Db.rst(this.source_RecTypeID, dtyID, 'rst_DisplayName') || dtyID;
+                newDetails[newKey] = details[dtyID];
+
+                return newDetails;
+            }, {});
+
+            const jsonString = JSON.stringify(details, null, 2);
+
+            blob = new Blob([jsonString], {type: 'application/json'});
+
+        }else if(format === 'csv'){
+
+            const headers = ['H-ID', 'Record title', 'Value'];
+
+            const tsvRows = [];
+            for(const dtyID in details){
+
+                tsvRows.push($Db.rst(this.source_RecTypeID, dtyID, 'rst_DisplayName'));
+                tsvRows.push(headers.join('\t'));
+
+                tsvRows.push(
+                    ...details[dtyID].map(row => 
+                        row.map(data => 
+                            data.replace(/[\t\n\r]/g, ' ')
+                        ).join('\t')
+                    )
+                );
+            }
+
+            const tsvContent = tsvRows.join('\n');
+
+            blob = new Blob([tsvContent], {type: 'text/csv;charset=utf-8;'});
+        }
+
+        if(!blob){
+            return;
+        }
+
+        // Generate Blob link and anchor tags
+        const blobURL = URL.createObjectURL(blob);
+        const $a = $('<a>', {
+            href: blobURL,
+            download: `unmatched-values.${format}`,
+            style: 'display:none;'
+        }).appendTo(this._$('#div_fieldset'));
+
+        // Trigger click, jQuery doesn't work
+        $a[0].click();
+
+        // Clean up
+        $a.remove();
+        URL.revokeObjectURL(blobURL);
     }
         
 });
