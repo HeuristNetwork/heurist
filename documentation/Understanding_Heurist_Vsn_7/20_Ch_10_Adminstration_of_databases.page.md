@@ -151,6 +151,26 @@
 
 <span style="color: rgb(0, 0, 0);">These sections will be described in this help where they are relevant. If you do not understand them then we recommend leave as is or contact the Heurist Team for further details.</span>
 
+### <span style="color: rgb(15, 71, 97);">LANGUAGES</span>
+
+Heurist has extensive functions for managing multiple languages and providing translations:
+
+- Interface (requires translation of strings in the localisation file)
+- Saved search names (defined in save search form)
+- Facet names (
+- Terms (defined in vocabulary editor)
+- Text field values
+- Record types and fields not yet supported as of Aug 2026  
+    (but could be handled with similar methods to terms - coding required)
+
+**Interface languages** are hardcoded in the source code in client/profile/profilePreferences.html. To add new language add a language entry in the selector, copy localization\_eng.txt and translate to the new language.   
+  
+**Text field, term translations and saved search names** use values starting with a three letter language code, eg. *FRE:Repoussé*, which will replace the default language (which requires no prefix) when a website is set to a language other than the default. The list of languages for translations are set in Design &gt; Properties.   
+  
+The term translations are accessible in smarty reports and can be used in searches (the trnslated terms will be shown in the lsit of values in a facet search, where a translation to the appropriate language is available, otherwise it will show the term in the default language).
+
+Note: Translated terms are not yet (Aug 2026) accessible in the edit form (requires modification of editing\_input.js and utils\_ui.js to use translated values for labels and dropdowns in edit form).
+
 ### <span style="color: rgb(15, 71, 97);">MANAGE USERS</span>
 
 <span style="color: rgb(0, 0, 0);">See </span><span style="color: rgb(0, 0, 0); background-color: rgb(0, 255, 255);">@todo link to</span><span style="color: rgb(0, 0, 0);"> Getting started &gt; 4. Collaborative work &gt; 4.1. Workgroups and Users</span>

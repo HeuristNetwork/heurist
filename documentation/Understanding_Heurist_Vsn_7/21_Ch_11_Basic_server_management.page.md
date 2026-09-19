@@ -6,6 +6,16 @@ This chapter outlines some useful procedures for managing Heurist servers, inclu
 
 Heurist is designed to run on any Linux server
 
+#### **Emergency Unix commands**
+
+<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">These commands may depend on the Unix version and the way MySQL is configured, refer to system documentation or ask AI for instructions if these do not work </span>
+
+- <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">To restart MySQL (commonest form of failure eg. if disk space exhausted or stuck query). Works on HeuristRef.Net (OVH Cloud), HeuristAU.net (Intersect server) and Heurist.Huma-Num.fr</span>  
+    <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> sudo service mysqld restart</span>  
+    <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Note: Sometimes </span>**restart** <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">does nothing (no response). In that case first use </span>**stop**<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">, then use </span>**start**
+- <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">To restart Apache web server</span>  
+    <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> sudo apachectl restart</span>
+
 #### **Handy Unix commands &amp; other useful things**
 
 - <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Disk usage of subdirectories, largest first : </span>  

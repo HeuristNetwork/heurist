@@ -1491,6 +1491,8 @@ When you create or edit a record it opens automatically in **data entry** mode. 
 
 ![84bec25f-6f29-4233-b467-d39538ed54ec.png](https://heurist-doc.huma-num.fr/uploads/84bec25f-6f29-4233-b467-d39538ed54ec.png)
 
+<p class="callout info">The data entry form is also a data structure modification form - click **Modify structure** at the top (available to database adminstrators only). This allows direct modification of the structure for the record type being edited so that the changes can be tested as you work. See later, and the following chapter.</p>
+
 ---
 
 ## 1. Opening and Navigating Records
@@ -1543,19 +1545,29 @@ In the top left corner are the icon and name of the record type to which the dat
 
 #### 2.2.1. Modify structure of the record type form
 
-Click <span style="color:rgb(132,63,161);">\[Modify Structure\]</span> to modify the fields of the record type. A new windows will open with a summary of the fields to be completed for a record of this record type on the left, and a reproduction of the Data Entry form on the right. A gear icon appear at the left of the fields. Clicking on it allows you to edit the field in question. See chapter 5 for further details.
+Click <span style="color:rgb(132,63,161);">\[Modify Structure\]</span> to modify the fields of the record type. A new windows will open with a summary of the fields to be completed for a record of this record type on the left, and the Data Entry form on the right.
+
+<p class="callout info">This is an extremely powerful function, as it allows you to modify the structure of your database on the fly without affecting existing data (other than intentional deletion of fields and associated data, which comes with adequate warnings). Fields can be added, renamed, reorganised, grouped under headings and to some extent field type changes are permitted (without loss of data).   
+  
+The numbers next to the tree show how many times a field has been used; this is particularly useful when importing legacy data to identify little-used fields which one may wish to remove or combine with other fields. The tick and crossed-out circle icons allow one to open a new browser window for all the records with / without the given field.</p>
+
+See chapter 5 for further details.
 
 ![50cb926d-1385-40e1-bf45-1b39110d81cc.png](https://heurist-doc.huma-num.fr/uploads/50cb926d-1385-40e1-bf45-1b39110d81cc.png)
 
-<p class="callout info">Values given will only be applied to the data being viewed. All other changes will be applied to the entire record type, thus modifying the structure of all data within that record type.</p>
+A gear icon appear at the left of the fields. Rollover displays a short menu of frequently used changes. Clicking on it allows you to edit the field in question.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/image.png)
+
+<p class="callout info">Strucural changes will be applied to the entire record type, thus modifying the structure of all records for that type. Values entered in the form relate to the current record and can be saved exactly the same way as in standard data entry mode. </p>
 
 #### 2.2.2. Modify the constructed title
 
-Click <span style="color:rgb(132,63,161);">\[Constructed title\]</span> to modify the **title mask** for the record type.
+Click the gearwheel left of <span style="color:rgb(132,63,161);">\[Constructed title\]</span> to modify the **title mask** for the record type.
 
 ![f042a27b-b7e7-49dd-932f-51c1ca509b4d.png](https://heurist-doc.huma-num.fr/uploads/f042a27b-b7e7-49dd-932f-51c1ca509b4d.png)
 
-The title mask gives you a summary of the record which is display in lists of results and where a record is referenced through a record pointer or a relationship marker. The form you get by clicking of <span style="color:rgb(132,63,161);">\[Constructed title\]</span> allows you to personnalise it by selecting the field making up the summary. See chapter 5 for further details.
+The title mask gives you a summary of the record content which is displayed in lists of results and where a record is referenced through a record pointer or a relationship marker. The form you get by clicking on <span style="color:rgb(132,63,161);">\[Constructed title\]</span> allows you to personalise it by selecting the fields which are concatenated to provide the title. See chapter 5 for further details.
 
 ### 2.3. Form options
 
@@ -1563,7 +1575,7 @@ At the right of the record type related buttons are several options :
 
 ![abcffdd8-2b38-420c-be40-a54c36f32572.png](https://heurist-doc.huma-num.fr/uploads/abcffdd8-2b38-420c-be40-a54c36f32572.png)
 
-- When checked <span style="color:rgb(132,63,161);">\[Show help\]</span> shows the **Help text**, which specifies the expected value of the field under it.
+- When checked <span style="color:rgb(132,63,161);">\[Show help\]</span> shows the **Help text**, which specifies the expected value of the field under it. This help text corresponds with the Description of the field entered when defining the field (and can be changed)
 - The <span style="color:rgb(132,63,161);">\[Optional fields\]</span> checkbox allows you to show or hide optional fields in the form
 
 ![48348d51-89e0-42c5-808b-23c02851a5d2.png](https://heurist-doc.huma-num.fr/uploads/48348d51-89e0-42c5-808b-23c02851a5d2.png)
@@ -1668,13 +1680,13 @@ Fields can be required, recommended, or optional.
 
 As you roll over a data field you will see a number of icons at the beginning or the end of the field.
 
-- ![deeb3543-f7a0-495a-9f94-330ba69572fc.png](https://heurist-doc.huma-num.fr/uploads/deeb3543-f7a0-495a-9f94-330ba69572fc.png)clear (delete) the value
+- ![deeb3543-f7a0-495a-9f94-330ba69572fc.png](https://heurist-doc.huma-num.fr/uploads/deeb3543-f7a0-495a-9f94-330ba69572fc.png) clear (delete) the value
 - ![78256baa-fa48-4f62-ba85-2be78e688a55.png](https://heurist-doc.huma-num.fr/uploads/78256baa-fa48-4f62-ba85-2be78e688a55.png)hide (currently everybody can see the value) or![b5f0a757-0c7b-4bf0-91b1-31647e4f609c.png](https://heurist-doc.huma-num.fr/uploads/b5f0a757-0c7b-4bf0-91b1-31647e4f609c.png)show (currently only the registered users can see the value) the value to public. You can show a record to public (see 2.3) but hide some of the values of it by doing so.
 - ![b8345cf5-360f-47b5-ae56-84beb73212cd.png](https://heurist-doc.huma-num.fr/uploads/b8345cf5-360f-47b5-ae56-84beb73212cd.png)open the vocabulary editor (directly at the vocabulary used by the field). Allowing you to act (add, edit, creating sub-term, merge, rearrange, delete) upon the terms it contains
 - ![8c0ceb5e-b364-442b-931a-3153bd01b5eb.png](https://heurist-doc.huma-num.fr/uploads/8c0ceb5e-b364-442b-931a-3153bd01b5eb.png)add new term to the list from where the value is taken
 - ![0e785009-ccbf-46d1-89f4-79928dcd82fc.png](https://heurist-doc.huma-num.fr/uploads/0e785009-ccbf-46d1-89f4-79928dcd82fc.png)add a value to the field. It is to the left of the field, only if it can take more than one value
 - ![5acf146e-0c26-422d-b078-7c9debc66bdf.png](https://heurist-doc.huma-num.fr/uploads/5acf146e-0c26-422d-b078-7c9debc66bdf.png)drag the value up or down. Allows reordering the values of a multi-valued field
-- ![72e95229-5b3f-4f42-95ce-ac8c27e200ad.png](https://heurist-doc.huma-num.fr/uploads/72e95229-5b3f-4f42-95ce-ac8c27e200ad.png)appear under the name of a multi-valued field after a reordering of values. Will undo it.
+- ![72e95229-5b3f-4f42-95ce-ac8c27e200ad.png](https://heurist-doc.huma-num.fr/uploads/72e95229-5b3f-4f42-95ce-ac8c27e200ad.png)appears under the name of a multi-valued field after a reordering of values. Will undo it.
 - ![d926c4b3-e93b-4cb6-a48d-8bc528d5b679.png](https://heurist-doc.huma-num.fr/uploads/d926c4b3-e93b-4cb6-a48d-8bc528d5b679.png)show calendar to select a date. It remembers the last date entered to minimise navigation. However, if you wish to skip to a different period or enter a historic date you may type the whole date with dashes, or simply type year and month or just year. If you then select he calendar icon it will jump to the appropriate year and month.
 - ![3d90a63c-6b0d-47d1-b4c9-7e771030fb10.png](https://heurist-doc.huma-num.fr/uploads/3d90a63c-6b0d-47d1-b4c9-7e771030fb10.png)brings up a more comprehensive date setting with several tabs (see 3.2.1.)
 - ![4f3d2451-cb6b-43ce-8078-f9d73aeaf04b.png](https://heurist-doc.huma-num.fr/uploads/4f3d2451-cb6b-43ce-8078-f9d73aeaf04b.png)add a picture by taking it with with the camera on the device you are using
@@ -1684,25 +1696,29 @@ As you roll over a data field you will see a number of icons at the beginning or
 
 Not all icons appear beside each field, as the actions they trigger isn't always expected. The data entry form is designed to gather data in a structured format. While designing the database (see chapter 5) you specify the required data type for each field :
 
-- Dropdown (terms)
+- Dropdown (terms, may be hierarchical)
 - Numeric (integer or decimal)
-- Text (single line)
-- Memo text (multi-line or html)
+- Text (single line text)
+- Memo text (multi-line text, html or code)  
+      
+    **More complex fields**
 - Date / temporal *More complex fields with specific behaviours*
-- Geospatial
-- File or media URL
-- Record pointer / Foreign Key  *These fields are the key to linking records*
-- Relationship marker
+- Geospatial *Used to record locations/areas and build maps*
+- File or media URL *Used for images, audio, video, 3D, and other files* (can be on a remote server)  
+      
+    **Linking fields**
+- Record pointer / Foreign Key  } *These fields are the key to linking records*
+- Relationship marker }
 
 ### 3.1. Simple type fields
 
 **Numeric (integer or decimal)** A positive or negative number, with or without decimals. Non-numeric characters other than minus or decimal point are ignored.
 
-**Text (single line)** A single line of plain text, typically used for names, titles and short descriptions. Use multi-line text for longer descriptions. Max 250 characters.
+**Text (single line)** A single line of plain text, typically used for names, titles and short descriptions. Use multi-line text for longer descriptions. Max 250 characters. If a text value starts with http:// or https:// it is treated as a URL.
 
-**Memo Text (multi-line or html)** A plain text field which can accomodate multiple lines of text. Use for longer textual content (drag and drop the bottom-right corner to expand the editor). Offers three editor :
+**Memo Text (multi-line or html)** A plain text field which can accomodate multiple lines of text. Use for longer textual content (drag and drop the bottom-right corner to expand the editor). Offers three editors :
 
-- **text**: write in plain text. If the text starts with https:// it is treated as a URL
+- **text**: write in plain text
 - **wysiwyg**: What You See Is What You Get, interface with several button to format your text so you don't have to know html to do so
 - **codeeditor**: a code editor, it makes it easier to write directly in a structured language such as xml or html or to correct it.
 
@@ -1714,7 +1730,7 @@ As this type of field deals with html, you can integrate to your text other elem
 - Hyperlink to be open in the current or a new window
 - Link towards another record.
 
-**Dropdown (Terms)** A flat or hierarchical list of categories, where the terms are drawn from a (or severals) predefined vocabulary. Generally from a single one eg. countries, languages, source, condition, material, colour. Using dropdown terms ensures referential integrity standardizing entries (e.g., avoiding inconsistencies likes "Yes" vs "yes"). Use dropdown when the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
+**Dropdown (Terms)** A flat or hierarchical list of categories, where the terms are drawn from a predefined vocabulary (the vocabulary can include terms from otehr vocabularies by reference). Generally from a single one eg. countries, languages, source, condition, material, colour. Using dropdown terms ensures referential integrity standardizing entries (e.g., avoiding inconsistencies likes "Yes" vs "yes"). Use dropdown when the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
 
 ### 3.2. Special type fields
 
@@ -1770,8 +1786,8 @@ Clicking on the field will open a small windows which allows to choose between u
 These fields types create connections between the new record and other records of specified type or types (potentially including the same type as the record you are editing).  
 There are two kinds of record linking field type :
 
-- **record pointers** (by using it you're simply adding a direct link to a particualr record (equivalent to a foreign key) as a value in the record)
-- **relationship markers** (by using it, you're addind a new record for the relationship into the *Record relationship* record type.)
+- **record pointers** : these simply add a direct link to a particular record (equivalent to a foreign key in conventional relational databases) as a value in the record. The target record type(s) allowed are defined by the record pointer settings;
+- **relationship markers** : these add a new *Record relationship* record linking the current record with another record. The target record type(s) and types of relationship allowed are defined by the relationship marker settings.
 
 In both cases the link will appear in the network view (see chapter 8b) and if the target record is not yet in the database, the field will allow you to create new records (see chapter 5).
 
@@ -1813,13 +1829,18 @@ One of the most powerful features of Heurist is the ability to modify record str
 
 To open the structure modifying interface :
 
-- **Either :** Design → Record Types → \[click on the pen next to the Record Type name\] → \[bottom of the pop up window\] Edit fields
+- **Either :** Design → Record Types → \[click on the pen next to the Record Type name\] → \[bottom of the pop up window\] **Modify record structure (fields, tabs etc.)** - was **Edit fields** in older versions.
 
 ![e889bbc7-1173-4d96-8704-94836a9d9670.jpg](https://heurist-doc.huma-num.fr/uploads/e889bbc7-1173-4d96-8704-94836a9d9670.jpg)
 
+or
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/YQnimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/YQnimage.png)
+
 **Or :** Create a new record or open an existing record of the appropriate type for editing   
- and click Modify structure (at the top of the form).   
- **We recommend using this method to dynamically change structure as you start to develop your data**
+ and click Modify structure (at the top of the form).
+
+<p class="callout info"> **We recommend using this method to dynamically change structure as you start to develop your data**</p>
 
 ![e5e17e5b-ef6a-449a-86ee-d419f673d79a.png](https://heurist-doc.huma-num.fr/uploads/e5e17e5b-ef6a-449a-86ee-d419f673d79a.png)
 
@@ -1949,10 +1970,8 @@ The other entries in the menu are discussed in the following pages.
     - Date ranges, different ways of representing
     - Fuzzy start and end
     - Different calendar and conversion
-    - Import and auto-correction of dates
-
-> **Entering historical dates**: When entering a date, simply type the year in the box to instantly jump to that year, then select from the calendar dropdown
-
+    - Import and auto-correction of dates  
+        **Entering historical dates**: When entering a date, simply type the year in the box to instantly jump to that year, then select from the calendar dropdown
 - Numeric
     - Dealing with integers and whole numbers
 - Record pointers
@@ -2494,17 +2513,56 @@ However, if there is a long list and/or time limits eg. in family relationships,
 - The set of relationships is open-ended or requires complex constraints, such as genealogical relationships which might be extended with new relationships, and where one might wish to specify, for example, that a person can have no more than four grandparents, only two of whom can be grandfathers.
 - By using relationships, you can record additional information about the relationship, including the type of relationship (from a list of allowable types), the date range of the relationship and notes about the relationship
 
-# Constructed titles
+### **Constructed titles and Title masks**
 
-&lt;so underused …&gt; show lots of tips and tricks of how to use them, notably when dealing with hierarchical entities Title masks allow you to define composite titles that can be constructed dynamically from field values. The constructed title is generated on-the-fly when the record is created or modified. For information see the section on Constructed Titles
+One of the most powerful and underutilised features of Heurist is hidden-in-plain-sight. It is the title used to represent records in the results list, in connections, in reports and many other places.
 
-@todo link.
+The **Constructed title** is like the reference you might find in the bibliography at the end of a book: it uses a concatenation of important fields, sometimes shortened, to uniquely identify and summarise the database record in question. The constructed title is generated on-the-fly when the record is created or modified.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/IGqimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/IGqimage.png)
+
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/ZPCimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/ZPCimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/e8gimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/e8gimage.png)
+
+Constructed titles are used to represent records when they are listed in search results and as the visible representation of the record referenced in a pointer field (first image below) or relationship marker field (second image below).
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/zJPimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/zJPimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/RiVimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/RiVimage.png)
+
+Constructed titles can also be used in reports and visualisations, for sorting, in other constructed titles, and as the constructed title of connected records. We strongly recommend putting a little thought into the design of the constructed titles, as well-designed constructed titles can greatly improve the clarity and ease of use of the database.
+
+The **Title Mask defines the** choice of fields in the constructed title. Title masks are one of the most useful, and perhaps misunderstood or under-used features of Heurist. A separate title mask, with different fields, is defined for each record type. The constructed value is used as the extended title displayed in search results and other lists.
+
+The title mask builds a constructed title from the values of fields in the record.
+
+- Fields are identified by \[ \] e.g. \*\*\[Title\], pp. \[Start\_Page\]-\[End\_Page\] \*\*might generate: **"Alice in Wonderland, pp. 37-39"** **Conditional text**
+- Add optional text before a field (if it has a value) or a different set of text if a value is not available by adding {\\Text for existing value \\Text for missing value} after a field, for example: **\[Starting\_date\] {\\Starting date: \\Start date unknown}** will either generate: **"Starting date: 04-11-1974"** if there is a date, or **"Start date unknown"** if Starting\_date is empty. You can also leave the value blank, in which case nothing will be output in the case of a missing value.
+- **Inserting a literal square-bracket** : use two consecutive square-brackets (\[\[ or \]\]).
+- **Inserting fields from the tree** : The element names in square brackets should match field names for the record type, and this is ensured by providing a tree of available fields which can be inserted![img_061.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_061.png)
+
+Constructed titles can use fields in the parent record (connected by a parent-child record pointer), as we can see in this example:
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/C2Gimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/C2Gimage.png)
 
 **Constructed title aka Record title or RecTitle**
 
-One of the most powerful features of Heurist is hidden-in-plain-sight. It is the title used to represent records in the results list, but it is actually far more than this. The Constructed Title is a title constructed from one or more fields in the record.
+#### Setting the constructed title
 
-To set the constructed title for a record type, edit any record of that type (or simply add a new blank record) and click on the *Title mask* button at the top of the edit form, which will bring up a dialogue allowing you to select the fields which you want to use to construct the title for every record of that type.![img_051.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_051.png)\*\*HTML tags in Constructed Titles
+To set the constructed title for a record type, edit any record of that type (or simply add a new blank record) and click on the *Constructed title* link left of the title at the top of the edit form:
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/acvimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/acvimage.png)
+
+which will bring up a dialogue allowing you to select the fields which you want to use to construct the title for every record of that type.![img_051.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_051.png)\*\*HTML tags in Constructed Titles.
+
+### Admin &gt; Rebuild Record Titles
+
+This option recalculates all the constructed (composite) record titles, compares them with the existing title and updates the title where the title has changed (generally due to changes in the title mask for the record type). At the end of the process it will display a list of records for which the titles were changed and a list of records for which the new title would be blank (an error condition). Note. To check the validity of title masks, see Administration | Verify Title Masks. Result Title fields are scanned and title usage updated where applicable. The scan shows a list of records for which the titles were changed. This includes: number processed number marked for update number left as is (these are left blank due to incorrect formatting etc. and need to be checked manually via the next step) To view all updated records in the Search Results Pane (in a new browser window), click the view updated records link. Note. If the title is blank, update the record appropriately (see Define New Record Type | Title Masks).
+
+### Content to be merged or eliminated
+
+&lt;so underused …&gt; show lots of tips and tricks of how to use them, notably when dealing with hierarchical entities Title masks allow you to define composite titles that can be constructed dynamically from field values.
 
 \*\*You can add simple html tags in the constructed title eg. **for bold or** [**link**](https://docs.heuristref.net/something.net/path/%5BImage%20Name%5D) to put link to open an image referenced in the record purely by its name. Please remember to close tags. Bold, italic, underline, strong, emphasis and superscript are allowed, Others are stripped out automatically. If you need others, contact the Heurist team. Note. To verify title masks, see Masks provide the ability to build a composite title based on information taken from other fields in the record, on the fly. The title mask is a string into which field values are inserted to create an extended title for the record. The constructed value is used as the extended title displayed in search results and other lists. Fields in the record are indicated by square brackets. The element names in square brackets should match field names for this record type. For example, a Person record might have the fields: Given Name(s), Family Name, Title. In this case you could create the following title mask: \[Family Name\], \[Given Name(s)\] (\[Title\] A person whose Family Name = 'Smith', Given Name(s) = 'John', Title = 'Dr' will be rendered in the Title field as: Smith, John (Dr) Other people will be rendered appropriately. Fields in records that are referenced by the record through pointers can also be used. For example: \[personpointer\].\[Last name\] This pulls out a person's name from a person record pointed to by the current record. Additional text or punctuation can also be included. For example: \[Title\], pp. \[Start\_Page\]-\[End\_Page\] This renders the Title field and Start and End Page fields as, for example: Alice in Wonderland, pp. 37-39 To insert a literal square-bracket, use two consecutive square-brackets (\[\[ or \]\]). Fields in records referenced by the record through pointers can also be used: \[personpointer\].\[Last name\] This gets a person's name from a Person record pointed to by the current record. To create a title mask
 
@@ -2515,23 +2573,7 @@ To set the constructed title for a record type, edit any record of that type (or
 - When ready, you can test the mask using actual data. From the Test Mask dropdown, select any record, then click Test to view the result:![img_053.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_053.png)
 - When the mask is correct, click Save Mask to save it. The mask will now appear in the Mask field.
 
-### **Constructed titles**
-
-The **Constructed title** is like the reference you might find in the bibliography at the end of a book: it uses important fields to uniquely identify and summarise the bibliographic reference, or in this case the database record in question.![img_054.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_054.png)![img_055.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_055.png)![img_056.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_056.png)Constructed titles are used to represent records when they are listed in search results and as the visible representation of the record referenced in a pointer field (left) or relationship marker field (right).![img_057.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_057.png)![img_058.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_058.png)Constructed titles can use fields in the parent record (connected by a parent-child record pointer), as we can see in this example:![img_059.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_059.png)Constructed titles can also be used in reports and visualisations, searches, sorting or in the constructed title of connected records. We strongly recommend putting a little thought into this, as well-designed constructed titles can greatly improve the clarity and ease of use of the database. We recommend you read the help for Constructed titles.
-
-&lt;June 2022: this page to be completed with good examples of constructed titles. If we have not done it, please send us an email asking for us to do so, or to help you with your constructed titles&gt;
-
-### ***webpage:***\*\* Rebuild Record Titles \*\****id 584***
-
-![img_060.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_060.png)This option recalculates all the constructed (composite) record titles, compares them with the existing title and updates the title where the title has changed (generally due to changes in the title mask for the record type). At the end of the process it will display a list of records for which the titles were changed and a list of records for which the new title would be blank (an error condition). Note. To check the validity of title masks, see Administration | Verify Title Masks. Result Title fields are scanned and title usage updated where applicable. The scan shows a list of records for which the titles were changed. This includes: number processed number marked for update number left as is (these are left blank due to incorrect formatting etc. and need to be checked manually via the next step) To view all updated records in the Search Results Pane (in a new browser window), click the view updated records link. Note. If the title is blank, update the record appropriately (see Define New Record Type | Title Masks).
-
-### ***webpage:***\*\* Title masks \*\****id 730***
-
-Title masks are one of the most useful, and perhaps misunderstood or under-used features of Heurist. They create a short summary of content of each record - a sort of 'bibliographic reference' like you might see at the back of an article - by concatenating a number of fields of your choice from within the record. A separate title mask, with different fields, is defined for each record type. The constructed value is used as the extended title displayed in search results and other lists. The title mask builds a constructed title from the values of fields in the record. Fields are identified by \[ \] e.g. \*\*\[Title\], pp. \[Start\_Page\]-\[End\_Page\] \*\*might generate: **"Alice in Wonderland, pp. 37-39"** **Conditional text** Add optional text before a field (if it has a value) or a different set of text if a value is not available by adding {\\Text for existing value \\Text for missing value} after a field, for example: **\[Starting\_date\] {\\Starting date: \\Start date unknown}** will either generate: **"Starting date: 04-11-1974"** if there is a date, or **"Start date unknown"** if Starting\_date is empty. You can also leave the value blank, in which case nothign will be output in the case of a missing value. \*\*Inserting square brackets \*\* To insert a literal square-bracket, use two consecutive square-brackets (\[\[ or \]\]). **Inserting fields from the tree** The element names in square brackets should match field names for the record type, and this is ensured by providing a tree of available fields which can be inserted![img_061.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_061.png)
-
-# A short example of adding and editing data
-
-This example is drawn from Michael Falks Tutorial # ????
+###   
 
 # Ch 06 : Populating the database (import, lookup & synchronisation)
 
@@ -2665,24 +2707,27 @@ The import process handles the following types of scenarios:
 
 #### 3.1.4 Before You Begin
 
-<p class="callout info">At a minimum, you must have a suitable record type structure defined in the database (it is possible to add addiitonal fields durign the import, but you at least need th record types and their connections) and a corresponding CSV/TSV file holding the entries you wish to transform into records. </p>
+<p class="callout info">At a minimum, you must have a suitable record type structure defined in the database (it is quit easy to add additional fields during the import, but you need the record types and their connections) and a corresponding CSV/TSV file holding the entries you wish to transform into records. CSV / TSV files can be exported easily using Save as from spreadsheets such as Excel and Open Office. We recommend tab-separated files.</p>
 
 <p class="callout info">Importing can be a complex business. It is important to clean up the data as much as possible in advance. The following provides some tips on how to prepare your data:</p>
 
 - We recommend breaking very large files into manageable blocks of about two thousand lines.
-- Only one record type can be imported at each step of the process.
+- Heurist can pick out specific columns to create different record types (eg. picking out Places or Persons) and creates a Heurist ID for each of those records in a new column whih can then be imported onto a record pointer field.
 - Have one row per entry, with each column containing a single element of data (split concatenated values into separate columns, and place notes about data items in a separate column, not appended to the data value).
 - The first line MUST contain column labels. Do it for your own sanity! The first line of your data also determines the expected field count.
-- Data rows must occupy a single line of data terminated with a linefeed: CRLF (Windows) or LF (Unix/Mac). Linefeeds within memo fields should be represented by CR only. Fields should be separated by tab or comma. Quotes may exist within unquoted fields, but within quoted fields they should be preceded by a backslash ( \\" ). Fields containing the field separator should be enclosed in quotes. Editors such as [Notepad++](http://notepad-plus-plus.org/%22%20%5Ct%20%22_blank) (a free, open source Windows application) show tabs, CR and LF as symbols and can do global replacements on them.
+- Data rows must occupy a single line of data terminated with a linefeed: CRLF (Windows) or LF (Unix/Mac). Linefeeds within memo fields should be represented by CR only. Fields should be separated by tab or comma. Quotes may exist within unquoted fields, but within quoted fields they should be preceded by a backslash (\\"). Fields containing the field separator should be enclosed in quotes. Editors such as [Notepad++](http://notepad-plus-plus.org/%22%20%5Ct%20%22_blank) (a free, open source Windows application) show tabs, CR and LF as symbols and can do global replacements on them.
 - Coded columns should use a consistent set of codes. In addition to your spreadsheet program, you may find OpenRefine a useful tool for checking and correcting coded columns, splitting fields, georeferencing, finding URL references and so on.
-- We strongly suggest editing the structure of the database to add any fields and terms that you will require for the import, before attempting to load the data. If you start trying to load data without the appropriate fields in place you will find it frustrating having to exit the process repeatedly to add fields.
-- If you have missing data for **Required fields**, you may find it convenient to set those fields to **Optional** before importing, then set them back to **Required**, then use **Database &gt; Structure &gt; Verify** to get a list of the records which need correcting. Alternatively, you can add some dummy value to the data, such as 'Missing', and search for this value after import.
+- If you have missing data for **Required fields**, you can still import the data with missing values, then use **Database &gt; Structure &gt; Verify** to get a list of the records which need correcting.
 - The import process can be repeated on the file to extract multiple entities from different columns and replace them with record IDs which can be used in a subsequent insertion or update of records.
 - Please visit the page on [Importing delimited text files](http://heuristnetwork.org/importing-data/) on the Heurist network site for tips on successful import. &lt;ce renvoi ne devrait plus être nécessaire par la suite&gt;
 
 #### 3.1.5 Delimited Text Importer Wizard
 
 The Import Wizard takes you through a number of screens and steps to assist you in defining the import. (Read the screen instructions carefully. It might be a good idea to carry out a trial import with a small dataset to check that the result is as you expected.)
+
+<p class="callout info">Heurist also has a data verification function which matches a delimited data file with fields in the database. It is triggered with Populate &gt; Verify db against CSV/TSV The steps are identical until one reaches the selection of fields to import, at which point one uses the same dialogue to select the fields to compare before clicking on the verification report button.  
+  
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-09/scaled-1680-/zl1image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-09/zl1image.png)</p>
 
 ##### Set Data Source
 
@@ -2784,6 +2829,8 @@ Click <span style="color: rgb(132, 63, 161);">\[OK\]</span> and close the window
 ### 3.2 Zotero Bibliography
 
 **Zotero Bibliography Sync** allows you to automatically synchronise a Zotero web library with the already existing bibliography structure within Heurist. It is especially powerful because it allows you to update bibliographic data from an active Zotero library, thereby saving time and effort in updating bibliography records within Heurist.
+
+<p class="callout info">The synchronisation function looks for changes made since the last synchronisation, so it works fast even with a 20,000+ Zotero library once the initial synch has been done (which will take half an hour or so).</p>
 
 Heurist provides the following functions and capabilities for importing bibliographic data:
 
@@ -2911,7 +2958,7 @@ Heurist will recognise these specific IIIF file and display them by using the em
 
 #### 4.6 Process IIIF Manifests
 
-**Process IIIF Manifests** function, is reserved for **advanced users.**  It reads IIIF manifests and incluiding Annoftations, and creates or updates Annotation records in the Heurist database.
+**Process IIIF Manifests** function, is reserved for **advanced users.** It reads IIIF manifests and incluiding Annoftations, and creates or updates Annotation records in the Heurist database.
 
 [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/Dglimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/Dglimage.png)
 
@@ -3928,7 +3975,7 @@ Store RDF name (like foaf:Person OR dbo:Genre) in some field of defRectype, defD
 
 DATA: Import Omeka resource/value tables into Heurist Records/recDetails
 
-# Ch 07: Using the database (find, filter & view
+# Ch 07: Using the database (find, filter & view)
 
 **\[Explore\]** is the workhorse function that allows you to make use of the data recorded in a database. The core function of Explore is filtering the database to isolate a subset of the database to which some sort of listing, analysis, visualisation or export will be applied (filter also acts as a simple search to locate information to look through eg. a reference, web bookmark or images). This workflow, from filter through results list or subset to reading, visualization, analysis and output, is represented in the left-to-right flow across the Explore screen :
 
@@ -4572,9 +4619,11 @@ For all other export types, it is possible to choose between:
 
 Heurist defines an XML schema called Heurist Markup Language (HML). HML can be used both as an interpretable archivable format (it is included as the primary element of Publish &gt; Safeguard file) and as a data source which can be transformed with XSLT transforms, Python, PHP, or many other languages to a required format.
 
+Check the box "Include uploaded files and deliver as a single zip file for download" (see below) to include the images and other files which have been uploaded or attached to the selected records, and deliver the XML file and the images as a downoaded zip file. Note that this can become very large if you include a lot of records with images.
+
 Check the box "Include human-readable names and local IDs for everything" if you plan to look at the XML file and interpret its structure (this will create a very large file duer to repetition). It is often better to export an explanation of the structure through Populate &gt;Heurist XML/JSON - Download template.
 
-[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/P0Jimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/P0Jimage.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-09/scaled-1680-/KFwimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-09/KFwimage.png)
 
 ### JSON
 
@@ -8322,17 +8371,17 @@ Opens a standard record edit form for the CMS\_Home record which defines the web
 
 <span style="color: rgb(0, 0, 0);">The available widgets are:</span>
 
-- <span style="color: rgb(0, 0, 0);">Filter: This widget gives visitors access to the standard Heurist search bar, such as you see at the top of the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
-- <span style="color: rgb(0, 0, 0);">Saved Filters: This widget allows you to embed Saved Filters on a Heurist webpage. In most cases, we recommend that you use </span>[<span style="color: rgb(0, 0, 255);">Faceted Searches</span>](https://heuristref.net/h6-alpha/viewers/smarty/546)<span style="color: rgb(0, 0, 0);"> with this widget, as they provide the best user experience.</span>
-- <span style="color: rgb(0, 0, 0);">Standard Filter Result: This widget displays records in a similar manner to the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
-- <span style="color: rgb(0, 0, 0);">Custom Report: This widget displays information using a Custom Report that you have built in the Explore Menu. Custom Reports can also be embedded within other widgets, for instance to configure the popups on the Map and Timeline, or to provide a different view of records in the Standard Filter Result.</span>
-- <span style="color: rgb(0, 0, 0);">Table Format: This widget displays records in a tabular format, the same as the List View in the Explore Menu</span>
-- <span style="color: rgb(0, 0, 0);">Map and Timeline: This widget plots records on a map with embedded timeline, just like the Map View in the Explore Menu. You can utilise Map Documents defined in your Heurist database to provide additional advanced functionality.</span>
-- <span style="color: rgb(0, 0, 0);">Story Map: This widget plots a set of records on the map as a connected series, with an accompanying 'slideshow' of information about each record. This is ideal for 10-20 records.</span>
-- <span style="color: rgb(0, 0, 0);">Network Graph: This widget displays records as nodes in a network, much like the Network View in the Explore Menu.</span>
-- <span style="color: rgb(0, 0, 0);">Menu: This widget allows you to add a navigation menu to your site, like the one that is automatically generated in your website header.</span>
-- <span style="color: rgb(0, 0, 0);">Add Record: This widget allows you to add an 'Add Record' button to your page. Visitors can click the button to open the standard data entry form for a given record type.</span>
-- <span style="color: rgb(0, 0, 0);">Email Us Form: This widget allows you to add a contact form to your page, so that visitors can email you without you revealing your email address publicly on the internet.</span>
+- **Filter:** <span style="color: rgb(0, 0, 0);">This widget gives visitors access to the standard Heurist search bar, such as you see at the top of the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
+- **Saved Filters:**<span style="color: rgb(0, 0, 0);"> This widget allows you to embed Saved Filters on a Heurist webpage. In most cases, we recommend that you use </span>[<span style="color: rgb(0, 0, 255);">Faceted Searches</span>](https://heuristref.net/h6-alpha/viewers/smarty/546)<span style="color: rgb(0, 0, 0);"> with this widget, as they provide the best user experience.</span>
+- **Standard Filter Result:**<span style="color: rgb(0, 0, 0);"> This widget displays records in a similar manner to the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
+- **Custom Report:**<span style="color: rgb(0, 0, 0);"> This widget displays information using a Custom Report that you have built in the Explore Menu. Custom Reports can also be embedded within other widgets, for instance to configure the popups on the Map and Timeline, or to provide a different view of records in the Standard Filter Result.</span>
+- **Table Format:** <span style="color: rgb(0, 0, 0);">This widget displays records in a tabular format, the same as the List View in the Explore Menu</span>
+- **Map and Timeline:**<span style="color: rgb(0, 0, 0);"> This widget plots records on a map with embedded timeline, just like the Map View in the Explore Menu. You can utilise Map Documents defined in your Heurist database to provide additional advanced functionality.</span>
+- **Story Map:** <span style="color: rgb(0, 0, 0);">This widget plots a set of records on the map as a connected series, with an accompanying 'slideshow' of information about each record. This is ideal for 10-20 records.</span>
+- **Network Graph:**<span style="color: rgb(0, 0, 0);"> This widget displays records as nodes in a network, much like the Network View in the Explore Menu.</span>
+- **Menu:** <span style="color: rgb(0, 0, 0);">This widget allows you to add a navigation menu to your site, like the one that is automatically generated in your website header.</span>
+- **Add Record:**<span style="color: rgb(0, 0, 0);"> This widget allows you to add an 'Add Record' button to your page. Visitors can click the button to open the standard data entry form for a given record type.</span>
+- **Email Us Form:**<span style="color: rgb(0, 0, 0);"> This widget allows you to add a contact form to your page, so that visitors can email you without you revealing your email address publicly on the internet.</span>
 
 #### **How do I configure a widget?**
 
@@ -8355,6 +8404,24 @@ Opens a standard record edit form for the CMS\_Home record which defines the web
 <span style="color: rgb(0, 0, 0);">When you configure a widget, you have the option to specify which search realm it belongs to. You simply tell Heurist what search realms you would like to exist, and it will take care of creating and utilising them. If your 'Saved Filters' and 'Network Graph' are both in a search realm called 'Bob', then they will be linked. If you instead write 'Jane' in the search realm box for both widgets, then they will be linked together in a search realm called 'Jane'.</span>
 
 ### <span style="color: rgb(0, 0, 0);">Types of widgets</span>
+
+#### <span style="color: rgb(0, 0, 0);">Simple text box</span>  
+
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/dekimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/dekimage.png)
+
+<span style="color: rgb(0, 0, 0);">The simplest of all components, the simple text box contains static WYSIYYG text (</span>*Simple text boxes can also be loaded in two and three column modes as a shortcut to individual positioning or flexboxes).*
+
+<span style="color: rgb(0, 0, 0);">Simple text can be edited in WYSIWYG mode simply by clicking on the text in website edit mode:</span>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/UBsimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/UBsimage.png)
+
+Apart from the usual formatting options, one can create a link which inserts a new record in the database (**Add Rec)**, one can insert images and other files from those previously uploaded or by uploading from your local drive or providing a remote URL (**Add Media** - see data entry of file fields for detailex explanation), or standard web hyperlinks (**URL).**
+
+<p class="callout info">To insert a link which skips to an another page in the website, use the URL button and simply enter the ID of the web page you wish to load.  
+*(find the ID either by a search for CMS Web Pages - open another browser tab to carry out the search - or by editing the site structure - button at top left in website edit more - and looking at hte menu pages which are connected to the CMS Home page)*  
+  
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/Euiimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/Euiimage.png)</p>
 
 #### <span style="color: rgb(0, 0, 0);">Filter</span>
 
@@ -8382,7 +8449,9 @@ Opens a standard record edit form for the CMS\_Home record which defines the web
 
 **Unique widget id:**<span style="color: rgb(0, 0, 0);"> A name for the map widget on this page. This feature is only useful if you are using custom Javascript or CSS in your website.</span>
 
-#### <span style="color: rgb(0, 0, 0);">Standard filter results</span>
+<span style="color: rgb(0, 0, 0);">-------------------------------------------------------------------------------------------------------------------------</span>
+
+### <span style="color: rgb(0, 0, 0);">Standard filter results</span>
 
 <span style="color: rgb(0, 0, 0);">This widget allows you to display </span><span style="color: rgb(51, 51, 51);">a </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">Filtered Results</span> <span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">pane, displaying the records in your current 'result set'. </span>  
 <span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">The current 'result set' is the set of records retrieved by the filter you have most recently applied.</span><span style="color: rgb(51, 51, 51);"> (see chapter 7).</span>
@@ -8451,7 +8520,9 @@ Opens a standard record edit form for the CMS\_Home record which defines the web
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-lb7gkrwl.png)
 
-#### <span style="color: rgb(0, 0, 0);">Map and Timeline</span>
+\----------------------------------------------------------------------------------------------------
+
+### <span style="color: rgb(0, 0, 0);">Map and Timeline</span>
 
 There are many options for controlling the appearance and functionality of the map widget.
 
@@ -8506,9 +8577,15 @@ There are many options for controlling the appearance and functionality of the m
 
 **Unique widget id:**<span style="color: rgb(0, 0, 0);"> A name for the map widget on this page. This feature is only useful if you are using custom Javascript or CSS in your website.</span>
 
+\-----------------------------------------------------------------------------------------------------------------------------
+
 #### <span style="color: rgb(0, 0, 0);">Story Map \[TO DO\]</span>
 
+\-----------------------------------------------------------------------------------------------------------------------------
+
 #### <span style="color: rgb(0, 0, 0);">Network Graph \[TO DO\]</span>
+
+\-----------------------------------------------------------------------------------------------------------------------------
 
 #### <span style="color: rgb(0, 0, 0);">Menu \[TO DO\]</span>
 
@@ -9429,6 +9506,10 @@ Examples:
 
 In values use {nnn} to replace regex matching values
 
+Here is a typical example of the substitutions file allowing the use of textual URLs for the user in place of the numeric URLs which the system recognises:
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/ch3image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/ch3image.png)
+
 #### **Self-contained website**
 
 Whatever the server which serves the database and website, you can make this appear as part of your domain. You can use an existing domain or purchase one quite cheaply if you don't already have one (typically $10 - 40 per year for .net and .org domains, but depends on the 'desirability' of the name - do a search for Cheap domains and shop around). Then ask the domain to point to your database.
@@ -9676,6 +9757,26 @@ User has to define the name of this template in “Custom website template file�
 ![embedded-image-nzayyoj9.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-nzayyoj9.png)
 
 <span style="color:rgb(0,0,0);">These sections will be described in this help where they are relevant. If you do not understand them then we recommend leave as is or contact the Heurist Team for further details.</span>
+
+### <span style="color:rgb(15,71,97);">LANGUAGES</span>
+
+Heurist has extensive functions for managing multiple languages and providing translations:
+
+- Interface (requires translation of strings in the localisation file)
+- Saved search names (defined in save search form)
+- Facet names (
+- Terms (defined in vocabulary editor)
+- Text field values
+- Record types and fields not yet supported as of Aug 2026  
+    (but could be handled with similar methods to terms - coding required)
+
+**Interface languages** are hardcoded in the source code in client/profile/profilePreferences.html. To add new language add a language entry in the selector, copy localization\_eng.txt and translate to the new language.   
+  
+**Text field, term translations and saved search names** use values starting with a three letter language code, eg. *FRE:Repoussé*, which will replace the default language (which requires no prefix) when a website is set to a language other than the default. The list of languages for translations are set in Design &gt; Properties.   
+  
+The term translations are accessible in smarty reports and can be used in searches (the trnslated terms will be shown in the lsit of values in a facet search, where a translation to the appropriate language is available, otherwise it will show the term in the default language).
+
+Note: Translated terms are not yet (Aug 2026) accessible in the edit form (requires modification of editing\_input.js and utils\_ui.js to use translated values for labels and dropdowns in edit form).
 
 ### <span style="color:rgb(15,71,97);">MANAGE USERS</span>
 
@@ -10517,6 +10618,16 @@ This chapter outlines some useful procedures for managing Heurist servers, inclu
 #### **General observations**
 
 Heurist is designed to run on any Linux server
+
+#### **Emergency Unix commands**
+
+<span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">These commands may depend on the Unix version and the way MySQL is configured, refer to system documentation or ask AI for instructions if these do not work </span>
+
+- <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">To restart MySQL (commonest form of failure eg. if disk space exhausted or stuck query). Works on HeuristRef.Net (OVH Cloud), HeuristAU.net (Intersect server) and Heurist.Huma-Num.fr</span>  
+    <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);"> sudo service mysqld restart</span>  
+    <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">Note: Sometimes </span>**restart** <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">does nothing (no response). In that case first use </span>**stop**<span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">, then use </span>**start**
+- <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">To restart Apache web server</span>  
+    <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);"> sudo apachectl restart</span>
 
 #### **Handy Unix commands &amp; other useful things**
 

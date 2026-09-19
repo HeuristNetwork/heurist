@@ -130,24 +130,27 @@ The import process handles the following types of scenarios:
 
 #### 3.1.4 Before You Begin
 
-<p class="callout info">At a minimum, you must have a suitable record type structure defined in the database (it is possible to add addiitonal fields durign the import, but you at least need th record types and their connections) and a corresponding CSV/TSV file holding the entries you wish to transform into records. </p>
+<p class="callout info">At a minimum, you must have a suitable record type structure defined in the database (it is quit easy to add additional fields during the import, but you need the record types and their connections) and a corresponding CSV/TSV file holding the entries you wish to transform into records. CSV / TSV files can be exported easily using Save as from spreadsheets such as Excel and Open Office. We recommend tab-separated files.</p>
 
 <p class="callout info">Importing can be a complex business. It is important to clean up the data as much as possible in advance. The following provides some tips on how to prepare your data:</p>
 
 - We recommend breaking very large files into manageable blocks of about two thousand lines.
-- Only one record type can be imported at each step of the process.
+- Heurist can pick out specific columns to create different record types (eg. picking out Places or Persons) and creates a Heurist ID for each of those records in a new column whih can then be imported onto a record pointer field.
 - Have one row per entry, with each column containing a single element of data (split concatenated values into separate columns, and place notes about data items in a separate column, not appended to the data value).
 - The first line MUST contain column labels. Do it for your own sanity! The first line of your data also determines the expected field count.
-- Data rows must occupy a single line of data terminated with a linefeed: CRLF (Windows) or LF (Unix/Mac). Linefeeds within memo fields should be represented by CR only. Fields should be separated by tab or comma. Quotes may exist within unquoted fields, but within quoted fields they should be preceded by a backslash ( \\" ). Fields containing the field separator should be enclosed in quotes. Editors such as [Notepad++](http://notepad-plus-plus.org/%22%20%5Ct%20%22_blank) (a free, open source Windows application) show tabs, CR and LF as symbols and can do global replacements on them.
+- Data rows must occupy a single line of data terminated with a linefeed: CRLF (Windows) or LF (Unix/Mac). Linefeeds within memo fields should be represented by CR only. Fields should be separated by tab or comma. Quotes may exist within unquoted fields, but within quoted fields they should be preceded by a backslash (\\"). Fields containing the field separator should be enclosed in quotes. Editors such as [Notepad++](http://notepad-plus-plus.org/%22%20%5Ct%20%22_blank) (a free, open source Windows application) show tabs, CR and LF as symbols and can do global replacements on them.
 - Coded columns should use a consistent set of codes. In addition to your spreadsheet program, you may find OpenRefine a useful tool for checking and correcting coded columns, splitting fields, georeferencing, finding URL references and so on.
-- We strongly suggest editing the structure of the database to add any fields and terms that you will require for the import, before attempting to load the data. If you start trying to load data without the appropriate fields in place you will find it frustrating having to exit the process repeatedly to add fields.
-- If you have missing data for **Required fields**, you may find it convenient to set those fields to **Optional** before importing, then set them back to **Required**, then use **Database &gt; Structure &gt; Verify** to get a list of the records which need correcting. Alternatively, you can add some dummy value to the data, such as 'Missing', and search for this value after import.
+- If you have missing data for **Required fields**, you can still import the data with missing values, then use **Database &gt; Structure &gt; Verify** to get a list of the records which need correcting.
 - The import process can be repeated on the file to extract multiple entities from different columns and replace them with record IDs which can be used in a subsequent insertion or update of records.
 - Please visit the page on [Importing delimited text files](http://heuristnetwork.org/importing-data/) on the Heurist network site for tips on successful import. &lt;ce renvoi ne devrait plus être nécessaire par la suite&gt;
 
 #### 3.1.5 Delimited Text Importer Wizard
 
 The Import Wizard takes you through a number of screens and steps to assist you in defining the import. (Read the screen instructions carefully. It might be a good idea to carry out a trial import with a small dataset to check that the result is as you expected.)
+
+<p class="callout info">Heurist also has a data verification function which matches a delimited data file with fields in the database. It is triggered with Populate &gt; Verify db against CSV/TSV The steps are identical until one reaches the selection of fields to import, at which point one uses the same dialogue to select the fields to compare before clicking on the verification report button.  
+  
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-09/scaled-1680-/zl1image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-09/zl1image.png)</p>
 
 ##### Set Data Source
 
@@ -249,6 +252,8 @@ Click <span style="color: rgb(132, 63, 161);">\[OK\]</span> and close the window
 ### 3.2 Zotero Bibliography
 
 **Zotero Bibliography Sync** allows you to automatically synchronise a Zotero web library with the already existing bibliography structure within Heurist. It is especially powerful because it allows you to update bibliographic data from an active Zotero library, thereby saving time and effort in updating bibliography records within Heurist.
+
+<p class="callout info">The synchronisation function looks for changes made since the last synchronisation, so it works fast even with a 20,000+ Zotero library once the initial synch has been done (which will take half an hour or so).</p>
 
 Heurist provides the following functions and capabilities for importing bibliographic data:
 
@@ -376,7 +381,7 @@ Heurist will recognise these specific IIIF file and display them by using the em
 
 #### 4.6 Process IIIF Manifests
 
-**Process IIIF Manifests** function, is reserved for **advanced users.**  It reads IIIF manifests and incluiding Annoftations, and creates or updates Annotation records in the Heurist database.
+**Process IIIF Manifests** function, is reserved for **advanced users.** It reads IIIF manifests and incluiding Annoftations, and creates or updates Annotation records in the Heurist database.
 
 [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/Dglimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/Dglimage.png)
 

@@ -116,17 +116,17 @@ Opens a standard record edit form for the CMS\_Home record which defines the web
 
 <span style="color: rgb(0, 0, 0);">The available widgets are:</span>
 
-- <span style="color: rgb(0, 0, 0);">Filter: This widget gives visitors access to the standard Heurist search bar, such as you see at the top of the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
-- <span style="color: rgb(0, 0, 0);">Saved Filters: This widget allows you to embed Saved Filters on a Heurist webpage. In most cases, we recommend that you use </span>[<span style="color: rgb(0, 0, 255);">Faceted Searches</span>](https://heuristref.net/h6-alpha/viewers/smarty/546)<span style="color: rgb(0, 0, 0);"> with this widget, as they provide the best user experience.</span>
-- <span style="color: rgb(0, 0, 0);">Standard Filter Result: This widget displays records in a similar manner to the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
-- <span style="color: rgb(0, 0, 0);">Custom Report: This widget displays information using a Custom Report that you have built in the Explore Menu. Custom Reports can also be embedded within other widgets, for instance to configure the popups on the Map and Timeline, or to provide a different view of records in the Standard Filter Result.</span>
-- <span style="color: rgb(0, 0, 0);">Table Format: This widget displays records in a tabular format, the same as the List View in the Explore Menu</span>
-- <span style="color: rgb(0, 0, 0);">Map and Timeline: This widget plots records on a map with embedded timeline, just like the Map View in the Explore Menu. You can utilise Map Documents defined in your Heurist database to provide additional advanced functionality.</span>
-- <span style="color: rgb(0, 0, 0);">Story Map: This widget plots a set of records on the map as a connected series, with an accompanying 'slideshow' of information about each record. This is ideal for 10-20 records.</span>
-- <span style="color: rgb(0, 0, 0);">Network Graph: This widget displays records as nodes in a network, much like the Network View in the Explore Menu.</span>
-- <span style="color: rgb(0, 0, 0);">Menu: This widget allows you to add a navigation menu to your site, like the one that is automatically generated in your website header.</span>
-- <span style="color: rgb(0, 0, 0);">Add Record: This widget allows you to add an 'Add Record' button to your page. Visitors can click the button to open the standard data entry form for a given record type.</span>
-- <span style="color: rgb(0, 0, 0);">Email Us Form: This widget allows you to add a contact form to your page, so that visitors can email you without you revealing your email address publicly on the internet.</span>
+- **Filter:** <span style="color: rgb(0, 0, 0);">This widget gives visitors access to the standard Heurist search bar, such as you see at the top of the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
+- **Saved Filters:**<span style="color: rgb(0, 0, 0);"> This widget allows you to embed Saved Filters on a Heurist webpage. In most cases, we recommend that you use </span>[<span style="color: rgb(0, 0, 255);">Faceted Searches</span>](https://heuristref.net/h6-alpha/viewers/smarty/546)<span style="color: rgb(0, 0, 0);"> with this widget, as they provide the best user experience.</span>
+- **Standard Filter Result:**<span style="color: rgb(0, 0, 0);"> This widget displays records in a similar manner to the </span>[<span style="color: rgb(0, 0, 255);">Filtered Results Pane</span>](https://heuristref.net/h6-alpha/viewers/smarty/727)<span style="color: rgb(0, 0, 0);"> of the </span>[<span style="color: rgb(0, 0, 255);">Explore Menu</span>](https://heuristref.net/h6-alpha/viewers/smarty/672)<span style="color: rgb(0, 0, 0);">.</span>
+- **Custom Report:**<span style="color: rgb(0, 0, 0);"> This widget displays information using a Custom Report that you have built in the Explore Menu. Custom Reports can also be embedded within other widgets, for instance to configure the popups on the Map and Timeline, or to provide a different view of records in the Standard Filter Result.</span>
+- **Table Format:** <span style="color: rgb(0, 0, 0);">This widget displays records in a tabular format, the same as the List View in the Explore Menu</span>
+- **Map and Timeline:**<span style="color: rgb(0, 0, 0);"> This widget plots records on a map with embedded timeline, just like the Map View in the Explore Menu. You can utilise Map Documents defined in your Heurist database to provide additional advanced functionality.</span>
+- **Story Map:** <span style="color: rgb(0, 0, 0);">This widget plots a set of records on the map as a connected series, with an accompanying 'slideshow' of information about each record. This is ideal for 10-20 records.</span>
+- **Network Graph:**<span style="color: rgb(0, 0, 0);"> This widget displays records as nodes in a network, much like the Network View in the Explore Menu.</span>
+- **Menu:** <span style="color: rgb(0, 0, 0);">This widget allows you to add a navigation menu to your site, like the one that is automatically generated in your website header.</span>
+- **Add Record:**<span style="color: rgb(0, 0, 0);"> This widget allows you to add an 'Add Record' button to your page. Visitors can click the button to open the standard data entry form for a given record type.</span>
+- **Email Us Form:**<span style="color: rgb(0, 0, 0);"> This widget allows you to add a contact form to your page, so that visitors can email you without you revealing your email address publicly on the internet.</span>
 
 #### **How do I configure a widget?**
 
@@ -149,6 +149,24 @@ Opens a standard record edit form for the CMS\_Home record which defines the web
 <span style="color: rgb(0, 0, 0);">When you configure a widget, you have the option to specify which search realm it belongs to. You simply tell Heurist what search realms you would like to exist, and it will take care of creating and utilising them. If your 'Saved Filters' and 'Network Graph' are both in a search realm called 'Bob', then they will be linked. If you instead write 'Jane' in the search realm box for both widgets, then they will be linked together in a search realm called 'Jane'.</span>
 
 ### <span style="color: rgb(0, 0, 0);">Types of widgets</span>
+
+#### <span style="color: rgb(0, 0, 0);">Simple text box</span>  
+
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/dekimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/dekimage.png)
+
+<span style="color: rgb(0, 0, 0);">The simplest of all components, the simple text box contains static WYSIYYG text (</span>*Simple text boxes can also be loaded in two and three column modes as a shortcut to individual positioning or flexboxes).*
+
+<span style="color: rgb(0, 0, 0);">Simple text can be edited in WYSIWYG mode simply by clicking on the text in website edit mode:</span>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/UBsimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/UBsimage.png)
+
+Apart from the usual formatting options, one can create a link which inserts a new record in the database (**Add Rec)**, one can insert images and other files from those previously uploaded or by uploading from your local drive or providing a remote URL (**Add Media** - see data entry of file fields for detailex explanation), or standard web hyperlinks (**URL).**
+
+<p class="callout info">To insert a link which skips to an another page in the website, use the URL button and simply enter the ID of the web page you wish to load.  
+*(find the ID either by a search for CMS Web Pages - open another browser tab to carry out the search - or by editing the site structure - button at top left in website edit more - and looking at hte menu pages which are connected to the CMS Home page)*  
+  
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/Euiimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/Euiimage.png)</p>
 
 #### <span style="color: rgb(0, 0, 0);">Filter</span>
 
@@ -176,7 +194,9 @@ Opens a standard record edit form for the CMS\_Home record which defines the web
 
 **Unique widget id:**<span style="color: rgb(0, 0, 0);"> A name for the map widget on this page. This feature is only useful if you are using custom Javascript or CSS in your website.</span>
 
-#### <span style="color: rgb(0, 0, 0);">Standard filter results</span>
+<span style="color: rgb(0, 0, 0);">-------------------------------------------------------------------------------------------------------------------------</span>
+
+### <span style="color: rgb(0, 0, 0);">Standard filter results</span>
 
 <span style="color: rgb(0, 0, 0);">This widget allows you to display </span><span style="color: rgb(51, 51, 51);">a </span><span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">Filtered Results</span> <span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">pane, displaying the records in your current 'result set'. </span>  
 <span style="color: rgb(51, 51, 51); background-color: rgb(255, 255, 255);">The current 'result set' is the set of records retrieved by the filter you have most recently applied.</span><span style="color: rgb(51, 51, 51);"> (see chapter 7).</span>
@@ -245,7 +265,9 @@ Opens a standard record edit form for the CMS\_Home record which defines the web
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-lb7gkrwl.png)
 
-#### <span style="color: rgb(0, 0, 0);">Map and Timeline</span>
+\----------------------------------------------------------------------------------------------------
+
+### <span style="color: rgb(0, 0, 0);">Map and Timeline</span>
 
 There are many options for controlling the appearance and functionality of the map widget.
 
@@ -300,9 +322,15 @@ There are many options for controlling the appearance and functionality of the m
 
 **Unique widget id:**<span style="color: rgb(0, 0, 0);"> A name for the map widget on this page. This feature is only useful if you are using custom Javascript or CSS in your website.</span>
 
+\-----------------------------------------------------------------------------------------------------------------------------
+
 #### <span style="color: rgb(0, 0, 0);">Story Map \[TO DO\]</span>
 
+\-----------------------------------------------------------------------------------------------------------------------------
+
 #### <span style="color: rgb(0, 0, 0);">Network Graph \[TO DO\]</span>
+
+\-----------------------------------------------------------------------------------------------------------------------------
 
 #### <span style="color: rgb(0, 0, 0);">Menu \[TO DO\]</span>
 

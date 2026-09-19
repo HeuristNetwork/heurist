@@ -146,9 +146,11 @@ For all other export types, it is possible to choose between:
 
 Heurist defines an XML schema called Heurist Markup Language (HML). HML can be used both as an interpretable archivable format (it is included as the primary element of Publish &gt; Safeguard file) and as a data source which can be transformed with XSLT transforms, Python, PHP, or many other languages to a required format.
 
+Check the box "Include uploaded files and deliver as a single zip file for download" (see below) to include the images and other files which have been uploaded or attached to the selected records, and deliver the XML file and the images as a downoaded zip file. Note that this can become very large if you include a lot of records with images.
+
 Check the box "Include human-readable names and local IDs for everything" if you plan to look at the XML file and interpret its structure (this will create a very large file duer to repetition). It is often better to export an explanation of the structure through Populate &gt;Heurist XML/JSON - Download template.
 
-[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/P0Jimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/P0Jimage.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-09/scaled-1680-/KFwimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-09/KFwimage.png)
 
 ### JSON
 

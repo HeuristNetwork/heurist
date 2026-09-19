@@ -74,6 +74,10 @@ Examples:
 
 In values use {nnn} to replace regex matching values
 
+Here is a typical example of the substitutions file allowing the use of textual URLs for the user in place of the numeric URLs which the system recognises:
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/ch3image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/ch3image.png)
+
 #### **Self-contained website**
 
 Whatever the server which serves the database and website, you can make this appear as part of your domain. You can use an existing domain or purchase one quite cheaply if you don't already have one (typically $10 - 40 per year for .net and .org domains, but depends on the 'desirability' of the name - do a search for Cheap domains and shop around). Then ask the domain to point to your database.

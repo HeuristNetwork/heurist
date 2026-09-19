@@ -1,4 +1,4 @@
-# Ch 07: Using the database (find, filter & view
+# Ch 07: Using the database (find, filter & view)
 
 **\[Explore\]** is the workhorse function that allows you to make use of the data recorded in a database. The core function of Explore is filtering the database to isolate a subset of the database to which some sort of listing, analysis, visualisation or export will be applied (filter also acts as a simple search to locate information to look through eg. a reference, web bookmark or images). This workflow, from filter through results list or subset to reading, visualization, analysis and output, is represented in the left-to-right flow across the Explore screen :
 

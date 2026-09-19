@@ -6,6 +6,8 @@ When you create or edit a record it opens automatically in **data entry** mode. 
 
 ![](https://heurist-doc.huma-num.fr/uploads/84bec25f-6f29-4233-b467-d39538ed54ec.png)
 
+<p class="callout info">The data entry form is also a data structure modification form - click **Modify structure** at the top (available to database adminstrators only). This allows direct modification of the structure for the record type being edited so that the changes can be tested as you work. See later, and the following chapter.</p>
+
 ---
 
 ## 1. Opening and Navigating Records
@@ -58,19 +60,29 @@ In the top left corner are the icon and name of the record type to which the dat
 
 #### 2.2.1. Modify structure of the record type form
 
-Click <span style="color: rgb(132, 63, 161);">\[Modify Structure\]</span> to modify the fields of the record type. A new windows will open with a summary of the fields to be completed for a record of this record type on the left, and a reproduction of the Data Entry form on the right. A gear icon appear at the left of the fields. Clicking on it allows you to edit the field in question. See chapter 5 for further details.
+Click <span style="color: rgb(132, 63, 161);">\[Modify Structure\]</span> to modify the fields of the record type. A new windows will open with a summary of the fields to be completed for a record of this record type on the left, and the Data Entry form on the right.
+
+<p class="callout info">This is an extremely powerful function, as it allows you to modify the structure of your database on the fly without affecting existing data (other than intentional deletion of fields and associated data, which comes with adequate warnings). Fields can be added, renamed, reorganised, grouped under headings and to some extent field type changes are permitted (without loss of data).   
+  
+The numbers next to the tree show how many times a field has been used; this is particularly useful when importing legacy data to identify little-used fields which one may wish to remove or combine with other fields. The tick and crossed-out circle icons allow one to open a new browser window for all the records with / without the given field.</p>
+
+See chapter 5 for further details.
 
 ![](https://heurist-doc.huma-num.fr/uploads/50cb926d-1385-40e1-bf45-1b39110d81cc.png)
 
-<p class="callout info">Values given will only be applied to the data being viewed. All other changes will be applied to the entire record type, thus modifying the structure of all data within that record type.</p>
+A gear icon appear at the left of the fields. Rollover displays a short menu of frequently used changes. Clicking on it allows you to edit the field in question.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/image.png)
+
+<p class="callout info">Strucural changes will be applied to the entire record type, thus modifying the structure of all records for that type. Values entered in the form relate to the current record and can be saved exactly the same way as in standard data entry mode. </p>
 
 #### 2.2.2. Modify the constructed title
 
-Click <span style="color: rgb(132, 63, 161);">\[Constructed title\]</span> to modify the **title mask** for the record type.
+Click the gearwheel left of <span style="color: rgb(132, 63, 161);">\[Constructed title\]</span> to modify the **title mask** for the record type.
 
 ![](https://heurist-doc.huma-num.fr/uploads/f042a27b-b7e7-49dd-932f-51c1ca509b4d.png)
 
-The title mask gives you a summary of the record which is display in lists of results and where a record is referenced through a record pointer or a relationship marker. The form you get by clicking of <span style="color: rgb(132, 63, 161);">\[Constructed title\]</span> allows you to personnalise it by selecting the field making up the summary. See chapter 5 for further details.
+The title mask gives you a summary of the record content which is displayed in lists of results and where a record is referenced through a record pointer or a relationship marker. The form you get by clicking on <span style="color: rgb(132, 63, 161);">\[Constructed title\]</span> allows you to personalise it by selecting the fields which are concatenated to provide the title. See chapter 5 for further details.
 
 ### 2.3. Form options
 
@@ -78,7 +90,7 @@ At the right of the record type related buttons are several options :
 
 ![](https://heurist-doc.huma-num.fr/uploads/abcffdd8-2b38-420c-be40-a54c36f32572.png)
 
-- When checked <span style="color: rgb(132, 63, 161);">\[Show help\]</span> shows the **Help text**, which specifies the expected value of the field under it.
+- When checked <span style="color: rgb(132, 63, 161);">\[Show help\]</span> shows the **Help text**, which specifies the expected value of the field under it. This help text corresponds with the Description of the field entered when defining the field (and can be changed)
 - The <span style="color: rgb(132, 63, 161);">\[Optional fields\]</span> checkbox allows you to show or hide optional fields in the form
 
 ![](https://heurist-doc.huma-num.fr/uploads/48348d51-89e0-42c5-808b-23c02851a5d2.png)
@@ -183,13 +195,13 @@ Fields can be required, recommended, or optional.
 
 As you roll over a data field you will see a number of icons at the beginning or the end of the field.
 
-- ![](https://heurist-doc.huma-num.fr/uploads/deeb3543-f7a0-495a-9f94-330ba69572fc.png)clear (delete) the value
+- ![](https://heurist-doc.huma-num.fr/uploads/deeb3543-f7a0-495a-9f94-330ba69572fc.png) clear (delete) the value
 - ![](https://heurist-doc.huma-num.fr/uploads/78256baa-fa48-4f62-ba85-2be78e688a55.png)hide (currently everybody can see the value) or![](https://heurist-doc.huma-num.fr/uploads/b5f0a757-0c7b-4bf0-91b1-31647e4f609c.png)show (currently only the registered users can see the value) the value to public. You can show a record to public (see 2.3) but hide some of the values of it by doing so.
 - ![](https://heurist-doc.huma-num.fr/uploads/b8345cf5-360f-47b5-ae56-84beb73212cd.png)open the vocabulary editor (directly at the vocabulary used by the field). Allowing you to act (add, edit, creating sub-term, merge, rearrange, delete) upon the terms it contains
 - ![](https://heurist-doc.huma-num.fr/uploads/8c0ceb5e-b364-442b-931a-3153bd01b5eb.png)add new term to the list from where the value is taken
 - ![](https://heurist-doc.huma-num.fr/uploads/0e785009-ccbf-46d1-89f4-79928dcd82fc.png)add a value to the field. It is to the left of the field, only if it can take more than one value
 - ![](https://heurist-doc.huma-num.fr/uploads/5acf146e-0c26-422d-b078-7c9debc66bdf.png)drag the value up or down. Allows reordering the values of a multi-valued field
-- ![](https://heurist-doc.huma-num.fr/uploads/72e95229-5b3f-4f42-95ce-ac8c27e200ad.png)appear under the name of a multi-valued field after a reordering of values. Will undo it.
+- ![](https://heurist-doc.huma-num.fr/uploads/72e95229-5b3f-4f42-95ce-ac8c27e200ad.png)appears under the name of a multi-valued field after a reordering of values. Will undo it.
 - ![](https://heurist-doc.huma-num.fr/uploads/d926c4b3-e93b-4cb6-a48d-8bc528d5b679.png)show calendar to select a date. It remembers the last date entered to minimise navigation. However, if you wish to skip to a different period or enter a historic date you may type the whole date with dashes, or simply type year and month or just year. If you then select he calendar icon it will jump to the appropriate year and month.
 - ![](https://heurist-doc.huma-num.fr/uploads/3d90a63c-6b0d-47d1-b4c9-7e771030fb10.png)brings up a more comprehensive date setting with several tabs (see 3.2.1.)
 - ![](https://heurist-doc.huma-num.fr/uploads/4f3d2451-cb6b-43ce-8078-f9d73aeaf04b.png)add a picture by taking it with with the camera on the device you are using
@@ -199,25 +211,29 @@ As you roll over a data field you will see a number of icons at the beginning or
 
 Not all icons appear beside each field, as the actions they trigger isn't always expected. The data entry form is designed to gather data in a structured format. While designing the database (see chapter 5) you specify the required data type for each field :
 
-- Dropdown (terms)
+- Dropdown (terms, may be hierarchical)
 - Numeric (integer or decimal)
-- Text (single line)
-- Memo text (multi-line or html)
+- Text (single line text)
+- Memo text (multi-line text, html or code)  
+      
+    **More complex fields**
 - Date / temporal *More complex fields with specific behaviours*
-- Geospatial
-- File or media URL
-- Record pointer / Foreign Key  *These fields are the key to linking records*
-- Relationship marker
+- Geospatial *Used to record locations/areas and build maps*
+- File or media URL *Used for images, audio, video, 3D, and other files* (can be on a remote server)  
+      
+    **Linking fields**
+- Record pointer / Foreign Key  } *These fields are the key to linking records*
+- Relationship marker }
 
 ### 3.1. Simple type fields
 
 **Numeric (integer or decimal)** A positive or negative number, with or without decimals. Non-numeric characters other than minus or decimal point are ignored.
 
-**Text (single line)** A single line of plain text, typically used for names, titles and short descriptions. Use multi-line text for longer descriptions. Max 250 characters.
+**Text (single line)** A single line of plain text, typically used for names, titles and short descriptions. Use multi-line text for longer descriptions. Max 250 characters. If a text value starts with http:// or https:// it is treated as a URL.
 
-**Memo Text (multi-line or html)** A plain text field which can accomodate multiple lines of text. Use for longer textual content (drag and drop the bottom-right corner to expand the editor). Offers three editor :
+**Memo Text (multi-line or html)** A plain text field which can accomodate multiple lines of text. Use for longer textual content (drag and drop the bottom-right corner to expand the editor). Offers three editors :
 
-- **text**: write in plain text. If the text starts with https:// it is treated as a URL
+- **text**: write in plain text
 - **wysiwyg**: What You See Is What You Get, interface with several button to format your text so you don't have to know html to do so
 - **codeeditor**: a code editor, it makes it easier to write directly in a structured language such as xml or html or to correct it.
 
@@ -229,7 +245,7 @@ As this type of field deals with html, you can integrate to your text other elem
 - Hyperlink to be open in the current or a new window
 - Link towards another record.
 
-**Dropdown (Terms)** A flat or hierarchical list of categories, where the terms are drawn from a (or severals) predefined vocabulary. Generally from a single one eg. countries, languages, source, condition, material, colour. Using dropdown terms ensures referential integrity standardizing entries (e.g., avoiding inconsistencies likes "Yes" vs "yes"). Use dropdown when the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
+**Dropdown (Terms)** A flat or hierarchical list of categories, where the terms are drawn from a predefined vocabulary (the vocabulary can include terms from otehr vocabularies by reference). Generally from a single one eg. countries, languages, source, condition, material, colour. Using dropdown terms ensures referential integrity standardizing entries (e.g., avoiding inconsistencies likes "Yes" vs "yes"). Use dropdown when the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
 
 ### 3.2. Special type fields
 
@@ -285,8 +301,8 @@ Clicking on the field will open a small windows which allows to choose between u
 These fields types create connections between the new record and other records of specified type or types (potentially including the same type as the record you are editing).  
 There are two kinds of record linking field type :
 
-- **record pointers** (by using it you're simply adding a direct link to a particualr record (equivalent to a foreign key) as a value in the record)
-- **relationship markers** (by using it, you're addind a new record for the relationship into the *Record relationship* record type.)
+- **record pointers** : these simply add a direct link to a particular record (equivalent to a foreign key in conventional relational databases) as a value in the record. The target record type(s) allowed are defined by the record pointer settings;
+- **relationship markers** : these add a new *Record relationship* record linking the current record with another record. The target record type(s) and types of relationship allowed are defined by the relationship marker settings.
 
 In both cases the link will appear in the network view (see chapter 8b) and if the target record is not yet in the database, the field will allow you to create new records (see chapter 5).
 

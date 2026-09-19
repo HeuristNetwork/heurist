@@ -6,13 +6,18 @@ One of the most powerful features of Heurist is the ability to modify record str
 
 To open the structure modifying interface :
 
-- **Either :** Design → Record Types → \[click on the pen next to the Record Type name\] → \[bottom of the pop up window\] Edit fields
+- **Either :** Design → Record Types → \[click on the pen next to the Record Type name\] → \[bottom of the pop up window\] **Modify record structure (fields, tabs etc.)** - was **Edit fields** in older versions.
 
 ![](https://heurist-doc.huma-num.fr/uploads/e889bbc7-1173-4d96-8704-94836a9d9670.jpg)
 
+or
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/YQnimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/YQnimage.png)
+
 **Or :** Create a new record or open an existing record of the appropriate type for editing   
- and click Modify structure (at the top of the form).   
- **We recommend using this method to dynamically change structure as you start to develop your data**
+ and click Modify structure (at the top of the form).
+
+<p class="callout info"> **We recommend using this method to dynamically change structure as you start to develop your data**</p>
 
 ![](https://heurist-doc.huma-num.fr/uploads/e5e17e5b-ef6a-449a-86ee-d419f673d79a.png)
 
@@ -142,10 +147,8 @@ The other entries in the menu are discussed in the following pages.
     - Date ranges, different ways of representing
     - Fuzzy start and end
     - Different calendar and conversion
-    - Import and auto-correction of dates
-
-> **Entering historical dates**: When entering a date, simply type the year in the box to instantly jump to that year, then select from the calendar dropdown
-
+    - Import and auto-correction of dates  
+        **Entering historical dates**: When entering a date, simply type the year in the box to instantly jump to that year, then select from the calendar dropdown
 - Numeric
     - Dealing with integers and whole numbers
 - Record pointers
@@ -687,17 +690,56 @@ However, if there is a long list and/or time limits eg. in family relationships,
 - The set of relationships is open-ended or requires complex constraints, such as genealogical relationships which might be extended with new relationships, and where one might wish to specify, for example, that a person can have no more than four grandparents, only two of whom can be grandfathers.
 - By using relationships, you can record additional information about the relationship, including the type of relationship (from a list of allowable types), the date range of the relationship and notes about the relationship
 
-# Constructed titles
+### **Constructed titles and Title masks**
 
-&lt;so underused …&gt; show lots of tips and tricks of how to use them, notably when dealing with hierarchical entities Title masks allow you to define composite titles that can be constructed dynamically from field values. The constructed title is generated on-the-fly when the record is created or modified. For information see the section on Constructed Titles
+One of the most powerful and underutilised features of Heurist is hidden-in-plain-sight. It is the title used to represent records in the results list, in connections, in reports and many other places.
 
-@todo link.
+The **Constructed title** is like the reference you might find in the bibliography at the end of a book: it uses a concatenation of important fields, sometimes shortened, to uniquely identify and summarise the database record in question. The constructed title is generated on-the-fly when the record is created or modified.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/IGqimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/IGqimage.png)
+
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/ZPCimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/ZPCimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/e8gimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/e8gimage.png)
+
+Constructed titles are used to represent records when they are listed in search results and as the visible representation of the record referenced in a pointer field (first image below) or relationship marker field (second image below).
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/zJPimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/zJPimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/RiVimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/RiVimage.png)
+
+Constructed titles can also be used in reports and visualisations, for sorting, in other constructed titles, and as the constructed title of connected records. We strongly recommend putting a little thought into the design of the constructed titles, as well-designed constructed titles can greatly improve the clarity and ease of use of the database.
+
+The **Title Mask defines the** choice of fields in the constructed title. Title masks are one of the most useful, and perhaps misunderstood or under-used features of Heurist. A separate title mask, with different fields, is defined for each record type. The constructed value is used as the extended title displayed in search results and other lists.
+
+The title mask builds a constructed title from the values of fields in the record.
+
+- Fields are identified by \[ \] e.g. \*\*\[Title\], pp. \[Start\_Page\]-\[End\_Page\] \*\*might generate: **"Alice in Wonderland, pp. 37-39"** **Conditional text**
+- Add optional text before a field (if it has a value) or a different set of text if a value is not available by adding {\\Text for existing value \\Text for missing value} after a field, for example: **\[Starting\_date\] {\\Starting date: \\Start date unknown}** will either generate: **"Starting date: 04-11-1974"** if there is a date, or **"Start date unknown"** if Starting\_date is empty. You can also leave the value blank, in which case nothing will be output in the case of a missing value.
+- **Inserting a literal square-bracket** : use two consecutive square-brackets (\[\[ or \]\]).
+- **Inserting fields from the tree** : The element names in square brackets should match field names for the record type, and this is ensured by providing a tree of available fields which can be inserted![img_061.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_061.png)
+
+Constructed titles can use fields in the parent record (connected by a parent-child record pointer), as we can see in this example:
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/C2Gimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/C2Gimage.png)
 
 **Constructed title aka Record title or RecTitle**
 
-One of the most powerful features of Heurist is hidden-in-plain-sight. It is the title used to represent records in the results list, but it is actually far more than this. The Constructed Title is a title constructed from one or more fields in the record.
+#### Setting the constructed title
 
-To set the constructed title for a record type, edit any record of that type (or simply add a new blank record) and click on the *Title mask* button at the top of the edit form, which will bring up a dialogue allowing you to select the fields which you want to use to construct the title for every record of that type.![img_051.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_051.png)\*\*HTML tags in Constructed Titles
+To set the constructed title for a record type, edit any record of that type (or simply add a new blank record) and click on the *Constructed title* link left of the title at the top of the edit form:
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/acvimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/acvimage.png)
+
+which will bring up a dialogue allowing you to select the fields which you want to use to construct the title for every record of that type.![img_051.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_051.png)\*\*HTML tags in Constructed Titles.
+
+### Admin &gt; Rebuild Record Titles
+
+This option recalculates all the constructed (composite) record titles, compares them with the existing title and updates the title where the title has changed (generally due to changes in the title mask for the record type). At the end of the process it will display a list of records for which the titles were changed and a list of records for which the new title would be blank (an error condition). Note. To check the validity of title masks, see Administration | Verify Title Masks. Result Title fields are scanned and title usage updated where applicable. The scan shows a list of records for which the titles were changed. This includes: number processed number marked for update number left as is (these are left blank due to incorrect formatting etc. and need to be checked manually via the next step) To view all updated records in the Search Results Pane (in a new browser window), click the view updated records link. Note. If the title is blank, update the record appropriately (see Define New Record Type | Title Masks).
+
+### Content to be merged or eliminated
+
+&lt;so underused …&gt; show lots of tips and tricks of how to use them, notably when dealing with hierarchical entities Title masks allow you to define composite titles that can be constructed dynamically from field values.
 
 \*\*You can add simple html tags in the constructed title eg. **for bold or** [**link**](https://docs.heuristref.net/something.net/path/%5BImage%20Name%5D) to put link to open an image referenced in the record purely by its name. Please remember to close tags. Bold, italic, underline, strong, emphasis and superscript are allowed, Others are stripped out automatically. If you need others, contact the Heurist team. Note. To verify title masks, see Masks provide the ability to build a composite title based on information taken from other fields in the record, on the fly. The title mask is a string into which field values are inserted to create an extended title for the record. The constructed value is used as the extended title displayed in search results and other lists. Fields in the record are indicated by square brackets. The element names in square brackets should match field names for this record type. For example, a Person record might have the fields: Given Name(s), Family Name, Title. In this case you could create the following title mask: \[Family Name\], \[Given Name(s)\] (\[Title\] A person whose Family Name = 'Smith', Given Name(s) = 'John', Title = 'Dr' will be rendered in the Title field as: Smith, John (Dr) Other people will be rendered appropriately. Fields in records that are referenced by the record through pointers can also be used. For example: \[personpointer\].\[Last name\] This pulls out a person's name from a person record pointed to by the current record. Additional text or punctuation can also be included. For example: \[Title\], pp. \[Start\_Page\]-\[End\_Page\] This renders the Title field and Start and End Page fields as, for example: Alice in Wonderland, pp. 37-39 To insert a literal square-bracket, use two consecutive square-brackets (\[\[ or \]\]). Fields in records referenced by the record through pointers can also be used: \[personpointer\].\[Last name\] This gets a person's name from a Person record pointed to by the current record. To create a title mask
 
@@ -708,20 +750,4 @@ To set the constructed title for a record type, edit any record of that type (or
 - When ready, you can test the mask using actual data. From the Test Mask dropdown, select any record, then click Test to view the result:![img_053.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_053.png)
 - When the mask is correct, click Save Mask to save it. The mask will now appear in the Mask field.
 
-### **Constructed titles**
-
-The **Constructed title** is like the reference you might find in the bibliography at the end of a book: it uses important fields to uniquely identify and summarise the bibliographic reference, or in this case the database record in question.![img_054.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_054.png)![img_055.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_055.png)![img_056.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_056.png)Constructed titles are used to represent records when they are listed in search results and as the visible representation of the record referenced in a pointer field (left) or relationship marker field (right).![img_057.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_057.png)![img_058.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_058.png)Constructed titles can use fields in the parent record (connected by a parent-child record pointer), as we can see in this example:![img_059.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_059.png)Constructed titles can also be used in reports and visualisations, searches, sorting or in the constructed title of connected records. We strongly recommend putting a little thought into this, as well-designed constructed titles can greatly improve the clarity and ease of use of the database. We recommend you read the help for Constructed titles.
-
-&lt;June 2022: this page to be completed with good examples of constructed titles. If we have not done it, please send us an email asking for us to do so, or to help you with your constructed titles&gt;
-
-### ***webpage:***\*\* Rebuild Record Titles \*\****id 584***
-
-![img_060.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_060.png)This option recalculates all the constructed (composite) record titles, compares them with the existing title and updates the title where the title has changed (generally due to changes in the title mask for the record type). At the end of the process it will display a list of records for which the titles were changed and a list of records for which the new title would be blank (an error condition). Note. To check the validity of title masks, see Administration | Verify Title Masks. Result Title fields are scanned and title usage updated where applicable. The scan shows a list of records for which the titles were changed. This includes: number processed number marked for update number left as is (these are left blank due to incorrect formatting etc. and need to be checked manually via the next step) To view all updated records in the Search Results Pane (in a new browser window), click the view updated records link. Note. If the title is blank, update the record appropriately (see Define New Record Type | Title Masks).
-
-### ***webpage:***\*\* Title masks \*\****id 730***
-
-Title masks are one of the most useful, and perhaps misunderstood or under-used features of Heurist. They create a short summary of content of each record - a sort of 'bibliographic reference' like you might see at the back of an article - by concatenating a number of fields of your choice from within the record. A separate title mask, with different fields, is defined for each record type. The constructed value is used as the extended title displayed in search results and other lists. The title mask builds a constructed title from the values of fields in the record. Fields are identified by \[ \] e.g. \*\*\[Title\], pp. \[Start\_Page\]-\[End\_Page\] \*\*might generate: **"Alice in Wonderland, pp. 37-39"** **Conditional text** Add optional text before a field (if it has a value) or a different set of text if a value is not available by adding {\\Text for existing value \\Text for missing value} after a field, for example: **\[Starting\_date\] {\\Starting date: \\Start date unknown}** will either generate: **"Starting date: 04-11-1974"** if there is a date, or **"Start date unknown"** if Starting\_date is empty. You can also leave the value blank, in which case nothign will be output in the case of a missing value. \*\*Inserting square brackets \*\* To insert a literal square-bracket, use two consecutive square-brackets (\[\[ or \]\]). **Inserting fields from the tree** The element names in square brackets should match field names for the record type, and this is ensured by providing a tree of available fields which can be inserted![img_061.png](https://docs.heuristref.net/05-ModifyingStructure_images/img_061.png)
-
-# A short example of adding and editing data
-
-This example is drawn from Michael Falks Tutorial # ????
+###   
