@@ -152,7 +152,15 @@ final class RecordQueryParser
             }
             return $result;
         }
-        return array_values($query);
+        $result = array();
+        foreach(array_values($query) as $item){
+            if(is_array($item) && count($item) > 1 && $this->isAssociative($item)){
+                foreach($item as $key=>$value){ $result[] = array((string)$key=>$value); }
+            }else{
+                $result[] = $item;
+            }
+        }
+        return $result;
     }
     private function validateGroup(array $group, int $depth): void
     {
@@ -265,7 +273,7 @@ final class RecordQueryParser
             'access','user','usr','ws','workset','tag','keyword','kwd','f','field','fc','count','cnt',
             'geo','file','lt','linked_to','linkedto','lf','linked_from','linkedfrom',
             'rt','related_to','relatedto','rf','related_from','relatedfrom','related',
-            'links','relf','r','any','all','not','sortby','sort','s'
+            'links','relf','r','any','all','not','sortby','sort','s','exists'
         ), true);
     }
     private function isAssociative(array $value): bool

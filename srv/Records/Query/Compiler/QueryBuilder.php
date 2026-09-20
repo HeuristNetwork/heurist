@@ -201,6 +201,7 @@ final class QueryBuilder
         $linkAlias = $state->nextAlias('rl');
         $childAlias = $state->nextAlias('lr');
         $childQuery = $this->parser->linkedValueQuery($value);
+        list($childQuery, $negate) = $this->extractExistsModifier($childQuery);
         $parentColumn = $direction === 'to' ? 'rl_SourceID' : 'rl_TargetID';
         $childColumn = $direction === 'to' ? 'rl_TargetID' : 'rl_SourceID';
         $edge = array(
@@ -219,10 +220,34 @@ final class QueryBuilder
         $childWhere = $this->compileGroup($childQuery, 'AND', $state, $childAlias, $depth);
         $this->records->appendAccessConditions($childWhere, $state, $state['context'], $childAlias);
 
-        return 'EXISTS (SELECT 1 FROM recLinks '.$linkAlias
+        $exists = 'EXISTS (SELECT 1 FROM recLinks '.$linkAlias
             .' INNER JOIN Records '.$childAlias.' ON '.$childAlias.'.rec_ID='
             .$linkAlias.'.'.$childColumn
             .' WHERE '.implode(' AND ', array_merge($edge, $childWhere)).')';
+        return $negate ? 'NOT '.$exists : $exists;
+    }
+
+    /**
+     * Strip an "exists" modifier from a linked-record child query.
+     * NULL negates the surrounding EXISTS to NOT EXISTS; -NULL keeps it (the default).
+     */
+    private function extractExistsModifier(array $childQuery): array
+    {
+        $negate = false;
+        $remaining = array();
+        foreach($childQuery as $predicate){
+            $key = (string)array_keys($predicate)[0];
+            list($base) = $this->parser->predicateParts($key);
+            if($base === 'exists'){
+                $flag = strtoupper(trim((string)$predicate[$key]));
+                if($flag === 'NULL'){ $negate = true; }
+                elseif($flag === '-NULL'){ $negate = false; }
+                else{ throw new QueryValidationException('exists predicate accepts NULL or -NULL'); }
+                continue;
+            }
+            $remaining[] = $predicate;
+        }
+        return array($remaining, $negate);
     }
 
     /** Compile a directional Relationship-record edge as correlated EXISTS. */
