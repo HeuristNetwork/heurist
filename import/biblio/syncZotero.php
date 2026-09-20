@@ -914,8 +914,11 @@ if($step == 1){  //first step - info about current status
 
     updateLastSync($api_Key, $group_ID, $user_ID, $syncID, $syncIndex);
 
+    // JT#3246: Keep long Zotero reports in a bounded, responsive panel so the
+    // scrollbar remains beside the report instead of at the far edge of a wide dialog.
     $report = '<div class="zotero-sync-report" '
-        .'style="box-sizing:border-box;max-height:70vh;overflow:auto;padding:10px;word-break:break-word">'
+        .'style="box-sizing:border-box;width:calc(100% - 20px);max-width:1100px;'
+        .'max-height:70vh;overflow:auto;padding:10px;word-break:break-word">'
         .implode('', $outputLines)
         .'</div>';
     exitServerCall($report, HEURIST_OK);
