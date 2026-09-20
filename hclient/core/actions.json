@@ -804,14 +804,14 @@
     {
       "href": "import/synchronisation/configureSatellites.php",
       "id": "menu-sync-configure",
-      "text": "Configure satellites",
+      "text": "Master-satellite setup",
       "title": "Configure this database as a synchronisation master or satellite",
       "data": {
         "user-admin-status": "1",
         "size": "large",
-        "header": "Populate > Configure satellites",
+        "header": "Design > Master-satellite setup",
         "icon": "ui-icon-gear",
-        "container": "populate"
+        "container": "design"
       }
     },
     {

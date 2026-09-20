@@ -146,6 +146,11 @@
 #menu-import-verify-csv-hint#Compare a delimited source file with matching records without modifying the database
 #menu-import-zotero#Zotero bibliography sync
 #menu-import-xml#Heurist XML/JSon
+#DB synchronisation#DB synchronisation
+#menu-sync-configure#Master-satellite setup
+#menu-sync-configure-hint#Configure this database as a synchronisation master or satellite
+#menu-sync-master#Synchronise with master
+#menu-sync-master-hint#Synchronise this satellite database with its configured master
 #menu-import-kml#KML
 #menu-import-get-template#Download template
 #menu-import-csv-hint#Import data from delimited text file. Supports matching, record creation, record update.

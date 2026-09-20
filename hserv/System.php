@@ -1148,10 +1148,30 @@ class System {
         .'Request: '.substr(print_r($_REQUEST, true),0,2000)."\n\n"
         ."------------------\n";
 
+        $log_destinations = array();
         if(defined('HEURIST_FILESTORE_ROOT')){
             $root_folder = HEURIST_FILESTORE_ROOT;
-            fileAdd($sTitle.'  '.$sMsg, $root_folder.'_LOGS/'.$curr_logfile);
+            $internal_logfile = $root_folder.'_LOGS/'.$curr_logfile;
+            $internal_log_dir = dirname($internal_logfile);
+            $internal_log_written = false;
+            if(is_dir($internal_log_dir) && is_writable($internal_log_dir)
+                && (!is_file($internal_logfile) || is_writable($internal_logfile))){
+                fileAdd($sTitle.'  '.$sMsg, $internal_logfile);
+                $internal_log_written = is_file($internal_logfile);
+            }
+            if($internal_log_written){
+                $log_destinations[] = $internal_logfile;
+            }
         }
+
+        // Always also use PHP's configured error log. Some installations do
+        // not have a writable HEURIST_FILESTORE_ROOT/_LOGS directory.
+        error_log($sTitle.'  '.$sMsg);
+        $php_logfile = trim((string)ini_get('error_log'));
+        if($php_logfile !== ''){
+            $log_destinations[] = $php_logfile;
+        }
+        $log_destinations = array_values(array_unique($log_destinations));
 
         $mysql_gone_away_error = $this->mysqli && $this->mysqli->errno==2006;
         if($mysql_gone_away_error){
@@ -1159,9 +1179,11 @@ class System {
             .' There is database server interruption. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
         }else{
             $message = "Heurist was unable to process this request. <br><strong>$message</strong><br>";
-            $sysmsg = <<<EXP
-An error has been written to the internal error log and errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. In order to alert us and provide background, please report the circumstances in as much detail as possible by submitting a ticket (link in the header of the main Heurist pages)
-EXP;
+            $log_message = $log_destinations
+                ? "Technical details have been written to:\n".implode("\n", $log_destinations)
+                : 'The configured error-log destination could not be determined.';
+            $sysmsg = $log_message."\n\nErrors may also be emailed to the Heurist team on servers maintained directly by the project. "
+                .'To provide the circumstances and background, please submit a ticket using the link in the header of the main Heurist pages.';
 
         }
 
@@ -1376,6 +1398,11 @@ EXP;
             // Get latest code version (USystem::getLastCodeAndDbVersion might be static or global)
             $lastCode_VersionOnServer = USystem::getLastCodeAndDbVersion();
 
+            // Used by the Populate menu to distinguish master-only and
+            // satellite-only synchronisation actions.
+            $syncConfig = $this->settings->getDatabaseSetting('Synchronisation');
+            $syncRole = is_array($syncConfig) ? (string)($syncConfig['role'] ?? '') : '';
+
             $res = [
                 "currentUser" => $this->currentUser,
                 "sysinfo" => [
@@ -1394,6 +1421,7 @@ EXP;
                     "db_total_records" => $this->settings->get('sys_RecordCount'),
                     "db_usergroups" => user_getAllWorkgroups($this->mysqli),
                     "associationMembershipStatus" => $associationMembershipStatus,
+                    "synchronisation_role" => $syncRole,
                     "baseURL" => HEURIST_BASE_URL,
                     'baseURL_pro' => HEURIST_BASE_URL_PRO,
                     'database_prefix' => HEURIST_DB_PREFIX,

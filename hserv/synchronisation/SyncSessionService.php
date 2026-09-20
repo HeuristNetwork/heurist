@@ -67,6 +67,155 @@ final class SyncSessionService
     }
 
     /**
+     * Identifies satellite-only record types, base fields and record-structure
+     * fields so affected records can be held back without stopping other records.
+     */
+    public function validateStructureUsage(string $sessionID, int $satelliteDBID, array $usage): array
+    {
+        if (!$this->ensureSchema()) {
+            return $this->system->getError();
+        }
+        if (!$this->getSession($sessionID, $satelliteDBID)) {
+            return $this->system->addError(HEURIST_INVALID_REQUEST, 'Unknown synchronisation session.');
+        }
+
+        $recordTypes = is_array($usage['recordTypes'] ?? null) ? $usage['recordTypes'] : [];
+        $fields = is_array($usage['fields'] ?? null) ? $usage['fields'] : [];
+        if (count($recordTypes) > 1000 || count($fields) > 10000) {
+            return $this->system->addError(HEURIST_INVALID_REQUEST, 'The synchronisation structure preflight exceeds its size limit.');
+        }
+
+        ConceptCode::setSystem($this->system);
+        $resolvedRecordTypes = [];
+        $unsupportedRecordTypes = [];
+        $blockedRecordIDs = [];
+        foreach ($recordTypes as $recordType) {
+            $conceptID = trim((string)($recordType['conceptID'] ?? ''));
+            $localID = (int)($recordType['localID'] ?? 0);
+            $name = trim((string)($recordType['name'] ?? ''));
+            $masterID = (int)ConceptCode::getRecTypeLocalID($conceptID);
+            // Database clones can retain matching local structure IDs while their
+            // origin metadata is absent. Preserve the existing safe name check.
+            if ($masterID < 1 && $localID > 0 && $name !== '') {
+                $candidateName = mysql__select_value(
+                    $this->mysqli,
+                    'SELECT rty_Name FROM defRecTypes WHERE rty_ID=?',
+                    ['i', $localID]
+                );
+                if (is_string($candidateName) && hash_equals($candidateName, $name)) {
+                    $masterID = $localID;
+                }
+            }
+            $key = $conceptID !== '' ? $conceptID : 'local-'.$localID;
+            $resolvedRecordTypes[$key] = $masterID;
+            if ($masterID < 1) {
+                $unsupportedRecordTypes[$key] = $name !== '' ? $name : ($conceptID !== '' ? $conceptID : 'Unnamed record type');
+                $this->collectRecordIDs($blockedRecordIDs, $recordType['recordIDs'] ?? []);
+            }
+        }
+
+        $unsupportedBaseFields = [];
+        $unsupportedStructureFields = [];
+        foreach ($fields as $field) {
+            $conceptID = trim((string)($field['conceptID'] ?? ''));
+            $localID = (int)($field['localID'] ?? 0);
+            $name = trim((string)($field['name'] ?? ''));
+            $type = trim((string)($field['type'] ?? ''));
+            $recordTypeConceptID = trim((string)($field['recordTypeConceptID'] ?? ''));
+            $recordTypeName = trim((string)($field['recordTypeName'] ?? ''));
+            $masterFieldID = (int)ConceptCode::getDetailTypeLocalID($conceptID);
+            if ($masterFieldID < 1 && $localID > 0 && $name !== '') {
+                $candidate = mysql__select_row(
+                    $this->mysqli,
+                    'SELECT dty_Name,dty_Type FROM defDetailTypes WHERE dty_ID='.$localID
+                );
+                if (is_array($candidate) && is_string($candidate[0] ?? null)
+                    && hash_equals((string)$candidate[0], $name)
+                    && hash_equals((string)($candidate[1] ?? ''), $type)) {
+                    $masterFieldID = $localID;
+                }
+            }
+            $displayName = $name !== '' ? $name : ($conceptID !== '' ? $conceptID : 'Unnamed field');
+            $context = $recordTypeName !== '' ? $recordTypeName : $recordTypeConceptID;
+            $display = '"'.$displayName.'"'.($context !== '' ? ' (used in "'.$context.'")' : '');
+            if ($masterFieldID < 1) {
+                $fieldKey = $conceptID !== '' ? $conceptID : 'local-'.$localID;
+                $unsupportedBaseFields[$recordTypeConceptID.'|'.$fieldKey] = $display;
+                $this->collectRecordIDs($blockedRecordIDs, $field['recordIDs'] ?? []);
+                continue;
+            }
+            $masterFieldType = (string)mysql__select_value(
+                $this->mysqli,
+                'SELECT dty_Type FROM defDetailTypes WHERE dty_ID=?',
+                ['i', $masterFieldID]
+            );
+            if ($masterFieldType === '' || !hash_equals($masterFieldType, $type)) {
+                $fieldKey = $conceptID !== '' ? $conceptID : 'local-'.$localID;
+                $unsupportedBaseFields[$recordTypeConceptID.'|'.$fieldKey] = $display
+                    .' (satellite field type "'.$type.'"; master field type "'.$masterFieldType.'")';
+                $this->collectRecordIDs($blockedRecordIDs, $field['recordIDs'] ?? []);
+                continue;
+            }
+            $masterRecordTypeID = (int)($resolvedRecordTypes[$recordTypeConceptID] ?? 0);
+            if ($masterRecordTypeID < 1) {
+                continue; // The containing record type is already reported above.
+            }
+            if (!mysql__select_value(
+                $this->mysqli,
+                'SELECT rst_ID FROM defRecStructure WHERE rst_RecTypeID=? AND rst_DetailTypeID=? LIMIT 1',
+                ['ii', $masterRecordTypeID, $masterFieldID]
+            )) {
+                $key = $masterRecordTypeID.'-'.$masterFieldID;
+                $unsupportedStructureFields[$key] = '"'.$displayName.'" added to record type "'.$context.'"';
+                $this->collectRecordIDs($blockedRecordIDs, $field['recordIDs'] ?? []);
+            }
+        }
+
+        if (!$unsupportedRecordTypes && !$unsupportedBaseFields && !$unsupportedStructureFields) {
+            return ['status' => HEURIST_OK, 'data' => ['valid' => true, 'blockedRecordIDs' => []]];
+        }
+
+        $lines = [
+            'The following record types and/or fields have been created and used on this satellite database. '
+                .'To avoid polluting the master, they have not been imported automatically.',
+            ''
+        ];
+        if ($unsupportedRecordTypes) {
+            $lines[] = 'Record types:';
+            foreach ($unsupportedRecordTypes as $label) $lines[] = '- '.$label;
+            $lines[] = '';
+        }
+        if ($unsupportedBaseFields) {
+            $lines[] = 'Base field types:';
+            foreach ($unsupportedBaseFields as $label) $lines[] = '- '.$label;
+            $lines[] = '';
+        }
+        if ($unsupportedStructureFields) {
+            $lines[] = 'Fields added to record types:';
+            foreach ($unsupportedStructureFields as $label) $lines[] = '- '.$label;
+            $lines[] = '';
+        }
+        $lines[] = 'If you, or the owner of the master database, wish to add them to the master database, open the master database and use Design > Browse templates, then navigate to the satellite database to import the relevant record types and/or fields. Then rerun the synchronisation.';
+        return [
+            'status' => HEURIST_OK,
+            'data' => [
+                'valid' => false,
+                'blockedRecordIDs' => array_values(array_map('intval', array_keys($blockedRecordIDs))),
+                'notice' => implode("\n", $lines)
+            ]
+        ];
+    }
+
+    private function collectRecordIDs(array &$target, $recordIDs): void
+    {
+        if (!is_array($recordIDs)) return;
+        foreach ($recordIDs as $recordID) {
+            $recordID = (int)$recordID;
+            if ($recordID > 0) $target[$recordID] = true;
+        }
+    }
+
+    /**
      * Allocates real temporary Records and permanently associates each one with
      * the originating satellite/local ID. Repeating a request returns the same mapping.
      */
@@ -227,9 +376,6 @@ final class SyncSessionService
             }
             $details = [];
             foreach (($record['details'] ?? []) as $detail) {
-                if (!empty($detail['dtl_UploadedFileID']) || ($detail['dty_Type'] ?? '') === 'file') {
-                    return $this->system->addError(HEURIST_ACTION_BLOCKED, "Record $recordID contains a file; file transfer is not enabled in this stage.");
-                }
                 $dtyID = (int)ConceptCode::getDetailTypeLocalID((string)($detail['detailTypeConceptID'] ?? ''));
                 if ($dtyID < 1 && (int)($detail['dtl_DetailTypeID'] ?? 0) > 0) {
                     $candidateID = (int)$detail['dtl_DetailTypeID'];
@@ -264,8 +410,17 @@ final class SyncSessionService
                     && !mysql__select_value($this->mysqli, 'SELECT rec_ID FROM Records WHERE rec_ID=?', ['i', (int)$value])) {
                     return $this->system->addError(HEURIST_INVALID_REQUEST, "Record $recordID points to missing master record $value.");
                 }
+                $masterFileID = null;
+                if (!empty($detail['satelliteFileID'])) {
+                    $masterFileID = (int)mysql__select_value($this->mysqli,
+                        'SELECT sfm_MasterFileID FROM sysSyncFileMap WHERE sfm_SatelliteDBID=? AND sfm_SatelliteFileID=?',
+                        ['ii', $satelliteDBID, (int)$detail['satelliteFileID']]);
+                    if ($masterFileID < 1) return $this->system->addError(HEURIST_ACTION_BLOCKED,
+                        "The file dependency for record $recordID has not been uploaded.");
+                }
                 $detail['_masterDtyID'] = $dtyID;
                 $detail['_masterValue'] = $value;
+                $detail['_masterFileID'] = $masterFileID;
                 $details[] = $detail;
             }
             $record['_details'] = $details;
@@ -291,12 +446,13 @@ final class SyncSessionService
             if (!$ok || !$this->mysqli->query('DELETE FROM recDetails WHERE dtl_RecID='.$recordID)) { $ok = false; break; }
             foreach ($record['_details'] as $detail) {
                 $stmt = $this->mysqli->prepare('INSERT INTO recDetails '
-                    .'(dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_Geo,dtl_Certainty,dtl_Annotation,dtl_HideFromPublic,dtl_AddedByImport) '
-                    .'VALUES (?,?,?,IF(? IS NULL,NULL,ST_GeomFromText(?)),?,?,?,1)');
+                    .'(dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo,dtl_Certainty,dtl_Annotation,dtl_HideFromPublic,dtl_AddedByImport) '
+                    .'VALUES (?,?,?,?,IF(? IS NULL,NULL,ST_GeomFromText(?)),?,?,?,1)');
                 $dtyID = (int)$detail['_masterDtyID']; $value = $detail['_masterValue']; $geo = $detail['dtl_Geo'] ?? null;
+                $fileID = $detail['_masterFileID'];
                 $certainty = (float)($detail['dtl_Certainty'] ?? 1); $annotation = $detail['dtl_Annotation'] ?? null;
                 $hidden = isset($detail['dtl_HideFromPublic']) ? (int)$detail['dtl_HideFromPublic'] : null;
-                $stmt->bind_param('iisssdsi', $recordID, $dtyID, $value, $geo, $geo, $certainty, $annotation, $hidden);
+                $stmt->bind_param('iisissdsi', $recordID, $dtyID, $value, $fileID, $geo, $geo, $certainty, $annotation, $hidden);
                 $ok = $stmt->execute();
                 if (!$ok) $this->system->addError(HEURIST_DB_ERROR, "Unable to add a field to master record $recordID.", $stmt->error);
                 $stmt->close();

@@ -1922,6 +1922,12 @@ $.widget( "heurist.slidersMenu", {
                                 //window.hWin.HAPI4.sysinfo.matomo_api_key
                                 window.hWin.HEURIST4.util.setDisabled(item, true);
                             }
+
+                            if(action_id=='menu-sync-master'
+                                && window.hWin.HAPI4.sysinfo.synchronisation_role=='master'){
+                                window.hWin.HEURIST4.util.setDisabled(item, true);
+                                item.attr('title', 'This database is configured as Master. Synchronisation is triggered from satellites');
+                            }
                         }
 
                         let action_hint = window.hWin.HR( action_id+'-hint' ); 
@@ -1961,6 +1967,10 @@ $.widget( "heurist.slidersMenu", {
 
             let li = $(e.target);
             if(!li.is('li')) li = li.parents('li');
+
+            if(li.hasClass('ui-state-disabled')){
+                return;
+            }
             
             if(li.attr('data-action')=='menu-admin-server'){
                 this.menues[section].find('li').removeClass('ui-state-active');

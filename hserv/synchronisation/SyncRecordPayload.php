@@ -31,10 +31,10 @@ final class SyncRecordPayload
                 .'FROM recDetails d JOIN defDetailTypes t ON t.dty_ID=d.dtl_DetailTypeID '
                 .'WHERE d.dtl_RecID=? ORDER BY d.dtl_ID', ['i', $recordID]);
             while ($res && ($detail = $res->fetch_assoc())) {
-                if (!empty($detail['dtl_UploadedFileID']) || $detail['dty_Type'] === 'file') {
-                    throw new \RuntimeException('Record '.$recordID.' contains an uploaded file. File transfer is the next synchronisation stage.');
-                }
                 $detail['detailTypeConceptID'] = ConceptCode::getDetailTypeConceptID((int)$detail['dtl_DetailTypeID']);
+                if (!empty($detail['dtl_UploadedFileID'])) {
+                    $detail['satelliteFileID'] = (int)$detail['dtl_UploadedFileID'];
+                }
                 if (in_array($detail['dty_Type'], ['enum', 'relationtype'], true) && (int)$detail['dtl_Value'] > 0) {
                     $detail['termConceptID'] = ConceptCode::getTermConceptID((int)$detail['dtl_Value']);
                     $detail['termLabel'] = (string)mysql__select_value($mysqli,

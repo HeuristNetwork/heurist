@@ -28,9 +28,30 @@ final class SyncHttpClient
         return $this->request('allocate_ids', ['sessionID' => $sessionID, 'records' => $records]);
     }
 
+    public function validateStructureUsage(string $sessionID, array $usage): array
+    {
+        return $this->request('validate_structure_usage', ['sessionID' => $sessionID, 'usage' => $usage]);
+    }
+
     public function uploadRecords(string $sessionID, array $payload): array
     {
         return $this->request('upload_records', ['sessionID' => $sessionID, 'payload' => $payload]);
+    }
+
+    public function uploadDependencies(string $sessionID, array $payload): array
+    {
+        return $this->request('upload_dependencies', ['sessionID' => $sessionID, 'payload' => $payload]);
+    }
+
+    public function downloadChanges(string $sessionID, int $afterChangeID, bool $includeStructure = false,
+        string $structureHash = ''): array
+    {
+        return $this->request('download_changes', [
+            'sessionID' => $sessionID,
+            'afterChangeID' => $afterChangeID,
+            'includeStructure' => $includeStructure,
+            'structureHash' => $structureHash
+        ]);
     }
 
     private function request(string $action, array $payload): array

@@ -14,7 +14,7 @@ $dbname = $system->dbname();
 <head>
     <meta charset="utf-8">
     <meta name="robots" content="noindex,nofollow">
-    <title>Configure satellites</title>
+    <title>Master-satellite setup</title>
     <?php includeJQuery(); ?>
     <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
     <style>
@@ -47,8 +47,8 @@ $dbname = $system->dbname();
         #reference-list td { white-space: normal; }
     </style>
 </head>
-<body class="popup ui-heurist-populate">
-<h2>Configure database synchronisation</h2>
+<body class="popup ui-heurist-design">
+<h2>Master-satellite setup</h2>
 
 <?php if (!$enabled): ?>
     <div class="message error" style="display:block"><?=htmlspecialchars(SyncFeature::UNAVAILABLE_MESSAGE)?></div>

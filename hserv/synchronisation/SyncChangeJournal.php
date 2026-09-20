@@ -10,6 +10,7 @@ final class SyncChangeJournal
 {
     private \hserv\System $system;
     private \mysqli $mysqli;
+    private bool $installed = false;
 
     public function __construct(\hserv\System $system)
     {
@@ -19,6 +20,7 @@ final class SyncChangeJournal
 
     public function ensureInstalled(): bool
     {
+        if ($this->installed) return true;
         $table = "CREATE TABLE IF NOT EXISTS sysSyncChanges (
             sch_ID bigint unsigned NOT NULL auto_increment,
             sch_Entity enum('record','detail','term') NOT NULL,
@@ -33,12 +35,32 @@ final class SyncChangeJournal
             KEY sch_Term (sch_TermID,sch_ID),
             KEY sch_ChangedAt (sch_ChangedAt)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Append-only semantic change journal for database synchronisation'";
-        if (!$this->mysqli->query($table)) {
-            $this->system->addError(HEURIST_DB_ERROR, 'Unable to create synchronisation change journal.', $this->mysqli->error);
+        $tableExists = mysql__select_value(
+            $this->mysqli,
+            "SELECT TABLE_NAME FROM information_schema.TABLES "
+                ."WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='sysSyncChanges'"
+        );
+        if (!$tableExists && !$this->mysqli->query($table)) {
+            $this->system->addError(
+                HEURIST_DB_ERROR,
+                'Unable to create synchronisation change journal.',
+                $this->mysqli->error
+            );
             return false;
         }
 
         $triggers = $this->triggerDefinitions();
+        $triggerNames = array_keys($triggers);
+        $quotedNames = "'".implode("','", array_map([$this->mysqli, 'real_escape_string'], $triggerNames))."'";
+        $triggerCount = (int)mysql__select_value(
+            $this->mysqli,
+            "SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() "
+                ."AND TRIGGER_NAME IN ($quotedNames)"
+        );
+        if ($triggerCount === count($triggers)) {
+            $this->installed = true;
+            return true;
+        }
         foreach ($triggers as $name => $sql) {
             $exists = mysql__select_value(
                 $this->mysqli,
@@ -54,6 +76,7 @@ final class SyncChangeJournal
                 return false;
             }
         }
+        $this->installed = true;
         return true;
     }
 
@@ -84,6 +107,27 @@ final class SyncChangeJournal
         $result->close();
         $stmt->close();
         return $rows;
+    }
+
+    /** Returns already-uploaded satellite records changed since the last successful scan. */
+    public function getUpdatedRecordIDsBetween(int $afterChangeID, int $throughChangeID): array
+    {
+        if (!$this->ensureInstalled()) return [];
+        $stmt = $this->mysqli->prepare(
+            "SELECT DISTINCT c.sch_RecID FROM sysSyncChanges c "
+            ."JOIN sysSyncOutboundRecords o ON o.sor_CurrentRecID=c.sch_RecID AND o.sor_Status='UPLOADED' "
+            ."JOIN Records r ON r.rec_ID=c.sch_RecID AND r.rec_FlagTemporary=0 "
+            ."WHERE c.sch_ID>? AND c.sch_ID<=? AND (c.sch_Entity='detail' "
+            ."OR (c.sch_Entity='record' AND c.sch_Action='update')) ORDER BY c.sch_RecID"
+        );
+        $stmt->bind_param('ii', $afterChangeID, $throughChangeID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $ids = [];
+        while ($row = $result->fetch_row()) $ids[] = (int)$row[0];
+        $result->close();
+        $stmt->close();
+        return $ids;
     }
 
     public function latestChangeID(): int

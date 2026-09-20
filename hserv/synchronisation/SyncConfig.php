@@ -67,6 +67,7 @@ final class SyncConfig
             if ($result['satellites'] === false) {
                 return false;
             }
+            $result['masterInventorySeeded'] = !empty($existing['masterInventorySeeded']);
         } else {
             $master = is_array($config['master'] ?? null) ? $config['master'] : [];
             $masterID = (int)($master['databaseID'] ?? 0);
@@ -101,6 +102,7 @@ final class SyncConfig
             ];
             $result['lastCompletedSession'] = $existing['lastCompletedSession'] ?? null;
             $result['lastMasterChangeReceived'] = (int)($existing['lastMasterChangeReceived'] ?? 0);
+            $result['lastMasterStructureHash'] = (string)($existing['lastMasterStructureHash'] ?? '');
             $result['lastNewRecordScanChangeID'] = (int)($existing['lastNewRecordScanChangeID'] ?? 0);
             $result['initialInventorySeeded'] = !empty($existing['initialInventorySeeded']);
         }
@@ -209,8 +211,10 @@ final class SyncConfig
         $allowed = [
             'lastCompletedSession',
             'lastMasterChangeReceived',
+            'lastMasterStructureHash',
             'lastNewRecordScanChangeID',
-            'initialInventorySeeded'
+            'initialInventorySeeded',
+            'masterInventorySeeded'
         ];
         $values = array_intersect_key($values, array_flip($allowed));
         if (!$values) {
