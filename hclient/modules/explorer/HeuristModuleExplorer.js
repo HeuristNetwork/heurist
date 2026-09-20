@@ -333,20 +333,8 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
         });
     }
 
-    _editSymbology(value, options) {
-        if (typeof this.options.onEditSymbology === 'function') return Promise.resolve(this.options.onEditSymbology(value, options));
-        var fn = window.hWin && window.hWin.editSymbology;
-        if (typeof fn !== 'function') fn = typeof window.editSymbology === 'function' ? window.editSymbology : null;
-        if (!fn) return Promise.reject(new Error('Symbology editor is not available'));
-        return new Promise(function(resolve) {
-            fn(value, options.mode_edit || options.mode || 0, function(result) { resolve(result); }, function() { resolve(null); });
-        });
-    }
-
-    _editExtent(value, options) {
-        if (typeof this.options.onEditExtent === 'function') return Promise.resolve(this.options.onEditExtent(value, options));
-        return Promise.reject(new Error('Extent editor is not configured for Explorer'));
-    }
+    // _editSymbology and _editExtent are inherited unchanged from
+    // HeuristModuleViewer, shared with HeuristModuleMap.
 
     _selectFieldset(value, options) {
         if (typeof this.options.onSelectFieldset === 'function') return Promise.resolve(this.options.onSelectFieldset(value, options));
