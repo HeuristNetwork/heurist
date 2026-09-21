@@ -2585,8 +2585,8 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
         $new_title = mb_substr($new_title,0,1023);
     }
 
-    $params = ['ss', $new_title, date(DATE_8601)];
-    $res = mysql__exec_param_query($mysqli, "UPDATE Records set rec_Title=?, rec_Modified=? where rec_ID={$recID}", $params );
+    $params = ['ssis', $new_title, date(DATE_8601), $recID, $new_title];
+    $res = mysql__exec_param_query($mysqli, "UPDATE Records SET rec_Title=?, rec_Modified=? WHERE rec_ID=? AND CAST(rec_Title AS BINARY) <> CAST(? AS BINARY)", $params );
     if($res!==true){
         $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $res);
         return false;
