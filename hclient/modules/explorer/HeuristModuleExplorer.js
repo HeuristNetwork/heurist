@@ -270,6 +270,14 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
         put('DT_NAME', sourceTitle);
         if (requestSource.q != null) put('DT_QUERY_STRING', json(requestSource.q));
         if (requestSource.rules != null) put('DT_EXPANSION_RULES', json(requestSource.rules));
+        if (presentation.filterForm != null) {
+            if (!(definitionId('DT_FILTER_FORM') > 0)) {
+                return Promise.reject(new Error('DT_FILTER_FORM is required to save the Filter Form layout'));
+            }
+            put('DT_FILTER_FORM', json(presentation.filterForm));
+        } else if (definitionId('DT_FILTER_FORM') > 0) {
+            put('DT_FILTER_FORM', '');
+        }
         if (Array.isArray(presentation.data && presentation.data.fields)) {
             put('DT_TABLE_FIELDS', json(presentation.data.fields));
         }

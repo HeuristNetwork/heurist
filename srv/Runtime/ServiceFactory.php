@@ -58,7 +58,7 @@ final class ServiceFactory
             'RT_TLCMAP_DATASET',
             'DT_DATA_SOURCE', 'DT_QUERY_STRING', 
             'DT_GEO_FIELDS', 'DT_TABLE_FIELDS', 'DT_TIMELINE_FIELDS', 
-            'DT_EXPANSION_RULES',
+            'DT_EXPANSION_RULES', 'DT_FILTER_FORM',
             'DT_SHORT_SUMMARY', 'DT_CRS', 'DT_FILE_RESOURCE', 'DT_GEO_OBJECT',
             'DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'DT_IS_VISIBLE',
             'DT_MAP_BOOKMARK', 'DT_MAP_IMAGE_LAYER_SCHEMA',

@@ -72,6 +72,7 @@ class QuerySourcePresentationService
                 'query'=>$this->parseQuery($queryValue)
             ),
             'fields'=>$fields,
+            'filterForm'=>$this->parseFilterForm($this->querySources->value($querySource, 'DT_FILTER_FORM')),
             'timefields'=>$timefields,
             'map'=>array(
                 'geoFields'=>$geofields,
@@ -106,6 +107,17 @@ class QuerySourcePresentationService
     private function numberOrNull($value)
     {
         return is_numeric($value) ? 0 + $value : null;
+    }
+
+    /** Decode a Filter Form layout stored independently of DT_QUERY_STRING. */
+    private function parseFilterForm($value): ?array
+    {
+        if($value === null || trim((string)$value) === '') return null;
+        $layout = json_decode((string)$value, true);
+        if(!is_array($layout) || !isset($layout['groups']) || !is_array($layout['groups'])){
+            throw new QueryValidationException('QuerySource Filter Form must define groups');
+        }
+        return $layout;
     }
 
     private function parseRules($value): array

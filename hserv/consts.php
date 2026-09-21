@@ -487,6 +487,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_GEO_OUTPUTMODE' => array(2, 1162),  //combined map features per record or individual features
     'DT_EXPANSION_RULES' => array(2, 1163),
     'DT_TABLE_FIELDS' => array(2, 1164),
+    'DT_FILTER_FORM' => array(2, 1165), // QuerySource Filter Form layout JSON
     'DT_TIMELINE_FIELDS' => array(2, 1105),
     
     'DT_MIME_TYPE' => array(2, 29),
