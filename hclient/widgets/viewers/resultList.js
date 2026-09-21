@@ -232,6 +232,20 @@ $.widget( "heurist.resultList", {
 
     _longestAggregateLabel: 0,
 
+    // Inline result list sorter
+    _resultSorter: null,
+    _originalSortOrder: [],
+    _sortInterrupted: false,
+    _defaultSortFields: {
+        default: 'Default (search)',
+        rec_ID: 'Record ID',
+        rec_Title: 'Record Title',
+        rec_URL: 'Record URL',
+        rec_RecTypeID: 'Record Type ID',
+        rec_Modified: 'Last Modification',
+        rec_OwnerUGrpID: 'Record Owner'
+    },
+
     // the constructor
     _create: function() {
 
@@ -323,6 +337,8 @@ $.widget( "heurist.resultList", {
 
                     //accept events from the same realm only
                     if(!that._isSameRealm(data)) return;
+
+                    that._sortInterrupted = true;
 
                     that.span_pagination.hide();
                     that.span_info.hide();
@@ -438,7 +454,10 @@ $.widget( "heurist.resultList", {
                     if(recset==null){
                         
                         that._currentRecordset = recset;
-                        
+                        that._originalSortOrder = [];
+
+                        that._prepareSortbyDropdown();
+
                         if(data.empty_remark){
 
                             let msg = data.is_facet && !window.hWin.HEURIST4.util.isempty(that.options.placeholder_text) ? 
@@ -926,18 +945,39 @@ $.widget( "heurist.resultList", {
             }
         }
 
-        let showExportBackend = this.options.entityName == 'records' && !this._is_publication; // show CSV export button on backend
-        if(showExportBackend || this.options.show_export_button){ 
+        const isBackendInterface = this.options.entityName == 'records' && !this._is_publication;
 
-            let title = showExportBackend ? 'Export current results in CSV format' : 'Export current results';
+        if(isBackendInterface || this.options.show_export_button){ // show CSV export button on backend
+
+            let title = isBackendInterface ? 'Export current results in CSV format' : 'Export current results';
             this.export_button = $('<button>', {
-                text: showExportBackend ? window.hWin.HR('CSV') : window.hWin.HR('Export'), title: window.hWin.HR(title),
+                text: isBackendInterface ? window.hWin.HR('CSV') : window.hWin.HR('Export'), title: window.hWin.HR(title),
                 class: 'ui-main-color', style: 'padding: 8px; float: right; margin-right: 10px;'
             }).button({icon: 'ui-icon-arrowthick-1-s'}).insertBefore(this.view_mode_selector);
 
             this._on(this.export_button, {
                 click: this._exportRecords
             });
+        }
+
+        if(isBackendInterface || this.options.show_recordlist_sorter){ // show sorting dropdown
+
+            if(!this._resultSorter){
+
+                let $sortContainer = $('<span>', {
+                    id: 'sel-recordset-sortby',
+                    style: 'float: right; margin-right: 10px;',
+                    html: `sort <select style="max-width: 10em;"></select>`
+                }).insertBefore(this.view_mode_selector);
+    
+                this._resultSorter = $sortContainer.find('select');
+
+                this._on(this._resultSorter, {
+                    change: () => this._sortResults()
+                });
+            }
+
+            this._prepareSortbyDropdown();
         }
 
         if(this.options.header_class){
@@ -1465,6 +1505,7 @@ $.widget( "heurist.resultList", {
     _renderRecordsIncrementally: function( recordset ){
 
         this._currentRecordset = recordset;
+        this._originalSortOrder = recordset.getOrder();
 
         let total_count_of_curr_request = 0;
 
@@ -1479,6 +1520,8 @@ $.widget( "heurist.resultList", {
                 this._renderPage(0, recordset);
                 this._triggerOnPage(0); 
             }
+
+            this._prepareSortbyDropdown();
 
         }else if(this._count_of_divs<1) {   // EMPTY RESULT SET
 
@@ -4754,6 +4797,8 @@ $.widget( "heurist.resultList", {
             this._currentRecordset = this._fullRecordset ?? this._currentRecordset;
         }
 
+        this._prepareSortbyDropdown();
+
         const query = this._currentRecordset.length() > 0 ? `ids:${this._currentRecordset.getIds().join(',')}` : '';
 
         window.hWin.HAPI4.currentRecordset = this._currentRecordset;
@@ -4991,6 +5036,102 @@ $.widget( "heurist.resultList", {
             assignOwnerLabel(span);
         });
 
+    },
+
+    _prepareSortbyDropdown: function(){
+
+        if(!this._resultSorter || this._resultSorter.length === 0){
+            return;
+        }
+
+        this._resultSorter.parent().attr('title', '')
+        this._resultSorter.find('option').remove();
+
+        if(!this._currentRecordset){
+            return;
+        }
+
+        for(const fieldID in this._defaultSortFields){
+            if(Object.hasOwn(this._defaultSortFields, fieldID)){
+                $('<option>', {
+                    value: fieldID,
+                    text: this._defaultSortFields[fieldID]
+                }).appendTo(this._resultSorter);
+            }
+        }
+
+        let intervalID = null;
+        intervalID = setInterval(() => {
+
+            let rectypeIDs = this._currentRecordset.getRectypes();
+            if(rectypeIDs.length === 0){
+                return;
+            }
+
+            const ignoreDTYIDs = $Db.dty().getSubSetByRequest({'dty_Type': 'separator'}).getIds();
+            let fields = $Db.getSharedFields(rectypeIDs, ignoreDTYIDs);
+
+            for(const dtyID of fields){
+                $('<option>', {
+                    value: `f:${dtyID}`,
+                    text: rectypeIDs.length > 1 ? $Db.dty(dtyID, 'dty_Name') : $Db.rst(rectypeIDs[0], dtyID, 'rst_DisplayName')
+                }).appendTo(this._resultSorter);
+            }
+
+            clearInterval(intervalID);
+        }, 500);
+    },
+
+    _sortResults: function(){
+
+        let sortby = this._resultSorter.val();
+        let optionLabel = sortby === 'default' ? 'Original order' : this._resultSorter.find(`option[value="${sortby}"]`).text();
+        let $parentEle = this._resultSorter.parent();
+
+        if(sortby === 'default'){
+
+            this._currentRecordset.setOrder(this._originalSortOrder);
+
+            this._renderPage(0, this._currentRecordset);
+            this._triggerOnPage(0);
+
+            return;
+        }
+
+        this._sortInterrupted = false;
+
+        if(Object.hasOwn(this._defaultSortFields, sortby)){
+            sortby = `${this._defaultSortFields[sortby]}`;
+        }else if(window.hWin.HEURIST4.util.isPositiveInt(sortby)){
+            sortby = `f:${sortby}`;
+        }else if(!sortby || !sortby.startsWith('f:')){
+            return;
+        }
+
+        window.hWin.HEURIST4.util.setDisabled(this._resultSorter, true);
+        $parentEle.attr('title', 'Performing sort');
+
+        window.hWin.HAPI4.RecordSearch.doSearchWithCallback({q: [{ids: this._currentRecordset.getIds()}, {'sortby': sortby}], details: 'id'}, (response) => {
+
+            if(this._sortInterrupted){
+                this._sortInterrupted = false;
+                return;
+            }
+
+            if(!response){
+                $parentEle.attr('title', 'An error has occurred, sorting has been disabled.');
+                return;
+            }
+
+            window.hWin.HEURIST4.util.setDisabled(this._resultSorter, false);
+            $parentEle.attr('title', `Sorting by: ${optionLabel}`);
+
+            let newOrder = response.getOrder();
+            this._currentRecordset.setOrder(newOrder);
+
+            this._renderPage(0, this._currentRecordset);
+            this._triggerOnPage(0);
+        });
     }
 
 });
