@@ -1689,10 +1689,17 @@ $.widget( "heurist.slidersMenu", {
      * @memberof Widgets.Navigation.slidersMenu
      */
     _openSectionMenu: function(e){
-
+        
         let section = this._getSectionName(e);
 
-        if(window.hWin.HEURIST4.util.isFunction(this._beforeSwitch.handler) && this._beforeSwitch.menu !== section && !this._beforeSwitch.handler()){
+        if(section=='heurist8' && !window.hWin.HAPI4.sysinfo.isExperimentalAllowed){
+            return;
+        }
+        
+        if(window.hWin.HEURIST4.util.isFunction(this._beforeSwitch.handler) 
+            && this._beforeSwitch.menu !== section 
+            && !this._beforeSwitch.handler())
+        {
             return;
         }
         
@@ -1721,9 +1728,11 @@ $.widget( "heurist.slidersMenu", {
             .appendTo( this.element );
             
         if(section=='heurist8'){
-            this.containers[section].css({'left':this._left_position+'px'});
-            this.menues[section].css({width:0}).hide();
-            window.hWin.HAPI4.LayoutMgr.appInitAll('Heurist8', this.containers[section] );
+            if(window.hWin.HAPI4.sysinfo.isExperimentalAllowed){
+                this.containers[section].css({'left':this._left_position+'px'});
+                this.menues[section].css({width:0}).hide();
+                window.hWin.HAPI4.LayoutMgr.appInitAll('Heurist8', this.containers[section] );
+            }
             return;
         }
         
