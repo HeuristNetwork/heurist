@@ -349,6 +349,29 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
      */
     function executeScript($system, $filename){
 
+        if (!$system->isAdmin()) {
+            $system->addError(HEURIST_REQUEST_DENIED, 'Administrator access required');
+            return false;
+        }
+
+
+        $upgradeDir = realpath(HEURIST_DIR . 'admin/setup/dbupgrade');
+        $scriptPath = realpath($filename);
+
+
+        if (
+            $upgradeDir === false ||
+            $scriptPath === false ||
+            !str_starts_with($scriptPath, $upgradeDir . DIRECTORY_SEPARATOR) ||
+            !preg_match('/^DBUpgrade_[A-Za-z0-9._]+\.sql$/', basename($scriptPath)) ||
+            !is_file($scriptPath) ||
+            !is_readable($scriptPath)
+        ) {
+            $system->addError(HEURIST_INVALID_REQUEST, 'Invalid database upgrade script');
+            return false;
+        }
+
+        
         if(db_script($system->dbnameFull(), $filename)){ //dbnameFullWithHost
             return true;
         }else{
