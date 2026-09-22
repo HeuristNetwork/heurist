@@ -227,8 +227,8 @@ node_modules/
 hclient/bundles/heurist-*/
 tests/
 descriptors/
-composer.lock
 *.lock
+!composer.lock
 
 *.mjs
 package.json
@@ -240,3 +240,5 @@ package-lock.json
 
 # VSCode
 .vscode
+.env
+external
