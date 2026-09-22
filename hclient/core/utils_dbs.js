@@ -3495,16 +3495,20 @@ window.hWin.HEURIST4.dbs = {
             return dty_IDs;
         }
 
+        rty_IDs = rty_IDs.map(id => Number.parseInt(id));
+        ignored_dty_id = ignored_dty_id.map(id => Number.parseInt(id));
+
+        let allDtyIDs = [];
+
         for(const rty_ID of rty_IDs){
 
-            let fields_for_rty = $Db.rst(rty_ID).getIds(); // Get all dty_IDs for this rty_ID
-            if(dty_IDs.length == 0){ // First record type, so all its fields are potential shared fields
-                dty_IDs = fields_for_rty;
-                continue;
-            }
-            // Intersect current dty_IDs with fields_for_rty
-            dty_IDs = dty_IDs.filter(fld_id => fields_for_rty.includes(fld_id));
+            let fieldsForRty = $Db.rst(rty_ID).getIds(); // Get all dty_IDs for this rty_ID
+            fieldsForRty = fieldsForRty.map(id => Number.parseInt(id));
+
+            allDtyIDs.push(fieldsForRty);
         }
+
+        dty_IDs = window.hWin.HEURIST4.util.arrayIntersection(allDtyIDs);
 
         if(dty_IDs.length > 0 && ignored_dty_id.length > 0){
             dty_IDs = dty_IDs.filter(fld_id => !ignored_dty_id.includes(fld_id));

@@ -58,7 +58,7 @@ final class ServiceFactory
             'RT_TLCMAP_DATASET',
             'DT_DATA_SOURCE', 'DT_QUERY_STRING', 
             'DT_GEO_FIELDS', 'DT_TABLE_FIELDS', 'DT_TIMELINE_FIELDS', 
-            'DT_EXPANSION_RULES',
+            'DT_EXPANSION_RULES', 'DT_FILTER_FORM',
             'DT_SHORT_SUMMARY', 'DT_CRS', 'DT_FILE_RESOURCE', 'DT_GEO_OBJECT',
             'DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'DT_IS_VISIBLE',
             'DT_MAP_BOOKMARK', 'DT_MAP_IMAGE_LAYER_SCHEMA',
@@ -66,7 +66,7 @@ final class ServiceFactory
             'DT_MAXIMUM_ZOOM_LEVEL', 'DT_MIME_TYPE', 'DT_MINIMUM_ZOOM',
             'DT_MINIMUM_ZOOM_LEVEL', 'DT_SERVICE_URL', 'DT_SMARTY_TEMPLATE',
             'DT_SYMBOLOGY', 'DT_TIMELINE_FIELDS', 'DT_WORLD_BASEMAP',
-            'DT_ZOOM_KM_POINT', 'DT_START_DATE', 'DT_END_DATE'
+            'DT_ZOOM_KM_POINT', 'DT_START_DATE', 'DT_END_DATE', 'DT_NAME'
         );
         $codeIds = array();
         foreach($codeNames as $codeName){

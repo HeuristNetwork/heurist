@@ -573,6 +573,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
     if (file_exists($filename)) {
 
         $range = @$_SERVER['HTTP_RANGE'];
+        $range_min = 0;
         $range_max = 0;
         if($range!=null){
             //get bytes range  bytes=0-88
@@ -582,10 +583,28 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             $range_max = intval($range_max);
         }
 
-        header('Content-Description: File Transfer');
+        $is_compressible = !$mimeType || $mimeType == 'application/octet-stream' || $mimeType == MIMETYPE_JSON;
         $is_zip = false;
-        if(!$mimeType || $mimeType == 'application/octet-stream' || $mimeType == MIMETYPE_JSON){
-            $is_zip = true;
+        $output = null;
+        if($range==null && $is_compressible
+            && preg_match(
+                    '/(?:^|,)\s*gzip\s*(?:;\s*q=(?!0(?:\.0*)?(?:\s|,|$))[^,]*)?(?:,|$)/i',
+                    $_SERVER['HTTP_ACCEPT_ENCODING'] ?? ''
+            ))
+        {
+            $contents = file_get_contents($filename);
+            if($contents!==false){
+                $output = gzencode($contents, 6);
+                $is_zip = $output!==false;
+            }
+            unset($contents);
+        }
+
+        header('Content-Description: File Transfer');
+        if($is_compressible){
+            header('Vary: Accept-Encoding');
+        }
+        if($is_zip){
             header('Content-Encoding: gzip');
         }
         if ($mimeType) {
@@ -613,15 +632,14 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
-        header('Content-Length: ' . ($range_max>0?($range_max-$range_min+1):filesize($filename))); //CONTENT_LENGTH
+        $content_length = $is_zip
+            ? strlen($output)
+            : ($range_max>0 ? ($range_max-$range_min+1) : filesize($filename));
+        header('Content-Length: ' . $content_length); //CONTENT_LENGTH
         @ob_clean();
         ob_end_flush();//flush();
 
         if($is_zip){
-            ob_start();
-            readfile($filename);
-            $output = gzencode(ob_get_contents(),6); //memory overflow may happen here
-            ob_end_clean();
             echo $output;
             unset($output);
         }else{

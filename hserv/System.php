@@ -1340,7 +1340,7 @@ class System {
                $accessToken_DeepLAPI, $useRewriteRulesForRecordLink,
                $allowCMSCreation,
                $matomoUrl, $matomoSiteId, $accessToken_Matomo,
-               $envVersion, $dbHostName;
+               $envVersion, $dbHostName, $experimental;
 
         // Initialize $needEncodeRecordDetails if not set
         $needEncodeRecordDetails = $needEncodeRecordDetails ?? 0;
@@ -1421,6 +1421,7 @@ class System {
                     "db_total_records" => $this->settings->get('sys_RecordCount'),
                     "db_usergroups" => user_getAllWorkgroups($this->mysqli),
                     "associationMembershipStatus" => $associationMembershipStatus,
+                    'isExperimentalAllowed' => $experimental ?? false,
                     "synchronisation_role" => $syncRole,
                     "baseURL" => HEURIST_BASE_URL,
                     'baseURL_pro' => HEURIST_BASE_URL_PRO,

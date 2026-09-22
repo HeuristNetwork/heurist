@@ -1839,7 +1839,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['placeholder_text'] = placeholder;
 
         }else if(widget_name=='heurist_resultList'){
-            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'] || opts['support_collection'];
+
+            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode']
+                || opts['show_export_button'] || opts['support_collection']
+                || opts['show_result_sort'];
+
             if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
                 opts['recordview_onselect']  = 'inline'; //default value    
             }
