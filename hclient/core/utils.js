@@ -1331,8 +1331,37 @@ window.hWin.HEURIST4.util = {
     getParentWinProperty: function(prop) {
        return prop && window.hWin.HEURIST4.util.canAccessParentWinProperty(prop) ?window.parent[prop] :null;
     },
-    
-    
+
+    arrayIntersection: function(arrays, ...additionalArrays){
+
+        if(arrays.length <= 1 && additionalArrays.length === 0){ // nothing to check
+
+            let returnArray = arrays.length === 1 && Array.isArray(arrays[0]) ? arrays[0] : arrays;
+            return returnArray ?? [];
+
+        }
+
+        if(Array.isArray(arrays[0])){ // first arguement is array of arrays
+            arrays = [...arrays];
+        }
+        if(additionalArrays.length > 0){ // append remaining argument arrays to original
+            arrays = [arrays, ...additionalArrays];
+        }
+
+        // Remove duplicates and sort based on lengths, use the smallest set as the base
+        let sortedSets = arrays.map(array => new Set(array))
+                                 .sort((a, b) => a.size - b.size);
+        let baseSet = sortedSets.shift();
+
+        // Get intersections
+        let intersections = [...baseSet].filter((dtyID) => 
+            sortedSets.every((set) => 
+                set.has(dtyID)
+            )
+        );
+
+        return intersections;
+    },
     
     //constants for saved searches\
     _NAME: 0, 
