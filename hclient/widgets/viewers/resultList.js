@@ -972,9 +972,7 @@ $.widget( "heurist.resultList", {
                     html: `sort <select style="max-width: 10em;"></select>`
                 }).insertBefore(this.view_mode_selector);
     
-                this._resultSorter = $sortContainer.find('select').hSelect();
-
-                this._on(this._resultSorter, {
+                this._resultSorter = $sortContainer.find('select').hSelect({
                     change: () => this._sortResults()
                 });
             }
