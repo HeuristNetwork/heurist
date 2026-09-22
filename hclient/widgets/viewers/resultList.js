@@ -156,8 +156,10 @@ $.widget( "heurist.resultList", {
 
         field_for_ext_classes: 20, // add class related to field value to record's row; 0 - disabled, n > 0 - detail type id
 
-        show_export_button: false, // display to that opens the export menu, for exporting the current result set
+        show_export_button: false, // display button that opens the export menu, using the current result set
         export_options: 'all', // export formats allowed
+
+        show_result_sort: false, // show the result sorter
 
         check_linked_media: true, // check linked records (only type "media") for an image
         
@@ -960,19 +962,17 @@ $.widget( "heurist.resultList", {
             });
         }
 
-        if(isBackendInterface || this.options.show_recordlist_sorter){ // show sorting dropdown
+        if(isBackendInterface || this.options.show_result_sort){ // show sorting dropdown
 
             if(!this._resultSorter){
 
                 let $sortContainer = $('<span>', {
                     id: 'sel-recordset-sortby',
-                    style: 'float: right; margin-right: 10px;',
+                    style: 'float: right; margin: 0.5em 1em 0px 0px;',
                     html: `sort <select style="max-width: 10em;"></select>`
                 }).insertBefore(this.view_mode_selector);
     
-                this._resultSorter = $sortContainer.find('select');
-
-                this._on(this._resultSorter, {
+                this._resultSorter = $sortContainer.find('select').hSelect({
                     change: () => this._sortResults()
                 });
             }
@@ -5076,6 +5076,11 @@ $.widget( "heurist.resultList", {
                     value: `f:${dtyID}`,
                     text: rectypeIDs.length > 1 ? $Db.dty(dtyID, 'dty_Name') : $Db.rst(rectypeIDs[0], dtyID, 'rst_DisplayName')
                 }).appendTo(this._resultSorter);
+            }
+
+            if(this._resultSorter.hSelect('instance') !== undefined){
+                this._resultSorter.hSelect('refresh');
+                //this._resultSorter.hSelect('widget').hide();
             }
 
             clearInterval(intervalID);
