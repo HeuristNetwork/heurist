@@ -58,17 +58,19 @@ class QuerySourcePresentationService
         $timefields = $this->parseFields(
             $this->querySources->value($querySource, 'DT_TIMELINE_FIELDS')
         );
+        
+                $title = (string)($this->querySources->value($querySource, 'DT_NAME') ?? $querySource['rec_Title'] ?? '');
 
         return array(
             'format'=>'heurist-query-source',
             'version'=>1,
             'id'=>intval($querySource['rec_ID']),
-            'title'=>(string)($this->querySources->value($querySource, 'DT_NAME') ?? $querySource['rec_Title'] ?? ''),
+            'title'=>$title,
             'description'=>(string)($this->querySources->value($querySource, 'DT_SHORT_SUMMARY') ?? ''),
             'source'=>array(
                 'type'=>'heurist-query',
                 'recordId'=>intval($source['rec_ID'] ?? 0),
-                'title'=>(string)($source['rec_Title'] ?? ''),
+                'title'=>$title,
                 'query'=>$this->parseQuery($queryValue)
             ),
             'fields'=>$fields,

@@ -66,7 +66,7 @@ final class ServiceFactory
             'DT_MAXIMUM_ZOOM_LEVEL', 'DT_MIME_TYPE', 'DT_MINIMUM_ZOOM',
             'DT_MINIMUM_ZOOM_LEVEL', 'DT_SERVICE_URL', 'DT_SMARTY_TEMPLATE',
             'DT_SYMBOLOGY', 'DT_TIMELINE_FIELDS', 'DT_WORLD_BASEMAP',
-            'DT_ZOOM_KM_POINT', 'DT_START_DATE', 'DT_END_DATE'
+            'DT_ZOOM_KM_POINT', 'DT_START_DATE', 'DT_END_DATE', 'DT_NAME'
         );
         $codeIds = array();
         foreach($codeNames as $codeName){
