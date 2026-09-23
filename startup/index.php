@@ -194,6 +194,8 @@ if (!defined('PDIR')){
                     }});
                     $('#orcid-data-link').on({click: _getDataFromORCID});
 
+                    window.hWin.HEURIST4.util.detectCapsLock(screen);
+
                     refreshCaptcha();
                     _showStep(2);
                 });

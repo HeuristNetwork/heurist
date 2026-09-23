@@ -1332,6 +1332,45 @@ window.hWin.HEURIST4.util = {
        return prop && window.hWin.HEURIST4.util.canAccessParentWinProperty(prop) ?window.parent[prop] :null;
     },
 
+    detectCapsLock: function($container, inputSelector, warningSelector){
+
+        inputSelector = !window.hWin.HEURIST4.util.isempty(inputSelector) ? inputSelector : 'input[type="password"]';
+        warningSelector = !window.hWin.HEURIST4.util.isempty(warningSelector) ? warningSelector : '.capslock-warning';
+
+        let $inputs = $container.find(inputSelector);
+        let $capsWarning = $container.find(warningSelector);
+
+        if($inputs.length === 0){
+            return;
+        }
+
+        if($capsWarning.length === 0){
+            $capsWarning = $('<span>', {
+                class: 'capslock-warning ui-state-error',
+                style: 'margin-left: 1em; display: inline-block; padding: 0.3em 0.4em 0.2em;',
+                text: 'Warning: Caps lock is on'
+            }).appendTo($container).hide();
+        }
+
+        let $__checkForCapsLock = (event) => {
+
+            let isCapsLockOn = event.type === 'blur' ? false : event.originalEvent.getModifierState('CapsLock');
+            let $input = $(event.target);
+
+            if(isCapsLockOn){
+                $capsWarning.insertAfter($input).show();
+            }else{
+                $capsWarning.hide();
+            }
+        };
+
+        $inputs.on({
+            click: $__checkForCapsLock,
+            keyup: $__checkForCapsLock,
+            blur: $__checkForCapsLock
+        });
+    },
+
     arrayIntersection: function(arrays, ...additionalArrays){
 
         if(arrays.length <= 1 && additionalArrays.length === 0){ // nothing to check

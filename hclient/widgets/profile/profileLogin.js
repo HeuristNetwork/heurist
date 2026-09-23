@@ -317,7 +317,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 }
             }, id:'btn_close'});
 
-            setupCapsLockWarning($dlg);
+                window.hWin.HEURIST4.util.detectCapsLock($dlg, 'input.text');
 
             // login dialog definition
             $dlg.dialog({
@@ -526,7 +526,7 @@ function setupAccountResetPin($dlg){
         return;
     }
 
-    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'),null,'sending pin...');
+    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'), null, 'Sending pin...');
 
     window.hWin.HAPI4.SystemMgr.reset_password({username: username.val(), pin: 1, captcha: captcha_code}, function(response){
 
@@ -558,7 +558,7 @@ function validateAccountResetPin($dlg){
     let username = $dlg.find('#reset_username').val();
     let pin = $dlg.find('#reset_pin').val();
 
-    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'),null,'validating pin...');
+    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'), null, 'Validating pin...');
 
     window.hWin.HAPI4.SystemMgr.reset_password({username: username, pin: pin}, function(response){
 
@@ -601,7 +601,7 @@ function resetAccountPassword($dlg){
         return;
     }
 
-    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'),null,'validating pin...');
+    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'), null, 'Verifying password reset...');
 
     window.hWin.HAPI4.SystemMgr.reset_password({username: username, pin: pin, new_password: pwd}, function(response){
 
@@ -985,43 +985,4 @@ function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
         }
     });
 
-}
-
-/**
- * @function setupCapsLockWarning
- * @description Display a warning about Caps Lock being on
- *              when the user is typing into one of the input fields
- * @param {?jQuery} $container - Element containing the input fields and warning element.
- * @returns {void}
- */
-function setupCapsLockWarning($container){
-
-    let $inputs = $container.find('input.text');
-    let $capsLockWarning = $container.find('#capslock-warning');
-    if($inputs.length === 0 || $capsLockWarning.length === 0){
-        return;
-    }
-
-    let $__checkForCapsLock = (event) => {
-        window.hWin.HEURIST4.isCapsLockOn = event.originalEvent.getModifierState('CapsLock');
-        $__moveCapsLockWarning(event);
-    };
-
-    let $__moveCapsLockWarning = (event) => {
-
-        let $target = $(event.target);
-
-        if(!window.hWin.HEURIST4.isCapsLockOn){
-            $capsLockWarning.hide();
-            return;
-        }
-
-        $capsLockWarning.insertAfter($target).show();
-    };
-
-    $container.find('input.text').on({
-        click: $__checkForCapsLock,
-        keyup: $__checkForCapsLock,
-        focus: $__moveCapsLockWarning
-    });
 }
