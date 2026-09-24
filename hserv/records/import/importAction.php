@@ -17,6 +17,7 @@ use hserv\entity\DbDefTerms;
 use hserv\utilities\USanitize;
 use hserv\entity\DbRecUploadedFiles;
 use hserv\utilities\Temporal;
+require_once __DIR__.'/importDate.php';
 
 require_once dirname(__FILE__).'/../edit/recordModify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordinates.php';
@@ -1638,7 +1639,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = self::validateDateField($query, $imp_session, $field, $idx, 'warning');
+            $wrong_records = self::validateDateField($query, $imp_session, $field, $idx, 'error');
 
         }else{
             $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id;
@@ -2192,10 +2193,8 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
      *
      * Iterates through rows from `$query`. For each row, it extracts values from the
      * column `$fields_checked`. If multi-valued, values are split.
-     * Each individual value is checked:
-     * - If it matches a year-only regex (`REGEX_YEARONLY`), it's considered valid.
-     * - Otherwise, it's passed to `new Temporal()`. If the `Temporal` object is valid, the date is good.
-     * - As a fallback, it tries parsing with `new DateTime()`.
+     * Each value uses the same strict parser and saved day/month selection as
+     * preprocessing and saving. There is no permissive DateTime fallback.
      * Invalid date values are highlighted in the row data for error reporting.
      *
      * @param string $query SQL query to select rows from the import table.
@@ -2215,44 +2214,18 @@ private static function validateDateField($query, $imp_session, $fields_checked,
 
             $is_error = false;
             $newvalue = array();
-            $values = self::getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
+            $values = self::getDateValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
                 if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value)!='NULL'){
 
 
-                    if( preg_match(REGEX_YEARONLY, $r_value) ){ //this is year only
-                        array_push($newvalue, $r_value);
-                    }else{
-
-                         $temporal = new Temporal($r_value);
-                         if($temporal->isValid()){
-                             array_push($newvalue, $r_value);
-                         }else{
-
-                             try{
-                                $t2 = new DateTime($r_value);
-                                $value = $t2->format(DATE_8601);
-                                array_push($newvalue, $value);
-                             } catch (Exception  $e){
-                                $is_error = true;
-                                array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
-                             }
-                         }
-
-                        /* OLD VERSION - strtotime doesn't work for dates prior 1901
-                        $date = date_parse($r_value);
-                        if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
-                        {
-                            $value = strtotime($r_value);
-                            $value = date(DATE_8601, $value);
-                            array_push($newvalue, $value);
-                        }else{
-                            $is_error = true;
-                            array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
-                        }
-                        */
-
+                    $date = ImportDate::normalise($r_value, $imp_session['csv_dateformat'] ?? 1);
+                    $display = htmlspecialchars($r_value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                    if ($date === null) {
+                        $is_error = true;
+                        $display = '<span style="color:red">'.$display.'</span>';
                     }
+                    $newvalue[] = $display;
                 }
             }
 
@@ -2268,7 +2241,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
             $error["count_".$type] = $cnt_error;
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
-            $error["err_message"] = "Date values must be in dd-mm-yyyy, mm/dd/yyyy or yyyy-mm-dd formats. Or it should be valid Temporal object.";
+            $error["err_message"] = "Date could not be interpreted safely. Use the selected day/month order, an explicit year, ISO yyyy-mm-dd, or a valid Heurist temporal. Impossible dates, question marks and ambiguous short years require correction. The original source value has been retained.";
             $error["short_message"] = "Invalid Dates";
             $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
             array_push($imp_session['validation'][$type], $error);
@@ -2437,6 +2410,54 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
     }
 
     return $nv;
+}
+
+/** A temporal object's tags/metadata can contain the repeat-value separator. */
+private static function getDateValues($value, $enclosure, $separator){
+    $trimmed = trim((string)$value);
+    if (preg_match('/^(?:\|(?:VER|TYP)=|[\{\[])/', $trimmed)) {
+        return array($trimmed);
+    }
+    return self::getMultiValues($trimmed, $enclosure, $separator ?: 'none');
+}
+
+/**
+ * Check every mapped date before performImport writes any records. The regular
+ * validation page can be bypassed with "ignore errors", so saving needs its
+ * own guard. The buffered result is rewound for the normal import loop.
+ */
+private static function checkImportDates($res, $field_types, $structure, $type_index,
+                                        $session, $enclosure, $separator,
+                                        $key_values, $field_indexes){
+    $order = ImportDate::order($session['csv_dateformat'] ?? 1);
+    $date_columns = array();
+    foreach ($field_types as $index=>$type) {
+        if (($structure[$type][$type_index] ?? null) === 'date') { $date_columns[] = $index; }
+    }
+    if (empty($date_columns)) { return null; }
+    while ($row = $res->fetch_row()) {
+        foreach ($date_columns as $index) {
+            foreach (self::getDateValues($row[$index], $enclosure, $separator) as $raw) {
+                if ($raw !== '' && $raw !== 'NULL' && ImportDate::normalise($raw, $order) === null) {
+                    return 'Date cannot be interpreted safely at source row '.intval(end($row))
+                        .', mapped column '.($index+1).': '.htmlspecialchars($raw, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                        .'. Correct the source date and reload the CSV. No records from this import step were written.';
+                }
+            }
+        }
+    }
+    // Sequence matching may substitute values for cells; check those as well.
+    foreach ((array)$key_values as $values) {
+        foreach ($date_columns as $index) {
+            $column = $field_indexes[$index] ?? null;
+            $raw = $column === null ? null : ($values[$column] ?? null);
+            if ($raw !== null && $raw !== '' && $raw !== 'NULL' && ImportDate::normalise($raw, $order) === null) {
+                return 'A matched date cannot be interpreted safely. Correct the date mapping before importing.';
+            }
+        }
+    }
+    if ($res->num_rows > 0) { $res->data_seek(0); }
+    return null;
 }
 
 
@@ -3079,6 +3100,15 @@ public static function performImport($params, $mode_output){
         if(!$csv_mvsep) {$csv_mvsep = '|';}
         if(!$csv_enclosure) {$csv_enclosure = '"';}
 
+        $date_error = self::checkImportDates($res, $field_types, $recordTypeStructure,
+            $idx_fieldtype, $imp_session, $csv_enclosure, $csv_mvsep,
+            $mapping_keys_values, $field_indexes);
+        if ($date_error !== null) {
+            $res->close();
+            mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
+            return $date_error;
+        }
+
         $previos_recordId = null;
         $recid_in_idfield = null; //value in id field in import table before import session
         $prev_recid_in_idfield = null;
@@ -3248,6 +3278,8 @@ public static function performImport($params, $mode_output){
 
                         if(@$mapping_keys_values_curr[@$field_indexes[$index]]){
                             $values = array( $mapping_keys_values_curr[$field_indexes[$index]] );
+                        }elseif($fieldtype_type === 'date'){
+                            $values = self::getDateValues($row[$index], $csv_enclosure, $csv_mvsep);
                         }elseif(strpos($row[$index], $csv_mvsep)!==false){ //multivalue
                             $values = self::getMultiValues($row[$index], $csv_enclosure, $csv_mvsep);
                         }else{
@@ -3410,8 +3442,9 @@ public static function performImport($params, $mode_output){
 
                                 if($value!='' && $value!='NULL') {
                                     if($fieldtype_type == "date") {
-                                        //$value = strtotime($value);
-                                        //$value = date(DATE_8601, $value);
+                                        // Preflight checked this value. Convert with the saved
+                                        // CSV order before recordSave's shared temporal parser.
+                                        $value = ImportDate::normalise($value, $imp_session['csv_dateformat'] ?? 1);
                                     }else{
                                         //replace \\r to\r \\n to \n
                                         $value = str_replace("\\r", "\r", $value);

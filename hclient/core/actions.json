@@ -499,6 +499,19 @@
         "text": "Clear record view cache"
     },
     {
+        "id": "menu-url-substitutions",
+        "href": "framecontent/urlSubstitutions.php",
+        "data": {
+            "icon": "ui-icon-link",
+            "user-admin-status": "1",
+            "size": "medium",
+            "header": "URL Substitutions",
+            "container": "admin"
+        },
+        "title": "Allows the simplification of URLs by defining words which are replaced with user-defined strings",
+        "text": "URL substitutions"
+    },
+    {
         "id": "menu-structure-duplicates",
         
         "data": {

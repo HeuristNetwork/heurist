@@ -296,11 +296,14 @@ if(!$format){ $format='csv';}
                     <div class="header" style="min-width: 50px;">Date format:</div>
                     <div class="input-cell">
                         <select id="csv_dateformat" class="text ui-widget-content ui-corner-all" style="width:120px;">
-                            <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select>
+                            <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option>
                         </select>
                         <div class="heurist-helper1" style="display: block;">
                             Also supports ISO yyyy-mm-dd (and optional hh:mm:ss)
                             and human friendly dates such as 1827, 1st Sept 1827, 1 sep 1827
+                            <br>The selected order applies throughout import, including fields mapped later.
+                            Use four digits for years before 100 (e.g. 0078) in full dates.
+                            Ambiguous or impossible dates are reported for correction; no date is guessed.
                         </div>
                     </div>
                 </div>

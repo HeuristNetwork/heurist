@@ -732,7 +732,7 @@ class Temporal {
                 //(($date['year']<0)?'-':'').
                 $res = strval($date['year']);
 
-                if($date['month']>0){
+                if(!empty($date['month'])){
                     $res = $res.'.'.str_pad(strval($date['month']),2,'0',STR_PAD_LEFT);
                     if($date['day']>0 && $date['has_days']){
                         $res = $res.str_pad(strval($date['day']),2,'0',STR_PAD_LEFT);
@@ -866,6 +866,9 @@ class Temporal {
                     if(is_array($date)){
                         $date['has_days'] = $origHasDays;
                         $date['has_seconds'] = $origHasSeconds;
+                        // Midnight is an explicit time too; retain its precision
+                        // when the strict CSV parser passes a validated timestamp.
+                        $date['has_time'] = strpos($value, ':') !== false;
                     }
 
                     if($is_bce){
@@ -961,7 +964,7 @@ class Temporal {
                 return null; //wrong value for year
             }
 
-            $has_time = (@$date['hour']>0 || @$date['minute']>0 || @$date['second']>0);
+            $has_time = (!empty($date['has_time']) || @$date['hour']>0 || @$date['minute']>0 || @$date['second']>0);
 
             //for strict ISO - make sure month and days are 2 digits
             if(@$date['month'] || $has_time){
@@ -980,7 +983,7 @@ class Temporal {
                         $date['hour'] = 0;
                     }
 
-                    if($date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
+                    if($has_time){
                         $res = $res.' '.str_pad(strval($date['hour']),2,'0',STR_PAD_LEFT);
 
                         if(!@$date['minute']) { $date['minute'] = 0; }
@@ -1034,7 +1037,7 @@ class Temporal {
                 $res = strval(abs($date['year']));
             }
 
-            $has_time = (@$date['hour']>0 || @$date['minute']>0 || @$date['second']>0);
+            $has_time = (!empty($date['has_time']) || @$date['hour']>0 || @$date['minute']>0 || @$date['second']>0);
 
             $is_greg_or_julian = (!$calendar ||
                 strtolower($calendar)=='gregorian' || strtolower($calendar)=='julian');
@@ -1070,7 +1073,7 @@ class Temporal {
                     $date['hour'] = 0;
                 }
 
-                if($date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
+                if($has_time){
                     $res = $res.' '.str_pad(strval($date['hour']),2,'0',STR_PAD_LEFT);
 
                     if(!@$date['minute']) { $date['minute'] = 0; }

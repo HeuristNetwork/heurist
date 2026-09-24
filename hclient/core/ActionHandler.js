@@ -171,6 +171,12 @@ class ActionHandler {
             href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?') >= 0 ? '&' : '?') + 'db=' + window.hWin.HAPI4.database;
         }
 
+        // Configuration must be re-read on every click, including when the
+        // Design container is already showing this same action.
+        if (action.id === 'menu-sync-configure') {
+            href += '&reload=' + Date.now();
+        }
+
         if (target) {
             window.open(href, target);
         } else {

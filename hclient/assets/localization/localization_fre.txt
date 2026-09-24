@@ -343,7 +343,7 @@
 #menu-export-kml-hint#Générer un fichier KML d'après les résultats (requête/filtre en cours + requête étendue)
 #menu-export-gephi-hint#Générer un fichier GEPHI d'après les résultats (requête/filtre en cours + requête étendue)
 #menu-export-iiif-hnt#Générer un manifeste IIIF d'après les résultats
-#Please see the Export tab on the right under Explore#Voir l'onglet Export (à droite sur le menu Explorer)
+#See the Export tab in the Explore menu#Voir l'onglet Export (à droite sur le menu Explorer)
 #Safeguard#Sauvegarde
 #menu-profile-tags#Gérer les tags
 #menu-profile-reminders#Gérer les rappels
