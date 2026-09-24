@@ -387,6 +387,10 @@
         if(strlen($targetLanguage) == 3){ // get ar2
             $targetLanguage = $glb_lang_codes_index[$targetLanguage];
         }
+
+        $deeplLanguages = array_map('strtolower', $deeplLanguages);
+        $targetLanguage = strtolower($targetLanguage);
+
         if(!in_array($targetLanguage, $deeplLanguages)){
             $system->addError(HEURIST_INVALID_REQUEST, 'The provided language is not supported by Deepl.<br>If you believe this is in error, please contact the Heurist team.');
             return false;
@@ -427,6 +431,13 @@
         return replacePunctuation($response, true);
     }
 
+    /**
+     * Sends the Translate API requests to Deepl, either all at once or in chunks
+     *
+     * @param CurlHandle $curlHandle cURL handle
+     * @param string $baseURL API request base URL
+     * @param string $string String to be translated
+     */
     function processDeepLRequest($curlHandle, $baseURL, $string){
 
         if(empty($baseURL) || empty($string)){
@@ -591,7 +602,7 @@
             $titleNodes = $xpath->query('//@title[not(ancestor::*[@translate="no"])]'); // get all titles not within, or used with, translate=no tags
             foreach($titleNodes as $node){
 
-                if(empty(trim($node->nodeValue))){
+                if(empty(trim($node->nodeValue)) || !$node instanceof DOMNode){
                     continue;
                 }
 

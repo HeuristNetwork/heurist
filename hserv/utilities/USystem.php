@@ -853,23 +853,26 @@ class USystem {
      */
     private static function updateDeeplLanguages(){
 
-        global $accessToken_DeepLAPI;
+        global $accessToken_DeepLAPI, $serverName_DeepL;
 
         if(empty($accessToken_DeepLAPI)){
             return;
         }
+        if(empty($serverName_DeepL)){
+            $serverName_DeepL = 'https://api-free.deepl.com';
+        }
 
-        $target_url = 'https://api-free.deepl.com/v2/languages?type=target';
+        $target_url = "{$serverName_DeepL}/v3/languages?resource=translate_text"; // https://api-free.deepl.com/v2/languages?type=target
 
         $language_file = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/DEEPL_languages.json';
-        if(folderExists(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', true) !== true){
+        if(folderExists(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', true) !== 1){
             folderCreate2(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', '');
             fileDelete(HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json');
         }
 
-        $target_res = loadRemoteURLContentWithRange($target_url, false, true, 60, array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI));
+        $target_res = loadRemoteURLContentWithRange($target_url, false, true, 60, ["Authorization: DeepL-Auth-Key {$accessToken_DeepLAPI}"]);
 
-        $target_languages = array();
+        $target_languages = [];
 
         if(!empty($target_res)){
 
@@ -879,7 +882,11 @@ class USystem {
             // Extra processing needed, some target languages have multiple versions; e.g. ENG-GB and ENG-US
             foreach ($target_res as $lang) {
 
-                $lang_name = $lang['language'];
+                $lang_name = $lang['lang'];
+                if(!$lang['usable_as_target']){
+                    continue;
+                }
+
                 if(strpos($lang_name, '-') !== false){
                     $lang_name = explode('-', $lang_name)[0];
                 }
@@ -888,7 +895,7 @@ class USystem {
                     continue;
                 }
 
-                array_push($target_languages, $lang_name);
+                $target_languages[] = $lang_name;
             }
         }
 
@@ -1051,6 +1058,7 @@ class USystem {
             'timestamp' => time()
         ];
 
+        $rawdata = null;
         if(strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL)) === 0){
             //the same version
             $mysql_indexdb = mysql__init(HEURIST_INDEX_DATABASE);

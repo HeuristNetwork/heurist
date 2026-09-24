@@ -1505,7 +1505,7 @@ $.widget( "heurist.resultList", {
     _renderRecordsIncrementally: function( recordset ){
 
         this._currentRecordset = recordset;
-        this._originalSortOrder = recordset.getOrder();
+        this._originalSortOrder = recordset?.getOrder();
 
         let total_count_of_curr_request = 0;
 

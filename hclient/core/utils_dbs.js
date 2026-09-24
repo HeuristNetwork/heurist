@@ -3502,7 +3502,12 @@ window.hWin.HEURIST4.dbs = {
 
         for(const rty_ID of rty_IDs){
 
-            let fieldsForRty = $Db.rst(rty_ID).getIds(); // Get all dty_IDs for this rty_ID
+            let rstFields = $Db.rst(rty_ID);
+            if(!rstFields || rstFields.length() === 0){
+                continue;
+            }
+
+            let fieldsForRty = rstFields.getIds(); // Get all dty_IDs for this rty_ID
             fieldsForRty = fieldsForRty.map(id => Number.parseInt(id));
 
             allDtyIDs.push(fieldsForRty);
