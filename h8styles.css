@@ -26,7 +26,8 @@ body.heurist-modern {
 /* The H8 selector remains visible in the legacy interface, but only activates
    this stylesheet after it is clicked. */
 .h8-interface-link {
-    color: #ffffff;
+    color: #17375f;
+    background: rgba(255, 255, 255, .72);
     cursor: pointer;
     font-weight: 600;
     letter-spacing: .04em;
@@ -42,6 +43,15 @@ body.heurist-modern {
 .h8-interface-link.active {
     color: #ffffff;
     background: #1769c2;
+}
+
+/* Keep the legacy entry visible on hover and keyboard focus while retaining
+   the intentionally faint minus sign in the normal H7 view. */
+.ui-heurist-heurist8.ui-heurist-header:hover,
+.ui-heurist-heurist8.ui-heurist-header:focus-visible {
+    color: #17375f !important;
+    opacity: 1 !important;
+    outline: 2px solid #1769c2;
 }
 
 /* Flatter application surfaces and restrained separators. */
