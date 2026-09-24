@@ -351,6 +351,10 @@ final class RecordQueryParser
         if(preg_match('/^geo(?::?([0-9]+))?:(within|intersects)$/', $lower, $matches)){
             return array('geo', ($matches[1] !== '' ? $matches[1].':' : '').$matches[2]);
         }
+        // a whole keyword wins over prefix splitting (`related` is not `r` + "elated")
+        if(isset(self::KEYWORD_ALIASES[$lower])){
+            return array(self::KEYWORD_ALIASES[$lower], '');
+        }
         if(preg_match('/^([a-z_]+?)([0-9]+)$/i', $raw, $matches)){
             $base = $matches[1]; $suffix = $matches[2];
         }else{

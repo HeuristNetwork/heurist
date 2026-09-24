@@ -593,15 +593,27 @@ final class RecordSearchService
         return array_map('intval', array_keys($all));
     }
 
-    /** Resolve inverse relationship terms and all their descendants. */
+    /**
+     * Resolve the terms a relationship reads as when seen from its target, plus
+     * their descendants. A term's reverse is its trm_InverseTermID, or any term
+     * naming it as inverse (one-sided definitions); a term with no inverse is
+     * undirected and reads the same both ways, so it is its own reverse.
+     */
     private function inverseTermIds(array $termIds): array
     {
         $inverse = array();
         foreach(array_chunk($this->uniqueIds($termIds), self::SQL_CHUNK_SIZE) as $chunk){
-            $sql = 'SELECT DISTINCT trm_InverseTermID FROM defTerms WHERE trm_ID IN ('
-                .implode(',', array_fill(0, count($chunk), '?')).')';
-            foreach($this->executor->executeRows($sql, str_repeat('i', count($chunk)), $chunk) as $row){
-                $id = intval($row[0]); if($id>0){ $inverse[] = $id; }
+            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+            $sql = 'SELECT trm_ID, trm_InverseTermID FROM defTerms'
+                .' WHERE trm_ID IN ('.$placeholders.') OR trm_InverseTermID IN ('.$placeholders.')';
+            $found = array_fill_keys($chunk, false);
+            foreach($this->executor->executeRows($sql, str_repeat('i', 2*count($chunk)), array_merge($chunk, $chunk)) as $row){
+                $termId = intval($row[0]); $inverseId = intval($row[1]);
+                if(isset($found[$termId]) && $inverseId>0){ $inverse[] = $inverseId; $found[$termId] = true; }
+                if(isset($found[$inverseId]) && $termId>0){ $inverse[] = $termId; $found[$inverseId] = true; }
+            }
+            foreach($found as $termId=>$hasInverse){
+                if(!$hasInverse){ $inverse[] = intval($termId); }
             }
         }
         return empty($inverse) ? array() : $this->expandTermIds($inverse);
