@@ -1937,6 +1937,15 @@ $.widget( "heurist.slidersMenu", {
                                 window.hWin.HEURIST4.util.setDisabled(item, true);
                                 item.attr('title', 'This database is configured as Master. Synchronisation is triggered from satellites');
                             }
+
+                            // JT#3294 URL substitutions are intentionally exposed in the
+                            // menu on all servers, but may only be opened when experimental
+                            // functions are enabled. Keeping the disabled item visible tells
+                            // administrators why it is unavailable.
+                            if(action_id=='menu-url-substitutions'
+                                && !window.hWin.HAPI4.sysinfo.isExperimentalAllowed){
+                                window.hWin.HEURIST4.util.setDisabled(item, true);
+                            }
                         }
 
                         let action_hint = window.hWin.HR( action_id+'-hint' ); 
@@ -1945,6 +1954,14 @@ $.widget( "heurist.slidersMenu", {
                         }
                         if(!action_hint){
                             item.attr('title',action_hint);
+                        }
+
+                        if(action_id=='menu-url-substitutions'
+                            && !window.hWin.HAPI4.sysinfo.isExperimentalAllowed){
+                            item.attr('title', 'Sorry, experimental function not available on this server. '
+                                + (action_hint || ''));
+                        }else if(action_id=='menu-url-substitutions' && action_hint){
+                            item.attr('title', action_hint);
                         }
                        
                         if(action.data?.is_association_member && window.hWin.HAPI4.sysinfo.associationMembershipStatus==='nonmember'){
