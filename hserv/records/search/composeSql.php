@@ -1352,6 +1352,13 @@ class HPredicate {
      * @var string|int|null 
      */
     public $field_id = null;
+
+    /**
+     * Spatial match mode of a `geo[:<id>]:within|intersects` predicate, or null
+     * (then WKT means `within` and an extent means `intersects`).
+     * @var string|null
+     */
+    public $geo_mode = null;
     /** 
      * The determined Heurist field type (e.g., 'enum', 'date', 'freetext', 'resource') 
      * for the current `$field_id`. Fetched from `defDetailTypes` table.
@@ -1561,6 +1568,10 @@ class HPredicate {
 
         $key = explode(":", strtolower($key));
         $this->pred_type  = $key[0];
+        // geo[:<id>]:within|intersects - the trailing part is the match mode, not a field id
+        if($this->pred_type=='geo' && count($key)>1 && in_array(end($key), array('within','intersects'))){
+            $this->geo_mode = array_pop($key);
+        }
         $ll = count($key);
         if($ll>1){ //get field ids "f:5" -> 5
             if($this->pred_type=='f'){
@@ -1947,8 +1958,10 @@ class HPredicate {
      * Handles:
      * - `NULL` or `-NULL`: Checks for records where the geo field is not defined.
      * - `""` (empty string): Checks for records where the geo field has any non-null value.
-     * - WKT string: Constructs an `ST_Contains` or `MBRContains` (though `ST_Contains` is in the code)
-     *   condition to find records whose geometry is contained within the provided WKT geometry.
+     * - WKT string or `{west,south,east,north}` extent, matched by `$this->geo_mode`:
+     *   `within` -> ST_Contains (record geometry entirely inside the area),
+     *   `intersects` -> ST_Intersects (record geometry touches the area).
+     *   Without a mode, WKT means `within` and an extent means `intersects`.
      *
      * @return array An array `['where' => $sql_condition]`.
      */
@@ -1993,6 +2006,11 @@ class HPredicate {
                 }
 
                 $wkt = "POLYGON (($west $south, $east $south, $east $north, $west $north, $west $south))";
+                $spatialFunction = 'ST_Intersects';
+            }
+            if($this->geo_mode == 'within'){
+                $spatialFunction = 'ST_Contains';
+            }elseif($this->geo_mode == 'intersects'){
                 $spatialFunction = 'ST_Intersects';
             }
 

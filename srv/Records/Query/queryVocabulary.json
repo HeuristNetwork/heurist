@@ -1,5 +1,5 @@
 {
-  "_about": "Shared vocabulary for the Filter Builder and the query-language describer (Tasks A/C). Operators + phrase templates ONLY - the predicate keyword list (KEYWORD_ALIASES / LINK_PREDICATES) is hard-copied on the client from srv/Records/Query/Parser/RecordQueryParser.php. i18nKey values are resolved through heurist-explorer's $HR() against assets/localization/localization_<lang>.txt (#key#value). Canonical copy lives here; heurist-explorer keeps an identical copy. See documentation/development/query-language-filter-builder-plan.md sections 4.1 and 6.",
+  "_about": "Shared vocabulary for the Filter Builder and the query-language describer (Tasks A/C). Operators + phrase templates ONLY - the predicate keyword list (KEYWORD_ALIASES / LINK_PREDICATES) is hard-copied on the client from srv/Records/Query/Parser/RecordQueryParser.php. i18nKey values are resolved through heurist-explorer's $HR() against assets/localization/localization_<lang>.txt (#key#value). Canonical copy: heurist-explorer apps/explorer/src/utils/queryVocabulary.json; heurist srv/Records/Query/queryVocabulary.json must stay byte-identical to it. See documentation/development/query-language-filter-builder-plan.md sections 4.1 and 6.",
   "version": "1",
 
   "fieldKinds": {
@@ -53,7 +53,7 @@
       { "token": "<>", "input": "range",  "pattern": "{a}<>{b}", "i18nKey": "op.between" }
     ],
     "date": [
-      { "token": "<>", "input": "range", "pattern": "{a}<>{b}", "i18nKey": "op.overlaps" },
+      { "token": "<>", "input": "range", "pattern": "<>{a}/{b}", "i18nKey": "op.overlaps" },
       { "token": "><", "input": "range", "pattern": "><{a}/{b}", "i18nKey": "op.within_range" },
       { "token": "=",  "input": "date",  "i18nKey": "op.on" },
       { "token": ">=", "input": "date",  "i18nKey": "op.on_or_after" },
@@ -77,7 +77,8 @@
       { "token": "=", "input": "text", "i18nKey": "op.exact" }
     ],
     "geo": [
-      { "token": "", "input": "wkt", "i18nKey": "op.within" }
+      { "token": "", "input": "wkt", "geoMode": "intersects", "i18nKey": "op.intersects" },
+      { "token": "", "input": "wkt", "geoMode": "within", "i18nKey": "op.within" }
     ],
     "bool": [
       { "token": "", "input": "bool", "i18nKey": "op.is" }
@@ -107,6 +108,7 @@
     "all_of":       "phrase.all_of",
     "field_cond":   "phrase.field_cond",
     "header_cond":  "phrase.header_cond",
+    "field_count":  "phrase.field_count",
     "linked_to":    "phrase.linked_to",
     "linked_from":  "phrase.linked_from",
     "related_to":   "phrase.related_to",
@@ -143,10 +145,12 @@
       "op.is_not": "is not",
       "op.is_exactly": "is exactly",
       "op.within": "is within",
+      "op.intersects": "intersects",
       "op.any_of": "is any of",
       "op.all_of": "is all of",
       "op.is_set": "has a value",
       "op.is_empty": "has no value",
+      "op.count": "count",
 
       "phrase.find": "Find {rectype}",
       "phrase.any_type": "records",
@@ -158,6 +162,7 @@
       "phrase.all_of": "all of ({conditions})",
       "phrase.field_cond": "{field} {op} {value}",
       "phrase.header_cond": "{field} {op} {value}",
+      "phrase.field_count": "number of {field} values",
       "phrase.linked_to": "linked to {subquery}",
       "phrase.linked_from": "linked from {subquery}",
       "phrase.related_to": "related to {subquery}",

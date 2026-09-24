@@ -255,14 +255,21 @@ final class FieldPredicateCompiler
             .'AND dc.dtl_DetailTypeID=?'.$this->detailVisibilityCondition('dc', $recordAlias, $state).') '
             .$operator.' ?';
     }
+    /**
+     * Spatial predicate `geo[:<fieldId>][:within|intersects]`.
+     *
+     * The value is WKT or a `{west,south,east,north}` extent. The match mode is
+     * `within` (ST_Contains(area, geometry): the record lies entirely inside the
+     * area) or `intersects` (ST_Intersects: the record touches the area). Without
+     * a mode, WKT means `within` and an extent means `intersects` - the long-standing
+     * behaviour of the two value forms.
+     */
     public function geoCondition(string $suffix, $value, SqlBuildContext $state, string $recordAlias = 'r'): string
     {
+        list($fieldId, $mode) = self::geoSuffixParts($suffix);
         $fieldSql = '';
-        if($suffix !== ''){
-            if(!ctype_digit($suffix) || intval($suffix)<1){
-                throw new QueryValidationException('Geo predicate field ID must be numeric');
-            }
-            $state->bind(intval($suffix), 'i');
+        if($fieldId !== null){
+            $state->bind($fieldId, 'i');
             $fieldSql = ' AND gd.dtl_DetailTypeID=?';
         }
         if($value === null || (!is_array($value) && strtoupper(trim((string)$value)) === 'NULL')){
@@ -294,7 +301,7 @@ final class FieldPredicateCompiler
                 $state->bind($wkt, 's');
                 return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
                     .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.' '
-                    .'AND ST_Intersects(ST_GeomFromText(?),gd.dtl_Geo)'
+                    .'AND '.self::geoSqlFunction($mode ?? 'intersects').'(ST_GeomFromText(?),gd.dtl_Geo)'
                     .$this->detailVisibilityCondition('gd', $recordAlias, $state).')';
             }
             return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
@@ -304,8 +311,38 @@ final class FieldPredicateCompiler
         $state->bind($text, 's');
         return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
             .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.' '
-            .'AND ST_Contains(ST_GeomFromText(?),gd.dtl_Geo)'
+            .'AND '.self::geoSqlFunction($mode ?? 'within').'(ST_GeomFromText(?),gd.dtl_Geo)'
             .$this->detailVisibilityCondition('gd', $recordAlias, $state).')';
+    }
+
+    /**
+     * Split a geo suffix `[<fieldId>][:within|intersects]` (either part optional).
+     *
+     * @return array{0:?int,1:?string} [field id or null, mode or null]
+     * @throws QueryValidationException for anything else
+     */
+    public static function geoSuffixParts(string $suffix): array
+    {
+        $fieldId = null;
+        $mode = null;
+        foreach($suffix === '' ? array() : explode(':', $suffix) as $part){
+            $lower = strtolower(trim($part));
+            if($mode === null && ($lower === 'within' || $lower === 'intersects')){
+                $mode = $lower;
+            }elseif($fieldId === null && $mode === null && ctype_digit($lower) && intval($lower) > 0){
+                $fieldId = intval($lower);
+            }else{
+                throw new QueryValidationException(
+                    'Geo predicate must be geo[:<field ID>][:within|intersects], got geo:'.$suffix);
+            }
+        }
+        return array($fieldId, $mode);
+    }
+
+    /** SQL spatial function for a geo match mode (area first, record geometry second). */
+    private static function geoSqlFunction(string $mode): string
+    {
+        return $mode === 'intersects' ? 'ST_Intersects' : 'ST_Contains';
     }
     public function textCondition(
         string $column,
@@ -562,27 +599,65 @@ final class FieldPredicateCompiler
         return array_map('intval', array_keys($found));
     }
 
-    /** Header dates use ISO values and legacy slash/<> BETWEEN syntax. */
+    /**
+     * Header dates use ISO values and legacy slash/<> BETWEEN syntax. The detail-date
+     * range forms `<>a/b` (overlaps) and `><a/b` (within) are accepted too: a header
+     * date is a single point, so both mean BETWEEN.
+     *
+     * A value covers its whole period: `1900/2000` is 1900-01-01 00:00:00 to
+     * 2000-12-31 23:59:59, and `<=2000` / `>2000` compare against the end of 2000.
+     */
     public function headerDateCondition(string $column, $value, SqlBuildContext $state): string
     {
         $text = $this->normalizeRelativeDate(trim((string)$value));
+        if(strpos($text, '<>') === 0 || strpos($text, '><') === 0){
+            $text = trim(substr($text, 2));
+        }
         $operator = null;
         foreach(array('>=','<=','>','<','=') as $candidate){
             if(strpos($text, $candidate) === 0){ $operator = $candidate; $text = trim(substr($text, strlen($candidate))); break; }
         }
-        $range = $this->splitRange($text, '<>') ?? $this->splitRange($text, '/');
+        // `2000/02` is a month, not the range 2000..02
+        $isSlashMonth = preg_match('/^\d{4}\/\d{1,2}$/', $text) === 1;
+        $range = $this->splitRange($text, '<>') ?? ($isSlashMonth ? null : $this->splitRange($text, '/'));
         if($range !== null){
             $from = Temporal::dateToISO($range[0]); $to = Temporal::dateToISO($range[1]);
             if($from === null || $to === null){ throw new QueryValidationException('Invalid date range'); }
-            $state->bind($from, 's'); $state->bind($to, 's');
+            $state->bind($from, 's'); $state->bind($this->headerPeriodEnd($range[1], $to), 's');
             return $column.' BETWEEN ? AND ?';
         }
         $iso = Temporal::dateToISO($text);
         if($iso === null){ throw new QueryValidationException('Invalid date value: '.$text); }
-        if($operator !== null){ $state->bind($iso, 's'); return $column.' '.$operator.' ?'; }
+        if($operator !== null){
+            // "up to and including" / "after" a period compare against its last moment
+            $bound = ($operator === '<=' || $operator === '>') ? $this->headerPeriodEnd($text, $iso) : $iso;
+            $state->bind($bound, 's');
+            return $column.' '.$operator.' ?';
+        }
         $pattern = preg_match('/^\d{4}[-\/]\d{2}$/', $text) ? str_replace('/', '-', $text).'%' : $iso.'%';
         $state->bind($pattern, 's');
         return $column.' LIKE ?';
+    }
+
+    /**
+     * Last moment of the period a header-date value names, from its written
+     * precision: a year (`2000`) ends on 31 December, a month (`2000-02`, `2000/02`)
+     * on its last day, a day at 23:59:59; a value with a time is used as is.
+     *
+     * @param string $raw Value as written.
+     * @param string $iso Its `Temporal::dateToISO()` form (start of the period).
+     */
+    private function headerPeriodEnd(string $raw, string $iso): string
+    {
+        $raw = trim($raw);
+        if(preg_match('/^\d{4}$/', $raw)){
+            return $raw.'-12-31 23:59:59';
+        }
+        if(preg_match('/^(\d{4})[-\/](\d{1,2})$/', $raw, $m)){
+            $month = new \DateTimeImmutable(sprintf('%04d-%02d-01', $m[1], $m[2]));
+            return $month->format('Y-m-t').' 23:59:59';
+        }
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $iso) ? $iso.' 23:59:59' : $iso;
     }
 
     /** Detail dates are compared through recDetailsDateIndex estimated bounds. */

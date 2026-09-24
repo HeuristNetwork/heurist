@@ -60,7 +60,9 @@ final class QueryValueResolver
 
             if($this->isFieldPredicate($base) && $suffix !== ''){
                 list($fieldName, $qualifier) = $this->splitFieldSuffix($suffix);
-                if(!ctype_digit($fieldName)){
+                // geo:within / geo:intersects carry a match mode, not a field name
+                $isGeoMode = $base === 'geo' && in_array(strtolower($fieldName), array('within','intersects'), true);
+                if(!ctype_digit($fieldName) && !$isGeoMode){
                     $fieldId = $this->resolveField($fieldName, $types);
                     $suffix = (string)$fieldId.($qualifier === '' ? '' : ':'.$qualifier);
                     $key = $base.':'.$suffix;

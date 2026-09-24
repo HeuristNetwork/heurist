@@ -289,10 +289,10 @@ final class RecordQueryParser
     }
     private function extractTextSubqueries(string $query): string
     {
-        while(strpos($query, ')') !== false){
-            $close = strpos($query, ')');
-            $open = strrpos(substr($query, 0, $close), '(');
-            if($open === false){
+        // parentheses inside "quoted" values (e.g. WKT "POLYGON ((…))") are literal
+        while(($close = $this->unquotedPosition($query, ')')) !== null){
+            $open = $this->unquotedPosition(substr($query, 0, $close), '(', true);
+            if($open === null){
                 throw new QueryValidationException('Unmatched closing parenthesis');
             }
             $inner = substr($query, $open+1, $close-$open-1);
@@ -301,10 +301,24 @@ final class RecordQueryParser
             $this->textSubqueries[$index] = $parsedInner;
             $query = substr($query, 0, $open).' __SUBQUERY_'.$index.'__ '.substr($query, $close+1);
         }
-        if(strpos($query, '(') !== false){
+        if($this->unquotedPosition($query, '(') !== null){
             throw new QueryValidationException('Unmatched opening parenthesis');
         }
         return $query;
+    }
+    /** Position of the first (or last) `$char` outside double quotes, or null. */
+    private function unquotedPosition(string $text, string $char, bool $last = false): ?int
+    {
+        $found = null;
+        $quoted = false;
+        for($i=0, $n=strlen($text); $i<$n; $i++){
+            if($text[$i] === '"'){ $quoted = !$quoted; continue; }
+            if(!$quoted && $text[$i] === $char){
+                if(!$last){ return $i; }
+                $found = $i;
+            }
+        }
+        return $found;
     }
     private function tokenize(string $query): array
     {
@@ -319,6 +333,10 @@ final class RecordQueryParser
     }
     private function splitKeywordValue(string $token): array
     {
+        // geo[:<id>]:within|intersects:<value> - the match mode belongs to the key
+        if(preg_match('/^(geo(?::?[0-9]+)?:(?:within|intersects)):(.*)$/i', $token, $matches)){
+            return array($matches[1], $matches[2], true);
+        }
         if(preg_match('/^([a-z_]+):([0-9]+):(.*)$/i', $token, $matches)){
             return array($matches[1].$matches[2], $matches[3], true);
         }
@@ -330,6 +348,9 @@ final class RecordQueryParser
     {
         $raw = trim($raw);
         $lower = strtolower($raw);
+        if(preg_match('/^geo(?::?([0-9]+))?:(within|intersects)$/', $lower, $matches)){
+            return array('geo', ($matches[1] !== '' ? $matches[1].':' : '').$matches[2]);
+        }
         if(preg_match('/^([a-z_]+?)([0-9]+)$/i', $raw, $matches)){
             $base = $matches[1]; $suffix = $matches[2];
         }else{
