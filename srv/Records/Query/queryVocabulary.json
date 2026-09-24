@@ -57,7 +57,10 @@
       { "token": "><", "input": "range", "pattern": "><{a}/{b}", "i18nKey": "op.within_range" },
       { "token": "=",  "input": "date",  "i18nKey": "op.on" },
       { "token": ">=", "input": "date",  "i18nKey": "op.on_or_after" },
-      { "token": "<=", "input": "date",  "i18nKey": "op.on_or_before" }
+      { "token": ">",  "input": "date",  "i18nKey": "op.after" },
+      { "token": "<=", "input": "date",  "i18nKey": "op.on_or_before" },
+      { "token": "<",  "input": "date",  "i18nKey": "op.before" },
+      { "token": "",   "input": "date",  "i18nKey": "op.falls_in" }
     ],
     "enum": [
       { "token": "",  "input": "term", "i18nKey": "op.is" },
@@ -95,7 +98,7 @@
     { "token": "-NULL", "input": "none", "whole": true, "i18nKey": "op.is_set" },
     { "token": "NULL",  "input": "none", "whole": true, "i18nKey": "op.is_empty" }
   ],
-  "commonAppliesTo": ["text", "number", "date", "enum", "term", "record", "file"],
+  "commonAppliesTo": ["text", "number", "date", "enum", "term", "record", "file", "tag"],
 
   "phrases": {
     "find":         "phrase.find",
@@ -141,6 +144,9 @@
       "op.on": "is on",
       "op.on_or_after": "is on or after",
       "op.on_or_before": "is on or before",
+      "op.after": "is after",
+      "op.before": "is before",
+      "op.falls_in": "falls in",
       "op.is": "is",
       "op.is_not": "is not",
       "op.is_exactly": "is exactly",

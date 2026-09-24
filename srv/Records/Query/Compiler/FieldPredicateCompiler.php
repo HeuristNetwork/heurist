@@ -122,6 +122,26 @@ final class FieldPredicateCompiler
     {
         if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
         $text = (string)$value;
+
+        // @+ (all words) across any field is record-level: each word may be in a
+        // different field (given and family names live in separate fields), so the
+        // record must be a candidate for every word. A single field (f:<id>:@+…)
+        // still needs all words in that field - see textCondition.
+        if(strpos($text, '@+') === 0){
+            preg_match_all('/"[^"]*"|\S+/u', trim(substr($text, 2)), $matches);
+            $words = $matches[0] ?? array();
+            if(count($words) > 1){
+                $sources = array();
+                foreach($words as $word){
+                    $sources[] = $this->anyFieldCandidateSource('@+'.$word, $state);
+                }
+                $first = array_shift($sources);
+                $where = array_map(static function($source, $index){
+                    return 'aw.rec_ID IN (SELECT aw'.$index.'.rec_ID FROM ('.$source.') aw'.$index.')';
+                }, $sources, array_keys($sources));
+                return 'SELECT aw.rec_ID FROM ('.$first.') aw WHERE '.implode(' AND ', $where);
+            }
+        }
         $positiveExclusion = strpos($text, '@-') === 0;
         $queries = array();
         $isDbOwner = !empty(($state['context'] ?? array())['isDbOwner']);
