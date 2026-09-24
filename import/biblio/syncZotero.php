@@ -396,7 +396,7 @@ if($step == 1){  // info about current status
             print '<br><br>' . implode('<br>', $mapping_rt_errors2) . '</p>';
         }
 
-        print "<p style='color: red;margin-top: 0px;'>Please import them from the Heurist_Bibliographic database (# 6) using Design > Browse templates</p>";
+        print "<p style='color: red;margin-top: 0px;'>You may be able to find missing fields in the Heurist_Core_Definitions database (# 2) using Design > Browse templates, however the bibliographic definitions are normally integral to all new databases.</p>";
     }
 
     if(!empty($successful_rows)){
@@ -454,7 +454,7 @@ $previousSync = $previousSync && array_key_exists($syncIndex, $previousSync) ? $
 
 $lastSync = $previousSync['id'] > 0 ? "<br><br>Last Sync Version: <strong>{$previousSync['id']} ({$previousSync['date']})</strong>" : '';
 if(!$syncingStep){
-    print "<div><b>Zotero connection configured</b>{$lastSync}</div>";
+    print "<div><b>zotero has been initiated with api key [$api_Key]</b>{$lastSync}</div>";
     print '<br><a href="#" onclick="open_sysIdentification()">Click here to modify properties which determine Zotero connection</a><br><br>';
 }
 
@@ -510,7 +510,7 @@ if($step == 1){  //first step - info about current status
                 [$syncCount, $latestSyncID] = getZoteroHeaders($api_Key, 'users', $user_ID, $previousSync['id']);
             }
 
-            if($syncCount !== false && $latestSyncID !== false && $syncCount > 0){
+            if($syncCount > 0){
 
                 print <<<HTML
                 <div class='divStart' style='margin-bottom: 2em;'>
@@ -519,25 +519,22 @@ if($step == 1){  //first step - info about current status
                     <a href='#' onclick='__startProcess("{$lib_key_idx}", "{$syncCount}", "{$previousSync["id"]}")'><button class='h3button'>Sync to latest version</button></a>
                 </div><br>
                 HTML;
-            }elseif($syncCount === 0 && $latestSyncID !== false){
-                $extraMessage = '<span style="font-weight: bold; color: #5cb760;">No changes since last sync</span><br>';
             }else{
-                $extraMessage = '<span class="ui-state-error">Could not check Zotero for changes. Please retry later.</span><br>';
+                $extraMessage = '<span style="font-weight: bold; color: #5cb760;">No changes since last sync</span><br>';
             }
         }
 
         if($totalitems > 0){
 
-            if($previousSync['id'] <= 0){
-                $extraMessage = 'No saved Zotero sync version was found. Run a full update to establish one.<br>';
-            }
-
             print <<<HTML
             <div class='divStart'>
                 Total items count in library: <strong>{$totalitems}</strong><br>
                 {$extraMessage}<br>
-                <a href='#' onclick='__startProcess("{$lib_key_idx}", "{$totalitems}", 0);return false;'><button class='h3button'>Update existing records from Zotero (full library)</button></a><br>
-                <span>Updates matched records in place. Existing Heurist record IDs, links and fields not supplied by Zotero are retained.</span>
+                <a href='#' onclick='__startProcess("{$lib_key_idx}", "{$totalitems}", 0)'><button class='h3button'>Reload from Scratch</button></a><br>
+                <span style="color: red;padding-top: 0.5em;display: inline-block;">
+                    This will delete all records derived from Zotero and reload them.<br>
+                    Existing data for these records will be lost.
+                </span>
             </div><br><br>
             HTML;
             print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../hclient/assets/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
@@ -893,8 +890,6 @@ if($step == 1){  //first step - info about current status
                             $cnt_added[]=$new_recid;
                             $cnt_report[$recordType]['added'][] = $new_recid;
                         }
-                    }else{
-                        $isFailure = true;
                     }
                 }
             }//entry
@@ -915,14 +910,9 @@ if($step == 1){  //first step - info about current status
 
     //$output = ob_get_clean();
 
-    if(!handleUnresolvedPointers($mysqli, $unresolved_pointers)){
-        $isFailure = true;
-    }
+    handleUnresolvedPointers($mysqli, $unresolved_pointers);
 
-    // Never advance the cursor after an incomplete run: the next run must retry it.
-    if(!$isFailure && !$terminatedByUser){
-        updateLastSync($api_Key, $group_ID, $user_ID, $syncID, $syncIndex);
-    }
+    updateLastSync($api_Key, $group_ID, $user_ID, $syncID, $syncIndex);
 
     // JT#3246: Keep long Zotero reports in a bounded, responsive panel so the
     // scrollbar remains beside the report instead of at the far edge of a wide dialog.
@@ -1519,9 +1509,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         $record['ScratchPad'] = null;
         $record['details'] = $details;
 
-        // Mode 4 replaces Zotero-supplied fields while retaining unrelated local
-        // details (including uploaded files and pointers to other records).
-        $out = recordSave($system, $record, true, false, 4, $record_count);//see recordModify.php
+        $out = recordSave($system, $record, true, false, 0, $record_count);//see recordModify.php
 
         if ( @$out['status'] != HEURIST_OK ) {
             $outputLines[] = "<div style='color:red'> Error: ".htmlspecialchars($out["message"]).DIV_E;
@@ -1658,7 +1646,6 @@ function prepareErrors(){
 function handleUnresolvedPointers($mysqli, $unresolved_pointers){
 
     global $outputLines;
-    $success = true;
 
     // try to find 'unresolved pointers
     // $rec_id - record to be updated
@@ -1677,7 +1664,6 @@ function handleUnresolvedPointers($mysqli, $unresolved_pointers){
         if(!isPositiveInt($rec_id)){
             $rec_id = htmlspecialchars($rec_id);
             $outputLines[] = "Invalid record ID provided for handling pointers: {$rec_id}";
-            $success = false;
             continue;
         }
 
@@ -1697,16 +1683,12 @@ function handleUnresolvedPointers($mysqli, $unresolved_pointers){
                     if(!isPositiveInt($res_rec_id)){
                         $res_rec_id = htmlspecialchars($res_rec_id);
                         $outputLines[] = "Invalid record pointer target provided: {$res_rec_id}";
-                        $success = false;
                         continue;
                     }
 
                     //update main record
                     $insertValues = ['dtl_RecID' => $rec_id, 'dtl_DetailTypeID' => $dt_id, 'dtl_Value' => $res_rec_id, 'dtl_AddedByImport' => 1];
-                    // Re-running a full reconciliation must not duplicate an existing link.
-                    $existing = mysql__select_value($mysqli, 'SELECT dtl_ID FROM recDetails WHERE dtl_RecID='
-                        .$rec_id.' AND dtl_DetailTypeID='.intval($dt_id).' AND dtl_Value='.$res_rec_id.' LIMIT 1');
-                    $result = $existing ?: mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $insertValues);
+                    $result = mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $insertValues);
 
                     if(!isPositiveInt($result)){
 
@@ -1717,13 +1699,11 @@ function handleUnresolvedPointers($mysqli, $unresolved_pointers){
                         $msg = "Failed to connect {$recTitles[$res_rec_id]} to {$recTitles[$rec_id]}";
                         $msg .= !empty($result) ? ", reason: {$result}" : '';
                         $outputLines[] = $msg;
-                        $success = false;
                     }
                 }
             }
         }
     }
-    return $success;
 }
 
 /**
