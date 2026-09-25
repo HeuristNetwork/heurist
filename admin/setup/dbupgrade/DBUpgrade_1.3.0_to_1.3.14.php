@@ -249,7 +249,8 @@ EXP
             $report[] = 'Upgraded to 1.3.19';
         }
 
-       }catch(Exception $exception){
+       }catch(Throwable $exception){
+            $system->addError(HEURIST_DB_ERROR, 'Database upgrade to 1.3.19 failed', $exception->getMessage());
             return false;
        }
 

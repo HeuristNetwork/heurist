@@ -120,10 +120,15 @@ if(!defined('PDIR')){
                         $upgrade_success = true;
                         $keep_minver = $src_min;
                         $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
+                        try {
                         while ( $src_min<$trg_min || ($src_min==3 && $src_sub<$trg_sub) ) {
                             $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).'.0';
 
-                            if($trg_maj==1 && $src_min==2){
+                            // The 1.3.0-to-1.4.0 file is only a holding pen.
+                            // Use the approved bridge from the 1.3.19 baseline.
+                            if($src_maj==1 && $src_min==3 && $src_sub>=19 && $trg_min>=4){
+                                $filename = 'DBUpgrade_1.3.19_to_1.4.0.sql';
+                            }elseif($trg_maj==1 && $src_min==2){
                                 $filename = $filename.'.php';
                             }elseif($src_min==3 && $trg_sub>0){
                                 $filename = 'DBUpgrade_1.3.0_to_1.3.14.php';
@@ -133,7 +138,9 @@ if(!defined('PDIR')){
 
                             if( file_exists($dir.$filename) ){
 
-                                if($trg_maj==1 && $src_min==2){
+                                if($src_maj==1 && $src_min==3 && $src_sub>=19 && $trg_min>=4){
+                                    $rep = executeScript($system, $dir.$filename);
+                                }elseif($trg_maj==1 && $src_min==2){
                                     include_once $filename;
                                     $rep = updateDatabseTo_v3($system);//PHP
                                 }elseif($src_min==3 && $src_sub<$trg_sub){
@@ -175,9 +182,9 @@ if(!defined('PDIR')){
 
                                 }else{
                                     $error = $system->getError();
-                                    if($error){
-                                        print errorDiv($error['message'].BR.@$error['sysmsg']);
-                                    }
+                                    print errorDiv($error
+                                        ? $error['message'].' '.($error['sysmsg'] ?? '')
+                                        : 'Database upgrade failed without a reported error. Check the PHP error log.');
 
                                     $upgrade_success = false;
                                     break;
@@ -189,6 +196,12 @@ if(!defined('PDIR')){
                                 $upgrade_success = false;
                                 break;
                             }
+                        }
+                        } catch (Throwable $exception) {
+                            $upgrade_success = false;
+                            error_log('Heurist database upgrade failed: '.$exception);
+                            print errorDiv('Database upgrade stopped: '.$exception->getMessage()
+                                .'. See the PHP error log for the stack trace.');
                         }
 
                         if( (!($trg_min==3 && $trg_sub>0)) && $src_min>$keep_minver){ //update database - set version up to date
@@ -234,6 +247,10 @@ if(!defined('PDIR')){
                                 $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
                                 while ($src_min<$trg_min) {
                                     $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).".0.sql";
+                                    if($src_maj==1 && $src_min==3
+                                        && (int)$system->settings->get('sys_dbSubSubVersion')>=19){
+                                        $filename = 'DBUpgrade_1.3.19_to_1.4.0.sql';
+                                    }
                                     if( file_exists($dir.$filename) ){
 
                                         $safety = "";
@@ -362,12 +379,22 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
         if (
             $upgradeDir === false ||
             $scriptPath === false ||
-            !str_starts_with($scriptPath, $upgradeDir . DIRECTORY_SEPARATOR) ||
+            strpos($scriptPath, $upgradeDir . DIRECTORY_SEPARATOR) !== 0 ||
             !preg_match('/^DBUpgrade_[A-Za-z0-9._]+\.sql$/', basename($scriptPath)) ||
             !is_file($scriptPath) ||
             !is_readable($scriptPath)
         ) {
             $system->addError(HEURIST_INVALID_REQUEST, 'Invalid database upgrade script');
+            return false;
+        }
+
+        // The upstream 1.3 -> 1.4 file is a holding pen of proposals, not a
+        // migration. Never execute it or mark a database as upgraded from it.
+        if (basename($scriptPath) === 'DBUpgrade_1.3.0_to_1.4.0.sql'
+            && strpos(file_get_contents($scriptPath), 'This is a holding pen for ideas') !== false) {
+            $system->addError(HEURIST_INVALID_REQUEST,
+                'The 1.4.0 upgrade script is a draft, not an executable migration. '
+                .'Check HEURIST_MIN_DBVERSION in hserv/consts.php and provide the completed 1.4.0 migration before upgrading.');
             return false;
         }
 
