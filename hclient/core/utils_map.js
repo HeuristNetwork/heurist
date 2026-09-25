@@ -500,6 +500,26 @@
         return ui._heuristMapConfigurationPromise;
     };
 
+    
+    ui.showMapDrawDialogOLD = function(wkt_params, options){
+                    
+        let url = window.hWin.HAPI4.baseURL 
+            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
+
+        window.hWin.HEURIST4.msg.showDialog(url, {
+            height:options.height ?? 540,
+            width:options.width ?? 800,
+            window: window.hWin,  //opener is top most heurist window
+            dialogid: 'map_digitizer_dialog',
+            default_palette_class: 'ui-heurist-populate',
+            params: wkt_params,
+            title: window.hWin.HR('Heurist map digitizer'),
+            //class:'ui-heurist-bg-light',
+            callback: options.callback,
+        });
+    };
+
+    
     /**
      * Open or reuse the shared heurist-map drawing dialog.
      *
@@ -512,6 +532,14 @@
         params = $.extend(true, {}, params || {});
         options = options || {};
         let body = $(window.hWin.document).find('body');
+        
+        //H8 feature. No available in this version 
+        // we use current version mapping
+        if(true){
+            ui.showMapDrawDialogOLD(params, options);
+            return;
+        }
+        
 
         function loadMapViewer(){
             if($.heurist && $.heurist.mapViewer) return Promise.resolve();

@@ -172,12 +172,15 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
 
             // New heurist-map configuration editor. mapViewer is loaded lazily because
             // profilePreferences is also used in contexts where the map viewer is absent.
-            this._$('#btn_heurist_map_config').button();
-            this._on(this._$('#btn_heurist_map_config'), {
-                click: function(){
-                    that._openHeuristMapConfiguration();
-                }
-            });
+            const newmap_cfg = this._$('#btn_heurist_map_config');
+            if(newmap_cfg.length>0){
+                this._$('#btn_heurist_map_config').button();
+                this._on(this._$('#btn_heurist_map_config'), {
+                    click: function(){
+                        that._openHeuristMapConfiguration();
+                    }
+                });
+            }
         
         return this._super();
     },
