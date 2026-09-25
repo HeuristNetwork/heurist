@@ -25,24 +25,29 @@ body.heurist-modern {
 
 /* The H8 selector remains visible in the legacy interface, but only activates
    this stylesheet after it is clicked. */
-.h8-interface-link {
-    color: #17375f;
-    background: rgba(255, 255, 255, .72);
+.h8-interface-link,
+body.heurist-modern .slidersMenu .h8-interface-link {
+    color: #c2bbbb;
+    opacity: .5;
+    background: transparent !important;
+    border: 0 !important;
+    min-height: 22px;
+    height: 22px;
+    line-height: 22px;
+    padding: 0 !important;
     cursor: pointer;
-    font-weight: 600;
-    letter-spacing: .04em;
+    font-weight: normal;
     transition: background-color .15s ease, color .15s ease;
 }
 
 .h8-interface-link:hover,
-.h8-interface-link:focus-visible {
-    color: #17375f;
-    background: #edf5ff;
-}
-
-.h8-interface-link.active {
-    color: #ffffff;
-    background: #1769c2;
+.h8-interface-link:focus-visible,
+body.heurist-modern .slidersMenu .h8-interface-link:hover,
+body.heurist-modern .slidersMenu .h8-interface-link:focus-visible {
+    color: #17375f !important;
+    opacity: 1;
+    background: #ffffff !important;
+    outline: 2px solid #1769c2;
 }
 
 /* Keep the legacy entry visible on hover and keyboard focus while retaining
@@ -51,7 +56,14 @@ body.heurist-modern {
 .ui-heurist-heurist8.ui-heurist-header:focus-visible {
     color: #17375f !important;
     opacity: 1 !important;
+    background: #ffffff !important;
     outline: 2px solid #1769c2;
+}
+
+/* The original H8 Explorer creates its iframe only when its widget has size. */
+.ui-menu6-container.ui-heurist-heurist8 [widgetid="heurist_Explorer"] {
+    width: 100%;
+    height: 100%;
 }
 
 /* Flatter application surfaces and restrained separators. */
@@ -116,6 +128,22 @@ body.heurist-modern {
     white-space: nowrap;
 }
 
+.heurist-modern .ui-menu6-section .explore-build-menu {
+    display: none;
+}
+
+.heurist-modern .workspace-stub .ui-icon {
+    color: var(--h8-blue);
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.heurist-modern .favourite-filters > li.fancytree-node {
+    min-height: 20px;
+    padding: 2px 6px !important;
+    line-height: 20px;
+}
+
 /* Keep the filter visually self-contained and separate from result actions. */
 .heurist-modern .result-list-head {
     background: var(--h8-surface);
@@ -139,6 +167,17 @@ body.heurist-modern {
     border-bottom: 1px solid var(--h8-line-strong);
     color: var(--h8-text);
     font-weight: 600;
+}
+
+/* Tint the complete query field, including its prompt and second line. */
+.heurist-modern .result-filter-panel .search-query-field,
+.heurist-modern .result-filter-panel .search-query-field .ui-widget-content {
+    background: var(--h8-filter-head) !important;
+}
+
+/* This temporary comparison control is not part of the H8 filter controls. */
+.heurist-modern .result-filter-panel .search-new-engine-test {
+    display: none !important;
 }
 
 .heurist-modern .div-result-list-toolbar {

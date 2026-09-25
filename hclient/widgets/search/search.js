@@ -206,7 +206,7 @@ $.widget( "heurist.search", {
 
         // Search field
         this.div_search_input = $('<div>')
-        .addClass('div-table-cell')       
+        .addClass('div-table-cell search-query-field')
         .appendTo( this.div_search );
 
         //promt to be shown when input is empty        
@@ -512,6 +512,7 @@ $.widget( "heurist.search", {
             label: 'New',
             title: 'Run this filter with the new search engine'
         })
+        .addClass('search-new-engine-test')
         .css({'min-height':'18px','min-width':'18px','margin-left':'3px'})
         .appendTo(this.div_search_as_user)
         .addClass(this.options.button_class)

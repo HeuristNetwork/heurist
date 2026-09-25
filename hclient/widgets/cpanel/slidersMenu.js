@@ -163,6 +163,18 @@ $.widget( "heurist.slidersMenu", {
                 that._on(that.divMainMenu.find('.ui-heurist-header'),{
                     click: that._openSectionMenu
                 });
+
+                // The visible H8 button styles Explore. The faint minus below
+                // still opens the original experimental Heurist8 layout.
+                const h8Link = that.divMainMenu.find('.h8-interface-link');
+                that._on(h8Link, {click: function(){
+                    if(!that._h8ExperimentalAllowed()){
+                        that._showH8Unavailable();
+                        return;
+                    }
+                    const isActive = $(window.hWin.document.body).hasClass('heurist-modern');
+                    that.switchContainer('explore', true, !isActive);
+                }});
                 
                 const urlParams = new URLSearchParams(window.hWin.location.search);
                 
@@ -1688,11 +1700,23 @@ $.widget( "heurist.slidersMenu", {
      * @private
      * @memberof Widgets.Navigation.slidersMenu
      */
+    _h8ExperimentalAllowed: function(){
+        const pageSetting = window.hWin.heuristExperimentalAllowed;
+        return typeof pageSetting === 'boolean'
+            ? pageSetting
+            : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
+    },
+
+    _showH8Unavailable: function(){
+        window.hWin.HEURIST4.msg.showMsgDlg('Sorry, this function is not available on this server');
+    },
+
     _openSectionMenu: function(e){
         
         let section = this._getSectionName(e);
 
-        if(section=='heurist8' && !window.hWin.HAPI4.sysinfo.isExperimentalAllowed){
+        if(section=='heurist8' && !this._h8ExperimentalAllowed()){
+            this._showH8Unavailable();
             return;
         }
         
@@ -1703,10 +1727,23 @@ $.widget( "heurist.slidersMenu", {
             return;
         }
         
-        this.switchContainer( section );
+        // The original Heurist8 layout has no section menu: display its app
+        // container even while the app is completing initialization.
+        if(section === 'heurist8'){
+            this._initH8Layout();
+        }
+        this.switchContainer( section, section === 'heurist8' );
         
         this._collapseMainMenuPanel(true, 200);
 
+    },
+
+    _initH8Layout: function(){
+        if(this._h8LayoutInitialized || !this._h8ExperimentalAllowed()){
+            return;
+        }
+        this._h8LayoutInitialized = true;
+        window.hWin.HAPI4.LayoutMgr.appInitAll('Heurist8', this.containers.heurist8);
     },
 
     /**
@@ -1728,11 +1765,8 @@ $.widget( "heurist.slidersMenu", {
             .appendTo( this.element );
             
         if(section=='heurist8'){
-            if(window.hWin.HAPI4.sysinfo.isExperimentalAllowed){
-                this.containers[section].css({'left':this._left_position+'px'});
-                this.menues[section].css({width:0}).hide();
-                window.hWin.HAPI4.LayoutMgr.appInitAll('Heurist8', this.containers[section] );
-            }
+            this.containers[section].css({'left':this._left_position+'px'});
+            this.menues[section].css({width:0}).hide();
             return;
         }
         
@@ -2128,7 +2162,15 @@ $.widget( "heurist.slidersMenu", {
      * @param {boolean} [force_show=false] - If true, forces the container to be shown.
      * @memberof Widgets.Navigation.slidersMenu
      */
-    switchContainer: function( section, force_show ){
+    switchContainer: function( section, force_show, h8_mode ){
+
+        const isH8 = section === 'explore' && h8_mode === true;
+        $(window.hWin.document.body).toggleClass('heurist-modern', isH8);
+        if(this.divMainMenu){
+            this.divMainMenu.find('.h8-interface-link')
+                .toggleClass('active', isH8)
+                .attr('aria-pressed', isH8 ? 'true' : 'false');
+        }
 
         if(section=='explore' && this._active_section==section){
             this._onCloseSearchFaceted();
@@ -2144,6 +2186,11 @@ $.widget( "heurist.slidersMenu", {
             that.containers[section].show();    
         }else{
             return;
+        }
+
+        if(section === 'heurist8'){
+            // The Explorer iframe is created once its host becomes visible.
+            this.containers[section].find('[widgetid="heurist_Explorer"]').trigger('myOnShowEvent');
         }
         
         if(section != 'explore' || !that.containers[section]) {
