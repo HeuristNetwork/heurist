@@ -30,6 +30,9 @@ use Heurist\Runtime\RuntimeContext;
 /** Compiles one filter/user query against its current legacy storage. */
 final class SystemQueryBuilder
 {
+    /** "Website filters": saved filters owned by this workgroup are readable by everyone, guests included. */
+    public const WEB_FILTERS_GROUP = 4;
+
     private RuntimeContext $runtime;
     private RecordQueryParser $parser;
     private FieldPredicateCompiler $values;
@@ -122,7 +125,7 @@ final class SystemQueryBuilder
                 if(!isset($this->schema['headers']['owner'])){
                     throw new UnsupportedQueryException('owner is not available for '.$this->schema['type']);
                 }
-                return $this->values->integerCondition($this->column($this->schema['headers']['owner']), $value, $state);
+                return $this->ownerCondition($value, $state);
             case 'f': case 'field':
                 if($suffix === '' || !isset($this->schema['fields'][$suffix])){
                     throw new QueryValidationException('Unknown '.$this->schema['type'].' field: '.$suffix);
@@ -134,6 +137,22 @@ final class SystemQueryBuilder
             default:
                 throw new UnsupportedQueryException('Predicate is not supported for system records: '.$base);
         }
+    }
+
+    /**
+     * owner: one group/user ID with an optional comparison (integerCondition), or a list
+     * "0,4,6" (IN; a leading "-" excludes the list). Owner 0 is a valid ID (Everyone).
+     */
+    private function ownerCondition($value, SqlBuildContext $state): string
+    {
+        $column = $this->column($this->schema['headers']['owner']);
+        $text = is_array($value) ? implode(',', $value) : trim((string)$value);
+        if(!preg_match('/^(-?)\s*(\d+(?:\s*,\s*\d+)+)$/', $text, $match)){
+            return $this->values->integerCondition($column, $value, $state);
+        }
+        $ids = array_values(array_unique(array_map('intval', preg_split('/\s*,\s*/', $match[2]))));
+        foreach($ids as $id){ $state->bind($id, 'i'); }
+        return $column.($match[1] === '-' ? ' NOT IN (' : ' IN (').implode(',', array_fill(0, count($ids), '?')).')';
     }
 
     private function idCondition($value, SqlBuildContext $state): string
@@ -165,7 +184,13 @@ final class SystemQueryBuilder
     {
         if($this->schema['constraint']){ $where[] = $this->schema['constraint']; }
         if(!$this->runtime->hasAccess || $this->runtime->userId < 1){
-            $where[] = '0=1';
+            // guests: only the website filters (saved filters of WEB_FILTERS_GROUP); nothing else
+            if($this->schema['type'] === 'filter'){
+                $state->bind(self::WEB_FILTERS_GROUP, 'i');
+                $where[] = $this->column($this->schema['headers']['owner']).'=?';
+            }else{
+                $where[] = '0=1';
+            }
             return;
         }
         if(in_array($this->schema['type'], array('user','group'), true)){
@@ -185,8 +210,8 @@ final class SystemQueryBuilder
         }
         if($this->schema['type'] !== 'filter' || $this->runtime->isDbOwner){ return; }
         // Owner 0 is the legacy public scope; System::hasAccess(0) permits it
-        // for every authenticated user.
-        $owners = array_merge(array(0, $this->runtime->userId), $this->runtime->groupIds);
+        // for every authenticated user. Website filters are readable by everyone.
+        $owners = array_merge(array(0, self::WEB_FILTERS_GROUP, $this->runtime->userId), $this->runtime->groupIds);
         $owners = array_values(array_unique(array_filter(
             array_map('intval', $owners), static function($id){return $id>=0;}
         )));

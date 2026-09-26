@@ -190,6 +190,8 @@ final class QueryValueResolver
         preg_match('/^(<>|><|<=|>=|==|!=|=|<|>|-)?\s*(.*)$/s', $text, $match);
         $operator = $match[1] ?? ''; $label = trim($match[2] ?? $text);
         if($label === '' || ctype_digit($label)){ return $value; }
+        // several term IDs (a multi-value selection, OR): nothing to resolve
+        if(preg_match('/^\d+(\s*,\s*\d+)+$/', $label)){ return $value; }
         $path = array_values(array_filter(array_map('trim', explode('.', $label)), static function($part){ return $part !== ''; }));
         $leaf = count($path)>1 ? $path[count($path)-1] : $label;
         $rows = $this->rows(
