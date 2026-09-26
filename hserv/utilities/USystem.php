@@ -129,7 +129,7 @@ class USystem {
                     $host_params['domain'] = $localhost;
                 }
 
-            }else{
+            }else if(!empty($serverName)){
                 $k = strpos($serverName,":");
                 $host_params['domain'] = ($k>0)?substr($serverName,0,$k-1):$serverName;
                 $host_params['server_name'] = $serverName;
@@ -667,7 +667,7 @@ class USystem {
         //add functions for other daily tasks
         self::sendDailyErrorReport();
         self::heuristVersionCheck();// Check if different local and server code versions are different
-        self::updateDeeplLanguages();// Get list of allowed target languages from Deepl API
+        self::updateDeeplLanguages($system);// Get list of allowed target languages from Deepl API
         self::removePreparedParameters($system);// Remove potential leftover prepared parameters
         self::sendDailyReportToMainServer( $system );
     }
@@ -733,7 +733,7 @@ class USystem {
             error_log('Unable to send daily server activity report: '.curl_error($ch));
         }
 
-        curl_close($ch);
+        unset($ch);
     }
     
     /**
@@ -848,58 +848,29 @@ class USystem {
      * Fetches the list from DeepL and saves it to a JSON file (DEEPL_languages.json) in HEURIST_FILESTORE_ROOT.
      * Requires $accessToken_DeepLAPI to be globally defined.
      *
-     * @global string|null $accessToken_DeepLAPI The DeepL API authentication key.
+     * @param \hserv\System $system
      * @return void
      */
-    private static function updateDeeplLanguages(){
+    private static function updateDeeplLanguages($system){
 
         global $accessToken_DeepLAPI, $serverName_DeepL;
+        $DeepL = null;
 
-        if(empty($accessToken_DeepLAPI)){
+        try{
+            $DeepL = new DeepL($system, $accessToken_DeepLAPI, $serverName_DeepL);
+        }catch(\Exception $e){
             return;
         }
-        if(empty($serverName_DeepL)){
-            $serverName_DeepL = 'https://api-free.deepl.com';
-        }
 
-        $target_url = "{$serverName_DeepL}/v3/languages?resource=translate_text"; // https://api-free.deepl.com/v2/languages?type=target
+        $languages = $DeepL->getDeepLLanguages();
 
-        $language_file = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/DEEPL_languages.json';
+        $languageFile = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/DEEPL_languages.json';
         if(folderExists(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', true) !== 1){
             folderCreate2(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', '');
             fileDelete(HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json');
         }
 
-        $target_res = loadRemoteURLContentWithRange($target_url, false, true, 60, ["Authorization: DeepL-Auth-Key {$accessToken_DeepLAPI}"]);
-
-        $target_languages = [];
-
-        if(!empty($target_res)){
-
-            $target_res = json_decode($target_res, true);
-            $target_res = json_last_error() !== JSON_ERROR_NONE ? array() : $target_res;
-
-            // Extra processing needed, some target languages have multiple versions; e.g. ENG-GB and ENG-US
-            foreach ($target_res as $lang) {
-
-                $lang_name = $lang['lang'];
-                if(!$lang['usable_as_target']){
-                    continue;
-                }
-
-                if(strpos($lang_name, '-') !== false){
-                    $lang_name = explode('-', $lang_name)[0];
-                }
-
-                if(array_search($lang_name, $target_languages) !== false){
-                    continue;
-                }
-
-                $target_languages[] = $lang_name;
-            }
-        }
-
-        fileSave(json_encode($target_languages), $language_file);
+        fileSave(json_encode($languages), $languageFile);
     }
 
     /**
