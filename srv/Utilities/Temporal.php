@@ -104,6 +104,14 @@ class Temporal {
 
             $this->tDate['estMinDate'] = Temporal::_dateDecimal($minmax[0]);
             $this->tDate['estMaxDate'] = Temporal::_dateDecimal($minmax[1]);
+
+            // search values (as _parseTemporal: a "<>" / "><" prefix means search) cover whole periods:
+            // "2026" finds every date within 2026. Stored values keep their own precision.
+            $text = is_string($date) ? ltrim($date) : '';
+            if($is_for_search || strpos($text, '<>')===0 || strpos($text, '><')===0){
+                [$this->tDate['estMinDate'], $this->tDate['estMaxDate']]
+                    = Temporal::_searchBounds($this->tDate['estMinDate'], $this->tDate['estMaxDate']);
+            }
         }
     }
 
@@ -359,9 +367,12 @@ class Temporal {
                     if($matches && is_array(@$matches[0]) && count($matches[0])==3 && in_array($matches[0][1],$seps) ){
 
                         $values = array($matches[0][0],$matches[0][2]);
+                        // "2026-07": a month, not the years 2026..7 (search mode accepts short parts)
+                        $isMonth = $matches[0][1]==='-' && strlen(ltrim($values[0],'-'))>2
+                            && preg_match('/^\d{1,2}$/', $values[1]) && intval($values[1])>=1 && intval($values[1])<=12;
 
-                        if( (strlen($values[0])>2 && strlen($values[1])>2)
-                        || $is_for_search ) {
+                        if( !$isMonth && ((strlen($values[0])>2 && strlen($values[1])>2)
+                        || $is_for_search) ) {
                             $tStart = null;
                             $tEnd = null;
 
@@ -657,6 +668,21 @@ class Temporal {
      * These values are pre-calculated and stored in the tDate property.
      *
      * @return array|null An array containing [estMinDate, estMaxDate] as decimal values, or null if the date is not valid.
+     *
+     * In search mode (see setValue) the bounds cover whole periods: '2026' gives [2026, 2026.1231],
+     * '2026-07' [2026.07, 2026.0731], '-100' [-100.1231, -100]. Fixed 2026-09-26 (before, a single
+     * year was not widened, so f:<date>:"2026" found no date within 2026, and '2026-07' was read as
+     * the years 2026..7).
+     *
+     * Known issues of the parser (not fixed, same in hserv/utilities/Temporal.php):
+     * - `'c. 1850'` reads the dot as a range separator and gives [today, 1850.1231] (`'circa 1850'`,
+     *   `'c 1850'` work).
+     * - `'1850-60'` is read as the years 1850..60 in search mode (invalid when not searching).
+     *
+     * Known issue (not fixed): the decimal encoding YYYY.MMDD is not monotonic for negative years -
+     * April of -100 is -100.0401, below -100 - so month/day ranges inside a negative year do not order
+     * correctly (whole negative years do, through the widening above). Changing it needs a new
+     * getEstDate() SQL function and a reindex of recDetailsDateIndex.
      */
     public function getMinMax()
     {
@@ -750,43 +776,116 @@ class Temporal {
     }
 
     /**
-     * Converts a decimal date representation (YYYY.MMDD) to a YYYY-MM-DD string.
+     * Converts a decimal date representation (YYYY.MMDD, as in recDetailsDateIndex) to an ISO date.
      *
-     * @param string|float $date The decimal date value.
-     * @param bool $lpad_years Optional. If true, pads years with leading zeros (currently not used in logic). Defaults to false.
-     * @return string The date in YYYY-MM-DD format, or the original year if no decimal part.
+     * Without $upper the precision of the decimal is kept: a year alone stays a year (1850), a month
+     * gives YYYY-MM (1850.07 -> 1850-07), a day YYYY-MM-DD. With $upper (true for an upper bound,
+     * false for a lower one) the result is always a full date: a missing month or day becomes the first
+     * of the period for a lower bound and the last for an upper bound (1850 -> 1850-12-31 upper).
+     * Years before 1 are written -YYYY (at least 4 digits).
+     *
+     * @param string|float $date The decimal date value (DECIMAL text is read exactly).
+     * @param bool|null $upper Null keeps the precision; true/false give the upper/lower full date.
+     * @return string The date.
      */
-    public static function decimalToYMD($date, $lpad_years=false){
+    public static function decimalToYMD($date, $upper=null){
 
-        $date = strval($date);
-        $k = strpos($date,'.');
-        if($k>0){
+        [$year, $month, $day] = Temporal::decimalParts($date);
+        $yearText = ($year<0 ? '-' : '').str_pad(strval(abs($year)), 4, '0', STR_PAD_LEFT);
 
-            $res = substr($date,0,$k);//year
-            $mmdd = substr($date,$k+1);
-            if(strlen($mmdd)<3){
-                $month = str_pad($mmdd,2,'0',STR_PAD_RIGHT);
-            }else{
-                $month = substr($mmdd,0,2);
-                if(substr($mmdd,2)==0){
-                    $day = '01';
-                }else{
-                    $day = str_pad(substr($mmdd,2), 2,'0',STR_PAD_RIGHT);
-                }
-            }
-
-            if(intval($res)<0 && strlen($res)<5){
-                $res = '-'.str_pad(substr($res,1), 4,'0',STR_PAD_LEFT);
-            }
-
-            $res = $res.'-'.$month.'-'.$day;
-
-        }elseif($date=='0'){
-                $res = '0000-01-01';
-        }else{
-                $res = $date;
+        if($upper===null){
+            if($month<1){ return strval($year); }
+            $res = $yearText.'-'.str_pad(strval($month), 2, '0', STR_PAD_LEFT);
+            return $day>0 ? $res.'-'.str_pad(strval($day), 2, '0', STR_PAD_LEFT) : $res;
         }
-        return $res;
+
+        if($month<1 || $month>12){ $month = $upper ? 12 : 1; $day = 0; }
+        $last = Temporal::daysInMonth($year, $month);
+        if($day<1 || $day>$last){ $day = $upper ? $last : 1; }
+        return $yearText.'-'.str_pad(strval($month), 2, '0', STR_PAD_LEFT).'-'.str_pad(strval($day), 2, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Splits a decimal date (YYYY.MMDD) into year, month and day (0 = not given).
+     * A DECIMAL(15,4) string is read exactly; a float is formatted with 4 decimals first.
+     *
+     * @param string|float|int $decimal Decimal date.
+     * @return array{0:int,1:int,2:int} year (negative before year 1), month, day.
+     */
+    public static function decimalParts($decimal): array
+    {
+        $text = is_string($decimal) && preg_match('/^\s*-?\d+(\.\d+)?\s*$/', $decimal)
+            ? trim($decimal) : sprintf('%.4f', (float)$decimal);
+        $negative = $text[0]==='-';
+        $pieces = explode('.', ltrim($text, '-'));
+        $fraction = str_pad(substr($pieces[1] ?? '', 0, 4), 4, '0');
+        $year = intval($pieces[0]);
+        return array($negative ? -$year : $year, intval(substr($fraction, 0, 2)), intval(substr($fraction, 2, 2)));
+    }
+
+    /**
+     * Days in a month, for any year (proleptic Gregorian leap rule; DateTime cannot represent every year).
+     */
+    public static function daysInMonth(int $year, int $month): int
+    {
+        $leap = ($year % 4 === 0 && $year % 100 !== 0) || $year % 400 === 0;
+        return array(31, $leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[max(1, min(12, $month)) - 1];
+    }
+
+    /**
+     * The decimals of every date within the period a decimal date names, as [lowest, highest]:
+     * a year Y covers Y.0000 (a stored year) and Y.0101-Y.1231, a month Y.MM covers Y.MM and
+     * Y.MM01-Y.MMlast, a day only itself. Years before 1 run backwards within the year
+     * (April -100 is -100.0401, below -100), so their period is [Y - high fraction, Y - low fraction].
+     *
+     * @param string $decimal Decimal date text (see _decimalOf).
+     * @return float[] [lowest, highest]
+     */
+    private static function _decimalPeriod(string $decimal): array
+    {
+        [$year, $month, $day] = Temporal::decimalParts($decimal);
+        if($month<1){
+            $low = 0; $high = 0.1231;
+        }elseif($day<1){
+            $low = $month / 100; $high = $month / 100 + Temporal::daysInMonth($year, $month) / 10000;
+        }else{
+            $low = $high = $month / 100 + $day / 10000;
+        }
+        $magnitude = abs($year);
+        return strpos(trim($decimal), '-')===0
+            ? array(round(-($magnitude + $high), 4), round(-($magnitude + $low), 4))
+            : array(round($magnitude + $low, 4), round($magnitude + $high, 4));
+    }
+
+    /**
+     * Search bounds: a lower bound on the first of a month or year and an upper bound on the last day
+     * stand for the whole month or year, so that values stored with month or year precision
+     * (Y.MM, Y.0000) fall inside; then each bound covers its whole period (see _decimalPeriod).
+     *
+     * @param float $min Lower decimal bound.
+     * @param float $max Upper decimal bound.
+     * @return float[] [min, max] widened.
+     */
+    private static function _searchBounds($min, $max): array
+    {
+        [$year, $month, $day] = Temporal::decimalParts($min);
+        if($day===1){ $day = 0; }
+        if($day===0 && $month===1){ $month = 0; }
+        $low = Temporal::_decimalPeriod(Temporal::_decimalOf($year, $month, $day, (float)$min < 0))[0];
+
+        [$year, $month, $day] = Temporal::decimalParts($max);
+        if($month>0 && $day===Temporal::daysInMonth($year, $month)){ $day = 0; }
+        if($day===0 && $month===12){ $month = 0; }
+        $high = Temporal::_decimalPeriod(Temporal::_decimalOf($year, $month, $day, (float)$max < 0))[1];
+
+        return array($low, $high);
+    }
+
+    /** @return string Decimal date text for year, month, day (0 = not given); $negative for year 0 BCE. */
+    private static function _decimalOf(int $year, int $month, int $day, bool $negative): string
+    {
+        return ($negative || $year<0 ? '-' : '').abs($year).'.'.str_pad(strval($month), 2, '0', STR_PAD_LEFT)
+            .str_pad(strval($day), 2, '0', STR_PAD_LEFT);
     }
 
     //

@@ -147,6 +147,31 @@ final class RecordSearchService
     }
 
     /**
+     * detail=ranges: record counts per range of one numeric or date field over
+     * the query's records (see FieldValueBuckets).
+     *
+     * @return array{field:string,type:string,match:string,total:int,truncated:bool,buckets:array}
+     */
+    public function valueBuckets(SearchRequest $request): array
+    {
+        $buckets = new FieldValueBuckets($this->builder, $this->executor);
+        $field = $buckets->describe($request->valueField, $request->valueRanges);
+        $query = $this->builder->normalize($request->query);
+        if($request->filter !== null && $request->filter !== '' && $request->filter !== array()){
+            $query[] = array('all'=>$this->builder->normalize($request->filter));
+        }
+        $context = $this->searchContext($request, array());
+        $candidateCache = array();
+        $query = $this->resolveSelectiveAnyFields($query, $context, $candidateCache);
+        $result = $this->builder->supportsSqlExecution($query)
+            ? $buckets->bucketsForQuery($query, $context, $field)
+            : $buckets->bucketsForIds($this->evaluateGroup($query, null, 'all', $context, 0), $context, $field);
+        $grouping = $field['type'] === 'date' ? array('groupby'=>$field['groupby']) : array('ranges'=>$field['ranges']);
+        return array_merge(array('field'=>$field['field'], 'type'=>$field['type']), $grouping,
+            array('match'=>$field['match']), $result);
+    }
+
+    /**
      * detail=minmax: smallest and largest value of one numeric or date field
      * over the query's records (see FieldValueRange).
      *

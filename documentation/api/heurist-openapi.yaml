@@ -224,7 +224,8 @@ paths:
         rec_ID, rec_RecTypeID and rec_Title. Use fields to add headers or native/linked details, detail=ids for the
         IDs-only DTO, detail=count for a count-only summary, detail=rectypes for counts grouped by record type, or
         detail=values for the distinct values of one field (with record counts) among the matching records, or
-        detail=minmax for the smallest and largest value of one numeric or date field.
+        detail=minmax for the smallest and largest value of one numeric or date field, or detail=ranges for record
+        counts per range of one numeric or date field.
         Graph documents are served by the separate /{database}/graph endpoint.
       security:
       - {}
@@ -268,13 +269,16 @@ paths:
           - rectypes
           - values
           - minmax
+          - ranges
           default: records
         description: >-
           ids returns the IDs-only DTO and ignores fields. count returns only the query and total. rectypes returns
           the query, total and counts grouped by rec_RecTypeID. values returns the distinct values of `field` among
           the matching records with the number of records for each; limit is capped at 1000 and total is the
           number of distinct values. minmax returns the bounds of `field` among the matching records (for "auto"
-          slider bounds) and the number of records that have a value.
+          slider bounds) and the number of records that have a value. ranges returns the field's values grouped
+          into ranges (groupby for dates, ranges for numbers) with the number of records in each; selecting a
+          range with its from/to finds exactly that many records.
       - name: field
         in: query
         schema:
@@ -286,7 +290,35 @@ paths:
           term IDs (labels are resolved by the client); resource/relmarker values are linked record IDs with
           label (title) and rty; owner/addedby values carry label and kind (user or group); tags are limited to
           the current user and their groups. detail=minmax (required there): a detail type ID of type integer,
-          float, year or date, or added / modified.
+          float, year or date, or added / modified. detail=ranges: the same fields.
+      - name: groupby
+        in: query
+        schema:
+          type: string
+          enum: [month, year, decade, century]
+          default: year
+        description: >-
+          detail=ranges, date fields only. Decades and centuries start at a multiple of 10 / 100 (1990-1999,
+          1900-1999).
+      - name: ranges
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 10
+        description: >-
+          detail=ranges, numeric fields only. At most this many equal ranges with round boundaries (1, 2, 2.5 or
+          5 x 10^n) between the smallest and largest value; integer fields get whole, non-overlapping ranges.
+      - name: match
+        in: query
+        schema:
+          type: string
+          enum: [overlap, within]
+          default: overlap
+        description: >-
+          detail=ranges, detail date fields. overlap (operators <> and "falls in"): a date counts in every range its
+          span overlaps. within (operator ><): only in a range that contains its whole span.
       - name: text
         in: query
         schema:
@@ -2510,6 +2542,66 @@ components:
       - $ref: '#/components/schemas/RecordRectypeCountsResponse'
       - $ref: '#/components/schemas/RecordValuesResponse'
       - $ref: '#/components/schemas/RecordValueRangeResponse'
+      - $ref: '#/components/schemas/RecordValueBucketsResponse'
+    RecordValueBucketsResponse:
+      type: object
+      description: >-
+        detail=ranges. Non-empty ranges from the smallest to the largest value. from/to are in the form record
+        search accepts (detail dates: years for year-based ranges, ISO dates for months; header dates: ISO
+        dates; numbers: numbers): a filter uses <>from/to, ><from/to or from/to for dates and from<>to for
+        numbers. When a grouping would give more than 1000 ranges (months across millennia, prehistoric
+        years), only the ranges holding the start or end of some value are listed, at most 1000 (truncated).
+      required: [query, field, type, match, total, truncated, buckets]
+      properties:
+        query:
+          description: Query representation supplied by the caller.
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        field:
+          type: string
+        type:
+          type: string
+          enum: [number, date]
+        groupby:
+          type: string
+          description: Dates only.
+        ranges:
+          type: integer
+          description: Numbers only.
+        match:
+          type: string
+          enum: [overlap, within]
+        total:
+          type: integer
+          minimum: 0
+          description: Number of matching records that have a value.
+        truncated:
+          type: boolean
+        buckets:
+          type: array
+          items:
+            type: object
+            required: [from, to, label, count]
+            properties:
+              from:
+                oneOf:
+                - type: number
+                - type: string
+              to:
+                oneOf:
+                - type: number
+                - type: string
+              label:
+                type: string
+              count:
+                type: integer
+                minimum: 1
     RecordValueRangeResponse:
       type: object
       description: >-

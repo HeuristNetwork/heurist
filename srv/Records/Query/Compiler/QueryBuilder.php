@@ -90,6 +90,17 @@ final class QueryBuilder
         return $where;
     }
 
+    /**
+     * Condition that hides a detail row the current user may not see (field
+     * visibility, hidden-from-public values) - the rule every detail predicate applies.
+     * Binds nothing; returns '' for the database owner.
+     */
+    public function detailVisibilityCondition(SqlBuildContext $state,string $detailAlias,string $recordAlias): string
+    {
+        $condition=$this->fields->detailVisibilityCondition($detailAlias,$recordAlias,$state);
+        return $condition===''?'':preg_replace('/^s*ANDs+/','',$condition);
+    }
+
     /** Compile counts grouped by record type over the complete filtered query. */
     public function buildRectypeCounts($query,array $context=array()): CompiledQuery
     {

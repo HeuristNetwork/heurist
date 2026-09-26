@@ -37,6 +37,8 @@ final class SearchRequest
     public $valueField;
     public string $valueText;
     public string $valueSort;
+    /** detail=ranges: groupby (dates), ranges (numbers), match (overlap|within). */
+    public array $valueRanges = array();
 
     /** Initialise and constrain all externally supplied request options. */
     public function __construct(array $query, array $options = array())
@@ -54,6 +56,9 @@ final class SearchRequest
         $this->valueField = $options['field'] ?? null;
         $this->valueText = trim((string)($options['text'] ?? ''));
         $this->valueSort = strtolower(trim((string)($options['valueSort'] ?? 'count'))) === 'value' ? 'value' : 'count';
+        foreach(array('groupby','ranges','match') as $key){
+            if(isset($options[$key]) && is_scalar($options[$key])){ $this->valueRanges[$key] = (string)$options[$key]; }
+        }
         if($this->detail === 'values'){
             $this->limit = min(FieldValueCounter::MAX_LIMIT, $this->limit);
         }

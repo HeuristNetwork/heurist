@@ -57,6 +57,9 @@ final class FieldPredicateCompiler
         }
 
         $fieldType = $this->fieldType($fieldId);
+        // Known issue (found 2026-09-26, not fixed): 'year' fields fall through to scalarCondition,
+        // which compares strings ('900' > '1850'); integer/float compare as DECIMAL. detail=minmax and
+        // detail=ranges compare year fields as numbers, so they can disagree for years that are not 4 digits.
         if($fieldType === 'date'){
             $condition = $this->detailDateCondition($value, $state);
             return 'EXISTS (SELECT 1 FROM recDetailsDateIndex di INNER JOIN recDetails d ON d.dtl_ID=di.rdi_DetailID '
@@ -680,10 +683,30 @@ final class FieldPredicateCompiler
         return preg_match('/^\d{4}-\d{2}-\d{2}$/', $iso) ? $iso.' 23:59:59' : $iso;
     }
 
-    /** Detail dates are compared through recDetailsDateIndex estimated bounds. */
+    /**
+     * Detail dates are compared through recDetailsDateIndex estimated bounds.
+     *
+     * Ranges: `<>from/to` (overlaps), `><from/to` (within) or plain `from/to` (falls in, as
+     * overlap). The infix forms `from<>to` / `from><to` (numbers' syntax) mean the same as the
+     * prefix forms.
+     *
+     * Search values cover whole periods (Temporal search mode, fixed 2026-09-26): `2026` finds every
+     * date within 2026, `2026-07` every date in July 2026, `-100` every date of the year -100, and a
+     * range from January 1 / to December 31 includes values stored as a plain year.
+     *
+     * Known issue (not fixed; see Temporal::getMinMax): month/day ranges inside a negative year do not
+     * order correctly (the decimal encoding runs backwards within years before 1).
+     */
     public function detailDateCondition($value, SqlBuildContext $state): string
     {
         $text = $this->normalizeRelativeDate(trim((string)$value)); $operator = null;
+        // infix "from<>to" / "from><to" -> prefix "<>from/to" / "><from/to", which Temporal reads
+        foreach(array('<>','><') as $separator){
+            if(strpos($text, $separator) > 0 && ($range = $this->splitRange($text, $separator)) !== null){
+                $text = $separator.$range[0].'/'.$range[1];
+                break;
+            }
+        }
         $within = strpos($text, '><') !== false;
         $overlap = strpos($text, '<>') !== false;
         if(!$within && !$overlap){

@@ -98,7 +98,8 @@ final class FieldValueCounter
 
         $state = new SqlBuildContext($context);
         $parts = $this->sourceParts($field, $state, $context);
-        $where = array_merge($parts['where'], $this->builder->compileConditions($query, $state, $context));
+        $where = array_merge($parts['where'], $this->detailVisibility($field, $state),
+            $this->builder->compileConditions($query, $state, $context));
         $where = array_merge($where, $this->targetConditions($field, $state, $context));
         $this->appendText($where, $parts, $state, $options['text']);
         $from = 'FROM Records r '.$parts['joins'].' WHERE '.implode(' AND ', $where);
@@ -113,7 +114,8 @@ final class FieldValueCounter
 
         $countState = new SqlBuildContext($context);
         $countParts = $this->sourceParts($field, $countState, $context);
-        $countWhere = array_merge($countParts['where'], $this->builder->compileConditions($query, $countState, $context));
+        $countWhere = array_merge($countParts['where'], $this->detailVisibility($field, $countState),
+            $this->builder->compileConditions($query, $countState, $context));
         $countWhere = array_merge($countWhere, $this->targetConditions($field, $countState, $context));
         $this->appendText($countWhere, $countParts, $countState, $options['text']);
         $total = intval($this->executor->executeScalar(new CompiledQuery(
@@ -139,7 +141,7 @@ final class FieldValueCounter
         foreach(array_chunk($ids, self::ID_CHUNK_SIZE) as $chunk){
             $state = new SqlBuildContext($context);
             $parts = $this->sourceParts($field, $state, $context);
-            $where = $parts['where'];
+            $where = array_merge($parts['where'], $this->detailVisibility($field, $state));
             foreach($chunk as $id){ $state->bind($id, 'i'); }
             $where[] = 'r.rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
             $where = array_merge($where, $this->targetConditions($field, $state, $context));
@@ -259,6 +261,14 @@ final class FieldValueCounter
                     'textOn'=>'vd.dtl_Value'
                 ));
         }
+    }
+
+    /** Hidden detail values stay hidden (the rule of every detail predicate); header fields have none. */
+    private function detailVisibility(array $field, SqlBuildContext $state): array
+    {
+        if($field['dtyId'] < 1 || $field['type'] === 'relmarker'){ return array(); }
+        $condition = $this->builder->detailVisibilityCondition($state, 'vd', 'r');
+        return $condition === '' ? array() : array($condition);
     }
 
     /** Access (and target type) conditions for the linked record of resource/relmarker fields. */

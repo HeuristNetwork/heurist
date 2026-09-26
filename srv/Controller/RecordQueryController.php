@@ -110,6 +110,14 @@ final class RecordQueryController
             $options['field'] = $params['field'] ?? null;
             return new SearchRequest($normalized, $options);
         }
+        if(strtolower(trim((string)($params['detail'] ?? ''))) === 'ranges'){
+            // detail=ranges: record counts per range of one numeric or date field
+            $options['field'] = $params['field'] ?? null;
+            foreach(array('groupby','ranges','match') as $key){
+                if(array_key_exists($key, $params)){ $options[$key] = $params[$key]; }
+            }
+            return new SearchRequest($normalized, $options);
+        }
         if(strtolower(trim((string)($params['detail'] ?? ''))) === 'values'){
             // detail=values: field + text; "sort" orders the values (count|value), not records
             $options['field'] = $params['field'] ?? null;
@@ -149,6 +157,15 @@ final class RecordQueryController
             return array_merge(
                 array('query'=>$this->responseQuery($params, $request)),
                 $this->service->countValues($request)
+            );
+        }
+        if($request->detail === 'ranges'){
+            if(!method_exists($this->service, 'valueBuckets')){
+                throw new UnsupportedQueryException('detail=ranges is not supported by this search service');
+            }
+            return array_merge(
+                array('query'=>$this->responseQuery($params, $request)),
+                $this->service->valueBuckets($request)
             );
         }
         if($request->detail === 'minmax'){
