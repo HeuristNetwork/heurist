@@ -56,8 +56,7 @@ $registeredID = (int)$system->settings->get('sys_dbRegisteredID');
 <h2>Master-satellite setup</h2>
 
 <?php if (!$enabled): ?>
-    <div class="message error" style="display:block"><?=htmlspecialchars(SyncFeature::UNAVAILABLE_MESSAGE)?></div>
-    <script>alert(<?=json_encode(SyncFeature::UNAVAILABLE_MESSAGE)?>);</script>
+    <div class="message error" style="display:block"><?=htmlspecialchars(HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE)?></div>
 <?php else: ?>
 <?php if ($registeredID < 1): ?>
     <div class="message error" style="display:block">This database must be registered (Design &gt; Register) to be set up as either a master or a satellite</div>

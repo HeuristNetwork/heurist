@@ -505,7 +505,7 @@
             "icon": "ui-icon-link",
             "user-admin-status": "1",
             "size": "medium",
-            "header": "URL Substitutions",
+            "header": "Edit URL Substitutions file",
             "container": "admin"
         },
         "title": "Allows the simplification of URLs by defining words which are replaced with user-defined strings",

@@ -6,7 +6,7 @@ $enabled=SyncFeature::isEnabled();$config=$enabled?(new SyncConfig($system))->lo
 <title>Synchronise with Master</title><?php includeJQuery();include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
 <style>body{margin:18px 24px;color:#222}.controls{display:flex;gap:12px;align-items:center}#working{display:none}#summary,#error{display:none;margin-top:14px;padding:10px}#summary{background:#e6efc2;color:#264409}#error{background:#fbe3e4;color:#8a1f11}details{margin-top:10px}pre{white-space:pre-wrap;background:#f5f5f5;padding:10px}</style></head>
 <body class="popup ui-heurist-populate">
-<?php if(!$enabled):?><p><?=htmlspecialchars(SyncFeature::UNAVAILABLE_MESSAGE)?></p>
+<?php if(!$enabled):?><p><?=htmlspecialchars(HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE)?></p>
 <?php elseif(($config['role']??'')!=='satellite'):?><p>This database is not configured as a Satellite. Use <strong>Design → Master-satellite setup</strong>.</p>
 <?php else:$master=(string)$config['master']['database'];?>
 <h2>Synchronise with Master (<?=htmlspecialchars($master)?>)</h2>

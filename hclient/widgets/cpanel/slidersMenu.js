@@ -167,9 +167,12 @@ $.widget( "heurist.slidersMenu", {
                 // The visible H8 button styles Explore. The faint minus below
                 // still opens the original experimental Heurist8 layout.
                 const h8Link = that.divMainMenu.find('.h8-interface-link');
+                if(!that._h8ExperimentalAllowed()){
+                    that._markExperimentalUnavailable(h8Link);
+                    that._markExperimentalUnavailable(that.divMainMenu.find('.ui-heurist-heurist8'));
+                }
                 that._on(h8Link, {click: function(){
                     if(!that._h8ExperimentalAllowed()){
-                        that._showH8Unavailable();
                         return;
                     }
                     const isActive = $(window.hWin.document.body).hasClass('heurist-modern');
@@ -1707,8 +1710,11 @@ $.widget( "heurist.slidersMenu", {
             : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
     },
 
-    _showH8Unavailable: function(){
-        window.hWin.HEURIST4.msg.showMsgDlg('Sorry, this function is not available on this server');
+    _markExperimentalUnavailable: function(element){
+        // Keep the element hoverable so its explanation remains accessible.
+        element.addClass('ui-state-disabled')
+            .attr({'aria-disabled': 'true', title: window.hWin.heuristExperimentalUnavailableMessage})
+            .css({opacity: 0.5, cursor: 'not-allowed'});
     },
 
     _openSectionMenu: function(e){
@@ -1716,7 +1722,6 @@ $.widget( "heurist.slidersMenu", {
         let section = this._getSectionName(e);
 
         if(section=='heurist8' && !this._h8ExperimentalAllowed()){
-            this._showH8Unavailable();
             return;
         }
         
@@ -1927,6 +1932,7 @@ $.widget( "heurist.slidersMenu", {
      */
     _initSectionMenu: function( section ){
 
+        const widget = this;
         //loop by <li> elements - search action and init item        
         $.each(this.menues[section].find('li[data-action]'),
             function(i, item){
@@ -1963,7 +1969,6 @@ $.widget( "heurist.slidersMenu", {
                          +'<span class="menu-text truncate" style="max-width: 109px;">'+action_label+'</span>')
                         .appendTo(item);
 
-                        const experimentalAllowed = window.hWin.HAPI4.sysinfo.isExperimentalAllowed;
                         if(action_id=='menu-import-get-template'){
                             item.find('.ui-icon').addClass('ui-icon-gear');
                             item.css({'font-size':'10px', padding:'0 0 0 25px','margin-top':'-1px', 'margin-left': '0.25em'});
@@ -1981,15 +1986,6 @@ $.widget( "heurist.slidersMenu", {
                                 item.attr('title', 'This database is configured as Master. Synchronisation is triggered from satellites');
                             }
 
-                            // JT#3294 URL substitutions are intentionally exposed in the
-                            // menu on all servers, but may only be opened when experimental
-                            // functions are enabled. Keeping the disabled item visible tells
-                            // administrators why it is unavailable.
-                            if(action_id=='menu-url-substitutions'
-                                && (experimentalAllowed === false || experimentalAllowed === 0
-                                    || experimentalAllowed === '0' || experimentalAllowed === 'false')){
-                                window.hWin.HEURIST4.util.setDisabled(item, true);
-                            }
                         }
 
                         let action_hint = window.hWin.HR( action_id+'-hint' ); 
@@ -2000,13 +1996,12 @@ $.widget( "heurist.slidersMenu", {
                             item.attr('title',action_hint);
                         }
 
-                        if(action_id=='menu-url-substitutions'
-                            && (experimentalAllowed === false || experimentalAllowed === 0
-                                || experimentalAllowed === '0' || experimentalAllowed === 'false')){
-                            item.attr('title', 'Sorry, this function is not available on this server. '
-                                + (action_hint || ''));
-                        }else if(action_id=='menu-url-substitutions' && action_hint){
+                        if(action_id=='menu-url-substitutions' && action_hint){
                             item.attr('title', action_hint);
+                        }
+                        if(!widget._h8ExperimentalAllowed()
+                            && ['menu-sync-configure', 'menu-sync-master', 'menu-url-substitutions'].includes(action_id)){
+                            widget._markExperimentalUnavailable(item);
                         }
                        
                         if(action.data?.is_association_member && window.hWin.HAPI4.sysinfo.associationMembershipStatus==='nonmember'){
@@ -2032,17 +2027,14 @@ $.widget( "heurist.slidersMenu", {
         //execute menu on click           
         this._on(this.menues[section].find('li[data-action]'),{click:function(e){
 
+            let li = $(e.target).closest('li[data-action]');
+            if(li.hasClass('ui-state-disabled')){
+                return;
+            }
             if(window.hWin.HEURIST4.util.isFunction(this._beforeSwitch.handler) && !this._beforeSwitch.handler()){
                 return;
             }
 
-            let li = $(e.target);
-            if(!li.is('li')) li = li.parents('li');
-
-            if(li.hasClass('ui-state-disabled')){
-                return;
-            }
-            
             if(li.attr('data-action')=='menu-admin-server'){
                 this.menues[section].find('li').removeClass('ui-state-active');
                 li.addClass('ui-state-active');
@@ -2059,7 +2051,7 @@ $.widget( "heurist.slidersMenu", {
                 let url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/urlSubstitutions.php'
                     + '?db=' + encodeURIComponent(window.hWin.HAPI4.database);
                 window.hWin.HEURIST4.msg.showDialog(url, {
-                    title: 'URL substitutions', width: 800, height: 600
+                    title: 'Edit URL Substitutions file', width: 800, height: 600
                 });
                 return;
             }

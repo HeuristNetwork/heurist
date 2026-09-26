@@ -405,6 +405,7 @@ if($isLocalHost){
     // A separate sysinfo request can resolve to another installation on a
     // reverse-proxied or versionless URL.
     window.hWin.heuristExperimentalAllowed = <?php echo json_encode($experimental === true); ?>;
+    window.hWin.heuristExperimentalUnavailableMessage = <?php echo json_encode(HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE); ?>;
 
     /**
      * Initializes the page after basic setup is complete.

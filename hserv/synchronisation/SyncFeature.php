@@ -7,8 +7,6 @@ namespace hserv\synchronisation;
  */
 final class SyncFeature
 {
-    public const UNAVAILABLE_MESSAGE = 'Sorry, this function is not available on this server';
-
     /** Read the server experimental flag without enabling the feature implicitly. */
     public static function isEnabled(): bool
     {
@@ -22,7 +20,7 @@ final class SyncFeature
         if (self::isEnabled()) {
             return true;
         }
-        $system->addError(HEURIST_ACTION_BLOCKED, self::UNAVAILABLE_MESSAGE);
+        $system->addError(HEURIST_ACTION_BLOCKED, HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE);
         return false;
     }
 

@@ -26,6 +26,8 @@ use \hserv\utilities\USystem;
 
 /** @const string Current Heurist code version. Value sourced from $version in configIni.php. */
 define('HEURIST_VERSION', $version);
+/** Message shown when a server has not enabled experimental functions. */
+define('HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE', 'Sorry, this function is not yet available on this server. Contact support@HeuristNetwork.org for further information.');
 /** @const string Minimal database version required for this code version. */
 define('HEURIST_MIN_DBVERSION', "1.3.19");
 
