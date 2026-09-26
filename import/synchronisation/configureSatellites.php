@@ -8,6 +8,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 $enabled = SyncFeature::isEnabled();
 $dbname = $system->dbname();
+$registeredID = (int)$system->settings->get('sys_dbRegisteredID');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,6 +23,9 @@ $dbname = $system->dbname();
         fieldset { margin: 14px 0; padding: 14px; max-width: 1100px; }
         .form-label { display: inline-block; width: 220px; margin: 5px 0; }
         input[type=text], input[type=password], input[type=url], input[type=number] { width: 360px; }
+        #master-id { width: 8ch; }
+        #master-database { width: 50ch; max-width: 100%; }
+        #master-secret { width: 20ch; }
         .role-choice { display: inline-block; margin: 4px 30px 4px 0; }
         table { border-collapse: collapse; width: 100%; margin-top: 8px; }
         th, td { border-bottom: 1px solid #ccc; padding: 5px; text-align: left; white-space: nowrap; }
@@ -29,6 +33,7 @@ $dbname = $system->dbname();
         td.database-cell { min-width: 165px; }
         td.database-cell input { width: 88px !important; }
         .message { margin: 12px 0; padding: 10px; display: none; max-width: 1050px; }
+        #message { margin-bottom: 6px; }
         .error { background: #fbe3e4; color: #8a1f11; }
         .success { background: #e6efc2; color: #264409; }
         .hint { color: #555; font-size: 0.92em; margin: 4px 0 8px 224px; }
@@ -54,19 +59,22 @@ $dbname = $system->dbname();
     <div class="message error" style="display:block"><?=htmlspecialchars(SyncFeature::UNAVAILABLE_MESSAGE)?></div>
     <script>alert(<?=json_encode(SyncFeature::UNAVAILABLE_MESSAGE)?>);</script>
 <?php else: ?>
-<p>All participating databases must be registered. Structure is controlled by the master; satellites may collect records and permitted new terms.</p>
-<div id="message" class="message"></div>
+<?php if ($registeredID < 1): ?>
+    <div class="message error" style="display:block">This database must be registered (Design &gt; Register) to be set up as either a master or a satellite</div>
+<?php endif; ?>
+<p>All participating databases must be registered. Structure is controlled by the Master; Satellites may collect records and permitted new terms.</p>
 
 <fieldset>
     <legend>Database role</legend>
-    <label class="role-choice"><input type="radio" name="role" value="master"> Master</label>
-    <label class="role-choice"><input type="radio" name="role" value="satellite"> Satellite</label>
+    <label class="role-choice"><input type="radio" name="role" value="master"<?=($registeredID < 1 ? ' disabled' : '')?>> Master (<?=htmlspecialchars($dbname)?>)</label>
+    <label class="role-choice"><input type="radio" name="role" value="satellite"<?=($registeredID < 1 ? ' disabled' : '')?>> Satellite (<?=htmlspecialchars($dbname)?>)</label>
+    <label class="role-choice"><input type="radio" name="role" value="disconnected"> Disconnect</label>
 </fieldset>
 
 <fieldset id="master-panel">
     <legend>Authorised satellites (highest priority first)</legend>
     <table id="satellites">
-        <thead><tr><th>Registered database</th><th>Name</th><th>Heurist URL (optional)</th><th>Priority</th><th>Enabled</th><th>Shared secret</th><th></th></tr></thead>
+        <thead><tr><th>Registered database</th><th>Name</th><th>Heurist URL (optional)</th><th>Priority</th><th>Enabled</th><th>Shared password</th><th></th></tr></thead>
         <tbody></tbody>
     </table>
     <p class="hint" style="margin-left:0">Select databases from the Reference Index. If the URL is blank, the satellite is assumed to use this Heurist server.</p>
@@ -75,17 +83,19 @@ $dbname = $system->dbname();
 
 <fieldset id="satellite-panel">
     <legend>Master database</legend>
-    <div><span class="form-label">Registered database</span><input id="master-id" type="number" min="1"> <button id="browse-master" type="button">Browse Reference Index</button></div>
-    <div><label class="form-label" for="master-database">Database name</label><input id="master-database" type="text"></div>
-    <div><label class="form-label" for="master-url">Heurist codebase URL</label><input id="master-url" type="url" placeholder="https://example.org/HEURIST/h7-alpha/"></div>
-    <p class="hint">The main Heurist URL only—not a script URL and not <code>?db=database_name</code>. A pasted database URL will be corrected automatically.</p>
-    <div><label class="form-label" for="master-secret">Shared secret</label><input id="master-secret" type="password" autocomplete="new-password"></div>
+    <p><strong>Master database</strong></p>
+    <div><span class="form-label">Master database registered ID</span><input id="master-id" type="number" min="1" max="99999999"> <button id="browse-master" type="button">Browse Reference Index</button></div>
+    <div><label class="form-label" for="master-database">Master database name</label><input id="master-database" type="text" size="50" maxlength="50"></div>
+    <div><label class="form-label" for="master-url">Heurist code instance URL</label><input id="master-url" type="url" placeholder="https://example.org/HEURIST/h7-alpha/"></div>
+    <p class="hint">The URL to the root of the Heurist instance (ending for example in <code>/heurist</code> or <code>/h7-alpha</code>)</p>
+    <div><label class="form-label" for="master-secret">Shared secret (arbitrary password)</label><input id="master-secret" type="password" size="20" autocomplete="new-password"></div>
 </fieldset>
 
+<div id="message" class="message"></div>
 <div class="save-row">
     <button id="save" class="ui-button-action" type="button">Save configuration</button>
     <span id="save-working" class="working">Saving configuration…</span>
-    <span class="secret-note">A row of asterisks means a secret is already set. Leave it unchanged to retain that secret.</span>
+    <span class="secret-note">A row of asterisks means a shared password is already set. Leave it unchanged to retain that shared password.</span>
 </div>
 
 <div id="reference-dialog" title="Select a registered database">
@@ -156,11 +166,12 @@ $dbname = $system->dbname();
         }));
         $('#satellites tbody').append(row);
     };
-    const currentRole = () => $('input[name=role]:checked').val() || 'master';
+    const currentRole = () => $('input[name=role]:checked').val() || 'disconnected';
     const showRole = () => {
-        const master = currentRole() === 'master';
+        const role = currentRole();
+        const master = role === 'master';
         $('#master-panel').toggle(master);
-        $('#satellite-panel').toggle(!master);
+        $('#satellite-panel').toggle(role === 'satellite');
     };
 
     const decodeReferenceData = data => {
@@ -240,7 +251,7 @@ $dbname = $system->dbname();
                     priority: Number($(this).find('.priority').val()), enabled: $(this).find('.enabled').prop('checked'),
                     sharedSecret: $(this).find('.secret').val()};
             }).get();
-        } else {
+        } else if (role === 'satellite') {
             const masterUrl = normaliseDatabaseUrl($('#master-url').val());
             if (masterUrl.database && !$('#master-database').val()) $('#master-database').val(masterUrl.database);
             $('#master-url').val(masterUrl.url);
@@ -252,7 +263,8 @@ $dbname = $system->dbname();
         try {
             const result = await request({action: 'save_config', config});
             if (result.status !== 'ok') throw new Error(diagnostic(result) || 'Configuration could not be saved.');
-            message('Synchronisation configuration saved.', false, true);
+            message(role === 'disconnected' ? 'Database disconnected from synchronisation.' :
+                'Synchronisation configuration saved.', false, true);
             $('.secret, #master-secret').val('');
             const saved = result.data || {};
             (saved.satellites || []).forEach(item => {
@@ -269,7 +281,11 @@ $dbname = $system->dbname();
     request({action: 'get_config'}).then(result => {
         if (result.status !== 'ok') throw new Error(diagnostic(result) || 'Configuration could not be loaded.');
         const config = result.data || {};
-        $('input[name=role][value="' + (config.role || 'master') + '"]').prop('checked', true);
+        const savedRole = config.role || 'disconnected';
+        $('input[name=role][value="' + savedRole + '"]').prop('checked', true);
+        if (!$('input[name=role]:checked').length) {
+            $('input[name=role][value="disconnected"]').prop('checked', true);
+        }
         (config.satellites || []).forEach(addRow);
         if (config.master) {
             $('#master-id').val(config.master.databaseID || '');

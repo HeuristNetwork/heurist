@@ -7,6 +7,7 @@ namespace hserv\synchronisation;
  */
 final class SyncAuth
 {
+    /** Authenticate the enabled satellite, timestamp, action/body HMAC and unused nonce before allowing a master operation. */
     public static function verifyMasterRequest(
         \hserv\System $system,
         array $config,

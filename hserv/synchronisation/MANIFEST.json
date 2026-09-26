@@ -1,0 +1,161 @@
+{
+  "baseline": "9e0a43ba14a505c84065fec9b8cf49b08d0baccc",
+  "branch": "h7dev",
+  "files": [
+    {
+      "path": "hserv/synchronisation/README.md",
+      "status": "modified",
+      "sha256": "1a68aa9aa4e243f489b4e9bf8d9ea3b6465c6a4c0561218c76c6d283e8c1bd28"
+    },
+    {
+      "path": "hserv/synchronisation/RecordIDRemapper.php",
+      "status": "modified",
+      "sha256": "522dedf2cec892b1b978f3689605445f104b2a93382fdea0b10afdb153ef7e67"
+    },
+    {
+      "path": "hserv/synchronisation/SatelliteInboundService.php",
+      "status": "modified",
+      "sha256": "b0c35e8b572a28e5ec70851ef7468d4c8ba42ad9b63e83f66bc3d3f7dbc3e4e5"
+    },
+    {
+      "path": "hserv/synchronisation/SatelliteSyncService.php",
+      "status": "modified",
+      "sha256": "3a3e2d723085df37206978c07991013e3531e0a0aea84eb46942fb03e09e6ec0"
+    },
+    {
+      "path": "hserv/synchronisation/SyncAdditiveRecord.php",
+      "status": "new",
+      "sha256": "e007ece5916ab8b282f24a2992ea7a2bb3582cfe6c050e192445b7b64e7f41f9"
+    },
+    {
+      "path": "hserv/synchronisation/SyncAuth.php",
+      "status": "modified",
+      "sha256": "20bc78ebcd9330646b3889bfcb0ef3f2be7d02f8271e25916b2f05ef41da5a39"
+    },
+    {
+      "path": "hserv/synchronisation/SyncChangeJournal.php",
+      "status": "modified",
+      "sha256": "75be063f3d5b19a1202d20157242081a8d912e882c102ac1d982638500842ce6"
+    },
+    {
+      "path": "hserv/synchronisation/SyncConfig.php",
+      "status": "modified",
+      "sha256": "08a30c8ad9e66180402384789564bc7e7fdff19dd2160372d084e860393f284d"
+    },
+    {
+      "path": "hserv/synchronisation/SyncDependencyPayload.php",
+      "status": "modified",
+      "sha256": "6f7365a06e3eb022bdf0782430f5cbd1519ba5e79c65a025223c35ef50667d00"
+    },
+    {
+      "path": "hserv/synchronisation/SyncDependencyService.php",
+      "status": "modified",
+      "sha256": "358fdf7395147580b26657fdb87979d2cc4cf67e199d7d96aa884c63cadc943f"
+    },
+    {
+      "path": "hserv/synchronisation/SyncFeature.php",
+      "status": "modified",
+      "sha256": "8308b1fc7fe4262a20e0fe3a759f901b28356af6a6be61d97d0a3d4c388d83cf"
+    },
+    {
+      "path": "hserv/synchronisation/SyncFileStorage.php",
+      "status": "new",
+      "sha256": "204fe506fe4f20046b98db92d122e956af139b2fc809da9e9acaf7ddc1812e1a"
+    },
+    {
+      "path": "hserv/synchronisation/SyncHttpClient.php",
+      "status": "modified",
+      "sha256": "1a1e292b06e8a32d6bb028d3e6962dddc30c07cff107b9ca954882edab82ee26"
+    },
+    {
+      "path": "hserv/synchronisation/SyncMasterChangeService.php",
+      "status": "modified",
+      "sha256": "10cab92efa853c95ced48f58bce10c393d39c4ac4a1322b3c65c65a9a6898392"
+    },
+    {
+      "path": "hserv/synchronisation/SyncProgress.php",
+      "status": "modified",
+      "sha256": "27d813f032a10a09a4d9fb0a827a5856357ab60b95c372374fb079274f20c26e"
+    },
+    {
+      "path": "hserv/synchronisation/SyncRecordPayload.php",
+      "status": "modified",
+      "sha256": "a83ad650b28493421e2626c9b768ea682239c3629b3b08076c5822e10dfade5f"
+    },
+    {
+      "path": "hserv/synchronisation/SyncSchema.php",
+      "status": "modified",
+      "sha256": "19d9527884428a81215332c1d66c68356a762005bf2796c46290fe43d9f8ede1"
+    },
+    {
+      "path": "hserv/synchronisation/SyncSessionService.php",
+      "status": "modified",
+      "sha256": "9ec1c5332c8907e9c929076f4b92e0ae020cbade313e2b8fffe80a8a1df56f0f"
+    },
+    {
+      "path": "hserv/synchronisation/SyncStructurePayload.php",
+      "status": "modified",
+      "sha256": "5db0f37d63558c24ddd0aec70f1767b8c4ec319ddfa78667de78d503418c976b"
+    },
+    {
+      "path": "hserv/synchronisation/SyncTransaction.php",
+      "status": "new",
+      "sha256": "2332710faacdcca047206ba5c0ec8f1a5a3ef2502c86bc7b136b365e15aefed8"
+    },
+    {
+      "path": "import/synchronisation/configureSatellites.php",
+      "status": "unchanged",
+      "sha256": "917a6d48172fc2946bea32eeec76967909e7216b2c9edcce5bd75ec63537b7b3"
+    },
+    {
+      "path": "import/synchronisation/synchroniseWithMaster.php",
+      "status": "unchanged",
+      "sha256": "e150edaa35a7e6a05aff8039e91627d9d1918883e69dc5e3459cd3cfd8f958fb"
+    },
+    {
+      "path": "hserv/controller/synchronisationController.php",
+      "status": "modified",
+      "sha256": "c01b83e1543959604413963e0366fcb80f09f1b77f73125d83ccc9126a6c55a9"
+    },
+    {
+      "path": "hserv/controller/sys_structure.php",
+      "status": "unchanged",
+      "sha256": "3bc3a5af6a540c1f2f8a99b4ff18873664bf2179dd87a9ecd700078099013ac4"
+    },
+    {
+      "path": "hserv/controller/entityScrudSrv.php",
+      "status": "unchanged",
+      "sha256": "3456b3af116ff5c28c65f3f1de0502f3f78fc57fbf3d4c2e012e6c3ac70d4858"
+    },
+    {
+      "path": "hclient/core/actions.json",
+      "status": "unchanged",
+      "sha256": "17333ab6bd5800e1cf9d92d966b511a2a4763120d545de54ed59b9a65fa76293"
+    },
+    {
+      "path": "hserv/SystemSettings.php",
+      "status": "unchanged",
+      "sha256": "5dbfbc78fc77e920e4c68eb7152e3728522c662047cca7ce4300e4625e64d41a"
+    },
+    {
+      "path": "tests/synchronisation/additive_regression.php",
+      "status": "new",
+      "sha256": "b52fe5d909a2ae36fecc9f095185a1011a7d17d55b1268e85b22c31c185e9b96"
+    },
+    {
+      "path": "tests/synchronisation/config_regression.php",
+      "status": "new",
+      "sha256": "7457c2becb052b7e952d332cd18f6713ddf31292d6d26107ffc89d2b8b30cb59"
+    },
+    {
+      "path": "tests/synchronisation/file_regression.php",
+      "status": "new",
+      "sha256": "2b4f72815ec4bb589099d8bbc5a9d648ced2e10c12526007bb5c1fbdd8ee9ec2"
+    },
+    {
+      "path": "tests/synchronisation/remap_engine.sql",
+      "status": "new",
+      "sha256": "e21ddf613638b53e25cd0219ea92a734b447d2ea6ca47539d613664b9d6d1a98"
+    }
+  ]
+}

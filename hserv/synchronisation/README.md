@@ -1,60 +1,63 @@
-# Experimental master/satellite synchronisation
+# Master–Satellite synchronisation (database 1.5.0)
 
-This directory contains the isolated foundation for synchronising registered
-Heurist databases. It is inactive unless `$experimental = true` is set in the
-server's parent `heuristConfigIni.php`.
+This implementation intentionally synchronises only terms and uploaded-file
+references/content. Record data is disabled until its separate specification is
+approved. Existing Master/Satellite configuration and the Satellite definition
+editing restrictions remain in place.
 
-## Implemented
+## Identity and authority
 
-- database-specific `settings/synchronisation.json` configuration;
-- master/satellite roles and ordered satellite priorities;
-- derived-key HMAC authentication, timestamp checks and nonce replay protection;
-- persistent, resumable master sessions;
-- idempotent master record-ID allocation using real temporary `Records`;
-- a permanent `(satellite database ID, original local record ID) -> master ID` map;
-- an append-only trigger-based record/detail/term change journal, installed only
-  when a database is explicitly configured for synchronisation;
-- discovery of newly completed satellite records, record-type resolution by
-  concept code, remote ID allocation and resumable local remapping;
-- a one-time first-sync inventory which journals non-temporary satellite
-  records created before the synchronisation triggers were installed;
-- transactional, two-stage satellite ID remapping with an audited list of
-  record-ID-bearing tables and record-pointer detail values;
-- validated record-content upload into the reserved master records, including
-  concept-code mapping for record types, fields and existing terms;
-- retry-safe, hashed payload batches (100 records per satellite request) with
-  transactional application on the master;
-- transfer of permitted satellite-created vocabulary terms beneath existing
-  master vocabularies;
-- transfer of external-file registrations and local uploaded files, with
-  content hashes and permanent satellite-to-master file mappings;
-- detection and full-record upload of changes to previously synchronised
-  satellite records;
-- incremental download and local application of master records contributed by
-  other satellites, including their permitted terms and uploaded files;
-- dependency-safe record-pointer application using batch pre-creation and
-  temporary shells for master targets delivered in later batches;
-- automatic master-to-satellite structure updates before records are applied,
-  including record types, fields, record structures and vocabularies;
-- preflight detection and holdback of satellite-created record types and fields
-  used by pending records, while compatible records continue to synchronise,
-  with an explicit list and master template-import guidance;
-- pollable progress reporting which begins with new/updated record counts and
-  reports each allocation, dependency and record-transfer phase;
-- JSON diagnostics for otherwise blank controller failures and an extended
-  execution allowance for slow master connections;
-- normal structure editing blocked on satellites while term editing remains available.
+Every object is identified permanently by `originating database ID + ID in that
+originating database`. Local IDs are not used to decide whether two concepts are
+the same. After Master allocation, record IDs and uploaded-file IDs themselves
+are changed on the Satellite to the Master IDs, including all audited pointers.
 
-Tables beginning `sysSync` are created on first operational use. They are kept
-out of the core schema while the feature is experimental.
+The Master is authoritative for the content of every existing concept. A
+Satellite can contribute a new concept, but it cannot overwrite an existing
+Master term or file. A replacement file on Master keeps the same row and concept;
+its MD5 and bytes replace the Satellite copy on the next run.
 
-## Deliberately not yet enabled
+MD5 (`ulf_MD5Checksum`) remains fundamental. It verifies transferred bytes and
+reports the exceptional legacy-clone case where the same historical `ulf_ID`
+contains different bytes. No second checksum field is introduced.
 
-- three-way merge, deletion and priority conflict resolution;
-- master-to-satellite change delivery and completion cursors.
+## Restart model
 
-The UI performs a real authenticated start/resume handshake, permanent-ID
-remapping, dependency transfer and record-content upload. New satellite terms
-are accepted only below an existing master vocabulary. Structure remains under
-master control and is refreshed on every synchronisation. Local files are
-currently limited to 20 MB each and 40 MB per dependency batch.
+Every run exchanges complete manifests. There are no last-sync timestamps,
+change journals, cursors, or permanent session state. The receiver requests any
+concept which is missing, incomplete, or different from Master. An interrupted
+run is restarted normally: allocated placeholder rows and explicit `SyncState`
+values reveal unfinished work, while completed work is ignored.
+
+The only support tables are `sysSyncNonces` (HTTP replay protection) and
+`sysSyncProgress` (a disposable UI log). They are not synchronization state.
+
+## Ordered stages
+
+1. Satellite integrity check assigns missing concept identities and calculates
+   missing MD5 values for local files.
+2. Satellite sends all locally originated term concepts. Master requests and
+   inserts only missing concepts.
+3. Master sends its complete term manifest. Satellite requests missing or
+   different terms and applies Master labels and hierarchy positions.
+4. Satellite sends all file concepts with local IDs and MD5 values. Master
+   allocates or reuses `recUploadedFiles.ulf_ID` rows.
+5. Satellite transactionally changes its file primary IDs and all
+   `recDetails.dtl_UploadedFileID` references to the Master IDs.
+6. Master requests metadata and bytes only for incomplete file rows. Each file
+   is logged with concept, name, MD5, direction and byte count.
+7. Master sends its full file manifest. Satellite requests missing, incomplete,
+   or different files and applies the Master content.
+
+Terms finish before files begin. Record data will begin only after both stages
+finish in the later record implementation.
+
+## Structure limitation
+
+Satellite-created terms must be added with the term-field `+` button beneath an
+existing vocabulary. Only label and hierarchy are synchronized in this stage.
+General definition changes (record types, fields, descriptions, codes, URIs and
+restructured vocabularies) require a future, separate structure synchronization
+operation from the Master configuration form. When record transfer is added, a
+missing definition must stop that record and tell the administrator to run that
+structure operation; it must never upload corrupted or partially mapped data.

@@ -15,7 +15,9 @@ final class SyncProgress
     public function begin(int $newRecords, int $updatedRecords): void
     {
         SyncSchema::ensureProgress($this->mysqli);
-        $message = "New records found: $newRecords\nUpdated records found: $updatedRecords";
+        // Counts are retained only for schema compatibility. Record transfer is
+        // not part of the term-and-file implementation.
+        $message = 'Starting complete term and file manifest comparison.';
         $stmt = $this->mysqli->prepare(
             "INSERT INTO sysSyncProgress (spr_ID,spr_State,spr_Step,spr_NewRecords,spr_UpdatedRecords,"
             ."spr_NewCompleted,spr_UpdatedCompleted,spr_Message,spr_Log) VALUES (1,'RUNNING','COUNTED',?,?,0,0,?,?) "
@@ -32,7 +34,7 @@ final class SyncProgress
     public function startCounting(): void
     {
         SyncSchema::ensureProgress($this->mysqli);
-        $message = 'Counting new and updated records…';
+        $message = 'Preparing complete term and file manifest comparison…';
         $stmt = $this->mysqli->prepare(
             "INSERT INTO sysSyncProgress (spr_ID,spr_State,spr_Step,spr_NewRecords,spr_UpdatedRecords,"
             ."spr_NewCompleted,spr_UpdatedCompleted,spr_Message,spr_Log) VALUES (1,'COUNTING','COUNTING',0,0,0,0,?,'') "

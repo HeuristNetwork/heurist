@@ -40,18 +40,31 @@ final class SyncConfig
 
     private function validateAndNormalise(array $config, array $existing)
     {
+        $role = strtolower(trim((string)($config['role'] ?? '')));
+
+        // Disconnecting is deliberately always available. It removes the active
+        // role (and therefore the satellite structure lock) without deleting
+        // records, permanent concept identities or transferred files.
+        if ($role === 'disconnected') {
+            return [
+                'version' => 1,
+                'role' => 'disconnected',
+                'databaseID' => $this->registeredDatabaseID(),
+                'updatedAt' => gmdate('c')
+            ];
+        }
+
         $registeredID = $this->registeredDatabaseID();
         if ($registeredID < 1) {
             $this->system->addError(
                 HEURIST_ACTION_BLOCKED,
-                'Database synchronisation requires a registered Heurist database.'
+                'This database must be registered (Design > Register) to be set up as either a master or a satellite'
             );
             return false;
         }
 
-        $role = strtolower(trim((string)($config['role'] ?? '')));
         if (!in_array($role, ['master', 'satellite'], true)) {
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Role must be master or satellite.');
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Role must be master, satellite or disconnected.');
             return false;
         }
 
@@ -67,7 +80,6 @@ final class SyncConfig
             if ($result['satellites'] === false) {
                 return false;
             }
-            $result['masterInventorySeeded'] = !empty($existing['masterInventorySeeded']);
         } else {
             $master = is_array($config['master'] ?? null) ? $config['master'] : [];
             $masterID = (int)($master['databaseID'] ?? 0);
@@ -100,11 +112,6 @@ final class SyncConfig
                 'url' => $url,
                 'sharedKey' => $secret !== '' ? hash('sha256', $secret) : $existingKey
             ];
-            $result['lastCompletedSession'] = $existing['lastCompletedSession'] ?? null;
-            $result['lastMasterChangeReceived'] = (int)($existing['lastMasterChangeReceived'] ?? 0);
-            $result['lastMasterStructureHash'] = (string)($existing['lastMasterStructureHash'] ?? '');
-            $result['lastNewRecordScanChangeID'] = (int)($existing['lastNewRecordScanChangeID'] ?? 0);
-            $result['initialInventorySeeded'] = !empty($existing['initialInventorySeeded']);
         }
         return $result;
     }
@@ -206,20 +213,4 @@ final class SyncConfig
         return [rtrim($authority.'/'.ltrim($path, '/'), '/'), $database];
     }
 
-    public function updateRuntime(array $values): bool
-    {
-        $allowed = [
-            'lastCompletedSession',
-            'lastMasterChangeReceived',
-            'lastMasterStructureHash',
-            'lastNewRecordScanChangeID',
-            'initialInventorySeeded',
-            'masterInventorySeeded'
-        ];
-        $values = array_intersect_key($values, array_flip($allowed));
-        if (!$values) {
-            return true;
-        }
-        return $this->system->settings->setDatabaseSetting('Synchronisation', $values, 1);
-    }
 }

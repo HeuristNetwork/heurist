@@ -9,12 +9,14 @@ final class SyncFeature
 {
     public const UNAVAILABLE_MESSAGE = 'Sorry, this function is not available on this server';
 
+    /** Read the server experimental flag without enabling the feature implicitly. */
     public static function isEnabled(): bool
     {
         global $experimental;
         return isset($experimental) && $experimental === true;
     }
 
+    /** Report the existing availability explanation when this server has not enabled the experiment. */
     public static function requireEnabled(\hserv\System $system): bool
     {
         if (self::isEnabled()) {
