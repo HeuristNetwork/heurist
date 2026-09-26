@@ -1940,6 +1940,12 @@ $.widget( "heurist.slidersMenu", {
                     
                     item.addClass('fancytree-node');
                     
+                    if(action==null && action_id=='menu-url-substitutions'){
+                        // This admin utility must still work if actions.json is cached
+                        // from before the menu entry was added.
+                        action = {text: 'URL substitutions', title: 'Edit URL substitutions',
+                            data: {icon: 'ui-icon-link'}};
+                    }
                     if(action==null){
                         return;
                     }
@@ -1947,7 +1953,9 @@ $.widget( "heurist.slidersMenu", {
                         let action_icon = action.data?.icon || '';
 
                         let action_label = window.hWin.HR( action_id ); 
-                        if(!action_label){ //localized version not found
+                        if(action_id=='menu-url-substitutions'){
+                            action_label = 'URL substitutions';
+                        }else if(!action_label){ //localized version not found
                             action_label = action.text;
                         }
                     
@@ -1955,6 +1963,7 @@ $.widget( "heurist.slidersMenu", {
                          +'<span class="menu-text truncate" style="max-width: 109px;">'+action_label+'</span>')
                         .appendTo(item);
 
+                        const experimentalAllowed = window.hWin.HAPI4.sysinfo.isExperimentalAllowed;
                         if(action_id=='menu-import-get-template'){
                             item.find('.ui-icon').addClass('ui-icon-gear');
                             item.css({'font-size':'10px', padding:'0 0 0 25px','margin-top':'-1px', 'margin-left': '0.25em'});
@@ -1977,7 +1986,8 @@ $.widget( "heurist.slidersMenu", {
                             // functions are enabled. Keeping the disabled item visible tells
                             // administrators why it is unavailable.
                             if(action_id=='menu-url-substitutions'
-                                && !window.hWin.HAPI4.sysinfo.isExperimentalAllowed){
+                                && (experimentalAllowed === false || experimentalAllowed === 0
+                                    || experimentalAllowed === '0' || experimentalAllowed === 'false')){
                                 window.hWin.HEURIST4.util.setDisabled(item, true);
                             }
                         }
@@ -1991,8 +2001,9 @@ $.widget( "heurist.slidersMenu", {
                         }
 
                         if(action_id=='menu-url-substitutions'
-                            && !window.hWin.HAPI4.sysinfo.isExperimentalAllowed){
-                            item.attr('title', 'Sorry, experimental function not available on this server. '
+                            && (experimentalAllowed === false || experimentalAllowed === 0
+                                || experimentalAllowed === '0' || experimentalAllowed === 'false')){
+                            item.attr('title', 'Sorry, this function is not available on this server. '
                                 + (action_hint || ''));
                         }else if(action_id=='menu-url-substitutions' && action_hint){
                             item.attr('title', action_hint);
@@ -2042,6 +2053,16 @@ $.widget( "heurist.slidersMenu", {
                         .css({left:(this._left_position+211)+'px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'});
             }
 
+            if(li.attr('data-action')=='menu-url-substitutions'){
+                // Open independently of actions.json: an older cached copy can
+                // lack the action even when the menu and editor are up to date.
+                let url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/urlSubstitutions.php'
+                    + '?db=' + encodeURIComponent(window.hWin.HAPI4.database);
+                window.hWin.HEURIST4.msg.showDialog(url, {
+                    title: 'URL substitutions', width: 800, height: 600
+                });
+                return;
+            }
             window.hWin.HAPI4.actionHandler.executeActionById(li.attr('data-action')); 
         }});
         

@@ -393,11 +393,18 @@ if($isLocalHost){
 <script src="https://cdn.jsdelivr.net/npm/driver.js@0.9.8/dist/driver.min.js"></script>
 -->
 
+<!-- Styles for the opt-in H8 interface. -->
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h8styles.css" />
+
 <!-- Intro.js JS -->
 <script src="https://cdn.jsdelivr.net/npm/intro.js@8.3.2/intro.min.js"></script>
 <link href=" https://cdn.jsdelivr.net/npm/intro.js@8.3.2/minified/introjs.min.css " rel="stylesheet">
 
 <script type="text/javascript">
+    // Use the configuration loaded by this page for its experimental UI.
+    // A separate sysinfo request can resolve to another installation on a
+    // reverse-proxied or versionless URL.
+    window.hWin.heuristExperimentalAllowed = <?php echo json_encode($experimental === true); ?>;
 
     /**
      * Initializes the page after basic setup is complete.

@@ -103,6 +103,8 @@
 #menu-manage-calcfields#Rebuild calculation fields
 #menu-interact-log#Interaction log
 #menu-clear-rec-cache#Clear record view cache
+#menu-url-substitutions#URL substitutions
+#menu-url-substitutions-hint#Edit URL substitutions for this database
 #menu-profile-files-hint#Manage uploaded files and registered remote media resources
 #menu-profile-preferences-hint#Display preferences relating to behaviours related to this database
 #menu-structure-duplicates-hint#Fuzzy search to identify records which might contain duplicate data
