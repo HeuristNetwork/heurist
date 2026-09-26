@@ -31,6 +31,9 @@ final class SystemQueryService
     private RuntimeContext $runtime;
     private SystemEntitySchemaRegistry $schemas;
 
+    /** @var array<int,string>|null Current user's role per group, loaded once. */
+    private ?array $roles = null;
+
     public function __construct(
         DatabaseInterface $database,
         RuntimeContext $runtime,
@@ -84,17 +87,26 @@ final class SystemQueryService
         $selection = $this->selectFields($request->fields, $schema, $recordId !== null);
         $records = $this->loadRecords($ids, $schema, $selection);
         if($recordId !== null){ return $records[0] ?? null; }
+        $meta = array(
+            'database'=>$params['db'] ?? $this->runtime->databaseName,
+            'entity'=>'sys',
+            'type'=>$type,
+            'fields'=>array(
+                'headers'=>$selection['outputs'],
+                'details'=>$this->fieldMetadata($selection['fields'], $schema)
+            )
+        );
+        if($type === 'user' || $type === 'group'){
+            // lets clients tell which of the listed users is the caller, and
+            // whether the list is complete (administrator) or restricted
+            $meta['currentUser'] = array(
+                'id'=>$this->runtime->userId,
+                'isAdmin'=>$this->runtime->isAdmin || $this->runtime->isDbOwner
+            );
+        }
         return array(
             'records'=>$records,
-            'meta'=>array(
-                'database'=>$params['db'] ?? $this->runtime->databaseName,
-                'entity'=>'sys',
-                'type'=>$type,
-                'fields'=>array(
-                    'headers'=>$selection['outputs'],
-                    'details'=>$this->fieldMetadata($selection['fields'], $schema)
-                )
-            ),
+            'meta'=>$meta,
             'pagination'=>$this->pagination($result, $params)
         );
     }
@@ -332,7 +344,25 @@ final class SystemQueryService
     private function legacyVirtualFieldValue(string $name, $source)
     {
         if($name === 'filtertype'){ return $this->classifyLegacySavedSearch($source); }
+        if($name === 'role'){ return $this->currentUserRoles()[intval($source)] ?? 'none'; }
         return null;
+    }
+
+    /** Load the current user's group roles (admin/member) from sysUsrGrpLinks. */
+    private function currentUserRoles(): array
+    {
+        if($this->roles !== null){ return $this->roles; }
+        $this->roles = array();
+        if($this->runtime->userId < 1){ return $this->roles; }
+        $rows = $this->database->fetchAll(
+            'SELECT ugl_GroupID, ugl_Role FROM sysUsrGrpLinks WHERE ugl_UserID=?',
+            array($this->runtime->userId)
+        );
+        foreach($rows as $row){
+            $role = strtolower((string)($row['ugl_Role'] ?? ''));
+            $this->roles[intval($row['ugl_GroupID'])] = $role === 'admin' ? 'admin' : 'member';
+        }
+        return $this->roles;
     }
 
     private function pagination(SearchResult $result, array $params): array

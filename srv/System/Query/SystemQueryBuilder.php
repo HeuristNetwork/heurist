@@ -168,6 +168,21 @@ final class SystemQueryBuilder
             $where[] = '0=1';
             return;
         }
+        if(in_array($this->schema['type'], array('user','group'), true)){
+            // Database administrators see every user and group; other users
+            // see only themselves and the groups they belong to.
+            if($this->runtime->isAdmin || $this->runtime->isDbOwner){ return; }
+            $visible = $this->schema['type'] === 'user'
+                ? array($this->runtime->userId)
+                : array_values(array_diff($this->runtime->groupIds, array($this->runtime->userId)));
+            $visible = array_values(array_unique(array_filter(array_map('intval', $visible),
+                static function($id){return $id>0;})));
+            if(empty($visible)){ $where[] = '0=1'; return; }
+            foreach($visible as $id){ $state->bind($id, 'i'); }
+            $where[] = $this->column($this->schema['headers']['id'])
+                .' IN ('.implode(',', array_fill(0, count($visible), '?')).')';
+            return;
+        }
         if($this->schema['type'] !== 'filter' || $this->runtime->isDbOwner){ return; }
         // Owner 0 is the legacy public scope; System::hasAccess(0) permits it
         // for every authenticated user.

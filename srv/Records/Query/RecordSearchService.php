@@ -146,6 +146,58 @@ final class RecordSearchService
         return array('targetIds'=>array_values($returned), 'edges'=>array_values($edges), 'truncated'=>$truncated);
     }
 
+    /**
+     * detail=minmax: smallest and largest value of one numeric or date field
+     * over the query's records (see FieldValueRange).
+     *
+     * @return array{field:string,type:string,min:mixed,max:mixed,count:int}
+     */
+    public function valueRange(SearchRequest $request): array
+    {
+        $range = new FieldValueRange($this->builder, $this->executor);
+        $field = $range->describeField($request->valueField);
+        $query = $this->builder->normalize($request->query);
+        if($request->filter !== null && $request->filter !== '' && $request->filter !== array()){
+            $query[] = array('all'=>$this->builder->normalize($request->filter));
+        }
+        $context = $this->searchContext($request, array());
+        $candidateCache = array();
+        $query = $this->resolveSelectiveAnyFields($query, $context, $candidateCache);
+        $result = $this->builder->supportsSqlExecution($query)
+            ? $range->rangeForQuery($query, $context, $field)
+            : $range->rangeForIds($this->evaluateGroup($query, null, 'all', $context, 0), $context, $field);
+        return array_merge(array('field'=>$field['field'], 'type'=>$field['type']), $result);
+    }
+
+    /**
+     * detail=values: distinct values of one field over the query's records,
+     * with record counts (see FieldValueCounter).
+     *
+     * @return array{field:string,total:int,values:array}
+     */
+    public function countValues(SearchRequest $request): array
+    {
+        $counter = new FieldValueCounter($this->builder, $this->executor);
+        $field = $counter->describeField($request->valueField);
+        $query = $this->builder->normalize($request->query);
+        if($request->filter !== null && $request->filter !== '' && $request->filter !== array()){
+            $query[] = array('all'=>$this->builder->normalize($request->filter));
+        }
+        $context = $this->searchContext($request, array());
+        $candidateCache = array();
+        $query = $this->resolveSelectiveAnyFields($query, $context, $candidateCache);
+        $options = array(
+            'text'=>$request->valueText,
+            'limit'=>$request->limit,
+            'offset'=>$request->offset,
+            'sort'=>$request->valueSort
+        );
+        $result = $this->builder->supportsSqlExecution($query)
+            ? $counter->countForQuery($query, $context, $field, $options)
+            : $counter->countForIds($this->evaluateGroup($query, null, 'all', $context, 0), $context, $field, $options);
+        return array('field'=>$field['field'], 'total'=>$result['total'], 'values'=>$result['values']);
+    }
+
     /** Execute a search and always return the requested page and full count. */
     public function search(SearchRequest $request, array $context = array()): SearchResult
     {

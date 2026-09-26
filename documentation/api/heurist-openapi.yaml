@@ -222,7 +222,9 @@ paths:
       description: >-
         Anonymous requests return only publicly visible records. By default each record is an envelope containing
         rec_ID, rec_RecTypeID and rec_Title. Use fields to add headers or native/linked details, detail=ids for the
-        IDs-only DTO, detail=count for a count-only summary, or detail=rectypes for counts grouped by record type.
+        IDs-only DTO, detail=count for a count-only summary, detail=rectypes for counts grouped by record type, or
+        detail=values for the distinct values of one field (with record counts) among the matching records, or
+        detail=minmax for the smallest and largest value of one numeric or date field.
         Graph documents are served by the separate /{database}/graph endpoint.
       security:
       - {}
@@ -264,10 +266,39 @@ paths:
           - ids
           - count
           - rectypes
+          - values
+          - minmax
           default: records
         description: >-
           ids returns the IDs-only DTO and ignores fields. count returns only the query and total. rectypes returns
-          the query, total and counts grouped by rec_RecTypeID.
+          the query, total and counts grouped by rec_RecTypeID. values returns the distinct values of `field` among
+          the matching records with the number of records for each; limit is capped at 1000 and total is the
+          number of distinct values. minmax returns the bounds of `field` among the matching records (for "auto"
+          slider bounds) and the number of records that have a value.
+      - name: field
+        in: query
+        schema:
+          type: string
+        example: '1'
+        description: >-
+          detail=values only (required there). A detail type ID (freetext, enum, relationtype, integer, float,
+          year, date, boolean, resource, relmarker) or one of rectype, owner, addedby, access, tag. Enum values are
+          term IDs (labels are resolved by the client); resource/relmarker values are linked record IDs with
+          label (title) and rty; owner/addedby values carry label and kind (user or group); tags are limited to
+          the current user and their groups. detail=minmax (required there): a detail type ID of type integer,
+          float, year or date, or added / modified.
+      - name: text
+        in: query
+        schema:
+          type: string
+        description: detail=values only. Case-insensitive substring filter on the value or its label.
+      - name: sort
+        in: query
+        schema:
+          type: string
+        description: >-
+          Record order. With detail=values it orders the values instead - count (default, most frequent first) or
+          value (by label, else value).
       - name: resolveDetails
         in: query
         schema:
@@ -495,9 +526,12 @@ paths:
       summary: Search filters or users
       description: >-
         Uses the common Heurist query contract with stable fields mapped to current system tables.
-        The singular t predicate selects filter or user; omission currently defaults to filter.
+        The singular t predicate selects filter, user or group; omission currently defaults to filter.
         Authentication is required. Filter results are limited to the current user and accessible
-        groups unless the caller is the database owner.
+        groups unless the caller is the database owner. Users and groups: database administrators see all
+        of them; other users see only themselves and the groups they belong to. Group records support the
+        virtual field role (admin, member or none for the current user). User and group responses add
+        meta.currentUser {id, isAdmin}.
       security:
       - bearerAuth: []
       parameters:
@@ -569,7 +603,7 @@ paths:
       - name: systemType
         in: path
         required: true
-        schema: {type: string, enum: [filter, user]}
+        schema: {type: string, enum: [filter, user, group]}
       - name: systemId
         in: path
         required: true
@@ -2348,14 +2382,14 @@ components:
       type: object
       required: [rec_ID, rec_RecTypeID, rec_Title]
       properties:
-        rec_ID: {type: integer, minimum: 1}
-        rec_RecTypeID: {type: string, enum: [filter, user]}
+        rec_ID: {type: integer, minimum: 0, description: 'Group 0 is the legacy "Everyone" scope.'}
+        rec_RecTypeID: {type: string, enum: [filter, user, group]}
         rec_Title: {type: string}
         rec_Modified: {type: string}
         rec_OwnerUGrpID: {type: integer}
         details:
           type: object
-          description: Resolved logical fields; filter supports query and user supports email.
+          description: Resolved logical fields; filter supports query, user supports email, group supports role.
           additionalProperties:
             type: array
             items:
@@ -2371,7 +2405,15 @@ components:
       properties:
         database: {type: string}
         entity: {type: string, const: sys}
-        type: {type: string, enum: [filter, user]}
+        type: {type: string, enum: [filter, user, group]}
+        currentUser:
+          type: object
+          description: User and group responses only - the caller and whether they administer the database.
+          required: [id, isAdmin]
+          properties:
+            id: {type: integer, minimum: 0}
+            isAdmin: {type: boolean}
+          additionalProperties: false
         fields:
           type: object
           required: [headers, details]
@@ -2466,6 +2508,87 @@ components:
       - $ref: '#/components/schemas/RecordIdsResponse'
       - $ref: '#/components/schemas/RecordCountResponse'
       - $ref: '#/components/schemas/RecordRectypeCountsResponse'
+      - $ref: '#/components/schemas/RecordValuesResponse'
+      - $ref: '#/components/schemas/RecordValueRangeResponse'
+    RecordValueRangeResponse:
+      type: object
+      description: >-
+        detail=minmax. Numeric bounds are numbers. Date bounds are ISO dates (YYYY-MM-DD; years before 1 as
+        -YYYY-MM-DD) from the estimated span of each date, so fuzzy and ranged dates widen the bounds; a lower
+        bound without month or day starts the period and an upper bound ends it. Bounds are null without values.
+      required: [query, field, type, min, max, count]
+      properties:
+        query:
+          description: Query representation supplied by the caller.
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        field:
+          type: string
+        type:
+          type: string
+          enum: [number, date]
+        min:
+          nullable: true
+          oneOf:
+          - type: number
+          - type: string
+        max:
+          nullable: true
+          oneOf:
+          - type: number
+          - type: string
+        count:
+          type: integer
+          minimum: 0
+          description: Number of matching records that have a value.
+    RecordValuesResponse:
+      type: object
+      required: [query, field, total, values]
+      properties:
+        query:
+          description: Query representation supplied by the caller.
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        field:
+          type: string
+        total:
+          type: integer
+          minimum: 0
+          description: Number of distinct values (may exceed the values returned).
+        values:
+          type: array
+          items:
+            type: object
+            required: [value, count]
+            properties:
+              value:
+                oneOf:
+                - type: integer
+                - type: string
+              count:
+                type: integer
+                minimum: 1
+              label:
+                type: string
+              rty:
+                type: integer
+              kind:
+                type: string
+                enum: [user, group]
+            additionalProperties: false
+      additionalProperties: false
     RecordCountResponse:
       type: object
       required: [query, total]
@@ -2580,8 +2703,14 @@ components:
               type: string
         detail:
           type: string
-          enum: [records, ids, count, rectypes]
+          enum: [records, ids, count, rectypes, values]
           default: records
+        field:
+          type: string
+          description: detail=values only; see the GET field parameter.
+        text:
+          type: string
+          description: detail=values only; case-insensitive substring filter.
         resolveDetails:
           type: boolean
           default: false

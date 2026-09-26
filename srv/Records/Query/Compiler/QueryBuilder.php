@@ -68,6 +68,28 @@ final class QueryBuilder
         return new CompiledQuery('SELECT COUNT(DISTINCT r.rec_ID) FROM Records r WHERE '.implode(' AND ',$where),$state->types(),$state->values(),$normalized);
     }
 
+    /**
+     * Compile a query's conditions plus record access over alias r into $state,
+     * for callers that compose their own SELECT (field value counts). Parameters
+     * already bound to $state (for example by JOINs) keep their position.
+     */
+    public function compileConditions($query,SqlBuildContext $state,array $context=array()): array
+    {
+        $normalized=$this->normalize($query);
+        if(!$this->supportsSqlExecution($normalized)){throw new UnsupportedQueryException('Query requires batched execution');}
+        $where=$this->compileGroup($normalized,'AND',$state,'r',0);
+        $this->records->appendAccessConditions($where,$state,$context,'r');
+        return $where;
+    }
+
+    /** Record access conditions for another Records alias (linked target records). */
+    public function accessConditions(SqlBuildContext $state,array $context,string $alias): array
+    {
+        $where=array();
+        $this->records->appendAccessConditions($where,$state,$context,$alias);
+        return $where;
+    }
+
     /** Compile counts grouped by record type over the complete filtered query. */
     public function buildRectypeCounts($query,array $context=array()): CompiledQuery
     {

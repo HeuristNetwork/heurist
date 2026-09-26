@@ -56,6 +56,23 @@ final class SystemEntitySchemaRegistry
             'fields'=>array(
                 'email'=>array('column'=>'ugr_eMail', 'name'=>'Email', 'type'=>'text')
             )
+        ),
+        'group'=>array(
+            'table'=>'sysUGrps', 'alias'=>'s',
+            'constraint'=>'s.ugr_Type="workgroup"',
+            'headers'=>array(
+                'id'=>array('column'=>'ugr_ID', 'output'=>'rec_ID', 'type'=>'integer'),
+                'title'=>array('column'=>'ugr_Name', 'output'=>'rec_Title', 'type'=>'text'),
+                'modified'=>array('column'=>'ugr_Modified', 'output'=>'rec_Modified', 'type'=>'date')
+            ),
+            'fields'=>array(
+                // The current user's membership (sysUsrGrpLinks.ugl_Role):
+                // admin, member or none. SystemQueryService derives it in PHP.
+                'role'=>array(
+                    'column'=>'ugr_ID', 'name'=>'Role of current user',
+                    'type'=>'enum', 'virtual'=>true
+                )
+            )
         )
     );
 
@@ -73,7 +90,7 @@ final class SystemEntitySchemaRegistry
     public function normalizeType(string $type): string
     {
         $type = strtolower(trim($type));
-        $aliases = array('filters'=>'filter', 'users'=>'user');
+        $aliases = array('filters'=>'filter', 'users'=>'user', 'groups'=>'group', 'workgroup'=>'group');
         return $aliases[$type] ?? $type;
     }
 

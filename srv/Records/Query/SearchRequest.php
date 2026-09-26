@@ -33,6 +33,10 @@ final class SearchRequest
     public bool $sortProvided;
     /** Additional query predicate/group ANDed with the base query. */
     public $filter;
+    /** detail=values: the field, a substring filter and the order (count|value). */
+    public $valueField;
+    public string $valueText;
+    public string $valueSort;
 
     /** Initialise and constrain all externally supplied request options. */
     public function __construct(array $query, array $options = array())
@@ -47,5 +51,11 @@ final class SearchRequest
         $this->sortProvided = array_key_exists('sort', $options);
         $this->sort = $this->sortProvided ? $options['sort'] : null;
         $this->filter = $options['filter'] ?? null;
+        $this->valueField = $options['field'] ?? null;
+        $this->valueText = trim((string)($options['text'] ?? ''));
+        $this->valueSort = strtolower(trim((string)($options['valueSort'] ?? 'count'))) === 'value' ? 'value' : 'count';
+        if($this->detail === 'values'){
+            $this->limit = min(FieldValueCounter::MAX_LIMIT, $this->limit);
+        }
     }
 }

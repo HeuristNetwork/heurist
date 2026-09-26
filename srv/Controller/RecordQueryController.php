@@ -105,6 +105,18 @@ final class RecordQueryController
             'resolveDetails' => $params['resolveDetails'] ?? false,
             'filter' => $this->structuredParameter($params['filter'] ?? null)
         );
+        if(strtolower(trim((string)($params['detail'] ?? ''))) === 'minmax'){
+            // detail=minmax: bounds of one numeric or date field
+            $options['field'] = $params['field'] ?? null;
+            return new SearchRequest($normalized, $options);
+        }
+        if(strtolower(trim((string)($params['detail'] ?? ''))) === 'values'){
+            // detail=values: field + text; "sort" orders the values (count|value), not records
+            $options['field'] = $params['field'] ?? null;
+            $options['text'] = $params['text'] ?? '';
+            $options['valueSort'] = $params['sort'] ?? 'count';
+            return new SearchRequest($normalized, $options);
+        }
         if(array_key_exists('sort', $params)){
             $options['sort'] = $this->structuredParameter($params['sort']);
         }
@@ -128,6 +140,24 @@ final class RecordQueryController
         if($request->detail === 'graph'){
             throw new QueryValidationException(
                 'detail=graph is not supported by /records; use the /graph endpoint'
+            );
+        }
+        if($request->detail === 'values'){
+            if(!method_exists($this->service, 'countValues')){
+                throw new UnsupportedQueryException('detail=values is not supported by this search service');
+            }
+            return array_merge(
+                array('query'=>$this->responseQuery($params, $request)),
+                $this->service->countValues($request)
+            );
+        }
+        if($request->detail === 'minmax'){
+            if(!method_exists($this->service, 'valueRange')){
+                throw new UnsupportedQueryException('detail=minmax is not supported by this search service');
+            }
+            return array_merge(
+                array('query'=>$this->responseQuery($params, $request)),
+                $this->service->valueRange($request)
             );
         }
         $result = $this->service->search($request);
