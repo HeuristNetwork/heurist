@@ -47,7 +47,7 @@ final class RecordPredicateCompiler
             case 'after': case 'since': return $this->fields->headerDateCondition($r.'.rec_Modified', '>'.(string)$value, $state);
             case 'addedby': return $this->userCondition($r.'.rec_AddedByUGrpID', $value, $state);
             case 'owner': case 'workgroup': case 'wg': return $this->userCondition($r.'.rec_OwnerUGrpID', $value, $state);
-            case 'access': return $this->fields->scalarCondition($r.'.rec_NonOwnerVisibility', $value, $state);
+            case 'access': return $this->accessCondition($r.'.rec_NonOwnerVisibility', $value, $state);
             case 'user': case 'usr':
                 $state->bind($this->resolveUserId($value, $state), 'i');
                 return 'EXISTS (SELECT 1 FROM usrBookmarks ub WHERE ub.bkm_recID='.$r.'.rec_ID AND ub.bkm_UGrpID=?)';
@@ -77,6 +77,26 @@ final class RecordPredicateCompiler
             $visibility[]='('.$r.'.rec_NonOwnerVisibility="viewable" AND (NOT EXISTS (SELECT 1 FROM usrRecPermissions rp0 WHERE rp0.rcp_RecID='.$r.'.rec_ID) OR EXISTS (SELECT 1 FROM usrRecPermissions rp WHERE rp.rcp_RecID='.$r.'.rec_ID AND rp.rcp_UGrpID IN ('.$ph.'))))';
         }
         $where[]='('.implode(' OR ',$visibility).')';
+    }
+
+    /**
+     * access: one visibility value with the scalar operators, or a list of values
+     * "viewable,public" (IN; a leading "-" excludes them: NOT IN).
+     */
+    private function accessCondition(string $column, $value, SqlBuildContext $state): string
+    {
+        $text = is_array($value) ? implode(',', $value) : trim((string)$value);
+        if(!preg_match('/^(-?)s*([a-z]+(?:s*,s*[a-z]+)+)$/i', $text, $match)){
+            return $this->fields->scalarCondition($column, $value, $state);
+        }
+        $items = array_values(array_unique(array_map('strtolower', preg_split('/s*,s*/', $match[2]))));
+        $allowed = array('hidden','viewable','pending','public');
+        $unknown = array_diff($items, $allowed);
+        if(!empty($unknown)){
+            throw new QueryValidationException('Unknown visibility: '.implode(', ', $unknown));
+        }
+        foreach($items as $item){ $state->bind($item, 's'); }
+        return $column.($match[1] === '-' ? ' NOT IN (' : ' IN (').implode(',', array_fill(0, count($items), '?')).')';
     }
 
     private function userCondition(string $column, $value, SqlBuildContext $state): string
