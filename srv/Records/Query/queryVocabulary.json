@@ -88,9 +88,7 @@
     ],
     "tag": [
       { "token": "",     "input": "tag",  "i18nKey": "op.is" },
-      { "token": "-",    "input": "tag",  "i18nKey": "op.is_not" },
-      { "token": "any",  "input": "tags", "i18nKey": "op.any_of" },
-      { "token": "all",  "input": "tags", "i18nKey": "op.all_of" }
+      { "token": "-",    "input": "tag",  "i18nKey": "op.is_not" }
     ]
   },
 

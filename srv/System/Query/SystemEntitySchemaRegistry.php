@@ -57,6 +57,25 @@ final class SystemEntitySchemaRegistry
                 'email'=>array('column'=>'ugr_eMail', 'name'=>'Email', 'type'=>'text')
             )
         ),
+        // Tags (keywords): personal tags (owner = a user) and group tags (owner = a workgroup)
+        'tag'=>array(
+            'table'=>'usrTags', 'alias'=>'s',
+            'constraint'=>null,
+            'headers'=>array(
+                'id'=>array('column'=>'tag_ID', 'output'=>'rec_ID', 'type'=>'integer'),
+                'title'=>array('column'=>'tag_Text', 'output'=>'rec_Title', 'type'=>'text'),
+                'modified'=>array('column'=>'tag_Modified', 'output'=>'rec_Modified', 'type'=>'date'),
+                'owner'=>array('column'=>'tag_UGrpID', 'output'=>'rec_OwnerUGrpID', 'type'=>'integer')
+            ),
+            'fields'=>array(
+                'description'=>array('column'=>'tag_Description', 'name'=>'Description', 'type'=>'text'),
+                // name of the owning user or group (SystemQueryService derives it in PHP)
+                'ownername'=>array('column'=>'tag_UGrpID', 'output'=>'ownerName', 'name'=>'Owner name',
+                    'type'=>'text', 'virtual'=>true),
+                // query only: {"record":"81"} - the tags attached to the given record(s)
+                'record'=>array('column'=>'tag_ID', 'name'=>'Tagged record', 'type'=>'integer', 'queryOnly'=>true)
+            )
+        ),
         'group'=>array(
             'table'=>'sysUGrps', 'alias'=>'s',
             'constraint'=>'s.ugr_Type="workgroup"',
@@ -90,7 +109,8 @@ final class SystemEntitySchemaRegistry
     public function normalizeType(string $type): string
     {
         $type = strtolower(trim($type));
-        $aliases = array('filters'=>'filter', 'users'=>'user', 'groups'=>'group', 'workgroup'=>'group');
+        $aliases = array('filters'=>'filter', 'users'=>'user', 'groups'=>'group', 'workgroup'=>'group',
+            'tags'=>'tag', 'keyword'=>'tag', 'keywords'=>'tag');
         return $aliases[$type] ?? $type;
     }
 

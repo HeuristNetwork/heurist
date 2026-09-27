@@ -126,7 +126,12 @@ final class SystemQueryBuilder
                     throw new UnsupportedQueryException('owner is not available for '.$this->schema['type']);
                 }
                 return $this->ownerCondition($value, $state);
+            case 'user':
+                return $this->userScopeCondition($value, $state);
             case 'f': case 'field':
+                if($suffix === 'record' && $this->schema['type'] === 'tag'){
+                    return $this->recordTagsCondition($value, $state);
+                }
                 if($suffix === '' || !isset($this->schema['fields'][$suffix])){
                     throw new QueryValidationException('Unknown '.$this->schema['type'].' field: '.$suffix);
                 }
@@ -153,6 +158,53 @@ final class SystemQueryBuilder
         $ids = array_values(array_unique(array_map('intval', preg_split('/\s*,\s*/', $match[2]))));
         foreach($ids as $id){ $state->bind($id, 'i'); }
         return $column.($match[1] === '-' ? ' NOT IN (' : ' IN (').implode(',', array_fill(0, count($ids), '?')).')';
+    }
+
+    /**
+     * `user`: records of a given user (an id or `current`) - tags: the user's personal
+     * tags and the tags of the groups they belong to; groups: the groups they belong
+     * to (member or admin). Visibility still applies (appendAccess).
+     */
+    private function userScopeCondition($value, SqlBuildContext $state): string
+    {
+        $text = strtolower(trim((string)(is_array($value) ? reset($value) : $value)));
+        $userId = in_array($text, array('current', 'currentuser', 'current_user'), true)
+            ? $this->runtime->userId : intval($text);
+        if($userId < 1 || (!ctype_digit($text) && $userId !== $this->runtime->userId)){
+            throw new QueryValidationException('user requires a user ID or "current"');
+        }
+        $memberOf = 'SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID=?';
+        if($this->schema['type'] === 'tag'){
+            $state->bind($userId, 'i'); $state->bind($userId, 'i');
+            return '('.$this->column($this->schema['headers']['owner']).'=? OR '
+                .$this->column($this->schema['headers']['owner']).' IN ('.$memberOf.'))';
+        }
+        if($this->schema['type'] === 'group'){
+            $state->bind($userId, 'i');
+            return $this->column($this->schema['headers']['id']).' IN ('.$memberOf.')';
+        }
+        throw new UnsupportedQueryException('user is not available for '.$this->schema['type']);
+    }
+
+    /** `record` (tags only): the tags attached to the given record(s). */
+    private function recordTagsCondition($value, SqlBuildContext $state): string
+    {
+        if($this->schema['type'] !== 'tag'){
+            throw new UnsupportedQueryException('record is available for tags only');
+        }
+        $items = is_array($value) ? $value : preg_split('/\s*,\s*/', trim((string)$value));
+        $ids = array();
+        foreach($items as $item){
+            if(!ctype_digit((string)$item) || intval($item) < 1){
+                throw new QueryValidationException('Invalid record ID: '.(string)$item);
+            }
+            $ids[] = intval($item);
+        }
+        $ids = array_values(array_unique($ids));
+        if(empty($ids)){ return '0=1'; }
+        foreach($ids as $id){ $state->bind($id, 'i'); }
+        return $this->column($this->schema['headers']['id']).' IN (SELECT rtl_TagID FROM usrRecTagLinks WHERE rtl_RecID IN ('
+            .implode(',', array_fill(0, count($ids), '?')).'))';
     }
 
     private function idCondition($value, SqlBuildContext $state): string
@@ -206,6 +258,16 @@ final class SystemQueryBuilder
             foreach($visible as $id){ $state->bind($id, 'i'); }
             $where[] = $this->column($this->schema['headers']['id'])
                 .' IN ('.implode(',', array_fill(0, count($visible), '?')).')';
+            return;
+        }
+        if($this->schema['type'] === 'tag'){
+            // tags: the database administrators see all; others their own and their groups' tags
+            if($this->runtime->isAdmin || $this->runtime->isDbOwner){ return; }
+            $owners = array_values(array_unique(array_filter(array_map('intval',
+                array_merge(array($this->runtime->userId), $this->runtime->groupIds)), static function($id){ return $id > 0; })));
+            if(empty($owners)){ $where[] = '0=1'; return; }
+            foreach($owners as $id){ $state->bind($id, 'i'); }
+            $where[] = $this->column($this->schema['headers']['owner']).' IN ('.implode(',', array_fill(0, count($owners), '?')).')';
             return;
         }
         if($this->schema['type'] !== 'filter' || $this->runtime->isDbOwner){ return; }

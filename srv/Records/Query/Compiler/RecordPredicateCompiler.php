@@ -129,16 +129,29 @@ final class RecordPredicateCompiler
         )));
     }
 
-    /** Complete numeric/text tag predicate including any/all and NULL forms. */
+    /**
+     * Tag (keyword) predicate. Each tag is an ID or a tag text (a text matches every
+     * tag with that text, as in legacy Heurist); IDs and texts may be mixed:
+     * "1,6" / [1,6] / ["key1","DBM 1"] - any of them; {"any":[…]} likewise;
+     * {"all":[…]} - every one; {"not":{…}} - the negation of the inner form;
+     * a leading "-" negates a list ("-1,6": none of them); NULL - records without
+     * tags, -NULL or "" - records with any tag. "Owner\\text" (a user or group name, a
+     * backslash, the tag text) picks that owner's tag when several owners use the same
+     * text, e.g. "Database Managers\\key1" (in JSON the backslash is written twice).
+     */
     private function tagCondition(string $recordAlias, $value, SqlBuildContext $state): string
     {
         $all = false;
         if(is_array($value) && $this->fields->isAssociative($value)){
+            if(array_key_exists('not', $value)){
+                return 'NOT ('.$this->tagCondition($recordAlias, $value['not'], $state).')';
+            }
             $all = array_key_exists('all', $value);
             $value = $value[$all ? 'all' : 'any'] ?? array();
         }
         $values = is_array($value) ? $value : preg_split('/\s*,\s*/', trim((string)$value));
-        $values = array_values(array_filter(array_map('strval', $values), static function($v){ return $v !== ''; }));
+        $values = array_values(array_filter(array_map(static function($v){ return trim((string)$v); }, $values),
+            static function($v){ return $v !== ''; }));
         if(count($values) === 1 && strtoupper($values[0]) === 'NULL'){
             return 'NOT EXISTS (SELECT 1 FROM usrRecTagLinks rtl WHERE rtl.rtl_RecID='.$recordAlias.'.rec_ID)';
         }
@@ -148,18 +161,31 @@ final class RecordPredicateCompiler
         $negate = false;
         foreach($values as &$tag){ if(strpos($tag, '-') === 0){ $negate = true; $tag = substr($tag, 1); } }
         unset($tag);
-        $numeric = count(array_filter($values, 'ctype_digit')) === count($values);
-        $column = $numeric ? 'rtl.rtl_TagID' : 'ut.tag_Text';
-        $conditions = array();
-        foreach($values as $tag){
-            $state->bind($numeric ? intval($tag) : $tag, $numeric ? 'i' : 's');
-            $conditions[] = $column.'=?';
+        // one tag: its ID, or every tag with its text
+        $one = function(string $tag) use ($state): string {
+            if(ctype_digit($tag)){ $state->bind(intval($tag), 'i'); return 'rtl.rtl_TagID=?'; }
+            $cut = strrpos($tag, '\\');
+            if($cut !== false && $cut > 0 && $cut < strlen($tag) - 1){
+                $state->bind(trim(substr($tag, 0, $cut)), 's');
+                $state->bind(trim(substr($tag, $cut + 1)), 's');
+                return 'rtl.rtl_TagID IN (SELECT ut.tag_ID FROM usrTags ut INNER JOIN sysUGrps ug ON ug.ugr_ID=ut.tag_UGrpID'
+                    .' WHERE ug.ugr_Name=? AND ut.tag_Text=?)';
+            }
+            $state->bind($tag, 's');
+            return 'rtl.rtl_TagID IN (SELECT ut.tag_ID FROM usrTags ut WHERE ut.tag_Text=?)';
+        };
+        $tagged = static function(string $condition) use ($recordAlias): string {
+            return $recordAlias.'.rec_ID IN (SELECT rtl.rtl_RecID FROM usrRecTagLinks rtl WHERE '.$condition.')';
+        };
+        if($all && count($values) > 1){
+            $parts = array();
+            foreach($values as $tag){ $parts[] = $tagged($one($tag)); }
+            $condition = '('.implode(' AND ', $parts).')';
+        }else{
+            $parts = array();
+            foreach($values as $tag){ $parts[] = $one($tag); }
+            $condition = $tagged('('.implode(' OR ', $parts).')');
         }
-        $sql = 'SELECT rtl.rtl_RecID FROM usrRecTagLinks rtl';
-        if(!$numeric){ $sql .= ' INNER JOIN usrTags ut ON ut.tag_ID=rtl.rtl_TagID'; }
-        $sql .= ' WHERE ('.implode(' OR ', $conditions).')';
-        if($all && count($values)>1){ $sql .= ' GROUP BY rtl.rtl_RecID HAVING COUNT(DISTINCT '.$column.')='.count($values); }
-        $condition = $recordAlias.'.rec_ID IN ('.$sql.')';
         return $negate ? 'NOT ('.$condition.')' : $condition;
     }
     private function recordIdCondition(string $column, $value, SqlBuildContext $state): string

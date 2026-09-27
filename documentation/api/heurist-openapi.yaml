@@ -564,14 +564,23 @@ paths:
     get:
       tags: [System records]
       operationId: searchSystemRecords
-      summary: Search filters or users
+      summary: Search filters, users, groups or tags
       description: >-
         Uses the common Heurist query contract with stable fields mapped to current system tables.
-        The singular t predicate selects filter, user or group; omission currently defaults to filter.
-        Authentication is required. Filter results are limited to the current user and accessible
-        groups unless the caller is the database owner. Users and groups: database administrators see all
+        The singular t predicate selects filter, user, group or tag (aliases tags, keyword); omission currently
+        defaults to filter. Authentication is required, except for saved filters of the Website filters group (4),
+        which everyone may read. Filter results are limited to Everyone (0), Website filters (4), the current user
+        and the groups they belong to, unless the caller is the database owner; owner accepts a list
+        ("0,4,6", or "-1,2" to exclude). Tags (usrTags: id, title = tag text, owner = the user or group owning the
+        tag, modified, field description): database administrators see all; other users their personal tags and
+        the tags of the groups they belong to. The predicate user=<id|current> selects the tags of that user (their
+        personal and their groups' tags), or with t=group the groups that user belongs to - e.g.
+        {"t":"tag","user":"current"} (all tags for the current user), {"t":"tag","owner":"6"} (one group's
+        tags), {"t":"group","user":"5"}. The tag predicate record=<id[,id]> selects the tags attached to those
+        records, e.g. {"t":"tag","record":"81","user":"current"} (the current user's tags on record 81) with
+        fields=owner,ownername. Users and groups: database administrators see all
         of them; other users see only themselves and the groups they belong to. Group records support the
-        virtual field role (admin, member or none for the current user). User and group responses add
+        virtual field role (admin, member or none for the current user). User, group and tag responses add
         meta.currentUser {id, isAdmin}.
       security:
       - bearerAuth: []
@@ -592,7 +601,7 @@ paths:
         schema: {type: string}
         description: >-
           Comma-separated universal headers and logical fields. Filter supports query;
-          user supports email. The f: prefix is optional.
+          user supports email; group supports role; tag supports description and ownername (name of the owning user or group). owner returns rec_OwnerUGrpID. The f: prefix is optional.
       - name: detail
         in: query
         schema: {type: string, enum: [records, ids], default: records}
@@ -644,7 +653,7 @@ paths:
       - name: systemType
         in: path
         required: true
-        schema: {type: string, enum: [filter, user, group]}
+        schema: {type: string, enum: [filter, user, group, tag]}
       - name: systemId
         in: path
         required: true
@@ -2424,7 +2433,7 @@ components:
       required: [rec_ID, rec_RecTypeID, rec_Title]
       properties:
         rec_ID: {type: integer, minimum: 0, description: 'Group 0 is the legacy "Everyone" scope.'}
-        rec_RecTypeID: {type: string, enum: [filter, user, group]}
+        rec_RecTypeID: {type: string, enum: [filter, user, group, tag]}
         rec_Title: {type: string}
         rec_Modified: {type: string}
         rec_OwnerUGrpID: {type: integer}
@@ -2446,7 +2455,7 @@ components:
       properties:
         database: {type: string}
         entity: {type: string, const: sys}
-        type: {type: string, enum: [filter, user, group]}
+        type: {type: string, enum: [filter, user, group, tag]}
         currentUser:
           type: object
           description: User and group responses only - the caller and whether they administer the database.
