@@ -99,6 +99,10 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
 
             // The only legacy runtime services exposed to Explorer.
             editRecord: function(recordId) { return that._openRecordEdit(recordId); },
+            // whether the editors above can really be used here (logged in, editors loaded)
+            canEditRecords: function() { return that._canEditRecords(); },
+            canEditSavedFilters: function() { return that._canEditSavedFilters(); },
+            canSaveSources: function() { return that._canSaveSources(); },
             viewRecord: function(recordId) { return that._openRecordView(recordId); },
             addRecord: function(recordTypeId) { return that._addRecordEdit(recordTypeId); },
             editSymbology: function(value, options) { return that._editSymbology(value, options || {}); },

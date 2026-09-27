@@ -27,6 +27,35 @@ class HeuristModuleViewer {
         this.options = options || {};
     }
 
+    /**
+     * Whether the Heurist record editor can be opened from this page: a logged-in
+     * user and the editor loaded (not in published/standalone pages). Bridges expose
+     * it as `canEditRecords()`; modules hide their edit actions when it is false.
+     */
+    _canEditRecords() {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+        return Boolean(hapi && typeof hapi.has_access === 'function' && hapi.has_access()
+            && ui && typeof ui.openRecordEdit === 'function');
+    }
+
+    /** Whether the Saved Filter editor can be opened: a logged-in user and the editor loaded. */
+    _canEditSavedFilters() {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
+        return Boolean(hapi && typeof hapi.has_access === 'function' && hapi.has_access()
+            && ui && typeof ui.editSavedFilter === 'function');
+    }
+
+    /** Whether a Query Source record can be saved: a logged-in user, RT_QUERY_SOURCE and the record manager. */
+    _canSaveSources() {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        var constants = hapi && hapi.sysinfo && hapi.sysinfo.dbconst;
+        return Boolean(hapi && typeof hapi.has_access === 'function' && hapi.has_access()
+            && Number(constants && constants.RT_QUERY_SOURCE) > 0
+            && hapi.RecordMgr && typeof hapi.RecordMgr.saveRecord === 'function');
+    }
+
     /** Bind the legacy host notification that a hidden viewer became visible. */
     _bindShowEvent() {
         var that = this;
