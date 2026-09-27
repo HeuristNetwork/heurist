@@ -168,6 +168,55 @@ final class FieldValueCounter
         );
     }
 
+    /**
+     * Count values of a field in linked records by the main records that reach them:
+     * a value counts each main record once, however many of its linked records carry it
+     * (a Person with two "Visited" Events counts 1 for "Visited").
+     *
+     * @param array<int,int[]> $rootTargets Main record id → linked record ids (RecordSearchService::linkedPathTargets).
+     * @return array{total:int,values:array}
+     */
+    public function countThroughLinks(array $rootTargets, array $context, array $field, array $options): array
+    {
+        if(!$this->hasVisibleSource($field, $context)){ return array('total'=>0, 'values'=>array()); }
+        $options = $this->normalizeOptions($options);
+        $rootsOf = array();
+        foreach($rootTargets as $root=>$targets){
+            foreach($targets as $target){ $rootsOf[intval($target)][intval($root)] = true; }
+        }
+        $byValue = array();
+        foreach(array_chunk(array_keys($rootsOf), self::ID_CHUNK_SIZE) as $chunk){
+            $state = new SqlBuildContext($context);
+            $parts = $this->sourceParts($field, $state, $context);
+            $where = array_merge($parts['where'], $this->detailVisibility($field, $state));
+            foreach($chunk as $id){ $state->bind($id, 'i'); }
+            $where[] = 'r.rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
+            $where = array_merge($where, $this->targetConditions($field, $state, $context));
+            $this->appendText($where, $parts, $state, $options['text']);
+            $rows = $this->executor->executeRows(
+                'SELECT DISTINCT r.rec_ID, '.$parts['value'].', '.$parts['label'].', '.$parts['rty'].', '.$parts['kind']
+                    .' FROM Records r '.$parts['joins'].' WHERE '.implode(' AND ', $where),
+                $state->types(), $state->values()
+            );
+            foreach($rows as $row){
+                $key = (string)$row[1];
+                if(!isset($byValue[$key])){ $byValue[$key] = array('row'=>array($row[1], 0, $row[2], $row[3], $row[4]), 'roots'=>array()); }
+                $byValue[$key]['roots'] += $rootsOf[intval($row[0])] ?? array();
+            }
+        }
+        $values = array();
+        foreach($byValue as $entry){
+            $row = $entry['row'];
+            $row[1] = count($entry['roots']);
+            if($row[1] > 0){ $values[] = $this->valueRow($row); }
+        }
+        usort($values, $this->comparator($options['sort']));
+        return array(
+            'total'=>count($values),
+            'values'=>array_slice($values, $options['offset'], $options['limit'])
+        );
+    }
+
     /** Tags need a logged-in user; every other field is visible to guests too. */
     private function hasVisibleSource(array $field, array $context): bool
     {

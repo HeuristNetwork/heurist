@@ -319,6 +319,15 @@ paths:
         description: >-
           detail=ranges, detail date fields. overlap (operators <> and "falls in"): a date counts in every range its
           span overlaps. within (operator ><): only in a range that contains its whole span.
+      - name: via
+        in: query
+        schema:
+          type: string
+        description: >-
+          detail=values only. JSON array of link predicates (lt, lf, rt, rf, related), outer first, from the
+          matching records to the records carrying field, each with its own conditions, e.g.
+          [{"lt:240":[{"t":"48"}]}]. Values are then counted by the matching (main) records that reach them:
+          a main record counts once per value however many of its linked records carry it.
       - name: text
         in: query
         schema:
