@@ -10,7 +10,8 @@
 *
 * Accepted fields: a detail type ID (freetext, enum, relationtype, integer,
 * float, year, date, boolean, resource, relmarker) or one of the header
-* keywords rectype, owner, addedby, access, tag.
+* keywords rectype, owner, addedby, access, tag, title (record titles, e.g. a
+* filter form listing titles to pick from).
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Search
@@ -32,7 +33,7 @@ final class FieldValueCounter
 {
     public const MAX_LIMIT = 1000;
     private const ID_CHUNK_SIZE = 5000;
-    private const HEADER_FIELDS = array('rectype','owner','addedby','access','tag');
+    private const HEADER_FIELDS = array('rectype','owner','addedby','access','tag','title');
     private const DETAIL_TYPES = array(
         'freetext','enum','relationtype','integer','float','year','date','boolean','resource','relmarker'
     );
@@ -209,6 +210,8 @@ final class FieldValueCounter
                     'kind'=>'IF(vug.ugr_Type="user","user","group")',
                     'textOn'=>'vug.ugr_Name'
                 ));
+            case 'title':
+                return array_merge($parts, array('value'=>'r.rec_Title', 'textOn'=>'r.rec_Title'));
             case 'access':
                 return array_merge($parts, array(
                     'value'=>'r.rec_NonOwnerVisibility', 'textOn'=>'r.rec_NonOwnerVisibility'

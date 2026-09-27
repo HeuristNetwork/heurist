@@ -286,7 +286,7 @@ paths:
         example: '1'
         description: >-
           detail=values only (required there). A detail type ID (freetext, enum, relationtype, integer, float,
-          year, date, boolean, resource, relmarker) or one of rectype, owner, addedby, access, tag. Enum values are
+          year, date, boolean, resource, relmarker) or one of rectype, owner, addedby, access, tag, title. Enum values are
           term IDs (labels are resolved by the client); resource/relmarker values are linked record IDs with
           label (title) and rty; owner/addedby values carry label and kind (user or group); tags are limited to
           the current user and their groups. detail=minmax (required there): a detail type ID of type integer,
