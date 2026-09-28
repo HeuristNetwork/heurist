@@ -204,7 +204,7 @@ if ($mode > 1) {
                     data: {db: '<?php echo $system->dbname(); ?>', a: 'getdoi', service_id: serviceId, identifier: identifier},
                     dataType: 'json',
                     success: function(response) {
-                        var $status = $('#doi-status-' + identifier);
+                        var $status = $(document.getElementById('doi-status-' + identifier));
                         if (window.hWin.HAPI4 && response.status == window.hWin.ResponseStatus.OK) {
                             var d = response.data;
                             $status.text(d.doiRegistered
@@ -225,6 +225,9 @@ if ($mode > 1) {
              * @param {string} identifier Repository data identifier (= reserved DOI string for Nakala)
              */
             function publishRepositoryDOI(serviceId, identifier) {
+                if (window.hWin.heuristExperimentalAllowed !== true) {
+                    return;
+                }
                 if (!confirm('Publishing makes this Nakala deposit PUBLIC and registers its DOI permanently.\n'
                             + 'It CANNOT be undone or made private again. Continue?')) {
                     return;
@@ -234,7 +237,7 @@ if ($mode > 1) {
                     data: {db: '<?php echo $system->dbname(); ?>', a: 'publish', service_id: serviceId, identifier: identifier},
                     dataType: 'json',
                     success: function(response) {
-                        var $status = $('#doi-status-' + identifier);
+                        var $status = $(document.getElementById('doi-status-' + identifier));
                         if (window.hWin.HAPI4 && response.status == window.hWin.ResponseStatus.OK) {
                             var d = response.data;
                             $status.text(' (published - DOI is now live and citable at https://doi.org/' + d.doi + ')');
@@ -455,6 +458,31 @@ if ($mode > 1) {
                 color: red;
                 font-size: larger;
                 font-weight: bold;
+            }
+            .repository-upload-result{
+                max-width: 850px;
+                line-height: 1.45;
+                overflow-wrap: anywhere;
+            }
+            .repository-upload-result p{
+                margin: 10px 0;
+            }
+            .repository-upload-actions{
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                align-items: center;
+                margin-top: 12px;
+            }
+            .repository-action-unavailable{
+                position: relative;
+                display: inline-block;
+                opacity: 0.5;
+            }
+            .repository-action-unavailable .hover-explanation{
+                position: absolute;
+                inset: 0;
+                cursor: not-allowed;
             }
         </style>
     </head>
@@ -958,7 +986,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     $repo_details_all = user_getRepositoryCredentials2($system, $repo_account);
                     $repo_details = $repo_details_all[$repo_account] ?? null;
 
-                    echo_flush2('<hr><br>Uploading archive to ' . htmlspecialchars($repo) . '...');
+                    echo_flush2('<hr><p>Uploading archive to ' . htmlspecialchars($repo) . '...</p>');
 
                     if ($repo_details === null || empty($repo_details['params']['writeApiKey'])) {
                         $msg = $repo_details === null ?
@@ -1096,17 +1124,29 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 'Data' => $data
                             ]);
 
-                            $rtn_msg = htmlspecialchars($nakalaURL);
-                            $rtn_msg = "The uploaded archive is at <a href='{$rtn_msg}' target='_blank'>{$rtn_msg}&nbsp;<span class='ui-icon ui-icon-extlink'></span></a>"
-                                     . "<br>Reserved DOI: <code>{$nakalaDOI}</code> "
-                                     . "<span id='doi-status-{$nakalaDOI}'>(not yet public/citable - the backup was kept private)</span>"
-                                     . "<br><input type='button' value='Check DOI status' onClick=\"checkRepositoryDOI('{$repo_account}','{$nakalaDOI}');\">"
-                                     . " <input type='button' value='Publish &amp; register DOI (permanent, makes archive public)' onClick=\"publishRepositoryDOI('{$repo_account}','{$nakalaDOI}');\">";
+                            $nakalaURLSafe = htmlspecialchars($nakalaURL, ENT_QUOTES);
+                            $rtn_msg = "<div class='repository-upload-result'>"
+                                     . "<p>The uploaded archive is at <a href='{$nakalaURLSafe}' target='_blank' rel='noopener'>{$nakalaURLSafe}</a></p>"
+                                     . "<p>Reserved DOI: <code>{$nakalaDOI}</code><br>"
+                                     . "<span id='doi-status-{$nakalaDOI}'>(not yet public/citable; the backup was kept private)</span></p>"
+                                     . "<div class='repository-upload-actions'>"
+                                     . "<input type='button' value='Check DOI status' onClick=\"checkRepositoryDOI('{$repo_account}','{$nakalaDOI}');\">";
 
-                            echo_flush2('finished<br>');
+                            if(SafeguardBackup::isEnabled()){
+                                $rtn_msg .= "<input type='button' value='Publish &amp; register DOI (permanent, makes archive public)' "
+                                          . "onClick=\"publishRepositoryDOI('{$repo_account}','{$nakalaDOI}');\">";
+                            }else{
+                                $hover = htmlspecialchars(HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE, ENT_QUOTES);
+                                $rtn_msg .= "<span class='repository-action-unavailable ui-state-disabled' title='{$hover}' aria-disabled='true'>"
+                                          . "<input type='button' value='Publish &amp; register DOI (permanent, makes archive public)' disabled>"
+                                          . "<span class='hover-explanation' title='{$hover}' aria-label='{$hover}'></span></span>";
+                            }
+                            $rtn_msg .= '</div></div>';
+
+                            echo_flush2('<p>Upload finished.</p>');
 
                         }
-                        echo_flush2('<br>'. $rtn_msg .'<br>');
+                        echo_flush2($rtn_msg);
                     } elseif ($repo == 'Zenodo') {
                         try {
                             $cfg = SafeguardBackup::settings($system);

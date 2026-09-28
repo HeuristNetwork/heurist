@@ -20,6 +20,9 @@ if (!$system->init($argv[1], false, false)) {
 if (!$system->initPathConstants()) {
     exit(1);
 }
+if (!SafeguardBackup::isEnabled()) {
+    exit(0); // A queued job must stop if the server disables the experiment.
+}
 $settings = $system->getSysDir('settings');
 $lock = fopen($settings.'safeguard_worker.lock', 'c');
 if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {

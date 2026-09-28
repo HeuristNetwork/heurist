@@ -131,13 +131,16 @@ if(!$system->init(@$_REQUEST['db'])){
             $res = user_saveRepositoryCredentials($system, $to_edit, $to_delete);
 
         }elseif($action=='backup_settings'){
-            if(!$system->isAdmin()){
+            if(!SafeguardBackup::isEnabled()){
+                $res = ['enabled' => false];
+            }elseif(!$system->isAdmin()){
                 $system->addError(HEURIST_REQUEST_DENIED, 'Only an administrator in the owners group may configure safeguarding');
                 $res = false;
             }else{
                 $config = SafeguardBackup::settings($system);
                 $available = user_getRepositoryList($system, $ugr_ID, true);
                 $res = [
+                    'enabled' => true,
                     'interval_days' => (int)($config['interval_days'] ?? 30),
                     'accounts' => $config['accounts'] ?? [],
                     'available' => array_values(array_filter($available, function($entry) {
@@ -149,54 +152,69 @@ if(!$system->init(@$_REQUEST['db'])){
             }
 
         }elseif($action=='backup_save'){
-            try {
-                $accounts = json_decode($_REQUEST['accounts'] ?? '[]', true);
-                SafeguardBackup::saveConfig($system, (int)($_REQUEST['interval_days'] ?? 0),
-                    $accounts, ($_REQUEST['email_file'] ?? '0') === '1');
-                $res = true;
-            }catch(Throwable $e){
-                $system->addError(HEURIST_INVALID_REQUEST, $e->getMessage());
+            if(!SafeguardBackup::requireEnabled($system)){
                 $res = false;
+            }else{
+                try {
+                    $accounts = json_decode($_REQUEST['accounts'] ?? '[]', true);
+                    SafeguardBackup::saveConfig($system, (int)($_REQUEST['interval_days'] ?? 0),
+                        $accounts, ($_REQUEST['email_file'] ?? '0') === '1');
+                    $res = true;
+                }catch(Throwable $e){
+                    $system->addError(HEURIST_INVALID_REQUEST, $e->getMessage());
+                    $res = false;
+                }
             }
 
         }elseif($action=='backup_check'){
             // Called after login/Explore startup. Never perform a large export in the HTTP worker.
-            $config = SafeguardBackup::settings($system);
-            $accounts = $config['accounts'] ?? [];
-            $res = ['configured' => !empty($accounts), 'notice' => null];
-            if($system->isAdmin() && !empty($config['notice']['id'])
-                && empty($config['notice']['seen'][$ugr_ID])){
-                $res['notice'] = $config['notice']['text'];
-                $config['notice']['seen'][$ugr_ID] = true;
-                $system->settings->setDatabaseSetting('Safeguard backups', $config);
-            }
-            if($accounts){
-                $days = max(1, (int)($config['interval_days'] ?? 30));
-                $due = false;
-                foreach($accounts as $account){
-                    $last = strtotime($config['deposits'][$account]['date'] ?? '') ?: 0;
-                    if(!$last || $last + $days * 86400 <= time()){
-                        $due = true;
-                        break;
-                    }
+            if(!SafeguardBackup::isEnabled()){
+                $res = ['enabled' => false, 'configured' => false, 'notice' => null];
+            }else{
+                $config = SafeguardBackup::settings($system);
+                $accounts = $config['accounts'] ?? [];
+                $res = ['enabled' => true, 'configured' => !empty($accounts), 'notice' => null];
+                if($system->isAdmin() && !empty($config['notice']['id'])
+                    && empty($config['notice']['seen'][$ugr_ID])){
+                    $res['notice'] = $config['notice']['text'];
+                    $config['notice']['seen'][$ugr_ID] = true;
+                    $system->settings->setDatabaseSetting('Safeguard backups', $config);
                 }
-                // Limit failed-job launches to one per hour; success is tracked per account.
-                $attempt = strtotime($config['last_attempt'] ?? '') ?: 0;
-                if($due && $attempt + 3600 <= time()){
-                    $php = PHP_BINDIR.'/php';
-                    $worker = dirname(__FILE__).'/../../export/dbbackup/automaticSafeguard.php';
-                    if(is_executable($php) && function_exists('exec')){
-                        $config['last_attempt'] = gmdate('c');
-                        if($system->settings->setDatabaseSetting('Safeguard backups', $config)){
-                            $command = escapeshellarg($php).' '.escapeshellarg($worker).' '
-                                .escapeshellarg($system->dbname()).' >/dev/null 2>&1 &';
-                            exec($command);
+                if($accounts){
+                    $days = max(1, (int)($config['interval_days'] ?? 30));
+                    $due = false;
+                    foreach($accounts as $account){
+                        $last = strtotime($config['deposits'][$account]['date'] ?? '') ?: 0;
+                        if(!$last || $last + $days * 86400 <= time()){
+                            $due = true;
+                            break;
                         }
-                    }else{
-                        $res['notice'] = 'Automatic safeguarding requires a PHP CLI executable and process launching on this server.';
+                    }
+                    // Limit failed-job launches to one per hour; success is tracked per account.
+                    $attempt = strtotime($config['last_attempt'] ?? '') ?: 0;
+                    if($due && $attempt + 3600 <= time()){
+                        $php = PHP_BINDIR.'/php';
+                        $worker = dirname(__FILE__).'/../../export/dbbackup/automaticSafeguard.php';
+                        if(is_executable($php) && function_exists('exec')){
+                            $config['last_attempt'] = gmdate('c');
+                            if($system->settings->setDatabaseSetting('Safeguard backups', $config)){
+                                $command = escapeshellarg($php).' '.escapeshellarg($worker).' '
+                                    .escapeshellarg($system->dbname()).' >/dev/null 2>&1 &';
+                                exec($command);
+                            }
+                        }else{
+                            $res['notice'] = 'Automatic safeguarding requires a PHP CLI executable and process launching on this server.';
+                        }
                     }
                 }
             }
+
+        }elseif($action=='publish' && !SafeguardBackup::requireEnabled($system)){
+            $res = false;
+
+        }elseif($action=='publish' && !$system->isAdmin()){
+            $system->addError(HEURIST_REQUEST_DENIED, 'Only a database administrator may publish a safeguard');
+            $res = false;
 
         }elseif($action=='getdoi' || $action=='publish'){
             // (Re)confirm, or publish-and-register, the DOI for a record already deposited in an

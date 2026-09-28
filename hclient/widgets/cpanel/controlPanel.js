@@ -829,7 +829,7 @@ $.widget( "heurist.controlPanel", {
         if(this._safeguard_checked || !window.hWin.HAPI4.has_access()) return;
         this._safeguard_checked = true;
         window.hWin.HAPI4.SystemMgr.repositoryAction({a:'backup_check'}, (response) => {
-            if(response.status != window.hWin.ResponseStatus.OK) return;
+            if(response.status != window.hWin.ResponseStatus.OK || response.data.enabled === false) return;
             if(response.data.notice){
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     $('<div>').text(response.data.notice).html(), null, {title:'Database safeguard'});

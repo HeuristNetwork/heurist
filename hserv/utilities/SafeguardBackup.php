@@ -13,6 +13,22 @@ require_once dirname(__FILE__).'/UFile.php';
 
 class SafeguardBackup
 {
+    /** Use the same strict server-level experimental gate as other features. */
+    public static function isEnabled()
+    {
+        global $experimental;
+        return isset($experimental) && $experimental === true;
+    }
+
+    public static function requireEnabled($system)
+    {
+        if (self::isEnabled()) {
+            return true;
+        }
+        $system->addError(HEURIST_ACTION_BLOCKED, HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE);
+        return false;
+    }
+
     public static function settings($system)
     {
         $config = $system->settings->getDatabaseSetting('Safeguard backups');
@@ -21,6 +37,9 @@ class SafeguardBackup
 
     public static function saveConfig($system, $days, $accounts, $email)
     {
+        if (!self::requireEnabled($system)) {
+            throw new \RuntimeException(HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE);
+        }
         if (!$system->isAdmin() || $days < 1 || $days > 365 || !is_array($accounts)) {
             throw new \RuntimeException('Database manager permissions and an interval of 1–365 days are required');
         }

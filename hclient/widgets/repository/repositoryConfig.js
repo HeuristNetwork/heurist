@@ -73,7 +73,15 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      */
     _initControls:function(){
 
-        this._loadBackupSettings();
+        const pageSetting = window.hWin.heuristExperimentalAllowed;
+        const experimentalAllowed = typeof pageSetting === 'boolean'
+            ? pageSetting
+            : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
+        if(experimentalAllowed){
+            this._loadBackupSettings();
+        }else{
+            this._markSafeguardUnavailable();
+        }
         this._on(this._$('#backup_save_settings'), {click: this._saveBackupSettings});
 
         //fill record type selector
@@ -173,8 +181,25 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
 
     },
 
+    _markSafeguardUnavailable: function(){
+        const section = this._$('#safeguard_section');
+        const message = window.hWin.heuristExperimentalUnavailableMessage;
+        section.addClass('ui-state-disabled')
+            .attr({'aria-disabled':'true', title:message});
+        section.find('input, button').prop('disabled', true);
+        if(!section.find('.safeguard-hover-overlay').length){
+            $('<div class="safeguard-hover-overlay">')
+                .attr({title:message, 'aria-label':message})
+                .appendTo(section);
+        }
+    },
+
     _loadBackupSettings: function(){
         window.hWin.HAPI4.SystemMgr.repositoryAction({a:'backup_settings'}, (response) => {
+            if(response.status == window.hWin.ResponseStatus.OK && response.data.enabled === false){
+                this._markSafeguardUnavailable();
+                return;
+            }
             if(response.status != window.hWin.ResponseStatus.OK){
                 this._$('#backup_save_settings, #backup_interval_days, #backup_email_file').prop('disabled', true);
                 return;

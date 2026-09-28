@@ -5,6 +5,15 @@ The Design > External repositories screen holds one schedule for the database
 optional email attachment. Only database managers can save it. Any logged-in
 user who opens Explore can trigger a due check.
 
+Safeguarding is experimental. Unless the server's `$experimental` variable is
+strictly `TRUE`, the section is greyed and disabled with the standard
+unavailable hover message. Saving is rejected by the controller, login checks
+do nothing, and an already queued CLI worker exits before depositing data.
+The manual Nakala upload can still create a private pending deposit, but its
+"Publish & register DOI" control is disabled with the same hover message until
+the flag is enabled. The publish controller enforces this and administrator
+access independently of the browser.
+
 The browser calls `repoController.php?a=backup_check`. It returns immediately,
 launching `automaticSafeguard.php` using PHP CLI if at least one selected account
 is due. A per-database file lock prevents overlapping jobs, while a one-hour
