@@ -826,16 +826,18 @@ $.widget( "heurist.controlPanel", {
      * @returns {void}
      */
     _checkSafeguard: function(){
-        if(this._safeguard_checked || !window.hWin.HAPI4.has_access()) return;
+        if(this._safeguard_checked || !window.hWin.HAPI4.has_access()
+            || window.hWin.heuristExperimentalAllowed !== true) return;
         this._safeguard_checked = true;
         window.hWin.HAPI4.SystemMgr.repositoryAction({a:'backup_check'}, (response) => {
-            if(response.status != window.hWin.ResponseStatus.OK || response.data.enabled === false) return;
+            if(window.hWin.heuristExperimentalAllowed !== true
+                || response.status != window.hWin.ResponseStatus.OK || response.data?.enabled !== true) return;
             if(response.data.notice){
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     $('<div>').text(response.data.notice).html(), null, {title:'Database safeguard'});
             }else if(!response.data.configured){
                 window.hWin.HEURIST4.msg.showMsgDlg(
-                    'Heurist can back up your database to a repository automatically at specified intervals, and obtain a DOI for your data. We strongly recommend configuring this in Design > External Repositories',
+                    'Heurist can back up your database to a repository automatically at specified intervals, and obtain a DOI for your data. <br>We strongly recommend configuring this in Design > External Repositories',
                     null, {title:'Database safeguard'});
             }
         });

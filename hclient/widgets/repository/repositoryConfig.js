@@ -207,7 +207,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
             const config = response.data;
             this._$('#backup_interval_days').val(config.interval_days);
             this._$('#backup_email_file').prop('checked', config.email_file);
-            this._$('#backup_last_date').text(config.last_backup ? ' Last backup: '+config.last_backup : ' No automatic backup yet');
+            this._$('#backup_last_date').text(config.last_backup ? ' Last backup: '+config.last_backup : ' No successful automatic backup yet');
             const list = this._$('#backup_accounts').empty();
             if(!config.available.length){
                 list.text('Configure a Nakala or Zenodo write API key below first.');
