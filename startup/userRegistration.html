@@ -18,8 +18,8 @@ userRegistration.html - HTML strucutre for the new user registration form.
 
 <form name="formRegistration" class="registration-form"  style="display: inline-block;width:60%">
     <div>
-        <div class="header"><label for="ugr_ORCID">ORCID identifier</label></div>
-        <input type="text" name="ugr_ORCID" id="ugr_ORCID" class="text ui-widget-content ui-corner-all mandatory"  maxlength="20"/>
+        <div class="header"><label for="ugr_ORCID">ORCID identifier (optional)</label></div>
+        <input type="text" name="ugr_ORCID" id="ugr_ORCID" class="text ui-widget-content ui-corner-all"  maxlength="20"/>
         <span id="orcid-data-link" style="color:blue;cursor:pointer;text-decoration:underline;padding-left:10px;font-size:smaller;display:none;">retrieve your data from ORCID</span>
     </div>
     <div>
@@ -82,16 +82,16 @@ userRegistration.html - HTML strucutre for the new user registration form.
     </div>
 
     <div>
-        <div class="header" style="vertical-align:top;"><label for="ugr_Interests">Research interests</label></div>
+        <div class="header" style="vertical-align:top;"><label for="ugr_Interests">Research interests (optional)</label></div>
         <textarea id="ugr_Interests" name="ugr_Interests" rows="2" cols="80" style="width:35em;resize:none"
-            class="text ui-widget-content ui-corner-all mandatory"></textarea>
+            class="text ui-widget-content ui-corner-all"></textarea>
         <div class="heurist-helper1" style="display:none;">
             Enter a concise description (up to 250 characters) of your research interests.
         </div>
     </div>
 
     <div>
-        <div class="header" style="vertical-align:top;"><label for="ugr_URLs">Personal Website URLs</label></div>
+        <div class="header" style="vertical-align:top;"><label for="ugr_URLs">Personal Website URLs (optional)</label></div>
         <textarea id="ugr_URLs" name="ugr_URLs" rows="3" cols="80" style="width:35em"
             class="text ui-widget-content ui-corner-all"></textarea>
     </div>
