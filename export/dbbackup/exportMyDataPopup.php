@@ -67,6 +67,7 @@ use hserv\structure\ConceptCode;
 use hserv\utilities\DbUtils;
 use hserv\utilities\UArchive;
 use hserv\utilities\DbExportTSV;
+use hserv\utilities\SafeguardBackup;
 
 // Initialize the page (minimal version for popups)
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
@@ -685,7 +686,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
             // Validate repository if specified
             $repo = !empty(@$_REQUEST['repository']) ? htmlspecialchars($_REQUEST['repository']) : null;
-            if ($is_repository && (!$repo || $repo != 'Nakala')) { // Currently only Nakala seems fully supported
+            if ($is_repository && (!$repo || !in_array($repo, ['Nakala', 'Zenodo'], true))) {
                 // CONTACT_HEURIST_TEAM constant is defined in const.php
                 report_message('The repository ' . $repo . ' is not supported please ' . (defined('CONTACT_HEURIST_TEAM') ? CONTACT_HEURIST_TEAM : 'contact the support team'), true, false);
             }
@@ -1106,6 +1107,32 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
                         }
                         echo_flush2('<br>'. $rtn_msg .'<br>');
+                    } elseif ($repo == 'Zenodo') {
+                        try {
+                            $cfg = SafeguardBackup::settings($system);
+                            $previous = $cfg['deposits'][$repo_account] ?? [];
+                            $checkpoint = function($entry) use (&$cfg, $system, $repo_account) {
+                                $cfg['deposits'][$repo_account] = $entry;
+                                if (!$system->settings->setDatabaseSetting('Safeguard backups', $cfg)) {
+                                    throw new RuntimeException('Could not save Zenodo draft state');
+                                }
+                            };
+                            $result = SafeguardBackup::deposit($system, $repo_account,
+                                FOLDER_BACKUP.'.'.$display_format, $previous, $checkpoint);
+                            $cfg['deposits'][$repo_account] = $result;
+                            $system->settings->setDatabaseSetting('Safeguard backups', $cfg);
+                            $dois = $system->settings->getDatabaseSetting('DOIs');
+                            $dois = is_array($dois) ? $dois : [];
+                            $dois['database'][$repo_account] = ['doi' => $result['doi'],
+                                'version_doi' => $result['version_doi'], 'date' => gmdate('c')];
+                            $dois['database_doi'] = $dois['database_doi'] ?? $result['doi'];
+                            $system->settings->setDatabaseSetting('DOIs', $dois);
+                            echo_flush2('<br>Published on Zenodo. Database DOI: '
+                                .htmlspecialchars($result['doi']).'<br>Version DOI: '
+                                .htmlspecialchars($result['version_doi']).'<br>');
+                        } catch (Throwable $e) {
+                            report_message(htmlspecialchars($e->getMessage()), true, true);
+                        }
                     } else { // Other repositories not supported for direct upload
                         report_message('The repository ' . htmlspecialchars($repo) . ' is not supported for direct upload by this script. Please ' . (defined('CONTACT_HEURIST_TEAM') ? CONTACT_HEURIST_TEAM : 'contact the support team'), true, true);
                     }

@@ -33,12 +33,29 @@
                      
     <div class="ent_content" style="font-size: 0.9em;">
 
-        <div class="ent_content_full" style="top:10px;padding-left:20px;">
-            Services configured here enable the story and retrieve of external resources such as a images, documents, video 
+        <div class="ent_content_full" style="top:10px;min-height:170px;padding:10px 20px;box-sizing:border-box;">
+            <strong>Automatic database safeguarding</strong><br>
+            After a logged-in user opens Explore, Heurist checks whether the interval has passed and the database has changed.
+            If so, it creates a self-documenting safeguard file and deposits it in each selected repository account.
+            The first published deposit obtains a DOI; later deposits become versions of the same item.
+            The archive files are kept restricted because a full database backup may contain private data and repository credentials.
+            <div style="margin-top:8px;">
+                <label for="backup_interval_days">Backup interval (days):</label>
+                <input id="backup_interval_days" type="number" min="1" max="365" value="30" style="width:65px;">
+                <span id="backup_accounts" style="margin-left:15px;"></span>
+            </div>
+            <label><input id="backup_email_file" type="checkbox"> Email the safeguard file to the database owner</label>
+            <span class="heurist-helper1">Large files, particularly archives with many images, may be rejected by the recipient's email service.</span>
+            <div><button id="backup_save_settings" type="button">Save safeguarding settings</button>
+                <span id="backup_last_date"></span></div>
+        </div>
+
+        <div class="ent_content_full" style="top:185px;padding-left:20px;">
+            Services configured here enable the storage and retrieval of external resources such as images, documents, video
             on/from the external repositories.<br><br>
         </div>
 
-        <div class="ent_content_full" style="top:100px;width:300px;border-right:1px solid gray;">
+        <div class="ent_content_full" style="top:240px;width:300px;border-right:1px solid gray;">
             <div style="width:280px;padding:10px 10px 0;font-weight:bold;">
                 Repository services
             </div><br>
@@ -53,7 +70,7 @@
             </div>
         </div>
 
-        <div class="ent_content_full" id="editing_panel" style="top:100px;left:301px;padding:10px;">
+        <div class="ent_content_full" id="editing_panel" style="top:240px;left:301px;padding:10px;">
 
             <h4 id="service_name" style="padding-left:20px;"><span class="ui-icon ui-icon-arrowthick-1-w"></span>Select a service to edit or click the assign button</h4>
             

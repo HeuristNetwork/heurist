@@ -47,7 +47,8 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      */
     _init: function() {
 
-        let _services = ['Nakala','Flickr','Zenodo','Isidore','MediHAL','DSpace'];
+        let _services = ['Nakala','Zenodo'];
+        // Future services: Flickr, Isidore, MediHAL, DSpace.
         this._available_services = [];
         for(let idx in _services){
             this._available_services.push({service:_services[idx].toLowerCase(),label:_services[idx]});
@@ -71,6 +72,9 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      * @private
      */
     _initControls:function(){
+
+        this._loadBackupSettings();
+        this._on(this._$('#backup_save_settings'), {click: this._saveBackupSettings});
 
         //fill record type selector
         this.selectUserGroups = this._$('#sel_usergroup').css({'list-style-type': 'none'});
@@ -161,11 +165,56 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
 
                 window.hWin.HEURIST4.util.setDisabled(that.save_btn, !that._services_modified);
                 window.hWin.HEURIST4.msg.showMsgFlash('Saved repositories configurations...', 3000);
+                that._loadBackupSettings();
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
 
+    },
+
+    _loadBackupSettings: function(){
+        window.hWin.HAPI4.SystemMgr.repositoryAction({a:'backup_settings'}, (response) => {
+            if(response.status != window.hWin.ResponseStatus.OK){
+                this._$('#backup_save_settings, #backup_interval_days, #backup_email_file').prop('disabled', true);
+                return;
+            }
+            const config = response.data;
+            this._$('#backup_interval_days').val(config.interval_days);
+            this._$('#backup_email_file').prop('checked', config.email_file);
+            this._$('#backup_last_date').text(config.last_backup ? ' Last backup: '+config.last_backup : ' No automatic backup yet');
+            const list = this._$('#backup_accounts').empty();
+            if(!config.available.length){
+                list.text('Configure a Nakala or Zenodo write API key below first.');
+            }
+            for(const account of config.available){
+                const label = $('<label>').css('margin-right','10px');
+                $('<input type="checkbox" class="backup-account">').val(account[0])
+                    .prop('checked', config.accounts.includes(account[0])).appendTo(label);
+                label.append(document.createTextNode(' '+account[1]+' ('+account[3]+')'));
+                list.append(label);
+            }
+        });
+    },
+
+    _saveBackupSettings: function(){
+        const days = Number(this._$('#backup_interval_days').val());
+        if(!Number.isInteger(days) || days < 1 || days > 365){
+            window.hWin.HEURIST4.msg.showMsgFlash('Choose an interval from 1 to 365 days');
+            return;
+        }
+        const accounts = this._$('#backup_accounts .backup-account:checked').map((_, el) => el.value).get();
+        window.hWin.HAPI4.SystemMgr.repositoryAction({
+            a:'backup_save', interval_days:days, accounts:JSON.stringify(accounts),
+            email_file:this._$('#backup_email_file').is(':checked') ? 1 : 0
+        }, (response) => {
+            if(response.status == window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgFlash('Safeguarding settings saved', 3000);
+                window.hWin.HAPI4.SystemMgr.repositoryAction({a:'backup_check'}, () => {});
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
     },
 
     /**

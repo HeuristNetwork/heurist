@@ -2109,7 +2109,10 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas)
         if (array_key_exists('description', $file)) {
             $fileArr['description'] = htmlspecialchars($file['description']);
         }
-        if (array_key_exists('embargoed', $file) && !empty($file['embargoed'])) {
+        if (array_key_exists('embargoed', $file) && $file['embargoed'] === 'indefinite') {
+            // Published data record and DOI, with archive file kept inaccessible.
+            $fileArr['embargoed'] = null;
+        } elseif (array_key_exists('embargoed', $file) && !empty($file['embargoed'])) {
 
             $now = strtotime('now');
             $timestamp = strtotime($file['embargoed']);
@@ -2821,7 +2824,7 @@ function publishNakalaData($system, $apiKey, $identifier)
 }
 
 /**
- * Placeholder for Zenodo DOI retrieval - not yet implemented, see getRepositoryDOI().
+ * Fetch DOI and publication status for an existing Zenodo deposition.
  *
  * Zenodo has a similar nuance to Nakala: creating a deposition (POST /api/deposit/depositions)
  * immediately returns a numeric internal 'id' plus a *pre-reserved* DOI under
@@ -2843,8 +2846,12 @@ function publishNakalaData($system, $apiKey, $identifier)
  */
 function getZenodoDOI($system, $apiKey, $identifier)
 {
-    $system->addError(HEURIST_ACTION_BLOCKED, 'DOI retrieval for Zenodo is not yet implemented.');
-    return false;
+    try {
+        return \hserv\utilities\SafeguardBackup::zenodoDetails($apiKey, $identifier);
+    } catch (\Throwable $e) {
+        $system->addError(HEURIST_ACTION_BLOCKED, $e->getMessage());
+        return false;
+    }
 }
 
 /**

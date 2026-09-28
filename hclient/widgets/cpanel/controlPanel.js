@@ -407,6 +407,7 @@ $.widget( "heurist.controlPanel", {
             this._performInitialSearch();
             this._getUserNotifications();
             this._showFAIRScore();
+            this._checkSafeguard();
         }
     },
 
@@ -454,6 +455,7 @@ $.widget( "heurist.controlPanel", {
                     that._performInitialSearch();
                     that._getUserNotifications();
                     that._showFAIRScore();
+                    that._checkSafeguard();
 
                 } else if(that.options.login_inforced){
                     window.hWin.location  = window.hWin.HAPI4.baseURL;
@@ -823,6 +825,22 @@ $.widget( "heurist.controlPanel", {
      * @private
      * @returns {void}
      */
+    _checkSafeguard: function(){
+        if(this._safeguard_checked || !window.hWin.HAPI4.has_access()) return;
+        this._safeguard_checked = true;
+        window.hWin.HAPI4.SystemMgr.repositoryAction({a:'backup_check'}, (response) => {
+            if(response.status != window.hWin.ResponseStatus.OK) return;
+            if(response.data.notice){
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    $('<div>').text(response.data.notice).html(), null, {title:'Database safeguard'});
+            }else if(!response.data.configured){
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Heurist can back up your database to a repository automatically at specified intervals, and obtain a DOI for your data. We strongly recommend configuring this in Design > External Repositories',
+                    null, {title:'Database safeguard'});
+            }
+        });
+    },
+
     _getUserNotifications: function(){
 
         if(this._retrieved_notifications){ return; }
@@ -1093,4 +1111,3 @@ $.widget( "heurist.controlPanel", {
     //https://github.com/HeuristNetwork/heurist - repo
 
 });
-
