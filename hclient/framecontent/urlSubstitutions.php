@@ -31,7 +31,7 @@ $saved = false;
 $content = '';
 
 if (!isset($experimental) || $experimental !== true) {
-    $error = 'Sorry, experimental function not available on this server';
+    $error = HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE;
 } else {
     $settingsDir = rtrim(HEURIST_FILESTORE_DIR, '/\\') . DIRECTORY_SEPARATOR . 'settings';
     $filePath = $settingsDir . DIRECTORY_SEPARATOR . 'URLSubstitutions.txt';
@@ -79,10 +79,10 @@ if (!isset($experimental) || $experimental !== true) {
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>URL Substitutions</title>
+    <title>Edit URL Substitutions file</title>
     <style>
         body { box-sizing: border-box; margin: 0; padding: 18px; font: 14px Arial, sans-serif; }
-        h1 { font-size: 18px; margin: 0 0 14px; }
+        .editor-instructions { font-size: 13px; margin: 0 0 14px; }
         textarea { box-sizing: border-box; width: 100%; height: 390px; padding: 10px; resize: vertical;
             font: 13px/1.4 Consolas, "Courier New", monospace; }
         .actions { margin-top: 12px; text-align: right; }
@@ -93,7 +93,7 @@ if (!isset($experimental) || $experimental !== true) {
     </style>
 </head>
 <body>
-    <h1>URL Substitutions</h1>
+    <p class="editor-instructions">Edit the file content below. # comments may be removed</p>
     <?php if ($error !== ''): ?>
         <div class="message error"><?=htmlspecialchars($error, ENT_QUOTES, 'UTF-8')?></div>
     <?php else: ?>
