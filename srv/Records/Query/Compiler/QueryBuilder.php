@@ -27,7 +27,7 @@ final class QueryBuilder
 {
     private const DEFAULT_LIMIT=300000;
     private const MAX_LIMIT=300000;
-    private $parser; private $resolver; private $fields; private $records; private $sort;
+    private $parser; private $resolver; private $fields; private $records; private $sort; private $terms;
 
     /** Initialise all query compilers with one database abstraction. */
     public function __construct(DatabaseInterface $database)
@@ -37,6 +37,7 @@ final class QueryBuilder
         $this->fields=new FieldPredicateCompiler($database);
         $this->records=new RecordPredicateCompiler($database,$this->fields);
         $this->sort=new SortCompiler($this->fields,$this->parser);
+        $this->terms=new RelationTermResolver($database);
     }
 
     public function normalize($query): array{return $this->resolver->resolve($this->parser->normalize($query));}
@@ -218,9 +219,50 @@ final class QueryBuilder
             if($this->fields->isLinkFieldPresenceTest($suffix,$value)){return $this->fields->fieldCondition(intval($suffix),$value,$state,$r);}
             return $this->compileResourceLink($r,'from',$suffix,$value,$state,$depth+1);
         }
-        if(in_array($base,array('rt','related_to','relatedto'),true)){return $this->compileRelationship($r,'to',$value,$state,$depth+1);}
-        if(in_array($base,array('rf','related_from','relatedfrom'),true)){return $this->compileRelationship($r,'from',$value,$state,$depth+1);}
+        if(in_array($base,array('rt','related_to','relatedto'),true)){return $this->compileRelationship($r,'to',$suffix,$value,$state,$depth+1);}
+        if(in_array($base,array('rf','related_from','relatedfrom'),true)){return $this->compileRelationship($r,'from',$suffix,$value,$state,$depth+1);}
+        if($base==='links'){return $this->compileAnyLink($r,$suffix,$value,$state,$depth+1);}
+        if($base==='related'){return $this->compileRelated($r,$suffix,$value,$state,$depth+1);}
+        if($base==='connected'){
+            if($suffix!==''){throw new QueryValidationException('connected does not accept a field or relationship type');}
+            return '('.$this->compileAnyLink($r,'',$value,$state,$depth+1)
+                .' OR '.$this->compileRelated($r,'',$value,$state,$depth+1).')';
+        }
         throw new UnsupportedQueryException('Predicate is not executable: '.$base);
+    }
+
+    /** links[:field] - a resource link in either direction: lt OR lf. */
+    private function compileAnyLink(string $parentAlias, string $suffix, $value, SqlBuildContext $state, int $depth): string
+    {
+        list($to, $negate) = $this->resourceLinkExists($parentAlias, 'to', $suffix, $value, $state, $depth);
+        list($from) = $this->resourceLinkExists($parentAlias, 'from', $suffix, $value, $state, $depth);
+        $either = '('.$to.' OR '.$from.')';
+        return $negate ? 'NOT '.$either : $either;
+    }
+
+    /**
+     * related[:types] - a relationship in either direction. Types (the suffix and r)
+     * read from the parent: outgoing relationships use them, incoming ones their inverse.
+     */
+    private function compileRelated(string $parentAlias, string $suffix, $value, SqlBuildContext $state, int $depth): string
+    {
+        list($childQuery, $relationshipQuery, $explicitTypes) =
+            $this->splitRelationshipQuery($this->parser->linkedValueQuery($value));
+        $types = $explicitTypes === null ? null : $this->terms->expand($explicitTypes);
+        if($suffix !== ''){
+            $suffixTypes = $this->terms->expand($this->fields->numericList($suffix, 'relationship type'));
+            $types = $types === null ? $suffixTypes : array_values(array_intersect($types, $suffixTypes));
+        }
+        $parts = array($this->relationshipExists(
+            $parentAlias, 'to', $childQuery, $relationshipQuery, $types, $state, $depth
+        ));
+        $reverse = $types === null ? null : $this->terms->inverse($types);
+        if($reverse === null || !empty($reverse)){
+            $parts[] = $this->relationshipExists(
+                $parentAlias, 'from', $childQuery, $relationshipQuery, $reverse, $state, $depth
+            );
+        }
+        return '('.implode(' OR ', $parts).')';
     }
 
     private function compileResourceLink(
@@ -231,6 +273,19 @@ final class QueryBuilder
         SqlBuildContext $state,
         int $depth
     ): string {
+        list($exists, $negate) = $this->resourceLinkExists($parentAlias, $direction, $suffix, $value, $state, $depth);
+        return $negate ? 'NOT '.$exists : $exists;
+    }
+
+    /** One-direction resource link as [EXISTS, negated by an exists:NULL modifier]. */
+    private function resourceLinkExists(
+        string $parentAlias,
+        string $direction,
+        string $suffix,
+        $value,
+        SqlBuildContext $state,
+        int $depth
+    ): array {
         $linkAlias = $state->nextAlias('rl');
         $childAlias = $state->nextAlias('lr');
         $childQuery = $this->parser->linkedValueQuery($value);
@@ -257,7 +312,7 @@ final class QueryBuilder
             .' INNER JOIN Records '.$childAlias.' ON '.$childAlias.'.rec_ID='
             .$linkAlias.'.'.$childColumn
             .' WHERE '.implode(' AND ', array_merge($edge, $childWhere)).')';
-        return $negate ? 'NOT '.$exists : $exists;
+        return array($exists, $negate);
     }
 
     /**
@@ -283,19 +338,61 @@ final class QueryBuilder
         return array($remaining, $negate);
     }
 
-    /** Compile a directional Relationship-record edge as correlated EXISTS. */
+    /**
+     * Compile a directional Relationship-record edge as correlated EXISTS. With a
+     * relation-marker suffix the marker's relationship types and endpoint record
+     * types constrain the edge, as in chunked execution.
+     */
     private function compileRelationship(
         string $parentAlias,
         string $direction,
+        string $suffix,
         $value,
         SqlBuildContext $state,
         int $depth
     ): string {
+        list($childQuery, $relationshipQuery, $relationTypes) =
+            $this->splitRelationshipQuery($this->parser->linkedValueQuery($value));
+        if($suffix === ''){
+            return $this->relationshipExists(
+                $parentAlias, $direction, $childQuery, $relationshipQuery, $relationTypes, $state, $depth, false
+            );
+        }
+        if(!ctype_digit($suffix) || intval($suffix)<1){
+            throw new QueryValidationException('Relation-marker field ID must be a positive integer');
+        }
+        $marker = $this->terms->marker(intval($suffix));
+        $types = $relationTypes === null ? null : $this->terms->expand($relationTypes);
+        if($marker['types'] !== null){
+            $types = $types === null ? $marker['types'] : array_values(array_intersect($types, $marker['types']));
+        }
+        if(!empty($marker['recordTypes'])){
+            $childQuery = array_values(array_filter($childQuery, static function($predicate){
+                return !array_key_exists('_all', $predicate);
+            }));
+            $childQuery[] = array('t'=>$marker['recordTypes']);
+        }
+        return $this->relationshipExists($parentAlias, $direction, $childQuery, $relationshipQuery, $types, $state, $depth);
+    }
+
+    /**
+     * One-direction relationship EXISTS. $types null = any type; $expanded says whether
+     * they already include descendant terms, otherwise the closure table adds them.
+     */
+    private function relationshipExists(
+        string $parentAlias,
+        string $direction,
+        array $childQuery,
+        array $relationshipQuery,
+        ?array $types,
+        SqlBuildContext $state,
+        int $depth,
+        bool $expanded = true
+    ): string {
         $linkAlias = $state->nextAlias('rrl');
         $childAlias = $state->nextAlias('rr');
         $relationshipAlias = $state->nextAlias('rel');
-        list($childQuery, $relationshipQuery, $relationTypes) =
-            $this->splitRelationshipQuery($this->parser->linkedValueQuery($value));
+        $relationTypes = $types;
 
         $parentColumn = $direction === 'to' ? 'rl_SourceID' : 'rl_TargetID';
         $childColumn = $direction === 'to' ? 'rl_TargetID' : 'rl_SourceID';
@@ -303,7 +400,13 @@ final class QueryBuilder
             $linkAlias.'.'.$parentColumn.'='.$parentAlias.'.rec_ID',
             $linkAlias.'.rl_RelationID IS NOT NULL'
         );
-        if($relationTypes !== null){
+        if($relationTypes !== null && $expanded){
+            if(empty($relationTypes)){ $edge[] = '0=1'; }
+            else{
+                $edge[] = $linkAlias.'.rl_RelationTypeID IN ('.implode(',', array_fill(0, count($relationTypes), '?')).')';
+                foreach($relationTypes as $type){ $state->bind(intval($type), 'i'); }
+            }
+        }elseif($relationTypes !== null){
             $edge[] = $this->relationshipTypeCondition($linkAlias, $relationTypes, $state);
         }
         $childWhere = $this->compileGroup($childQuery, 'AND', $state, $childAlias, $depth);

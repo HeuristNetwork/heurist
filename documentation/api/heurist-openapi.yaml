@@ -238,7 +238,14 @@ paths:
         in: query
         schema:
           type: string
-        description: Heurist search expression.
+        description: >-
+          Heurist search expression. Link direction: lt:X (linked to) finds records whose pointer fields point
+          to X; lf:X (linked from) finds records that X points to. Likewise for relationships: rt:X finds
+          records that are the source of a relationship to X; rf:X finds records that are the target of a
+          relationship from X. Both directions: links:X (lt OR lf) and related:X (rt OR rf); connected:X is
+          links OR related and takes no suffix. An optional field or relation type ID follows the prefix
+          (lt:240, links:134, rt:5369). An empty linked query ({"lf":[]}) matches any record; in expansion
+          rules it is the parent result, written * in compact paths (*:lf:10).
       - name: w
         in: query
         schema:

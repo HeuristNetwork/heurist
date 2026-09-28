@@ -33,11 +33,11 @@ final class RecordQueryParser
         'linkedto'=>'lt','linkto'=>'lt','link_to'=>'lt','lt'=>'lt','linked_from'=>'lf',
         'linkedfrom'=>'lf','linkfrom'=>'lf','link_from'=>'lf','lf'=>'lf','related_to'=>'rt',
         'relatedto'=>'rt','rt'=>'rt','related_from'=>'rf','relatedfrom'=>'rf','rf'=>'rf',
-        'related'=>'related','links'=>'links','relf'=>'relf','r'=>'r','any'=>'any','all'=>'all',
+        'related'=>'related','links'=>'links','connected'=>'connected','relf'=>'relf','r'=>'r','any'=>'any','all'=>'all',
         'not'=>'not','sortby'=>'sortby','sort'=>'sortby','s'=>'sortby'
     );
     private const LINK_PREDICATES = array('lt','linked_to','linkedto','lf','linked_from','linkedfrom',
-        'rt','related_to','relatedto','rf','related_from','relatedfrom','related','links','relf','r');
+        'rt','related_to','relatedto','rf','related_from','relatedfrom','related','links','connected','relf','r');
     private $textSubqueries = array();
     /** @var array<string,bool> Additional logical fields normalized to f:<name>. */
     private $logicalFields = array();
@@ -185,7 +185,10 @@ final class RecordQueryParser
                 && $suffix !== '' && !$this->isValidFieldSuffix($suffix)){
                 throw new QueryValidationException('Predicate '.$key.' has an invalid field ID');
             }
-            if($base === 'relf' && ($suffix === '' || !$this->isResolvableFieldSuffix($suffix))){
+            if($base === 'connected' && $suffix !== ''){
+                throw new QueryValidationException('Predicate connected does not accept a field or relationship type');
+            }
+            if($base === 'relf' && ($suffix === ''|| !$this->isResolvableFieldSuffix($suffix))){
                 throw new QueryValidationException('Predicate '.$key.' requires a Relationship field ID or name');
             }
             if($base === 'r' && $suffix !== '' && !$this->isResolvableFieldSuffix($suffix)){
@@ -232,24 +235,22 @@ final class RecordQueryParser
             $key = (string)array_keys($predicate)[0];
             $value = $predicate[$key];
             list($base, $suffix) = $this->predicateParts($key);
-            if(in_array($base, array('links','related','r','relf'), true)){
+            if(in_array($base, array('r','relf'), true)){
                 throw new UnsupportedQueryException('Predicate requires chunked execution: '.$key);
             }
             if(in_array($base, array('lt','linked_to','linkedto','lf','linked_from','linkedfrom'), true)
                 && $this->isLinkFieldPresenceTest($suffix, $value)){
                 continue;
             }
-            if(in_array($base, array('rt','related_to','relatedto','rf','related_from','relatedfrom'), true)
-                && $suffix !== ''){
-                throw new UnsupportedQueryException('Relation-marker predicates require chunked execution: '.$key);
-            }
             if(in_array($base, array('any','all','not'), true)){
                 $this->assertSqlExecutable($this->normalizeQueryArray($value), $depth);
             }elseif(in_array($base, self::LINK_PREDICATES, true)){
                 $child = $this->linkedValueQuery($value);
-                if(in_array($base, array('rt','related_to','relatedto','rf','related_from','relatedfrom'), true)){
+                if(in_array($base, array('rt','related_to','relatedto','rf','related_from','relatedfrom','related'), true)){
                     list($child, $relationship) = $this->splitRelationshipQuery($child);
                     $this->assertSqlExecutable($relationship, $depth+1);
+                }elseif($base === 'connected' && $this->hasRelationshipConstraint($child)){
+                    throw new QueryValidationException('connected does not accept r or relf; use related');
                 }
                 $this->assertSqlExecutable($child, $depth+1);
             }elseif(is_array($value)
@@ -273,7 +274,7 @@ final class RecordQueryParser
             'access','user','usr','ws','workset','tag','keyword','kwd','f','field','fc','count','cnt',
             'geo','file','lt','linked_to','linkedto','lf','linked_from','linkedfrom',
             'rt','related_to','relatedto','rf','related_from','relatedfrom','related',
-            'links','relf','r','any','all','not','sortby','sort','s','exists'
+            'links','connected','relf','r','any','all','not','sortby','sort','s','exists'
         ), true);
     }
     private function isAssociative(array $value): bool
@@ -426,6 +427,8 @@ final class RecordQueryParser
 
     public function linkedValueQuery($value): array
     {
+        // an empty linked query means any record (in expansion rules: the parent result)
+        if($value === null || $value === array()){ return array(); }
         if(is_array($value) && !$this->isScalarValueList($value)){ return $this->normalizeQueryArray($value); }
         return array(array('ids'=>$this->numericList($value, 'linked record')));
     }
@@ -458,6 +461,16 @@ final class RecordQueryParser
         }
         return array(empty($child)?array(array('_all'=>true)):$child,
             empty($relationship)?array(array('_all'=>true)):$relationship, null);
+    }
+
+    /** Whether a linked query constrains the Relationship record (r, r:<field>, relf). */
+    private function hasRelationshipConstraint(array $query): bool
+    {
+        foreach($query as $predicate){
+            list($base) = $this->predicateParts((string)array_keys($predicate)[0]);
+            if($base === 'r' || $base === 'relf'){ return true; }
+        }
+        return false;
     }
 
     private function numericList($value, string $label): array

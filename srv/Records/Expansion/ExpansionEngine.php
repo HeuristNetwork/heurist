@@ -25,6 +25,8 @@ final class ExpansionEngine
     private const RESOURCE_REVERSE = array('lt','linked_to','linkedto');
     private const RELATION_FORWARD = array('rf','related_from','relatedfrom');
     private const RELATION_REVERSE = array('rt','related_to','relatedto');
+    /** Undirected traversals: pointers, relationships, or both, in either direction. */
+    private const UNDIRECTED = array('links', 'related', 'connected');
 
     /** @var RecordSearchService */
     private $search;
@@ -155,8 +157,36 @@ final class ExpansionEngine
     private function readEdges(array $parentIds, array $anchor, int $batchSize): array
     {
         $rows = array();
-        $forward = in_array($anchor['base'], array_merge(self::RESOURCE_FORWARD, self::RELATION_FORWARD), true);
-        $relationship = in_array($anchor['base'], array_merge(self::RELATION_FORWARD, self::RELATION_REVERSE), true);
+        $base = $anchor['base'];
+        if(in_array($base, self::UNDIRECTED, true)){
+            $kinds = $base === 'links' ? array(false) : ($base === 'related' ? array(true) : array(false, true));
+            $directions = array(true, false);
+        }else{
+            $kinds = array(in_array($base, array_merge(self::RELATION_FORWARD, self::RELATION_REVERSE), true));
+            $directions = array(in_array($base, array_merge(self::RESOURCE_FORWARD, self::RELATION_FORWARD), true));
+        }
+        if($base === 'connected' && $anchor['suffix'] !== ''){
+            throw new QueryValidationException('connected does not accept a field or relationship type');
+        }
+        foreach($kinds as $relationship){
+            foreach($directions as $forward){
+                $rows = array_merge($rows, $this->readEdgePass(
+                    $parentIds, $anchor, $relationship, $forward, $batchSize
+                ));
+            }
+        }
+        return $rows;
+    }
+
+    /** One edge read: pointers or relationships, forward (parent is source) or reverse. */
+    private function readEdgePass(
+        array $parentIds,
+        array $anchor,
+        bool $relationship,
+        bool $forward,
+        int $batchSize
+    ): array {
+        $rows = array();
         $parentColumn = $forward ? 'rl_SourceID' : 'rl_TargetID';
         $childColumn = $forward ? 'rl_TargetID' : 'rl_SourceID';
         foreach(array_chunk($parentIds, $batchSize) as $chunk){
@@ -262,7 +292,8 @@ final class ExpansionEngine
             'lf'=>'lt', 'linked_from'=>'lt', 'linkedfrom'=>'lt',
             'lt'=>'lf', 'linked_to'=>'lf', 'linkedto'=>'lf',
             'rf'=>'rt', 'related_from'=>'rt', 'relatedfrom'=>'rt',
-            'rt'=>'rf', 'related_to'=>'rf', 'relatedto'=>'rf'
+            'rt'=>'rf', 'related_to'=>'rf', 'relatedto'=>'rf',
+            'links'=>'links', 'related'=>'related', 'connected'=>'connected'
         )[$anchor['base']];
         $operator = $outward.($anchor['suffix'] === '' ? '' : $anchor['suffix']);
         $prefix = $parent === '' ? $parentType : $parent;
@@ -273,7 +304,7 @@ final class ExpansionEngine
     {
         return in_array($base, array_merge(
             self::RESOURCE_FORWARD, self::RESOURCE_REVERSE,
-            self::RELATION_FORWARD, self::RELATION_REVERSE
+            self::RELATION_FORWARD, self::RELATION_REVERSE, self::UNDIRECTED
         ), true);
     }
 

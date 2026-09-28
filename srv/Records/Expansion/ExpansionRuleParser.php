@@ -53,26 +53,34 @@ final class ExpansionRuleParser
     public function pathToRules(string $path): array
     {
         $tokens = array_values(array_filter(array_map('trim', explode(':', $path)), 'strlen'));
-        if(count($tokens) < 3 || !ctype_digit($tokens[0]) || count($tokens)%2 === 0){
+        // '*' is any record type: an empty linked query, i.e. the parent result
+        $isType = static function(string $token): bool { return $token === '*' || ctype_digit($token); };
+        if(count($tokens) < 3 || !$isType($tokens[0]) || count($tokens)%2 === 0){
             throw new QueryValidationException('Invalid compact expansion path: '.$path);
         }
-        $parentType = intval($tokens[0]);
+        $parentType = $tokens[0] === '*' ? 0 : intval($tokens[0]);
         $root = array();
         $level =& $root;
         for($index=1; $index<count($tokens); $index+=2){
-            if(!preg_match('/^(lt|lf|rt|rf)([0-9]*)$/i', $tokens[$index], $match)
-                || !ctype_digit($tokens[$index+1])){
+            if(!preg_match('/^(lt|lf|rt|rf|links|related|connected)([0-9]*)$/i', $tokens[$index], $match)
+                || !$isType($tokens[$index+1])){
                 throw new QueryValidationException('Invalid compact expansion path step: '.$tokens[$index]);
             }
             $operator = strtolower($match[1]);
             $field = $match[2];
-            $childType = intval($tokens[$index+1]);
-            if($childType < 1){ throw new QueryValidationException('Record type IDs in paths must be positive'); }
-            $inverse = array('lt'=>'lf', 'lf'=>'lt', 'rt'=>'rf', 'rf'=>'rt')[$operator];
+            if($operator === 'connected' && $field !== ''){
+                throw new QueryValidationException('connected does not accept a field: '.$tokens[$index]);
+            }
+            $childType = $tokens[$index+1] === '*' ? 0 : intval($tokens[$index+1]);
+            if($tokens[$index+1] !== '*' && $childType < 1){
+                throw new QueryValidationException('Record type IDs in paths must be positive');
+            }
+            $inverse = array('lt'=>'lf', 'lf'=>'lt', 'rt'=>'rf', 'rf'=>'rt',
+                'links'=>'links', 'related'=>'related', 'connected'=>'connected')[$operator];
             $key = $inverse.($field === '' ? '' : ':'.$field);
-            $rule = array(
-                'query'=>array(array('t'=>$childType), array($key=>array(array('t'=>$parentType))))
-            );
+            $query = $childType > 0 ? array(array('t'=>$childType)) : array();
+            $query[] = array($key=>$parentType > 0 ? array(array('t'=>$parentType)) : array());
+            $rule = array('query'=>$query);
             $level[] = $rule;
             $last = count($level)-1;
             $level[$last]['levels'] = array();
