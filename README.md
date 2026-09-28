@@ -14,6 +14,9 @@ Heurist is built using PHP, JavaScript, and MySQL. It was developed from 2005 un
 
 **See https://HeuristNetwork.org/Installation for installation instructions** Also see the `_README.md` file in the root of the codebase for further information on user interface functions and other background information. See files in the `/documentation` directory for general documentation, contribution guidelines, and installation information. Please note tht the latest code is in the h7dev branch as of 2026.
 
+To run a local Heurist development instance with Docker Compose, see the
+[Docker Compose setup guide](documentation/docker-compose-setup.md).
+
 
 ---
 
@@ -147,4 +150,3 @@ Heurist can also be installed on a Windows server. Systemik Solutions is working
 ### **Feedback / Questions**
 
 Please add a ticket, and we will get back to you promptly.
-
