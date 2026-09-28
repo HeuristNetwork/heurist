@@ -301,6 +301,6 @@ final class QueryValueResolver
     }
     private function isNestedLink(string $base, $value): bool
     {
-        return is_array($value) && in_array($base, array('lt','linked_to','linkedto','lf','linked_from','linkedfrom','rt','related_to','relatedto','rf','related_from','relatedfrom','related'), true);
+        return is_array($value) && in_array($base, array('lt','linked_to','linkedto','lf','linked_from','linkedfrom','rt','related_to','relatedto','rf','related_from','relatedfrom','related','links','connected'), true);
     }
 }

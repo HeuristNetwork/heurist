@@ -65,7 +65,7 @@ final class RecordSearchService
         foreach($this->builder->normalize($query) as $predicate){
             $key = (string)array_keys($predicate)[0];
             list($base, $suffix) = $this->predicateParts($key);
-            if(in_array($base, array('lt','lf','rt','rf','links','related'), true)){
+            if(in_array($base, array('lt','lf','rt','rf','links','related','connected'), true)){
                 if($anchor !== null){ throw new QueryValidationException('Exactly one traversal is required per expansion step'); }
                 $anchor = array($base, $suffix, $predicate[$key]);
             }else{ $targetQuery[] = $predicate; }
@@ -73,8 +73,13 @@ final class RecordSearchService
         if($anchor === null){ throw new QueryValidationException('Expansion rule has no traversal'); }
         list($base, $suffix, $value) = $anchor;
         $relation = in_array($base, array('rt','rf','related'), true);
-        $directions = in_array($base, array('links','related'), true) ? array('to','from')
+        $directions = in_array($base, array('links','related','connected'), true) ? array('to','from')
             : array(in_array($base, array('lf','rf'), true) ? 'to' : 'from');
+        // [relationship?, direction] edge reads; 'connected' reads pointers and relationships
+        $passes = array();
+        foreach($base === 'connected' ? array(false, true) : array($relation) as $isRelation){
+            foreach($directions as $direction){ $passes[] = array($isRelation, $direction); }
+        }
         $requestedTypes = null; $markerTypes = null; $relationshipQuery = array();
         if($relation){
             list($parentQuery, $relationshipQuery, $requestedTypes) = $this->splitRelationshipValue($value);
@@ -93,22 +98,22 @@ final class RecordSearchService
         $parentQuery[] = array('ids'=>$seeds);
         $parents = $this->search(new SearchRequest($parentQuery, array('limit'=>10000)))->ids;
         $rows = array(); $truncated = false;
-        foreach($directions as $direction){
+        foreach($passes as list($isRelation, $direction)){
             $types = $requestedTypes;
             // 'related' is expressed from the target's perspective.
             if($base === 'related' && $direction === 'to' && $types !== null) $types = $this->inverseTermIds($types);
             if($markerTypes !== null) $types = $types === null ? $markerTypes : array_values(array_intersect($types, $markerTypes));
-            if($relation && $types === array()) continue;
+            if($isRelation && $types === array()) continue;
             foreach(array_chunk($parents, self::SQL_CHUNK_SIZE) as $chunk){
                 $parentColumn = $direction === 'to' ? 'rl_SourceID' : 'rl_TargetID';
                 $childColumn = $direction === 'to' ? 'rl_TargetID' : 'rl_SourceID';
                 $values = $chunk;
                 $conditions = array('rl.'.$parentColumn.' IN ('.implode(',', array_fill(0, count($chunk), '?')).')',
-                    'rl.rl_RelationID IS '.($relation ? 'NOT NULL' : 'NULL'));
-                if($relation && $types !== null){
+                    'rl.rl_RelationID IS '.($isRelation ? 'NOT NULL' : 'NULL'));
+                if($isRelation && $types !== null){
                     $conditions[] = 'rl.rl_RelationTypeID IN ('.implode(',', array_fill(0, count($types), '?')).')';
                     $values = array_merge($values, $types);
-                }elseif(!$relation && $suffix !== ''){
+                }elseif(!$isRelation && $suffix !== ''){
                     $conditions[] = 'rl.rl_DetailTypeID=?';
                     $values[] = $this->positiveSuffix($suffix, 'Resource-link field ID');
                 }
@@ -128,14 +133,16 @@ final class RecordSearchService
         $targets = $this->search(new SearchRequest($targetQuery, array('limit'=>10000)))->ids;
         $allowed = array_fill_keys($targets, true);
         $relationships = array();
-        if($relation){
-            $relationshipQuery[] = array('ids'=>$this->uniqueIds(array_column($rows, 6)));
+        $relationshipIds = $this->uniqueIds(array_column($rows, 6));
+        if(!empty($relationshipIds)){
+            // Relationship records are subject to the same access rules as endpoints
+            $relationshipQuery[] = array('ids'=>$relationshipIds);
             $relationships = array_fill_keys($this->search(new SearchRequest($relationshipQuery, array('limit'=>10000)))->ids, true);
         }
         $nodes = array_fill_keys($seeds, true); $edges = array(); $returned = array();
         foreach($rows as $row){
             list($parent, $child, $source, $target, $field, $term, $relationId) = array_map('intval', $row);
-            if(!isset($allowed[$child]) || ($relation && !isset($relationships[$relationId]))) continue;
+            if(!isset($allowed[$child]) || ($relationId > 0 && !isset($relationships[$relationId]))) continue;
             $id = $source.':'.$target.':'.$field.':'.$term;
             if(isset($edges[$id])) continue;
             if((!isset($nodes[$child]) && count($nodes)>=$maxNodes) || count($edges)>=$maxEdges){ $truncated = true; continue; }
@@ -217,6 +224,13 @@ final class RecordSearchService
             'offset'=>$request->offset,
             'sort'=>$request->valueSort
         );
+        if(!empty($request->valueVia)){
+            // the field is in linked records: count the main records that reach each value
+            $roots = $this->evaluateGroup($query, null, 'all', $context, 0);
+            $via = $this->builder->normalize($request->valueVia);
+            $result = $counter->countThroughLinks($this->linkedPathTargets($roots, $via, $context), $context, $field, $options);
+            return array('field'=>$field['field'], 'total'=>$result['total'], 'values'=>$result['values']);
+        }
         $result = $this->builder->supportsSqlExecution($query)
             ? $counter->countForQuery($query, $context, $field, $options)
             : $counter->countForIds($this->evaluateGroup($query, null, 'all', $context, 0), $context, $field, $options);
@@ -350,7 +364,7 @@ final class RecordSearchService
         if(!is_array($value) || $this->isIdList($value)){ return false; }
         return in_array($base, array(
             'lt','linked_to','linkedto','lf','linked_from','linkedfrom',
-            'rt','related_to','relatedto','rf','related_from','relatedfrom','related'
+            'rt','related_to','relatedto','rf','related_from','relatedfrom','related','links','connected'
         ), true);
     }
 
@@ -397,8 +411,13 @@ final class RecordSearchService
             if($this->isComplexPredicate($predicate)){ $complex[] = $predicate; }
             else{ $flat[] = $predicate; }
         }
+        $seed = empty($flat) && $candidateIds === null
+            ? $this->traversalParentCandidates($complex, $context, $depth) : null;
         if(!empty($flat)){
             $current = $this->executeFlatSet($flat, $candidateIds, $context);
+        }elseif($seed !== null){
+            // child-first: only records at the far end of a matching edge can match
+            $current = empty($seed) ? array() : $this->executeFlatSet(array(array('ids'=>$seed)), null, $context);
         }elseif($candidateIds === null){
             $current = $this->executeFlatSet(array(array('_all'=>true)), null, $context);
         }else{
@@ -424,11 +443,90 @@ final class RecordSearchService
                 $current = $this->filterByRelationship($current, 'from', $suffix, $value, $context, $depth+1);
             }elseif($base === 'related'){
                 $current = $this->filterByRelationship($current, 'both', $suffix, $value, $context, $depth+1);
+            }elseif($base === 'links'){
+                // resource links in either direction: lt OR lf
+                $current = $this->edgeParents($current,
+                    $this->matchingLinkEdges($current, $suffix, $value, $context, $depth+1));
+            }elseif($base === 'connected'){
+                // resource links or relationships, either direction
+                $current = $this->edgeParents($current, array_merge(
+                    $this->matchingLinkEdges($current, '', $value, $context, $depth+1),
+                    $this->matchingRelationshipEdges($current, 'both', '', $value, $context, $depth+1)
+                ));
             }else{
                 throw new UnsupportedQueryException('Predicate is not supported by Phase 3: '.$key);
             }
         }
         return $current;
+    }
+
+    /**
+     * Safety net for traversals that stay chunked: with no other constraint the parent
+     * set would be every record. Read the edges from the child side instead and return
+     * their parent ends - a superset the ordinary traversal then filters. Null when no
+     * traversal can seed the set, it has an exists modifier, or the set is too large to
+     * pass as one ID list (MAX_PRECOMPUTED_CANDIDATES).
+     */
+    private function traversalParentCandidates(array $complex, array $context, int $depth): ?array
+    {
+        $passes = array(
+            'lt'=>array(array(false,'to')), 'linked_to'=>array(array(false,'to')), 'linkedto'=>array(array(false,'to')),
+            'lf'=>array(array(false,'from')), 'linked_from'=>array(array(false,'from')), 'linkedfrom'=>array(array(false,'from')),
+            'rt'=>array(array(true,'to')), 'related_to'=>array(array(true,'to')), 'relatedto'=>array(array(true,'to')),
+            'rf'=>array(array(true,'from')), 'related_from'=>array(array(true,'from')), 'relatedfrom'=>array(array(true,'from')),
+            'links'=>array(array(false,'to'), array(false,'from')),
+            'related'=>array(array(true,'to'), array(true,'from')),
+            'connected'=>array(array(false,'to'), array(false,'from'), array(true,'to'), array(true,'from'))
+        );
+        foreach($complex as $predicate){
+            $key = (string)array_keys($predicate)[0];
+            list($base, $suffix) = $this->predicateParts($key);
+            if(!isset($passes[$base])){ continue; }
+            $isRelation = in_array($base, array_merge(self::RELATION_TO, self::RELATION_FROM, array('related')), true);
+            $childQuery = $isRelation
+                ? $this->splitRelationshipValue($predicate[$key])[0]
+                : $this->normaliseLinkedValue($predicate[$key]);
+            $constrained = false;
+            foreach($childQuery as $item){
+                list($childBase) = $this->predicateParts((string)array_keys($item)[0]);
+                if($childBase === 'exists'){ return null; }
+                if($childBase !== '_all'){ $constrained = true; }
+            }
+            $children = null;
+            if($constrained){
+                array_unshift($childQuery, array('_all'=>true));
+                $children = $this->evaluateGroup($childQuery, null, 'all', $context, $depth+1);
+                if(empty($children)){ return array(); }
+            }
+            // a field suffix narrows pointer edges; relationship suffixes are left to the traversal
+            $fieldId = (!$isRelation && $base !== 'connected') ? $this->positiveSuffix($suffix, 'Resource-link field ID') : null;
+            $parents = array();
+            foreach($passes[$base] as list($relation, $direction)){
+                $parentColumn = $direction === 'to' ? 'rl_SourceID' : 'rl_TargetID';
+                $childColumn = $direction === 'to' ? 'rl_TargetID' : 'rl_SourceID';
+                $conditions = array('rl_RelationID IS '.($relation ? 'NOT NULL' : 'NULL'));
+                $types = ''; $values = array();
+                if($fieldId !== null && !$relation){
+                    $conditions[] = 'rl_DetailTypeID=?'; $types .= 'i'; $values[] = $fieldId;
+                }
+                foreach($children === null ? array(null) : array_chunk($children, self::SQL_CHUNK_SIZE) as $chunk){
+                    $where = $conditions; $chunkTypes = $types; $chunkValues = $values;
+                    if($chunk !== null){
+                        $where[] = $childColumn.' IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
+                        $chunkTypes .= str_repeat('i', count($chunk));
+                        $chunkValues = array_merge($chunkValues, $chunk);
+                    }
+                    $sql = 'SELECT DISTINCT '.$parentColumn.' FROM recLinks WHERE '.implode(' AND ', $where);
+                    foreach($this->executor->executeRows($sql, $chunkTypes, $chunkValues) as $row){
+                        $parents[intval($row[0])] = true;
+                        if(count($parents) > self::MAX_PRECOMPUTED_CANDIDATES){ return null; }
+                    }
+                }
+            }
+            unset($parents[0]);
+            return array_keys($parents);
+        }
+        return null;
     }
 
     /** Run a flat query, optionally restricted to an ordered candidate set. */
@@ -459,6 +557,22 @@ final class RecordSearchService
         array $context,
         int $depth
     ): array {
+        return $this->edgeParents($parents,
+            $this->matchingResourceEdges($parents, $direction, $fieldSuffix, $value, $context, $depth));
+    }
+
+    /**
+     * [parent, child] resource-link edges whose child matches the linked sub-query
+     * (the search's own semantics; also used to walk a facet's link path).
+     */
+    private function matchingResourceEdges(
+        array $parents,
+        string $direction,
+        string $fieldSuffix,
+        $value,
+        array $context,
+        int $depth
+    ): array {
         $fieldId = $this->positiveSuffix($fieldSuffix, 'Resource-link field ID');
         $edges = $this->loadResourceEdges($parents, $direction, $fieldId);
         if(empty($edges)){ return array(); }
@@ -469,7 +583,24 @@ final class RecordSearchService
             $this->uniqueIds(array_column($edges, 1)),
             'all', $context, $depth
         );
-        return $this->parentsForMatchingEdges($parents, $edges, $matchingChildren);
+        return $this->edgesToChildren($edges, $matchingChildren);
+    }
+
+    /**
+     * [parent, child] resource-link edges in both directions (`links`): the parent points
+     * to the child (lt) or the child points to the parent (lf), the child matching the sub-query.
+     */
+    private function matchingLinkEdges(
+        array $parents,
+        string $fieldSuffix,
+        $value,
+        array $context,
+        int $depth
+    ): array {
+        return array_merge(
+            $this->matchingResourceEdges($parents, 'to', $fieldSuffix, $value, $context, $depth),
+            $this->matchingResourceEdges($parents, 'from', $fieldSuffix, $value, $context, $depth)
+        );
     }
 
     /** Return [parent ID, child ID] direct-resource edges. */
@@ -503,6 +634,22 @@ final class RecordSearchService
 
     /** Traverse relationship edges, endpoint queries, type filters, and Relationship records. */
     private function filterByRelationship(
+        array $parents,
+        string $direction,
+        string $suffix,
+        $value,
+        array $context,
+        int $depth
+    ): array {
+        return $this->edgeParents($parents,
+            $this->matchingRelationshipEdges($parents, $direction, $suffix, $value, $context, $depth));
+    }
+
+    /**
+     * [parent, child, Relationship record, type] edges whose Relationship record and
+     * endpoint match (the search's own semantics; also used to walk a facet's link path).
+     */
+    private function matchingRelationshipEdges(
         array $parents,
         string $direction,
         string $suffix,
@@ -569,7 +716,7 @@ final class RecordSearchService
             $this->uniqueIds(array_column($edges, 1)),
             'all', $context, $depth
         );
-        return $this->parentsForMatchingEdges($parents, $edges, $matchingChildren);
+        return $this->edgesToChildren($edges, $matchingChildren);
     }
 
     /** Return [parent, child, Relationship record, relationship type] edges. */
@@ -698,15 +845,81 @@ final class RecordSearchService
 
     private function normaliseLinkedValue($value): array
     {
+        // an empty linked query means any record (in expansion rules: the parent result)
+        if($value === null || $value === array()){ return array(); }
         if(is_array($value) && !$this->isIdList($value)){ return $this->builder->normalize($value); }
         return array(array('ids'=>$this->normalizeIds($value, 'linked record')));
     }
 
     private function parentsForMatchingEdges(array $parents, array $edges, array $matchingChildren): array
     {
-        $childSet = array_fill_keys($matchingChildren, true); $parentSet = array();
-        foreach($edges as $edge){ if(isset($childSet[$edge[1]])){ $parentSet[$edge[0]] = true; } }
+        return $this->edgeParents($parents, $this->edgesToChildren($edges, $matchingChildren));
+    }
+
+    /** Edges whose child is one of the matching children. */
+    private function edgesToChildren(array $edges, array $matchingChildren): array
+    {
+        $childSet = array_fill_keys($matchingChildren, true);
+        return array_values(array_filter($edges, static function($edge) use ($childSet){
+            return isset($childSet[$edge[1]]);
+        }));
+    }
+
+    /** Parents (in their order) that have at least one of the edges. */
+    private function edgeParents(array $parents, array $edges): array
+    {
+        $parentSet = array();
+        foreach($edges as $edge){ $parentSet[$edge[0]] = true; }
         return $this->orderedSubset($parents, $parentSet);
+    }
+
+    /**
+     * Follow a chain of link predicates from each root record: \`via\` lists, from the
+     * outside in, the links of a linked branch (\`{"lt:240":[{"t":"48"}, …other
+     * conditions of that branch]}\`), each step matched like the search matches it.
+     *
+     * @param int[] $rootIds Main records.
+     * @param array $via Link predicates, outer first.
+     * @param array $context Search context.
+     * @return array<int,int[]> Root id → the records reached at the end of the path.
+     */
+    public function linkedPathTargets(array $rootIds, array $via, array $context): array
+    {
+        $reach = array();
+        foreach($this->uniqueIds($rootIds) as $root){ $reach[$root] = array($root); }
+        foreach($via as $step){
+            if(!is_array($step) || count($step) !== 1){
+                throw new QueryValidationException('Each via step must be one link predicate');
+            }
+            $key = (string)array_keys($step)[0];
+            $value = $step[$key];
+            list($base, $suffix) = $this->predicateParts($key);
+            $parents = $this->uniqueIds(array_merge(array(), ...array_values($reach)));
+            if(empty($parents)){ return array_fill_keys(array_keys($reach), array()); }
+            if(in_array($base, self::RESOURCE_TO, true)){
+                $edges = $this->matchingResourceEdges($parents, 'to', $suffix, $value, $context, 1);
+            }elseif(in_array($base, self::RESOURCE_FROM, true)){
+                $edges = $this->matchingResourceEdges($parents, 'from', $suffix, $value, $context, 1);
+            }elseif(in_array($base, self::RELATION_TO, true)){
+                $edges = $this->matchingRelationshipEdges($parents, 'to', $suffix, $value, $context, 1);
+            }elseif(in_array($base, self::RELATION_FROM, true)){
+                $edges = $this->matchingRelationshipEdges($parents, 'from', $suffix, $value, $context, 1);
+            }elseif($base === 'related'){
+                $edges = $this->matchingRelationshipEdges($parents, 'both', $suffix, $value, $context, 1);
+            }elseif($base === 'links'){
+                $edges = $this->matchingLinkEdges($parents, $suffix, $value, $context, 1);
+            }else{
+                throw new QueryValidationException('A via step must be a link predicate (lt, lf, rt, rf, related, links): '.$key);
+            }
+            $children = array();
+            foreach($edges as $edge){ $children[$edge[0]][$edge[1]] = true; }
+            foreach($reach as $root=>$ids){
+                $next = array();
+                foreach($ids as $id){ foreach($children[$id] ?? array() as $child=>$unused){ $next[$child] = true; } }
+                $reach[$root] = array_keys($next);
+            }
+        }
+        return $reach;
     }
 
     private function uniqueRelationshipEdges(array $edges): array
@@ -724,7 +937,7 @@ final class RecordSearchService
         $key = (string)array_keys($predicate)[0];
         list($base) = $this->predicateParts($key);
         return in_array($base, array_merge(
-            array('all','any','not','related','r','relf','links'),
+            array('all','any','not','related','r','relf','links','connected'),
             self::RESOURCE_TO, self::RESOURCE_FROM, self::RELATION_TO, self::RELATION_FROM
         ), true);
     }

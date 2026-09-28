@@ -123,6 +123,9 @@ final class RecordQueryController
             $options['field'] = $params['field'] ?? null;
             $options['text'] = $params['text'] ?? '';
             $options['valueSort'] = $params['sort'] ?? 'count';
+            // the field is in linked records reached through these link predicates
+            $via = $this->structuredParameter($params['via'] ?? null);
+            if(is_array($via) && !empty($via)){ $options['via'] = $via; }
             return new SearchRequest($normalized, $options);
         }
         if(array_key_exists('sort', $params)){

@@ -96,7 +96,7 @@ final class SystemQueryService
                 'details'=>$this->fieldMetadata($selection['fields'], $schema)
             )
         );
-        if($type === 'user' || $type === 'group'){
+        if($type === 'user' || $type === 'group' || $type === 'tag'){
             // lets clients tell which of the listed users is the caller, and
             // whether the list is complete (administrator) or restricted
             $meta['currentUser'] = array(
@@ -133,7 +133,7 @@ final class SystemQueryService
             $field = $headerAliases[$field] ?? $field;
             if($field === 'type'){ $headers['type'] = true; }
             elseif(isset($schema['headers'][$field])){ $headers[$field] = true; }
-            elseif(isset($schema['fields'][$field])){ $fields[$field] = true; }
+            elseif(isset($schema['fields'][$field]) && empty($schema['fields'][$field]['queryOnly'])){ $fields[$field] = true; }
             elseif($field !== ''){ throw new QueryValidationException('Unknown '.$schema['type'].' output field: '.$field); }
         }
         $outputs = array('rec_ID','rec_RecTypeID','rec_Title');
@@ -345,7 +345,21 @@ final class SystemQueryService
     {
         if($name === 'filtertype'){ return $this->classifyLegacySavedSearch($source); }
         if($name === 'role'){ return $this->currentUserRoles()[intval($source)] ?? 'none'; }
+        if($name === 'ownername'){ return $this->ownerName(intval($source)); }
         return null;
+    }
+
+    /** @var array<int,string> Names of users/groups already looked up. */
+    private array $ownerNames = array();
+
+    /** Name of a user or group (tag owner), looked up once per ID. */
+    private function ownerName(int $id): string
+    {
+        if(!array_key_exists($id, $this->ownerNames)){
+            $rows = $this->database->fetchAll('SELECT ugr_Name FROM sysUGrps WHERE ugr_ID=?', array($id));
+            $this->ownerNames[$id] = (string)($rows[0]['ugr_Name'] ?? '');
+        }
+        return $this->ownerNames[$id];
     }
 
     /** Load the current user's group roles (admin/member) from sysUsrGrpLinks. */

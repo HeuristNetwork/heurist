@@ -140,6 +140,7 @@ class HeuristModuleRecordView extends HeuristModuleViewer {
             updateSettings: function(settings) { return that._updateSettings(settings); },
             updateState: function(state) { return that._updateState(state); },
             editRecord: function(recordId) { return that._openRecordEdit(recordId); },
+            canEditRecords: function() { return that._canEditRecords(); },
             viewRecord: function(recordId) { return that._openRecordView(recordId); },
             addRecord: function(recordTypeId) { return that._addRecordEdit(recordTypeId); },
             // Used only when the child explicitly navigates to a linked

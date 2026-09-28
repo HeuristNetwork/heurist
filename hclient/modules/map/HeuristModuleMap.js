@@ -159,6 +159,7 @@ class HeuristModuleMap extends HeuristModuleRecordset {
             editRecord: function(recordId) {
                 return that._openRecordEdit(recordId);
             },
+            canEditRecords: function() { return that._canEditRecords(); },
             viewRecord: function(recordId) {
                 return that._openRecordView(recordId);
             },
