@@ -37,8 +37,8 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     // default options
     options: {
 
-        height: 800,
-        width:  875,
+        height: 850,
+        width:  1100,
         modal:  true,
         title:  'Record Type Title Mask Edit',
         default_palette_class: 'ui-heurist-design', 
@@ -102,10 +102,12 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         this._loadRecordTypeTreeView();
         
         //init buttons
-        let btn = this.element.find('#btnInsertField').button();
+        let btn = this.element.find('#btnInsertField').button()
+            .addClass('ui-heurist-btn-header1 ui-button-action');
         this._on(btn, {click: this._doInsert});
 
-        btn = this.element.find('#btnTestMask').button();
+        btn = this.element.find('#btnTestMask').button()
+            .addClass('ui-heurist-btn-header1 ui-button-action');
         this._on(btn, {click: this._doTest});
 
         this._on(this.element.find('#selectAll'), {click: 

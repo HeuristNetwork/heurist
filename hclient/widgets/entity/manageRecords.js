@@ -3651,39 +3651,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 if(!hasField){ // open modify structure, if able when there are no fields
                     this.editRecordType(true);
-                }else if(window.hWin.HEURIST4.util.isnull(this.options.edit_structure) && 
-                         window.hWin.HEURIST4.util.isnull(this.options.rts_editor))
-                { // check for default title mask
-
-                    let title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
-                    let match_result = title_mask?title_mask.match(/\[([^\]]+)\]/g):null; // check for fields in title mask
-
-                    if(title_mask == 'record [ID]' || !match_result){
-
-                        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                            'You have not yet selected the fields used to create the <b>Constructed title</b><br><br>'
-
-                            +'The <b>Constructed title</b> is like the reference you might find in the bibliography at the end<br>'
-                            +'it uses important fields to uniquely identify and summarise the bibliographic reference, or in this case<br>'
-                            +'the database record in question.<br><br>'
-
-                            +'<b>Constructed titles</b> are used to represent records when they are listed in search results<br>'
-                            +'and as the visible representation of the record referenced in a pointer field or relationship marker.<br>'
-                            +'They can also be used in reports and visualisations, searches, sorting or in the constructed title<br>'
-                            +'of connected records.<br><br>'
-
-                            +'We strongly recommend putting a little thought into this, as well-designed constructed titles can<br>'
-                            +'greatly improve the clarity and ease of use of the database.<br>'
-                            +'We recommend you read the <a href="'
-                                +window.hWin.HAPI4.sysinfo.referenceServerURL
-                                +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
-                                +'&website=39&pageid=773" target="_blank">help for Constructed titles</a>', 
-                            { 'Proceed': function(){ that.editRecordTypeTitle(); $dlg.dialog('close'); } },
-                            {title:'Constructed title not yet configured', yes:'Proceed'},
-                            {default_palette_class: 'ui-heurist-design'});
-
-                        return;
-                    }
                 }
             }
 
@@ -4141,6 +4108,41 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
         
         if(fields==null) return; //validation failed
+
+        // Prompt only when saving. Opening a record must not interrupt editing.
+        if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false &&
+           window.hWin.HEURIST4.util.isnull(this.options.edit_structure) &&
+           window.hWin.HEURIST4.util.isnull(this.options.rts_editor)){
+            let title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
+            let match_result = title_mask?title_mask.match(/\[([^\]]+)\]/g):null; // check for fields in title mask
+
+            if(title_mask == 'record [ID]' || !match_result){
+
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    'You have not yet selected the fields used to create the <b>Constructed title</b><br><br>'
+
+                    +'The <b>Constructed title</b> is like the reference you might find in the bibliography at the end<br>'
+                    +'it uses important fields to uniquely identify and summarise the bibliographic reference, or in this case<br>'
+                    +'the database record in question.<br><br>'
+
+                    +'<b>Constructed titles</b> are used to represent records when they are listed in search results<br>'
+                    +'and as the visible representation of the record referenced in a pointer field or relationship marker.<br>'
+                    +'They can also be used in reports and visualisations, searches, sorting or in the constructed title<br>'
+                    +'of connected records.<br><br>'
+
+                    +'We strongly recommend putting a little thought into this, as well-designed constructed titles can<br>'
+                    +'greatly improve the clarity and ease of use of the database.<br>'
+                    +'We recommend you read the <a href="'
+                        +window.hWin.HAPI4.sysinfo.referenceServerURL
+                        +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
+                        +'&website=39&pageid=773" target="_blank">help for Constructed titles</a>',
+                    { 'Proceed': function(){ that.editRecordTypeTitle(); $dlg.dialog('close'); } },
+                    {title:'Constructed title not yet configured', yes:'Proceed'},
+                    {default_palette_class: 'ui-heurist-design'});
+
+                return;
+            }
+        }
 
         //assign new set of tags to record
         if(Array.isArray(that._updated_tags_selection)){
@@ -8116,4 +8118,4 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         this.options.rts_editor = null;
         this.reloadEditForm( true );
     }
-});        
+});

@@ -16,7 +16,7 @@
 -->
 <div class="ent_wrapper">
     
-        <div style="position:absolute; top:0px;bottom:0px;left:0px;width:202px;">
+        <div style="position:absolute; top:0px;bottom:0px;left:0px;width:280px;">
         
             <select id="sel_record_scope" style="display:none"></select>         
             
@@ -29,25 +29,42 @@
                 <label id="selectAll_container" style="font-size: 11px;"><input type="checkbox" id="selectAll">Select All Visible checkboxes</label>
             </div>
 
-            <div style="position:absolute;top:7em;bottom:0px;left:0px;width:220px;outline: none;margin-top:-8px;overflow:auto">
+            <div style="position:absolute;top:7em;bottom:0px;left:0px;right:0px;outline:none;margin-top:-8px;overflow:auto">
                 <div id="rectype_tree" class="rtt-tree tree-facets"></div>
             </div>
         </div>
             
-        <div id="formContainer" style="position:absolute;top:0px;bottom:0px;left:220px;right:5px;overflow-y:auto;overflow-x: hidden">
-                <div style="padding:10px;text-align:left;padding-bottom:0px;" class="heurist-helper">
+        <div id="formContainer" style="position:absolute;top:0px;bottom:0px;left:300px;right:5px;overflow-y:auto;overflow-x:hidden">
+            <div style="padding:20px 10px 12px;text-align:left;">
+                <h3 style="margin:4px 0 14px;font-size:1.2em;font-weight:bold;">Title mask</h3>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:1.1em;">
+                    <span>Select fields on the left, then</span>
+                    <button id="btnInsertField" type="button" style="white-space:nowrap;">INSERT BELOW <span aria-hidden="true" style="font-size:1.35em;vertical-align:middle;margin-left:8px;">&#x2b07;</span></button>
+                </div>
+                <textarea id="rty_TitleMask" rows="10" style="box-sizing:border-box;font-size:1em;width:100%;max-width:740px;height:178px;"></textarea>
+                <div class="heurist-helper2" style="margin:10px 0 0;line-height:1.35;">
+                    For legibility we strongly advise splitting field specifications onto separate lines (which will be combined in the result)
+                </div>
+                <div style="margin:10px 0 24px;">
+                    Use <u>underline</u>, <b>bold</b>, <i>italics</i> liberally to promote readability, and limit length of long text fields eg. {50}
+                </div>
+                <h3 style="margin:0 0 12px;font-size:1.2em;font-weight:bold;">Test mask</h3>
+                <select id="listRecords" style="width:500px;max-width:100%;"><option>select from records of this type (if any exist) ...</option></select>
+                <div style="margin:14px 0 0;"><button id="btnTestMask" type="button">TEST</button></div>
+                <div id="testResult" title="Test result will appear here" style="padding:10px 0;min-height:36px;text-align:left"></div>
+            </div>
+            <hr style="margin:1px 10px 0;">
+                <div style="padding:16px 8px 20px 8px;text-align:left;line-height:1.25;" class="heurist-helper">
 
-                    The title mask builds a constructed/composite title from fields in the record.
-                    <br>The constructed value is used as the extended title displayed in search results and other lists.
-                    <br>It can also be used in the construction of other titles eg. parent records or relationships.
-                    <br><u>It is well worth investing time and thought</u> in defining good constructed titles.
+                    The title mask builds a constructed/composite title from fields in the record. The constructed value is used as the
+                    <br>extended title displayed in search results and other lists. It can also be used in the construction of other titles
+                    <br> eg. parent records or relationships. <u>It is well worth investing time and thought</u> in defining good constructed titles.
                     
                     <p><u>Field values</u> are inserted into the title mask by enclosing the field name in [  ]
                     <br>e.g. <b>[Title], pp. [Start_Page]-[End_Page]</b> might generate: <b>"Alice in Wonderland, pp. 37-39" </b>
                     </p>
                     
                     <p><u>Inserting fields</u>: The element names in square brackets MUST match field names for this record type.
-                    <br>Use the tree view of fields on the left to select fields to insert
                     <br>To insert a literal square-bracket, use two consecutive square-brackets: [[ or ]] 
                     </p>
 
@@ -61,50 +78,6 @@
                     </p>
                     <p><u>We strongly recommend putting each field on a separate line</u> for readability (line breaks in the title mask are ignored)
                     </p> 
-                    <p>You may use <u>underline</u>, <b>bold</b>, <i>italics</i>, and other simple html in the title.
-                    </p>
                 </div>
-
-                <hr>
-
-                <div style="text-align:left; padding-top:20px;padding-bottom:1px;padding-left: 20px;">
-                    <b>Build Mask:</b> &nbsp;&nbsp;&nbsp; <button id="btnInsertField" style="width:60px;">Insert fields</button>
-                    &nbsp;&nbsp;<span class="heurist-helper2">Select fields in tree and click button to insert in mask at cursor position</span>
-                    <br>
-                    <span class="heurist-helper2" style="display: inline-block;padding:10px 0px;">
-                    For legibility we strongly advise splitting field specifications onto separate lines (which will be combined in the result)</span>
-                    <br>Use <u>underline</u>, <b>bold</b>, <i>italics</i> liberally to promote readability, and limit length of long text fields eg. {50}
-                    <br>
-                    <textarea cols="550" id="rty_TitleMask" rows="10" style="font-size:1em;width:550px;"></textarea><br>
-                    <br>
-                </div>
-
-                <!-- Debug section
-                <div style="text-align:left; padding-top:10px; padding-left: 10px;display: block;" >
-                    Canonical Mask:&nbsp;
-
-                    <input maxlength="500" id="rty_CanonincalMask" style="width:350;"/> &nbsp;&nbsp;
-
-                    <button style="width:60px;" onclick="window.editRectypeTitle.doCanonical(2)">make canonic</button>
-
-                    <button style="width:60px;" onclick="window.editRectypeTitle.doCanonical(3)">make text</button>
-
-                    <br>&nbsp;<br>&nbsp;<br>
-                </div>
-                -->
-                
-
-                <hr>
-
-                <div style="padding-top:10px;padding-bottom:10px;padding-left: 20px;text-align:left">
-                    <b>Test mask</b> <br>&nbsp;<br>
-
-                    <select id="listRecords" style="width:300px;"><option>select from records of this type (if any exist) ...</option></select>
-
-                    <br>&nbsp;<br><button id="btnTestMask" style="width:40px;">Test</button>
-
-                    <div id="testResult" title="Test result will appear here"  style="padding:5px; padding-left:40px;width: 400px; height: 10px;text-align:left"></div>
-                </div>
-
         </div>
 </div>
