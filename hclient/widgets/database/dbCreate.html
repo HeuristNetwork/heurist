@@ -12,7 +12,7 @@
 * @since        6.0
 */
 -->
-<div id="div_header" class="ent_wrapper" style="margin-left:40px;width:640px;font-size:0.95em">
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;max-width:900px;right:20px;font-size:0.95em;overflow-y:auto">
     <div class="heurist-helper1" style="margin-top:50px">       
         As creator of a database you become the database owner and can manage the database and other
         <br>database users, including creation of workgroups and modification of database structure.
@@ -32,6 +32,12 @@
         <div class="heurist-helper2">
             The password set by your system administrator for new database creation
         </div>
+    </div>
+
+    <div id="new_database_templates" style="margin:24px 0;">
+        <h3>Choose a structure template</h3>
+        <p class="heurist-helper1">The new database will contain the selected database's entity types, fields and vocabularies. Records are not copied.</p>
+        <div id="database_template_list" aria-live="polite">Loading curated templates…</div>
     </div>
 
     <div class="entry-box">

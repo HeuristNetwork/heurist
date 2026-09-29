@@ -589,6 +589,99 @@ class DbUtils {
     }
 
     /**
+     * Create with the complete definitions of a curated registered database.
+     * ID 0 preserves the offline/bundled creation path. The browser supplies only
+     * an ID: resolve its URL on the server, and download and validate its native
+     * definitions export before creating any database or folders.
+     */
+    /** Set only for template failures where retrying with bundled definitions is safe. */
+    public static $creationTemplateFallbackAvailable = false;
+
+    public static function databaseCreateFromRegisteredTemplate($database_name, &$user_record, $template_id=0){
+        self::initialize();
+        self::$creationTemplateFallbackAvailable = false;
+        global $experimental;
+        if(!is_numeric($template_id) || (string)(int)$template_id !== (string)$template_id
+            || (int)$template_id < 0 || (int)$template_id >= 1000){
+            self::$system->addError(HEURIST_INVALID_REQUEST, 'Select a curated template with a registered database ID below 1000.');
+            return false;
+        }
+        $template_id = (int)$template_id;
+        if($template_id === 0){
+            return self::databaseCreateFull($database_name, $user_record);
+        }
+        if($template_id !== 2 && (!isset($experimental) || $experimental !== true)){
+            self::$system->addError(HEURIST_ACTION_BLOCKED, HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE);
+            return false;
+        }
+        $url = DbRegis::registrationGet(array('dbID'=>$template_id));
+        $parts = $url ? parse_url($url) : false;
+        $query = array();
+        if($parts && isset($parts['query'])) parse_str($parts['query'], $query);
+        if(!$parts || !in_array($parts['scheme'] ?? '', array('http','https'), true)
+            || empty($parts['host']) || empty($query['db'])){
+            self::$creationTemplateFallbackAvailable = true;
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Unable to resolve the selected template database. Please retry or use the default Core Definitions.');
+            return false;
+        }
+        // Registry URLs normally end in /?db=...; also accept index.php and
+        // standalone menu URLs, resolving relative to their code instance folder.
+        $path = $parts['path'] ?? '/';
+        if(substr($path, -1) !== '/') $path = substr($path, 0, strrpos($path, '/') + 1);
+        $base = $parts['scheme'].'://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '').$path;
+        $export_url = $base.'hserv/structure/export/getDBStructureAsSQL.php?'
+            .http_build_query(array('db'=>$query['db'], 'plain'=>1));
+        $data = loadRemoteURLContent($export_url);
+        // Reject error pages and incomplete downloads. The existing importer
+        // consumes these same paired markers, in its fixed table order.
+        $starts = is_string($data) ? substr_count($data, '>>StartData>>') : 0;
+        if($starts < 15 || $starts !== substr_count((string)$data, '>>EndData>>')
+            || strpos((string)$data, '>>EndOfFile>>') === false){
+            self::$creationTemplateFallbackAvailable = true;
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Unable to download the complete structure of the selected template. No new database has been created.');
+            return false;
+        }
+        $file = tempnam(sys_get_temp_dir(), 'heurist_template_');
+        if($file === false){
+            self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to prepare the selected database template.');
+            return false;
+        }
+        try{
+            if(file_put_contents($file, $data) !== strlen($data)){
+                self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to save the downloaded database template.');
+                return false;
+            }
+            // databaseCreateFull rolls back the new database if import fails.
+            $importFailed = false;
+            $result = self::databaseCreateFull($database_name, $user_record, $file, $importFailed);
+            self::$creationTemplateFallbackAvailable = $importFailed;
+            if($result === false) return false;
+            // IDs are retained by the native import. Replace the bundled type
+            // icons, which otherwise could depict unrelated types with these IDs.
+            list(, $new_name) = mysql__get_names($database_name);
+            $folder = self::$system->getFileStoreRootFolder().$new_name.'/entity/defRecTypes/';
+            $ids = mysql__select_list2(self::$mysqli, 'SELECT rty_ID FROM defRecTypes WHERE rty_ID>0');
+            $failed = array();
+            foreach($ids as $id){
+                foreach(array('icon'=>'icon', 'thumbnail'=>'thumb') as $subfolder=>$version){
+                    $target = $folder.$subfolder.'/'.$id.'.png';
+                    if(file_exists($target)) unlink($target);
+                    $icon = loadRemoteURLContent($base.'hserv/controller/fileGet.php?'
+                        .http_build_query(array('db'=>$query['db'], 'id'=>$id, 'version'=>$version, 'def'=>2)));
+                    if(!is_string($icon) || @getimagesizefromstring($icon) === false
+                        || file_put_contents($target, $icon) === false){
+                        $failed[$id] = true;
+                    }
+                }
+            }
+            if(count($failed)) $result[] = 'The structure was imported, but icons could not be copied for '.count($failed).' entity types.';
+            return $result;
+        }finally{
+            unlink($file);
+        }
+    }
+
+    /**
      * Creates a new Heurist database with file folders, initializes it with a given user, and makes it ready to use.
      *
      * @param string $database_name Target database name.
@@ -597,7 +690,9 @@ class DbUtils {
      *                                      Defaults to HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt".
      * @return array|false An array of warning messages on success (can be empty), or false on critical failure.
      */
-    public static function databaseCreateFull($database_name, &$user_record, $templateFileName=null){
+    public static function databaseCreateFull($database_name, &$user_record, $templateFileName=null, &$templateImportFailed=null){
+
+            $templateImportFailed = false;
 
             self::initialize();
             $mysqli = self::$mysqli;
@@ -653,7 +748,8 @@ class DbUtils {
             if(!self::importDefinitionsFromTemplate($database_name_full, $templateFileName)){
                 //rollback
                 folderDelete($database_folder);
-                mysql__drop_database( $mysqli, $database_name_full );
+                $dropped = mysql__drop_database( $mysqli, $database_name_full );
+                $templateImportFailed = $dropped && !is_dir($database_folder);
                 return false;
             }
 

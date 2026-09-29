@@ -185,7 +185,13 @@ class ImportDefinitions {
         'defFileExtToMimetype',
         'defTranslations',
         'usrSavedSearches',
-        'sysDashboard' // added 12/11/18
+        'sysDashboard', // added 12/11/18
+        // These follow the dashboard in the current native structure export.
+        // Import them as well so template fields retain their calculation,
+        // crosswalk and URL-prefix definitions. Older files may end earlier.
+        'defCalcFunctions',
+        'defCrosswalk',
+        'defURLPrefixes'
         );
 
         $splittedData = explode(START_TOKEN, $data);
