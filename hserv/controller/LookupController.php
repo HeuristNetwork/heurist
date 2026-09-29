@@ -110,8 +110,6 @@ class LookupController{
 
         'orcid' => 'https://orcid.org/{__ORCID__}/record',
 
-        'countryISO2ToName' => 'https://api.worldbank.org/v2/country/{__ISO2__}?format=json',
-
         'isni' => 'https://isni.oclc.org/sru/DB=1.2/',
         'isni_recdump' => 'https://isni.oclc.org/sru/DB=1.2/'
     ];
@@ -164,10 +162,6 @@ class LookupController{
             'id' => '/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/'
         ],
 
-        'countryISO2ToName' => [
-            'iso2' => self::ALPHANUMERIC
-        ],
-
         'isni' => [
             'query' => self::ALPHANUMERIC,
             'maximumRecords' => self::NUMERIC,
@@ -178,9 +172,6 @@ class LookupController{
     private const LOOKUP_NO_QUERY = [
         'orcid' => [
             'id' => '{__ORCID__}'
-        ],
-        'countryISO2ToName' => [
-            'iso2' => '{__ISO2__}'
         ]
     ];
 
