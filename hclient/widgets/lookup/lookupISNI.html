@@ -1,0 +1,205 @@
+<!--
+/**
+* lookupISNI.html - HTML structure for ISNI Records Lookup.
+*
+* @fileOverview
+* This HTML file defines the layout and form elements for the ISNI lookup widget.
+*
+* @project     Heurist academic knowledge management system
+* @package     hclient\widgets\lookup
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Brandon McKay <blmckay13@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       6.0
+*/
+-->
+<div id="tabs-cont">
+
+    <ul>
+        <li><a href="#frm-search">Search</a></li>
+        <li><a href="#frm-results">Results</a></li>
+        <li><a href="#frm-settings">Options</a></li>
+    </ul>
+
+    <!-- Search Container -->
+    <div id="frm-search" style="overflow-y: auto; padding: 1em 0 !important;">
+
+        <fieldset style="display:inline-block;"><legend style="display:none"></legend>
+
+            <!-- Any -->
+            <div class="isni_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_any">Any Phrase:</label>
+                </div>
+                <select id="inpt_any_link">
+                    <option value="=">=</option>
+                    <option value="exact">exact</option>
+                    <option value="any">any</option>
+                    <option value="all">all</option>
+                    <option value="<">&lt;</option>
+                    <option value=">">&gt;</option>
+                    <option value="<=">&lt;=</option>
+                    <option value=">=">&gt;=</option>
+                    <option value="<>">NOT</option>
+                </select>
+                <input id="inpt_any" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em;"/>
+                <select id="inpt_any_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                    <option value="not">NOT</option>
+                </select>
+
+            </div>
+
+            <div class="isni_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_isni">ISNI:</label>
+                </div>
+                <select id="inpt_isni_link">
+                    <option value="=">=</option>
+                    <option value="exact">exact</option>
+                    <option value="any">any</option>
+                    <option value="all">all</option>
+                    <option value="<">&lt;</option>
+                    <option value=">">&gt;</option>
+                    <option value="<=">&lt;=</option>
+                    <option value=">=">&gt;=</option>
+                    <option value="<>">NOT</option>
+                </select>
+                <input id="inpt_isni" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em;"/>
+                <select id="inpt_isni_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                    <option value="not">NOT</option>
+                </select>
+
+            </div>
+
+            <div class="isni_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_isni">Name:</label>
+                </div>
+                <select id="inpt_name_link">
+                    <option value="=">=</option>
+                    <option value="exact">exact</option>
+                    <option value="any">any</option>
+                    <option value="all">all</option>
+                    <option value="<">&lt;</option>
+                    <option value=">">&gt;</option>
+                    <option value="<=">&lt;=</option>
+                    <option value=">=">&gt;=</option>
+                    <option value="<>">NOT</option>
+                </select>
+                <input id="inpt_name" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em;"/>
+                <select id="inpt_name_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                    <option value="not">NOT</option>
+                </select>
+
+            </div>
+
+            <div class="isni_form_field">
+
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_isni">ORCID ID:</label>
+                </div>
+                <select id="inpt_orcid_link">
+                    <option value="=">=</option>
+                    <option value="exact">exact</option>
+                    <option value="any">any</option>
+                    <option value="all">all</option>
+                    <option value="<">&lt;</option>
+                    <option value=">">&gt;</option>
+                    <option value="<=">&lt;=</option>
+                    <option value=">=">&gt;=</option>
+                    <option value="<>">NOT</option>
+                </select>
+                <input id="inpt_orcid" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em;"/>
+                <select id="inpt_orcid_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                    <option value="not">NOT</option>
+                </select>
+
+            </div>
+
+        </fieldset>
+
+        <div style="display: block; margin: 10px 0 0 10px;" id="btn_container">
+            <button id="btnStartSearch">Search</button>
+
+            <div class="header optional" style="display: inline-block;margin-left: 10px;" id="sort_results_container">
+                <label for="sort_results">Sort by: </label>
+
+                <select id="sort_results">
+                    <option value="none">Default</option>
+                    <option value="relevance">Relevance</option>
+                    <option value="creation">Creation</option>
+                    <option value="title">Title</option>
+                    <option value="creator">Creator</option>
+                </select>
+            </div>
+
+            <div class="header optional" style="display: inline-block;margin-left: 10px;" id="rec_limit_container">
+                <label for="rec_limit">Search for </label>
+
+                <select id="rec_limit">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                    <option value="500">500</option>
+                </select>
+
+                <label for="rec_limit"> records</label>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Result List Container -->
+    <div id="frm-results" style="display: none;">
+        <div id="div_result" class="ent_content_full" style="height: 570px;"></div>
+    </div>
+
+    <!-- Additional settings for role code fields -->
+    <div id="frm-settings" style="display: none;">
+        <div style="padding: 10px 5px;">
+
+            <div style="display: table; margin: 10px 0px;">
+                <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
+                    <label for="dump_record">Retrieve full record: </label>
+                </div>
+
+                <div div class="input-cell" style="margin-left: 15px;">
+                    <input type="checkbox" name="dump_record" checked="checked" style="margin-top: 0;">
+                    <span class="heurist-helper1" style="display: block;">Retrieve the complete ISNI record on selection</span>
+                </div>
+            </div>
+
+            <div style="display: table; margin: 10px 0px;">
+                <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
+                    <label for="rty_flds">Dump record to: </label>
+                </div>
+
+                <div div class="input-cell" style="margin-left: 15px;">
+                    <label><input type="radio" name="dump_field" value="rec_ScratchPad" checked="checked"> Record scratch pad</label>
+                    <label><input type="radio" name="dump_field" value="dty_ID"> Record field (blocktext fields only)</label>
+                    <select id="rty_flds">
+                    </select>
+                    <span class="heurist-helper1" style="display: block;">Where will the record dump be placed</span>
+                </div>
+            </div>
+
+            <button id="save-settings" class="ui-button-action">Save options</button>
+        </div>
+    </div>
+
+</div>

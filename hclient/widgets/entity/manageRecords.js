@@ -6439,6 +6439,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             that.resource_values = []; // list of search values for recpointer fields
             that.relmarker_values = []; // list of search values and term values for relationship marker fields
 
+            const allowedRecDumps = ['bnfLibrary', 'bnfLibraryAut', 'isni'];
+
             if(!window.hWin.HEURIST4.util.isempty(recset['ext_url'])){
                 that.lookup_record_link = {url: recset['ext_url'], type: 'ext'};
             }else if(!window.hWin.HEURIST4.util.isempty(recset['heurist_url'])){
@@ -6451,7 +6453,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 const dt_id = dtyIds[k];
 
-                if(dt_id>0){
+                if(dt_id > 0){
 
                     let newval = recset[dt_id];
                     let type = $Db.dty(dt_id, 'dty_Type');
@@ -6533,68 +6535,94 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         const fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
                         if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
                     } 
-                }else if(dt_id == 'BnF_ID' && cfg.options.dump_record == true){ // retrieve record from BnF and place in record scratch pad
+                }
+                if(allowedRecDumps.includes(cfg.service) && cfg.options.dump_record == true){ // retrieve record from BnF and place in record scratch pad
 
-                    let value = recset['BnF_ID'];
+                    let requestURL = '';
+                    let requestService = '';
+                    if(dt_id == 'BnF_ID'){
 
-                    if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
-                        continue;
+                        let value = recset['BnF_ID'];
+
+                        if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
+                            continue;
+                        }
+
+                        requestURL = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
+                        let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
+
+                        requestURL += encodeURIComponent(fld_name + ' all ' + value) + ')';
+
+                        requestService = 'bnf_recdump';
+                    }else if(dt_id == 'isni'){
+
+                        let value = recset['isni'];
+
+                        if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
+                            continue;
+                        }
+
+                        requestURL = `https://isni.oclc.org/sru/DB=1.2/?version=1.1&operation=searchRetrieve&recordSchema=isni-b&maximumRecords=1&startRecord=1&query=`;
+                        requestURL += encodeURIComponent(`pica.isn = ${value}`);
+
+                        requestService = 'isni_recdump';
                     }
 
-                    let req_url = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
-                    let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
-
-                    req_url += encodeURIComponent(fld_name + ' all ' + value) + ')';
-
-                    let req = {
-                        service: req_url,
-                        serviceType: 'bnf_recdump'
-                    };
-
-                    window.hWin.HAPI4.RecordMgr.lookupService(req, (response) => {
-                        if(window.hWin.HEURIST4.util.isJSON(response)){
-                            response = window.hWin.HEURIST4.util.isJSON(response);
-                            if(response.record != null){
-
-                                let scratchpad_txt = response.record + '\r\n\r\n';
-
-                                let fld_id = cfg.options.dump_field;
-                                if(isNaN(parseInt(fld_id)) || fld_id < 1 || !$Db.rst(that._currentEditRecTypeID, fld_id) || $Db.dty(fld_id, 'dty_Type') != 'blocktext'){
-                                    fld_id = 'rec_ScratchPad';   
-                                }
-                                let $fld = that._editing.getFieldByName(fld_id);
-
-                                if(fld_id == 'rec_ScratchPad'){
-
-                                    if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
-                                        scratchpad_txt += '\r\n\r\n' + $fld.text();
-                                    }
-    
-                                    $fld.editing_input('setValue',[scratchpad_txt]);
-                                    $fld.editing_input('isChanged', true);
-
-                                    that.editFormPopup.layout().open("east"); // expand panel
-                                    
-                                    let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(4));
-                                    if($acc_ele.accordion('instance') != undefined){ // expand accordion
-                                        $acc_ele.accordion('option', 'active', 0);
-                                    }
-                                }else{
-
-                                    let existing_vals = $fld.editing_input('getValues');
-                                    if(existing_vals[0] != ''){
-                                        existing_vals.push([scratchpad_txt]);
-                                    }
-                                    $fld.editing_input('setValue',[scratchpad_txt]);
-                                }
-                            }
-                        }
-                    });
+                    that._dumpExternalRecordIntoField(requestURL, requestService, cfg.options.dump_field);
                 }
             }
 
             that.processTermFields(assigned_fields, {}); // order of operations is: Terms, Files, Record pointers, Relationship markers
         }
+    },
+
+    _dumpExternalRecordIntoField: function(externalURL, serviceType, dumpingToField){
+
+        let that = this;
+        let request = {
+            service: externalURL,
+            serviceType: serviceType
+        };
+
+        window.hWin.HAPI4.RecordMgr.lookupService(request, (response) => {
+            if(window.hWin.HEURIST4.util.isJSON(response)){
+                response = window.hWin.HEURIST4.util.isJSON(response);
+                if(response.record != null){
+
+                    let scratchpad_txt = response.record + '\r\n\r\n';
+
+                    let fld_id = dumpingToField;
+                    if(isNaN(parseInt(fld_id)) || fld_id < 1 || !$Db.rst(that._currentEditRecTypeID, fld_id) || $Db.dty(fld_id, 'dty_Type') != 'blocktext'){
+                        fld_id = 'rec_ScratchPad';   
+                    }
+                    let $fld = that._editing.getFieldByName(fld_id);
+
+                    if(fld_id == 'rec_ScratchPad'){
+
+                        if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
+                            scratchpad_txt += '\r\n\r\n' + $fld.text();
+                        }
+
+                        $fld.editing_input('setValue',[scratchpad_txt]);
+                        $fld.editing_input('isChanged', true);
+
+                        that.editFormPopup.layout().open("east"); // expand panel
+                        
+                        let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(4));
+                        if($acc_ele.accordion('instance') != undefined){ // expand accordion
+                            $acc_ele.accordion('option', 'active', 0);
+                        }
+                    }else{
+
+                        let existing_vals = $fld.editing_input('getValues');
+                        if(existing_vals[0] != ''){
+                            existing_vals.push([scratchpad_txt]);
+                        }
+                        $fld.editing_input('setValue',[scratchpad_txt]);
+                    }
+                }
+            }
+        });
     },
 	
     /**

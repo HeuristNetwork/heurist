@@ -37,6 +37,7 @@ Widget hierarchy:<br>
 | [Nakala Authors](lookupNakalaAuthor.js) | Search the authority records from Nakala's database | site: [nakala.fr](https://nakala.fr/) | Done |
 | [Opentheso](lookupOpentheso.js) | Query various servers that have a Opentheso service | sites: [pactols.frantiq.fr](https://pactols.frantiq.fr/index.xhtml) ; [opentheso.huma-num.fr](https://opentheso.huma-num.fr/index.xhtml) | Done |
 | [Wikidata](lookupWikidata_SPARQL.js) | Perform SPARQL requests on the Wikidata database | site: [wikidata.org](https://query.wikidata.org/) | Done |
+| [ISNI](lookupISNI.js) | Query ISNI records | site: [isni.org](https://isni.org/) | Done |
 
 ---
 
