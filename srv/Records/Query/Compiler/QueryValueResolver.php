@@ -297,7 +297,7 @@ final class QueryValueResolver
     }
     private function isFieldPredicate(string $base): bool
     {
-        return in_array($base, array('f','field','fc','count','cnt','geo','file','lt','linked_to','linkedto','lf','linked_from','linkedfrom','rt','related_to','relatedto','rf','related_from','relatedfrom','relf','r'), true);
+        return in_array($base, array('f','field','fc','count','cnt','geo','file','lt','linked_to','linkedto','lf','linked_from','linkedfrom','rt','related_to','relatedto','rf','related_from','relatedfrom','related','relf','r'), true);
     }
     private function isNestedLink(string $base, $value): bool
     {

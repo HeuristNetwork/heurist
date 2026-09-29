@@ -157,9 +157,11 @@ unique. Use the array form instead.</p>
 <tr><td><code>geo:NULL</code></td><td><code>{"geo":"NULL"}</code></td><td>Records without geometry. An empty value means any geometry; WKT can be supplied as a value.</td></tr>
 <tr><td><code>lt134(t:12)</code></td><td><code>{"lt:134":{"t":12}}</code></td><td>Records linked to matching records through resource field 134. Aliases: <code>linked_to</code>, <code>linkedto</code>.</td></tr>
 <tr><td><code>lf134(t:10)</code></td><td><code>{"lf:134":{"t":10}}</code></td><td>Records linked from matching records through field 134. Aliases: <code>linked_from</code>, <code>linkedfrom</code>.</td></tr>
-<tr><td>Use JSON</td><td><code>{"rt":{"t":10,"r":3115}}</code></td><td>Outgoing relationship to matching records. Aliases: <code>related_to</code>, <code>relatedto</code>.</td></tr>
-<tr><td>Use JSON</td><td><code>{"rf":{"t":10,"r":3115}}</code></td><td>Incoming relationship from matching records. Aliases: <code>related_from</code>, <code>relatedfrom</code>.</td></tr>
-<tr><td>Use JSON</td><td><code>{"related:3115":{"t":10}}</code></td><td>Relationship in either direction, using direct and inverse relationship terms.</td></tr>
+<tr><td><code>links134(t:12)</code></td><td><code>{"links:134":{"t":12}}</code></td><td>Resource link through field 134 in either direction (<code>lt</code> OR <code>lf</code>).</td></tr>
+<tr><td>Use JSON</td><td><code>{"rt:245":{"t":10,"r":5419}}</code></td><td>Relationship stored with the current record as its source. The optional suffix is a relationship field (relmarker). Aliases: <code>related_to</code>, <code>relatedto</code>.</td></tr>
+<tr><td>Use JSON</td><td><code>{"rf:245":{"t":4}}</code></td><td>Relationship stored with the current record as its target. Aliases: <code>related_from</code>, <code>relatedfrom</code>.</td></tr>
+<tr><td>Use JSON</td><td><code>{"related:245":{"t":4}}</code></td><td>Relationship in either stored direction. The optional suffix is a relationship field, not a relationship type.</td></tr>
+<tr><td>Use JSON</td><td><code>{"connected":{"t":12}}</code></td><td>Any resource link or relationship, in either direction. Takes no suffix.</td></tr>
 <tr><td><code>sortby:-modified</code></td><td><code>{"sortby":"-modified"}</code></td><td>Sort descending by modification date. Aliases: <code>sort</code>, <code>s</code>.</td></tr>
 </tbody>
 </table>
@@ -282,39 +284,91 @@ Event links through field 134 to Places classified by term 10443.</p>
 
 <pre>{"t":10,"lt:134":51}</pre>
 
+<h4>Existence: any linked record, or none</h4>
+
+<p>A link or relationship condition already means "at least one such linked record
+exists". An empty value matches any linked record:</p>
+
+<pre>{"t":10,"lt:240":[]}</pre>
+
+<p>To find records <em>without</em> such a link, add <code>"exists":"NULL"</code> inside
+the value. It works for <code>lt</code>, <code>lf</code>, <code>links</code>,
+<code>rt</code>, <code>rf</code>, <code>related</code> and <code>connected</code>:</p>
+
+<pre>{"t":4,"related:245":[{"t":10},{"exists":"NULL"}]}</pre>
+
+<p>This finds Organizations with no Person related through field 245.</p>
+
+<p><code>"exists":"-NULL"</code> (or an empty value) is the default and can be omitted.</p>
+
 <h4>Relationship queries</h4>
 
-<p>Relationship records connect a source record and target record and have a
-relationship-type term. Use:</p>
+<p>A relationship is a Relationship record connecting a <em>source</em> record and a
+<em>target</em> record with a relationship type (a term). It is stored once, from the
+record on which it was entered, so the same connection may be stored in either direction.</p>
+
+<table class="query-reference">
+<thead><tr><th>Predicate</th><th>Direction</th><th>Relationship type</th></tr></thead>
+<tbody>
+<tr><td><code>rt[:FIELD]</code></td><td>Strict: the current record is the stored <em>source</em>.</td><td>The stored type is in <code>r</code> / the field's vocabulary.</td></tr>
+<tr><td><code>rf[:FIELD]</code></td><td>Strict: the current record is the stored <em>target</em>.</td><td>The stored type is in <code>r</code> / the field's vocabulary.</td></tr>
+<tr><td><code>related[:FIELD]</code></td><td>Either stored direction.</td><td>The stored type <em>or its inverse</em> is in <code>r</code> / the field's vocabulary.</td></tr>
+</tbody>
+</table>
+
+<p>The optional <code>FIELD</code> suffix is always a <strong>relationship (relmarker)
+field</strong> ID or name, never a relationship type. The field supplies:</p>
 
 <ul>
-<li><code>rt</code> for an outgoing relationship;</li>
-<li><code>rf</code> for an incoming relationship;</li>
-<li><code>related:TERM</code> for either direction with inverse-term resolution;</li>
-<li><code>r</code> inside the relationship query to restrict relationship type;</li>
-<li><code>relf:FIELD</code> to restrict a field belonging to the Relationship record.</li>
+<li>its <strong>vocabulary</strong>, which limits the relationship types (child terms included);</li>
+<li>its <strong>record types</strong>: the record types that have the field (owner) and the
+field's target record types. For <code>rt</code> the current record must be of an owner type
+and the related record of a target type; for <code>rf</code> the other way round; for
+<code>related</code> either pairing. A <code>t</code> inside the value narrows this further.</li>
+</ul>
+
+<p>Conditions on the Relationship record itself go <strong>inside</strong> the value:</p>
+
+<ul>
+<li><code>r</code>: the stored relationship type (term ID or comma list, child terms included).
+With <code>related</code> the term or its inverse matches, so either end of the relationship
+is found;</li>
+<li><code>relf:FIELD</code> (short form <code>r:FIELD</code>): a field of the Relationship
+record, for example its start date.</li>
 </ul>
 
 <pre>{
-  "t": 10,
-  "rt": {
-    "t": 10,
-    "r": 3115
-  }
+  "t": 4,
+  "related:245": [
+    {"t": 10},
+    {"r": 5419},
+    {"relf:10": "&gt;2001"}
+  ]
 }</pre>
+
+<p>This finds Organizations related, in either direction and through the vocabulary of
+field 245 (Organization to Person), to Persons with relationship type 5419 and a relationship start date after 2001.</p>
 
 <pre>{
-  "t": 48,
-  "rt": {
-    "t": 10,
-    "r": 5419,
-    "relf:10": "2024"
+  "t": 4,
+  "rt:245": {
+    "t": 10
   }
 }</pre>
 
-<p>A suffix on <code>rt</code> or <code>rf</code>, for example <code>rt:245</code>,
-identifies a relationship-marker detail type. Its allowed record types and
-relationship-type constraints are resolved from the field definition.</p>
+<p>This finds Organizations that are the stored source of a field-245 relationship to a
+Person. Use <code>related</code> when it does not matter on which record the relationship
+was entered.</p>
+
+<p>Without a suffix and without <code>r</code>, <code>related</code> finds records with
+any relationship to the given records (here 100, 200 or 123):</p>
+
+<pre>{"t":10,"related":{"ids":"100,200,123"}}</pre>
+
+<p class="note">Link paths used for linked output fields, map and timeline fields use the
+same prefixes followed by a field ID, with <code>r</code> for <code>related</code>:
+for example <code>10:r245:4:1</code> (Person, related through field 245 to Organization,
+its field 1).</p>
 
 <h4>Logical groups: all, any and not</h4>
 
@@ -503,8 +557,9 @@ such as:</p>
 <li>Do not repeat a key inside one JSON object; use an array of one-key predicates.</li>
 <li>Use JSON for complex nesting and logical groups.</li>
 <li><code>usr:current</code>, <code>ws:current</code>, rating sort and other current-user operations require authentication.</li>
-<li>A relationship-marker suffix such as <code>rt:245</code> is a detail type ID, not a relationship term ID.</li>
-<li>Use <code>r</code> or <code>related:TERM</code> to specify relationship types.</li>
+<li>The suffix of <code>rt</code>, <code>rf</code> and <code>related</code> (for example <code>related:245</code>) is a relationship field ID, not a relationship term ID.</li>
+<li>Use <code>r</code> inside the value to specify relationship types.</li>
+<li><code>rt</code> and <code>rf</code> follow the direction in which a relationship was stored; use <code>related</code> to find it from either end.</li>
 <li>Fulltext search follows MySQL/MariaDB fulltext indexing rules and is not equivalent to substring matching.</li>
 <li>Very deep linked paths may use the batched compatibility executor rather than one nested SQL expression.</li>
 <li>Viewport coordinates do not add new query syntax: they are the structured value of the existing <code>geo</code> predicate.</li>

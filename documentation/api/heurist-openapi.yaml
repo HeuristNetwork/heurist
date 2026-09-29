@@ -240,12 +240,17 @@ paths:
           type: string
         description: >-
           Heurist search expression. Link direction: lt:X (linked to) finds records whose pointer fields point
-          to X; lf:X (linked from) finds records that X points to. Likewise for relationships: rt:X finds
-          records that are the source of a relationship to X; rf:X finds records that are the target of a
-          relationship from X. Both directions: links:X (lt OR lf) and related:X (rt OR rf); connected:X is
-          links OR related and takes no suffix. An optional field or relation type ID follows the prefix
-          (lt:240, links:134, rt:5369). An empty linked query ({"lf":[]}) matches any record; in expansion
-          rules it is the parent result, written * in compact paths (*:lf:10).
+          to X; lf:X (linked from) finds records that X points to. Likewise for relationships, by the stored
+          direction: rt:X finds records that are the stored source of a relationship to X; rf:X the stored
+          target. related:X is a relationship in either stored direction; links:X is lt OR lf; connected:X is
+          links OR related and takes no suffix. The optional suffix is a field ID: a pointer field for
+          lt/lf/links (lt:240), a relationship (relmarker) field for rt/rf/related (related:155) - the field's
+          vocabulary limits the relation types and its record types (owner, target) the two ends. Inside
+          the value, r is the stored relation type (with child terms; for related the term or its inverse)
+          and relf:N a field of the Relationship record: {"related:155":[{"t":14},{"r":4501},{"relf:10":">2001"}]}.
+          An empty linked query ({"lf":[]}) matches any record; in expansion rules it is the parent result,
+          written * in compact paths (*:lf:10). Compact paths use lt, lf, rt, rf and r (= related), each
+          followed by a field ID (10:r155:14).
       - name: w
         in: query
         schema:

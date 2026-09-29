@@ -86,7 +86,7 @@ final class RecordFieldSelector
                 );
                 continue;
             }
-            if(preg_match('/^([0-9]+):(?:(?:lt|lf|rt|rf))?([0-9]+)$/i', $field, $match)
+            if(preg_match('/^([0-9]+):(?:(?:lt|lf|rt|rf|r))?([0-9]+)$/i', $field, $match)
                 && intval($match[1])>0 && intval($match[2])>0){
                 $details[$field] = array(
                     'key'=>$field,
@@ -113,13 +113,13 @@ final class RecordFieldSelector
             throw new QueryValidationException('Invalid linked output field path: '.$path);
         }
         $fieldToken = array_pop($tokens);
-        if(preg_match('/^(?:(?:lt|lf|rt|rf))?([0-9]+)$/i', $fieldToken, $terminalMatch)!==1
+        if(preg_match('/^(?:(?:lt|lf|rt|rf|r))?([0-9]+)$/i', $fieldToken, $terminalMatch)!==1
             || intval($terminalMatch[1])<1){
             throw new QueryValidationException('Linked output path must end with a detail-type ID: '.$path);
         }
         $fieldId = intval($terminalMatch[1]);
         for($index=1; $index<count($tokens); $index+=2){
-            if(!preg_match('/^(lt|lf|rt|rf)[0-9]*$/i', $tokens[$index])
+            if(!preg_match('/^(lt|lf|rt|rf|r)[0-9]*$/i', $tokens[$index])
                 || !isset($tokens[$index+1]) || !ctype_digit($tokens[$index+1])){
                 throw new QueryValidationException('Invalid linked output field path: '.$path);
             }
