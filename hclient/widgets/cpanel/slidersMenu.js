@@ -1236,6 +1236,9 @@ $.widget( "heurist.slidersMenu", {
                             }
                     }  });  
                 }else{
+                    // This popup is reused. A record type may have been added or edited
+                    // since its first opening, so rebuild its list from current definitions.
+                    cont.recordAdd('refreshRecordTypes');
                     cont.recordAdd('doExpand', expandRecordAddSetting);                        
                 }
                

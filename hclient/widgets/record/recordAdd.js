@@ -1003,6 +1003,11 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         */
         return ele;
     },
+
+    /** Rebuild the selector and the compact Add Record list from current definitions. */
+    refreshRecordTypes: function(){
+        this._fillSelectRecordTypes(this.options.currentRecType);
+    },
     
     
     /**
