@@ -2237,7 +2237,7 @@ $.widget( "heurist.editing_input", {
             this.child_terms = this.child_terms ? this.child_terms : allTerms;
 
             // Display term selector as radio buttons/checkboxes
-            if(this.f('rst_TermsAsButtons') == 1 && !this.options.is_faceted_search && this.child_terms && this.child_terms.length<=20){
+            if(this.f('rst_TermsAsButtons') == 1 && !this.options.is_faceted_search && this.child_terms && this._enumButtonsAllowed(this.f('rst_FilteredJsonTermIDTree'))){
 
                 this.enum_buttons = Number.parseInt(this.f('rst_MaxValues')) != 1 ? 'checkbox' : 'radio';
                 let inpt_id = $input.attr('id');
@@ -7047,14 +7047,46 @@ $.widget( "heurist.editing_input", {
     //
     // Recreate dropdown or checkboxes|radio buttons, called by adding new term and manage terms onClose
     //
-    _recreateEnumField: function(vocab_id){
+    // Keep the normal 20-value limit, with an explicit override below 100.
+    // The override belongs to this field editor and does not change its definition.
+    _enumButtonsAllowed: function(vocab_id){
+        const count = this.child_terms.length;
+        this.input_cell.find('.enum_buttons_warning').remove();
+        if(count <= 20 || (count < 100 && this._enumButtonsOverride)){
+            return true;
+        }
+
+        const $warning = $('<div>', {'class': 'enum_buttons_warning'})
+            .css({'max-width': '48em', 'margin': '6px 0', 'white-space': 'normal'})
+            .append($('<div>').text('Sorry, there are too many values (' + count
+                + ') to display this field as buttons.'))
+            .appendTo(this.input_cell);
+
+        if(count < 100){
+            $('<div>').text('If you really insist on buttons we can try ...')
+                .css('margin-top', '6px').appendTo($warning);
+            const $try = $('<button>', {type: 'button', text: 'Try buttons anyway'})
+                .css('margin-top', '6px').appendTo($warning).button();
+            $try.button('option', 'disabled', !!this.is_disabled);
+            this._on($try, {click: function(){
+                if(this.is_disabled) return;
+                this._enumButtonsOverride = true;
+                this._recreateEnumField(vocab_id, true);
+            }});
+        }
+        return false;
+    },
+
+    _recreateEnumField: function(vocab_id, keepTerms){
 
         let that = this;
 
-        this.child_terms = $Db.trm_TreeData(vocab_id, 'set'); //refresh
+        if(!keepTerms){
+            this.child_terms = $Db.trm_TreeData(vocab_id, 'set'); //refresh
+        }
         let asButtons = this._isForRecords && this.f('rst_TermsAsButtons') == 1;
 
-        if(asButtons && this.child_terms.length <= 20){ // recreate buttons/checkboxes
+        if(asButtons && this._enumButtonsAllowed(vocab_id)){ // recreate buttons/checkboxes
 
             this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
             let dtb_res = this._createEnumButtons(true);
