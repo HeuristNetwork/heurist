@@ -53,9 +53,9 @@ class LookupController{
     private array $request = [];
 
     private string $lookupType = '';
-    private string $lookupURL = '';
     private string $lookupMetadata = '';
     private string $lookupAction = '';
+    private string $lookupURL = '';
     private array $lookupHeaders = [];
     private int $lookupTimeout = 30;
     /** @var mixed $lookupResponse */
@@ -165,7 +165,8 @@ class LookupController{
         'isni' => [
             'query' => self::ALPHANUMERIC,
             'maximumRecords' => self::NUMERIC,
-            'startRecord' => self::NUMERIC
+            'startRecord' => self::NUMERIC,
+            'sortKeys' => self::ALPHANUMERIC
         ]
     ];
 
@@ -182,6 +183,13 @@ class LookupController{
     private string $marcCodesFile = '';
 
     private const MARC_CODE_SOURCE = 'https://id.loc.gov/vocabulary/relators.json';
+
+    private const ISNI_SOURCE_CODES = [
+        'LCNACO' => 'Library of Congress',
+        'VIAF' => 'VIAF',
+        'WKP' => 'Wikidata',
+        'SUDOC' => 'Id Ref'
+    ];
 
     private string $ESTCMsg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
 
@@ -1219,6 +1227,54 @@ class LookupController{
                 }
             }
 
+            if(isset($ISNIMetadata->sources)){
+
+                $sources = $ISNIMetadata->sources;
+                foreach($sources as $source){
+
+                    $sourceCode = (string)$source->codeOfSource[0] ?? '';
+                    $sourceID = (string)$source->sourceIdentifier[0] ?? '';
+                    $sourceURI = (string)$source->reference->URI[0] ?? '';
+
+                    if($sourceCode === '' || $sourceID === ''){
+                        continue;
+                    }elseif($sourceURI === ''){
+
+                        $sourceID = str_replace(' ', '', $sourceID);
+                        switch($sourceCode){
+                            case 'LCNACO':
+                                $sourceURI = "http://id.loc.gov/authorities/names/{$sourceID}";
+                                break;
+                            case 'VIAF':
+                                $sourceURI = "http://viaf.org/viaf/{$sourceID}";
+                                break;
+                            case 'WKP':
+                                $sourceURI = "https://www.wikidata.org/wiki/{$sourceID}";
+                                break;
+                            case 'SUDOC':
+                                $sourceURI = "https://www.idref.fr/{$sourceID}";
+                                break;
+                            case 'DNB':
+                                $sourceURI = "http://d-nb.info/gnd/{$sourceID}";
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    if($sourceURI === ''){
+                        continue;
+                    }
+
+                    $sourceCode = array_key_exists($sourceCode, self::ISNI_SOURCE_CODES) ? self::ISNI_SOURCE_CODES[$sourceCode] : $sourceCode;
+
+                    $sourceString = "{$sourceCode}: {$sourceURI}";
+
+                    if(!in_array($sourceString, $isniRecord['sources'])){
+                        $isniRecord['sources'][] = $sourceString;
+                    }
+                }
+            }
             if(isset($ISNIMetadata->externalInformation)){
 
                 $externalSources = $ISNIMetadata->externalInformation;
