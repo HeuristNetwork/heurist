@@ -68,7 +68,7 @@ final class RecordQueryParser
             }
         }
 
-        $normalized = $this->normalizeLogicalFields($this->normalizeQueryArray($normalized));
+        $normalized = $this->normalizeLogicalFields($this->expandTextGroups($this->normalizeQueryArray($normalized)));
         $this->validate($normalized);
         return $normalized;
     }
@@ -392,6 +392,47 @@ final class RecordQueryParser
         }
         return $result;
     }
+    /**
+     * A group (`all` / `any` / `not`) may hold a plain-text query, e.g. a text query
+     * embedded by an expansion level `{t:10, lf:[{all:"t:5 f:1:x"}]}`. It is parsed
+     * here; its sort is dropped (only the top level sorts).
+     */
+    private function expandTextGroups(array $group): array
+    {
+        $result = array();
+        foreach($group as $predicate){
+            if(!is_array($predicate) || count($predicate) !== 1){
+                $result[] = $predicate;
+                continue;
+            }
+            $key = (string)array_keys($predicate)[0];
+            $value = $predicate[$key];
+            list($base) = $this->predicateParts($key);
+            $isGroup = in_array($base, array('any','all','not'), true);
+            if($isGroup && is_string($value) && trim($value) !== ''){
+                $decoded = json_decode(trim($value), true);
+                $value = json_last_error() === JSON_ERROR_NONE && is_array($decoded)
+                    ? $decoded : $this->withoutSort($this->textToJson($value));
+            }
+            if(is_array($value) && ($isGroup
+                || (in_array($base, self::LINK_PREDICATES, true) && !$this->isScalarValueList($value)))){
+                $value = $this->expandTextGroups($this->normalizeQueryArray($value));
+            }
+            $result[] = array($key=>$value);
+        }
+        return $result;
+    }
+
+    /** Predicates of a parsed text query without its sort. */
+    private function withoutSort(array $group): array
+    {
+        return array_values(array_filter($group, function($predicate){
+            if(!is_array($predicate) || count($predicate) !== 1){ return true; }
+            list($base) = $this->predicateParts((string)array_keys($predicate)[0]);
+            return !in_array($base, array('sortby','sort','s'), true);
+        }));
+    }
+
     private function resolveTextValue($value)
     {
         $value = $this->unquote((string)$value);
