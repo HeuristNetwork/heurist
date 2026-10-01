@@ -835,9 +835,9 @@ $.widget( "heurist.controlPanel", {
             if(response.data.notice){
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     $('<div>').text(response.data.notice).html(), null, {title:'Database safeguard'});
-            }else if(!response.data.configured){
+            }else if(response.data.show_introduction === true){
                 window.hWin.HEURIST4.msg.showMsgDlg(
-                    'Heurist can back up your database to a repository automatically at specified intervals, and obtain a DOI for your data. <br>We strongly recommend configuring this in Design > External Repositories',
+                    'Heurist can back up your database to a repository automatically at specified intervals, and obtain a DOI for your data. <br>We strongly recommend configuring this in Publish > Set up automatic deposit',
                     null, {title:'Database safeguard'});
             }
         });

@@ -558,7 +558,17 @@
             "container": "publish"
         },
         "title": "Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which is then uploaded to the selected repository",
-        "text": "Safeguard file - to repository"
+        "text": "Safeguard file → repository"
+    },
+    {
+        "id": "menu-automatic-deposit",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "configure_AutomaticDeposit",
+            "icon": "ui-icon-cloud-upload",
+            "container": "publish"
+        },
+        "text": "Set up automatic deposit"
     },
     {
         "id": "menu-profile-files",
