@@ -14,6 +14,8 @@
 
 namespace Heurist\Records\Map;
 
+use Heurist\Database\QueryTrace;
+
 /** Stages bounded feature generation before committing a complete response. */
 final class GeoJsonStreamWriter
 {
@@ -70,6 +72,12 @@ final class GeoJsonStreamWriter
         }
         $meta = json_encode($stream->meta(), JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
         if($meta === false){ throw new \RuntimeException('Unable to encode map metadata'); }
-        fwrite($buffer, '],"meta":'.$meta.'}');
+        fwrite($buffer, '],"meta":'.$meta);
+        if(QueryTrace::enabled()){
+            // debug=1|2: SQL timings of this request
+            $debug = json_encode(QueryTrace::toArray(), JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+            if($debug !== false){ fwrite($buffer, ',"debug":'.$debug); }
+        }
+        fwrite($buffer, '}');
     }
 }

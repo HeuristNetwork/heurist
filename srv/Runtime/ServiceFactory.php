@@ -22,12 +22,14 @@ use Heurist\Controller\DefinitionController;
 use Heurist\Controller\GraphController;
 use Heurist\Controller\MapDataController;
 use Heurist\Controller\PublicationController;
+use Heurist\Controller\QueryCancelController;
 use Heurist\Controller\RecordPresentationController;
 use Heurist\Controller\RecordQueryController;
 use Heurist\Controller\SystemQueryController;
 use Heurist\Controller\TimeDataController;
 use Heurist\Database\DatabaseFactory;
 use Heurist\Database\DatabaseInterface;
+use Heurist\Database\QueryTrace;
 use Heurist\Publication\PublicationService;
 use Heurist\Records\Map\MapFeatureService;
 use Heurist\Records\Presentation\QuerySourcePresentationService;
@@ -50,6 +52,7 @@ final class ServiceFactory
     /** Build the PDO and runtime boundary from the current legacy initialization. */
     public static function fromLegacySystem($system): self
     {
+        QueryTrace::markBoot();
         $runtime = RuntimeContext::fromLegacySystem($system);
         $codeNames = array(
             'RT_QUERY_SOURCE', 'RT_MAP_DOCUMENT', 'RT_MAP_LAYER',
@@ -74,8 +77,20 @@ final class ServiceFactory
                 $codeIds[$codeName] = intval(constant($codeName));
             }
         }
+        $database = DatabaseFactory::fromHeuristConfiguration($runtime->databaseNameFull);
+        // srv/ services never write the PHP session. Releasing its lock lets parallel
+        // module requests and a cancel request run while a long query is executing.
+        if(session_status() === PHP_SESSION_ACTIVE){ session_write_close(); }
+        RequestRegistry::register($database, $runtime);
+        if(QueryTrace::enabled()){
+            // SQL text and EXPLAIN only for logged-in users
+            QueryTrace::allowSql($runtime->userId > 0);
+            QueryTrace::setExplainer(static function(string $sql, array $values) use ($database): array {
+                return $database->fetchAll($sql, $values);
+            });
+        }
         return new self(
-            DatabaseFactory::fromHeuristConfiguration($runtime->databaseNameFull),
+            $database,
             $runtime,
             new SystemCode($codeIds),
             (string)$system->getSysDir('generated-pubs'),
@@ -104,6 +119,12 @@ final class ServiceFactory
     public function recordQueryController(): RecordQueryController
     {
         return new RecordQueryController($this->database, $this->runtime);
+    }
+
+    /** Create the controller that cancels a running query (POST /records/cancel). */
+    public function queryCancelController(): QueryCancelController
+    {
+        return new QueryCancelController($this->database, $this->runtime);
     }
 
     /** Create the graph-document controller for the heurist-graph client. */

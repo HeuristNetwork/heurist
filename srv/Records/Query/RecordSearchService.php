@@ -19,6 +19,7 @@
 
 namespace Heurist\Records\Query;
 
+use Heurist\Database\QueryTrace;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Records\Query\Compiler\QueryBuilder;
@@ -268,24 +269,61 @@ final class RecordSearchService
         $context['sortProvided'] = $request->sortProvided;
         $context['sort'] = $request->sort;
         $candidateCache = array();
+        QueryTrace::begin('resolve');
         $query = $this->resolveSelectiveAnyFields($query, $context, $candidateCache);
+        QueryTrace::end();
+        if($this->containsTraversal($query, 0)){
+            // Restrict the outer Records scan to records that appear in recLinks
+            // next to the linked set. The link conditions themselves are unchanged.
+            QueryTrace::begin('candidates');
+            $candidates = $this->linkCandidates($query, 'all', 0);
+            QueryTrace::end($candidates === null ? null : count($candidates));
+            if($candidates === array()){
+                QueryTrace::note('no link candidates: empty result without main query');
+                return new SearchResult(array(), 0, $request->offset, $request->limit, null, array());
+            }
+            if($candidates !== null){
+                QueryTrace::note('link candidates: '.count($candidates));
+                $query[] = array('ids'=>$candidates);
+            }
+        }
         if(empty($context['forceChunked']) && $this->builder->supportsSqlExecution($query)){
+            QueryTrace::setPath('sql');
             if($request->detail === 'count'){
-                $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
+                $compiled = $this->builder->buildCount($query, $context);
+                QueryTrace::setMain($compiled->sql, $compiled->values, 'count');
+                QueryTrace::begin('count');
+                $total = intval($this->executor->executeScalar($compiled));
+                QueryTrace::end(1);
                 return new SearchResult(array(), $total, 0, 1);
             }
             if($request->detail === 'rectypes'){
-                $rectypes = $this->executor->executeRectypeCounts(
-                    $this->builder->buildRectypeCounts($query, $context)
-                );
+                $compiled = $this->builder->buildRectypeCounts($query, $context);
+                QueryTrace::setMain($compiled->sql, $compiled->values, 'rectypes');
+                QueryTrace::begin('rectypes');
+                $rectypes = $this->executor->executeRectypeCounts($compiled);
+                QueryTrace::end(count($rectypes));
                 $total = array_sum(array_column($rectypes, 'count'));
                 return new SearchResult(array(), $total, 0, 1, null, $rectypes);
             }
-            $ids = $this->executor->executeIds($this->builder->buildIds($query, $context));
+            $compiled = $this->builder->buildIds($query, $context);
+            QueryTrace::setMain($compiled->sql, $compiled->values, 'ids');
+            QueryTrace::begin('ids');
+            $ids = $this->executor->executeIds($compiled);
+            QueryTrace::end(count($ids));
+            if(count($ids) < $request->limit && ($request->offset === 0 || !empty($ids))){
+                // a short page is the last one: the total is known without the count query
+                return new SearchResult($ids, $request->offset + count($ids), $request->offset, $request->limit);
+            }
+            QueryTrace::begin('count');
             $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
+            QueryTrace::end(1);
             return new SearchResult($ids, $total, $request->offset, $request->limit);
         }
+        QueryTrace::setPath('fallback');
+        QueryTrace::begin('fallback');
         $ids = $this->evaluateGroup($query, null, 'all', $context, 0);
+        QueryTrace::end(count($ids));
         if($request->detail === 'count'){
             return new SearchResult(array(), count($ids), 0, 1);
         }
@@ -368,6 +406,115 @@ final class RecordSearchService
             $result[] = $predicate;
         }
         return $result;
+    }
+
+    /** Whether a query group contains a link/relationship traversal outside a "not" group. */
+    private function containsTraversal(array $group, int $depth): bool
+    {
+        if($depth > self::MAX_QUERY_DEPTH){ return false; }
+        foreach($this->normalizeGroup($group) as $predicate){
+            if(!is_array($predicate) || empty($predicate)){ continue; }
+            $key = (string)array_keys($predicate)[0];
+            list($base) = $this->predicateParts($key);
+            if($this->isTraversalBase($base)){ return true; }
+            if(($base === 'all' || $base === 'any') && is_array($predicate[$key])
+                && $this->containsTraversal($predicate[$key], $depth+1)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Superset of the record IDs that can satisfy a group, read from recLinks only.
+     * It is a necessary condition, never a replacement of the compiled predicates.
+     *
+     * @param string $mode 'all' intersects known sets; 'any' needs a set for every branch.
+     * @return int[]|null NULL when there is no useful restriction (unknown or too many).
+     */
+    private function linkCandidates(array $group, string $mode, int $depth): ?array
+    {
+        if($depth > self::MAX_QUERY_DEPTH){ return null; }
+        $sets = array();
+        foreach($this->normalizeGroup($group) as $predicate){
+            $set = null;
+            if(is_array($predicate) && !empty($predicate)){
+                $key = (string)array_keys($predicate)[0];
+                $value = $predicate[$key];
+                list($base) = $this->predicateParts($key);
+                try{
+                    if(($base === 'all' || $base === 'any') && is_array($value)){
+                        $set = $this->linkCandidates($value, $base, $depth+1);
+                    }elseif($this->isTraversalBase($base)){
+                        $set = $this->traversalCandidates($base, $value, $depth);
+                    }elseif($base === 'ids' && $mode === 'all'){
+                        $set = $this->normalizeIds($value, 'record');
+                    }
+                }catch(QueryValidationException $exception){
+                    $set = null; // the main query reports the error
+                }
+            }
+            if($set === null){
+                if($mode === 'any'){ return null; }
+                continue;
+            }
+            $sets[] = $set;
+        }
+        if(empty($sets)){ return null; }
+        $result = array_shift($sets);
+        foreach($sets as $set){
+            $result = $mode === 'any'
+                ? array_merge($result, $set)
+                : array_values(array_intersect($result, $set));
+        }
+        $result = $this->uniqueIds($result);
+        return count($result) > self::MAX_PRECOMPUTED_CANDIDATES ? null : $result;
+    }
+
+    /**
+     * Records next to the linked set of one traversal predicate in recLinks.
+     * Pointer links (lt, lf, links) use the link direction; relationships and
+     * connected use both directions because relationships can be stored inverse.
+     */
+    private function traversalCandidates(string $base, $value, int $depth): ?array
+    {
+        list($value, $negate) = $this->extractExists($value);
+        if($negate){ return null; } // records WITHOUT such a link
+        $child = $this->normaliseLinkedValue($value);
+        $childIds = empty($child) ? null : $this->linkCandidates($child, 'all', $depth+1);
+        if($childIds === array()){ return array(); }
+
+        $kind = in_array($base, array_merge(self::RESOURCE_TO, self::RESOURCE_FROM, array('links')), true)
+            ? ' AND rl_RelationID IS NULL'
+            : (in_array($base, array('connected'), true) ? '' : ' AND rl_RelationID IS NOT NULL');
+        $toSource = !in_array($base, self::RESOURCE_FROM, true); // r is rl_SourceID
+        $toTarget = !in_array($base, self::RESOURCE_TO, true);   // r is rl_TargetID
+        $cap = self::MAX_PRECOMPUTED_CANDIDATES + 1;
+
+        $result = array();
+        $chunks = $childIds === null ? array(null) : array_chunk($childIds, self::SQL_CHUNK_SIZE);
+        foreach($chunks as $chunk){
+            $parts = array();
+            $values = array();
+            foreach(array('rl_SourceID'=>$toSource, 'rl_TargetID'=>$toTarget) as $column=>$enabled){
+                if(!$enabled){ continue; }
+                $other = $column === 'rl_SourceID' ? 'rl_TargetID' : 'rl_SourceID';
+                $where = '1=1'.$kind;
+                if($chunk !== null){
+                    $where .= ' AND '.$other.' IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
+                    $values = array_merge($values, $chunk);
+                }
+                $parts[] = 'SELECT '.$column.' AS id FROM recLinks WHERE '.$where;
+            }
+            $values[] = $cap;
+            $rows = $this->executor->executeRows(
+                'SELECT DISTINCT id FROM ('.implode(' UNION ', $parts).') AS link_candidates LIMIT ?',
+                '', $values
+            );
+            foreach($rows as $row){ $result[] = intval($row[0]); }
+            if(count($result) >= $cap){ return null; }
+        }
+        return $this->uniqueIds($result);
     }
 
     /** NULL, -NULL, and empty values retain their established field semantics. */

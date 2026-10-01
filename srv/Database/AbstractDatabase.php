@@ -76,6 +76,7 @@ abstract class AbstractDatabase implements DatabaseInterface
      */
     protected function statement(string $sql, array $parameters): PDOStatement
     {
+        $started = QueryTrace::enabled() ? hrtime(true) : 0;
         try{
             $statement = $this->pdo->prepare($sql);
             $position = 1;
@@ -90,8 +91,14 @@ abstract class AbstractDatabase implements DatabaseInterface
                 $statement->bindValue($parameter, $value, $type);
             }
             $statement->execute();
+            if($started){
+                QueryTrace::record($sql, $parameters, (hrtime(true) - $started) / 1e6, $statement->rowCount());
+            }
             return $statement;
         }catch(PDOException $exception){
+            if($started){
+                QueryTrace::record($sql, $parameters, (hrtime(true) - $started) / 1e6, null);
+            }
             throw new DatabaseException('Database query failed', 0, $exception);
         }
     }

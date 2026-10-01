@@ -49,9 +49,32 @@ final class MysqlDatabase extends AbstractDatabase
             .';port='.intval(HEURIST_DB_PORT ?: 3306)
             .';dbname='.$databaseName.';charset=utf8mb4';
         try{
-            return new self(new PDO($dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD));
+            $pdo = new PDO($dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+            StatementLimit::apply($pdo);
+            return new self($pdo);
         }catch(PDOException $exception){
             throw new DatabaseException('Unable to connect to the Heurist database', 0, $exception);
+        }
+    }
+
+    /** Server thread id of this connection (used to cancel its running query). */
+    public function connectionId(): int
+    {
+        return intval($this->pdo->query('SELECT CONNECTION_ID()')->fetchColumn());
+    }
+
+    /**
+     * Stop the statement running on another connection (KILL QUERY).
+     * The connection itself stays open; its query fails with error 1317.
+     */
+    public function killQuery(int $connectionId): bool
+    {
+        if($connectionId < 1){ return false; }
+        try{
+            $this->pdo->exec('KILL QUERY '.$connectionId);
+            return true;
+        }catch(PDOException $exception){
+            return false; // already finished or not ours
         }
     }
 

@@ -20,6 +20,7 @@
 namespace Heurist\Controller;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Database\QueryTrace;
 use Heurist\Runtime\ApiResponse;
 use Heurist\Runtime\ErrorReporter;
 use Heurist\Runtime\RuntimeContext;
@@ -229,6 +230,7 @@ final class RecordQueryController
             // fields=_all - every populated detail value, regardless of type.
             'allDetails'=>$selection['all'] ?? false
         );
+        QueryTrace::begin('details');
         $records = $this->dataService->loadRecords(
             $result->ids, $selection['headers'], $native, $valueOptions
         );
@@ -255,6 +257,7 @@ final class RecordQueryController
                 );
             }
         }
+        QueryTrace::end(count($records));
 
         $meta = array(
             'database'=>$params['db'] ?? $this->databaseName(),
@@ -294,7 +297,7 @@ final class RecordQueryController
                 $next = $params;
                 $next['offset'] = $result->offset+$result->limit;
                 $next['limit'] = $result->limit;
-                unset($next['query']);
+                unset($next['query'], $next['debug']);
                 $pagination['next'] = strtok($uri, '?').'?'.http_build_query($next);
             }
         }
@@ -313,11 +316,13 @@ final class RecordQueryController
         }catch(UnsupportedQueryException $e){
             $this->response->sendError(422, 'unsupported_query', $e->getMessage());
         }catch(SearchExecutionException $e){
+            if($this->response->sendInterrupted($e)){ return; }
             $this->errors->report($e, $this->runtime);
             $this->response->sendError(500, 'server_error', 'Record query execution failed');
         }catch(\InvalidArgumentException $e){
             $this->response->sendError(400, 'invalid_request', $e->getMessage());
         }catch(\Throwable $e){
+            if($this->response->sendInterrupted($e)){ return; }
             $this->errors->report($e, $this->runtime);
             $this->response->sendError(500, 'server_error', 'Record query execution failed');
         }

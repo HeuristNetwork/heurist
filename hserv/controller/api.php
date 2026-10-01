@@ -77,6 +77,7 @@ use hserv\utilities\USystem;
 use hserv\utilities\UJwt;
 use hserv\controller\MapDataController as LegacyMapDataController;
 use Heurist\Runtime\ServiceFactory;
+use Heurist\Database\QueryTrace;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 $composerAutoload = dirname(__FILE__).'/../../vendor/autoload.php';
@@ -220,6 +221,9 @@ echo "</pre>";
 exit;
 */
 
+// debug=1|2: modern srv/ endpoints add a "debug" section with SQL timings
+QueryTrace::enableFromRequest($req_params);
+
 if(@$requestUri[1]!== 'api' || @$req_params['ent']!=null){
     //takes all parameters from $req_params
 
@@ -344,7 +348,7 @@ if($is_timeline_query && $http_method === 'POST'){
         if(!array_key_exists('fields', $json)){ unset($req_params['fields']); }
         if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
             $contractKeys = array(
-                'timefields','timeFields','fields','resolveDetails','rules','limit','offset','sort','filter'
+                'timefields','timeFields','fields','resolveDetails','rules','limit','offset','sort','filter','debug'
             );
             $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
             if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
@@ -371,7 +375,7 @@ if($is_record_query){
     }
     if($http_method === 'POST' && is_array($json)
         && !isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
-        $contractKeys = array('limit','offset','fields','detail','resolveDetails','sort','filter');
+        $contractKeys = array('limit','offset','fields','detail','resolveDetails','sort','filter','debug');
         $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
         if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
             $req_params['query'] = $json;
@@ -389,6 +393,17 @@ if($is_record_query){
     $method = 'search';
 }
 
+// POST /api/{db}/records/cancel {"rid":...} stops a running query of the same
+// user (KILL QUERY on the connection registered for that request id).
+$is_query_cancel = ($resource === 'records' && @$requestUri[4] === 'cancel');
+if($is_query_cancel){
+    if($http_method !== 'POST'){
+        exitWithError('Method not allowed', 405, array('Allow' => 'POST'));
+    }
+    if(is_array($json) && array_key_exists('rid', $json)){ $req_params['rid'] = $json['rid']; }
+    $method = 'search';
+}
+
 // The modern graph collection returns renderer-neutral graph documents for the
 // heurist-graph client. It is read-only for both GET and POST and has its own
 // request contract (query, links, rule, limits) separate from /records.
@@ -403,7 +418,7 @@ if($is_graph_query){
         exitWithError('Invalid JSON request body', 400);
     }
     if($http_method === 'POST' && is_array($json)){
-        $graphContractKeys = array('query','q','ids','links','rule','rules','limit','offset','limits');
+        $graphContractKeys = array('query','q','ids','links','rule','rules','limit','offset','limits','debug');
         if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
             $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
             if($isList || empty(array_intersect(array_keys($json), $graphContractKeys))){
@@ -444,7 +459,7 @@ if($is_system_query){
         }
         if(!array_key_exists('fields', $json)){ unset($req_params['fields']); }
         if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
-            $contractKeys = array('rules','limit','offset','fields','detail','resolveDetails','sort','filter');
+            $contractKeys = array('rules','limit','offset','fields','detail','resolveDetails','sort','filter','debug');
             $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
             if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
                 $req_params['query'] = $json;
@@ -557,6 +572,13 @@ if($is_def_query){
         ? intval($requestUri[5]) : null;
     $controller = ServiceFactory::fromLegacySystem($system)->systemQueryController();
     $controller->output($req_params, $systemType, $systemId);
+    $system->dbclose();
+    exit;
+
+}elseif($is_query_cancel){
+
+    $controller = ServiceFactory::fromLegacySystem($system)->queryCancelController();
+    $controller->output($req_params);
     $system->dbclose();
     exit;
 
@@ -771,7 +793,7 @@ else
             if(is_array($json)){
                 foreach(array(
                     'query','q','ids','fields','detail','resolveDetails','limit','offset',
-                    'sort','filter'
+                    'sort','filter','debug'
                 ) as $key){
                     if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
                 }
