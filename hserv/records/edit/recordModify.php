@@ -1319,7 +1319,10 @@ function recordUpdateOwnerAccess($system, $params){
             $params['OwnerUGrpID'] = $system->getUserId();
         }
 
-        $owner_grps = prepareIds( @$params['OwnerUGrpID'], true);
+        // Owner 0 means "Any logged-in user". Wrap scalar values so prepareIds'
+        // legacy loose null check cannot discard a numeric zero.
+        $requested_owner = @$params['OwnerUGrpID'];
+        $owner_grps = prepareIds(is_array($requested_owner) ? $requested_owner : [$requested_owner], true);
         $access = @$params['NonOwnerVisibility'];
 
         if((isEmptyArray($owner_grps) || $access==null) && !$system->isAdmin()){
@@ -1426,7 +1429,8 @@ function recordUpdateOwnerAccess($system, $params){
         $fields = ['rec_Modified=?'];
         $data = [$rec_mod];
         $types = 's';
-        if($main_owner && $main_owner >= 0){
+        // Null means ownership was not requested; zero is a valid owner ID.
+        if($main_owner !== null && $main_owner >= 0){
             $fields[] = 'rec_OwnerUGrpID=?';
             $data[] = $main_owner;
             $types .= 'i';
