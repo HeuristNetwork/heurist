@@ -16,9 +16,63 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       3.2
 */
+// Return a small loading page before any database/API setup. The real page
+// is requested separately so web-server buffering cannot hide this message.
+if (intval($_REQUEST['step'] ?? 0)!==2 && !isset($_GET['zotero_setup'])) {
+    header('Content-Type: text/html; charset=utf-8');
+    echo '<!doctype html><html><head><meta charset="utf-8"><title>Zotero synchronisation</title></head><body>'
+        .'<div id="processResults" style="margin:20px;font:14px Arial;max-width:1000px;line-height:1.5">Checking configuration, querying and verifying the Zotero library. This may take a couple of minutes</div>'
+        .'<script>const u=new URL(location.href);u.searchParams.set("zotero_setup","1");'
+        .'fetch(u,{credentials:"same-origin"}).then(r=>{if(!r.ok)throw new Error("Server response "+r.status);return r.text();})'
+        .'.then(html=>{document.open();document.write(html);document.close();})'
+        .'.catch(e=>{document.getElementById("processResults").append(document.createElement("br"),document.createTextNode("Setup could not complete: "+e.message));});</script></body></html>';
+    exit;
+}
+
 use hserv\structure\ConceptCode;
 use hserv\utilities\Temporal;
 use hserv\utilities\DbUtils;
+
+// Catch exceptions/fatal errors before the final report is reached. Buffer incidental
+// PHP output so an error response remains valid JSON for the dialogue.
+$zoteroDiagnosticStage = 'Initialising syncZotero.php';
+$zoteroDiagnosticFinished = false;
+$zoteroDiagnosticReserve = str_repeat(' ', 262144);
+if(intval($_REQUEST['step'] ?? 0) === 2){
+    $zoteroDiagnosticBufferLevel = ob_get_level();
+    ob_start();
+    set_exception_handler(function($exception){
+        zoteroDiagnosticAbort(get_class($exception).': '.$exception->getMessage(), $exception->getFile(), $exception->getLine());
+    });
+    register_shutdown_function(function(){
+        global $zoteroDiagnosticFinished, $zoteroDiagnosticReserve;
+        if($zoteroDiagnosticFinished){ return; }
+        $zoteroDiagnosticReserve = null;
+        $error = error_get_last();
+        $fatal = $error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR], true);
+        zoteroDiagnosticAbort($fatal ? $error['message'] : 'The script exited before completing the synchronisation report.',
+            $fatal ? $error['file'] : __FILE__, $fatal ? $error['line'] : 0);
+    });
+}
+
+function zoteroDiagnosticAbort($message, $file, $line){
+    global $zoteroDiagnosticStage, $zoteroDiagnosticFinished, $zoteroDiagnosticBufferLevel, $outputLines;
+    $zoteroDiagnosticFinished = true;
+    while(ob_get_level() > $zoteroDiagnosticBufferLevel){ ob_end_clean(); }
+    // Never expose a Zotero API key embedded in an exception URL.
+    $message = preg_replace('/([?&]key=)[^&\s]+/i', '$1[redacted]', $message);
+    $detail = 'Zotero diagnostics 2026-10-01-collections-v11: '.$zoteroDiagnosticStage.'. '.$message
+        .' — '.$file.':'.intval($line);
+    error_log($detail);
+    $report = '<div style="max-width:1000px;padding:15px"><h3>Synchronisation incomplete</h3><p>'
+        .htmlspecialchars($detail, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+        .'</p><p>The run did not reach confirmed completion. Check settings/zotero_sync_status.json for the saved version. '
+        .'Records already saved remain in the database.</p>'
+        .implode('', is_array($outputLines) ? $outputLines : []).'</div>';
+    if(!headers_sent()){ header('Content-Type: application/json; charset=utf-8'); }
+    echo json_encode(['status' => defined('HEURIST_OK') ? HEURIST_OK : 'ok', 'data' => $report], JSON_INVALID_UTF8_SUBSTITUTE);
+    exit;
+}
 
 ini_set('max_execution_time', '0');
 
@@ -30,6 +84,9 @@ require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
 require_once dirname(__FILE__).'/../../hserv/structure/import/dbsImport.php';
 require_once dirname(__FILE__).'/../../external/php/phpZotero.php';
+require_once __DIR__.'/zoteroSyncStatus.php';
+require_once __DIR__.'/zoteroCollections.php';
+require_once __DIR__.'/../../hserv/structure/import/importHierarchicalTerms.php';
 
 $system->defineConstants();
 
@@ -151,10 +208,18 @@ if(!$syncingStep){
             .ui-accordion-header.ui-state-active .ui-icon {
                 background-image: url('https://code.jquery.com/ui/1.12.1/themes/base/images/ui-icons_444444_256x240.png') !important;
             }
+            #processResults { box-sizing:border-box; margin:10px 0 0; }
+            .zotero-sync-report { height:100%; box-sizing:border-box; overflow-y:scroll;
+                border:1px solid #9aa9b2; background:#fff; padding:16px; word-break:break-word; }
+            .zotero-sync-report > * { max-width:1050px; }
+            .zotero-sync-report p, .zotero-sync-report details { margin:0 0 18px; }
+            details summary { cursor:pointer; padding:8px 0; }
+            .zotero-failures table { border-collapse:collapse; margin:12px 0; font-size:0.9em; }
+            .zotero-failures td, .zotero-failures th { border:1px solid #ccd3d7; padding:7px; text-align:left; vertical-align:top; }
         </style>
 
         <script>
-            function __startProcess(libraryIndex, count, syncID){
+            function __startProcess(libraryIndex, count, syncID, retryOnly = false){
 
                 const sessionID = window.hWin.HEURIST4.util.random();
 
@@ -165,7 +230,8 @@ if(!$syncingStep){
                     cnt: count,
                     db: '<?= $system->dbname() ?>',
                     lib_key: libraryIndex,
-                    sessionID: sessionID
+                    sessionID: sessionID,
+                    retryOnly: retryOnly ? 1 : 0
                 };
 
                 if(window.hWin.HEURIST4.util.isPositiveInt(syncID)){
@@ -176,18 +242,41 @@ if(!$syncingStep){
 
                     window.hWin.HEURIST4.msg.hideProgress();
 
-                    if(response.status !== window.hWin.ResponseStatus.OK){
+                    $('#processProgressbar').hide();
+                    if(!response || response.status !== window.hWin.ResponseStatus.OK){
+                        $('#processResults').text('Zotero diagnostics v4: the server did not return a valid completion report. Check the PHP/server error log.');
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                         return;
                     }
 
                     $('#processResults').html(response.data);
+                    resizeZoteroReport();
+
                 });
             }
+
+            function markZoteroManuallyCorrected(key){
+                window.hWin.HEURIST4.util.sendRequest(`${window.hWin.HAPI4.baseURL}import/biblio/syncZotero.php`, {
+                    step:2, db: <?= json_encode($system->dbname()) ?>,
+                    lib_key: <?= json_encode((string)($_REQUEST['lib_key'] ?? '0')) ?>, manuallyResolved:key
+                }, null, (response) => {
+                    if(response && response.status === window.hWin.ResponseStatus.OK){ window.location.reload(); }
+                    else { window.hWin.HEURIST4.msg.showMsgErr(response); }
+                });
+            }
+            function resizeZoteroReport(){
+                const panel = document.getElementById('processResults');
+                if(panel && panel.querySelector('.zotero-sync-report')){
+                    panel.style.height = Math.max(200, window.innerHeight - panel.getBoundingClientRect().top - 12) + 'px';
+                }
+            }
+            window.addEventListener('resize', resizeZoteroReport);
 
             function showProcess(sessionID){
 
                 $('#setupContainer').hide();
+
+                $('#processResults').text('Checking configuration, querying and verifying the Zotero library. This may take a couple of minutes');
 
                 let $progressDiv = $('#processProgressbar');
                 $progressDiv.show();
@@ -218,6 +307,8 @@ if(!$syncingStep){
     </head>
 
     <body class="popup" style="margin-right:30px;overflow:auto">
+        <div id="processResults"><p>Checking configuration, querying and verifying the Zotero library. This may take a couple of minutes</p></div>
+        <?php if (ob_get_level()) { ob_flush(); } flush(); ?>
 
         <?php
 
@@ -444,17 +535,94 @@ if( is_empty($group_ID) && is_empty($user_ID) || is_empty($api_Key) ){
     exit;
 }
 
+// Language values use the immutable base field, including non-standard fields.
+foreach (['2-965'=>'detailtype','2-496'=>'term'] as $concept=>$definitionType) {
+    $localID = $definitionType==='term' ? ConceptCode::getTermLocalID($concept) : ConceptCode::getDetailTypeLocalID($concept);
+    if (!$localID) {
+        if (!$syncingStep) { print '<p>Importing missing Language definition '.htmlspecialchars($concept).' automatically...</p>'; }
+        $import = new DbsImport($system);
+        if (!$import->doPrepare(['defType'=>$definitionType,'conceptCode'=>$concept]) || !$import->doImport()) {
+            $message = 'Cannot import Language definition '.$concept.': '.$system->getErrorMsg();
+            if ($syncingStep) { exitServerCall($message, HEURIST_ERROR); }
+            print '<p>'.htmlspecialchars($message).'</p>'; exit;
+        }
+    }
+}
+$collectionSetupMessages = [];
+$missingCollectionDefinitions = [];
+foreach (['1774-1189','1774-1190','1774-1191'] as $concept) {
+    if (!ConceptCode::getDetailTypeLocalID($concept)) { $missingCollectionDefinitions[] = $concept; }
+}
+if ($missingCollectionDefinitions && !$syncingStep) {
+    print '<p style="max-width:800px;line-height:1.5">Importing missing Zotero collection fields from Heurist_Core_Definitions automatically...</p>';
+}
+try {
+    zoteroEnsureCollectionDefinitions($system, $collectionSetupMessages);
+} catch (Throwable $e) {
+    // A real download failure is actionable; missing record-type assignment is not.
+    if ($syncingStep) { exitServerCall($e->getMessage(), HEURIST_ERROR); }
+    print '<p>'.htmlspecialchars($e->getMessage()).'</p>';
+    exit;
+}
+$collectionRecordTypes = [];
+foreach ($mapping_rt as $mapping) {
+    $rt = intval($mapping['h3rectype']);
+    $collectionRecordTypes[$rt] = $rectypes['names'][$rt] ?? ('Record type '.$rt);
+}
+$collectionFields = zoteroCollectionFields($system->getMysqli(), $collectionRecordTypes, $collectionConfigErrors, $collectionNonstandardTypes);
+$collectionConfigReport = zoteroCollectionConfigurationReport($collectionConfigErrors, $collectionNonstandardTypes, $collectionSetupMessages);
+if (!$syncingStep) {
+    print $collectionConfigReport;
+    print '<p style="max-width:800px;line-height:1.5">Collection fields: <strong>1774-1189</strong> — collection/sub-collection name; '
+        .'<strong>1774-1190</strong> — collection identifier; <strong>1774-1191</strong> — hierarchical terms for the complete path. '
+        .'Run a full library update to fill these fields for records already synchronised, and after renaming or moving collections.</p>';
+}
+
 $zotero = null;
 $zotero = new phpZotero($api_Key);
 
-$previousSync = $system->settings->getDatabaseSetting('External IDs');
-$syncIndex = $user_Name ?? $lib_key_idx;
-$syncIndex = "ZoteroSync_{$syncIndex}";
-$previousSync = $previousSync && array_key_exists($syncIndex, $previousSync) ? $previousSync[$syncIndex] : ['id' => 0, 'date' => null];
+// Stable library identity, independent of its editable display name.
+$syncIndex = ($group_ID ? 'groups/' : 'users/').($group_ID ?: $user_ID);
+$legacy = $system->settings->getDatabaseSetting('External IDs');
+$legacyIndex = 'ZoteroSync_'.($user_Name ?? $lib_key_idx);
+try {
+    $syncStatus = new ZoteroSyncStatus($system->getSysDir('settings'), $syncIndex, $legacy[$legacyIndex] ?? []);
+    // Copy the old checkpoint once. Future reads/writes use only the dedicated file.
+    $syncStatus->save();
+    if (is_array($legacy) && isset($legacy[$legacyIndex])) {
+        unset($legacy[$legacyIndex]);
+        if (!$system->settings->setDatabaseSetting('External IDs', $legacy)) {
+            error_log('Zotero status was migrated, but the obsolete external_IDs.json sync entry could not be removed.');
+        }
+    }
+} catch (Throwable $e) {
+    if ($syncingStep) { exitServerCall($e->getMessage(), HEURIST_ACTION_BLOCKED); }
+    print errorDiv(htmlspecialchars($e->getMessage()));
+    exit;
+}
+$previousSync = ['id' => intval($syncStatus->state['last_version']), 'date' => htmlspecialchars($syncStatus->state['last_sync'] ?? '')];
+$retryOnly = !empty($_REQUEST['retryOnly']);
+$retryKeys = array_keys($syncStatus->state['failed_records']);
+if ($syncingStep && !empty($_REQUEST['manuallyResolved'])) {
+    $key = (string)$_REQUEST['manuallyResolved'];
+    if (!isset($syncStatus->state['failed_records'][$key])) {
+        exitServerCall('This Zotero key is not in the retry list.', HEURIST_ACTION_BLOCKED);
+    }
+    $syncStatus->complete($key);
+    $syncStatus->save();
+    $syncStatus->release();
+    exitServerCall('Removed manually corrected record from the retry list.', HEURIST_OK);
+}
+if (!$syncingStep) { $syncStatus->release(); }
 
 $lastSync = $previousSync['id'] > 0 ? "<br><br>Last Sync Version: <strong>{$previousSync['id']} ({$previousSync['date']})</strong>" : '';
 if(!$syncingStep){
-    print "<div><b>Zotero connection configured</b>{$lastSync}</div>";
+    print "<div><b>Zotero connection configured</b>{$lastSync}</div><p style='font-size:0.9em;color:#666'>Zotero diagnostics 2026-10-01-collections-v11</p>";
+    print zoteroReportSpacing(zoteroFailedRecordsReport($syncStatus->state['failed_records']));
+    if ($retryKeys) {
+        $onclick = '__startProcess('.json_encode($lib_key_idx).', '.count($retryKeys).', '.$previousSync['id'].', true)';
+        print '<p><button class="h3button" onclick="'.htmlspecialchars($onclick, ENT_QUOTES).'">Retry failed records only</button></p>';
+    }
     print '<br><a href="#" onclick="open_sysIdentification()">Click here to modify properties which determine Zotero connection</a><br><br>';
 }
 
@@ -546,7 +714,7 @@ if($step == 1){  //first step - info about current status
             print "No items found within Library";
         }
 
-        print "</div><div class='ent_wrapper' id='processProgressbar' style='background: white;z-index: 6000001;display: none;'></div><div id='processResults'></div>";
+        print "</div><div class='ent_wrapper' id='processProgressbar' style='background: white;z-index: 6000001;display: none;'></div><div id='processResultsPosition'></div><script>$('#processResults').appendTo('#processResultsPosition').empty();</script>";
     }
 }elseif($syncingStep){ //second step - sync
 
@@ -583,8 +751,16 @@ if($step == 1){  //first step - info about current status
     $arr_notfound = [];
 
     $start = 0;
-    $totalitems = intval($_REQUEST['cnt']);
+    $syncID = $syncID > 0 ? $previousSync['id'] : 0;
+    [$totalitems, $runVersion] = getZoteroHeaders($api_Key, $group_ID ? 'groups' : 'users', $group_ID ?: $user_ID, $syncID, $diagnostic);
+    if ($runVersion === false) { exitServerCall($diagnostic, HEURIST_ACTION_BLOCKED); }
+    if ($retryOnly) { $totalitems = 0; }
+    // Retries have no since filter; otherwise unchanged failed items never return.
+    $retryBatches = array_chunk($retryKeys, 50);
     $fetch = min($totalitems, 100);
+    $enumerationComplete = true;
+    $recordKeys = [];
+    $recordTitles = [];
     $new_recid = 0;
     $isFailure = false;
 
@@ -604,6 +780,13 @@ if($step == 1){  //first step - info about current status
 
     $outputLines[] = '<br>Starting Zotero Library Sync for '. intval($totalitems) .' records...<br>';
 
+    $collectionMap = [];
+    $collectionFetchError = null;
+    $collectionVocabulary = [];
+    if ($collectionFields) {
+        try { $collectionMap = zoteroFetchCollections($api_Key, $group_ID ? 'groups' : 'users', $group_ID ?: $user_ID); }
+        catch (Throwable $e) { $collectionFetchError = $e->getMessage(); }
+    }
     $searchOptions = [
         'format' => 'atom',
         'content' => 'json',
@@ -614,33 +797,57 @@ if($step == 1){  //first step - info about current status
         $searchOptions['since'] = intval($syncID);
     }
 
-    while ($start < $totalitems){
+    $attemptedKeys = [];
+    $progressTotal = $totalitems;
+    while ($start < $totalitems || $retryBatches){
+        $isRetryBatch = $start >= $totalitems;
+        $batchKeys = $isRetryBatch ? array_values(array_filter(array_shift($retryBatches), function($key) use ($syncStatus, $attemptedKeys) {
+            return !isset($attemptedKeys[$key]) && isset($syncStatus->state['failed_records'][$key]);
+        })) : [];
+        if ($isRetryBatch && !$batchKeys) { continue; }
+        $options = $searchOptions;
+        if ($isRetryBatch) {
+            unset($options['since']);
+            $options['itemKey'] = implode(',', $batchKeys);
+            $options['start'] = 0;
+            $options['limit'] = 50;
+        } else {
+            $options['start'] = $start;
+            $options['limit'] = min(100, $totalitems - $start);
+        }
+        $unresolved_pointers = [];
+
 
         $searchOptions['start'] = $start;
         $searchOptions['limit'] = $fetch;
 
+        $zoteroDiagnosticStage = 'Fetching Zotero items, offset '.intval($start).', count '.intval($fetch);
         if($group_ID){
-            $items = $zotero->getItemsTop($group_ID, $searchOptions, "groups");
+            $items = $zotero->getItemsTop($group_ID, $options, "groups");
         }else{
-            $items = $zotero->getItemsTop($user_ID, $searchOptions);
+            $items = $zotero->getItemsTop($user_ID, $options);
         }
 
-        $zdata = simplexml_load_string($items);
+        $zoteroDiagnosticStage = 'Reading Zotero items, offset '.intval($start).', count '.intval($fetch);
+        $zdata = $items ? simplexml_load_string($items) : false;
+        if ($zotero->getResponseStatus() >= 400) { $zdata = false; }
 
         if($zdata===false){
 
             $outputLines[] = "<div style='color:red'>Error: zotero returns non valid xml response for range $start ~ ".intval($start+$fetch)." </div>";
             $isFailure = true;
+            $enumerationComplete = false;
 
             $system->addError(HEURIST_ERROR, 'Zotero Synchronisation, Invalid XML Response',
                 'Zotero Synchronisation has Encountered an Invalid XML Response',
                 "Error: zotero returns non valid xml response for range $start ~ ".intval($start+$fetch));
 
             break;
-        }elseif(count($zdata->children()) < 1){
+        }elseif(!$isRetryBatch && count($zdata->entry) < 1){
 
             $outputLines[] = "<div style='color:red'>Error: zotero returns empty response for range $start ~ ".intval($start+$fetch)." </div>";
             $isFailure = true;
+            $enumerationComplete = false;
 
             $system->addError(HEURIST_ERROR, 'Zotero Synchronisation, Empty Response',
                 'Zotero Synchronisation has encountered an Empty Response',
@@ -649,20 +856,42 @@ if($step == 1){  //first step - info about current status
             break;
         }
 
-        foreach ($zdata->children() as $entry){
+        if (!$isRetryBatch && count($zdata->entry) !== $options['limit']) {
+            $enumerationComplete = false;
+            $outputLines[] = errorDiv('Zotero returned fewer items than expected. The previous version will be retained.');
+        }
 
-            if($sessionID > 0){
-                ++$sessionCount;
-                if(DbUtils::setSessionVal("{$sessionCount},{$totalitems}")){
-                    $terminatedByUser = true;
-                    $outputLines[] = '<div style="font-weight: bold;">Process terminated by User</div>';
-                    break 2;
-                }
-            }
+        if ($isRetryBatch) { $progressTotal += count($zdata->entry); }
+
+        // Persist the fetched work BEFORE modifying any Heurist record. A fatal error
+        // leaves these keys available for retry rather than silently skipping them.
+        foreach ($zdata->entry as $pendingEntry) {
+            $pendingKey = strval(findXMLelement($pendingEntry, 'zapi', 'key'));
+            if (!$pendingKey) { $enumerationComplete = false; continue; }
+            if (isset($attemptedKeys[$pendingKey])) { continue; }
+            $syncStatus->fail($pendingKey, strval(findXMLelement($pendingEntry, null, 'title')), 0,
+                'Processing interrupted before this item completed.', 'pending');
+        }
+        $syncStatus->save();
+        $seenKeys = [];
+        foreach ($zdata->children() as $entry){
 
             if($entry->getName() == "entry"){
 
                 $zotero_itemid = strval(findXMLelement($entry, "zapi", "key"));
+                if (!$zotero_itemid) { $enumerationComplete = false; continue; }
+                $seenKeys[] = $zotero_itemid;
+                if (isset($attemptedKeys[$zotero_itemid])) { continue; }
+                $attemptedKeys[$zotero_itemid] = true;
+                if ($sessionID > 0) {
+                    ++$sessionCount;
+                    if (DbUtils::setSessionVal("{$sessionCount},{$progressTotal}")) {
+                        $terminatedByUser=true;
+                        $outputLines[]='<div style="font-weight:bold">Process terminated by User</div>';
+                        break 2;
+                    }
+                }
+
 
                 // 2) get content of item if itemType is supported
                 $itemtype = strval(findXMLelement($entry, "zapi", "itemType"));
@@ -670,10 +899,12 @@ if($step == 1){  //first step - info about current status
 
                 if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
 
+                    $syncStatus->fail($zotero_itemid, $itemtitle, 0, 'Zotero record type is not mapped: '.$itemtype, 'mapping');
+                    $syncStatus->state['failed_records'][$zotero_itemid]['zotero_type'] = $itemtype;
                     $itemtype = htmlspecialchars($itemtype);
                     $itemtitle = htmlspecialchars($itemtitle);
 
-                    array_push($arr_ignored, "<br>Undefined record type : <strong>{$itemtype}</strong> <em>{$itemtitle}</em><br>");
+
 
                     if(!@$arr_ignored_by_type[$itemtype]) {$arr_ignored_by_type[$itemtype] = 0;}
                     $arr_ignored_by_type[$itemtype]++;
@@ -690,7 +921,12 @@ if($step == 1){  //first step - info about current status
                 "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID="
                 .intval($dt_SourceRecordID)." and d.dtl_Value='"
                 .$mysqli->real_escape_string($zotero_itemid)."'";
-                $res = $mysqli->query($query);
+                try { $res = $mysqli->query($query); } catch (Throwable $e) { $res = false; }
+                if ($res === false) {
+                    $syncStatus->fail($zotero_itemid, $itemtitle, 0, 'Could not look up the existing Heurist record; no new record was created. Check the database error log.');
+                    $isFailure = true;
+                    continue;
+                }
                 if($res){
                     $row = $res->fetch_row();
                     if($row){
@@ -704,6 +940,11 @@ if($step == 1){  //first step - info about current status
                 }
 
                 $content = json_decode(strval(findXMLelement($entry, null, "content")));
+                if (!is_object($content)) {
+                    $syncStatus->fail($zotero_itemid, $itemtitle, $recId, 'Invalid Zotero item JSON.');
+                    $isFailure = true;
+                    continue;
+                }
 
                 // 5) create "details" array based on mapping
 
@@ -715,10 +956,39 @@ if($step == 1){  //first step - info about current status
                 $recordType = $mapping_dt["h3rectype"];
 
                 $is_empty_zotero_entry = true;
+                $itemMappingErrors = [];
+                $emptyCollectionFields = [];
+                $collectionItemError = null;
+                if (!empty($collectionFields[$recordType])) {
+                    try {
+                        if ($collectionFetchError) { throw new RuntimeException($collectionFetchError); }
+                        if (!isset($content->collections)) { throw new RuntimeException('Zotero item response lacks collection memberships.'); }
+                        $values = zoteroCollectionValues($content->collections, $collectionMap, ($group_ID ? 'groups/' : 'users/').($group_ID ?: $user_ID));
+                        foreach ($collectionFields[$recordType] as $kind => $fieldID) {
+                            $fieldValues = $values[$kind];
+                            if ($kind==='paths' && $fieldValues) {
+                                if (!isset($collectionVocabulary[$fieldID])) { $collectionVocabulary[$fieldID] = zoteroCollectionVocabulary($system, $fieldID); }
+                                $leafIDs = importHierarchicalTerms($system, $collectionVocabulary[$fieldID], $fieldValues);
+                                $fieldValues = array_values(array_unique(array_values($leafIDs)));
+                                // recordSave validates terms against the current vocabulary tree.
+                                $alldettypes = dbs_GetDetailTypes($system);
+                                $allterms = dbs_GetTerms($system);
+                            }
+                            if ($fieldValues) { $details['t:'.$fieldID] = $fieldValues; }
+                            else { $emptyCollectionFields[] = $fieldID; }
+                        }
+                    } catch (Throwable $e) {
+                        $collectionItemError = ($collectionItemError ? $collectionItemError.' ' : '').'Collections: '.$e->getMessage();
+                        // Preserve existing collection fields when metadata could not be read.
+                        foreach ($collectionFields[$recordType] as $fieldID) { unset($details['t:'.$fieldID]); }
+                        $emptyCollectionFields = [];
+                    }
+                }
 
                 foreach ($content as $zkey => $value){
+                    if ($zkey==='collections') { continue; }
 
-                    if(!$value) {continue;}
+                    if($value===null || $value==='' || $value===[]) {continue;}
 
                     $is_empty_zotero_entry = false;
 
@@ -756,7 +1026,7 @@ if($step == 1){  //first step - info about current status
                             $ctype = @$creator->$prop;
 
                             $key = @$mapping_dt[$ctype];
-                            if(!$key) {continue;}
+                            if(!$key) { zoteroCountUnassigned($recordType, $ctype); continue;}
 
                             $prop = 'name';
                             $title = @$creator->$prop;
@@ -796,7 +1066,7 @@ if($step == 1){  //first step - info about current status
                     }
 
                     //find heurist field type mapped to zotero key
-                    $key = @$mapping_dt[$zkey];
+                    $key = $zkey==='language' ? ConceptCode::getDetailTypeLocalID('2-965') : @$mapping_dt[$zkey];
                     $resource_rt_id = null;
                     $resource_dt_id = null;
 
@@ -811,6 +1081,8 @@ if($step == 1){  //first step - info about current status
                         if(!@$alldettypes['typedefs'][$detail_id] && $zkey != 'url'){
                             //field id not found in this db
                             $msg = $itemtype.'.'.$zkey.' -> '.$detail_id;
+                            zoteroCountUnassigned($recordType, $zkey);
+                            $itemMappingErrors[] = 'Mapped field for Zotero '.$zkey.' is missing (field Concept ID '.ConceptCode::getDetailTypeConceptID($detail_id).').';
                             if(!in_array($msg, $arr_notfound)){
                                 array_push($arr_notfound, $msg);
                                 $cnt_notfound++;
@@ -818,17 +1090,20 @@ if($step == 1){  //first step - info about current status
                             continue;
                         }
 
-                        $dt_type = $alldettypes['typedefs'][$detail_id]['commonFields'][$fi_dettype];
+                        // Language must never fall through to text storage, even if cached
+                        // metadata was loaded before definitions were imported.
+                        $dt_type = $zkey==='language' ? 'enum' : mysql__select_value($system->getMysqli(), 'SELECT dty_Type FROM defDetailTypes WHERE dty_ID='.intval($detail_id));
 
                         if($dt_type=='enum' || $dt_type=='relationtype'){
                             // 6) find terms by label values
-                            $trm_value = resolveTermValue($dt_type, $value);
-                            if($trm_value==null){
-                                $report_log = $report_log." term not found for ".$value;
+                            $trm_value = resolveTermValue($detail_id, $dt_type, $value, $recordType);
+                            if(!is_numeric($trm_value) || intval($trm_value)<=0){
+                                $fieldName = $alldettypes['names'][$detail_id] ?? ('Field '.$detail_id);
+                                $itemMappingErrors[] = 'Zotero value "'.(is_scalar($value) ? $value : json_encode($value)).'" does not match a selectable term in '.$fieldName.' (Concept ID '.ConceptCode::getDetailTypeConceptID($detail_id).') .';
                                 continue;
                             }
 
-                            $value = $trm_value;
+                            $value = intval($trm_value);
 
                         }elseif($dt_type=='resource'){
 
@@ -861,10 +1136,7 @@ if($step == 1){  //first step - info about current status
                         }
 
                     }elseif(!($zkey == 'url' || $zkey=='key')){
-                        if(!in_array($itemtype.'.'.$zkey, $arr_notmapped)){
-                            array_push($arr_notmapped, $itemtype.'.'.$zkey);
-                            $cnt_notmapped++;
-                        }
+                        zoteroCountUnassigned($recordType, $zkey);
                     }
                 }//for fields in content
 
@@ -872,15 +1144,34 @@ if($step == 1){  //first step - info about current status
 
                 if($is_empty_zotero_entry){
 
+                    $syncStatus->fail($zotero_itemid, $itemtitle, $recId, 'No data recorded in Zotero.');
                     $outputLines[] = errorDiv('Warning: zotero id '.htmlspecialchars($zotero_itemid).': no data recorded in Zotero for this entry');
 
                 }elseif(empty($details)){
                     //no one zotero key has proper mapping to heurist fields
                     array_push($arr_empty, $zotero_itemid);
                     $cnt_empty++;
+                    $syncStatus->fail($zotero_itemid, $itemtitle, $recId, 'No Zotero fields have a usable mapping.', 'mapping');
                 }else{
-                    $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo, $totalitems);
+                    $zoteroDiagnosticStage = 'Saving Zotero item '.$zotero_itemid.', Heurist record '.intval($recId).', record type '.intval($recordType);
+                    $itemErrorStart = count($outputLines);
+                    try {
+                        $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo, $totalitems);
+                    } catch (Throwable $e) {
+                        $outputLines[] = errorDiv(htmlspecialchars(preg_replace('/([?&]key=)[^&\s]+/i', '$1[redacted]', $e->getMessage())));
+                        $new_recid = 0;
+                    }
                     if($new_recid){
+                        if ($emptyCollectionFields) {
+                            try {
+                                $cleared = $mysqli->query('DELETE FROM recDetails WHERE dtl_RecID='.intval($new_recid).' AND dtl_DetailTypeID IN ('.implode(',', array_map('intval',$emptyCollectionFields)).')');
+                            } catch (Throwable $e) { $cleared = false; }
+                            if (!$cleared) { $collectionItemError = 'Could not clear removed Zotero collection memberships for H-ID '.intval($new_recid).'.'; }
+                        }
+                        $recordKeys[$new_recid] = $zotero_itemid;
+                        $recordTitles[$new_recid] = $itemtitle;
+                        if (empty($unresolved_records)) { $syncStatus->complete($zotero_itemid); }
+                        else { $syncStatus->fail($zotero_itemid, $itemtitle, $new_recid, 'Author/institution links awaiting resolution.', 'pending'); }
                         if(!empty($unresolved_records)){
                             $unresolved_pointers[$new_recid] = $unresolved_records;
                         }
@@ -894,18 +1185,33 @@ if($step == 1){  //first step - info about current status
                             $cnt_report[$recordType]['added'][] = $new_recid;
                         }
                     }else{
+                        $syncStatus->fail($zotero_itemid, $itemtitle, $recId,
+                            strip_tags(implode(' ', array_slice($outputLines, $itemErrorStart))) ?: 'Record save failed.');
                         $isFailure = true;
                     }
+                }
+                if ($collectionItemError) {
+                    $itemMappingErrors[] = $collectionItemError;
+                }
+                if ($itemMappingErrors) {
+                    $syncStatus->fail($zotero_itemid, $itemtitle, $new_recid ?: $recId, implode("\n", $itemMappingErrors), 'field_mapping');
                 }
             }//entry
 
         }//end of for each loop by items in fetch
 
-        $start = $start + $fetch;
+        if (!handleUnresolvedPointers($mysqli, $unresolved_pointers)) { $isFailure = true; }
+        if ($isRetryBatch) {
+            foreach (array_diff($batchKeys, $seenKeys) as $missingKey) {
+                $old = $syncStatus->state['failed_records'][$missingKey] ?? [];
+                $syncStatus->fail($missingKey, $old['title'] ?? '', $old['heurist_record_id'] ?? 0,
+                    'Item was not returned by Zotero (deleted, trashed, or no longer top-level).', 'unavailable');
+            }
+        }
+        $syncStatus->save();
+        if (!$isRetryBatch) { $start += $options['limit']; }
 
     }// end of while loop
-
-    prepareUpdateTable();
 
     prepareErrors();
 
@@ -915,23 +1221,44 @@ if($step == 1){  //first step - info about current status
 
     //$output = ob_get_clean();
 
-    if(!handleUnresolvedPointers($mysqli, $unresolved_pointers)){
-        $isFailure = true;
+    $detailLines = $outputLines;
+    $outputLines = $collectionConfigReport ? [$collectionConfigReport] : [];
+    // Item failures are now a retry queue, not a reason to replay the whole library.
+    // Stop/fetch failures still retain the old cursor because unseen keys are unknown.
+    if (!$terminatedByUser && $enumerationComplete && !$retryOnly) {
+        [, $endVersion] = getZoteroHeaders($api_Key, $group_ID ? 'groups' : 'users', $group_ID ?: $user_ID, $syncID, $diagnostic);
+        if ($endVersion !== false && $endVersion === $runVersion) {
+            $syncStatus->state['last_version'] = $runVersion;
+            $syncStatus->state['last_sync'] = gmdate('c');
+        } else {
+            $outputLines[] = errorDiv('The library changed during synchronisation, or its final version could not be checked. The previous checkpoint is retained to avoid missing changes.');
+        }
     }
-
-    // An incomplete run must retain its previous cursor so it can be retried.
-    if(!$isFailure && !$terminatedByUser){
-        updateLastSync($api_Key, $group_ID, $user_ID, $syncID, $syncIndex);
+    if ($terminatedByUser || !$enumerationComplete) {
+        $outputLines[] = errorDiv('Download was interrupted. The previous Zotero version is retained; fetched unfinished items remain in the retry list.');
     }
-
-    // JT#3246: Keep long Zotero reports in a bounded, responsive panel so the
-    // scrollbar remains beside the report instead of at the far edge of a wide dialog.
-    $report = '<div class="zotero-sync-report" '
-        .'style="box-sizing:border-box;width:calc(100% - 20px);max-width:1100px;'
-        .'max-height:70vh;overflow:auto;padding:10px;word-break:break-word">'
-        .implode('', $outputLines)
-        .'</div>';
-    exitServerCall($report, HEURIST_OK);
+    $syncStatus->save();
+    $remaining = count($syncStatus->state['failed_records']);
+    $outputLines[] = '<p><strong>Saved Zotero version: '.intval($syncStatus->state['last_version']).'</strong><br>'
+        .'Status file: settings/zotero_sync_status.json<br>Records awaiting retry: '.$remaining.'</p>';
+    $actionable = array_filter($syncStatus->state['failed_records'], function($entry) { return $entry['category'] !== 'mapping'; });
+    prepareUpdateTable(!$enumerationComplete || count($actionable) > 0);
+    if ($actionable) {
+        foreach ($actionable as $entry) {
+            $id = intval($entry['heurist_record_id']);
+            $link = $id ? '<a target="_blank" href="'.HEURIST_BASE_URL.'?db='.rawurlencode($system->dbname()).'&amp;q=ids:'.$id.'">H-ID '.$id.'</a>' : 'Not yet saved in Heurist';
+            $outputLines[] = '<p>'.$link.' — '.htmlspecialchars($entry['title']).'<br>'.nl2br(htmlspecialchars(preg_replace('/\.\s+(?=Zotero value)/', ".\n", $entry['error']))).'</p>';
+        }
+    }
+    $outputLines[] = zoteroReportSpacing(zoteroFailedRecordsReport($syncStatus->state['failed_records']));
+    $outputLines[] = '<p><a href="'.htmlspecialchars($_SERVER['PHP_SELF']).'?db='.rawurlencode($system->dbname())
+        .'&amp;lib_key='.rawurlencode($lib_key_idx).'&amp;step=1">Return to Zotero synchronisation / retry failed records</a></p>';
+    $outputLines[] = '<details><summary>Mapping warnings and diagnostic details — show</summary>'
+        .implode('', $detailLines).'</details>';
+    $report = '<div class="zotero-sync-report"><p><strong>Zotero synchronisation 2026-10-01-collections-v11</strong></p>'
+        .implode('', $outputLines).'</div>';
+    $syncStatus->release();
+    exitServerCall(str_replace('Heurist H-ID', 'H-ID', $report), HEURIST_OK);
 }
 
 /**
@@ -1274,7 +1601,7 @@ function assignUnresolvedPointer(&$unresolved, $key, $value){
  */
 function createResourceRecord($mysqli, $record_type, $recdetails, $missing_pointers_count){
 
-    global $alldettypes, $fi_dettype, $report_log;
+    global $alldettypes, $fi_dettype, $report_log, $outputLines;
 
     if(is_array($recdetails) && array_key_exists(0, $recdetails)){ //these are creators
         $recource_recids = array();
@@ -1287,23 +1614,24 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
     $value_params = array('');
     $query = '';
     $details = array();
+    $unusableValues = [];
     $dcnt = 1;
     $recource_recid = null; //returned value
 
     foreach($recdetails as $dt_id=>$recdata){  //detail id in main record
 
 
-        if(!@$alldettypes['typedefs'][$dt_id]) {continue;}  //detail type not found
+        if(!@$alldettypes['typedefs'][$dt_id]) { $unusableValues[]='Missing mapped field '.ConceptCode::getDetailTypeConceptID($dt_id); continue;}  //detail type not found
 
         $dt_type = $alldettypes['typedefs'][$dt_id]['commonFields'][$fi_dettype];
         if($dt_type=='enum' || $dt_type=='relationtype'){
 
-            $trm_value = resolveTermValue($dt_type, $recdata);
-            if($trm_value==null){
+            $trm_value = resolveTermValue($dt_id, $dt_type, $recdata, $record_type);
+            if(!is_numeric($trm_value) || intval($trm_value)<=0){
                 $report_log = $report_log."<br> term not found for ".$recdata;
                 continue;
             }
-            $value = $trm_value;
+            $value = intval($trm_value);
 
         }elseif($dt_type=='resource'){ //next level of reference
 
@@ -1331,7 +1659,9 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
             $value = $recdata;
             if($dt_id==DT_DATE){
 
-                $value = Temporal::dateToISO($value, 1);
+                $originalDate = $value;
+                $value = zoteroPublicationDate($value);
+                if (!$value) { $unusableValues[] = 'Publication date "'.$originalDate.'" could not be converted to a date in '.($alldettypes['names'][$dt_id] ?? 'Date').' (Concept ID '.ConceptCode::getDetailTypeConceptID($dt_id).').'; }
                 /*
                 try{
                 $t2 = new DateTime($value);
@@ -1381,12 +1711,15 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
             $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID=".intval($record_type).$query;
         }
           
-        if($record_type == RT_PERSON || $record_type == RT_ORGANISATION){
-            $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID in (".
-                intval(RT_PERSON).",".intval(RT_ORGANISATION).")".$query;
-        }
+        // The SELECT is already complete above; do not prepend another SELECT.
         //$res = $mysqli->query($query);
         $res = mysql__select_param_query($mysqli,$query,$value_params);
+        if($res === false){
+            $outputLines[] = errorDiv('Resource lookup failed in createResourceRecord (import/biblio/syncZotero.php), target record type '
+                .intval($record_type).', MySQL error '.intval($mysqli->errno).': '.$mysqli->error
+                .'. No replacement resource record was created.');
+            return 0;
+        }
         if($res){
             $row = $res->fetch_row();
             if($row){
@@ -1395,6 +1728,13 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
         }
     }
 
+    if (empty($details)) {
+        $outputLines[] = errorDiv('Cannot create or identify '.htmlspecialchars($GLOBALS['rectypes']['names'][$record_type] ?? 'unknown type')
+            .' (Concept ID '.ConceptCode::getRecTypeConceptID($record_type).'): '
+            .htmlspecialchars(implode(' ', $unusableValues) ?: 'The supplied values produced no mapped target fields.')
+            .' The bibliography record is saved, but this link is missing. Open the H-ID listed below, edit the record and select or create the target in the indicated link field.');
+        return 0;
+    }
     if(!($recource_recid>0)){
         //such record not found - create new one
         $recource_recid = addRecordFromZotero(null, $record_type, null, $details, null, false, $missing_pointers_count);
@@ -1435,29 +1775,148 @@ function findXMLelement($xml, $ns, $name){
     return null;
 }
 
-/**
- * Resolve a term label to its corresponding term ID based on the detail type.
- * It performs a case-insensitive 'starts-with' match for the term label.
- *
- * @param string $dt_type The detail type context, typically 'enum' or 'relation',
- *                        to determine the domain of terms to search within.
- * @param string $value The term label (string value) to resolve.
- * @return int|string|null The ID of the resolved term if found; otherwise, null.
- *                         Term IDs can be integers (common) or strings.
- */
-function resolveTermValue($dt_type, $value)
-{
-    global $allterms, $fi_trmlabel;
+/** Resolve only inside the field vocabulary and record-type term restrictions. */
+/** Count each nonempty source value once per record type and Zotero field. */
+function zoteroReportSpacing($html) {
+    return str_replace('<p><a download=', '<p style="margin-top:18px"><a download=', $html);
+}
 
-    $terms = $allterms['termsByDomainLookup'][($dt_type=='enum'?'enum':'relation')];
-    $trm_value = null;
-    foreach ($terms as $trmid => $term){
-        if( strpos(strtolower($term[$fi_trmlabel]), strtolower($value))===0 ){
-            $trm_value = $trmid;
-            break;
+function zoteroCountUnassigned($recordType, $sourceField) {
+    global $rectypes, $arr_notmapped, $cnt_notmapped;
+    $label = ($rectypes['names'][$recordType] ?? ('Record type '.$recordType)).' : '.ucfirst((string)$sourceField);
+    $arr_notmapped[$label] = ($arr_notmapped[$label] ?? 0)+1;
+    $cnt_notmapped++;
+}
+
+/** Find the single vocabulary shared by every member of an explicit term list. */
+/** Preserve month precision for French Zotero publication dates. */
+function zoteroPublicationDate($value) {
+    $months=['janvier'=>1,'février'=>2,'fevrier'=>2,'mars'=>3,'avril'=>4,'mai'=>5,'juin'=>6,
+        'juillet'=>7,'août'=>8,'aout'=>8,'septembre'=>9,'octobre'=>10,'novembre'=>11,'décembre'=>12,'decembre'=>12];
+    $text=trim((string)$value);
+    if (preg_match('/^([\p{L}]+)\s+(\d{4})$/u', $text, $match)) {
+        $month=function_exists('mb_strtolower') ? mb_strtolower($match[1],'UTF-8') : strtolower($match[1]);
+        if (isset($months[$month])) { return sprintf('%04d-%02d',intval($match[2]),$months[$month]); }
+    }
+    return Temporal::dateToISO($value,1);
+}
+
+function zoteroVocabularyRoot($system, array $termIDs) {
+    $roots=[];
+    foreach ($termIDs as $id) {
+        $seen=[];
+        while ($id && !isset($seen[$id])) {
+            $seen[$id]=true;
+            $parent=mysql__select_value($system->getMysqli(),'SELECT trm_ParentTermID FROM defTerms WHERE trm_ID='.intval($id));
+            if (!$parent) { $roots[intval($id)]=true; break; }
+            $id=intval($parent);
         }
     }
-    return $trm_value;
+    return count($roots)===1 ? intval(array_key_first($roots)) : 0;
+}
+
+function resolveTermValue($fieldID, $dt_type, $value, $recordType = null) {
+    global $allterms, $alldettypes, $rectypes, $fi_trmlabel, $system;
+    if (!is_scalar($value) || trim((string)$value)==='') { return null; }
+    $domain = $dt_type==='enum' ? 'enum' : 'relation';
+    $indexes = $alldettypes['typedefs']['fieldNamesToIndex'];
+    $field = $alldettypes['typedefs'][$fieldID]['commonFields'] ?? [];
+    $tree = $field[$indexes['dty_JsonTermIDTree'] ?? -1] ?? null;
+    $nonselectable = $field[$indexes['dty_TermIDTreeNonSelectableIDs'] ?? -1] ?? '';
+    $getIDs = function($formatted) {
+        if (!$formatted) { return []; }
+        if (is_array($formatted)) { $formatted = json_encode($formatted); }
+        return array_values(array_unique(array_filter(array_map('intval', getTermsFromFormat((string)$formatted)))));
+    };
+    $expand = function($formatted) use ($getIDs, $allterms) {
+        $ids = $getIDs($formatted);
+        if (!is_numeric($formatted)) { return $ids; }
+        // A scalar vocabulary ID means its descendants, including references.
+        $queue = [$ids[0] ?? 0]; $seen = []; $result = [];
+        while ($queue) {
+            $parent = array_pop($queue);
+            if (!$parent || isset($seen[$parent])) { continue; }
+            $seen[$parent] = true;
+            foreach ($allterms['trm_Links'][$parent] ?? [] as $id) {
+                $id = intval($id);
+                if ($id !== intval($formatted)) { $result[$id] = $id; }
+                $queue[] = $id;
+            }
+        }
+        return array_values($result);
+    };
+    $isLanguage = $dt_type==='enum' && intval($fieldID)===intval(ConceptCode::getDetailTypeLocalID('2-965'));
+    if ($isLanguage) { $tree = ConceptCode::getTermLocalID('2-496'); }
+    // An unconfigured enum field is not permission to search every vocabulary.
+    if (!$tree && $dt_type==='enum') { return null; }
+    $lookup = $allterms['termsByDomainLookup'][$domain] ?? [];
+    $allowed = $tree ? $expand($tree) : array_keys($lookup);
+    $structIndexes = $rectypes['typedefs']['dtFieldNamesToIndex'] ?? [];
+    $structure = $rectypes['typedefs'][$recordType]['dtFields'][$fieldID] ?? [];
+    $filtered = $structure[$structIndexes['rst_FilteredJsonTermIDTree'] ?? -1] ?? null;
+    if ($filtered) { $allowed = array_intersect($allowed, $expand($filtered)); }
+    $excluded = $getIDs($nonselectable);
+    foreach (['rst_TermIDTreeNonSelectableIDs','dty_TermIDTreeNonSelectableIDs'] as $key) {
+        if (isset($structIndexes[$key])) { $excluded = array_merge($excluded, $getIDs($structure[$structIndexes[$key]] ?? '')); }
+    }
+    $allowed = array_diff($allowed, $excluded);
+    $normalise = function($text) { $text = trim((string)$text); return function_exists('mb_strtolower') ? mb_strtolower($text, 'UTF-8') : strtolower($text); };
+    $wanted = $normalise($value); $exact = []; $prefix = [];
+    $codeIndex = $allterms['fieldNamesToIndex']['trm_Code'] ?? -1;
+    foreach ($allowed as $id) {
+        $term = $lookup[$id] ?? null;
+        if (!$term) { continue; }
+        $label = $normalise($term[$fi_trmlabel] ?? '');
+        $code = $normalise($term[$codeIndex] ?? '');
+        if ($label===$wanted || ($code!=='' && $code===$wanted)) { $exact[$id] = intval($id); }
+        elseif (strlen($wanted)>=2 && strpos($label, $wanted)===0) { $prefix[$id] = intval($id); }
+    }
+    // Never pick an arbitrary first term when two allowed terms match.
+    if ($exact) { return reset($exact); }
+    // A prefix is not an exact incoming value: add it instead of rejecting it.
+    if ($dt_type!=='enum') { return null; }
+    $root = is_numeric($tree) ? intval($tree) : zoteroVocabularyRoot($system, $getIDs($tree));
+    if (!$root) { return null; }
+    // Reuse an exact term anywhere within this vocabulary, even when the
+    // form's selectable list omitted it. Extend that list below.
+    $id=0;
+    foreach ($expand($root) as $existingID) {
+        $existing = $lookup[$existingID] ?? [];
+        if ($normalise($existing[$fi_trmlabel] ?? '')===$wanted
+            || ($codeIndex>=0 && $normalise($existing[$codeIndex] ?? '')===$wanted)) { $id=intval($existingID); break; }
+    }
+    $parent = $root;
+    if (!$isLanguage && $filtered && is_numeric($filtered)) { $parent = intval($filtered); }
+    if (!$id) {
+        $entity = new \hserv\entity\DbDefTerms($system);
+        $entity->setData(['isfull'=>1,'fields'=>[['trm_Label'=>trim((string)$value),
+            'trm_ParentTermID'=>$parent,'trm_Domain'=>'enum']]]);
+        $ids = $entity->save();
+        if ($ids===false || empty($ids)) { throw new RuntimeException('Cannot add term "'.trim((string)$value).'" to vocabulary Concept ID '.ConceptCode::getTermConceptID($parent).': '.$system->getErrorMsg()); }
+        // Verify the stored row rather than trusting/casting a save response.
+        $id = intval(mysql__select_value($system->getMysqli(),
+            'SELECT trm_ID FROM defTerms WHERE trm_ParentTermID=? AND trm_Label=? AND trm_Domain="enum"',
+            ['is',$parent,trim((string)$value)]));
+        if ($id<=0) { throw new RuntimeException('No valid stored term ID for "'.trim((string)$value).'" in vocabulary Concept ID '.ConceptCode::getTermConceptID($parent).'.'); }
+    }
+    // Explicit allowed term sets must also include the new term; otherwise it
+    // would be stored outside the selectable field constraint on the next run.
+    foreach ([['defDetailTypes','dty_', 'dty_ID', $fieldID,'dty_JsonTermIDTree',$tree],
+              ['defRecStructure','rst_', 'rst_ID', $structure[$structIndexes['rst_ID'] ?? -1] ?? 0,'rst_FilteredJsonTermIDTree',$filtered]] as $constraint) {
+        [$table,$prefixName,$idColumn,$rowID,$column,$format] = $constraint;
+        if ($format && !is_numeric($format)) {
+            $updated = $getIDs($format); $updated[]=$id;
+            if (!$rowID && $table==='defRecStructure') { $rowID=mysql__select_value($system->getMysqli(),'SELECT rst_ID FROM defRecStructure WHERE rst_RecTypeID='.intval($recordType).' AND rst_DetailTypeID='.intval($fieldID)); }
+            if (!$rowID || !mysql__insertupdate($system->getMysqli(),$table,$prefixName,[$idColumn=>intval($rowID),$column=>json_encode(array_values(array_unique($updated)))])) {
+                throw new RuntimeException('Cannot include new term in the selectable list for field Concept ID '.ConceptCode::getDetailTypeConceptID($fieldID).'.');
+            }
+        }
+    }
+    // Refresh so subsequent items reuse the term and the normal column indexes.
+    $allterms = dbs_GetTerms($system);
+    $alldettypes = dbs_GetDetailTypes($system);
+    $rectypes = dbs_GetRectypeStructures($system, null, 2);
+    return $id;
 }
 
 /**
@@ -1506,6 +1965,19 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         if($zotero_itemid){
             $details["t:".$dt_SourceRecordID] = array("0"=>$zotero_itemid);
         }
+        // Reject raw labels and zero before recordSave's no-validation path.
+        foreach ($details as $fieldKey=>$values) {
+            if (strpos($fieldKey,'t:')!==0) { continue; }
+            $fieldID=intval(substr($fieldKey,2));
+            $type=mysql__select_value($system->getMysqli(),'SELECT dty_Type FROM defDetailTypes WHERE dty_ID='.$fieldID);
+            if ($type!=='enum') { continue; }
+            foreach ($values as $termID) {
+                if (!preg_match('/^[0-9]+$/D',(string)$termID) || intval($termID)<=0
+                    || !mysql__select_value($system->getMysqli(),'SELECT trm_ID FROM defTerms WHERE trm_ID='.intval($termID).' AND trm_Domain="enum"')) {
+                    throw new RuntimeException('Invalid term value "'.(string)$termID.'" for field Concept ID '.ConceptCode::getDetailTypeConceptID($fieldID).'; the record was not saved with an invalid term.');
+                }
+            }
+        }
         // 8) save rtecord
         $ref = null;
 
@@ -1523,7 +1995,9 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         $out = recordSave($system, $record, true, false, 4, $record_count);//see recordModify.php
 
         if ( @$out['status'] != HEURIST_OK ) {
-            $outputLines[] = "<div style='color:red'> Error: ".htmlspecialchars($out["message"]).DIV_E;
+            $outputLines[] = "<div style='color:red'> Error: ".htmlspecialchars('Record save failed in addRecordFromZotero (import/biblio/syncZotero.php). Zotero item: '
+                .($zotero_itemid ?: '(resource record)').'; Heurist record: '.($recId ?: '(new)')
+                .'; record type: '.$recordType.'. '.($out['message'] ?? 'No error message returned')).DIV_E;
         }else{
 
             $new_recid = intval($out['data']);
@@ -1558,12 +2032,12 @@ function is_empty($question){
     return $ret;
 }
 
-function prepareUpdateTable(){
+function prepareUpdateTable($isFailure = false){
 
-    global $rectypes, $cnt_report, $cnt_added, $cnt_updated, $arr_ignored, $outputLines, $terminatedByUser;
+    global $rectypes, $cnt_report, $cnt_added, $cnt_updated, $arr_ignored, $outputLines, $terminatedByUser, $enumerationComplete;
 
-    $status = $terminatedByUser ? 'Stopped' : 'Completed';
-    $outputLines[] = "<p></p><hr><p><b>Synching {$status}, Printing Report</b></p>";
+    $status = $terminatedByUser ? 'Stopped' : (!$enumerationComplete ? 'Interrupted' : ($isFailure ? 'completed with records requiring attention' : 'completed'));
+    $outputLines[] = "<p><b>Synchronisation {$status}</b></p>";
 
     $outputLines[] = TABLE_S.'<tr><td>&nbsp;</td><td>added</td><td>updated</td></tr>';
     foreach($cnt_report as $rty_ID => $cnt){
@@ -1574,10 +2048,10 @@ function prepareUpdateTable(){
 
     $outputLines[] = TABLE_E.'<div><br>Records added : '.composeLinkForAllIds($cnt_added).DIV_E;
 
-    $outputLines[] = '<div>Records updated : '.composeLinkForAllIds($cnt_updated).DIV_E;
+    $outputLines[] = '<div style="margin-bottom:18px">Records updated: '.composeLinkForAllIds($cnt_updated).DIV_E;
 
     if(!empty($arr_ignored)){
-        $outputLines[] = '<div>'. implode('<br>', $arr_ignored) .'</div>';
+        $outputLines[] = '<details><summary>Unmapped records: '.count($arr_ignored).' — show list</summary>'.implode('', $arr_ignored).'</details>';
     }
 }
 
@@ -1627,11 +2101,10 @@ function prepareErrors(){
         // Not Mapped
         $outputLines[] = '<div style="color:black">';
         if($cnt_notmapped > 0){
-            $outputLines[] = "<br>Zotero keys that are not mapped to Heurist field types: {$cnt_notmapped}";
-            $outputLines[] = '<br>In general these will be insignificant, please submit bug/improvement request if necessary';
-            $outputLines[] = "<div style ='padding-left:20px'>- ".implode($line_sep, $arr_notmapped).DIV_E;
-
-            $err_msg .= "\nZotero keys that are not mapped to Heurist field types: {$cnt_notmapped}";
+            $outputLines[] = '<p style="margin-top:18px"><strong>Unassigned data values:</strong></p><div style="padding-left:20px">';
+            foreach ($arr_notmapped as $label=>$count) { $outputLines[] = htmlspecialchars($label).' n='.intval($count).'<br>'; }
+            $outputLines[] = '</div>';
+            $err_msg .= "\nUnassigned data values: ".json_encode($arr_notmapped);
         }
         $outputLines[] = DIV_E;
 
@@ -1639,13 +2112,7 @@ function prepareErrors(){
 
         $outputLines[] = '<span><br>If you think the Zotero import needs updating or wish to provide additional information please create a ticket - link at top of page.</span>';
 
-        $outputLines[] = <<<WARNING
-        <script>
-            window.hWin.HEURIST4.msg.showMsgDlg(`Warning: {$tot_erros} warnings reported: Please check the warnings listed. 
-            We do not map all fields from Zotero as for most purposes these are fields of little use in your database. 
-            Please create a ticket at top of page if you think the Zotero import needs updating.`, null, "Zotero synchronisation warnings");
-        </script>
-        WARNING;
+        // Warnings remain in the report; no modal obscures the completion result.
     }
 }
 
@@ -1656,7 +2123,7 @@ function prepareErrors(){
  */
 function handleUnresolvedPointers($mysqli, $unresolved_pointers){
 
-    global $outputLines;
+    global $outputLines, $zoteroDiagnosticStage, $syncStatus, $recordKeys, $recordTitles, $alldettypes, $rectypes;
     $success = true;
 
     // try to find 'unresolved pointers
@@ -1680,11 +2147,21 @@ function handleUnresolvedPointers($mysqli, $unresolved_pointers){
             continue;
         }
 
+        $bibliographyType = intval(mysql__select_value($mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID='.$rec_id));
+        $recordErrorStart = count($outputLines);
+        $recordFailed = false;
         foreach($pntdata as $dt_id => $recdata){  //detail id in main record
 
             foreach($recdata as $resource_rt_id => $resource_details){ //recordtype
 
-                $recource_recid = createResourceRecord($mysqli, $resource_rt_id, $resource_details, $missing_pointers_count);
+                $zoteroDiagnosticStage = 'Resolving resource for bibliography record '.intval($rec_id).', field '.intval($dt_id).', target record type '.intval($resource_rt_id);
+                $resourceErrorStart = count($outputLines);
+                try {
+                    $recource_recid = createResourceRecord($mysqli, $resource_rt_id, $resource_details, $missing_pointers_count);
+                } catch (Throwable $e) {
+                    $outputLines[] = htmlspecialchars(preg_replace('/([?&]key=)[^&\s]+/i', '$1[redacted]', $e->getMessage()));
+                    $recource_recid = 0;
+                }
 
                 if(!is_array($recource_recid)){
                     $recource_recid = ["0" => $recource_recid];
@@ -1695,8 +2172,22 @@ function handleUnresolvedPointers($mysqli, $unresolved_pointers){
                     $res_rec_id = intval($res_rec_id);
                     if(!isPositiveInt($res_rec_id)){
                         $res_rec_id = htmlspecialchars($res_rec_id);
-                        $outputLines[] = "Invalid record pointer target provided: {$res_rec_id}";
+                        $requested = is_array($resource_details) && array_key_exists(0, $resource_details)
+                            ? ($resource_details[$idx] ?? $resource_details) : $resource_details;
+                        $sourceValues = [];
+                        array_walk_recursive($requested, function($value) use (&$sourceValues) { if (is_scalar($value) && (string)$value !== '') { $sourceValues[] = (string)$value; } });
+                        $fieldName = $alldettypes['names'][$dt_id] ?? 'Unknown field';
+                        $targetName = $rectypes['names'][$resource_rt_id] ?? 'Unknown record type';
+                        $sourceTypeName = $rectypes['names'][$bibliographyType] ?? 'Unknown record type';
+                        $cause = trim(strip_tags(implode(' ', array_splice($outputLines, $resourceErrorStart))));
+                        $message = 'Could not find or create the link for H-ID '.$rec_id
+                            .' ('.$sourceTypeName.', Concept ID '.ConceptCode::getRecTypeConceptID($bibliographyType).'), title "'.($recordTitles[$rec_id] ?? '').'"'
+                            .', Zotero key '.($recordKeys[$rec_id] ?? 'unknown').'. Field: '.$fieldName.' (Concept ID '.ConceptCode::getDetailTypeConceptID($dt_id).')'
+                            .'; target: '.$targetName.' (Concept ID '.ConceptCode::getRecTypeConceptID($resource_rt_id).'). Source value: '.implode(' / ', $sourceValues).'. '
+                            .($cause ?: 'No usable target record was produced; check the mapped name fields and required target fields.');
+                        $outputLines[] = '<p class="ui-state-error">'.htmlspecialchars($message).'</p>';
                         $success = false;
+                        $recordFailed = true;
                         continue;
                     }
 
@@ -1713,13 +2204,21 @@ function handleUnresolvedPointers($mysqli, $unresolved_pointers){
                         $recTitles[$rec_id] ??= "Rec #<strong>{$rec_id}</strong>";
                         $recTitles[$res_rec_id] ??= "Rec #<strong>{$res_rec_id}</strong>";
 
-                        $msg = "Failed to connect {$recTitles[$res_rec_id]} to {$recTitles[$rec_id]}";
+                        $msg = "Failed to link target H-ID {$res_rec_id} (".htmlspecialchars($rectypes['names'][$resource_rt_id] ?? 'Unknown type').") to H-ID {$rec_id} (".htmlspecialchars($rectypes['names'][$bibliographyType] ?? 'Unknown type')."), field ".htmlspecialchars($alldettypes['names'][$dt_id] ?? 'Unknown field')." (Concept ID ".ConceptCode::getDetailTypeConceptID($dt_id).").";
                         $msg .= !empty($result) ? ", reason: {$result}" : '';
                         $outputLines[] = $msg;
                         $success = false;
+                        $recordFailed = true;
                     }
                 }
             }
+        }
+        $key = $recordKeys[$rec_id] ?? null;
+        if ($key) {
+            if ($recordFailed) {
+                $syncStatus->fail($key, $recordTitles[$rec_id] ?? '', $rec_id,
+                    strip_tags(implode(' ', array_slice($outputLines, $recordErrorStart))));
+            } elseif (($syncStatus->state['failed_records'][$key]['category'] ?? '') === 'pending') { $syncStatus->complete($key); }
         }
     }
     return $success;
@@ -1730,9 +2229,12 @@ function handleUnresolvedPointers($mysqli, $unresolved_pointers){
  * @param string $type
  * @param int $id
  * @param int $lastSync
+ * @param string|null $diagnostic Safe request failure description (no API key).
  * @return array<bool|int|null>
  */
-function getZoteroHeaders($apiKey, $type, $id, $lastSync = 0){
+function getZoteroHeaders($apiKey, $type, $id, $lastSync = 0, &$diagnostic = null){
+
+    $diagnostic = null;
 
     $sortBy = $type === 'groups' ? 'sort=desc' : 'direction=desc';
     $URL = "https://api.zotero.org/{$type}/{$id}/items/top?key={$apiKey}&format=atom&content=none&start=0&limit=1&order=dateModified&{$sortBy}";
@@ -1760,13 +2262,18 @@ function getZoteroHeaders($apiKey, $type, $id, $lastSync = 0){
 
     $results = curl_exec($curlHandle);
     $error = curl_error($curlHandle);
-    //$httpStatus = intval(curl_getinfo($curlHandle, CURLINFO_HTTP_CODE));
-    if($error){
+    $httpStatus = intval(curl_getinfo($curlHandle, CURLINFO_HTTP_CODE));
+    if($error || $results === false || $httpStatus !== 200){
+        // Do not expose the URL or cURL message: either can contain the API key.
+        $diagnostic = "Zotero checkpoint request failed: {$type}/{$id}/items/top, since=".intval($lastSync)
+            .", HTTP {$httpStatus}, cURL error ".curl_errno($curlHandle)." (getZoteroHeaders).";
+        curl_close($curlHandle);
         return [false, false];
     }
 
     $headerSize = curl_getinfo($curlHandle, CURLINFO_HEADER_SIZE);
 
+    curl_close($curlHandle);
     $headers = substr($results, 0, $headerSize);
     $newline = strpos($headers, "\r") !== false ? "\r\n" : "\n";
     $headers = explode($newline, trim($headers));
@@ -1790,39 +2297,12 @@ function getZoteroHeaders($apiKey, $type, $id, $lastSync = 0){
         }
     }
 
+    if($syncID === null || $totalResults === null){
+        $diagnostic = 'Zotero checkpoint response is missing '.($syncID === null ? 'Last-Modified-Version' : 'Total-Results')
+            ."; {$type}/{$id}/items/top (getZoteroHeaders).";
+        return [false, false];
+    }
     return [$totalResults, $syncID];
-}
-
-/**
- * @param string $api_Key
- * @param string|int $group_ID
- * @param string|int $user_ID
- * @param int $syncID
- * @param string $syncIndex
- * @return void
- */
-function updateLastSync($api_Key, $group_ID, $user_ID, $syncID, $syncIndex){
-
-    global $system;
-
-    $latestSyncID = false;
-    if($group_ID){
-        [, $latestSyncID] = getZoteroHeaders($api_Key, 'groups', $group_ID, $syncID);
-    }else{
-        [, $latestSyncID] = getZoteroHeaders($api_Key, 'users', $user_ID, $syncID);
-    }
-
-    if($latestSyncID !== false){
-
-        $settings = [
-            $syncIndex => [
-                'id' => $latestSyncID,
-                'date' => date('Y-m-d H:i:s')
-            ]
-        ];
-
-        $system->settings->setDatabaseSetting('External IDs', $settings, 1);
-    }
 }
 
 /**
@@ -1832,13 +2312,18 @@ function updateLastSync($api_Key, $group_ID, $user_ID, $syncID, $syncIndex){
  */
 function exitServerCall($data, $status){
 
-    global $system;
+    global $system, $zoteroDiagnosticFinished, $zoteroDiagnosticBufferLevel;
 
+    // Clean buffered warnings/HTML before emitting the AJAX JSON response.
+    if(isset($zoteroDiagnosticBufferLevel)){
+        while(ob_get_level() > $zoteroDiagnosticBufferLevel){ ob_end_clean(); }
+    }
+    $zoteroDiagnosticFinished = true;
     if($status !== HEURIST_OK){
         $system->errorExitApi($data, $status, false);
     }
 
-    print json_encode(['data' => $data, 'status' => $status]);
+    print json_encode(['data' => $data, 'status' => $status], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
 

@@ -124,17 +124,28 @@ class MapPresentationService
         $timelineFields = $this->layers->values($layer, 'DT_TIMELINE_FIELDS');
 
         // Native zoom levels may be defined on the MapLayer itself or inherited
-        // from its linked source record (notably tiled-image sources). Explicit
-        // MapLayer values take precedence over source values.
+        // from its linked source record. For a Query Source the layer is shown
+        // in the intersection of both ranges; when they do not overlap, the
+        // source range wins (it belongs to the data definition shared by every
+        // layer using it). For other sources (notably tiled images, where the
+        // source range is the native tile range) explicit MapLayer values take
+        // precedence.
         $layerMinZoom = $this->numberOrNull($this->layers->value($layer, 'DT_MINIMUM_ZOOM_LEVEL'));
         $layerMaxZoom = $this->numberOrNull($this->layers->value($layer, 'DT_MAXIMUM_ZOOM_LEVEL'));
         $sourceMinZoom = $this->numberOrNull($this->layers->value($sourceRecord, 'DT_MINIMUM_ZOOM_LEVEL'));
         $sourceMaxZoom = $this->numberOrNull($this->layers->value($sourceRecord, 'DT_MAXIMUM_ZOOM_LEVEL'));
         $dynamicRequests = $this->termBoolean($this->layers->value($sourceRecord, 'DT_IS_LOADED_BY_EXTENT'), false);
 
-        $effectiveMinZoom = $layerMinZoom !== null ? $layerMinZoom : $sourceMinZoom;
-        $effectiveMaxZoom = $layerMaxZoom !== null ? $layerMaxZoom : $sourceMaxZoom;
-        
+        $isQuerySource = $this->layers->codeId('RT_QUERY_SOURCE') === intval($sourceRecord['rec_RecTypeID'] ?? 0);
+        if($isQuerySource){
+            list($effectiveMinZoom, $effectiveMaxZoom) = $this->intersectZoomRanges(
+                $layerMinZoom, $layerMaxZoom, $sourceMinZoom, $sourceMaxZoom
+            );
+        }else{
+            $effectiveMinZoom = $layerMinZoom !== null ? $layerMinZoom : $sourceMinZoom;
+            $effectiveMaxZoom = $layerMaxZoom !== null ? $layerMaxZoom : $sourceMaxZoom;
+        }
+
         $style = $this->buildStyle($this->layers->value($layer, 'DT_SYMBOLOGY'));
 
         return array(
@@ -162,6 +173,31 @@ class MapPresentationService
                 'popupTemplate' => $this->scalar($this->layers->value($layer, 'DT_SMARTY_TEMPLATE'))
             )
         );
+    }
+
+    /**
+     * Intersect a MapLayer zoom range with its source zoom range.
+     *
+     * A missing bound (null) means "no limit". When the two ranges do not
+     * overlap, the source range is returned unchanged.
+     *
+     * @param int|float|null $layerMin MapLayer minimum native zoom.
+     * @param int|float|null $layerMax MapLayer maximum native zoom.
+     * @param int|float|null $sourceMin Source minimum native zoom.
+     * @param int|float|null $sourceMax Source maximum native zoom.
+     * @return array{0: int|float|null, 1: int|float|null} Effective [min, max].
+     */
+    private function intersectZoomRanges($layerMin, $layerMax, $sourceMin, $sourceMax): array
+    {
+        $min = $layerMin === null ? $sourceMin
+            : ($sourceMin === null ? $layerMin : max($layerMin, $sourceMin));
+        $max = $layerMax === null ? $sourceMax
+            : ($sourceMax === null ? $layerMax : min($layerMax, $sourceMax));
+
+        if($min !== null && $max !== null && $min > $max){
+            return array($sourceMin, $sourceMax);
+        }
+        return array($min, $max);
     }
 
     private function buildSource(array $record): array

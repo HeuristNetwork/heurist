@@ -19,9 +19,11 @@
 
 namespace Heurist\Records\Query;
 
+use Heurist\Database\QueryTrace;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Records\Query\Compiler\QueryBuilder;
+use Heurist\Records\Query\Compiler\RelationTermResolver;
 
 /** Executes flat, logical, resource-link, and relationship record searches. */
 final class RecordSearchService
@@ -39,8 +41,8 @@ final class RecordSearchService
     private $builder;
     /** @var QueryExecutor */
     private $executor;
-    /** @var array<int,array{types:array,recordTypes:array}> */
-    private $relationMarkerCache = array();
+    /** @var RelationTermResolver Relationship vocabularies, inverse terms and field constraints */
+    private $terms;
 
     /** Initialise record search with explicit database and request context. */
     public function __construct(
@@ -53,6 +55,17 @@ final class RecordSearchService
         $this->runtime = $runtime;
         $this->executor = $executor ?? new QueryExecutor($database);
         $this->builder = $builder ?? new QueryBuilder($database);
+        $this->terms = new RelationTermResolver($database);
+    }
+
+    /**
+     * Edge reads of a relationship predicate (rt / rf / related, optional relationship
+     * field), shared by search, graph steps and ExpansionEngine; see
+     * RelationTermResolver::relationshipLegs.
+     */
+    public function relationshipLegs(string $base, string $suffix, ?array $explicitTypes): array
+    {
+        return $this->terms->relationshipLegs($base, $suffix, $explicitTypes);
     }
 
     /** Execute one graph traversal using the same access, marker and term
@@ -73,38 +86,37 @@ final class RecordSearchService
         if($anchor === null){ throw new QueryValidationException('Expansion rule has no traversal'); }
         list($base, $suffix, $value) = $anchor;
         $relation = in_array($base, array('rt','rf','related'), true);
-        $directions = in_array($base, array('links','related','connected'), true) ? array('to','from')
-            : array(in_array($base, array('lf','rf'), true) ? 'to' : 'from');
-        // [relationship?, direction] edge reads; 'connected' reads pointers and relationships
+        // Edge reads: pointers by direction; relationships by the legs shared with search
+        // (RelationTermResolver). Here the outer record is the record found (child) and the
+        // linked record is the seed: a leg with the outer record as stored source reads
+        // from the seed as target.
         $passes = array();
-        foreach($base === 'connected' ? array(false, true) : array($relation) as $isRelation){
-            foreach($directions as $direction){ $passes[] = array($isRelation, $direction); }
-        }
-        $requestedTypes = null; $markerTypes = null; $relationshipQuery = array();
-        if($relation){
-            list($parentQuery, $relationshipQuery, $requestedTypes) = $this->splitRelationshipValue($value);
-            if($requestedTypes !== null) $requestedTypes = $this->expandTermIds($requestedTypes);
-            if($suffix !== ''){
-                if($base === 'related'){
-                    $types = $this->expandTermIds($this->normalizeIds($suffix, 'relationship type'));
-                    $requestedTypes = $requestedTypes === null ? $types : array_values(array_intersect($types, $requestedTypes));
-                }else{
-                    $marker = $this->relationMarkerConstraints($this->positiveSuffix($suffix, 'Relation-marker field ID'));
-                    $markerTypes = $marker['types'];
-                    if(!empty($marker['recordTypes'])) $parentQuery[] = array('t'=>$marker['recordTypes']);
-                }
+        if(!$relation){
+            $directions = in_array($base, array('links','connected'), true) ? array('to','from')
+                : array($base === 'lf' ? 'to' : 'from');
+            foreach($directions as $direction){
+                $passes[] = array('relation'=>false, 'direction'=>$direction, 'types'=>null, 'seedTypes'=>null, 'childTypes'=>null);
             }
-        }else{ $parentQuery = $this->normaliseLinkedValue($value); }
+        }
+        $relationshipQuery = array(array('_all'=>true));
+        if($relation || $base === 'connected'){
+            list($parentQuery, $relationshipQuery, $explicitTypes) = $this->splitRelationshipValue($value);
+            $legBase = $base === 'connected' ? 'related' : $base;
+            foreach($this->terms->relationshipLegs($legBase, $base === 'connected' ? '' : $suffix, $explicitTypes) as $leg){
+                $passes[] = array('relation'=>true, 'direction'=>$leg['direction'] === 'to' ? 'from' : 'to',
+                    'types'=>$leg['types'], 'seedTypes'=>$leg['linkedTypes'], 'childTypes'=>$leg['outerTypes']);
+            }
+        }
+        if(!$relation){ $parentQuery = $this->normaliseLinkedValue($value); }
         $parentQuery[] = array('ids'=>$seeds);
         $parents = $this->search(new SearchRequest($parentQuery, array('limit'=>10000)))->ids;
         $rows = array(); $truncated = false;
-        foreach($passes as list($isRelation, $direction)){
-            $types = $requestedTypes;
-            // 'related' is expressed from the target's perspective.
-            if($base === 'related' && $direction === 'to' && $types !== null) $types = $this->inverseTermIds($types);
-            if($markerTypes !== null) $types = $types === null ? $markerTypes : array_values(array_intersect($types, $markerTypes));
-            if($isRelation && $types === array()) continue;
-            foreach(array_chunk($parents, self::SQL_CHUNK_SIZE) as $chunk){
+        foreach($passes as $index=>$pass){
+            $direction = $pass['direction']; $isRelation = $pass['relation']; $types = $pass['types'];
+            $passParents = $pass['seedTypes'] === null || empty($parents) ? $parents
+                : $this->search(new SearchRequest(array(array('t'=>$pass['seedTypes']), array('ids'=>$parents)),
+                    array('limit'=>10000)))->ids;
+            foreach(array_chunk($passParents, self::SQL_CHUNK_SIZE) as $chunk){
                 $parentColumn = $direction === 'to' ? 'rl_SourceID' : 'rl_TargetID';
                 $childColumn = $direction === 'to' ? 'rl_TargetID' : 'rl_SourceID';
                 $values = $chunk;
@@ -123,7 +135,15 @@ final class RecordSearchService
                     .',rl.rl_SourceID,rl.rl_TargetID,COALESCE(rl.rl_DetailTypeID,0),'
                     .'COALESCE(rl.rl_RelationTypeID,0),COALESCE(rl.rl_RelationID,0) FROM recLinks rl WHERE '
                     .implode(' AND ', $conditions).' ORDER BY rl.'.$parentColumn.',rl.'.$childColumn.' LIMIT '.$remaining;
-                $rows = array_merge($rows, $this->executor->executeRows($sql, str_repeat('i', count($values)), $values));
+                $passRows = $this->executor->executeRows($sql, str_repeat('i', count($values)), $values);
+                if($pass['childTypes'] !== null && !empty($passRows)){
+                    $typed = array_fill_keys($this->search(new SearchRequest(array(array('t'=>$pass['childTypes']),
+                        array('ids'=>$this->uniqueIds(array_column($passRows, 1)))), array('limit'=>10000)))->ids, true);
+                    $passRows = array_values(array_filter($passRows, static function($row) use ($typed){
+                        return isset($typed[intval($row[1])]);
+                    }));
+                }
+                $rows = array_merge($rows, $passRows);
             }
         }
         if(count($rows)>10000){ $truncated = true; $rows = array_slice($rows, 0, 10000); }
@@ -249,24 +269,61 @@ final class RecordSearchService
         $context['sortProvided'] = $request->sortProvided;
         $context['sort'] = $request->sort;
         $candidateCache = array();
+        QueryTrace::begin('resolve');
         $query = $this->resolveSelectiveAnyFields($query, $context, $candidateCache);
+        QueryTrace::end();
+        if($this->containsTraversal($query, 0)){
+            // Restrict the outer Records scan to records that appear in recLinks
+            // next to the linked set. The link conditions themselves are unchanged.
+            QueryTrace::begin('candidates');
+            $candidates = $this->linkCandidates($query, 'all', 0);
+            QueryTrace::end($candidates === null ? null : count($candidates));
+            if($candidates === array()){
+                QueryTrace::note('no link candidates: empty result without main query');
+                return new SearchResult(array(), 0, $request->offset, $request->limit, null, array());
+            }
+            if($candidates !== null){
+                QueryTrace::note('link candidates: '.count($candidates));
+                $query[] = array('ids'=>$candidates);
+            }
+        }
         if(empty($context['forceChunked']) && $this->builder->supportsSqlExecution($query)){
+            QueryTrace::setPath('sql');
             if($request->detail === 'count'){
-                $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
+                $compiled = $this->builder->buildCount($query, $context);
+                QueryTrace::setMain($compiled->sql, $compiled->values, 'count');
+                QueryTrace::begin('count');
+                $total = intval($this->executor->executeScalar($compiled));
+                QueryTrace::end(1);
                 return new SearchResult(array(), $total, 0, 1);
             }
             if($request->detail === 'rectypes'){
-                $rectypes = $this->executor->executeRectypeCounts(
-                    $this->builder->buildRectypeCounts($query, $context)
-                );
+                $compiled = $this->builder->buildRectypeCounts($query, $context);
+                QueryTrace::setMain($compiled->sql, $compiled->values, 'rectypes');
+                QueryTrace::begin('rectypes');
+                $rectypes = $this->executor->executeRectypeCounts($compiled);
+                QueryTrace::end(count($rectypes));
                 $total = array_sum(array_column($rectypes, 'count'));
                 return new SearchResult(array(), $total, 0, 1, null, $rectypes);
             }
-            $ids = $this->executor->executeIds($this->builder->buildIds($query, $context));
+            $compiled = $this->builder->buildIds($query, $context);
+            QueryTrace::setMain($compiled->sql, $compiled->values, 'ids');
+            QueryTrace::begin('ids');
+            $ids = $this->executor->executeIds($compiled);
+            QueryTrace::end(count($ids));
+            if(count($ids) < $request->limit && ($request->offset === 0 || !empty($ids))){
+                // a short page is the last one: the total is known without the count query
+                return new SearchResult($ids, $request->offset + count($ids), $request->offset, $request->limit);
+            }
+            QueryTrace::begin('count');
             $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
+            QueryTrace::end(1);
             return new SearchResult($ids, $total, $request->offset, $request->limit);
         }
+        QueryTrace::setPath('fallback');
+        QueryTrace::begin('fallback');
         $ids = $this->evaluateGroup($query, null, 'all', $context, 0);
+        QueryTrace::end(count($ids));
         if($request->detail === 'count'){
             return new SearchResult(array(), count($ids), 0, 1);
         }
@@ -351,6 +408,115 @@ final class RecordSearchService
         return $result;
     }
 
+    /** Whether a query group contains a link/relationship traversal outside a "not" group. */
+    private function containsTraversal(array $group, int $depth): bool
+    {
+        if($depth > self::MAX_QUERY_DEPTH){ return false; }
+        foreach($this->normalizeGroup($group) as $predicate){
+            if(!is_array($predicate) || empty($predicate)){ continue; }
+            $key = (string)array_keys($predicate)[0];
+            list($base) = $this->predicateParts($key);
+            if($this->isTraversalBase($base)){ return true; }
+            if(($base === 'all' || $base === 'any') && is_array($predicate[$key])
+                && $this->containsTraversal($predicate[$key], $depth+1)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Superset of the record IDs that can satisfy a group, read from recLinks only.
+     * It is a necessary condition, never a replacement of the compiled predicates.
+     *
+     * @param string $mode 'all' intersects known sets; 'any' needs a set for every branch.
+     * @return int[]|null NULL when there is no useful restriction (unknown or too many).
+     */
+    private function linkCandidates(array $group, string $mode, int $depth): ?array
+    {
+        if($depth > self::MAX_QUERY_DEPTH){ return null; }
+        $sets = array();
+        foreach($this->normalizeGroup($group) as $predicate){
+            $set = null;
+            if(is_array($predicate) && !empty($predicate)){
+                $key = (string)array_keys($predicate)[0];
+                $value = $predicate[$key];
+                list($base) = $this->predicateParts($key);
+                try{
+                    if(($base === 'all' || $base === 'any') && is_array($value)){
+                        $set = $this->linkCandidates($value, $base, $depth+1);
+                    }elseif($this->isTraversalBase($base)){
+                        $set = $this->traversalCandidates($base, $value, $depth);
+                    }elseif($base === 'ids' && $mode === 'all'){
+                        $set = $this->normalizeIds($value, 'record');
+                    }
+                }catch(QueryValidationException $exception){
+                    $set = null; // the main query reports the error
+                }
+            }
+            if($set === null){
+                if($mode === 'any'){ return null; }
+                continue;
+            }
+            $sets[] = $set;
+        }
+        if(empty($sets)){ return null; }
+        $result = array_shift($sets);
+        foreach($sets as $set){
+            $result = $mode === 'any'
+                ? array_merge($result, $set)
+                : array_values(array_intersect($result, $set));
+        }
+        $result = $this->uniqueIds($result);
+        return count($result) > self::MAX_PRECOMPUTED_CANDIDATES ? null : $result;
+    }
+
+    /**
+     * Records next to the linked set of one traversal predicate in recLinks.
+     * Pointer links (lt, lf, links) use the link direction; relationships and
+     * connected use both directions because relationships can be stored inverse.
+     */
+    private function traversalCandidates(string $base, $value, int $depth): ?array
+    {
+        list($value, $negate) = $this->extractExists($value);
+        if($negate){ return null; } // records WITHOUT such a link
+        $child = $this->normaliseLinkedValue($value);
+        $childIds = empty($child) ? null : $this->linkCandidates($child, 'all', $depth+1);
+        if($childIds === array()){ return array(); }
+
+        $kind = in_array($base, array_merge(self::RESOURCE_TO, self::RESOURCE_FROM, array('links')), true)
+            ? ' AND rl_RelationID IS NULL'
+            : (in_array($base, array('connected'), true) ? '' : ' AND rl_RelationID IS NOT NULL');
+        $toSource = !in_array($base, self::RESOURCE_FROM, true); // r is rl_SourceID
+        $toTarget = !in_array($base, self::RESOURCE_TO, true);   // r is rl_TargetID
+        $cap = self::MAX_PRECOMPUTED_CANDIDATES + 1;
+
+        $result = array();
+        $chunks = $childIds === null ? array(null) : array_chunk($childIds, self::SQL_CHUNK_SIZE);
+        foreach($chunks as $chunk){
+            $parts = array();
+            $values = array();
+            foreach(array('rl_SourceID'=>$toSource, 'rl_TargetID'=>$toTarget) as $column=>$enabled){
+                if(!$enabled){ continue; }
+                $other = $column === 'rl_SourceID' ? 'rl_TargetID' : 'rl_SourceID';
+                $where = '1=1'.$kind;
+                if($chunk !== null){
+                    $where .= ' AND '.$other.' IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
+                    $values = array_merge($values, $chunk);
+                }
+                $parts[] = 'SELECT '.$column.' AS id FROM recLinks WHERE '.$where;
+            }
+            $values[] = $cap;
+            $rows = $this->executor->executeRows(
+                'SELECT DISTINCT id FROM ('.implode(' UNION ', $parts).') AS link_candidates LIMIT ?',
+                '', $values
+            );
+            foreach($rows as $row){ $result[] = intval($row[0]); }
+            if(count($result) >= $cap){ return null; }
+        }
+        return $this->uniqueIds($result);
+    }
+
     /** NULL, -NULL, and empty values retain their established field semantics. */
     private function isFieldPresenceValue($value): bool
     {
@@ -429,6 +595,9 @@ final class RecordSearchService
             $key = (string)array_keys($predicate)[0];
             $value = $predicate[$key];
             list($base, $suffix) = $this->predicateParts($key);
+            // exists:NULL inside a link/relationship value - records without such a link
+            $before = $current; $negate = false;
+            if($this->isTraversalBase($base)){ list($value, $negate) = $this->extractExists($value); }
             if($base === 'all' || $base === 'any' || $base === 'not'){
                 $current = $this->evaluateGroup(
                     $this->normalizeGroup($value), $current, $base, $context, $depth+1
@@ -455,6 +624,12 @@ final class RecordSearchService
                 ));
             }else{
                 throw new UnsupportedQueryException('Predicate is not supported by Phase 3: '.$key);
+            }
+            if($negate){
+                $matched = array_fill_keys($current, true);
+                $current = array_values(array_filter($before, static function($id) use ($matched){
+                    return !isset($matched[$id]);
+                }));
             }
         }
         return $current;
@@ -527,6 +702,37 @@ final class RecordSearchService
             return array_keys($parents);
         }
         return null;
+    }
+
+    /** Whether a predicate follows links or relationships (and may carry an exists modifier). */
+    private function isTraversalBase(string $base): bool
+    {
+        return in_array($base, array_merge(self::RESOURCE_TO, self::RESOURCE_FROM, self::RELATION_TO,
+            self::RELATION_FROM, array('related', 'links', 'connected')), true);
+    }
+
+    /**
+     * Remove an exists modifier from a link/relationship value: NULL = records without
+     * such a link (negate), -NULL or empty = with one (the default).
+     *
+     * @return array{0:mixed,1:bool} The value without the modifier, and whether to negate.
+     */
+    private function extractExists($value): array
+    {
+        if(!is_array($value) || $this->isIdList($value)){ return array($value, false); }
+        $negate = false; $rest = array(); $found = false;
+        foreach($this->builder->normalize($value) as $predicate){
+            $key = (string)array_keys($predicate)[0];
+            list($base) = $this->predicateParts($key);
+            if($base !== 'exists'){ $rest[] = $predicate; continue; }
+            $flag = strtoupper(trim((string)$predicate[$key]));
+            if($flag === 'NULL'){ $negate = true; }
+            elseif($flag !== '-NULL' && $flag !== ''){
+                throw new QueryValidationException('exists predicate accepts NULL or -NULL');
+            }
+            $found = true;
+        }
+        return array($found ? $rest : $value, $negate);
     }
 
     /** Run a flat query, optionally restricted to an ordered candidate set. */
@@ -657,43 +863,23 @@ final class RecordSearchService
         array $context,
         int $depth
     ): array {
-        $markerFieldId = null; $suffixRelationTypes = null;
-        if($direction === 'both'){
-            if($suffix !== ''){ $suffixRelationTypes = $this->normalizeIds($suffix, 'relationship type'); }
-        }else{
-            $markerFieldId = $this->positiveSuffix($suffix, 'Relation-marker field ID');
-        }
+        // rt / rf / related with the same legs as SQL compilation (RelationTermResolver)
+        $base = $direction === 'to' ? 'rt' : ($direction === 'from' ? 'rf' : 'related');
         list($childQuery, $relationshipQuery, $explicitTypes) = $this->splitRelationshipValue($value);
-        $requestedTypes = $explicitTypes === null ? null : $this->expandTermIds($explicitTypes);
-        if($suffixRelationTypes !== null){
-            $suffixTypes = $this->expandTermIds($suffixRelationTypes);
-            $requestedTypes = $requestedTypes === null
-                ? $suffixTypes
-                : array_values(array_intersect($requestedTypes, $suffixTypes));
-        }
-
-        $markerTypes = null; $markerRecordTypes = array();
-        if($markerFieldId !== null){
-            $marker = $this->relationMarkerConstraints($markerFieldId);
-            $markerTypes = $marker['types'];
-            $markerRecordTypes = $marker['recordTypes'];
-        }
-        $directTypes = $requestedTypes === null ? $markerTypes : $requestedTypes;
-        if($requestedTypes !== null && $markerTypes !== null){
-            $directTypes = array_values(array_intersect($directTypes, $markerTypes));
-        }
-
         $edges = array();
-        if($direction === 'to' || $direction === 'both'){
-            $edges = $this->loadRelationshipEdges($parents, 'to', $directTypes);
-        }
-        if($direction === 'from'){
-            $edges = $this->loadRelationshipEdges($parents, 'from', $directTypes);
-        }elseif($direction === 'both'){
-            $reverseTypes = $requestedTypes === null ? $markerTypes : $this->inverseTermIds($requestedTypes);
-            if($requestedTypes === null || !empty($reverseTypes)){
-                $edges = array_merge($edges, $this->loadRelationshipEdges($parents, 'from', $reverseTypes));
+        foreach($this->terms->relationshipLegs($base, $suffix, $explicitTypes) as $leg){
+            $legParents = $leg['outerTypes'] === null ? $parents
+                : $this->executeFlatSet(array(array('t'=>$leg['outerTypes'])), $parents, $context);
+            if(empty($legParents)){ continue; }
+            $legEdges = $this->loadRelationshipEdges($legParents, $leg['direction'], $leg['types']);
+            if($leg['linkedTypes'] !== null && !empty($legEdges)){
+                $typed = array_fill_keys($this->executeFlatSet(array(array('t'=>$leg['linkedTypes'])),
+                    $this->uniqueIds(array_column($legEdges, 1)), $context), true);
+                $legEdges = array_values(array_filter($legEdges, static function($edge) use ($typed){
+                    return isset($typed[$edge[1]]);
+                }));
             }
+            $edges = array_merge($edges, $legEdges);
         }
         $edges = $this->uniqueRelationshipEdges($edges);
         if(empty($edges)){ return array(); }
@@ -709,7 +895,6 @@ final class RecordSearchService
         }));
         if(empty($edges)){ return array(); }
 
-        if(!empty($markerRecordTypes)){ $childQuery[] = array('t'=>$markerRecordTypes); }
         array_unshift($childQuery, array('_all'=>true));
         $matchingChildren = $this->evaluateGroup(
             $childQuery,
@@ -777,70 +962,6 @@ final class RecordSearchService
             empty($relationship) ? array(array('_all'=>true)) : $relationship,
             $types
         );
-    }
-
-    /** Resolve relmarker vocabulary and endpoint record-type constraints. */
-    private function relationMarkerConstraints(int $fieldId): array
-    {
-        if(isset($this->relationMarkerCache[$fieldId])){ return $this->relationMarkerCache[$fieldId]; }
-        $rows = $this->executor->executeRows(
-            'SELECT dty_JsonTermIDTree,dty_PtrTargetRectypeIDs FROM defDetailTypes WHERE dty_ID=?',
-            'i', array($fieldId)
-        );
-        if(empty($rows)){ throw new QueryValidationException('Unknown relation-marker field ID: '.$fieldId); }
-        $rootTypes = $this->idsFromText($rows[0][0] ?? '');
-        $constraints = array(
-            'types' => empty($rootTypes) ? null : $this->expandTermIds($rootTypes),
-            'recordTypes' => $this->idsFromText($rows[0][1] ?? '')
-        );
-        $this->relationMarkerCache[$fieldId] = $constraints;
-        return $constraints;
-    }
-
-    /** Include every descendant relationship term through defTermsLinks. */
-    private function expandTermIds(array $termIds): array
-    {
-        $all = array_fill_keys($this->uniqueIds($termIds), true);
-        $frontier = array_keys($all);
-        while(!empty($frontier)){
-            $next = array();
-            foreach(array_chunk($frontier, self::SQL_CHUNK_SIZE) as $chunk){
-                $sql = 'SELECT DISTINCT trl_TermID FROM defTermsLinks WHERE trl_ParentID IN ('
-                    .implode(',', array_fill(0, count($chunk), '?')).')';
-                foreach($this->executor->executeRows($sql, str_repeat('i', count($chunk)), $chunk) as $row){
-                    $id = intval($row[0]);
-                    if($id>0 && !isset($all[$id])){ $all[$id] = true; $next[] = $id; }
-                }
-            }
-            $frontier = $next;
-        }
-        return array_map('intval', array_keys($all));
-    }
-
-    /**
-     * Resolve the terms a relationship reads as when seen from its target, plus
-     * their descendants. A term's reverse is its trm_InverseTermID, or any term
-     * naming it as inverse (one-sided definitions); a term with no inverse is
-     * undirected and reads the same both ways, so it is its own reverse.
-     */
-    private function inverseTermIds(array $termIds): array
-    {
-        $inverse = array();
-        foreach(array_chunk($this->uniqueIds($termIds), self::SQL_CHUNK_SIZE) as $chunk){
-            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
-            $sql = 'SELECT trm_ID, trm_InverseTermID FROM defTerms'
-                .' WHERE trm_ID IN ('.$placeholders.') OR trm_InverseTermID IN ('.$placeholders.')';
-            $found = array_fill_keys($chunk, false);
-            foreach($this->executor->executeRows($sql, str_repeat('i', 2*count($chunk)), array_merge($chunk, $chunk)) as $row){
-                $termId = intval($row[0]); $inverseId = intval($row[1]);
-                if(isset($found[$termId]) && $inverseId>0){ $inverse[] = $inverseId; $found[$termId] = true; }
-                if(isset($found[$inverseId]) && $termId>0){ $inverse[] = $termId; $found[$inverseId] = true; }
-            }
-            foreach($found as $termId=>$hasInverse){
-                if(!$hasInverse){ $inverse[] = intval($termId); }
-            }
-        }
-        return empty($inverse) ? array() : $this->expandTermIds($inverse);
     }
 
     private function normaliseLinkedValue($value): array
@@ -996,11 +1117,6 @@ final class RecordSearchService
         return $this->uniqueIds($values);
     }
 
-    private function idsFromText($value): array
-    {
-        preg_match_all('/(?<![0-9])[1-9][0-9]*(?![0-9])/', (string)$value, $matches);
-        return $this->uniqueIds($matches[0] ?? array());
-    }
 
     private function isIdList(array $values): bool
     {

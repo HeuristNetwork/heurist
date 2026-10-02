@@ -477,10 +477,19 @@ class ActionHandler {
                 popup_dialog_options['path'] = 'widgets/lookup/';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', popup_dialog_options);
                 break;
+            case "menu-automatic-deposit":
             case "menu-repository-config":
+                if(actionid === 'menu-automatic-deposit'){
+                    const allowed = typeof window.hWin.heuristExperimentalAllowed === 'boolean'
+                        ? window.hWin.heuristExperimentalAllowed
+                        : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
+                    if(!allowed) break;
+                }
                 popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
                 popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['repository_config'];
-                popup_dialog_options['title'] = window.hWin.HR('Repository service configuration');
+                popup_dialog_options['backupOnly'] = actionid === 'menu-automatic-deposit';
+                popup_dialog_options['title'] = window.hWin.HR(actionid === 'menu-automatic-deposit'
+                    ? 'Set up automatic deposit' : 'Repository service configuration');
                 popup_dialog_options['path'] = 'widgets/repository/';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
                 break;

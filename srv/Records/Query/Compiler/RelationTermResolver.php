@@ -79,22 +79,95 @@ final class RelationTermResolver
         return empty($inverse) ? array() : $this->expand($inverse);
     }
 
-    /** A relation marker's allowed relationship types (null = any) and endpoint record types. */
+    /**
+     * A relationship (relmarker) field: its vocabulary with child terms (`types`, null = any),
+     * the record types that have the field (`ownerTypes`) and its target record types
+     * (`recordTypes`); an empty type list means any record type.
+     */
     public function marker(int $fieldId): array
     {
         if(isset($this->markers[$fieldId])){ return $this->markers[$fieldId]; }
         $rows = $this->database->fetchRows(
-            'SELECT dty_JsonTermIDTree,dty_PtrTargetRectypeIDs FROM defDetailTypes WHERE dty_ID=?',
+            'SELECT dty_JsonTermIDTree,dty_PtrTargetRectypeIDs,dty_Type FROM defDetailTypes WHERE dty_ID=?',
             array($fieldId)
         );
-        if(empty($rows)){ throw new QueryValidationException('Unknown relation-marker field ID: '.$fieldId); }
+        if(empty($rows)){ throw new QueryValidationException('Unknown relationship field ID: '.$fieldId); }
         $row = array_values($rows[0]);
+        if(isset($row[2]) && $row[2] !== 'relmarker'){
+            throw new QueryValidationException('Field '.$fieldId.' is not a relationship field');
+        }
         $rootTypes = self::idsFromText($row[0] ?? '');
+        $owners = $this->database->fetchRows(
+            'SELECT DISTINCT rst_RecTypeID FROM defRecStructure WHERE rst_DetailTypeID=?', array($fieldId)
+        );
         $this->markers[$fieldId] = array(
             'types' => empty($rootTypes) ? null : $this->expand($rootTypes),
+            'ownerTypes' => self::ids(array_map(static function($owner){ return array_values($owner)[0]; }, $owners)),
             'recordTypes' => self::idsFromText($row[1] ?? '')
         );
         return $this->markers[$fieldId];
+    }
+
+    /**
+     * The edge reads ("legs") of a relationship predicate, one meaning for search, graph
+     * steps and expansion rules (docs/development/09 ... §11). Outer = the record the
+     * predicate is on, linked = the records in its value.
+     *
+     * - `rt[:N]`: outer is the stored source; `rf[:N]`: outer is the stored target.
+     *   Types: the stored type is in `r` / N's vocabulary. Record types: rt outer ∈ owners(N),
+     *   linked ∈ targets(N); rf the other way round.
+     * - `related[:N]`: either stored direction; the stored type or its inverse is in `r` /
+     *   N's vocabulary; (outer ∈ owners and linked ∈ targets) or (outer ∈ targets and
+     *   linked ∈ owners).
+     *
+     * @param string $base rt|rf|related (aliases resolved by the caller)
+     * @param string $suffix Relationship field ID, or ''
+     * @param array|null $explicitTypes Relation types given as `r` in the value, or null
+     * @return array<int,array{direction:string,types:?array,outerTypes:?array,linkedTypes:?array}>
+     *         direction 'to' = outer is the stored source, 'from' = outer is the stored
+     *         target; null lists mean any. No legs = nothing can match.
+     */
+    public function relationshipLegs(string $base, string $suffix, ?array $explicitTypes): array
+    {
+        $related = $base === 'related';
+        $marker = null;
+        if($suffix !== ''){
+            if(!ctype_digit($suffix) || intval($suffix) < 1){
+                throw new QueryValidationException('Relationship field ID must be a positive integer: '.$suffix);
+            }
+            $marker = $this->marker(intval($suffix));
+        }
+        // a term or its inverse reads the same relationship from its other end
+        $both = function(array $terms): array {
+            return array_values(array_unique(array_merge($this->expand($terms), $this->inverse($terms))));
+        };
+        $types = null;
+        if($explicitTypes !== null){
+            $types = $related ? $both($explicitTypes) : $this->expand($explicitTypes);
+        }
+        if($marker !== null && $marker['types'] !== null){
+            $vocabulary = $related ? $both($marker['types']) : $marker['types'];
+            $types = $types === null ? $vocabulary : array_values(array_intersect($types, $vocabulary));
+        }
+        if($types !== null && empty($types)){ return array(); }
+
+        $owners = $marker === null || empty($marker['ownerTypes']) ? null : $marker['ownerTypes'];
+        $targets = $marker === null || empty($marker['recordTypes']) ? null : $marker['recordTypes'];
+        if($related){
+            $pairs = array(array($owners, $targets));
+            if($marker !== null && $owners !== $targets){ $pairs[] = array($targets, $owners); }
+            $directions = array('to', 'from');
+        }else{
+            $pairs = array($base === 'rt' ? array($owners, $targets) : array($targets, $owners));
+            $directions = array($base === 'rt' ? 'to' : 'from');
+        }
+        $legs = array();
+        foreach($directions as $direction){
+            foreach($pairs as list($outer, $linked)){
+                $legs[] = array('direction'=>$direction, 'types'=>$types, 'outerTypes'=>$outer, 'linkedTypes'=>$linked);
+            }
+        }
+        return $legs;
     }
 
     private static function ids(array $values): array

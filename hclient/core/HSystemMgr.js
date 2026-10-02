@@ -1281,9 +1281,10 @@ class HSystemMgr {
   * @param {boolean} [is_conservative=true] - If true (conservative mode), the import process might be more cautious about overwriting
   *                                           or may have specific behavior for handling conflicts (server-side logic).
   * @param {function(Object): void} [callback] - Optional callback to handle the server response after the import attempt.
+  * @param {string} [source_databaseURL] - Known source URL, including the db query parameter.
   * @returns {void}
   */
-  import_definitions(source_databaseID, definition_ids, entity_type, is_rename_target, is_conservative, callback) {
+  import_definitions(source_databaseID, definition_ids, entity_type, is_rename_target, is_conservative, callback, source_databaseURL) {
       
       let request = {
           a: 'import', // Server-side action might be different, this seems like a sub-parameter for sys_structure
@@ -1294,6 +1295,12 @@ class HSystemMgr {
           db: window.hWin.HAPI4.database, // Current database context
           import: entity_type // Specifies what kind of entity to import (e.g., 'rectype')
       };
+
+      // Browse templates already knows the source location used to list its definitions.
+      // Keep ID-only callers using the existing registration resolver.
+      if (source_databaseURL) {
+          request.databaseURL = source_databaseURL;
+      }
 
       window.hWin.HAPI4.callserver('sys_structure', request, function (response) {
           if (response.status == window.hWin.ResponseStatus.OK) {

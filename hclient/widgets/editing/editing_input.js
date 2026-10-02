@@ -2237,7 +2237,7 @@ $.widget( "heurist.editing_input", {
             this.child_terms = this.child_terms ? this.child_terms : allTerms;
 
             // Display term selector as radio buttons/checkboxes
-            if(this.f('rst_TermsAsButtons') == 1 && !this.options.is_faceted_search && this.child_terms && this.child_terms.length<=20){
+            if(this.f('rst_TermsAsButtons') == 1 && !this.options.is_faceted_search && this.child_terms && this._enumButtonsAllowed(this.f('rst_FilteredJsonTermIDTree'))){
 
                 this.enum_buttons = Number.parseInt(this.f('rst_MaxValues')) != 1 ? 'checkbox' : 'radio';
                 let inpt_id = $input.attr('id');
@@ -7047,14 +7047,46 @@ $.widget( "heurist.editing_input", {
     //
     // Recreate dropdown or checkboxes|radio buttons, called by adding new term and manage terms onClose
     //
-    _recreateEnumField: function(vocab_id){
+    // Keep the normal 20-value limit, with an explicit override below 100.
+    // The override belongs to this field editor and does not change its definition.
+    _enumButtonsAllowed: function(vocab_id){
+        const count = this.child_terms.length;
+        this.input_cell.find('.enum_buttons_warning').remove();
+        if(count <= 20 || (count < 100 && this._enumButtonsOverride)){
+            return true;
+        }
+
+        const $warning = $('<div>', {'class': 'enum_buttons_warning'})
+            .css({'max-width': '48em', 'margin': '6px 0', 'white-space': 'normal'})
+            .append($('<div>').text('Sorry, there are too many values (' + count
+                + ') to display this field as buttons.'))
+            .appendTo(this.input_cell);
+
+        if(count < 100){
+            $('<div>').text('If you really insist on buttons we can try ...')
+                .css('margin-top', '6px').appendTo($warning);
+            const $try = $('<button>', {type: 'button', text: 'Try buttons anyway'})
+                .css('margin-top', '6px').appendTo($warning).button();
+            $try.button('option', 'disabled', !!this.is_disabled);
+            this._on($try, {click: function(){
+                if(this.is_disabled) return;
+                this._enumButtonsOverride = true;
+                this._recreateEnumField(vocab_id, true);
+            }});
+        }
+        return false;
+    },
+
+    _recreateEnumField: function(vocab_id, keepTerms){
 
         let that = this;
 
-        this.child_terms = $Db.trm_TreeData(vocab_id, 'set'); //refresh
+        if(!keepTerms){
+            this.child_terms = $Db.trm_TreeData(vocab_id, 'set'); //refresh
+        }
         let asButtons = this._isForRecords && this.f('rst_TermsAsButtons') == 1;
 
-        if(asButtons && this.child_terms.length <= 20){ // recreate buttons/checkboxes
+        if(asButtons && this._enumButtonsAllowed(vocab_id)){ // recreate buttons/checkboxes
 
             this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
             let dtb_res = this._createEnumButtons(true);
@@ -7681,7 +7713,9 @@ $.widget( "heurist.editing_input", {
         // File IDs, needed for processes below
         let f_id = value.ulf_ID;
         let f_nonce = value.ulf_ObfuscatedFileID;
-        const dtyID = this.options.dtID ?? this.f('rst_DetailTypeID');
+        const rtyID = Number.parseInt(this.options.rectypeID);
+        const dtyID = Number.parseInt(this.options.dtID ?? this.f('rst_DetailTypeID'));
+        const fieldKey = `${rtyID}.${dtyID}`;
 
         // urls for downloading and loading the thumbnail
         let dwnld_link = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&debug=1&download=1&file=${f_nonce}`;
@@ -7886,6 +7920,13 @@ $.widget( "heurist.editing_input", {
 
                     $input_img.find('.mode_switcher').text(!$input_img.hasClass('thumb_image') ? 'thumbnail' : 'larger');
                 }
+
+                let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+                showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+                if(window.hWin.HEURIST4.util.isObject(showAllImagesPrefs) && !showAllImagesPrefs.allowed.includes(fieldKey)){
+                    showAllImagesPrefs.allowed.push(fieldKey);
+                    window.hWin.HAPI4.save_pref('edit_record_showAllRecords', showAllImagesPrefs);
+                }
             }
         });
 
@@ -8088,19 +8129,24 @@ $.widget( "heurist.editing_input", {
 
     _getInlineImageContainer: function(){
 
+        let $imageContainer = this.element.find('.image-containers');
+        const rtyID = Number.parseInt(this.options.rectypeID);
+        const dtyID = Number.parseInt(this.options.dtID ?? this.f('rst_DetailTypeID'));
+        const valueKey = `${rtyID}.${dtyID}`;
+
         let __showAllInlineImages = (event) => {
 
             const forcedShow = event.isForced;
 
-            let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllRecords', []);
+            let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
             showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
-            if(!Array.isArray(showAllImagesPrefs)){
+            if(!window.hWin.HEURIST4.util.isObject(showAllImagesPrefs)){
                 console.error(`showAllImagesPrefs is not an array, found: ${showAllImagesPrefs}`);
                 return;
             }
 
-            const valueKey = `${rtyID}.${dtyID}`;
-            const valueKeyIndex = showAllImagesPrefs.indexOf(valueKey);
+            const valueKeyIndex = showAllImagesPrefs.allowed.indexOf(valueKey);
+            const blockedKeyIndex = showAllImagesPrefs.blocked.indexOf(valueKey);
 
             if(valueKeyIndex === -1 || forcedShow){
 
@@ -8119,29 +8165,27 @@ $.widget( "heurist.editing_input", {
                 });
 
                 if(!forcedShow){
-                    showAllImagesPrefs.push(valueKey);
+                    showAllImagesPrefs.allowed.push(valueKey);
+                    showAllImagesPrefs.blocked.splice(blockedKeyIndex, 1);
                 }
 
             }else{
 
                 this.element.find('div.image_input .hideTumbnail').trigger('click');
-                showAllImagesPrefs.splice(valueKeyIndex, 1);
+                showAllImagesPrefs.allowed.splice(valueKeyIndex, 1);
+                showAllImagesPrefs.blocked.push(valueKeyIndex);
             }
 
             if(!forcedShow){
-                window.hWin.HAPI4.save_pref('edit_record_showAllRecords', showAllImagesPrefs);
+                window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
             }
         };
-
-        let $imageContainer = this.element.find('.image-containers');
-        const rtyID = Number.parseInt(this.options.rectypeID);
-        const dtyID = Number.parseInt(this.options.dtID ?? this.f('rst_DetailTypeID'));
 
         if($imageContainer.length > 0){
             return $imageContainer;
         }
 
-        if(!Number.isNaN(rtyID) && rtyID > 0 && !Number.isNaN(dtyID) && dtyID > 0){
+        if(window.hWin.HEURIST4.util.isPositiveInt(rtyID) && window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
 
             let $showAllImages = $('<span>', {
                 class: 'showAllImages smallbutton ui-icon ui-icon-eye-open',
@@ -8206,7 +8250,6 @@ $.widget( "heurist.editing_input", {
         }).prependTo($image_div).hide();
 
         // Viewers
-        
         $('<a>', {
             href: '#',
             class: `mode_switcher`,
@@ -8231,8 +8274,6 @@ $.widget( "heurist.editing_input", {
             html: '<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);"></span>&nbsp;Mirador'
         }).appendTo($img_controls).hide();
 
-
-
         $('<a>', {
             href: fileDownload,
             target: '_surf',
@@ -8243,7 +8284,6 @@ $.widget( "heurist.editing_input", {
             html: '<span class="ui-icon ui-icon-download" />'
         }).appendTo($img_controls);
 
-        
         // for closing inline image when 'frozen'
         $('<a>', {
             href: '#',

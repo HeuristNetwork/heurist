@@ -36,7 +36,8 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
         htmlContent: 'repositoryConfig.html',
         helpContent: null,
 
-        type: 'repository'
+        type: 'repository',
+        backupOnly: false
     },
 
     /**
@@ -73,13 +74,17 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      */
     _initControls:function(){
 
+        this._$('#safeguard_section').toggle(this.options.backupOnly);
+        this._$('.repository-credentials').toggle(!this.options.backupOnly);
+        this._$('.btnSave').toggle(!this.options.backupOnly);
+
         const pageSetting = window.hWin.heuristExperimentalAllowed;
         const experimentalAllowed = typeof pageSetting === 'boolean'
             ? pageSetting
             : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
-        if(experimentalAllowed){
+        if(this.options.backupOnly && experimentalAllowed){
             this._loadBackupSettings();
-        }else{
+        }else if(this.options.backupOnly){
             this._markSafeguardUnavailable();
         }
         this._on(this._$('#backup_save_settings'), {click: this._saveBackupSettings});
@@ -173,12 +178,17 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
 
                 window.hWin.HEURIST4.util.setDisabled(that.save_btn, !that._services_modified);
                 window.hWin.HEURIST4.msg.showMsgFlash('Saved repositories configurations...', 3000);
-                that._loadBackupSettings();
+                if(that.options.backupOnly) that._loadBackupSettings();
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
 
+    },
+
+    _getActionButtons: function(){
+        const buttons = this._super();
+        return this.options.backupOnly ? buttons.filter(button => button.class === 'btnClose') : buttons;
     },
 
     _markSafeguardUnavailable: function(){
@@ -207,18 +217,23 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
             const config = response.data;
             this._$('#backup_interval_days').val(config.interval_days);
             this._$('#backup_email_file').prop('checked', config.email_file);
-            this._$('#backup_last_date').text(config.last_backup ? ' Last backup: '+config.last_backup : ' No automatic backup yet');
+            this._$('#backup_last_date').text(config.last_backup ? ' Last backup: '+config.last_backup : ' No successful automatic backup yet');
             const list = this._$('#backup_accounts').empty();
             if(!config.available.length){
-                list.text('Configure a Nakala or Zenodo write API key below first.');
+                list.append($('<p>').text('Configure repository credentials in Design > External repositories to add a repository.'));
             }
             for(const account of config.available){
-                const label = $('<label>').css('margin-right','10px');
+                const label = $('<label>').css({display:'block', margin:'10px 0'});
                 $('<input type="checkbox" class="backup-account">').val(account[0])
                     .prop('checked', config.accounts.includes(account[0])).appendTo(label);
                 label.append(document.createTextNode(' '+account[1]+' ('+account[3]+')'));
                 list.append(label);
             }
+            const email = $('<label>').css({display:'block', margin:'10px 0'});
+            $('<input id="backup_email_file" type="checkbox">')
+                .prop('checked', config.email_file === true).appendTo(email);
+            email.append(document.createTextNode(' Email file to database owner'));
+            list.append(email);
         });
     },
 

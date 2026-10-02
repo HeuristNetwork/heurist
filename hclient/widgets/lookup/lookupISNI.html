@@ -1,19 +1,12 @@
 <!--
 /**
-* lookupBnFLibrary_bib.html - HTML structure for BnF Bibliographic Records Lookup.
+* lookupISNI.html - HTML structure for ISNI Records Lookup.
 *
 * @fileOverview
-* This HTML file defines the layout and form elements for the
-* "Bibliothèque nationale de France (BnF) Bibliographic Records Lookup" widget.
-* It includes input fields for various search criteria specific to bibliographic
-* records (e.g., title, author, general keyword), along with controls for
-* boolean operators and link types for constructing SRU queries. It also contains
-* placeholders for displaying search results and settings (like author role codes
-* and record dump options).
-* This file is loaded by the `heurist.lookupBnFLibrary_bib` jQuery UI widget.
+* This HTML file defines the layout and form elements for the ISNI lookup widget.
 *
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\lookup
+* @package     hclient\widgets\lookup
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -36,15 +29,21 @@
         <fieldset style="display:inline-block;"><legend style="display:none"></legend>
 
             <!-- Any -->
-            <div class="bnf_form_field">
+            <div class="isni_form_field">
 
                 <div class="header recommended" style="text-align: right;">
-                    <label for="inpt_any">Any Field:</label>
+                    <label for="inpt_any">Any Phrase:</label>
                 </div>
                 <select id="inpt_any_link">
-                    <option value="any">ANY</option>
-                    <option value="all" selected>ALL</option>
-                    <option value="adj">ADJ</option>
+                    <option value="=">=</option>
+                    <option value="exact">exact</option>
+                    <option value="any">any</option>
+                    <option value="all">all</option>
+                    <option value="<">&lt;</option>
+                    <option value=">">&gt;</option>
+                    <option value="<=">&lt;=</option>
+                    <option value=">=">&gt;=</option>
+                    <option value="<>">NOT</option>
                 </select>
                 <input id="inpt_any" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em;"/>
                 <select id="inpt_any_logic">
@@ -55,19 +54,24 @@
 
             </div>
 
-            <!-- Title -->
-            <div class="bnf_form_field">
+            <div class="isni_form_field">
 
                 <div class="header recommended" style="text-align: right;">
-                    <label for="inpt_title">Title:</label>
+                    <label for="inpt_isni">ISNI:</label>
                 </div>
-                <select id="inpt_title_link">
-                    <option value="any">ANY</option>
-                    <option value="all" selected>ALL</option>
-                    <option value="adj">ADJ</option>
+                <select id="inpt_isni_link">
+                    <option value="=">=</option>
+                    <option value="exact">exact</option>
+                    <option value="any">any</option>
+                    <option value="all">all</option>
+                    <option value="<">&lt;</option>
+                    <option value=">">&gt;</option>
+                    <option value="<=">&lt;=</option>
+                    <option value=">=">&gt;=</option>
+                    <option value="<>">NOT</option>
                 </select>
-                <input id="inpt_title" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em"/>
-                <select id="inpt_title_logic">
+                <input id="inpt_isni" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em;"/>
+                <select id="inpt_isni_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
                     <option value="not">NOT</option>
@@ -75,19 +79,24 @@
 
             </div>
 
-            <!-- Author -->
-            <div class="bnf_form_field">
+            <div class="isni_form_field">
 
                 <div class="header recommended" style="text-align: right;">
-                    <label for="inpt_author">Author:</label>
+                    <label for="inpt_isni">Name:</label>
                 </div>
-                <select id="inpt_author_link">
-                    <option value="any">ANY</option>
-                    <option value="all" selected>ALL</option>
-                    <option value="adj">ADJ</option>
+                <select id="inpt_name_link">
+                    <option value="=">=</option>
+                    <option value="exact">exact</option>
+                    <option value="any">any</option>
+                    <option value="all">all</option>
+                    <option value="<">&lt;</option>
+                    <option value=">">&gt;</option>
+                    <option value="<=">&lt;=</option>
+                    <option value=">=">&gt;=</option>
+                    <option value="<>">NOT</option>
                 </select>
-                <input id="inpt_author" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em"/>
-                <select id="inpt_author_logic">
+                <input id="inpt_name" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em;"/>
+                <select id="inpt_name_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
                     <option value="not">NOT</option>
@@ -95,36 +104,47 @@
 
             </div>
 
-            <!-- Record ID -->
-            <div class="bnf_form_field">
+            <div class="isni_form_field">
 
                 <div class="header recommended" style="text-align: right;">
-                    <label for="inpt_recordid">Record ID:</label>
+                    <label for="inpt_isni">ORCID ID:</label>
                 </div>
-                <select id="inpt_recordid_link">
-                    <option value="any">ANY</option>
-                    <option value="all" selected>ALL</option>
-                    <option value="adj">ADJ</option>
+                <select id="inpt_orcid_link">
+                    <option value="=">=</option>
+                    <option value="exact">exact</option>
+                    <option value="any">any</option>
+                    <option value="all">all</option>
+                    <option value="<">&lt;</option>
+                    <option value=">">&gt;</option>
+                    <option value="<=">&lt;=</option>
+                    <option value=">=">&gt;=</option>
+                    <option value="<>">NOT</option>
                 </select>
-                <input id="inpt_recordid" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:40em"/>
+                <input id="inpt_orcid" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em;"/>
+                <select id="inpt_orcid_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                    <option value="not">NOT</option>
+                </select>
 
             </div>
-
-    <!--
-    Recherche par type de document (a : texte imprimé / c : musique notée / e : document cartographique / g : enregistrement sonore / h : image animée / i : image fixe 
-    / o : objet monétiforme / p : objet / r : multimédia multisupport / s : document électronique / t : document d'archive et manuscrit) 
-    et récupération des notices de spectacles (v : spectacle)
-
-    Search by type of document
-    a: printed text / c: notated music / e: cartographic document / g: sound recording / h: moving image / i: still image / 
-    o: monetary object / p: object / r: multi-support multimedia / s: electronic document / t: archive document and manuscript)
-    and recovery of show notes (v: show)
-    -->
 
         </fieldset>
 
         <div style="display: block; margin: 10px 0 0 10px;" id="btn_container">
             <button id="btnStartSearch">Search</button>
+
+            <div class="header optional" style="display: inline-block;margin-left: 10px;" id="sort_results_container">
+                <label for="sort_results">Sort by: </label>
+
+                <select id="sort_results">
+                    <option value="none">Default</option>
+                    <option value="relevance">Relevance</option>
+                    <option value="creation">Creation</option>
+                    <option value="title">Title</option>
+                    <option value="creator">Creator</option>
+                </select>
+            </div>
 
             <div class="header optional" style="display: inline-block;margin-left: 10px;" id="rec_limit_container">
                 <label for="rec_limit">Search for </label>
@@ -160,7 +180,7 @@
 
                 <div div class="input-cell" style="margin-left: 15px;">
                     <input type="checkbox" name="dump_record" checked="checked" style="margin-top: 0;">
-                    <span class="heurist-helper1" style="display: block;">Retrieve the complete BnF record on selection</span>
+                    <span class="heurist-helper1" style="display: block;">Retrieve the complete ISNI record on selection</span>
                 </div>
             </div>
 
@@ -175,20 +195,6 @@
                     <select id="rty_flds">
                     </select>
                     <span class="heurist-helper1" style="display: block;">Where will the record dump be placed</span>
-                </div>
-            </div>
-
-            <div style="display: table; margin: 10px 0px;">
-                <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
-                    <label for="author_codes">Author codes: </label> 
-                </div>
-
-                <div class="input-cell" style="margin-left: 15px;">
-                    <textarea id="author_codes" rows="2" cols="50" class="input-div"></textarea>
-                    <span class="heurist-helper1" style="display: block;">
-                        List role codes to identify which type of people/companies/other entities are to be placed within the author field, the remaining will be placed within the contributor field (if mapped).<br>
-                        Leave the field blank to place all involved within the Author field.
-                    </span>
                 </div>
             </div>
 

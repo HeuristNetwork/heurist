@@ -589,6 +589,99 @@ class DbUtils {
     }
 
     /**
+     * Create with the complete definitions of a curated registered database.
+     * ID 0 preserves the offline/bundled creation path. The browser supplies only
+     * an ID: resolve its URL on the server, and download and validate its native
+     * definitions export before creating any database or folders.
+     */
+    /** Set only for template failures where retrying with bundled definitions is safe. */
+    public static $creationTemplateFallbackAvailable = false;
+
+    public static function databaseCreateFromRegisteredTemplate($database_name, &$user_record, $template_id=0){
+        self::initialize();
+        self::$creationTemplateFallbackAvailable = false;
+        global $experimental;
+        if(!is_numeric($template_id) || (string)(int)$template_id !== (string)$template_id
+            || (int)$template_id < 0 || (int)$template_id >= 1000){
+            self::$system->addError(HEURIST_INVALID_REQUEST, 'Select a curated template with a registered database ID below 1000.');
+            return false;
+        }
+        $template_id = (int)$template_id;
+        if($template_id === 0){
+            return self::databaseCreateFull($database_name, $user_record);
+        }
+        if($template_id !== 2 && (!isset($experimental) || $experimental !== true)){
+            self::$system->addError(HEURIST_ACTION_BLOCKED, HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE);
+            return false;
+        }
+        $url = DbRegis::registrationGet(array('dbID'=>$template_id));
+        $parts = $url ? parse_url($url) : false;
+        $query = array();
+        if($parts && isset($parts['query'])) parse_str($parts['query'], $query);
+        if(!$parts || !in_array($parts['scheme'] ?? '', array('http','https'), true)
+            || empty($parts['host']) || empty($query['db'])){
+            self::$creationTemplateFallbackAvailable = true;
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Unable to resolve the selected template database. Please retry or use the default Core Definitions.');
+            return false;
+        }
+        // Registry URLs normally end in /?db=...; also accept index.php and
+        // standalone menu URLs, resolving relative to their code instance folder.
+        $path = $parts['path'] ?? '/';
+        if(substr($path, -1) !== '/') $path = substr($path, 0, strrpos($path, '/') + 1);
+        $base = $parts['scheme'].'://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '').$path;
+        $export_url = $base.'hserv/structure/export/getDBStructureAsSQL.php?'
+            .http_build_query(array('db'=>$query['db'], 'plain'=>1));
+        $data = loadRemoteURLContent($export_url);
+        // Reject error pages and incomplete downloads. The existing importer
+        // consumes these same paired markers, in its fixed table order.
+        $starts = is_string($data) ? substr_count($data, '>>StartData>>') : 0;
+        if($starts < 15 || $starts !== substr_count((string)$data, '>>EndData>>')
+            || strpos((string)$data, '>>EndOfFile>>') === false){
+            self::$creationTemplateFallbackAvailable = true;
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Unable to download the complete structure of the selected template. No new database has been created.');
+            return false;
+        }
+        $file = tempnam(sys_get_temp_dir(), 'heurist_template_');
+        if($file === false){
+            self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to prepare the selected database template.');
+            return false;
+        }
+        try{
+            if(file_put_contents($file, $data) !== strlen($data)){
+                self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to save the downloaded database template.');
+                return false;
+            }
+            // databaseCreateFull rolls back the new database if import fails.
+            $importFailed = false;
+            $result = self::databaseCreateFull($database_name, $user_record, $file, $importFailed);
+            self::$creationTemplateFallbackAvailable = $importFailed;
+            if($result === false) return false;
+            // IDs are retained by the native import. Replace the bundled type
+            // icons, which otherwise could depict unrelated types with these IDs.
+            list(, $new_name) = mysql__get_names($database_name);
+            $folder = self::$system->getFileStoreRootFolder().$new_name.'/entity/defRecTypes/';
+            $ids = mysql__select_list2(self::$mysqli, 'SELECT rty_ID FROM defRecTypes WHERE rty_ID>0');
+            $failed = array();
+            foreach($ids as $id){
+                foreach(array('icon'=>'icon', 'thumbnail'=>'thumb') as $subfolder=>$version){
+                    $target = $folder.$subfolder.'/'.$id.'.png';
+                    if(file_exists($target)) unlink($target);
+                    $icon = loadRemoteURLContent($base.'hserv/controller/fileGet.php?'
+                        .http_build_query(array('db'=>$query['db'], 'id'=>$id, 'version'=>$version, 'def'=>2)));
+                    if(!is_string($icon) || @getimagesizefromstring($icon) === false
+                        || file_put_contents($target, $icon) === false){
+                        $failed[$id] = true;
+                    }
+                }
+            }
+            if(count($failed)) $result[] = 'The structure was imported, but icons could not be copied for '.count($failed).' entity types.';
+            return $result;
+        }finally{
+            unlink($file);
+        }
+    }
+
+    /**
      * Creates a new Heurist database with file folders, initializes it with a given user, and makes it ready to use.
      *
      * @param string $database_name Target database name.
@@ -597,7 +690,9 @@ class DbUtils {
      *                                      Defaults to HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt".
      * @return array|false An array of warning messages on success (can be empty), or false on critical failure.
      */
-    public static function databaseCreateFull($database_name, &$user_record, $templateFileName=null){
+    public static function databaseCreateFull($database_name, &$user_record, $templateFileName=null, &$templateImportFailed=null){
+
+            $templateImportFailed = false;
 
             self::initialize();
             $mysqli = self::$mysqli;
@@ -653,7 +748,8 @@ class DbUtils {
             if(!self::importDefinitionsFromTemplate($database_name_full, $templateFileName)){
                 //rollback
                 folderDelete($database_folder);
-                mysql__drop_database( $mysqli, $database_name_full );
+                $dropped = mysql__drop_database( $mysqli, $database_name_full );
+                $templateImportFailed = $dropped && !is_dir($database_folder);
                 return false;
             }
 
@@ -1448,6 +1544,96 @@ class DbUtils {
         return $res;
     }
 
+    /** Snapshot versions before sysIdentification is cleared/copied to the target. */
+    private static function databaseCloneVersion($mysqli, $database) {
+        $database = str_replace('`', '``', $database);
+        try {
+            $result = $mysqli->query("SELECT sys_dbVersion,sys_dbSubVersion,sys_dbSubSubVersion FROM `{$database}`.sysIdentification LIMIT 1");
+            $row = $result ? $result->fetch_row() : null;
+            return $row ? implode('.', array_map('intval', $row)) : 'unavailable';
+        } catch (\Throwable $e) { return 'unavailable'; }
+    }
+
+    /**
+     * Diagnose a failed table copy without guessing that SQL row N is a Heurist ID.
+     * Metadata queries must not replace the original MySQL error or reveal account
+     * values. Only schema names, primary-key column names and a row count are read.
+     */
+    private static function databaseCloneFailureMessage($mysqli, $source, $target, $table, array $error, array $versions) {
+        $quote = function($name) { return '`'.str_replace('`', '``', $name).'`'; };
+        $readColumns = function($db) use ($mysqli, $quote, $table) {
+            $columns = [];
+            try {
+                $result = $mysqli->query('SHOW COLUMNS FROM '.$quote($db).'.'.$quote($table));
+                if (!$result) { return null; }
+                while ($row = $result->fetch_assoc()) { $columns[$row['Field']] = $row; }
+            } catch (\Throwable $e) { return null; }
+            return $columns;
+        };
+        $src = $readColumns($source);
+        $dst = $readColumns($target);
+        $lines = [
+            'Database clone stopped while copying table '.$table.'.',
+            'Source: '.$source.' (database format '.($versions['source'] ?? 'unavailable').').',
+            'Target: '.$target.' (database format '.($versions['target'] ?? 'unavailable').' before cloning).',
+            'MySQL error '.intval($error['code']).' / SQLSTATE '.($error['state'] ?? 'unknown').': '.$error['message']
+        ];
+        if ($src !== null && $dst !== null) {
+            $lines[] = 'Column counts: source '.count($src).'; target '.count($dst).'.';
+            $sourceOnly = array_diff(array_keys($src), array_keys($dst));
+            $targetOnly = array_diff(array_keys($dst), array_keys($src));
+            $lines[] = 'Columns present only in source: '.($sourceOnly ? implode(', ', $sourceOnly) : 'none').'.';
+            $lines[] = 'Columns present only in target: '.($targetOnly ? implode(', ', $targetOnly) : 'none').'.';
+            $orderDiff = [];
+            $srcNames = array_keys($src); $dstNames = array_keys($dst);
+            if (!$sourceOnly && !$targetOnly && $srcNames !== $dstNames) {
+                foreach ($srcNames as $index => $name) {
+                    if ($name !== $dstNames[$index]) { $orderDiff[] = 'position '.($index+1).': '.$name.' -> '.$dstNames[$index]; }
+                }
+                $lines[] = 'Different column order (source -> target): '.implode('; ', $orderDiff).'.';
+            }
+            $typeDiff = [];
+            foreach ($src as $name => $definition) {
+                if (isset($dst[$name]) && $definition['Type'] !== $dst[$name]['Type']) {
+                    $typeDiff[] = $name.' ('.$definition['Type'].' -> '.$dst[$name]['Type'].')';
+                }
+            }
+            if ($typeDiff) { $lines[] = 'Different column types (source -> target): '.implode('; ', $typeDiff).'.'; }
+            $keys = [];
+            foreach ($src as $name => $definition) { if ($definition['Key']==='PRI') { $keys[] = $name; } }
+            $lines[] = 'Source MySQL row identifier: '.($keys ? implode(' + ', $keys) : 'no primary key').'.';
+        } else { $lines[] = 'Table column definitions could not be read for '.($src===null ? 'source ' : '').($dst===null ? 'target' : '').'.'; }
+        try {
+            $result = $mysqli->query('SELECT COUNT(*) FROM '.$quote($source).'.'.$quote($table));
+            $row = $result ? $result->fetch_row() : null;
+            if ($row) { $lines[] = 'Source table rows involved in this copy: '.intval($row[0]).'.'; }
+        } catch (\Throwable $e) { /* Preserve the original failure if diagnostic access fails. */ }
+        $kind = strtolower($table);
+        if (intval($error['code'])===1136) {
+            $lines[] = 'This is a table-structure mismatch during INSERT ... SELECT *. It does not identify a defective individual MySQL row. "Row 1" is an SQL row position, not a primary-key value or Heurist H-ID 1.';
+        } else {
+            $lines[] = 'The copy uses INSERT ... SELECT * without an explicit row order. An SQL row position cannot safely be translated into a primary key or Heurist H-ID. Any key/constraint identified by MySQL appears in the error above.';
+        }
+        $recordKeys = [
+            'records'=>'Heurist records: Records.rec_ID is the Heurist H-ID.',
+            'recdetails'=>'Field values: recDetails.dtl_ID identifies the MySQL detail row; dtl_RecID identifies its Heurist H-ID; dtl_DetailTypeID identifies the field.',
+            'reclinks'=>'Relationships: recLinks.rl_ID identifies the MySQL relationship row; rl_SourceID and rl_TargetID identify the Heurist H-IDs.',
+            'recuploadedfiles'=>'Uploaded files: recUploadedFiles.ulf_ID is a file reference ID, not a Heurist H-ID. Referencing records use recDetails.dtl_UploadedFileID and dtl_RecID.',
+            'sysugrps'=>'Users/groups: sysUGrps.ugr_ID identifies a user or group. This table contains no bibliographic/data records and its IDs are not Heurist H-IDs.',
+            'sysusrgrplinks'=>'User/group memberships: sysUsrGrpLinks.ugl_UserID and ugl_GroupID identify users/groups, not Heurist H-IDs.'
+        ];
+        $lines[] = $recordKeys[$kind] ?? 'This message identifies the table and its MySQL row identifier above; it does not establish a specific Heurist H-ID.';
+        if (intval($error['code'])===1136) {
+            $lines[] = 'Compare the listed source/target schema differences. Upgrade the source database to the format used by this code, or repair the inconsistent table definition, before retrying the clone. Do not change individual data records to fix this column-count error.';
+        }
+        $html = '<div style="max-width:1000px;line-height:1.45;overflow-wrap:anywhere">';
+        foreach ($lines as $index => $line) {
+            $line = htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $html .= '<p style="margin:0 0 12px">'.($index===0 ? '<strong>'.$line.'</strong>' : $line).'</p>';
+        }
+        return $html.'</div>';
+    }
+
     /**
     * Copy all tables (except csv import cache) from one db to another
     * It is assumed that all tables exist and empty in target db
@@ -1473,6 +1659,7 @@ class DbUtils {
         $res = true;
         $mysqli = self::$mysqli;
         $message = null;
+        $cloneMessageIsHtml = false;
 
         $db_source = $mysqli->real_escape_string($db_source);
         $db_target = $mysqli->real_escape_string($db_target);
@@ -1495,6 +1682,9 @@ class DbUtils {
         }
 
         if($res){
+
+                $cloneVersions = ['source'=>self::databaseCloneVersion($mysqli, $db_source),
+                    'target'=>self::databaseCloneVersion($mysqli, $db_target)];
 
                 // Remove initial values from empty target database
                 $mysqli->query('delete from sysIdentification where 1');
@@ -1553,25 +1743,28 @@ class DbUtils {
 
                         $table = $mysqli->real_escape_string($table);
                         $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
-                        $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM `".$db_source."`.`".$table."`"  );
+                        try {
+                            $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM `".$db_source."`.`".$table."`");
+                            $cloneError = $res ? null : ['code'=>$mysqli->errno, 'state'=>$mysqli->sqlstate, 'message'=>$mysqli->error];
+                        } catch (\Throwable $e) {
+                            $res = false;
+                            $cloneError = ['code'=>$e->getCode(), 'state'=>method_exists($e, 'getSqlState') ? $e->getSqlState() : $mysqli->sqlstate, 'message'=>$e->getMessage()];
+                        }
 
                         if($res){
                                 if($verbose) {
                                     echo " > " . htmlspecialchars($table) . ": ".intval($mysqli->affected_rows) . "  ";
                                 }
                         }else{
-                                if($table=='usrReportSchedule'){
-                                    if($verbose) {
-                                        echo "<br><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: {$mysqli->error}</p>";
-                                    }
-                                }else{
-                                    $message = "Unable to add records into $table - SQL error: ".$mysqli->error;
-                                    if($verbose) {
-                                        $message = "<br><p class=\"error\">Error: $message</p>";
-                                    }
-                                    $res = false;
-                                    break;
-                                }
+                            $diagnostic = self::databaseCloneFailureMessage($mysqli, $db_source, $db_target, $table, $cloneError, $cloneVersions);
+                            if($table=='usrReportSchedule'){
+                                if($verbose) { echo $diagnostic; }
+                            }else{
+                                $message = $diagnostic;
+                                $cloneMessageIsHtml = true;
+                                $res = false;
+                                break;
+                            }
                         }
 
                         if($table=='recForwarding'){ //remove missed records otherwise we get exception on constraint addition
@@ -1641,7 +1834,7 @@ class DbUtils {
 
         if(!$res){
             if($verbose) {
-                if($message) {echo htmlspecialchars($message);}
+                if($message) {echo $cloneMessageIsHtml ? $message : htmlspecialchars($message);}
             }else{
                 self::$system->addError(HEURIST_ERROR, $message);
             }

@@ -62,7 +62,7 @@ final class ExpansionRuleParser
         $root = array();
         $level =& $root;
         for($index=1; $index<count($tokens); $index+=2){
-            if(!preg_match('/^(lt|lf|rt|rf|links|related|connected)([0-9]*)$/i', $tokens[$index], $match)
+            if(!preg_match('/^(lt|lf|rt|rf|links|related|connected|r)([0-9]*)$/i', $tokens[$index], $match)
                 || !$isType($tokens[$index+1])){
                 throw new QueryValidationException('Invalid compact expansion path step: '.$tokens[$index]);
             }
@@ -76,7 +76,7 @@ final class ExpansionRuleParser
                 throw new QueryValidationException('Record type IDs in paths must be positive');
             }
             $inverse = array('lt'=>'lf', 'lf'=>'lt', 'rt'=>'rf', 'rf'=>'rt',
-                'links'=>'links', 'related'=>'related', 'connected'=>'connected')[$operator];
+                'links'=>'links', 'related'=>'related', 'r'=>'related', 'connected'=>'connected')[$operator];
             $key = $inverse.($field === '' ? '' : ':'.$field);
             $query = $childType > 0 ? array(array('t'=>$childType)) : array();
             $query[] = array($key=>$parentType > 0 ? array(array('t'=>$parentType)) : array());

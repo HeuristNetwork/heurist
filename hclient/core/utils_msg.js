@@ -930,6 +930,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 modal: (options['modal']!==false),
                 resizable: (options.resizable!==false),
                 draggable: (options.draggable!==false),
+                showResizeButtons: (options.showResizeButtons === true),
                 title: options["title"],
                 resizeStop: function( event, ui ) {
                     $dosframe.css('width','100%');

@@ -1236,6 +1236,9 @@ $.widget( "heurist.slidersMenu", {
                             }
                     }  });  
                 }else{
+                    // This popup is reused. A record type may have been added or edited
+                    // since its first opening, so rebuild its list from current definitions.
+                    cont.recordAdd('refreshRecordTypes');
                     cont.recordAdd('doExpand', expandRecordAddSetting);                        
                 }
                
@@ -1961,7 +1964,7 @@ $.widget( "heurist.slidersMenu", {
                         let action_label = window.hWin.HR( action_id ); 
                         if(action_id=='menu-url-substitutions'){
                             action_label = 'URL substitutions';
-                        }else if(!action_label){ //localized version not found
+                        }else if(!action_label || action_label === action_id){ //localized version not found
                             action_label = action.text;
                         }
                     
@@ -2000,7 +2003,7 @@ $.widget( "heurist.slidersMenu", {
                             item.attr('title', action_hint);
                         }
                         if(!widget._h8ExperimentalAllowed()
-                            && ['menu-sync-configure', 'menu-sync-master', 'menu-url-substitutions'].includes(action_id)){
+                            && ['menu-sync-configure', 'menu-sync-master', 'menu-url-substitutions', 'menu-automatic-deposit'].includes(action_id)){
                             widget._markExperimentalUnavailable(item);
                         }
                        

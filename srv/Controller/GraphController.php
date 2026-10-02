@@ -128,11 +128,13 @@ final class GraphController
         }catch(UnsupportedQueryException $e){
             $this->response->sendError(422, 'unsupported_query', $e->getMessage());
         }catch(SearchExecutionException $e){
+            if($this->response->sendInterrupted($e)){ return; }
             $this->errors->report($e, $this->runtime);
             $this->response->sendError(500, 'server_error', 'Graph query execution failed');
         }catch(\InvalidArgumentException $e){
             $this->response->sendError(400, 'invalid_request', $e->getMessage());
         }catch(\Throwable $e){
+            if($this->response->sendInterrupted($e)){ return; }
             $this->errors->report($e, $this->runtime);
             $this->response->sendError(500, 'server_error', 'Graph query execution failed');
         }

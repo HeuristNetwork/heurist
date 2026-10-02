@@ -125,6 +125,7 @@ ini_set('max_execution_time', 0);
             $options = [
                 'defType' => @$req_params["import"],
                 'databaseID' => @$req_params["databaseID"],
+                'databaseURL' => @$req_params["databaseURL"],
                 'definitionID' => @$req_params["definitionID"],
                 'is_rename_target' => @$req_params["is_rename_target"] == 1,
                 'conservative' => @$req_params["conservative"] == 1,

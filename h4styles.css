@@ -1811,6 +1811,18 @@ ul.fancytree-container ul{
     font-style:normal;
 }
 
+/* Guidance above the two column groups in the delimited file field mapping table. */
+#tblFieldMapping tr.csv-id-group > td{
+    background-color:#eaf7fc;
+}
+#tblFieldMapping .csv-mapping-help .heurist-helper1{
+    color:#3D9946;
+    font-size:0.8em;
+    line-height:1.25;
+    padding:10px 6px;
+    vertical-align:top;
+}
+
 
 /* nearly same as helper but nor affected to help status*/
 .heurist-prompt{

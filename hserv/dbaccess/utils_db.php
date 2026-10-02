@@ -2335,6 +2335,28 @@ $mysqli->kill($thread_id);
     }
 
     /**
+     * Checks if an index (key) exists in a given table of the current database.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $table_name The name of the table.
+     * @param string $key_name The name of the index.
+     * @return bool True if the index exists, false otherwise.
+     */
+    function hasIndex($mysqli, $table_name, $key_name){
+
+        $table_name = preg_replace(REGEX_ALPHANUM, "", $table_name);
+
+        $res = $mysqli->query("SHOW INDEX FROM `$table_name` WHERE Key_name='"
+                .$mysqli->real_escape_string($key_name)."'");
+        $row_cnt = 0;
+        if($res){
+            $row_cnt = $res->num_rows;
+            $res->close();
+        }
+        return $row_cnt>0;
+    }
+
+    /**
      * Checks and updates the ENUM definition for the `sysUGrps.ugr_Enabled` column.
      *
      * Ensures the `ugr_Enabled` column includes all necessary ENUM values

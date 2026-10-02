@@ -1278,7 +1278,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         // Prepare URL
         let full_url = this.baseURL;
         if(!full_url.endsWith('?') && !full_url.endsWith('&')){
-            full_url += full_url.indexOf('?') === false ? '?' : '&';
+            full_url += full_url.indexOf('?') === -1 ? '?' : '&';
         }
 
         // Process + Add parameters

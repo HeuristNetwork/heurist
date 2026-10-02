@@ -140,7 +140,8 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
 
                     if($usr_owner!=null){
                         //it returns false or array of warnings
-                        $res = DbUtils::databaseCreateFull($database_name, $usr_owner);
+                        $res = DbUtils::databaseCreateFromRegisteredTemplate(
+                            $database_name, $usr_owner, $req_params['template_id'] ?? 0);
 
                         if($res!==false){
                             sendEmailNewDatabase($usr_owner, $database_name, null);
@@ -474,6 +475,9 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
    }
 }
 
+if($action === 'create' && DbUtils::$creationTemplateFallbackAvailable){
+    $response['template_fallback_available'] = true;
+}
 header(CTYPE_JSON);
 print json_encode($response);
 

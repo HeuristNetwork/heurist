@@ -30,6 +30,9 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 }
 $config = SafeguardBackup::settings($system);
 $accounts = $config['accounts'] ?? [];
+if (!empty($config['email_file'])) {
+    $accounts[] = 'email_owner';
+}
 if (!$accounts) {
     exit(0);
 }
@@ -86,6 +89,22 @@ try {
     $successes = [];
     foreach ($needed as $account) {
         try {
+            if ($account === 'email_owner') {
+                if (!$ownerEmail) {
+                    throw new RuntimeException('The database owner has no email address');
+                }
+                require_once dirname(__FILE__).'/../../hserv/utilities/UMail.php';
+                if (!sendEmail($ownerEmail, 'Heurist database safeguard: '.$system->dbname(),
+                    'Your database safeguard file is attached.', false, $archive)) {
+                    throw new RuntimeException('Email delivery to the database owner failed');
+                }
+                $config['deposits'][$account] = ['date' => gmdate('c'), 'fingerprint' => $fingerprint];
+                if (!$system->settings->setDatabaseSetting('Safeguard backups', $config)) {
+                    throw new RuntimeException('Could not save the successful email delivery');
+                }
+                $successes[] = 'the database owner by email';
+                continue;
+            }
             $checkpoint = function ($entry) use ($system, &$config, $account) {
                 $config['deposits'][$account] = $entry;
                 if (!$system->settings->setDatabaseSetting('Safeguard backups', $config)) {
@@ -140,7 +159,7 @@ if ($message !== '') {
     $system->settings->setDatabaseSetting('Safeguard backups', $config);
     if ($ownerEmail) {
         require_once dirname(__FILE__).'/../../hserv/utilities/UMail.php';
-        $attachment = (!empty($config['email_file']) && isset($archive) && is_file($archive)) ? $archive : null;
+        $attachment = null; // The selected email destination was handled and checkpointed above.
         if (!sendEmail($ownerEmail, 'Heurist database safeguard: '.$system->dbname(), $message, false, $attachment)) {
             $config['notice']['text'] .= ' Email delivery to the database owner failed.';
             $system->settings->setDatabaseSetting('Safeguard backups', $config);

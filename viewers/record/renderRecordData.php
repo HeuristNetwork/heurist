@@ -366,7 +366,6 @@ if(!$system->hasAccess()){
                         }
 
                         let rec_title = link.innerHTML.indexOf('- >') === -1 ? link.innerHTML : link.innerHTML.split(' - > ')[1];
-                        let title = `${rec_title} <em style="font-size:0.9em;font-weight:normal;position:absolute;right:11em;top:25%;">${window.hWin.HR('drag to rescale')}</em>`;
                         let cover = link.innerHTML; //innerText
 
                         let cur_params = window.hWin.HEURIST4.util.getUrlParams(location.href);
@@ -390,11 +389,12 @@ if(!$system->hasAccess()){
 
                         window.hWin.HEURIST4.msg.showDialog(href,
                             {
-                                title:title,
+                                title: rec_title,
                                 width: width,
                                 height: height,
                                 modal:false,
                                 coverMsg: cover,
+                                showResizeButtons: true,
                                 onOpen: function(e, ui){
 
                                     let $dlg = $(this);
@@ -405,25 +405,16 @@ if(!$system->hasAccess()){
 
                                     window.hWin.record_viewer_popups.push($dlg);
 
-                                    // Place popup
-                                    if(pos){
-
-                                        let top = pos.top + (pos.top * 0.1);
-                                        let left = pos.left + (pos.left * 0.05);
-
-                                        $dlg.parent().css({
-                                            top: top,
-                                            left: left
-                                        });
-                                    }
-
                                     // Add 'Close all' button
                                     let $titleBar = $dlg.parent().find('.ui-dialog-titlebar');
                                     if($titleBar.length > 0){
 
-                                        $('<button>', {style: 'position: absolute;font-size: 0.8em;right: 4em;top: 0.2em;'})
+                                        let $resizeBtnContainer = $titleBar.find('.ui-dialog-resize-container');
+
+                                        // Add close all button
+                                        $('<button>', {style: 'font-size: 0.8em;width: 6.5em;margin-right: 3.5em;'})
                                             .text('Close all')
-                                            .insertBefore($titleBar.find('button'))
+                                            .insertAfter($resizeBtnContainer)
                                             .button()
                                             .on('click', () => {
 
@@ -439,7 +430,27 @@ if(!$system->hasAccess()){
                                                 }
                                             });
 
-                                        $titleBar.find('.ui-dialog-title').css('width', '73%');
+                                        $titleBar.find('.ui-dialog-title').css({width: '75%', 'margin-right': '2em'});
+                                        // Add text about drag resizing
+                                        $('<em>', {
+                                            style: 'font-size: 0.9em;font-weight: normal;width: 9em;',
+                                            text: window.hWin.HR('drag to rescale')
+                                        }).insertAfter($titleBar.find('.ui-dialog-title'));
+
+                                        $resizeBtnContainer.css('flex-basis', '20em');
+                                        $resizeBtnContainer.find('button')[1].click(); // auto resize to standard size
+                                    }
+
+                                    // Place popup
+                                    if(pos){
+
+                                        let top = pos.top + (pos.top * 0.2);
+                                        let left = pos.left + (pos.left * 0.1);
+
+                                        $dlg.parent().css({
+                                            top: top,
+                                            left: left
+                                        });
                                     }
                                 }
                             }
@@ -1339,7 +1350,7 @@ function print_details(array $bib) {
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
             <a href="#more" oncontextmenu="return false;"
-                onClick='document.querySelectorAll(".fieldRow").forEach(el => {el.style.display = "";});document.querySelectorAll(".moreRow").forEach(el => {el.style.display = "none";});return false;' style="color:blue">            
+                onClick='document.querySelectorAll(".fieldRow").forEach(el => {el.style.display = "";});document.querySelectorAll(".moreRow").forEach(el => {el.style.display = "none";});return false;' style="color:blue">
                 more...
             </a>
             </div><div class="detail"></div></div></div>
@@ -2799,7 +2810,7 @@ function composeRecLink(int $rec_ID, string $rec_Title){
     global $system;
 
     return '<a target="_popup" href="'.$system->recordLink($rec_ID)
-                            .'" onclick="return (typeof link_open === \'function\')?link_open(this, false):true;">'
+                            .'" onclick="return (typeof link_open === \'function\')?link_open(this, true):true;">'
                             .USanitize::sanitizeString($rec_Title,ALLOWED_TAGS).'</a>';
 }
 

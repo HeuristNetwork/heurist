@@ -77,7 +77,8 @@ final class SystemQueryBuilder
         $idOrder = $this->compileSort($normalized, $idState, $sort, $sortProvided);
         $idState->bind($limit, 'i');
         $idState->bind($offset, 'i');
-        $ids = new CompiledQuery('SELECT DISTINCT '.$idColumn.$idBase.$idOrder.' LIMIT ? OFFSET ?',
+        // One table, no joins: IDs are unique. DISTINCT would break ORDER BY under ONLY_FULL_GROUP_BY (error 3065)
+        $ids = new CompiledQuery('SELECT '.$idColumn.$idBase.$idOrder.' LIMIT ? OFFSET ?',
             $idState->types(), $idState->values(), $normalized);
         return array('ids'=>$ids, 'count'=>$count);
     }

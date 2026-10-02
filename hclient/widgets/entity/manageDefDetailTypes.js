@@ -846,6 +846,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             + 'and then customise the field appropriately for this record type.</div><br>').prependTo(main_container);
 
                         let btnBasefieldsList = $(main_container).find('span#btn-basefields-list').button({label: 'Choose base fields'})
+                        if(this.options.excludedFieldTypes?.length){
+                            // The general base-field picker cannot restrict types. Keep this
+                            // importer dialog within the types accepted by its mapping row.
+                            btnBasefieldsList.hide();
+                        }
                         let rty_ID = this.options.newFieldForRtyID;
                         let that = this;
 
@@ -991,6 +996,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 let ele = this._editing.getFieldByName('dty_Type');  
                 ele = ele.find('.input-div');
+
+                if(this.options.excludedFieldTypes?.length){
+                    ele.find('select option').filter((_, option) =>
+                        this.options.excludedFieldTypes.includes(option.value)).remove();
+                    ele.find('select').hSelect('refresh');
+                }
 
                 if(ele.find('select').hSelect("instance")){ 
                     let len = ele.find('select').find('option').length;
@@ -1271,6 +1282,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 if( $Db.dty(dty_ID, 'dty_ShowInLists')!='0'
                     && field_type!='separator'
+                    && !(that.options.excludedFieldTypes || []).includes(field_type)
                     && (!aUsage || !aUsage.getById(dty_ID))
                     && (field_name.toLowerCase().indexOf( entered )>=0)
                     && (field_name.toLowerCase().indexOf( entered )>=0)

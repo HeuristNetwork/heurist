@@ -29,6 +29,7 @@
 --    * Database structure version: 1.3.6  @ 20/10/2022, 
 --    * Database structure version: 1.3.10  @ 05/04/2023, 
 --    * Database structure version: 1.3.16  @ 27/08/2024, 
+--    * Database structure version: 1.4.0  @ 02/10/2026, origin identity and sync state for Records and recUploadedFiles
 
 --    * THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
 --    * DO NOT DELETE THEM
@@ -78,7 +79,11 @@ CREATE TABLE Records (
   rec_URLErrorMessage varchar(255) default NULL COMMENT 'Error returned by URL checking script for bad/inaccessible URLs',
   rec_URLExtensionForMimeType varchar(10) default NULL COMMENT 'A mime type extension for multimedia files pointed to DIRECTLY by the record URL',
   rec_Hash varchar(60) default NULL COMMENT 'A composite truncated metaphones + numeric values hash of significant fields',
+  rec_OriginatingDBID mediumint unsigned default NULL COMMENT 'Registered ID of the database where this record originated',
+  rec_IDInOriginatingDB int unsigned default NULL COMMENT 'rec_ID assigned by the database where this record originated',
+  rec_SyncState enum('local','allocated','pending_dependencies','complete') NOT NULL default 'local' COMMENT 'Completeness state for restartable master-satellite synchronisation',
   PRIMARY KEY  (rec_ID),
+  UNIQUE KEY rec_OriginIdentity (rec_OriginatingDBID,rec_IDInOriginatingDB),
   KEY rec_URL (rec_URL(63)),
   KEY rec_Title (rec_Title(63)),
   KEY rec_RecTypeID (rec_RecTypeID),
@@ -580,8 +585,12 @@ CREATE TABLE recUploadedFiles (
   ulf_Parameters text COMMENT 'Parameters including source (flickr,youtube...), default player etc. used to determine special processing',
   ulf_WhoCanView enum('viewable','loginrequired') NULL COMMENT 'Defines if the file is visible when not logged in. If public or blank then file is visible to all',
   ulf_MD5Checksum text(32) NULL COMMENT 'A checksum for the uploaded file which can be used to verify integrity and to merge duplicates',
+  ulf_OriginatingDBID mediumint unsigned default NULL COMMENT 'Registered ID of the database where this file reference originated',
+  ulf_IDInOriginatingDB mediumint unsigned default NULL COMMENT 'ulf_ID assigned by the database where this file reference originated',
+  ulf_SyncState enum('local','pending_metadata','pending_content','complete') NOT NULL default 'local' COMMENT 'Completeness state for restartable master-satellite synchronisation',
 --   ulf_DOI varchar(250) default NULL COMMENT 'Persistent identifier (DOI) obtained for this file resource',
   PRIMARY KEY  (ulf_ID),
+  UNIQUE KEY ulf_OriginIdentity (ulf_OriginatingDBID,ulf_IDInOriginatingDB),
   KEY ulf_ObfuscatedFileIDKey (ulf_ObfuscatedFileID),
   KEY ulf_Description (ulf_Description(100)),
   KEY ulf_UploaderUGrpID (ulf_UploaderUGrpID),
@@ -976,7 +985,7 @@ CREATE TABLE usrWorkingSubsets (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior,sys_MediaFolders)
-  VALUES (1,0,1,3,19,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
+  VALUES (1,0,1,4,0,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user

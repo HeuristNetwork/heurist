@@ -20,7 +20,7 @@
     }
     .lookup_data span.truncate{
         display: inline-block;
- 
+
         max-width: 300px;
 
         vertical-align: middle;
@@ -56,10 +56,10 @@
 <div class="ent_wrapper">
 
     <div class="ui-heurist-header"></div>
-                     
+
     <div class="ent_content" style="font-size: 0.9em;">
 
-        <div class="ent_content_full" id="safeguard_section" style="position:absolute;top:10px;bottom:auto;left:0;right:0;height:240px;padding:10px 20px;box-sizing:border-box;">
+        <div class="ent_content_full" id="safeguard_section" style="position:absolute;top:10px;bottom:10px;left:0;right:0;overflow:auto;padding:10px 20px;box-sizing:border-box;">
             <div class="safeguard-content">
                 <strong>Automatic database safeguarding</strong>
                 <p class="safeguard-explanation">
@@ -71,10 +71,12 @@
                 <div class="safeguard-option">
                     <label for="backup_interval_days">Backup interval (days):</label>
                     <input id="backup_interval_days" type="number" min="1" max="365" value="30" style="width:65px;">
-                    <span id="backup_accounts" style="margin-left:15px;"></span>
+
                 </div>
                 <div class="safeguard-option">
-                    <label><input id="backup_email_file" type="checkbox"> Email the safeguard file to the database owner</label>
+                    <strong>Select repositories</strong>
+                    <p class="safeguard-explanation">Choose the repositories to which the safeguard file should be sent at the indicated interval</p>
+                    <div id="backup_accounts"></div>
                     <span class="heurist-helper1 safeguard-warning">Large files, particularly archives with many images, may be rejected by the recipient's email service.</span>
                 </div>
                 <div class="safeguard-option">
@@ -84,12 +86,12 @@
             </div>
         </div>
 
-        <div class="ent_content_full" style="top:265px;padding-left:20px;">
+        <div class="ent_content_full repository-credentials" style="top:10px;padding-left:20px;">
             Services configured here enable the storage and retrieval of external resources such as images, documents, video
             on/from the external repositories.<br><br>
         </div>
 
-        <div class="ent_content_full" style="top:320px;width:300px;border-right:1px solid gray;">
+        <div class="ent_content_full repository-credentials" style="top:65px;width:300px;border-right:1px solid gray;">
             <div style="width:280px;padding:10px 10px 0;font-weight:bold;">
                 Repository services
             </div><br>
@@ -104,14 +106,14 @@
             </div>
         </div>
 
-        <div class="ent_content_full" id="editing_panel" style="top:320px;left:301px;padding:10px;">
+        <div class="ent_content_full repository-credentials" id="editing_panel" style="top:65px;left:301px;padding:10px;">
 
             <h4 id="service_name" style="padding-left:20px;"><span class="ui-icon ui-icon-arrowthick-1-w"></span>Select a service to edit or click the assign button</h4>
-            
+
             <div id="service_config" style="display:none">
-            
+
                 <fieldset id="assign_fieldset"><legend style="display:none"></legend>
-                    
+
                     <div style="padding: 0.2em; width: 100%;" class="input" id="service_type">
                         <div class="header" style="padding: 0 16px 0 16px;">
                             <label for="sel_servicetype">Repository:</label>
@@ -125,9 +127,9 @@
                         </div>
                         <select id="sel_usergroup" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
                     </div>
-                    
+
                 </fieldset>
-                
+
                 <div style="padding-left:20px;display: inline-block;" class="service_details" id="service_params">
                     <h4 style="display: inline-block;margin-bottom: 1em;">Define credentials for selected repository</h4>
 
@@ -141,14 +143,14 @@
                         <tr><td>Readonly Password</td><td><input data-field="readPwd" type="password" autocomplete="off"/></td></tr>
                     </table>
                 </div>
-                
+
                 <div style="text-align: center;padding: 20px;">
                     <button id="btnApplyCfg" class="ui-button-action" title="Use this configuration">Apply</button>
                     <button id="btnDiscard">Cancel</button>
                 </div>
 
             </div>
-            
+
         </div>
 
     </div>

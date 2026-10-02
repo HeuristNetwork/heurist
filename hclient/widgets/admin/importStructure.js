@@ -1039,6 +1039,21 @@ $.widget( "heurist.importStructure", {
             return;
         }
 
+        // Use the same registered location as the structure listing, rather than
+        // resolving the registration ID again through a separate lookup/cache.
+        const sourceRecord = this._cachedRecordset_dbs
+            ? this._cachedRecordset_dbs.getById(this._selectedDB) : null;
+        let sourceURL;
+        if (sourceRecord) {
+            const baseURL = this._cachedRecordset_dbs.fld(sourceRecord, 'rec_URL');
+            const dbName = this._cachedRecordset_dbs.fld(sourceRecord, 'rec_Title');
+            if (baseURL && dbName) {
+                const url = new URL(baseURL, window.hWin.HAPI4.baseURL);
+                url.searchParams.set('db', dbName);
+                sourceURL = url.href;
+            }
+        }
+
         const that = this;
 
         const style = {'font-size': '16px', 'background-color': '#FFF', 'opacity': 1};
@@ -1182,7 +1197,7 @@ $.widget( "heurist.importStructure", {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
 
-            }
+            }, sourceURL
         );
         
     },

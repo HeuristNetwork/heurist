@@ -72,11 +72,13 @@ final class TimeDataController
         }catch(UnsupportedQueryException $exception){
             $this->response->sendError(422, 'unsupported_query', $exception->getMessage());
         }catch(SearchExecutionException $exception){
+            if($this->response->sendInterrupted($exception)){ return; }
             $this->errors->report($exception, $this->runtime);
             $this->response->sendError(500, 'server_error', 'Timeline query execution failed');
         }catch(\InvalidArgumentException $exception){
             $this->response->sendError(400, 'invalid_request', $exception->getMessage());
         }catch(\Throwable $exception){
+            if($this->response->sendInterrupted($exception)){ return; }
             $this->errors->report($exception, $this->runtime);
             $this->response->sendError(500, 'server_error', 'Unable to produce timeline data');
         }

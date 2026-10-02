@@ -68,7 +68,7 @@ final class MapFieldSelector
             throw new QueryValidationException('Geographic field path must end with a detail-type ID: '.$code);
         }
         for($index=1; $index<count($tokens); $index+=2){
-            if(!preg_match('/^(lt|lf|rt|rf)[0-9]*$/i', $tokens[$index])
+            if(!preg_match('/^(lt|lf|rt|rf|r)[0-9]*$/i', $tokens[$index])
                 || !isset($tokens[$index+1]) || !ctype_digit($tokens[$index+1])){
                 throw new QueryValidationException('Invalid geographic field path: '.$code);
             }

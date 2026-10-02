@@ -3651,39 +3651,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 if(!hasField){ // open modify structure, if able when there are no fields
                     this.editRecordType(true);
-                }else if(window.hWin.HEURIST4.util.isnull(this.options.edit_structure) && 
-                         window.hWin.HEURIST4.util.isnull(this.options.rts_editor))
-                { // check for default title mask
-
-                    let title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
-                    let match_result = title_mask?title_mask.match(/\[([^\]]+)\]/g):null; // check for fields in title mask
-
-                    if(title_mask == 'record [ID]' || !match_result){
-
-                        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                            'You have not yet selected the fields used to create the <b>Constructed title</b><br><br>'
-
-                            +'The <b>Constructed title</b> is like the reference you might find in the bibliography at the end<br>'
-                            +'it uses important fields to uniquely identify and summarise the bibliographic reference, or in this case<br>'
-                            +'the database record in question.<br><br>'
-
-                            +'<b>Constructed titles</b> are used to represent records when they are listed in search results<br>'
-                            +'and as the visible representation of the record referenced in a pointer field or relationship marker.<br>'
-                            +'They can also be used in reports and visualisations, searches, sorting or in the constructed title<br>'
-                            +'of connected records.<br><br>'
-
-                            +'We strongly recommend putting a little thought into this, as well-designed constructed titles can<br>'
-                            +'greatly improve the clarity and ease of use of the database.<br>'
-                            +'We recommend you read the <a href="'
-                                +window.hWin.HAPI4.sysinfo.referenceServerURL
-                                +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
-                                +'&website=39&pageid=773" target="_blank">help for Constructed titles</a>', 
-                            { 'Proceed': function(){ that.editRecordTypeTitle(); $dlg.dialog('close'); } },
-                            {title:'Constructed title not yet configured', yes:'Proceed'},
-                            {default_palette_class: 'ui-heurist-design'});
-
-                        return;
-                    }
                 }
             }
 
@@ -3720,29 +3687,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 that._editing.displayValueErrors(check_for_errors);
             }
             if(this.editForm.find('.showAllImages').length > 0){
-
-                let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllRecords', []);
-                showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
-
-                if(Array.isArray(showAllImagesPrefs)){
-
-                    for(const keyValue of showAllImagesPrefs){
-
-                        const dtyID = keyValue.split('.')[1];
-                        if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID) || keyValue.indexOf(`${this._currentEditRecTypeID}.`) < 0){
-                            continue;
-                        }
-
-                        setTimeout((dtyID) => {
-
-                            const event = $.Event('click');
-                            event.isForced = true;
-
-                            this.editForm.find(`div[data-dtid="${dtyID}"] .showAllImages`).trigger(event);
-
-                        }, 500, dtyID);
-                    }
-                }
+                this._setupInlineImages();
             }
 
             if(this.options.fill_in_data){ // force ismodified
@@ -4141,6 +4086,41 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
         
         if(fields==null) return; //validation failed
+
+        // Prompt only when saving. Opening a record must not interrupt editing.
+        if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false &&
+           window.hWin.HEURIST4.util.isnull(this.options.edit_structure) &&
+           window.hWin.HEURIST4.util.isnull(this.options.rts_editor)){
+            let title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
+            let match_result = title_mask?title_mask.match(/\[([^\]]+)\]/g):null; // check for fields in title mask
+
+            if(title_mask == 'record [ID]' || !match_result){
+
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    'You have not yet selected the fields used to create the <b>Constructed title</b><br><br>'
+
+                    +'The <b>Constructed title</b> is like the reference you might find in the bibliography at the end<br>'
+                    +'it uses important fields to uniquely identify and summarise the bibliographic reference, or in this case<br>'
+                    +'the database record in question.<br><br>'
+
+                    +'<b>Constructed titles</b> are used to represent records when they are listed in search results<br>'
+                    +'and as the visible representation of the record referenced in a pointer field or relationship marker.<br>'
+                    +'They can also be used in reports and visualisations, searches, sorting or in the constructed title<br>'
+                    +'of connected records.<br><br>'
+
+                    +'We strongly recommend putting a little thought into this, as well-designed constructed titles can<br>'
+                    +'greatly improve the clarity and ease of use of the database.<br>'
+                    +'We recommend you read the <a href="'
+                        +window.hWin.HAPI4.sysinfo.referenceServerURL
+                        +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
+                        +'&website=39&pageid=773" target="_blank">help for Constructed titles</a>',
+                    { 'Proceed': function(){ that.editRecordTypeTitle(); $dlg.dialog('close'); } },
+                    {title:'Constructed title not yet configured', yes:'Proceed'},
+                    {default_palette_class: 'ui-heurist-design'});
+
+                return;
+            }
+        }
 
         //assign new set of tags to record
         if(Array.isArray(that._updated_tags_selection)){
@@ -6439,6 +6419,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             that.resource_values = []; // list of search values for recpointer fields
             that.relmarker_values = []; // list of search values and term values for relationship marker fields
 
+            const allowedRecDumps = ['bnfLibrary', 'bnfLibraryAut', 'isni'];
+
             if(!window.hWin.HEURIST4.util.isempty(recset['ext_url'])){
                 that.lookup_record_link = {url: recset['ext_url'], type: 'ext'};
             }else if(!window.hWin.HEURIST4.util.isempty(recset['heurist_url'])){
@@ -6451,7 +6433,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 const dt_id = dtyIds[k];
 
-                if(dt_id>0){
+                if(dt_id > 0){
 
                     let newval = recset[dt_id];
                     let type = $Db.dty(dt_id, 'dty_Type');
@@ -6533,68 +6515,94 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         const fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
                         if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
                     } 
-                }else if(dt_id == 'BnF_ID' && cfg.options.dump_record == true){ // retrieve record from BnF and place in record scratch pad
+                }
+                if(allowedRecDumps.includes(cfg.service) && cfg.options.dump_record == true){ // retrieve record from BnF and place in record scratch pad
 
-                    let value = recset['BnF_ID'];
+                    let requestURL = '';
+                    let requestService = '';
+                    if(dt_id == 'BnF_ID'){
 
-                    if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
-                        continue;
+                        let value = recset['BnF_ID'];
+
+                        if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
+                            continue;
+                        }
+
+                        requestURL = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
+                        let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
+
+                        requestURL += encodeURIComponent(fld_name + ' all ' + value) + ')';
+
+                        requestService = 'bnf_recdump';
+                    }else if(dt_id == 'isni'){
+
+                        let value = recset['isni'];
+
+                        if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
+                            continue;
+                        }
+
+                        requestURL = `https://isni.oclc.org/sru/DB=1.2/?version=1.1&operation=searchRetrieve&recordSchema=isni-b&maximumRecords=1&startRecord=1&query=`;
+                        requestURL += encodeURIComponent(`pica.isn = ${value}`);
+
+                        requestService = 'isni_recdump';
                     }
 
-                    let req_url = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
-                    let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
-
-                    req_url += encodeURIComponent(fld_name + ' all ' + value) + ')';
-
-                    let req = {
-                        service: req_url,
-                        serviceType: 'bnf_recdump'
-                    };
-
-                    window.hWin.HAPI4.RecordMgr.lookupService(req, (response) => {
-                        if(window.hWin.HEURIST4.util.isJSON(response)){
-                            response = window.hWin.HEURIST4.util.isJSON(response);
-                            if(response.record != null){
-
-                                let scratchpad_txt = response.record + '\r\n\r\n';
-
-                                let fld_id = cfg.options.dump_field;
-                                if(isNaN(parseInt(fld_id)) || fld_id < 1 || !$Db.rst(that._currentEditRecTypeID, fld_id) || $Db.dty(fld_id, 'dty_Type') != 'blocktext'){
-                                    fld_id = 'rec_ScratchPad';   
-                                }
-                                let $fld = that._editing.getFieldByName(fld_id);
-
-                                if(fld_id == 'rec_ScratchPad'){
-
-                                    if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
-                                        scratchpad_txt += '\r\n\r\n' + $fld.text();
-                                    }
-    
-                                    $fld.editing_input('setValue',[scratchpad_txt]);
-                                    $fld.editing_input('isChanged', true);
-
-                                    that.editFormPopup.layout().open("east"); // expand panel
-                                    
-                                    let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(4));
-                                    if($acc_ele.accordion('instance') != undefined){ // expand accordion
-                                        $acc_ele.accordion('option', 'active', 0);
-                                    }
-                                }else{
-
-                                    let existing_vals = $fld.editing_input('getValues');
-                                    if(existing_vals[0] != ''){
-                                        existing_vals.push([scratchpad_txt]);
-                                    }
-                                    $fld.editing_input('setValue',[scratchpad_txt]);
-                                }
-                            }
-                        }
-                    });
+                    that._dumpExternalRecordIntoField(requestURL, requestService, cfg.options.dump_field);
                 }
             }
 
             that.processTermFields(assigned_fields, {}); // order of operations is: Terms, Files, Record pointers, Relationship markers
         }
+    },
+
+    _dumpExternalRecordIntoField: function(externalURL, serviceType, dumpingToField){
+
+        let that = this;
+        let request = {
+            service: externalURL,
+            serviceType: serviceType
+        };
+
+        window.hWin.HAPI4.RecordMgr.lookupService(request, (response) => {
+            if(window.hWin.HEURIST4.util.isJSON(response)){
+                response = window.hWin.HEURIST4.util.isJSON(response);
+                if(response.record != null){
+
+                    let scratchpad_txt = response.record + '\r\n\r\n';
+
+                    let fld_id = dumpingToField;
+                    if(isNaN(parseInt(fld_id)) || fld_id < 1 || !$Db.rst(that._currentEditRecTypeID, fld_id) || $Db.dty(fld_id, 'dty_Type') != 'blocktext'){
+                        fld_id = 'rec_ScratchPad';   
+                    }
+                    let $fld = that._editing.getFieldByName(fld_id);
+
+                    if(fld_id == 'rec_ScratchPad'){
+
+                        if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
+                            scratchpad_txt += '\r\n\r\n' + $fld.text();
+                        }
+
+                        $fld.editing_input('setValue',[scratchpad_txt]);
+                        $fld.editing_input('isChanged', true);
+
+                        that.editFormPopup.layout().open("east"); // expand panel
+                        
+                        let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(4));
+                        if($acc_ele.accordion('instance') != undefined){ // expand accordion
+                            $acc_ele.accordion('option', 'active', 0);
+                        }
+                    }else{
+
+                        let existing_vals = $fld.editing_input('getValues');
+                        if(existing_vals[0] != ''){
+                            existing_vals.push([scratchpad_txt]);
+                        }
+                        $fld.editing_input('setValue',[scratchpad_txt]);
+                    }
+                }
+            }
+        });
     },
 	
     /**
@@ -8087,5 +8095,41 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         this.editFormPopup.layout().hide('west');
         this.options.rts_editor = null;
         this.reloadEditForm( true );
+    },
+
+    _setupInlineImages: function(){
+
+        let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'});
+        let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+        showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+        let prefUpdated = false;
+
+        for(const fileDtyID of fileFields.getOrder()){
+
+            if(!$Db.rst(this._currentEditRecTypeID, fileDtyID) || showAllImagesPrefs.blocked.includes(`${this._currentEditRecTypeID}.${fileDtyID}`)){
+                continue;
+            }
+
+            if(!showAllImagesPrefs.allowed.includes(`${this._currentEditRecTypeID}.${fileDtyID}`)){
+
+                showAllImagesPrefs.allowed.push(`${this._currentEditRecTypeID}.${fileDtyID}`);
+                window.hWin.HAPI4.currentUser.ugr_Preferences.edit_record_showAllImagesPerField = showAllImagesPrefs; // update local cache, before complete save
+
+                prefUpdated = true;
+            }
+
+            setTimeout((dtyID) => {
+
+                const event = $.Event('click');
+                event.isForced = true;
+
+                this.editForm.find(`div[data-dtid="${dtyID}"] .showAllImages`).trigger(event);
+
+            }, 500, fileDtyID);
+        }
+
+        if(prefUpdated){
+            window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
+        }
     }
-});        
+});

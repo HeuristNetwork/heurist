@@ -855,6 +855,10 @@ class USystem {
 
         global $accessToken_DeepLAPI, $serverName_DeepL;
         $DeepL = null;
+        
+        if(!(isset($accessToken_DeepLAPI) && isset($serverName_DeepL))){
+            return;
+        }
 
         try{
             $DeepL = new DeepL($system, $accessToken_DeepLAPI, $serverName_DeepL);

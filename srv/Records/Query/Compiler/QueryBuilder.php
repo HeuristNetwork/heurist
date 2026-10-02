@@ -55,7 +55,8 @@ final class QueryBuilder
         $sort=$this->compileEffectiveSort($normalized,$state,$context);
         $limit=intval($context['limit']??self::DEFAULT_LIMIT);if($limit<1){$limit=self::DEFAULT_LIMIT;}$limit=min($limit,self::MAX_LIMIT);
         $offset=max(0,intval($context['offset']??0));
-        $sql='SELECT DISTINCT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$sort.' LIMIT ? OFFSET ?';
+        // No joins, so rec_ID is unique; DISTINCT would break ORDER BY under ONLY_FULL_GROUP_BY (error 3065)
+        $sql='SELECT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$sort.' LIMIT ? OFFSET ?';
         $state->bind($limit,'i');$state->bind($offset,'i');
         return new CompiledQuery($sql,$state->types(),$state->values(),$normalized);
     }
@@ -157,7 +158,8 @@ final class QueryBuilder
         if(!$this->supportsFlatExecution($normalized)){throw new UnsupportedQueryException('Query requires linked execution');}
         $state=new SqlBuildContext($context);$where=$this->compileGroup($normalized,'AND',$state,'r',0);
         $this->records->appendAccessConditions($where,$state,$context,'r');
-        return new CompiledQuery('SELECT DISTINCT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$this->compileEffectiveSort($normalized,$state,$context),$state->types(),$state->values(),$normalized);
+        // As in buildIds(): no joins, no DISTINCT (error 3065 with ORDER BY under ONLY_FULL_GROUP_BY)
+        return new CompiledQuery('SELECT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$this->compileEffectiveSort($normalized,$state,$context),$state->types(),$state->values(),$normalized);
     }
 
     /** Compile an explicit request sort in preference to the query's top-level sort. */
@@ -219,14 +221,14 @@ final class QueryBuilder
             if($this->fields->isLinkFieldPresenceTest($suffix,$value)){return $this->fields->fieldCondition(intval($suffix),$value,$state,$r);}
             return $this->compileResourceLink($r,'from',$suffix,$value,$state,$depth+1);
         }
-        if(in_array($base,array('rt','related_to','relatedto'),true)){return $this->compileRelationship($r,'to',$suffix,$value,$state,$depth+1);}
-        if(in_array($base,array('rf','related_from','relatedfrom'),true)){return $this->compileRelationship($r,'from',$suffix,$value,$state,$depth+1);}
+        if(in_array($base,array('rt','related_to','relatedto'),true)){return $this->compileRelationships($r,'rt',$suffix,$value,$state,$depth+1);}
+        if(in_array($base,array('rf','related_from','relatedfrom'),true)){return $this->compileRelationships($r,'rf',$suffix,$value,$state,$depth+1);}
         if($base==='links'){return $this->compileAnyLink($r,$suffix,$value,$state,$depth+1);}
-        if($base==='related'){return $this->compileRelated($r,$suffix,$value,$state,$depth+1);}
+        if($base==='related'){return $this->compileRelationships($r,'related',$suffix,$value,$state,$depth+1);}
         if($base==='connected'){
             if($suffix!==''){throw new QueryValidationException('connected does not accept a field or relationship type');}
             return '('.$this->compileAnyLink($r,'',$value,$state,$depth+1)
-                .' OR '.$this->compileRelated($r,'',$value,$state,$depth+1).')';
+                .' OR '.$this->compileRelationships($r,'related','',$value,$state,$depth+1).')';
         }
         throw new UnsupportedQueryException('Predicate is not executable: '.$base);
     }
@@ -238,31 +240,6 @@ final class QueryBuilder
         list($from) = $this->resourceLinkExists($parentAlias, 'from', $suffix, $value, $state, $depth);
         $either = '('.$to.' OR '.$from.')';
         return $negate ? 'NOT '.$either : $either;
-    }
-
-    /**
-     * related[:types] - a relationship in either direction. Types (the suffix and r)
-     * read from the parent: outgoing relationships use them, incoming ones their inverse.
-     */
-    private function compileRelated(string $parentAlias, string $suffix, $value, SqlBuildContext $state, int $depth): string
-    {
-        list($childQuery, $relationshipQuery, $explicitTypes) =
-            $this->splitRelationshipQuery($this->parser->linkedValueQuery($value));
-        $types = $explicitTypes === null ? null : $this->terms->expand($explicitTypes);
-        if($suffix !== ''){
-            $suffixTypes = $this->terms->expand($this->fields->numericList($suffix, 'relationship type'));
-            $types = $types === null ? $suffixTypes : array_values(array_intersect($types, $suffixTypes));
-        }
-        $parts = array($this->relationshipExists(
-            $parentAlias, 'to', $childQuery, $relationshipQuery, $types, $state, $depth
-        ));
-        $reverse = $types === null ? null : $this->terms->inverse($types);
-        if($reverse === null || !empty($reverse)){
-            $parts[] = $this->relationshipExists(
-                $parentAlias, 'from', $childQuery, $relationshipQuery, $reverse, $state, $depth
-            );
-        }
-        return '('.implode(' OR ', $parts).')';
     }
 
     private function compileResourceLink(
@@ -329,7 +306,7 @@ final class QueryBuilder
             if($base === 'exists'){
                 $flag = strtoupper(trim((string)$predicate[$key]));
                 if($flag === 'NULL'){ $negate = true; }
-                elseif($flag === '-NULL'){ $negate = false; }
+                elseif($flag === '-NULL' || $flag === ''){ $negate = false; }
                 else{ throw new QueryValidationException('exists predicate accepts NULL or -NULL'); }
                 continue;
             }
@@ -339,60 +316,47 @@ final class QueryBuilder
     }
 
     /**
-     * Compile a directional Relationship-record edge as correlated EXISTS. With a
-     * relation-marker suffix the marker's relationship types and endpoint record
-     * types constrain the edge, as in chunked execution.
+     * rt / rf / related [:field] - relationships as correlated EXISTS, one per edge read
+     * ("leg", see RelationTermResolver::relationshipLegs): stored direction, stored relation
+     * types, and the record types of both ends. The legs are alternatives (OR).
      */
-    private function compileRelationship(
+    private function compileRelationships(
         string $parentAlias,
-        string $direction,
+        string $base,
         string $suffix,
         $value,
         SqlBuildContext $state,
         int $depth
     ): string {
-        list($childQuery, $relationshipQuery, $relationTypes) =
-            $this->splitRelationshipQuery($this->parser->linkedValueQuery($value));
-        if($suffix === ''){
-            return $this->relationshipExists(
-                $parentAlias, $direction, $childQuery, $relationshipQuery, $relationTypes, $state, $depth, false
-            );
+        // exists:NULL - records without such a relationship (as for lt/lf)
+        list($linkedQuery, $negate) = $this->extractExistsModifier($this->parser->linkedValueQuery($value));
+        list($childQuery, $relationshipQuery, $explicitTypes) = $this->splitRelationshipQuery($linkedQuery);
+        $parts = array();
+        foreach($this->terms->relationshipLegs($base, $suffix, $explicitTypes) as $leg){
+            $parts[] = $this->relationshipExists($parentAlias, $leg, $childQuery, $relationshipQuery, $state, $depth);
         }
-        if(!ctype_digit($suffix) || intval($suffix)<1){
-            throw new QueryValidationException('Relation-marker field ID must be a positive integer');
-        }
-        $marker = $this->terms->marker(intval($suffix));
-        $types = $relationTypes === null ? null : $this->terms->expand($relationTypes);
-        if($marker['types'] !== null){
-            $types = $types === null ? $marker['types'] : array_values(array_intersect($types, $marker['types']));
-        }
-        if(!empty($marker['recordTypes'])){
-            $childQuery = array_values(array_filter($childQuery, static function($predicate){
-                return !array_key_exists('_all', $predicate);
-            }));
-            $childQuery[] = array('t'=>$marker['recordTypes']);
-        }
-        return $this->relationshipExists($parentAlias, $direction, $childQuery, $relationshipQuery, $types, $state, $depth);
+        $any = empty($parts) ? '0=1' : (count($parts) === 1 ? $parts[0] : '('.implode(' OR ', $parts).')');
+        return $negate ? 'NOT '.$any : $any;
     }
 
-    /**
-     * One-direction relationship EXISTS. $types null = any type; $expanded says whether
-     * they already include descendant terms, otherwise the closure table adds them.
-     */
+    /** One leg: the outer record's type, and an EXISTS over its relationships in one stored direction. */
     private function relationshipExists(
         string $parentAlias,
-        string $direction,
+        array $leg,
         array $childQuery,
         array $relationshipQuery,
-        ?array $types,
         SqlBuildContext $state,
-        int $depth,
-        bool $expanded = true
+        int $depth
     ): string {
         $linkAlias = $state->nextAlias('rrl');
         $childAlias = $state->nextAlias('rr');
         $relationshipAlias = $state->nextAlias('rel');
-        $relationTypes = $types;
+        $direction = $leg['direction'];
+        $relationTypes = $leg['types'];
+        $outerType = '';
+        if($leg['outerTypes'] !== null){
+            $outerType = $this->typeCondition($parentAlias.'.rec_RecTypeID', $leg['outerTypes'], $state).' AND ';
+        }
 
         $parentColumn = $direction === 'to' ? 'rl_SourceID' : 'rl_TargetID';
         $childColumn = $direction === 'to' ? 'rl_TargetID' : 'rl_SourceID';
@@ -400,14 +364,11 @@ final class QueryBuilder
             $linkAlias.'.'.$parentColumn.'='.$parentAlias.'.rec_ID',
             $linkAlias.'.rl_RelationID IS NOT NULL'
         );
-        if($relationTypes !== null && $expanded){
-            if(empty($relationTypes)){ $edge[] = '0=1'; }
-            else{
-                $edge[] = $linkAlias.'.rl_RelationTypeID IN ('.implode(',', array_fill(0, count($relationTypes), '?')).')';
-                foreach($relationTypes as $type){ $state->bind(intval($type), 'i'); }
-            }
-        }elseif($relationTypes !== null){
-            $edge[] = $this->relationshipTypeCondition($linkAlias, $relationTypes, $state);
+        if($relationTypes !== null){
+            $edge[] = $this->typeCondition($linkAlias.'.rl_RelationTypeID', $relationTypes, $state);
+        }
+        if($leg['linkedTypes'] !== null){
+            $edge[] = $this->typeCondition($childAlias.'.rec_RecTypeID', $leg['linkedTypes'], $state);
         }
         $childWhere = $this->compileGroup($childQuery, 'AND', $state, $childAlias, $depth);
         $this->records->appendAccessConditions($childWhere, $state, $state['context'], $childAlias);
@@ -418,12 +379,13 @@ final class QueryBuilder
             $relationshipWhere, $state, $state['context'], $relationshipAlias
         );
 
-        return 'EXISTS (SELECT 1 FROM recLinks '.$linkAlias
+        $exists = 'EXISTS (SELECT 1 FROM recLinks '.$linkAlias
             .' INNER JOIN Records '.$childAlias.' ON '.$childAlias.'.rec_ID='
             .$linkAlias.'.'.$childColumn
             .' INNER JOIN Records '.$relationshipAlias.' ON '.$relationshipAlias.'.rec_ID='
             .$linkAlias.'.rl_RelationID'
             .' WHERE '.implode(' AND ', array_merge($edge, $childWhere, $relationshipWhere)).')';
+        return $outerType === '' ? $exists : '('.$outerType.$exists.')';
     }
 
     /** Separate endpoint predicates from Relationship-record predicates. */
@@ -455,17 +417,12 @@ final class QueryBuilder
         );
     }
 
-    /** Include requested relationship terms and descendants in the closure table. */
-    private function relationshipTypeCondition(string $linkAlias, array $types, SqlBuildContext $state): string
+    /** `column IN (ids)`, or a false condition for an empty list. */
+    private function typeCondition(string $column, array $ids, SqlBuildContext $state): string
     {
-        if(empty($types)){ return '0=1'; }
-        $direct = implode(',', array_fill(0, count($types), '?'));
-        foreach($types as $type){ $state->bind($type, 'i'); }
-        $descendants = implode(',', array_fill(0, count($types), '?'));
-        foreach($types as $type){ $state->bind($type, 'i'); }
-        return '('.$linkAlias.'.rl_RelationTypeID IN ('.$direct.') OR '
-            .$linkAlias.'.rl_RelationTypeID IN (SELECT trl_TermID FROM defTermsLinks '
-            .'WHERE trl_ParentID IN ('.$descendants.')))';
+        if(empty($ids)){ return '0=1'; }
+        foreach($ids as $id){ $state->bind(intval($id), 'i'); }
+        return $column.' IN ('.implode(',', array_fill(0, count($ids), '?')).')';
     }
 
 }

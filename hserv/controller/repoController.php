@@ -169,11 +169,16 @@ if(!$system->init(@$_REQUEST['db'])){
         }elseif($action=='backup_check'){
             // Called after login/Explore startup. Never perform a large export in the HTTP worker.
             if(!SafeguardBackup::isEnabled()){
-                $res = ['enabled' => false, 'configured' => false, 'notice' => null];
+                $res = ['enabled' => false, 'configured' => false, 'show_introduction' => false, 'notice' => null];
             }else{
                 $config = SafeguardBackup::settings($system);
                 $accounts = $config['accounts'] ?? [];
-                $res = ['enabled' => true, 'configured' => !empty($accounts), 'notice' => null];
+                $configured = !empty($config['interval_days']) && (!empty($accounts) || !empty($config['email_file']));
+                $res = ['enabled' => true, 'configured' => $configured,
+                    'show_introduction' => !$configured, 'notice' => null];
+                if(!empty($config['email_file'])){
+                    $accounts[] = 'email_owner'; // Independent destination, also valid without a repository.
+                }
                 if($system->isAdmin() && !empty($config['notice']['id'])
                     && empty($config['notice']['seen'][$ugr_ID])){
                     $res['notice'] = $config['notice']['text'];

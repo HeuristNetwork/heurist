@@ -156,56 +156,71 @@ final class ExpansionEngine
     /** Read edge rows as parent, child, source, target, field, relationship. */
     private function readEdges(array $parentIds, array $anchor, int $batchSize): array
     {
-        $rows = array();
         $base = $anchor['base'];
-        if(in_array($base, self::UNDIRECTED, true)){
-            $kinds = $base === 'links' ? array(false) : ($base === 'related' ? array(true) : array(false, true));
-            $directions = array(true, false);
-        }else{
-            $kinds = array(in_array($base, array_merge(self::RELATION_FORWARD, self::RELATION_REVERSE), true));
-            $directions = array(in_array($base, array_merge(self::RESOURCE_FORWARD, self::RELATION_FORWARD), true));
-        }
         if($base === 'connected' && $anchor['suffix'] !== ''){
             throw new QueryValidationException('connected does not accept a field or relationship type');
         }
-        foreach($kinds as $relationship){
-            foreach($directions as $forward){
-                $rows = array_merge($rows, $this->readEdgePass(
-                    $parentIds, $anchor, $relationship, $forward, $batchSize
-                ));
+        $relationBase = in_array($base, self::RELATION_FORWARD, true) ? 'rf'
+            : (in_array($base, self::RELATION_REVERSE, true) ? 'rt'
+            : (in_array($base, array('related', 'connected'), true) ? 'related' : null));
+        // pointer reads: forward = the parent (seed) is the stored source
+        $passes = array();
+        if($relationBase === null || $base === 'connected'){
+            $forwards = in_array($base, self::UNDIRECTED, true) ? array(true, false)
+                : array(in_array($base, self::RESOURCE_FORWARD, true));
+            foreach($forwards as $forward){
+                $passes[] = array('relation'=>false, 'forward'=>$forward, 'types'=>null, 'parentTypes'=>null, 'childTypes'=>null);
             }
+        }
+        // relationship reads: the legs shared with search. The rule's outer record is the
+        // child, the parent is the linked record: a leg whose outer record is the stored
+        // source reads from the parent as target.
+        if($relationBase !== null){
+            $legs = $this->search->relationshipLegs($relationBase, $base === 'connected' ? '' : $anchor['suffix'],
+                $this->relationshipTypes($anchor['parentQuery']));
+            foreach($legs as $leg){
+                $passes[] = array('relation'=>true, 'forward'=>$leg['direction'] === 'from',
+                    'types'=>$leg['types'], 'parentTypes'=>$leg['linkedTypes'], 'childTypes'=>$leg['outerTypes']);
+            }
+        }
+        $rows = array();
+        foreach($passes as $pass){
+            $rows = array_merge($rows, $this->readEdgePass($parentIds, $anchor, $pass, $batchSize));
         }
         return $rows;
     }
 
-    /** One edge read: pointers or relationships, forward (parent is source) or reverse. */
-    private function readEdgePass(
-        array $parentIds,
-        array $anchor,
-        bool $relationship,
-        bool $forward,
-        int $batchSize
-    ): array {
+    /**
+     * One edge read: pointers or relationships, forward (parent is the stored source) or
+     * reverse, with optional relation types and parent/child record types.
+     */
+    private function readEdgePass(array $parentIds, array $anchor, array $pass, int $batchSize): array
+    {
         $rows = array();
-        $parentColumn = $forward ? 'rl_SourceID' : 'rl_TargetID';
-        $childColumn = $forward ? 'rl_TargetID' : 'rl_SourceID';
+        $parentColumn = $pass['forward'] ? 'rl_SourceID' : 'rl_TargetID';
+        $childColumn = $pass['forward'] ? 'rl_TargetID' : 'rl_SourceID';
+        $inList = static function(string $column, array $ids, string &$types, array &$values): string {
+            $types .= str_repeat('i', count($ids));
+            $values = array_merge($values, array_map('intval', $ids));
+            return $column.' IN ('.implode(',', array_fill(0, count($ids), '?')).')';
+        };
         foreach(array_chunk($parentIds, $batchSize) as $chunk){
-            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
-            $conditions = array('rl.'.$parentColumn.' IN ('.$placeholders.')');
-            $values = array_values($chunk);
-            $types = str_repeat('i', count($chunk));
-            if($relationship){
+            $types = ''; $values = array(); $joins = '';
+            $conditions = array($inList('rl.'.$parentColumn, $chunk, $types, $values));
+            if($pass['relation']){
                 $conditions[] = 'rl.rl_RelationID IS NOT NULL';
-                $relationTypes = $this->relationshipTypes($anchor['parentQuery']);
-                if(!empty($relationTypes)){
-                    $conditions[] = 'rl.rl_RelationTypeID IN ('
-                        .implode(',', array_fill(0, count($relationTypes), '?')).')';
-                    $types .= str_repeat('i', count($relationTypes));
-                    $values = array_merge($values, $relationTypes);
+                if($pass['types'] !== null){ $conditions[] = $inList('rl.rl_RelationTypeID', $pass['types'], $types, $values); }
+                if($pass['parentTypes'] !== null){
+                    $joins .= ' INNER JOIN Records rp ON rp.rec_ID=rl.'.$parentColumn;
+                    $conditions[] = $inList('rp.rec_RecTypeID', $pass['parentTypes'], $types, $values);
+                }
+                if($pass['childTypes'] !== null){
+                    $joins .= ' INNER JOIN Records rc ON rc.rec_ID=rl.'.$childColumn;
+                    $conditions[] = $inList('rc.rec_RecTypeID', $pass['childTypes'], $types, $values);
                 }
             }else{
                 $conditions[] = 'rl.rl_RelationID IS NULL';
-                if($anchor['suffix'] !== ''){
+                if($anchor['suffix'] !== '' && $anchor['base'] !== 'connected'){
                     if(!ctype_digit($anchor['suffix']) || intval($anchor['suffix']) < 1){
                         throw new QueryValidationException('Expansion link field must be a positive ID');
                     }
@@ -216,16 +231,16 @@ final class ExpansionEngine
             }
             $sql = 'SELECT rl.'.$parentColumn.',rl.'.$childColumn
                 .',rl.rl_SourceID,rl.rl_TargetID,COALESCE(rl.rl_DetailTypeID,0)'
-                .',COALESCE(rl.rl_RelationID,0) FROM recLinks rl WHERE '.implode(' AND ', $conditions);
+                .',COALESCE(rl.rl_RelationID,0) FROM recLinks rl'.$joins.' WHERE '.implode(' AND ', $conditions);
             $rows = array_merge($rows, $this->executor->executeRows($sql, $types, $values));
         }
         return $rows;
     }
 
-    /** Read a direct relationship-type constraint from the nested parent query. */
-    private function relationshipTypes($parentQuery): array
+    /** Relation types given as "r" in the nested parent query; null when there are none. */
+    private function relationshipTypes($parentQuery): ?array
     {
-        if(!is_array($parentQuery)){ return array(); }
+        if(!is_array($parentQuery)){ return null; }
         foreach($parentQuery as $predicate){
             if(!is_array($predicate) || count($predicate)!==1){ continue; }
             $key = (string)array_keys($predicate)[0];
@@ -235,7 +250,7 @@ final class ExpansionEngine
             $values = is_array($value) ? $value : preg_split('/\s*,\s*/', (string)$value);
             return array_values(array_filter(array_map('intval', $values)));
         }
-        return array();
+        return null;
     }
 
     /** Apply endpoint conditions and ordinary access rules in one IDs search. */
@@ -293,7 +308,7 @@ final class ExpansionEngine
             'lt'=>'lf', 'linked_to'=>'lf', 'linkedto'=>'lf',
             'rf'=>'rt', 'related_from'=>'rt', 'relatedfrom'=>'rt',
             'rt'=>'rf', 'related_to'=>'rf', 'relatedto'=>'rf',
-            'links'=>'links', 'related'=>'related', 'connected'=>'connected'
+            'links'=>'links', 'related'=>'r', 'connected'=>'connected'
         )[$anchor['base']];
         $operator = $outward.($anchor['suffix'] === '' ? '' : $anchor['suffix']);
         $prefix = $parent === '' ? $parentType : $parent;

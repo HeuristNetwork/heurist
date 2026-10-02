@@ -261,5 +261,29 @@
         "SPARQL_field_map": [],
         "SPARQL_queries": {}
     }
+},
+{
+    "service": "isni",
+    "rty_ID": "",
+    "label": "ISNI - Record lookup",
+    "dialog": "lookupISNI",
+    "description": "Query ISNI records from ISNI.org",
+    "fields": {
+        "isni": "",
+        "titles": "",
+        "names": "",
+        "dates": "",
+        "locations": "",
+        "entity_type": "",
+        "related_persons": "",
+        "creation_class": "",
+        "creation_role": "",
+        "isni_uri": "",
+        "sources": ""
+    },
+    "options": {
+        "dump_record": false,
+        "dump_field": "rec_ScratchPad"
+    }
 }
 ]

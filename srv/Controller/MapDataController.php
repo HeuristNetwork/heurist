@@ -74,6 +74,7 @@ final class MapDataController
         }catch(\InvalidArgumentException $exception){
             $this->response->sendError(400, 'invalid_request', $exception->getMessage());
         }catch(Throwable $exception){
+            if($this->response->sendInterrupted($exception)){ return; }
             $this->errors->report($exception, $this->runtime);
             $this->response->sendError(500, 'server_error', 'Unable to produce map data');
         }
