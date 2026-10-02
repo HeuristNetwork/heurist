@@ -27,19 +27,17 @@ if(!defined('PDIR')){
     define('PDIR','../../../');//need for proper path to js and css
     require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 }
-    require_once dirname(__FILE__).'/../../../hserv/utilities/DbExecuteScript.php';
-    require_once dirname(__FILE__).'/../../../hserv/structure/import/dbsImport.php';
+    require_once dirname(__FILE__).'/DBUpgrade.php';
+    require_once dirname(__FILE__).'/DBUpgrade_1.4.php';
 
     $src_maj = intval( $system->settings->get('sys_dbVersion') );
     $src_min = intval( $system->settings->get('sys_dbSubVersion') );
     $src_sub = intval( $system->settings->get('sys_dbSubSubVersion') );
 
-    $trg_ver = explode(".", HEURIST_MIN_DBVERSION);
-    $trg_maj = intval($trg_ver[0]);
-    $trg_min = intval($trg_ver[1]);
-    $trg_sub = intval($trg_ver[2]);
+    $trg_maj = intval(explode(".", HEURIST_MIN_DBVERSION)[0]);
 
-    if( $src_maj==$trg_maj && $src_min == $trg_min && $src_sub==$trg_sub){ //versions are ok redirect to main page
+    if( @$_REQUEST['mode']!='action'
+        && version_compare("$src_maj.$src_min.$src_sub", HEURIST_MIN_DBVERSION) >= 0){ //versions are ok redirect to main page
         redirectURL(HEURIST_BASE_URL . '?db=' . $_REQUEST['db']);
         exit;
     }
@@ -117,103 +115,9 @@ if(!defined('PDIR')){
 
                     if($system->isAdmin() && @$_REQUEST['mode']=='action' && $src_maj==$trg_maj){ //upgrade minor versions
                     //2d iteration ACTION!!!
-                        $upgrade_success = true;
-                        $keep_minver = $src_min;
-                        $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
-                        try {
-                        while ( $src_min<$trg_min || ($src_min==3 && $src_sub<$trg_sub) ) {
-                            $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).'.0';
+                        $upgrade_res = doUpgradeDatabase($system, null, true, true);
 
-                            // The 1.3.0-to-1.4.0 file is only a holding pen.
-                            // Use the approved bridge from the 1.3.19 baseline.
-                            if($src_maj==1 && $src_min==3 && $src_sub>=19 && $trg_min>=4){
-                                $filename = 'DBUpgrade_1.3.19_to_1.4.0.sql';
-                            }elseif($trg_maj==1 && $src_min==2){
-                                $filename = $filename.'.php';
-                            }elseif($src_min==3 && $trg_sub>0){
-                                $filename = 'DBUpgrade_1.3.0_to_1.3.14.php';
-                            }else{
-                                $filename = $filename.'.sql';
-                            }
-
-                            if( file_exists($dir.$filename) ){
-
-                                if($src_maj==1 && $src_min==3 && $src_sub>=19 && $trg_min>=4){
-                                    $rep = executeScript($system, $dir.$filename);
-                                }elseif($trg_maj==1 && $src_min==2){
-                                    include_once $filename;
-                                    $rep = updateDatabseTo_v3($system);//PHP
-                                }elseif($src_min==3 && $src_sub<$trg_sub){
-
-                                    if($src_sub<19){
-                                        include_once $filename;
-                                        $rep = updateDatabseTo_v1_3_19($system);
-
-                                        if($rep!==false && $src_sub<14){ //for db_utils.php
-                                            $rep2 = recreateRecDetailsDateIndex($system, true, true);
-                                            if($rep2){
-                                                $rep = array_merge($rep, $rep2);
-                                            }else{
-                                                $rep = false;
-                                            }
-                                        }
-
-                                    }else{
-                                        $rep = array('');
-                                    }
-
-                                }else{
-                                    $rep = executeScript($system, $dir.$filename);//execute SQL script
-                                }
-
-                                if($rep){
-                                    $src_min++;
-
-                                    if(is_array($rep)){
-                                        foreach($rep as $msg){
-                                            print '<p>'.$msg.'</p>';
-                                        }
-                                    }
-                                    if($trg_min==3 && $trg_sub>0){ //to 1.3.16
-
-                                    }else{
-                                        print "<p>Upgraded to $src_maj.$src_min.0</p>";
-                                    }
-
-                                }else{
-                                    $error = $system->getError();
-                                    print errorDiv($error
-                                        ? $error['message'].' '.($error['sysmsg'] ?? '')
-                                        : 'Database upgrade failed without a reported error. Check the PHP error log.');
-
-                                    $upgrade_success = false;
-                                    break;
-                                }
-
-                            }else{
-                                print "<p style='font-weight:bold'>Cannot find the database upgrade script '".$filename
-                                ."'.".CONTACT_HEURIST_TEAM_PLEASE.'</p>';
-                                $upgrade_success = false;
-                                break;
-                            }
-                        }
-                        } catch (Throwable $exception) {
-                            $upgrade_success = false;
-                            error_log('Heurist database upgrade failed: '.$exception);
-                            print errorDiv('Database upgrade stopped: '.$exception->getMessage()
-                                .'. See the PHP error log for the stack trace.');
-                        }
-
-                        if( (!($trg_min==3 && $trg_sub>0)) && $src_min>$keep_minver){ //update database - set version up to date
-                            $mysqli = $system->getMysqli();
-                            mysql__usedatabase($mysqli, $system->dbname());
-                            $query1 = "update sysIdentification set sys_dbSubVersion=$src_min, sys_dbSubSubVersion=0 where 1";
-                            $res1 = $mysqli->query($query1);
-
-                            print "<br>";
-                        }
-
-                        if($upgrade_success){
+                        if($upgrade_res['status']=='upgraded' || $upgrade_res['status']=='uptodate'){
                             print "<p>Upgrade was successeful.&nbsp;&nbsp;<a href='".HEURIST_BASE_URL."?db=".$system->dbname()."'>Return to main page</a></p>";
                         }
 
@@ -232,6 +136,10 @@ if(!defined('PDIR')){
                     </p>
 
                     <?php
+                        //automatic upgrade failed (see initPage.php)
+                        if(isset($upgrade_res) && $upgrade_res['status']=='error'){
+                            print errorDiv('Automatic upgrade failed: '.end($upgrade_res['report']));
+                        }
 
                         if($system->isAdmin()){
 
@@ -245,12 +153,8 @@ if(!defined('PDIR')){
                                 $is_allfind = true;
                                 //DBUpgrade_1.1.0_to_1.2.0.sql etc.
                                 $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
-                                while ($src_min<$trg_min) {
+                                while ($src_min<3) {
                                     $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).".0.sql";
-                                    if($src_maj==1 && $src_min==3
-                                        && (int)$system->settings->get('sys_dbSubSubVersion')>=19){
-                                        $filename = 'DBUpgrade_1.3.19_to_1.4.0.sql';
-                                    }
                                     if( file_exists($dir.$filename) ){
 
                                         $safety = "";
@@ -282,11 +186,12 @@ if(!defined('PDIR')){
                                             break;
                                         }
 
-                                        $scripts_info  = $scripts_info."<tr><td width='100'>".
+                                        $scripts_info  = $scripts_info."<tr><td width='130'>".
                                         $src_maj.".".$src_min.".0 to ".$src_maj.".".($src_min+1).".0</td><td>".$safety
                                         ." <i>".$description."</i></td></tr>";
 
                                         $src_min++;
+                                        $src_sub = 0;
                                     }else{
                                         print "<p style='font-weight:bold'>Cannot find the upgrade script '".$filename
                                         ."'.".CONTACT_HEURIST_TEAM_PLEASE."</p>";
@@ -294,14 +199,24 @@ if(!defined('PDIR')){
                                         break;
                                     }
                                 }
-                                //special case
-                                if($trg_min==3 && $trg_sub==14){
+
+                                if($is_allfind && $src_min==3 && $src_sub<19){
 
 $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_TermsAsButtons,rst_PointerMode,rst_NonOwnerVisibility),   recUploadedFiles(ulf_PreferredSource), defTerms (trm_OrderInBranch), recDetails(dtl_HideFromPublic),sysIdentification(sys_NakalaKey), sysUGrps(usr_ExternalAuthentication)   Add tables:sysWorkflowRules,defTranslations,recDetailsDateIndex';
+                                    if($src_sub<14){
+                                        $description .= '. Date index will be rebuilt - it may take considerable time';
+                                    }
 
                                     $scripts_info  = $scripts_info
-                                        .'<tr><td width="130">1.3.0 to 1.3.14</td><td> SAFE '
+                                        .'<tr><td width="130">1.3.'.$src_sub.' to 1.3.19</td><td> SAFE '
                                         ." <i>".$description."</i></td></tr>";
+                                    $src_sub = 19;
+                                }
+
+                                if($is_allfind && $src_min==3 && $src_sub>=19){
+                                    $scripts_info  = $scripts_info
+                                        .'<tr><td width="130">1.3.19 to 1.4.0</td><td> SAFE '
+                                        ." <i>".DBUPGRADE_1_4_DESCRIPTION."</i></td></tr>";
                                 }
 
                                 if($is_allfind)    {
@@ -353,74 +268,3 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
         </div>
     </body>
 </html>
-
-<?php
-    /**
-     * Executes a given SQL script file against the current database.
-     *
-     * Outputs error messages directly to HTML if the script execution fails or if the user is not an admin.
-     *
-     * @global hserv\System $system The global Heurist System object, used to check admin status.
-     * @param string $filename The full path to the SQL script file to be executed.
-     * @return bool True if the script execution was successful, false otherwise.
-     */
-    function executeScript($system, $filename){
-
-        if (!$system->isAdmin()) {
-            $system->addError(HEURIST_REQUEST_DENIED, 'Administrator access required');
-            return false;
-        }
-
-
-        $upgradeDir = realpath(HEURIST_DIR . 'admin/setup/dbupgrade');
-        $scriptPath = realpath($filename);
-
-
-        if (
-            $upgradeDir === false ||
-            $scriptPath === false ||
-            strpos($scriptPath, $upgradeDir . DIRECTORY_SEPARATOR) !== 0 ||
-            !preg_match('/^DBUpgrade_[A-Za-z0-9._]+\.sql$/', basename($scriptPath)) ||
-            !is_file($scriptPath) ||
-            !is_readable($scriptPath)
-        ) {
-            $system->addError(HEURIST_INVALID_REQUEST, 'Invalid database upgrade script');
-            return false;
-        }
-
-        // The upstream 1.3 -> 1.4 file is a holding pen of proposals, not a
-        // migration. Never execute it or mark a database as upgraded from it.
-        if (basename($scriptPath) === 'DBUpgrade_1.3.0_to_1.4.0.sql'
-            && strpos(file_get_contents($scriptPath), 'This is a holding pen for ideas') !== false) {
-            $system->addError(HEURIST_INVALID_REQUEST,
-                'The 1.4.0 upgrade script is a draft, not an executable migration. '
-                .'Check HEURIST_MIN_DBVERSION in hserv/consts.php and provide the completed 1.4.0 migration before upgrading.');
-            return false;
-        }
-
-        
-        if(db_script($system->dbnameFull(), $filename)){ //dbnameFullWithHost
-            return true;
-        }else{
-?>
-                <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-                    <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
-                    Error: Unable to execute <?php echo htmlspecialchars($filename);?> for database <?php echo htmlspecialchars($system->dbname()); ?><br>
-                    Please check whether this file is valid. <?php echo CONTACT_HEURIST_TEAM_PLEASE;?> if needed<br>
-                </div>
-<?php
-                if(!$system->isAdmin()){
-                ?>
-        <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-            <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
-            You must be logged in as database owner to upgrade the database structure
-            <button onclick="doLogin(true)">Login</button>
-        </div>
-                <?php
-                }
-
-
-            return false;
-        }
-    }
-?>

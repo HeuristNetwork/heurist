@@ -28,19 +28,8 @@
 
 use hserv\structure\ConceptCode;
 
-
-    // return true if need manual update
-    function tryAutoDatabaseUpdateAllowed($system){
-        $src_maj = intval( $system->settings->get('sys_dbVersion') );
-        $src_min = intval( $system->settings->get('sys_dbSubVersion') );
-        $src_sub = intval( $system->settings->get('sys_dbSubSubVersion') );
-        $rep = false;
-        if($src_maj==1 && $src_min==3 && $src_sub<19 && $src_sub>15){
-            $rep = updateDatabseTo_v1_3_19($system);
-        }
-        return ($rep===false);
-    }
-
+require_once dirname(__FILE__).'/../../../hserv/structure/dbsUsersGroups.php';
+require_once dirname(__FILE__).'/../../../hserv/structure/import/dbsImport.php';
 
     function updateDatabseTo_v1_3_19($system, $dbname=null){
 
@@ -225,12 +214,12 @@ EXP
             $report[] = 'Upgraded to 1.3.16';
        }
 
-        if($dbVerSubSub<17){
+       if($dbVerSubSub<17){
 
             list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_Password', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_Password` varchar(255) NOT NULL COMMENT 'Encrypted password string'", true);
 
             $report[] = 'Upgraded to 1.3.17';
-        }
+       }
 
        if($dbVerSubSub<18){
 
@@ -241,13 +230,13 @@ EXP
             $report[] = 'Upgraded to 1.3.18';
        }
 
-        if($dbVerSubSub < 19){
+       if($dbVerSubSub < 19){
 
             [$is_added, $report[]] = alterTable($system, 'sysUGrps', 'ugr_ORCID', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_ORCID` varchar(19) default NULL COMMENT 'An ORC ID associated with this user account, formatted as: 0000-1111-2222-3333'", true);
             [$is_added, $report[]] = alterTable($system, 'defRecStructure', 'rst_DisplayHelpText', "ALTER TABLE `defRecStructure` ADD COLUMN `rst_DisplayHelpText` varchar(5000) default NULL COMMENT 'The user help text to be displayed for this detail type for this record type'", true);
 
             $report[] = 'Upgraded to 1.3.19';
-        }
+       }
 
        }catch(Throwable $exception){
             $system->addError(HEURIST_DB_ERROR, 'Database upgrade to 1.3.19 failed', $exception->getMessage());
@@ -289,6 +278,7 @@ EXP
 
 
             if(!empty($to_be_imported)){
+                    $res = false;
                     $importDef = new DbsImport( $system );
                     if($importDef->doPrepare(  array(
                     'defType'=>'detailtype',
@@ -301,7 +291,7 @@ EXP
                         $report[] = 'Field 2-1098 "IIIF Annonation" and 2-1080 "Workflow stages" are imported';
                     }
             }
-
+            
         return $report;
     }
 ?>
