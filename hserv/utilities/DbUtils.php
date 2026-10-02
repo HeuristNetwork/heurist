@@ -1544,6 +1544,96 @@ class DbUtils {
         return $res;
     }
 
+    /** Snapshot versions before sysIdentification is cleared/copied to the target. */
+    private static function databaseCloneVersion($mysqli, $database) {
+        $database = str_replace('`', '``', $database);
+        try {
+            $result = $mysqli->query("SELECT sys_dbVersion,sys_dbSubVersion,sys_dbSubSubVersion FROM `{$database}`.sysIdentification LIMIT 1");
+            $row = $result ? $result->fetch_row() : null;
+            return $row ? implode('.', array_map('intval', $row)) : 'unavailable';
+        } catch (\Throwable $e) { return 'unavailable'; }
+    }
+
+    /**
+     * Diagnose a failed table copy without guessing that SQL row N is a Heurist ID.
+     * Metadata queries must not replace the original MySQL error or reveal account
+     * values. Only schema names, primary-key column names and a row count are read.
+     */
+    private static function databaseCloneFailureMessage($mysqli, $source, $target, $table, array $error, array $versions) {
+        $quote = function($name) { return '`'.str_replace('`', '``', $name).'`'; };
+        $readColumns = function($db) use ($mysqli, $quote, $table) {
+            $columns = [];
+            try {
+                $result = $mysqli->query('SHOW COLUMNS FROM '.$quote($db).'.'.$quote($table));
+                if (!$result) { return null; }
+                while ($row = $result->fetch_assoc()) { $columns[$row['Field']] = $row; }
+            } catch (\Throwable $e) { return null; }
+            return $columns;
+        };
+        $src = $readColumns($source);
+        $dst = $readColumns($target);
+        $lines = [
+            'Database clone stopped while copying table '.$table.'.',
+            'Source: '.$source.' (database format '.($versions['source'] ?? 'unavailable').').',
+            'Target: '.$target.' (database format '.($versions['target'] ?? 'unavailable').' before cloning).',
+            'MySQL error '.intval($error['code']).' / SQLSTATE '.($error['state'] ?? 'unknown').': '.$error['message']
+        ];
+        if ($src !== null && $dst !== null) {
+            $lines[] = 'Column counts: source '.count($src).'; target '.count($dst).'.';
+            $sourceOnly = array_diff(array_keys($src), array_keys($dst));
+            $targetOnly = array_diff(array_keys($dst), array_keys($src));
+            $lines[] = 'Columns present only in source: '.($sourceOnly ? implode(', ', $sourceOnly) : 'none').'.';
+            $lines[] = 'Columns present only in target: '.($targetOnly ? implode(', ', $targetOnly) : 'none').'.';
+            $orderDiff = [];
+            $srcNames = array_keys($src); $dstNames = array_keys($dst);
+            if (!$sourceOnly && !$targetOnly && $srcNames !== $dstNames) {
+                foreach ($srcNames as $index => $name) {
+                    if ($name !== $dstNames[$index]) { $orderDiff[] = 'position '.($index+1).': '.$name.' -> '.$dstNames[$index]; }
+                }
+                $lines[] = 'Different column order (source -> target): '.implode('; ', $orderDiff).'.';
+            }
+            $typeDiff = [];
+            foreach ($src as $name => $definition) {
+                if (isset($dst[$name]) && $definition['Type'] !== $dst[$name]['Type']) {
+                    $typeDiff[] = $name.' ('.$definition['Type'].' -> '.$dst[$name]['Type'].')';
+                }
+            }
+            if ($typeDiff) { $lines[] = 'Different column types (source -> target): '.implode('; ', $typeDiff).'.'; }
+            $keys = [];
+            foreach ($src as $name => $definition) { if ($definition['Key']==='PRI') { $keys[] = $name; } }
+            $lines[] = 'Source MySQL row identifier: '.($keys ? implode(' + ', $keys) : 'no primary key').'.';
+        } else { $lines[] = 'Table column definitions could not be read for '.($src===null ? 'source ' : '').($dst===null ? 'target' : '').'.'; }
+        try {
+            $result = $mysqli->query('SELECT COUNT(*) FROM '.$quote($source).'.'.$quote($table));
+            $row = $result ? $result->fetch_row() : null;
+            if ($row) { $lines[] = 'Source table rows involved in this copy: '.intval($row[0]).'.'; }
+        } catch (\Throwable $e) { /* Preserve the original failure if diagnostic access fails. */ }
+        $kind = strtolower($table);
+        if (intval($error['code'])===1136) {
+            $lines[] = 'This is a table-structure mismatch during INSERT ... SELECT *. It does not identify a defective individual MySQL row. "Row 1" is an SQL row position, not a primary-key value or Heurist H-ID 1.';
+        } else {
+            $lines[] = 'The copy uses INSERT ... SELECT * without an explicit row order. An SQL row position cannot safely be translated into a primary key or Heurist H-ID. Any key/constraint identified by MySQL appears in the error above.';
+        }
+        $recordKeys = [
+            'records'=>'Heurist records: Records.rec_ID is the Heurist H-ID.',
+            'recdetails'=>'Field values: recDetails.dtl_ID identifies the MySQL detail row; dtl_RecID identifies its Heurist H-ID; dtl_DetailTypeID identifies the field.',
+            'reclinks'=>'Relationships: recLinks.rl_ID identifies the MySQL relationship row; rl_SourceID and rl_TargetID identify the Heurist H-IDs.',
+            'recuploadedfiles'=>'Uploaded files: recUploadedFiles.ulf_ID is a file reference ID, not a Heurist H-ID. Referencing records use recDetails.dtl_UploadedFileID and dtl_RecID.',
+            'sysugrps'=>'Users/groups: sysUGrps.ugr_ID identifies a user or group. This table contains no bibliographic/data records and its IDs are not Heurist H-IDs.',
+            'sysusrgrplinks'=>'User/group memberships: sysUsrGrpLinks.ugl_UserID and ugl_GroupID identify users/groups, not Heurist H-IDs.'
+        ];
+        $lines[] = $recordKeys[$kind] ?? 'This message identifies the table and its MySQL row identifier above; it does not establish a specific Heurist H-ID.';
+        if (intval($error['code'])===1136) {
+            $lines[] = 'Compare the listed source/target schema differences. Upgrade the source database to the format used by this code, or repair the inconsistent table definition, before retrying the clone. Do not change individual data records to fix this column-count error.';
+        }
+        $html = '<div style="max-width:1000px;line-height:1.45;overflow-wrap:anywhere">';
+        foreach ($lines as $index => $line) {
+            $line = htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $html .= '<p style="margin:0 0 12px">'.($index===0 ? '<strong>'.$line.'</strong>' : $line).'</p>';
+        }
+        return $html.'</div>';
+    }
+
     /**
     * Copy all tables (except csv import cache) from one db to another
     * It is assumed that all tables exist and empty in target db
@@ -1569,6 +1659,7 @@ class DbUtils {
         $res = true;
         $mysqli = self::$mysqli;
         $message = null;
+        $cloneMessageIsHtml = false;
 
         $db_source = $mysqli->real_escape_string($db_source);
         $db_target = $mysqli->real_escape_string($db_target);
@@ -1591,6 +1682,9 @@ class DbUtils {
         }
 
         if($res){
+
+                $cloneVersions = ['source'=>self::databaseCloneVersion($mysqli, $db_source),
+                    'target'=>self::databaseCloneVersion($mysqli, $db_target)];
 
                 // Remove initial values from empty target database
                 $mysqli->query('delete from sysIdentification where 1');
@@ -1649,25 +1743,28 @@ class DbUtils {
 
                         $table = $mysqli->real_escape_string($table);
                         $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
-                        $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM `".$db_source."`.`".$table."`"  );
+                        try {
+                            $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM `".$db_source."`.`".$table."`");
+                            $cloneError = $res ? null : ['code'=>$mysqli->errno, 'state'=>$mysqli->sqlstate, 'message'=>$mysqli->error];
+                        } catch (\Throwable $e) {
+                            $res = false;
+                            $cloneError = ['code'=>$e->getCode(), 'state'=>method_exists($e, 'getSqlState') ? $e->getSqlState() : $mysqli->sqlstate, 'message'=>$e->getMessage()];
+                        }
 
                         if($res){
                                 if($verbose) {
                                     echo " > " . htmlspecialchars($table) . ": ".intval($mysqli->affected_rows) . "  ";
                                 }
                         }else{
-                                if($table=='usrReportSchedule'){
-                                    if($verbose) {
-                                        echo "<br><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: {$mysqli->error}</p>";
-                                    }
-                                }else{
-                                    $message = "Unable to add records into $table - SQL error: ".$mysqli->error;
-                                    if($verbose) {
-                                        $message = "<br><p class=\"error\">Error: $message</p>";
-                                    }
-                                    $res = false;
-                                    break;
-                                }
+                            $diagnostic = self::databaseCloneFailureMessage($mysqli, $db_source, $db_target, $table, $cloneError, $cloneVersions);
+                            if($table=='usrReportSchedule'){
+                                if($verbose) { echo $diagnostic; }
+                            }else{
+                                $message = $diagnostic;
+                                $cloneMessageIsHtml = true;
+                                $res = false;
+                                break;
+                            }
                         }
 
                         if($table=='recForwarding'){ //remove missed records otherwise we get exception on constraint addition
@@ -1737,7 +1834,7 @@ class DbUtils {
 
         if(!$res){
             if($verbose) {
-                if($message) {echo htmlspecialchars($message);}
+                if($message) {echo $cloneMessageIsHtml ? $message : htmlspecialchars($message);}
             }else{
                 self::$system->addError(HEURIST_ERROR, $message);
             }
