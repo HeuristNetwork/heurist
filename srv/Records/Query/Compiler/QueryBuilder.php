@@ -55,7 +55,8 @@ final class QueryBuilder
         $sort=$this->compileEffectiveSort($normalized,$state,$context);
         $limit=intval($context['limit']??self::DEFAULT_LIMIT);if($limit<1){$limit=self::DEFAULT_LIMIT;}$limit=min($limit,self::MAX_LIMIT);
         $offset=max(0,intval($context['offset']??0));
-        $sql='SELECT DISTINCT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$sort.' LIMIT ? OFFSET ?';
+        // No joins, so rec_ID is unique; DISTINCT would break ORDER BY under ONLY_FULL_GROUP_BY (error 3065)
+        $sql='SELECT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$sort.' LIMIT ? OFFSET ?';
         $state->bind($limit,'i');$state->bind($offset,'i');
         return new CompiledQuery($sql,$state->types(),$state->values(),$normalized);
     }
@@ -157,7 +158,8 @@ final class QueryBuilder
         if(!$this->supportsFlatExecution($normalized)){throw new UnsupportedQueryException('Query requires linked execution');}
         $state=new SqlBuildContext($context);$where=$this->compileGroup($normalized,'AND',$state,'r',0);
         $this->records->appendAccessConditions($where,$state,$context,'r');
-        return new CompiledQuery('SELECT DISTINCT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$this->compileEffectiveSort($normalized,$state,$context),$state->types(),$state->values(),$normalized);
+        // As in buildIds(): no joins, no DISTINCT (error 3065 with ORDER BY under ONLY_FULL_GROUP_BY)
+        return new CompiledQuery('SELECT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$this->compileEffectiveSort($normalized,$state,$context),$state->types(),$state->values(),$normalized);
     }
 
     /** Compile an explicit request sort in preference to the query's top-level sort. */
