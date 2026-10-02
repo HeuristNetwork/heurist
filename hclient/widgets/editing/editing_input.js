@@ -7713,7 +7713,9 @@ $.widget( "heurist.editing_input", {
         // File IDs, needed for processes below
         let f_id = value.ulf_ID;
         let f_nonce = value.ulf_ObfuscatedFileID;
-        const dtyID = this.options.dtID ?? this.f('rst_DetailTypeID');
+        const rtyID = Number.parseInt(this.options.rectypeID);
+        const dtyID = Number.parseInt(this.options.dtID ?? this.f('rst_DetailTypeID'));
+        const fieldKey = `${rtyID}.${dtyID}`;
 
         // urls for downloading and loading the thumbnail
         let dwnld_link = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&debug=1&download=1&file=${f_nonce}`;
@@ -7918,6 +7920,13 @@ $.widget( "heurist.editing_input", {
 
                     $input_img.find('.mode_switcher').text(!$input_img.hasClass('thumb_image') ? 'thumbnail' : 'larger');
                 }
+
+                let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+                showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+                if(window.hWin.HEURIST4.util.isObject(showAllImagesPrefs) && !showAllImagesPrefs.allowed.includes(fieldKey)){
+                    showAllImagesPrefs.allowed.push(fieldKey);
+                    window.hWin.HAPI4.save_pref('edit_record_showAllRecords', showAllImagesPrefs);
+                }
             }
         });
 
@@ -8120,19 +8129,24 @@ $.widget( "heurist.editing_input", {
 
     _getInlineImageContainer: function(){
 
+        let $imageContainer = this.element.find('.image-containers');
+        const rtyID = Number.parseInt(this.options.rectypeID);
+        const dtyID = Number.parseInt(this.options.dtID ?? this.f('rst_DetailTypeID'));
+        const valueKey = `${rtyID}.${dtyID}`;
+
         let __showAllInlineImages = (event) => {
 
             const forcedShow = event.isForced;
 
-            let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllRecords', []);
+            let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
             showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
-            if(!Array.isArray(showAllImagesPrefs)){
+            if(!window.hWin.HEURIST4.util.isObject(showAllImagesPrefs)){
                 console.error(`showAllImagesPrefs is not an array, found: ${showAllImagesPrefs}`);
                 return;
             }
 
-            const valueKey = `${rtyID}.${dtyID}`;
-            const valueKeyIndex = showAllImagesPrefs.indexOf(valueKey);
+            const valueKeyIndex = showAllImagesPrefs.allowed.indexOf(valueKey);
+            const blockedKeyIndex = showAllImagesPrefs.blocked.indexOf(valueKey);
 
             if(valueKeyIndex === -1 || forcedShow){
 
@@ -8151,29 +8165,27 @@ $.widget( "heurist.editing_input", {
                 });
 
                 if(!forcedShow){
-                    showAllImagesPrefs.push(valueKey);
+                    showAllImagesPrefs.allowed.push(valueKey);
+                    showAllImagesPrefs.blocked.splice(blockedKeyIndex, 1);
                 }
 
             }else{
 
                 this.element.find('div.image_input .hideTumbnail').trigger('click');
-                showAllImagesPrefs.splice(valueKeyIndex, 1);
+                showAllImagesPrefs.allowed.splice(valueKeyIndex, 1);
+                showAllImagesPrefs.blocked.push(valueKeyIndex);
             }
 
             if(!forcedShow){
-                window.hWin.HAPI4.save_pref('edit_record_showAllRecords', showAllImagesPrefs);
+                window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
             }
         };
-
-        let $imageContainer = this.element.find('.image-containers');
-        const rtyID = Number.parseInt(this.options.rectypeID);
-        const dtyID = Number.parseInt(this.options.dtID ?? this.f('rst_DetailTypeID'));
 
         if($imageContainer.length > 0){
             return $imageContainer;
         }
 
-        if(!Number.isNaN(rtyID) && rtyID > 0 && !Number.isNaN(dtyID) && dtyID > 0){
+        if(window.hWin.HEURIST4.util.isPositiveInt(rtyID) && window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
 
             let $showAllImages = $('<span>', {
                 class: 'showAllImages smallbutton ui-icon ui-icon-eye-open',
@@ -8238,7 +8250,6 @@ $.widget( "heurist.editing_input", {
         }).prependTo($image_div).hide();
 
         // Viewers
-        
         $('<a>', {
             href: '#',
             class: `mode_switcher`,
@@ -8263,8 +8274,6 @@ $.widget( "heurist.editing_input", {
             html: '<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);"></span>&nbsp;Mirador'
         }).appendTo($img_controls).hide();
 
-
-
         $('<a>', {
             href: fileDownload,
             target: '_surf',
@@ -8275,7 +8284,6 @@ $.widget( "heurist.editing_input", {
             html: '<span class="ui-icon ui-icon-download" />'
         }).appendTo($img_controls);
 
-        
         // for closing inline image when 'frozen'
         $('<a>', {
             href: '#',

@@ -3687,29 +3687,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 that._editing.displayValueErrors(check_for_errors);
             }
             if(this.editForm.find('.showAllImages').length > 0){
-
-                let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllRecords', []);
-                showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
-
-                if(Array.isArray(showAllImagesPrefs)){
-
-                    for(const keyValue of showAllImagesPrefs){
-
-                        const dtyID = keyValue.split('.')[1];
-                        if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID) || keyValue.indexOf(`${this._currentEditRecTypeID}.`) < 0){
-                            continue;
-                        }
-
-                        setTimeout((dtyID) => {
-
-                            const event = $.Event('click');
-                            event.isForced = true;
-
-                            this.editForm.find(`div[data-dtid="${dtyID}"] .showAllImages`).trigger(event);
-
-                        }, 500, dtyID);
-                    }
-                }
+                this._setupInlineImages();
             }
 
             if(this.options.fill_in_data){ // force ismodified
@@ -8117,5 +8095,41 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         this.editFormPopup.layout().hide('west');
         this.options.rts_editor = null;
         this.reloadEditForm( true );
+    },
+
+    _setupInlineImages: function(){
+
+        let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'});
+        let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+        showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+        let prefUpdated = false;
+
+        for(const fileDtyID of fileFields.getOrder()){
+
+            if(!$Db.rst(this._currentEditRecTypeID, fileDtyID) || showAllImagesPrefs.blocked.includes(`${this._currentEditRecTypeID}.${fileDtyID}`)){
+                continue;
+            }
+
+            if(!showAllImagesPrefs.allowed.includes(`${this._currentEditRecTypeID}.${fileDtyID}`)){
+
+                showAllImagesPrefs.allowed.push(`${this._currentEditRecTypeID}.${fileDtyID}`);
+                window.hWin.HAPI4.currentUser.ugr_Preferences.edit_record_showAllImagesPerField = showAllImagesPrefs; // update local cache, before complete save
+
+                prefUpdated = true;
+            }
+
+            setTimeout((dtyID) => {
+
+                const event = $.Event('click');
+                event.isForced = true;
+
+                this.editForm.find(`div[data-dtid="${dtyID}"] .showAllImages`).trigger(event);
+
+            }, 500, fileDtyID);
+        }
+
+        if(prefUpdated){
+            window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
+        }
     }
 });
