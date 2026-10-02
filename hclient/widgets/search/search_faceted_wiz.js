@@ -916,6 +916,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 //additional rectypes                
                 this.select_additional_rectypes = this._createInputElement_RecordTypeSelector();
+                this.select_additional_rectypes.find('.editint-inout-repeat-container').hide();
                 this.select_additional_rectypes.hide();
                 
                 this.svs_MultiRtSearch = $dlg.find('#svs_MultiRtSearch');
