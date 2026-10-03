@@ -510,6 +510,11 @@ class BulkEmailSystem {
      * @return string SQL where clause
      */
     private function generateWhereClause($users, $db) {
+        // Defense-in-depth: re-validate $db before interpolating it into SQL, in case
+        // callers ever bypass the upstream preg_match check on the database name.
+        if ($users === "admin" && !preg_match('/^[a-zA-Z0-9_-]+$/', $db)) {
+            return "WHERE 1=0";
+        }
         switch ($users) {
             case "owner":
                 return "WHERE ugr.ugr_ID = 2";
