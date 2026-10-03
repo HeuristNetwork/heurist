@@ -24,8 +24,12 @@ use Heurist\Utilities\Temporal;
 /** Compiles typed detail, file, date, enum, geo, and text predicates. */
 final class FieldPredicateCompiler
 {
+    /** Columns with a FULLTEXT index (blankDBStructure.sql), by column name → table. */
+    private const FULLTEXT_COLUMNS = array('dtl_Value'=>'recDetails', 'rec_Title'=>'Records');
+
     private DatabaseInterface $database;
     private $fieldTypeCache = array();
+    private $fulltextIndexCache = array();
     /** Initialise the field compiler with definition-table access. */
     public function __construct(DatabaseInterface $database){ $this->database = $database; }
 
@@ -95,7 +99,7 @@ final class FieldPredicateCompiler
         if(($prefix === '=' || $prefix === '==') && $language !== null && $language !== 'all'){
             $comparisonValue = $prefix.$language.':'.$text;
         }
-        $condition = $this->scalarCondition($column, $comparisonValue, $state);
+        $condition = $this->scalarCondition($column, $comparisonValue, $state, true);
         if($language === null){
             return '('.$condition.' AND '.$column.' NOT RLIKE "^[A-Za-z]{2,3}:")';
         }
@@ -386,13 +390,60 @@ final class FieldPredicateCompiler
             return $this->forcedComparison($column, '=', substr($text, 1), $state);
         }
         if(strpos($text, '-') === 0){
-            $state->bind($this->likePattern(substr($text, 1)), 's');
-            return $column.' NOT LIKE ? ESCAPE "\\\\"';
+            return $this->containsCondition($column, substr($text, 1), $state, true);
+        }
+        return $this->containsCondition($column, $text, $state);
+    }
+
+    /**
+     * "Contains": word-prefix MATCH where the column has a FULLTEXT index, otherwise LIKE.
+     * Values with % or _ are legacy LIKE patterns (starts with, ends with) and stay LIKE.
+     */
+    public function containsCondition(string $column, string $text, SqlBuildContext $state, bool $negate = false): string
+    {
+        if(strpos($text, '%') === false && strpos($text, '_') === false){
+            $match = $this->wordPrefixMatch($column, $text, $state);
+            if($match !== null){ return $negate ? 'NOT ('.$match.')' : $match; }
         }
         $state->bind($this->likePattern($text), 's');
-        return $column.' LIKE ? ESCAPE "\\\\"';
+        return $column.($negate ? ' NOT' : '').' LIKE ? ESCAPE "\\\\"';
     }
-    public function scalarCondition(string $column, $value, SqlBuildContext $state): string
+
+    /**
+     * MATCH ... AGAINST('+word1* +word2*' IN BOOLEAN MODE): every word, as a word or
+     * the start of a word ("Orange" finds "Orange", "Oranges", not "Blood-range").
+     * When the text is more than one indexable word, a LIKE on the narrowed rows keeps
+     * the phrase and the short words / stopwords the index skips. Returns null when
+     * the column has no FULLTEXT index or the text has no indexable word.
+     */
+    public function wordPrefixMatch(string $column, string $text, SqlBuildContext $state): ?string
+    {
+        $text = trim($text);
+        if(!preg_match('/(?:^|\.)(\w+)$/', $column, $name) || !isset(self::FULLTEXT_COLUMNS[$name[1]])){ return null; }
+        $words = $this->indexableFulltextWords($text);
+        if(empty($words) || !$this->hasFulltextIndex(self::FULLTEXT_COLUMNS[$name[1]], $name[1])){ return null; }
+        $state->bind(implode(' ', array_map(static function($word){ return '+'.$word.'*'; }, $words)), 's');
+        $condition = 'MATCH('.$column.') AGAINST (? IN BOOLEAN MODE)';
+        if(count($words) === 1 && $words[0] === $text){ return $condition; }
+        $state->bind($this->likePattern($text), 's');
+        return '('.$condition.' AND '.$column.' LIKE ? ESCAPE "\\\\")';
+    }
+
+    /** Whether the FULLTEXT index exists (purgeFullTextIndexes.php drops it on inactive databases). */
+    private function hasFulltextIndex(string $table, string $column): bool
+    {
+        $key = $table.'.'.$column;
+        if(!array_key_exists($key, $this->fulltextIndexCache)){
+            $this->fulltextIndexCache[$key] = intval($this->database->fetchValue(
+                'SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE()'
+                .' AND TABLE_NAME=? AND COLUMN_NAME=? AND INDEX_TYPE="FULLTEXT"',
+                array($table, $column), 0
+            )) > 0;
+        }
+        return $this->fulltextIndexCache[$key];
+    }
+    /** $contains: plain values use containsCondition() (text fields) instead of LIKE. */
+    public function scalarCondition(string $column, $value, SqlBuildContext $state, bool $contains = false): string
     {
         $text = trim((string)$value);
         if(strpos($text, '@') === 0){ return $this->fulltextCondition($column, $text, $state); }
@@ -405,6 +456,9 @@ final class FieldPredicateCompiler
             return $column.' BETWEEN ? AND ?';
         }
         list($operator, $cleanValue) = $this->comparison((string)$value);
+        if($contains && ($operator === 'LIKE' || $operator === 'NOT LIKE')){
+            return $this->containsCondition($column, $cleanValue, $state, $operator === 'NOT LIKE');
+        }
         if($operator === 'LIKE' || $operator === 'NOT LIKE'){
             $state->bind($this->likePattern($cleanValue), 's');
             return $column.' '.$operator.' ? ESCAPE "\\\\"';

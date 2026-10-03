@@ -335,10 +335,15 @@ final class FieldValueCounter
         return $where;
     }
 
-    /** Add a case-insensitive substring filter on the field's text. */
+    /**
+     * Narrow the values to those whose text matches what the user typed in the picker:
+     * words starting with it on FULLTEXT columns (titles, detail values), else a substring.
+     */
     private function appendText(array &$where, array $parts, SqlBuildContext $state, string $text): void
     {
         if($text === '' || $parts['textOn'] === null){ return; }
+        $match = $this->builder->wordPrefixMatch($parts['textOn'], $text, $state);
+        if($match !== null){ $where[] = $match; return; }
         $state->bind('%'.addcslashes($text, '%_\\').'%', 's');
         $where[] = $parts['textOn'].' LIKE ?';
     }

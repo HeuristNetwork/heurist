@@ -103,6 +103,15 @@ final class QueryBuilder
         return $condition===''?'':preg_replace('/^s*ANDs+/','',$condition);
     }
 
+    /**
+     * Word-prefix FULLTEXT condition for a text column, or null when the column has
+     * no FULLTEXT index or the text no indexable word (caller keeps its LIKE).
+     */
+    public function wordPrefixMatch(string $column, string $text, SqlBuildContext $state): ?string
+    {
+        return $this->fields->wordPrefixMatch($column, $text, $state);
+    }
+
     /** Compile counts grouped by record type over the complete filtered query. */
     public function buildRectypeCounts($query,array $context=array()): CompiledQuery
     {
