@@ -326,7 +326,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                       dbname: dbname};
 
             if(`${request.uname}_${request.dbname}`.length > this._DB_NAME_LIMIT){
-                window.hWin.HEURIST4.msg.showMsgFlash('Database name too long, reduce to 40 characters at most', 5000);
+                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR(`Database name too long, reduce to ${this._DB_NAME_LIMIT} characters at most`));
                 return;
             }
            if(this.options.actionName=='create'){
@@ -365,6 +365,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of database'));
                 return;
            }
+            if(dbname.length > this._DB_NAME_LIMIT){
+                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR(`Database name too long, reduce to ${this._DB_NAME_LIMIT} characters at most`));
+                return;
+            }
            let dbarchive_file = this._$('#selectedZip').text();
            if(dbarchive_file==''){
                 window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of source zip archive'));
