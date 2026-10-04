@@ -50,138 +50,140 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
      * @returns {void}
      */
     _initControls: function(){
-            let that = this;
-             
-            //find all labels and apply localization
-            this._$('label').each(function(){
-                $(this).html(window.hWin.HR($(this).html()));
-            })
-            this._$('.header').css({'min-width':'300px', 'width':'300px'});
-
-            //fill list of languages
-            //fill list of layouts
-            this.initProfilePreferences();
-
-            //assign values to form fields from window.hWin.HAPI4.currentUser['ugr_Preferences']
-            let prefs = window.hWin.HAPI4.currentUser['ugr_Preferences'];
+        let that = this;
             
-            let allFields = this._$('input,select');
+        //find all labels and apply localization
+        this._$('label').each(function(){
+            $(this).html(window.hWin.HR($(this).html()));
+        })
+        this._$('.header').css({'min-width':'300px', 'width':'300px'});
 
-            //default
-            prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-            prefs['userFontSize'] = window.hWin.HAPI4.get_prefs_def('userFontSize', 12);
-            prefs['searchQueryInBrowser'] = window.hWin.HAPI4.get_prefs_def('searchQueryInBrowser', 1);
-            prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
-            prefs['mapcluster_zoom'] = window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 12);
-            prefs['entity_btn_on'] = window.hWin.HAPI4.get_prefs_def('entity_btn_on', 1);
-            
-            let map_controls = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'bookmark,geocoder,selector,print,publish');
-            map_controls = map_controls.split(',');
-            prefs['mctrl_bookmark'] = 0;prefs['mctrl_geocoder'] = 0;
-            prefs['mctrl_selector'] = 0;prefs['mctrl_print'] = 0;
-            prefs['mctrl_publish'] = 0;
-            for(let i=0;i<map_controls.length;i++){
-                prefs['mctrl_'+map_controls[i]] = 1;
-            }
+        //fill list of languages
+        //fill list of layouts
+        this.initProfilePreferences();
 
-            // Map popup record view
-            window.hWin.HEURIST4.ui.createTemplateSelector( this._$('#map_template'), 
-                [{key:'',title:'Standard map popup template'},
-                 {key:'standard',title:'Standard record info (in popup)'},
-                 {key:'none',title:'Disable popup'}
-                 ],
-                 window.hWin.HAPI4.get_prefs_def('map_template', null));
+        //assign values to form fields from window.hWin.HAPI4.currentUser['ugr_Preferences']
+        let prefs = window.hWin.HAPI4.currentUser['ugr_Preferences'];
+        
+        let allFields = this._$('input,select');
 
-            // Main record view
-            window.hWin.HEURIST4.ui.createTemplateSelector( this._$('#main_recview'), [{key:'default',title:'Standard record view'}],
-                window.hWin.HAPI4.get_prefs_def('main_recview', 'default'));
+        //default
+        prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+        prefs['userFontSize'] = window.hWin.HAPI4.get_prefs_def('userFontSize', 12);
+        prefs['searchQueryInBrowser'] = window.hWin.HAPI4.get_prefs_def('searchQueryInBrowser', 1);
+        prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
+        prefs['mapcluster_zoom'] = window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 12);
+        prefs['entity_btn_on'] = window.hWin.HAPI4.get_prefs_def('entity_btn_on', 1);
+        
+        let map_controls = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'bookmark,geocoder,selector,print,publish');
+        map_controls = map_controls.split(',');
+        prefs['mctrl_bookmark'] = 0;prefs['mctrl_geocoder'] = 0;
+        prefs['mctrl_selector'] = 0;prefs['mctrl_print'] = 0;
+        prefs['mctrl_publish'] = 0;
+        for(let i=0;i<map_controls.length;i++){
+            prefs['mctrl_'+map_controls[i]] = 1;
+        }
 
-            //from prefs to ui
-            allFields.each(function(){
-                if(prefs[this.id]){
-                    if(this.type=="checkbox"){
-                        this.checked = (prefs[this.id]=="1" || prefs[this.id]=="true")
-                    }else{
-                        $(this).val(prefs[this.id]);
-                    }
-                };
+        // Map popup record view
+        window.hWin.HEURIST4.ui.createTemplateSelector( this._$('#map_template'), 
+            [{key:'',title:'Standard map popup template'},
+                {key:'standard',title:'Standard record info (in popup)'},
+                {key:'none',title:'Disable popup'}
+                ],
+                window.hWin.HAPI4.get_prefs_def('map_template', null));
+
+        // Main record view
+        window.hWin.HEURIST4.ui.createTemplateSelector( this._$('#main_recview'), [{key:'default',title:'Standard record view'}],
+            window.hWin.HAPI4.get_prefs_def('main_recview', 'default'));
+
+        //from prefs to ui
+        allFields.each(function(){
+            if(prefs[this.id]){
+                if(this.type=="checkbox"){
+                    this.checked = (prefs[this.id]=="1" || prefs[this.id]=="true")
+                }else{
+                    $(this).val(prefs[this.id]);
+                }
+            };
+        });
+        
+        //change font size example
+        this._$('#userFontSizeExample')
+            .css('font-size', prefs['userFontSize']+'px')
+            .position({
+                my: 'left+15 center',
+                at: 'right center',
+                of: this._$('#userFontSize')
             });
-            
-            //change font size example
+
+        this._on(this._$('#userFontSize'),{change: function(){ 
+            let size = this._$('#userFontSize').val();
             this._$('#userFontSizeExample')
-                .css('font-size', prefs['userFontSize']+'px')
+                .css('font-size', size+'px')
                 .position({
                     my: 'left+15 center',
                     at: 'right center',
                     of: this._$('#userFontSize')
                 });
+        }});
 
-            this._on(this._$('#userFontSize'),{change: function(){ 
-                let size = this._$('#userFontSize').val();
-                this._$('#userFontSizeExample')
-                    .css('font-size', size+'px')
-                    .position({
-                        my: 'left+15 center',
-                        at: 'right center',
-                        of: this._$('#userFontSize')
-                    });
-            }});
-
-            //custom/user heurist theme
-            let custom_theme_div = this._$('#custom_theme_div');
-            
-            let $btn_edit_clear2 = $('<span>')
-            .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
-            .attr('tabindex', '-1')
-            .attr('title', 'Reset default color settings')
-            .appendTo( custom_theme_div )
-            .css({'line-height': '20px',cursor:'pointer',
-                outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'});
-                
-            this._on($btn_edit_clear2, { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                    function(){that._$('#custom_theme').val('');}); }});
-                
-            let $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open theme editor'})
-                .addClass('smallbutton')
-                .css({'line-height': '20px',cursor:'pointer','text-decoration':'underline'})
-                .appendTo( custom_theme_div );
-                
-                
-            let openThemeDialog = { click: function (){
-                    let current_val = window.hWin.HEURIST4.util.isJSON( that._$('#custom_theme').val() );
-                    if(!current_val) current_val = {};
-                    
-                    window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
-                        that._$('#custom_theme').val(JSON.stringify(new_value));
-                    });
-            }};
-                
-            this._on($btn_edit_switcher2, openThemeDialog);
-            this._on(this._$('#custom_theme').attr('readonly','readonly'), openThemeDialog );
-
-            
-            //map symbology editor            
-            window.hWin.HEURIST4.ui.initEditSymbologyControl(this._$('#map_default_style'));
-            window.hWin.HEURIST4.ui.initEditSymbologyControl(this._$('#map_select_style'));
-            
-            
-            let useMapcluster = {change: function(){ that._$('#mapcluster_on').prop('checked', true); }};
-            this._on(this._$('#mapcluster_grid'), useMapcluster);
-            this._on(this._$('#mapcluster_count'), useMapcluster);
-            this._on(this._$('#mapcluster_zoom'), useMapcluster);
-
-            // New heurist-map configuration editor. mapViewer is loaded lazily because
-            // profilePreferences is also used in contexts where the map viewer is absent.
-            const newmap_cfg = this._$('#btn_heurist_map_config');
-            if(newmap_cfg.length>0){
-                this._$('#btn_heurist_map_config').button();
-                this._on(this._$('#btn_heurist_map_config'), {
-                    click: function(){
-                        that._openHeuristMapConfiguration();
-                    }
-                });
-            }
+        //custom/user heurist theme
+        let custom_theme_div = this._$('#custom_theme_div');
         
+        let $btn_edit_clear2 = $('<span>')
+        .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
+        .attr('tabindex', '-1')
+        .attr('title', 'Reset default color settings')
+        .appendTo( custom_theme_div )
+        .css({'line-height': '20px',cursor:'pointer',
+            outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'});
+            
+        this._on($btn_edit_clear2, { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
+                function(){that._$('#custom_theme').val('');}); }});
+            
+        let $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open theme editor'})
+            .addClass('smallbutton')
+            .css({'line-height': '20px',cursor:'pointer','text-decoration':'underline'})
+            .appendTo( custom_theme_div );
+            
+            
+        let openThemeDialog = { click: function (){
+                let current_val = window.hWin.HEURIST4.util.isJSON( that._$('#custom_theme').val() );
+                if(!current_val) current_val = {};
+                
+                window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
+                    that._$('#custom_theme').val(JSON.stringify(new_value));
+                });
+        }};
+            
+        this._on($btn_edit_switcher2, openThemeDialog);
+        this._on(this._$('#custom_theme').attr('readonly','readonly'), openThemeDialog );
+
+        
+        //map symbology editor            
+        window.hWin.HEURIST4.ui.initEditSymbologyControl(this._$('#map_default_style'));
+        window.hWin.HEURIST4.ui.initEditSymbologyControl(this._$('#map_select_style'));
+        
+        
+        let useMapcluster = {change: function(){ that._$('#mapcluster_on').prop('checked', true); }};
+        this._on(this._$('#mapcluster_grid'), useMapcluster);
+        this._on(this._$('#mapcluster_count'), useMapcluster);
+        this._on(this._$('#mapcluster_zoom'), useMapcluster);
+
+        // New heurist-map configuration editor. mapViewer is loaded lazily because
+        // profilePreferences is also used in contexts where the map viewer is absent.
+        const newmap_cfg = this._$('#btn_heurist_map_config');
+        if(newmap_cfg.length>0){
+            this._$('#btn_heurist_map_config').button();
+            this._on(this._$('#btn_heurist_map_config'), {
+                click: function(){
+                    that._openHeuristMapConfiguration();
+                }
+            });
+        }
+
+        this._setupInlineImageSettings();
+
         return this._super();
     },
 
@@ -470,6 +472,166 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
                     }
                 );
             
+    },
+
+    _setupInlineImageSettings: function(){
+
+        const that = this;
+        let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+        showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+
+        if(!window.hWin.HEURIST4.util.isObject(showAllImagesPrefs)){
+            return;
+        }
+
+        let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'}).getOrder();
+        let filteredRecTypes = new Set();
+        for(const dtyID of fileFields){
+
+            let recTypes = $Db.rst_usage(dtyID);
+            if(recTypes.length === 0){
+                continue;
+            }
+
+            recTypes.forEach((id) => filteredRecTypes.add(id));
+        }
+
+        let $__checkIfAll = (mode, rtyIDs) => {
+
+            let checklist = showAllImagesPrefs[mode];
+            if(!checklist){
+                return [];
+            }
+
+            let list = [];
+            for(const rtyID of rtyIDs){
+
+                let usedFileFields = $Db.rst(rtyID).getSubSetByIds(fileFields).getOrder();
+
+                let isAllIn = true;
+                for(const dtyID of usedFileFields){
+                    if(!checklist.includes(`${rtyID}.${dtyID}`)){
+                        isAllIn = false;
+                        break;
+                    }
+                }
+
+                if(isAllIn){
+                    list.push(rtyID);
+                }
+            }
+
+            return list;
+        };
+
+        let allowedRTYIDs = new Set(showAllImagesPrefs.allowed.map((key) => key.split('.')[0]));
+        allowedRTYIDs = $__checkIfAll('allowed', allowedRTYIDs);
+
+        let allowedFieldOptions = {
+            recID: -1,
+            dtID: 'dty_PtrTargetRectypeIDs',
+            dtFields:{
+                dty_Type: 'resource',
+                rst_DisplayName: 'Show for these record types:',
+                rst_DisplayHelpText: '', 
+                rst_FieldConfig: { entity: 'DefRecTypes', csv: true }
+            },
+            values: allowedRTYIDs.length > 0 ? allowedRTYIDs : null,
+            filters: {ids: [...filteredRecTypes]},
+            change: function() { that._saveInlineImageSettings('allowed', this.getValues()[0]) }
+        };
+
+        $('#showImagesAllowed').editing_input(allowedFieldOptions);
+
+        let blockedRTYIDs = new Set(showAllImagesPrefs.blocked.map((key) => key.split('.')[0]));
+        blockedRTYIDs = $__checkIfAll('blocked', blockedRTYIDs);
+
+        let blockedFieldOptions = {
+            recID: -1,
+            dtID: 'dty_PtrTargetRectypeIDs',
+            dtFields:{
+                dty_Type: 'resource',
+                rst_DisplayName: 'Hide for these record types:',
+                rst_DisplayHelpText: '', 
+                rst_FieldConfig: { entity: 'DefRecTypes', csv: true }
+            },
+            values: blockedRTYIDs.length > 0 ? blockedRTYIDs : null,
+            filters: {ids: [...filteredRecTypes]},
+            change: function() { that._saveInlineImageSettings('blocked', this.getValues()[0]) }
+        };
+
+        $('#showImagesBlocked').editing_input(blockedFieldOptions);
+
+        $('#showImagesAllowed').css('margin', '0px 2em 0px 1em');
+        $('#showImagesAllowed,#showImagesBlocked').css({'float': 'left', 'max-width': '35em'});
+        $('#showImagesAllowed .entity_selector,#showImagesBlocked .entity_selector').css('max-width', '25em');
+        $('.input-cell').attr('style', 'margin-top: 1em;margin-bottom: 1em;');
+    },
+
+    _saveInlineImageSettings: function(mode, recTypeIDs){
+
+        let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+        showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+
+        if(!window.hWin.HEURIST4.util.isObject(showAllImagesPrefs)){
+            return;
+        }
+
+        recTypeIDs = typeof recTypeIDs === 'string' ? recTypeIDs.split(',') : [recTypeIDs];
+        const oppositeMode = mode === 'allowed' ? 'blocked' : 'allowed';
+
+        let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'}).getOrder();
+        let checklist = showAllImagesPrefs[mode] ?? [];
+        let opposingList = showAllImagesPrefs[oppositeMode] ?? [];
+        let hasChanges = false;
+
+        let $__updateFieldListings = (rtyIDs) => {
+
+            if(!checklist){
+                return;
+            }
+
+            for(const rtyID of rtyIDs){
+
+                let usedFileFields = $Db.rst(rtyID).getSubSetByIds(fileFields).getOrder();
+
+                for(const dtyID of usedFileFields){
+                    let key = `${rtyID}.${dtyID}`;
+                    if(!checklist.includes(key)){
+                        checklist.push(key);
+                        hasChanges = true;
+                    }
+                }
+
+                if(hasChanges){
+                    opposingList = opposingList.filter((key) => key.indexOf(`${rtyID}.`) === -1);
+                }
+            }
+        };
+
+        $__updateFieldListings(recTypeIDs);
+
+        if(!hasChanges){
+            return;
+        }
+
+        let newOptions = {[mode]: checklist, [oppositeMode]: opposingList};
+        let request = {edit_record_showAllImagesPerField: JSON.stringify(newOptions)};
+
+        window.hWin.HAPI4.SystemMgr.save_prefs(request, (response) => {
+
+            if(response.status !== window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            if(window.hWin.HAPI4?.currentUser?.ugr_Preferences){ // update local cache
+                window.hWin.HAPI4.currentUser.ugr_Preferences.edit_record_showAllImagesPerField = newOptions;
+            }
+
+            window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+            window.hWin.HEURIST4.msg.showMsgFlash('Record editor image settings saved');
+        });
     },
 
     /** Standard widget cleanup. Map configuration host cleanup is owned by

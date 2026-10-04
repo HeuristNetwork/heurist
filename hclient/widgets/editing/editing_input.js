@@ -2741,6 +2741,9 @@ $.widget( "heurist.editing_input", {
                 if(this.options.selectSubRecord){
                     rg_options['skipFieldAdditions'] = true;
                 }
+                if(this.options.filters?.ids){
+                    rg_options['filters'] = {ids: this.options.filters.ids};
+                }
 
                 window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, rg_options);
             }
@@ -7923,9 +7926,13 @@ $.widget( "heurist.editing_input", {
 
                 let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
                 showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
-                if(window.hWin.HEURIST4.util.isObject(showAllImagesPrefs) && !showAllImagesPrefs.allowed.includes(fieldKey)){
+                const fieldKeyIndex = showAllImagesPrefs.allowed.indexOf(fieldKey);
+                if(!showAllImagesPrefs.allowed.includes(fieldKey)){
+
                     showAllImagesPrefs.allowed.push(fieldKey);
-                    window.hWin.HAPI4.save_pref('edit_record_showAllRecords', showAllImagesPrefs);
+                    showAllImagesPrefs.blocked.slice(fieldKeyIndex, 1);
+
+                    window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
                 }
             }
         });
@@ -7954,6 +7961,17 @@ $.widget( "heurist.editing_input", {
                 $image_div.hide();
 
                 window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
+
+                let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+                showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+                const fieldKeyIndex = showAllImagesPrefs.allowed.indexOf(fieldKey);
+                if(showAllImagesPrefs.allowed.includes(fieldKey)){
+
+                    showAllImagesPrefs.allowed.slice(fieldKeyIndex, 1);
+                    showAllImagesPrefs.blocked.push(fieldKey);
+
+                    window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
+                }
             }
         });
 
