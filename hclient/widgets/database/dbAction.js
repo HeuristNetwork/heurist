@@ -51,6 +51,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _session_id:0,
     _select_file_dlg:null,
 
+    _DB_NAME_LIMIT: 60, // Limit database name to 60 characters, also see databaseController.php::DB_NAME_LIMIT
 
     /**
      * @function _init
@@ -324,6 +325,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
            request = {uname : (ele.length>0?ele.val().trim():''), // Use current user if uname field not present/empty
                       dbname: dbname};
 
+            if(`${request.uname}_${request.dbname}`.length > this._DB_NAME_LIMIT){
+                window.hWin.HEURIST4.msg.showMsgFlash('Database name too long, reduce to 40 characters at most', 5000);
+                return;
+            }
            if(this.options.actionName=='create'){
                 if(this._creationTemplatesLoading){
                     window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the template list to load');
