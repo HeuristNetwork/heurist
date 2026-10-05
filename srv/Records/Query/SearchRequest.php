@@ -41,6 +41,8 @@ final class SearchRequest
     public array $valueRanges = array();
     /** detail=values: link predicates from the main records to the records carrying the field. */
     public array $valueVia = array();
+    /** False: a full page does not run the count query; `total` is then -1 (unknown). */
+    public bool $countTotal = true;
 
     /** Initialise and constrain all externally supplied request options. */
     public function __construct(array $query, array $options = array())
@@ -48,6 +50,9 @@ final class SearchRequest
         $this->query = $query;
         $this->limit = min(100000, max(1, intval($options['limit'] ?? 1000)));
         $this->offset = max(0, intval($options['offset'] ?? 0));
+        if(array_key_exists('total', $options) && $options['total'] !== null && $options['total'] !== ''){
+            $this->countTotal = filter_var($options['total'], FILTER_VALIDATE_BOOLEAN);
+        }
         $this->fields = $options['fields'] ?? null;
         $detail = strtolower(trim((string)($options['detail'] ?? 'records')));
         $this->detail = $detail === '' ? 'records' : $detail;

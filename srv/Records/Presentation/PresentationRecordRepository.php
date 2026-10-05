@@ -46,26 +46,7 @@ final class PresentationRecordRepository
     {
         if($recordId < 1){ return null; }
         $parameters = array($recordId);
-        $access = 'rec_FlagTemporary=0';
-        if($this->runtime->userId < 1){
-            $access .= ' AND rec_NonOwnerVisibility IN ("public","pending")';
-        }elseif(!$this->runtime->isDbOwner){
-            $groups = $this->runtime->groupIds;
-            $groups[] = $this->runtime->userId;
-            $groups = array_values(array_unique(array_filter(array_map('intval', $groups))));
-            $visible = array('rec_NonOwnerVisibility IN ("public","pending")');
-            if(!empty($groups)){
-                $placeholders = implode(',', array_fill(0, count($groups), '?'));
-                $visible[] = 'rec_OwnerUGrpID IN ('.$placeholders.')';
-                array_push($parameters, ...$groups);
-                $visible[] = '(rec_NonOwnerVisibility="viewable" AND ('
-                    .'NOT EXISTS (SELECT 1 FROM usrRecPermissions rp0 WHERE rp0.rcp_RecID=rec_ID) OR '
-                    .'EXISTS (SELECT 1 FROM usrRecPermissions rp WHERE rp.rcp_RecID=rec_ID '
-                    .'AND rp.rcp_UGrpID IN ('.$placeholders.'))))';
-                array_push($parameters, ...$groups);
-            }
-            $access .= ' AND ('.implode(' OR ', $visible).')';
-        }
+        $access = $this->accessCondition($parameters);
         $rows = $this->database->fetchAll(
             'SELECT rec_ID,rec_RecTypeID,rec_Title FROM Records WHERE rec_ID=? AND '.$access.' LIMIT 1',
             $parameters
@@ -84,6 +65,41 @@ final class PresentationRecordRepository
             $record['details'][intval($row[0])][] = $row[1];
         }
         return $record;
+    }
+
+    /**
+     * SQL condition for records the current user may view (unqualified Records
+     * columns). Its placeholder values are appended to $parameters.
+     */
+    public function accessCondition(array &$parameters): string
+    {
+        $access = 'rec_FlagTemporary=0';
+        if($this->runtime->userId < 1){
+            $access .= ' AND rec_NonOwnerVisibility IN ("public","pending")';
+        }elseif(!$this->runtime->isDbOwner){
+            $groups = $this->userAndGroupIds();
+            $visible = array('rec_NonOwnerVisibility IN ("public","pending")');
+            if(!empty($groups)){
+                $placeholders = implode(',', array_fill(0, count($groups), '?'));
+                $visible[] = 'rec_OwnerUGrpID IN ('.$placeholders.')';
+                array_push($parameters, ...$groups);
+                $visible[] = '(rec_NonOwnerVisibility="viewable" AND ('
+                    .'NOT EXISTS (SELECT 1 FROM usrRecPermissions rp0 WHERE rp0.rcp_RecID=rec_ID) OR '
+                    .'EXISTS (SELECT 1 FROM usrRecPermissions rp WHERE rp.rcp_RecID=rec_ID '
+                    .'AND rp.rcp_UGrpID IN ('.$placeholders.'))))';
+                array_push($parameters, ...$groups);
+            }
+            $access .= ' AND ('.implode(' OR ', $visible).')';
+        }
+        return $access;
+    }
+
+    /** The current user id followed by the ids of their groups. */
+    public function userAndGroupIds(): array
+    {
+        $groups = $this->runtime->groupIds;
+        $groups[] = $this->runtime->userId;
+        return array_values(array_unique(array_filter(array_map('intval', $groups))));
     }
 
     /** Resolve a Query source. */

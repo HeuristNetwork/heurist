@@ -203,6 +203,13 @@ foreach ($databases as $idx=>$db_name){
                 }
             }
         }
+
+        // Report Schedule records (2-1105, plan 12) run in their own PHP process per
+        // database: record type and field constants are defined once per process
+        if(mysql__select_value($mysqli, 'SELECT rty_ID FROM defRecTypes WHERE rty_OriginatingDBID=2 AND rty_IDInOriginatingDB=1105')){
+            passthru(escapeshellarg(PHP_BINARY).' '.escapeshellarg(dirname(__FILE__).'/runReportSchedules.php')
+                .' --db='.escapeshellarg($db_name));
+        }
     }
 
     if(in_array($db_name,$exclusionList)){

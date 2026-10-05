@@ -5,7 +5,7 @@
 # Current source repositories:
 #   - heurist-explorer (monorepo; builds and deploys six bundles in one pass:
 #     heurist-explorer, heurist-data, heurist-graph, heurist-map, heurist-timeline,
-#     heurist-recordview)
+#     heurist-recordview, heurist-reports)
 #   - heurist-mirador4 (standalone repo with its own deploy:heurist script)
 #
 # Dedicated source checkouts live under /var/www/html/HEURIST.
@@ -27,7 +27,7 @@ BRANCH="${HEURIST_CLIENT_BRANCH:-main}"
 
 # Independent distributions produced by the heurist-explorer monorepo's
 # `npm run build:all` / `npm run deploy:all`.
-EXPLORER_BUNDLES=(heurist-explorer heurist-data heurist-graph heurist-map heurist-timeline heurist-recordview)
+EXPLORER_BUNDLES=(heurist-explorer heurist-data heurist-graph heurist-map heurist-timeline heurist-recordview heurist-reports)
 
 # Override these environment variables if a repository uses a different URL.
 HEURIST_EXPLORER_REPO="${HEURIST_EXPLORER_REPO:-git@github.com:HeuristNetwork/heurist-explorer.git}"

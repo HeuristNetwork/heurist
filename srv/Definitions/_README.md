@@ -32,7 +32,8 @@ structure edit / import, so no explicit version query is needed.
 See `documentation/development/query-language-filter-builder-plan.md` §4 for the
 full shape. Summary:
 
-- `meta` — `db`, `dbId` (registered ID, for concept codes), `version` (== ETag),
+- `meta` — `db`, `format` (2; a cached snapshot of an older format is rebuilt),
+  `dbId` (registered ID, for concept codes), `version` (== ETag),
   `generated`, `language`, `languages`, `dbconst`
   (`RT_RELATION`, `DT_PRIMARY_RESOURCE`, `DT_TARGET_RESOURCE`, `DT_RELATION_TYPE`).
 - `rectypeGroups`, `fieldGroups` — `{id: {name, order}}`.
@@ -41,7 +42,8 @@ full shape. Summary:
   `type` = `dty_Type`; layout-only `separator` fields are omitted. `vocabulary`
   is the vocabulary root term ID (integer) for enum / relation fields, absent
   otherwise.
-- `structure` — `[{rty, dty, name, order, req}]` (`rst` per-rectype placement;
+- `structure` — `[{rty, dty, name, order, req, max}]` (`rst` per-rectype placement;
+  `max` = `rst_MaxValues`, 0 = unlimited (repeatable);
   consumer must drop `req == "forbidden"`; separator fields excluded). No
   per-rectype term/pointer narrowing — the builder uses the global field's
   `vocabulary` / `targetTypes`.

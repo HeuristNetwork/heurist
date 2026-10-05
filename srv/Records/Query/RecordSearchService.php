@@ -315,6 +315,10 @@ final class RecordSearchService
                 // a short page is the last one: the total is known without the count query
                 return new SearchResult($ids, $request->offset + count($ids), $request->offset, $request->limit);
             }
+            if(!$request->countTotal){
+                // the caller needs only this page (e.g. the first 50 ids of a report test)
+                return new SearchResult($ids, -1, $request->offset, $request->limit);
+            }
             QueryTrace::begin('count');
             $total = intval($this->executor->executeScalar($this->builder->buildCount($query, $context)));
             QueryTrace::end(1);

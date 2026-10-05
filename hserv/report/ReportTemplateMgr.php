@@ -373,7 +373,8 @@ class ReportTemplateMgr
 
         //2. find all texts within {} - expressions
         if (! preg_match_all('/\{([^}]+)\}/s', $template, $matches)){
-            return $template;    // nothing to do -- no substitutions
+            // nothing to do -- no substitutions (mode 1 callers expect the array form)
+            return $mode == 1 ? ["template" => $template, "details_not_found" => []] : $template;
         }
 
         $not_found_details = array();

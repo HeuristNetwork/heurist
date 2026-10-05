@@ -636,6 +636,9 @@ class ReportExecute
         if ($this->templateFile==null){  //execution from $this->params['template_body']
 
                 $temp_templateFile = $this->saveTemporaryTemplate($content);
+                // the temporary file name is per user and file times have 1 s resolution:
+                // without this a second test within the same second runs the old compiled body
+                $this->smarty->setForceCompile(true);
 
                 if($this->publishmode == 4){
                     try{
