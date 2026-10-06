@@ -1058,50 +1058,153 @@ class UImage {
     }
 
     /**
-     * Creates a thumbnail image from the first page of a PDF file.
-     * Uses ImageMagick's `convert` command if Imagick extension is not loaded, otherwise uses Imagick.
+     * Render only the first PDF page as a PNG thumbnail, preserving aspect ratio.
+     * Shared by upload previews and fileCreateThumbnail (including HML imports).
+     * Uses already installed Poppler pdftoppm or ImageMagick convert, in bounded
+     * child processes; no new PHP library. ImageMagick needs a PDF delegate
+     * (usually Ghostscript) and a policy allowing PDF reads. GD cannot render PDFs.
+     * Failure is logged and returns false; callers may keep their normal placeholder.
+     * The original PDF is never modified. No global System object is required.
      *
-     * @param string $filename Path to the source PDF file.
-     * @param string $thumbnail_file Path to save the generated thumbnail image (typically PNG).
-     * @return bool True on success, false on failure.
+     * @param string $filename Local source PDF path.
+     * @param string $thumbnail_file Destination PNG path.
+     * @param int $max_width Maximum thumbnail width.
+     * @param int $max_height Maximum thumbnail height.
+     * @param string|null $errorMessage Receives a diagnostic on failure.
+     * @return bool Whether a non-empty PNG was written successfully.
      */
-    public static function getPdfThumbnail( $filename, $thumbnail_file ){
-        global $system;
-
-        if(!extension_loaded('imagick')){
-
-            $cmd = 'convert -thumbnail x200 -flatten ';//-background white -alpha remove
-            $cmd .= ' '.escapeshellarg($filename.'[0]');
-            $cmd .= ' '.escapeshellarg($thumbnail_file);
-            exec($cmd, $output, $error);
-
-            if ($error) {
-                USanitize::errorLog('ERROR on pdf thumbnail creation: '.$filename.'  '.$cmd.'   '.implode('\n', $output));
-                return false;
-            }
-
-        }else{
-            //Imagic
-            try {
-
-                $im =  new \Imagick($filename.'[0]');
-                $im->setImageFormat('png');
-                $im->thumbnailImage(200,200);
-
-                if(file_exists($thumbnail_file)){
-                    unlink($thumbnail_file);
+    public static function getPdfThumbnail($filename, $thumbnail_file, $max_width=200, $max_height=200, &$errorMessage=null){
+        $errorMessage = null;
+        if(!is_callable('proc_open')){
+            $errorMessage = 'PDF thumbnail rendering requires PHP proc_open to be enabled so renderer execution can be time-limited.';
+            return false;
+        }
+        if(!is_file($filename) || !is_readable($filename)){
+            $errorMessage = 'PDF source does not exist or is not readable: '.$filename;
+            return false;
+        }
+        $max_width = max(1, intval($max_width));
+        $max_height = max(1, intval($max_height));
+        $directory = dirname($thumbnail_file);
+        if(!is_dir($directory) || !is_writable($directory)){
+            $errorMessage = 'PDF thumbnail folder does not exist or is not writable: '.$directory;
+            return false;
+        }
+        $temporary = @tempnam($directory, 'pdf_thumb_');
+        if($temporary===false){
+            $errorMessage = 'Cannot create temporary PDF thumbnail in '.$directory;
+            return false;
+        }
+        $problems = [];
+        try {
+            // Run existing server renderers in child processes. Rendering inside
+            // PHP/Imagick cannot be interrupted reliably if a PDF delegate hangs.
+            // Poppler is tried first: it does not depend on ImageMagick PDF policy.
+            $commands = [
+                ['pdftoppm', '-f', '1', '-l', '1', '-singlefile', '-png', '-scale-to',
+                    (string)min($max_width, $max_height), $filename, $temporary],
+                ['convert', '-density', '72', $filename.'[0]', '-background', 'white',
+                    '-alpha', 'remove', '-alpha', 'off', '-thumbnail',
+                    $max_width.'x'.$max_height, 'png:'.$temporary]
+            ];
+            foreach($commands as $command){
+                $problem = null;
+                if(self::runPdfThumbnailCommand($command, $problem)){
+                    $output = $command[0]==='pdftoppm' ? $temporary.'.png' : $temporary;
+                    clearstatcache(true, $output);
+                    $info = @getimagesize($output);
+                    // Header inspection alone can accept a truncated PNG.
+                    // Decode when GD is available before publishing the result.
+                    $valid = $info && $info[0]>0 && $info[1]>0 && $info[2]===IMAGETYPE_PNG;
+                    if($valid && is_callable('imagecreatefrompng')){
+                        $decoded = @imagecreatefrompng($output);
+                        $valid = $decoded!==false;
+                        if($decoded!==false){ imagedestroy($decoded); }
+                    }
+                    if($valid){
+                        // Set serving permissions BEFORE publishing the file.
+                        // Rename within the destination folder atomically swaps
+                        // a complete image; never unlink the previous thumbnail.
+                        if(@chmod($output, 0644) && @rename($output, $thumbnail_file)){
+                            return true;
+                        }
+                    }
+                    $problem = 'Renderer returned no valid PNG or the thumbnail could not be saved.';
                 }
-                $im->writeImage($thumbnail_file);
-
-            } catch(\ImagickException $e) {
-                USanitize::errorLog($e . ', From Database: ' . $system->dbname());
-                return false;
+                $problems[] = $command[0].': '.$problem;
             }
+            $errorMessage = 'PDF thumbnail could not be created. '.implode(' | ', $problems);
+            USanitize::errorLog($errorMessage.' Source: '.$filename);
+            return false;
+        }catch(\Throwable $e){
+            $errorMessage = 'PDF thumbnail failed: '.$e->getMessage();
+            USanitize::errorLog($errorMessage);
+            return false;
+        }finally{
+            foreach([$temporary, $temporary.'.png'] as $path){
+                if(file_exists($path)){ @unlink($path); }
+            }
+        }
+    }
 
+    /**
+     * Execute an existing PDF renderer without a shell, with a 15-second deadline.
+     * Nonblocking output avoids pipe deadlock. No server package is installed here.
+     * A failed or timed-out process is reported to the caller, rather than leaving
+     * thumbnail-refresh requests waiting indefinitely for a PDF delegate.
+     */
+    private static function runPdfThumbnailCommand(array $command, &$errorMessage){
+        $pipes = [];
+        $process = @proc_open($command, [0=>['pipe','r'], 1=>['pipe','w'], 2=>['pipe','w']], $pipes);
+        if(!is_resource($process)){
+            $errorMessage = 'Cannot start renderer; check PHP process permissions.';
+            return false;
+        }
+        fclose($pipes[0]);
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+        $deadline = microtime(true)+15;
+        $diagnostic = '';
+        $exitCode = -1;
+        $timedOut = false;
+        try {
+            do {
+                $diagnostic .= stream_get_contents($pipes[1]).stream_get_contents($pipes[2]);
+                $diagnostic = substr($diagnostic, -4096);
+                $status = proc_get_status($process);
+                if(!$status['running']){ $exitCode = $status['exitcode']; break; }
+                if(microtime(true)>=$deadline){
+                    $timedOut = true;
+                    proc_terminate($process, 9);
+                    break;
+                }
+                usleep(20000);
+            }while(true);
+            $diagnostic .= stream_get_contents($pipes[1]).stream_get_contents($pipes[2]);
+        }finally{
+            fclose($pipes[1]); fclose($pipes[2]);
+            $closedCode = proc_close($process);
+        }
+        if($timedOut){ $errorMessage = 'Timed out after 15 seconds.'; return false; }
+        if($exitCode<0){ $exitCode = $closedCode; }
+        if($exitCode!==0){
+            // Exit 127 indicates a missing executable (or a missing delegate,
+            // interpreter or runtime dependency). Keep a stable code marker for
+            // the refresh UI; stderr alone may omit the exit code entirely.
+            if($exitCode===127){
+                $errorMessage = 'Renderer exited with code 127: the PDF rendering command or one of its dependencies could not be found or started. Ask your server administrator to check the installed renderer and the PHP worker PATH.';
+                if(trim($diagnostic)!==''){
+                    $errorMessage .= ' Details: '.trim($diagnostic);
+                }
+            }else{
+                $errorMessage = 'Renderer exited with code '.$exitCode.'.';
+                if(trim($diagnostic)!==''){
+                    $errorMessage .= ' '.trim($diagnostic);
+                }
+            }
+            return false;
         }
         return true;
-        //$resized = file_get_contents($thumbnail_file);
-        //return $resized;
     }
 
     /**

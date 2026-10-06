@@ -916,13 +916,25 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         $('#div_result').empty();
 
         let sResult = '';
+        if(action_type==='reset_thumbs'){
+            sResult = '<div style="padding:4px">Thumbnail refresh diagnostics v7</div>'
+                + '<div style="padding:4px">Files matched: '+(response.filesmatched ?? 'unavailable: server action has not been updated')+'</div>'
+                + '<div style="padding:4px">PDF file references matched: '+(response.pdfmatched ?? 'unavailable')+'</div>'
+                + '<div style="padding:4px">PDF thumbnails rebuilt: '+(response.pdfrebuilt ?? 0)+'</div>'
+                + '<div style="padding:4px">Errors: '+(response.errors ?? 0)+'</div>';
+            if(response.filesmatched===0){
+                sResult += '<p>No file references were found for these editable records. No thumbnails were rebuilt.</p>';
+            }
+        }
         for(let key in response){
+            if(action_type==='reset_thumbs' && ['filesmatched','pdfmatched','pdfrebuilt'].includes(key)){ continue; }
             if(key && key.indexOf('_')<0 && response[key]>0){
                 const lbl_key = 'record_action_'+key;
                 let lbl = window.hWin.HR(lbl_key);
                 if(lbl==lbl_key){
                     lbl = window.hWin.HR(lbl_key+'_'+action_type);
                 }
+                if(action_type==='reset_thumbs' && key==='pdfrebuilt'){ lbl = 'PDF thumbnails rebuilt'; }
                 let tag_link = '';
                 if(response[key+'_tag']){
                     tag_link = '<span><a href="'+
@@ -956,7 +968,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 if(key=='errors' && response['errors_list']){
                     const recids = Object.keys(response['errors_list']);
                     if(recids && recids.length>0){
-                        sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
+                        sResult += '<div style="background-color:#ffcccc">';
                         for(let key2 in response['errors_list']){
                             let text = response['errors_list'][key2];
                             if(Array.isArray(text)){
@@ -970,7 +982,22 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }
         }
 
-        $('#div_result').html(sResult).css({padding:'10px'}).show();
+        // Show deployment help once, collapsed by default. Match the stable
+        // renderer exit marker, including older v3 responses. Keep help text
+        // static: renderer diagnostics must never be interpolated into it.
+        if(action_type==='reset_thumbs' && response.errors_list
+                && Object.values(response.errors_list).some(function(error){
+                    return /\bcode\s+127\b/i.test(Array.isArray(error) ? error.join(' ') : String(error));
+                })){
+            sResult += "<details class=\"pdf-thumbnail-admin-help\" style=\"margin-top:18px;max-width:780px\">\n<summary style=\"cursor:pointer;font-weight:bold\">Instructions for server administrator</summary>\n<div class=\"pdf-thumbnail-admin-help-body\" tabindex=\"0\" role=\"region\" aria-label=\"PDF thumbnail administrator instructions\" style=\"padding:8px 12px;line-height:1.5;overflow-wrap:anywhere;box-sizing:border-box\">\n<p>Ask your server administrator to install or repair a PDF renderer and make it available to the PHP process. Exit code 127 normally means that the command, a required delegate, interpreter or runtime dependency could not be found or started. A command may work over SSH but be unavailable to Apache or PHP-FPM because its PATH, permissions or execution environment differ.</p>\n<p><b>1. Recommended: install Poppler.</b> Heurist first tries <code>pdftoppm</code>, supplied by <code>poppler-utils</code>. This renders PDF pages without Ghostscript or ImageMagick PDF-policy changes. Install using the command appropriate to the server:</p>\n<pre style=\"white-space:pre-wrap\"># CentOS 7 / RHEL 7\nsudo yum install poppler-utils\n\n# Rocky Linux / AlmaLinux / current RHEL or Fedora\nsudo dnf install poppler-utils\n\n# Debian / Ubuntu\nsudo apt-get update\nsudo apt-get install poppler-utils\n\n# openSUSE\nsudo zypper install poppler-tools\n\n# Arch Linux\nsudo pacman -S poppler</pre>\n<p><b>CentOS 7: mirrorlist errors or HTTP 404.</b> CentOS 7 reached end of life on 30 June 2024. Its retired mirrors can prevent any package installation. Stop the failed yum command with Ctrl+C. The following commands use a separate temporary repository directory and the official Vault archive for this installation only; existing CentOS, EPEL and Remi repository configuration is not changed. Package signature verification remains enabled.</p>\n<pre style=\"white-space:pre-wrap\">pdf_repo_dir=$(mktemp -d /tmp/heurist-pdf-repos.XXXXXX)\ncat > \"$pdf_repo_dir/CentOS-Vault.repo\" <<'EOF'\n[pdf-vault-base]\nname=CentOS 7.9.2009 Vault Base\nbaseurl=https://vault.centos.org/7.9.2009/os/$basearch/\nenabled=1\ngpgcheck=1\ngpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7\n\n[pdf-vault-updates]\nname=CentOS 7.9.2009 Vault Updates\nbaseurl=https://vault.centos.org/7.9.2009/updates/$basearch/\nenabled=1\ngpgcheck=1\ngpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7\nEOF\nsudo yum --setopt=reposdir=\"$pdf_repo_dir\" --disableplugin=fastestmirror install poppler-utils\npdftoppm -v</pre>\n<p>Run these commands in the same shell. Check that <code>/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7</code> exists. If the command reports a missing key, obtain and verify the official CentOS signing key; do not bypass signature checks. If Vault itself cannot resolve or HTTPS fails, have the administrator check DNS, outbound access, proxy settings, the system clock and CA certificates. Do not disable TLS verification. After installation, test rendering as the PHP worker below. Vault contains archived packages with no new security fixes; plan migration to a supported OS.</p>\n<p><b>2. Check the actual PHP worker environment.</b> Find the executable and verify that it starts:</p>\n<pre style=\"white-space:pre-wrap\">command -v pdftoppm\n/usr/bin/pdftoppm -v\n\n# Example for an Apache/PHP worker running as apache:\nsudo -u apache /usr/bin/pdftoppm -f 1 -l 1 -singlefile -png -scale-to 200 /path/to/test.pdf /path/to/writable/test-thumbnail</pre>\n<p>Replace <code>apache</code> with the PHP-FPM pool user (often <code>apache</code> or <code>www-data</code>) and replace both example paths. The test creates <code>test-thumbnail.png</code>. The PHP worker must be able to read the PDF, traverse its folders and write the thumbnail folder. A sudo test checks Unix permissions but does not reproduce all PHP-FPM restrictions or SELinux confinement; also test through Heurist.</p>\n<p>Ensure the renderer directory, normally <code>/usr/bin</code>, is in the web PHP process PATH. For PHP-FPM, check the relevant pool's <code>env[PATH]</code> setting, chroot/container mounts and systemd service restrictions. Restart the affected service after configuration changes. Heurist requires <code>proc_open</code> to be callable in the web PHP configuration; check <code>disable_functions</code> and the PHP version (array-based process commands require PHP 7.4 or later). PHP CLI settings can differ from web PHP settings. Check missing shared libraries if an installed executable still will not start.</p>\n<p><b>3. Alternative: ImageMagick with Ghostscript.</b> If Poppler is unavailable, Heurist tries ImageMagick's <code>convert</code>. Install both the renderer and its PDF delegate:</p>\n<pre style=\"white-space:pre-wrap\"># CentOS 7 / RHEL 7\nsudo yum install ImageMagick ghostscript\n\n# Rocky Linux / AlmaLinux / current RHEL or Fedora\nsudo dnf install ImageMagick ghostscript\n\n# Debian / Ubuntu\nsudo apt-get install imagemagick ghostscript\n\n# Inspect availability, delegates and policies:\ncommand -v convert\ncommand -v gs\nconvert -version\ngs --version\nconvert -list delegate\nconvert -list policy\n\n# Render only the first page (quote the page selector):\nconvert -density 72 '/path/to/test.pdf[0]' -background white -alpha remove -alpha off -thumbnail 200x200 /path/to/writable/test-thumbnail.png</pre>\n<p>If ImageMagick 7 provides only <code>magick</code> and no <code>convert</code>, use Poppler for this Heurist version, or install the distribution's supported compatibility command. Do not simply rename the binary. Ghostscript must be executable in the PHP worker's environment as well as the administrator's shell.</p>\n<p><b>4. If ImageMagick reports a PDF security-policy denial.</b> This is a separate problem from exit 127. Use <code>convert -list policy</code> to locate the active policy.xml (commonly under <code>/etc/ImageMagick/</code>, <code>/etc/ImageMagick-6/</code> or <code>/etc/ImageMagick-7/</code>). Prefer Poppler so the PDF restriction can remain in place. If the administrator approves ImageMagick PDF reading, keep ImageMagick and Ghostscript patched and adjust only the relevant PDF coder rule to allow reading:</p>\n<pre style=\"white-space:pre-wrap\">&lt;policy domain=\"coder\" rights=\"read\" pattern=\"PDF\" /&gt;</pre>\n<p>Check for other matching PDF, grouped-coder or delegate restrictions; this single rule may not override every policy. Preserve unrelated restrictions and resource limits. Do not disable the whole security policy or enable all delegates. On CentOS 7, archived versions may lack current security fixes, making Poppler with a server upgrade the preferred route.</p>\n<p><b>5. If rendering still fails.</b> Inspect Apache/PHP-FPM logs and SELinux audit denials, filesystem permissions, available memory/disk space, and encrypted or damaged PDFs. Correct the specific permission or policy issue; do not disable SELinux or use world-writable folders. Re-run <b>Recode &gt; Refresh thumbnails</b> after the server correction. Existing thumbnails are retained when a rebuild fails.</p>\n<p>Reference: <a href=\"https://www.centos.org/centos-linux/\" target=\"_blank\" rel=\"noopener noreferrer\">CentOS lifecycle</a>; <a href=\"https://imagemagick.org/security-policy/\" target=\"_blank\" rel=\"noopener noreferrer\">ImageMagick security policy</a>.</p>\n</div></details>";
+        }
+
+        // The popup body has overflow:hidden, so the result must own its scroll.
+        // Keep one scrollbar for the entire report, including expanded help.
+        // Nested help/error containers must not have their own scroll bounds.
+        $('#div_result').html(sResult).css({padding:'10px', overflowY:'auto',
+            overflowX:'hidden', maxHeight:'calc(100vh - 90px)', bottom:'3.5em',
+            boxSizing:'border-box'}).show();
         $('#btn-ok').button('option','label',window.hWin.HR('New Action'));
         $('#btn-cancel').button('option','label',window.hWin.HR('Close'));
     }

@@ -19,7 +19,9 @@ use hserv\records\batch\RecordsBatchAction;
  *
  * Report format:
  * - passed, noaccess: selected and inaccessible record counts.
- * - processed: number of thumbnail files successfully deleted.
+ * - processed: number of non-PDF thumbnail files successfully deleted.
+ * - pdfrebuilt: number of PDF thumbnails generated immediately.
+ * - errors/errors_list: failed PDF rendering or deletion, with record IDs and diagnostics.
  *
  * @return array|false The result array (`$this->result_data`) with `['processed']` set to the count
  *                     of successfully deleted thumbnail files.
@@ -44,11 +46,19 @@ class RecordsBatchResetThumbnails extends RecordsBatchAction
         $mysqli = $this->system->getMysqli();
 
         //1. find external urls for field values
-        $query = 'SELECT ulf_ObfuscatedFileID FROM recUploadedFiles, recDetails '
+        $query = 'SELECT DISTINCT ulf_ObfuscatedFileID, ulf_MimeExt, dtl_RecID, ulf_ID, ulf_OrigFileName FROM recUploadedFiles, recDetails '
         .'WHERE ulf_ID=dtl_UploadedFileID '
         .SQL_AND.predicateId('dtl_RecID', $this->recIDs);
 
         $cnt = 0;
+        $pdfResults = [];
+        $errors = [];
+        $pdfCount = 0;
+        $fileCount = 0;
+        $pdfMatched = 0;
+        // PDF refresh renders immediately so failures appear in the batch report.
+        // Other file types keep the established lazy regeneration behaviour.
+        require_once __DIR__.'/../../search/recordFile.php';
         $res = $mysqli->query($query);
         if ($res){
 
@@ -58,16 +68,36 @@ class RecordsBatchResetThumbnails extends RecordsBatchAction
                     break;
                 }
                 $progressDone++;
+                $fileCount++;
                 $obfuscation_id = preg_replace('/[^a-z0-9]/', "", $row[0]);//for snyk
                 $thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.$obfuscation_id.'.png';//'ulf_ObfuscatedFileID'
-                if(file_exists($thumbnail_file)){
-                    unlink($thumbnail_file);
-                    $cnt++;
+                if(in_array(strtolower($row[1] ?? ''), ['pdf','application/pdf'])
+                        || strtolower(pathinfo($row[4] ?? '', PATHINFO_EXTENSION))==='pdf'){
+                    $pdfMatched++;
+                    if(!array_key_exists($obfuscation_id, $pdfResults)){
+                        $pdfResults[$obfuscation_id] = \fileCreateThumbnail($this->system, intval($row[3]), false);
+                        if($pdfResults[$obfuscation_id]===true){ $pdfCount++; }
+                    }
+                    if($pdfResults[$obfuscation_id]!==true){
+                        $errors[$row[2]] = htmlspecialchars('PDF file '.$obfuscation_id.': '
+                            .($pdfResults[$obfuscation_id] ?: 'PDF source was not found or could not be rendered.'), ENT_QUOTES, 'UTF-8');
+                    }
+                }elseif(file_exists($thumbnail_file)){
+                    if(@unlink($thumbnail_file)){ $cnt++; }
+                    else { $errors[$row[2]] = 'Cannot remove thumbnail: check file permissions.'; }
                 }
             }
+        }else{
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot query files for thumbnail refresh: '.$mysqli->error);
+            return false;
         }
 
+        $this->result_data['filesmatched'] = $fileCount;
+        $this->result_data['pdfmatched'] = $pdfMatched;
         $this->result_data['processed'] = $cnt;
+        $this->result_data['pdfrebuilt'] = $pdfCount;
+        $this->result_data['errors'] = count($errors);
+        $this->result_data['errors_list'] = $errors;
         return $this->result_data;
     }
 

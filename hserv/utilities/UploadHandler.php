@@ -1417,6 +1417,29 @@ class UploadHandler
         return $image_info && $image_info[0] && $image_info[1];
     }
 
+    /**
+     * Create a first-page PDF upload preview using the shared renderer.
+     * Only the thumbnail version is written: never process/resize the original PDF.
+     * Missing PDF support must not turn a successful file upload into an error;
+     * fileDownload can retry lazy creation after server PDF support is enabled.
+     */
+    protected function handle_pdf_thumbnail($file_path, $file) {
+        if(!isset($this->options['image_versions']['thumbnail'])){
+            return;
+        }
+        $name = pathinfo($file->name, PATHINFO_FILENAME).'.png';
+        $paths = $this->get_scaled_image_file_paths($name, $file->subfolder, 'thumbnail');
+        if(!$paths[0]){
+            return;
+        }
+        $options = $this->options['image_versions']['thumbnail'];
+        if(UImage::getPdfThumbnail($file_path, $paths[1],
+                $options['max_width'] ?? 200, $options['max_height'] ?? 200)){
+            $file->thumbnailName = $name;
+            $file->thumbnailUrl = $this->get_download_url($name, $file->subfolder, 'thumbnail');
+        }
+    }
+
     protected function handle_image_file($file_path, $file) {
         $failed_versions = array();
         foreach($this->options['image_versions'] as $version => $options) {
@@ -1581,6 +1604,8 @@ class UploadHandler
                 $file->url = $this->get_download_url($file->name, $file->subfolder);
                 if ($this->is_valid_image_file($file_path)) {
                     $this->handle_image_file($file_path, $file);
+                }elseif(strtolower(pathinfo($file->name, PATHINFO_EXTENSION))==='pdf'){
+                    $this->handle_pdf_thumbnail($file_path, $file);
                 }
             } else {
                 $file->size = $file_size;

@@ -382,6 +382,8 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
     if($fileid == null){
         $suitable_media_condition = " and (rd.dtl_UploadedFileID is not null)" // Ensure there's an uploaded file linked
                                   ." and (fxm.fxm_MimeType like 'image%'"
+                                  ." OR fxm.fxm_MimeType='application/pdf'"
+                                  ." OR LOWER(ruf.ulf_MimeExt) IN ('pdf','application/pdf')"
                                   ." OR fxm.fxm_MimeType='video/youtube'"
                                   ." OR fxm.fxm_MimeType='video/vimeo'"
                                   ." OR fxm.fxm_MimeType='audio/soundcloud'" // Soundcloud also considered for thumb
@@ -1340,7 +1342,9 @@ function fileGetMetadata($fileinfo){
     }
 
     // Populate common metadata
-    $res['mimetype'] = $mimeType;
+    $isPdf = $mimeType==='application/pdf' || in_array(strtolower($fileinfo['ulf_MimeExt'] ?? ''), ['pdf','application/pdf']);
+    $res['has_thumbnail'] = $isPdf;
+    $res['mimetype'] = $isPdf ? 'application/pdf' : $mimeType;
     $res['original_name'] = $originalFileName;
     $res['size_KB'] = $fileinfo['ulf_FileSizeKB'] ?? null;
     $res['description'] = $fileinfo['ulf_Description'] ?? null;
@@ -1370,8 +1374,37 @@ function fileGetMetadata($fileinfo){
  * @param int|string $fileid The `ulf_ID` (numeric) or `ulf_ObfuscatedFileID` (string) of the file.
  * @param bool $is_download If true, outputs the thumbnail image directly to the browser.
  *                          Otherwise, saves it to the thumbnail directory.
- * @return void Outputs image or redirects if `$is_download` is true.
+ * @return bool|string|null For PDFs, true on success or an error string on failure;
+ *                         other file types retain their existing return behaviour.
  */
+/**
+ * Serve the last available PDF thumbnail, or a visible PDF label on failure.
+ * The label is a response only: never cache it over a real thumbnail. Keeping
+ * the existing file readable during rendering avoids blank refresh previews.
+ */
+function fileOutputPdfThumbnailOrPlaceholder($thumbnail_file){
+    clearstatcache(true, $thumbnail_file);
+    $info = is_readable($thumbnail_file) ? @getimagesize($thumbnail_file) : false;
+    if($info && $info[2]===IMAGETYPE_PNG){
+        $content = @file_get_contents($thumbnail_file);
+        if($content!==false && $content!==''){
+            header('Content-type: image/png');
+            echo $content;
+            return;
+        }
+    }
+    // Reuse Heurist's existing file-label drawing capability. No placeholder
+    // is written to disk, so a later request can retry the PDF renderer.
+    $image = UImage::createFromString('PDF');
+    if($image){
+        header('Content-type: image/png');
+        imagepng($image);
+        imagedestroy($image);
+    }else{
+        http_response_code(503);
+    }
+}
+
 function fileCreateThumbnail( $system, $fileid, $is_download ){
 
     $img = null; //image to be resized
@@ -1412,8 +1445,15 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             }
 
             //special case for pdf
-            if($mimeExt=='application/pdf' || $mimeExt=='pdf'){
-                UImage::getPdfThumbnail($filename, $thumbnail_file);
+            if(strtolower($mimeExt)=='application/pdf' || strtolower($mimeExt)=='pdf'){
+                // Shared lazy generation covers data entry and imported/HML files.
+                $created = UImage::getPdfThumbnail($filename, $thumbnail_file, 200, 200, $pdfError);
+                if($is_download){
+                    // A failed refresh must not replace an existing thumbnail
+                    // in the browser with the generic blank placeholder.
+                    fileOutputPdfThumbnailOrPlaceholder($thumbnail_file);
+                }
+                return $created ? true : $pdfError;
                 
             }else if(($file['ulf_PreferredSource'] ?? '')==='iiif'){ //locally uploaded manifest json
 
@@ -1498,6 +1538,32 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 }
                 
                 return;
+
+            }elseif(strtolower($file['ulf_MimeExt'] ?? '')==='pdf'
+                    || strtolower($file['ulf_MimeExt'] ?? '')==='application/pdf'
+                    || ($file['fxm_MimeType'] ?? '')==='application/pdf'){
+                // HML can register a PDF as a remote reference. Download a temporary
+                // copy for the same first-page renderer, then always remove it.
+                $temporary = tempnam(HEURIST_SCRATCH_DIR, 'pdf_source_');
+                $created = false;
+                $pdfError = 'Cannot download remote PDF for thumbnail generation.';
+                if($temporary!==false){
+                    try {
+                        if(saveURLasFile($file['ulf_ExternalFileReference'], $temporary)){
+                            $created = UImage::getPdfThumbnail($temporary, $thumbnail_file, 200, 200, $pdfError);
+                        }
+                    }finally{
+                        if(file_exists($temporary)){
+                            unlink($temporary);
+                        }
+                    }
+                }
+                if($is_download){
+                    // A failed refresh must not replace an existing thumbnail
+                    // in the browser with the generic blank placeholder.
+                    fileOutputPdfThumbnailOrPlaceholder($thumbnail_file);
+                }
+                return $created ? true : $pdfError;
 
             }elseif(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
                 //@todo for image services (flikr...) take thumbnails directly
