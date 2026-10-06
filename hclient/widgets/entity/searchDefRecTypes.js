@@ -32,12 +32,9 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
     _initControls: function() {
         
         let that = this;
-        
-       
-        
+
         this._super();
-        
-        
+
         window.hWin.HRA(this.element);
 
         //hide all help divs except current mode
@@ -50,10 +47,9 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         this.btn_csv_import = this.element.find('#btn_csv_import');
 
         if(this.options.edit_mode=='none' || this.options.import_structure){
+
             this.btn_add_record.parent().hide();
-           
-           
-            
+
             let ele = this.element.find('#div_show_all_groups');
             ele.parent().css('float','left');
             ele.hide();
@@ -311,94 +307,93 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
      */
     startSearch: function(){
         
-            if(!this.input_search) return;
-            
-            let request = {}
-            
-            let is_search_one_group = (!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0)
+        if(!this.input_search) return;
         
-            if(!is_search_one_group && this.input_search.val()!=''){
-                let s = this.input_search.val();
-                if(window.hWin.HEURIST4.util.isNumber(s) && parseInt(s)>0){
-                     request['rty_ID'] = s;   
-                     s = '';
-                }else if (s.indexOf('-')>0){
-                    
-                    let codes = s.split('-');
-                    if(codes.length==2 
-                        && window.hWin.HEURIST4.util.isNumber(codes[0])
-                        && window.hWin.HEURIST4.util.isNumber(codes[1])
-                        && parseInt(codes[0])>0 && parseInt(codes[1])>0 ){
-                        request['rty_OriginatingDBID'] = codes[0];
-                        request['rty_IDInOriginatingDB'] = codes[1];
-                        s = '';
-                    }
-                }
+        let request = {}
+        
+        let is_search_one_group = (!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0)
+    
+        if(!is_search_one_group && this.input_search.val()!=''){
+            let s = this.input_search.val();
+            if(window.hWin.HEURIST4.util.isPositiveInt(s)){
+                request['rty_ID'] = s;
+                s = '';
+            }else if (s.indexOf('-')>0){
                 
-                if(s!='') request['rty_Name'] = s;
+                let codes = s.split('-');
+                if(codes.length==2 
+                    && window.hWin.HEURIST4.util.isNumber(codes[0])
+                    && window.hWin.HEURIST4.util.isNumber(codes[1])
+                    && parseInt(codes[0])>0 && parseInt(codes[1])>0 ){
+                    request['rty_OriginatingDBID'] = codes[0];
+                    request['rty_IDInOriginatingDB'] = codes[1];
+                    s = '';
+                }
             }
             
-            if(this.options.import_structure){
+            if(s!='') request['rty_Name'] = s;
+        }
+        
+        if(this.options.import_structure){
 
-                if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
-                        request['rty_ID_local'] = '=0';
-                }
-                
-            }else if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){
-                    if(this.input_search_group.val()>0){
-                        request['rty_RecTypeGroupID'] = this.input_search_group.val();
-                        this.options.rtg_ID = request['rty_RecTypeGroupID'];
-                    }else{
-                        this.options.rtg_ID = null;
-                    }
-                    
-            }else{
+            if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
+                    request['rty_ID_local'] = '=0';
+            }
             
-                if( this.options.rtg_ID<0 ){
-                    //not in given group
-                    request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
-                }
-            
-                let sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
-                if(is_search_one_group)
-                {
-                    this.input_search.parent().hide();
-
-                    request['rty_RecTypeGroupID'] = this.options.rtg_ID;
-                    sGroupTitle += ($Db.rtg(this.options.rtg_ID,'rtg_Name')
-                                        +'</h4><div class="heurist-helper3 truncate rtg_Description" style="font-size:0.7em">'
-                                        +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
-
-                    sGroupTitle += '<div style="font-size: 0.8em; color: green; padding-top: 0.2em;">Drag into the groups on the left to organise</div>';
+        }else if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){
+                if(this.input_search_group.val()>0){
+                    request['rty_RecTypeGroupID'] = this.input_search_group.val();
+                    this.options.rtg_ID = request['rty_RecTypeGroupID'];
                 }else{
-                    this.input_search.parent().show();
-                    sGroupTitle += window.hWin.HR('All Groups')+
-                        '</h4><div class="heurist-helper3" style="font-size:0.7em">'+window.hWin.HR('All record type groups')+'</div>';
+                    this.options.rtg_ID = null;
                 }
+                
+        }else{
+        
+            if( this.options.rtg_ID<0 ){
+                //not in given group
+                request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
+            }
+        
+            let sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
+            if(is_search_one_group)
+            {
+                this.input_search.parent().hide();
 
-                this.element.find('#div_group_information').html(sGroupTitle);
-            }
-            
-            this.input_sort_type = this.element.find('#input_sort_type');
-            if(this.input_sort_type.val()=='recent'){
-                request['sort:rty_Modified'] = '-1' 
-            }else if(this.input_sort_type.val()=='id'){
-                request['sort:rty_ID'] = '1';   
-            }else if(this.input_sort_type.val()=='count'){
-                request['sort:rty_RecCount'] = '-1';   
-            }else if(this.input_sort_type.val()=='ccode'){
-                request['sort:rty_OriginatingDBID'] = '1';
-                request['sort:rty_IDInOriginatingDB'] = '1';
+                request['rty_RecTypeGroupID'] = this.options.rtg_ID;
+                sGroupTitle += ($Db.rtg(this.options.rtg_ID,'rtg_Name')
+                                    +'</h4><div class="heurist-helper3 truncate rtg_Description" style="font-size:0.7em">'
+                                    +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
+
+                sGroupTitle += '<div style="font-size: 0.8em; color: green; padding-top: 0.2em;">Drag into the groups on the left to organise</div>';
             }else{
-                request['sort:rty_Name'] = '1';   
+                this.input_search.parent().show();
+                sGroupTitle += window.hWin.HR('All Groups')+
+                    '</h4><div class="heurist-helper3" style="font-size:0.7em">'+window.hWin.HR('All record type groups')+'</div>';
             }
-  
-            if(this.options.use_cache){
-            
-                this._trigger( "onfilter", null, request);            
-            }else{
-                this._search_request = request;
-                this._super();                
-            }            
+
+            this.element.find('#div_group_information').html(sGroupTitle);
+        }
+        
+        this.input_sort_type = this.element.find('#input_sort_type');
+        if(this.input_sort_type.val()=='recent'){
+            request['sort:rty_Modified'] = '-1' 
+        }else if(this.input_sort_type.val()=='id'){
+            request['sort:rty_ID'] = '1';   
+        }else if(this.input_sort_type.val()=='count'){
+            request['sort:rty_RecCount'] = '-1';   
+        }else if(this.input_sort_type.val()=='ccode'){
+            request['sort:rty_OriginatingDBID'] = '1';
+            request['sort:rty_IDInOriginatingDB'] = '1';
+        }else{
+            request['sort:rty_Name'] = '1';   
+        }
+
+        if(this.options.use_cache){
+            this._trigger( "onfilter", null, request);
+        }else{
+            this._search_request = request;
+            this._super();
+        }
     }
 });

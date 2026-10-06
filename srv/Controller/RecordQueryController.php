@@ -103,6 +103,8 @@ final class RecordQueryController
             'offset' => $params['offset'] ?? 0,
             'fields' => $params['fields'] ?? null,
             'detail' => $params['detail'] ?? null,
+            // total=0: no count query for a full page (pagination.total is then -1)
+            'total' => $params['total'] ?? null,
             'resolveDetails' => $params['resolveDetails'] ?? false,
             'filter' => $this->structuredParameter($params['filter'] ?? null)
         );

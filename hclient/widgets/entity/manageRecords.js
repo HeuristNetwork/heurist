@@ -8102,6 +8102,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'});
         let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
         showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+        showAllImagesPrefs.blocked = !Array.isArray(showAllImagesPrefs.blocked) ? [] : showAllImagesPrefs.blocked;
         let prefUpdated = false;
 
         for(const fileDtyID of fileFields.getOrder()){
@@ -8129,6 +8130,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         if(prefUpdated){
+
+            // Ensure allowed and blocked are arrays
+            showAllImagesPrefs.allowed = Array.isArray(showAllImagesPrefs.allowed) ? showAllImagesPrefs.allowed : [];
+            showAllImagesPrefs.blocked = Array.isArray(showAllImagesPrefs.blocked) ? showAllImagesPrefs.blocked : [];
+
             window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
         }
     }

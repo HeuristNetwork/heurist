@@ -28,6 +28,8 @@ require_once dirname(__FILE__).'/../../admin/setup/dboperations/welcomeEmail.php
 
 define('PARAM_WELCOME','?welcome=1&db=');
 
+define('DB_NAME_LIMIT', 60); // Limit database names to 60 characters, also see dbAction.js::_DB_NAME_LIMIT
+
 $system = new hserv\System();
 
 //sysadmin protection - reset from request to avoid exposure in possible error/log messages
@@ -46,6 +48,7 @@ if($action==null){
 
 $session_id = DbUtils::prepareSessionId($req_params['session']??null);
 
+$response = null;
 if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connectRemote')){ //db required, except create
     //get error and response
     $response = $system->getError();
@@ -53,7 +56,21 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
 
    $isNewUserRegistration = ($action == 'create' || $action == 'connectRemote') && !$system->hasAccess();
 
-   if ($isNewUserRegistration && $action === 'create' && !$system->captcha()->consumeCaptcha($req_params['ugr_Captcha'] ?? null)) 
+   if(in_array($action, ['create', 'rename', 'clone', 'restore'])){
+
+       $fullName = array_key_exists('uname', $req_params) ? $req_params['uname'] : '';
+       $fullName .= array_key_exists('dbname', $req_params) ? $req_params['dbname'] : '';
+
+       if($fullName === ''){
+           $response = $system->addError(HEURIST_INVALID_REQUEST, 'Please enter a database name');
+       }else if(strlen($fullName) > DB_NAME_LIMIT){
+           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Your entered database name is too long, please reduce it to the maximum of 40 characters');
+       }
+   }
+
+   if(is_array($response)){
+    // prevent further action
+   }elseif ($isNewUserRegistration && $action === 'create' && !$system->captcha()->consumeCaptcha($req_params['ugr_Captcha'] ?? null)) 
    {
         // return error before long-running operation
         $response = $system->getError();

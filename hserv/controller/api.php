@@ -484,6 +484,21 @@ if($is_def_query){
     $method = 'search';
 }
 
+// Reports manager (plan 12): /api/{db}/reports[/{ref}[/{action}]]
+// See srv/Controller/ReportController.php for the routes. Anonymous users may
+// only list card reports and render one record; the controller checks the rest.
+$is_reports_query = ($resource === 'reports');
+if($is_reports_query && !in_array($http_method, array('GET','POST','PUT','DELETE'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, DELETE'));
+}
+
+// Background jobs (plan 12): /api/{db}/jobs[/{id}[/cancel|result]], logged-in users only.
+// See srv/Controller/JobController.php.
+$is_jobs_query = ($resource === 'jobs');
+if($is_jobs_query && !in_array($http_method, array('GET','POST'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+}
+
 // Routes where auth processing is not needed here
 $is_public_annotation_read =
     ($resource === 'annotations'
@@ -526,7 +541,8 @@ if($method === 'search'){
         'trm', 'terms', 'trl', 'termlinks',
         'rst', 'recstructure',
         'def',
-        'map', 'time'
+        'map', 'time',
+        'reports'
     );
     $allow_anonymous = in_array($resource, $publicSearchResources, true);    
 }
@@ -587,6 +603,40 @@ if($is_def_query){
     $req_params['restapi'] = 1;
     $controller = ServiceFactory::fromLegacySystem($system)->graphController();
     $controller->output($req_params);
+    $system->dbclose();
+    exit;
+
+}elseif($is_jobs_query){
+
+    $factory = ServiceFactory::fromLegacySystem($system);
+    // srv Smarty engine; the legacy renderer only converts templates on import/export
+    $controller = $factory->jobController($factory->reportJobHandlers(
+        $factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)),
+        new hserv\report\ReportRecordWriter($system)
+    ));
+    $controller->handleRequest(
+        $http_method,
+        array_slice($requestUri, 4),
+        $req_params,
+        is_array($json) ? $json : null
+    );
+    $system->dbclose();
+    exit;
+
+}elseif($is_reports_query){
+
+    $factory = ServiceFactory::fromLegacySystem($system);
+    $controller = $factory->reportController(
+        $factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)),
+        new hserv\report\ReportRecordWriter($system)
+    );
+    $controller->handleRequest(
+        $http_method,
+        array_slice($requestUri, 4),
+        $req_params,
+        is_array($json) ? $json : null,
+        $_FILES
+    );
     $system->dbclose();
     exit;
 

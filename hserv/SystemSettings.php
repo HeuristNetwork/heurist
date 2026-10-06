@@ -68,7 +68,9 @@ class SystemSettings {
         'Safeguard backups' => 'safeguard_backups.json',
         'DOIs' => 'DOIs.json',
         // added 18/9/26 for master-satellite synchronisation
-        'Synchronisation' => 'synchronisation.json' 
+        'Synchronisation' => 'synchronisation.json',
+        // added 4/10/26 for Smarty reports (allowDynamicReports)
+        'Reports' => 'reports.json'
     ];
 
     /**

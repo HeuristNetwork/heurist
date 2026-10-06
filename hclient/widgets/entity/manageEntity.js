@@ -392,6 +392,13 @@ $.widget( "heurist.manageEntity", {
             }
         
         }
+
+        if(this.options?.filters?.ids){
+            this.options.filters.ids = typeof this.options.filters.ids === 'string' && this.options.filters.ids.indexOf(',') > 0 ? this.options.filters.ids.split(',') : this.options.filters.ids;
+            this.options.filters.ids = Array.isArray(this.options.filters.ids) ? this.options.filters.ids.filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id)) : this.options.filters.ids;
+            this.options.filters.ids = window.hWin.HEURIST4.util.isPositiveInt(this.options.filters.ids) ? [this.options.filters.ids] : this.options.filters.ids;
+            this.options.filters.ids = !Array.isArray(this.options.filters.ids) ? null : this.options.filters.ids;
+        }
         
         let that = this;
         if(!window.hWin.HEURIST4.util.isempty(this._entityName)){
@@ -1421,6 +1428,10 @@ $.widget( "heurist.manageEntity", {
         let subset = null;
         if(this.options.use_cache && this._cachedRecordset && this.recordList.resultList('instance')){
             subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
+
+            if(this.options.filters?.ids && subset.length() > 0){
+                subset = subset.getSubSetByIds(this.options.filters.ids);
+            }
             if(this.options.list_mode=='default'){
                 this.recordList.resultList('updateResultSet', subset, request);   
             }

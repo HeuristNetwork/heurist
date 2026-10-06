@@ -1416,6 +1416,13 @@ class DbUtils {
         $warnings[] = folderCreate2($database_folder. '/generated-reports', 'used to write generated reports');
         $warnings[] = folderCreate2($database_folder. '/backup', 'used to write files for user data dump');
 
+        // New databases do not run record-set reports for an arbitrary query on request;
+        // without this file (existing databases) they are allowed. See srv/Reports/ReportPolicy.php
+        if(folderCreate($database_folder.'settings', true)){
+            fileSave(json_encode(array('allowDynamicReports'=>false), JSON_PRETTY_PRINT),
+                $database_folder.'settings/reports.json');
+        }
+
         //remove empty warns
         $warnings = array_filter($warnings, function($value) { return $value !== '';});
         if(!empty($warnings)){

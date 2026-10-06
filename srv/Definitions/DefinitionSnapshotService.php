@@ -30,6 +30,9 @@ final class DefinitionSnapshotService
     private RuntimeContext $runtime;
     private string $cacheDirectory;
 
+    /** Snapshot format; a cached snapshot of an older format is rebuilt (2: structure rows have "max"). */
+    private const FORMAT = 2;
+
     /** @param string $cacheDirectory Absolute path of the database "entity" dir, or '' to disable caching. */
     public function __construct(
         DatabaseInterface $database,
@@ -115,6 +118,7 @@ final class DefinitionSnapshotService
 
         return array(
             'db'        => $this->runtime->databaseName,
+            'format'    => self::FORMAT,
             'dbId'      => $registeredId,
             'version'   => (string)time(),   // replaced with the cache-file mtime by get()
             'generated' => gmdate('c'),
@@ -127,6 +131,7 @@ final class DefinitionSnapshotService
     /** Whether a cached snapshot contains constants required by the current client contract. */
     private function hasCurrentDbconst(array $meta): bool
     {
+        if(intval($meta['format'] ?? 1) < self::FORMAT){ return false; }
         $dbconst = $meta['dbconst'] ?? null;
         if(!is_array($dbconst)){ return false; }
         foreach(array('DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'TRM_NO', 'TRM_YES') as $name){
@@ -245,7 +250,7 @@ final class DefinitionSnapshotService
     {
         $out = array();
         $rows = $this->database->fetchAll(
-            'SELECT rst_RecTypeID,rst_DetailTypeID,rst_DisplayName,rst_DisplayOrder,rst_RequirementType '
+            'SELECT rst_RecTypeID,rst_DetailTypeID,rst_DisplayName,rst_DisplayOrder,rst_RequirementType,rst_MaxValues '
             .'FROM defRecStructure '
             .'WHERE rst_DetailTypeID NOT IN (SELECT dty_ID FROM defDetailTypes WHERE dty_Type=?) '
             .'ORDER BY rst_RecTypeID,rst_DisplayOrder,rst_DetailTypeID',
@@ -257,7 +262,9 @@ final class DefinitionSnapshotService
                 'dty'   => intval($row['rst_DetailTypeID']),
                 'name'  => (string)$row['rst_DisplayName'],
                 'order' => intval($row['rst_DisplayOrder']),
-                'req'   => (string)$row['rst_RequirementType']
+                'req'   => (string)$row['rst_RequirementType'],
+                // 0 = unlimited (repeatable); Smarty report editor loops over repeatable fields
+                'max'   => intval($row['rst_MaxValues'])
             );
         }
         return $out;

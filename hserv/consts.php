@@ -458,7 +458,11 @@ $rtDefines = array(
     
     'RT_IIIF_ANNOTATION' => array(2, 109),
     'RT_IIIF_MANIFEST' => array(2, 110),
-    'RT_IIIF_CANVAS' => array(2, 111)
+    'RT_IIIF_CANVAS' => array(2, 111),
+    
+    // Smarty reports (plan 12)
+    'RT_CUSTOM_REPORT' => array(2, 1104),
+    'RT_REPORT_SCHEDULE' => array(2, 1105)
     
 );
 
@@ -537,7 +541,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_LAYOUT_STRING' => array(2, 48),
     'DT_TRANSFORM_RESOURCE' => array(2, 50),
     'DT_PROPERTY_VALUE' => array(2, 51),
-    'DT_TOOL_TYPE' => array(2, 52),
     'DT_RECORD_TYPE' => array(2, 53),
     'DT_DETAIL_TYPE' => array(2, 54),
     'DT_COMMAND' => array(2, 55),
@@ -581,6 +584,10 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_OPACITY' => array(3, 1090),         // outdated
     'DT_ORDERING_HIERARCHY' => array(2, 1082), // field used to define drag-drop ordering of records
     'DT_DATA_SOURCE' => array(3, 1083),
+    // Smarty reports (plan 12)
+    'DT_IS_CARD_VIEW' => array(2, 1182), // Flag Yes|No: report for a single record (popups, cards, record view)
+    'DT_REPORT' => array(2, 1183), // pointer to Custom Report
+    'DT_INTERVAL_MINUTES' => array(2, 1184), // regeneration interval of a report schedule
     // Shape
     'DT_ZIP_FILE' => array(3, 1072),
     'DT_SHAPE_FILE' => array(3, 1069),
