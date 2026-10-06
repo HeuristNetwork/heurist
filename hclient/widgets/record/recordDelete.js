@@ -414,7 +414,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
 function(){
     that.doAction(true, true);
 },
-{title:'Deleting target records ('+response.data.source_links_count+')',yes:'Delete records',no:'Cancel'});
+{title:'Deleting target records ('+response.data.source_links_count+')',yes:'Delete records',no:'Cancel'}, {default_palette_class: 'ui-heurist-explore'});
     
   let btn = $dlg.parent().find('button:contains("Delete records")');
   let chb = $dlg.find('input[type="checkbox"]').on('change', function(){

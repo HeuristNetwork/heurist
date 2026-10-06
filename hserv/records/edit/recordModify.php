@@ -1105,7 +1105,10 @@ function recordDelete($system, $recids, $need_transaction=true,
             mysql__update_progress(null, $progress_session_id, true, '0,'.$tot_count);
         }
 
+        $allowed_recids = array_unique($allowed_recids);
+
         foreach ($allowed_recids as $recID) {
+
             //$stat = array('deleted'=>array($recID), 'rels_count'=>0, 'bkmk_count'=>0);
             $stat = deleteOneRecord($system, $recID, $rectypes[$recID]);
 
@@ -1113,7 +1116,7 @@ function recordDelete($system, $recids, $need_transaction=true,
                 $msg_error = $stat['error'];
                 break;
             }else{
-                $deleted = array_merge($deleted, $stat['deleted']);
+                $deleted = array_merge_unique($deleted, $stat['deleted']);
                 $rels_count += $stat['rels_count'];
                 $bkmk_count += $stat['bkmk_count'];
                 

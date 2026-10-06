@@ -5068,14 +5068,14 @@ $.widget( "heurist.editing_input", {
                             const isIiifImage = that._isIiifImageFileValue(value, response.data);
 
                             if ((response.data.mimetype && response.data.mimetype.indexOf('image/')===0)
-                                || isMiradorManifest || isIiifImage)
+                                || response.data.has_thumbnail || isMiradorManifest || isIiifImage)
                             {
                                 $image_container.find('.image_input > img')
                                     .attr('src', `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&offer_download=1&thumb=${value.ulf_ObfuscatedFileID}`);
 
                                 that._applyIiifImagePreviewControls(ele, value, response.data);
                                         
-                                if((response.data.width > 0 && response.data.height > 0) || isMiradorManifest || isIiifImage) {
+                                if((response.data.width > 0 && response.data.height > 0) || response.data.has_thumbnail || isMiradorManifest || isIiifImage) {
 
                                     $image_container.find('.smallText').text('Click image to freeze in place').css({
                                         'font-size': 'smaller',
