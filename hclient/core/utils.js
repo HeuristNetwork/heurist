@@ -1354,7 +1354,14 @@ window.hWin.HEURIST4.util = {
 
         let $__checkForCapsLock = (event) => {
 
-            let isCapsLockOn = event.type === 'blur' ? false : event.originalEvent.getModifierState('CapsLock');
+            // was: let isCapsLockOn = event.type === 'blur' ? false : event.originalEvent.getModifierState('CapsLock');
+            // ChatGPT mod: Some click or synthetic events do not provide getModifierState.
+            // Blur always clears the Caps Lock warning.
+            let originalEvent = event.originalEvent || event;
+            let isCapsLockOn = event.type !== 'blur'
+            && typeof originalEvent.getModifierState === 'function'
+            && originalEvent.getModifierState('CapsLock');
+    
             let $input = $(event.target);
 
             if(isCapsLockOn){
