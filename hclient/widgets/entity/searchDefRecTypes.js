@@ -315,7 +315,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
     
         if(!is_search_one_group && this.input_search.val()!=''){
             let s = this.input_search.val();
-            if(window.hWin.HEURIST4.util.isPOsitiveInt(s)){
+            if(window.hWin.HEURIST4.util.isPositiveInt(s)){
                 request['rty_ID'] = s;
                 s = '';
             }else if (s.indexOf('-')>0){
