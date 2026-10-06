@@ -484,6 +484,9 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
             return;
         }
 
+        showAllImagesPrefs.allowed = Array.isArray(showAllImagesPrefs.allowed) ? showAllImagesPrefs.allowed : [];
+        showAllImagesPrefs.blocked = Array.isArray(showAllImagesPrefs.blocked) ? showAllImagesPrefs.blocked : [];
+
         let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'}).getOrder();
         let filteredRecTypes = new Set();
         for(const dtyID of fileFields){

@@ -7930,7 +7930,7 @@ $.widget( "heurist.editing_input", {
                 if(!showAllImagesPrefs.allowed.includes(fieldKey)){
 
                     showAllImagesPrefs.allowed.push(fieldKey);
-                    showAllImagesPrefs.blocked.slice(fieldKeyIndex, 1);
+                    showAllImagesPrefs.blocked.splice(fieldKeyIndex, 1);
 
                     window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
                 }
@@ -7967,7 +7967,7 @@ $.widget( "heurist.editing_input", {
                 const fieldKeyIndex = showAllImagesPrefs.allowed.indexOf(fieldKey);
                 if(showAllImagesPrefs.allowed.includes(fieldKey)){
 
-                    showAllImagesPrefs.allowed.slice(fieldKeyIndex, 1);
+                    showAllImagesPrefs.allowed.splice(fieldKeyIndex, 1);
                     showAllImagesPrefs.blocked.push(fieldKey);
 
                     window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
