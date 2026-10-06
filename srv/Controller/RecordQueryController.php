@@ -34,8 +34,8 @@ use Heurist\Records\Query\QueryExecutor;
 use Heurist\Records\Query\UnsupportedQueryException;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Data\RecordFieldSelector;
+use Heurist\Records\Data\RecordPageAssembler;
 use Heurist\Records\Expansion\ExpansionEngine;
-use Heurist\Records\Expansion\ExpansionRequest;
 
 /** Shared request boundary for public and internal modern record searches. */
 final class RecordQueryController
@@ -219,46 +219,15 @@ final class RecordQueryController
         array $selection,
         array $params
     ): array {
-        $native = array_values(array_filter($selection['details'], static function($field){
-            return $field['traversal'] === null;
-        }));
-        $linked = array_values(array_filter($selection['details'], static function($field){
-            return $field['traversal'] !== null;
-        }));
-        $valueOptions = array(
-            'resolveDetails'=>$request->resolveDetails,
-            // Presentation-only virtual headers are resolved by RecordDataService.
-            'virtuals'=>$selection['virtuals'] ?? array(),
-            // fields=_all - every populated detail value, regardless of type.
-            'allDetails'=>$selection['all'] ?? false
-        );
+        $assembler = new RecordPageAssembler($this->dataService, function(){
+            return $this->expansionEngine ?? new ExpansionEngine($this->executor, $this->service);
+        });
         QueryTrace::begin('details');
-        $records = $this->dataService->loadRecords(
-            $result->ids, $selection['headers'], $native, $valueOptions
-        );
-        $paths = array();
-        $linkedByTraversal = array();
-        foreach($linked as $field){ $linkedByTraversal[$field['traversal']][] = $field; }
-        foreach($linkedByTraversal as $traversal=>$pathFields){
-            $engine = $this->expansionEngine;
-            if($engine === null){
-                $engine = new ExpansionEngine($this->executor, $this->service);
-            }
-            $expansion = $engine->expand(new ExpansionRequest($result->ids, $traversal));
-            $terminalPathId = null;
-            foreach($expansion->getPaths() as $pathId=>$code){
-                if($code === $traversal){ $terminalPathId = (string)$pathId; }
-            }
-            if($terminalPathId === null){ continue; }
-            $publicPathId = (string)(count($paths)+1);
-            $paths[$publicPathId] = $traversal;
-            $occurrences = $expansion->getOccurrences($terminalPathId);
-            foreach($pathFields as $field){
-                $this->dataService->attachLinkedValues(
-                    $records, $field, $occurrences, $publicPathId, $valueOptions
-                );
-            }
-        }
+        $page = $assembler->assemble($result->ids, $selection, array(
+            'resolveDetails'=>$request->resolveDetails
+        ));
+        $records = $page['records'];
+        $paths = $page['paths'];
         QueryTrace::end(count($records));
 
         $meta = array(
@@ -269,7 +238,7 @@ final class RecordQueryController
                     array('rec_ID','rec_RecTypeID','rec_Title'),
                     $selection['headers'], $selection['virtuals'] ?? array()
                 ))),
-                'details'=>$this->dataService->loadFieldMetadata($selection['details'])
+                'details'=>$assembler->fieldMetadata($selection)
             )
         );
         if(!empty($paths)){ $meta['paths'] = $paths; }

@@ -38,6 +38,10 @@ use Heurist\Jobs\JobRunner;
 use Heurist\Jobs\JobStore;
 use Heurist\Publication\PublicationService;
 use Heurist\Records\Map\MapFeatureService;
+use Heurist\Records\Export\ExportJob;
+use Heurist\Records\Export\ExportPlanner;
+use Heurist\Records\Export\ExportService;
+use Heurist\Records\Export\ExportSettings;
 use Heurist\Records\Presentation\QuerySourcePresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
 use Heurist\Records\Presentation\PresentationRecordRepository;
@@ -99,7 +103,9 @@ final class ServiceFactory
             'RT_CUSTOM_REPORT', 'RT_REPORT_SCHEDULE', 'DT_FILE_NAME',
             'DT_IS_CARD_VIEW', 'DT_REPORT', 'DT_INTERVAL_MINUTES',
             // srv Smarty engine (plan 12, Phase 6): relationships, CMS menu descriptions
-            'RT_RELATION', 'RT_CMS_MENU', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE'
+            'RT_RELATION', 'RT_CMS_MENU', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
+            // record export (plan 13): KML time span
+            'DT_DATE'
         );
         $codeIds = array();
         foreach($codeNames as $codeName){
@@ -120,6 +126,7 @@ final class ServiceFactory
             });
         }
         $reportSettings = $system->settings->getDatabaseSetting('Reports');
+        $exportSettings = $system->settings->getDatabaseSetting('Export');
         return new self(
             $database,
             $runtime,
@@ -132,6 +139,7 @@ final class ServiceFactory
                 'generatedUrl' => (string)$system->getSysUrl('generated-reports'),
                 'jobs' => (string)$system->getSysDir('scratch').'jobs/',
                 'settings' => is_array($reportSettings) ? $reportSettings : array(),
+                'exportSettings' => is_array($exportSettings) ? $exportSettings : array(),
                 'javaScriptAllowed' => static function() use ($system): bool {
                     return (bool)$system->settings->isJavaScriptAllowed();
                 },
@@ -377,6 +385,28 @@ final class ServiceFactory
         );
     }
 
+    /**
+     * Background job type of record export (plan 13): export.
+     *
+     * @return array<int,JobHandlerInterface>
+     */
+    public function exportJobHandlers(): array
+    {
+        $planner = new ExportPlanner(
+            $this->database,
+            $this->runtime,
+            new ExportSettings((array)($this->reportEnvironment['exportSettings'] ?? array())),
+            $this->visibleIdsFilter()
+        );
+        $service = new ExportService($this->database, $this->runtime, $planner, array(
+            'date' => $this->codes->id('DT_DATE'),
+            'start' => $this->codes->id('DT_START_DATE'),
+            'end' => $this->codes->id('DT_END_DATE'),
+            'relationType' => $this->codes->id('DT_RELATION_TYPE')
+        ));
+        return array(new ExportJob($service, function(): int { return $this->connectionId(); }));
+    }
+
     /** Template runner of the srv Smarty engine. */
     public function smartyRunner(): SmartyTemplateRunner
     {
@@ -390,21 +420,8 @@ final class ServiceFactory
             $values['templateDir'] = (string)($this->reportEnvironment['templates'] ?? '');
         }
         $database = $this->database;
-        $presentations = $this->presentations;
         $runtime = $this->runtime;
-        $visibleIds = static function(array $ids) use ($database, $presentations): array {
-            $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static function($id){ return $id > 0; })));
-            $visible = array();
-            foreach(array_chunk($ids, 1000) as $chunk){
-                $parameters = $chunk;
-                $sql = 'SELECT rec_ID FROM Records WHERE rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).') AND ';
-                $sql .= $presentations->accessCondition($parameters);
-                foreach($database->fetchColumn($sql, $parameters) as $id){
-                    $visible[intval($id)] = true;
-                }
-            }
-            return array_values(array_filter($ids, static function($id) use ($visible){ return isset($visible[$id]); }));
-        };
+        $visibleIds = $this->visibleIdsFilter();
         $search = static function(string $query) use ($database, $runtime): array {
             $builder = new QueryBuilder($database);
             $decoded = json_decode($query, true);
@@ -428,6 +445,26 @@ final class ServiceFactory
             $codes,
             is_callable($values['constant'] ?? null) ? $values['constant'] : null
         );
+    }
+
+    /** Filter of record ids by the access rules of the current user (order kept). */
+    private function visibleIdsFilter(): callable
+    {
+        $database = $this->database;
+        $presentations = $this->presentations;
+        return static function(array $ids) use ($database, $presentations): array {
+            $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static function($id){ return $id > 0; })));
+            $visible = array();
+            foreach(array_chunk($ids, 1000) as $chunk){
+                $parameters = $chunk;
+                $sql = 'SELECT rec_ID FROM Records WHERE rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).') AND ';
+                $sql .= $presentations->accessCondition($parameters);
+                foreach($database->fetchColumn($sql, $parameters) as $id){
+                    $visible[intval($id)] = true;
+                }
+            }
+            return array_values(array_filter($ids, static function($id) use ($visible){ return isset($visible[$id]); }));
+        };
     }
 
     /** Database connection id of the modern services (KILL QUERY on Stop). */

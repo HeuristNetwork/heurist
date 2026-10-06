@@ -98,148 +98,12 @@ final class MapFeatureService
         ));
 
         $mode = $this->outputMode($params);
-        $simplify = $this->boolean($params['simplify'] ?? false);
-        $state = array(
-            'returnedRecords'=>count($searchResult->ids),
-            'returnedFeatures'=>0,
-            'records'=>array(),
-            'paths'=>array()
-        );
-        $pathIds = array();
-        foreach($selection['linked'] as $field){
-            if(!isset($pathIds[$field['traversal']])){
-                $id = (string)(count($pathIds)+1);
-                $pathIds[$field['traversal']] = $id;
-                $state['paths'][$id] = $field['traversal'];
-            }
-        }
-
-        $features = (function() use (
-            $searchResult, $selection, $mode, $simplify, $pathIds, $extent, &$state
-        ) {
-            foreach(array_chunk($searchResult->ids, self::BATCH_SIZE) as $topIds){
-                $topRecords = $this->data->loadRecords($topIds, array('rec_Title'), array());
-                $topById = array();
-                foreach($topRecords as $record){ $topById[intval($record['rec_ID'])] = $record; }
-                $geometries = array_fill_keys($topIds, array());
-
-                $nativeFields = $selection['native'];
-                if($selection['allNative']){
-                    $nativeFields = array_values(array_unique(array_merge(
-                        $nativeFields,
-                        $this->data->findFieldIdsByType($topIds, 'geo')
-                    )));
-                }
-                $nativeValues = $this->data->loadFieldValues(
-                    $topIds, $nativeFields, array('extent'=>$extent)
-                );
-                foreach($topIds as $topId){
-                    foreach($nativeFields as $fieldId){
-                        $index = 0;
-                        foreach($nativeValues[$topId][$fieldId] ?? array() as $value){
-                            $geometry = $this->geometry($value, $simplify);
-                            if($geometry === null){ continue; }
-                            $index++;
-                            if($mode === 'features'){
-                                $state['returnedFeatures']++;
-                                yield $this->feature(
-                                    (string)$topId.':'.$fieldId.':'.$index,
-                                    $topById[$topId] ?? array('rec_ID'=>(string)$topId),
-                                    $geometry
-                                );
-                            }else{
-                                $geometries[$topId][] = $geometry;
-                            }
-                        }
-                    }
-                }
-
-                $linkedByTraversal = array();
-                foreach($selection['linked'] as $field){
-                    $linkedByTraversal[$field['traversal']][] = $field;
-                }
-                foreach($linkedByTraversal as $traversal=>$fields){
-                    $graph = $this->expansion->expand(new ExpansionRequest(
-                        $topIds,
-                        $this->expansionRules($traversal, $extent),
-                        array('includeHeaders'=>true)
-                    ));
-                    $graphArray = $graph->toArray();
-                    $recordTypes = array();
-                    foreach($graphArray['records'] as $record){
-                        $recordId = intval($record['rec_ID']);
-                        $recordTypes[$recordId] = intval($record['rec_RecTypeID'] ?? 0);
-                        $state['records'][$recordId] = array(
-                            'rec_ID'=>(string)$recordId,
-                            'rec_RecTypeID'=>(string)($record['rec_RecTypeID'] ?? ''),
-                            'rec_Title'=>$record['rec_Title'] ?? null
-                        );
-                    }
-                    $internalPathId = null;
-                    foreach($graph->getPaths() as $id=>$code){
-                        if($code === $traversal){ $internalPathId = (string)$id; }
-                    }
-                    if($internalPathId === null){ continue; }
-                    $occurrences = $graph->getOccurrences($internalPathId);
-                    $owners = array();
-                    foreach($occurrences as $occurrence){
-                        $chain = $occurrence['recordIds'] ?? array();
-                        if(!empty($chain)){ $owners[intval(end($chain))] = intval(end($chain)); }
-                    }
-                    foreach($fields as $field){
-                        $values = $this->data->loadFieldValues(
-                            array_values($owners),
-                            array($field['fieldId']),
-                            array('extent'=>$extent)
-                        );
-                        $occurrenceIndex = 0;
-                        foreach($occurrences as $occurrence){
-                            $topId = intval($occurrence['top'] ?? 0);
-                            $chain = array_values(array_map('intval', $occurrence['recordIds'] ?? array()));
-                            if(empty($chain) || !isset($topById[$topId])){ continue; }
-                            $ownerId = intval(end($chain));
-                            foreach($values[$ownerId][$field['fieldId']] ?? array() as $value){
-                                $geometry = $this->geometry($value, $simplify);
-                                if($geometry === null){ continue; }
-                                $occurrenceIndex++;
-                                if($mode === 'features'){
-                                    $properties = $topById[$topId];
-                                    unset($properties['details']);
-                                    $properties['_geoRecordID'] = (string)$ownerId;
-                                    $properties['_geoRecordTypeID'] = (string)($recordTypes[$ownerId] ?? '');
-                                    $properties['_geoFieldID'] = (string)$field['fieldId'];
-                                    $properties['_path'] = array(
-                                        'id'=>$pathIds[$traversal],
-                                        'recordIDs'=>array_map('strval', $chain)
-                                    );
-                                    $state['returnedFeatures']++;
-                                    yield $this->feature(
-                                        (string)$topId.':'.$pathIds[$traversal].':'.$ownerId
-                                            .':'.$field['fieldId'].':'.$occurrenceIndex,
-                                        $properties,
-                                        $geometry
-                                    );
-                                }else{
-                                    $geometries[$topId][] = $geometry;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if($mode === 'records'){
-                    foreach($topIds as $topId){
-                        if(empty($geometries[$topId])){ continue; }
-                        $state['returnedFeatures']++;
-                        yield $this->feature(
-                            (string)$topId,
-                            $topById[$topId] ?? array('rec_ID'=>(string)$topId),
-                            $this->combine($geometries[$topId])
-                        );
-                    }
-                }
-            }
-        })();
+        $state = array();
+        $features = $this->featuresForIds($searchResult->ids, $selection, array(
+            'mode'=>$mode,
+            'simplify'=>$this->boolean($params['simplify'] ?? false),
+            'extent'=>$extent
+        ), $state);
 
         $meta = function() use ($searchResult, $mode, $extent, &$state): array {
             $result = array(
@@ -261,6 +125,173 @@ final class MapFeatureService
             return $result;
         };
         return new MapFeatureStream($features, $meta);
+    }
+
+    /**
+     * GeoJSON features of the given top records, loaded in batches.
+     *
+     * @param array $ids Top record ids, in output order.
+     * @param array $selection MapFieldSelector::parse() result (native and linked geo fields).
+     * @param array $options mode ("records"|"features"), simplify (bool), extent (array|null),
+     *        properties (callable fn(array $topIds): array<int,array> - extra feature
+     *        properties per record id), onBatch (callable fn(int $done) - after each batch).
+     * @param array $state Filled while iterating: returnedRecords, returnedFeatures,
+     *        records and paths of linked geometry (for the metadata).
+     * @return \Generator<array> Features.
+     */
+    public function featuresForIds(array $ids, array $selection, array $options, array &$state): \Generator
+    {
+        $mode = (string)($options['mode'] ?? 'records');
+        $simplify = !empty($options['simplify']);
+        $extent = $options['extent'] ?? null;
+        $properties = is_callable($options['properties'] ?? null) ? $options['properties'] : null;
+        $onBatch = is_callable($options['onBatch'] ?? null) ? $options['onBatch'] : null;
+        $done = 0;
+        $state = array(
+            'returnedRecords'=>count($ids),
+            'returnedFeatures'=>0,
+            'records'=>array(),
+            'paths'=>array()
+        );
+        $pathIds = array();
+        foreach($selection['linked'] as $field){
+            if(!isset($pathIds[$field['traversal']])){
+                $id = (string)(count($pathIds)+1);
+                $pathIds[$field['traversal']] = $id;
+                $state['paths'][$id] = $field['traversal'];
+            }
+        }
+
+        foreach(array_chunk($ids, self::BATCH_SIZE) as $topIds){
+            $topRecords = $this->data->loadRecords($topIds, array('rec_Title'), array());
+            $extra = $properties !== null ? (array)call_user_func($properties, $topIds) : array();
+            $topById = array();
+            foreach($topRecords as $record){
+                $id = intval($record['rec_ID']);
+                $topById[$id] = isset($extra[$id]) ? array_merge($record, $extra[$id]) : $record;
+            }
+            $geometries = array_fill_keys($topIds, array());
+
+            $nativeFields = $selection['native'];
+            if($selection['allNative']){
+                $nativeFields = array_values(array_unique(array_merge(
+                    $nativeFields,
+                    $this->data->findFieldIdsByType($topIds, 'geo')
+                )));
+            }
+            $nativeValues = $this->data->loadFieldValues(
+                $topIds, $nativeFields, array('extent'=>$extent)
+            );
+            foreach($topIds as $topId){
+                foreach($nativeFields as $fieldId){
+                    $index = 0;
+                    foreach($nativeValues[$topId][$fieldId] ?? array() as $value){
+                        $geometry = $this->geometry($value, $simplify);
+                        if($geometry === null){ continue; }
+                        $index++;
+                        if($mode === 'features'){
+                            $state['returnedFeatures']++;
+                            yield $this->feature(
+                                (string)$topId.':'.$fieldId.':'.$index,
+                                $topById[$topId] ?? array('rec_ID'=>(string)$topId),
+                                $geometry
+                            );
+                        }else{
+                            $geometries[$topId][] = $geometry;
+                        }
+                    }
+                }
+            }
+
+            $linkedByTraversal = array();
+            foreach($selection['linked'] as $field){
+                $linkedByTraversal[$field['traversal']][] = $field;
+            }
+            foreach($linkedByTraversal as $traversal=>$fields){
+                $graph = $this->expansion->expand(new ExpansionRequest(
+                    $topIds,
+                    $this->expansionRules($traversal, $extent),
+                    array('includeHeaders'=>true)
+                ));
+                $graphArray = $graph->toArray();
+                $recordTypes = array();
+                foreach($graphArray['records'] as $record){
+                    $recordId = intval($record['rec_ID']);
+                    $recordTypes[$recordId] = intval($record['rec_RecTypeID'] ?? 0);
+                    $state['records'][$recordId] = array(
+                        'rec_ID'=>(string)$recordId,
+                        'rec_RecTypeID'=>(string)($record['rec_RecTypeID'] ?? ''),
+                        'rec_Title'=>$record['rec_Title'] ?? null
+                    );
+                }
+                $internalPathId = null;
+                foreach($graph->getPaths() as $id=>$code){
+                    if($code === $traversal){ $internalPathId = (string)$id; }
+                }
+                if($internalPathId === null){ continue; }
+                $occurrences = $graph->getOccurrences($internalPathId);
+                $owners = array();
+                foreach($occurrences as $occurrence){
+                    $chain = $occurrence['recordIds'] ?? array();
+                    if(!empty($chain)){ $owners[intval(end($chain))] = intval(end($chain)); }
+                }
+                foreach($fields as $field){
+                    $values = $this->data->loadFieldValues(
+                        array_values($owners),
+                        array($field['fieldId']),
+                        array('extent'=>$extent)
+                    );
+                    $occurrenceIndex = 0;
+                    foreach($occurrences as $occurrence){
+                        $topId = intval($occurrence['top'] ?? 0);
+                        $chain = array_values(array_map('intval', $occurrence['recordIds'] ?? array()));
+                        if(empty($chain) || !isset($topById[$topId])){ continue; }
+                        $ownerId = intval(end($chain));
+                        foreach($values[$ownerId][$field['fieldId']] ?? array() as $value){
+                            $geometry = $this->geometry($value, $simplify);
+                            if($geometry === null){ continue; }
+                            $occurrenceIndex++;
+                            if($mode === 'features'){
+                                $properties = $topById[$topId];
+                                unset($properties['details']);
+                                $properties['_geoRecordID'] = (string)$ownerId;
+                                $properties['_geoRecordTypeID'] = (string)($recordTypes[$ownerId] ?? '');
+                                $properties['_geoFieldID'] = (string)$field['fieldId'];
+                                $properties['_path'] = array(
+                                    'id'=>$pathIds[$traversal],
+                                    'recordIDs'=>array_map('strval', $chain)
+                                );
+                                $state['returnedFeatures']++;
+                                yield $this->feature(
+                                    (string)$topId.':'.$pathIds[$traversal].':'.$ownerId
+                                        .':'.$field['fieldId'].':'.$occurrenceIndex,
+                                    $properties,
+                                    $geometry
+                                );
+                            }else{
+                                $geometries[$topId][] = $geometry;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if($mode === 'records'){
+                foreach($topIds as $topId){
+                    if(empty($geometries[$topId])){ continue; }
+                    $state['returnedFeatures']++;
+                    yield $this->feature(
+                        (string)$topId,
+                        $topById[$topId] ?? array('rec_ID'=>(string)$topId),
+                        $this->combine($geometries[$topId])
+                    );
+                }
+            }
+            if($onBatch !== null){
+                $done += count($topIds);
+                call_user_func($onBatch, $done);
+            }
+        }
     }
 
     private function validateGeoFields(array $fields): void

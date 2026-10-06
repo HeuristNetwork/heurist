@@ -114,6 +114,12 @@ final class JobContext
         $this->store->writeResult($this->id(), $content);
     }
 
+    /** Folder for result files of this job (e.g. an export file), created on demand. */
+    public function resultDirectory(): string
+    {
+        return $this->store->resultDirectory($this->id());
+    }
+
     /** Write the current state with a fresh heartbeat. */
     private function write(): void
     {

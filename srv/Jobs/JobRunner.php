@@ -214,6 +214,29 @@ final class JobRunner
         return $job['status'] === 'done' ? $this->store->readResult($id) : null;
     }
 
+    /**
+     * Result file of a finished job: only its owner may download it (managers
+     * see the job, not the exported data).
+     *
+     * @return array{path:string,name:string,mime:string}|null Null when the job has no result file.
+     */
+    public function resultFile(string $id): ?array
+    {
+        $job = $this->accessibleJob($id);
+        $name = (string)($job['result']['file'] ?? '');
+        if($job['status'] !== 'done' || empty($job['result']['download']) || $name === ''){
+            return null;
+        }
+        if(intval($job['userId']) !== $this->runtime->userId){
+            throw new DomainException('Only the user who started the job can download its file');
+        }
+        $path = $this->store->resultFilePath($id, $name);
+        if($path === null){
+            throw new OutOfBoundsException('The result file no longer exists');
+        }
+        return array('path' => $path, 'name' => $name, 'mime' => (string)($job['result']['mime'] ?? 'application/octet-stream'));
+    }
+
     private function accessibleJob(string $id): array
     {
         $this->requireMember();

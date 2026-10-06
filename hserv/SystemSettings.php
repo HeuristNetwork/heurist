@@ -70,7 +70,9 @@ class SystemSettings {
         // added 18/9/26 for master-satellite synchronisation
         'Synchronisation' => 'synchronisation.json',
         // added 4/10/26 for Smarty reports (allowDynamicReports)
-        'Reports' => 'reports.json'
+        'Reports' => 'reports.json',
+        // added 6/10/26 for record export (maxRecords, timeLimit)
+        'Export' => 'export.json'
     ];
 
     /**

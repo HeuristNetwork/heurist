@@ -53,6 +53,8 @@ tags:
   description: Retrieve public MapDocument and MapLayer definitions, Heurist record/query GeoJSON, and file-backed map datasource content
 - name: Timeline
   description: Retrieve public temporal data for Heurist record queries
+- name: Jobs
+  description: Background jobs of logged-in users - record export into a file, Smarty report preview and generation
 paths:
   /databases:
     get:
@@ -2112,6 +2114,202 @@ paths:
           description: Query uses an unsupported feature.
         '500':
           $ref: '#/components/responses/ServerError'
+  /{database}/jobs:
+    get:
+      tags:
+      - Jobs
+      operationId: listJobs
+      summary: List background jobs
+      description: >-
+        Jobs of the current user, newest first. The database owner and administrators may ask for every job with
+        all=1. Logged-in users only. Job files are kept for 7 days.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: all
+        in: query
+        description: Every job of the database (owner and administrators only).
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+      - Jobs
+      operationId: startJob
+      summary: Start a background job
+      description: >-
+        Validates the parameters, creates the job and answers 202 with the queued job; the connection is closed and
+        the same server process runs the job. Poll GET /jobs/{jobId} for progress. Job types: export (record export
+        into a file, parameters ExportJobParams), report-preview and report-generate (Smarty reports). One active
+        job of the same type per user (a second start is refused with 403; a report-preview replaces the older one)
+        and at most maxJobs active jobs per database. Record export has no streaming endpoint by design: a job has
+        limits, Stop, progress and a result file that only its owner can download.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - type
+              - params
+              properties:
+                type:
+                  type: string
+                  enum:
+                  - export
+                  - report-preview
+                  - report-generate
+                params:
+                  oneOf:
+                  - $ref: '#/components/schemas/ExportJobParams'
+                  - type: object
+                    description: Parameters of the report job types.
+            example:
+              type: export
+              params:
+                format: csv
+                scope:
+                  query: t:10
+                columns:
+                  '10':
+                  - '1'
+                  - field: '20'
+                    ext: code
+                values:
+                  date: start
+                limit: 1000
+                fileName: Persons
+      responses:
+        '202':
+          description: The queued job (it runs after the response)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/Job'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: >-
+            A job of this type is already running for the user, too many jobs run in the database, or the export
+            has more records than the database maximum (setting Export maxRecords).
+  /{database}/jobs/{jobId}:
+    get:
+      tags:
+      - Jobs
+      operationId: getJob
+      summary: State and progress of a job
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: The job
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/Job'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /{database}/jobs/{jobId}/cancel:
+    post:
+      tags:
+      - Jobs
+      operationId: cancelJob
+      summary: Stop a job
+      description: Asks the job to stop at its next check and stops its current SQL statement (KILL QUERY).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: The job with cancelRequested
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/Job'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /{database}/jobs/{jobId}/result:
+    get:
+      tags:
+      - Jobs
+      operationId: getJobResult
+      summary: Result of a finished job
+      description: >-
+        For an export the result file is sent as an attachment (Content-Disposition), only to the user who started
+        the job. For a report preview the result is HTML.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: The result file or content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            text/html:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: The file belongs to another user.
+        '404':
+          $ref: '#/components/responses/NotFound'
 components:
   securitySchemes:
     bearerAuth:
@@ -2120,6 +2318,14 @@ components:
       bearerFormat: JWT
       description: JWT supplied in the Authorization header. Existing Heurist browser sessions may also be recognised.
   parameters:
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      description: Job id (32 hexadecimal characters).
+      schema:
+        type: string
+        pattern: ^[a-f0-9]{32}$
     Database:
       name: database
       in: path
@@ -2212,6 +2418,189 @@ components:
       schema:
         type: string
   schemas:
+    Job:
+      type: object
+      description: State of a background job.
+      properties:
+        id:
+          type: string
+          example: 3f2a9c0d4b1e4c7a9e5d2b6c8a1f0e3d
+        type:
+          type: string
+          example: export
+        userId:
+          type: integer
+        title:
+          type: string
+          example: 'Export CSV: Persons'
+        status:
+          type: string
+          enum:
+          - queued
+          - running
+          - done
+          - failed
+          - cancelled
+          - timeout
+          - lost
+        progress:
+          type: object
+          properties:
+            done:
+              type: integer
+            total:
+              type: integer
+              description: 0 when unknown.
+            message:
+              type: string
+              example: writing records
+        params:
+          type: object
+        limitSeconds:
+          type: integer
+        createdAt:
+          type: integer
+        startedAt:
+          type: integer
+          nullable: true
+        finishedAt:
+          type: integer
+          nullable: true
+        elapsedSeconds:
+          type: integer
+        cancelRequested:
+          type: boolean
+        result:
+          type: object
+          nullable: true
+          description: >-
+            Export - file, size, records, format, rectypes (records per record type), mime and download (true -
+            GET /jobs/{jobId}/result sends the file).
+        error:
+          type: string
+          nullable: true
+    ExportJobParams:
+      type: object
+      description: >-
+        Parameters of the job type "export". Every record is written once, the result first, then the records the
+        expansion rules reach. Column field codes are the codes of the /records fields parameter.
+      required:
+      - format
+      - scope
+      properties:
+        format:
+          type: string
+          enum:
+          - csv
+          - tsv
+          - json
+          - geojson
+          - kml
+          - xml
+          - gephi
+          description: >-
+            csv/tsv - one table per record type (a zip for several), first column H-ID; json - the /records
+            envelope (fields=_all, resolveDetails) with concept codes; geojson - one feature per record with
+            geometry; kml - one Placemark per geo value; xml - flat HML that the HML import reads; gephi - GEXF 1.2.
+        scope:
+          type: object
+          properties:
+            query:
+              description: Query of the data source (text or JSON query array).
+            ids:
+              type: array
+              items:
+                type: integer
+              description: Selected records (instead of the whole result).
+            rectypes:
+              type: array
+              items:
+                type: integer
+              description: Only these record types of the result.
+        rules:
+          description: Expansion rules (DataSource rules or a compact path). Omit for the result only.
+        columns:
+          type: object
+          description: >-
+            Output fields per record type id; "*" for every record type without its own list. Required for
+            csv/tsv; properties for geojson/kml, node attributes for gephi; json and xml export all fields.
+          additionalProperties:
+            type: array
+            items:
+              oneOf:
+              - type: string
+                example: '10:lf134:12:1'
+              - type: object
+                properties:
+                  field:
+                    type: string
+                  ext:
+                    type: string
+                    enum:
+                    - term
+                    - code
+                    - conceptid
+                    - desc
+                    - internalid
+        values:
+          type: object
+          properties:
+            date:
+              type: string
+              enum:
+              - asis
+              - start
+              - range
+            file:
+              type: string
+              enum:
+              - url
+              - id
+              - details
+            pointer:
+              type: string
+              enum:
+              - id
+              - title
+            enum:
+              type: string
+              enum:
+              - term
+              - code
+              - conceptid
+              - desc
+              - internalid
+        csv:
+          type: object
+          properties:
+            sep:
+              type: string
+              description: One character, or "tab".
+              example: ','
+            quote:
+              type: string
+              description: One character, or "none".
+              example: '"'
+            mvsep:
+              type: string
+              description: Separator of repeated values.
+              example: '|'
+            header:
+              type: boolean
+            eol:
+              type: string
+              enum:
+              - nix
+              - win
+        limit:
+          type: integer
+          description: Records of the result (0 = all, up to the database setting Export maxRecords).
+        fileName:
+          type: string
+          description: Download name without extension (A-Za-z0-9 space - _ ( )).
+        title:
+          type: string
+          description: Caption of the job (data source title).
     Error:
       type: object
       required:

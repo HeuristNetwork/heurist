@@ -7,6 +7,7 @@
 *   <id>.cancel  Stop request (a separate file, so the running job never races
 *                with the cancel request over the state file)
 *   <id>.result  optional result content (e.g. preview HTML)
+*   <id>/        optional folder of result files (e.g. an export file)
 *
 * A queued/running job whose heartbeat is older than LOST_SECONDS is reported as
 * "lost" (the PHP process ended without finishing it). Files older than
@@ -152,6 +153,33 @@ final class JobStore
     }
 
     /**
+     * Folder of the job's result files (created on demand).
+     *
+     * @return string Absolute path with a trailing slash.
+     */
+    public function resultDirectory(string $id): string
+    {
+        $folder = substr($this->path($id, 'json'), 0, -5).'/';
+        if(!is_dir($folder) && !@mkdir($folder, 0775, true) && !is_dir($folder)){
+            throw new RuntimeException('Cannot create the job result folder');
+        }
+        return $folder;
+    }
+
+    /**
+     * Path of a result file in the job's folder, or null when it does not exist.
+     *
+     * @param string $id Job id.
+     * @param string $file File name (no folders).
+     */
+    public function resultFilePath(string $id, string $file): ?string
+    {
+        if($file === '' || $file !== basename($file) || $file[0] === '.'){ return null; }
+        $path = substr($this->path($id, 'json'), 0, -5).'/'.$file;
+        return is_file($path) ? $path : null;
+    }
+
+    /**
      * Jobs, newest first.
      *
      * @param int|null $userId Only the jobs of this user; null for all.
@@ -215,6 +243,12 @@ final class JobStore
         foreach(glob($this->directory.'*') ?: array() as $file){
             if(basename($file) !== 'index.html' && is_file($file) && filemtime($file) < $limit && @unlink($file)){
                 $removed++;
+            }elseif(is_dir($file) && self::isValidId(basename($file)) && filemtime($file) < $limit){
+                // result files of an old job (e.g. export)
+                foreach(glob($file.'/*') ?: array() as $inner){
+                    if(is_file($inner)){ @unlink($inner); }
+                }
+                if(@rmdir($file)){ $removed++; }
             }
         }
         return $removed;

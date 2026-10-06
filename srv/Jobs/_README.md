@@ -12,7 +12,9 @@ queued job, closes the HTTP connection and runs the job in the same PHP process
 the job with `POST /jobs/{id}/cancel`.
 
 State is kept in JSON files, `<filestore>/<db>/scratch/jobs/<id>.json`; Stop is a
-separate `<id>.cancel` file; result content (e.g. preview HTML) is `<id>.result`.
+separate `<id>.cancel` file; result content (e.g. preview HTML) is `<id>.result`;
+result files (e.g. an export) are in the folder `<id>/` and are downloaded by
+`GET /jobs/{id}/result` only by the user who started the job (`JobRunner::resultFile`).
 Files older than 7 days are removed. A job without a heartbeat for 90 s is "lost".
 
 Statuses: `queued`, `running`, `done`, `failed`, `cancelled`, `timeout`, `lost`.
@@ -25,7 +27,9 @@ has a time limit; Stop also runs `KILL QUERY` on the connections a job registere
 
 Job types are supplied by the caller (`hserv/controller/api.php`):
 `report-preview` and `report-generate` (`Reports/Jobs/ReportPreviewJob.php`,
-`ReportGenerateJob.php`, built by `Runtime\ServiceFactory::reportJobHandlers()`).
+`ReportGenerateJob.php`, built by `Runtime\ServiceFactory::reportJobHandlers()`) and
+`export` (`Records/Export/ExportJob.php`, `ServiceFactory::exportJobHandlers()`, plan 13).
+The endpoints are in `documentation/api/heurist-openapi.yaml` (tag Jobs).
 
 ## Key files
 

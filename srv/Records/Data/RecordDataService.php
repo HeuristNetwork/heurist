@@ -30,6 +30,8 @@ final class RecordDataService
     /** @var QueryExecutor */
     private $executor;
     private RuntimeContext $runtime;
+    /** @var int|null Registered id of this database (concept codes), read once. */
+    private ?int $registeredId = null;
 
     /** Initialise batched record retrieval with the shared database adapter. */
     public function __construct(
@@ -202,7 +204,7 @@ final class RecordDataService
         $ids = array_values(array_unique(array_map(static function($field){
             return intval($field['fieldId']);
         }, $fields)));
-        $sql = 'SELECT dty_ID,dty_Name,dty_Type,dty_OriginatingDBID FROM defDetailTypes WHERE dty_ID IN ('
+        $sql = 'SELECT dty_ID,dty_Name,dty_Type,dty_OriginatingDBID,dty_IDInOriginatingDB FROM defDetailTypes WHERE dty_ID IN ('
             .implode(',', array_fill(0, count($ids), '?')).')';
         $definitions = array();
         foreach($this->executor->executeRows($sql, str_repeat('i', count($ids)), $ids) as $row){
@@ -210,7 +212,7 @@ final class RecordDataService
                 'dty_ID'=>(string)$row[0],
                 'dty_Name'=>$row[1],
                 'dty_Type'=>$row[2],
-                'dty_ConceptCode'=>(string)$row[3].'-'.(string)$row[0]
+                'dty_ConceptCode'=>$this->conceptCode($row[3], $row[4], intval($row[0]))
             );
         }
         $result = array();
@@ -251,7 +253,8 @@ final class RecordDataService
                 .'f.ulf_ID,CONCAT(f.ulf_FilePath,f.ulf_FileName),f.ulf_ExternalFileReference,'
                 .'fxm.fxm_MimeType,f.ulf_PreferredSource,f.ulf_OrigFileName,f.ulf_FileSizeKB,'
                 .'f.ulf_ObfuscatedFileID,f.ulf_Description,f.ulf_Added,f.ulf_MimeExt,'
-                .'f.ulf_Caption,f.ulf_Copyright,f.ulf_Copyowner,f.ulf_Parameters,f.ulf_WhoCanView '
+                .'f.ulf_Caption,f.ulf_Copyright,f.ulf_Copyowner,f.ulf_Parameters,f.ulf_WhoCanView,'
+                .'trm.trm_IDInOriginatingDB '
                 .'FROM recDetails d JOIN defDetailTypes t ON t.dty_ID=d.dtl_DetailTypeID '
                 .'LEFT JOIN Records rr ON t.dty_Type="resource" AND rr.rec_ID=d.dtl_Value '
                 .'LEFT JOIN defTerms trm ON t.dty_Type IN ("enum","relationtype") AND trm.trm_ID=d.dtl_Value '
@@ -363,7 +366,7 @@ final class RecordDataService
                 'trm_ID'=>(string)$raw,
                 'trm_Label'=>$row[11],
                 'trm_Code'=>$row[12],
-                'trm_ConceptCode'=>$row[13] === null ? null : (string)$row[13]
+                'trm_ConceptCode'=>$row[11] === null ? null : $this->conceptCode($row[13], $row[30], intval($raw))
             );
         }
         if($type === 'file'){
@@ -397,6 +400,25 @@ final class RecordDataService
         }
         if($type === 'separator' || $type === 'relmarker'){ return null; }
         return $raw;
+    }
+
+    /**
+     * Concept code "<db>-<id>": the originating database and id, or this database's
+     * registered id (0 when not registered) and the local id. Same rule as the
+     * definitions snapshot (DefinitionSnapshotService::conceptCode).
+     */
+    private function conceptCode($originDb, $originId, int $localId): string
+    {
+        if($this->registeredId === null){
+            $rows = $this->executor->executeRows('SELECT sys_dbRegisteredID FROM sysIdentification LIMIT 1', '', array());
+            $this->registeredId = isset($rows[0][0]) ? intval($rows[0][0]) : 0;
+        }
+        $originDb = intval($originDb);
+        $originId = intval($originId);
+        if($originDb > 0 && $originId > 0 && $originDb !== $this->registeredId){
+            return $originDb.'-'.$originId;
+        }
+        return max(0, $this->registeredId).'-'.$localId;
     }
 
     private function ids(array $ids): array
