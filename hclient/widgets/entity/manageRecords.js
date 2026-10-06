@@ -8101,8 +8101,23 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'});
         let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+
         showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
-        showAllImagesPrefs.blocked = !Array.isArray(showAllImagesPrefs.blocked) ? [] : showAllImagesPrefs.blocked;
+        
+        // was: showAllImagesPrefs.blocked = !Array.isArray(showAllImagesPrefs.blocked) ? [] : showAllImagesPrefs.blocked;
+        // ChatGPT fix7/10/26: Older or invalid preferences may lack either list.
+        // Initialise both before using includes() or push().
+        if (!showAllImagesPrefs
+                || typeof showAllImagesPrefs !== 'object'
+                || Array.isArray(showAllImagesPrefs)) {
+            showAllImagesPrefs = {};
+        }
+        showAllImagesPrefs.allowed = Array.isArray(showAllImagesPrefs.allowed)
+            ? showAllImagesPrefs.allowed : [];
+        showAllImagesPrefs.blocked = Array.isArray(showAllImagesPrefs.blocked)
+            ? showAllImagesPrefs.blocked : [];
+        // end ChatGPT fix 7/10/26
+        
         let prefUpdated = false;
 
         for(const fileDtyID of fileFields.getOrder()){
