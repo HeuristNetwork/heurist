@@ -132,6 +132,9 @@ final class ServiceFactory
                 'generatedUrl' => (string)$system->getSysUrl('generated-reports'),
                 'jobs' => (string)$system->getSysDir('scratch').'jobs/',
                 'settings' => is_array($reportSettings) ? $reportSettings : array(),
+                'javaScriptAllowed' => static function() use ($system): bool {
+                    return (bool)$system->settings->isJavaScriptAllowed();
+                },
                 // values of the srv Smarty engine, read only when a report runs
                 'engine' => static function() use ($system): array {
                     return self::legacyEngineEnvironment($system);
@@ -442,7 +445,8 @@ final class ServiceFactory
             $renderer,
             $writer,
             (string)($this->reportEnvironment['generated'] ?? ''),
-            (string)($this->reportEnvironment['generatedUrl'] ?? '')
+            (string)($this->reportEnvironment['generatedUrl'] ?? ''),
+            $this->reportEnvironment['javaScriptAllowed'] ?? false
         );
     }
 

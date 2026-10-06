@@ -18,7 +18,10 @@ the srv one (`Smarty/`, plan 12 Phase 6). The new API always uses the srv engine
 and `runReportSchedules.php`); the legacy renderer only converts templates on
 import/export.
 
-HTTP routes: see `Controller/ReportController.php`.
+HTTP routes: see `Controller/ReportController.php`. The list (`GET /reports`)
+gives logged-in users `settings`: `javaScriptAllowed` (the database is in
+`js_in_database_authorised.txt`; otherwise scripts and style blocks are removed
+from report output) and `testRecordLimit`.
 
 ## Key files
 

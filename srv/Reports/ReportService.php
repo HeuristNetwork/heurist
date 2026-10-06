@@ -34,6 +34,8 @@ final class ReportService
     private ReportRecordWriterInterface $writer;
     private string $generatedDirectory;
     private string $generatedUrl;
+    /** @var callable|bool Database may run JavaScript in reports (or a callable that tells it). */
+    private $javaScriptAllowed;
 
     /** Initialise the service from explicit dependencies. */
     public function __construct(
@@ -43,8 +45,10 @@ final class ReportService
         ReportRendererInterface $renderer,
         ReportRecordWriterInterface $writer,
         string $generatedDirectory = '',
-        string $generatedUrl = ''
+        string $generatedUrl = '',
+        $javaScriptAllowed = false
     ) {
+        $this->javaScriptAllowed = $javaScriptAllowed;
         $this->reports = $reports;
         $this->templates = $templates;
         $this->policy = $policy;
@@ -83,8 +87,22 @@ final class ReportService
             $result['missingDefinitions'] = $this->reports->missingDefinitions();
             $result['canSetup'] = $this->policy->isManager();
             $result['allowDynamicReports'] = $this->policy->allowDynamicReports();
+            // what the client needs to know about the report output
+            $result['settings'] = array(
+                'javaScriptAllowed' => $this->javaScriptAllowed(),
+                'testRecordLimit' => ReportPolicy::TEST_RECORD_LIMIT
+            );
         }
         return $result;
+    }
+
+    /** Whether the database may run JavaScript and CSS blocks in reports (js_in_database_authorised.txt). */
+    private function javaScriptAllowed(): bool
+    {
+        if(is_callable($this->javaScriptAllowed)){
+            $this->javaScriptAllowed = (bool)call_user_func($this->javaScriptAllowed);
+        }
+        return (bool)$this->javaScriptAllowed;
     }
 
     /** One report record (by id) or unregistered file (by name). */
