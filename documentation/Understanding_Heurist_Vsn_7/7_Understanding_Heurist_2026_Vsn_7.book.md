@@ -472,17 +472,19 @@ Documentation rédigée le 07/11/2025 par Barbara Bonazzi, mise à jour le 03/03
 
 The following is a typical workflow for a new user managing their own database:
 
-![e3f41fe1-783f-4b0d-a5f6-48e85babf8e9.png](https://heurist-doc.huma-num.fr/uploads/e3f41fe1-783f-4b0d-a5f6-48e85babf8e9.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/2lcimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/2lcimage.png)
 
 ### 1.1 Register as a user
 
 Register via [Heurist website](https://heurist.huma-num.fr/heurist/startup).
 
-![bb686d16-d643-4d73-9894-77303d03b754.png](https://heurist-doc.huma-num.fr/uploads/bb686d16-d643-4d73-9894-77303d03b754.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/kzIimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/kzIimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/WY3image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/WY3image.png)
 
 New users should click on the **Register** button and fill in the registration form:
 
-![1190bca6-70e3-48ed-8c86-d6cfb560f8e7.png](https://heurist-doc.huma-num.fr/uploads/1190bca6-70e3-48ed-8c86-d6cfb560f8e7.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/QEGimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/QEGimage.png)
 
 **Note 1**: Server administrators may require registration to be approved by them, in which case they receive an email requiring them to approve your registration and there may be a delay. Otherwise it is immediate.
 
@@ -498,15 +500,25 @@ Please see the video tutorial: [https://www.youtube.com/watch?v=-lRjmkpQh4g](htt
 
 Once you have filled in the registration form above you will be offered the opportunity to create a new database using the login information entered in the registration form.
 
-![9f678fb4-c5ff-4128-bae0-e85d0f354516.png](https://heurist-doc.huma-num.fr/uploads/9f678fb4-c5ff-4128-bae0-e85d0f354516.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/BZ9image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/BZ9image.png)
 
-The prefix (editable) identifies the owner but may be changed. We recommend retaining this prefix and using it for all your databases, so they appear together in the list of databases. Please keep database names concise and informative about the contents. Spaces, apostrophes and other special characters are not permitted in the database name. For spaces use underscores ( \_ ). Database names are case sensitive. ‘Lit\_study’ and ‘lit\_study’ are different databases. When you click on “Create Database”, you will become the owner of this database (user # 2) and the administrator of the Database Owners group (Group # 1), with all rights on the database and content.
+By default all new databases have the predefined record types, fields and vocabularies, and their connections and organisation into groups, which are defined in the Heurist\_Core\_Definitions database. Below this are displayed additional curated database structures (which also appear at the top of Design &gt; Browse templates). These will contain the same core definitions but then additional structures appropriate to a particular target domain.
+
+<p class="callout info">If the Heurist Reference Index is unavailable, the core definitions will be loaded from a file in the Heurist code.</p>
+
+<p class="callout warning">Note: The alternative database templates capability was added in September 2026 and has not yet been populated with template databases other than the small museums template created in the early 20-teens.</p>
+
+The prefix (editable) identifies the owner but may be changed. We recommend retaining this prefix and using it for all your databases, so they appear together in the list of databases. Please keep database names concise and informative about the contents.
+
+Spaces, apostrophes and other special characters are not permitted in the database name. For spaces use underscores ( \_ ). Database names are case sensitive. ‘Lit\_study’ and ‘lit\_study’ are different databases.
+
+<p class="callout info">When you click on “Create Database”, you will become the owner of this database (user # 2) and the administrator of the Database Owners group (Group # 1), with all rights on the database and content.</p>
 
 #### 1.2.3 From within a Heurist database
 
 If you already have a Heurist database, you can create a new database with **Admin &gt; New**.
 
-![3003081f-f20d-415e-8531-a9cbcc62b20d.png](https://heurist-doc.huma-num.fr/uploads/3003081f-f20d-415e-8531-a9cbcc62b20d.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/Zxsimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/Zxsimage.png)
 
 For the naming conventions, see above.
 
@@ -514,13 +526,13 @@ When you click “Create Database”, you will be the owner of the new database 
 
 #### 1.2.4 Enter the database
 
-![cb54eea2-c739-4f38-9ed0-724cf9dcc938.png](https://heurist-doc.huma-num.fr/uploads/cb54eea2-c739-4f38-9ed0-724cf9dcc938.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/IAcimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/IAcimage.png)
 
 Click on **Get Started** to open the new database and login with the user name / password you entered .
 
-Some databases may show additional fuctions such as institutional logins and the ability to request a login (which can be set in Admin &gt; Properties).
+Some databases may show additional functions such as institutional logins and the ability to request a login (which can be set in Admin &gt; Properties).
 
-![bf3d4705-677f-4240-87c2-726101356721.png](https://heurist-doc.huma-num.fr/uploads/bf3d4705-677f-4240-87c2-726101356721.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/U1Qimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/U1Qimage.png)
 
 We suggest bookmarking the database so you can open it again easily (otherwise you need to search for it on the server through [https://heuristref.net](https://heuristref.net) or [https://heurist.huma-num.fr](https://heurist.huma-num.fr)).
 
@@ -555,7 +567,7 @@ The elements defined include:
 
 To see the existing structures, click on the **Design** menu (purple), then **Record types** and select, eg., the second group **People and Organisations** (the first group is an empty group as a convenience to hold the types you plan to use most often).
 
-![07b78780-cd98-4398-9f48-244e8d54d416.png](https://heurist-doc.huma-num.fr/uploads/07b78780-cd98-4398-9f48-244e8d54d416.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/iYHimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/iYHimage.png)
 
 <p class="callout info">**DON'T PANIC!** Some people panic because their database is already full of things they (think they) don't want. To simplify the database you may drag the things you don't want into the **Trash** (they will still be there if you later decide you need them, and they have little or no effect on the performance of the system).</p>
 
@@ -569,19 +581,19 @@ Note however that there is no automatic update of database structure between sep
 
 The principal features of Heurist are accessed through a standard menu/sub-menu layout on the left, and one or two panels on the right in which the menu functions are performed. Each of the menu entries on the left opens a sub-menu of functions. We will explore these in the order **Admin** – **Design** – **Populate** – **Explore** – **Publish** as this represents a logical workflow (even though most users will go to and from between them).
 
- ![f0ea07ae-4d15-403a-9a3c-596604e5e86e.png](https://heurist-doc.huma-num.fr/uploads/f0ea07ae-4d15-403a-9a3c-596604e5e86e.png) ![848a3b51-6828-4658-9dac-4a28350417a3.png](https://heurist-doc.huma-num.fr/uploads/848a3b51-6828-4658-9dac-4a28350417a3.png)
+ ![f0ea07ae-4d15-403a-9a3c-596604e5e86e.png](https://heurist-doc.huma-num.fr/uploads/f0ea07ae-4d15-403a-9a3c-596604e5e86e.png) [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/z0iimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/z0iimage.png)
 
 ### 3.1 Design
 
 Use this to manage your database, including access to Standard Administration tools (depending on your access privileges), such as creating databases, managing users and groups, etc. @todo link to documentation for **Design.**
 
- ![bf6d9716-514b-4379-befb-ed035b1026cd.png](https://heurist-doc.huma-num.fr/uploads/bf6d9716-514b-4379-befb-ed035b1026cd.png)
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/zHoimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/zHoimage.png)![bf6d9716-514b-4379-befb-ed035b1026cd.png](https://heurist-doc.huma-num.fr/uploads/bf6d9716-514b-4379-befb-ed035b1026cd.png)
 
 ### 3.2 Explore
 
 The **Explore** menu is in many ways the most important and most complex, since it is the one which comprises all the ways by which you can browse, search and use the data you have collected.
 
-![1a819ed2-4b07-4dfc-adb9-2ab1dee68e98.png](https://heurist-doc.huma-num.fr/uploads/1a819ed2-4b07-4dfc-adb9-2ab1dee68e98.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/IWPimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/IWPimage.png)
 
 Explore: Use these tools to create queries, filters, and faceted searches, to gain the most out of your data.
 
@@ -591,19 +603,19 @@ Explore: Use these tools to create queries, filters, and faceted searches, to ga
 
 Use these to import data from various formats and export data to various formats. @todo link to documentation for **Populate**
 
- ![d070066d-11b8-4eb7-8550-60e8997550f6.png](https://heurist-doc.huma-num.fr/uploads/d070066d-11b8-4eb7-8550-60e8997550f6.png)
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/JGqimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/JGqimage.png)![d070066d-11b8-4eb7-8550-60e8997550f6.png](https://heurist-doc.huma-num.fr/uploads/d070066d-11b8-4eb7-8550-60e8997550f6.png)
 
 ### 3.4 Publish
 
 This allows you to publish your data in a variety of formats, including a fully interactive website, as well as a variety of raw data formats such as CSV, JSon, KML, and GEPHI. @todo link to documentation for **Publish**
 
- ![2be4c37a-2437-4b99-96f7-22d10f42333c.png](https://heurist-doc.huma-num.fr/uploads/2be4c37a-2437-4b99-96f7-22d10f42333c.png)
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/1TOimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/1TOimage.png)![2be4c37a-2437-4b99-96f7-22d10f42333c.png](https://heurist-doc.huma-num.fr/uploads/2be4c37a-2437-4b99-96f7-22d10f42333c.png)
 
 ### 3.5 Admin
 
 The **Admin** &gt; **Database** menu offers a first set of advanced functionalities and allows you to:
 
-![7cb866d0-9c01-41e3-a1bb-707f7fd48c7e.png](https://heurist-doc.huma-num.fr/uploads/7cb866d0-9c01-41e3-a1bb-707f7fd48c7e.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/dGzimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/dGzimage.png)![7cb866d0-9c01-41e3-a1bb-707f7fd48c7e.png](https://heurist-doc.huma-num.fr/uploads/7cb866d0-9c01-41e3-a1bb-707f7fd48c7e.png)
 
 - Open another database
 - Create a new database, as explained above.
@@ -640,10 +652,9 @@ Database structure can only be modified by administrators in the Database Manage
 - Clone, clear and delete the database.
 - Run all database administration utilities.
 - Carry out any tasks that the Administrators of individual groups can do (whether or not they are a member of that group).
-- For example:Add, edit and view records specific to any group.
-    
-    Allocate users to any group (as Administrators or members).
-    
+- For example:  
+    Add, edit and view records specific to any group.  
+    Allocate users to any group (as Administrators or members).  
     Change record Ownership to any workgroup.  
     Register the database (only available to the database owner, user #2)
 - **Member**
@@ -708,9 +719,7 @@ Any records you want others to see can be made Viewable. They will not be editab
 
 The default access of all new records can be set in the Database properties : Menu **Design &gt; Properties**, section **Behaviour**.
 
-![e51fddf3-8beb-46f2-b3c1-322e89fee8e7.png](https://heurist-doc.huma-num.fr/uploads/e51fddf3-8beb-46f2-b3c1-322e89fee8e7.png)
-
-![679b510b-016c-4edf-a625-00bc384a1712.png](https://heurist-doc.huma-num.fr/uploads/679b510b-016c-4edf-a625-00bc384a1712.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/OzJimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/OzJimage.png)
 
 ## 5. Useful Functions
 
@@ -727,13 +736,21 @@ you may wish to skip this section and return to it later</p>
 
 **Explore &gt; Overview** takes you to a summary of your database. This is also shown when you first open the database. The buttons and the list of the commonest entities on this page are clickable.
 
-![b08d1691-acf5-4eee-88c5-096a745f698a.png](https://heurist-doc.huma-num.fr/uploads/b08d1691-acf5-4eee-88c5-096a745f698a.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/Pefimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/Pefimage.png)
 
 **Design &gt; Properties** (or the EDIT METADATA button above) takes you to the **Database Properties** form.
 
-**Basic description** The basic information section describes the database, owner and access right
+@todo: document all of these
 
-![c1f54ea5-1664-43c3-80be-8cbdcc6f3be1.png](https://heurist-doc.huma-num.fr/uploads/c1f54ea5-1664-43c3-80be-8cbdcc6f3be1.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/R5Qimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/R5Qimage.png)
+
+part 2
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/hMsimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/hMsimage.png)
+
+**Basic description** The basic information section describes the database, owner and access rights
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/JxMimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/JxMimage.png)
 
 ##### **Additional settings** 
 
@@ -761,7 +778,7 @@ This function allows one to set up a range of settings which apply to your use o
 
 <p class="callout info">As user preferences are stored in your session variables on your web browser, it is important to check the “Keep me logged in for a month” (which is extended each time you log in from the same computer within one month) so that they are remembered. </p>
 
- ![6481e3ba-301b-435b-9b58-f3318c84b31e.png](https://heurist-doc.huma-num.fr/uploads/6481e3ba-301b-435b-9b58-f3318c84b31e.png)
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/nk9image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/nk9image.png)
 
 Most of these settings are fairly self-explanatory, but we will thus explain some of the more obscure settings.
 
@@ -825,15 +842,15 @@ Click **‘Visualise’** in the Design menu to access the network visualisation
 
 Generally, it is best just to visualise a few record types at a time—the graph can get very busy if you show too many types. To choose which record types to display, click the dropdown at the top left of the visualisation:
 
-![0f871315-9bb5-40d9-8702-94ccab9541fe.png](https://heurist-doc.huma-num.fr/uploads/0f871315-9bb5-40d9-8702-94ccab9541fe.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/47wimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/47wimage.png)
 
 Click the ‘show’ checkbox next to each of the record types you are interested in.
 
-![b88919a2-39fb-4e41-a79f-d1394ffd873d.png](https://heurist-doc.huma-num.fr/uploads/b88919a2-39fb-4e41-a79f-d1394ffd873d.png)
+[![igbimage.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/7yQigbimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/7yQigbimage.png)[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/igbimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/igbimage.png)
 
 To move the visualisation around, click in the whitespace and drag with your mouse. You can also click and drag the displayed record types. Click the ℹ️ icon to view more information about each record. Click the ✏️ icon to modify the record type. If you hover over a connection between two records, you will see information about how these records are connected to one another. For example, in this database a ‘Person’ can be related to a ‘Place’ in three different ways: the Place might be the Person’s place of birth, the Person’s place of death, or it might be a Place where the Person held a political office. Each of these relationships—place of birth, place of death and political office(s)—is a field in the ‘Person’ type, and can be seen in the data entry form for a ‘Person’.
 
-![dcc965b6-897f-4e9c-a193-c17d336a8738.png](https://heurist-doc.huma-num.fr/uploads/dcc965b6-897f-4e9c-a193-c17d336a8738.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/AOqimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/AOqimage.png)
 
 #### 5.3.1 The Explore Overview Screen\*\*
 
@@ -843,7 +860,13 @@ The Explore menu offers a range of powerful tools for viewing, querying and filt
 
 @todo: The metadata editing has been greatly improved as of late July 2026 and will require re-documenting
 
-![5a3261d1-af04-45e1-8b4d-913f83685eb4.png](https://heurist-doc.huma-num.fr/uploads/5a3261d1-af04-45e1-8b4d-913f83685eb4.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/y54image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/y54image.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/Dngimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/Dngimage.png)
+
+In Design &gt; Properties it looks like this. The metadata is read from the Heurist Reference Index for registered databases.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/5fLimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/5fLimage.png)
 
 ### 5.4 Simple Filters
 
@@ -853,19 +876,19 @@ Heurist comes with some simple filters pre-configured, so that you can do some b
 
 You can filter out older records, and just show records that have been entered or edited in the last fortnight. To do this, click ‘recent’ at the top of the Explore menu. This can be useful while you are in the data entry phase of your project, when you want to see the records you’re currently working with.
 
-![2a7ec77f-f021-40dc-aa39-31a56ba4cdf8.png](https://heurist-doc.huma-num.fr/uploads/2a7ec77f-f021-40dc-aa39-31a56ba4cdf8.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/aiLimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/aiLimage.png)
 
 #### 5.4.2 See All Records
 
 To view all the records in your database in one long list, click ‘All records'
 
-![c3db0991-4d51-425f-aede-e3c0ce15db5f.png](https://heurist-doc.huma-num.fr/uploads/c3db0991-4d51-425f-aede-e3c0ce15db5f.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/A3aimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/A3aimage.png)
 
 #### 5.4.3 Filter by record type/entity
 
 To see all the records of a particular type, hover over ‘Entities’. This will bring up a list of all the record types currently used by your database (e.g. Place, Person). Click on the record type you are interested in to see all the records of that type.
 
-![8f7b62fe-bafa-48ef-b536-fd63f7b790eb.png](https://heurist-doc.huma-num.fr/uploads/8f7b62fe-bafa-48ef-b536-fd63f7b790eb.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/pCDimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/pCDimage.png)
 
 #### 5.4.4 Finding records quickly
 
@@ -887,9 +910,7 @@ Click on **Recent changes** and edit the string in the filter box (behind the ey
 
 Situated at top right of the screen:
 
-![28c9e147-4d2f-44fa-8036-20553e4e8e8e.png](https://heurist-doc.huma-num.fr/uploads/28c9e147-4d2f-44fa-8036-20553e4e8e8e.png)
-
-![96755744-6232-4242-9067-8c34d8be75c3.png](https://heurist-doc.huma-num.fr/uploads/96755744-6232-4242-9067-8c34d8be75c3.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/NGFimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/NGFimage.png)
 
 **HELP (web links, open in new tab)**
 
@@ -911,11 +932,10 @@ Situated at top right of the screen:
 
 Situated at top right of the screen:
 
-![ab027cc4-eaaa-4631-8e7c-f40f2ec55d5d.png](https://heurist-doc.huma-num.fr/uploads/ab027cc4-eaaa-4631-8e7c-f40f2ec55d5d.png)
+![loading.gif](https://docs.heuristref.net/loading.gif)[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/R6Iimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/R6Iimage.png)
 
-![d52434a1-f4c9-43a3-ac20-1de8a8a98e67.png](https://heurist-doc.huma-num.fr/uploads/d52434a1-f4c9-43a3-ac20-1de8a8a98e67.png)
+**My preferences** displays the **User preferences** form to manage your Heurist environment.
 
-- **My preferences** displays the **User preferences** form to manage your Heurist environment.
 - **Manage tags**: The Manage Tags option lets you edit and remove all of your tags in one place. Tags are personalised terms created by a Heurist user and can be added when creating or editing a record (one you own or have bookmarked).
 
 The Manage Tags dialog lists all tags you have created, by usage (default).
@@ -1003,7 +1023,7 @@ You don't need to worry about *tables* and *columns* in a Heurist database. Inst
 
 A Heurist database is best understood by a diagram which identifies the different entities in the database, and shows how they are related. You can actually generate such a diagram of your database using the [Visualise](https://heuristref.net/h6-alpha/viewers/smarty/hclient/widgets/cms/Visualise.html) tool.
 
-![ded98d6a-094d-4042-bb56-7bdb6af75ed1.png](https://heurist-doc.huma-num.fr/uploads/ded98d6a-094d-4042-bb56-7bdb6af75ed1.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/FHhimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/FHhimage.png)![ded98d6a-094d-4042-bb56-7bdb6af75ed1.png](https://heurist-doc.huma-num.fr/uploads/ded98d6a-094d-4042-bb56-7bdb6af75ed1.png)
 
 **Diagram of a Graph Database (Wikimedia Commons)**
 
@@ -1489,7 +1509,7 @@ This also allows Heurist to carry out specific actions based on known concept ID
 
 When you create or edit a record it opens automatically in **data entry** mode. It is a form where the fields to fill are specific to each **entity type** and the values given to the fields change for each **record**.
 
-![84bec25f-6f29-4233-b467-d39538ed54ec.png](https://heurist-doc.huma-num.fr/uploads/84bec25f-6f29-4233-b467-d39538ed54ec.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/eZGimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/eZGimage.png)
 
 <p class="callout info">The data entry form is also a data structure modification form - click **Modify structure** at the top (available to database adminstrators only). This allows direct modification of the structure for the record type being edited so that the changes can be tested as you work. See later, and the following chapter.</p>
 
@@ -1501,7 +1521,7 @@ When you create or edit a record it opens automatically in **data entry** mode. 
 
 To create a new record and fill its data entry form, you can click the <span style="color:rgb(132,63,161);">\[New\]</span> button. The type of the record you add by doing so is indicated in italics under "New". It will be the same type as the last record you added. To change it, just stay over the button without clicking it : a slide tray appears and allow you to click the correct **record type** (entity type).
 
-![46d9a187-6ad3-4a15-b737-a7117bb456ca.png](https://heurist-doc.huma-num.fr/uploads/46d9a187-6ad3-4a15-b737-a7117bb456ca.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/m1uimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/m1uimage.png)![46d9a187-6ad3-4a15-b737-a7117bb456ca.png](https://heurist-doc.huma-num.fr/uploads/46d9a187-6ad3-4a15-b737-a7117bb456ca.png)
 
 Another way to add new records is with the \[Populate\] menu. See chapter 6 for further details.
 
@@ -1509,7 +1529,7 @@ Another way to add new records is with the \[Populate\] menu. See chapter 6 for 
 
 To edit an existing record, you first need to find it. This can be done with the <span style="color:rgb(132,63,161);">\[Explore\] </span>section. You can access it by clicking on the Heurist logo or on the button in the left menu. See chapter 7 for further details
 
-.![9368862e-047c-4d9e-9fd3-343cf140929d.png](https://heurist-doc.huma-num.fr/uploads/9368862e-047c-4d9e-9fd3-343cf140929d.png)
+.[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/kmQimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/kmQimage.png)![9368862e-047c-4d9e-9fd3-343cf140929d.png](https://heurist-doc.huma-num.fr/uploads/9368862e-047c-4d9e-9fd3-343cf140929d.png)
 
 Double-click on the record you want to edit, or click on the pencil icon![dcf34fac-6cd7-4611-806e-99422aaef225.png](https://heurist-doc.huma-num.fr/uploads/dcf34fac-6cd7-4611-806e-99422aaef225.png)or new tab icons![28cb6716-644d-4acb-97dc-15d0b136d1c1.png](https://heurist-doc.huma-num.fr/uploads/28cb6716-644d-4acb-97dc-15d0b136d1c1.png)which appear when you roll over it in the results list. You can also click the pencil icon on the Record tab in the righthand pane or wherever it is used to view information on a record.
 
@@ -1517,7 +1537,7 @@ Double-click on the record you want to edit, or click on the pencil icon![dcf34f
 
 The Data Entry form allows you to edit the record you're consulting and its metadata (\[Record Summary\]). It also give you easy access for editing the structure of its record type (\[Modify Structure\]).
 
-![27a5f4b5-b954-4910-ad96-e08f6c0f865c.png](https://heurist-doc.huma-num.fr/uploads/27a5f4b5-b954-4910-ad96-e08f6c0f865c.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/7V6image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/7V6image.png)![27a5f4b5-b954-4910-ad96-e08f6c0f865c.png](https://heurist-doc.huma-num.fr/uploads/27a5f4b5-b954-4910-ad96-e08f6c0f865c.png)
 
 The heart of the Data Entry is the form which allows you to indicate the values of your record. At the right of the form, there is an expandable column with metadata about the record. At the top of the form are some buttons, either related to the record type <span style="color:rgb(0,0,0);">(</span><span style="color:rgb(132,63,161);">\[Modify Structure\]</span><span style="color:rgb(0,0,0);"> and </span><span style="color:rgb(132,63,161);">\[Constructed title\]</span><span style="color:rgb(0,0,0);">) </span>or to the form itself (in green on the screenshot). Finaly, two horizontal bars frame the windows : they govern the window itself and the interactions the latter allows with the database. We will examine each of the components of this form in turn.
 
@@ -1539,7 +1559,7 @@ The <span style="color:rgb(132,63,161);">\[New\]</span> button will create a new
 
 ### 2.2. Record type related buttons
 
-![f7bce0ad-9234-47db-a572-345d6c919cdd.png](https://heurist-doc.huma-num.fr/uploads/f7bce0ad-9234-47db-a572-345d6c919cdd.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/aKJimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/aKJimage.png)![f7bce0ad-9234-47db-a572-345d6c919cdd.png](https://heurist-doc.huma-num.fr/uploads/f7bce0ad-9234-47db-a572-345d6c919cdd.png)
 
 In the top left corner are the icon and name of the record type to which the data belongs.
 
@@ -1549,23 +1569,25 @@ Click <span style="color:rgb(132,63,161);">\[Modify Structure\]</span> to modify
 
 <p class="callout info">This is an extremely powerful function, as it allows you to modify the structure of your database on the fly without affecting existing data (other than intentional deletion of fields and associated data, which comes with adequate warnings). Fields can be added, renamed, reorganised, grouped under headings and to some extent field type changes are permitted (without loss of data).   
   
-The numbers next to the tree show how many times a field has been used; this is particularly useful when importing legacy data to identify little-used fields which one may wish to remove or combine with other fields. The tick and crossed-out circle icons allow one to open a new browser window for all the records with / without the given field.</p>
+The numbers next to the tree show how many times a field has been used; this is particularly useful when importing legacy data to identify little-used fields which one may wish to remove or combine with other fields.   
+  
+The tick and crossed-out circle icons allow one to open a new browser window for all the records with / without the given field.</p>
 
 See chapter 5 for further details.
 
-![50cb926d-1385-40e1-bf45-1b39110d81cc.png](https://heurist-doc.huma-num.fr/uploads/50cb926d-1385-40e1-bf45-1b39110d81cc.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/D5Simage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/D5Simage.png)![50cb926d-1385-40e1-bf45-1b39110d81cc.png](https://heurist-doc.huma-num.fr/uploads/50cb926d-1385-40e1-bf45-1b39110d81cc.png)
 
 A gear icon appear at the left of the fields. Rollover displays a short menu of frequently used changes. Clicking on it allows you to edit the field in question.
 
-[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/image.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/rl1image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/rl1image.png)
 
-<p class="callout info">Strucural changes will be applied to the entire record type, thus modifying the structure of all records for that type. Values entered in the form relate to the current record and can be saved exactly the same way as in standard data entry mode. </p>
+<p class="callout info">Structural changes will be applied to the entire record type, thus modifying the structure of all records for that type. Values entered in the form relate to the current record and can be saved exactly the same way as in standard data entry mode. </p>
 
 #### 2.2.2. Modify the constructed title
 
 Click the gearwheel left of <span style="color:rgb(132,63,161);">\[Constructed title\]</span> to modify the **title mask** for the record type.
 
-![f042a27b-b7e7-49dd-932f-51c1ca509b4d.png](https://heurist-doc.huma-num.fr/uploads/f042a27b-b7e7-49dd-932f-51c1ca509b4d.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/AEWimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/AEWimage.png)![f042a27b-b7e7-49dd-932f-51c1ca509b4d.png](https://heurist-doc.huma-num.fr/uploads/f042a27b-b7e7-49dd-932f-51c1ca509b4d.png)
 
 The title mask gives you a summary of the record content which is displayed in lists of results and where a record is referenced through a record pointer or a relationship marker. The form you get by clicking on <span style="color:rgb(132,63,161);">\[Constructed title\]</span> allows you to personalise it by selecting the fields which are concatenated to provide the title. See chapter 5 for further details.
 
@@ -1573,24 +1595,23 @@ The title mask gives you a summary of the record content which is displayed in l
 
 At the right of the record type related buttons are several options :
 
-![abcffdd8-2b38-420c-be40-a54c36f32572.png](https://heurist-doc.huma-num.fr/uploads/abcffdd8-2b38-420c-be40-a54c36f32572.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/Mnyimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/Mnyimage.png)
 
-- When checked <span style="color:rgb(132,63,161);">\[Show help\]</span> shows the **Help text**, which specifies the expected value of the field under it. This help text corresponds with the Description of the field entered when defining the field (and can be changed)
-- The <span style="color:rgb(132,63,161);">\[Optional fields\]</span> checkbox allows you to show or hide optional fields in the form
-
-![48348d51-89e0-42c5-808b-23c02851a5d2.png](https://heurist-doc.huma-num.fr/uploads/48348d51-89e0-42c5-808b-23c02851a5d2.png)
+When checked <span style="color:rgb(132,63,161);">\[Show help\]</span> shows the **Help text**, which specifies the expected value of the field under it. This help text corresponds with the Description of the field entered when defining the field (and can be changed)  
+   
+The <span style="color:rgb(132,63,161);">\[Optional fields\]</span> checkbox allows you to show or hide optional fields in the form. Note that ther are tow levels of optional field - Recommended and Optional. Only the ones marked *Optional* are hidden by this button. The internt of recommended vs optional is to allow very little used fiels (optioonal) to be hidden for a less clutterd data entry form.
 
 <span style="color:rgb(132,63,161);">\[Hide from public\]</span> : when clicked, only the registered users can see the record. When unclicked the record is readable by anyone. The visibility of the record is indicated in the <span style="color:rgb(132,63,161);">\[Record Summary\]</span> (see 2.4), at the end of the record view (which everybody can see with the HTML link if the record is public, even if the database is not), and in the result view with the color (blue if public) and eye symbol.
 
-![ef094e8f-88bc-4878-940d-d98d28070810.png](https://heurist-doc.huma-num.fr/uploads/ef094e8f-88bc-4878-940d-d98d28070810.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/ADVimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/ADVimage.png)
 
-<span style="color:rgb(132,63,161);">\[Refresh structure\]</span> : refresh the structure. Useful if modifications have been made to the record type or to the constructed title from the data entry form to apply them to the actual record.
+<span style="color:rgb(132,63,161);">\[Refresh structure\]</span> : refresh the structure. Useful if modifications have been made to the record type from the data entry form to apply them to the actual record. The constructed title can be refreshed by hitting Save even if the save button is greyed out (it is always available but is grey when no data on the form has been edited).
 
 <span style="color:rgb(132,63,161);">\[History\]</span> : open the History section of the \[Record Summary\] (see 2.4)
 
 <span style="color:rgb(132,63,161);">\[Template\]</span> : download a csv summary of the form for the record type with details about the fields and their accepted values, starting with the values automatically asked for all the records, regardless of their record type (H-ID : the unique identifier automatically attributed to the record ; rec\_URL : the record URL ; rec\_Tags : the tags attributed to the record).For use in offline or highly repetitive data collection using a spreadsheet. Lists of terms can be used to control data entry (requires setup in the spreadsheet). Data can be imported back to Heurist with Import &gt; Delimited text / CSV.
 
-<span style="color:rgb(132,63,161);">\[Bug report\]</span> : open a form to report a bug
+<span style="color:rgb(132,63,161);">\[Create ticket\]</span> : open a form to report a bug
 
 ### 2.4. Record Summary
 
@@ -1600,7 +1621,7 @@ On the right side of the form is a tab titled <span style="color:rgb(132,63,161)
 
 Opening the right side panel shows the record type of the record. Click on it to change it. The values of the previous fields will be relocated in other fields (for example the value of the field "Family name" will be assigned to the field "Title") if the field of the source record type is not in the record type of destination.
 
-Under the name of the record type are indicated the record access and ownership. By default, the record is viewable by anly logged-in user and the owner is the one who have created it. The later can change ownership and visibility of the record by clicking on the pencil icon.
+Under the name of the record type are indicated the record access and ownership. By default, the record is viewable by any logged-in user and the owner is the one who have created it. The later can change ownership and visibility of the record by clicking on the pencil icon.
 
 - Ownership can be reattributed to "Any logged-in user", everyone, a specific user, or a specific workgroup (about workgroups, see chapter 10)
 - Visibility can be changed to be the same as the ownership, "any logged-in user" or public (everyone can access it)
@@ -1617,20 +1638,21 @@ Those cannot be changed (except for the third one which changes automatically wh
 
 This section concerns the management of the record by the logged-in user. It contains two parts who can be edited using the pencil icon.
 
-**Bookmarks** : this part is personal and cannot be consulted by other user. It allows you to define a password reminder, to rate the record and to write personnal notes. Writing something in this section will trigger the bookmark icon, who will appear orange in the database. If you have write a password reminder, a little key will show as well.
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/7OYimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/7OYimage.png)
 
-![d3ac0dac-254a-429d-a3af-1616b7cf9432.png](https://heurist-doc.huma-num.fr/uploads/d3ac0dac-254a-429d-a3af-1616b7cf9432.png)
+**Bookmarks** : this part is personal and cannot be consulted by other user. It allows you to define a password reminder, to rate the record and to write personal notes. Writing something in this section will trigger the bookmark icon, which will appear orange in the database. If you have write a password reminder, a little key will show as well.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/p2Gimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/p2Gimage.png)
 
 <p class="callout warning">The content is not encrypted. Do not enter important passwords verbatim, as the security on on this data is basic. We suggest using a prompt whih is meaningful only to you, rather than an actual password.</p>
 
 To remove the bookmark, go to the result section, select the record, click <span style="color:rgb(132,63,161);">\[Selected\]</span>, then unbookmark it. It will remove the bookmark itself as well as its content, the tags of the record and the password reminder.
 
-![5f68ef20-930c-4200-969f-db744c9a134f.png](https://heurist-doc.huma-num.fr/uploads/5f68ef20-930c-4200-969f-db744c9a134f.png)
-
-The Data Entry form doesn't allow you to unbookmark a record, only to clear the content of the bookmark if you created one prior.  
-Note: The bookmark's icon doesn't appear anymore in the later version of Heurist.
+The Data Entry form doesn't allow you to unbookmark a record, only to clear the content of the bookmark if you created one prior. Note: The bookmark's icon doesn't appear anymore in the later version of Heurist.
 
 **Reminders** : allow the setting of immediate and periodic reminders to either an individual user, a workgroup or specific email addresses. The minimum frequency is daily, but monthly or yearly might be more appropriate.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/dsaimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/dsaimage.png)
 
 #### 2.4.3. Tags
 
@@ -1719,10 +1741,9 @@ Not all icons appear beside each field, as the actions they trigger isn't always
 **Memo Text (multi-line or html)** A plain text field which can accomodate multiple lines of text. Use for longer textual content (drag and drop the bottom-right corner to expand the editor). Offers three editors :
 
 - **text**: write in plain text
-- **wysiwyg**: What You See Is What You Get, interface with several button to format your text so you don't have to know html to do so
-- **codeeditor**: a code editor, it makes it easier to write directly in a structured language such as xml or html or to correct it.
 
-![7889a098-43a9-4d57-90e7-d59b48c06cef.png](https://heurist-doc.huma-num.fr/uploads/7889a098-43a9-4d57-90e7-d59b48c06cef.png)
+**wysiwyg**: What You See Is What You Get, interface with several button to format your text so you don't have to know html to do so  
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/BYyimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/BYyimage.png)**codeeditor**: a code editor, it makes it easier to write directly in a structured language such as xml or html or to correct it. ![7889a098-43a9-4d57-90e7-d59b48c06cef.png](https://heurist-doc.huma-num.fr/uploads/7889a098-43a9-4d57-90e7-d59b48c06cef.png)
 
 As this type of field deals with html, you can integrate to your text other elements, such as :
 
@@ -1749,12 +1770,19 @@ The date can be entered manually, with the calendar icon, with the \[range\] but
 
 <p class="callout info">If the purpose is to obtain a date range, you should use two fields : Start date and End date, which will give you two values. Both of them are date field type. Using only one date field will provide only one value. Thus the range function of date type field is useful for indicating a date whose accuracy is not certain. </p>
 
-![c5a1fb01-0231-49de-b0e4-7528aa35db66.png](https://heurist-doc.huma-num.fr/uploads/c5a1fb01-0231-49de-b0e4-7528aa35db66.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/6nZimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/6nZimage.png)![c5a1fb01-0231-49de-b0e4-7528aa35db66.png](https://heurist-doc.huma-num.fr/uploads/c5a1fb01-0231-49de-b0e4-7528aa35db66.png)
 
-- **Simple Date** : for a single date. To use to specify the degree of certainty about the date (exact, approximate, before, after), the time of the event, the type of determination of the date, the calendar, and to add comment about it.
-- **Simple Range** : for setting a estimation of date based on two other (earliest possible and latest possible). Allows you to precise the probability curve (flat, central, slow start, slow finish), the way the estimation had been made (attested, conjecture, measurement), to precise the calendar and to comment the date.
-- **Fuzzy Range** : same as **Simple Range** except that the certainty is modulated as the beginning and end date of reference are subdivided in "not before/after" (Terminus Post Quem, Terminus Ante Quem) and "probable begin/end".
-- **Radiometric** : useful for radiometrics values. Can only be used to set a BCE (before common era) or a BP (before present) date. You can precise what is the standard deviation (Std dev) of the value, its positive deviation (pos dev)or negative deviation (neg dev). It is also possible to indicate the Lab Code of the sample used and if the date as been calibrated. The date can be commented.
+**Simple Date** : for a single date. To use to specify the degree of certainty about the date (exact, approximate, before, after), the time of the event, the type of determination of the date, the calendar, and to add comment about it.
+
+**Simple Range** : for setting a estimation of date based on two other (earliest possible and latest possible). Allows you to precise the probability curve (flat, central, slow start, slow finish), the way the estimation had been made (attested, conjecture, measurement), to precise the calendar and to comment the date.
+
+**Fuzzy Range** : same as **Simple Range** except that the certainty is modulated as the beginning and end date of reference are subdivided in "not before/after" (Terminus Post Quem, Terminus Ante Quem) and "probable begin/end".  
+  
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/B59image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/B59image.png)
+
+**Radiometric** : useful for radiometrics values. Can only be used to set a BCE (before common era) or a BP (before present) date. You can precise what is the standard deviation (Std dev) of the value, its positive deviation (pos dev)or negative deviation (neg dev). It is also possible to indicate the Lab Code of the sample used and if the date as been calibrated. The date can be commented.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/fJzimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/fJzimage.png)
 
 #### 3.2.2. Geospatial (point, line, polygon ...)
 
@@ -1779,7 +1807,7 @@ A file such as a photo, video, PDF, scanned document, spreadsheet or XML, upload
 
 Clicking on the field will open a small windows which allows to choose between using a file already uploaded in the database (<span style="color:rgb(132,63,161);">\[Choose previously referenced file\]</span>), upload a new one (to Heurist or to external repository, but the later is depreciated), or use an external URL linking directly to the file. You then might indicate some metadata about the file : its name, copyright, copyright owner and visibility (public or logged users)
 
-![a3a0be97-d26c-45a1-aa4f-7987b5c37513.png](https://heurist-doc.huma-num.fr/uploads/a3a0be97-d26c-45a1-aa4f-7987b5c37513.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/vnJimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/vnJimage.png)![a3a0be97-d26c-45a1-aa4f-7987b5c37513.png](https://heurist-doc.huma-num.fr/uploads/a3a0be97-d26c-45a1-aa4f-7987b5c37513.png)
 
 ### 3.3. Record linking type fields
 
@@ -1798,6 +1826,10 @@ In both cases the link will appear in the network view (see chapter 8b) and if t
 - The type of relationship, however, is implicit in the field name - father, mother, service, education, place or component all imply a fixed relationship to the parent entity - <u>but not otherwise recorded</u>.
 - Typically, selecting the field opens a list of available values, comparable to a dropdown field, except that the options are existing records instead of terms from a vocabulary.
 
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/XGjimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/XGjimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/f3eimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/f3eimage.png)
+
 **Relationship marker** A more complex connection which allows specification of relationship type and period of validity.
 
 - Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
@@ -1808,7 +1840,21 @@ In both cases the link will appear in the network view (see chapter 8b) and if t
 
 [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/btZimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/btZimage.png)
 
-![2ce712db-90c2-46bc-aeda-fe86ff1517a4.png](https://heurist-doc.huma-num.fr/uploads/2ce712db-90c2-46bc-aeda-fe86ff1517a4.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/icpimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/icpimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/T6Himage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/T6Himage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/gnuimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/gnuimage.png)
+
+#### **Child record pointers**
+
+@TODO
+
+<span style="color:rgb(0,0,0);">Child record pointer fields will be displayed with a quick search ‘dropdown’.</span>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/vFvimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/vFvimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/u7Wimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/u7Wimage.png)
 
 ## 4. Optimising Forms for Usability
 
@@ -3696,7 +3742,7 @@ Try a small trimmed Manifest first. Failures may be caused by remote annotation-
 
 ## 10. Summary of ownership by mode
 
-<table id="bkmrk-feature-annotation-o"><colgroup><col></col><col></col><col></col></colgroup><tbody><tr><th>Feature
+<table id="bkmrk-featureannotation-ov"><colgroup><col></col><col></col><col></col></colgroup><tbody><tr><th>Feature
 
 </th><th>Annotation overlay
 
@@ -3757,6 +3803,61 @@ Try a small trimmed Manifest first. Failures may be caused by remote annotation-
 </td><td>Build or take over a Manifest in Heurist
 
 </td></tr></tbody></table>
+
+**Process IIIF Manifest**
+
+Reads a registered **IIIF Presentation Manifest** and creates or updates records representing its contents. A manifest describes a digital resource’s ordered pages or views, known as *canvases*, together with media references, metadata and annotations. The manifest may be uploaded locally or registered through an external URL.
+
+Two processing modes are available:
+
+- **Full manifest management:** creates or updates Manifest, Canvas and Annotation records. Heurist manages the resulting manifest structure, including canvas order and metadata, and can generate its own IIIF manifest output. Referenced media may remain external or be stored locally.
+- **Annotation overlay:** imports annotations while retaining the source manifest’s canvas structure and identifiers. No Heurist Manifest record is created. This mode supports IIIF Presentation API version 3 and is unavailable where the selected file already has a managed Manifest record.
+
+On re-import, records modified locally in Heurist or Mirador are preserved by default and reported separately.
+
+Annotation thumbnails can subsequently be generated for selected annotation records using **Recode &gt; Create IIIF annotation thumbnails** above the results in the Explore menu.
+
+#### **Explore &gt; Recode &gt; Create IIIF annotation thumbnails**
+
+*TODO: duplicated at end of chapter 6b, need to decide where it belongs and simply reference*
+
+Creates a thumbnail showing the image region identified by each IIIF annotation. For example, an annotation marking a detail in a manuscript page receives a thumbnail of that detail, making it easier to recognise the annotation in record lists.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/H9Zimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/H9Zimage.png)
+
+The operation processes **IIIF Annotation records in the current search results**, subject to access permissions. Other record types are excluded. In the current implementation, ticking individual records does not restrict the operation: first use a search to obtain the annotations you want to process.
+
+**Creating or replacing thumbnails**
+
+The dialogue contains a checkbox, **Create thumbnails for missed only**, selected by default.
+
+- **Checked:** creates thumbnails for annotations without a thumbnail reference and retains existing references.
+- **Unchecked:** recreates thumbnails for all annotations being processed, replacing their existing thumbnail references when creation succeeds.
+
+Use the default setting to fill gaps after importing annotations. Clear it when thumbnails need updating—for example, after changing an annotation’s selected region or its source image.
+
+**How the thumbnail is generated**
+
+Heurist reads the annotation’s region selection and locates the image associated with its canvas. The image can come from an external IIIF image service, a locally stored file or a directly accessible remote image.
+
+Supported selections include:
+
+- **Rectangular regions**, stored as a pixel-based fragment selector.
+- **SVG regions**, such as polygons or other supported shapes. The thumbnail shows the rectangular area enclosing the shape, including any surrounding image within that rectangle.
+
+The cropped image is scaled to fit within **200 × 200 pixels**, preserving its proportions, stored locally and attached to the annotation’s Thumbnail field. The annotation text, selected region and original image are unchanged.
+
+**Requirements and results**
+
+The database must contain the **IIIF Annotation record type, Concept ID 2-109**, and the necessary annotation fields. Each annotation needs a supported region selection and a resolvable canvas image.
+
+A thumbnail may fail to generate if the region is missing or unsupported, the canvas image cannot be identified, the remote resource is inaccessible, or image processing or file storage fails.
+
+The operation reports processed records and failures. **The processed count includes annotations whose existing thumbnail references were retained**, so it does not necessarily equal the number of newly generated images.
+
+Missing-only mode checks for an existing thumbnail reference; it does not verify that the referenced image file still exists. To repair a broken thumbnail, clear the checkbox and recreate it.
+
+#### .
 
 # Ch 06c: Omeka-S to Heurist
 
@@ -3974,6 +4075,73 @@ Manual matching Omeka-&gt;Heurist: Resource class-&gt;Rectypes Property-&gt;Fiel
 Store RDF name (like foaf:Person OR dbo:Genre) in some field of defRectype, defDetailTypes tables OR keep matching in external file Omeka ID-&gt;Heurist ID, or RDF name-&gt;Heurist concept code I believe it is much cleaner to store such data in the database, this then allows us to use it directly in a future RDF export. Every time we use files we end up with problems eg. of synchronisation, referential integrity etc.
 
 DATA: Import Omeka resource/value tables into Heurist Records/recDetails
+
+# Ch 06d: File uploads, media registration and creation of media records
+
+*Documentation by ChatGPT Sol 5 lite 6/10/26 with some additions. Content not yet systematically verified.*
+
+#### **Populate &gt; Media files**
+
+**T**hese menu items provides tools for uploading files, registering externally stored files and creating database records to describe them.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/TLrimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/TLrimage.png)
+
+<p class="callout info">Heurist distinguishes between a **registered file**, which can be attached to a record through a File field, and a **Digital Media record**, which describes the file and can be searched, classified and linked to other records.</p>
+
+**Manage files**
+
+Opens the file manager, listing files uploaded to the database and registered references to external resources. It allows you to inspect and preview files, edit their descriptions, register additional files or external URLs, and remove unwanted entries. File references can also be exported as CSV for use in subsequent imports.
+
+Use this to manage the database’s collection of attachments. Registering a file does not, by itself, create a Digital Media record describing it.
+
+Take care when deleting files: records that use them may lose access to their attachments.
+
+**Upload files from local**
+
+Uploads files from your computer into the database’s file storage and registers them with Heurist. These may include images, PDFs, audio, video and other permitted file types. Thumbnails are generated where supported.
+
+This is useful for uploading a batch of files before attaching them to existing records or creating Digital Media records.
+
+Uploading makes the files available to the database; it does not automatically create descriptive records for them. File size and type restrictions depend on the server configuration. Very large files or large collections may require transfer by a server administrator, followed by **Register external transfers**.
+
+<p class="callout info">Heurist is designed as a working data system not a repository and does not stream audio and video, necessitating a full download of audio and video. Streamable files are best loaded on a streaming server such as YouTube (ad supported) or PeerTube, or one provided by your local institutions. Large scans are best placed in a repository such as Nakala or Zenodo and referenced as remote files.</p>
+
+<p class="callout warning">Typically Heurist is configured in Apache with a 30MByte limit on PHP file uploads to avoid the upload of huge video files or very large TIF scans, which could consume more space than dozens or hundreds of individual databases. Although these will not affect the performance of the database, they may not open on a web browser and/or take an inordinately long time to load, making them next to useless.</p>
+
+**Upload files from URLs**
+
+Registers a batch of files using a list of URLs, optionally accompanied by descriptions. You can paste the list into the dialogue or upload a delimited text file. A recommended format is a CSV with the column headings <span style="background-color: color(srgb 0.0337662 0.0337662 0.0337662 / 0.0905882);">URL,Description</span>.
+
+After analysing the list, identify the URL and description columns and choose whether to:
+
+- **Download the files:** Heurist retrieves them and stores local copies in the database’s file storage.
+- **Register external references:** Heurist stores their URLs and accesses the files at their existing locations.
+
+Use direct file URLs wherever possible, rather than links to web pages containing the files.
+
+Local copies remain available independently of the original provider. External references depend on the provider keeping the files accessible at the registered URLs. This operation registers files; descriptive Digital Media records can be created separately where appropriate.
+
+**Register external transfers**
+
+Scans the database’s configured media folders for files placed there outside the normal Heurist upload process—for example, files transferred directly by SFTP by a server administrator.
+
+It adds previously unregistered files to the file manager and generates thumbnails where supported. Files already indexed are left unchanged. The folders and file extensions to scan are controlled by the database’s media settings.
+
+Use this after a direct server transfer, particularly for collections too large to upload conveniently through the browser.
+
+Here, “external transfers” means files transferred into the database’s server storage by another method. It does not mean registering remote URLs. The operation registers files but does not create Digital Media records.
+
+**Create records from files**
+
+Creates **Digital Media records** for files in the configured media folders, with each record linked to its corresponding file. These records provide a place to store descriptive information, classifications and connections to other database records.
+
+The process scans the configured folders and their descendants and uses file metadata and associated XML manifests where available. Files already represented by a corresponding Digital Media record are not given another record by this process; existing Digital Media records are left unaffected.
+
+Use this when the files themselves are research objects—for example, a collection of photographs that needs individual descriptions and links to people, places or objects.
+
+Check the folders and permitted extensions before proceeding: scanning a large collection can create many records. The database also needs the appropriate Digital Media record type and fields, identified by their Concept IDs.
+
+<p class="callout info">Please see the chapter on IIIF manifests and annotations for **Process IIIF manifest**</p>
 
 # Ch 07: Using the database (find, filter & view)
 
@@ -4470,6 +4638,268 @@ It is also possible to nest logical conjunctions. For example: `{"not":{"any":[{
 notes, n Synonym for f:\[DT\_SHORT\_SUMMARY\] Where DT\_SHORT\_SUMMARY is replaced with local code of concept 2-3 todo
 
 &lt;???Facet search pre-query YES?? what format?? this one works and is clearly different from the mappable query format. Are we simply talking about the presence or absence of "q:" ? Have facet search pre-query ignore "q" and "rules" section if present No {"f:10":"1914-12-31T23:59:59.999Z&lt;&gt;1931-01-01"} Expansion rules YES Generated by expansion rule wizard This is a part of the full mappable query JSon opject No \[{"query":"t:12 linkedfrom:16-90 ","codes":\["16","90","","12","",2\],"levels":\[\]}\]
+
+# Ch 07a : Recoding and verification
+
+### Introduction
+
+In this chapter we will look at ways that data in the database can be verified for consistency and modified through batch processes.
+
+### Admin &gt; Verify Integrity
+
+*Content generated by ChatGPT Sol Lite 6/10/26 based on application source code.*
+
+**Admin &gt; Verify Integrity** checks the consistency of a Heurist database’s definitions, records and supporting indexes. It detects problems such as broken record pointers, invalid terms, missing required values and inconsistent field definitions, and provides repair options where a correction can be made automatically.
+
+Select the desired checks and click **Verify Integrity**. Ordinary checks are selected initially; checks labelled **Slow** must be selected separately. “Mark all” applies to the ordinary checks. On large databases, running slow checks individually can help avoid timeouts.
+
+Follow the record links in the report to inspect affected data. Prioritise invalid owners, nonexistent pointer targets and nonexistent term values, then problems affecting the searches, maps, timelines or workflows your project uses.
+
+**Verification is not entirely read-only:** some checks perform housekeeping or corrections during the check itself, including definition-group repair, workflow-stage consolidation and certain whitespace corrections. Date checking can also normalise some recognised formats. Take a safeguard backup before a comprehensive run, and read repair buttons carefully—especially those offering to **delete faulty values**.
+
+A successful check establishes consistency for the conditions tested. It does not prove that the research content is accurate, that a valid pointer identifies the intended record, or that every attachment and external resource is recoverable.
+
+**Not all reported problems are equally serious.** Some prevent information from being accessed or interpreted correctly; others indicate incomplete data, or simply untidy formatting. A database with warnings is not necessarily unusable.
+
+The descriptions below follow the current **v**ersion 7 code. The priority ratings describe the practical consequences of leaving a problem unresolved; they are not severity labels displayed by Heurist.
+
+**Record ownership and connections**
+
+<table id="bkmrk-checkwhat-is-checked"><colgroup><col style="width:130px;"></col><col></col><col></col></colgroup><tbody><tr><th>Check</th><th>What is checked</th><th>Consequences if left unresolved</th></tr><tr><td>**Record Owner/Creator**
+
+</td><td>Checks that the owner and “Added by” references identify an existing user or group.
+
+</td><td>**Essential for invalid owners:** ownership controls editing permissions, and an invalid owner can make normal management of records difficult. An invalid creator mainly damages attribution. The repair assigns invalid references to Database Manager, ID 2.
+
+</td></tr><tr><td>**Pointer Targets**
+
+</td><td>Finds record pointers referring to records that do not exist.
+
+</td><td>**Essential:** these links cannot be followed, and connected searches, reports and relationship displays may be incomplete. The automatic repair **deletes the faulty pointers**; it cannot recover the intended target.
+
+</td></tr><tr><td>**Target Types**
+
+</td><td>Checks that a pointer’s target belongs to one of the record types permitted for that field.
+
+</td><td>**Important:** a link may open successfully but connect the wrong kind of information—for example, an Author field pointing to a Place. Searches and reports that assume the expected type can give misleading results.
+
+</td></tr><tr><td>**Invalid Parents**
+
+</td><td>Checks that parent–child connections agree in both directions: the parent identifies the child, and the child identifies the parent.
+
+</td><td>**Important where parent–child structures are used:** records may be omitted from child lists or appear inconsistently in navigation and editing. Some missing reverse pointers can be added automatically; other discrepancies require inspection.
+
+</td></tr></tbody></table>
+
+**Vocabularies and database definitions**
+
+<table id="bkmrk-checkwhat-is-checked-1"><colgroup><col style="width:131px;"></col><col></col><col></col></colgroup><tbody><tr><th>Check</th><th>What is checked</th><th>Consequences if left unresolved</th></tr><tr><td>**Invalid/Duplicate Terms**
+
+</td><td>Finds references to missing parent or inverse terms, and flags duplicate labels or labels ending in numbers that may have resulted from duplicate avoidance.
+
+</td><td>**Important for broken term references:** vocabulary hierarchy or inverse relationships may behave incorrectly. **Usually lower priority for duplicate labels:** these can split classification and search results, but identical labels in different contexts may be legitimate. Review before merging or removing terms.
+
+</td></tr><tr><td>**Field Types**
+
+</td><td>Checks field definitions for references to nonexistent terms, nonexistent non-selectable terms, or nonexistent record types in pointer constraints.
+
+</td><td>**Usually a routine repair:** stale references can affect available choices or constraints. Heurist offers Auto Repair. Repeated recurrence deserves investigation.
+
+</td></tr><tr><td>**Default Values**
+
+</td><td>Checks that defaults specified in record type definitions are valid for their fields.
+
+</td><td>**Important for subsequent data entry:** new records may receive an invalid default or fail to receive the intended value. Existing records are not necessarily affected.
+
+</td></tr><tr><td>**Definitions Groups**
+
+</td><td>Checks that record types, base fields and vocabularies belong to existing organisational groups.
+
+</td><td>**Mostly a definition-management problem:** definitions may be difficult to find in the design interface. The checker automatically places affected definitions in the appropriate **Trash** group when that group exists; this does not delete them.
+
+</td></tr><tr><td>**Title Masks**
+
+</td><td>Checks whether each record type has a valid expression for constructing record titles.
+
+</td><td>**Important for usability:** generated titles may fail or be incomplete, making records difficult to identify in results and pointer selectors. The underlying field values are not necessarily damaged.
+
+</td></tr><tr><td>**Term Values**
+
+</td><td>Finds term fields containing identifiers for terms that do not exist.
+
+</td><td>**Essential for affected classifications:** the value cannot be resolved to a valid term, compromising display and searching. The automatic repair **deletes the faulty term values**; it does not reconstruct their meaning.
+
+</td></tr><tr><td>**Expected Terms**
+
+</td><td>Checks that existing terms belong to the vocabulary or permitted term selection specified for the field.
+
+</td><td>**Important:** a recognisable term can still be inappropriate for its field, causing inconsistent classification and filtering. Where the permitted vocabulary contains the same label, Heurist can offer a replacement.
+
+</td></tr></tbody></table>
+
+**Record contents**
+
+<table id="bkmrk-checkwhat-is-checked-2"><colgroup><col style="width:131px;"></col><col></col><col></col></colgroup><tbody><tr><th>Check</th><th>What is checked</th><th>Consequences if left unresolved</th></tr><tr><td>**Empty Fields**
+
+</td><td>Finds stored field entries containing null or empty values.
+
+</td><td>**Generally minor housekeeping:** an empty entry adds no useful information and can complicate value counts or processing. Removing it does not supply any missing information.
+
+</td></tr><tr><td>**Non-Standard Fields**
+
+</td><td>Finds values in fields that are not included in the record type’s defined field list.
+
+</td><td>**Often harmless and sometimes intentional**, particularly after imports or structural changes. The values remain stored, but may be overlooked during normal editing or reporting. Consider adding the field to the record type rather than deleting its data.
+
+</td></tr><tr><td>**Required Fields**
+
+</td><td>Finds required fields that are missing or empty.
+
+</td><td>**Depends on the field:** omission of an essential identifier or descriptive value may compromise the record; another required field may merely represent a completeness policy. The database can still operate, but the records do not meet their declared requirements.
+
+</td></tr><tr><td>**Single Value Fields**
+
+</td><td>Finds fields defined to accept one value that contain multiple values.
+
+</td><td>**Important when the values conflict:** different displays or processing routines may use one value or show several. Review the values and either retain the correct one or change the field’s repeatability.
+
+</td></tr><tr><td>**Multiple Workflow Stages**
+
+</td><td>Finds multiple workflow-stage values where the field permits only one.
+
+</td><td>**Usually moderate:** contradictory stages make workflow filtering unreliable. The checker automatically reduces them to one stage, preferring a non-importing stage where available.
+
+</td></tr><tr><td>**Geo Values**
+
+</td><td>Checks for missing or invalid geometry, inconsistent geometry descriptions, and coordinates outside valid bounds.
+
+</td><td>**Important for mapping and spatial analysis:** affected records may be absent from maps or appear in incorrect locations. Certain wrapped longitudes can be corrected automatically; other problems need manual repair.
+
+</td></tr><tr><td>**Date Values**
+
+</td><td>Checks whether date values can be recognised and interpreted, offering corrections for some formats and identifying values requiring manual attention.
+
+</td><td>**Important for chronological work:** invalid or misinterpreted dates can give incorrect date searches, sorting or timeline positions. Review ambiguous day/month interpretations carefully.
+
+</td></tr><tr><td>**Spaces in Values**
+
+</td><td>Checks text for leading and trailing whitespace, double spaces and longer sequences of whitespace.
+
+</td><td>**Usually very minor:** mainly affects presentation, although whitespace can interfere with matching or duplicate detection. Some whitespace is corrected automatically; longer sequences are offered for selected repair. Preserve intentional formatting in transcriptions or quotations.
+
+</td></tr><tr><td>**Invalid Characters**
+
+</td><td>Checks free-text and block-text values for characters regarded as invalid by the checker.
+
+</td><td>**Variable importance:** these can cause display or export problems. Inspect the reported characters before changing them, particularly in multilingual text or source transcriptions.
+
+</td></tr></tbody></table>
+
+**Supporting indexes**
+
+<table id="bkmrk-checkwhat-is-checked-3"><colgroup><col style="width:131px;"></col><col></col><col></col></colgroup><tbody><tr><th>Check</th><th>What is checked</th><th>Consequences if left unresolved</th></tr><tr><td>**Date Index**
+
+</td><td>Checks consistency between stored date fields and the supporting date index.
+
+</td><td>**Important for reliable date searches:** records may be missed or incorrectly selected even when their displayed dates look correct. Rebuilding the index repairs the supporting search data; invalid source dates require separate correction.
+
+</td></tr><tr><td>**Relationship Cache**
+
+</td><td>Checks the supporting cache used to represent record relationships.
+
+</td><td>**Important for connected searches and relationship displays:** links may be missing or inconsistent despite the underlying records being correct. The cache can be rebuilt from the stored data.
+
+</td></tr></tbody></table>
+
+Two additional checks open separately:
+
+<table id="bkmrk-checkpurpose-and-con"><colgroup><col></col><col></col></colgroup><tbody><tr><th>Check</th><th>Purpose and consequences</th></tr><tr><td>**Check files for consistency**
+
+</td><td>Finds missing, duplicate and unused uploaded files. **Missing originals are serious:** attachments cannot be opened and must be recovered or relinked. Duplicate or unused files are generally storage housekeeping; inspect them before removal.
+
+</td></tr><tr><td>**Check URLs in text fields and titles**
+
+</td><td>Checks record URLs and links within text fields. Broken links reduce access to referenced resources, but do not normally damage the database itself. A failed URL check can also reflect temporary unavailability or access restrictions.
+
+</td></tr></tbody></table>
+
+### Recode menu
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/yPSimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/yPSimage.png)
+
+The Recode menu operates on the current result set, except where indicated.
+
+#### Add field value
+
+Adds a value to a chosen field across the selected records, leaving existing values unchanged. For example, add the same keyword to a group of records. Records are skipped if adding the value would exceed the field’s permitted number of values.
+
+#### Replace field value
+
+Replaces matching values in a chosen field across the selected records. You can replace a complete value, replace matching text within a value, or replace all values in the field. Other fields are unaffected.
+
+#### Delete field value
+
+Removes matching values, matching text within values, or all values from a chosen field across the selected records. It does not delete the records themselves. Records are normally skipped if deletion would leave a required field empty.
+
+#### Relate : Link
+
+Links the selected records to a chosen target record, using a record pointer field or a typed relationship. For example, link a group of documents to the person who created them.
+
+#### Foreign key match
+
+Creates record links by matching values in a field of the source records with values in a field of the target records. For example, match an institution code in person records to the same code in institution records, then store the resulting links in a record pointer field. The source results must contain only one record type.
+
+#### Change record types
+
+Changes the selected records to another record type. Existing data is retained, but it may not satisfy the new type’s field requirements. Run **Verify → Verify integrity** afterwards to identify records needing correction.
+
+#### Local files to remote repository
+
+Uploads locally stored files referenced by a chosen field to a configured remote repository. Updates their file references to point to the repository resources. An option allows the local copies to be deleted after upload.
+
+#### Remote URLs to local files
+
+Downloads files referenced by remote URLs in a chosen file field and stores them in the database’s file storage. Replaces the remote references with references to the local copies. Other fields are unaffected.
+
+#### Reset thumbnails
+
+1. Search for **all records** in the database.
+2. Choose **Recode → Refresh thumbnails** (may appear as **Reset thumbnails**).
+3. Select **Current results set**, then **Go**.
+4. Reopen **Admin → Manage files** to trigger thumbnail regeneration.
+
+<p class="callout info">This removes the existing thumbnails—including broken ones—and recreates them when next displayed. Original images are untouched. It covers files linked to records; unreferenced files are excluded.</p>
+
+#### Case conversion
+
+Changes the capitalisation of text in a chosen field across the selected records, using the selected conversion rule. A list of exceptions allows particular words or phrases to retain specified capitalisation.
+
+#### Multiline text to HTML
+
+Converts plain text in a multiline text field into HTML, preserving line breaks, paragraph breaks and repeated spaces when displayed. Values already containing HTML are left unchanged.
+
+#### Translation
+
+Translates text in a chosen field into the selected language using the configured DeepL service. Stores the translation as an additional value in the same field, identified by a language prefix, while retaining the source text. Options allow existing translations to be replaced or deleted.
+
+#### Extract text from PDF files
+
+Extracts embedded text from PDF files attached to the selected records and stores it in a chosen text field, normally **Extracted text** (Concept ID **2-652**). Each PDF’s text is stored as a separate value, up to 64,000 characters, without overwriting populated destination values. This extracts existing PDF text; scanned pages require OCR first.
+
+#### Insert incremental values
+
+This function is designed to fill in or extend values which increment by 1. This can be applied to text fields as well as to numeric fields. It is typically used to create sequences of identifiers which are more appropriate to the users' needs than the simple sequential numbering of the Heurist identifiers (H-IDs), although the use of the latter are strongly recommended wherever possible as they are unique and an unequivocal identifier for every record (even across all registered databases provided they are prefixed with the database ID - see chapter ????).
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/AhTimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/AhTimage.png)
+
+The function will automatically pick up an existing prefix in a text field, so if there are values abcd-1, abcd-2, ... it will generate values with a prefix abcd- followed by the next available number. If multiple prefixes are used you should specify the prefix you want, otherwise the prefix is unpredictable (generally the last one used).
+
+By default this function left pads numbers with zeroes (default 4 digits), so you will get values such as abcd-0008 etc. but this can be changed with *Digits in numeric suffix (text fields only)*
+
+#### Create IIIF annotation thumbnails
+
+TODO  
+This does not in fact exist @ 6/10/2026. Check what was meant here,
 
 # Ch 08 : Result sets, manipulation, custom reports and visualisation
 
@@ -10631,6 +11061,8 @@ Heurist is designed to run on any Linux server
 
 #### **Handy Unix commands &amp; other useful things**
 
+- <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">Find Unix version: cat /etc/os-release</span>  
+    <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);"></span>
 - <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">Disk usage of subdirectories, largest first : </span>  
     <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);"> </span>*sudo du -sh /var/log/\*/ | sort -hr*
 - <span style="color:rgb(34,34,34);background-color:rgb(255,255,255);">Delete files older than 30 days : </span>  
@@ -10821,86 +11253,4 @@ Test the configuration with:
 sudo logrotate -d /etc/logrotate.d/mysql-slow
 ```
 
-###   
-
-# Ch 07a : Recoding and verification
-
-### Introduction
-
-In this chapter we will look at ways that data in the database can be verified for consistency and modified through batch processes.
-
-### Design &gt; Verification
-
-TODO
-
-### Recode menu
-
-[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/yPSimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/yPSimage.png)
-
-The Recode menu operates on the current result set, except where indicated.
-
-#### Add field value?
-
-TODO
-
-#### Replace field value
-
-TODO
-
-#### Delete field value
-
-TODO
-
-#### Relate : Link
-
-TODO
-
-#### Foreign key match
-
-TODO
-
-#### Change record types
-
-TODO
-
-#### Local files to remote repository
-
-TODO
-
-#### Remote URLs to local files
-
-TODO
-
-#### Reset thumbnails
-
-TODO
-
-#### Case conversion
-
-TODO
-
-#### Multiline text to HTML
-
-TODO
-
-#### Translation
-
-TODO
-
-#### Extract text from PDF files
-
-TODO
-
-#### Insert incremental values
-
-[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/AhTimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/AhTimage.png)
-
-This function is designed to fill in or extend values which increment by 1. This can be applied to text fields as well as to numeric fields. It is typically used to create sequences of identifiers which are more appropriate to the users' needs than the simple sequential numbering of the Heurist identifiers (H-IDs), although the use of the latter are strongly recommended wherever possible as they are unique and an unequivocal identifier for every record (even across all registered databases provided they are prefixed with the database ID - see chapter ????).
-
-The function will automatically pick up an existing prefix in a text field, so if there are values abcd-1, abcd-2, ... it will generate values with a prefix abcd- followed by the next available number. If multiple prefixes are used you should specify the prefix you want, otherwise the prefix is unpredictable (generally the last one used).
-
-By default this function left pads numbers with zeroes (default 4 digits), so you will get values such as abcd-0008 etc. but this can be changed with *Digits in numeric suffix (text fields only)*
-
-#### Create IIIF annotation thumbnails
-
-TODO
+###

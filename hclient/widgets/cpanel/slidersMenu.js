@@ -2432,8 +2432,7 @@ $.widget( "heurist.slidersMenu", {
 
             this.introductions[section] = $('<div><div class="gs-box" style="margin:10px;max-width:500px;height:100px;cursor:pointer">'
                 +'<div style="display:inline-block"><img width="110" height="60" alt="" src="'
-                +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
-
+                +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+(section === 'heurist8' ? 'explore' : section)+'.png"></div>'
                 +'<span class="ui-heurist-title header" id="start-hints" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
                     +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>'
 

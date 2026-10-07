@@ -6,17 +6,19 @@ Documentation rédigée le 07/11/2025 par Barbara Bonazzi, mise à jour le 03/03
 
 The following is a typical workflow for a new user managing their own database:
 
-![](https://heurist-doc.huma-num.fr/uploads/e3f41fe1-783f-4b0d-a5f6-48e85babf8e9.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/2lcimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/2lcimage.png)
 
 ### 1.1 Register as a user
 
 Register via [Heurist website](https://heurist.huma-num.fr/heurist/startup).
 
-![](https://heurist-doc.huma-num.fr/uploads/bb686d16-d643-4d73-9894-77303d03b754.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/kzIimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/kzIimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/WY3image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/WY3image.png)
 
 New users should click on the **Register** button and fill in the registration form:
 
-![](https://heurist-doc.huma-num.fr/uploads/1190bca6-70e3-48ed-8c86-d6cfb560f8e7.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/QEGimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/QEGimage.png)
 
 **Note 1**: Server administrators may require registration to be approved by them, in which case they receive an email requiring them to approve your registration and there may be a delay. Otherwise it is immediate.
 
@@ -32,15 +34,25 @@ Please see the video tutorial: [https://www.youtube.com/watch?v=-lRjmkpQh4g](htt
 
 Once you have filled in the registration form above you will be offered the opportunity to create a new database using the login information entered in the registration form.
 
-![](https://heurist-doc.huma-num.fr/uploads/9f678fb4-c5ff-4128-bae0-e85d0f354516.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/BZ9image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/BZ9image.png)
 
-The prefix (editable) identifies the owner but may be changed. We recommend retaining this prefix and using it for all your databases, so they appear together in the list of databases. Please keep database names concise and informative about the contents. Spaces, apostrophes and other special characters are not permitted in the database name. For spaces use underscores ( \_ ). Database names are case sensitive. ‘Lit\_study’ and ‘lit\_study’ are different databases. When you click on “Create Database”, you will become the owner of this database (user # 2) and the administrator of the Database Owners group (Group # 1), with all rights on the database and content.
+By default all new databases have the predefined record types, fields and vocabularies, and their connections and organisation into groups, which are defined in the Heurist\_Core\_Definitions database. Below this are displayed additional curated database structures (which also appear at the top of Design &gt; Browse templates). These will contain the same core definitions but then additional structures appropriate to a particular target domain.
+
+<p class="callout info">If the Heurist Reference Index is unavailable, the core definitions will be loaded from a file in the Heurist code.</p>
+
+<p class="callout warning">Note: The alternative database templates capability was added in September 2026 and has not yet been populated with template databases other than the small museums template created in the early 20-teens.</p>
+
+The prefix (editable) identifies the owner but may be changed. We recommend retaining this prefix and using it for all your databases, so they appear together in the list of databases. Please keep database names concise and informative about the contents.
+
+Spaces, apostrophes and other special characters are not permitted in the database name. For spaces use underscores ( \_ ). Database names are case sensitive. ‘Lit\_study’ and ‘lit\_study’ are different databases.
+
+<p class="callout info">When you click on “Create Database”, you will become the owner of this database (user # 2) and the administrator of the Database Owners group (Group # 1), with all rights on the database and content.</p>
 
 #### 1.2.3 From within a Heurist database
 
 If you already have a Heurist database, you can create a new database with **Admin &gt; New**.
 
-![](https://heurist-doc.huma-num.fr/uploads/3003081f-f20d-415e-8531-a9cbcc62b20d.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/Zxsimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/Zxsimage.png)
 
 For the naming conventions, see above.
 
@@ -48,13 +60,13 @@ When you click “Create Database”, you will be the owner of the new database 
 
 #### 1.2.4 Enter the database
 
-![](https://heurist-doc.huma-num.fr/uploads/cb54eea2-c739-4f38-9ed0-724cf9dcc938.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/IAcimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/IAcimage.png)
 
 Click on **Get Started** to open the new database and login with the user name / password you entered .
 
-Some databases may show additional fuctions such as institutional logins and the ability to request a login (which can be set in Admin &gt; Properties).
+Some databases may show additional functions such as institutional logins and the ability to request a login (which can be set in Admin &gt; Properties).
 
-![](https://heurist-doc.huma-num.fr/uploads/bf3d4705-677f-4240-87c2-726101356721.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/U1Qimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/U1Qimage.png)
 
 We suggest bookmarking the database so you can open it again easily (otherwise you need to search for it on the server through [https://heuristref.net](https://heuristref.net) or [https://heurist.huma-num.fr](https://heurist.huma-num.fr)).
 
@@ -89,7 +101,7 @@ The elements defined include:
 
 To see the existing structures, click on the **Design** menu (purple), then **Record types** and select, eg., the second group **People and Organisations** (the first group is an empty group as a convenience to hold the types you plan to use most often).
 
-![](https://heurist-doc.huma-num.fr/uploads/07b78780-cd98-4398-9f48-244e8d54d416.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/iYHimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/iYHimage.png)
 
 <p class="callout info">**DON'T PANIC!** Some people panic because their database is already full of things they (think they) don't want. To simplify the database you may drag the things you don't want into the **Trash** (they will still be there if you later decide you need them, and they have little or no effect on the performance of the system).</p>
 
@@ -103,19 +115,19 @@ Note however that there is no automatic update of database structure between sep
 
 The principal features of Heurist are accessed through a standard menu/sub-menu layout on the left, and one or two panels on the right in which the menu functions are performed. Each of the menu entries on the left opens a sub-menu of functions. We will explore these in the order **Admin** – **Design** – **Populate** – **Explore** – **Publish** as this represents a logical workflow (even though most users will go to and from between them).
 
- ![](https://heurist-doc.huma-num.fr/uploads/f0ea07ae-4d15-403a-9a3c-596604e5e86e.png) ![](https://heurist-doc.huma-num.fr/uploads/848a3b51-6828-4658-9dac-4a28350417a3.png)
+ ![](https://heurist-doc.huma-num.fr/uploads/f0ea07ae-4d15-403a-9a3c-596604e5e86e.png) [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/z0iimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/z0iimage.png)
 
 ### 3.1 Design
 
 Use this to manage your database, including access to Standard Administration tools (depending on your access privileges), such as creating databases, managing users and groups, etc. @todo link to documentation for **Design.**
 
- ![](https://heurist-doc.huma-num.fr/uploads/bf6d9716-514b-4379-befb-ed035b1026cd.png)
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/zHoimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/zHoimage.png)![](https://heurist-doc.huma-num.fr/uploads/bf6d9716-514b-4379-befb-ed035b1026cd.png)
 
 ### 3.2 Explore
 
 The **Explore** menu is in many ways the most important and most complex, since it is the one which comprises all the ways by which you can browse, search and use the data you have collected.
 
-![](https://heurist-doc.huma-num.fr/uploads/1a819ed2-4b07-4dfc-adb9-2ab1dee68e98.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/IWPimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/IWPimage.png)
 
 Explore: Use these tools to create queries, filters, and faceted searches, to gain the most out of your data.
 
@@ -125,19 +137,19 @@ Explore: Use these tools to create queries, filters, and faceted searches, to ga
 
 Use these to import data from various formats and export data to various formats. @todo link to documentation for **Populate**
 
- ![](https://heurist-doc.huma-num.fr/uploads/d070066d-11b8-4eb7-8550-60e8997550f6.png)
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/JGqimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/JGqimage.png)![](https://heurist-doc.huma-num.fr/uploads/d070066d-11b8-4eb7-8550-60e8997550f6.png)
 
 ### 3.4 Publish
 
 This allows you to publish your data in a variety of formats, including a fully interactive website, as well as a variety of raw data formats such as CSV, JSon, KML, and GEPHI. @todo link to documentation for **Publish**
 
- ![](https://heurist-doc.huma-num.fr/uploads/2be4c37a-2437-4b99-96f7-22d10f42333c.png)
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/1TOimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/1TOimage.png)![](https://heurist-doc.huma-num.fr/uploads/2be4c37a-2437-4b99-96f7-22d10f42333c.png)
 
 ### 3.5 Admin
 
 The **Admin** &gt; **Database** menu offers a first set of advanced functionalities and allows you to:
 
-![](https://heurist-doc.huma-num.fr/uploads/7cb866d0-9c01-41e3-a1bb-707f7fd48c7e.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/dGzimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/dGzimage.png)![](https://heurist-doc.huma-num.fr/uploads/7cb866d0-9c01-41e3-a1bb-707f7fd48c7e.png)
 
 - Open another database
 - Create a new database, as explained above.
@@ -174,10 +186,9 @@ Database structure can only be modified by administrators in the Database Manage
 - Clone, clear and delete the database.
 - Run all database administration utilities.
 - Carry out any tasks that the Administrators of individual groups can do (whether or not they are a member of that group).
-- For example:Add, edit and view records specific to any group.
-    
-    Allocate users to any group (as Administrators or members).
-    
+- For example:  
+    Add, edit and view records specific to any group.  
+    Allocate users to any group (as Administrators or members).  
     Change record Ownership to any workgroup.  
     Register the database (only available to the database owner, user #2)
 - **Member**
@@ -242,9 +253,7 @@ Any records you want others to see can be made Viewable. They will not be editab
 
 The default access of all new records can be set in the Database properties : Menu **Design &gt; Properties**, section **Behaviour**.
 
-![](https://heurist-doc.huma-num.fr/uploads/e51fddf3-8beb-46f2-b3c1-322e89fee8e7.png)
-
-![](https://heurist-doc.huma-num.fr/uploads/679b510b-016c-4edf-a625-00bc384a1712.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/OzJimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/OzJimage.png)
 
 ## 5. Useful Functions
 
@@ -261,13 +270,21 @@ you may wish to skip this section and return to it later</p>
 
 **Explore &gt; Overview** takes you to a summary of your database. This is also shown when you first open the database. The buttons and the list of the commonest entities on this page are clickable.
 
-![](https://heurist-doc.huma-num.fr/uploads/b08d1691-acf5-4eee-88c5-096a745f698a.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/Pefimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/Pefimage.png)
 
 **Design &gt; Properties** (or the EDIT METADATA button above) takes you to the **Database Properties** form.
 
-**Basic description** The basic information section describes the database, owner and access right
+@todo: document all of these
 
-![](https://heurist-doc.huma-num.fr/uploads/c1f54ea5-1664-43c3-80be-8cbdcc6f3be1.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/R5Qimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/R5Qimage.png)
+
+part 2
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/hMsimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/hMsimage.png)
+
+**Basic description** The basic information section describes the database, owner and access rights
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/JxMimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/JxMimage.png)
 
 ##### **Additional settings** 
 
@@ -295,7 +312,7 @@ This function allows one to set up a range of settings which apply to your use o
 
 <p class="callout info">As user preferences are stored in your session variables on your web browser, it is important to check the “Keep me logged in for a month” (which is extended each time you log in from the same computer within one month) so that they are remembered. </p>
 
- ![](https://heurist-doc.huma-num.fr/uploads/6481e3ba-301b-435b-9b58-f3318c84b31e.png)
+ [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/nk9image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/nk9image.png)
 
 Most of these settings are fairly self-explanatory, but we will thus explain some of the more obscure settings.
 
@@ -359,15 +376,15 @@ Click **‘Visualise’** in the Design menu to access the network visualisation
 
 Generally, it is best just to visualise a few record types at a time—the graph can get very busy if you show too many types. To choose which record types to display, click the dropdown at the top left of the visualisation:
 
-![](https://heurist-doc.huma-num.fr/uploads/0f871315-9bb5-40d9-8702-94ccab9541fe.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/47wimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/47wimage.png)
 
 Click the ‘show’ checkbox next to each of the record types you are interested in.
 
-![](https://heurist-doc.huma-num.fr/uploads/b88919a2-39fb-4e41-a79f-d1394ffd873d.png)
+[![igbimage.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/7yQigbimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/7yQigbimage.png)[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/igbimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/igbimage.png)
 
 To move the visualisation around, click in the whitespace and drag with your mouse. You can also click and drag the displayed record types. Click the ℹ️ icon to view more information about each record. Click the ✏️ icon to modify the record type. If you hover over a connection between two records, you will see information about how these records are connected to one another. For example, in this database a ‘Person’ can be related to a ‘Place’ in three different ways: the Place might be the Person’s place of birth, the Person’s place of death, or it might be a Place where the Person held a political office. Each of these relationships—place of birth, place of death and political office(s)—is a field in the ‘Person’ type, and can be seen in the data entry form for a ‘Person’.
 
-![](https://heurist-doc.huma-num.fr/uploads/dcc965b6-897f-4e9c-a193-c17d336a8738.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/AOqimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/AOqimage.png)
 
 #### 5.3.1 The Explore Overview Screen\*\*
 
@@ -377,7 +394,13 @@ The Explore menu offers a range of powerful tools for viewing, querying and filt
 
 @todo: The metadata editing has been greatly improved as of late July 2026 and will require re-documenting
 
-![](https://heurist-doc.huma-num.fr/uploads/5a3261d1-af04-45e1-8b4d-913f83685eb4.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/y54image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/y54image.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/Dngimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/Dngimage.png)
+
+In Design &gt; Properties it looks like this. The metadata is read from the Heurist Reference Index for registered databases.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/5fLimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/5fLimage.png)
 
 ### 5.4 Simple Filters
 
@@ -387,19 +410,19 @@ Heurist comes with some simple filters pre-configured, so that you can do some b
 
 You can filter out older records, and just show records that have been entered or edited in the last fortnight. To do this, click ‘recent’ at the top of the Explore menu. This can be useful while you are in the data entry phase of your project, when you want to see the records you’re currently working with.
 
-![](https://heurist-doc.huma-num.fr/uploads/2a7ec77f-f021-40dc-aa39-31a56ba4cdf8.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/aiLimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/aiLimage.png)
 
 #### 5.4.2 See All Records
 
 To view all the records in your database in one long list, click ‘All records'
 
-![](https://heurist-doc.huma-num.fr/uploads/c3db0991-4d51-425f-aede-e3c0ce15db5f.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/A3aimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/A3aimage.png)
 
 #### 5.4.3 Filter by record type/entity
 
 To see all the records of a particular type, hover over ‘Entities’. This will bring up a list of all the record types currently used by your database (e.g. Place, Person). Click on the record type you are interested in to see all the records of that type.
 
-![](https://heurist-doc.huma-num.fr/uploads/8f7b62fe-bafa-48ef-b536-fd63f7b790eb.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/pCDimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/pCDimage.png)
 
 #### 5.4.4 Finding records quickly
 
@@ -421,9 +444,7 @@ Click on **Recent changes** and edit the string in the filter box (behind the ey
 
 Situated at top right of the screen:
 
-![](https://heurist-doc.huma-num.fr/uploads/28c9e147-4d2f-44fa-8036-20553e4e8e8e.png)
-
-![](https://heurist-doc.huma-num.fr/uploads/96755744-6232-4242-9067-8c34d8be75c3.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/NGFimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/NGFimage.png)
 
 **HELP (web links, open in new tab)**
 
@@ -445,11 +466,10 @@ Situated at top right of the screen:
 
 Situated at top right of the screen:
 
-![](https://heurist-doc.huma-num.fr/uploads/ab027cc4-eaaa-4631-8e7c-f40f2ec55d5d.png)
+![](https://docs.heuristref.net/loading.gif)[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/R6Iimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/R6Iimage.png)
 
-![](https://heurist-doc.huma-num.fr/uploads/d52434a1-f4c9-43a3-ac20-1de8a8a98e67.png)
+**My preferences** displays the **User preferences** form to manage your Heurist environment.
 
-- **My preferences** displays the **User preferences** form to manage your Heurist environment.
 - **Manage tags**: The Manage Tags option lets you edit and remove all of your tags in one place. Tags are personalised terms created by a Heurist user and can be added when creating or editing a record (one you own or have bookmarked).
 
 The Manage Tags dialog lists all tags you have created, by usage (default).
@@ -537,7 +557,7 @@ You don't need to worry about *tables* and *columns* in a Heurist database. Inst
 
 A Heurist database is best understood by a diagram which identifies the different entities in the database, and shows how they are related. You can actually generate such a diagram of your database using the [Visualise](https://heuristref.net/h6-alpha/viewers/smarty/hclient/widgets/cms/Visualise.html) tool.
 
-![](https://heurist-doc.huma-num.fr/uploads/ded98d6a-094d-4042-bb56-7bdb6af75ed1.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/FHhimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/FHhimage.png)![](https://heurist-doc.huma-num.fr/uploads/ded98d6a-094d-4042-bb56-7bdb6af75ed1.png)
 
 **Diagram of a Graph Database (Wikimedia Commons)**
 

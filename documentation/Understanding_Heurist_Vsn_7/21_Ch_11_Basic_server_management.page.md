@@ -18,6 +18,8 @@ Heurist is designed to run on any Linux server
 
 #### **Handy Unix commands &amp; other useful things**
 
+- <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Find Unix version: cat /etc/os-release</span>  
+    <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"></span>
 - <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Disk usage of subdirectories, largest first : </span>  
     <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> </span>*sudo du -sh /var/log/\*/ | sort -hr*
 - <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Delete files older than 30 days : </span>  
