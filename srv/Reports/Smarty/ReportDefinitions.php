@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace Heurist\Reports\Smarty;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
 
 /** Cached definitions of one report run. */
 final class ReportDefinitions
@@ -35,8 +36,8 @@ final class ReportDefinitions
     private ?array $fieldTypes = null;
     /** @var array<int,array<int,string>> rty => [dty => display name] in form order */
     private array $structures = array();
-    /** @var array<int,array>|null trm_ID => [label, code, desc, parent, originDb, originId, inverse] */
-    private ?array $terms = null;
+    /** Terms (and the concept-code rule) come from the shared srv loader. */
+    private DefinitionLookup $lookup;
     /** @var array<string,array<string,array<string,string>>> entity => lang => id|field => text */
     private array $translations = array();
 
@@ -48,6 +49,7 @@ final class ReportDefinitions
     {
         $this->database = $database;
         $this->registeredDbId = $registeredDbId;
+        $this->lookup = new DefinitionLookup($database);
     }
 
     /** Name of a record type ('' when unknown). */
@@ -99,15 +101,15 @@ final class ReportDefinitions
     }
 
     /**
-     * A term: id, label, code, desc, conceptid, parent, inverse; null when unknown.
+     * A term (DefinitionLookup): internalid, term (label), code, conceptid, desc, parent,
+     * inverse; null when unknown.
      *
      * @param mixed $termId
      * @return array|null
      */
     public function term($termId): ?array
     {
-        $this->loadTerms();
-        return $this->terms[intval($termId)] ?? null;
+        return $this->lookup->term(intval($termId));
     }
 
     /**
@@ -122,14 +124,14 @@ final class ReportDefinitions
     {
         $term = $this->term($termId);
         if($term === null){ return ''; }
-        $labels = explode('.', $term['label']);
+        $labels = explode('.', $term['term']);
         $guard = 0;
         while($term['parent'] > 0 && $guard++ < 50){
             $term = $this->term($term['parent']);
             if($term === null || !($term['parent'] > 0)){
                 break; // the vocabulary itself is not shown
             }
-            $labels = array_merge(explode('.', $term['label']), $labels);
+            $labels = array_merge(explode('.', $term['term']), $labels);
         }
         $i = 1;
         while($i < count($labels)){
@@ -157,7 +159,7 @@ final class ReportDefinitions
         if($term !== null && $term['inverse'] > 0){
             return $term['inverse'];
         }
-        foreach($this->terms ?? array() as $id => $other){
+        foreach($this->lookup->allTerms() as $id => $other){
             if($other['inverse'] === $termId){
                 return $id;
             }
@@ -265,7 +267,7 @@ final class ReportDefinitions
         if($entity === 'trm'){
             foreach($ids as $id){
                 $term = $this->term($id);
-                $defaults[$id] = $term === null ? '' : (string)($field === 'trm_Label' ? $term['label'] : $term['desc']);
+                $defaults[$id] = $term === null ? '' : (string)($field === 'trm_Label' ? $term['term'] : $term['desc']);
             }
         }elseif($entity === 'ulf'){
             foreach($ids as $id){
@@ -287,31 +289,5 @@ final class ReportDefinitions
             }
         }
         return $defaults;
-    }
-
-    /** All terms, once. */
-    private function loadTerms(): void
-    {
-        if($this->terms !== null){ return; }
-        $this->terms = array();
-        foreach($this->database->fetchRows(
-            'SELECT trm_ID,trm_Label,trm_Code,trm_Description,trm_ParentTermID,'
-            .'trm_OriginatingDBID,trm_IDInOriginatingDB,trm_InverseTermID FROM defTerms'
-        ) as $row){
-            $id = intval($row[0]);
-            $origin = intval($row[5]);
-            $conceptId = $origin > 0
-                ? $origin.'-'.intval($row[6])
-                : ($this->registeredDbId !== '' ? $this->registeredDbId.'-'.$id : '');
-            $this->terms[$id] = array(
-                'id' => $id,
-                'label' => (string)$row[1],
-                'code' => $row[2],
-                'desc' => $row[3],
-                'parent' => intval($row[4]),
-                'conceptid' => $conceptId,
-                'inverse' => intval($row[7])
-            );
-        }
     }
 }

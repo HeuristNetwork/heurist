@@ -5,7 +5,9 @@
 * Port of the list mode of export/xml/kml.php: every geo value of an exported
 * record becomes a Placemark with the record id and title, a TimeStamp/TimeSpan
 * from the record's Date field or Start/End date pair, and the geometry (geoPHP
-* WKT to KML, as the legacy script). New: the requested columns are written as
+* WKT to KML, as the legacy script). With geo fields of the data source
+* (ExportRequest::$geoFields, direct or linked paths) only those give geometry;
+* with its time fields (ExportRequest::$timeFields) the time span covers their values. New: the requested columns are written as
 * ExtendedData. Records without geo values are not written.
 * The file is written with XMLWriter (XmlStreamWriter), flushed after every batch;
 * only the geometry from geoPHP is inserted as ready-made KML.
@@ -25,7 +27,7 @@ declare(strict_types=1);
 namespace Heurist\Records\Export\Writer;
 
 use Heurist\Records\Export\ExportColumns;
-use Heurist\Records\Export\ExportDefinitions;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Export\ExportRequest;
 use Heurist\Utilities\Temporal;
 
@@ -34,7 +36,7 @@ final class KmlExportWriter implements ExportWriterInterface
 {
     private ExportRequest $request;
     private ExportColumns $columns;
-    private ExportDefinitions $definitions;
+    private DefinitionLookup $definitions;
     private string $path;
     /** @var array{date:int,start:int,end:int} Field ids of the time span. */
     private array $dateFields;
@@ -46,11 +48,11 @@ final class KmlExportWriter implements ExportWriterInterface
     /**
      * @param ExportRequest $request Columns.
      * @param ExportColumns $columns Column expansion and cells.
-     * @param ExportDefinitions $definitions Field types.
+     * @param DefinitionLookup $definitions Field types.
      * @param string $workDir Folder for the file.
      * @param array $dateFields date (DT_DATE), start (DT_START_DATE), end (DT_END_DATE).
      */
-    public function __construct(ExportRequest $request, ExportColumns $columns, ExportDefinitions $definitions,
+    public function __construct(ExportRequest $request, ExportColumns $columns, DefinitionLookup $definitions,
         string $workDir, array $dateFields)
     {
         $this->request = $request;
@@ -71,6 +73,7 @@ final class KmlExportWriter implements ExportWriterInterface
         foreach($this->request->columns as $list){
             foreach(ExportColumns::codes($list) as $code){ $codes[] = $code; }
         }
+        foreach(array_merge($this->request->geoFields, $this->request->timeFields) as $code){ $codes[] = $code; }
         return array_values(array_unique($codes));
     }
 
@@ -95,7 +98,11 @@ final class KmlExportWriter implements ExportWriterInterface
         foreach($records as $record){
             $geoValues = array();
             foreach($record['details'] ?? array() as $fieldId => $values){
-                if(!ctype_digit((string)$fieldId) || $this->definitions->fieldType(intval($fieldId)) !== 'geo'){ continue; }
+                if(!empty($this->request->geoFields)){
+                    if(!in_array((string)$fieldId, $this->request->geoFields, true)){ continue; }
+                }elseif(!ctype_digit((string)$fieldId) || $this->definitions->fieldType(intval($fieldId)) !== 'geo'){
+                    continue;
+                }
                 foreach($values as $value){
                     $wkt = is_array($value) ? (string)($value['geo']['wkt'] ?? '') : '';
                     if($wkt !== ''){ $geoValues[] = $wkt; }
@@ -172,6 +179,9 @@ final class KmlExportWriter implements ExportWriterInterface
      */
     private function timeRange(array $record): ?array
     {
+        if(!empty($this->request->timeFields)){
+            return $this->timeFieldsRange($record);
+        }
         $first = static function(array $record, int $fieldId){
             if($fieldId < 1){ return null; }
             $values = $record['details'][(string)$fieldId] ?? $record['details'][$fieldId] ?? array();
@@ -197,6 +207,36 @@ final class KmlExportWriter implements ExportWriterInterface
         }catch(\Throwable $error){
             return null;
         }
+    }
+
+    /**
+     * Earliest and latest date of the values of the data source time fields.
+     *
+     * @return array{0:string,1:string}|null
+     */
+    private function timeFieldsRange(array $record): ?array
+    {
+        $min = null;
+        $max = null;
+        foreach($this->request->timeFields as $code){
+            foreach($record['details'][$code] ?? array() as $value){
+                $text = is_array($value) ? ($value['value'] ?? '') : $value;
+                if(!is_string($text) || $text === ''){ continue; }
+                try{
+                    $temporal = new Temporal($text);
+                    if(!$temporal->isValid()){ continue; }
+                    $range = $temporal->calcMinMax();
+                }catch(\Throwable $error){
+                    continue;
+                }
+                if(!is_array($range) || (string)$range[0] === ''){ continue; }
+                // ISO dates (also negative years with the same length) compare as text within one era
+                if($min === null || strcmp((string)$range[0], $min) < 0){ $min = (string)$range[0]; }
+                $end = (string)($range[1] ?? $range[0]);
+                if($max === null || strcmp($end, $max) > 0){ $max = $end; }
+            }
+        }
+        return $min === null ? null : array($min, $max ?? $min);
     }
 
     private function extendedData(array $record): void

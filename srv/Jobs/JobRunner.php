@@ -198,13 +198,38 @@ final class JobRunner
     /**
      * Jobs of the current user; managers may ask for all jobs.
      *
+     * @param bool $all Every job of the database (managers only).
+     * @param string|null $type Only jobs of this type.
+     * @param bool $brief Without the stored parameters (small answer for lists).
      * @return array<int,array>
      */
-    public function listJobs(bool $all = false): array
+    public function listJobs(bool $all = false, ?string $type = null, bool $brief = false): array
     {
         $this->requireMember();
         $userId = $all && $this->isManager() ? null : $this->runtime->userId;
-        return array_map(array($this, 'publicJob'), $this->store->listJobs($userId));
+        $jobs = array();
+        foreach($this->store->listJobs($userId) as $job){
+            if($type !== null && $job['type'] !== $type){ continue; }
+            $public = $this->publicJob($job);
+            if($brief){ unset($public['params']); }
+            $jobs[] = $public;
+        }
+        return $jobs;
+    }
+
+    /**
+     * Remove a finished job and its result files (its owner, managers).
+     *
+     * @return array{id:string,deleted:bool}
+     */
+    public function delete(string $id): array
+    {
+        $job = $this->accessibleJob($id);
+        if(in_array($job['status'], JobStore::ACTIVE, true)){
+            throw new DomainException('The job is still running. Stop it first.');
+        }
+        $this->store->delete($id);
+        return array('id' => $id, 'deleted' => true);
     }
 
     /** Stored result content of a finished job, or null. */

@@ -42,7 +42,7 @@ outputs with the report names `term`, `code`, `conceptid`, `desc`, `internalid`
 (the QSE column `ext: "id"` is read as `internalid`).
 
 Settings: database settings file "Export" (`settings/export.json`):
-`maxRecords` (default 100000) and `timeLimit` (seconds, default 600).
+`maxRecords` (default 500000) and `timeLimit` (seconds, default 600).
 
 ## Key files
 

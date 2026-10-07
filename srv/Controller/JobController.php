@@ -4,16 +4,21 @@
 *
 *   POST /jobs {"type": "...", "params": {...}}  start; returns the queued job, then
 *                                                the same PHP process runs it
-*   GET  /jobs[?all=1]                           own jobs (managers: all=1 for every job)
+*   GET  /jobs[?all=1][&type=..][&brief=1]       own jobs (managers: all=1 for every job), newest
+*                                                first; type: only that job type; brief: without
+*                                                the stored parameters (small answer for lists)
 *   GET  /jobs/{id}                              state and progress
 *   POST /jobs/{id}/cancel                       Stop (also KILL QUERY on its connections)
+*   DELETE /jobs/{id}                            remove a finished job and its result files
 *   GET  /jobs/{id}/result                       stored result content (e.g. preview HTML), or the
 *                                                result file of the job (e.g. an export) as a
 *                                                download; the file only for the job's owner
 *
 * The start response is sent and the connection closed before the job runs
 * (fastcgi_finish_request when available, otherwise Content-Length +
-* Connection: close). The client polls GET /jobs/{id}.
+* Connection: close). The client polls GET /jobs/{id}. The PHP session is closed
+* before the job runs: a job holding the session lock would block every other
+* request of the same browser (polling included) until it ends.
 *
 * @project     Heurist academic knowledge management system
 * @package     Controller
@@ -82,7 +87,12 @@ final class JobController
         try{
             if($id === ''){
                 if($method === 'GET'){
-                    $this->send($this->runner->listJobs(filter_var($params['all'] ?? false, FILTER_VALIDATE_BOOLEAN)));
+                    $type = trim((string)($params['type'] ?? ''));
+                    $this->send($this->runner->listJobs(
+                        filter_var($params['all'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                        $type === '' ? null : $type,
+                        filter_var($params['brief'] ?? false, FILTER_VALIDATE_BOOLEAN)
+                    ));
                 }elseif($method === 'POST'){
                     $type = (string)($body['type'] ?? $params['type'] ?? '');
                     $jobParams = $body['params'] ?? array();
@@ -99,7 +109,11 @@ final class JobController
 
             switch($action){
                 case '':
-                    if($method !== 'GET'){ $this->methodNotAllowed('GET'); break; }
+                    if($method === 'DELETE'){
+                        $this->send($this->runner->delete($id));
+                        break;
+                    }
+                    if($method !== 'GET'){ $this->methodNotAllowed('GET, DELETE'); break; }
                     $this->send($this->runner->get($id));
                     break;
                 case 'cancel':
@@ -138,6 +152,9 @@ final class JobController
     private function sendAndRun(array $job): void
     {
         $body = json_encode(array('status' => 0, 'data' => $job), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        // legacy code may have reopened the session (SessionStore::get keeps it open); after the
+        // response is sent it cannot be started again (headers sent)
+        if(session_status() === PHP_SESSION_ACTIVE){ session_write_close(); }
         if(!$this->detach){
             print $body;
             $this->runJob((string)$job['id']);

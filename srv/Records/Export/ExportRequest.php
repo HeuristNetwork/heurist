@@ -5,11 +5,18 @@
 *   format   csv | tsv | json | geojson | kml | xml | gephi
 *   scope    {query, ids?, rectypes?}  query of the data source; ids = the selection;
 *            rectypes = only these record types of the result
-*   rules    expansion rules (as in a DataSource); empty = the result only
+*   rules    expansion rules (as in a DataSource); empty = the result only; used by
+*            json, xml and gephi (ignored for csv, tsv, geojson, kml)
 *   columns  {"<rtyId>"|"*": [field code | {field, ext}]}  output fields per record type;
-*            "*" applies to every record type without its own list
-*   values   {date: asis|start|range, file: url|id|details, pointer: id|title,
-*             enum: term|code|conceptid|desc|internalid}
+*            "*" applies to every record type without its own list; a record type without
+*            columns gets MINIMAL_COLUMNS
+*   values   {date: raw|readable, file: url|details|id, pointerTitle: bool,
+*             termHierarchy: bool, enum: term|code|conceptid|desc|internalid (default
+*             output of term columns without ext)}
+*   geofields  geojson, kml: geo field codes of the data source (direct or linked paths)
+*            giving the geometry; empty = every direct geo field
+*   timefields kml: date field codes of the data source giving the time span; empty =
+*            the Date or Start/End date fields
 *   csv      {sep, quote, mvsep, header, eol: nix|win}
 *   limit    records of the result to export (0 = all, up to the database maximum);
 *            gephi: at most GEPHI_MAX records in all (expanded records included)
@@ -50,11 +57,16 @@ final class ExportRequest
     public const ENUM_OUTPUTS = array('term', 'code', 'conceptid', 'desc', 'internalid');
 
     private const VALUE_CHOICES = array(
-        'date' => array('asis', 'start', 'range'),
-        'file' => array('url', 'id', 'details'),
-        'pointer' => array('id', 'title'),
+        'date' => array('raw', 'readable'),
+        'file' => array('url', 'details', 'id'),
         'enum' => self::ENUM_OUTPUTS
     );
+
+    /** Columns of a record type without its own list: id, record type and title. */
+    public const MINIMAL_COLUMNS = array('rec_ID', 'rec_RecTypeID', 'rec_Title');
+
+    /** Formats that write the expanded records too. */
+    public const EXPANDING_FORMATS = array('json', 'xml', 'gephi');
 
     public string $format;
     /** @var mixed Query of the data source (text or JSON array). */
@@ -67,8 +79,12 @@ final class ExportRequest
     public $rules;
     /** @var array<string,array<int,array{field:string,ext:?string}>> Columns per record type ("*" = any). */
     public array $columns;
-    /** @var array{date:string,file:string,pointer:string,enum:string} */
+    /** @var array{date:string,file:string,enum:string,pointerTitle:bool,termHierarchy:bool} */
     public array $values;
+    /** @var string[] geojson, kml: geo field codes of the geometry (empty = every direct geo field). */
+    public array $geoFields;
+    /** @var string[] kml: date field codes of the time span (empty = Date or Start/End). */
+    public array $timeFields;
     /** @var array{sep:string,quote:string,mvsep:string,header:bool,eol:string} */
     public array $csv;
     public int $limit;
@@ -98,7 +114,8 @@ final class ExportRequest
         }
 
         $rules = $params['rules'] ?? null;
-        $this->rules = ($rules === null || $rules === '' || $rules === array()) ? null : $rules;
+        $this->rules = ($rules === null || $rules === '' || $rules === array()
+            || !in_array($format, self::EXPANDING_FORMATS, true)) ? null : $rules;
 
         $this->columns = self::columns($params['columns'] ?? array());
 
@@ -107,11 +124,17 @@ final class ExportRequest
         foreach(self::VALUE_CHOICES as $type => $choices){
             $value = strtolower(trim((string)($values[$type] ?? $choices[0])));
             if($type === 'enum' && $value === 'id'){ $value = 'internalid'; }
+            if($type === 'date' && $value === 'asis'){ $value = 'raw'; }
             if(!in_array($value, $choices, true)){
                 throw new InvalidArgumentException('Unknown '.$type.' output: '.$value);
             }
             $this->values[$type] = $value;
         }
+        $this->values['pointerTitle'] = filter_var($values['pointerTitle'] ?? (($values['pointer'] ?? '') === 'title'),
+            FILTER_VALIDATE_BOOLEAN);
+        $this->values['termHierarchy'] = filter_var($values['termHierarchy'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $this->geoFields = self::codeList($params['geofields'] ?? array(), 'geo');
+        $this->timeFields = self::codeList($params['timefields'] ?? array(), 'time');
 
         $csv = is_array($params['csv'] ?? null) ? $params['csv'] : array();
         $sep = (string)($csv['sep'] ?? ($format === 'tsv' ? "\t" : ','));
@@ -182,11 +205,36 @@ final class ExportRequest
             'columns' => $this->columns,
             'values' => $this->values,
             'csv' => $this->csv,
+            'geofields' => $this->geoFields,
+            'timefields' => $this->timeFields,
             'limit' => $this->limit,
             'fileName' => $this->fileName,
             'title' => $this->title,
             'names' => $this->names
         );
+    }
+
+    /**
+     * Field codes (direct ids or linked paths) of geo or time fields.
+     *
+     * @return string[]
+     */
+    private static function codeList($value, string $kind): array
+    {
+        if(is_string($value)){ $value = $value === '' ? array() : explode(',', $value); }
+        if(!is_array($value)){
+            throw new InvalidArgumentException('"'.$kind.'fields" must be a list of field codes');
+        }
+        $codes = array();
+        foreach($value as $code){
+            $code = trim((string)(is_array($code) ? ($code['field'] ?? '') : $code));
+            if($code === ''){ continue; }
+            if(preg_match('/^[A-Za-z0-9_:]{1,200}$/', $code) !== 1){
+                throw new InvalidArgumentException('Invalid '.$kind.' field: '.$code);
+            }
+            $codes[$code] = $code;
+        }
+        return array_values($codes);
     }
 
     /** @return int[] */

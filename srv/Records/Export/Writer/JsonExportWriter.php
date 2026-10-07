@@ -36,7 +36,7 @@ declare(strict_types=1);
 
 namespace Heurist\Records\Export\Writer;
 
-use Heurist\Records\Export\ExportDefinitions;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Export\ValueFormatter;
 use RuntimeException;
 
@@ -50,7 +50,7 @@ final class JsonExportWriter implements ExportWriterInterface
     private const CONCEPT_HEADERS = array('rec_Title', 'rec_URL', 'rec_ScratchPad', 'rec_NonOwnerVisibility',
         'rec_Added', 'rec_Modified');
 
-    private ExportDefinitions $definitions;
+    private DefinitionLookup $definitions;
     private ValueFormatter $formatter;
     private bool $names;
     private string $path;
@@ -64,12 +64,12 @@ final class JsonExportWriter implements ExportWriterInterface
     private array $fields = array();
 
     /**
-     * @param ExportDefinitions $definitions Names and concept codes.
+     * @param DefinitionLookup $definitions Names and concept codes.
      * @param ValueFormatter $formatter File URLs.
      * @param string $workDir Folder for the file.
      * @param bool $names Names and local ids (the /records envelope); false: concept codes only.
      */
-    public function __construct(ExportDefinitions $definitions, ValueFormatter $formatter, string $workDir, bool $names = false)
+    public function __construct(DefinitionLookup $definitions, ValueFormatter $formatter, string $workDir, bool $names = false)
     {
         $this->definitions = $definitions;
         $this->formatter = $formatter;
@@ -176,9 +176,9 @@ final class JsonExportWriter implements ExportWriterInterface
             case 'relationtype':
                 if(is_array($value)){
                     return (string)($value['trm_ConceptCode']
-                        ?? ($this->definitions->term(intval($value['trm_ID'] ?? $value['value'] ?? 0))['concept'] ?? ''));
+                        ?? ($this->definitions->term(intval($value['trm_ID'] ?? $value['value'] ?? 0))['conceptid'] ?? ''));
                 }
-                return (string)($this->definitions->term(intval($value))['concept'] ?? $value);
+                return (string)($this->definitions->term(intval($value))['conceptid'] ?? $value);
             case 'resource':
                 return is_array($value) ? (string)($value['rec_ID'] ?? $value['value'] ?? '') : (string)$value;
             case 'file':

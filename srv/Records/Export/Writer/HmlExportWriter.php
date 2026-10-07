@@ -34,7 +34,7 @@ declare(strict_types=1);
 
 namespace Heurist\Records\Export\Writer;
 
-use Heurist\Records\Export\ExportDefinitions;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Export\ValueFormatter;
 
 /** Writes one HML document. */
@@ -42,7 +42,7 @@ final class HmlExportWriter implements ExportWriterInterface
 {
     private const GEO_TYPES = array('r' => 'bounds', 'c' => 'circle', 'pl' => 'polygon', 'l' => 'path', 'p' => 'point', 'm' => 'multi');
 
-    private ExportDefinitions $definitions;
+    private DefinitionLookup $definitions;
     private ValueFormatter $formatter;
     private string $path;
     private int $relationTypeField;
@@ -60,13 +60,13 @@ final class HmlExportWriter implements ExportWriterInterface
     private array $incoming = array();
 
     /**
-     * @param ExportDefinitions $definitions Names and concept codes.
+     * @param DefinitionLookup $definitions Names and concept codes.
      * @param ValueFormatter $formatter File URLs, record URLs.
      * @param string $workDir Folder for the file.
      * @param int $relationTypeField DT_RELATION_TYPE (inverse term attributes).
      * @param bool $names Local ids and names besides the concept codes.
      */
-    public function __construct(ExportDefinitions $definitions, ValueFormatter $formatter, string $workDir,
+    public function __construct(DefinitionLookup $definitions, ValueFormatter $formatter, string $workDir,
         int $relationTypeField, bool $names = false)
     {
         $this->names = $names;
@@ -208,17 +208,17 @@ final class HmlExportWriter implements ExportWriterInterface
         if($useInverse){ $attrs['useInverse'] = 'true'; }
         if($this->names){ $attrs['termID'] = (string)$termId; }
         $attrs['relatedRecordID'] = (string)($useInverse ? $link['source'] : $link['target']);
-        if($this->names){ $attrs['term'] = $term['label'] ?? ''; }
-        $attrs['termConceptID'] = $term['concept'] ?? '';
+        if($this->names){ $attrs['term'] = $term['term'] ?? ''; }
+        $attrs['termConceptID'] = $term['conceptid'] ?? '';
         if(!empty($term['code'])){ $attrs['code'] = $term['code']; }
         $inverse = intval($term['inverse'] ?? 0);
         if($inverse > 0){
             $inverseTerm = $this->definitions->term($inverse);
             if($this->names){
-                $attrs['inverse'] = $inverseTerm['label'] ?? '';
+                $attrs['inverse'] = $inverseTerm['term'] ?? '';
                 $attrs['invTermID'] = (string)$inverse;
             }
-            $attrs['invTermConceptID'] = $inverseTerm['concept'] ?? '';
+            $attrs['invTermConceptID'] = $inverseTerm['conceptid'] ?? '';
         }
         $this->xml->element('relationship', $attrs, (string)$link['relation']);
     }
@@ -243,13 +243,13 @@ final class HmlExportWriter implements ExportWriterInterface
                 $termId = intval(is_array($value) ? ($value['trm_ID'] ?? $value['value'] ?? 0) : $value);
                 $term = $this->definitions->term($termId);
                 if($this->names){ $attrs['termID'] = (string)$termId; }
-                if($term !== null){ $attrs['termConceptID'] = $term['concept']; }
+                if($term !== null){ $attrs['termConceptID'] = $term['conceptid']; }
                 if($fieldId === $this->relationTypeField && !empty($term['inverse'])){
                     $inverse = $this->definitions->term(intval($term['inverse']));
-                    if($this->names){ $attrs['inverse'] = $inverse['label'] ?? ''; }
-                    $attrs['invTermConceptID'] = $inverse['concept'] ?? '';
+                    if($this->names){ $attrs['inverse'] = $inverse['term'] ?? ''; }
+                    $attrs['invTermConceptID'] = $inverse['conceptid'] ?? '';
                 }
-                $this->xml->element('detail', $attrs, $term['label'] ?? (string)$termId);
+                $this->xml->element('detail', $attrs, $term['term'] ?? (string)$termId);
                 return;
             case 'file':
                 $file = is_array($value) && is_array($value['file'] ?? null) ? $value['file'] : array();

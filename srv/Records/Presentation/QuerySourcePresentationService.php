@@ -193,7 +193,8 @@ class QuerySourcePresentationService
         }
         if(isset($field['ext']) && !in_array(
             $field['ext'], array(
-                'term', 'code', 'conceptid', 'id',
+                // term outputs: the names of the report field tree; "id" = internalid (older columns)
+                'term', 'code', 'conceptid', 'desc', 'internalid', 'id',
                 'url', 'thumb',
                 'wkt', 'geojson', 'pair',
                 'iso', 'human', 'raw'

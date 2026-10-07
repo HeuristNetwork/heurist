@@ -3,8 +3,8 @@
 * CsvExportWriter.php - CSV/TSV export: one table per record type
 *
 * Each record type gets its own file "<record type name>.csv" (or .tsv) with the
-* columns requested for it ("*" columns for the others, else the title). The
-* first column is always H-ID (rec_ID). ExportService zips the files when there
+* columns requested for it ("*" columns for the others, else the minimal columns:
+* record type and title). The first column is always H-ID (rec_ID). ExportService zips the files when there
 * is more than one. No aggregations (they belong to Crosstabs).
 *
 * @project     Heurist academic knowledge management system
@@ -22,7 +22,7 @@ declare(strict_types=1);
 namespace Heurist\Records\Export\Writer;
 
 use Heurist\Records\Export\ExportColumns;
-use Heurist\Records\Export\ExportDefinitions;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Export\ExportRequest;
 use RuntimeException;
 
@@ -31,7 +31,7 @@ final class CsvExportWriter implements ExportWriterInterface
 {
     private ExportRequest $request;
     private ExportColumns $columns;
-    private ExportDefinitions $definitions;
+    private DefinitionLookup $definitions;
     private string $workDir;
     private string $extension;
     private string $eol;
@@ -47,10 +47,10 @@ final class CsvExportWriter implements ExportWriterInterface
     /**
      * @param ExportRequest $request Columns and CSV options.
      * @param ExportColumns $columns Column expansion and cells.
-     * @param ExportDefinitions $definitions Record type names (file names).
+     * @param DefinitionLookup $definitions Record type names (file names).
      * @param string $workDir Folder for the files.
      */
-    public function __construct(ExportRequest $request, ExportColumns $columns, ExportDefinitions $definitions, string $workDir)
+    public function __construct(ExportRequest $request, ExportColumns $columns, DefinitionLookup $definitions, string $workDir)
     {
         $this->request = $request;
         $this->columns = $columns;
@@ -116,7 +116,9 @@ final class CsvExportWriter implements ExportWriterInterface
         if(isset($this->handles[$rectypeId])){ return $this->handles[$rectypeId]; }
         $columns = $this->request->columnsFor($rectypeId);
         if(empty($columns)){
-            $columns = array(array('field' => 'rec_Title', 'ext' => null));
+            $columns = array_map(static function(string $field): array {
+                return array('field' => $field, 'ext' => null);
+            }, ExportRequest::MINIMAL_COLUMNS);
         }
         $this->expanded[$rectypeId] = $this->columns->expand($rectypeId, $columns, true);
         $path = $this->workDir.'rt'.$rectypeId.'.'.$this->extension;

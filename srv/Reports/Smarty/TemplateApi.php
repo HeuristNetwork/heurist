@@ -264,7 +264,7 @@ final class TemplateApi
             $type = $typeId > 0 ? $this->definitions->term($typeId) : null;
             if($type === null){ continue; }
             $record['recRelationID'] = $relationId;
-            $record['recRelationType'] = $type['label'];
+            $record['recRelationType'] = $type['term'];
             $record['recRelationNotes'] = $this->firstValue($raw, 'DT_SHORT_SUMMARY');
             $record['recRelationStartDate'] = Temporal::toHumanReadable($this->firstValue($raw, 'DT_START_DATE'));
             $record['recRelationEndDate'] = Temporal::toHumanReadable($this->firstValue($raw, 'DT_END_DATE'));

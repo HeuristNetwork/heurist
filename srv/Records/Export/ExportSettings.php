@@ -3,7 +3,7 @@
 * ExportSettings.php - Database settings of record export
 *
 * Settings come from the database settings file "Export" (settings/export.json):
-*   maxRecords   - records in one export, expanded records included (default 100000, up to 5000000)
+*   maxRecords   - records in one export, expanded records included (default 500000, up to 5000000)
 *   timeLimit    - seconds for one export job (default 600, 30..7200)
 *
 * @project     Heurist academic knowledge management system
@@ -34,7 +34,7 @@ final class ExportSettings
     /** Records allowed in one export (setting maxRecords). */
     public function maxRecords(): int
     {
-        return $this->intSetting('maxRecords', 100000, 1, 5000000);
+        return $this->intSetting('maxRecords', 500000, 1, 5000000);
     }
 
     /** Time limit of one export job in seconds (setting timeLimit). */

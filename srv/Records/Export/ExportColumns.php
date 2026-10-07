@@ -27,6 +27,8 @@ declare(strict_types=1);
 
 namespace Heurist\Records\Export;
 
+use Heurist\Definitions\DefinitionLookup;
+
 use Heurist\Records\Data\RecordFieldSelector;
 
 /** Expands requested columns and reads their cells from record objects. */
@@ -59,11 +61,11 @@ final class ExportColumns
         'internalid' => ' (Internal ID)'
     );
 
-    private ExportDefinitions $definitions;
+    private DefinitionLookup $definitions;
     private ValueFormatter $formatter;
     private RecordFieldSelector $selector;
 
-    public function __construct(ExportDefinitions $definitions, ValueFormatter $formatter)
+    public function __construct(DefinitionLookup $definitions, ValueFormatter $formatter)
     {
         $this->definitions = $definitions;
         $this->formatter = $formatter;
@@ -106,7 +108,7 @@ final class ExportColumns
                 $result[] = $entry;
             }elseif($type === 'resource'){
                 $result[] = $entry;
-                if($this->formatter->format('pointer') === 'title'){
+                if($this->formatter->pointerTitles()){
                     $result[] = array_merge($entry, array('header' => $name.' title', 'part' => 'title'));
                 }
             }elseif($type === 'file' && $this->formatter->format('file') === 'details'){

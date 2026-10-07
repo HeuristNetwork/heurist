@@ -30,8 +30,12 @@ final class DefinitionSnapshotService
     private RuntimeContext $runtime;
     private string $cacheDirectory;
 
-    /** Snapshot format; a cached snapshot of an older format is rebuilt (2: structure rows have "max"). */
-    private const FORMAT = 2;
+    /**
+     * Snapshot format; a cached snapshot of an older format is rebuilt
+     * (2: structure rows have "max"; 3: terms named as the report field tree -
+     * term, code, conceptid, desc - by DefinitionLookup).
+     */
+    private const FORMAT = 3;
 
     /** @param string $cacheDirectory Absolute path of the database "entity" dir, or '' to disable caching. */
     public function __construct(
@@ -270,27 +274,20 @@ final class DefinitionSnapshotService
         return $out;
     }
 
+    /**
+     * Terms with the names of the report field tree and Smarty term subfields
+     * (DefinitionLookup): term, conceptid, code, desc; domain and inverse when set.
+     * The key of each entry is the internal id.
+     */
     private function terms(int $registeredId): array
     {
         $out = array();
-        $rows = $this->database->fetchAll(
-            'SELECT trm_ID,trm_Label,trm_Code,trm_Domain,trm_InverseTermID,'
-            .'trm_OriginatingDBID,trm_IDInOriginatingDB '
-            .'FROM defTerms ORDER BY trm_ID'
-        );
-        foreach($rows as $row){
-            $id = intval($row['trm_ID']);
-            $entry = array(
-                'label'   => (string)$row['trm_Label'],
-                'concept' => $this->conceptCode(
-                    $registeredId, $row['trm_OriginatingDBID'], $row['trm_IDInOriginatingDB'], $id
-                )
-            );
-            $code = trim((string)$row['trm_Code']);
-            if($code !== ''){ $entry['code'] = $code; }
-            if(strtolower((string)$row['trm_Domain']) === 'relation'){ $entry['domain'] = 'relation'; }
-            $inverse = intval($row['trm_InverseTermID']);
-            if($inverse > 0){ $entry['inverse'] = $inverse; }
+        foreach((new DefinitionLookup($this->database))->allTerms() as $id => $term){
+            $entry = array('term' => $term['term'], 'conceptid' => $term['conceptid']);
+            if($term['code'] !== ''){ $entry['code'] = $term['code']; }
+            if($term['desc'] !== ''){ $entry['desc'] = $term['desc']; }
+            if($term['domain'] === 'relation'){ $entry['domain'] = 'relation'; }
+            if($term['inverse'] > 0){ $entry['inverse'] = $term['inverse']; }
             $out[(string)$id] = $entry;
         }
         return $out;
@@ -325,12 +322,7 @@ final class DefinitionSnapshotService
      */
     private function conceptCode(int $registeredId, $originDb, $originId, int $localId): string
     {
-        $originDb = intval($originDb);
-        $originId = intval($originId);
-        if($originDb > 0 && $originId > 0 && $originDb !== $registeredId){
-            return $originDb.'-'.$originId;
-        }
-        return ($registeredId > 0 ? $registeredId : 0).'-'.$localId;
+        return DefinitionLookup::conceptCodeFor($registeredId, $originDb, $originId, $localId);
     }
 
     /** Positive integers embedded in a CSV list or JSON term-ID tree string. */

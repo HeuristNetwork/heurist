@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace Heurist\Records\Export;
 
+use Heurist\Definitions\DefinitionLookup;
+
 use Heurist\Database\DatabaseInterface;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Data\RecordFieldSelector;
@@ -114,7 +116,7 @@ final class ExportService
                 .($this->runtime->userId > 0 ? '' : ' (only public records are used)'));
         }
 
-        $definitions = new ExportDefinitions($this->database);
+        $definitions = new DefinitionLookup($this->database);
         $formatter = new ValueFormatter($definitions, $request->values, $this->runtime->baseUrl, $this->runtime->databaseName);
         $columns = new ExportColumns($definitions, $formatter);
         $meta = array(
@@ -170,7 +172,7 @@ final class ExportService
     }
 
     /** Writer of a format (GeoJSON is written by geoJson()). */
-    private function writer(ExportRequest $request, ExportDefinitions $definitions, ValueFormatter $formatter,
+    private function writer(ExportRequest $request, DefinitionLookup $definitions, ValueFormatter $formatter,
         ExportColumns $columns, string $workDir): ExportWriterInterface
     {
         switch($request->format){
@@ -261,7 +263,9 @@ final class ExportService
         $total = count($ids);
         $state = array();
         $service = new MapFeatureService($this->database, $this->runtime);
-        $features = $service->featuresForIds($ids, (new MapFieldSelector())->parse(null), array(
+        // geo fields of the data source (direct or linked), else every direct geo field
+        $selection = (new MapFieldSelector())->parse(empty($request->geoFields) ? null : $request->geoFields);
+        $features = $service->featuresForIds($ids, $selection, array(
             'mode' => 'records',
             'properties' => $properties,
             'onBatch' => static function(int $done) use ($check, $progress, $total): void {

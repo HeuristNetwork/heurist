@@ -26,24 +26,26 @@ declare(strict_types=1);
 
 namespace Heurist\Records\Export;
 
+use Heurist\Definitions\DefinitionLookup;
+
 use Heurist\Utilities\Temporal;
 
 /** Converts resolved field values to cell text. */
 final class ValueFormatter
 {
-    private ExportDefinitions $definitions;
-    /** @var array{date:string,file:string,pointer:string,enum:string} */
+    private DefinitionLookup $definitions;
+    /** @var array{date:string,file:string,enum:string,pointerTitle:bool,termHierarchy:bool} */
     private array $values;
     private string $baseUrl;
     private string $databaseName;
 
     /**
-     * @param ExportDefinitions $definitions Term descriptions.
+     * @param DefinitionLookup $definitions Term descriptions.
      * @param array $values Value formats of the request (ExportRequest::$values).
      * @param string $baseUrl Heurist base URL (file download links).
      * @param string $databaseName Database name (file download links).
      */
-    public function __construct(ExportDefinitions $definitions, array $values, string $baseUrl, string $databaseName)
+    public function __construct(DefinitionLookup $definitions, array $values, string $baseUrl, string $databaseName)
     {
         $this->definitions = $definitions;
         $this->values = $values;
@@ -51,10 +53,16 @@ final class ValueFormatter
         $this->databaseName = $databaseName;
     }
 
-    /** Value format of a field type (date, file, pointer, enum). */
+    /** Value format of a field type (date, file, enum). */
     public function format(string $kind): string
     {
         return (string)($this->values[$kind] ?? '');
+    }
+
+    /** True when pointer columns get a title column. */
+    public function pointerTitles(): bool
+    {
+        return !empty($this->values['pointerTitle']);
     }
 
     /**
@@ -168,21 +176,29 @@ final class ValueFormatter
             case 'code':
                 return (string)($value['trm_Code'] ?? ($this->definitions->term($id)['code'] ?? ''));
             case 'conceptid':
-                return (string)($value['trm_ConceptCode'] ?? ($this->definitions->term($id)['concept'] ?? ''));
+                return (string)($value['trm_ConceptCode'] ?? ($this->definitions->term($id)['conceptid'] ?? ''));
             case 'desc':
                 return (string)($this->definitions->term($id)['desc'] ?? '');
             default:
-                return (string)($value['trm_Label'] ?? ($this->definitions->term($id)['label'] ?? ''));
+                if(!empty($this->values['termHierarchy']) && $id > 0){
+                    $label = $this->definitions->termHierarchyLabel($id);
+                    if($label !== ''){ return $label; }
+                }
+                return (string)($value['trm_Label'] ?? ($this->definitions->term($id)['term'] ?? ''));
         }
     }
 
+    /** Date as stored (raw: simple date or temporal JSON) or human readable. */
     private function date(string $value): string
     {
-        $format = $this->format('date');
-        if($format === 'asis' || $value === ''){ return $value; }
-        $range = $this->dateRange($value);
-        if($range === null){ return $value; }
-        if($format === 'start' || $range[0] === $range[1]){ return $range[0]; }
-        return $range[0].'/'.$range[1];
+        if($this->format('date') !== 'readable' || $value === ''){ return $value; }
+        try{
+            $temporal = new Temporal($value);
+            if(!$temporal->isValid()){ return $value; }
+            $text = trim((string)$temporal->toReadable('both'));
+            return $text !== '' ? $text : $value;
+        }catch(\Throwable $error){
+            return $value;
+        }
     }
 }

@@ -495,8 +495,8 @@ if($is_reports_query && !in_array($http_method, array('GET','POST','PUT','DELETE
 // Background jobs (plan 12): /api/{db}/jobs[/{id}[/cancel|result]], logged-in users only.
 // See srv/Controller/JobController.php.
 $is_jobs_query = ($resource === 'jobs');
-if($is_jobs_query && !in_array($http_method, array('GET','POST'), true)){
-    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+if($is_jobs_query && !in_array($http_method, array('GET','POST','DELETE'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
 }
 
 // Routes where auth processing is not needed here

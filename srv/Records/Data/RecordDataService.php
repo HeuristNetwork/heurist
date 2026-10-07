@@ -19,6 +19,7 @@
 namespace Heurist\Records\Data;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Records\Query\QueryExecutor;
 
@@ -403,9 +404,7 @@ final class RecordDataService
     }
 
     /**
-     * Concept code "<db>-<id>": the originating database and id, or this database's
-     * registered id (0 when not registered) and the local id. Same rule as the
-     * definitions snapshot (DefinitionSnapshotService::conceptCode).
+     * Concept code "<db>-<id>" by the one srv rule (DefinitionLookup::conceptCodeFor).
      */
     private function conceptCode($originDb, $originId, int $localId): string
     {
@@ -413,12 +412,7 @@ final class RecordDataService
             $rows = $this->executor->executeRows('SELECT sys_dbRegisteredID FROM sysIdentification LIMIT 1', '', array());
             $this->registeredId = isset($rows[0][0]) ? intval($rows[0][0]) : 0;
         }
-        $originDb = intval($originDb);
-        $originId = intval($originId);
-        if($originDb > 0 && $originId > 0 && $originDb !== $this->registeredId){
-            return $originDb.'-'.$originId;
-        }
-        return max(0, $this->registeredId).'-'.$localId;
+        return DefinitionLookup::conceptCodeFor($this->registeredId, $originDb, $originId, $localId);
     }
 
     private function ids(array $ids): array

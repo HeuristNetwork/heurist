@@ -1,14 +1,23 @@
 <?php
 /**
-* ExportDefinitions.php - Definitions an export needs: record types, fields, terms, groups
+* DefinitionLookup.php - One loader of database definitions for srv code
 *
-* Read once per export with plain queries (no definitions snapshot cache): names
-* and concept codes of record types and fields, display names of fields per
-* record type, term labels, codes, descriptions and concept codes, user and
-* group names. Concept codes follow DefinitionSnapshotService::conceptCode().
+* Record types, fields, structure display names, terms, user/group names, read
+* once per instance with plain queries. Used by the definitions snapshot (client),
+* the srv Smarty engine (ReportDefinitions) and record export. Holds the one
+* concept-code rule of srv (conceptCodeFor), also used by RecordDataService.
+*
+* Terms use the names of the report field tree and the Smarty term subfields
+* (also HDbDefs.term() in the client):
+*   internalid  local term id
+*   term        label
+*   code        standard code ('' when none)
+*   conceptid   concept code "<db>-<id>"
+*   desc        description ('' when none)
+* plus parent (trm_ParentTermID), inverse (inverse term id) and domain.
 *
 * @project     Heurist academic knowledge management system
-* @package     Records\Export
+* @package     Definitions
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -19,30 +28,45 @@
 
 declare(strict_types=1);
 
-namespace Heurist\Records\Export;
+namespace Heurist\Definitions;
 
 use Heurist\Database\DatabaseInterface;
 
-/** Lazy lookups of database definitions for the export writers. */
-final class ExportDefinitions
+/** Lazy lookups of database definitions. */
+final class DefinitionLookup
 {
     private DatabaseInterface $database;
     private ?int $registeredId = null;
-    /** @var array<int,array{name:string,concept:string}>|null */
+    /** @var array<int,array{name:string,plural:string,concept:string}>|null */
     private ?array $rectypes = null;
     /** @var array<int,array{name:string,type:string,concept:string}>|null */
     private ?array $fields = null;
     /** @var array<int,array<int,array{name:string,order:int}>>|null rty => dty => structure */
     private ?array $structure = null;
-    /** @var array<int,array{label:string,code:string,desc:string,concept:string,inverse:int}>|null */
+    /** @var array<int,array{internalid:int,term:string,code:string,conceptid:string,desc:string,parent:int,inverse:int,domain:string}>|null */
     private ?array $terms = null;
     /** @var array<int,string>|null */
     private ?array $groups = null;
 
-    /** @param DatabaseInterface $database Database of the export. */
+    /** @param DatabaseInterface $database Database of the definitions. */
     public function __construct(DatabaseInterface $database)
     {
         $this->database = $database;
+    }
+
+    /**
+     * Concept code "<db>-<id>": the originating database and id when the definition
+     * comes from another database, else this database's registered id (0 when not
+     * registered) and the local id.
+     */
+    public static function conceptCodeFor(int $registeredId, $originDb, $originId, int $localId): string
+    {
+        $originDb = intval($originDb);
+        $originId = intval($originId);
+        if($originDb > 0 && $originId > 0 && $originDb !== $registeredId){
+            return $originDb.'-'.$originId;
+        }
+        return max(0, $registeredId).'-'.$localId;
     }
 
     /** Registered id of the database (0 when not registered). */
@@ -54,6 +78,12 @@ final class ExportDefinitions
             ));
         }
         return $this->registeredId;
+    }
+
+    /** Concept code of a definition of this database (see conceptCodeFor). */
+    public function conceptCode($originDb, $originId, int $localId): string
+    {
+        return self::conceptCodeFor($this->registeredId(), $originDb, $originId, $localId);
     }
 
     /** Record type name ('' when unknown). */
@@ -107,30 +137,64 @@ final class ExportDefinitions
     }
 
     /**
-     * Term definition.
+     * Term definition (names of the field tree and Smarty term subfields).
      *
-     * @return array{label:string,code:string,desc:string,concept:string,inverse:int}|null
+     * @return array{internalid:int,term:string,code:string,conceptid:string,desc:string,parent:int,inverse:int,domain:string}|null
      */
     public function term(int $id): ?array
+    {
+        return $this->allTerms()[$id] ?? null;
+    }
+
+    /**
+     * Every term, by id.
+     *
+     * @return array<int,array{internalid:int,term:string,code:string,conceptid:string,desc:string,parent:int,inverse:int,domain:string}>
+     */
+    public function allTerms(): array
     {
         if($this->terms === null){
             $this->terms = array();
             $rows = $this->database->fetchAll(
-                'SELECT trm_ID,trm_Label,trm_Code,trm_Description,trm_OriginatingDBID,trm_IDInOriginatingDB,'
-                .'trm_InverseTermID FROM defTerms'
+                'SELECT trm_ID,trm_Label,trm_Code,trm_Description,trm_Domain,trm_OriginatingDBID,'
+                .'trm_IDInOriginatingDB,trm_InverseTermID,trm_ParentTermID FROM defTerms ORDER BY trm_ID'
             );
             foreach($rows as $row){
                 $termId = intval($row['trm_ID']);
                 $this->terms[$termId] = array(
-                    'label' => (string)$row['trm_Label'],
+                    'internalid' => $termId,
+                    'term' => (string)$row['trm_Label'],
                     'code' => trim((string)$row['trm_Code']),
+                    'conceptid' => $this->conceptCode($row['trm_OriginatingDBID'], $row['trm_IDInOriginatingDB'], $termId),
                     'desc' => trim((string)$row['trm_Description']),
-                    'concept' => $this->conceptCode($row['trm_OriginatingDBID'], $row['trm_IDInOriginatingDB'], $termId),
-                    'inverse' => intval($row['trm_InverseTermID'])
+                    'parent' => intval($row['trm_ParentTermID']),
+                    'inverse' => intval($row['trm_InverseTermID']),
+                    'domain' => strtolower(trim((string)$row['trm_Domain']))
                 );
             }
         }
-        return $this->terms[$id] ?? null;
+        return $this->terms;
+    }
+
+    /**
+     * Term label with its parent terms, without the vocabulary: "Parent.Child"
+     * (legacy DbsTerms::getTermLabel with hierarchy).
+     */
+    public function termHierarchyLabel(int $id): string
+    {
+        $term = $this->term($id);
+        if($term === null){ return ''; }
+        $labels = array($term['term']);
+        $seen = array($id => true);
+        $parentId = $term['parent'];
+        while($parentId > 0 && !isset($seen[$parentId])){
+            $parent = $this->term($parentId);
+            if($parent === null || $parent['parent'] < 1){ break; } // the vocabulary itself is left out
+            array_unshift($labels, $parent['term']);
+            $seen[$parentId] = true;
+            $parentId = $parent['parent'];
+        }
+        return implode('.', $labels);
     }
 
     /** Name of a user or workgroup ('' when unknown). */
@@ -145,30 +209,19 @@ final class ExportDefinitions
         return $this->groups[$id] ?? '';
     }
 
-    /** Concept code "<db>-<id>" (DefinitionSnapshotService::conceptCode). */
-    public function conceptCode($originDb, $originId, int $localId): string
-    {
-        $registeredId = $this->registeredId();
-        $originDb = intval($originDb);
-        $originId = intval($originId);
-        if($originDb > 0 && $originId > 0 && $originDb !== $registeredId){
-            return $originDb.'-'.$originId;
-        }
-        return max(0, $registeredId).'-'.$localId;
-    }
-
-    /** @return array<int,array{name:string,concept:string}> */
+    /** @return array<int,array{name:string,plural:string,concept:string}> */
     private function allRectypes(): array
     {
         if($this->rectypes === null){
             $this->rectypes = array();
             $rows = $this->database->fetchAll(
-                'SELECT rty_ID,rty_Name,rty_OriginatingDBID,rty_IDInOriginatingDB FROM defRecTypes'
+                'SELECT rty_ID,rty_Name,rty_Plural,rty_OriginatingDBID,rty_IDInOriginatingDB FROM defRecTypes'
             );
             foreach($rows as $row){
                 $id = intval($row['rty_ID']);
                 $this->rectypes[$id] = array(
                     'name' => (string)$row['rty_Name'],
+                    'plural' => (string)$row['rty_Plural'],
                     'concept' => $this->conceptCode($row['rty_OriginatingDBID'], $row['rty_IDInOriginatingDB'], $id)
                 );
             }

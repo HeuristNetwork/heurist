@@ -4,7 +4,10 @@
 *
 * Port of hserv/records/export/ExportRecordsGEPHI.php with the same attribute
 * layout (the Graph module's client GEXF uses it too):
-*   node attributes  0 name, 1 image, 2 rectype, 3 count, 4 url, 5.. requested "*" columns
+*   node attributes  0 name, 1 image, 2 rectype, 3 count, 4 url, 5.. the requested columns
+*                    of every record type (one attribute per column; a node has values for
+*                    the columns of its record type; a record type without columns, e.g.
+*                    reached by expansion, has the minimal attributes 0-4 only)
 *   edge attributes  0 relation-id, 1 relation-name, 2 relation-image, 3 relation-count,
 *                    4 relation-start, 5 relation-end
 * Nodes are the exported records. Edges are the pointers and relationships whose
@@ -28,7 +31,7 @@ declare(strict_types=1);
 namespace Heurist\Records\Export\Writer;
 
 use Heurist\Records\Export\ExportColumns;
-use Heurist\Records\Export\ExportDefinitions;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Export\ExportRequest;
 use Heurist\Records\Export\ValueFormatter;
 
@@ -49,11 +52,13 @@ final class GexfExportWriter implements ExportWriterInterface
 
     private ExportRequest $request;
     private ExportColumns $columns;
-    private ExportDefinitions $definitions;
+    private DefinitionLookup $definitions;
     private ValueFormatter $formatter;
     private string $path;
     private ?XmlStreamWriter $xml = null;
-    /** @var array Expanded "*" columns (node attributes 5..). */
+    /** @var array<string,array{id:int,title:string}> Column attributes 5.. by column key. */
+    private array $attributes = array();
+    /** @var array<int,array> Expanded columns per record type. */
     private array $expanded = array();
     private array $links = array();
     /** @var callable|null fn(int[] $relationIds): array<int,array{0:string,1:string}> start/end of relationships */
@@ -63,11 +68,11 @@ final class GexfExportWriter implements ExportWriterInterface
     /**
      * @param ExportRequest $request "*" columns.
      * @param ExportColumns $columns Column expansion and cells.
-     * @param ExportDefinitions $definitions Field and term names.
+     * @param DefinitionLookup $definitions Field and term names.
      * @param ValueFormatter $formatter Icon and record URLs.
      * @param string $workDir Folder for the file.
      */
-    public function __construct(ExportRequest $request, ExportColumns $columns, ExportDefinitions $definitions,
+    public function __construct(ExportRequest $request, ExportColumns $columns, DefinitionLookup $definitions,
         ValueFormatter $formatter, string $workDir)
     {
         $this->request = $request;
@@ -75,7 +80,21 @@ final class GexfExportWriter implements ExportWriterInterface
         $this->definitions = $definitions;
         $this->formatter = $formatter;
         $this->path = rtrim($workDir, '/\\').'/export.gexf';
-        $this->expanded = $columns->expand(0, $request->columns['*'] ?? array(), false);
+        // one attribute per distinct column of all record types (same field and output = same attribute)
+        foreach($request->columns as $rectype => $list){
+            foreach($columns->expand(intval($rectype), $list, false) as $column){
+                $key = self::columnKey($column);
+                if(!isset($this->attributes[$key])){
+                    $this->attributes[$key] = array('id' => 5 + count($this->attributes), 'title' => $column['header']);
+                }
+            }
+        }
+    }
+
+    /** Identity of an output column: field, part and enum output. */
+    private static function columnKey(array $column): string
+    {
+        return $column['key'].'|'.$column['part'].'|'.($column['ext'] ?? '');
     }
 
     /**
@@ -93,7 +112,11 @@ final class GexfExportWriter implements ExportWriterInterface
     /** @inheritDoc */
     public function fieldCodes(): array
     {
-        return ExportColumns::codes($this->request->columns['*'] ?? array());
+        $all = array();
+        foreach($this->request->columns as $list){
+            foreach($list as $column){ $all[] = $column; }
+        }
+        return ExportColumns::codes($all);
     }
 
     /** @inheritDoc */
@@ -117,8 +140,8 @@ final class GexfExportWriter implements ExportWriterInterface
         foreach(self::NODE_ATTRIBUTES as $id => list($title, $type)){
             $this->xml->element('attribute', array('id' => (string)$id, 'title' => $title, 'type' => $type));
         }
-        foreach($this->expanded as $index => $column){
-            $this->xml->element('attribute', array('id' => (string)(5 + $index), 'title' => $column['header'], 'type' => 'string'));
+        foreach($this->attributes as $attribute){
+            $this->xml->element('attribute', array('id' => (string)$attribute['id'], 'title' => $attribute['title'], 'type' => 'string'));
         }
         $this->xml->end(); // attributes
         $this->xml->start('attributes', array('class' => 'edge'));
@@ -143,10 +166,12 @@ final class GexfExportWriter implements ExportWriterInterface
             $this->attvalue(2, (string)$rectypeId);
             $this->attvalue(3, '0');
             $this->attvalue(4, $this->formatter->recordUrl($recordId));
-            if(!empty($this->expanded)){
-                $cells = $this->columns->cells($record, $this->expanded, '|');
+            $columns = $this->recordTypeColumns($rectypeId);
+            if(!empty($columns)){
+                $cells = $this->columns->cells($record, $columns, '|');
                 foreach($cells as $index => $cell){
-                    if($cell !== ''){ $this->attvalue(5 + $index, $cell); }
+                    $attribute = $this->attributes[self::columnKey($columns[$index])] ?? null;
+                    if($cell !== '' && $attribute !== null){ $this->attvalue($attribute['id'], $cell); }
                 }
             }
             $this->xml->end(); // attvalues
@@ -174,7 +199,7 @@ final class GexfExportWriter implements ExportWriterInterface
             $printed[$pair] = true;
             if($link['relType'] > 0){
                 $relationId = $link['relType'];
-                $relationName = $this->definitions->term($relationId)['label'] ?? 'Floating relationship';
+                $relationName = $this->definitions->term($relationId)['term'] ?? 'Floating relationship';
             }elseif($link['field'] > 0){
                 $relationId = $link['field'];
                 $relationName = $this->definitions->field($relationId)['name'] ?? (string)$relationId;
@@ -216,6 +241,16 @@ final class GexfExportWriter implements ExportWriterInterface
     public function edgeCount(): int
     {
         return $this->edges;
+    }
+
+    /** Expanded columns of a record type (none: minimal attributes only). */
+    private function recordTypeColumns(int $rectypeId): array
+    {
+        if(!isset($this->expanded[$rectypeId])){
+            $list = $this->request->columnsFor($rectypeId);
+            $this->expanded[$rectypeId] = empty($list) ? array() : $this->columns->expand($rectypeId, $list, false);
+        }
+        return $this->expanded[$rectypeId];
     }
 
     private function attvalue(int $for, string $value): void

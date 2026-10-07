@@ -234,6 +234,22 @@ final class JobStore
         return $active;
     }
 
+    /** Remove a job: state, Stop flag, result content and result files. */
+    public function delete(string $id): void
+    {
+        foreach(array('json', 'cancel', 'result') as $extension){
+            $file = $this->path($id, $extension);
+            if(is_file($file)){ @unlink($file); }
+        }
+        $folder = substr($this->path($id, 'json'), 0, -5);
+        if(is_dir($folder)){
+            foreach(glob($folder.'/*') ?: array() as $inner){
+                if(is_file($inner)){ @unlink($inner); }
+            }
+            @rmdir($folder);
+        }
+    }
+
     /** Remove the files of jobs older than KEEP_DAYS. */
     public function cleanup(): int
     {

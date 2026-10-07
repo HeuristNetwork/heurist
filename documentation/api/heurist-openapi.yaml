@@ -2132,6 +2132,16 @@ paths:
         description: Every job of the database (owner and administrators only).
         schema:
           type: boolean
+      - name: type
+        in: query
+        description: Only jobs of this type (e.g. export).
+        schema:
+          type: string
+      - name: brief
+        in: query
+        description: Leave out the stored parameters of each job (small answer for lists).
+        schema:
+          type: boolean
       responses:
         '200':
           description: Jobs
@@ -2248,6 +2258,41 @@ paths:
                     $ref: '#/components/schemas/Job'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Jobs
+      operationId: deleteJob
+      summary: Remove a finished job and its result file
+      description: The job's owner (or the database owner and administrators); a running job must be stopped first.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      deleted:
+                        type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: The job is still running, or belongs to another user.
         '404':
           $ref: '#/components/responses/NotFound'
   /{database}/jobs/{jobId}/cancel:

@@ -47,7 +47,8 @@ full shape. Summary:
   consumer must drop `req == "forbidden"`; separator fields excluded). No
   per-rectype term/pointer narrowing — the builder uses the global field's
   `vocabulary` / `targetTypes`.
-- `terms` — `{id: {label, code?, concept, domain?, inverse?}}`.
+- `terms` — `{id: {term, code?, conceptid, desc?, domain?, inverse?}}` (snapshot format 3; the names of
+  the report field tree and the Smarty term subfields; `HDbDefs.term()` adds `internalid`).
 - `termlinks` — `[{parent, term}]` (from `defTermsLinks`, falls back to
   `trm_ParentTermID`).
 
@@ -67,3 +68,12 @@ client derives it from `fields.targetTypes` + `structure`.
 - `../Controller/DefinitionController.php` — HTTP adapter (conditional GET).
 - Wiring: `srv/Runtime/ServiceFactory.php` (`definitionController()`),
   `hserv/controller/api.php` (`$is_def_query` branch).
+
+## DefinitionLookup
+
+`DefinitionLookup.php` is the one srv loader of definitions (record types, fields,
+structure names, terms, user/group names) and holds the one concept-code rule
+(`conceptCodeFor`). It is used by this snapshot, the srv Smarty engine
+(`Reports/Smarty/ReportDefinitions`), record export and `RecordDataService`.
+Terms are `{internalid, term, code, conceptid, desc, parent, inverse, domain}`.
+
