@@ -3845,9 +3845,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                             const value_spaceless = values[k].replaceAll(/\s+/g, ''); // remove all whitespaces
 
-                            const approx_regex = /circa.?|ca.?|approx.?|~/; // circa 1995, ca. 1995, approx 1995, ~1995
-                            const has_range = /[à|.|to|\-|,]/; // range separators
-                            const range_regex = /\d+|[à|.|to|\-|,]+/g; // 1990-1995, 1990to1995, 1990..1995, 1990,1995 (spaces removed first)
+                            const approx_regex = /circa\.?|ca\.?|c\.?|approx\.?|~/; // circa 1995, ca. 1995, approx 1995, ~1995
+                            const has_range = /à|\.\.?|to|--?>|--?|>>?|,/; // range separators
+                            const range_regex = /(?:\d+|[bB][cC][eE]|[bB][cC]|[aA][cC]|[cC][eE])?(à|\.\.?|to|--?>|--?|>>?|,)(\d+)/g; // 1990-1995, 1990to1995, 1990..1995, 1990,1995 (spaces removed first)
                             const has_named_month = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/ig; // e.g. 12Jan1995
 
                             // Approximate date
@@ -3883,15 +3883,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                             // Ranged dates
                             matches = [...value_spaceless.matchAll(range_regex)];
+                            let splitByDash = value_spaceless.split('-');
                             if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0 
-                                    && has_range.test(value_spaceless) && (value_spaceless.split('-')<3) ){
+                                    && has_range.test(value_spaceless) && (splitByDash.length < 3 || splitByDash[1] === '') ){
 
                                 let is_ambig = false;
 
-                                const sep_match_index = Math.floor(matches.length / 2);
-                                const sep = matches[sep_match_index][0];
-                                const sep_index = matches[sep_match_index]['index'];
-                                
+                                const sep = matches[0][1];
+                                const sep_index = value_spaceless.indexOf(sep);
+
                                 let TPQ = value_spaceless.slice(0, sep_index);
                                 let TAQ = value_spaceless.slice(sep_index + sep.length);
 
@@ -3926,7 +3926,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                         let temp = TPQ;
                                         TPQ = TAQ;
                                         TAQ = temp;
-                                    }                                
+                                    }
 
                                     let temporal = new Temporal();
                                     temporal.setType('p');
