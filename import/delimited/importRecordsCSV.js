@@ -5377,13 +5377,23 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }else{
             $('#divheader').css('background','rgba(151, 244, 128, 0.83)');
 
-            if(page != 3){
-                $('tr.helper').hide();
-            }else{
+            if(page == 3){
                 $('tr.helper').show().children().html(
                     '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
                     +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
                 );
+            }else if(page == 4){
+                $('tr.helper').show().children().html(
+                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">IMPORTING</span> Choose all the fields you want to import &nbsp;&nbsp;'
+                );
+            }else if(page == 5){
+                let stepTitle = $('#head_step3').title().replace('step 3: ', '');
+                $('tr.helper').show().children().html(
+                    `<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">${stepTitle}</span> Double check all details before proceeding with the import &nbsp;&nbsp;`
+                    +'<span style="color:green;">Note: Changing any of the field mapping below will take you back to the IMPORTING stage.</span>'
+                );
+            }else{
+                $('tr.helper').hide();
             }
         }
         
