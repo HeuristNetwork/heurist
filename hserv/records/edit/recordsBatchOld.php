@@ -639,7 +639,7 @@ class RecordsBatch
             //$dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");
         }elseif($basetype=='date'){
 
-            $useNewTemporalFormatInRecDetails = ($this->system->settings->get('sys_dbSubSubVersion')>=14);
+            $useNewTemporalFormatInRecDetails = $this->system->settings->isDbVersionAtLeast('1.3.14');
 
             $dtl['dtl_Value'] = Temporal::getValueForRecDetails( $this->data['val'], $useNewTemporalFormatInRecDetails );
 
@@ -856,7 +856,7 @@ class RecordsBatch
             return false;
         }
 
-        $useNewTemporalFormatInRecDetails = ($this->system->settings->get('sys_dbSubSubVersion')>=14);
+        $useNewTemporalFormatInRecDetails = $this->system->settings->isDbVersionAtLeast('1.3.14');
 
 
         if(@$this->data['rVal']!=null || @$this->data['encoded']==2){

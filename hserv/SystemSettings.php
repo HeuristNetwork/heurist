@@ -331,6 +331,26 @@ class SystemSettings {
     }
 
     /**
+     * Checks whether the database schema version is equal to or newer than the given version.
+     *
+     * @param string $version Version to compare against (e.g. "1.3.14").
+     * @return bool True if database version >= $version.
+     */
+    public function isDbVersionAtLeast($version){
+
+        $settings = $this->get();
+        if(!is_array($settings)){
+            return false;
+        }
+
+        $db_version = intval(@$settings['sys_dbVersion']).'.'
+                     .intval(@$settings['sys_dbSubVersion']).'.'
+                     .intval(@$settings['sys_dbSubSubVersion']);
+
+        return version_compare($db_version, $version, '>=');
+    }
+
+    /**
      * Checks if custom JavaScript execution is allowed for the current database
      * in contexts like Smarty reports and CMS content.
      *

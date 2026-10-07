@@ -2384,7 +2384,7 @@ function recordSearch($system, $params, $relation_query=null)
     $system->defineConstant('RT_CMS_MENU');
     $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 
-    $useNewTemporalFormatInRecDetails = ($system->settings->get('sys_dbSubSubVersion')>=14);
+    $useNewTemporalFormatInRecDetails = $system->settings->isDbVersionAtLeast('1.3.14');
 
     $fieldtypes_in_res = null;
     //search for geo and time fields and remove non timemap records - for rules we need all records

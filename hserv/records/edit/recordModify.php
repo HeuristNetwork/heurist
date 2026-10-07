@@ -430,7 +430,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
     }
 
-    $useNewTemporalFormatInRecDetails = ($system->settings->get('sys_dbSubSubVersion')>=14);
+    $useNewTemporalFormatInRecDetails = $system->settings->isDbVersionAtLeast('1.3.14');
 
 
     //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)

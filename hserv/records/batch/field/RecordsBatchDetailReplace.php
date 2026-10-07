@@ -75,7 +75,7 @@ class RecordsBatchDetailReplace extends RecordsBatchAction
             return false;
         }
 
-        $useNewTemporalFormatInRecDetails = ($this->system->settings->get('sys_dbSubSubVersion')>=14);
+        $useNewTemporalFormatInRecDetails = $this->system->settings->isDbVersionAtLeast('1.3.14');
 
 
         if(@$this->data['rVal']!=null || @$this->data['encoded']==2){
