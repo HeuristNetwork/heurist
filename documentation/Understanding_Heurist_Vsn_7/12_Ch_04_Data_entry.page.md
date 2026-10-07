@@ -4,7 +4,7 @@
 
 When you create or edit a record it opens automatically in **data entry** mode. It is a form where the fields to fill are specific to each **entity type** and the values given to the fields change for each **record**.
 
-![](https://heurist-doc.huma-num.fr/uploads/84bec25f-6f29-4233-b467-d39538ed54ec.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/eZGimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/eZGimage.png)
 
 <p class="callout info">The data entry form is also a data structure modification form - click **Modify structure** at the top (available to database adminstrators only). This allows direct modification of the structure for the record type being edited so that the changes can be tested as you work. See later, and the following chapter.</p>
 
@@ -16,7 +16,7 @@ When you create or edit a record it opens automatically in **data entry** mode. 
 
 To create a new record and fill its data entry form, you can click the <span style="color: rgb(132, 63, 161);">\[New\]</span> button. The type of the record you add by doing so is indicated in italics under "New". It will be the same type as the last record you added. To change it, just stay over the button without clicking it : a slide tray appears and allow you to click the correct **record type** (entity type).
 
-![](https://heurist-doc.huma-num.fr/uploads/46d9a187-6ad3-4a15-b737-a7117bb456ca.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/m1uimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/m1uimage.png)![](https://heurist-doc.huma-num.fr/uploads/46d9a187-6ad3-4a15-b737-a7117bb456ca.png)
 
 Another way to add new records is with the \[Populate\] menu. See chapter 6 for further details.
 
@@ -24,7 +24,7 @@ Another way to add new records is with the \[Populate\] menu. See chapter 6 for 
 
 To edit an existing record, you first need to find it. This can be done with the <span style="color: rgb(132, 63, 161);">\[Explore\] </span>section. You can access it by clicking on the Heurist logo or on the button in the left menu. See chapter 7 for further details
 
-.![](https://heurist-doc.huma-num.fr/uploads/9368862e-047c-4d9e-9fd3-343cf140929d.png)
+.[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/kmQimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/kmQimage.png)![](https://heurist-doc.huma-num.fr/uploads/9368862e-047c-4d9e-9fd3-343cf140929d.png)
 
 Double-click on the record you want to edit, or click on the pencil icon![](https://heurist-doc.huma-num.fr/uploads/dcf34fac-6cd7-4611-806e-99422aaef225.png)or new tab icons![](https://heurist-doc.huma-num.fr/uploads/28cb6716-644d-4acb-97dc-15d0b136d1c1.png)which appear when you roll over it in the results list. You can also click the pencil icon on the Record tab in the righthand pane or wherever it is used to view information on a record.
 
@@ -32,7 +32,7 @@ Double-click on the record you want to edit, or click on the pencil icon![](http
 
 The Data Entry form allows you to edit the record you're consulting and its metadata (\[Record Summary\]). It also give you easy access for editing the structure of its record type (\[Modify Structure\]).
 
-![](https://heurist-doc.huma-num.fr/uploads/27a5f4b5-b954-4910-ad96-e08f6c0f865c.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/7V6image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/7V6image.png)![](https://heurist-doc.huma-num.fr/uploads/27a5f4b5-b954-4910-ad96-e08f6c0f865c.png)
 
 The heart of the Data Entry is the form which allows you to indicate the values of your record. At the right of the form, there is an expandable column with metadata about the record. At the top of the form are some buttons, either related to the record type <span style="color: rgb(0, 0, 0);">(</span><span style="color: rgb(132, 63, 161);">\[Modify Structure\]</span><span style="color: rgb(0, 0, 0);"> and </span><span style="color: rgb(132, 63, 161);">\[Constructed title\]</span><span style="color: rgb(0, 0, 0);">) </span>or to the form itself (in green on the screenshot). Finaly, two horizontal bars frame the windows : they govern the window itself and the interactions the latter allows with the database. We will examine each of the components of this form in turn.
 
@@ -54,7 +54,7 @@ The <span style="color: rgb(132, 63, 161);">\[New\]</span> button will create a 
 
 ### 2.2. Record type related buttons
 
-![](https://heurist-doc.huma-num.fr/uploads/f7bce0ad-9234-47db-a572-345d6c919cdd.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/aKJimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/aKJimage.png)![](https://heurist-doc.huma-num.fr/uploads/f7bce0ad-9234-47db-a572-345d6c919cdd.png)
 
 In the top left corner are the icon and name of the record type to which the data belongs.
 
@@ -64,23 +64,25 @@ Click <span style="color: rgb(132, 63, 161);">\[Modify Structure\]</span> to mod
 
 <p class="callout info">This is an extremely powerful function, as it allows you to modify the structure of your database on the fly without affecting existing data (other than intentional deletion of fields and associated data, which comes with adequate warnings). Fields can be added, renamed, reorganised, grouped under headings and to some extent field type changes are permitted (without loss of data).   
   
-The numbers next to the tree show how many times a field has been used; this is particularly useful when importing legacy data to identify little-used fields which one may wish to remove or combine with other fields. The tick and crossed-out circle icons allow one to open a new browser window for all the records with / without the given field.</p>
+The numbers next to the tree show how many times a field has been used; this is particularly useful when importing legacy data to identify little-used fields which one may wish to remove or combine with other fields.   
+  
+The tick and crossed-out circle icons allow one to open a new browser window for all the records with / without the given field.</p>
 
 See chapter 5 for further details.
 
-![](https://heurist-doc.huma-num.fr/uploads/50cb926d-1385-40e1-bf45-1b39110d81cc.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/D5Simage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/D5Simage.png)![](https://heurist-doc.huma-num.fr/uploads/50cb926d-1385-40e1-bf45-1b39110d81cc.png)
 
 A gear icon appear at the left of the fields. Rollover displays a short menu of frequently used changes. Clicking on it allows you to edit the field in question.
 
-[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-08/scaled-1680-/image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-08/image.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/rl1image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/rl1image.png)
 
-<p class="callout info">Strucural changes will be applied to the entire record type, thus modifying the structure of all records for that type. Values entered in the form relate to the current record and can be saved exactly the same way as in standard data entry mode. </p>
+<p class="callout info">Structural changes will be applied to the entire record type, thus modifying the structure of all records for that type. Values entered in the form relate to the current record and can be saved exactly the same way as in standard data entry mode. </p>
 
 #### 2.2.2. Modify the constructed title
 
 Click the gearwheel left of <span style="color: rgb(132, 63, 161);">\[Constructed title\]</span> to modify the **title mask** for the record type.
 
-![](https://heurist-doc.huma-num.fr/uploads/f042a27b-b7e7-49dd-932f-51c1ca509b4d.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/AEWimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/AEWimage.png)![](https://heurist-doc.huma-num.fr/uploads/f042a27b-b7e7-49dd-932f-51c1ca509b4d.png)
 
 The title mask gives you a summary of the record content which is displayed in lists of results and where a record is referenced through a record pointer or a relationship marker. The form you get by clicking on <span style="color: rgb(132, 63, 161);">\[Constructed title\]</span> allows you to personalise it by selecting the fields which are concatenated to provide the title. See chapter 5 for further details.
 
@@ -88,24 +90,23 @@ The title mask gives you a summary of the record content which is displayed in l
 
 At the right of the record type related buttons are several options :
 
-![](https://heurist-doc.huma-num.fr/uploads/abcffdd8-2b38-420c-be40-a54c36f32572.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/Mnyimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/Mnyimage.png)
 
-- When checked <span style="color: rgb(132, 63, 161);">\[Show help\]</span> shows the **Help text**, which specifies the expected value of the field under it. This help text corresponds with the Description of the field entered when defining the field (and can be changed)
-- The <span style="color: rgb(132, 63, 161);">\[Optional fields\]</span> checkbox allows you to show or hide optional fields in the form
-
-![](https://heurist-doc.huma-num.fr/uploads/48348d51-89e0-42c5-808b-23c02851a5d2.png)
+When checked <span style="color: rgb(132, 63, 161);">\[Show help\]</span> shows the **Help text**, which specifies the expected value of the field under it. This help text corresponds with the Description of the field entered when defining the field (and can be changed)  
+   
+The <span style="color: rgb(132, 63, 161);">\[Optional fields\]</span> checkbox allows you to show or hide optional fields in the form. Note that ther are tow levels of optional field - Recommended and Optional. Only the ones marked *Optional* are hidden by this button. The internt of recommended vs optional is to allow very little used fiels (optioonal) to be hidden for a less clutterd data entry form.
 
 <span style="color: rgb(132, 63, 161);">\[Hide from public\]</span> : when clicked, only the registered users can see the record. When unclicked the record is readable by anyone. The visibility of the record is indicated in the <span style="color: rgb(132, 63, 161);">\[Record Summary\]</span> (see 2.4), at the end of the record view (which everybody can see with the HTML link if the record is public, even if the database is not), and in the result view with the color (blue if public) and eye symbol.
 
-![](https://heurist-doc.huma-num.fr/uploads/ef094e8f-88bc-4878-940d-d98d28070810.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/ADVimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/ADVimage.png)
 
-<span style="color: rgb(132, 63, 161);">\[Refresh structure\]</span> : refresh the structure. Useful if modifications have been made to the record type or to the constructed title from the data entry form to apply them to the actual record.
+<span style="color: rgb(132, 63, 161);">\[Refresh structure\]</span> : refresh the structure. Useful if modifications have been made to the record type from the data entry form to apply them to the actual record. The constructed title can be refreshed by hitting Save even if the save button is greyed out (it is always available but is grey when no data on the form has been edited).
 
 <span style="color: rgb(132, 63, 161);">\[History\]</span> : open the History section of the \[Record Summary\] (see 2.4)
 
 <span style="color: rgb(132, 63, 161);">\[Template\]</span> : download a csv summary of the form for the record type with details about the fields and their accepted values, starting with the values automatically asked for all the records, regardless of their record type (H-ID : the unique identifier automatically attributed to the record ; rec\_URL : the record URL ; rec\_Tags : the tags attributed to the record).For use in offline or highly repetitive data collection using a spreadsheet. Lists of terms can be used to control data entry (requires setup in the spreadsheet). Data can be imported back to Heurist with Import &gt; Delimited text / CSV.
 
-<span style="color: rgb(132, 63, 161);">\[Bug report\]</span> : open a form to report a bug
+<span style="color: rgb(132, 63, 161);">\[Create ticket\]</span> : open a form to report a bug
 
 ### 2.4. Record Summary
 
@@ -115,7 +116,7 @@ On the right side of the form is a tab titled <span style="color: rgb(132, 63, 1
 
 Opening the right side panel shows the record type of the record. Click on it to change it. The values of the previous fields will be relocated in other fields (for example the value of the field "Family name" will be assigned to the field "Title") if the field of the source record type is not in the record type of destination.
 
-Under the name of the record type are indicated the record access and ownership. By default, the record is viewable by anly logged-in user and the owner is the one who have created it. The later can change ownership and visibility of the record by clicking on the pencil icon.
+Under the name of the record type are indicated the record access and ownership. By default, the record is viewable by any logged-in user and the owner is the one who have created it. The later can change ownership and visibility of the record by clicking on the pencil icon.
 
 - Ownership can be reattributed to "Any logged-in user", everyone, a specific user, or a specific workgroup (about workgroups, see chapter 10)
 - Visibility can be changed to be the same as the ownership, "any logged-in user" or public (everyone can access it)
@@ -132,20 +133,21 @@ Those cannot be changed (except for the third one which changes automatically wh
 
 This section concerns the management of the record by the logged-in user. It contains two parts who can be edited using the pencil icon.
 
-**Bookmarks** : this part is personal and cannot be consulted by other user. It allows you to define a password reminder, to rate the record and to write personnal notes. Writing something in this section will trigger the bookmark icon, who will appear orange in the database. If you have write a password reminder, a little key will show as well.
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/7OYimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/7OYimage.png)
 
-![](https://heurist-doc.huma-num.fr/uploads/d3ac0dac-254a-429d-a3af-1616b7cf9432.png)
+**Bookmarks** : this part is personal and cannot be consulted by other user. It allows you to define a password reminder, to rate the record and to write personal notes. Writing something in this section will trigger the bookmark icon, which will appear orange in the database. If you have write a password reminder, a little key will show as well.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/p2Gimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/p2Gimage.png)
 
 <p class="callout warning">The content is not encrypted. Do not enter important passwords verbatim, as the security on on this data is basic. We suggest using a prompt whih is meaningful only to you, rather than an actual password.</p>
 
 To remove the bookmark, go to the result section, select the record, click <span style="color: rgb(132, 63, 161);">\[Selected\]</span>, then unbookmark it. It will remove the bookmark itself as well as its content, the tags of the record and the password reminder.
 
-![](https://heurist-doc.huma-num.fr/uploads/5f68ef20-930c-4200-969f-db744c9a134f.png)
-
-The Data Entry form doesn't allow you to unbookmark a record, only to clear the content of the bookmark if you created one prior.  
-Note: The bookmark's icon doesn't appear anymore in the later version of Heurist.
+The Data Entry form doesn't allow you to unbookmark a record, only to clear the content of the bookmark if you created one prior. Note: The bookmark's icon doesn't appear anymore in the later version of Heurist.
 
 **Reminders** : allow the setting of immediate and periodic reminders to either an individual user, a workgroup or specific email addresses. The minimum frequency is daily, but monthly or yearly might be more appropriate.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/dsaimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/dsaimage.png)
 
 #### 2.4.3. Tags
 
@@ -234,7 +236,8 @@ Not all icons appear beside each field, as the actions they trigger isn't always
 **Memo Text (multi-line or html)** A plain text field which can accomodate multiple lines of text. Use for longer textual content (drag and drop the bottom-right corner to expand the editor). Offers three editors :
 
 - **text**: write in plain text
-- **wysiwyg**: What You See Is What You Get, interface with several button to format your text so you don't have to know html to do so
+- **wysiwyg**: What You See Is What You Get, interface with several button to format your text so you don't have to know html to do so  
+    [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/BYyimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/BYyimage.png)
 - **codeeditor**: a code editor, it makes it easier to write directly in a structured language such as xml or html or to correct it.
 
 ![](https://heurist-doc.huma-num.fr/uploads/7889a098-43a9-4d57-90e7-d59b48c06cef.png)
@@ -264,12 +267,19 @@ The date can be entered manually, with the calendar icon, with the \[range\] but
 
 <p class="callout info">If the purpose is to obtain a date range, you should use two fields : Start date and End date, which will give you two values. Both of them are date field type. Using only one date field will provide only one value. Thus the range function of date type field is useful for indicating a date whose accuracy is not certain. </p>
 
-![](https://heurist-doc.huma-num.fr/uploads/c5a1fb01-0231-49de-b0e4-7528aa35db66.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/6nZimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/6nZimage.png)![](https://heurist-doc.huma-num.fr/uploads/c5a1fb01-0231-49de-b0e4-7528aa35db66.png)
 
-- **Simple Date** : for a single date. To use to specify the degree of certainty about the date (exact, approximate, before, after), the time of the event, the type of determination of the date, the calendar, and to add comment about it.
-- **Simple Range** : for setting a estimation of date based on two other (earliest possible and latest possible). Allows you to precise the probability curve (flat, central, slow start, slow finish), the way the estimation had been made (attested, conjecture, measurement), to precise the calendar and to comment the date.
-- **Fuzzy Range** : same as **Simple Range** except that the certainty is modulated as the beginning and end date of reference are subdivided in "not before/after" (Terminus Post Quem, Terminus Ante Quem) and "probable begin/end".
-- **Radiometric** : useful for radiometrics values. Can only be used to set a BCE (before common era) or a BP (before present) date. You can precise what is the standard deviation (Std dev) of the value, its positive deviation (pos dev)or negative deviation (neg dev). It is also possible to indicate the Lab Code of the sample used and if the date as been calibrated. The date can be commented.
+**Simple Date** : for a single date. To use to specify the degree of certainty about the date (exact, approximate, before, after), the time of the event, the type of determination of the date, the calendar, and to add comment about it.
+
+**Simple Range** : for setting a estimation of date based on two other (earliest possible and latest possible). Allows you to precise the probability curve (flat, central, slow start, slow finish), the way the estimation had been made (attested, conjecture, measurement), to precise the calendar and to comment the date.
+
+**Fuzzy Range** : same as **Simple Range** except that the certainty is modulated as the beginning and end date of reference are subdivided in "not before/after" (Terminus Post Quem, Terminus Ante Quem) and "probable begin/end".  
+  
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/B59image.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/B59image.png)
+
+**Radiometric** : useful for radiometrics values. Can only be used to set a BCE (before common era) or a BP (before present) date. You can precise what is the standard deviation (Std dev) of the value, its positive deviation (pos dev)or negative deviation (neg dev). It is also possible to indicate the Lab Code of the sample used and if the date as been calibrated. The date can be commented.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/fJzimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/fJzimage.png)
 
 #### 3.2.2. Geospatial (point, line, polygon ...)
 
@@ -294,7 +304,7 @@ A file such as a photo, video, PDF, scanned document, spreadsheet or XML, upload
 
 Clicking on the field will open a small windows which allows to choose between using a file already uploaded in the database (<span style="color: rgb(132, 63, 161);">\[Choose previously referenced file\]</span>), upload a new one (to Heurist or to external repository, but the later is depreciated), or use an external URL linking directly to the file. You then might indicate some metadata about the file : its name, copyright, copyright owner and visibility (public or logged users)
 
-![](https://heurist-doc.huma-num.fr/uploads/a3a0be97-d26c-45a1-aa4f-7987b5c37513.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/vnJimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/vnJimage.png)![](https://heurist-doc.huma-num.fr/uploads/a3a0be97-d26c-45a1-aa4f-7987b5c37513.png)
 
 ### 3.3. Record linking type fields
 
@@ -313,6 +323,10 @@ In both cases the link will appear in the network view (see chapter 8b) and if t
 - The type of relationship, however, is implicit in the field name - father, mother, service, education, place or component all imply a fixed relationship to the parent entity - <u>but not otherwise recorded</u>.
 - Typically, selecting the field opens a list of available values, comparable to a dropdown field, except that the options are existing records instead of terms from a vocabulary.
 
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/XGjimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/XGjimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/f3eimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/f3eimage.png)
+
 **Relationship marker** A more complex connection which allows specification of relationship type and period of validity.
 
 - Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
@@ -323,7 +337,21 @@ In both cases the link will appear in the network view (see chapter 8b) and if t
 
 [![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-07/scaled-1680-/btZimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-07/btZimage.png)
 
-![](https://heurist-doc.huma-num.fr/uploads/2ce712db-90c2-46bc-aeda-fe86ff1517a4.png)
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/icpimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/icpimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/T6Himage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/T6Himage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/gnuimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/gnuimage.png)
+
+#### **Child record pointers**
+
+@TODO
+
+<span style="color: rgb(0, 0, 0);">Child record pointer fields will be displayed with a quick search ‘dropdown’.</span>
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/vFvimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/vFvimage.png)
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/u7Wimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/u7Wimage.png)
 
 ## 4. Optimising Forms for Usability
 

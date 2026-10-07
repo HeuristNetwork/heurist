@@ -373,7 +373,7 @@ Try a small trimmed Manifest first. Failures may be caused by remote annotation-
 
 ## 10. Summary of ownership by mode
 
-<table id="bkmrk-feature-annotation-o"><colgroup><col></col><col></col><col></col></colgroup><tbody><tr><th>Feature
+<table id="bkmrk-featureannotation-ov"><colgroup><col></col><col></col><col></col></colgroup><tbody><tr><th>Feature
 
 </th><th>Annotation overlay
 
@@ -434,3 +434,58 @@ Try a small trimmed Manifest first. Failures may be caused by remote annotation-
 </td><td>Build or take over a Manifest in Heurist
 
 </td></tr></tbody></table>
+
+**Process IIIF Manifest**
+
+Reads a registered **IIIF Presentation Manifest** and creates or updates records representing its contents. A manifest describes a digital resource’s ordered pages or views, known as *canvases*, together with media references, metadata and annotations. The manifest may be uploaded locally or registered through an external URL.
+
+Two processing modes are available:
+
+- **Full manifest management:** creates or updates Manifest, Canvas and Annotation records. Heurist manages the resulting manifest structure, including canvas order and metadata, and can generate its own IIIF manifest output. Referenced media may remain external or be stored locally.
+- **Annotation overlay:** imports annotations while retaining the source manifest’s canvas structure and identifiers. No Heurist Manifest record is created. This mode supports IIIF Presentation API version 3 and is unavailable where the selected file already has a managed Manifest record.
+
+On re-import, records modified locally in Heurist or Mirador are preserved by default and reported separately.
+
+Annotation thumbnails can subsequently be generated for selected annotation records using **Recode &gt; Create IIIF annotation thumbnails** above the results in the Explore menu.
+
+#### **Explore &gt; Recode &gt; Create IIIF annotation thumbnails**
+
+*TODO: duplicated at end of chapter 6b, need to decide where it belongs and simply reference*
+
+Creates a thumbnail showing the image region identified by each IIIF annotation. For example, an annotation marking a detail in a manuscript page receives a thumbnail of that detail, making it easier to recognise the annotation in record lists.
+
+[![image.png](https://docs.heuristref.net/uploads/images/gallery/2026-10/scaled-1680-/H9Zimage.png)](https://docs.heuristref.net/uploads/images/gallery/2026-10/H9Zimage.png)
+
+The operation processes **IIIF Annotation records in the current search results**, subject to access permissions. Other record types are excluded. In the current implementation, ticking individual records does not restrict the operation: first use a search to obtain the annotations you want to process.
+
+**Creating or replacing thumbnails**
+
+The dialogue contains a checkbox, **Create thumbnails for missed only**, selected by default.
+
+- **Checked:** creates thumbnails for annotations without a thumbnail reference and retains existing references.
+- **Unchecked:** recreates thumbnails for all annotations being processed, replacing their existing thumbnail references when creation succeeds.
+
+Use the default setting to fill gaps after importing annotations. Clear it when thumbnails need updating—for example, after changing an annotation’s selected region or its source image.
+
+**How the thumbnail is generated**
+
+Heurist reads the annotation’s region selection and locates the image associated with its canvas. The image can come from an external IIIF image service, a locally stored file or a directly accessible remote image.
+
+Supported selections include:
+
+- **Rectangular regions**, stored as a pixel-based fragment selector.
+- **SVG regions**, such as polygons or other supported shapes. The thumbnail shows the rectangular area enclosing the shape, including any surrounding image within that rectangle.
+
+The cropped image is scaled to fit within **200 × 200 pixels**, preserving its proportions, stored locally and attached to the annotation’s Thumbnail field. The annotation text, selected region and original image are unchanged.
+
+**Requirements and results**
+
+The database must contain the **IIIF Annotation record type, Concept ID 2-109**, and the necessary annotation fields. Each annotation needs a supported region selection and a resolvable canvas image.
+
+A thumbnail may fail to generate if the region is missing or unsupported, the canvas image cannot be identified, the remote resource is inaccessible, or image processing or file storage fails.
+
+The operation reports processed records and failures. **The processed count includes annotations whose existing thumbnail references were retained**, so it does not necessarily equal the number of newly generated images.
+
+Missing-only mode checks for an existing thumbnail reference; it does not verify that the referenced image file still exists. To repair a broken thumbnail, clear the checkbox and recreate it.
+
+#### .
