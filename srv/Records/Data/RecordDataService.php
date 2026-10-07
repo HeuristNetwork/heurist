@@ -198,13 +198,52 @@ final class RecordDataService
         }
     }
 
+    /**
+     * Attach header values (rec_Title, rec_ID, ...) of linked records reached through
+     * concrete expansion occurrences (paths ending with a header field, e.g.
+     * 10:lt241:12:rec_Title). Values are entries {value, path} as in attachLinkedValues.
+     */
+    public function attachLinkedHeaders(
+        array &$records,
+        array $field,
+        array $occurrences,
+        string $pathId
+    ): void
+    {
+        $header = (string)($field['header'] ?? '');
+        if($header === ''){ return; }
+        $owners = array();
+        foreach($occurrences as $occurrence){
+            $chain = $occurrence['recordIds'] ?? array();
+            if(!empty($chain)){ $owners[intval(end($chain))] = intval(end($chain)); }
+        }
+        $values = array();
+        foreach($this->loadRecords(array_values($owners), array($header), array()) as $owner){
+            $values[intval($owner['rec_ID'])] = $owner[$header] ?? null;
+        }
+        $recordIndex = array();
+        foreach($records as $index=>$record){ $recordIndex[intval($record['rec_ID'])] = $index; }
+        foreach($occurrences as $occurrence){
+            $topId = intval($occurrence['top'] ?? 0);
+            $chain = array_values(array_map('intval', $occurrence['recordIds'] ?? array()));
+            if(!isset($recordIndex[$topId]) || empty($chain)){ continue; }
+            $value = $values[intval(end($chain))] ?? null;
+            if($value === null || $value === ''){ continue; }
+            $records[$recordIndex[$topId]]['details'][$field['key']][] = array(
+                'value'=>(string)$value,
+                'path'=>array('id'=>$pathId, 'recordIDs'=>array_map('strval', $chain))
+            );
+        }
+    }
+
     /** Return OpenAPI field definitions once per requested detail/path. */
     public function loadFieldMetadata(array $fields): array
     {
         if(empty($fields)){ return array(); }
-        $ids = array_values(array_unique(array_map(static function($field){
+        $ids = array_values(array_unique(array_filter(array_map(static function($field){
             return intval($field['fieldId']);
-        }, $fields)));
+        }, $fields))));
+        if(empty($ids)){ $ids = array(0); }
         $sql = 'SELECT dty_ID,dty_Name,dty_Type,dty_OriginatingDBID,dty_IDInOriginatingDB FROM defDetailTypes WHERE dty_ID IN ('
             .implode(',', array_fill(0, count($ids), '?')).')';
         $definitions = array();
@@ -218,6 +257,12 @@ final class RecordDataService
         }
         $result = array();
         foreach($fields as $field){
+            if(!empty($field['header'])){
+                // header field of linked records (path ending with rec_Title, rec_ID, ...)
+                $result[] = array('dty_ID'=>null, 'dty_Name'=>$field['header'], 'dty_Type'=>'header',
+                    'dty_ConceptCode'=>null, 'dty_PathCode'=>$field['pathCode']);
+                continue;
+            }
             $definition = $definitions[intval($field['fieldId'])] ?? array(
                 'dty_ID'=>(string)$field['fieldId'],
                 'dty_Name'=>null,

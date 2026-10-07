@@ -44,7 +44,9 @@ final class RecordFieldSelector
      * A path may end with either a bare detail-type ID or an lt/lf/rt/rf
      * prefixed ID. At the terminal position the prefix does not request
      * another traversal: it identifies the resource/relationship field that
-     * is itself part of the requested output.
+     * is itself part of the requested output. A path may also end with a
+     * header field of the linked records (10:lt241:12:rec_ID): the entry then
+     * has `header` (the Records column) and fieldId 0.
      */
     public function parse($fields): array
     {
@@ -113,22 +115,25 @@ final class RecordFieldSelector
             throw new QueryValidationException('Invalid linked output field path: '.$path);
         }
         $fieldToken = array_pop($tokens);
-        if(preg_match('/^(?:(?:lt|lf|rt|rf|r))?([0-9]+)$/i', $fieldToken, $terminalMatch)!==1
-            || intval($terminalMatch[1])<1){
-            throw new QueryValidationException('Linked output path must end with a detail-type ID: '.$path);
+        $header = self::HEADERS[strtolower($fieldToken)] ?? null;
+        if($header === null && (preg_match('/^(?:(?:lt|lf|rt|rf|r))?([0-9]+)$/i', $fieldToken, $terminalMatch)!==1
+            || intval($terminalMatch[1])<1)){
+            throw new QueryValidationException('Linked output path must end with a detail-type ID or a header field: '.$path);
         }
-        $fieldId = intval($terminalMatch[1]);
+        $fieldId = $header === null ? intval($terminalMatch[1]) : 0;
         for($index=1; $index<count($tokens); $index+=2){
             if(!preg_match('/^(lt|lf|rt|rf|r)[0-9]*$/i', $tokens[$index])
                 || !isset($tokens[$index+1]) || !ctype_digit($tokens[$index+1])){
                 throw new QueryValidationException('Invalid linked output field path: '.$path);
             }
         }
-        return array(
+        $field = array(
             'key'=>$path,
             'fieldId'=>$fieldId,
             'pathCode'=>$path,
             'traversal'=>implode(':', $tokens)
         );
+        if($header !== null){ $field['header'] = $header; }
+        return $field;
     }
 }

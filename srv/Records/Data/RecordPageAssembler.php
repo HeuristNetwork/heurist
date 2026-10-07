@@ -82,6 +82,11 @@ final class RecordPageAssembler
             $paths[$publicPathId] = $traversal;
             $occurrences = $expansion->getOccurrences($terminalPathId);
             foreach($pathFields as $field){
+                if(!empty($field['header'])){
+                    // header field of the linked records (rec_Title, rec_ID, ...)
+                    $this->dataService->attachLinkedHeaders($records, $field, $occurrences, $publicPathId);
+                    continue;
+                }
                 $this->dataService->attachLinkedValues(
                     $records, $field, $occurrences, $publicPathId, $valueOptions
                 );

@@ -250,6 +250,50 @@ final class JobStore
         }
     }
 
+    /**
+     * Total size of the result files of a user's jobs of one type (bytes).
+     *
+     * @param int $userId Owner of the jobs.
+     * @param string $type Job type (e.g. export).
+     */
+    public function resultBytes(int $userId, string $type): int
+    {
+        $bytes = 0;
+        foreach($this->listJobs($userId) as $job){
+            if($job['type'] !== $type){ continue; }
+            $folder = substr($this->path((string)$job['id'], 'json'), 0, -5);
+            foreach(glob($folder.'/*') ?: array() as $file){
+                if(is_file($file)){ $bytes += intval(filesize($file)); }
+            }
+        }
+        return $bytes;
+    }
+
+    /**
+     * Remove finished jobs of a type older than its keep time (e.g. export results
+     * after 24 hours), with their result files.
+     *
+     * @param string $type Job type.
+     * @param int $seconds Keep time after the job ended.
+     * @return int Removed jobs.
+     */
+    public function cleanupType(string $type, int $seconds): int
+    {
+        if(!is_dir($this->directory) || $seconds < 1){ return 0; }
+        $removed = 0;
+        $limit = time() - $seconds;
+        foreach(glob($this->directory.'*.json') ?: array() as $file){
+            if(filemtime($file) >= $limit){ continue; }
+            $job = json_decode((string)@file_get_contents($file), true);
+            if(!is_array($job) || ($job['type'] ?? '') !== $type || in_array($job['status'] ?? '', self::ACTIVE, true)){
+                continue;
+            }
+            $this->delete((string)$job['id']);
+            $removed++;
+        }
+        return $removed;
+    }
+
     /** Remove the files of jobs older than KEEP_DAYS. */
     public function cleanup(): int
     {

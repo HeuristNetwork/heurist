@@ -64,6 +64,20 @@ final class JobRunner
     }
 
     /**
+     * Remove old jobs: every type after JobStore::KEEP_DAYS, a type whose handler has
+     * keepSeconds() (e.g. export: 24 hours) after that time.
+     */
+    private function cleanup(): void
+    {
+        foreach($this->handlers as $type => $handler){
+            if(method_exists($handler, 'keepSeconds')){
+                $this->store->cleanupType($type, intval($handler->keepSeconds()));
+            }
+        }
+        $this->store->cleanup();
+    }
+
+    /**
      * Validate a request and create a queued job. The caller runs it with run().
      *
      * @param string $type Job type.
@@ -77,7 +91,14 @@ final class JobRunner
         if($handler === null){
             throw new InvalidArgumentException('Unknown job type: '.$type);
         }
-        $this->store->cleanup();
+        $this->cleanup();
+        // a type may limit the result files a user keeps (e.g. export: 100 MB)
+        if(method_exists($handler, 'maxResultBytes')){
+            $max = intval($handler->maxResultBytes());
+            if($max > 0 && $this->store->resultBytes($this->runtime->userId, $type) > $max){
+                throw new DomainException('Your export folder is full. Please clear it first.');
+            }
+        }
         if($handler->replacesPrevious()){
             // a new test run replaces the user's older one (its page no longer needs it)
             foreach($this->store->activeJobs($this->runtime->userId, $type, true) as $previous){
@@ -114,7 +135,7 @@ final class JobRunner
         if($handler === null){
             throw new InvalidArgumentException('Unknown job type: '.$type);
         }
-        $this->store->cleanup();
+        $this->cleanup();
         $job = $this->store->create($type, $this->runtime->userId, $title, $params, $handler->limitSeconds());
         return $this->run((string)$job['id']);
     }
@@ -207,6 +228,7 @@ final class JobRunner
     {
         $this->requireMember();
         $userId = $all && $this->isManager() ? null : $this->runtime->userId;
+        $this->cleanup(); // the list never shows results older than their keep time
         $jobs = array();
         foreach($this->store->listJobs($userId) as $job){
             if($type !== null && $job['type'] !== $type){ continue; }

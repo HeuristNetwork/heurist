@@ -5,7 +5,8 @@
 * prepare() validates the parameters (ExportRequest); run() exports into the
 * job's result folder (JobContext::resultDirectory). The file is downloaded with
 * GET /api/{db}/jobs/{id}/result by the user who started the job, and removed
-* with the job after JobStore::KEEP_DAYS. One export per user at a time.
+* with the job after 24 hours (keepSeconds). One export per user at a time; a
+* new export is refused while the user's export results take more than 100 MB.
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Export
@@ -58,6 +59,18 @@ final class ExportJob implements JobHandlerInterface
     public function limitSeconds(): int
     {
         return $this->service->planner()->settings()->timeLimitSeconds();
+    }
+
+    /** Export results are kept 24 hours (JobRunner removes older ones). */
+    public function keepSeconds(): int
+    {
+        return 86400;
+    }
+
+    /** A user's export results may take 100 MB; a new export is refused above that. */
+    public function maxResultBytes(): int
+    {
+        return 100 * 1024 * 1024;
     }
 
     /** One export per user; a second one is refused. */

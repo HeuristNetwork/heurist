@@ -10,9 +10,10 @@
 *   GET  /jobs/{id}                              state and progress
 *   POST /jobs/{id}/cancel                       Stop (also KILL QUERY on its connections)
 *   DELETE /jobs/{id}                            remove a finished job and its result files
-*   GET  /jobs/{id}/result                       stored result content (e.g. preview HTML), or the
+*   GET  /jobs/{id}/result[?inline=1]            stored result content (e.g. preview HTML), or the
 *                                                result file of the job (e.g. an export) as a
-*                                                download; the file only for the job's owner
+*                                                download (inline=1: shown in the browser, text
+*                                                formats as text); the file only for the job's owner
 *
 * The start response is sent and the connection closed before the job runs
 * (fastcgi_finish_request when available, otherwise Content-Length +
@@ -124,7 +125,7 @@ final class JobController
                     if($method !== 'GET'){ $this->methodNotAllowed('GET'); break; }
                     $file = $this->runner->resultFile($id);
                     if($file !== null){
-                        $this->sendFile($file);
+                        $this->sendFile($file, filter_var($params['inline'] ?? false, FILTER_VALIDATE_BOOLEAN));
                         break;
                     }
                     $content = $this->runner->resultContent($id);
@@ -187,15 +188,23 @@ final class JobController
     }
 
     /** Stream a result file as a download (no session lock, no output buffering). */
-    private function sendFile(array $file): void
+    private function sendFile(array $file, bool $inline = false): void
     {
+        $mime = $file['mime'];
+        if($inline){
+            // shown in a browser tab: JSON and XML as such, other text formats as plain text
+            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $mime = $extension === 'json' ? 'application/json; charset=utf-8'
+                : ($extension === 'xml' ? 'text/xml; charset=utf-8'
+                : ($extension === 'zip' ? $mime : 'text/plain; charset=utf-8'));
+        }
         if($this->detach){
             // a large file must not be collected in output buffers (CLI tests keep theirs)
             while(ob_get_level() > 0){ ob_end_clean(); }
         }
         $name = str_replace(array('"', "\r", "\n"), '', $file['name']);
-        header('Content-Type: '.$file['mime']);
-        header('Content-Disposition: attachment; filename="'.$name."\"; filename*=UTF-8''".rawurlencode($file['name']));
+        header('Content-Type: '.$mime);
+        header('Content-Disposition: '.($inline ? 'inline' : 'attachment').'; filename="'.$name."\"; filename*=UTF-8''".rawurlencode($file['name']));
         header('Content-Length: '.filesize($file['path']));
         header('Cache-Control: private, no-cache');
         header('X-Content-Type-Options: nosniff');

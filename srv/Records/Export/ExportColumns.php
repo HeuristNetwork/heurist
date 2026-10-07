@@ -64,6 +64,8 @@ final class ExportColumns
     private DefinitionLookup $definitions;
     private ValueFormatter $formatter;
     private RecordFieldSelector $selector;
+    /** CSV/TSV captions (legacy RecordsExportCSV): "<field> H-ID", "<field> Record Title". */
+    private bool $tableCaptions = false;
 
     public function __construct(DefinitionLookup $definitions, ValueFormatter $formatter)
     {
@@ -83,6 +85,7 @@ final class ExportColumns
     public function expand(int $rectypeId, array $columns, bool $idFirst): array
     {
         $result = array();
+        $this->tableCaptions = $idFirst;
         if($idFirst){
             $result[] = array('header' => 'H-ID', 'key' => 'rec_ID', 'type' => 'header', 'part' => 'value', 'ext' => null);
         }
@@ -98,7 +101,8 @@ final class ExportColumns
             if(empty($parsed['details'])){ continue; }
             $field = $parsed['details'][0];
             $fieldId = intval($field['fieldId']);
-            $type = $this->definitions->fieldType($fieldId);
+            // a header field of linked records (10:lt241:12:rec_ID) is plain text
+            $type = empty($field['header']) ? $this->definitions->fieldType($fieldId) : 'freetext';
             $name = $this->caption($rectypeId, $field);
             $key = (string)$field['key'];
             $entry = array('header' => $name, 'key' => $key, 'type' => $type, 'part' => 'value', 'ext' => null);
@@ -107,9 +111,10 @@ final class ExportColumns
                 $entry['header'] = $name.(self::ENUM_SUFFIX[$entry['ext']] ?? '');
                 $result[] = $entry;
             }elseif($type === 'resource'){
-                $result[] = $entry;
+                // CSV as the legacy export: "Place of death H-ID", "Place of death Record Title"
+                $result[] = $idFirst ? array_merge($entry, array('header' => $name.' H-ID')) : $entry;
                 if($this->formatter->pointerTitles()){
-                    $result[] = array_merge($entry, array('header' => $name.' title', 'part' => 'title'));
+                    $result[] = array_merge($entry, array('header' => $name.($idFirst ? ' Record Title' : ' title'), 'part' => 'title'));
                 }
             }elseif($type === 'file' && $this->formatter->format('file') === 'details'){
                 foreach(array('file_id' => ' ID', 'file_name' => ' name', 'file_mime' => ' mime type', 'file_url' => ' URL')
@@ -198,6 +203,11 @@ final class ExportColumns
         for($index = 1; $index < count($tokens); $index += 2){
             $step = $tokens[$index];
             $next = isset($tokens[$index + 1]) ? intval($tokens[$index + 1]) : 0;
+            if($index === count($tokens) - 1 && !empty($field['header'])){
+                $names[] = $field['header'] === 'rec_ID' ? ($this->tableCaptions ? 'H-ID' : 'Record ID')
+                    : (self::HEADER_NAMES[$field['header']] ?? $field['header']);
+                break;
+            }
             if(preg_match('/^(lt|lf|rt|rf|r)?([0-9]*)$/i', $step, $match) !== 1){ continue; }
             $stepField = intval($match[2]);
             if($index === count($tokens) - 1){
