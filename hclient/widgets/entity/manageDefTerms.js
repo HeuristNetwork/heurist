@@ -458,6 +458,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     click: function() { that._onActionListener(null, 'term-delete-mutliple'); }};
                 this._defineActionButton2(del_multi_btn, c1_btns);
 
+                let move_unused_btn = {showLabel:true, text:window.hWin.HR('Group unused together'), //Group unused terms together
+                                    css:{'margin-left':'0.75em','display':'inline-block',padding:'2px'}, class:'btnGroupUnused',
+                                    click: function() { that._onActionListener(null, 'term-group-unused'); }};
+                this._defineActionButton2(move_unused_btn, c1_btns);
+
                 $('<br><span style="font-size:10px">drag to <label><input type="radio" name="rbDnD" id="rbDnD_move" checked></span>move as sub-term<label> '
                     +'<label><input type="radio" name="rbDnD" id="rbDnD_merge"/>merge into target term<label></span>')
                 .appendTo(c1_btns);
@@ -2787,6 +2792,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
 
                 that._deleteAndClose(false, selected_recs);
+            }else if(action === 'term-group-unused'){ // group all unused terms together
+                that._groupUnusedTerms();
             }
         }
     },
@@ -3494,6 +3501,89 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this.recordList.resultList('updateResultSet', this._cachedRecordset);    
         }
         return this._cachedRecordset;
+    },
+
+    _groupUnusedTerms: function(){
+
+        const that = this;
+
+        const vocabID = this.options.trm_VocabularyID;
+        const childTermIDs = $Db.trm_TreeData(vocabID, 'set');
+
+        const unusedTermsID = $Db.getTermByLabel(12676, 'UNUSED TERMS');
+
+        if(!unusedTermsID){
+
+            let newTerm = {
+                trm_Label: 'UNUSED TERMS',
+                trm_ParentTermID: vocabID,
+                trm_Domain: 'enum'
+            };
+
+            this._saveEditAndClose(newTerm, (response) => {console.log(response);
+                that._triggerRefresh(that.options.auxilary);
+                setTimeout(() => that._groupUnusedTerms(), 2000);
+            }, (errorResponse) => {
+                if(errorResponse.message.indexOf('Duplicate label') >= 0){
+                    that._triggerRefresh(that.options.auxilary);
+                    setTimeout(() => that._groupUnusedTerms(), 2000);
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(errorResponse);
+                }
+            });
+
+            return;
+        }
+
+        let toMove = [{ // ensure UNUSED TERMS is a top level term at the bottom of the list
+            trm_ID: unusedTermsID,
+            trm_ParentTermID: vocabID,
+            trm_OrderInBranch: '-999'
+        }];
+        for(const trmID of childTermIDs){
+
+            if(trmID == unusedTermsID){
+                continue;
+            }
+
+            let count = this._cachedUsages[trmID];
+            if(!count || count == 0){
+                toMove.push({
+                    trm_ID: trmID,
+                    trm_ParentTermID: unusedTermsID
+                });
+            }
+        }
+
+        if(toMove.length === 0){
+            window.hWin.HEURIST4.msg.showMsgFlash('No terms to move...', 3000);
+            return;
+        }
+
+        let request = {
+            a: 'save',
+            entity: 'defTerms',
+            fields: toMove,
+            isfull: 0,
+            request_id: window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, 'Moving unused temrs...');
+        window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+            if(response.status !== window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            for(const term of toMove){
+                $Db.trm(term['trm_ID'], 'trm_ParentTermID', term['trm_ParentTermID']);
+            }
+
+            that._triggerRefresh(that.options.auxilary);
+        });
     }
 });
 
