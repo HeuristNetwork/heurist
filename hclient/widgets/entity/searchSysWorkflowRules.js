@@ -123,10 +123,11 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
                 
                 let recset = $Db.swf();
                 let id;
-                if(recset.length()>0){
+                if(recset.length()>0){ // get first available set
                     id = recset.fld(recset.getFirstRecord(),'swf_RecTypeID');
-                }else{
-                    //get first
+                    id = $Db.rty(id) ? id : null;
+                }
+                if(!id){ // get first
                     id = this.input_search_rectype.find('option[value!=0]:first').attr('value');
                 }
 
@@ -199,7 +200,7 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
 
             let rty_name = $Db.rty(record['swf_RecTypeID'], 'rty_Name');
 
-            if(!rectype_names.includes(rty_name)){ 
+            if(!window.hWin.HEURIST4.util.isempty(rty_name) && !rectype_names.includes(rty_name)){ 
                 rectype_names.push(rty_name); 
             }
         });

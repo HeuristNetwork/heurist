@@ -15,6 +15,7 @@
 */
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
+use hserv\entity\DbSysWorkflowRules;
 use hserv\utilities\USanitize;
 use hserv\structure\ConceptCode;
 
@@ -280,6 +281,8 @@ class DbDefRecTypes extends DbEntityBase
             return false;
         }
 
+        $swfRules = new DbSysWorkflowRules($this->system);
+
         $rtyID = $this->recordIDs[0];
 
         $mysqli = $this->system->getMysqli();
@@ -346,6 +349,11 @@ class DbDefRecTypes extends DbEntityBase
         }
 
         if($res){
+
+            // Remove deleted record type's Workflow stages
+            $swfRules->setData(['rty_ID' => $rtyID, 'clearRulesByRty' => 1]);
+            $swfRules->batch_action();
+
             $res = parent::delete(true);
         }
 

@@ -224,10 +224,26 @@ class DbSysWorkflowRules extends DbEntityBase
     public function batch_action(){
 
         $ret = true;
-        $rty_ID = @$this->data['rty_ID'];
-        if($rty_ID>0){
+        $rty_ID = intval(@$this->data['rty_ID']);
+        $mysqli = $this->system->getMysqli();
 
-            $mysqli = $this->system->getMysqli();
+        if(!$this->system->isAdmin()){
+
+            $this->system->addError(HEURIST_REQUEST_DENIED,
+                'You are not DB admin. Insufficient rights (logout/in to refresh) for this operation');
+            $ret = false;
+
+        }elseif(@$this->data['clearRulesByRty'] && $rty_ID > 0){
+
+            $query = "SELECT swf_ID FROM sysWorkflowRules WHERE swf_RecTypeID = {$rty_ID}";
+            $swf_IDs = mysql__select_list2($mysqli, $query, 'intval');
+
+            if(count($swf_IDs) > 0){
+                $this->data[$this->primaryField] = $swf_IDs;
+                $this->delete();
+            }
+
+        }elseif($rty_ID > 0){
 
             if(mysql__select_value($mysqli,
             'SELECT swf_RecTypeID FROM sysWorkflowRules where swf_RecTypeID='.$rty_ID.' LIMIT 1')>0){
@@ -236,22 +252,14 @@ class DbSysWorkflowRules extends DbEntityBase
                 $ret = false;
             }else{
 
-                if(!$this->system->isAdmin()){
-
-                    $this->system->addError(HEURIST_REQUEST_DENIED,
-                        'You are not DB admin. Insufficient rights (logout/in to refresh) for this operation');
+                $this->system->defineConstant('TRM_SWF');
+                $query = 'INSERT INTO sysWorkflowRules (swf_RecTypeID,swf_Stage) SELECT '
+                .$rty_ID.', trm_ID FROM defTerms where trm_ParentTermID='.TRM_SWF.' ORDER BY trm_Label';
+                $ret = $mysqli->query($query);
+                if(!$ret){
+                    $this->system->addError(HEURIST_DB_ERROR,
+                        'Cannot add ruleset to sysWorkflowRules table', $mysqli->error);
                     $ret = false;
-                }else{
-
-                    $this->system->defineConstant('TRM_SWF');
-                    $query = 'INSERT INTO sysWorkflowRules (swf_RecTypeID,swf_Stage) SELECT '
-                    .$rty_ID.', trm_ID FROM defTerms where trm_ParentTermID='.TRM_SWF.' ORDER BY trm_Label';
-                    $ret = $mysqli->query($query);
-                    if(!$ret){
-                        $this->system->addError(HEURIST_DB_ERROR,
-                            'Cannot add ruleset to sysWorkflowRules table', $mysqli->error);
-                        $ret = false;
-                    }
                 }
             }
 
