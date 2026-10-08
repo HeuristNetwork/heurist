@@ -56,6 +56,7 @@ $.widget( "heurist.dbVerify", $.heurist.dbAction, {
             target_types:{name:'Target Types', slow:1},
             required_fields:{name:'Required Fields', slow:1},
             single_value:{name:'Single Value Fields', slow:1},
+            duplicate_values:{name:'Duplicate Field Values', slow:1},
             relationship_cache:{name:'Relationship Cache', slow:1},
             date_values:{name:'Date Values', slow:1},
             fld_spacing:{name:'Spaces in Values', slow:1},
@@ -243,6 +244,10 @@ $.widget( "heurist.dbVerify", $.heurist.dbAction, {
             this._on(this._$('button[data-fix]').button(),{click:(event)=>{
                 let action_to_fix = $(event.currentTarget).attr('data-fix'); // Use currentTarget
                 let request_params = {checks: action_to_fix, fix:1, reload:1}; // Prepare request for fixing
+                let fix_operation = $(event.currentTarget).attr('data-fix-operation');
+                if(fix_operation){
+                    request_params['fix_operation'] = fix_operation;
+                }
                 let marker = $(event.currentTarget).attr('data-selected');
                 let sel_ids = [];
 
