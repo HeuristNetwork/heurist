@@ -381,9 +381,16 @@ $.widget( "heurist.searchBuilderItem", {
             }else{
                 this.label_token.text('broken!');
             }
-        }else if(this.options.dty_ID > 0){
+        }else if(!window.hWin.HEURIST4.util.isempty(this.options.dty_ID)){
 
-            let lbl_text = $Db.dty(this.options.dty_ID,'dty_Name');
+            let lbl_text = '';
+            if(window.hWin.HEURIST4.util.isPositiveInt(this.options.dty_ID)){
+                lbl_text = $Db.dty(this.options.dty_ID,'dty_Name');
+            }else{
+                let res = $Db.parseHierarchyCode(`any:${this.options.dty_ID}`);
+                lbl_text = res !== false ? res['harchy_fields'][0] : `${this.options.dty_ID.charAt(0).toUpperCase()}${str.slice(1)}`;
+            }
+
             if(this.options.enum_field!=null){
                 lbl_text = lbl_text + '.' + this.options.enum_field;
             }
