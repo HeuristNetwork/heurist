@@ -1722,7 +1722,7 @@ $.widget( "heurist.svs_list", {
                             setTimeout(function(){ that.options.menu_locked.call( that, false ); }, 2000);
                         }
 
-                        let $ele = $(document.elementFromPoint(ui.position.left, ui.position.top));
+                        let $ele = $(document.elementFromPoint(ui.position.left, ui.position.top - 10));
                         let node = ui.helper.data('ftSourceNode');
 
                         let procFavourites = !node.folder && node.key && !node.data.url;
@@ -1734,14 +1734,33 @@ $.widget( "heurist.svs_list", {
                                 name = node.title;
                             }
 
-                            that.options.handle_favourites.call(that, node.key, name, true);
+                            let placement = -1; // 0 = tp top, -1 = to bottom, n = beneath listed filter
+                            let dropPositionTop = ui.position.top - 85;
+                            if($ele.is('span.truncate') || $ele.is('li.fancytree-node')){
+
+                                let $currentNode = $ele.is('span.truncate') ? $ele.parent() : $ele;
+                                let $prevNode = $currentNode.prev();
+
+                                let topPosition = $ele.is('span.truncate') ? $ele.position().top :  $ele.find('span.truncate').position().top;
+
+                                placement = topPosition <= dropPositionTop ? $currentNode.attr('data-fid') : 0;
+                                placement = topPosition > dropPositionTop && $prevNode.length > 0 ? $prevNode.attr('data-fid') : placement;
+                            }else{
+
+                                let $firstNode = $ele.is('.ui-heurist-title') ? $ele.parent().find('ul li.fancytree-node').first() : $ele.find('li.fancytree-node');
+                                let firstNodePositionTop = $firstNode.length === 0 ? dropPositionTop : $firstNode.position().top;
+                                placement = firstNodePositionTop >= dropPositionTop ? 0 : -1;
+                            }
+
+                            that.options.handle_favourites.call(that, node.key, name, true, placement);
                         }
                     },
                     appendTo: 'body',
                     containment: 'window',
                     revert: 'invalid',
                     cursorAt: {top: 0, left: 5},
-                    zIndex: 2001
+                    zIndex: 2001,
+                    scroll: false
                 };
             }
 
