@@ -19,6 +19,7 @@ set -Eeuo pipefail
 
 HEURIST_ROOT="${HEURIST_ROOT:-/var/www/html/HEURIST}"
 DIST_ROOT="${HEURIST_CLIENT_DIST_ROOT:-$HEURIST_ROOT/h7-alpha/hclient/bundles}"
+DIST_ROOT2="${HEURIST_CLIENT_DIST_ROOT2:-$HEURIST_ROOT/DISTRIBUTION/BUNDLES}"
 LOG_FILE="${HEURIST_CLIENT_MODULE_LOG:-/var/log/heurist_client_modules.log}"
 LOG_PREFIX="[heurist-client-modules]"
 OWNER="${HEURIST_CLIENT_OWNER:-osmakov}"
@@ -228,6 +229,7 @@ fix_permissions() {
 require_command git
 require_command node
 require_command npm
+require_command rsync
 check_node_version
 acquire_lock
 
@@ -240,6 +242,12 @@ build_and_deploy_explorer
 build_and_deploy_mirador4
 
 fix_permissions
+
+# Mirror deployed bundles after permissions are finalised in DIST_ROOT.
+# No ownership or permission changes are made in DIST_ROOT2.
+echo "$LOG_PREFIX Copying deployed bundles to $DIST_ROOT2..."
+mkdir -p "$DIST_ROOT2"
+rsync -a "$DIST_ROOT/" "$DIST_ROOT2/"
 
 echo "$LOG_PREFIX Client-module build/deployment completed successfully."
 exit 0
