@@ -36,6 +36,7 @@
 * @uses $_REQUEST['include_tilestacks'] If 1, includes tiled map images.
 * @uses $_REQUEST['include_hml'] If 1, includes HML export.
 * @uses $_REQUEST['include_tsv'] If 1, includes TSV export.
+* @uses $_REQUEST['include_crate'] If 1, includes RO-Crate export.
 * @uses $_REQUEST['include_docs'] If 1, includes background documentation (hidden, checked by default).
 * @uses $_REQUEST['allrecs'] If 1, includes resources from other users (hidden, checked by default).
 * @uses $_REQUEST['license'] Specifies the license for Nakala uploads.
@@ -46,6 +47,7 @@
 * @const FOLDER_SQL_BACKUP Path to the folder for storing standalone SQL backups.
 * @const FOLDER_HML_BACKUP Path to the folder for storing standalone HML backups.
 * @const FOLDER_TSV_BACKUP Path to the folder for storing standalone TSV backups.
+* @const FOLDER_CRATE_BACKUP Path to the folder for storing standalone RO-Crate backups.
 */
 
 /**
@@ -67,6 +69,7 @@ use hserv\structure\ConceptCode;
 use hserv\utilities\DbUtils;
 use hserv\utilities\UArchive;
 use hserv\utilities\DbExportTSV;
+use hserv\utilities\DbExportROCrate;
 use hserv\utilities\SafeguardBackup;
 
 // Initialize the page (minimal version for popups)
@@ -95,6 +98,11 @@ define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'
  * @var string
  */
 define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_tsv');
+/**
+ * Path to the temporary folder for storing a standalone RO-Crate backup.
+ * @var string
+ */
+define('FOLDER_CRATE_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_ro-crate');
 
 // --- Main script logic: Handle request parameters ---
 $mode = @$_REQUEST['mode']; // Current operation mode
@@ -123,6 +131,8 @@ if ($mode > 1) {
     } elseif ($mode == '6' && folderExists(FOLDER_TSV_BACKUP, false)) {  // Download archived TSV subdirectory
         // REMARK: Assumes FOLDER_TSV_BACKUP gets zipped/tarred with its name + .$format
         downloadFile($mime, FOLDER_TSV_BACKUP.'.'.$format);
+    } elseif ($mode == '7' && folderExists(FOLDER_CRATE_BACKUP, false)) {  // Download archived ro-crate subdirectory
+        downloadFile($mime, FOLDER_CRATE_BACKUP.'.'.$format);
     } elseif ($mode == '4') {  // Cleanup backup folder (called on exit/cancel)
         folderDelete2(HEURIST_FILESTORE_DIR.DIR_BACKUP, false); // false = do not delete parent folder itself
     }
@@ -575,6 +585,13 @@ if ($mode > 1) {
                     </label>
                 </div>
 
+                <div class="input-row">
+                    <label title="Adds a folder containing the database dump in an RO-Crate">
+                        <input type="checkbox" name="include_crate" value="1">
+                        Include database dump in an RO-Crate (includes both an SQL and TSV dump of the database)
+                    </label>
+                </div>
+
                 <!-- REMARK: BZip format option is commented out in HTML as of 2024-04-09, but PHP logic for 'tar' still exists. -->
                 <!-- 2024-04-09 - we use solely zip
                 <div class="input-row">
@@ -681,6 +698,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             $separate_sql_zip = !$is_repository;
             $separate_hml_zip = !$is_repository && @$_REQUEST['include_hml'] == '1';
             $separate_tsv_zip = !$is_repository && @$_REQUEST['include_tsv'] == '1';
+            $separate_crate_zip = !$is_repository && @$_REQUEST['include_crate'] == '1';
 
             // --- Prepare backup folders ---
             if (file_exists(FOLDER_BACKUP)) { // Main backup folder
@@ -706,10 +724,18 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             if ($separate_tsv_zip && !folderCreate(FOLDER_TSV_BACKUP, true)) { // TSV-only backup folder
                 $separate_tsv_zip = false;
             }
+            if ($separate_crate_zip && !folderCreate(FOLDER_CRATE_BACKUP, true)) { // RO-Crate-only backup folder
+                $separate_crate_zip = false;
+            }
             // Folder for TSV output within the main backup package
             if (@$_REQUEST['include_tsv'] == 1 && !folderCreate(FOLDER_BACKUP . '/tsv-output/records', true)) {
                 $_REQUEST['include_tsv'] = 0; // Disable TSV if subfolder creation fails
                 echo_flush2("Failed to create sub directory for TSV output within backup directory<br>");
+            }
+            // Folder for RO-Crate output within the main backup package
+            if (@$_REQUEST['include_crate'] == 1 && !folderCreate(FOLDER_BACKUP . '/ro-crate', true)) {
+                $_REQUEST['include_crate'] = 0; // Disable RO-Crate if subfolder creation fails
+                echo_flush2("Failed to create sub directory for RO-Crate output within backup directory<br>");
             }
 
             // Validate repository if specified
@@ -824,13 +850,17 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             }
 
             // --- TSV Export ---
+            $tsvFiles = null;
             if (@$_REQUEST['include_tsv'] == '1') {
+
                 echo_flush2("Exporting database records as TSV<br>(may take several minutes for large databases)<br>");
+
                 $dbExportTSV = new DbExportTSV();
                 $dbExportTSV->setSession($system);
                 $dbExportTSV->setBackupFolder();
                 // This should generate files in FOLDER_BACKUP . '/tsv-output/'
-                [$warns, $files] = $dbExportTSV->output(); 
+                [$warns, $tsvFiles] = $dbExportTSV->output();
+
                 if (!empty($warns)) {
                     echo_flush2(implode('<br>', $warns));
                 }
@@ -852,9 +882,10 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
            saveURLasFile($url_xml, FOLDER_BACKUP."/Database_Structure.xml");
 
             // --- SQL Dump ---
+            $database_dumpfile = FOLDER_BACKUP."/{$system->dbname()}_MySQL_Database_Dump.sql";
             if ($system->isAdmin()) { // Only admins can perform full SQL dump
                 echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
-                $database_dumpfile = FOLDER_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql";
+
                 $dump_options = array('skip-triggers' => true,
                                       'single-transaction' => true,
                                       'quick' =>true,
@@ -870,6 +901,43 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
                 if ($separate_sql_zip) { // Copy SQL dump for separate archive
                     $separate_sql_zip = fileCopy($database_dumpfile, FOLDER_SQL_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql");
+                }
+            }
+
+            if(@$_REQUEST['include_crate'] == 1){
+
+                echo_flush2('Exporting database as an RO-Crate<br>(may take several minutes for large databases)<br>');
+
+                $dbExportCrate = new DbExportROCrate($system);
+
+                if(!empty($tsvFiles) && folderExists(FOLDER_BACKUP . DIRECTORY_SEPARATOR . 'tsv-output', false)){
+                    $tsvFiles['tablesDir'] = FOLDER_BACKUP . DIRECTORY_SEPARATOR . 'tsv-output';
+                    $tsvFiles['recordsDir'] = FOLDER_BACKUP . DIRECTORY_SEPARATOR . 'tsv-output/records';
+                }
+
+                try{
+
+                    $dbExportCrate->export('ro-crate', [
+                        'includeSqlDump' => true,
+                        'includeFiles' => false,// true
+                        'sqlDump' => $database_dumpfile,
+                        'tsvFiles' => $tsvFiles,
+                        'parentDir' => FOLDER_BACKUP
+                    ]);
+
+                    $separate_crate_zip = $separate_crate_zip && folderSize2(FOLDER_BACKUP . '/ro-crate') > 0;
+                    if ($separate_crate_zip) {
+                        $separate_crate_zip = folderRecurseCopy(FOLDER_BACKUP . '/ro-crate', FOLDER_CRATE_BACKUP);
+                    }
+                    if(folderExists(FOLDER_BACKUP . '/ro-crate', false)){ // cleanup folder
+                        folderDelete2(FOLDER_BACKUP . '/ro-crate');
+                    }
+                }catch(Throwable $error){
+                    echo_flush2("RO-Crate error: {$error->getMessage()}");
+                    if(folderExists(FOLDER_BACKUP . '/ro-crate', false)){ // cleanup folder
+                        folderDelete2(FOLDER_BACKUP . '/ro-crate');
+                    }
+                    $separate_crate_zip = false;
                 }
             }
 
@@ -927,6 +995,17 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     }
                 }
 
+                $res_crate_archive = false;
+                if ($separate_crate_zip) { // Create separate RO-Crate archive
+                    $destination_crate = FOLDER_CRATE_BACKUP.'.'.$format;
+                    if (file_exists($destination_crate)) unlink($destination_crate);
+                    if ($format == 'zip') {
+                        $res_crate_archive = UArchive::zip(FOLDER_CRATE_BACKUP, null, $destination_crate, true);
+                    } else {
+                        $res_crate_archive = UArchive::createBz2(FOLDER_CRATE_BACKUP, null, $destination_crate, true);
+                    }
+                }
+
                 // --- Display Download Links or Upload to Repository ---
                 if (!$is_repository) { // Provide download links
                     $param_format = ($format == 'tar' || $format == 'tar.bz2') ? '&is_tar=1' : '&is_zip=1'; // Keep original tar/zip param for download URL
@@ -970,6 +1049,17 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
     <?php } else { ?>
         <br><br>
         <div class="errorMsg">Failed to create / set up a standalone TSV folder. <?php echo htmlspecialchars(is_string($res_tsv_archive) ? $res_tsv_archive : '');?></div>
+    <?php
+        }
+    }
+    if ($separate_crate_zip) {
+        if ($res_crate_archive === true) { ?>
+        <br><br>
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_ro-crate.<?php echo $display_format; ?>?mode=7&db=<?php echo $system->dbname().$param_format;?>"
+            target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the RO-Crate <?php echo $display_format;?> only</a>
+    <?php } else { ?>
+        <br><br>
+        <div class="errorMsg">Failed to create / set up a standalone RO-Crate folder. <?php echo htmlspecialchars(is_string($res_crate_archive) ? $res_crate_archive : '');?></div>
     <?php
         }
     }
@@ -1209,11 +1299,12 @@ function report_message($message, $is_error = true, $need_cleanup = false)
         } else {
             // Cleanup temporary folders for individual downloads
             // REMARK: Main FOLDER_BACKUP is deleted by UArchive::zip/createBz2 if successful and last param is true.
-            // These lines ensure specific SQL/HML/TSV folders are removed if they were created for separate zips.
+            // These lines ensure specific SQL/HML/TSV/RO-Crate folders are removed if they were created for separate zips.
             if (defined('FOLDER_BACKUP')) folderDelete2(FOLDER_BACKUP, true);
             if (defined('FOLDER_SQL_BACKUP')) folderDelete2(FOLDER_SQL_BACKUP, true);
             if (defined('FOLDER_HML_BACKUP')) folderDelete2(FOLDER_HML_BACKUP, true);
             if (defined('FOLDER_TSV_BACKUP')) folderDelete2(FOLDER_TSV_BACKUP, true);
+            if (defined('FOLDER_CRATE_BACKUP')) folderDelete2(FOLDER_CRATE_BACKUP, true);
         }
         // Release the action lock
         isActionInProgress('exportDB', -1, $system->dbname());
