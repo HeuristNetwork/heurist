@@ -248,6 +248,7 @@ fix_permissions
 echo "$LOG_PREFIX Copying deployed bundles to $DIST_ROOT2..."
 mkdir -p "$DIST_ROOT2"
 rsync -a "$DIST_ROOT/" "$DIST_ROOT2/"
+find "$DIST_ROOT2" -type f -name "*.map" -delete
 
 echo "$LOG_PREFIX Client-module build/deployment completed successfully."
 exit 0
