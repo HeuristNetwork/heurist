@@ -28,12 +28,20 @@ info:
 
     Map and timeline endpoints return engine-neutral MapDocument, MapLayer, GeoJSON and temporal presentation resources.'
 servers:
-- url: https://{host}/api
+- url: ../api
+  description: This Heurist installation (same server as this documentation)
+- url: '{scheme}://{host}/api'
   description: A Heurist installation
   variables:
+    scheme:
+      default: https
+      enum:
+      - https
+      - http
+      description: Protocol used to reach the Heurist server
     host:
       default: heuristref.net
-      description: Host name of the Heurist server
+      description: Host name of the Heurist server, including any path prefix (e.g. 127.0.0.1/heurist)
 tags:
 - name: Databases
   description: List registered databases available on the server
