@@ -192,7 +192,7 @@ if ($with_triggers) {
 
 // --- Initialize TSV Exporter if needed ---
 if (!$arg_skip_tsv) {
-    $dbExportTSV = new DbExportTSV($system);
+    $dbExportTSV = new DbExportTSV();
 }
 
 set_time_limit(0); // No time limit for this script.
@@ -277,9 +277,10 @@ foreach ($arg_database as $idx => $db_name) {
         $system->setDbnameFull($db_name); // Set current database context for the system object
         mysql__usedatabase($mysqli, $db_name); // Select database in mysqli connection
         
-        $dbExportTSV->setSession($system, $folder);
+        $dbExportTSV->setSession($system);
+        $dbExportTSV->setBackupFolder($folder);
 
-        $warns = $dbExportTSV->output();
+        [$warns, $files] = $dbExportTSV->output();
         if(!empty($warns)){
              echo (implode("\n", $warns)."\n");
         }

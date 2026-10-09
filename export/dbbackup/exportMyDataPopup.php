@@ -826,9 +826,11 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             // --- TSV Export ---
             if (@$_REQUEST['include_tsv'] == '1') {
                 echo_flush2("Exporting database records as TSV<br>(may take several minutes for large databases)<br>");
-                $dbExportTSV = new DbExportTSV($system);
+                $dbExportTSV = new DbExportTSV();
+                $dbExportTSV->setSession($system);
+                $dbExportTSV->setBackupFolder();
                 // This should generate files in FOLDER_BACKUP . '/tsv-output/'
-                $warns = $dbExportTSV->output(); 
+                [$warns, $files] = $dbExportTSV->output(); 
                 if (!empty($warns)) {
                     echo_flush2(implode('<br>', $warns));
                 }
