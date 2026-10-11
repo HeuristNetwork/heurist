@@ -9,7 +9,8 @@ entry points during migration.
 
 ## Key files
 
-- `RecordQueryController.php` — records search/retrieval response.
+- `RecordQueryController.php` — records search/retrieval response; also one record
+  (`GET /records/{id}`, `outputItem`: same record object and meta, no pagination).
 - `RecordPresentationController.php` — Dataset, Map Document and Map Layer reads.
 - `MapDataController.php` — query-to-GeoJSON output only.
 - `PublicationController.php` — map/data/timeline/graph/crosstabs publication actions.

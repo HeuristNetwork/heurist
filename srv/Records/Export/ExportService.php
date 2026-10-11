@@ -153,7 +153,9 @@ final class ExportService
                     });
                 }
             }
-            $written = $this->writeRecords($writer, $ids, $meta, $check, $progress, $rectypes);
+            // JSON is the /records envelope: resolved values only with names (resolveDetails)
+            $resolve = !($writer instanceof JsonExportWriter) || $request->names;
+            $written = $this->writeRecords($writer, $ids, $meta, $check, $progress, $rectypes, $resolve);
             $files = $writer->files();
         }
 
@@ -186,7 +188,7 @@ final class ExportService
             case 'gephi':
                 return new GexfExportWriter($request, $columns, $definitions, $formatter, $workDir);
             default:
-                return new JsonExportWriter($definitions, $formatter, $workDir, $request->names);
+                return new JsonExportWriter($workDir);
         }
     }
 
@@ -194,10 +196,11 @@ final class ExportService
      * Load the records in batches and pass them to the writer.
      *
      * @param array<int,int> $rectypes Filled: records per record type.
+     * @param bool $resolve resolveDetails of the record objects.
      * @return int Records written.
      */
     private function writeRecords(ExportWriterInterface $writer, array $ids, array $meta,
-        callable $check, callable $progress, array &$rectypes): int
+        callable $check, callable $progress, array &$rectypes, bool $resolve = true): int
     {
         $assembler = $this->assembler();
         $selection = (new RecordFieldSelector())->parse($writer->fieldCodes());
@@ -207,8 +210,12 @@ final class ExportService
         try{
             foreach(array_chunk($ids, self::BATCH) as $chunk){
                 $check();
-                $page = $assembler->assemble($chunk, $selection, array('resolveDetails' => true));
+                $page = $assembler->assemble($chunk, $selection, array('resolveDetails' => $resolve));
                 $records = array_values($page['records']);
+                if($writer instanceof JsonExportWriter){
+                    // meta.fields, meta.recordTypes and meta.terms as /records with defs=1
+                    $writer->addMeta($assembler->fieldMetadata($selection, $records), $assembler->definitions($records));
+                }
                 foreach($records as $record){
                     $rectypeId = intval($record['rec_RecTypeID'] ?? 0);
                     $rectypes[$rectypeId] = ($rectypes[$rectypeId] ?? 0) + 1;

@@ -370,6 +370,14 @@ paths:
         description: >-
           Resolve type-specific metadata using standard rec_*, trm_* and ulf_* field names. Linked values retain
           their path provenance whether this option is true or false.
+      - name: defs
+        in: query
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Add meta.recordTypes and meta.terms - names and concept codes of the record types (records and resolved
+          pointer targets) and terms used by the returned records. Field concept codes are always in meta.fields.details.
       responses:
         '200':
           description: Records response with metadata and pagination
@@ -721,6 +729,20 @@ paths:
           enum:
           - ids
         description: Set to ids for an ID-only records array. This mode takes precedence over and ignores fields.
+      - name: resolveDetails
+        in: query
+        schema:
+          type: boolean
+          default: false
+        description: As for the records search - resolved values with standard rec_*, trm_* and ulf_* names.
+      - name: defs
+        in: query
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Add meta.recordTypes and meta.terms - names and concept codes of the record types (records and resolved
+          pointer targets) and terms used by the returned records. Field concept codes are always in meta.fields.details.
       responses:
         '200':
           description: Records response for one requested record. Missing or inaccessible records return an empty
@@ -735,9 +757,9 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/ServerError'
-      description: Anonymous requests return only publicly visible records. The response keeps the established records
-        array and record detail structure, and adds metadata and pagination. A missing or inaccessible record returns
-        an empty records array.
+      description: Anonymous requests return only publicly visible records. The record object and meta are the same as
+        for /records?ids={recordId} (details are arrays of values keyed by field ID); there is no pagination. A missing
+        or inaccessible record returns an empty records array.
   /{database}/rectypes:
     get:
       tags:
@@ -2553,7 +2575,8 @@ components:
           - gephi
           description: >-
             csv/tsv - one table per record type (a zip for several), first column H-ID; json - the /records
-            envelope (fields=_all, resolveDetails) with concept codes; geojson - one feature per record with
+            envelope, the same as /records?fields=_all&defs=1 (with names - also resolveDetails=1), plus
+            meta.title, meta.exported and meta.total; geojson - one feature per record with
             geometry; kml - one Placemark per geo value; xml - flat HML that the HML import reads; gephi - GEXF 1.2.
         scope:
           type: object
@@ -3278,6 +3301,10 @@ components:
         resolveDetails:
           type: boolean
           default: false
+        defs:
+          type: boolean
+          default: false
+          description: Add meta.recordTypes and meta.terms (see the defs query parameter).
         limit:
           type: integer
           minimum: 1
@@ -3465,8 +3492,6 @@ components:
       required:
       - database
       - entity
-      - self
-      - fields
       properties:
         database:
           type: string
@@ -3478,6 +3503,23 @@ components:
           format: uri
         fields:
           $ref: '#/components/schemas/RecordFieldsMeta'
+        recordTypes:
+          type: object
+          description: defs=1 only. Record types used by the records, keyed by rty_ID.
+          additionalProperties:
+            type: object
+            properties:
+              rty_Name: {type: string}
+              rty_ConceptCode: {type: string}
+        terms:
+          type: object
+          description: defs=1 only. Terms of enum and relationtype values, keyed by trm_ID.
+          additionalProperties:
+            type: object
+            properties:
+              trm_Label: {type: string}
+              trm_Code: {type: string}
+              trm_ConceptCode: {type: string}
       additionalProperties: false
     RecordItemResponse:
       type: object
@@ -3579,6 +3621,7 @@ components:
             type: string
         details:
           type: array
+          description: Definitions of the requested fields; with fields=_all, of every field present in the records.
           items:
             $ref: '#/components/schemas/RecordDetailField'
       additionalProperties: false
@@ -3601,6 +3644,23 @@ components:
           description: Reusable linked traversal definitions keyed by the path ID stored beside linked values.
           additionalProperties:
             type: string
+        recordTypes:
+          type: object
+          description: defs=1 only. Record types used by the records, keyed by rty_ID.
+          additionalProperties:
+            type: object
+            properties:
+              rty_Name: {type: string}
+              rty_ConceptCode: {type: string}
+        terms:
+          type: object
+          description: defs=1 only. Terms of enum and relationtype values, keyed by trm_ID.
+          additionalProperties:
+            type: object
+            properties:
+              trm_Label: {type: string}
+              trm_Code: {type: string}
+              trm_ConceptCode: {type: string}
       additionalProperties: false
     MapSearchRequest:
       type: object

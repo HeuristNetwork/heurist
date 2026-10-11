@@ -74,6 +74,7 @@ client derives it from `fields.targetTypes` + `structure`.
 `DefinitionLookup.php` is the one srv loader of definitions (record types, fields,
 structure names, terms, user/group names) and holds the one concept-code rule
 (`conceptCodeFor`). It is used by this snapshot, the srv Smarty engine
-(`Reports/Smarty/ReportDefinitions`), record export and `RecordDataService`.
+(`Reports/Smarty/ReportDefinitions`), record export and `RecordDataService`
+(field metadata, concept codes and `defs` of `/records`).
 Terms are `{internalid, term, code, conceptid, desc, parent, inverse, domain}`.
 

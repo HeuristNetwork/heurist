@@ -27,6 +27,8 @@ final class SearchRequest
     public $fields;
     public string $detail;
     public bool $resolveDetails;
+    /** defs=1: meta.recordTypes and meta.terms of the definitions used by the page. */
+    public bool $defs;
     /** Request sort overriding a top-level query sort. */
     public $sort;
     /** Whether sort was explicitly supplied, including an empty sort. */
@@ -57,6 +59,7 @@ final class SearchRequest
         $detail = strtolower(trim((string)($options['detail'] ?? 'records')));
         $this->detail = $detail === '' ? 'records' : $detail;
         $this->resolveDetails = filter_var($options['resolveDetails'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $this->defs = filter_var($options['defs'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $this->sortProvided = array_key_exists('sort', $options);
         $this->sort = $this->sortProvided ? $options['sort'] : null;
         $this->filter = $options['filter'] ?? null;

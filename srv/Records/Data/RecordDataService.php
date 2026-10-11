@@ -31,8 +31,9 @@ final class RecordDataService
     /** @var QueryExecutor */
     private $executor;
     private RuntimeContext $runtime;
-    /** @var int|null Registered id of this database (concept codes), read once. */
-    private ?int $registeredId = null;
+    private DatabaseInterface $database;
+    /** Names, types and concept codes of definitions (the one srv loader), created on first use. */
+    private ?DefinitionLookup $definitions = null;
 
     /** Initialise batched record retrieval with the shared database adapter. */
     public function __construct(
@@ -42,7 +43,17 @@ final class RecordDataService
     )
     {
         $this->runtime = $runtime;
+        $this->database = $database;
         $this->executor = $executor ?? new QueryExecutor($database);
+    }
+
+    /** Definition lookup shared by field metadata, concept codes and `defs`. */
+    public function definitions(): DefinitionLookup
+    {
+        if($this->definitions === null){
+            $this->definitions = new DefinitionLookup($this->database);
+        }
+        return $this->definitions;
     }
 
     /** Build standard record objects for the ordered top-query page. */
@@ -236,25 +247,13 @@ final class RecordDataService
         }
     }
 
-    /** Return OpenAPI field definitions once per requested detail/path. */
+    /**
+     * Field definitions (meta.fields.details) once per requested detail/path:
+     * dty_ID, dty_Name, dty_Type, dty_ConceptCode (DefinitionLookup), plus
+     * dty_PathCode for linked fields.
+     */
     public function loadFieldMetadata(array $fields): array
     {
-        if(empty($fields)){ return array(); }
-        $ids = array_values(array_unique(array_filter(array_map(static function($field){
-            return intval($field['fieldId']);
-        }, $fields))));
-        if(empty($ids)){ $ids = array(0); }
-        $sql = 'SELECT dty_ID,dty_Name,dty_Type,dty_OriginatingDBID,dty_IDInOriginatingDB FROM defDetailTypes WHERE dty_ID IN ('
-            .implode(',', array_fill(0, count($ids), '?')).')';
-        $definitions = array();
-        foreach($this->executor->executeRows($sql, str_repeat('i', count($ids)), $ids) as $row){
-            $definitions[intval($row[0])] = array(
-                'dty_ID'=>(string)$row[0],
-                'dty_Name'=>$row[1],
-                'dty_Type'=>$row[2],
-                'dty_ConceptCode'=>$this->conceptCode($row[3], $row[4], intval($row[0]))
-            );
-        }
         $result = array();
         foreach($fields as $field){
             if(!empty($field['header'])){
@@ -263,16 +262,71 @@ final class RecordDataService
                     'dty_ConceptCode'=>null, 'dty_PathCode'=>$field['pathCode']);
                 continue;
             }
-            $definition = $definitions[intval($field['fieldId'])] ?? array(
-                'dty_ID'=>(string)$field['fieldId'],
-                'dty_Name'=>null,
-                'dty_Type'=>null,
-                'dty_ConceptCode'=>null
+            $fieldId = intval($field['fieldId']);
+            $known = $this->definitions()->field($fieldId);
+            $definition = array(
+                'dty_ID'=>(string)$fieldId,
+                'dty_Name'=>$known['name'] ?? null,
+                'dty_Type'=>$known['type'] ?? null,
+                'dty_ConceptCode'=>$known['concept'] ?? null
             );
-            if($field['pathCode'] !== null){ $definition['dty_PathCode'] = $field['pathCode']; }
+            if(($field['pathCode'] ?? null) !== null){ $definition['dty_PathCode'] = $field['pathCode']; }
             $result[] = $definition;
         }
         return $result;
+    }
+
+    /**
+     * Definitions used by loaded records (`defs=1`): their record types and the
+     * record types of resolved pointer values, and the terms of enum and
+     * relationtype values (stored or resolved).
+     *
+     * @param array $records Record objects of loadRecords()/RecordPageAssembler.
+     * @return array{recordTypes:array<string,array>,terms:array<string,array>}
+     */
+    public function loadDefinitions(array $records): array
+    {
+        $lookup = $this->definitions();
+        $rectypeIds = array();
+        $termIds = array();
+        foreach($records as $record){
+            $rectypeIds[intval($record['rec_RecTypeID'] ?? 0)] = true;
+            foreach($record['details'] ?? array() as $key=>$values){
+                // the key is a field id, a type-qualified id (10:20) or a path code ending with the field id
+                $parts = explode(':', (string)$key);
+                $type = $lookup->fieldType(intval(end($parts)));
+                foreach((array)$values as $value){
+                    if($type === 'enum' || $type === 'relationtype'){
+                        $termId = is_array($value) ? ($value['trm_ID'] ?? $value['value'] ?? 0) : $value;
+                        $termIds[intval($termId)] = true;
+                    }elseif($type === 'resource' && is_array($value)){
+                        $rectypeIds[intval($value['rec_RecTypeID'] ?? 0)] = true;
+                    }
+                }
+            }
+        }
+        unset($rectypeIds[0], $termIds[0]);
+        ksort($rectypeIds);
+        ksort($termIds);
+
+        $recordTypes = array();
+        foreach(array_keys($rectypeIds) as $id){
+            $recordTypes[(string)$id] = array(
+                'rty_Name'=>$lookup->rectypeName($id),
+                'rty_ConceptCode'=>$lookup->rectypeConcept($id)
+            );
+        }
+        $terms = array();
+        foreach(array_keys($termIds) as $id){
+            $term = $lookup->term($id);
+            if($term === null){ continue; }
+            $terms[(string)$id] = array(
+                'trm_Label'=>$term['term'],
+                'trm_Code'=>$term['code'],
+                'trm_ConceptCode'=>$term['conceptid']
+            );
+        }
+        return array('recordTypes'=>$recordTypes, 'terms'=>$terms);
     }
 
     /**
@@ -448,16 +502,10 @@ final class RecordDataService
         return $raw;
     }
 
-    /**
-     * Concept code "<db>-<id>" by the one srv rule (DefinitionLookup::conceptCodeFor).
-     */
+    /** Concept code "<db>-<id>" by the one srv rule (DefinitionLookup). */
     private function conceptCode($originDb, $originId, int $localId): string
     {
-        if($this->registeredId === null){
-            $rows = $this->executor->executeRows('SELECT sys_dbRegisteredID FROM sysIdentification LIMIT 1', '', array());
-            $this->registeredId = isset($rows[0][0]) ? intval($rows[0][0]) : 0;
-        }
-        return DefinitionLookup::conceptCodeFor($this->registeredId, $originDb, $originId, $localId);
+        return $this->definitions()->conceptCode($originDb, $originId, $localId);
     }
 
     private function ids(array $ids): array

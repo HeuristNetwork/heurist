@@ -106,6 +106,7 @@ final class RecordQueryController
             // total=0: no count query for a full page (pagination.total is then -1)
             'total' => $params['total'] ?? null,
             'resolveDetails' => $params['resolveDetails'] ?? false,
+            'defs' => $params['defs'] ?? false,
             'filter' => $this->structuredParameter($params['filter'] ?? null)
         );
         if(strtolower(trim((string)($params['detail'] ?? ''))) === 'minmax'){
@@ -238,10 +239,15 @@ final class RecordQueryController
                     array('rec_ID','rec_RecTypeID','rec_Title'),
                     $selection['headers'], $selection['virtuals'] ?? array()
                 ))),
-                'details'=>$assembler->fieldMetadata($selection)
+                'details'=>$assembler->fieldMetadata($selection, $records)
             )
         );
         if(!empty($paths)){ $meta['paths'] = $paths; }
+        if($request->defs){
+            $definitions = $assembler->definitions($records);
+            $meta['recordTypes'] = (object)$definitions['recordTypes'];
+            $meta['terms'] = (object)$definitions['terms'];
+        }
         return array(
             'records'=>$records,
             'meta'=>$meta,
@@ -275,11 +281,56 @@ final class RecordQueryController
         return $pagination;
     }
 
+    /**
+     * One record: GET /api/{db}/records/{id}. The same record object and meta as
+     * /records?ids={id}; fields default to _all (header fields and every detail).
+     * Response {records:[record], meta} without pagination; a missing or hidden
+     * record gives an empty records array.
+     */
+    public function executeItem(array $params, int $recordId): array
+    {
+        unset($params['query'], $params['q'], $params['rules'], $params['filter'], $params['sort']);
+        $params['ids'] = (string)$recordId;
+        $params['limit'] = 1;
+        $params['offset'] = 0;
+        $params['total'] = 0;
+        if(!isset($params['fields']) || $params['fields'] === '' || $params['fields'] === array()){
+            $params['fields'] = '_all';
+        }
+        $detail = strtolower(trim((string)($params['detail'] ?? '')));
+        if($detail !== '' && $detail !== 'records' && $detail !== 'ids'){
+            throw new QueryValidationException('detail='.$detail.' is not supported by /records/{id}');
+        }
+        $response = $this->execute($params);
+        if($detail === 'ids'){
+            return array(
+                'records'=>array_map('strval', $response['ids'] ?? array()),
+                'meta'=>array('database'=>$params['db'] ?? $this->databaseName(), 'entity'=>'records')
+            );
+        }
+        unset($response['pagination']);
+        $uri = (string)($_SERVER['REQUEST_URI'] ?? '');
+        if($uri !== ''){ $response['meta']['self'] = $uri; }
+        return $response;
+    }
+
+    /** Execute executeItem() and write the JSON response (errors as output()). */
+    public function outputItem(array $params, int $recordId): void
+    {
+        $this->send(function() use ($params, $recordId){ return $this->executeItem($params, $recordId); });
+    }
+
     /** Execute and write a public-compatible JSON response. */
     public function output(array $params): void
     {
+        $this->send(function() use ($params){ return $this->execute($params); });
+    }
+
+    /** Run a response builder and write its JSON, or the error response. */
+    private function send(callable $build): void
+    {
         try{
-            $response = $this->execute($params);
+            $response = $build();
             if(defined('HEADER_CORS_POLICY')){ header(HEADER_CORS_POLICY); }
             $this->response->send($response);
         }catch(QueryValidationException $e){

@@ -375,7 +375,7 @@ if($is_record_query){
     }
     if($http_method === 'POST' && is_array($json)
         && !isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
-        $contractKeys = array('limit','offset','fields','detail','resolveDetails','sort','filter','debug');
+        $contractKeys = array('limit','offset','fields','detail','resolveDetails','defs','sort','filter','debug');
         $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
         if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
             $req_params['query'] = $json;
@@ -843,7 +843,7 @@ else
             // fields object. Restore its explicit query parameters from JSON.
             if(is_array($json)){
                 foreach(array(
-                    'query','q','ids','fields','detail','resolveDetails','limit','offset',
+                    'query','q','ids','fields','detail','resolveDetails','defs','limit','offset',
                     'sort','filter','debug'
                 ) as $key){
                     if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
@@ -851,6 +851,15 @@ else
             }
             $controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
             $controller->output($req_params);
+            $system->dbclose();
+            exit;
+        }
+
+        if($method=='search' && is_numeric($requestUri[4]) && intval($requestUri[4]) > 0){
+            // GET /records/{id}: the /records record object and meta (srv), with
+            // fields (default _all), detail=ids, resolveDetails and defs.
+            $controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
+            $controller->outputItem($req_params, intval($requestUri[4]));
             $system->dbclose();
             exit;
         }
