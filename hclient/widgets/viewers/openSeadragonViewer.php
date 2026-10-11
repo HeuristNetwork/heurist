@@ -25,6 +25,7 @@ $database = array_key_exists('db', $requestParameters) ? $requestParameters['db'
 $ulfID = array_key_exists('recID', $requestParameters) ? $requestParameters['recID'] : null;
 $imageURL = array_key_exists('image', $requestParameters) ? trim((string)$requestParameters['image']) : '';
 if(!$database || !$ulfID && $imageURL === ''){
+    echo !$database ? 'Database is missing' : 'Image is missing';
     exit;
 }
 
@@ -33,6 +34,7 @@ $language = getLangCode3($language);
 
 $system = new hserv\System();
 if(!$system->init($database, true, false)){
+    echo 'Unable to initialise Heurist System.';
     exit;
 }
 
@@ -42,6 +44,7 @@ $files = [];
 if($imageURL !== ''){
 
     if(!preg_match('~^https?://~i', $imageURL)){
+        echo 'Invalid image URL provided';
         exit;
     }
 
@@ -69,6 +72,7 @@ if($imageURL !== ''){
     }
 
     if($ulfQuery === ''){
+        echo 'Invalid image identifier provided';
         exit;
     }
 
@@ -91,17 +95,17 @@ if($imageURL !== ''){
 
         $filename = !empty($ulfRec['ulf_ExternalFileReference']) ? $ulfRec['ulf_ExternalFileReference'] : $ulfRec['ulf_OrigFileName'];
         $files[] = [
-            'type' => 'image',
+            'type' => strpos(strtolower($ulfRec['ulf_MimeExt']), 'pdf') >= 0 ? 'pdf': 'image',
             'url' => HEURIST_BASE_URL . "?db={$database}&fullres=1&file={$ulfRec['ulf_ObfuscatedFileID']}",
             'name' => $filename,
             'caption' => $caption,
             'desc' => $description,
             'copyright' => $ulfRec['ulf_Copyright'],
             'owner' => $ulfRec['ulf_Copyowner'],
-            'isManifest' => $ulfRec['ulf_OrigFileName'] == '_iiif',
-            'isPDF' => strtolower($ulfRec['ulf_MimeExt']) === 'pdf',
-            'usePDFImage' => true
+            'isManifest' => $ulfRec['ulf_OrigFileName'] == '_iiif'
         ];
+
+        break; // accept only the first file, for now
     }
 }
 ?>
@@ -123,9 +127,9 @@ if($imageURL !== ''){
         <title>Heurist OpenSeaDragon Viewer</title>
 
         <script 
-            src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/5.0.1/openseadragon.min.js" 
+            src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/6.1.1/openseadragon.min.js" 
             crossorigin="anonymous" 
-            integrity="sha384-Vh4b5HGyvDGMp6lVeYZe1zCqqyhS8oLTUC4SKIWmOuYH7nEuWiGIpSACopwLu9UD">
+            integrity="sha384-KKly+4vqqBHitr2XfNKWa3+0asIVpzYs2HijkM/zz0X6rgnyLuQEVERX9HqkM5/P">
         </script>
 
         <script
@@ -145,18 +149,42 @@ if($imageURL !== ''){
         />
 
         <style>
+            :root{
+
+                --dark: rgb(60 60 60);
+                --darker: rgb(30 30 30);
+                --bright: rgb(230 230 230);
+                --brighter: rgb(245 245 245);
+                --black: rgb(25 25 25);
+                --lightgrey: rgb(200 200 200);
+                --white: rgb(240 240 240);
+
+                --osd-background: var(--brighter);
+                --page-background: var(--bright);
+                --page-colour: var(--black);
+            }
+
             *{
                 font-family: Helvetica,Arial,sans-serif;
             }
 
+            body{
+                background-color: var(--page-background);
+                color: var(--page-colour);
+            }
+
             #openseadragon-img{
+
+                height: 70vh;
+                width: 70vw;
+
                 margin: 1em auto;
                 padding: 5px;
+
                 border: 1px solid black;
                 border-radius: 5px;
-            }
-            #openseadragon-img.greyBackground{
-                background-color: #282828;
+
+                background-color: var(--osd-background);
             }
 
             #img-title{
@@ -202,8 +230,8 @@ if($imageURL !== ''){
                 justify-content: center;
                 align-items: center;
 
-                background-color: white;
-                color: black;
+                background-color: transparent;
+                color: var(--page-colour);
                 font-size: 20px;
                 cursor: pointer;
                 transition: background-color 0.2s ease, transform 0.1s ease;
@@ -216,6 +244,48 @@ if($imageURL !== ''){
             .osd-toggle-bg:active{
                 transform: scale(0.95);
             }
+
+            .osd-coveralls{
+
+                background-color: rgba(0, 0, 0, 0.7);
+                color: var(--white);
+                opacity: 0;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                font-size: 1.2em;
+
+                z-index: 100;
+
+                transition: opacity 0.3s ease;
+
+                user-select: none;
+                -moz-user-select: none;
+            }
+
+            #osd-coverall{
+
+                position: absolute;
+                top: 0px;
+                left: 0px;
+
+                height: 100vh;
+                width: 100vw;
+
+                pointer-events: none;
+            }
+
+            #osd-error-coverall{
+
+                position: absolute;
+
+                padding: 5px;
+
+                height: 70vh;
+                width: 70vw;
+            }
         </style>
 
         <script>
@@ -225,9 +295,66 @@ if($imageURL !== ''){
 
             let pdfFiles = {};
             const TILE_SIZE = 256;
-            const PDF_CANVAS_SCALE = 4;
-            const PDF_IMAGE_SCALE = 2;
+            const PDF_RENDER_SCALE = 2;
             let fileIndex = 0;
+
+            function showCoverall(message){
+                const OSDCoverall = document.getElementById('osd-coverall');
+                if(message && message !== ''){
+                    OSDCoverall.querySelector('#osd-coverall-msg').textContent = message;
+                }
+                OSDCoverall.style.opacity = 1;
+            }
+            function hideCoverall(){
+                const OSDCoverall = document.getElementById('osd-coverall');
+                OSDCoverall.style.opacity = 0;
+            }
+
+            function showError(message, clearCanvas = false){
+
+                const OSDErrorCoverall = document.getElementById('osd-error-coverall');
+
+                message = message && message !== '' ? message : 'An error has occurred ...';
+                OSDErrorCoverall.querySelector('#osd-error-coverall-msg').textContent = message;
+
+                if(clearCanvas){
+                    let canvas = openSeadragonViewer.canvas.querySelector('canvas');
+                    let context = canvas.getContext('2d');
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                }
+
+                const rectBounds = document.getElementById('openseadragon-img').getBoundingClientRect();
+                OSDErrorCoverall.style.left = `${Math.ceil(rectBounds.x + 8)}px`;
+                OSDErrorCoverall.style.top = `${Math.ceil(rectBounds.y)}px`;
+
+                OSDErrorCoverall.style.opacity = 1;
+            }
+            function hideError(){
+                const OSDErrorCoverall = document.getElementById('osd-error-coverall');
+                OSDErrorCoverall.style.opacity = 0;
+            }
+
+            function loadFile(){
+
+                if(!Number.isInteger(fileIndex)){
+                    return;
+                }
+
+                const file = files[fileIndex];
+
+                if(file.type === 'pdf'){
+                    showPDFPage(fileIndex, 1);
+                }else if(file.type === 'iiif'){
+                    return;
+                }else{
+                    showCoverall('Loading Image ...');
+                    openSeadragonViewer.open({
+                        type: 'image',
+                        url: file.url,
+                        buildPyramid: false
+                    })
+                }
+            }
 
             function updateDetails(){
 
@@ -269,9 +396,9 @@ if($imageURL !== ''){
 
                 let pdfControls = document.getElementById('pdf-controls');
                 let pdfDetails = pdfFiles[fileIndex];
-                if(pdfControls && pdfDetails){
+                if(pdfControls){
 
-                    if(details.isPDF){
+                    if(pdfDetails){
 
                         pdfControls.style.display = 'block';
 
@@ -286,243 +413,199 @@ if($imageURL !== ''){
                 }
             }
 
-            async function preparePDF(idx, file){
+            async function getPDFInstance(index){
 
+                if(Object.hasOwn(pdfFiles, index)){
+                    return pdfFiles[index].pdfInstance;
+                }
                 try{
 
-                    const loadingTask = await pdfjsLib.getDocument(file.url);
-                    const pdf = await loadingTask.promise;
+                    const pdf = await pdfjsLib.getDocument(files[index].url).promise;
 
-                    const pageCount = pdf.numPages;
-
-                    pdfFiles[idx] = {
+                    pdfFiles[index] = {
                         pdfInstance: pdf,
-                        pageCount: pageCount,
+                        pageCount: pdf.numPages,
                         currentPage: 1,
                         pages: {}
                     };
 
-                    files[idx]['url'] = '';
-                    files[idx]['type'] = 'pdf';
-                    files[idx]['pdfPage'] = 1;
-
-                    // Prevent standard URL fetching behavior
-                    files[idx]['getTileUrl'] = function(level, x, y){
-                        return this.usePDFImage ? '' : `pdf-tile://${level}/${x}-${y}`;
-                    };
-
-                    if(files[idx].usePDFImage){
-                        files[idx]['getTileHashKey'] = function(level, x, y){
-                            return `${level}-${x}-${y}-${this.pdfPage}`;
-                        };
-                    }else{
-
-                        const page = await pdf.getPage(1);
-                        const viewport = page.getViewport({scale: PDF_CANVAS_SCALE});
-
-                        files[idx]['tileSize'] = 256;
-                        files[idx]['tileOverlap'] = 0;
-                        files[idx]['minLevel'] = 0;
-
-                        files[idx]['width'] = viewport.width * PDF_CANVAS_SCALE;
-                        files[idx]['height'] = viewport.height * PDF_CANVAS_SCALE;
-
-                        files[idx]['downloadTileStart'] = async function(imageJob){ //tile
-    
-                            const tile = imageJob.tile;
-    
-                            const canvas = await renderPDFPageAsCanvas(this.pdfPage, tile.level, tile.maxLevel ?? this.maxLevel);
-    
-                            !canvas ? imageJob.fail() : imageJob.finish(canvas);
-                        }
-    
-                        files[idx]['downloadTileAbort'] = function(values){
-                            console.error('Tile download was aborted.', values, this);
-                        };
-                    }
-
+                    return pdf;
                 }catch(e){
-                    console.error('Failed to prepare PDF for OpenSeadragon.', e);
-                    files[idx]['errorMsg'] = 'Failed to prepare PDF file for OpenSeadragon.';
+                    console.error(e);
+                    //`Unable to retrieve PDF document from ${files[index].url}. Error: ${e.message}`;
                 }
-
             }
 
-            async function renderPDFPageAsCanvas(pageNumber, level = 0, maxLevel = 10){
+            async function getPDFPage(index, pageNumber){
 
-                let pdfDetails = pdfFiles[fileIndex];
-                if(!pdfDetails){
+                if(Object.hasOwn(pdfFiles[index].pages, pageNumber)){
+                    return pdfFiles[index].pages[pageNumber];
+                }else if(!Object.hasOwn(pdfFiles, index)){
                     return;
                 }
 
                 try{
+                    const pdf = pdfFiles[index].pdfInstance;
                     const page = await pdf.getPage(pageNumber);
+                    pdfFiles[index].pages[pageNumber] = page;
+
+                    return page;
                 }catch(e){
-                    console.error(`Unable to retrieve page #${pageNumber}`, e);
-                    return;
+                    console.error(e);
+                    //`Unable to retrieve page #${pageNumber} from PDF. Error: ${e.message}`;
                 }
-
-                const canvas = document.createElement('canvas');
-                canvas.width = TILE_SIZE;
-                canvas.height = TILE_SIZE;
-                const context = canvas.getContext('2d');
-
-                const scaleAtLevel = Math.pow(2, level) / Math.pow(2, maxLevel);
-
-                const tileViewport = page.getViewport({
-                    scale: PDF_CANVAS_SCALE * scaleAtLevel,
-                    dontFlip: false,
-                    offsetX: -tile.x * TILE_SIZE,
-                    offsetY: -tile.y * TILE_SIZE
-                });
-
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: tileViewport
-                };
-
-                const renderTask = page.render(renderContext);
-
-                try{
-                    await renderTask.promise;
-                }catch(e){
-                    console.error('Rendering task has failed.', e);
-                    canvas = null;
-                }
-
-                return canvas;
             }
 
-            async function renderPDFPageAsImage(pageNumber){
+            async function showPDFPage(index, pageNumber){
 
-                let pdfDetails = pdfFiles[fileIndex];
-                if(!pdfDetails){
-                    return;
-                }
-
-                if(Object.hasOwn(pdfDetails.pages, pageNumber)){
-                    pdfDetails.currentPage = pageNumber;
-                    return pdfDetails.pages[pageNumber];
-                }
-
-                let pdf = pdfDetails.pdfInstance;
-
-                const page = await pdf.getPage(pageNumber);
-                const viewport = page.getViewport({ scale: PDF_IMAGE_SCALE });
-
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                await page.render({
-                    canvasContext: context,
-                    viewport: viewport
-                }).promise;
-
-                let imageURL = canvas.toDataURL('image/png');
-                pdfDetails.pages[pageNumber] = imageURL;
-
-                pdfDetails.currentPage = pageNumber;
-
-                return imageURL;
-            }
-
-            async function _initiateOSD(){
+                showCoverall(`Loading PDF Page #${pageNumber} ...`);
 
                 if(!pdfjsLib?.GlobalWorkerOptions?.workerSrc || pdfjsLib?.GlobalWorkerOptions?.workerSrc === ''){
                     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js';
                 }
 
-                for(const idx in files){
-                    if(files[idx].isPDF){
-                        await preparePDF(idx, files[idx]);
-                    }
+                // Get PDF
+                const pdf = await getPDFInstance(index);
+                if(!pdf){
+                    hideCoverall();
+                    return;
                 }
 
-                let width = window.innerWidth * 0.7;
-                let height = window.innerHeight * 0.7;
-                let openSeadragonEle = document.getElementById('openseadragon-img');
+                // Get PDF Page
+                const page = await getPDFPage(index, pageNumber);
+                if(!page){
+                    hideCoverall();
+                    return;
+                }
+                pdfFiles[index].currentPage = pageNumber;
 
-                openSeadragonEle.style.height = `${height}px`;
-                openSeadragonEle.style.width = `${width}px`;
+                // Define DPI factor and max zoom in
+                const viewport = page.getViewport({scale: PDF_RENDER_SCALE});
+                const maxLevel = Math.ceil(Math.log2(Math.max(viewport.width, viewport.height)) / TILE_SIZE);
 
-                window.addEventListener('resize', () => {
+                // Define custom tile source
+                const tileSource = new OpenSeadragon.TileSource({
 
-                    let width = window.innerWidth * 0.7;
-                    let height = window.innerHeight * 0.7;
+                    width: viewport.width,
+                    height: viewport.height,
 
-                    openSeadragonEle.style.height = `${height}px`;
-                    openSeadragonEle.style.width = `${width}px`;
-                });
+                    tileSize: TILE_SIZE,
+                    tileOverlap: 0,
 
-                try{
+                    minLevel: 0,
+                    maxLevel: maxLevel,
 
-                    let OSDFiles = files.length > 1 ? files : files[0];
+                    getTileUrl: (level, x, y) => `pdf-file://${fileIndex}-${pageNumber}/${level}/${x}-${y}`,
 
-                    openSeadragonViewer = OpenSeadragon({
-                        id: 'openseadragon-img',
-                        prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/5.0.1/images/',
-                        sequenceMode: Array.isArray(OSDFiles),
-                        tileSources: OSDFiles
-                    });
+                    downloadTileStart: async (tileJob) => {
 
-                    openSeadragonViewer.addHandler('open', async (event) => {
+                        const tile = tileJob.tile;
 
-                        if(!event.source.type === 'pdf' || !event.source.usePDFImage){
-                            openSeadragonViewer.raiseEvent('home');
+                        // Setup individual tile canvas
+                        const tileCanvas = document.createElement('canvas');
+                        tileCanvas.width = TILE_SIZE;
+                        tileCanvas.height = TILE_SIZE;
+
+                        const tileCanvasCtx = tileCanvas.getContext('2d');
+                        if(!tileCanvasCtx){
+                            tileJob.finish(null, 'Unable to retrieve canvas context for tiles.');
                             return;
                         }
 
-                        const pdfDataURL = await renderPDFPageAsImage(event.source.pdfPage);
-                        if(!pdfDataURL){
-                            return;
-                        }
+                        // Get current scale
+                        const maxLevel = tile.maxLevel ?? tileJob.source.maxLevel;
+                        const scale = Math.pow(2, tile.level - maxLevel);
 
-                        openSeadragonViewer.open({
-                            type: 'image',
-                            url: pdfDataURL,
-                            pdfPage: event.source.pdfPage
+                        // Get bound coords
+                        const offsetX = tile.x * TILE_SIZE / scale;
+                        const offsetY = tile.y * TILE_SIZE / scale;
+
+                        // Get viewport for tile
+                        const tileViewport = page.getViewport({
+                            scale: PDF_RENDER_SCALE * scale,
+                            dontFlip: false
                         });
 
-                        openSeadragonViewer.raiseEvent('home');
-                    });
+                        // Shift canvas to (0, 0)
+                        tileCanvasCtx.translate(-offsetX * scale, -offsetY * scale);
 
-                    openSeadragonViewer.addHandler('open-failed', (event) => {
+                        try{
 
-                        console.error('OpenSeadragon failed to open image.', event);
-                        let defaultElement = document.querySelector(".openseadragon-message");
-                        let messageElement = event.eventSource.messageDiv.lastChild.lastChild.lastChild;
+                            // Render page slice onto tile canvas
+                            await page.render({
+                                canvasContext: tileCanvasCtx,
+                                viewport: tileViewport
+                            }).promise;
 
-                        // dig down into the third child node, note: querySelector kept returning mixed results
-                        let errorMessage = event.source.isManifest
-                            ? 'OpenSeadragon cannot render IIIF Manifests, please use the Mirador viewer instead'
-                            : `The provided file "${event.source.name}" cannot be rendered by OpenSeadragon`;
+                            // Fulfill OSD promise
+                            tileJob.finish(tileCanvasCtx, null, 'context2d');
+                        }catch(e){
 
-                        errorMessage = event.source.isPDF
-                            ? `Heurist failed to prepare the PDF page #${event.source.pdfPage} for display`
-                            : errorMessage;
+                            console.error(e);
+                            tileJob.finish(null, 'PDF page rendering to tile canvas failed.');
+                        }
+                    }
+                });
 
-                        errorMessage = event.source.errorMsg ?? errorMessage;
+                openSeadragonViewer.open(tileSource);
+            }
 
-                        messageElement.innerText = errorMessage;
-                    });
+            function _initiateOSD(){
 
-                    openSeadragonViewer.addHandler('tile-load-failed', (event) => {
-                        console.error('Failed to load tile source.', event);
-                    });
+                openSeadragonViewer = OpenSeadragon({
+                    id: 'openseadragon-img',
+                    prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/5.0.1/images/',
+                    showNavigator: false,
+                    blendTime: 0
+                });
 
-                    openSeadragonViewer.addHandler('page', (event) => {
-                        fileIndex = event.page;
-                        updateDetails(event.page)
-                    });
+                openSeadragonViewer.addHandler('open', (event) => {
+                    setTimeout(hideCoverall, 250);
+                    updateDetails();
+                    openSeadragonViewer.raiseEvent('home'); // re-centre
+                });
 
-                    openSeadragonViewer.goToPage(0);
-                    updateDetails(0);
-                }catch(e){
-                    console.error('OpenSeadragon has been initialised', e);
-                    openSeadragonEle.innerHTML = 'Heurist has failed to prepare files for OpenSeadragon, please report this bug to <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a>';
-                }
+                openSeadragonViewer.addHandler('open-failed', (event) => {
+
+                    console.error('OpenSeadragon failed to open image.', event);
+
+                    hideCoverall();
+
+                    let defaultElement = document.querySelector(".openseadragon-message");
+                    let messageElement = event.eventSource.messageDiv.lastChild.lastChild.lastChild;
+                    messageElement.innerHTML = '';
+
+                    // dig down into the third child node, note: querySelector kept returning mixed results
+                    let errorMessage = event.source.isManifest
+                        ? 'OpenSeadragon cannot render IIIF Manifests, please use the Mirador viewer instead'
+                        : `The provided file "${event.source.name}" cannot be rendered by OpenSeadragon`;
+
+                    errorMessage = event.source.type === 'pdf'
+                        ? `Heurist failed to prepare the PDF page for display`
+                        : errorMessage;
+
+                    errorMessage = event.source.errorMsg ?? errorMessage;
+
+                    showError(errorMessage, true);
+                });
+
+                openSeadragonViewer.addHandler('tile-load-failed', (event) => {
+
+                    console.error('Failed to load tile source.', event);
+
+                    hideCoverall();
+                    showError('OpenSeadragon failed to load the requested tile source.');
+                });
+
+                openSeadragonViewer.addHandler('animation-finish', () => {
+                    hideCoverall();
+                    hideError();
+                });
+                openSeadragonViewer.addHandler('canvas-press', () => {
+                    hideCoverall();
+                });
+
+                loadFile();
             }
 
             async function handlePageSeek(event){
@@ -549,20 +632,7 @@ if($imageURL !== ''){
                 page = page > pageCount ? pageCount : page;
 
                 if(page != currentPage){
-
-                    const pdfDataURL = await renderPDFPageAsImage(page);
-
-                    if(pdfDataURL){
-
-                        openSeadragonViewer.open({
-                            type: 'image',
-                            url: pdfDataURL,
-                            pdfIndex: fileIndex,
-                            pdfPage: page
-                        });
-
-                        updateDetails(fileIndex);
-                    }
+                    showPDFPage(fileIndex, page);
                 }
             }
 
@@ -573,10 +643,21 @@ if($imageURL !== ''){
 
                 let toggleBGBtn = document.querySelector('.osd-toggle-bg');
                 toggleBGBtn.addEventListener('click', () => {
-                    document.getElementById('openseadragon-img').classList.toggle('greyBackground');
-                    let isDarkBG = document.getElementById('openseadragon-img').classList.contains('greyBackground');
-                    toggleBGBtn.innerHTML = isDarkBG ? lightOff : lightOn;
-                    toggleBGBtn.style.backgroundColor = isDarkBG ? 'lightgrey' : 'white';
+
+                    const root = document.querySelector(':root');
+
+                    const currentBG = getComputedStyle(root).getPropertyValue('--osd-background');
+                    const brightBG = getComputedStyle(root).getPropertyValue('--brighter');
+
+                    if(currentBG === brightBG){
+                        root.style.setProperty('--osd-background', 'var(--dark)');
+                        root.style.setProperty('--page-background', 'var(--darker)');
+                        root.style.setProperty('--page-colour', 'var(--lightgrey)');
+                    }else{
+                        root.style.setProperty('--osd-background', 'var(--brighter)');
+                        root.style.setProperty('--page-background', 'var(--bright)');
+                        root.style.setProperty('--page-colour', 'var(--black)');
+                    }
                 });
 
                 let pdfControls = document.querySelectorAll('.pdf-controller');
@@ -595,8 +676,11 @@ if($imageURL !== ''){
     <body>
 
         <div id="img-title" style="padding-left: 4em;"></div>
+
         <button class="osd-toggle-bg" title="Toggle grey background"><i class="fa-regular fa-lightbulb"></i></button>
+
         <div id="openseadragon-img"></div>
+
         <div id="pdf-controls" style="display: none; text-align: center;">
             <span class="pdf-controller" id="pdf-seek-backwards" title="Go to first page"><span class="fa-solid fa-angles-left"></span></span>
             <span class="pdf-controller" id="pdf-backwards" title="Go to the previous page"><span class="fa-solid fa-chevron-left"></span></span>
@@ -604,10 +688,18 @@ if($imageURL !== ''){
             <span class="pdf-controller" id="pdf-forwards" title="Go to the next page"><span class="fa-solid fa-chevron-right"></span></span>
             <span class="pdf-controller" id="pdf-seek-forwards" title="Go to last page"><span class="fa-solid fa-angles-right"></span></span>
         </div>
+
         <div id="img-add-info">
             <small id="img-copyright"></small>
             <div id="img-caption"></div>
             <div id="img-desc"></div>
+        </div>
+
+        <div id="osd-coverall" class="osd-coveralls">
+            <div id="osd-coverall-msg">Loading Resource ...</div>
+        </div>
+        <div id="osd-error-coverall" class="osd-coveralls">
+            <div id="osd-error-coverall-msg">An error has happened ...</div>
         </div>
 
     </body>
