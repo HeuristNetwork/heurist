@@ -529,7 +529,7 @@ $.widget( "heurist.editing_input", {
 
             //hardcoded list of fields and record types where multivalues mean translation (multilang support)
             let is_translation = this.f('rst_MultiLang') || 
-               ((that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+               ((that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] ||
                 that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'])
                 && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
                 
@@ -1393,7 +1393,7 @@ $.widget( "heurist.editing_input", {
             {
 
                 const isCMS_record = 
-                        (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+                        (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] ||
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']);
              
                 

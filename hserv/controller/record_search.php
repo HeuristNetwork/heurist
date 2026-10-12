@@ -154,7 +154,7 @@
         $system->defineConstants();
 
         if(!($system->defineConstant('RT_CMS_HOME') &&
-             $system->defineConstant('RT_CMS_MENU'))){
+             $system->defineConstant('RT_CMS_PAGE'))){
 
             $response = $system->addError(HEURIST_ERROR, 'Required record type "Menu" not defined in this database');
 

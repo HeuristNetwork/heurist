@@ -53,7 +53,8 @@ class WebSite {
     // {siteId:siteId, pageId:pageId, siteMenu:menuContentJSON}
     constructor(_options) {
         //set global constants
-        window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+        window.hWin.RT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'];
+        window.hWin.RT_CMS_MENU = window.hWin.RT_CMS_PAGE; //deprecated alias
         window.hWin.DT_VERSION = window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'];
         window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         window.hWin.DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'];
@@ -144,7 +145,7 @@ class WebSite {
     }    
 
     /**
-    * Loads given RT_CMS_MENU into container (by default main (v3) or #main-content (v2) )
+    * Loads given RT_CMS_PAGE into container (by default main (v3) or #main-content (v2) )
     * 
     * loadPage->initPage->onPageLoad
     */

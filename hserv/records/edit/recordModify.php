@@ -232,7 +232,7 @@ function recordAdd($system, $record, $return_id_only=false){
     }
 
     // for CMS rectypes by default public and owner is Database owners group
-    if ($system->defineConstant('RT_CMS_MENU') && $rectype==RT_CMS_MENU)
+    if ($system->defineConstant('RT_CMS_PAGE') && $rectype==RT_CMS_PAGE)
     {
         $access= 'public';
         $owner_grps = array(1);//database manager group
@@ -2861,7 +2861,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     //$stmt_size = $mysqli->prepare($query_size);
 
     $system->defineConstant('RT_CMS_HOME');
-    $system->defineConstant('RT_CMS_MENU');
+    $system->defineConstant('RT_CMS_PAGE');
     $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 
     //list of field ids that will not html purified
@@ -2913,7 +2913,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
 
                 //special case: split huge web content
-                if(defined('RT_CMS_MENU') && $rectype==RT_CMS_MENU && $dtyID==DT_EXTENDED_DESCRIPTION){
+                if(defined('RT_CMS_PAGE') && $rectype==RT_CMS_PAGE && $dtyID==DT_EXTENDED_DESCRIPTION){
                     $lim = checkMaxLength2($rval);
                     //TEST $lim = 100;
                     if($lim>0){

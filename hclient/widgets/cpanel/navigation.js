@@ -16,7 +16,7 @@
 /**
 * @class navigation
 * @memberof Widgets.Navigation
-* @description This widget creates a navigation menu based on Heurist RT_CMS_MENU records.
+* @description This widget creates a navigation menu based on Heurist RT_CMS_PAGE records.
  * It is primarily used for Content Management System (CMS) navigation.
  * The menu can be horizontal, vertical, or a tree view.
  * It handles fetching menu data, rendering the menu, and actions upon menu item selection.

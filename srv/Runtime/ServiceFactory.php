@@ -103,7 +103,7 @@ final class ServiceFactory
             'RT_CUSTOM_REPORT', 'RT_REPORT_SCHEDULE', 'DT_FILE_NAME',
             'DT_IS_CARD_VIEW', 'DT_REPORT', 'DT_INTERVAL_MINUTES',
             // srv Smarty engine (plan 12, Phase 6): relationships, CMS menu descriptions
-            'RT_RELATION', 'RT_CMS_MENU', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
+            'RT_RELATION', 'RT_CMS_PAGE', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
             // record export (plan 13): KML time span
             'DT_DATE'
         );
@@ -431,7 +431,7 @@ final class ServiceFactory
             return array_map('intval', $service->search(new SearchRequest($request, array('limit' => 100000)))->ids);
         };
         $codes = array();
-        foreach(array('RT_RELATION', 'RT_CMS_MENU', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
+        foreach(array('RT_RELATION', 'RT_CMS_PAGE', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
             'DT_SHORT_SUMMARY', 'DT_START_DATE', 'DT_END_DATE', 'DT_EXTENDED_DESCRIPTION') as $name){
             $codes[$name] = $this->codes->id($name);
         }

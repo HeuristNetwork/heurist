@@ -172,7 +172,7 @@ $system->defineConstant('DT_PARENT_ENTITY');
 $system->defineConstant('DT_DATE');
 $system->defineConstant('DT_WORKFLOW_STAGE');
 
-$system->defineConstant('RT_CMS_MENU');
+$system->defineConstant('RT_CMS_PAGE');
 $system->defineConstant('RT_CMS_HOME');
 $system->defineConstant('RT_IIIF_MANIFEST');
 $system->defineConstant('RT_IIIF_ANNOTATION');
@@ -2274,7 +2274,7 @@ function print_public_details(array $bib) {
         }
 
         $is_cms_content = !$is_map_popup &&
-                          (defined('RT_CMS_MENU') && $bib['rec_RecTypeID']==RT_CMS_MENU ||
+                          (defined('RT_CMS_PAGE') && $bib['rec_RecTypeID']==RT_CMS_PAGE ||
                            defined('RT_CMS_HOME') && $bib['rec_RecTypeID']==RT_CMS_HOME) &&
                            (defined('DT_EXTENDED_DESCRIPTION') && $bd['dty_ID']==DT_EXTENDED_DESCRIPTION ||
                             defined('DT_CMS_HEADER') && $bd['dty_ID']==DT_CMS_HEADER ||

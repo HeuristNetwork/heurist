@@ -72,7 +72,7 @@ final class ReportRecordAssembler
      * @param LanguageCodes $languages Language codes.
      * @param callable $visibleIds fn(array $ids): array.
      * @param int $userId Current user (personal tags).
-     * @param array<string,int> $codes RT_CMS_MENU, DT_EXTENDED_DESCRIPTION.
+     * @param array<string,int> $codes RT_CMS_PAGE, DT_EXTENDED_DESCRIPTION.
      */
     public function __construct(
         RecordDataService $data,
@@ -209,7 +209,7 @@ final class ReportRecordAssembler
             }
         }
         // CMS menu: all descriptions joined (as recordSearchDetails)
-        $menu = $this->codes['RT_CMS_MENU'] ?? 0;
+        $menu = $this->codes['RT_CMS_PAGE'] ?? 0;
         $description = $this->codes['DT_EXTENDED_DESCRIPTION'] ?? 0;
         if($menu > 0 && $rtyId === $menu && $description > 0 && isset($raw[$description])){
             $raw[$description] = array(implode('', $raw[$description]));

@@ -211,7 +211,7 @@ $TRM_NO = ConceptCode::getTermLocalID('2-531');//TRM_NO
 $TRM_NO_OLD = ConceptCode::getTermLocalID('99-5447');//TRM_NO_OLD
 
 
-$isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU &&
+$isWebPage = ($rec['rec_RecTypeID']==RT_CMS_PAGE &&
             defined('DT_CMS_PAGETYPE') &&
             __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254'));//TRM_PAGETYPE_WEBPAGE
 

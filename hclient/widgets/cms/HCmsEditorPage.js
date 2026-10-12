@@ -1730,7 +1730,7 @@ function(value){
     
     
  //
- //  Saves page configuration (this._layout_content) into RT_CMS_MENU record 
+ //  Saves page configuration (this._layout_content) into RT_CMS_PAGE record 
  //
  #saveLayoutCfg( callback ){
         
