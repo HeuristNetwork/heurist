@@ -187,11 +187,17 @@ if (!defined('PDIR')){
                     $('#btnTermsOK').button().on({click: function(){ $('#cbAgree').prop('checked',true).trigger('change'); _showStep(2);}});
                     $('#btnTermsCancel').button().on({click: function(){ $('#cbAgree').prop('checked',false).trigger('change'); _showStep(2);}});
 
-                    $('#ugr_ORCID').on({keyup: () => {
-                        const ORCID = $('#ugr_ORCID').val();
-                        const isValid = !window.hWin.HEURIST4.util.isempty(ORCID) && ORCID.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/);
-                        isValid ? $('#orcid-data-link').show() : $('#orcid-data-link').hide();
-                    }});
+                    const updateORCIDHint = () => {
+                        const isValid = _isValidORCID();
+                        $('#orcid-data-link').toggle(isValid);
+                        $('#orcid-hint').toggle(!isValid).text(
+                            window.hWin.HEURIST4.util.isempty($('#ugr_ORCID').val())
+                                ? 'optional'
+                                : 'A link will be shown here when the ORCID is valid'
+                        );
+                    };
+                    $('#ugr_ORCID').on('input change', updateORCIDHint);
+                    updateORCIDHint();
                     $('#orcid-data-link').on({click: _getDataFromORCID});
 
                     window.hWin.HEURIST4.util.detectCapsLock(screen);
@@ -203,10 +209,17 @@ if (!defined('PDIR')){
 
     }
 
+    /** Return whether the registration form contains a correctly formatted ORCID. */
+    function _isValidORCID(){
+        const orcid = $('#ugr_ORCID').val();
+        return !window.hWin.HEURIST4.util.isempty(orcid)
+            && /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/.test(orcid);
+    }
+
     function _getDataFromORCID(){
 
         const ORCID = $('#ugr_ORCID').val();
-        if(window.hWin.HEURIST4.util.isempty(ORCID) && ORCID.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/)){
+        if(!_isValidORCID()){
             window.hWin.HEURIST4.msg.showMsgFlash('Invalid ORCID...', 3000);
             return;
         }
@@ -224,9 +237,12 @@ if (!defined('PDIR')){
             window.hWin.HEURIST4.msg.sendCoverallToBack();
             response = window.hWin.HEURIST4.util.isJSON(response);
 
-            if(!response && Object.hasOwn(response, 'status') && response.status !== window.hWin.ResponseStatus.OK){
-                response = !response ? {status: 'error', message: 'Heurist has failed to retrieve your data from ORCID.<br>Please submit a ticket.'} : response;
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+            if(!response || (Object.hasOwn(response, 'status') && response.status !== window.hWin.ResponseStatus.OK)
+                || window.hWin.HEURIST4.util.isempty(response['orcid'])){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    status: window.hWin.ResponseStatus.INVALID_REQUEST,
+                    message: 'Sorry, this ORCID is not valid'
+                });
                 return;
             }
 
@@ -357,8 +373,8 @@ if (!defined('PDIR')){
 
             }
 
-            let orcid = regform.find('#ugr_ORCID').val();
-            if(!window.hWin.HEURIST4.util.isempty(orcid) && !orcid.match(/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/)){
+            const orcid = regform.find('#ugr_ORCID').val();
+            if(!window.hWin.HEURIST4.util.isempty(orcid) && !_isValidORCID()){
                 err_text += ', ORCID needs to be in format XXXX-XXXX-XXXX-XXXX';
             }
 

@@ -737,7 +737,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         this._Saml_from_UI( this._currentSaml );
 
         const ORCID = this._editing.getValue('ugr_ORCID');
-        if(!window.hWin.HEURIST4.util.isempty(ORCID) && !ORCID.match(/^\d{4}-\d{4}-\d{4}-\d{4}$/)){
+        if(!window.hWin.HEURIST4.util.isempty(ORCID) && !this._isValidORCID()){
             this._editing.getFieldByName('ugr_ORCID').editing_input('showErrorMsg', 'Invalid ORCID, must be in format of XXXX-XXXX-XXXX-XXXX');
             return null;
         }
@@ -893,6 +893,16 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     },
 
     /**
+     * @brief Return whether the edited user has a correctly formatted ORCID.
+     * @returns {boolean} False for an empty or malformed identifier.
+     */
+    _isValidORCID: function(){
+        const orcid = this._editing.getValue('ugr_ORCID');
+        return !window.hWin.HEURIST4.util.isempty(orcid)
+            && /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/.test(orcid);
+    },
+
+    /**
      * @brief Setup additional controls for ugr_ORCID field.
      * @memberof heurist.manageSysUsers
      */
@@ -950,7 +960,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             window.hWin.HEURIST4.msg.showMsgFlash('Please enter an ORCID...', 3000);
             $getData.hide();
             return;
-        }else if(!ORCID.match(/^\d{4}-\d{4}-\d{4}-\d{4}$/)){
+        }else if(!this._isValidORCID()){
             let error = {
                 message: 'Invalid ORCID identifier provided.<br>It must be in the format of 0000-1111-2222-3333.',
                 status: window.hWin.ResponseStatus.INVALID_REQUEST
@@ -971,9 +981,12 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             window.hWin.HEURIST4.msg.sendCoverallToBack();
 
             response = window.hWin.HEURIST4.util.isJSON(response);
-            if(!response || Object.hasOwn(response, 'status') && response.status !== window.hWin.ResponseStatus.OK){
-                response = !response ? {status: 'error', message: 'Heurist has failed to retrieve your data from ORCID.<br>Please submit a ticket.'} : response;
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+            if(!response || (Object.hasOwn(response, 'status') && response.status !== window.hWin.ResponseStatus.OK)
+                || window.hWin.HEURIST4.util.isempty(response['orcid'])){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    status: window.hWin.ResponseStatus.INVALID_REQUEST,
+                    message: 'Sorry, this ORCID is not valid'
+                });
                 return;
             }
 
