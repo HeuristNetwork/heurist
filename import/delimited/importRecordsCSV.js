@@ -1843,10 +1843,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             const ordinaryHelp = currentStep == 4 ?
                 '<tr class="csv-mapping-help"><td></td><td></td><td class="heurist-helper1">In general, do NOT select fields below which have already been used to create linked records identified by the H-IDs above.</td><td class="heurist-helper1">Record pointer fields are not shown below because they can only accept Heurist IDs (identified by H-ID in the column name).</td><td></td></tr>' : '';
             $('#tblFieldMapping > tbody').html(
-                '<tr height="40" class="helper" style="display:none"><td class="subh" colspan="5" style="padding:0 20px">'
-                    +'<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
-                    +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
-                +'</td></tr>'
+                '<tr height="40" class="helper" style="display:none"><td class="subh" colspan="5" style="padding:0 20px"></td></tr>'
                 +mappingHelp+sID_field+sIndexes+ordinaryHelp+sAllFields
                 +'<tr height="40" style="border-bottom:1px solid lightgray">'
                 + '<td class="subh" colspan="2"><a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td>'
@@ -1856,6 +1853,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     + '<input id="txtColData" placeholder="Value..." size="30">'
                 + '</td>'
                 +'</tr>');
+
+            _setTableHelperRow();
 
             $('#btnInsertData').button({icon: 'ui-icon-plus'});
 
@@ -2334,7 +2333,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
 
         if(!mapping_flds) mapping_flds = {};
-
         
         let allowed = Object.keys($Db.baseFieldType);
         allowed.splice(allowed.indexOf("separator"),1);
@@ -3253,8 +3251,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             });
                             
                             for(let i=0; i<id_suggestions.length; i++){
-                                $('#id_field_'+id_suggestions[i]).prop('checked',true);
-                                $('#id_field_'+id_suggestions[i]).trigger('change');
+                                $('#id_field_'+id_suggestions[i]).prop('checked',true).trigger('change');
                             }
                             
                         }else if(response.data.import_id>0){
@@ -3297,7 +3294,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         $('#divFieldMapping2').hide();
         
-        if(currentSeqIndex>=0 && imp_session['sequence'][currentSeqIndex]){
+        if(currentSeqIndex >= 0 && imp_session['sequence'][currentSeqIndex]){
+
             let key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
             
             let rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
@@ -3316,8 +3314,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 //$('label[for="sa_match1"]').css('color','');
                 
             }
+
+            let mode = $('#sa_match0').is(':checked') ? 0 : 1;
+            mode = $('#sa_match2').is(':checked') ? 2 : mode;
             
-            if($('#sa_match0').is(':checked')){ // normal matching
+            if(mode === 0){ // normal matching
                 
                  shelp = 'Please select one or more columns on which to match <b>'
                  + $Db.rty(rtyID,'rty_Name')
@@ -3334,7 +3335,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 shelp = shelp + ' Matching sets this ID field for existing records and allows '
                     +'the creation of new records for unmatched rows.';
                 
-            }else if($('#sa_match1').is(':checked')){ // use id field
+            }else if(mode === 1){ // use id field
                 
                 shelp = 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be used.<br><br>';
                 
@@ -3371,7 +3372,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     
                 }
                 
-            }else if($('#sa_match2').is(':checked')){  //skip matching
+            }else if(mode === 2){  //skip matching
 
                 shelp = 'By choosing not to match the incoming data, you will create '
                     +imp_session['reccount']+' new <b>'
@@ -3383,25 +3384,48 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
             }
             
-            if($('#sa_match2').is(':checked')){  //skip matching
+            if(mode === 2){  //skip matching
                 $('#btnMatchingStart').button({label:'Import all as new'}); //Skip matching
-            }else if($('#sa_match1').is(':checked')){  //use id column
+            }else if(mode === 1){  //use id column
                 $('#btnMatchingStart').button({label:'Use <i>'+imp_session['columns'][key_idx]+'</i>'}); //Skip matching
             }else{
                 $('#btnMatchingStart').button({label:'Match against existing records'});
             }
         
-            if($('#sa_match0').is(':checked')){ // normal matching
+            if(mode === 0){ // normal matching
+
                 $("input[id^='cbsa_dt_']").show();
                 $("select[id^='sa_dt_']").css('visibility','visible');
-                $('tr.helper').show();//#divFieldRoles > .tbfields > tbody > 
+                $('tr.helper').show();
+
+                if(window.hWin.HEURIST4.util.isObject(imp_session['sequence'][currentSeqIndex]['matching_flds'])
+                    && !window.hWin.HEURIST4.util.isempty(imp_session['sequence'][currentSeqIndex]['matching_flds'])
+                    && currentStep == 3){
+
+                    for(const idx in imp_session['sequence'][currentSeqIndex]['matching_flds']){
+
+                        let $checkbox = $(`#cbsa_dt_${idx}`);
+                        let $select = $(`#sa_dt_${idx}`);
+                        if($checkbox.length === 0 || $select.length === 0){
+                            continue;
+                        }
+
+                        $checkbox.prop('checked', true).trigger('change');
+                        $select.val(imp_session['sequence'][currentSeqIndex]['matching_flds'][idx]);
+                        if($select.hSelect('instance') !== undefined){
+                            $select.hSelect('refresh');
+                        }
+                    }
+                }else{
+                    imp_session['sequence'][currentSeqIndex]['matching_flds'] = {};
+                }
+
             }else{
                 $("input[id^='cbsa_dt_']").hide();
                 $("select[id^='sa_dt_']").css('visibility','hidden');
                 $('tr.helper').hide();
             }
-        
-        
+
         }
         $('#divMatchingSettingHelp').html(shelp);
         
@@ -3423,7 +3447,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }else if($('#sa_match1').is(':checked')){
             matchMode = 1;    
         }
-        
+
         _doMatching( matchMode, null );
     }
         
@@ -3448,7 +3472,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             let sWarning = '';
             let haveMapping = false; 
             //do we have id field?
-            let key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
+            let key_idx = _getFieldIndexForIdentifier(currentSeqIndex);
             //do we have field to match?
             let field_mapping = {};
             let multifields = []; //indexes of multivalue fields
@@ -3561,7 +3585,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             if(disamb_resolv!=null){
                 request['disamb_resolv'] = JSON.stringify( disamb_resolv );          
             }
-            
             
             _showStep(0);
         
@@ -5335,7 +5358,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     function _showStep(page){
         currentStep = page;
 
-        if(page>1){
+        if(page > 1){
             let container = $(window.hWin.document).find('.ui-menu6-container.ui-heurist-populate');
             if(container.find('.ui-helper-popup').is(':visible')){
                 container.find('.ui-helper-popup').hide();    
@@ -5346,35 +5369,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
         }
 
-        if(page == 5 && $('#sa_update').prop('checked')){
-            $('#divheader').css('background','rgba(200, 100, 200, 0.83)');
-
-            $('tr.helper').show().children().html(
-                '<span style="background:rgba(200, 100, 200, 0.83);display:inline-block;padding:3px;">UPDATE</span> Allocate <span style="color:purple;">purple fields</span> to '
-                +'<span style="color:purple;">record pointer fields</span> which connect to entities created in previous steps'
-            );
-        }else{
-            $('#divheader').css('background','rgba(151, 244, 128, 0.83)');
-
-            if(page == 3){
-                $('tr.helper').show().children().html(
-                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
-                    +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
-                );
-            }else if(page == 4){
-                $('tr.helper').show().children().html(
-                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">IMPORTING</span> Choose all the fields you want to import &nbsp;&nbsp;'
-                );
-            }else if(page == 5){
-                let stepTitle = $('#head_step3').title().replace('step 3: ', '');
-                $('tr.helper').show().children().html(
-                    `<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">${stepTitle}</span> Double check all details before proceeding with the import &nbsp;&nbsp;`
-                    +'<span style="color:green;">Note: Changing any of the field mapping below will take you back to the IMPORTING stage.</span>'
-                );
-            }else{
-                $('tr.helper').hide();
-            }
-        }
+        _setTableHelperRow();
         
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
@@ -5388,25 +5383,27 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('.warningMessage, .importIgnoreErrors').hide();
         $('.first-cell').prop('width', '250');
 
-        if(page==1){
+        if(page == 1){
+
             $("#selImportId").val('');  //clear selection
-            //if(session_selector && session_selector.hSelect('instance')) session_selector.hSelect("refresh");
+
             if(session_selector && session_selector.hSelect('instance')) {
                 let sw = $("#selImportId").width();        
-                if(sw>500) sw = 500;
+                if(sw > 500) sw = 500;
                 session_selector.hSelect("refresh");
                 $("#selImportId-button").css('width', sw);   
             }
+
             imp_ID = 0;
-            
-        }else if(page>2){  //matching and import
+
+        }else if(page > 2){  //matching and import
         
             $("div[class*='step'],h2[class*='step']").hide();
             $('.step'+page).show();
             
             _redrawArrow();            
             
-            if(page==3){
+            if(page == 3){
                 $('.step3 > .normal').show();
                 $('.step3 > .need_resolve').hide();
                 _onMatchModeSet();
@@ -5416,7 +5413,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
         }
 
-        if(page>=2){
+        if(page >= 2){
 
             if((!upload_file_name || upload_file_name == undefined) && imp_session && !window.hWin.HEURIST4.util.isempty(imp_session['import_file'])){
                 let filename_parts = imp_session['import_file'].split(' ').slice(0, -2);
@@ -5442,6 +5439,42 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
         }
         _adjustTablePosition();
+    }
+
+    function _setTableHelperRow(){
+
+        if(currentStep == 5 && $('#sa_update').prop('checked')){
+
+            $('#divheader').css('background','rgba(200, 100, 200, 0.83)');
+
+            $('tr.helper').show().children().html(
+                '<span style="background:rgba(200, 100, 200, 0.83);display:inline-block;padding:3px;">UPDATE</span> Allocate <span style="color:purple;">purple fields</span> to '
+                +'<span style="color:purple;">record pointer fields</span> which connect to entities created in previous steps'
+            );
+        }else{
+
+            $('#divheader').css('background','rgba(151, 244, 128, 0.83)');
+
+            if(currentStep == 3){
+                $('tr.helper').show().children().html(
+                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
+                    +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
+                );
+            }else if(currentStep == 4){
+                $('tr.helper').show().children().html(
+                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">IMPORTING</span> Choose all the fields you want to import &nbsp;&nbsp;'
+                );
+            }else if(currentStep == 5){
+
+                let stepTitle = $('#head_step3').text().replace('step 3: ', '');
+                $('tr.helper').show().children().html(
+                    `<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">${stepTitle}</span> Double check all details before proceeding with the import &nbsp;&nbsp;`
+                    +'<span style="color:green;">Note: Changing any of the field mapping below will take you back to the IMPORTING stage.</span>'
+                );
+            }else{
+                $('tr.helper').hide();
+            }
+        }
     }
 
     /**

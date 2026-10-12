@@ -265,8 +265,10 @@ private static function findRecordIds($imp_session, $params){
     $mapping_fieldname_to_index = array();//field_x => x for quick access
 
     //get arrays of  field_XXX => field type, field_XXX=>index in mapping
-    if(is_array($mapping))
-    {
+    if(is_array($mapping)){
+
+        $imp_session['sequence'][$currentSeqIndex]['matching_flds'] = $params['mapping'];
+
         foreach ($mapping as $index => $field_type) {
             if($field_type=="url" || $field_type=="id" || @$detDefs[$field_type]){
                     $field_name = "field_".$index;

@@ -204,9 +204,10 @@ if(!$format){ $format='csv';}
     <div class="ent_header" style="height:30em;padding-top:1em;">
 
         <div id="btnBackToStart2"
-                style="margin-left:2em;"
-                title="Return to the upload screen to select a new delimited file to upload to the server for processing">
-                Back to start</div>
+            style="margin-left:2em;"
+            title="Return to the upload screen to select a new delimited file to upload to the server for processing">
+                <span style="font-weight: 900;font-size: 1.1em;">Back to start</span>
+        </div>
 
         <div id="file_name2" style="display: inline-block;">
             <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span>
@@ -357,7 +358,8 @@ if(!$format){ $format='csv';}
             <div style="max-width: 500;float:left;">
                 <div id="btnBackToStart"
                     title="Return to the upload screen to select a new delimited file to upload to the server for processing">
-                    Back to start</div>
+                    <span style="font-weight: 900;font-size: 1.1em;">Back to start</span>
+                </div>
 
                 <div style="font-size:1.1em;padding: 7px 10px;border: 2px blue solid;margin: 8px 0;">
                     Target entity type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;">&nbsp;</h2>
