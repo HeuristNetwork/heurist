@@ -53,11 +53,17 @@ define('LOGIN_REQUIRED',1);
 
 require_once 'initPage.php';
 
+// Direct dialog access must obey the same server feature gate as the menu.
+if (@$_REQUEST['action'] === 'dms_to_decimal' && (!isset($experimental) || $experimental !== true)) {
+    echo '<p>'.htmlspecialchars(HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE, ENT_QUOTES, 'UTF-8').'</p>';
+    exit;
+}
+
 //verify parameter action
 $action_type = @$_REQUEST['action'];
 $allowed_actions = array('add_detail','replace_detail','delete_detail','rectype_change',
             'extract_pdf','url_to_file','local_to_repository','reset_thumbs',
-            'case_conversion','nl2br','translation','increment','iiif_thumbs');
+            'case_conversion','nl2br','translation','increment','iiif_thumbs','dms_to_decimal');
 if(!in_array($action_type, $allowed_actions)){
     //@todo - it does not work since initPage already produces some output
     // need to call this piece of code with callback function in initPage after system itit
@@ -95,6 +101,11 @@ if(!in_array($action_type, $allowed_actions)){
     }
 </script>
 <style type="text/css">
+    #div_widget > fieldset > .dms-options { display:block !important; width:100% !important; }
+    .dms-options label { display:inline-block; width:auto !important; max-width:none; float:none; }
+    .dms-options > label { display:block; width:100% !important; }
+    .dms-options fieldset { width:auto; min-width:0; }
+
     #div_result > div > span {
         min-width:200px;
         display:table-cell;

@@ -605,6 +605,8 @@ $.widget( "heurist.resultListMenu", {
 
             this.detailBatchEditPopup('case_conversion');
 
+        }else if(action == "menu-selected-dms_to_decimal"){
+            this.detailBatchEditPopup('dms_to_decimal');
         }else if(action == "menu-selected-increment"){
 
             this.detailBatchEditPopup('increment');
@@ -970,6 +972,15 @@ $.widget( "heurist.resultListMenu", {
      */
     detailBatchEditPopup: function(action_type, callback) {
         
+        if(action_type === 'dms_to_decimal'){
+            const allowed = typeof window.hWin.heuristExperimentalAllowed === 'boolean'
+                ? window.hWin.heuristExperimentalAllowed
+                : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
+            if(!allowed){
+                window.hWin.HEURIST4.msg.showMsgDlg('Sorry, this function is not available on this server.');
+                return;
+            }
+        }
         if(this.isResultSetEmpty()) return;
 
         let script_name = 'recordAction';
@@ -999,7 +1010,7 @@ $.widget( "heurist.resultListMenu", {
         let url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/'+script_name+'.php?'
                 +'db='+window.hWin.HAPI4.database+'&action='+action_type;
 
-        let height = action_type == 'case_conversion' ? 750 : 510;
+        let height = (action_type == 'case_conversion' || action_type == 'dms_to_decimal') ? 750 : 510;
         let width = 900;
 
         window.hWin.HEURIST4.msg.showDialog(url, {height:height, width:width,

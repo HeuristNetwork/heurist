@@ -188,6 +188,11 @@ class RecordsBatch
         return $this->executeAction(RecordsBatchFieldTranslation::class);
     }
 
+    public function coordinatesToDecimal()
+    {
+        return $this->executeAction(\hserv\records\batch\field\RecordsBatchCoordinatesToDecimal::class);
+    }
+
     public function fieldIncrementValue()
     {
         return $this->executeAction(RecordsBatchFieldIncrement::class);

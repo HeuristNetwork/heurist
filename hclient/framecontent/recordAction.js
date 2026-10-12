@@ -86,7 +86,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     function _init(){
         
         //fill header with description
-        $('#div_header').html(window.hWin.HR('record_action_'+action_type));
+        $('#div_header').html(action_type === 'dms_to_decimal' ? '<h3>Convert DMS coordinates to decimal</h3><p>Replaces values in the selected latitude and longitude fields with decimal degrees. Invalid values are left unchanged and reported.</p>' : window.hWin.HR('record_action_'+action_type));
         
         let btn_start_action = $('#btn-ok').button({label:window.hWin.HR('Go')});
         
@@ -282,6 +282,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             case 'case_conversion':
             case 'nl2br':
             case 'translation':
+            case 'dms_to_decimal':
             case 'increment':
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
@@ -365,6 +366,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 allowed = ['file'];    
             }else if(action_type=='case_conversion' || action_type=='translation'){
                 allowed = ['freetext','blocktext'];
+            }else if(action_type=='dms_to_decimal'){
+                allowed = ['freetext'];
             }else if(action_type=='increment'){
                 allowed = ['freetext','integer','float'];
             }
@@ -372,7 +375,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
         }
         
-        fieldSelect.onchange = _createInputElements;
+        fieldSelect.onchange = action_type === 'dms_to_decimal' ? function(){} : _createInputElements;
+        if(action_type === 'dms_to_decimal'){
+            $('#div_sel_fieldtype label').text('Latitude (Y):');
+        }
         _createInputElements();
     }
     
@@ -383,6 +389,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     function _createInputElements(){
 
         let $fieldset = $('#div_widget>fieldset');
+        if(action_type === 'dms_to_decimal'){
+            // Keep the existing tagging control alive while rebuilding the widget.
+            $('#cb_add_tags').parent().insertAfter($('#div_sel_fieldtype'));
+            $('#dms_longitude_row').remove();
+        }
         $fieldset.empty();
 
         if(action_type=='add_detail'){
@@ -633,6 +644,28 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
             _check_field_repeat = true;
             
+        }else if(action_type=='dms_to_decimal'){
+            $('<div id="dms_longitude_row" class="input" style="padding:0.2em;min-width:600px"><div class="header" style="padding:0 16px"><label for="dms_longitude">Longitude (X):</label></div><select id="dms_longitude" class="ui-widget-content ui-corner-all" style="max-width:30em"></select></div>').insertBefore($('#div_sel_fieldtype'));
+            $('#dms_longitude').html($('#sel_fieldtype').html()).val('');
+            $('#sel_fieldtype, #dms_longitude').prop('selectedIndex', -1);
+            $('<p id="dms_field_note" class="heurist-helper1">Only single line text fields are shown. Repeat values are supported</p>').appendTo($fieldset);
+            $('#cb_add_tags').parent().insertAfter($('#dms_field_note'));
+            $('<div class="dms-options" style="line-height:2;padding-right:30px;box-sizing:border-box;width:100%">'
+                + '<label><input type="radio" name="dms_method" value="quadrant" checked> Coordinates within a single quadrant (N or S of equator, E or W of Greenwich meridian)</label>'
+                + '<fieldset id="dms_quadrants" style="margin-left:24px;border:0"><legend style="display:none">Quadrant</legend>'
+                + ['NE','NW','SE','SW'].map(q => '<label style="margin-right:20px"><input type="radio" name="dms_quadrant" value="'+q+'" '+(q==='NE'?'checked':'')+'> '+q+'</label>').join('') + '</fieldset>'
+                + '<label><input type="radio" name="dms_method" value="indicators"> Coordinates use N/S/E/W indicators (local alternatives supported)</label>'
+                + '<fieldset id="dms_indicators" style="margin-left:24px;border:0"><legend style="display:none">Direction indicators</legend>Direction indicators: '
+                + [['north','N'],['south','S'],['east','E'],['west','W']].map(d => '<label style="margin-right:10px">'+d[0]+' <input id="dms_'+d[0]+'" value="'+d[1]+'" maxlength="1" style="width:2em"></label>').join('') + '</fieldset>'
+                + '<label><input type="radio" name="dms_method" value="sign"> Coordinates preceded by a minus sign are south of the equator or west of the meridian</label>'
+                + '<p>Example: latitude 0° 57\' 49.5&quot; S; longitude 101° 35\' 57&quot; E.<br>For Indonesian indicators, enter north U, south S, east T, west B.</p></div>').appendTo($fieldset);
+            const updateDmsOptions = function(){
+                const method = $('input[name="dms_method"]:checked').val();
+                $('#dms_quadrants').prop('disabled', method !== 'quadrant').css('opacity', method === 'quadrant' ? 1 : 0.45);
+                $('#dms_indicators').prop('disabled', method !== 'indicators').css('opacity', method === 'indicators' ? 1 : 0.45);
+            };
+            $('input[name="dms_method"]').on('change', updateDmsOptions);
+            updateDmsOptions();
         }else if(action_type=='increment'){
 
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
@@ -926,7 +959,23 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 sResult += '<p>No file references were found for these editable records. No thumbnails were rebuilt.</p>';
             }
         }
+        if(action_type === 'dms_to_decimal'){
+            sResult += '<div style="padding:4px">Records already containing decimal values: '+(response.already_decimal ?? 0)+'</div>'
+                + '<div style="padding:4px">Records with no values: '+(response.no_values ?? 0)+'</div>'
+                + '<div style="padding:4px">Records with uninterpretable values: '+(response.uninterpretable_values ?? 0)+'</div>';
+        }
         for(let key in response){
+            if(action_type === 'dms_to_decimal' && ['undefined','already_decimal','no_values','uninterpretable_values','csv_rows'].includes(key)){continue;}
+            if(action_type === 'dms_to_decimal' && key === 'errors'){
+                if(response.errors_list){
+                    sResult += '<div style="background-color:#ffcccc;padding:4px">';
+                    for(const id in response.errors_list){
+                        sResult += 'id:'+id+' : '+response.errors_list[id]+'<br>';
+                    }
+                    sResult += '</div>';
+                }
+                continue;
+            }
             if(action_type==='reset_thumbs' && ['filesmatched','pdfmatched','pdfrebuilt'].includes(key)){ continue; }
             if(key && key.indexOf('_')<0 && response[key]>0){
                 const lbl_key = 'record_action_'+key;
@@ -995,6 +1044,15 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         // The popup body has overflow:hidden, so the result must own its scroll.
         // Keep one scrollbar for the entire report, including expanded help.
         // Nested help/error containers must not have their own scroll bounds.
+        if(action_type === 'dms_to_decimal' && Array.isArray(response.csv_rows)){
+            const rows = [['H-ID','Original Longitude','Converted Longitude','Original Latitude','Converted Latitude'], ...response.csv_rows];
+            const csv = '\uFEFF'+rows.map(row => row.map(v => '"'+String(v ?? '').replace(/"/g, '""')+'"').join('\t')).join('\r\n')+'\r\n';
+            const url = URL.createObjectURL(new Blob([csv], {type:'text/tab-separated-values;charset=utf-8'}));
+            const previous = $('#div_result').data('dmsCsvUrl');
+            if(previous){URL.revokeObjectURL(previous);}
+            $('#div_result').data('dmsCsvUrl', url);
+            sResult += '<p><a href="'+url+'" download="DMS_original_and_converted_values.tsv"><i>Download TSV of original values plus converted values</i></a></p>';
+        }
         $('#div_result').html(sResult).css({padding:'10px', overflowY:'auto',
             overflowX:'hidden', maxHeight:'calc(100vh - 90px)', bottom:'3.5em',
             boxSizing:'border-box'}).show();
@@ -1033,7 +1091,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
             let dtyID = $('#sel_fieldtype').val();
             if(window.hWin.HEURIST4.util.isempty(dtyID) && action_type!='extract_pdf') {
-                alert('Field is not defined');
+                alert('You must select fields for both longitude and latitude');
                 return;
             }
 
@@ -1158,6 +1216,21 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         request['replace'] = 1;
                 }
                 
+            }else if(action_type=='dms_to_decimal'){
+                request.a = action_type;
+                request.longitudeID = $('#dms_longitude').val();
+                if(!request.longitudeID || request.longitudeID === dtyID){
+                    alert('Select two different latitude and longitude fields');
+                    return;
+                }
+                request.method = $('input[name="dms_method"]:checked').val();
+                request.quadrant = $('input[name="dms_quadrant"]:checked').val();
+                ['north','south','east','west'].forEach(d => {request[d] = $('#dms_'+d).val().trim().toUpperCase();});
+                if(request.method === 'indicators' && (['north','south','east','west'].some(d => !/^[A-Z]$/.test(request[d]))
+                        || new Set([request.north,request.south,request.east,request.west]).size !== 4)){
+                    alert('Enter four different direction letters');
+                    return;
+                }
             }else if(action_type=='increment'){
 
                 request['a'] = action_type;

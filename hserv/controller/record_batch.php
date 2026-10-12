@@ -104,6 +104,8 @@ require_once dirname(__FILE__).'/../records/edit/recordsBatch.php';
 
             $res = $dbRecDetails->fieldTranslation();
 
+        }elseif(@$_REQUEST['a'] == 'dms_to_decimal'){
+            $res = $dbRecDetails->coordinatesToDecimal();
         }elseif(@$_REQUEST['a'] == 'increment'){
 
             $res = $dbRecDetails->fieldIncrementValue();
