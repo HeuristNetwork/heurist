@@ -38,6 +38,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     currentSeqIndex = -1,  
     
     mode_display_separate = false,
+
+    // Validation review state prevents unresolved additions from trapping the user in a Prepare loop.
+    termErrorsReviewed = false,
+    dateErrorsReviewed = false,
     
     UTMzone = 0,
 
@@ -74,6 +78,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $('#divStep1 .heurist-helper2').first().text(
                 'The first line must contain column names; the database will not be modified.'
             );
+            $('#divActionsImport h2.step4').text('step 2: FIELDS TO VERIFY');
         }
         
         let is_h6style = window.hWin.HAPI4.sysinfo['layout']=='H6Default';
@@ -464,6 +469,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#btnVerifyDatabase')
                     .button({label: window.hWin.HR('Download verification report'), iconPosition:'end', icon:'ui-icon-arrowthickstop-1-s'})
                     .on('click', _doVerifyDatabaseAgainstSource);
+
+        // verifyDBAgainstSource: make the non-destructive action unmistakable
+        if(verifyDBAgainstSource){
+            $('#btnVerifyDatabase').button({label: window.hWin.HR('Run verification and download report')});
+        }
 
 /* repalced to help text                        
         $('#btnNextRecType1')
@@ -1701,6 +1711,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#mapping_column_header').text((currentStep==3)
                                                     ?'Column to Field mapping (record match)'
                                                     :'Fields to update');
+        if(verifyDBAgainstSource && currentStep!=3){
+            $('#mapping_column_header').text('Fields to verify');
+        }
         let stype = (currentStep==3)?'mapping_keys':'mapping_flds'; //for matching and for import
         let mapping_flds = imp_session['sequence'][currentSeqIndex][stype];  //field index=>dty_ID
         if(!mapping_flds) mapping_flds = {};
@@ -3856,7 +3869,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         _showStep(4);
                         
+                        // MODIFIED: some validation responses omit the active sequence entry; preserve it for Start Update
+                        const sequenceBeforeValidation = imp_session['sequence'];
                         imp_session = response.data; //assign to global var
+                        if(!imp_session['sequence'] || !imp_session['sequence'][currentSeqIndex]){
+                            imp_session['sequence'] = sequenceBeforeValidation;
+                        }
 
                         let res = imp_session['validation'];
                         
@@ -3891,7 +3909,37 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         //reset
                         $('#prepareWarnings').css('display','none');    
                         $('#mrr_warning').text('');
+                        $('#ignoreErrors').prop('checked', false);
                         let showingWarningsAndErrors = false;
+                        let requiresPrepareAgain = false;
+
+                        // Separate errors which can be corrected by adding terms from all other errors.
+                        res['term_error'] = [];
+                        res['other_error'] = [];
+                        $.each(res['error'] || [], function(idx, issue){
+                            let checkedField = issue['field_checked'];
+                            if(Array.isArray(checkedField)){ checkedField = checkedField[0]; }
+                            const mappedType = checkedField && res['mapped_fields']
+                                ? res['mapped_fields'][checkedField] : null;
+                            const baseType = mappedType ? $Db.dty(mappedType, 'dty_Type') : null;
+                            if(baseType === 'enum' || baseType === 'relationtype'){
+                                res['term_error'].push(issue);
+                            }else{
+                                res['other_error'].push(issue);
+                            }
+                        });
+                        let termErrorCount = res['term_error'].reduce(
+                            (total, issue) => total + Number(issue['count_error'] || 0), 0);
+                        let otherErrorCount = res['other_error'].reduce(
+                            (total, issue) => total + Number(issue['count_error'] || 0), 0);
+
+                        // If a manually repeated Prepare still finds the same term errors,
+                        // offer the normal explicit import-anyway path instead of looping.
+                        if(termErrorCount>0 && termErrorsReviewed){
+                            res['other_error'] = res['other_error'].concat(res['term_error']);
+                            otherErrorCount += termErrorCount;
+                            termErrorCount = 0;
+                        }
                             
                         if(res['utm_warning']>0){
                             $('#prepareWarnings').show();
@@ -3919,35 +3967,37 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 });
                             }
 
-                            // auto check 'ignore errors', these errors can be picked up and fixed by verify integrity or manually
-                            $('#sa_ignore_errors').prop('checked', true).trigger('change');
                         }else{
                             $('#btnShowWarnings').hide();
                         }
-                        
-                        if(res['count_error']>0){
-                            
-                            $('#mrr_error').text('Rows with unrecognised terms: '+res['count_error']);
-                            $('#prepareErrors').show();//.css('display','inline-block');
-                            showingWarningsAndErrors = true;
-                            
-                            window.hWin.HEURIST4.msg.showMsgErr({
-                                message: (res['count_error']==1?'There is one row ':('There are '+res['count_error']+' ROWS '))
-                                        +'with warnings in your input (the same error may occur in many rows).'
-                                        +'<br><br>These could include unrecognised terms, invalid dates, unknown record pointers '
-                                        +'(no record with given ID), missing required values and so forth.'
-                                        + '<br><br>The data can be imported as-is and new terms can be added automatically, '
-                                        + 'but if the data has too many mistakes it may be better to fix these in the source '
-                                        + 'file and then process it again. Open Refine is a useful free tool for fixing errors.'
-                                        + '<br><br> On the other hand, Admin > Verify Integrity can be used to find many common '
-                                        + 'errors once the data is loaded. Click "Show" button for a list of errors.',
-                                error_title: 'Invalid values'
-                            });
 
-                            $('.step3 > .normal').hide();
-                            $('.step3 > .skip_step').hide();
-                            $('.step3 > .need_resolve').show();
+                        // Missing terms must be added explicitly, followed by another manual Prepare.
+                        if(termErrorCount>0){
+                            $('#mrr_error').text('Rows with unrecognised terms: '+termErrorCount);
+                            $('#prepareErrors').show();
+                            _showRecords('term_error');
+                            termErrorsReviewed = true;
+                            requiresPrepareAgain = true;
+                        }
+
+                        // Open this second so the shorter date review appears above the terms dialog.
+                        if(res['count_date_error']>0 && !dateErrorsReviewed){
+                            _showRecords('date_error');
+                            dateErrorsReviewed = true;
+                        }
+
+                        if(requiresPrepareAgain){
+                            window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), true);
+                            $('.importIgnoreErrors').hide();
                         }else{
+
+                            // From this point the generic error list contains no term or date findings.
+                            res['error'] = res['other_error'];
+                            res['count_error'] = otherErrorCount;
+                            if(otherErrorCount>0){
+                                $('#mrr_error').text('Other data errors: '+otherErrorCount);
+                                $('#prepareErrors').show();
+                            }
 
                             if(res['geo_invalid'] && (res['geo_invalid']['invalid'].length > 0 || res['geo_invalid']['outOfBounds'].length > 0)){
 
@@ -3969,17 +4019,28 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 window.hWin.HEURIST4.msg.showMsgDlg(msg, null, null, {title: 'Invalid geographical data', default_palette_class: 'ui-heurist-populate'});
                             }
 
-                            $('#prepareErrors').css('display','none');
+                            if(otherErrorCount===0){ $('#prepareErrors').css('display','none'); }
                             _showStep(5);
+
+                            // Remaining invalid values may be retained after explicit confirmation.
+                            if(otherErrorCount>0 || res['count_warning']>0 || showingWarningsAndErrors){
+                                showingWarningsAndErrors = true;
+                                window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), true);
+                            }
                         }
 
                         if(showingWarningsAndErrors){
-                            $('.warningMessage').show();
+                            $('.warningMessage').hide();
                             $('.importIgnoreErrors').css('display', 'inline-block');
                             $('.first-cell').prop('width', '150');
                         }else{
                             $('.warningMessage, .importIgnoreErrors').hide();
                             $('.first-cell').prop('width', '250');
+                        }
+                        if(requiresPrepareAgain){
+                            $('.warningMessage').show();
+                            $('.importIgnoreErrors').hide();
+                            $('.first-cell').prop('width', '150');
                         }
                     }else{
                         _showStep(4);
@@ -4073,7 +4134,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             mapping   : field_mapping,
             ignore_insert: $('#sa_insert').prop('checked')?0:1,
             ignore_update: $('#sa_update').prop('checked')?0:1,
-            ignore_errors: $('#sa_ignore_errors').prop('checked')?1:0,
+            // MODIFIED: the single confirmed "Ignore data errors" choice controls final import
+            ignore_errors: $('#ignoreErrors').prop('checked')?1:0,
 
             is_csv_import: 1, // identify this request as a CSV import
 
@@ -4097,10 +4159,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
                         _showStep(5);
-                        
-                        imp_session = response.data; //assign to global var
 
-                        let imp_result = imp_session['import_report'];
+                        // MODIFIED: do not replace the live session with a plain-text validation response
+                        const importedSession = response.data;
+                        const imp_result = importedSession && importedSession['import_report'];
+                        if(!imp_result){
+                            _showStep(5);
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: (typeof importedSession === 'string' && importedSession)
+                                    ? importedSession
+                                    : 'The server did not return an import report. The current import session has been retained.',
+                                error_title: 'Import was not completed'
+                            });
+                            return;
+                        }
+                        imp_session = importedSession; //assign only a complete import session
                         
                         let msg = ''
                           +'<table class="tbresults"><tr><td>Total rows in import table:</td><td>'+ imp_result['total']
@@ -4440,7 +4513,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         const params = new URLSearchParams({
             db: window.hWin.HAPI4.database,
             action: 'verify_database_against_source',
-            output: 'csv',
+            output: 'ods',
             imp_ID: imp_ID,
             sa_rectype: rtyID,
             seq_index: currentSeqIndex,
@@ -4457,7 +4530,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         params.set('report_name', reportLabel);
         const reportFilename = 'Checking_'+reportLabel
             .replace(/[\\/:*?"<>|]/g, '-')
-            .replace(/\s{2,}/g, '_')+'.csv';
+            .replace(/\s{2,}/g, '_')+'.ods';
         const reportUrl = window.hWin.HAPI4.baseURL+'hserv/controller/importController.php?'+params.toString();
 
         // MODIFIED for verifyDBAgainstSource: download through a Blob with an
@@ -4622,7 +4695,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             +' if you have used an incomplete set of fields for matching.</div>';
 
         }
-        else if(mode=='error' || mode=='warning'){    //----------------------------------------------------------------------------------- 
+        else if(mode=='error' || mode=='warning' || mode=='date_error' || mode=='term_error'){    //-----------------------------------------------------------------------------------
 
             let is_missed = false;
             let tabs = res[mode];
@@ -4630,7 +4703,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             let dt_to_col = {};
 
             if(mode == 'warning'){
-                s = '<span style="color:red;">You MUST either change the field to a more lenient field, such as text, or check the \'Ignore validation. Add data "as is"\' box,<br>'
+                s = '<span style="color:red;">You MUST either change the field to a more lenient field, such as text, or check the \'Ignore data errors, import anyway\' box,<br>'
                   + 'otherwise the rows containing these data will not be processed.</span>';
             }
 
@@ -4684,7 +4757,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
                 }*/
                 
-                s = s + "<div><span class='error'>Values in red are invalid: </span> "+rec_tab['err_message']+"<br><br></div>";
+                s = s + "<div><span class='error'>"
+                    +(mode == 'date_error'
+                        ? 'Values in red are ambiguous or uninterpretable: '
+                        : 'Values in red are invalid: ')
+                    +"</span> "+rec_tab['err_message']+"<br><br></div>";
                 
                 let is_missed = (rec_tab['err_message'].indexOf('a value must be supplied')>0);
 
@@ -4803,7 +4880,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 s = s + '</div>';
             }
             
-            dlg_options['title'] = `Records with ${mode == 'error' ? 'warning' : 'error'}s`; // 
+            dlg_options['title'] = mode == 'date_error'
+                ? 'Dates requiring review'
+                : (mode == 'term_error' ? 'Unrecognised terms' : `Records with ${mode == 'error' ? 'warning' : 'error'}s`); //
             
         }
         else if(res['count_'+mode+'_rows']>0)
@@ -4856,7 +4935,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
 
-        const TABS = imp_session['validation']['error'];
+        const TABS = res[mode] || [];
 
         //activate add terms buttons
         let btn_ads = $dlg.find('.add_terms');
@@ -5317,6 +5396,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 shelp = shelp + '<br>Note that no changes are made to the database when you click the Prepare button.';
                 
                 $('#divPrepareSettingHelp').html(shelp);
+
+                // verifyDBAgainstSource: replace the importer instructions, but retain this help area
+                if(verifyDBAgainstSource){
+                    $('#divPrepareSettingHelp').html(
+                        'Select columns in the <b>'
+                        +window.hWin.HEURIST4.util.htmlEscape($Db.rty(rtyID,'rty_Name') || 'selected')
+                        +'</b> records which are to be verified, then click the button above'
+                    ).show();
+                }
                 
                 window.hWin.HEURIST4.util.setDisabled($('#btnPrepareStart'), false);
                 window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), true);
@@ -5511,15 +5599,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         let $dlg;
         let msg = `<div>
             Are you sure you want to ignore the data errors / warnings reported below?<br>
-            Please click on the highlighted warnings below and correct the errors if possible.
+            Faulty values may be inserted into the database.<br><br>
+            After importing, run <b>Admin &gt; Verify integrity</b> to find and fix them.
         </div>`;
 
         let btns = {};
         btns[window.hWin.HR('Yes')] = () => {
             window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), false);
+            $ignoreErrors.prop('checked', true);
             $dlg.dialog('close');
         };
-        btns[window.hWin.HR('No')] = () => { $dlg.dialog('close'); };
+        btns[window.hWin.HR('No')] = () => {
+            $ignoreErrors.prop('checked', false);
+            $dlg.dialog('close');
+        };
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: window.hWin.HR('Ignore reported data errors')}, {default_palette_class: 'ui-heurist-populate'});
     }

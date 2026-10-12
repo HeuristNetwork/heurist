@@ -140,6 +140,28 @@ if(!$format){ $format='csv';}
             body.verification-mode .importIgnoreErrors {
                 display:none !important;
             }
+
+            /* verifyDBAgainstSource: verification-specific presentation */
+            body.verification-mode #divheader {
+                background:rgba(218, 207, 239, 0.95) !important;
+            }
+            body.verification-mode .csv-mapping-help {
+                display:none !important;
+            }
+            body.verification-mode #divFieldMapping2,
+            body.verification-mode #divFieldMapping2 .tbresults {
+                background:rgba(218, 207, 239, 0.95) !important;
+            }
+            body.verification-mode #btnVerifyDatabase {
+                background:#3f9b4b !important;
+                border-color:#2f7939 !important;
+                color:#fff !important;
+                font-weight:bold !important;
+            }
+            body.verification-mode #btnVerifyDatabase:hover,
+            body.verification-mode #btnVerifyDatabase:focus {
+                background:#32823d !important;
+            }
         </style>
     </head>
 
@@ -504,9 +526,6 @@ if(!$format){ $format='csv';}
             <label><input type="checkbox" checked="checked" id="sa_update" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             Update existing records</label>
 
-            <label><input type="checkbox" id="sa_ignore_errors" class="text">&nbsp;
-            Ignore validation. Add data "as is"</label>
-
             <span style="padding-left: 230px;display:none;" id="presetMapping">Use previous mapping: <select id="sel_presetMapping"></select></span>
         </div>
         <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none;top:220px">
@@ -522,7 +541,8 @@ if(!$format){ $format='csv';}
             <label for="sa_upd0">Add new values without deletion of existing values (duplicates are ignored)</label><br>
 
             <input type="radio"  name="sa_upd" id="sa_upd21" value="21" class="text">&nbsp;
-            <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>
+            <!-- MODIFIED: clarify that replacement is limited to each currently processed record and mapped field -->
+            <label for="sa_upd21">Load new values, replacing all existing values for the record and field in question</label><br>
 
             <a href="#imp3" style="margin: 0.3em;line-height: 17px;text-decoration:none"
             onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">

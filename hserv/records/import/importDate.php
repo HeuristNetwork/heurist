@@ -28,6 +28,10 @@ class ImportDate {
         if ($value === '') { return null; }
         $order = self::order($order);
 
+        // Ambiguous abbreviated year pairs must not be guessed as year/month.
+        // Examples: 1564/5, 1510/11 and 1525-6 may denote year ranges.
+        if (preg_match('/^-?\d{3,6}[\/-]\d{1,2}$/D', $value)) { return null; }
+
         // Encoded temporals have their own ISO dates and metadata. Do not strip
         // punctuation, split their pipe tags, or feed their labels to DateTime.
         if ($value[0] === '{' || $value[0] === '[') {
@@ -69,6 +73,13 @@ class ImportDate {
             return self::temporal(array('start'=>array('earliest'=>$range[0]), 'end'=>array('latest'=>$range[1])));
         }
         return null;
+    }
+
+    /** Preserve an unconvertible source date visibly instead of dropping it. */
+    public static function markUninterpretable($value) {
+        $value = trim((string)$value);
+        $marker = ' (ambiguous or uninterpretable)';
+        return substr($value, -strlen($marker)) === $marker ? $value : $value.$marker;
     }
 
     /** Parse only explicit components, without any system clock or locale. */

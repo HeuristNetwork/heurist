@@ -430,7 +430,12 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
     }
 
-    $useNewTemporalFormatInRecDetails = $system->settings->isDbVersionAtLeast('1.3.14');
+    // MODIFIED for mixed h7 deployments: some installations have not yet
+    // received SystemSettings::isDbVersionAtLeast(). Use the shared schema
+    // version helper as a backward-compatible fallback.
+    $useNewTemporalFormatInRecDetails = method_exists($system->settings, 'isDbVersionAtLeast')
+        ? $system->settings->isDbVersionAtLeast('1.3.14')
+        : version_compare((string)getDbVersion($mysqli), '1.3.14', '>=');
 
 
     //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)
@@ -2894,6 +2899,10 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
             $dval = array('dtl_DetailTypeID'=>$dtyID);
 
+            // MODIFIED for CSV import: retain the original imported date text
+            // on the same detail row as its interpreted/stored value.
+            $dval['dtl_Annotation'] = @$record['details_annotation'][$dtyID][$eltID];
+
             $dtl_UploadedFileID = null;
             $dtl_Geo = null;
             $isValid = false;
@@ -2967,7 +2976,35 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                         $err_msg = 'Value is empty';
                     }else{
 
-                        $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
+                        // MODIFIED for CSV import: an ambiguous/uninterpretable date is
+                        // intentionally stored verbatim for Admin > Verify integrity.
+                        // Do not pass the marker text to Temporal, whose parser only
+                        // accepts date syntax and may fail before the raw value is saved.
+                        $date_before_storage_conversion = $dtl_Value;
+                        $uninterpretable_marker = ' (ambiguous or uninterpretable)';
+                        $is_marked_import_date = $modeImport>0 && is_string($dtl_Value)
+                            && substr($dtl_Value, -strlen($uninterpretable_marker)) === $uninterpretable_marker;
+                        // MODIFIED for CSV import: ImportDate has already validated and
+                        // canonicalised JSON temporals. Re-parsing them here can fail in
+                        // the legacy Temporal parser and is unnecessary.
+                        $has_import_source_annotation = $modeImport>0
+                            && @$dval['dtl_Annotation'] !== null;
+                        $trimmed_import_date = is_string($dtl_Value) ? ltrim($dtl_Value) : '';
+                        $is_prepared_import_temporal = $has_import_source_annotation
+                            && ($trimmed_import_date !== '')
+                            && ($trimmed_import_date[0] === '{' || $trimmed_import_date[0] === '[');
+                        if(!$is_marked_import_date && !$is_prepared_import_temporal){
+                            try{
+                                $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
+                            }catch(\Throwable $date_conversion_error){
+                                if(!$has_import_source_annotation){
+                                    throw $date_conversion_error;
+                                }
+                                // CSV dates must never abort the import. Keep the strictly
+                                // interpreted value and original annotation for recovery.
+                                $dtl_Value = $date_before_storage_conversion;
+                            }
+                        }
 
 /* Use old plain temporals
                         }else{
@@ -3142,7 +3179,17 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                     $dtl_Value = null;
                     $isValid = ($dtl_UploadedFileID>0);
 
-                    if($validation_mode==0 && !$isValid) {$isValid = 'ignore';}
+                    // MODIFIED for CSV import: preserve an unresolved file reference as text
+                    // instead of silently dropping the supplied value when importing anyway.
+                    if($validation_mode==0 && !$isValid && $modeImport==1){
+                        $dval['dtl_Value'] = $values[$eltID];
+                        $dval['dtl_UploadedFileID'] = null;
+                        $dval['dtl_Geo'] = null;
+                        array_push($insertValues, $dval);
+                        $isValid = 'ignore';
+                    }elseif($validation_mode==0 && !$isValid){
+                        $isValid = 'ignore';
+                    }
 
                     break;
 
@@ -4657,8 +4704,9 @@ function detailsInsert($system, $recID, $rectype, $detailValues, $modeImport, $s
     $mysqli = $system->getMysqli();
     $addedByImport = ($modeImport?1:0);
 
-    $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo, dtl_HideFromPublic) '.
-    "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?), ?)";
+    // MODIFIED for CSV import: dtl_Annotation preserves the original date text.
+    $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo, dtl_HideFromPublic, dtl_Annotation) '.
+    "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?), ?, ?)";
     $stmt = $mysqli->prepare($query);
 
     if ($stmt) {
@@ -4672,8 +4720,9 @@ function detailsInsert($system, $recID, $rectype, $detailValues, $modeImport, $s
             $dtl_UploadedFileID = @$values['dtl_UploadedFileID'];
             $dtl_Geo = @$values['dtl_Geo'];
             $dtl_HideFromPublic = @$values['dtl_HideFromPublic'];
+            $dtl_Annotation = @$values['dtl_Annotation'];
 
-            $stmt->bind_param('isisi', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo, $dtl_HideFromPublic);
+            $stmt->bind_param('isisis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo, $dtl_HideFromPublic, $dtl_Annotation);
             if(!$stmt->execute()){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding or invalid date format (System error: '.$mysqli->error.').', $mysqli->error);
                 return false;
