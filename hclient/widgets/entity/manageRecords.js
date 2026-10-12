@@ -109,6 +109,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
     _autoResizeCheckbox: null,
 
+    _editorPasteEvent: false,
+
     /**
      * @brief Initializes the manageRecords widget.
      * @override
@@ -3372,6 +3374,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // Applies values on record edit form for individual visibility settings
             //
             that._editing.setFieldsVisibility( that._currentEditRecordset );
+
+            if(!this._editorPasteEvent){ // @todo - check whether the entities (term, rectype, db props)
+                this._setupFilePasteHandling();
+            }
             
             that._afterInitEditForm();
 
@@ -8103,10 +8109,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
 
         showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
-        
-        // was: showAllImagesPrefs.blocked = !Array.isArray(showAllImagesPrefs.blocked) ? [] : showAllImagesPrefs.blocked;
-        // ChatGPT fix7/10/26: Older or invalid preferences may lack either list.
-        // Initialise both before using includes() or push().
+
         if (!showAllImagesPrefs
                 || typeof showAllImagesPrefs !== 'object'
                 || Array.isArray(showAllImagesPrefs)) {
@@ -8152,5 +8155,116 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
         }
+    },
+
+    _setupFilePasteHandling: function(){
+
+        let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'}).getOrder();
+
+        this._on(this.element, {
+            paste: (event) => {
+console.log(event);
+                let recTypeFileFields = [];
+                for(const dtyID of fileFields){
+
+                    if($Db.rst(this._currentEditRecTypeID, dtyID)){
+                        recTypeFileFields.push(dtyID);
+                    }
+                }
+
+                if(recTypeFileFields.length === 0){
+                    return;
+                }
+
+                let clipboardData = event.originalEvent.clipboardData || window.clipboardData;
+
+                if(!clipboardData || !clipboardData.items){
+                    return;
+                }
+
+                let files = clipboardData.files; //clipboardData.items
+                let filesToUpload = [];
+                for(let file of files){
+
+                    let fileDetails = file;
+                    if(file?.kind === 'file'){
+                        fileDetails = file[0].getAsFile();
+                    }
+
+                    filesToUpload.push(fileDetails);
+                }
+
+                if(filesToUpload.length > 0){
+
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    event.stopPropagation();
+
+                    this._handlePastedFiles(filesToUpload, recTypeFileFields);
+                }
+            }
+        });
+
+        this._editorPasteEvent = true;
+    },
+
+    _handlePastedFiles: function(files, dtyIDs){
+
+        if(!Array.isArray(files) || files.length === 0){
+            return;
+        }
+
+        let allowedFields = new Set();
+        for(const dtyID of dtyIDs){
+            if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID) || !$Db.rst(this._currentEditRecTypeID, dtyID)){
+                continue;
+            }
+            allowedFields.add(dtyID);
+        }
+
+        if(allowedFields.size === 0){
+            return;
+        }
+
+        const [dtyID] = allowedFields.size === 1 ? allowedFields : [0];
+        if(window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+
+            let $input = this._editing.getFieldByName(dtyID);
+            if(!$input || $input.length === 0){
+                return;
+            }
+
+            $input.editing_input('addPastedFiles', files);
+            return;
+        }
+
+        let fieldList = '';
+        let status = ' checked="checked"';
+        for(const dtyID of allowedFields){
+
+            fieldList += `<label style="cursor: pointer; display: block; margin: 5px 0px;">
+                <input type="radio" value="${dtyID}" name="fileField" ${status} />${$Db.rst(this._currentEditRecTypeID, dtyID, 'rst_DisplayName')}
+            </label>`;
+
+            status = '';
+        }
+
+        let $dlg;
+        let btns = {};
+        let content = `<div>
+            Please select a file field to send the pasted images to:
+            <div>${fieldList}</div>
+        </div>`;
+
+        btns[window.hWin.HR('Send to field')] = () => {
+            let dtyID = $dlg.find('[name="fileField"]:checked').val();
+            $dlg.dialog('close');
+            this._handlePastedFiles(files, [dtyID]);
+        };
+
+        btns[window.hWin.HR('Cancel')] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Pasting to multiple fields'}, {default_palette_class: 'ui-heurist-populate'});
     }
 });

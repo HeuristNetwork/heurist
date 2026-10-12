@@ -8414,5 +8414,81 @@ $.widget( "heurist.editing_input", {
             }
             $lastItem = this.element.find(`div[image-divid="${ID}"]`);
         });
+    },
+
+    addPastedFiles: function(files){
+
+        if(!this.isFileForRecord){
+            return;
+        }
+
+        if(this.input_cell.find('.hidden_image_uploader').length > 0){
+
+            this.input_cell.find('.hidden_image_uploader').fileupload('add', {
+                files: files
+            });
+
+            return;
+        }
+
+        let max_file_size = Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']);
+        let fileupload_opts = {
+
+            url: `${window.hWin.HAPI4.baseURL}hserv/controller/fileUpload.php`,
+            formData: [
+                {name:'db', value: window.hWin.HAPI4.database}, 
+                {name:'entity', value: 'recUploadedFiles'},
+                {name:'registerAtOnce', value: 1},
+                {name:'recID', value: this.options.recID},
+                {name:'usetempname', value: 1}
+            ],
+
+            max_file_size: max_file_size,
+            sequentialUploads: true,
+            dataType: 'json',
+
+            done: (e, response) => {
+
+                if(response.result){
+                    response = response.result;
+                }
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(response.data?.files)){
+                    return;
+                }
+
+                let fileValues = new Set([...this.getValues()]);
+                let hasNewFiles = false;
+                for(let idx = 0; idx < response.data.files.length; idx ++){
+
+                    let ulfID = response.data.files[idx].ulf_ID;
+                    if(window.hWin.HEURIST4.util.isPositiveInt(ulfID)){
+                        fileValues.add(ulfID);
+                        hasNewFiles = true;
+                    }
+                }
+
+                if(hasNewFiles){
+                    this.setValue([...fileValues]);
+                }
+            },
+            fail: function(e, response){
+                response = response.message ? response : {message: response, error_title: 'File upload error'};
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        };
+
+        $('<input>', {
+            type: 'file',
+            style: 'display: none;',
+            class: 'hidden_image_uploader'
+        }).fileupload(fileupload_opts).appendTo(this.input_cell);
+
+        this.addPastedFiles(files);
     }
 });
