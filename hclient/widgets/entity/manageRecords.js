@@ -111,6 +111,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
     _editorPasteEvent: false,
 
+    _ignoreAmbiguousDates: [],
+
     /**
      * @brief Initializes the manageRecords widget.
      * @override
@@ -3845,7 +3847,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                         if(dt == 'date'){
 
-                            if(Temporal.isValidFormat(values[k])){ // check if valid temporal string
+                            if(Temporal.isValidFormat(values[k]) || that._ignoreAmbiguousDates.includes(values[k])){ // check if valid temporal string
                                 continue; // is valid, skip
                             }
 
@@ -4023,7 +4025,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     continue;
                                 }
                             } catch(e) {
-                                if(e.indexOf('ambiguous') >= 0){
+                                if(e.indexOf('ambiguous') >= 0 || e.indexOf('unrecognized characters') >= 0){
                                     ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: ttype});
                                     continue;
                                 }
@@ -4256,6 +4258,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             return;
         }
+
+        this._ignoreAmbiguousDates = []; // reset ignore ambiguous dates setting
 
         // Message not needed right now as only one issue is handled, probably separate issues into tabs within the message dialog
 
@@ -5946,12 +5950,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      * - Add a comment to the temporal value.
      * Upon saving from the dialog, the clarified date (potentially as a Temporal string) updates the corresponding field value.
      * Continues until all ambiguous dates are processed or the user cancels.
+     * @param {bool} continueToSave Whether to proceed with saving after handling the ambiguous dates,
+     * This will only happen if no dates where changed.
      */
-    _handleAmbiguousDates: function(ambiguous_dates){
+    _handleAmbiguousDates: function(ambiguous_dates, continueToSave = true){
 
         let that = this;
 
         if(!ambiguous_dates || ambiguous_dates.length == 0){
+            if(continueToSave){
+                this._saveEditAndClose(null, 'none');
+            }
             return;
         }
 
@@ -5965,6 +5974,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             let com = $dlg.find('#COM').val();
             let t_date = new Temporal();
             let is_temporal = false;
+
+            if($dlg.find('#remain_ambiguous:checked').length > 0){
+
+                that._ignoreAmbiguousDates.push(cur_date.org_value);
+
+                $dlg.dialog('close');
+
+                that._handleAmbiguousDates(ambiguous_dates, continueToSave);
+
+                return;
+            }
 
             if(!window.hWin.HEURIST4.util.isempty(com)){
                 t_date.addObjForString("COM", com);
@@ -6059,7 +6079,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             $dlg.dialog('close');
 
-            that._handleAmbiguousDates(ambiguous_dates);
+            that._handleAmbiguousDates(ambiguous_dates, false);
         };
         btns[window.HR('Close')] = function(){
             $dlg.dialog('close');
@@ -6072,8 +6092,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         };
 
         let options = {
-            'default_palette_class': 'ui-heurist-explore',
-            'dialogId': 'fixing_ambig_dates'
+            default_palette_class: 'ui-heurist-explore',
+            dialogId: 'fixing_ambig_dates'
         };
 
         let fld_name = $Db.rst(that._currentEditRecTypeID, cur_date.dtyid, 'rst_DisplayName');
@@ -6082,6 +6102,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         + '<span>'
                             + 'For the field <strong>' + fld_name + '</strong><br>'
                             + 'We cannot unambiguously interpret what you mean by <strong>' + cur_date.org_value + '</strong>'
+                            + 'Retain ambiguous date? <input type="checkbox" id="remain_ambiguous" name="remain_ambiguous" /> (this will ignore anything entered below)<br>'
                         + '</span><br><br>';
 
         if(cur_date.type){
@@ -6120,7 +6141,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     break;
                 }
                 default:
-                    that._handleAmbiguousDates(ambiguous_dates);
+                    that._ignoreAmbiguousDates.push(cur_date.org_value);
+                    that._handleAmbiguousDates(ambiguous_dates, continueToSave);
                     break;
             }
         }
@@ -6130,6 +6152,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 +  '</div>';
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, labels, options);
+
+        $dlg.find('#remain_ambiguous').on('change', () => {
+            let enabled = $dlg.find('#remain_ambiguous').is(':checked');
+            let $inputs = $dlg.find('input:not(#remain_ambiguous),textarea');
+            window.hWin.HEURIST4.util.setDisabled($inputs, enabled);
+        });
     },
 
     _handleInvalidEntry: function(invalid_entries){
