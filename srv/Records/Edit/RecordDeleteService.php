@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Heurist\Records\Edit;
 
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Store\RecordStore;
 use Heurist\Runtime\RuntimeContext;
 use Throwable;
 
@@ -61,35 +62,37 @@ final class RecordDeleteService
      */
     public function references(int $recordId): array
     {
-        $database = $this->store->database();
+        $records = $this->store->records();
+        $links = $records->links(array($recordId), array('side'=>'target', 'kind'=>'pointer', 'order'=>'id'));
+        $links = array_values(array_filter($links, static function(array $link) use ($recordId): bool {
+            return $link[2] !== $recordId;
+        }));
+        $sources = $records->headers(array_column($links, 2));
         $pointers = array();
-        foreach($database->fetchAll(
-            'SELECT l.rl_SourceID,l.rl_DetailTypeID,r.rec_RecTypeID,r.rec_Title FROM recLinks l '
-            .'JOIN Records r ON r.rec_ID=l.rl_SourceID '
-            .'WHERE l.rl_TargetID=? AND l.rl_RelationID IS NULL AND l.rl_SourceID<>? ORDER BY l.rl_ID',
-            array($recordId, $recordId)
-        ) as $row){
+        foreach($links as $link){
+            $source = $sources[$link[2]] ?? null;
+            if($source === null){ continue; }
             $pointers[] = array(
-                'rec_ID' => (string)$row['rl_SourceID'],
-                'rec_RecTypeID' => (string)$row['rec_RecTypeID'],
-                'rec_Title' => (string)$row['rec_Title'],
-                'dty_ID' => (string)$row['rl_DetailTypeID']
+                'rec_ID' => (string)$link[2],
+                'rec_RecTypeID' => (string)$source['rec_RecTypeID'],
+                'rec_Title' => (string)$source['rec_Title'],
+                'dty_ID' => (string)$link[4]
             );
         }
         $relationships = array();
-        foreach($database->fetchAll(
-            'SELECT DISTINCT rl_RelationID,rl_SourceID,rl_TargetID,rl_RelationTypeID FROM recLinks '
-            .'WHERE rl_RelationID IS NOT NULL AND (rl_SourceID=? OR rl_TargetID=?)',
-            array($recordId, $recordId)
-        ) as $row){
-            $relationships[] = array(
-                'rec_ID' => (string)$row['rl_RelationID'],
-                'source' => (string)$row['rl_SourceID'],
-                'target' => (string)$row['rl_TargetID'],
-                'relationType' => $row['rl_RelationTypeID'] === null ? null : (string)$row['rl_RelationTypeID']
-            );
+        foreach(array('source', 'target') as $side){
+            foreach($records->links(array($recordId), array('side'=>$side, 'kind'=>'relationship')) as $link){
+                $key = $link[6].':'.$link[2].':'.$link[3].':'.$link[5];
+                if(isset($relationships[$key])){ continue; }
+                $relationships[$key] = array(
+                    'rec_ID' => (string)$link[6],
+                    'source' => (string)$link[2],
+                    'target' => (string)$link[3],
+                    'relationType' => $link[5] > 0 ? (string)$link[5] : null
+                );
+            }
         }
-        return array('pointers'=>$pointers, 'relationships'=>$relationships);
+        return array('pointers'=>$pointers, 'relationships'=>array_values($relationships));
     }
 
     /**
@@ -102,7 +105,7 @@ final class RecordDeleteService
     public function delete(int $recordId, bool $force = false): array
     {
         $this->permissions->assertAccount('delete');
-        $header = $recordId > 0 ? $this->store->header($recordId) : null;
+        $header = $recordId > 0 ? $this->store->records()->header($recordId) : null;
         if($header === null){
             throw RecordEditException::notFound('Record '.$recordId.' does not exist');
         }

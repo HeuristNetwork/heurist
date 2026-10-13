@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace Heurist\Reports\Smarty;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
 use RuntimeException;
 use Smarty\Smarty;
 
@@ -122,16 +123,14 @@ final class SmartyEngineFactory
             $parts = explode('\\', trim($match, ' {}'));
             $termId = intval(array_shift($parts));
             if($termId < 1){ continue; }
+            $definitions = DefinitionLookup::shared($this->database);
             $text = '';
             foreach($parts as $lang){
-                $text = (string)$this->database->fetchValue(
-                    'SELECT trn_Translation FROM defTranslations WHERE trn_Code=? AND trn_Source="trm_Label" '
-                    .'AND trn_LanguageCode=? LIMIT 1', array($termId, strtoupper(trim($lang))), ''
-                );
+                $text = (string)($definitions->translations('trm_Label', array($termId), strtoupper(trim($lang)))[(string)$termId] ?? '');
                 if($text !== ''){ break; }
             }
             if($text === ''){
-                $text = (string)$this->database->fetchValue('SELECT trm_Label FROM defTerms WHERE trm_ID=? LIMIT 1', array($termId), '');
+                $text = (string)($definitions->term($termId)['term'] ?? '');
             }
             $source = str_replace($match, $text, $source);
         }

@@ -41,7 +41,9 @@ namespace Heurist\Records\Edit;
 use Heurist\Database\DatabaseException;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Definitions\DefinitionLookup;
-use Heurist\Records\Query\Compiler\RelationTermResolver;
+use Heurist\Records\Files\FileRepository;
+use Heurist\Records\Store\RecordRepository;
+use Heurist\Runtime\DatabaseSettings;
 use Heurist\Utilities\LanguageCodes;
 use Heurist\Utilities\Temporal;
 
@@ -442,7 +444,7 @@ final class RecordValidator
     private function vocabulary(int $fieldId, array $roots): array
     {
         if(!isset($this->vocabularies[$fieldId])){
-            $terms = (new RelationTermResolver($this->database))->expand($roots);
+            $terms = $this->definitions->termDescendants($roots);
             $this->vocabularies[$fieldId] = array_fill_keys($terms, true);
         }
         return $this->vocabularies[$fieldId];
@@ -451,8 +453,7 @@ final class RecordValidator
     private function targetType(int $recordId): ?int
     {
         if(!array_key_exists($recordId, $this->targets)){
-            $type = $this->database->fetchValue('SELECT rec_RecTypeID FROM Records WHERE rec_ID=?', array($recordId));
-            $this->targets[$recordId] = $type === null ? null : intval($type);
+            $this->targets[$recordId] = RecordRepository::shared($this->database)->rectypeOf(array($recordId))[$recordId] ?? null;
         }
         return $this->targets[$recordId];
     }
@@ -460,9 +461,7 @@ final class RecordValidator
     private function fileExists(int $fileId): bool
     {
         if(!isset($this->files[$fileId])){
-            $this->files[$fileId] = $this->database->fetchValue(
-                'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ID=?', array($fileId)
-            ) !== null;
+            $this->files[$fileId] = !empty(FileRepository::shared($this->database)->existing(array($fileId)));
         }
         return $this->files[$fileId];
     }
@@ -514,13 +513,7 @@ final class RecordValidator
     private function newTemporalFormat(): bool
     {
         if($this->newTemporalFormat === null){
-            $rows = $this->database->fetchAll(
-                'SELECT sys_dbVersion,sys_dbSubVersion,sys_dbSubSubVersion FROM sysIdentification LIMIT 1'
-            );
-            $row = $rows[0] ?? array();
-            $version = intval($row['sys_dbVersion'] ?? 0).'.'.intval($row['sys_dbSubVersion'] ?? 0)
-                .'.'.intval($row['sys_dbSubSubVersion'] ?? 0);
-            $this->newTemporalFormat = version_compare($version, '1.3.14', '>=');
+            $this->newTemporalFormat = DatabaseSettings::shared($this->database)->isVersionAtLeast('1.3.14');
         }
         return $this->newTemporalFormat;
     }

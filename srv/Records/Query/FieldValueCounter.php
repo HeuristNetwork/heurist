@@ -67,19 +67,15 @@ final class FieldValueCounter
         if(!ctype_digit($name) || intval($name) < 1){
             throw new QueryValidationException('Unsupported field for detail=values: '.$field);
         }
-        $rows = $this->executor->executeRows(
-            'SELECT dty_Type, dty_PtrTargetRectypeIDs FROM defDetailTypes WHERE dty_ID=?',
-            'i', array(intval($name))
-        );
-        if(empty($rows)){
+        $definition = $this->executor->definitions()->field(intval($name));
+        if($definition === null){
             throw new QueryValidationException('Unknown field for detail=values: '.$field);
         }
-        $type = (string)$rows[0][0];
+        $type = $definition['type'];
         if(!in_array($type, self::DETAIL_TYPES, true)){
             throw new QueryValidationException('Field type '.$type.' is not supported by detail=values');
         }
-        $targets = array_values(array_filter(array_map('intval',
-            preg_split('/\s*,\s*/', trim((string)$rows[0][1])) ?: array())));
+        $targets = $definition['targetTypes'];
         return array('field'=>$name, 'type'=>$type, 'dtyId'=>intval($name), 'targets'=>$targets);
     }
 
@@ -99,14 +95,14 @@ final class FieldValueCounter
 
         $state = new SqlBuildContext($context);
         $parts = $this->sourceParts($field, $state, $context);
-        $where = array_merge($parts['where'], $this->detailVisibility($field, $state),
+        $where = array_merge($parts['where'],
             $this->builder->compileConditions($query, $state, $context));
         $where = array_merge($where, $this->targetConditions($field, $state, $context));
         $this->appendText($where, $parts, $state, $options['text']);
-        $from = 'FROM Records r '.$parts['joins'].' WHERE '.implode(' AND ', $where);
+        $from = 'FROM {records} r '.$parts['joins'].' WHERE '.implode(' AND ', $where);
         $state->bind($options['limit'], 'i');
         $state->bind($options['offset'], 'i');
-        $rows = $this->executor->executeRows(
+        $rows = $this->executeRows(
             'SELECT '.$parts['value'].' AS v, COUNT(DISTINCT r.rec_ID) AS c, MAX('.$parts['label'].'),'
                 .' MAX('.$parts['rty'].'), MAX('.$parts['kind'].') '.$from
                 .' GROUP BY v '.$this->orderBy($options['sort'], $parts['label']).' LIMIT ? OFFSET ?',
@@ -115,13 +111,13 @@ final class FieldValueCounter
 
         $countState = new SqlBuildContext($context);
         $countParts = $this->sourceParts($field, $countState, $context);
-        $countWhere = array_merge($countParts['where'], $this->detailVisibility($field, $countState),
+        $countWhere = array_merge($countParts['where'],
             $this->builder->compileConditions($query, $countState, $context));
         $countWhere = array_merge($countWhere, $this->targetConditions($field, $countState, $context));
         $this->appendText($countWhere, $countParts, $countState, $options['text']);
         $total = intval($this->executor->executeScalar(new CompiledQuery(
-            'SELECT COUNT(DISTINCT '.$countParts['value'].') FROM Records r '.$countParts['joins']
-                .' WHERE '.implode(' AND ', $countWhere),
+            $this->builder->sql('SELECT COUNT(DISTINCT '.$countParts['value'].') FROM {records} r '.$countParts['joins']
+                .' WHERE '.implode(' AND ', $countWhere)),
             $countState->types(), $countState->values(), $query
         )));
         return array('total'=>$total, 'values'=>array_map(array($this, 'valueRow'), $rows));
@@ -142,14 +138,14 @@ final class FieldValueCounter
         foreach(array_chunk($ids, self::ID_CHUNK_SIZE) as $chunk){
             $state = new SqlBuildContext($context);
             $parts = $this->sourceParts($field, $state, $context);
-            $where = array_merge($parts['where'], $this->detailVisibility($field, $state));
+            $where = $parts['where'];
             foreach($chunk as $id){ $state->bind($id, 'i'); }
             $where[] = 'r.rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
             $where = array_merge($where, $this->targetConditions($field, $state, $context));
             $this->appendText($where, $parts, $state, $options['text']);
-            $rows = $this->executor->executeRows(
+            $rows = $this->executeRows(
                 'SELECT '.$parts['value'].' AS v, COUNT(DISTINCT r.rec_ID), MAX('.$parts['label'].'),'
-                    .' MAX('.$parts['rty'].'), MAX('.$parts['kind'].') FROM Records r '.$parts['joins']
+                    .' MAX('.$parts['rty'].'), MAX('.$parts['kind'].') FROM {records} r '.$parts['joins']
                     .' WHERE '.implode(' AND ', $where).' GROUP BY v',
                 $state->types(), $state->values()
             );
@@ -188,14 +184,14 @@ final class FieldValueCounter
         foreach(array_chunk(array_keys($rootsOf), self::ID_CHUNK_SIZE) as $chunk){
             $state = new SqlBuildContext($context);
             $parts = $this->sourceParts($field, $state, $context);
-            $where = array_merge($parts['where'], $this->detailVisibility($field, $state));
+            $where = $parts['where'];
             foreach($chunk as $id){ $state->bind($id, 'i'); }
             $where[] = 'r.rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
             $where = array_merge($where, $this->targetConditions($field, $state, $context));
             $this->appendText($where, $parts, $state, $options['text']);
-            $rows = $this->executor->executeRows(
+            $rows = $this->executeRows(
                 'SELECT DISTINCT r.rec_ID, '.$parts['value'].', '.$parts['label'].', '.$parts['rty'].', '.$parts['kind']
-                    .' FROM Records r '.$parts['joins'].' WHERE '.implode(' AND ', $where),
+                    .' FROM {records} r '.$parts['joins'].' WHERE '.implode(' AND ', $where),
                 $state->types(), $state->values()
             );
             foreach($rows as $row){
@@ -246,7 +242,7 @@ final class FieldValueCounter
             case 'rectype':
                 return array_merge($parts, array(
                     'value'=>'r.rec_RecTypeID',
-                    'joins'=>'JOIN defRecTypes vrt ON vrt.rty_ID=r.rec_RecTypeID',
+                    'joins'=>'JOIN {rectypes} vrt ON vrt.rty_ID=r.rec_RecTypeID',
                     'label'=>'vrt.rty_Name', 'textOn'=>'vrt.rty_Name'
                 ));
             case 'owner':
@@ -254,7 +250,7 @@ final class FieldValueCounter
                 $column = $field['type'] === 'owner' ? 'r.rec_OwnerUGrpID' : 'r.rec_AddedByUGrpID';
                 return array_merge($parts, array(
                     'value'=>$column,
-                    'joins'=>'LEFT JOIN sysUGrps vug ON vug.ugr_ID='.$column,
+                    'joins'=>'LEFT JOIN {groups} vug ON vug.ugr_ID='.$column,
                     'label'=>'vug.ugr_Name',
                     'kind'=>'IF(vug.ugr_Type="user","user","group")',
                     'textOn'=>'vug.ugr_Name'
@@ -273,8 +269,8 @@ final class FieldValueCounter
                 foreach($owners as $id){ $state->bind($id, 'i'); }
                 return array_merge($parts, array(
                     'value'=>'vtg.tag_ID',
-                    'joins'=>'JOIN usrRecTagLinks vrtl ON vrtl.rtl_RecID=r.rec_ID'
-                        .' JOIN usrTags vtg ON vtg.tag_ID=vrtl.rtl_TagID AND vtg.tag_UGrpID IN ('
+                    'joins'=>'JOIN {tagLinks} vrtl ON vrtl.rtl_RecID=r.rec_ID'
+                        .' JOIN {tags} vtg ON vtg.tag_ID=vrtl.rtl_TagID AND vtg.tag_UGrpID IN ('
                         .implode(',', array_fill(0, count($owners), '?')).')',
                     'label'=>'vtg.tag_Text', 'textOn'=>'vtg.tag_Text'
                 ));
@@ -282,17 +278,17 @@ final class FieldValueCounter
                 $state->bind($field['dtyId'], 'i');
                 return array_merge($parts, array(
                     'value'=>'vt.rec_ID',
-                    'joins'=>'JOIN recDetails vd ON vd.dtl_RecID=r.rec_ID AND vd.dtl_DetailTypeID=?'
-                        .' JOIN Records vt ON vt.rec_ID=vd.dtl_Value',
+                    'joins'=>'JOIN {details} vd ON vd.dtl_RecID=r.rec_ID AND vd.dtl_DetailTypeID=?'
+                        .' JOIN {records} vt ON vt.rec_ID=vd.dtl_Value',
                     'label'=>'vt.rec_Title', 'rty'=>'vt.rec_RecTypeID', 'textOn'=>'vt.rec_Title'
                 ));
             case 'relmarker':
                 // related records in either direction of a relationship
                 return array_merge($parts, array(
                     'value'=>'vt.rec_ID',
-                    'joins'=>'JOIN recLinks vl ON vl.rl_RelationID IS NOT NULL'
+                    'joins'=>'JOIN {links} vl ON vl.rl_RelationID IS NOT NULL'
                         .' AND (vl.rl_SourceID=r.rec_ID OR vl.rl_TargetID=r.rec_ID)'
-                        .' JOIN Records vt ON vt.rec_ID=IF(vl.rl_SourceID=r.rec_ID,vl.rl_TargetID,vl.rl_SourceID)',
+                        .' JOIN {records} vt ON vt.rec_ID=IF(vl.rl_SourceID=r.rec_ID,vl.rl_TargetID,vl.rl_SourceID)',
                     'label'=>'vt.rec_Title', 'rty'=>'vt.rec_RecTypeID', 'textOn'=>'vt.rec_Title'
                 ));
             case 'enum':
@@ -300,8 +296,8 @@ final class FieldValueCounter
                 $state->bind($field['dtyId'], 'i');
                 return array_merge($parts, array(
                     'value'=>'vd.dtl_Value',
-                    'joins'=>'JOIN recDetails vd ON vd.dtl_RecID=r.rec_ID AND vd.dtl_DetailTypeID=?'
-                        .' LEFT JOIN defTerms vtr ON vtr.trm_ID=vd.dtl_Value',
+                    'joins'=>'JOIN {details} vd ON vd.dtl_RecID=r.rec_ID AND vd.dtl_DetailTypeID=?'
+                        .' LEFT JOIN {terms} vtr ON vtr.trm_ID=vd.dtl_Value',
                     // labels stay client-side (UI language); the join only serves text filtering
                     'textOn'=>'vtr.trm_Label'
                 ));
@@ -309,18 +305,10 @@ final class FieldValueCounter
                 $state->bind($field['dtyId'], 'i');
                 return array_merge($parts, array(
                     'value'=>'vd.dtl_Value',
-                    'joins'=>'JOIN recDetails vd ON vd.dtl_RecID=r.rec_ID AND vd.dtl_DetailTypeID=?',
+                    'joins'=>'JOIN {details} vd ON vd.dtl_RecID=r.rec_ID AND vd.dtl_DetailTypeID=?',
                     'textOn'=>'vd.dtl_Value'
                 ));
         }
-    }
-
-    /** Hidden detail values stay hidden (the rule of every detail predicate); header fields have none. */
-    private function detailVisibility(array $field, SqlBuildContext $state): array
-    {
-        if($field['dtyId'] < 1 || $field['type'] === 'relmarker'){ return array(); }
-        $condition = $this->builder->detailVisibilityCondition($state, 'vd', 'r');
-        return $condition === '' ? array() : array($condition);
     }
 
     /** Access (and target type) conditions for the linked record of resource/relmarker fields. */
@@ -379,5 +367,11 @@ final class FieldValueCounter
         if($row[3] !== null && $row[3] !== ''){ $result['rty'] = intval($row[3]); }
         if($row[4] !== null && $row[4] !== ''){ $result['kind'] = (string)$row[4]; }
         return $result;
+    }
+
+    /** Execute SQL text of the compiler; the builder resolves its table keys. */
+    private function executeRows(string $sql, string $types = '', array $values = array()): array
+    {
+        return $this->executor->executeRows($this->builder->sql($sql), $types, $values);
     }
 }

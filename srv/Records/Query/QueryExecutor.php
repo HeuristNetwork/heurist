@@ -19,6 +19,8 @@ namespace Heurist\Records\Query;
 
 use Heurist\Database\DatabaseException;
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Store\RecordRepository;
 
 /** Thin database boundary for the modern record search engine. */
 class QueryExecutor
@@ -29,6 +31,18 @@ class QueryExecutor
     public function __construct(DatabaseInterface $database)
     {
         $this->database = $database;
+    }
+
+    /** Definitions of the database of this executor (field types, terms). */
+    public function definitions(): DefinitionLookup
+    {
+        return DefinitionLookup::shared($this->database);
+    }
+
+    /** Record reads of the database of this executor (headers, links, counts). */
+    public function records(): RecordRepository
+    {
+        return RecordRepository::shared($this->database);
     }
 
     /** Execute an IDs query and return integer record IDs in database order. */
@@ -54,24 +68,13 @@ class QueryExecutor
     }
 
     /** Count record types for an already filtered fallback ID set. */
-    public function executeRectypeCountsForIds(array $ids, int $chunkSize = 1000): array
+    public function executeRectypeCountsForIds(array $ids): array
     {
-        $counts = array();
-        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
-        foreach(array_chunk($ids, max(1, $chunkSize)) as $chunk){
-            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
-            $rows = $this->executeRows(
-                'SELECT rec_RecTypeID, COUNT(*) FROM Records WHERE rec_ID IN ('
-                    .$placeholders.') GROUP BY rec_RecTypeID',
-                str_repeat('i', count($chunk)),
-                $chunk
-            );
-            foreach($rows as $row){
-                $typeId = intval($row[0]);
-                $counts[$typeId] = ($counts[$typeId] ?? 0) + intval($row[1]);
-            }
+        try{
+            $counts = $this->records()->rectypeCounts($ids);
+        }catch(DatabaseException $exception){
+            throw new SearchExecutionException('Unable to execute record search', 0, $exception);
         }
-        ksort($counts, SORT_NUMERIC);
         $result = array();
         foreach($counts as $typeId=>$count){
             $result[] = array('rec_RecTypeID'=>$typeId, 'count'=>$count);

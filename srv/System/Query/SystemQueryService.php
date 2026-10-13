@@ -23,6 +23,7 @@ use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\SearchRequest;
 use Heurist\Records\Query\SearchResult;
 use Heurist\Runtime\RuntimeContext;
+use Heurist\Users\UserGroupRepository;
 
 /** Orchestrates filter/user query compilation, execution and record output. */
 final class SystemQueryService
@@ -356,8 +357,7 @@ final class SystemQueryService
     private function ownerName(int $id): string
     {
         if(!array_key_exists($id, $this->ownerNames)){
-            $rows = $this->database->fetchAll('SELECT ugr_Name FROM sysUGrps WHERE ugr_ID=?', array($id));
-            $this->ownerNames[$id] = (string)($rows[0]['ugr_Name'] ?? '');
+            $this->ownerNames[$id] = UserGroupRepository::shared($this->database)->name($id);
         }
         return $this->ownerNames[$id];
     }
@@ -366,16 +366,7 @@ final class SystemQueryService
     private function currentUserRoles(): array
     {
         if($this->roles !== null){ return $this->roles; }
-        $this->roles = array();
-        if($this->runtime->userId < 1){ return $this->roles; }
-        $rows = $this->database->fetchAll(
-            'SELECT ugl_GroupID, ugl_Role FROM sysUsrGrpLinks WHERE ugl_UserID=?',
-            array($this->runtime->userId)
-        );
-        foreach($rows as $row){
-            $role = strtolower((string)($row['ugl_Role'] ?? ''));
-            $this->roles[intval($row['ugl_GroupID'])] = $role === 'admin' ? 'admin' : 'member';
-        }
+        $this->roles = UserGroupRepository::shared($this->database)->roles($this->runtime->userId);
         return $this->roles;
     }
 

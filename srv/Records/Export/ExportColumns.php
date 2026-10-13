@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Heurist\Records\Export;
 
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Users\UserGroupRepository;
 
 use Heurist\Records\Data\RecordFieldSelector;
 
@@ -62,14 +63,16 @@ final class ExportColumns
     );
 
     private DefinitionLookup $definitions;
+    private UserGroupRepository $users;
     private ValueFormatter $formatter;
     private RecordFieldSelector $selector;
     /** CSV/TSV captions (legacy RecordsExportCSV): "<field> H-ID", "<field> Record Title". */
     private bool $tableCaptions = false;
 
-    public function __construct(DefinitionLookup $definitions, ValueFormatter $formatter)
+    public function __construct(DefinitionLookup $definitions, ValueFormatter $formatter, UserGroupRepository $users)
     {
         $this->definitions = $definitions;
+        $this->users = $users;
         $this->formatter = $formatter;
         $this->selector = new RecordFieldSelector();
     }
@@ -156,7 +159,7 @@ final class ExportColumns
             if($column['type'] === 'header'){
                 $value = $record[$column['key']] ?? '';
                 if($column['key'] === 'rec_OwnerUGrpID' || $column['key'] === 'rec_AddedByUGrpID'){
-                    $name = $this->definitions->groupName(intval($value));
+                    $name = $this->users->name(intval($value));
                     $value = $name !== '' ? $name : $value;
                 }
                 $cells[] = is_array($value) ? (json_encode($value, JSON_UNESCAPED_UNICODE) ?: '') : (string)$value;

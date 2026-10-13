@@ -34,6 +34,8 @@ declare(strict_types=1);
 namespace Heurist\Records\Edit;
 
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Store\RecordStore;
+use Heurist\Runtime\DatabaseSettings;
 use Heurist\Runtime\RuntimeContext;
 use Throwable;
 
@@ -49,7 +51,6 @@ final class RecordSaveService
     private RecordTitle $title;
     /** @var array<string,int> cmsPage, workflowStage */
     private array $codes;
-    private ?bool $publicToPending = null;
 
     /**
      * @param array<string,int> $codes Local ids: cmsPage (RT_CMS_PAGE), workflowStage (DT_WORKFLOW_STAGE).
@@ -158,7 +159,7 @@ final class RecordSaveService
         }
         $this->assertWritable($rectype);
         $recordId = abs($pathId);
-        if($recordId > 0 && $this->store->header($recordId) !== null){
+        if($recordId > 0 && $this->store->records()->header($recordId) !== null){
             throw new RecordEditException(409, 'conflict', 'Record '.$recordId.' already exists');
         }
         $owner = $input->has('rec_OwnerUGrpID') ? $input->intHeader('rec_OwnerUGrpID') : $this->runtime->userId;
@@ -190,7 +191,7 @@ final class RecordSaveService
         if($recordId < 1){
             throw RecordEditException::invalid('PUT and PATCH change an existing record; use POST to insert');
         }
-        $stored = $this->store->header($recordId);
+        $stored = $this->store->records()->header($recordId);
         if($stored === null){
             throw RecordEditException::notFound('Record '.$recordId.' does not exist');
         }
@@ -219,7 +220,7 @@ final class RecordSaveService
         }
         $this->assertVisibility($visibility);
         $viewGroups = ($patch && !$input->has('rec_NonOwnerVisibilityGroups'))
-            ? $this->store->viewGroups($recordId) : $input->idsHeader('rec_NonOwnerVisibilityGroups');
+            ? ($this->store->records()->owners(array($recordId))[$recordId]['viewGroups'] ?? array()) : $input->idsHeader('rec_NonOwnerVisibilityGroups');
         if($visibility !== 'viewable'){ $viewGroups = array(); }
 
         $forbidden = array();
@@ -227,14 +228,14 @@ final class RecordSaveService
             if($row['requirement'] === 'forbidden'){ $forbidden[] = $fieldId; }
         }
         if($patch){
-            $details = $this->store->details($recordId);
+            $details = $this->store->records()->editValues($recordId);
             foreach($input->details() as $fieldId => $values){ $details[$fieldId] = $values; }
             foreach($forbidden as $fieldId){ unset($details[$fieldId]); }
         }else{
             $details = $input->details();
         }
         $stage = $this->codes['workflowStage'] ?? 0;
-        $currentStage = $stage > 0 ? intval($this->store->details($recordId, array($stage))[$stage][0] ?? 0) : 0;
+        $currentStage = $stage > 0 ? intval($this->store->records()->editValues($recordId, array($stage))[$stage][0] ?? 0) : 0;
 
         $keepUrl = $patch && !$input->has('rec_URL');
         $keepScratchPad = $patch && !$input->has('rec_ScratchPad');
@@ -271,14 +272,10 @@ final class RecordSaveService
         $newStage = intval($rows[$index]['value']);
         if($newStage < 1 || $newStage === $plan['currentStage']){ return false; }
 
-        $rules = $this->store->database()->fetchAll(
-            'SELECT swf_StageRestrictedTo,swf_SetOwnership,swf_SetVisibility FROM sysWorkflowRules '
-            .'WHERE swf_RecTypeID=? AND swf_Stage=?', array($plan['rectype'], $newStage)
-        );
-        $rule = $rules[0] ?? null;
+        $rule = $this->definitions->workflowRule($plan['rectype'], $newStage);
         $allowed = false;
         if($rule !== null){
-            $restricted = array_filter(array_map('intval', explode(',', (string)$rule['swf_StageRestrictedTo'])));
+            $restricted = array_filter(array_map('intval', explode(',', $rule['restrictedTo'])));
             $allowed = empty($restricted) || $this->runtime->isAdmin
                 || !empty(array_intersect($restricted, $this->permissions->memberOf()));
         }
@@ -291,13 +288,13 @@ final class RecordSaveService
             return false;
         }
         $byWorkflow = false;
-        if($rule['swf_SetOwnership'] !== null && $rule['swf_SetOwnership'] !== '' && intval($rule['swf_SetOwnership']) >= 0){
-            $plan['owner'] = intval($rule['swf_SetOwnership']);
+        if($rule['setOwnership'] !== null && $rule['setOwnership'] >= 0){
+            $plan['owner'] = $rule['setOwnership'];
             $plan['editGroups'] = $this->withoutOwner($plan['editGroups'], $plan['owner']);
             $byWorkflow = true;
         }
-        $visibility = $rule['swf_SetVisibility'];
-        if($visibility !== null && $visibility !== ''){
+        $visibility = $rule['setVisibility'];
+        if($visibility !== ''){
             if(in_array($visibility, array('public', 'viewable', 'hidden'), true)){
                 $plan['visibility'] = $visibility;
                 if($visibility !== 'viewable'){ $plan['viewGroups'] = array(); }
@@ -353,15 +350,6 @@ final class RecordSaveService
     /** Database setting sys_SetPublicToPendingOnEdit. */
     private function publicToPending(): bool
     {
-        if($this->publicToPending === null){
-            try{
-                $this->publicToPending = intval($this->store->database()->fetchValue(
-                    'SELECT sys_SetPublicToPendingOnEdit FROM sysIdentification LIMIT 1', array(), 0
-                )) === 1;
-            }catch(Throwable $exception){
-                $this->publicToPending = false;
-            }
-        }
-        return $this->publicToPending;
+        return DatabaseSettings::shared($this->store->database())->publicToPendingOnEdit();
     }
 }

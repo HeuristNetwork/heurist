@@ -25,6 +25,7 @@ use Heurist\Records\Query\UnsupportedQueryException;
 use Heurist\Records\Query\Parser\RecordQueryParser;
 use Heurist\Records\Query\Compiler\FieldPredicateCompiler;
 use Heurist\Records\Query\Compiler\SqlBuildContext;
+use Heurist\Records\Query\Compiler\SqlTables;
 use Heurist\Runtime\RuntimeContext;
 
 /** Compiles one filter/user query against its current legacy storage. */
@@ -38,12 +39,16 @@ final class SystemQueryBuilder
     private FieldPredicateCompiler $values;
     private array $schema;
 
+    /** Table names of the record and user tables in the SQL text (plan 15). */
+    private SqlTables $tables;
+
     public function __construct(DatabaseInterface $database, RuntimeContext $runtime, array $schema)
     {
         $this->runtime = $runtime;
         $this->schema = $schema;
         $this->parser = new RecordQueryParser(array_keys($schema['fields']));
-        $this->values = new FieldPredicateCompiler($database);
+        $this->tables = new SqlTables();
+        $this->values = new FieldPredicateCompiler($database, $this->tables);
     }
 
     /** Normalize through the shared record-query parser. */
@@ -67,7 +72,7 @@ final class SystemQueryBuilder
         $base = ' FROM '.$this->schema['table'].' '.$this->schema['alias'].' WHERE '.implode(' AND ', $where);
         $order = $this->compileSort($normalized, $state, $sort, $sortProvided);
         $idColumn = $this->column($this->schema['headers']['id']);
-        $count = new CompiledQuery('SELECT COUNT(DISTINCT '.$idColumn.')'.$base,
+        $count = new CompiledQuery($this->tables->resolve('SELECT COUNT(DISTINCT '.$idColumn.')'.$base),
             $state->types(), $state->values(), $normalized);
 
         $idState = new SqlBuildContext($state->context());
@@ -78,7 +83,7 @@ final class SystemQueryBuilder
         $idState->bind($limit, 'i');
         $idState->bind($offset, 'i');
         // One table, no joins: IDs are unique. DISTINCT would break ORDER BY under ONLY_FULL_GROUP_BY (error 3065)
-        $ids = new CompiledQuery('SELECT '.$idColumn.$idBase.$idOrder.' LIMIT ? OFFSET ?',
+        $ids = new CompiledQuery($this->tables->resolve('SELECT '.$idColumn.$idBase.$idOrder.' LIMIT ? OFFSET ?'),
             $idState->types(), $idState->values(), $normalized);
         return array('ids'=>$ids, 'count'=>$count);
     }
@@ -174,7 +179,7 @@ final class SystemQueryBuilder
         if($userId < 1 || (!ctype_digit($text) && $userId !== $this->runtime->userId)){
             throw new QueryValidationException('user requires a user ID or "current"');
         }
-        $memberOf = 'SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID=?';
+        $memberOf = 'SELECT ugl_GroupID FROM {memberships} WHERE ugl_UserID=?';
         if($this->schema['type'] === 'tag'){
             $state->bind($userId, 'i'); $state->bind($userId, 'i');
             return '('.$this->column($this->schema['headers']['owner']).'=? OR '
@@ -204,7 +209,7 @@ final class SystemQueryBuilder
         $ids = array_values(array_unique($ids));
         if(empty($ids)){ return '0=1'; }
         foreach($ids as $id){ $state->bind($id, 'i'); }
-        return $this->column($this->schema['headers']['id']).' IN (SELECT rtl_TagID FROM usrRecTagLinks WHERE rtl_RecID IN ('
+        return $this->column($this->schema['headers']['id']).' IN (SELECT rtl_TagID FROM {tagLinks} WHERE rtl_RecID IN ('
             .implode(',', array_fill(0, count($ids), '?')).'))';
     }
 

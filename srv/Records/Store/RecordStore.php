@@ -3,14 +3,14 @@
 * RecordStore.php - All SQL that writes records
 *
 * The one place with INSERT/UPDATE/DELETE of record headers, detail values and
-* record permissions. Table names are given to the constructor, so system
-* records can later move to their own tables (sysRecords/sysDetails, see
-* srv/System/Query/SystemEntitySchemaRegistry) without changing the services.
+* record permissions. Table names come from RecordSchema, so system records can
+* later move to their own tables (sysRecords/sysRecDetails) without changing the
+* services. Reads are RecordRepository on the same schema (records()).
 * Links (recLinks), the date index and the archive (sysArchive) are kept by
 * database triggers; setUser() gives the archive its user.
 *
 * @project     Heurist academic knowledge management system
-* @package     Records\Edit
+* @package     Records\Store
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -21,50 +21,32 @@
 
 declare(strict_types=1);
 
-namespace Heurist\Records\Edit;
+namespace Heurist\Records\Store;
 
 use Heurist\Database\WritableDatabaseInterface;
 
 /** Record writes on one set of record tables. */
 final class RecordStore
 {
-    /** Default (and current) tables of all records. */
-    public const DEFAULT_TABLES = array(
-        'records' => 'Records',
-        'details' => 'recDetails',
-        'permissions' => 'usrRecPermissions'
-    );
-
-    /** User tables that refer to a record and are cleaned when it is deleted (table => record column). */
-    private const RECORD_REFERENCES = array(
-        'usrReminders' => 'rem_RecID',
-        'recForwarding' => 'rfw_NewRecID',
-        'usrRecTagLinks' => 'rtl_RecID',
-        'recThreadedComments' => 'cmt_RecID',
-        'usrBookmarks' => 'bkm_recID'
-    );
-
     private WritableDatabaseInterface $database;
+    private RecordSchema $schema;
+    private RecordRepository $repository;
     private string $records;
     private string $details;
     private string $permissions;
 
     /**
      * @param WritableDatabaseInterface $database
-     * @param array{records?:string,details?:string,permissions?:string} $tables
+     * @param RecordSchema|null $schema Record tables (null = the current tables).
      */
-    public function __construct(WritableDatabaseInterface $database, array $tables = array())
+    public function __construct(WritableDatabaseInterface $database, ?RecordSchema $schema = null)
     {
-        $tables = array_merge(self::DEFAULT_TABLES, $tables);
-        foreach($tables as $name){
-            if(!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $name)){
-                throw new \InvalidArgumentException('Invalid table name '.$name);
-            }
-        }
         $this->database = $database;
-        $this->records = $tables['records'];
-        $this->details = $tables['details'];
-        $this->permissions = $tables['permissions'];
+        $this->schema = $schema ?? new RecordSchema();
+        $this->repository = $schema === null ? RecordRepository::shared($database) : new RecordRepository($database, $schema);
+        $this->records = $this->schema->records();
+        $this->details = $this->schema->details();
+        $this->permissions = $this->schema->permissions();
     }
 
     public function database(): WritableDatabaseInterface
@@ -72,73 +54,16 @@ final class RecordStore
         return $this->database;
     }
 
+    /** Reads on the same tables. */
+    public function records(): RecordRepository
+    {
+        return $this->repository;
+    }
+
     /** User of the following changes for the archive triggers (@logged_in_user_id). */
     public function setUser(int $userId): void
     {
         $this->database->execute('SET @logged_in_user_id = '.max(0, $userId));
-    }
-
-    /**
-     * Stored header of a record.
-     *
-     * @return array<string,mixed>|null
-     */
-    public function header(int $recordId): ?array
-    {
-        $rows = $this->database->fetchAll(
-            'SELECT rec_ID,rec_RecTypeID,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URL,rec_ScratchPad,'
-            .'rec_Modified,rec_FlagTemporary,rec_Title FROM '.$this->records.' WHERE rec_ID=?',
-            array($recordId)
-        );
-        return $rows[0] ?? null;
-    }
-
-    /**
-     * Visibility groups (rcp_Level="view") of a record.
-     *
-     * @return array<int,int>
-     */
-    public function viewGroups(int $recordId): array
-    {
-        return array_map('intval', $this->database->fetchColumn(
-            'SELECT rcp_UGrpID FROM '.$this->permissions.' WHERE rcp_RecID=? AND rcp_Level="view" ORDER BY rcp_ID',
-            array($recordId)
-        ));
-    }
-
-    /**
-     * Stored detail values of a record in the write format (RecordInput details):
-     * dty => values; files as ulf_ID, geo as {geo:{type,wkt}}, hidden values as
-     * {value, hidden:true}.
-     *
-     * @param array<int,int>|null $fieldIds Only these fields (null = all).
-     * @return array<int,array<int,mixed>>
-     */
-    public function details(int $recordId, ?array $fieldIds = null): array
-    {
-        $sql = 'SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,ST_AsText(dtl_Geo) AS wkt,dtl_HideFromPublic '
-            .'FROM '.$this->details.' WHERE dtl_RecID=?';
-        $parameters = array($recordId);
-        if($fieldIds !== null){
-            if(empty($fieldIds)){ return array(); }
-            $sql .= ' AND dtl_DetailTypeID IN ('.implode(',', array_fill(0, count($fieldIds), '?')).')';
-            $parameters = array_merge($parameters, array_values($fieldIds));
-        }
-        $result = array();
-        foreach($this->database->fetchAll($sql.' ORDER BY dtl_ID', $parameters) as $row){
-            if($row['dtl_UploadedFileID'] !== null){
-                $value = (string)$row['dtl_UploadedFileID'];
-            }elseif($row['wkt'] !== null){
-                $value = array('geo'=>array('type'=>(string)$row['dtl_Value'], 'wkt'=>(string)$row['wkt']));
-            }else{
-                $value = $row['dtl_Value'];
-            }
-            if(intval($row['dtl_HideFromPublic']) === 1){
-                $value = is_array($value) ? $value + array('hidden'=>true) : array('value'=>$value, 'hidden'=>true);
-            }
-            $result[intval($row['dtl_DetailTypeID'])][] = $value;
-        }
-        return $result;
     }
 
     /**
@@ -253,9 +178,10 @@ final class RecordStore
     public function deleteRecord(int $recordId): int
     {
         $bookmarks = 0;
-        foreach(self::RECORD_REFERENCES as $table => $column){
+        $bookmarkTable = $this->schema->table('bookmarks');
+        foreach($this->schema->references() as $table => $column){
             $count = $this->database->execute('DELETE FROM '.$table.' WHERE '.$column.'=?', array($recordId));
-            if($table === 'usrBookmarks'){ $bookmarks = $count; }
+            if($table === $bookmarkTable){ $bookmarks = $count; }
         }
         $this->database->execute('DELETE FROM '.$this->permissions.' WHERE rcp_RecID=?', array($recordId));
         $this->database->execute('DELETE FROM '.$this->details.' WHERE dtl_RecID=?', array($recordId));

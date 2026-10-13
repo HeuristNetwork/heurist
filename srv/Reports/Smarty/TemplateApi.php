@@ -35,6 +35,8 @@ namespace Heurist\Reports\Smarty;
 
 use Heurist\Database\DatabaseInterface;
 use Heurist\Records\Data\RecordDataService;
+use Heurist\Records\Files\FileRepository;
+use Heurist\Records\Store\RecordRepository;
 use Heurist\Utilities\LanguageCodes;
 use Heurist\Utilities\Temporal;
 
@@ -131,15 +133,9 @@ final class TemplateApi
     {
         switch($param){
             case 'db_total_records':
-                return $this->database->fetchValue('SELECT count(*) FROM Records WHERE NOT rec_FlagTemporary');
+                return array_sum($this->repository()->rectypeCounts());
             case 'db_rty_counts':
-                $counts = array();
-                foreach($this->database->fetchRows(
-                    'SELECT rec_RecTypeID,count(*) FROM Records WHERE NOT rec_FlagTemporary GROUP BY rec_RecTypeID'
-                ) as $row){
-                    $counts[$row[0]] = $row[1];
-                }
-                return $counts;
+                return $this->repository()->rectypeCounts();
             case 'lang':
                 return $this->language();
             case 'dbname':
@@ -240,12 +236,10 @@ final class TemplateApi
         $id = intval(is_array($rec) ? ($rec['recID'] ?? 0) : $rec);
         if($id < 1){ return array(); }
         $links = array();
-        foreach($this->database->fetchRows(
-            'SELECT rl_RelationID,rl_TargetID,1 FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID=? '
-            .'UNION ALL SELECT rl_RelationID,rl_SourceID,0 FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID=?',
-            array($id, $id)
-        ) as $row){
-            $links[] = array(intval($row[0]), intval($row[1]), intval($row[2]) === 1);
+        foreach(array('source' => true, 'target' => false) as $side => $isPrimary){
+            foreach($this->repository()->links(array($id), array('side' => $side, 'kind' => 'relationship')) as $row){
+                $links[] = array($row[6], $row[1], $isPrimary);
+            }
         }
         if(empty($links)){ return array(); }
 
@@ -289,22 +283,13 @@ final class TemplateApi
         $id = intval(is_array($rec) && !empty($rec['recID']) ? $rec['recID'] : $rec);
         $result = array('linkedto' => array(), 'linkedfrom' => array());
         if($id < 1){ return $result; }
-        foreach(array('linkedto' => array('rl_TargetID', 'rl_SourceID'), 'linkedfrom' => array('rl_SourceID', 'rl_TargetID')) as $key => $columns){
+        foreach(array('linkedto' => 'source', 'linkedfrom' => 'target') as $key => $side){
             if($direction !== null && $direction !== $key){ continue; }
-            $sql = 'SELECT '.$columns[0].' FROM recLinks';
-            $parameters = array();
+            $options = array('side' => $side, 'kind' => 'pointer');
             $types = $this->idList($rtyId);
-            if(!empty($types)){
-                $sql .= ' JOIN Records ON rec_ID='.$columns[0].' AND rec_RecTypeID IN ('.implode(',', array_fill(0, count($types), '?')).')';
-                $parameters = $types;
-            }
-            $sql .= ' WHERE rl_RelationID IS NULL AND '.$columns[1].'=?';
-            $parameters[] = $id;
-            if(intval($dtyId) > 0){
-                $sql .= ' AND rl_DetailTypeID=?';
-                $parameters[] = intval($dtyId);
-            }
-            $ids = array_map('intval', $this->database->fetchColumn($sql, $parameters));
+            if(!empty($types)){ $options['otherTypes'] = $types; }
+            if(intval($dtyId) > 0){ $options['fields'] = array(intval($dtyId)); }
+            $ids = array_column($this->repository()->links(array($id), $options), 1);
             $visible = array_flip(call_user_func($this->visibleIds, $ids));
             foreach($ids as $linked){
                 if(isset($visible[$linked])){ $result[$key][] = (string)$linked; }
@@ -366,31 +351,20 @@ final class TemplateApi
         if(is_array($functions) && count($functions) === 1 && $functions[0] == 0){
             return count($ids);
         }
-        $select = array();
-        $joins = array();
+        $valid = array();
         $result = array();
-        $index = 0;
         foreach((array)$functions as $function){
             $dtyId = intval($function[0] ?? 0);
             $type = (string)($function[1] ?? '');
             if(!in_array($type, array('avg', 'sum', 'count'), true)){ continue; }
-            if($dtyId > 0){
-                $select[] = $type.'(d'.$index.'.dtl_Value)';
-                $joins[] = 'JOIN recDetails d'.$index.' ON rec_ID=d'.$index.'.dtl_RecID AND d'.$index.'.dtl_DetailTypeID='.$dtyId;
-            }else{
-                $select[] = 'count(DISTINCT rec_ID)';
-            }
+            $valid[] = array($dtyId, $type);
             $result[] = array($dtyId, $type, 0);
-            $index++;
         }
-        if(empty($select) || empty($ids)){ return null; }
-        $rows = $this->database->fetchRows(
-            'SELECT '.implode(',', $select).' FROM Records '.implode(' ', $joins)
-            .' WHERE rec_ID IN ('.implode(',', array_fill(0, count($ids), '?')).')', $ids
-        );
-        if(empty($rows)){ return null; }
-        if(count($rows[0]) === 1){ return $rows[0][0]; }
-        foreach($rows[0] as $position => $value){ $result[$position][2] = $value; }
+        if(empty($valid) || empty($ids)){ return null; }
+        $row = $this->repository()->aggregate($ids, $valid);
+        if($row === null){ return null; }
+        if(count($row) === 1){ return $row[0]; }
+        foreach($row as $position => $value){ $result[$position][2] = $value; }
         return $result;
     }
 
@@ -436,15 +410,16 @@ final class TemplateApi
             }
             return count($results) === 1 ? $results[0] : $results;
         }
+        $fileIds = array();
         foreach(explode(',', (string)$files) as $url){
             $query = array();
             parse_str((string)parse_url(trim($url), PHP_URL_QUERY), $query);
             $fileId = $query['file'] ?? null;
-            if(is_string($fileId) && preg_match('/^[a-z0-9]+$/', $fileId)){
-                $results[] = (string)$this->database->fetchValue(
-                    'SELECT '.$column.' FROM recUploadedFiles WHERE ulf_ObfuscatedFileID=? LIMIT 1', array($fileId), ''
-                );
-            }
+            if(is_string($fileId) && preg_match('/^[a-z0-9]+$/', $fileId)){ $fileIds[] = $fileId; }
+        }
+        $found = FileRepository::shared($this->database)->filesByObfuscatedId($fileIds);
+        foreach($fileIds as $fileId){
+            $results[] = (string)($found[$fileId][$column] ?? '');
         }
         return count($results) === 1 ? $results[0] : $results;
     }
@@ -587,6 +562,11 @@ final class TemplateApi
             $this->raw[$relationId] = $loaded[$relationId] ?? null;
         }
         return $this->raw[$relationId];
+    }
+
+    private function repository(): RecordRepository
+    {
+        return RecordRepository::shared($this->database);
     }
 
     /** First value of a field given by its constant name. */

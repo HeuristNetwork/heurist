@@ -53,7 +53,9 @@ use Heurist\Records\Edit\RecordDeleteService;
 use Heurist\Records\Edit\RecordDuplicateService;
 use Heurist\Records\Edit\RecordPermissionService;
 use Heurist\Records\Edit\RecordSaveService;
-use Heurist\Records\Edit\RecordStore;
+use Heurist\Records\Store\RecordAccess;
+use Heurist\Records\Store\RecordRepository;
+use Heurist\Records\Store\RecordStore;
 use Heurist\Records\Edit\RecordTitle;
 use Heurist\Records\Edit\RecordValidator;
 use Heurist\Records\Edit\WritableRecordTypes;
@@ -248,7 +250,7 @@ final class ServiceFactory
         if(!($this->database instanceof WritableDatabaseInterface)){
             throw new \LogicException('The database adapter does not support writes');
         }
-        $definitions = new DefinitionLookup($this->database);
+        $definitions = DefinitionLookup::shared($this->database);
         $languages = new LanguageCodes(self::languageCodesFile());
         $store = new RecordStore($this->database);
         $permissions = new RecordPermissionService($this->database, $this->runtime);
@@ -317,7 +319,7 @@ final class ServiceFactory
     public function recordPresentationController(): RecordPresentationController
     {
         $maps = new MapPresentationService(
-            $this->presentations, $this->runtime, new ConceptCode($this->database)
+            $this->presentations, $this->runtime, DefinitionLookup::shared($this->database)
         );
         return new RecordPresentationController(
             new QuerySourcePresentationService($this->presentations), $maps
@@ -506,20 +508,10 @@ final class ServiceFactory
     /** Filter of record ids by the access rules of the current user (order kept). */
     private function visibleIdsFilter(): callable
     {
-        $database = $this->database;
-        $presentations = $this->presentations;
-        return static function(array $ids) use ($database, $presentations): array {
-            $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static function($id){ return $id > 0; })));
-            $visible = array();
-            foreach(array_chunk($ids, 1000) as $chunk){
-                $parameters = $chunk;
-                $sql = 'SELECT rec_ID FROM Records WHERE rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).') AND ';
-                $sql .= $presentations->accessCondition($parameters);
-                foreach($database->fetchColumn($sql, $parameters) as $id){
-                    $visible[intval($id)] = true;
-                }
-            }
-            return array_values(array_filter($ids, static function($id) use ($visible){ return isset($visible[$id]); }));
+        $records = RecordRepository::shared($this->database);
+        $access = RecordAccess::fromRuntime($this->runtime);
+        return static function(array $ids) use ($records, $access): array {
+            return $records->visibleIds($ids, $access);
         };
     }
 

@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace Heurist\Records\Edit;
 
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Store\RecordStore;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Utilities\LanguageCodes;
 use Throwable;
@@ -75,7 +76,7 @@ final class RecordDuplicateService
     public function duplicate(int $recordId): int
     {
         $this->permissions->assertAccount('add');
-        $header = $recordId > 0 ? $this->store->header($recordId) : null;
+        $header = $recordId > 0 ? $this->store->records()->header($recordId) : null;
         if($header === null || !$this->canView($recordId, $header)){
             throw RecordEditException::notFound('Record '.$recordId.' does not exist');
         }
@@ -108,7 +109,7 @@ final class RecordDuplicateService
             $this->store->copyContent($recordId, $newId);
             $names = array();
             if($nameField > 0){
-                foreach($this->store->details($newId, array($nameField))[$nameField] ?? array() as $name){
+                foreach($this->store->records()->editValues($newId, array($nameField))[$nameField] ?? array() as $name){
                     $name = is_array($name) ? (string)($name['value'] ?? '') : (string)$name;
                     list($language) = $this->languages->splitPrefix($name);
                     if($language === null && $name !== '' && strpos($name, self::NAME_PREFIX) !== 0){
@@ -137,7 +138,7 @@ final class RecordDuplicateService
         $visibility = (string)$header['rec_NonOwnerVisibility'];
         if($visibility === 'public' || $visibility === 'pending'){ return true; }
         if($visibility !== 'viewable'){ return false; }
-        $groups = $this->store->viewGroups($recordId);
+        $groups = $this->store->records()->owners(array($recordId))[$recordId]['viewGroups'] ?? array();
         return empty($groups) || !empty(array_intersect($groups, $this->permissions->memberOf()));
     }
 }

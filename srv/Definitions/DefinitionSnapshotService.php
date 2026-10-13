@@ -88,22 +88,25 @@ final class DefinitionSnapshotService
         return '0';
     }
 
-    /** Compose the full snapshot directly from the def* tables. */
+    /** Compose the full snapshot from the definitions (DefinitionLookup). */
     public function build(): array
     {
-        $registeredId = intval($this->database->fetchValue(
-            'SELECT sys_dbRegisteredID FROM sysIdentification LIMIT 1', array(), 0
-        ));
+        $lookup = $this->lookup();
         return array(
-            'meta'          => $this->meta($registeredId),
-            'rectypeGroups' => $this->groups('defRecTypeGroups', 'rtg'),
-            'fieldGroups'   => $this->groups('defDetailTypeGroups', 'dtg'),
-            'rectypes'      => $this->rectypes($registeredId),
-            'fields'        => $this->fields($registeredId),
-            'structure'     => $this->structure(),
-            'terms'         => $this->terms($registeredId),
-            'termlinks'     => $this->termlinks()
+            'meta'          => $this->meta($lookup->registeredId()),
+            'rectypeGroups' => $lookup->rectypeGroups(),
+            'fieldGroups'   => $lookup->fieldGroups(),
+            'rectypes'      => $this->rectypes(),
+            'fields'        => $this->fields(),
+            'structure'     => $lookup->structure(),
+            'terms'         => $this->terms(),
+            'termlinks'     => $lookup->termLinks()
         );
+    }
+
+    private function lookup(): DefinitionLookup
+    {
+        return DefinitionLookup::shared($this->database);
     }
 
     private function cacheFile(): string
@@ -113,12 +116,7 @@ final class DefinitionSnapshotService
 
     private function meta(int $registeredId): array
     {
-        $languages = array_values(array_filter(array_map(
-            'strval',
-            $this->database->fetchColumn(
-                'SELECT DISTINCT trn_LanguageCode FROM defTranslations ORDER BY trn_LanguageCode'
-            )
-        ), static function($code){ return $code !== ''; }));
+        $languages = $this->lookup()->languages();
 
         return array(
             'db'        => $this->runtime->databaseName,
@@ -148,96 +146,69 @@ final class DefinitionSnapshotService
     private function dbconst(): array
     {
         return array(
-            'RT_RELATION'              => $this->localByConcept('defRecTypes', 'rty', 2, 1),
-            'DT_PRIMARY_RESOURCE'      => $this->localByConcept('defDetailTypes', 'dty', 2, 7),
-            'DT_TARGET_RESOURCE'       => $this->localByConcept('defDetailTypes', 'dty', 2, 5),
-            'DT_RELATION_TYPE'         => $this->localByConcept('defDetailTypes', 'dty', 2, 6),
+            'RT_RELATION'              => $this->concept('rty', 2, 1),
+            'DT_PRIMARY_RESOURCE'      => $this->concept('dty', 2, 7),
+            'DT_TARGET_RESOURCE'       => $this->concept('dty', 2, 5),
+            'DT_RELATION_TYPE'         => $this->concept('dty', 2, 6),
             
-            'RT_MAP_DOCUMENT'    => $this->localByConcept('defRecTypes', 'rty', 3, 1019),
-            'RT_MAP_LAYER'    => $this->localByConcept('defRecTypes', 'rty', 3, 1020),
-            'RT_QUERY_SOURCE'    => $this->localByConcept('defRecTypes', 'rty', 3, 1021),
+            'RT_MAP_DOCUMENT'    => $this->concept('rty', 3, 1019),
+            'RT_MAP_LAYER'    => $this->concept('rty', 3, 1020),
+            'RT_QUERY_SOURCE'    => $this->concept('rty', 3, 1021),
             
             // Query Source map settings. These are Terms-list fields, so the
             // client must save local term ids rather than raw 0/1 values.
-            'DT_GEO_OUTPUTMODE'        => $this->localByConcept('defDetailTypes', 'dty', 2, 1162),
-            'DT_IS_LOADED_BY_EXTENT'   => $this->localByConcept('defDetailTypes', 'dty', 2, 1160),
-            'TRM_NO'                   => $this->localByConcept('defTerms', 'trm', 2, 531),
-            'TRM_YES'                  => $this->localByConcept('defTerms', 'trm', 2, 532),
+            'DT_GEO_OUTPUTMODE'        => $this->concept('dty', 2, 1162),
+            'DT_IS_LOADED_BY_EXTENT'   => $this->concept('dty', 2, 1160),
+            'TRM_NO'                   => $this->concept('trm', 2, 531),
+            'TRM_YES'                  => $this->concept('trm', 2, 532),
 
             // record editing (plan 14): writable system record types (the client opens
             // the new record editor for these) and the multilingual fields
-            'RT_CUSTOM_REPORT'         => $this->localByConcept('defRecTypes', 'rty', 2, 1104),
-            'RT_REPORT_SCHEDULE'       => $this->localByConcept('defRecTypes', 'rty', 2, 1105),
-            'RT_KML_SOURCE'            => $this->localByConcept('defRecTypes', 'rty', 3, 1014),
-            'RT_FILE_SOURCE'           => $this->localByConcept('defRecTypes', 'rty', 2, 53),
-            'RT_SHP_SOURCE'            => $this->localByConcept('defRecTypes', 'rty', 3, 1017),
-            'RT_IMAGE_SOURCE'          => $this->localByConcept('defRecTypes', 'rty', 3, 1018),
-            'RT_TILED_IMAGE_SOURCE'    => $this->localByConcept('defRecTypes', 'rty', 2, 11),
-            'RT_CMS_HOME'              => $this->localByConcept('defRecTypes', 'rty', 99, 51),
-            'RT_CMS_PAGE'              => $this->localByConcept('defRecTypes', 'rty', 99, 52),
-            'DT_NAME'                  => $this->localByConcept('defDetailTypes', 'dty', 2, 1),
-            'DT_SHORT_SUMMARY'         => $this->localByConcept('defDetailTypes', 'dty', 2, 3),
-            'DT_EXTENDED_DESCRIPTION'  => $this->localByConcept('defDetailTypes', 'dty', 2, 4),
+            'RT_CUSTOM_REPORT'         => $this->concept('rty', 2, 1104),
+            'RT_REPORT_SCHEDULE'       => $this->concept('rty', 2, 1105),
+            'RT_KML_SOURCE'            => $this->concept('rty', 3, 1014),
+            'RT_FILE_SOURCE'           => $this->concept('rty', 2, 53),
+            'RT_SHP_SOURCE'            => $this->concept('rty', 3, 1017),
+            'RT_IMAGE_SOURCE'          => $this->concept('rty', 3, 1018),
+            'RT_TILED_IMAGE_SOURCE'    => $this->concept('rty', 2, 11),
+            'RT_CMS_HOME'              => $this->concept('rty', 99, 51),
+            'RT_CMS_PAGE'              => $this->concept('rty', 99, 52),
+            'DT_NAME'                  => $this->concept('dty', 2, 1),
+            'DT_SHORT_SUMMARY'         => $this->concept('dty', 2, 3),
+            'DT_EXTENDED_DESCRIPTION'  => $this->concept('dty', 2, 4),
             // special fields of the record editor (query, filter form, rules, columns, symbology)
-            'DT_QUERY_STRING'          => $this->localByConcept('defDetailTypes', 'dty', 2, 12),
-            'DT_EXPANSION_RULES'       => $this->localByConcept('defDetailTypes', 'dty', 2, 1163),
-            'DT_TABLE_FIELDS'          => $this->localByConcept('defDetailTypes', 'dty', 2, 1164),
-            'DT_FILTER_FORM'           => $this->localByConcept('defDetailTypes', 'dty', 2, 1165),
-            'DT_SYMBOLOGY'             => $this->localByConcept('defDetailTypes', 'dty', 3, 1092),
+            'DT_QUERY_STRING'          => $this->concept('dty', 2, 12),
+            'DT_EXPANSION_RULES'       => $this->concept('dty', 2, 1163),
+            'DT_TABLE_FIELDS'          => $this->concept('dty', 2, 1164),
+            'DT_FILTER_FORM'           => $this->concept('dty', 2, 1165),
+            'DT_SYMBOLOGY'             => $this->concept('dty', 3, 1092),
             // other Query Source fields written by the Query Source editor
-            'DT_GEO_FIELDS'            => $this->localByConcept('defDetailTypes', 'dty', 2, 1161),
-            'DT_TIMELINE_FIELDS'       => $this->localByConcept('defDetailTypes', 'dty', 2, 1105),
-            'DT_MINIMUM_ZOOM_LEVEL'    => $this->localByConcept('defDetailTypes', 'dty', 2, 32),
-            'DT_MAXIMUM_ZOOM_LEVEL'    => $this->localByConcept('defDetailTypes', 'dty', 2, 33)
+            'DT_GEO_FIELDS'            => $this->concept('dty', 2, 1161),
+            'DT_TIMELINE_FIELDS'       => $this->concept('dty', 2, 1105),
+            'DT_MINIMUM_ZOOM_LEVEL'    => $this->concept('dty', 2, 32),
+            'DT_MAXIMUM_ZOOM_LEVEL'    => $this->concept('dty', 2, 33)
         );
     }
 
-    private function localByConcept(string $table, string $prefix, int $originDb, int $originId): int
+    /** Local id of a definition from its origin database and id (concept code). */
+    private function concept(string $kind, int $originDb, int $originId): int
     {
-        return intval($this->database->fetchValue(
-            'SELECT '.$prefix.'_ID FROM '.$table.' WHERE '
-            .$prefix.'_OriginatingDBID=? AND '.$prefix.'_IDInOriginatingDB=? LIMIT 1',
-            array($originDb, $originId), 0
-        ));
+        return $this->lookup()->localId($kind, $originDb.'-'.$originId);
     }
 
-    private function groups(string $table, string $prefix): array
+    private function rectypes(): array
     {
         $out = array();
-        $rows = $this->database->fetchAll(
-            'SELECT '.$prefix.'_ID AS id,'.$prefix.'_Name AS name,'.$prefix.'_Order AS ord '
-            .'FROM '.$table.' ORDER BY '.$prefix.'_Order,'.$prefix.'_Name'
-        );
-        foreach($rows as $row){
-            $out[(string)intval($row['id'])] = array(
-                'name'  => (string)$row['name'],
-                'order' => intval($row['ord'])
-            );
-        }
-        return $out;
-    }
-
-    private function rectypes(int $registeredId): array
-    {
-        $out = array();
-        $rows = $this->database->fetchAll(
-            'SELECT rty_ID,rty_Name,rty_Plural,rty_Description,rty_RecTypeGroupID,'
-            .'rty_OriginatingDBID,rty_IDInOriginatingDB,rty_ShowInLists '
-            .'FROM defRecTypes ORDER BY rty_ID'
-        );
-        foreach($rows as $row){
-            $id = intval($row['rty_ID']);
-            $plural = trim((string)$row['rty_Plural']);
+        foreach($this->lookup()->rectypes() as $id => $rectype){
+            $plural = trim($rectype['plural']);
             $entry = array(
-                'name'    => (string)$row['rty_Name'],
-                'plural'  => $plural !== '' ? $plural : (string)$row['rty_Name'],
-                'group'   => intval($row['rty_RecTypeGroupID']),
-                'concept' => $this->conceptCode(
-                    $registeredId, $row['rty_OriginatingDBID'], $row['rty_IDInOriginatingDB'], $id
-                ),
-                'showInLists' => intval($row['rty_ShowInLists']) === 1
+                'name'    => $rectype['name'],
+                'plural'  => $plural !== '' ? $plural : $rectype['name'],
+                'group'   => $rectype['group'],
+                'concept' => $rectype['concept'],
+                'showInLists' => $rectype['showInLists']
             );
-            $description = trim((string)$row['rty_Description']);
+            $description = trim($rectype['description']);
             if($description !== '' && stripos($description, 'Description of this record type') === false){
                 $entry['description'] = $description;
             }
@@ -247,55 +218,21 @@ final class DefinitionSnapshotService
     }
 
     /** Global field definitions. Layout-only "separator" pseudo-fields are omitted. */
-    private function fields(int $registeredId): array
+    private function fields(): array
     {
         $out = array();
-        $rows = $this->database->fetchAll(
-            'SELECT dty_ID,dty_Name,dty_Type,dty_DetailTypeGroupID,dty_JsonTermIDTree,'
-            .'dty_PtrTargetRectypeIDs,dty_OriginatingDBID,dty_IDInOriginatingDB '
-            .'FROM defDetailTypes WHERE dty_Type<>? ORDER BY dty_ID',
-            array('separator')
-        );
-        foreach($rows as $row){
-            $id = intval($row['dty_ID']);
+        foreach($this->lookup()->fields() as $id => $field){
+            if($field['type'] === 'separator'){ continue; }
             $entry = array(
-                'name'    => (string)$row['dty_Name'],
-                'type'    => (string)$row['dty_Type'],
-                'group'   => intval($row['dty_DetailTypeGroupID']),
-                'concept' => $this->conceptCode(
-                    $registeredId, $row['dty_OriginatingDBID'], $row['dty_IDInOriginatingDB'], $id
-                )
+                'name'    => $field['name'],
+                'type'    => $field['type'],
+                'group'   => $field['group'],
+                'concept' => $field['concept']
             );
-            $vocabulary = $this->firstId($row['dty_JsonTermIDTree']);
+            $vocabulary = $field['vocabulary'][0] ?? 0;
             if($vocabulary > 0){ $entry['vocabulary'] = $vocabulary; }
-            $targets = $this->idList($row['dty_PtrTargetRectypeIDs']);
-            if(!empty($targets)){ $entry['targetTypes'] = $targets; }
+            if(!empty($field['targetTypes'])){ $entry['targetTypes'] = $field['targetTypes']; }
             $out[(string)$id] = $entry;
-        }
-        return $out;
-    }
-
-    /** Per-record-type field placement. Separator fields are excluded. */
-    private function structure(): array
-    {
-        $out = array();
-        $rows = $this->database->fetchAll(
-            'SELECT rst_RecTypeID,rst_DetailTypeID,rst_DisplayName,rst_DisplayOrder,rst_RequirementType,rst_MaxValues '
-            .'FROM defRecStructure '
-            .'WHERE rst_DetailTypeID NOT IN (SELECT dty_ID FROM defDetailTypes WHERE dty_Type=?) '
-            .'ORDER BY rst_RecTypeID,rst_DisplayOrder,rst_DetailTypeID',
-            array('separator')
-        );
-        foreach($rows as $row){
-            $out[] = array(
-                'rty'   => intval($row['rst_RecTypeID']),
-                'dty'   => intval($row['rst_DetailTypeID']),
-                'name'  => (string)$row['rst_DisplayName'],
-                'order' => intval($row['rst_DisplayOrder']),
-                'req'   => (string)$row['rst_RequirementType'],
-                // 0 = unlimited (repeatable); Smarty report editor loops over repeatable fields
-                'max'   => intval($row['rst_MaxValues'])
-            );
         }
         return $out;
     }
@@ -305,10 +242,10 @@ final class DefinitionSnapshotService
      * (DefinitionLookup): term, conceptid, code, desc; domain and inverse when set.
      * The key of each entry is the internal id.
      */
-    private function terms(int $registeredId): array
+    private function terms(): array
     {
         $out = array();
-        foreach((new DefinitionLookup($this->database))->allTerms() as $id => $term){
+        foreach($this->lookup()->allTerms() as $id => $term){
             $entry = array('term' => $term['term'], 'conceptid' => $term['conceptid']);
             if($term['code'] !== ''){ $entry['code'] = $term['code']; }
             if($term['desc'] !== ''){ $entry['desc'] = $term['desc']; }
@@ -317,57 +254,5 @@ final class DefinitionSnapshotService
             $out[(string)$id] = $entry;
         }
         return $out;
-    }
-
-    /** Term hierarchy from defTermsLinks, falling back to trm_ParentTermID. */
-    private function termlinks(): array
-    {
-        $rows = $this->database->fetchRows(
-            'SELECT trl_ParentID,trl_TermID FROM defTermsLinks ORDER BY trl_ParentID,trl_TermID'
-        );
-        if(empty($rows)){
-            $rows = $this->database->fetchRows(
-                'SELECT trm_ParentTermID,trm_ID FROM defTerms '
-                .'WHERE trm_ParentTermID IS NOT NULL AND trm_ParentTermID>0 ORDER BY trm_ParentTermID,trm_ID'
-            );
-        }
-        $out = array();
-        foreach($rows as $row){
-            $parent = intval($row[0]);
-            $term = intval($row[1]);
-            if($parent > 0 && $term > 0){
-                $out[] = array('parent'=>$parent, 'term'=>$term);
-            }
-        }
-        return $out;
-    }
-
-    /**
-     * Stable OriginatingDBID-ID concept code.
-     * Local definitions (origin 0, null, or this database) use the registered ID.
-     */
-    private function conceptCode(int $registeredId, $originDb, $originId, int $localId): string
-    {
-        return DefinitionLookup::conceptCodeFor($registeredId, $originDb, $originId, $localId);
-    }
-
-    /** Positive integers embedded in a CSV list or JSON term-ID tree string. */
-    private function idList($value): array
-    {
-        if($value === null || $value === ''){ return array(); }
-        preg_match_all('/\d+/', (string)$value, $matches);
-        $ids = array();
-        foreach($matches[0] as $match){
-            $id = intval($match);
-            if($id > 0){ $ids[$id] = $id; }
-        }
-        return array_values($ids);
-    }
-
-    /** First positive integer in a value - the vocabulary root term ID, or 0. */
-    private function firstId($value): int
-    {
-        if($value === null || $value === ''){ return 0; }
-        return preg_match('/\d+/', (string)$value, $match) ? intval($match[0]) : 0;
     }
 }

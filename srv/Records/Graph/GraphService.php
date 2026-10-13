@@ -154,14 +154,11 @@ final class GraphService
     {
         $headers = array();
         foreach(array_chunk($ids, self::HEADER_CHUNK_SIZE) as $chunk){
-            if(empty($chunk)){ continue; }
-            $sql = 'SELECT rec_ID,rec_RecTypeID,rec_Title FROM Records WHERE rec_ID IN ('
-                .implode(',', array_fill(0, count($chunk), '?')).')';
-            foreach($this->executor->executeRows($sql, str_repeat('i', count($chunk)), $chunk) as $row){
-                $headers[intval($row[0])] = array(
-                    'rec_ID' => intval($row[0]),
-                    'rec_Title' => (string)$row[2],
-                    'rec_RecTypeID' => intval($row[1]),
+            foreach($this->executor->records()->headers($chunk) as $id=>$row){
+                $headers[$id] = array(
+                    'rec_ID' => $id,
+                    'rec_Title' => (string)$row['rec_Title'],
+                    'rec_RecTypeID' => intval($row['rec_RecTypeID']),
                 );
             }
         }

@@ -21,6 +21,8 @@ use Heurist\Records\Query\CompiledQuery;
 use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\UnsupportedQueryException;
 use Heurist\Records\Query\Parser\RecordQueryParser;
+use Heurist\Records\Store\RecordRepository;
+use Heurist\Records\Store\RecordSchema;
 
 /** Public facade that composes parameterized IDs and count SQL. */
 final class QueryBuilder
@@ -28,17 +30,28 @@ final class QueryBuilder
     private const DEFAULT_LIMIT=300000;
     private const MAX_LIMIT=300000;
     private $parser; private $resolver; private $fields; private $records; private $sort; private $terms;
+    private SqlTables $tables;
 
-    /** Initialise all query compilers with one database abstraction. */
-    public function __construct(DatabaseInterface $database)
+    /**
+     * Initialise all query compilers with one database abstraction.
+     *
+     * @param RecordSchema|null $schema Record tables of the compiled SQL (null = the current tables).
+     */
+    public function __construct(DatabaseInterface $database, ?RecordSchema $schema = null)
     {
+        $this->tables=new SqlTables($schema);
+        $repository=$schema===null?RecordRepository::shared($database):new RecordRepository($database,$schema);
         $this->parser=new RecordQueryParser();
         $this->resolver=new QueryValueResolver($database,$this->parser);
-        $this->fields=new FieldPredicateCompiler($database);
-        $this->records=new RecordPredicateCompiler($database,$this->fields);
+        $this->fields=new FieldPredicateCompiler($database,$this->tables);
+        $this->records=new RecordPredicateCompiler($database,$this->fields,$repository);
         $this->sort=new SortCompiler($this->fields,$this->parser);
         $this->terms=new RelationTermResolver($database);
     }
+
+    /** SQL text with the table keys ("{records}", "{details}", ...) replaced by the table names. */
+    public function sql(string $sql): string{return $this->tables->resolve($sql);}
+    public function tables(): SqlTables{return $this->tables;}
 
     public function normalize($query): array{return $this->resolver->resolve($this->parser->normalize($query));}
     public function textToJson(string $query): array{return $this->parser->textToJson($query);}
@@ -56,9 +69,9 @@ final class QueryBuilder
         $limit=intval($context['limit']??self::DEFAULT_LIMIT);if($limit<1){$limit=self::DEFAULT_LIMIT;}$limit=min($limit,self::MAX_LIMIT);
         $offset=max(0,intval($context['offset']??0));
         // No joins, so rec_ID is unique; DISTINCT would break ORDER BY under ONLY_FULL_GROUP_BY (error 3065)
-        $sql='SELECT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$sort.' LIMIT ? OFFSET ?';
+        $sql='SELECT r.rec_ID FROM {records} r WHERE '.implode(' AND ',$where).$sort.' LIMIT ? OFFSET ?';
         $state->bind($limit,'i');$state->bind($offset,'i');
-        return new CompiledQuery($sql,$state->types(),$state->values(),$normalized);
+        return new CompiledQuery($this->sql($sql),$state->types(),$state->values(),$normalized);
     }
 
     public function buildCount($query,array $context=array()): CompiledQuery
@@ -67,7 +80,7 @@ final class QueryBuilder
         if(!$this->supportsSqlExecution($normalized)){throw new UnsupportedQueryException('Query requires batched execution');}
         $state=new SqlBuildContext($context);$where=$this->compileGroup($normalized,'AND',$state,'r',0);
         $this->records->appendAccessConditions($where,$state,$context,'r');
-        return new CompiledQuery('SELECT COUNT(DISTINCT r.rec_ID) FROM Records r WHERE '.implode(' AND ',$where),$state->types(),$state->values(),$normalized);
+        return new CompiledQuery($this->sql('SELECT COUNT(DISTINCT r.rec_ID) FROM {records} r WHERE '.implode(' AND ',$where)),$state->types(),$state->values(),$normalized);
     }
 
     /**
@@ -93,17 +106,6 @@ final class QueryBuilder
     }
 
     /**
-     * Condition that hides a detail row the current user may not see (field
-     * visibility, hidden-from-public values) - the rule every detail predicate applies.
-     * Binds nothing; returns '' for the database owner.
-     */
-    public function detailVisibilityCondition(SqlBuildContext $state,string $detailAlias,string $recordAlias): string
-    {
-        $condition=$this->fields->detailVisibilityCondition($detailAlias,$recordAlias,$state);
-        return $condition===''?'':preg_replace('/^s*ANDs+/','',$condition);
-    }
-
-    /**
      * Word-prefix FULLTEXT condition for a text column, or null when the column has
      * no FULLTEXT index or the text no indexable word (caller keeps its LIKE).
      */
@@ -120,8 +122,8 @@ final class QueryBuilder
         $state=new SqlBuildContext($context);$where=$this->compileGroup($normalized,'AND',$state,'r',0);
         $this->records->appendAccessConditions($where,$state,$context,'r');
         return new CompiledQuery(
-            'SELECT r.rec_RecTypeID, COUNT(DISTINCT r.rec_ID) FROM Records r WHERE '
-                .implode(' AND ',$where).' GROUP BY r.rec_RecTypeID ORDER BY r.rec_RecTypeID',
+            $this->sql('SELECT r.rec_RecTypeID, COUNT(DISTINCT r.rec_ID) FROM {records} r WHERE '
+                .implode(' AND ',$where).' GROUP BY r.rec_RecTypeID ORDER BY r.rec_RecTypeID'),
             $state->types(),$state->values(),$normalized
         );
     }
@@ -134,7 +136,7 @@ final class QueryBuilder
         $source=$this->fields->anyFieldCandidateSource($value,$state);
         $state->bind($limit,'i');
         return new CompiledQuery(
-            'SELECT DISTINCT candidates.rec_ID FROM ('.$source.') candidates LIMIT ?',
+            $this->sql('SELECT DISTINCT candidates.rec_ID FROM ('.$source.') candidates LIMIT ?'),
             $state->types(),
             $state->values(),
             array(array('f'=>$value))
@@ -154,7 +156,7 @@ final class QueryBuilder
         $source=$this->fields->numericFieldCandidateSource($fieldId,$value,$state);
         $state->bind($limit,'i');
         return new CompiledQuery(
-            'SELECT DISTINCT candidates.rec_ID FROM ('.$source.') candidates LIMIT ?',
+            $this->sql('SELECT DISTINCT candidates.rec_ID FROM ('.$source.') candidates LIMIT ?'),
             $state->types(),
             $state->values(),
             array(array('f:'.$fieldId=>$value))
@@ -168,7 +170,7 @@ final class QueryBuilder
         $state=new SqlBuildContext($context);$where=$this->compileGroup($normalized,'AND',$state,'r',0);
         $this->records->appendAccessConditions($where,$state,$context,'r');
         // As in buildIds(): no joins, no DISTINCT (error 3065 with ORDER BY under ONLY_FULL_GROUP_BY)
-        return new CompiledQuery('SELECT r.rec_ID FROM Records r WHERE '.implode(' AND ',$where).$this->compileEffectiveSort($normalized,$state,$context),$state->types(),$state->values(),$normalized);
+        return new CompiledQuery($this->sql('SELECT r.rec_ID FROM {records} r WHERE '.implode(' AND ',$where).$this->compileEffectiveSort($normalized,$state,$context)),$state->types(),$state->values(),$normalized);
     }
 
     /** Compile an explicit request sort in preference to the query's top-level sort. */
@@ -294,8 +296,8 @@ final class QueryBuilder
         $childWhere = $this->compileGroup($childQuery, 'AND', $state, $childAlias, $depth);
         $this->records->appendAccessConditions($childWhere, $state, $state['context'], $childAlias);
 
-        $exists = 'EXISTS (SELECT 1 FROM recLinks '.$linkAlias
-            .' INNER JOIN Records '.$childAlias.' ON '.$childAlias.'.rec_ID='
+        $exists = 'EXISTS (SELECT 1 FROM {links} '.$linkAlias
+            .' INNER JOIN {records} '.$childAlias.' ON '.$childAlias.'.rec_ID='
             .$linkAlias.'.'.$childColumn
             .' WHERE '.implode(' AND ', array_merge($edge, $childWhere)).')';
         return array($exists, $negate);
@@ -388,10 +390,10 @@ final class QueryBuilder
             $relationshipWhere, $state, $state['context'], $relationshipAlias
         );
 
-        $exists = 'EXISTS (SELECT 1 FROM recLinks '.$linkAlias
-            .' INNER JOIN Records '.$childAlias.' ON '.$childAlias.'.rec_ID='
+        $exists = 'EXISTS (SELECT 1 FROM {links} '.$linkAlias
+            .' INNER JOIN {records} '.$childAlias.' ON '.$childAlias.'.rec_ID='
             .$linkAlias.'.'.$childColumn
-            .' INNER JOIN Records '.$relationshipAlias.' ON '.$relationshipAlias.'.rec_ID='
+            .' INNER JOIN {records} '.$relationshipAlias.' ON '.$relationshipAlias.'.rec_ID='
             .$linkAlias.'.rl_RelationID'
             .' WHERE '.implode(' AND ', array_merge($edge, $childWhere, $relationshipWhere)).')';
         return $outerType === '' ? $exists : '('.$outerType.$exists.')';

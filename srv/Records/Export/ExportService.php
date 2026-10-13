@@ -46,6 +46,7 @@ use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\QueryExecutor;
 use Heurist\Records\Query\RecordSearchService;
 use Heurist\Runtime\RuntimeContext;
+use Heurist\Users\UserGroupRepository;
 use RuntimeException;
 use ZipArchive;
 
@@ -116,9 +117,9 @@ final class ExportService
                 .($this->runtime->userId > 0 ? '' : ' (only public records are used)'));
         }
 
-        $definitions = new DefinitionLookup($this->database);
+        $definitions = DefinitionLookup::shared($this->database);
         $formatter = new ValueFormatter($definitions, $request->values, $this->runtime->baseUrl, $this->runtime->databaseName);
-        $columns = new ExportColumns($definitions, $formatter);
+        $columns = new ExportColumns($definitions, $formatter, UserGroupRepository::shared($this->database));
         $meta = array(
             'database' => $this->runtime->databaseName,
             'title' => $request->title,
@@ -184,7 +185,7 @@ final class ExportService
             case 'kml':
                 return new KmlExportWriter($request, $columns, $definitions, $workDir, $this->codes);
             case 'xml':
-                return new HmlExportWriter($definitions, $formatter, $workDir, $this->codes['relationType'], $request->names);
+                return new HmlExportWriter($definitions, UserGroupRepository::shared($this->database), $formatter, $workDir, $this->codes['relationType'], $request->names);
             case 'gephi':
                 return new GexfExportWriter($request, $columns, $definitions, $formatter, $workDir);
             default:
@@ -370,7 +371,7 @@ final class ExportService
         $search = new RecordSearchService($this->database, $this->runtime, new QueryBuilder($this->database), $executor);
         $engine = new ExpansionEngine($executor, $search);
         return new RecordPageAssembler(
-            new RecordDataService($this->database, $this->runtime, $executor),
+            new RecordDataService($this->database, $this->runtime),
             static function() use ($engine): ExpansionEngine { return $engine; }
         );
     }

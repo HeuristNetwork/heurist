@@ -163,7 +163,7 @@ final class SmartyTemplateRunner
     public function templateApi(?LanguageCodes $languages = null): TemplateApi
     {
         $languages = $languages ?? new LanguageCodes($this->environment->languageCodesFile);
-        $definitions = new ReportDefinitions($this->database, $this->environment->registeredDbId);
+        $definitions = new ReportDefinitions($this->database);
         $assembler = new ReportRecordAssembler($this->data, $this->database, $definitions, $this->environment,
             $languages, $this->visibleIds, $this->userId, $this->codes);
         return new TemplateApi(array(

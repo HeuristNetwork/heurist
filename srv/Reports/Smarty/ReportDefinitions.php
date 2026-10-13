@@ -4,8 +4,9 @@
 *
 * Record type names, field types, record type structures (with separators),
 * terms (label, code, concept id, description, hierarchical label), translations
-* of terms/files/types (defTranslations) and local ids of concept codes. Loaded
-* lazily once per report run.
+* of terms/files/types (defTranslations) and local ids of concept codes. Everything
+* about definitions comes from DefinitionLookup (plan 15); file captions are read
+* here until the file layer exists (plan 15, Phase 3).
 *
 * Replaces dbs_GetRectypeNames, dbs_GetDetailTypes, dbs_GetTerms/DbsTerms,
 * DbDefRecStructure, ConceptCode::get*LocalID and ReportRecord::getTranslation.
@@ -26,78 +27,47 @@ namespace Heurist\Reports\Smarty;
 
 use Heurist\Database\DatabaseInterface;
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Files\FileRepository;
 
-/** Cached definitions of one report run. */
+/** Definitions of one report run. */
 final class ReportDefinitions
 {
     private DatabaseInterface $database;
-    private string $registeredDbId;
-    private ?array $rectypeNames = null;
-    private ?array $fieldTypes = null;
-    /** @var array<int,array<int,string>> rty => [dty => display name] in form order */
-    private array $structures = array();
-    /** Terms (and the concept-code rule) come from the shared srv loader. */
+    /** Record types, fields, structure, terms, translations and concept codes. */
     private DefinitionLookup $lookup;
     /** @var array<string,array<string,array<string,string>>> entity => lang => id|field => text */
     private array $translations = array();
 
-    /**
-     * @param DatabaseInterface $database Database of the report.
-     * @param string $registeredDbId Registered database id ('' when not registered).
-     */
-    public function __construct(DatabaseInterface $database, string $registeredDbId = '')
+    /** @param DatabaseInterface $database Database of the report. */
+    public function __construct(DatabaseInterface $database)
     {
         $this->database = $database;
-        $this->registeredDbId = $registeredDbId;
-        $this->lookup = new DefinitionLookup($database);
+        $this->lookup = DefinitionLookup::shared($database);
     }
 
     /** Name of a record type ('' when unknown). */
     public function rectypeName($rtyId): string
     {
-        if($this->rectypeNames === null){
-            $this->rectypeNames = array();
-            foreach($this->database->fetchRows('SELECT rty_ID,rty_Name FROM defRecTypes') as $row){
-                $this->rectypeNames[intval($row[0])] = (string)$row[1];
-            }
-        }
-        return $this->rectypeNames[intval($rtyId)] ?? '';
+        return $this->lookup->rectypeName(intval($rtyId));
     }
 
     /** Base type of a field (freetext, enum, file, ...), or null when unknown. */
     public function fieldType($dtyId): ?string
     {
-        if($this->fieldTypes === null){
-            $this->fieldTypes = array();
-            foreach($this->database->fetchRows('SELECT dty_ID,dty_Type FROM defDetailTypes') as $row){
-                $this->fieldTypes[intval($row[0])] = (string)$row[1];
-            }
-        }
-        return $this->fieldTypes[intval($dtyId)] ?? null;
+        $type = $this->lookup->fieldType(intval($dtyId));
+        return $type === '' ? null : $type;
     }
 
     /**
-     * Fields of a record type in form order (separators included): [dty => display name].
+     * Fields of a record type in form order (separators included): [dty => display name,
+     * or the field name when the record type has none].
      *
      * @param mixed $rtyId Record type.
      * @return array<int,string>
      */
     public function structure($rtyId): array
     {
-        $rtyId = intval($rtyId);
-        if(!isset($this->structures[$rtyId])){
-            $this->structures[$rtyId] = array();
-            // the query of the legacy DbDefRecStructure "listshort": fields with the same
-            // display order come in the order the database gives them (as in the legacy engine)
-            foreach($this->database->fetchRows(
-                'SELECT rst_DetailTypeID,IF(rst_DisplayName IS NOT NULL AND CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) '
-                .'FROM defRecStructure LEFT JOIN defDetailTypes ON dty_ID=rst_DetailTypeID WHERE rst_RecTypeID=? '
-                .'ORDER BY rst_DisplayOrder ASC', array($rtyId)
-            ) as $row){
-                $this->structures[$rtyId][intval($row[0])] = (string)$row[1];
-            }
-        }
-        return $this->structures[$rtyId];
+        return $this->lookup->structureNames(intval($rtyId));
     }
 
     /**
@@ -159,12 +129,11 @@ final class ReportDefinitions
         if($term !== null && $term['inverse'] > 0){
             return $term['inverse'];
         }
-        foreach($this->lookup->allTerms() as $id => $other){
-            if($other['inverse'] === $termId){
-                return $id;
-            }
-        }
-        return $termId;
+        // a term that names this one as its inverse (the first by id, as before)
+        $others = array_filter($this->lookup->termInverse(array($termId)), static function($id) use ($termId){
+            return $id !== $termId;
+        });
+        return empty($others) ? $termId : min($others);
     }
 
     /**
@@ -204,17 +173,7 @@ final class ReportDefinitions
         }
         if(!empty($missing)){
             $numeric = array_values(array_filter($missing, 'ctype_digit'));
-            $found = array();
-            if(!empty($numeric)){
-                $placeholders = implode(',', array_fill(0, count($numeric), '?'));
-                foreach($this->database->fetchRows(
-                    'SELECT trn_Code,trn_Translation FROM defTranslations WHERE trn_Source=? '
-                    .'AND trn_LanguageCode=? AND trn_Code IN ('.$placeholders.')',
-                    array_merge(array($field, $lang), array_map('intval', $numeric))
-                ) as $row){
-                    $found[(string)$row[0]] = (string)$row[1];
-                }
-            }
+            $found = $this->lookup->translations($field, array_map('intval', $numeric), $lang);
             $defaults = $this->defaultTexts($entity, $field, $missing);
             foreach($missing as $id){
                 $text = $found[$id] ?? $defaults[$id] ?? '';
@@ -236,28 +195,7 @@ final class ReportDefinitions
      */
     public function localId(string $entity, $conceptCode): int
     {
-        $tables = array('rty' => 'defRecTypes', 'dty' => 'defDetailTypes', 'trm' => 'defTerms');
-        if(!isset($tables[$entity])){ return 0; }
-        $table = $tables[$entity];
-        $prefix = $entity.'_';
-        $parts = explode('-', trim((string)$conceptCode));
-        if(count($parts) === 1 && ctype_digit($parts[0])){
-            $localId = intval($parts[0]);
-        }elseif(count($parts) === 2 && ctype_digit($parts[1])
-            && (!(intval($parts[0]) > 0) || $parts[0] === $this->registeredDbId)){
-            $localId = intval($parts[1]);
-        }elseif(count($parts) === 2 && ctype_digit($parts[0]) && ctype_digit($parts[1])){
-            return intval($this->database->fetchValue(
-                'SELECT '.$prefix.'ID FROM '.$table.' WHERE '.$prefix.'OriginatingDBID=? AND '
-                .$prefix.'IDInOriginatingDB=? LIMIT 1',
-                array(intval($parts[0]), intval($parts[1])), 0
-            ));
-        }else{
-            return 0;
-        }
-        return intval($this->database->fetchValue(
-            'SELECT '.$prefix.'ID FROM '.$table.' WHERE '.$prefix.'ID=? LIMIT 1', array($localId), 0
-        ));
+        return $this->lookup->localId($entity, $conceptCode);
     }
 
     /** Default texts of entities without a translation. */
@@ -270,23 +208,20 @@ final class ReportDefinitions
                 $defaults[$id] = $term === null ? '' : (string)($field === 'trm_Label' ? $term['term'] : $term['desc']);
             }
         }elseif($entity === 'ulf'){
+            $files = FileRepository::shared($this->database);
             foreach($ids as $id){
-                $column = ctype_digit($id) ? 'ulf_ID' : 'ulf_ObfuscatedFileID';
-                if($column === 'ulf_ObfuscatedFileID' && !preg_match('/^[a-z0-9]+$/i', $id)){
+                $isId = ctype_digit($id);
+                if(!$isId && !preg_match('/^[a-z0-9]+$/i', $id)){
                     continue;
                 }
-                $defaults[$id] = (string)$this->database->fetchValue(
-                    'SELECT '.$field.' FROM recUploadedFiles WHERE '.$column.'=? LIMIT 1', array($id), ''
-                );
+                $file = $isId ? ($files->files(array(intval($id)))[intval($id)] ?? null)
+                    : ($files->filesByObfuscatedId(array($id))[$id] ?? null);
+                $defaults[$id] = (string)($file[$field] ?? '');
             }
         }elseif($entity === 'rty'){
             foreach($ids as $id){ $defaults[$id] = $this->rectypeName($id); }
         }else{
-            foreach($ids as $id){
-                $defaults[$id] = (string)$this->database->fetchValue(
-                    'SELECT dty_Name FROM defDetailTypes WHERE dty_ID=? LIMIT 1', array(intval($id)), ''
-                );
-            }
+            foreach($ids as $id){ $defaults[$id] = $this->lookup->field(intval($id))['name'] ?? ''; }
         }
         return $defaults;
     }

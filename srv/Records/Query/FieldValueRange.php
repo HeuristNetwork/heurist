@@ -74,13 +74,10 @@ final class FieldValueRange
         if(!ctype_digit($name) || intval($name) < 1){
             throw new QueryValidationException('Unsupported field for detail='.$detail.': '.$field);
         }
-        $rows = $this->executor->executeRows(
-            'SELECT dty_Type FROM defDetailTypes WHERE dty_ID=?', 'i', array(intval($name))
-        );
-        if(empty($rows)){
+        $type = $this->executor->definitions()->fieldType(intval($name));
+        if($type === ''){
             throw new QueryValidationException('Unknown field for detail='.$detail.': '.$field);
         }
-        $type = (string)$rows[0][0];
         if($type !== 'date' && !in_array($type, self::NUMERIC_TYPES, true)){
             throw new QueryValidationException('Field type '.$type.' is not supported by detail='.$detail);
         }
@@ -123,9 +120,9 @@ final class FieldValueRange
         $state = new SqlBuildContext($context);
         $parts = $this->sourceParts($field, $state);
         $where = array_merge($parts['where'], $this->builder->compileConditions($query, $state, $context));
-        $rows = $this->executor->executeRows(
+        $rows = $this->executeRows(
             'SELECT MIN('.$parts['min'].'), MAX('.$parts['max'].'), COUNT(DISTINCT r.rec_ID)'
-                .' FROM Records r '.$parts['joins'].' WHERE '.implode(' AND ', $where),
+                .' FROM {records} r '.$parts['joins'].' WHERE '.implode(' AND ', $where),
             $state->types(), $state->values()
         );
         $row = $rows[0] ?? array(null, null, 0);
@@ -140,9 +137,9 @@ final class FieldValueRange
             $state = new SqlBuildContext($context);
             $parts = $this->sourceParts($field, $state);
             $where = array_merge($parts['where'], array(self::idCondition($chunk, $state)));
-            $rows = $this->executor->executeRows(
+            $rows = $this->executeRows(
                 'SELECT MIN('.$parts['min'].'), MAX('.$parts['max'].'), COUNT(DISTINCT r.rec_ID)'
-                    .' FROM Records r '.$parts['joins'].' WHERE '.implode(' AND ', $where),
+                    .' FROM {records} r '.$parts['joins'].' WHERE '.implode(' AND ', $where),
                 $state->types(), $state->values()
             );
             $row = $rows[0] ?? array(null, null, 0);
@@ -167,20 +164,19 @@ final class FieldValueRange
             return array('joins'=>'', 'where'=>array($column.' IS NOT NULL'), 'min'=>$column, 'max'=>$column);
         }
         $state->bind($field['dtyId'], 'i');
-        $visibility = $this->builder->detailVisibilityCondition($state, 'vd', 'r');
-        $where = $visibility === '' ? array() : array($visibility);
+        $where = array();
         if($field['type'] === 'date'){
             // estimated bounds of each (possibly fuzzy or ranged) date, as decimal YYYY.MMDD
             return array(
-                'joins'=>'JOIN recDetailsDateIndex vdi ON vdi.rdi_RecID=r.rec_ID AND vdi.rdi_DetailTypeID=?'
-                    .' JOIN recDetails vd ON vd.dtl_ID=vdi.rdi_DetailID',
+                'joins'=>'JOIN {dateIndex} vdi ON vdi.rdi_RecID=r.rec_ID AND vdi.rdi_DetailTypeID=?'
+                    .' JOIN {details} vd ON vd.dtl_ID=vdi.rdi_DetailID',
                 'where'=>$where,
                 'min'=>'vdi.rdi_estMinDate', 'max'=>'vdi.rdi_estMaxDate'
             );
         }
         $where[] = "vd.dtl_Value REGEXP '".self::NUMERIC_PATTERN."'";
         return array(
-            'joins'=>'JOIN recDetails vd ON vd.dtl_RecID=r.rec_ID AND vd.dtl_DetailTypeID=?',
+            'joins'=>'JOIN {details} vd ON vd.dtl_RecID=r.rec_ID AND vd.dtl_DetailTypeID=?',
             'where'=>$where,
             'min'=>self::NUMERIC_VALUE, 'max'=>self::NUMERIC_VALUE
         );
@@ -234,4 +230,9 @@ final class FieldValueRange
         return ($year < 0 ? '-' : '').sprintf('%04d-%02d-%02d', abs($year), $month, $day);
     }
 
+    /** Execute SQL text of the compiler; the builder resolves its table keys. */
+    private function executeRows(string $sql, string $types = '', array $values = array()): array
+    {
+        return $this->executor->executeRows($this->builder->sql($sql), $types, $values);
+    }
 }

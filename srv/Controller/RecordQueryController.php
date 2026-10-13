@@ -81,7 +81,7 @@ final class RecordQueryController
         $this->executor = new QueryExecutor($database);
         $this->builder = new QueryBuilder($database);
         $this->service = $service ?? new RecordSearchService($database, $runtime, $this->builder, $this->executor);
-        $this->dataService = $dataService ?? new RecordDataService($database, $runtime, $this->executor);
+        $this->dataService = $dataService ?? new RecordDataService($database, $runtime);
         $this->fieldSelector = new RecordFieldSelector();
         $this->expansionEngine = $expansionEngine;
     }

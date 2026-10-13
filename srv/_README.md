@@ -13,6 +13,12 @@ storage is provided by `Publication/PublicationService.php`; its writable
 directory and runtime identity are injected by `Runtime/ServiceFactory.php`.
 Record editing (plan 14) is in `Records/Edit/`, for system record types only.
 
+Data access (plan 15): services do not query the database tables themselves.
+Definitions are read by `Definitions/DefinitionLookup`, records by
+`Records/Store/RecordRepository` (writes `RecordStore`, tables `RecordSchema`),
+files by `Records/Files/FileRepository`, users and groups by
+`Users/UserGroupRepository`, database settings by `Runtime/DatabaseSettings`.
+
 Dependency direction is Controller → Records → Database/Runtime. Classes below
 `/srv` are loaded by namespace and must not contain `require` or `include`.
 

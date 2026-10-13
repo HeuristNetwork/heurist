@@ -31,7 +31,9 @@ declare(strict_types=1);
 namespace Heurist\Records\Edit;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\RuntimeContext;
+use Heurist\Users\UserGroupRepository;
 
 /** Permission checks of record writes. */
 final class RecordPermissionService
@@ -58,9 +60,7 @@ final class RecordPermissionService
             throw new RecordEditException(401, 'access_denied', 'Log in to change records');
         }
         if($this->enabled === null){
-            $this->enabled = (string)$this->database->fetchValue(
-                'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID=?', array($this->runtime->userId), ''
-            );
+            $this->enabled = UserGroupRepository::shared($this->database)->enabled($this->runtime->userId);
         }
         $enabled = $this->enabled;
         $verb = $action === 'add' ? 'create' : ($action === 'edit' ? 'modify' : $action);
@@ -105,13 +105,9 @@ final class RecordPermissionService
      */
     public function owners(int $recordId): ?array
     {
-        $owner = $this->database->fetchValue('SELECT rec_OwnerUGrpID FROM Records WHERE rec_ID=?', array($recordId));
-        if($owner === null){ return null; }
-        $groups = array_map('intval', $this->database->fetchColumn(
-            'SELECT rcp_UGrpID FROM usrRecPermissions WHERE rcp_RecID=? AND rcp_Level="edit" ORDER BY rcp_ID',
-            array($recordId)
-        ));
-        return array('owner'=>intval($owner), 'editGroups'=>array_values(array_unique($groups)));
+        $owners = RecordRepository::shared($this->database)->owners(array($recordId))[$recordId] ?? null;
+        if($owners === null){ return null; }
+        return array('owner'=>$owners['owner'], 'editGroups'=>array_values(array_unique($owners['editGroups'])));
     }
 
     /** True when the user may change the record with these owner and edit groups. */
@@ -120,33 +116,6 @@ final class RecordPermissionService
         if($this->runtime->userId < 1){ return false; }
         if($owner === 0 || $this->runtime->isAdmin){ return true; }
         return !empty(array_intersect(array_merge(array($owner), $editGroups), $this->memberOf()));
-    }
-
-    /**
-     * Ids of the records the user may change (several records at once, for the
-     * GET output of edit groups and hidden values).
-     *
-     * @param array<int,int> $recordIds
-     * @return array<int,bool> rec_ID => true
-     */
-    public function editableIds(array $recordIds): array
-    {
-        $recordIds = array_values(array_unique(array_filter(array_map('intval', $recordIds))));
-        if(empty($recordIds) || $this->runtime->userId < 1){ return array(); }
-        if($this->runtime->isAdmin){ return array_fill_keys($recordIds, true); }
-        $members = $this->memberOf();
-        $editable = array();
-        foreach(array_chunk($recordIds, 500) as $chunk){
-            $ids = implode(',', array_fill(0, count($chunk), '?'));
-            $groups = implode(',', array_fill(0, count($members), '?'));
-            $sql = 'SELECT rec_ID FROM Records WHERE rec_ID IN ('.$ids.') AND (rec_OwnerUGrpID=0 '
-                .'OR rec_OwnerUGrpID IN ('.$groups.') OR EXISTS(SELECT 1 FROM usrRecPermissions '
-                .'WHERE rcp_RecID=rec_ID AND rcp_Level="edit" AND rcp_UGrpID IN ('.$groups.')))';
-            foreach($this->database->fetchColumn($sql, array_merge($chunk, $members, $members)) as $id){
-                $editable[intval($id)] = true;
-            }
-        }
-        return $editable;
     }
 
     /**
@@ -198,10 +167,7 @@ final class RecordPermissionService
     {
         $groupIds = array_values(array_unique(array_filter(array_map('intval', $groupIds))));
         if(empty($groupIds)){ return; }
-        $found = array_map('intval', $this->database->fetchColumn(
-            'SELECT ugr_ID FROM sysUGrps WHERE ugr_ID IN ('.implode(',', array_fill(0, count($groupIds), '?')).')',
-            $groupIds
-        ));
+        $found = UserGroupRepository::shared($this->database)->existing($groupIds);
         $missing = array_diff($groupIds, $found);
         if(!empty($missing)){
             throw new RecordEditException(422, 'validation', 'User or group '.implode(', ', $missing).' does not exist', array(

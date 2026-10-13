@@ -62,7 +62,7 @@ final class SortCompiler
                     $userId = intval($state['context']['userId'] ?? 0);
                     if($userId < 1){ throw new QueryValidationException('Rating sort requires authentication'); }
                     $state->bind($userId, 'i');
-                    $expressions[] = 'COALESCE((SELECT ub.bkm_Rating FROM usrBookmarks ub '
+                    $expressions[] = 'COALESCE((SELECT ub.bkm_Rating FROM {bookmarks} ub '
                         .'WHERE ub.bkm_recID=r.rec_ID AND ub.bkm_UGrpID=? LIMIT 1),0) '.$direction;
                     break;
                 case 'f': case 'field':
@@ -72,27 +72,22 @@ final class SortCompiler
                     $fieldId = intval($suffix); $fieldType = $this->fields->fieldType($fieldId);
                     $state->bind($fieldId, 'i');
                     if($fieldType === 'date'){
-                        $expressions[] = '(SELECT MIN(si.rdi_estMinDate) FROM recDetailsDateIndex si '
-                            .'INNER JOIN recDetails sdate ON sdate.dtl_ID=si.rdi_DetailID '
-                            .'WHERE si.rdi_RecID=r.rec_ID AND si.rdi_DetailTypeID=?'
-                            .$this->fields->detailVisibilityCondition('sdate', 'r', $state).') '.$direction;
+                        $expressions[] = '(SELECT MIN(si.rdi_estMinDate) FROM {dateIndex} si '
+                            .'INNER JOIN {details} sdate ON sdate.dtl_ID=si.rdi_DetailID '
+                            .'WHERE si.rdi_RecID=r.rec_ID AND si.rdi_DetailTypeID=?) '.$direction;
                     }elseif($fieldType === 'enum'){
                         $expressions[] = '(SELECT MIN(CONCAT(LPAD(COALESCE(st.trm_OrderInBranch,999999),6,"0"),st.trm_Label)) '
-                            .'FROM recDetails sd INNER JOIN defTerms st ON st.trm_ID=sd.dtl_Value '
-                            .'WHERE sd.dtl_RecID=r.rec_ID AND sd.dtl_DetailTypeID=?'
-                            .$this->fields->detailVisibilityCondition('sd', 'r', $state).') '.$direction;
+                            .'FROM {details} sd INNER JOIN {terms} st ON st.trm_ID=sd.dtl_Value '
+                            .'WHERE sd.dtl_RecID=r.rec_ID AND sd.dtl_DetailTypeID=?) '.$direction;
                     }elseif($fieldType === 'integer'){
-                        $expressions[] = '(SELECT MIN(CAST(sd.dtl_Value AS SIGNED)) FROM recDetails sd '
-                            .'WHERE sd.dtl_RecID=r.rec_ID AND sd.dtl_DetailTypeID=?'
-                            .$this->fields->detailVisibilityCondition('sd', 'r', $state).') '.$direction;
+                        $expressions[] = '(SELECT MIN(CAST(sd.dtl_Value AS SIGNED)) FROM {details} sd '
+                            .'WHERE sd.dtl_RecID=r.rec_ID AND sd.dtl_DetailTypeID=?) '.$direction;
                     }elseif($fieldType === 'float'){
-                        $expressions[] = '(SELECT MIN(CAST(sd.dtl_Value AS DECIMAL(65,20))) FROM recDetails sd '
-                            .'WHERE sd.dtl_RecID=r.rec_ID AND sd.dtl_DetailTypeID=?'
-                            .$this->fields->detailVisibilityCondition('sd', 'r', $state).') '.$direction;
+                        $expressions[] = '(SELECT MIN(CAST(sd.dtl_Value AS DECIMAL(65,20))) FROM {details} sd '
+                            .'WHERE sd.dtl_RecID=r.rec_ID AND sd.dtl_DetailTypeID=?) '.$direction;
                     }else{
-                        $expressions[] = '(SELECT MIN(sd.dtl_Value) FROM recDetails sd '
-                            .'WHERE sd.dtl_RecID=r.rec_ID AND sd.dtl_DetailTypeID=?'
-                            .$this->fields->detailVisibilityCondition('sd', 'r', $state).') '.$direction;
+                        $expressions[] = '(SELECT MIN(sd.dtl_Value) FROM {details} sd '
+                            .'WHERE sd.dtl_RecID=r.rec_ID AND sd.dtl_DetailTypeID=?) '.$direction;
                     }
                     $expressions[] = 'r.rec_Title ASC';
                     break;

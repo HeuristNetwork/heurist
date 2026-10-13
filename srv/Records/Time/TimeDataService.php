@@ -47,7 +47,7 @@ final class TimeDataService
     ) {
         $executor = new QueryExecutor($database);
         $search = new RecordSearchService($database, $runtime, null, $executor);
-        $this->data = $data ?? new RecordDataService($database, $runtime, $executor);
+        $this->data = $data ?? new RecordDataService($database, $runtime);
         $this->expansion = $expansion ?? new ExpansionEngine($executor, $search);
         $this->selector = $selector ?? new TimeFieldSelector();
         $this->startDateFieldId = $codes->id('DT_START_DATE');

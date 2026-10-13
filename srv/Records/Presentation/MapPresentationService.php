@@ -16,7 +16,7 @@
 */
 namespace Heurist\Records\Presentation;
 
-use Heurist\Runtime\ConceptCode;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Runtime\RuntimeContext;
 
 
@@ -33,26 +33,26 @@ class MapPresentationService
     private PresentationRecordRepository $documents;
     private PresentationRecordRepository $layers;
     private PresentationRecordRepository $terms;
-    private ConceptCode $conceptCodes;
+    private DefinitionLookup $definitions;
 
     /**
      * Initialise the map presentation service.
      *
      * @param PresentationRecordRepository $records Direct read-only record access.
      * @param RuntimeContext $runtime Current database and URL context.
-     * @param ConceptCode $conceptCodes Stable term-code lookup.
+     * @param DefinitionLookup $definitions Definitions (terms by concept code).
      */
     public function __construct(
         PresentationRecordRepository $records,
         RuntimeContext $runtime,
-        ConceptCode $conceptCodes
+        DefinitionLookup $definitions
     )
     {
         $this->runtime = $runtime;
         $this->documents = $records;
         $this->layers = $records;
         $this->terms = $records;
-        $this->conceptCodes = $conceptCodes;
+        $this->definitions = $definitions;
     }
 
     /**
@@ -257,7 +257,7 @@ class MapPresentationService
                     /*
                     $mimeType = intval($this->layers->value($record, 'DT_MIME_TYPE'));
                     if($mimeType>0){
-                        $mimeType = $this->conceptCodes->getTermConceptId($mimeType);
+                        $mimeType = $this->definitions->term($mimeType)['conceptid'] ?? null;
                         $extension = ($mimeType == '2-540')? 'png' :($mimeType == '2-537'?'jpg':'gif');
                         $url = $url.'.'.$extension;
                     }
@@ -278,7 +278,7 @@ class MapPresentationService
             $schema = $this->layers->value($record, 'DT_MAP_IMAGE_LAYER_SCHEMA');
             //if($schema !== null){ $source['tileSchema'] = $schema; }
             //TMS naming schema
-            $tmsSchema = $this->conceptCodes->getTermLocalId('2-548');
+            $tmsSchema = $this->definitions->localId('trm', '2-548');
             if(intval($schema) == $tmsSchema){
                 $source['tms'] = true;    
             }

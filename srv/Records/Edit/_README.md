@@ -53,8 +53,7 @@ The body is the record object of `GET /records/{id}` (input = output):
   workflow stage rules (no emails), one transaction, title.
 - `RecordDeleteService.php` — references check (recLinks), forced delete.
 - `RecordDuplicateService.php` — copy with "Copy of " name.
-- `RecordStore.php` — the only class with record write SQL; table names are given,
-  ready for `sysRecords`/`sysDetails`.
+- Writes are `Store/RecordStore.php`, reads `Store/RecordRepository.php` (plan 15).
 - `RecordTitle.php` — title from DT_NAME, else "Record #NNN".
 - `WritableRecordTypes.php` — hardcoded list of writable record types.
 - `RecordEditException.php` — HTTP status, error code, issues of a failed write.

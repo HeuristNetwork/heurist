@@ -21,7 +21,10 @@ declare(strict_types=1);
 namespace Heurist\Reports;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Presentation\PresentationRecordRepository;
+use Heurist\Records\Store\RecordAccess;
+use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Runtime\SystemCode;
 
@@ -117,15 +120,16 @@ final class ReportRepository
     {
         if(!$this->isInstalled()){ return array(); }
         $files = array();
-        foreach($this->database->fetchRows(
-            'SELECT d.dtl_Value FROM Records r JOIN recDetails d ON d.dtl_RecID=r.rec_ID AND d.dtl_DetailTypeID=? '
-            .'WHERE r.rec_RecTypeID=? AND r.rec_FlagTemporary=0',
-            array($this->codes->id('DT_FILE_NAME'), $this->codes->id('RT_CUSTOM_REPORT'))
-        ) as $row){
-            $file = strtolower(trim((string)$row[0]));
-            if($file === ''){ continue; }
-            if(substr($file, -4) !== '.tpl'){ $file .= '.tpl'; }
-            $files[$file] = ($files[$file] ?? 0) + 1;
+        $fileField = $this->codes->id('DT_FILE_NAME');
+        $ids = array_map(static function(array $row): int { return intval($row['rec_ID']); },
+            $this->repository()->find($this->codes->id('RT_CUSTOM_REPORT'), array('rec_ID')));
+        foreach($this->repository()->values($ids, array($fileField)) as $fields){
+            foreach($fields[$fileField] ?? array() as $value){
+                $file = strtolower(trim($value));
+                if($file === ''){ continue; }
+                if(substr($file, -4) !== '.tpl'){ $file .= '.tpl'; }
+                $files[$file] = ($files[$file] ?? 0) + 1;
+            }
         }
         return $files;
     }
@@ -145,17 +149,9 @@ final class ReportRepository
      */
     private function loadReports(?int $recordId): array
     {
-        $parameters = array($this->codes->id('RT_CUSTOM_REPORT'));
-        $where = 'rec_RecTypeID=?';
-        if($recordId !== null){
-            $where .= ' AND rec_ID=?';
-            $parameters[] = $recordId;
-        }
-        $where .= ' AND '.$this->records->accessCondition($parameters);
-        $rows = $this->database->fetchAll(
-            'SELECT rec_ID,rec_Title,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_Modified FROM Records WHERE '.$where,
-            $parameters
-        );
+        $rows = $this->repository()->find($this->codes->id('RT_CUSTOM_REPORT'),
+            array('rec_ID', 'rec_Title', 'rec_OwnerUGrpID', 'rec_NonOwnerVisibility', 'rec_Modified'),
+            RecordAccess::fromRuntime($this->runtime), $recordId === null ? null : array($recordId));
         if(empty($rows)){ return array(); }
 
         $ids = array_map(static function(array $row): int { return intval($row['rec_ID']); }, $rows);
@@ -258,22 +254,20 @@ final class ReportRepository
         $reportField = $this->codes->id('DT_REPORT');
         if($scheduleType < 1 || $reportField < 1){ return array(); }
 
-        $parameters = array($reportField, $scheduleType);
-        $where = 'rec_RecTypeID=?';
-        if($reportIds !== null){
-            $where .= ' AND dtl_Value IN ('.implode(',', array_fill(0, count($reportIds), '?')).')';
-            array_push($parameters, ...$reportIds);
+        $schedules = $this->repository()->find($scheduleType, array('rec_ID', 'rec_Title', 'rec_OwnerUGrpID'),
+            $ignoreAccess ? null : RecordAccess::fromRuntime($this->runtime), $scheduleId === null ? null : array($scheduleId));
+        $reports = $this->repository()->values(array_map(static function(array $row): int {
+            return intval($row['rec_ID']);
+        }, $schedules), array($reportField));
+        $wanted = $reportIds === null ? null : array_fill_keys(array_map('intval', $reportIds), true);
+        // one row per schedule and report it points to
+        $rows = array();
+        foreach($schedules as $schedule){
+            foreach($reports[intval($schedule['rec_ID'])][$reportField] ?? array() as $reportId){
+                if($wanted !== null && !isset($wanted[intval($reportId)])){ continue; }
+                $rows[] = $schedule + array('reportId' => $reportId);
+            }
         }
-        if($scheduleId !== null){
-            $where .= ' AND rec_ID=?';
-            $parameters[] = $scheduleId;
-        }
-        $where .= ' AND '.($ignoreAccess ? 'rec_FlagTemporary=0' : $this->records->accessCondition($parameters));
-        $rows = $this->database->fetchAll(
-            'SELECT rec_ID,rec_Title,rec_OwnerUGrpID,dtl_Value AS reportId FROM Records '
-            .'JOIN recDetails ON dtl_RecID=rec_ID AND dtl_DetailTypeID=? WHERE '.$where,
-            $parameters
-        );
         if(empty($rows)){ return array(); }
 
         $ids = array_map(static function(array $row): int { return intval($row['rec_ID']); }, $rows);
@@ -337,17 +331,12 @@ final class ReportRepository
     {
         $fieldIds = array_values(array_filter($fieldIds, static function(int $id): bool { return $id > 0; }));
         if(empty($recordIds) || empty($fieldIds)){ return array(); }
-        $parameters = array_merge($recordIds, $fieldIds);
-        $result = array();
-        foreach($this->database->fetchRows(
-            'SELECT dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails '
-            .'WHERE dtl_RecID IN ('.implode(',', array_fill(0, count($recordIds), '?')).') '
-            .'AND dtl_DetailTypeID IN ('.implode(',', array_fill(0, count($fieldIds), '?')).') ORDER BY dtl_ID',
-            $parameters
-        ) as $row){
-            $result[intval($row[0])][intval($row[1])][] = (string)$row[2];
-        }
-        return $result;
+        return $this->repository()->values($recordIds, $fieldIds);
+    }
+
+    private function repository(): RecordRepository
+    {
+        return RecordRepository::shared($this->database);
     }
 
     /** Distinct values of the given fields over all loaded records. */
@@ -369,14 +358,9 @@ final class ReportRepository
      */
     private function loadTerms(array $termIds): array
     {
-        if(empty($termIds)){ return array(); }
         $result = array();
-        foreach($this->database->fetchRows(
-            'SELECT trm_ID,trm_Label,trm_Code FROM defTerms WHERE trm_ID IN ('
-            .implode(',', array_fill(0, count($termIds), '?')).')',
-            $termIds
-        ) as $row){
-            $result[intval($row[0])] = array('label' => (string)$row[1], 'code' => (string)($row[2] ?? ''));
+        foreach(DefinitionLookup::shared($this->database)->terms($termIds) as $id => $term){
+            $result[$id] = array('label' => $term['term'], 'code' => $term['code']);
         }
         return $result;
     }

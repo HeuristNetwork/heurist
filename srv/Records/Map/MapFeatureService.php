@@ -59,7 +59,7 @@ final class MapFeatureService
         $this->runtime = $runtime;
         $this->builder = new QueryBuilder($database);
         $this->search = $search ?? new RecordSearchService($database, $runtime, $this->builder, $executor);
-        $this->data = $data ?? new RecordDataService($database, $runtime, $executor);
+        $this->data = $data ?? new RecordDataService($database, $runtime);
         $this->expansion = $expansion ?? new ExpansionEngine($executor, $this->search);
         $this->selector = $selector ?? new MapFieldSelector();
         $this->converter = $converter ?? new GeoJsonGeometryConverter();

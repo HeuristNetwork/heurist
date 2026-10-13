@@ -20,6 +20,10 @@ declare(strict_types=1);
 namespace Heurist\Records\Presentation;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Files\FileRepository;
+use Heurist\Records\Store\RecordAccess;
+use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Runtime\SystemCode;
 
@@ -45,53 +49,18 @@ final class PresentationRecordRepository
     public function getPublicRecord(int $recordId, ?string $recordTypeCode = null): ?array
     {
         if($recordId < 1){ return null; }
-        $parameters = array($recordId);
-        $access = $this->accessCondition($parameters);
-        $rows = $this->database->fetchAll(
-            'SELECT rec_ID,rec_RecTypeID,rec_Title FROM Records WHERE rec_ID=? AND '.$access.' LIMIT 1',
-            $parameters
-        );
-        if(empty($rows)){ return null; }
-        $record = $rows[0];
+        $records = RecordRepository::shared($this->database);
+        $record = $records->headers(array($recordId), RecordRepository::HEADERS, RecordAccess::fromRuntime($this->runtime))[$recordId] ?? null;
+        if($record === null){ return null; }
         if($recordTypeCode !== null){
             $requiredType = $this->codes->id($recordTypeCode);
             if($requiredType < 1 || intval($record['rec_RecTypeID']) !== $requiredType){ return null; }
         }
         $record['details'] = array();
-        foreach($this->database->fetchRows(
-            'SELECT dtl_DetailTypeID,COALESCE(ST_AsText(dtl_Geo),dtl_Value,CAST(dtl_UploadedFileID AS CHAR)) '
-            .'FROM recDetails WHERE dtl_RecID=? ORDER BY dtl_ID', array($recordId)
-        ) as $row){
-            $record['details'][intval($row[0])][] = $row[1];
+        foreach($records->details(array($recordId)) as $row){
+            $record['details'][$row['field']][] = $row['wkt'] ?? $row['value'] ?? ($row['file'] === null ? null : (string)$row['file']);
         }
         return $record;
-    }
-
-    /**
-     * SQL condition for records the current user may view (unqualified Records
-     * columns). Its placeholder values are appended to $parameters.
-     */
-    public function accessCondition(array &$parameters): string
-    {
-        $access = 'rec_FlagTemporary=0';
-        if($this->runtime->userId < 1){
-            $access .= ' AND rec_NonOwnerVisibility IN ("public","pending")';
-        }elseif(!$this->runtime->isDbOwner){
-            $groups = $this->userAndGroupIds();
-            $visible = array('rec_NonOwnerVisibility IN ("public","pending")');
-            if(!empty($groups)){
-                $placeholders = implode(',', array_fill(0, count($groups), '?'));
-                $visible[] = 'rec_OwnerUGrpID IN ('.$placeholders.')';
-                array_push($parameters, ...$groups);
-                $visible[] = '(rec_NonOwnerVisibility="viewable" AND ('
-                    .'NOT EXISTS (SELECT 1 FROM usrRecPermissions rp0 WHERE rp0.rcp_RecID=rec_ID) OR '
-                    .'EXISTS (SELECT 1 FROM usrRecPermissions rp WHERE rp.rcp_RecID=rec_ID '
-                    .'AND rp.rcp_UGrpID IN ('.$placeholders.'))))';
-                array_push($parameters, ...$groups);
-            }
-            $access .= ' AND ('.implode(' OR ', $visible).')';
-        }
-        return $access;
     }
 
     /** The current user id followed by the ids of their groups. */
@@ -130,33 +99,27 @@ final class PresentationRecordRepository
         return $fieldId > 0 ? array_values($record['details'][$fieldId] ?? array()) : array();
     }
 
-    /** Return the term code stored in the current definition schema. */
+    /** Code of a term (DefinitionLookup), null when the term does not exist. */
     public function getTermCode(int $termId): ?string
     {
-        $value = $this->database->fetchValue(
-            'SELECT trm_Code FROM defTerms WHERE trm_ID=? LIMIT 1', array($termId)
-        );
-        return $value === null ? null : (string)$value;
+        $term = DefinitionLookup::shared($this->database)->term($termId);
+        return $term === null ? null : $term['code'];
     }
 
-    /** Return the term label stored in the current definition schema. */
+    /** Label of a term (DefinitionLookup), null when the term does not exist. */
     public function getTermLabel(int $termId): ?string
     {
-        $value = $this->database->fetchValue(
-            'SELECT trm_Label FROM defTerms WHERE trm_ID=? LIMIT 1', array($termId)
-        );
-        return $value === null ? null : (string)$value;
+        $term = DefinitionLookup::shared($this->database)->term($termId);
+        return $term === null ? null : $term['term'];
     }
 
     /** Return the file metadata required by tile and image presentation. */
     public function getUploadedFile($fileId): ?array
     {
         if(!is_numeric($fileId) || intval($fileId) < 1){ return null; }
-        $rows = $this->database->fetchAll(
-            'SELECT ulf_ID,ulf_ObfuscatedFileID,ulf_ExternalFileReference,ulf_MimeExt '
-            .'FROM recUploadedFiles WHERE ulf_ID=? LIMIT 1', array(intval($fileId))
-        );
-        return $rows[0] ?? null;
+        $file = FileRepository::shared($this->database)->files(array(intval($fileId)))[intval($fileId)] ?? null;
+        return $file === null ? null : array_intersect_key($file,
+            array_flip(array('ulf_ID', 'ulf_ObfuscatedFileID', 'ulf_ExternalFileReference', 'ulf_MimeExt')));
     }
 
     /** Resolve a symbolic system code for source-type dispatch. */
