@@ -783,13 +783,16 @@ $.widget( "heurist.recordListExt", {
                     }
                     
                     if(this.options.record_with_custom_styles){
-                        newurl = newurl + '&cssid=' + this.options.record_with_custom_styles;
+                        newurl += `&cssid=${this.options.record_with_custom_styles}`;
                     }
                     if(this.options.fontsize>0){
-                        newurl = newurl + '&fontsize=' + this.options.fontsize;
+                        newurl += `&fontsize=${this.options.fontsize}`;
                     }
                     if(this.options.useRelmarkerTitle != 0){
                         newurl += `&useRelmarkerTitle=1`;
+                    }
+                    if(this._is_publication){
+                        newurl += '&publish=1';
                     }
                 }
             }
