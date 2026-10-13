@@ -43,9 +43,11 @@ final class RecordDuplicateService
     private LanguageCodes $languages;
     /** @var array<string,int> name (DT_NAME), cmsPage (RT_CMS_PAGE) */
     private array $codes;
+    private ?TitleMask $titleMask;
 
     /**
      * @param array<string,int> $codes Local ids: name (DT_NAME), cmsPage (RT_CMS_PAGE).
+     * @param TitleMask|null $titleMask Title from the mask of the record type (null: DT_NAME only).
      */
     public function __construct(
         RecordStore $store,
@@ -55,7 +57,8 @@ final class RecordDuplicateService
         RuntimeContext $runtime,
         RecordTitle $title,
         LanguageCodes $languages,
-        array $codes = array()
+        array $codes = array(),
+        ?TitleMask $titleMask = null
     ) {
         $this->store = $store;
         $this->permissions = $permissions;
@@ -65,6 +68,7 @@ final class RecordDuplicateService
         $this->title = $title;
         $this->languages = $languages;
         $this->codes = array_map('intval', $codes);
+        $this->titleMask = $titleMask;
     }
 
     /**
@@ -119,7 +123,8 @@ final class RecordDuplicateService
                     $names[] = $name;
                 }
             }
-            $this->store->setTitle($newId, $this->title->fromNames($names, $newId));
+            $title = $this->titleMask !== null ? $this->titleMask->fill($newId) : null;
+            $this->store->setTitle($newId, $title ?? $this->title->fromNames($names, $newId));
             $database->commit();
         }catch(Throwable $exception){
             $database->rollback();

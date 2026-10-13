@@ -16,7 +16,10 @@
 *     visibility of its rule, a refused stage keeps the stored stage (no emails);
 *   - one transaction: header, edit/view groups, detail values (deleted and
 *     inserted again, as in legacy), title from DT_NAME.
-* Not ported (plan 14): title masks, calculated fields, ElasticSearch, HTML
+* Title from the title mask of the record type (TitleMask, fill only), else from DT_NAME,
+* else "Record \NNN"; calculated fields of the record are run before the title
+* (CalculatedFields, plan 14 / plan 15 Phase 6).
+* Not ported (plan 14): ElasticSearch, HTML
 * cache, emails, parent/child pointers, relationship re-titling.
 *
 * @project     Heurist academic knowledge management system
@@ -49,11 +52,15 @@ final class RecordSaveService
     private WritableRecordTypes $writable;
     private RuntimeContext $runtime;
     private RecordTitle $title;
+    private ?TitleMask $titleMask;
+    private ?CalculatedFields $calculated;
     /** @var array<string,int> cmsPage, workflowStage */
     private array $codes;
 
     /**
      * @param array<string,int> $codes Local ids: cmsPage (RT_CMS_PAGE), workflowStage (DT_WORKFLOW_STAGE).
+     * @param TitleMask|null $titleMask Title from the mask of the record type (null: DT_NAME only).
+     * @param CalculatedFields|null $calculated Calculated fields run on save (null: none).
      */
     public function __construct(
         RecordStore $store,
@@ -63,7 +70,9 @@ final class RecordSaveService
         WritableRecordTypes $writable,
         RuntimeContext $runtime,
         RecordTitle $title,
-        array $codes = array()
+        array $codes = array(),
+        ?TitleMask $titleMask = null,
+        ?CalculatedFields $calculated = null
     ) {
         $this->store = $store;
         $this->validator = $validator;
@@ -73,6 +82,8 @@ final class RecordSaveService
         $this->runtime = $runtime;
         $this->title = $title;
         $this->codes = array_map('intval', $codes);
+        $this->titleMask = $titleMask;
+        $this->calculated = $calculated;
     }
 
     /**
@@ -136,7 +147,14 @@ final class RecordSaveService
             }
             $this->store->setPermissions($recordId, $plan['editGroups'], $plan['viewGroups']);
             $this->store->replaceDetails($recordId, $rows, $plan['keepFields']);
-            $this->store->setTitle($recordId, $this->title->fromRows($rows, $recordId));
+            if($this->calculated !== null){
+                foreach($this->calculated->update($recordId, $plan['rectype']) as $fieldId => $message){
+                    $issues[] = array('field'=>(string)$fieldId, 'index'=>0, 'code'=>'calculation', 'severity'=>'warning',
+                        'message'=>'Calculated field '.$fieldId.' was not updated: '.$message);
+                }
+            }
+            $title = $this->titleMask !== null ? $this->titleMask->fill($recordId) : null;
+            $this->store->setTitle($recordId, $title ?? $this->title->fromRows($rows, $recordId));
             $database->commit();
         }catch(Throwable $exception){
             $database->rollback();

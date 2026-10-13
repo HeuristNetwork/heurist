@@ -54,12 +54,18 @@ The body is the record object of `GET /records/{id}` (input = output):
 - `RecordDeleteService.php` — references check (recLinks), forced delete.
 - `RecordDuplicateService.php` — copy with "Copy of " name.
 - Writes are `Store/RecordStore.php`, reads `Store/RecordRepository.php` (plan 15).
-- `RecordTitle.php` — title from DT_NAME, else "Record #NNN".
+- `TitleMask.php` — title from the title mask of the record type (port of legacy
+  `TitleMask::fill` only; reads through the access layer of plan 15).
+- `RecordTitle.php` — title from DT_NAME, else "Record #NNN" (when the mask is not
+  defined, has an error or gives no text).
+- `CalculatedFields.php` — runs the Smarty formulas of calculated fields on save
+  (srv Smarty engine, `$r` = the record), before the title.
 - `WritableRecordTypes.php` — hardcoded list of writable record types.
 - `RecordEditException.php` — HTTP status, error code, issues of a failed write.
 
 ## Not ported yet
 
-Title masks, calculated fields, ElasticSearch, HTML output cache, workflow emails,
+Checking/converting title masks, calculated fields of other records that depend on
+the saved one, ElasticSearch, HTML output cache, workflow emails,
 parent/child pointers, relationship re-titling, file upload, batch save, guest
 user rights. Test: `tests/RecordEditApiTest.php --db=NAME --user=ID [--write]`.

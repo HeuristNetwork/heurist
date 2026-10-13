@@ -57,6 +57,9 @@ use Heurist\Records\Store\RecordAccess;
 use Heurist\Records\Store\RecordRepository;
 use Heurist\Records\Store\RecordStore;
 use Heurist\Records\Edit\RecordTitle;
+use Heurist\Records\Edit\TitleMask;
+use Heurist\Records\Edit\CalculatedFields;
+use Heurist\Records\Files\FileRepository;
 use Heurist\Records\Edit\RecordValidator;
 use Heurist\Records\Edit\WritableRecordTypes;
 use Heurist\Records\Data\RecordDataService;
@@ -256,6 +259,11 @@ final class ServiceFactory
         $permissions = new RecordPermissionService($this->database, $this->runtime);
         $writable = new WritableRecordTypes($this->codes);
         $title = new RecordTitle($languages, $this->codes->id('DT_NAME'));
+        $titleMask = new TitleMask($definitions, $store->records(), FileRepository::shared($this->database), $languages);
+        $calculated = new CalculatedFields($definitions, $store, function(string $formula, int $recordId): array {
+            return $this->smartyRunner()->run(array('body' => $formula), array($recordId),
+                array('mode' => 'txt', 'purpose' => 'render', 'record' => true));
+        });
         $validator = new RecordValidator($this->database, $definitions, $languages, array(
             'name' => $this->codes->id('DT_NAME'),
             'shortSummary' => $this->codes->id('DT_SHORT_SUMMARY'),
@@ -267,12 +275,12 @@ final class ServiceFactory
             new RecordSaveService($store, $validator, $permissions, $definitions, $writable, $this->runtime, $title, array(
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
                 'workflowStage' => $this->codes->id('DT_WORKFLOW_STAGE')
-            )),
+            ), $titleMask, $calculated),
             new RecordDeleteService($store, $permissions, $definitions, $writable, $this->runtime),
             new RecordDuplicateService($store, $permissions, $definitions, $writable, $this->runtime, $title, $languages, array(
                 'name' => $this->codes->id('DT_NAME'),
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE')
-            )),
+            ), $titleMask),
             $this->recordQueryController(),
             $this->runtime
         );

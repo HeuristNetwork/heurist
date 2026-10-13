@@ -160,6 +160,16 @@ final class RecordStore
         }
     }
 
+    /** Replace all values of one field of a record with one value (null = no value). */
+    public function setFieldValue(int $recordId, int $fieldId, ?string $value): void
+    {
+        $this->database->execute('DELETE FROM '.$this->details.' WHERE dtl_RecID=? AND dtl_DetailTypeID=?',
+            array($recordId, $fieldId));
+        if($value !== null){
+            $this->insertDetails($recordId, array(array('dty'=>$fieldId, 'value'=>$value, 'fileId'=>null, 'geo'=>null, 'hidden'=>null)));
+        }
+    }
+
     /** Remove the pointer values of a source record to a target record in one field. */
     public function removePointer(int $sourceId, int $fieldId, int $targetId): int
     {

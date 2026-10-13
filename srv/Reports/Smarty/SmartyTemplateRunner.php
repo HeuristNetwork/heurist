@@ -87,7 +87,8 @@ final class SmartyTemplateRunner
      *
      * @param array $source ['file' => template file name] or ['body' => template text].
      * @param array $ids Record ids (in report order).
-     * @param array $options mode (html), purpose (preview|file|render), replevel (0-3).
+     * @param array $options mode (html), purpose (preview|file|render), replevel (0-3),
+     *        record (true: $r is the first record, as for calculated fields).
      * @param callable|null $tick fn(int $done, int $total): void - progress; may throw to stop.
      * @return array{output:string,error:?string,records:int}
      */
@@ -134,6 +135,9 @@ final class SmartyTemplateRunner
             $smarty->assign('heurist', $api);
             $smarty->assign('results', $ids);
             $smarty->assign('template_file', $templateFile);
+            if(!empty($options['record'])){
+                $smarty->assign('r', $api->getRecord($ids[0]));
+            }
             $output = $smarty->fetch($template);
         }catch(JobInterruptedException $exception){
             throw $exception;
