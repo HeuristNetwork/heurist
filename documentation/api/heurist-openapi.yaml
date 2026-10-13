@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: Heurist Read API
+  title: Heurist API
   version: 1.0.0-beta
-  summary: Public read access to Heurist databases, records, database definitions, maps, timeline data, annotations
-    and IIIF resources
+  summary: Read access to Heurist databases, records, database definitions, maps, timeline data, annotations
+    and IIIF resources; writes of system records, reports and background jobs for logged-in users
   description: 'This specification describes the public read API currently exposed through
 
     `hserv/controller/api.php`.
@@ -63,6 +63,13 @@ tags:
   description: Retrieve public temporal data for Heurist record queries
 - name: Jobs
   description: Background jobs of logged-in users - record export into a file, Smarty report preview and generation
+- name: Record editing
+  description: >-
+    Insert, change, duplicate and delete records (logged-in users). The body is the record object of
+    GET /records/{recordId}. For now only system record types can be written - custom reports, report
+    schedules, map documents, map layers and their sources, query sources, website home and pages.
+- name: Reports
+  description: Smarty report templates, their records and schedules (reports manager)
 paths:
   /databases:
     get:
@@ -760,6 +767,341 @@ paths:
       description: Anonymous requests return only publicly visible records. The record object and meta are the same as
         for /records?ids={recordId} (details are arrays of values keyed by field ID); there is no pagination. A missing
         or inaccessible record returns an empty records array.
+    post:
+      tags:
+      - Record editing
+      operationId: insertRecord
+      summary: Insert a record
+      description: >-
+        Inserts a record of a writable (system) record type. recordId 0 takes the next free id; a negative
+        recordId inserts the record with that id (import), 409 if it exists. The owner is the current user and
+        the visibility "viewable" unless the body gives them; website pages (RT_CMS_PAGE) belong to group 1 and
+        are public. The title is the first name (DT_NAME) value without language prefix, or "Record #id".
+        Cross-site rules - the body must be sent with Content-Type application/json (415 otherwise) and an
+        Origin header must be this host (403 otherwise).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordWriteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordInput'}
+      responses:
+        '201':
+          description: The inserted record as GET /records/{recordId} returns it, with meta.issues (warnings).
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '400':
+          description: Invalid body (legacy format, unknown header) or a positive recordId
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '401':
+          description: Not logged in
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '403':
+          description: Not allowed (account, ownership, record type outside the writable list, other site)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '409':
+          description: A record with the given (negative) id exists
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '415':
+          description: Content-Type is not application/json
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '422':
+          description: Invalid values - errors lists them by field
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+    put:
+      tags:
+      - Record editing
+      operationId: replaceRecord
+      summary: Replace a record
+      description: >-
+        The body replaces the whole record - detail fields and edit/view groups missing from the body are
+        cleared; owner and visibility are kept when missing. Values of forbidden fields stay as stored. When the
+        body has rec_Modified and it differs from the stored one the answer is 409, unless force=1.
+        Cross-site rules - the body must be sent with Content-Type application/json (415 otherwise) and an
+        Origin header must be this host (403 otherwise).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordWriteId'
+      - $ref: '#/components/parameters/RecordForce'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordInput'}
+      responses:
+        '200':
+          description: The saved record, with meta.issues (warnings).
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '400':
+          description: Invalid body, or rec_ID / rec_RecTypeID differ from the stored record
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '401':
+          description: Not logged in
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '403':
+          description: Not allowed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '404':
+          description: Record does not exist
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '409':
+          description: The record was changed after it was loaded (rec_Modified gives the stored value)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '415':
+          description: Content-Type is not application/json
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '422':
+          description: Invalid values
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+    patch:
+      tags:
+      - Record editing
+      operationId: patchRecord
+      summary: Change some fields of a record
+      description: >-
+        Replaces only the detail fields in the body (an empty array clears a field); headers missing from the
+        body are kept. The complete record is validated after the change.
+        Cross-site rules - the body must be sent with Content-Type application/json (415 otherwise) and an
+        Origin header must be this host (403 otherwise).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordWriteId'
+      - $ref: '#/components/parameters/RecordForce'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordInput'}
+      responses:
+        '200':
+          description: The saved record, with meta.issues (warnings).
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '400':
+          description: Invalid body
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '401':
+          description: Not logged in
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '403':
+          description: Not allowed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '404':
+          description: Record does not exist
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '409':
+          description: The record was changed after it was loaded
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '415':
+          description: Content-Type is not application/json
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '422':
+          description: Invalid values
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+    delete:
+      tags:
+      - Record editing
+      operationId: deleteRecord
+      summary: Delete a record
+      description: >-
+        Without force a record that other records point to, or that is part of a relationship, is not deleted -
+        the 409 answer lists the references. With force=1 the pointer values in the other records are removed and
+        the relationship records are deleted too. Reminders, tags, comments, bookmarks and permissions of the
+        record are removed. Cross-site rule - a real DELETE request (or POST with X-HTTP-Method DELETE); an
+        Origin header must be this host.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordWriteId'
+      - $ref: '#/components/parameters/RecordForce'
+      responses:
+        '200':
+          description: Deleted records.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordDeleteResponse'}
+        '401':
+          description: Not logged in
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '403':
+          description: Not allowed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '404':
+          description: Record does not exist
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '409':
+          description: The record has references; nothing is deleted.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/RecordEditError'
+                - type: object
+                  properties:
+                    references: {$ref: '#/components/schemas/RecordReferences'}
+  /{database}/records/{recordId}/duplicate:
+    post:
+      tags:
+      - Record editing
+      operationId: duplicateRecord
+      summary: Duplicate a record
+      description: >-
+        Copies the header, detail values and edit/view groups. The copy belongs to the current user (website
+        pages - group 1, public) and its name values without language prefix start with "Copy of ".
+        Relationship and linked records are not copied. The request needs Content-Type application/json (the
+        body may be empty).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordId'
+      responses:
+        '201':
+          description: The new record.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '401':
+          description: Not logged in
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '403':
+          description: Not allowed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '404':
+          description: Record does not exist or is not visible
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '415':
+          description: Content-Type is not application/json
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+  /{database}/records/{recordId}/validate:
+    post:
+      tags:
+      - Record editing
+      operationId: validateRecord
+      summary: Check a record without saving it
+      description: >-
+        Runs every check of a save (insert when recordId is 0 or negative, replace otherwise) and writes
+        nothing.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordWriteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordInput'}
+      responses:
+        '200':
+          description: The record can be saved; issues lists warnings.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [valid, issues]
+                properties:
+                  valid: {type: boolean, const: true}
+                  issues:
+                    type: array
+                    items: {$ref: '#/components/schemas/RecordIssue'}
+        '400':
+          description: Invalid body
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '401':
+          description: Not logged in
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '403':
+          description: Not allowed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '404':
+          description: Record does not exist
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '415':
+          description: Content-Type is not application/json
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '422':
+          description: Invalid values
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
   /{database}/rectypes:
     get:
       tags:
@@ -2144,6 +2486,500 @@ paths:
           description: Query uses an unsupported feature.
         '500':
           $ref: '#/components/responses/ServerError'
+  /{database}/reports:
+    get:
+      tags:
+      - Reports
+      operationId: listReports
+      summary: List reports
+      description: >-
+        Report records and template files. scope=card lists single-record (card) reports and is allowed anonymously; all and set need a logged-in user.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: scope
+        in: query
+        schema: {type: string, enum: [all, card, set], default: all}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+    post:
+      tags:
+      - Reports
+      operationId: createReport
+      summary: Create a report
+      description: >-
+        Creates a Custom Report record and its template file.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: {type: string}
+                isCardView: {type: boolean}
+                body: {type: string, description: Template text}
+                description: {type: string}
+                file: {type: string}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/generated:
+    get:
+      tags:
+      - Reports
+      operationId: listGeneratedReports
+      summary: List generated report files
+      description: >-
+        Files in the generated-reports folder whose name starts with prefix.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: prefix
+        in: query
+        schema: {type: string}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/generated/{file}:
+    delete:
+      tags:
+      - Reports
+      operationId: deleteGeneratedReport
+      summary: Delete a generated report file
+      description: >-
+        Deletes one file of the generated-reports folder.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: file
+        in: path
+        required: true
+        schema: {type: string}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/schedules:
+    get:
+      tags:
+      - Reports
+      operationId: listReportSchedules
+      summary: List report schedules
+      description: >-
+        All visible schedules with their last generated file.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/setup:
+    post:
+      tags:
+      - Reports
+      operationId: setupReports
+      summary: Install report definitions
+      description: >-
+        Installs the Custom Report and Report Schedule record types and converts old schedules (database managers).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/import:
+    post:
+      tags:
+      - Reports
+      operationId: importReportTemplate
+      summary: Import a template
+      description: >-
+        Multipart upload in the field import_template (.gpl or .tpl); isCardView as a request parameter.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/{reportRef}:
+    get:
+      tags:
+      - Reports
+      operationId: getReport
+      summary: Get a report
+      description: >-
+        One report - record values and template file.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+    put:
+      tags:
+      - Reports
+      operationId: updateReport
+      summary: Change a report
+      description: >-
+        Changes title, description, isCardView or the template file name.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: {type: string}
+                description: {type: string}
+                isCardView: {type: boolean}
+                file: {type: string}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+    delete:
+      tags:
+      - Reports
+      operationId: deleteReport
+      summary: Delete a report
+      description: >-
+        Deletes the record and its template file when no other record uses it; keepFile=1 keeps the file.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      - name: keepFile
+        in: query
+        schema: {type: boolean}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/{reportRef}/template:
+    get:
+      tags:
+      - Reports
+      operationId: getReportTemplate
+      summary: Get a template
+      description: >-
+        Template text of a report.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+    put:
+      tags:
+      - Reports
+      operationId: saveReportTemplate
+      summary: Save a template
+      description: >-
+        Saves the template text.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body: {type: string}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/{reportRef}/register:
+    post:
+      tags:
+      - Reports
+      operationId: registerReportFile
+      summary: Register a template file
+      description: >-
+        Creates the Custom Report record of a template file that has none.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: {type: string}
+                isCardView: {type: boolean}
+                description: {type: string}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/{reportRef}/schedules:
+    post:
+      tags:
+      - Reports
+      operationId: createReportSchedule
+      summary: Add a schedule
+      description: >-
+        Adds a Report Schedule record of the report.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: {type: string}
+                querySource: {type: string}
+                output: {type: string}
+                format: {type: string}
+                intervalMinutes: {type: integer}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/{reportRef}/schedules/{scheduleId}:
+    put:
+      tags:
+      - Reports
+      operationId: updateReportSchedule
+      summary: Change a schedule
+      description: >-
+        Changes a Report Schedule record.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      - name: scheduleId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: {type: string}
+                querySource: {type: string}
+                suffix: {type: string}
+                format: {type: string}
+                intervalMinutes: {type: integer}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+    delete:
+      tags:
+      - Reports
+      operationId: deleteReportSchedule
+      summary: Delete a schedule
+      description: >-
+        Deletes a Report Schedule record.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      - name: scheduleId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      responses:
+        '200':
+          description: 'Success - {status: 0, data}'
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportResponse'}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/{reportRef}/export:
+    get:
+      tags:
+      - Reports
+      operationId: exportReportTemplate
+      summary: Download a template
+      description: >-
+        The template with concept codes (.gpl), as a file download.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      responses:
+        '200':
+          description: Template file
+          content:
+            text/plain:
+              schema: {type: string}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
+  /{database}/reports/{reportRef}/render:
+    get:
+      tags:
+      - Reports
+      operationId: renderReport
+      summary: Render a report for one record
+      description: >-
+        HTML of the report for record rec (card reports; allowed anonymously for visible records).
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/ReportRef'
+      - name: rec
+        in: query
+        required: true
+        schema: {type: integer, minimum: 1}
+      responses:
+        '200':
+          description: HTML
+          content:
+            text/html:
+              schema: {type: string}
+        '400': {$ref: '#/components/responses/ApiBadRequest'}
+        '401': {$ref: '#/components/responses/ApiUnauthorized'}
+        '403': {$ref: '#/components/responses/ApiForbidden'}
+        '404': {$ref: '#/components/responses/ApiNotFound'}
   /{database}/jobs:
     get:
       tags:
@@ -2442,6 +3278,29 @@ components:
       schema:
         type: integer
         minimum: 1
+    RecordWriteId:
+      name: recordId
+      in: path
+      required: true
+      description: Record id. On insert (POST) 0 takes the next id and a negative value gives the id (import).
+      schema:
+        type: integer
+    RecordForce:
+      name: force
+      in: query
+      description: >-
+        PUT/PATCH - save even when rec_Modified differs (overwrites another change). DELETE - remove the
+        references (pointer values in other records, relationship records) and delete.
+      schema:
+        type: boolean
+        default: false
+    ReportRef:
+      name: reportRef
+      in: path
+      required: true
+      description: Report record id or template file name (URL-encoded).
+      schema:
+        type: string
     RecordTypeId:
       name: recordTypeId
       in: path
@@ -3520,6 +4379,10 @@ components:
               trm_Label: {type: string}
               trm_Code: {type: string}
               trm_ConceptCode: {type: string}
+        issues:
+          type: array
+          description: Record writes only - warnings of the save (validation, workflow).
+          items: {$ref: '#/components/schemas/RecordIssue'}
       additionalProperties: false
     RecordItemResponse:
       type: object
@@ -3539,6 +4402,117 @@ components:
         meta:
           $ref: '#/components/schemas/RecordItemMeta'
       additionalProperties: false
+    RecordInput:
+      type: object
+      description: >-
+        A record to write - the record object of GET /records/{recordId}. A bare record or {records:[record]}.
+        Read-only headers of the GET output (rec_Title, rec_Added, rec_AddedByUGrpID, rec_Hash,
+        rec_FlagTemporary, virtual headers) are ignored. The legacy recordSave format (headers without rec_,
+        details keyed "t:NNN") is refused.
+      properties:
+        rec_ID: {type: [string, integer], description: Must equal the recordId of the URL when given.}
+        rec_RecTypeID: {type: [string, integer], description: Required on insert; cannot be changed.}
+        rec_OwnerUGrpID: {type: [string, integer]}
+        rec_NonOwnerVisibility: {type: string, enum: [viewable, hidden, public, pending]}
+        rec_NonOwnerVisibilityGroups:
+          type: array
+          description: Groups that may view the record (visibility viewable).
+          items: {type: [string, integer]}
+        rec_EditGroups:
+          type: array
+          description: Groups that may change the record besides the owner.
+          items: {type: [string, integer]}
+        rec_URL: {type: [string, 'null']}
+        rec_ScratchPad: {type: [string, 'null']}
+        rec_Modified:
+          type: string
+          description: Value of the loaded record; a different stored value gives 409 (concurrency check).
+        details:
+          type: object
+          description: >-
+            Arrays of values keyed by field id. Values in the compact form (term id, record id, ulf_ID, text,
+            date string or temporal JSON) or the resolved object form of GET (value, trm_ID, rec_ID, ulf_ID or
+            file.ulf_ID are read); geo {geo:{type, wkt}} or WKT. {..., hidden:true} hides the value from the
+            public. DT_NAME, DT_SHORT_SUMMARY and DT_EXTENDED_DESCRIPTION may have translations as further
+            values with a language prefix ("fre:...").
+          additionalProperties:
+            type: array
+            items: {$ref: '#/components/schemas/RecordDetailValue'}
+      additionalProperties: false
+    RecordIssue:
+      type: object
+      required: [field, code, severity, message]
+      properties:
+        field: {type: string, description: Field id or header name (rec_*).}
+        index: {type: [integer, 'null'], description: Position of the value in the field.}
+        code:
+          type: string
+          description: >-
+            required, type, vocabulary, pointer, file, geo, length, date, max, language, forbidden,
+            unknown_field, not_in_structure, rectype, owner, visibility, workflow
+        severity: {type: string, enum: [error, warning]}
+        message: {type: string}
+    RecordEditError:
+      type: object
+      required: [status, error, message]
+      properties:
+        status: {type: integer}
+        error:
+          type: string
+          enum: [invalid_request, access_denied, not_found, conflict, references, unsupported_media_type,
+            validation, method_not_allowed, server_error]
+        message: {type: string}
+        errors:
+          type: array
+          description: 422 - the issues of the record.
+          items: {$ref: '#/components/schemas/RecordIssue'}
+        rec_Modified: {type: string, description: 409 conflict - the stored value.}
+      additionalProperties: true
+    RecordReferences:
+      type: object
+      properties:
+        pointers:
+          type: array
+          items:
+            type: object
+            properties:
+              rec_ID: {type: string}
+              rec_RecTypeID: {type: string}
+              rec_Title: {type: string}
+              dty_ID: {type: string}
+        relationships:
+          type: array
+          items:
+            type: object
+            properties:
+              rec_ID: {type: string, description: Relationship record}
+              source: {type: string}
+              target: {type: string}
+              relationType: {type: [string, 'null']}
+    RecordDeleteResponse:
+      type: object
+      required: [deleted]
+      properties:
+        deleted:
+          type: array
+          description: The record and the relationship records deleted with it.
+          items: {type: string}
+        pointersRemoved: {type: integer}
+        relationshipsDeleted: {type: integer}
+        bookmarks: {type: integer}
+    ReportResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status: {type: integer, const: 0}
+        data: {}
+    ApiError:
+      type: object
+      required: [status, error, message]
+      properties:
+        status: {type: integer}
+        error: {type: string, description: 'invalid_request, access_denied, not_found, method_not_allowed, server_error'}
+        message: {type: string}
     SessionLoginRequest:
       type: object
       required:
@@ -4203,6 +5177,26 @@ components:
           $ref: '#/components/schemas/Pagination'
       additionalProperties: false
   responses:
+    ApiBadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    ApiUnauthorized:
+      description: Not logged in
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    ApiForbidden:
+      description: Not allowed
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    ApiNotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
     BadRequest:
       description: Invalid request
       content:

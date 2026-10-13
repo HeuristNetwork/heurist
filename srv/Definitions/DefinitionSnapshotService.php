@@ -138,7 +138,7 @@ final class DefinitionSnapshotService
         if(intval($meta['format'] ?? 1) < self::FORMAT){ return false; }
         $dbconst = $meta['dbconst'] ?? null;
         if(!is_array($dbconst)){ return false; }
-        foreach(array('DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'TRM_NO', 'TRM_YES') as $name){
+        foreach(array('DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'TRM_NO', 'TRM_YES', 'RT_CMS_PAGE', 'DT_NAME', 'DT_SYMBOLOGY', 'DT_GEO_FIELDS') as $name){
             if(!array_key_exists($name, $dbconst)){ return false; }
         }
         return true;
@@ -162,7 +162,33 @@ final class DefinitionSnapshotService
             'DT_GEO_OUTPUTMODE'        => $this->localByConcept('defDetailTypes', 'dty', 2, 1162),
             'DT_IS_LOADED_BY_EXTENT'   => $this->localByConcept('defDetailTypes', 'dty', 2, 1160),
             'TRM_NO'                   => $this->localByConcept('defTerms', 'trm', 2, 531),
-            'TRM_YES'                  => $this->localByConcept('defTerms', 'trm', 2, 532)
+            'TRM_YES'                  => $this->localByConcept('defTerms', 'trm', 2, 532),
+
+            // record editing (plan 14): writable system record types (the client opens
+            // the new record editor for these) and the multilingual fields
+            'RT_CUSTOM_REPORT'         => $this->localByConcept('defRecTypes', 'rty', 2, 1104),
+            'RT_REPORT_SCHEDULE'       => $this->localByConcept('defRecTypes', 'rty', 2, 1105),
+            'RT_KML_SOURCE'            => $this->localByConcept('defRecTypes', 'rty', 3, 1014),
+            'RT_FILE_SOURCE'           => $this->localByConcept('defRecTypes', 'rty', 2, 53),
+            'RT_SHP_SOURCE'            => $this->localByConcept('defRecTypes', 'rty', 3, 1017),
+            'RT_IMAGE_SOURCE'          => $this->localByConcept('defRecTypes', 'rty', 3, 1018),
+            'RT_TILED_IMAGE_SOURCE'    => $this->localByConcept('defRecTypes', 'rty', 2, 11),
+            'RT_CMS_HOME'              => $this->localByConcept('defRecTypes', 'rty', 99, 51),
+            'RT_CMS_PAGE'              => $this->localByConcept('defRecTypes', 'rty', 99, 52),
+            'DT_NAME'                  => $this->localByConcept('defDetailTypes', 'dty', 2, 1),
+            'DT_SHORT_SUMMARY'         => $this->localByConcept('defDetailTypes', 'dty', 2, 3),
+            'DT_EXTENDED_DESCRIPTION'  => $this->localByConcept('defDetailTypes', 'dty', 2, 4),
+            // special fields of the record editor (query, filter form, rules, columns, symbology)
+            'DT_QUERY_STRING'          => $this->localByConcept('defDetailTypes', 'dty', 2, 12),
+            'DT_EXPANSION_RULES'       => $this->localByConcept('defDetailTypes', 'dty', 2, 1163),
+            'DT_TABLE_FIELDS'          => $this->localByConcept('defDetailTypes', 'dty', 2, 1164),
+            'DT_FILTER_FORM'           => $this->localByConcept('defDetailTypes', 'dty', 2, 1165),
+            'DT_SYMBOLOGY'             => $this->localByConcept('defDetailTypes', 'dty', 3, 1092),
+            // other Query Source fields written by the Query Source editor
+            'DT_GEO_FIELDS'            => $this->localByConcept('defDetailTypes', 'dty', 2, 1161),
+            'DT_TIMELINE_FIELDS'       => $this->localByConcept('defDetailTypes', 'dty', 2, 1105),
+            'DT_MINIMUM_ZOOM_LEVEL'    => $this->localByConcept('defDetailTypes', 'dty', 2, 32),
+            'DT_MAXIMUM_ZOOM_LEVEL'    => $this->localByConcept('defDetailTypes', 'dty', 2, 33)
         );
     }
 

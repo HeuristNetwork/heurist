@@ -104,6 +104,16 @@ if(@$_REQUEST['method']){
     }
 }
 
+// Real HTTP verb of record writes (plan 14): never the ?method= parameter, and
+// PATCH stays PATCH ($method above turns it into PUT for the other resources).
+$http_verb = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+if($http_verb === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD'])){
+    $verb_override = strtoupper((string)$_SERVER['HTTP_X_HTTP_METHOD']);
+    if(in_array($verb_override, array('PUT', 'PATCH', 'DELETE'), true)){
+        $http_verb = $verb_override;
+    }
+}
+
 //allowed entities for entityScrud
 $entities = array(
 
@@ -404,6 +414,19 @@ if($is_query_cancel){
     $method = 'search';
 }
 
+// Record writes (plan 14): POST (insert), PUT, PATCH, DELETE /records/{id} and
+// POST /records/{id}/duplicate|validate. See srv/Controller/RecordEditController.php.
+// Logged-in users only; GET /records/{id} stays the read route below.
+$is_record_edit = ($resource === 'records'
+    && isset($requestUri[4]) && preg_match('/^-?\d+$/', (string)$requestUri[4])
+    && $http_verb !== 'GET');
+if($is_record_edit){
+    if(!in_array($http_verb, array('POST', 'PUT', 'PATCH', 'DELETE'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, PATCH, DELETE'));
+    }
+    $method = 'save'; // authentication required
+}
+
 // The modern graph collection returns renderer-neutral graph documents for the
 // heurist-graph client. It is read-only for both GET and POST and has its own
 // request contract (query, links, rule, limits) separate from /records.
@@ -595,6 +618,23 @@ if($is_def_query){
 
     $controller = ServiceFactory::fromLegacySystem($system)->queryCancelController();
     $controller->output($req_params);
+    $system->dbclose();
+    exit;
+
+}elseif($is_record_edit){
+
+    $controller = ServiceFactory::fromLegacySystem($system)->recordEditController();
+    $controller->handleRequest(
+        $http_verb,
+        array_slice($requestUri, 4),
+        $req_params,
+        is_array($json) ? $json : null,
+        array(
+            'contentType' => $contentType,
+            'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+            'host' => $_SERVER['HTTP_HOST'] ?? ''
+        )
+    );
     $system->dbclose();
     exit;
 

@@ -24,6 +24,7 @@ use Heurist\Controller\JobController;
 use Heurist\Controller\MapDataController;
 use Heurist\Controller\PublicationController;
 use Heurist\Controller\QueryCancelController;
+use Heurist\Controller\RecordEditController;
 use Heurist\Controller\RecordPresentationController;
 use Heurist\Controller\RecordQueryController;
 use Heurist\Controller\ReportController;
@@ -33,6 +34,7 @@ use Heurist\Database\DatabaseFactory;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Database\MysqlDatabase;
 use Heurist\Database\QueryTrace;
+use Heurist\Database\WritableDatabaseInterface;
 use Heurist\Jobs\JobHandlerInterface;
 use Heurist\Jobs\JobRunner;
 use Heurist\Jobs\JobStore;
@@ -45,7 +47,16 @@ use Heurist\Records\Export\ExportSettings;
 use Heurist\Records\Presentation\QuerySourcePresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
 use Heurist\Records\Presentation\PresentationRecordRepository;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Definitions\DefinitionSnapshotService;
+use Heurist\Records\Edit\RecordDeleteService;
+use Heurist\Records\Edit\RecordDuplicateService;
+use Heurist\Records\Edit\RecordPermissionService;
+use Heurist\Records\Edit\RecordSaveService;
+use Heurist\Records\Edit\RecordStore;
+use Heurist\Records\Edit\RecordTitle;
+use Heurist\Records\Edit\RecordValidator;
+use Heurist\Records\Edit\WritableRecordTypes;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\RecordSearchService;
@@ -64,6 +75,7 @@ use Heurist\Reports\ReportService;
 use Heurist\Reports\ReportTemplateStore;
 use Heurist\Records\Time\TimeDataService;
 use Heurist\System\Query\SystemQueryService;
+use Heurist\Utilities\LanguageCodes;
 
 /** Creates one consistent service graph for an initialized request. */
 final class ServiceFactory
@@ -105,7 +117,9 @@ final class ServiceFactory
             // srv Smarty engine (plan 12, Phase 6): relationships, CMS menu descriptions
             'RT_RELATION', 'RT_CMS_PAGE', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
             // record export (plan 13): KML time span
-            'DT_DATE'
+            'DT_DATE',
+            // record editing (plan 14)
+            'RT_CMS_HOME', 'DT_WORKFLOW_STAGE', 'DT_CMS_EXTFILES'
         );
         $codeIds = array();
         foreach($codeNames as $codeName){
@@ -191,8 +205,7 @@ final class ServiceFactory
             'registeredDbId' => (string)($settings->get('sys_dbRegisteredID') ?: ''),
             'language' => (string)$system->userGetPreference('layout_language', ''),
             'currentUser' => is_array($user) ? $user : array(),
-            // from this folder: HEURIST_DIR is not the Heurist folder in CLI scripts (cron)
-            'languageCodesFile' => dirname(__DIR__, 2).'/hclient/assets/language-codes-active-list.json',
+            'languageCodesFile' => self::languageCodesFile(),
             'recordLink' => static function(string $reference) use ($system): string {
                 return (string)$system->recordLink($reference);
             },
@@ -225,6 +238,49 @@ final class ServiceFactory
     public function recordQueryController(): RecordQueryController
     {
         return new RecordQueryController($this->database, $this->runtime);
+    }
+
+    /**
+     * Create the record write controller (plan 14): POST/PUT/PATCH/DELETE /records/{id}.
+     */
+    public function recordEditController(): RecordEditController
+    {
+        if(!($this->database instanceof WritableDatabaseInterface)){
+            throw new \LogicException('The database adapter does not support writes');
+        }
+        $definitions = new DefinitionLookup($this->database);
+        $languages = new LanguageCodes(self::languageCodesFile());
+        $store = new RecordStore($this->database);
+        $permissions = new RecordPermissionService($this->database, $this->runtime);
+        $writable = new WritableRecordTypes($this->codes);
+        $title = new RecordTitle($languages, $this->codes->id('DT_NAME'));
+        $validator = new RecordValidator($this->database, $definitions, $languages, array(
+            'name' => $this->codes->id('DT_NAME'),
+            'shortSummary' => $this->codes->id('DT_SHORT_SUMMARY'),
+            'extendedDescription' => $this->codes->id('DT_EXTENDED_DESCRIPTION'),
+            'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
+            'cmsExtFiles' => $this->codes->id('DT_CMS_EXTFILES')
+        ));
+        return new RecordEditController(
+            new RecordSaveService($store, $validator, $permissions, $definitions, $writable, $this->runtime, $title, array(
+                'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
+                'workflowStage' => $this->codes->id('DT_WORKFLOW_STAGE')
+            )),
+            new RecordDeleteService($store, $permissions, $definitions, $writable, $this->runtime),
+            new RecordDuplicateService($store, $permissions, $definitions, $writable, $this->runtime, $title, $languages, array(
+                'name' => $this->codes->id('DT_NAME'),
+                'cmsPage' => $this->codes->id('RT_CMS_PAGE')
+            )),
+            $this->recordQueryController(),
+            $this->runtime
+        );
+    }
+
+    /** Language codes list of value prefixes ("fre:") of this installation. */
+    public static function languageCodesFile(): string
+    {
+        // from this folder: HEURIST_DIR is not the Heurist folder in CLI scripts (cron)
+        return dirname(__DIR__, 2).'/hclient/assets/language-codes-active-list.json';
     }
 
     /** Create the controller that cancels a running query (POST /records/cancel). */

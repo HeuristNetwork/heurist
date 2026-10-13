@@ -1,13 +1,13 @@
 <?php
 /**
-* LanguageCodes.php - Language codes and language-prefixed values of reports
+* LanguageCodes.php - Language codes and language-prefixed values
 *
 * Port of getLangCode3(), extractLangPrefix() and getCurrentTranslation() of
 * hserv/utilities/ULocale.php: field values may start with "fre:" / "fr:" /
 * "*:" to give their language.
 *
 * @project     Heurist academic knowledge management system
-* @package     Reports\Smarty
+* @package     Utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace Heurist\Reports\Smarty;
+namespace Heurist\Utilities;
 
 /** Validates language codes and splits language prefixes. */
 final class LanguageCodes

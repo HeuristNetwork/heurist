@@ -29,7 +29,7 @@ use PDOStatement;
  * Concrete classes only need to define the connection bootstrap and driver name
  * decisions; fetch and statement execution remains common.
  */
-abstract class AbstractDatabase implements DatabaseInterface
+abstract class AbstractDatabase implements WritableDatabaseInterface
 {
     protected PDO $pdo;
 
@@ -65,6 +65,38 @@ abstract class AbstractDatabase implements DatabaseInterface
     public function getDriver(): string
     {
         return (string)$this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    }
+
+    public function execute(string $sql, array $parameters = array()): int
+    {
+        return $this->statement($sql, $parameters)->rowCount();
+    }
+
+    public function lastInsertId(): int
+    {
+        return intval($this->pdo->lastInsertId());
+    }
+
+    public function beginTransaction(): void
+    {
+        $this->pdo->beginTransaction();
+    }
+
+    public function commit(): void
+    {
+        $this->pdo->commit();
+    }
+
+    public function rollback(): void
+    {
+        if($this->pdo->inTransaction()){
+            $this->pdo->rollBack();
+        }
+    }
+
+    public function inTransaction(): bool
+    {
+        return $this->pdo->inTransaction();
     }
 
     /**

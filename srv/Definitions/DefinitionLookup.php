@@ -47,6 +47,10 @@ final class DefinitionLookup
     private ?array $terms = null;
     /** @var array<int,string>|null */
     private ?array $groups = null;
+    /** @var array<int,array<int,array>> rty => dty => edit structure row (structureRows) */
+    private array $editStructure = array();
+    /** @var array<int,array{targetTypes:array<int,int>,vocabulary:array<int,int>}> dty => constraints */
+    private array $fieldConstraints = array();
 
     /** @param DatabaseInterface $database Database of the definitions. */
     public function __construct(DatabaseInterface $database)
@@ -134,6 +138,76 @@ final class DefinitionLookup
             $result[$fieldId] = $entry['name'];
         }
         return $result;
+    }
+
+    /**
+     * Fields of a record type with what record editing needs, in form order,
+     * loaded per record type on first use. Separators and relmarkers are included
+     * (type tells them apart).
+     *
+     * @return array<int,array{id:int,name:string,type:string,requirement:string,max:int,
+     *         default:string,targetTypes:array<int,int>,vocabulary:array<int,int>}> dty => row
+     *         (requirement: required|recommended|optional|forbidden; max 0 = unlimited;
+     *         targetTypes: pointer constraint, empty = any; vocabulary: term tree root ids)
+     */
+    public function structureRows(int $rectypeId): array
+    {
+        if(!isset($this->editStructure[$rectypeId])){
+            $rows = $this->database->fetchAll(
+                'SELECT rst_DetailTypeID,rst_DisplayName,rst_RequirementType,rst_MaxValues,rst_DefaultValue,'
+                .'rst_PtrFilteredIDs,dty_Name,dty_Type,dty_PtrTargetRectypeIDs,dty_JsonTermIDTree '
+                .'FROM defRecStructure JOIN defDetailTypes ON dty_ID=rst_DetailTypeID '
+                .'WHERE rst_RecTypeID=? ORDER BY rst_DisplayOrder,rst_ID',
+                array($rectypeId)
+            );
+            $result = array();
+            foreach($rows as $row){
+                $fieldId = intval($row['rst_DetailTypeID']);
+                $targets = self::idList($row['rst_PtrFilteredIDs']);
+                $result[$fieldId] = array(
+                    'id' => $fieldId,
+                    'name' => trim((string)$row['rst_DisplayName']) !== '' ? (string)$row['rst_DisplayName'] : (string)$row['dty_Name'],
+                    'type' => (string)$row['dty_Type'],
+                    'requirement' => strtolower(trim((string)$row['rst_RequirementType'])),
+                    'max' => max(0, intval($row['rst_MaxValues'])),
+                    'default' => (string)$row['rst_DefaultValue'],
+                    'targetTypes' => !empty($targets) ? $targets : self::idList($row['dty_PtrTargetRectypeIDs']),
+                    'vocabulary' => self::idList($row['dty_JsonTermIDTree'])
+                );
+            }
+            $this->editStructure[$rectypeId] = $result;
+        }
+        return $this->editStructure[$rectypeId];
+    }
+
+    /**
+     * Pointer constraint and vocabulary of a field by its own definition (for values
+     * of fields that are not in the record structure).
+     *
+     * @return array{targetTypes:array<int,int>,vocabulary:array<int,int>}
+     */
+    public function fieldConstraints(int $fieldId): array
+    {
+        if(!isset($this->fieldConstraints[$fieldId])){
+            $rows = $this->database->fetchAll(
+                'SELECT dty_PtrTargetRectypeIDs,dty_JsonTermIDTree FROM defDetailTypes WHERE dty_ID=?',
+                array($fieldId)
+            );
+            $row = $rows[0] ?? array();
+            $this->fieldConstraints[$fieldId] = array(
+                'targetTypes' => self::idList($row['dty_PtrTargetRectypeIDs'] ?? null),
+                'vocabulary' => self::idList($row['dty_JsonTermIDTree'] ?? null)
+            );
+        }
+        return $this->fieldConstraints[$fieldId];
+    }
+
+    /** Positive integers of a CSV list or JSON term tree string. */
+    private static function idList($value): array
+    {
+        if($value === null || $value === ''){ return array(); }
+        preg_match_all('/\d+/', (string)$value, $matches);
+        return array_values(array_unique(array_filter(array_map('intval', $matches[0]))));
     }
 
     /**

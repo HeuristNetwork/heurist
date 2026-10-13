@@ -29,6 +29,7 @@ namespace Heurist\Reports\Smarty;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Jobs\JobInterruptedException;
 use Heurist\Records\Data\RecordDataService;
+use Heurist\Utilities\LanguageCodes;
 use Throwable;
 
 /** Executes templates with the srv data services. */

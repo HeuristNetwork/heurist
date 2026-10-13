@@ -20,7 +20,9 @@ namespace Heurist\Records\Data;
 
 use Heurist\Database\DatabaseInterface;
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Edit\RecordPermissionService;
 use Heurist\Runtime\RuntimeContext;
+use Heurist\Runtime\SystemCode;
 use Heurist\Records\Query\QueryExecutor;
 
 /** Loads requested values without knowing how their owner records were found. */
@@ -97,7 +99,13 @@ final class RecordDataService
             // fields=_all - every populated detail value for these records,
             // regardless of type, keyed by the raw detail-type id (there is
             // no caller-supplied field list to key by).
-            $values = $this->loadFieldValues($topIds, null, $options);
+            // Records the user may change also get their edit/view groups and
+            // {value, hidden:true} for values hidden from the public (plan 14).
+            $editable = $this->runtime->userId > 0
+                ? (new RecordPermissionService($this->database, $this->runtime))->editableIds($topIds)
+                : array();
+            $this->attachEditHeaders($records, array_keys($editable));
+            $values = $this->loadFieldValues($topIds, null, $options + array('markHidden'=>$editable));
             foreach($topIds as $id){
                 foreach($values[$id] ?? array() as $dtyId=>$fieldValues){
                     foreach($fieldValues as $value){
@@ -105,6 +113,7 @@ final class RecordDataService
                     }
                 }
             }
+            $this->joinPageContent($records);
             return array_values($records);
         }
 
@@ -121,7 +130,67 @@ final class RecordDataService
                 }
             }
         }
+        $this->joinPageContent($records);
         return array_values($records);
+    }
+
+    /**
+     * rec_EditGroups, rec_NonOwnerVisibilityGroups and rec_FlagTemporary of the
+     * records the user may change (the write format of plan 14 needs them).
+     *
+     * @param array<int,array> $records Records by id.
+     * @param array<int,int> $ids Editable record ids.
+     */
+    private function attachEditHeaders(array &$records, array $ids): void
+    {
+        if(empty($ids)){ return; }
+        foreach($ids as $id){
+            $records[$id]['rec_EditGroups'] = array();
+            $records[$id]['rec_NonOwnerVisibilityGroups'] = array();
+        }
+        foreach(array_chunk($ids, self::BATCH_SIZE) as $chunk){
+            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+            foreach($this->executor->executeRows(
+                'SELECT rcp_RecID,rcp_UGrpID,rcp_Level FROM usrRecPermissions WHERE rcp_RecID IN ('.$placeholders.') ORDER BY rcp_ID',
+                str_repeat('i', count($chunk)), $chunk
+            ) as $row){
+                $key = $row[2] === 'edit' ? 'rec_EditGroups' : 'rec_NonOwnerVisibilityGroups';
+                $records[intval($row[0])][$key][] = (string)$row[1];
+            }
+            foreach($this->executor->executeRows(
+                'SELECT rec_ID,rec_FlagTemporary FROM Records WHERE rec_ID IN ('.$placeholders.')',
+                str_repeat('i', count($chunk)), $chunk
+            ) as $row){
+                $records[intval($row[0])]['rec_FlagTemporary'] = (string)$row[1];
+            }
+        }
+    }
+
+    /**
+     * Website page content (RT_CMS_PAGE / DT_EXTENDED_DESCRIPTION) is saved in parts
+     * when it is long; give it as one value, as legacy recordSearch does.
+     */
+    private function joinPageContent(array &$records): void
+    {
+        $codes = new SystemCode();
+        $page = $codes->id('RT_CMS_PAGE');
+        $content = (string)$codes->id('DT_EXTENDED_DESCRIPTION');
+        if($page < 1 || $content === '0'){ return; }
+        foreach($records as &$record){
+            $parts = $record['details'][$content] ?? null;
+            if(intval($record['rec_RecTypeID'] ?? 0) !== $page || !is_array($parts) || count($parts) < 2){ continue; }
+            $hidden = false;
+            $text = '';
+            foreach($parts as $part){
+                if(is_array($part)){
+                    $hidden = $hidden || !empty($part['hidden']);
+                    $part = $part['value'] ?? '';
+                }
+                $text .= (string)$part;
+            }
+            $record['details'][$content] = array($hidden ? array('value'=>$text, 'hidden'=>true) : $text);
+        }
+        unset($record);
     }
 
     /** Resolve presentation-only fields in one query per page, never per record. */
@@ -344,6 +413,7 @@ final class RecordDataService
         if($hasFieldFilter){ $fieldIds = $this->ids($fieldIds); }
         if(empty($ownerIds) || ($hasFieldFilter && empty($fieldIds))){ return array(); }
         $values = array();
+        $markHidden = $options['markHidden'] ?? array();
         $extentCondition = $this->extentCondition($options['extent'] ?? null);
         foreach(array_chunk($ownerIds, self::BATCH_SIZE) as $chunk){
             $sql = 'SELECT d.dtl_ID,d.dtl_RecID,d.dtl_DetailTypeID,d.dtl_Value,'
@@ -354,7 +424,7 @@ final class RecordDataService
                 .'fxm.fxm_MimeType,f.ulf_PreferredSource,f.ulf_OrigFileName,f.ulf_FileSizeKB,'
                 .'f.ulf_ObfuscatedFileID,f.ulf_Description,f.ulf_Added,f.ulf_MimeExt,'
                 .'f.ulf_Caption,f.ulf_Copyright,f.ulf_Copyowner,f.ulf_Parameters,f.ulf_WhoCanView,'
-                .'trm.trm_IDInOriginatingDB '
+                .'trm.trm_IDInOriginatingDB,d.dtl_HideFromPublic '
                 .'FROM recDetails d JOIN defDetailTypes t ON t.dty_ID=d.dtl_DetailTypeID '
                 .'LEFT JOIN Records rr ON t.dty_Type="resource" AND rr.rec_ID=d.dtl_Value '
                 .'LEFT JOIN defTerms trm ON t.dty_Type IN ("enum","relationtype") AND trm.trm_ID=d.dtl_Value '
@@ -382,6 +452,10 @@ final class RecordDataService
                     filter_var($options['resolveDetails'] ?? false, FILTER_VALIDATE_BOOLEAN)
                 );
                 if($value !== null && $value !== ''){
+                    if(intval($row[31]) === 1 && isset($markHidden[intval($row[1])])){
+                        // hidden from the public: told to users who may change the record
+                        $value = is_array($value) ? $value + array('hidden'=>true) : array('value'=>$value, 'hidden'=>true);
+                    }
                     $values[intval($row[1])][intval($row[2])][] = $value;
                 }
             }

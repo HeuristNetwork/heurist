@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 namespace Heurist\Reports\Smarty;
 
+use Heurist\Utilities\LanguageCodes;
+
 /** Modifiers registered by SmartyEngineFactory. */
 final class TemplateModifiers
 {

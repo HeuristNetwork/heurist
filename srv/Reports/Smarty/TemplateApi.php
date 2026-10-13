@@ -35,6 +35,7 @@ namespace Heurist\Reports\Smarty;
 
 use Heurist\Database\DatabaseInterface;
 use Heurist\Records\Data\RecordDataService;
+use Heurist\Utilities\LanguageCodes;
 use Heurist\Utilities\Temporal;
 
 /** Data provider of report templates. */
