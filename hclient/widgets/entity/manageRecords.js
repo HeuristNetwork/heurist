@@ -8163,7 +8163,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         this._on(this.element, {
             paste: (event) => {
-console.log(event);
+
+                // Ensure current rectype can use files
                 let recTypeFileFields = [];
                 for(const dtyID of fileFields){
 
@@ -8176,12 +8177,13 @@ console.log(event);
                     return;
                 }
 
+                // Retrieve clipboard data
                 let clipboardData = event.originalEvent.clipboardData || window.clipboardData;
-
                 if(!clipboardData || !clipboardData.items){
                     return;
                 }
 
+                // Prepare files for upload
                 let files = clipboardData.files; //clipboardData.items
                 let filesToUpload = [];
                 for(let file of files){
@@ -8201,6 +8203,35 @@ console.log(event);
 
                     this._handlePastedFiles(filesToUpload, recTypeFileFields);
                 }
+            },
+            dragover: (event) => {
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.preventDefault();
+            },
+            drop: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.preventDefault();
+
+                // Retrieve data from original event
+                event = event.originalEvent;
+                if(!event.dataTransfer || event.dataTransfer.files.length === 0){
+                    return;
+                }
+
+                // Setup paste event
+                const pasteEvent = new ClipboardEvent('paste', {
+                    bubbles: true,
+                    cancelable: true
+                });
+
+                Object.defineProperty(pasteEvent, 'clipboardData', {
+                    value: event.dataTransfer,
+                    writable: false
+                });
+
+                // Trigger paste event
+                event.target.dispatchEvent(pasteEvent);
             }
         });
 

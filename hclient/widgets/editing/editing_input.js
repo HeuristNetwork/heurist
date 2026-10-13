@@ -3167,7 +3167,7 @@ $.widget( "heurist.editing_input", {
                         if(this.configMode.entity === 'sysBugreport'
                             && !window.hWin.HEURIST4.util.isempty(value)
                             && value.indexOf(this.configMode.entity) > 0
-                            && value.match(/~\d{10}(?:%20%28\d+%29)?\.(?:png|gif|jpg)\?\d{13}$/)){
+                            && value.match(/~\d{10}(?:%20%28\d+%29)?\.(?:png|gif|jpg)/)){
 
                             urlThumb = value;
                             using_temp_file = true;
@@ -3297,23 +3297,52 @@ $.widget( "heurist.editing_input", {
     max_file_size: max_file_size,
     sequentialUploads: true,
     dataType: 'json',
-    pasteZone: $input_img,
-    dropZone: $input_img,
+    pasteZone: this.configMode?.entity !== 'sysBugreport' ? $input_img : null,
+    dropZone: this.configMode?.entity !== 'sysBugreport' ? $input_img : null,
     paste: function(e, data){
+
+        if(that.config?.entity === 'sysBugreport'){ // removing pasteZone isn't enough
+            return false;
+        }
+
         upload_count = that.f('rst_MaxValues') != 1 ? data.files.length : 1;
+        uploaded_urls = [];
         keep_existing = that.f('rst_MaxValues') != 1 && Object.keys(that.newvalues).length > 0;
     },
     drop: function(e, data){
+
+        if(that.config?.entity === 'sysBugreport'){ // removing dropZone isn't enough
+            return false;
+        }
+
         upload_count = that.f('rst_MaxValues') != 1 ? data.files.length : 1;
+        uploaded_urls = [];
         keep_existing = that.f('rst_MaxValues') != 1 && Object.keys(that.newvalues).length > 0;
     },
     always: function(){
+
         if(upload_count > 0 && uploaded_urls.length === upload_count){
 
             let values = Object.values(that.newvalues).concat(...uploaded_urls);
             that.setValue(values);
 
+            $.each(that.inputs, (idx, input) => {
+
+                input = $(input);
+
+                const inputID = input.attr('id');
+                const thumbURL = input.parent().find('img.image_input').attr('src');
+
+                if(!Object.hasOwn(that.newvalues, inputID) || that.newvalues[inputID] != thumbURL){
+                    that.newvalues[inputID] = thumbURL;
+                }
+
+            });
+
+            that.onChange();
+
             upload_count = 0;
+            uploaded_urls = [];
         }
         keep_existing = false;
     },
@@ -3385,7 +3414,7 @@ $.widget( "heurist.editing_input", {
 
                     let urlThumb =
                     (that.configMode.entity=='recUploadedFiles'
-                        ?file.url
+                        ? file.url
                         :file[(that.configMode.version=='icon')?'iconUrl':'thumbnailUrl'])
                         +'?'+(new Date()).getTime();
 
@@ -3456,8 +3485,8 @@ $.widget( "heurist.editing_input", {
        
         $progress_bar.progressbar( "value", progress );        
     }                            
-                        };      
-                        
+};
+
     if(window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1){
         fileupload_opts['multipart'] = true;
         fileupload_opts['maxChunkSize'] = 10485760; //10M
@@ -3471,8 +3500,8 @@ $.widget( "heurist.editing_input", {
         fileupload_opts['formData'].push({name: 'acceptFileTypes', value:'zip|mbtiles'});
         
         $input.attr('accept','.zip, .mbtiles');
-    }                
-       
+    }
+
                         //init upload widget
                         $input.addClass('fileupload');
                         $input.fileupload( fileupload_opts );
@@ -4471,7 +4500,7 @@ $.widget( "heurist.editing_input", {
                     click: function(e){
                                                 
                         if(that.is_disabled) return;
-                        
+
                         //if empty
                         if(that.getValues()[0] == '') { 
 
@@ -5849,7 +5878,7 @@ $.widget( "heurist.editing_input", {
                 res = this.detailType == 'freetext' ? res.replaceAll(/  +/g, ' ') : res;
             }
         }else {
-            res = this.newvalues[$input.attr('id')];    
+            res = this.newvalues[$input.attr('id')];
             if(!res && $input.attr('data-value')){
                 res = $input.attr('data-value');
             }
@@ -8418,7 +8447,9 @@ $.widget( "heurist.editing_input", {
 
     addPastedFiles: function(files){
 
-        if(!this.isFileForRecord){
+        const isBugReporter = this.configMode?.entity === 'sysBugreport';
+        const isHandling = this.isFileForRecord || isBugReporter && this.detailType === 'file'; 
+        if(!isHandling){
             return;
         }
 
@@ -8431,14 +8462,20 @@ $.widget( "heurist.editing_input", {
             return;
         }
 
-        let max_file_size = Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']);
+        let uploadedFiles;
+
+        const registerAtOnce = this.isFileForRecord || this.configMode?.registerAtOnce ? 1 : 0;
+        const max_file_size = Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']);
+
         let fileupload_opts = {
 
             url: `${window.hWin.HAPI4.baseURL}hserv/controller/fileUpload.php`,
             formData: [
                 {name:'db', value: window.hWin.HAPI4.database}, 
-                {name:'entity', value: 'recUploadedFiles'},
-                {name:'registerAtOnce', value: 1},
+                {name:'entity', value: this.configMode?.entity ? this.configMode?.entity : 'recUploadedFiles'},
+                {name:'registerAtOnce', value: registerAtOnce},
+                {name:'version', value: this.configMode?.version},
+                {name:'maxsize', value: this.configMode?.size},
                 {name:'recID', value: this.options.recID},
                 {name:'usetempname', value: 1}
             ],
@@ -8446,6 +8483,34 @@ $.widget( "heurist.editing_input", {
             max_file_size: max_file_size,
             sequentialUploads: true,
             dataType: 'json',
+
+            start: () => {
+                uploadedFiles = new Set([...this.getValues()]); // get current values
+            },
+
+            stop: () => {
+
+                if(!isBugReporter){
+                    return;
+                }
+
+                // Bug reporter has special handling, all values at once (some can be missed if set within done event) and update newvalues
+                const cleanedFiles = [...uploadedFiles].filter(file => !window.hWin.HEURIST4.util.isempty(file));
+                this.setValue(cleanedFiles);
+
+                $.each(this.inputs, (idx, input) => {
+
+                    input = $(input);
+
+                    const inputID = input.attr('id');
+                    const thumbURL = input.parent().find('img.image_input').attr('src');
+
+                    if(!Object.hasOwn(this.newvalues, inputID) || this.newvalues[inputID] != thumbURL){
+                        this.newvalues[inputID] = thumbURL;
+                    }
+
+                });
+            },
 
             done: (e, response) => {
 
@@ -8462,20 +8527,23 @@ $.widget( "heurist.editing_input", {
                     return;
                 }
 
-                let fileValues = new Set([...this.getValues()]);
                 let hasNewFiles = false;
                 for(let idx = 0; idx < response.data.files.length; idx ++){
 
-                    let ulfID = response.data.files[idx].ulf_ID;
-                    if(window.hWin.HEURIST4.util.isPositiveInt(ulfID)){
-                        fileValues.add(ulfID);
+                    let file = registerAtOnce ? response.data.files[idx].ulf_ID : response.data.files[idx].url;
+                    if(window.hWin.HEURIST4.util.isPositiveInt(file) || !window.hWin.HEURIST4.util.isempty(file)){
+                        uploadedFiles.add(file);
                         hasNewFiles = true;
                     }
                 }
 
-                if(hasNewFiles){
-                    this.setValue([...fileValues]);
+                if(!hasNewFiles || isBugReporter){
+                    return;
                 }
+
+                // Cleanup values and then set values
+                const cleanedFiles = [...uploadedFiles].filter(file => window.hWin.HEURIST4.util.isPositiveInt(file) || !window.hWin.HEURIST4.util.isempty(file));
+                this.setValue(cleanedFiles);
             },
             fail: function(e, response){
                 response = response.message ? response : {message: response, error_title: 'File upload error'};
