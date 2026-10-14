@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace Heurist\Reports\Smarty;
 
+use Heurist\Utilities\GeoText;
 use Heurist\Utilities\Temporal;
 
 /** Formats values for {wrap} and {out}. */
@@ -102,16 +103,7 @@ final class ValueFormatter
             case 'file':
                 return $this->files($params, $mode, $style, $size, $info);
             case 'geo':
-                $value = $params['var'];
-                if(is_array($value) && !empty($value['wkt']) && class_exists('\geoPHP')){
-                    $geometry = \geoPHP::load($value['wkt'], 'wkt');
-                    if($geometry && !$geometry->isEmpty()){
-                        $point = $geometry->centroid();
-                        return '<a href="https://maps.google.com/maps?z=18&q='.$point->y().','.$point->x()
-                            .'" target="_blank" rel="noopener">'.($label === '' ? 'on map' : $label).'</a>';
-                    }
-                }
-                return '';
+                return $this->geo($params['var'], $mode, $label);
             case 'date':
                 $value = $params['var'];
                 if(is_array($value) && array_key_exists(0, $value)){
@@ -124,6 +116,40 @@ final class ValueFormatter
                 $content = $this->cmsContent(is_array($content) ? $content : $params['var']);
                 return ($label !== '' ? $label.': ' : '').$content.'<br>';
         }
+    }
+
+    /**
+     * Geo values: their readable text (GeoText, the same text as the client shows), one per
+     * line, after the label; mode="link" gives a map link at the centroid (label: the link
+     * text, "on map" by default), which was the only output of the legacy engine.
+     *
+     * @param mixed $value WKT text, a geo value ['wkt'=>...] or a list of them (fN_originalvalue).
+     * @param mixed $mode Null or "link".
+     * @param string $label Label.
+     * @return string
+     */
+    private function geo($value, $mode, string $label): string
+    {
+        $values = is_array($value) && array_key_exists(0, $value) ? $value : array($value);
+        $result = array();
+        foreach($values as $geo){
+            $wkt = is_array($geo) ? (string)($geo['wkt'] ?? '') : (is_string($geo) ? $geo : '');
+            if($wkt === ''){ continue; }
+            if($mode !== 'link'){
+                $result[] = htmlspecialchars(GeoText::summary($wkt));
+                continue;
+            }
+            if(class_exists('\geoPHP')){
+                $geometry = \geoPHP::load($wkt, 'wkt');
+                if($geometry && !$geometry->isEmpty()){
+                    $point = $geometry->centroid();
+                    $result[] = '<a href="https://maps.google.com/maps?z=18&q='.$point->y().','.$point->x()
+                        .'" target="_blank" rel="noopener">'.($label === '' ? 'on map' : $label).'</a>';
+                }
+            }
+        }
+        if(empty($result)){ return ''; }
+        return ($mode !== 'link' && $label !== '' ? $label.': ' : '').implode('<br>', $result);
     }
 
     /** Images, players or links of uploaded files (ReportExecute::processFieldFile). */

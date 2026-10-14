@@ -37,6 +37,7 @@ namespace Heurist\Reports\Smarty;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Store\RecordRepository;
+use Heurist\Utilities\GeoText;
 use Heurist\Utilities\LanguageCodes;
 use Heurist\Utilities\Temporal;
 
@@ -53,7 +54,6 @@ final class ReportRecordAssembler
     /** Suffix of the unprocessed values of a field. */
     public const RAW = '_originalvalue';
 
-    private const GEO_TYPES = array('p' => 'Point', 'pl' => 'Polygon', 'c' => 'Circle', 'r' => 'Rectangle', 'l' => 'Path', 'm' => 'Collection');
 
     private RecordDataService $data;
     private DatabaseInterface $database;
@@ -379,16 +379,8 @@ final class ReportRecordAssembler
             if(class_exists('\geoPHP')){
                 $geometry = \geoPHP::load($geo['wkt'], 'wkt');
                 if($geometry && !$geometry->isEmpty()){
-                    $box = $geometry->getBBox();
-                    $type = self::GEO_TYPES[$geo['type']] ?? 'Collection';
-                    if($type === 'Point'){
-                        $link = '<b>Point</b> '.($box['minx'] !== null ? round($box['minx'], 7).', '.round($box['miny'], 7) : '');
-                    }else{
-                        // the legacy text repeats maxx for the second Y value; kept for the same output
-                        $link = '<b>'.$type.'</b> X '.($box['minx'] !== null
-                            ? round($box['minx'], 7).', '.round($box['maxx'], 7).' Y '.round($box['miny'], 7).', '.round($box['maxx'], 7)
-                            : '');
-                    }
+                    // the readable text of the client and of {wrap dt="geo"} (the legacy text differed)
+                    $link = htmlspecialchars(GeoText::summary((string)$geo['wkt']));
                     $base = $this->environment->baseUrl;
                     $url = $base.'viewers/map/map.php?q=ids:'.$recordId.'&db='.$this->environment->databaseName
                         .'&notimeline=1&nocluster=1&basemap=OpenStreetMap&controls=none&published=true&popup=none';

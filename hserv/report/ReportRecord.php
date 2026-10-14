@@ -738,7 +738,10 @@ class ReportRecord
                             default: $type = "Collection";
                         }
                         
-                        if ($type == "Point"){
+                        if (class_exists('\Heurist\Utilities\GeoText')){
+                            // the same readable text as the client and the srv engine
+                            $link = htmlspecialchars(\Heurist\Utilities\GeoText::summary($value['geo']['wkt']));
+                        }elseif ($type == "Point"){
                             $link = "<b>Point</b> ".($bbox['minx']!=null?round($bbox['minx'],7).", ".round($bbox['miny'],7):'');
                         }else{
                             $link = "<b>$type</b> X ".($bbox['minx']!=null?round($bbox['minx'],7).", ".round($bbox['maxx'],7).

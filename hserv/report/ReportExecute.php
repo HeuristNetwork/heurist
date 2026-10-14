@@ -1612,8 +1612,17 @@ Javascript wrap:<br>
                     $value = $params['var'];
                     $result = '';
 
-                    if($value && $value['wkt']){
-                        $geom = \geoPHP::load($value['wkt'],'wkt');
+                    if(is_array($value) && array_key_exists(0, $value)){
+                        $value = $value[0];
+                    }
+                    $wkt = is_array($value) ? ($value['wkt'] ?? '') : (is_string($value) ? $value : '');
+
+                    // the same readable text as the client and the srv engine (Heurist\Utilities\GeoText)
+                    if($wkt && $mode != 'link' && class_exists('\Heurist\Utilities\GeoText')){
+                        $result = ($label != '' ? $label.': ' : '')
+                            .htmlspecialchars(\Heurist\Utilities\GeoText::summary($wkt));
+                    }elseif($wkt){
+                        $geom = \geoPHP::load($wkt,'wkt');
                         if(!$geom->isEmpty()){
                                 $point = $geom->centroid();
                                 if($label=="") {$label = "on map";}
