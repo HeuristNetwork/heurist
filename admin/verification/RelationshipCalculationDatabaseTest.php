@@ -12,10 +12,27 @@ $GLOBALS['glb_lang_codes_index'] = array('ENG'=>'EN');
 
 use hserv\records\edit\RelationshipCalculation as Calculation;
 
+// SQL placeholders bind values, not identifiers. Accept only our generated
+// fixture names before quoting an identifier for CREATE/DROP DATABASE.
+function calculationTestDatabaseIdentifier($name) {
+    if (!is_string($name) || !preg_match('/\Acurrent_locations_test_[a-f0-9]{8}\z/D', $name)) {
+        throw new InvalidArgumentException('Invalid calculation fixture database name');
+    }
+    return '`'.$name.'`';
+}
+foreach (array('current_locations_test_deadbeef`; DROP DATABASE mysql; --',
+    'mysql', 'current_locations_test_deadbeef;') as $unsafeName) {
+    $rejected = false;
+    try { calculationTestDatabaseIdentifier($unsafeName); }
+    catch (InvalidArgumentException $expected) { $rejected = true; }
+    same(true, $rejected, 'Unsafe database identifier is rejected');
+}
+
 $testPassword = getenv('HEURIST_MYSQL_ROOT_PASSWORD') ?: '';
 $db = new mysqli('127.0.0.1', 'root', $testPassword);
 $testDatabase = 'current_locations_test_'.bin2hex(random_bytes(4));
-$db->query('CREATE DATABASE '.$testDatabase);
+$testDatabaseIdentifier = calculationTestDatabaseIdentifier($testDatabase);
+$db->query('CREATE DATABASE '.$testDatabaseIdentifier);
 $db->select_db($testDatabase);
 $db->query("SET SESSION sql_mode='NO_ENGINE_SUBSTITUTION'");
 $db->multi_query(file_get_contents(dirname(__DIR__, 2).'/admin/setup/dbcreate/blankDBStructure.sql'));
@@ -55,9 +72,19 @@ $formula = Calculation::REFRESH_MARKER.'{$heurist->latestRelatedRecord($r,114,"9
 $stmt = $db->prepare('INSERT INTO defCalcFunctions (cfn_ID,cfn_Name,cfn_FunctionSpecification,cfn_RecTypeIDs) VALUES (1,\'Current location\',?,\'1\')');
 $stmt->bind_param('s', $formula); $stmt->execute();
 $db->query("INSERT INTO defRecStructure (rst_RecTypeID,rst_DetailTypeID,rst_DisplayName,rst_CalcFunctionID,rst_MaxValues) VALUES (104,1177,'Current Location',1,1),(115,1177,'Current Location',1,1)");
+$fixtureInsert = $db->prepare("INSERT INTO Records (rec_ID,rec_RecTypeID,rec_Title,rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility) VALUES (?,?,?,0,2,'public')");
+$fixtureInsert->bind_param('iis', $id, $type, $title);
 foreach (array(100=>104,101=>115,200=>114,201=>114,202=>114,300=>1,301=>1,302=>1,303=>1,304=>1) as $id=>$type) {
-    $db->query("INSERT INTO Records (rec_ID,rec_RecTypeID,rec_Title,rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility) VALUES ($id,$type,'Fixture $id',0,2,'public')");
+    $title = 'Fixture '.$id;
+    $fixtureInsert->execute();
 }
+// SQL-looking text must survive as data, including quotes and a comment marker.
+$id = 306; $type = 1; $title = "Fixture '); DROP TABLE Records; --";
+$fixtureInsert->execute();
+same($title, mysql__select_value($db, 'SELECT rec_Title FROM Records WHERE rec_ID=306'),
+    'Prepared inserts preserve SQL-looking text literally');
+same(11, (int)mysql__select_value($db, 'SELECT COUNT(*) FROM Records'),
+    'SQL-looking fixture text leaves the records table intact');
 $db->query("INSERT INTO recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES (300,10,'2025-01-01'),(301,10,'2026-01-01'),(303,10,'2026-10-14')");
 $db->query("INSERT INTO recLinks (rl_SourceID,rl_TargetID,rl_RelationID,rl_RelationTypeID) VALUES (100,200,300,9878),(100,201,301,9879),(100,202,302,9878),(100,202,303,9999),(101,200,304,9878)");
 same('201', Calculation::latestTarget($system,100,114,'9878,9879,13113'), 'Storage relationship types are isolated');
@@ -74,9 +101,11 @@ same('201',mysql__select_value($db,'SELECT dtl_Value FROM recDetails WHERE dtl_R
 same('200',mysql__select_value($db,'SELECT dtl_Value FROM recDetails WHERE dtl_RecID=101 AND dtl_DetailTypeID=1177'),'Box calculated target is persisted');
 
 // More than the legacy 100-record limit must not prevent local refreshes.
-for ($i=1000; $i<1105; $i++) {
-    $db->query("INSERT INTO Records (rec_ID,rec_RecTypeID,rec_Title,rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility) VALUES ($i,104,'Untouched',0,2,'public')");
+$type = 104; $title = 'Untouched';
+for ($id=1000; $id<1105; $id++) {
+    $fixtureInsert->execute();
 }
+$fixtureInsert->close();
 $db->query("UPDATE recDetails SET dtl_Value='2027-01-01' WHERE dtl_RecID=300 AND dtl_DetailTypeID=10");
 $refreshed = Calculation::refresh($system,array(100));
 same(array(),$refreshed['errors'],'Targeted update ignores the database-wide limit');
@@ -137,9 +166,12 @@ $formula = Calculation::REFRESH_MARKER.'{$heurist->latestRelatedRecord($r,114,"9
 $stmt=$db->prepare('UPDATE defCalcFunctions SET cfn_FunctionSpecification=? WHERE cfn_ID=1');
 $stmt->bind_param('s',$formula); $stmt->execute();
 $system->defineConstant('RT_RELATION');
+$structureInsert = $db->prepare("INSERT INTO defRecStructure (rst_RecTypeID,rst_DetailTypeID,rst_DisplayName,rst_MaxValues) VALUES (1,?,'Relationship field',1)");
+$structureInsert->bind_param('i', $field);
 foreach (array(5,7,6,10,3) as $field) {
-    $db->query("INSERT INTO defRecStructure (rst_RecTypeID,rst_DetailTypeID,rst_DisplayName,rst_MaxValues) VALUES (1,$field,'Relationship field',1)");
+    $structureInsert->execute();
 }
+$structureInsert->close();
 $db->query("INSERT INTO Records (rec_ID,rec_RecTypeID,rec_Title,rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility) VALUES (305,1,'New relationship',0,2,'public')");
 $saved=recordSave($system,array('ID'=>305,'RecTypeID'=>1,'FlagTemporary'=>0,'OwnerUGrpID'=>2,'NonOwnerVisibility'=>'public',
     'no_validation'=>'ignore_all','details'=>array(7=>array('100'),5=>array('201'),6=>array('9878'),10=>array('2028-01-01'),3=>array('Test move'))));
@@ -198,5 +230,5 @@ same('200',mysql__select_value($db,'SELECT dtl_Value FROM recDetails WHERE dtl_R
 $deleted=recordDelete($system,array($created['data']));
 same(HEURIST_OK,$deleted['status'],'The last history relationship can be deleted');
 same('200',mysql__select_value($db,'SELECT dtl_Value FROM recDetails WHERE dtl_RecID=100 AND dtl_DetailTypeID=1177'),'Deleting the last history entry keeps the current location');
-$db->query('DROP DATABASE '.$testDatabase);
+$db->query('DROP DATABASE '.$testDatabaseIdentifier);
 echo "Passed $checks checks including MySQL and Smarty\n";
