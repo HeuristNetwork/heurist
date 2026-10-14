@@ -572,3 +572,7 @@
 #fieldDesc_file#A file such as a photo, PDF, scanned document, spreadsheet or XML, uploaded and stored in the database or a URL to a remote file or streamed content.
 #fieldDesc_resource#A simple connection to another record, normally constrained to specific target record type(s). Use where the field represents a direct connection and is permanent eg.parent, author, component, place, period.
 #fieldDesc_relmarker#A more complex connection which allows specification of relationship type and period of validity. Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
+
+#dms_to_decimal#Convert DMS coordinates to decimal
+#menu-selected-dms_to_decimal#Convert DMS coordinates to decimal
+#record_action_dms_to_decimal#Convert latitude and longitude from degrees, minutes and seconds to decimal degrees in the selected fields. Repeat values are supported. Invalid values are preserved and reported.

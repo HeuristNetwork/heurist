@@ -461,7 +461,7 @@ span.fancytree-node:hover{
 
 .ui-heurist-design .ui-button-icon-only{
     background: none;
-    color:<?php uout('design_bg', CLR_DESIGN_BG)?> !important;
+    color:<?php uout('design_bg', '#7B4C98')?> !important;
 }
 .ui-heurist-design .ui-dialog-titlebar .ui-button-icon,
 .ui-heurist-design .ui-heurist-header .ui-button-icon{

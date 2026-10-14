@@ -64,16 +64,38 @@ client derives it from `fields.targetTypes` + `structure`.
 ## Files
 
 - `DefinitionSnapshotService.php` (`Heurist\Definitions`) — builds the payload
-  from the `def*` tables and manages the on-disk cache.
+  from `DefinitionLookup` and manages the on-disk cache.
 - `../Controller/DefinitionController.php` — HTTP adapter (conditional GET).
 - Wiring: `srv/Runtime/ServiceFactory.php` (`definitionController()`),
   `hserv/controller/api.php` (`$is_def_query` branch).
 
 ## DefinitionLookup
 
-`DefinitionLookup.php` is the one srv loader of definitions (record types, fields,
-structure names, terms, user/group names) and holds the one concept-code rule
-(`conceptCodeFor`). It is used by this snapshot, the srv Smarty engine
-(`Reports/Smarty/ReportDefinitions`), record export and `RecordDataService`.
+`DefinitionLookup.php` is the **only** srv class that queries the definition tables
+(plan 15, heurist-explorer `docs/development/15 Data-Access-Layer-Plan.md`):
+defRecTypes(+Groups), defDetailTypes(+Groups), defRecStructure, defTerms,
+defTermsLinks, defTranslations, defCalcFunctions, sysWorkflowRules. A move of the
+definitions to other tables changes this class only. Do not add definition queries
+anywhere else — add a method here.
+
+- `DefinitionLookup::shared($database)` — one instance and one cache per connection.
+- **Concept codes** (agreed 2026-10-13): `conceptCode()` / `rectypeConcept()` write
+  `<origin db>-<origin id>`, else `<registered id>-<local id>` (`0-<id>` unregistered);
+  `localId(kind, code)` reads every form — a value without `<db>-` is a local id,
+  `0-<id>` and `<registered id>-<id>` are local ids, other codes by origin.
+- **Record types / fields**: `rectype`, `rectypeName`, `rectypes`, `rectypeIdByName`,
+  `findRectypes`, `rectypeGroups`; `field`, `fieldType`, `fields`, `fieldConstraints`,
+  `findFields`, `fieldOwnerTypes`, `fieldGroups` (both tables loaded once).
+- **Structure**: `structureRows(rty)` (edit structure, per record type),
+  `structureFields`, `structureNames`, `fieldName`, `structure()` (snapshot),
+  `calculatedFields(rty)`, `workflowRule(rty, stage)`.
+- **Terms** (loaded per id): `term`, `terms(ids)`, `allTerms` (snapshot only),
+  `termHierarchyLabel`, `termsByLabelOrCode`, `termDescendants` (term links, or the
+  parent column when a database has none), `termInverse`, `termLinks` (snapshot).
+- **Translations**: `languages`, `translations(source, ids, language)`.
+- User and group names are `Users/UserGroupRepository` (no longer here).
+
 Terms are `{internalid, term, code, conceptid, desc, parent, inverse, domain}`.
+Database settings (registered id, version) are `Runtime/DatabaseSettings`.
+Test: `tests/DefinitionLookupTest.php`.
 

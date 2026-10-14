@@ -4,8 +4,8 @@
 *
 * Loads header fields, native detail values and values reached through linked
 * paths (lt/lf/rt/rf traversals) for one page of records. Used by the /records
-* API (RecordQueryController) and by the record export (plan 13), so both give
-* the same record objects.
+* API (RecordQueryController, also /records/{id}) and by the record export
+* (plan 13), so both give the same record objects, field metadata and `defs`.
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Data
@@ -95,9 +95,40 @@ final class RecordPageAssembler
         return array('records'=>$records, 'paths'=>$paths);
     }
 
-    /** Field definitions of the selection (meta.fields.details of the envelope). */
-    public function fieldMetadata(array $selection): array
+    /**
+     * Field definitions of the selection (meta.fields.details of the envelope).
+     * For fields=_all these are the fields present in the records, by field id.
+     *
+     * @param array $selection Output of RecordFieldSelector::parse().
+     * @param array $records Record objects of assemble() (used for fields=_all).
+     */
+    public function fieldMetadata(array $selection, array $records = array()): array
     {
-        return $this->dataService->loadFieldMetadata($selection['details']);
+        $fields = $selection['details'];
+        if(!empty($selection['all'])){
+            $requested = array();
+            foreach($fields as $field){ $requested[(string)$field['key']] = true; }
+            $present = array();
+            foreach($records as $record){
+                foreach(array_keys($record['details'] ?? array()) as $key){
+                    if(!isset($requested[(string)$key]) && ctype_digit((string)$key)){ $present[intval($key)] = true; }
+                }
+            }
+            ksort($present);
+            foreach(array_keys($present) as $fieldId){
+                $fields[] = array('key'=>(string)$fieldId, 'fieldId'=>$fieldId, 'pathCode'=>null, 'traversal'=>null);
+            }
+        }
+        return $this->dataService->loadFieldMetadata($fields);
+    }
+
+    /**
+     * Record types and terms used by the records (`defs=1`, meta.recordTypes and meta.terms).
+     *
+     * @return array{recordTypes:array<string,array>,terms:array<string,array>}
+     */
+    public function definitions(array $records): array
+    {
+        return $this->dataService->loadDefinitions($records);
     }
 }

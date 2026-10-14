@@ -140,6 +140,14 @@ if(array_key_exists('useRelmarkerTitle', $_REQUEST)){
     $useRelmarkerTitle = intval($system->userGetPreference('useRelmarkerTitle', 0));
 }
 
+// Used in 'publish' (CMS Websites) mode
+// Show only one translated value, without the language prefix
+// Otherwise, show all values + language prefixes
+$publishMode = 0;
+if(array_key_exists('publish', $_REQUEST)){
+    $publishMode = intval($_REQUEST['publish']);
+}
+
 $rectypesStructure = dbs_GetRectypeStructures($system);//getAllRectypeStructures();//get all rectype names
 
 $defTerms = dbs_GetTerms($system);
@@ -172,7 +180,7 @@ $system->defineConstant('DT_PARENT_ENTITY');
 $system->defineConstant('DT_DATE');
 $system->defineConstant('DT_WORKFLOW_STAGE');
 
-$system->defineConstant('RT_CMS_MENU');
+$system->defineConstant('RT_CMS_PAGE');
 $system->defineConstant('RT_CMS_HOME');
 $system->defineConstant('RT_IIIF_MANIFEST');
 $system->defineConstant('RT_IIIF_ANNOTATION');
@@ -942,8 +950,8 @@ if(!$system->hasAccess()){
                 
                 if(isAdminInterface){
                     $('#custom-report-link').show();
-                    $('#custom-report-link').on('click', () => openReportSelector());    
-                }                
+                    $('#custom-report-link').on('click', () => openReportSelector());
+                }
 
             });
 
@@ -1756,7 +1764,7 @@ function recviewer_add_iiif_manifest_thumb(array &$thumbs, array $bib): void {
 //
 function print_public_details(array $bib) {
 
-    global $system, $defTerms, $is_map_popup, $noclutter, $without_header, $is_production, $primary_language,
+    global $system, $defTerms, $is_map_popup, $noclutter, $without_header, $is_production, $primary_language, $publishMode,
         $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $connectedRecIDs, $group_details, $hide_images;
 
     $has_thumbs = false;
@@ -1906,12 +1914,13 @@ function print_public_details(array $bib) {
             }elseif($bd['dty_Type'] == 'blocktext') {
 
                 $bd['val'] = html_entity_decode($bd['val']);// @todo: get translation
-                list($lang, $value) = output_chunker($bd['val'], true);
+                [$lang, $value] = output_chunker($bd['val'], true);
+                $value = $publishMode === 0 && !empty($lang) ? "{$lang}:{$value}" : $value;
                 if($value == strip_tags($value)){
                     $bd['val'] = nl2br(str_replace('  ', NBSP, $value));
                 }
 
-                if(!empty($primary_language)){
+                if($publishMode !== 0 && !empty($primary_language)){
 
                     if(!array_key_exists($bd['dty_ID'], $translations)){
                         $translations[$bd['dty_ID']] = [ 'lang' => $lang, 'values' => [] ];
@@ -1931,7 +1940,6 @@ function print_public_details(array $bib) {
                     }
                 }
 
-                
                 // replace href="[numeric]" or href="[numeric]/something.tpl" to record view links
                 $bd['val'] = preg_replace_callback(
                     '/\bhref=(["\'])(\d+(?:\/[^"\']+\.tpl)?)\1/i',
@@ -1941,17 +1949,6 @@ function print_public_details(array $bib) {
                     },
                     $bd['val']
                 );
-                
-                /* OLD
-                $bd['val'] = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
-                        function($matches){
-                            global $system;
-
-                            return 'onclick="return (typeof link_open === \'function\')?link_open(this, false):true;" href="'
-                                    .$system->recordLink($matches[1]).'"';
-                        },
-                        $bd['val']);
-                */
 
             }elseif($bd['dty_Type'] == 'resource') {
 
@@ -2160,9 +2157,10 @@ function print_public_details(array $bib) {
                     $bd['val'] = $geoimage.$bd['val'];
 
                 } else {
-                    list($lang, $bd['val']) = output_chunker($bd['val'], true);
+                    [$lang, $bd['val']] = output_chunker($bd['val'], true);
+                    $bd['val'] = $publishMode === 0 && !empty($lang) ? "{$lang}:{$bd['val']}" : $bd['val'];
 
-                    if(!empty($primary_language)){
+                    if($publishMode !== 0 && !empty($primary_language)){
 
                         if(!array_key_exists($bd['dty_ID'], $translations)){
                             $translations[$bd['dty_ID']] = [ 'lang' => $lang, 'values' => [] ];
@@ -2274,7 +2272,7 @@ function print_public_details(array $bib) {
         }
 
         $is_cms_content = !$is_map_popup &&
-                          (defined('RT_CMS_MENU') && $bib['rec_RecTypeID']==RT_CMS_MENU ||
+                          (defined('RT_CMS_PAGE') && $bib['rec_RecTypeID']==RT_CMS_PAGE ||
                            defined('RT_CMS_HOME') && $bib['rec_RecTypeID']==RT_CMS_HOME) &&
                            (defined('DT_EXTENDED_DESCRIPTION') && $bd['dty_ID']==DT_EXTENDED_DESCRIPTION ||
                             defined('DT_CMS_HEADER') && $bd['dty_ID']==DT_CMS_HEADER ||

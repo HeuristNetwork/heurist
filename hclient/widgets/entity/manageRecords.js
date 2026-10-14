@@ -109,6 +109,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
     _autoResizeCheckbox: null,
 
+    _editorPasteEvent: false,
+
+    _ignoreAmbiguousDates: [],
+
     /**
      * @brief Initializes the manageRecords widget.
      * @override
@@ -3372,6 +3376,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // Applies values on record edit form for individual visibility settings
             //
             that._editing.setFieldsVisibility( that._currentEditRecordset );
+
+            if(!this._editorPasteEvent){ // @todo - check whether the entities (term, rectype, db props)
+                this._setupFilePasteHandling();
+            }
             
             that._afterInitEditForm();
 
@@ -3839,7 +3847,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                         if(dt == 'date'){
 
-                            if(Temporal.isValidFormat(values[k])){ // check if valid temporal string
+                            if(Temporal.isValidFormat(values[k]) || that._ignoreAmbiguousDates.includes(values[k])){ // check if valid temporal string
                                 continue; // is valid, skip
                             }
 
@@ -4017,7 +4025,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     continue;
                                 }
                             } catch(e) {
-                                if(e.indexOf('ambiguous') >= 0){
+                                if(e.indexOf('ambiguous') >= 0 || e.indexOf('unrecognized characters') >= 0){
                                     ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: ttype});
                                     continue;
                                 }
@@ -4250,6 +4258,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             return;
         }
+
+        this._ignoreAmbiguousDates = []; // reset ignore ambiguous dates setting
 
         // Message not needed right now as only one issue is handled, probably separate issues into tabs within the message dialog
 
@@ -5940,12 +5950,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      * - Add a comment to the temporal value.
      * Upon saving from the dialog, the clarified date (potentially as a Temporal string) updates the corresponding field value.
      * Continues until all ambiguous dates are processed or the user cancels.
+     * @param {bool} continueToSave Whether to proceed with saving after handling the ambiguous dates,
+     * This will only happen if no dates where changed.
      */
-    _handleAmbiguousDates: function(ambiguous_dates){
+    _handleAmbiguousDates: function(ambiguous_dates, continueToSave = true){
 
         let that = this;
 
         if(!ambiguous_dates || ambiguous_dates.length == 0){
+            if(continueToSave){
+                this._saveEditAndClose(null, 'none');
+            }
             return;
         }
 
@@ -5959,6 +5974,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             let com = $dlg.find('#COM').val();
             let t_date = new Temporal();
             let is_temporal = false;
+
+            if($dlg.find('#remain_ambiguous:checked').length > 0){
+
+                that._ignoreAmbiguousDates.push(cur_date.org_value);
+
+                $dlg.dialog('close');
+
+                that._handleAmbiguousDates(ambiguous_dates, continueToSave);
+
+                return;
+            }
 
             if(!window.hWin.HEURIST4.util.isempty(com)){
                 t_date.addObjForString("COM", com);
@@ -6053,7 +6079,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             $dlg.dialog('close');
 
-            that._handleAmbiguousDates(ambiguous_dates);
+            that._handleAmbiguousDates(ambiguous_dates, false);
         };
         btns[window.HR('Close')] = function(){
             $dlg.dialog('close');
@@ -6066,8 +6092,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         };
 
         let options = {
-            'default_palette_class': 'ui-heurist-explore',
-            'dialogId': 'fixing_ambig_dates'
+            default_palette_class: 'ui-heurist-explore',
+            dialogId: 'fixing_ambig_dates'
         };
 
         let fld_name = $Db.rst(that._currentEditRecTypeID, cur_date.dtyid, 'rst_DisplayName');
@@ -6076,6 +6102,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         + '<span>'
                             + 'For the field <strong>' + fld_name + '</strong><br>'
                             + 'We cannot unambiguously interpret what you mean by <strong>' + cur_date.org_value + '</strong>'
+                            + 'Retain ambiguous date? <input type="checkbox" id="remain_ambiguous" name="remain_ambiguous" /> (this will ignore anything entered below)<br>'
                         + '</span><br><br>';
 
         if(cur_date.type){
@@ -6114,7 +6141,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     break;
                 }
                 default:
-                    that._handleAmbiguousDates(ambiguous_dates);
+                    that._ignoreAmbiguousDates.push(cur_date.org_value);
+                    that._handleAmbiguousDates(ambiguous_dates, continueToSave);
                     break;
             }
         }
@@ -6124,6 +6152,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 +  '</div>';
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, labels, options);
+
+        $dlg.find('#remain_ambiguous').on('change', () => {
+            let enabled = $dlg.find('#remain_ambiguous').is(':checked');
+            let $inputs = $dlg.find('input:not(#remain_ambiguous),textarea');
+            window.hWin.HEURIST4.util.setDisabled($inputs, enabled);
+        });
     },
 
     _handleInvalidEntry: function(invalid_entries){
@@ -8103,10 +8137,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
 
         showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
-        
-        // was: showAllImagesPrefs.blocked = !Array.isArray(showAllImagesPrefs.blocked) ? [] : showAllImagesPrefs.blocked;
-        // ChatGPT fix7/10/26: Older or invalid preferences may lack either list.
-        // Initialise both before using includes() or push().
+
         if (!showAllImagesPrefs
                 || typeof showAllImagesPrefs !== 'object'
                 || Array.isArray(showAllImagesPrefs)) {
@@ -8152,5 +8183,147 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
         }
+    },
+
+    _setupFilePasteHandling: function(){
+
+        let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'}).getOrder();
+
+        this._on(this.element, {
+            paste: (event) => {
+
+                // Ensure current rectype can use files
+                let recTypeFileFields = [];
+                for(const dtyID of fileFields){
+
+                    if($Db.rst(this._currentEditRecTypeID, dtyID)){
+                        recTypeFileFields.push(dtyID);
+                    }
+                }
+
+                if(recTypeFileFields.length === 0){
+                    return;
+                }
+
+                // Retrieve clipboard data
+                let clipboardData = event.originalEvent.clipboardData || window.clipboardData;
+                if(!clipboardData || !clipboardData.items){
+                    return;
+                }
+
+                // Prepare files for upload
+                let files = clipboardData.files; //clipboardData.items
+                let filesToUpload = [];
+                for(let file of files){
+
+                    let fileDetails = file;
+                    if(file?.kind === 'file'){
+                        fileDetails = file[0].getAsFile();
+                    }
+
+                    filesToUpload.push(fileDetails);
+                }
+
+                if(filesToUpload.length > 0){
+
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    event.stopPropagation();
+
+                    this._handlePastedFiles(filesToUpload, recTypeFileFields);
+                }
+            },
+            dragover: (event) => {
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.preventDefault();
+            },
+            drop: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.preventDefault();
+
+                // Retrieve data from original event
+                event = event.originalEvent;
+                if(!event.dataTransfer || event.dataTransfer.files.length === 0){
+                    return;
+                }
+
+                // Setup paste event
+                const pasteEvent = new ClipboardEvent('paste', {
+                    bubbles: true,
+                    cancelable: true
+                });
+
+                Object.defineProperty(pasteEvent, 'clipboardData', {
+                    value: event.dataTransfer,
+                    writable: false
+                });
+
+                // Trigger paste event
+                event.target.dispatchEvent(pasteEvent);
+            }
+        });
+
+        this._editorPasteEvent = true;
+    },
+
+    _handlePastedFiles: function(files, dtyIDs){
+
+        if(!Array.isArray(files) || files.length === 0){
+            return;
+        }
+
+        let allowedFields = new Set();
+        for(const dtyID of dtyIDs){
+            if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID) || !$Db.rst(this._currentEditRecTypeID, dtyID)){
+                continue;
+            }
+            allowedFields.add(dtyID);
+        }
+
+        if(allowedFields.size === 0){
+            return;
+        }
+
+        const [dtyID] = allowedFields.size === 1 ? allowedFields : [0];
+        if(window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+
+            let $input = this._editing.getFieldByName(dtyID);
+            if(!$input || $input.length === 0){
+                return;
+            }
+
+            $input.editing_input('addPastedFiles', files);
+            return;
+        }
+
+        let fieldList = '';
+        let status = ' checked="checked"';
+        for(const dtyID of allowedFields){
+
+            fieldList += `<label style="cursor: pointer; display: block; margin: 5px 0px;">
+                <input type="radio" value="${dtyID}" name="fileField" ${status} />${$Db.rst(this._currentEditRecTypeID, dtyID, 'rst_DisplayName')}
+            </label>`;
+
+            status = '';
+        }
+
+        let $dlg;
+        let btns = {};
+        let content = `<div>
+            Please select a file field to send the pasted images to:
+            <div>${fieldList}</div>
+        </div>`;
+
+        btns[window.hWin.HR('Send to field')] = () => {
+            let dtyID = $dlg.find('[name="fileField"]:checked').val();
+            $dlg.dialog('close');
+            this._handlePastedFiles(files, [dtyID]);
+        };
+
+        btns[window.hWin.HR('Cancel')] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Pasting to multiple fields'}, {default_palette_class: 'ui-heurist-populate'});
     }
 });

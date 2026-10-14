@@ -150,7 +150,22 @@ if(!$system->init(@$_REQUEST['db'])){
 
         }elseif($action=='step5'){ // perform import
 
-            $res = ImportAction::performImport($_REQUEST, 'json');
+            // MODIFIED for CSV import diagnostics: do not reduce a PHP runtime
+            // exception to an opaque HTTP 500. Log the complete trace and return
+            // the immediate cause and source location through Heurist's normal
+            // JSON error response so the faulty import path can be corrected.
+            try{
+                $res = ImportAction::performImport($_REQUEST, 'json');
+            }catch(\Throwable $import_error){
+                error_log('CSV import step5 exception: '.$import_error->__toString());
+                $system->addError(
+                    HEURIST_ERROR,
+                    'CSV import failed: '.$import_error->getMessage()
+                        .' ('.basename($import_error->getFile()).':'.$import_error->getLine().')',
+                    $import_error->getMessage()
+                );
+                $res = false;
+            }
 
         // verifyDBAgainstSource: additions only
         }elseif($action=='verify_database_against_source'){
@@ -277,10 +292,10 @@ if(!$system->init(@$_REQUEST['db'])){
 // ----------------------- OUTPUT ----------------------------------
 //
 //
-if(@$_REQUEST['output']=='csv'){
+if(@$_REQUEST['output']=='csv' || @$_REQUEST['output']=='ods'){
 
 
-    if($_REQUEST['output']=='csv'){
+    if($_REQUEST['output']=='csv' || $_REQUEST['output']=='ods'){
         header('Content-Type: text/plain;charset=UTF-8');
         header('Pragma: public');
         // MODIFIED for verifyDBAgainstSource: determine one filename first and
@@ -289,7 +304,10 @@ if(@$_REQUEST['output']=='csv'){
         // verifyDBAgainstSource: override the generic import filename with the
         // same source filename/date/time shown in the uploaded-files list.
         if(@$_REQUEST['action']=='verify_database_against_source'){
-            header('Content-Type: text/tab-separated-values;charset=UTF-8');
+            $verification_is_ods = $_REQUEST['output']==='ods';
+            header('Content-Type: '.($verification_is_ods
+                ? 'application/vnd.oasis.opendocument.spreadsheet'
+                : 'text/tab-separated-values;charset=UTF-8'));
             $verification_session = ImportSession::load(intval(@$_REQUEST['imp_ID']));
             // verifyDBAgainstSource: sif_TempDataTable is the authoritative
             // filename/date/time string displayed in the uploaded-files list.
@@ -310,9 +328,7 @@ if(@$_REQUEST['output']=='csv'){
             $verification_name = preg_replace('/\s{2,}/', '_', trim((string)$verification_name));
             $verification_name = str_replace(':', '-', $verification_name);
             $verification_name = preg_replace('/[\\\/\"\r\n]+/', '_', $verification_name);
-            // MODIFIED for verifyDBAgainstSource: CSV extension requested for
-            // automatic spreadsheet association; content remains tab-delimited.
-            $download_filename = 'Checking_'.$verification_name.'.csv';
+            $download_filename = 'Checking_'.$verification_name.($verification_is_ods ? '.ods' : '.csv');
             // verifyDBAgainstSource: expose the authoritative filename to the
             // fetch/Blob download path; URL encoding keeps this header ASCII-safe.
             header('X-Heurist-Report-Filename: '.rawurlencode($download_filename));

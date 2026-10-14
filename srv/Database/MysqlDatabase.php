@@ -2,7 +2,7 @@
 /**
 * MysqlDatabase.php - MySQL implementation of modern database access
 *
-* Executes parameterised read queries for the new read-only records workflow.
+* Executes parameterised queries (reads, and writes of srv/Records/Edit).
 * Driver-specific record SQL remains in the query compiler, not in this class.
 *
 * @project     Heurist academic knowledge management system

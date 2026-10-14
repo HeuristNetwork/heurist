@@ -105,7 +105,6 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
             canSaveSources: function() { return that._canSaveSources(); },
             viewRecord: function(recordId) { return that._openRecordView(recordId); },
             addRecord: function(recordTypeId) { return that._addRecordEdit(recordTypeId); },
-            editSymbology: function(value, options) { return that._editSymbology(value, options || {}); },
             editExtent: function(value, options) { return that._editExtent(value, options || {}); },
             editRules: function(value, options) { return that._editRules(value, options || {}); },
             describeRules: function(rules) { return that._describeRules(rules); },
@@ -345,8 +344,8 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
         });
     }
 
-    // _editSymbology and _editExtent are inherited unchanged from
-    // HeuristModuleViewer, shared with HeuristModuleMap.
+    // _editExtent is inherited unchanged from HeuristModuleViewer, shared with
+    // HeuristModuleMap. Symbology is edited by the modules themselves (plan 17).
 
     _selectFieldset(value, options) {
         if (typeof this.options.onSelectFieldset === 'function') return Promise.resolve(this.options.onSelectFieldset(value, options));

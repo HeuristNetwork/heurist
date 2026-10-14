@@ -12,5 +12,6 @@ class or a collection of global database functions.
 - `ApiResponse.php` — standard JSON output and HTTP error mapping.
 - `ErrorReporter.php` — safe logging of unexpected server errors.
 - `SystemCode.php` — isolated RT/DT code resolution during migration.
-- `ConceptCode.php` — direct definition concept-code lookup.
+- `DatabaseSettings.php` — the one reader of sysIdentification (registered id, database
+  version, settings), one instance per connection. Concept codes are `Definitions/DefinitionLookup`.
 - `ServiceFactory.php` — temporary composition boundary for existing entry points.

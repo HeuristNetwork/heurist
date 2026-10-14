@@ -24,9 +24,10 @@ Flow (`ExportService::run`):
 Formats:
 - `csv` / `tsv` — `Writer/CsvExportWriter`: one table per record type, first
   column `H-ID`; columns per record type (`"*"` for the others).
-- `json` — `Writer/JsonExportWriter`: the `/records` envelope (`fields=_all`,
-  `resolveDetails`) with `meta.recordTypes` and field concept codes; no record
-  structure, no pagination.
+- `json` — `Writer/JsonExportWriter`: the `/records` envelope, the same as
+  `/records?fields=_all&defs=1` (with names also `resolveDetails=1`); field, record
+  type and term concept codes in `meta` (from `RecordPageAssembler`, as the API);
+  no record structure, no pagination.
 - `geojson` — `Map/MapFeatureService::featuresForIds` + `Map/GeoJsonStreamWriter`
   (as `/map`); one feature per record, columns as properties.
 - `kml` — `Writer/KmlExportWriter` (port of kml.php), columns as ExtendedData.

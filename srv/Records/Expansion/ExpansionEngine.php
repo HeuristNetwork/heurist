@@ -197,42 +197,24 @@ final class ExpansionEngine
     private function readEdgePass(array $parentIds, array $anchor, array $pass, int $batchSize): array
     {
         $rows = array();
-        $parentColumn = $pass['forward'] ? 'rl_SourceID' : 'rl_TargetID';
-        $childColumn = $pass['forward'] ? 'rl_TargetID' : 'rl_SourceID';
-        $inList = static function(string $column, array $ids, string &$types, array &$values): string {
-            $types .= str_repeat('i', count($ids));
-            $values = array_merge($values, array_map('intval', $ids));
-            return $column.' IN ('.implode(',', array_fill(0, count($ids), '?')).')';
-        };
-        foreach(array_chunk($parentIds, $batchSize) as $chunk){
-            $types = ''; $values = array(); $joins = '';
-            $conditions = array($inList('rl.'.$parentColumn, $chunk, $types, $values));
-            if($pass['relation']){
-                $conditions[] = 'rl.rl_RelationID IS NOT NULL';
-                if($pass['types'] !== null){ $conditions[] = $inList('rl.rl_RelationTypeID', $pass['types'], $types, $values); }
-                if($pass['parentTypes'] !== null){
-                    $joins .= ' INNER JOIN Records rp ON rp.rec_ID=rl.'.$parentColumn;
-                    $conditions[] = $inList('rp.rec_RecTypeID', $pass['parentTypes'], $types, $values);
+        $options = array('side'=>$pass['forward'] ? 'source' : 'target');
+        if($pass['relation']){
+            $options += array('kind'=>'relationship', 'relationTypes'=>$pass['types'],
+                'fromTypes'=>$pass['parentTypes'], 'otherTypes'=>$pass['childTypes']);
+        }else{
+            $options['kind'] = 'pointer';
+            if($anchor['suffix'] !== '' && $anchor['base'] !== 'connected'){
+                if(!ctype_digit($anchor['suffix']) || intval($anchor['suffix']) < 1){
+                    throw new QueryValidationException('Expansion link field must be a positive ID');
                 }
-                if($pass['childTypes'] !== null){
-                    $joins .= ' INNER JOIN Records rc ON rc.rec_ID=rl.'.$childColumn;
-                    $conditions[] = $inList('rc.rec_RecTypeID', $pass['childTypes'], $types, $values);
-                }
-            }else{
-                $conditions[] = 'rl.rl_RelationID IS NULL';
-                if($anchor['suffix'] !== '' && $anchor['base'] !== 'connected'){
-                    if(!ctype_digit($anchor['suffix']) || intval($anchor['suffix']) < 1){
-                        throw new QueryValidationException('Expansion link field must be a positive ID');
-                    }
-                    $conditions[] = 'rl.rl_DetailTypeID=?';
-                    $types .= 'i';
-                    $values[] = intval($anchor['suffix']);
-                }
+                $options['fields'] = array(intval($anchor['suffix']));
             }
-            $sql = 'SELECT rl.'.$parentColumn.',rl.'.$childColumn
-                .',rl.rl_SourceID,rl.rl_TargetID,COALESCE(rl.rl_DetailTypeID,0)'
-                .',COALESCE(rl.rl_RelationID,0) FROM recLinks rl'.$joins.' WHERE '.implode(' AND ', $conditions);
-            $rows = array_merge($rows, $this->executor->executeRows($sql, $types, $values));
+        }
+        foreach(array_chunk($parentIds, $batchSize) as $chunk){
+            // parent, child, source, target, field, relationship record
+            foreach($this->executor->records()->links($chunk, $options) as $link){
+                $rows[] = array($link[0], $link[1], $link[2], $link[3], $link[4], $link[6]);
+            }
         }
         return $rows;
     }
@@ -268,11 +250,8 @@ final class ExpansionEngine
         $graph = $result->toArray();
         $ids = array_column($graph['records'], 'rec_ID');
         foreach(array_chunk($ids, $batchSize) as $chunk){
-            if(empty($chunk)){ continue; }
-            $sql = 'SELECT rec_ID,rec_RecTypeID,rec_Title FROM Records WHERE rec_ID IN ('
-                .implode(',', array_fill(0, count($chunk), '?')).')';
-            foreach($this->executor->executeRows($sql, str_repeat('i', count($chunk)), $chunk) as $row){
-                $result->addRecord(intval($row[0]), intval($row[1]), (string)$row[2]);
+            foreach($this->executor->records()->headers($chunk) as $id=>$row){
+                $result->addRecord($id, intval($row['rec_RecTypeID']), (string)$row['rec_Title']);
             }
         }
     }

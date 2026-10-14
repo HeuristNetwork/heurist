@@ -46,6 +46,7 @@ use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\QueryExecutor;
 use Heurist\Records\Query\RecordSearchService;
 use Heurist\Runtime\RuntimeContext;
+use Heurist\Users\UserGroupRepository;
 use RuntimeException;
 use ZipArchive;
 
@@ -116,9 +117,9 @@ final class ExportService
                 .($this->runtime->userId > 0 ? '' : ' (only public records are used)'));
         }
 
-        $definitions = new DefinitionLookup($this->database);
+        $definitions = DefinitionLookup::shared($this->database);
         $formatter = new ValueFormatter($definitions, $request->values, $this->runtime->baseUrl, $this->runtime->databaseName);
-        $columns = new ExportColumns($definitions, $formatter);
+        $columns = new ExportColumns($definitions, $formatter, UserGroupRepository::shared($this->database));
         $meta = array(
             'database' => $this->runtime->databaseName,
             'title' => $request->title,
@@ -153,7 +154,9 @@ final class ExportService
                     });
                 }
             }
-            $written = $this->writeRecords($writer, $ids, $meta, $check, $progress, $rectypes);
+            // JSON is the /records envelope: resolved values only with names (resolveDetails)
+            $resolve = !($writer instanceof JsonExportWriter) || $request->names;
+            $written = $this->writeRecords($writer, $ids, $meta, $check, $progress, $rectypes, $resolve);
             $files = $writer->files();
         }
 
@@ -182,11 +185,11 @@ final class ExportService
             case 'kml':
                 return new KmlExportWriter($request, $columns, $definitions, $workDir, $this->codes);
             case 'xml':
-                return new HmlExportWriter($definitions, $formatter, $workDir, $this->codes['relationType'], $request->names);
+                return new HmlExportWriter($definitions, UserGroupRepository::shared($this->database), $formatter, $workDir, $this->codes['relationType'], $request->names);
             case 'gephi':
                 return new GexfExportWriter($request, $columns, $definitions, $formatter, $workDir);
             default:
-                return new JsonExportWriter($definitions, $formatter, $workDir, $request->names);
+                return new JsonExportWriter($workDir);
         }
     }
 
@@ -194,10 +197,11 @@ final class ExportService
      * Load the records in batches and pass them to the writer.
      *
      * @param array<int,int> $rectypes Filled: records per record type.
+     * @param bool $resolve resolveDetails of the record objects.
      * @return int Records written.
      */
     private function writeRecords(ExportWriterInterface $writer, array $ids, array $meta,
-        callable $check, callable $progress, array &$rectypes): int
+        callable $check, callable $progress, array &$rectypes, bool $resolve = true): int
     {
         $assembler = $this->assembler();
         $selection = (new RecordFieldSelector())->parse($writer->fieldCodes());
@@ -207,8 +211,12 @@ final class ExportService
         try{
             foreach(array_chunk($ids, self::BATCH) as $chunk){
                 $check();
-                $page = $assembler->assemble($chunk, $selection, array('resolveDetails' => true));
+                $page = $assembler->assemble($chunk, $selection, array('resolveDetails' => $resolve));
                 $records = array_values($page['records']);
+                if($writer instanceof JsonExportWriter){
+                    // meta.fields, meta.recordTypes and meta.terms as /records with defs=1
+                    $writer->addMeta($assembler->fieldMetadata($selection, $records), $assembler->definitions($records));
+                }
                 foreach($records as $record){
                     $rectypeId = intval($record['rec_RecTypeID'] ?? 0);
                     $rectypes[$rectypeId] = ($rectypes[$rectypeId] ?? 0) + 1;
@@ -363,7 +371,7 @@ final class ExportService
         $search = new RecordSearchService($this->database, $this->runtime, new QueryBuilder($this->database), $executor);
         $engine = new ExpansionEngine($executor, $search);
         return new RecordPageAssembler(
-            new RecordDataService($this->database, $this->runtime, $executor),
+            new RecordDataService($this->database, $this->runtime),
             static function() use ($engine): ExpansionEngine { return $engine; }
         );
     }

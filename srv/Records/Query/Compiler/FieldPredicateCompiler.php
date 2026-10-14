@@ -17,6 +17,7 @@ namespace Heurist\Records\Query\Compiler;
 
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\SearchExecutionException;
 use Heurist\Utilities\Temporal;
@@ -25,13 +26,21 @@ use Heurist\Utilities\Temporal;
 final class FieldPredicateCompiler
 {
     /** Columns with a FULLTEXT index (blankDBStructure.sql), by column name → table. */
-    private const FULLTEXT_COLUMNS = array('dtl_Value'=>'recDetails', 'rec_Title'=>'Records');
+    /** Columns with a FULLTEXT index => table key (SqlTables). */
+    private const FULLTEXT_COLUMNS = array('dtl_Value'=>'details', 'rec_Title'=>'records');
 
     private DatabaseInterface $database;
-    private $fieldTypeCache = array();
+    private DefinitionLookup $definitions;
     private $fulltextIndexCache = array();
     /** Initialise the field compiler with definition-table access. */
-    public function __construct(DatabaseInterface $database){ $this->database = $database; }
+    private SqlTables $tables;
+
+    public function __construct(DatabaseInterface $database, ?SqlTables $tables = null)
+    {
+        $this->database = $database;
+        $this->tables = $tables ?? new SqlTables();
+        $this->definitions = DefinitionLookup::shared($database);
+    }
 
     public function fieldCondition(
         int $fieldId,
@@ -45,19 +54,18 @@ final class FieldPredicateCompiler
         $nullValue = $value === null ? 'NULL' : strtoupper(trim((string)$value));
         if($nullValue === 'NULL'){
             $state->bind($fieldId, 'i');
-            return 'NOT EXISTS (SELECT 1 FROM recDetails d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
-                .'AND d.dtl_DetailTypeID=?'.$this->detailVisibilityCondition('d', $recordAlias, $state).')';
+            return 'NOT EXISTS (SELECT 1 FROM {details} d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND d.dtl_DetailTypeID=?)';
         }
         if($nullValue === '-NULL'){
             $state->bind($fieldId, 'i');
-            return 'EXISTS (SELECT 1 FROM recDetails d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
-                .'AND d.dtl_DetailTypeID=?'.$this->detailVisibilityCondition('d', $recordAlias, $state).')';
+            return 'EXISTS (SELECT 1 FROM {details} d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND d.dtl_DetailTypeID=?)';
         }
         $state->bind($fieldId, 'i');
         if((string)$value === ''){
-            return 'EXISTS (SELECT 1 FROM recDetails d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
-                .'AND d.dtl_DetailTypeID=? AND (d.dtl_Value IS NOT NULL AND d.dtl_Value<>"")'
-                .$this->detailVisibilityCondition('d', $recordAlias, $state).')';
+            return 'EXISTS (SELECT 1 FROM {details} d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND d.dtl_DetailTypeID=? AND (d.dtl_Value IS NOT NULL AND d.dtl_Value<>""))';
         }
 
         $fieldType = $this->fieldType($fieldId);
@@ -66,9 +74,8 @@ final class FieldPredicateCompiler
         // detail=ranges compare year fields as numbers, so they can disagree for years that are not 4 digits.
         if($fieldType === 'date'){
             $condition = $this->detailDateCondition($value, $state);
-            return 'EXISTS (SELECT 1 FROM recDetailsDateIndex di INNER JOIN recDetails d ON d.dtl_ID=di.rdi_DetailID '
-                .'WHERE di.rdi_RecID='.$recordAlias.'.rec_ID AND di.rdi_DetailTypeID=? AND '.$condition
-                .$this->detailVisibilityCondition('d', $recordAlias, $state).')';
+            return 'EXISTS (SELECT 1 FROM {dateIndex} di INNER JOIN {details} d ON d.dtl_ID=di.rdi_DetailID '
+                .'WHERE di.rdi_RecID='.$recordAlias.'.rec_ID AND di.rdi_DetailTypeID=? AND '.$condition.')';
         }
         if(in_array($fieldType, array('integer','float','resource'), true)){
             $condition = $this->numericCondition('CAST(d.dtl_Value AS DECIMAL(65,20))', $value, $state);
@@ -79,9 +86,8 @@ final class FieldPredicateCompiler
         }else{
             $condition = $this->scalarCondition('d.dtl_Value', $value, $state);
         }
-        return 'EXISTS (SELECT 1 FROM recDetails d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
-            .'AND d.dtl_DetailTypeID=? AND '.$condition
-            .$this->detailVisibilityCondition('d', $recordAlias, $state).')';
+        return 'EXISTS (SELECT 1 FROM {details} d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
+            .'AND d.dtl_DetailTypeID=? AND '.$condition.')';
     }
 
     /** Apply Heurist's language-prefix rules for freetext and blocktext details. */
@@ -151,61 +157,30 @@ final class FieldPredicateCompiler
         }
         $positiveExclusion = strpos($text, '@-') === 0;
         $queries = array();
-        $isDbOwner = !empty(($state['context'] ?? array())['isDbOwner']);
-        $detailSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records asrc ON asrc.rec_ID=ad.dtl_RecID ';
-        $enumSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records esrc ON esrc.rec_ID=ae.dtl_RecID ';
-        $linkSourceJoin = $isDbOwner ? '' : 'INNER JOIN Records lsrc ON lsrc.rec_ID=al.rl_SourceID ';
 
         $detailCondition = $this->textCondition('ad.dtl_Value', $text, $state, $positiveExclusion);
-        $queries[] = 'SELECT ad.dtl_RecID AS rec_ID FROM recDetails ad '
-            .'INNER JOIN defDetailTypes adt ON adt.dty_ID=ad.dtl_DetailTypeID '
-            .$detailSourceJoin
+        $queries[] = 'SELECT ad.dtl_RecID AS rec_ID FROM {details} ad '
+            .'INNER JOIN {fieldTypes} adt ON adt.dty_ID=ad.dtl_DetailTypeID '
             .'WHERE adt.dty_Type<>"resource" AND adt.dty_Type<>"enum" '
-            .'AND '.$detailCondition.$this->detailVisibilityCondition('ad', 'asrc', $state);
+            .'AND '.$detailCondition;
 
         $termText = $text;
         if(strpos($termText, '@+') === 0 || strpos($termText, '@-') === 0){ $termText = substr($termText, 2); }
         elseif(strpos($termText, '@') === 0){ $termText = substr($termText, 1); }
         $termCondition = $this->termCondition('ae.dtl_Value', $termText, $state);
-        $queries[] = 'SELECT ae.dtl_RecID AS rec_ID FROM recDetails ae '
-            .'INNER JOIN defDetailTypes aet ON aet.dty_ID=ae.dtl_DetailTypeID '
-            .$enumSourceJoin
+        $queries[] = 'SELECT ae.dtl_RecID AS rec_ID FROM {details} ae '
+            .'INNER JOIN {fieldTypes} aet ON aet.dty_ID=ae.dtl_DetailTypeID '
             .'WHERE aet.dty_Type="enum" '
-            .'AND '.$termCondition.$this->detailVisibilityCondition('ae', 'esrc', $state);
+            .'AND '.$termCondition;
 
         $linkedTitleCondition = $this->textCondition('alr.rec_Title', $text, $state, $positiveExclusion);
-        $queries[] = 'SELECT al.rl_SourceID AS rec_ID FROM recLinks al '
-            .'INNER JOIN Records alr ON alr.rec_ID=al.rl_TargetID '
-            .$linkSourceJoin
-            .'INNER JOIN recDetails ald ON ald.dtl_ID=al.rl_DetailID '
+        $queries[] = 'SELECT al.rl_SourceID AS rec_ID FROM {links} al '
+            .'INNER JOIN {records} alr ON alr.rec_ID=al.rl_TargetID '
+            .'INNER JOIN {details} ald ON ald.dtl_ID=al.rl_DetailID '
             .'WHERE al.rl_RelationID IS NULL AND al.rl_DetailTypeID>0 '
-            .'AND '.$linkedTitleCondition.$this->detailVisibilityCondition('ald', 'lsrc', $state);
+            .'AND '.$linkedTitleCondition;
 
         return 'SELECT anyfield.rec_ID FROM ('.implode(' UNION ALL ', $queries).') anyfield';
-    }
-
-    /** Apply defRecStructure and per-detail visibility for non-owner searches. */
-    public function detailVisibilityCondition(string $detailAlias, string $recordAlias, SqlBuildContext $state): string
-    {
-        $context = $state['context'] ?? array();
-        if(!empty($context['isDbOwner'])){ return ''; }
-        $userId = intval($context['userId'] ?? 0);
-        $condition = ' AND EXISTS (SELECT 1 FROM defRecStructure dvs WHERE '
-            .'dvs.rst_RecTypeID='.$recordAlias.'.rec_RecTypeID '
-            .'AND dvs.rst_DetailTypeID='.$detailAlias.'.dtl_DetailTypeID '
-            .'AND dvs.rst_RequirementType<>"forbidden"';
-        if($userId < 1){
-            $condition .= ' AND dvs.rst_NonOwnerVisibility IN ("public","pending")'
-                .' AND IFNULL('.$detailAlias.'.dtl_HideFromPublic,0)<>1';
-        }else{
-            $groups = array_values(array_unique(array_filter(array_map(
-                'intval', is_array($context['groupIds'] ?? null) ? $context['groupIds'] : array()
-            ), static function($id){ return $id >= 0; })));
-            $condition .= ' AND (dvs.rst_NonOwnerVisibility<>"hidden"';
-            if(!empty($groups)){ $condition .= ' OR '.$recordAlias.'.rec_OwnerUGrpID IN ('.implode(',', $groups).')'; }
-            $condition .= ')';
-        }
-        return $condition.')';
     }
 
     /** A suffixed link with NULL/-NULL is the corresponding field-presence query. */
@@ -237,14 +212,12 @@ final class FieldPredicateCompiler
         if($suffix !== ''){ $state->bind(intval($suffix), 'i'); $fieldSql = ' AND fd.dtl_DetailTypeID=?'; }
         $text = trim((string)$value); $upper = strtoupper($text);
         if($value === null || $upper === 'NULL'){
-            return 'NOT EXISTS (SELECT 1 FROM recDetails fd WHERE fd.dtl_RecID='.$recordAlias.'.rec_ID '
-                .'AND fd.dtl_UploadedFileID IS NOT NULL'.$fieldSql
-                .$this->detailVisibilityCondition('fd', $recordAlias, $state).')';
+            return 'NOT EXISTS (SELECT 1 FROM {details} fd WHERE fd.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND fd.dtl_UploadedFileID IS NOT NULL'.$fieldSql.')';
         }
         if($upper === '-NULL' || $text === ''){
-            return 'EXISTS (SELECT 1 FROM recDetails fd WHERE fd.dtl_RecID='.$recordAlias.'.rec_ID '
-                .'AND fd.dtl_UploadedFileID IS NOT NULL'.$fieldSql
-                .$this->detailVisibilityCondition('fd', $recordAlias, $state).')';
+            return 'EXISTS (SELECT 1 FROM {details} fd WHERE fd.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND fd.dtl_UploadedFileID IS NOT NULL'.$fieldSql.')';
         }
         if(strpos($text, '@') === 0){
             $state->bind(substr($text, 1), 's');
@@ -263,9 +236,9 @@ final class FieldPredicateCompiler
             $fileWhere = '(fu.ulf_OrigFileName '.$operator.' ? OR fu.ulf_ExternalFileReference '.$operator.' ? '
                 .'OR fu.ulf_Description '.$operator.' ?)';
         }
-        return 'EXISTS (SELECT 1 FROM recDetails fd INNER JOIN recUploadedFiles fu '
+        return 'EXISTS (SELECT 1 FROM {details} fd INNER JOIN {files} fu '
             .'ON fu.ulf_ID=fd.dtl_UploadedFileID WHERE fd.dtl_RecID='.$recordAlias.'.rec_ID'
-            .$fieldSql.' AND '.$fileWhere.$this->detailVisibilityCondition('fd', $recordAlias, $state).')';
+            .$fieldSql.' AND '.$fileWhere.')';
     }
 
     /** Owner/creator accepts IDs, current-user aliases, or login names. */
@@ -278,8 +251,8 @@ final class FieldPredicateCompiler
         if(!is_numeric($cleanValue)){ throw new QueryValidationException('Field count requires a numeric value'); }
         $count = intval($cleanValue);
         $state->bind($count, 'i');
-        return '(SELECT COUNT(*) FROM recDetails dc WHERE dc.dtl_RecID='.$recordAlias.'.rec_ID '
-            .'AND dc.dtl_DetailTypeID=?'.$this->detailVisibilityCondition('dc', $recordAlias, $state).') '
+        return '(SELECT COUNT(*) FROM {details} dc WHERE dc.dtl_RecID='.$recordAlias.'.rec_ID '
+            .'AND dc.dtl_DetailTypeID=?) '
             .$operator.' ?';
     }
     /**
@@ -300,14 +273,14 @@ final class FieldPredicateCompiler
             $fieldSql = ' AND gd.dtl_DetailTypeID=?';
         }
         if($value === null || (!is_array($value) && strtoupper(trim((string)$value)) === 'NULL')){
-            return 'NOT EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+            return 'NOT EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
                 .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql
-                .$this->detailVisibilityCondition('gd', $recordAlias, $state).')';
+                .')';
         }
         if(!is_array($value) && strtoupper(trim((string)$value)) === '-NULL'){
-            return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+            return 'EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
                 .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql
-                .$this->detailVisibilityCondition('gd', $recordAlias, $state).')';
+                .')';
         }
         $text = is_array($value) ? '' : trim((string)$value);
         if($text === ''){
@@ -326,20 +299,18 @@ final class FieldPredicateCompiler
                 }
                 $wkt = "POLYGON (($west $south, $east $south, $east $north, $west $north, $west $south))";
                 $state->bind($wkt, 's');
-                return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+                return 'EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
                     .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.' '
-                    .'AND '.self::geoSqlFunction($mode ?? 'intersects').'(ST_GeomFromText(?),gd.dtl_Geo)'
-                    .$this->detailVisibilityCondition('gd', $recordAlias, $state).')';
+                    .'AND '.self::geoSqlFunction($mode ?? 'intersects').'(ST_GeomFromText(?),gd.dtl_Geo))';
             }
-            return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+            return 'EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
                 .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql
-                .$this->detailVisibilityCondition('gd', $recordAlias, $state).')';
+                .')';
         }
         $state->bind($text, 's');
-        return 'EXISTS (SELECT 1 FROM recDetails gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+        return 'EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
             .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.' '
-            .'AND '.self::geoSqlFunction($mode ?? 'within').'(ST_GeomFromText(?),gd.dtl_Geo)'
-            .$this->detailVisibilityCondition('gd', $recordAlias, $state).')';
+            .'AND '.self::geoSqlFunction($mode ?? 'within').'(ST_GeomFromText(?),gd.dtl_Geo))';
     }
 
     /**
@@ -383,8 +354,7 @@ final class FieldPredicateCompiler
             return $this->fulltextCondition($column, $text, $state, $positiveFulltext);
         }
         if(strpos($text, '==') === 0){
-            $state->bind(substr($text, 2), 's');
-            return 'BINARY '.$column.' = BINARY ?';
+            return $this->caseSensitiveEquals($column, substr($text, 2), $state);
         }
         if(strpos($text, '=') === 0){
             return $this->forcedComparison($column, '=', substr($text, 1), $state);
@@ -421,7 +391,7 @@ final class FieldPredicateCompiler
         $text = trim($text);
         if(!preg_match('/(?:^|\.)(\w+)$/', $column, $name) || !isset(self::FULLTEXT_COLUMNS[$name[1]])){ return null; }
         $words = $this->indexableFulltextWords($text);
-        if(empty($words) || !$this->hasFulltextIndex(self::FULLTEXT_COLUMNS[$name[1]], $name[1])){ return null; }
+        if(empty($words) || !$this->hasFulltextIndex($this->tables->table(self::FULLTEXT_COLUMNS[$name[1]]), $name[1])){ return null; }
         $state->bind(implode(' ', array_map(static function($word){ return '+'.$word.'*'; }, $words)), 's');
         $condition = 'MATCH('.$column.') AGAINST (? IN BOOLEAN MODE)';
         if(count($words) === 1 && $words[0] === $text){ return $condition; }
@@ -442,14 +412,25 @@ final class FieldPredicateCompiler
         }
         return $this->fulltextIndexCache[$key];
     }
+    /**
+     * Exact, case-sensitive equality. The plain comparison (column collation) uses the
+     * value index to find the candidates; BINARY then keeps only the exact match.
+     * BINARY alone hides the column from the index (f:1:"==Johnson": 9.9 s -> 1 ms).
+     */
+    private function caseSensitiveEquals(string $column, string $text, SqlBuildContext $state): string
+    {
+        $state->bind($text, 's');
+        $state->bind($text, 's');
+        return '('.$column.' = ? AND BINARY '.$column.' = BINARY ?)';
+    }
+
     /** $contains: plain values use containsCondition() (text fields) instead of LIKE. */
     public function scalarCondition(string $column, $value, SqlBuildContext $state, bool $contains = false): string
     {
         $text = trim((string)$value);
         if(strpos($text, '@') === 0){ return $this->fulltextCondition($column, $text, $state); }
         if(strpos($text, '==') === 0){
-            $state->bind(substr($text, 2), 's');
-            return 'BINARY '.$column.' = BINARY ?';
+            return $this->caseSensitiveEquals($column, substr($text, 2), $state);
         }
         if(($range = $this->splitRange($text, '<>')) !== null){
             $state->bind($range[0], 's'); $state->bind($range[1], 's');
@@ -534,14 +515,11 @@ final class FieldPredicateCompiler
             : $value;
     }
 
-    /** Read the existing definition table directly; one lookup per field per request. */
+    /** Type of a field (DefinitionLookup), null when unknown. */
     public function fieldType(int $fieldId): ?string
     {
-        if(array_key_exists($fieldId, $this->fieldTypeCache)){ return $this->fieldTypeCache[$fieldId]; }
-        $value = $this->database->fetchValue(
-            'SELECT dty_Type FROM defDetailTypes WHERE dty_ID=? LIMIT 1', array($fieldId)
-        );
-        return $this->fieldTypeCache[$fieldId] = ($value === null ? null : (string)$value);
+        $type = $this->definitions->fieldType($fieldId);
+        return $type === '' ? null : $type;
     }
 
     /** Numeric exact/comparison and legacy low<>high range. */
@@ -575,16 +553,14 @@ final class FieldPredicateCompiler
             throw new QueryValidationException('Field '.$fieldId.' is not numeric');
         }
         $state->bind($fieldId, 'i');
-        $isDbOwner = !empty(($state['context'] ?? array())['isDbOwner']);
-        $sourceJoin = $isDbOwner ? '' : ' INNER JOIN Records nsrc ON nsrc.rec_ID=nd.dtl_RecID';
         $condition = $this->numericCondition(
             'CAST(nd.dtl_Value AS DECIMAL(65,20))',
             $value,
             $state
         );
-        return 'SELECT nd.dtl_RecID AS rec_ID FROM recDetails nd'.$sourceJoin
+        return 'SELECT nd.dtl_RecID AS rec_ID FROM {details} nd'
             .' WHERE nd.dtl_DetailTypeID=? AND '.$condition
-            .$this->detailVisibilityCondition('nd', 'nsrc', $state);
+            ;
     }
 
     /** Whether the detail definition is an integer or float field. */
@@ -628,20 +604,23 @@ final class FieldPredicateCompiler
         }
         $termField = $termField ?? 'label';
         if(in_array($termField, array('concept','conceptid'), true)){
-            $state->bind($text, 's');
-            $condition = $column.' IN (SELECT trm_ID FROM defTerms '
-                .'WHERE CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB)=?)';
+            // concept code to the local term id (DefinitionLookup, one rule); unknown: no match
+            $state->bind($this->definitions->localId('trm', $text), 'i');
+            $condition = $column.' = ?';
             return $negate ? 'NOT ('.$condition.')' : $condition;
         }
         $termColumns = array('term'=>'trm_Label','label'=>'trm_Label','desc'=>'trm_Description','code'=>'trm_Code');
         $termColumn = $termColumns[$termField] ?? 'trm_Label';
-        $state->bind($exact ? $text : $this->likePattern($text), 's');
-        $comparison = $caseSensitive ? 'BINARY '.$termColumn.' = BINARY ?'
-            : ($exact ? $termColumn.'=?' : $termColumn.' LIKE ? ESCAPE "\\\\"');
-        $subqueries = array('SELECT trm_ID FROM defTerms WHERE '.$comparison);
+        if($caseSensitive){
+            $comparison = $this->caseSensitiveEquals($termColumn, $text, $state);
+        }else{
+            $state->bind($exact ? $text : $this->likePattern($text), 's');
+            $comparison = $exact ? $termColumn.'=?' : $termColumn.' LIKE ? ESCAPE "\\\\"';
+        }
+        $subqueries = array('SELECT trm_ID FROM {terms} WHERE '.$comparison);
         if($termField === 'label' && $language !== null){
             $state->bind('trm_Label', 's');
-            $translation = 'SELECT CAST(trn_Code AS UNSIGNED) FROM defTranslations WHERE trn_Source=?';
+            $translation = 'SELECT CAST(trn_Code AS UNSIGNED) FROM {translations} WHERE trn_Source=?';
             if($language !== 'all'){
                 $state->bind($language, 's'); $translation .= ' AND trn_LanguageCode=?';
             }
@@ -656,24 +635,14 @@ final class FieldPredicateCompiler
         return $negate ? 'NOT ('.$condition.')' : $condition;
     }
 
-    /** Load all descendant term IDs through the existing closure table. */
+    /** Descendant term ids of terms, without the terms themselves (DefinitionLookup). */
     public function termChildrenAll(array $parentIds): array
     {
         if(empty($parentIds)){ return array(); }
-        $found = array(); $pending = array_values(array_unique(array_map('intval', $parentIds)));
-        while(!empty($pending)){
-            $placeholders = implode(',', array_fill(0, count($pending), '?'));
-            $next = array();
-            foreach($this->database->fetchColumn(
-                'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID IN ('.$placeholders.')', $pending
-            ) as $termId){
-                $id = intval($termId);
-                if($id > 0 && !isset($found[$id])){ $found[$id] = true; $next[] = $id; }
-            }
-            $pending = $next;
-        }
-        foreach($parentIds as $id){ unset($found[intval($id)]); }
-        return array_map('intval', array_keys($found));
+        $parents = array_fill_keys(array_map('intval', $parentIds), true);
+        return array_values(array_filter($this->definitions->termDescendants($parentIds), static function($id) use ($parents){
+            return !isset($parents[$id]);
+        }));
     }
 
     /**

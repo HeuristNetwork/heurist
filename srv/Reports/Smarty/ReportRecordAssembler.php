@@ -36,6 +36,9 @@ namespace Heurist\Reports\Smarty;
 
 use Heurist\Database\DatabaseInterface;
 use Heurist\Records\Data\RecordDataService;
+use Heurist\Records\Store\RecordRepository;
+use Heurist\Utilities\GeoText;
+use Heurist\Utilities\LanguageCodes;
 use Heurist\Utilities\Temporal;
 
 /** Loads records and converts them to the template record shape. */
@@ -51,7 +54,6 @@ final class ReportRecordAssembler
     /** Suffix of the unprocessed values of a field. */
     public const RAW = '_originalvalue';
 
-    private const GEO_TYPES = array('p' => 'Point', 'pl' => 'Polygon', 'c' => 'Circle', 'r' => 'Rectangle', 'l' => 'Path', 'm' => 'Collection');
 
     private RecordDataService $data;
     private DatabaseInterface $database;
@@ -72,7 +74,7 @@ final class ReportRecordAssembler
      * @param LanguageCodes $languages Language codes.
      * @param callable $visibleIds fn(array $ids): array.
      * @param int $userId Current user (personal tags).
-     * @param array<string,int> $codes RT_CMS_MENU, DT_EXTENDED_DESCRIPTION.
+     * @param array<string,int> $codes RT_CMS_PAGE, DT_EXTENDED_DESCRIPTION.
      */
     public function __construct(
         RecordDataService $data,
@@ -209,7 +211,7 @@ final class ReportRecordAssembler
             }
         }
         // CMS menu: all descriptions joined (as recordSearchDetails)
-        $menu = $this->codes['RT_CMS_MENU'] ?? 0;
+        $menu = $this->codes['RT_CMS_PAGE'] ?? 0;
         $description = $this->codes['DT_EXTENDED_DESCRIPTION'] ?? 0;
         if($menu > 0 && $rtyId === $menu && $description > 0 && isset($raw[$description])){
             $raw[$description] = array(implode('', $raw[$description]));
@@ -250,19 +252,7 @@ final class ReportRecordAssembler
     /** Personal tags of the current user: id => [tag, ...]. */
     private function personalTags(array $ids): array
     {
-        if($this->userId < 1){ return array(); }
-        $tags = array();
-        foreach(array_chunk($ids, 500) as $chunk){
-            foreach($this->database->fetchRows(
-                'SELECT rtl_RecID,tag_Text FROM usrRecTagLinks JOIN usrTags ON tag_ID=rtl_TagID '
-                .'WHERE tag_UGrpID=? AND rtl_RecID IN ('.implode(',', array_fill(0, count($chunk), '?')).') '
-                .'ORDER BY rtl_RecID,rtl_Order',
-                array_merge(array($this->userId), $chunk)
-            ) as $row){
-                $tags[intval($row[0])][] = (string)$row[1];
-            }
-        }
-        return $tags;
+        return RecordRepository::shared($this->database)->tags($ids, $this->userId);
     }
 
     /** fN, fNs and fN_originalvalue of one field (ReportRecord::getDetailForSmarty). */
@@ -389,16 +379,8 @@ final class ReportRecordAssembler
             if(class_exists('\geoPHP')){
                 $geometry = \geoPHP::load($geo['wkt'], 'wkt');
                 if($geometry && !$geometry->isEmpty()){
-                    $box = $geometry->getBBox();
-                    $type = self::GEO_TYPES[$geo['type']] ?? 'Collection';
-                    if($type === 'Point'){
-                        $link = '<b>Point</b> '.($box['minx'] !== null ? round($box['minx'], 7).', '.round($box['miny'], 7) : '');
-                    }else{
-                        // the legacy text repeats maxx for the second Y value; kept for the same output
-                        $link = '<b>'.$type.'</b> X '.($box['minx'] !== null
-                            ? round($box['minx'], 7).', '.round($box['maxx'], 7).' Y '.round($box['miny'], 7).', '.round($box['maxx'], 7)
-                            : '');
-                    }
+                    // the readable text of the client and of {wrap dt="geo"} (the legacy text differed)
+                    $link = htmlspecialchars(GeoText::summary((string)$geo['wkt']));
                     $base = $this->environment->baseUrl;
                     $url = $base.'viewers/map/map.php?q=ids:'.$recordId.'&db='.$this->environment->databaseName
                         .'&notimeline=1&nocluster=1&basemap=OpenStreetMap&controls=none&published=true&popup=none';

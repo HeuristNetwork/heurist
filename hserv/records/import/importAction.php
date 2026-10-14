@@ -265,8 +265,10 @@ private static function findRecordIds($imp_session, $params){
     $mapping_fieldname_to_index = array();//field_x => x for quick access
 
     //get arrays of  field_XXX => field type, field_XXX=>index in mapping
-    if(is_array($mapping))
-    {
+    if(is_array($mapping)){
+
+        $imp_session['sequence'][$currentSeqIndex]['matching_flds'] = $params['mapping'];
+
         foreach ($mapping as $index => $field_type) {
             if($field_type=="url" || $field_type=="id" || @$detDefs[$field_type]){
                     $field_name = "field_".$index;
@@ -702,8 +704,9 @@ public static function assignRecordIds($params){
     }
     $index = array_search($id_fieldname, $imp_session['columns']);//find it among existing columns
     if($index!==false){ //this is existing field
-        $id_field  = "field_".$index;
-        $imp_session['uniqcnt'][$index] = (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'];
+        $id_field  = "field_{$index}";
+        $imp_session['uniqcnt'][$index] = !isEmptyArray(@$pairs) ? count($pairs) : $imp_session['reccount'];
+        $imp_session['column_counts'][$index] = $imp_session['reccount'];
     }
 
     //add new field into import table
@@ -739,8 +742,9 @@ public static function assignRecordIds($params){
             return false;
         }*/
 
-        array_push($imp_session['columns'], $id_fieldname );
-        array_push($imp_session['uniqcnt'], (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'] );
+        $imp_session['columns'][] = $id_fieldname;
+        $imp_session['uniqcnt'][] = !isEmptyArray(@$pairs) ? count($pairs) : $imp_session['reccount'] ;
+        $imp_session['column_counts'][] = $imp_session['reccount'];
 
         if(@$params['idfield']){
             array_push($imp_session['multivals'], $field_count );//!!!!
@@ -981,6 +985,9 @@ public static function validateImport($params) {
         "count_ignore_rows"=>0,
         "count_error"=>0,
         "error"=>array(),
+        // Date findings are informative: dates are always imported and never block Prepare.
+        "count_date_error"=>0,
+        "date_error"=>array(),
         "count_warning"=>0,
         "warning"=>array(),
         "utm_warning"=>0,
@@ -2238,13 +2245,13 @@ private static function validateDateField($query, $imp_session, $fields_checked,
         $cnt_error = count($wrong_records);
         if($cnt_error>0){
             $error = array();
-            $error["count_".$type] = $cnt_error;
+            $error["count_error"] = $cnt_error;
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
-            $error["err_message"] = "Date could not be interpreted safely. Use the selected day/month order, an explicit year, ISO yyyy-mm-dd, or a valid Heurist temporal. Impossible dates, question marks and ambiguous short years require correction. The original source value has been retained.";
-            $error["short_message"] = "Invalid Dates";
-            $imp_session['validation']['count_'.$type] = $imp_session['validation']['count_'.$type]+$cnt_error;
-            array_push($imp_session['validation'][$type], $error);
+            $error["err_message"] = "These dates will be imported with a marker that they have not been converted to the normal date storage format. After importing please run Admin &gt; Verify integrity to identify and fix uninterpretable dates.";
+            $error["short_message"] = "Ambiguous or uninterpretable dates";
+            $imp_session['validation']['count_date_error'] += $cnt_error;
+            array_push($imp_session['validation']['date_error'], $error);
 
             return $imp_session;
         }
@@ -2619,6 +2626,10 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
         unset($details['ScratchPad']);
         $updatingRecHeader = true;
     }
+    // MODIFIED for CSV import: date values carry their original source text in
+    // a parallel array so recordSave can write it to recDetails.dtl_Annotation.
+    $record['details_annotation'] = @$details['_annotations'];
+    unset($details['_annotations']);
     $record['details'] = $details;
 
     $updating_record = $recordId != 0 && // Check that a record is actually being updated, for the final count
@@ -3100,13 +3111,16 @@ public static function performImport($params, $mode_output){
         if(!$csv_mvsep) {$csv_mvsep = '|';}
         if(!$csv_enclosure) {$csv_enclosure = '"';}
 
-        $date_error = self::checkImportDates($res, $field_types, $recordTypeStructure,
-            $idx_fieldtype, $imp_session, $csv_enclosure, $csv_mvsep,
-            $mapping_keys_values, $field_indexes);
-        if ($date_error !== null) {
-            $res->close();
-            mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
-            return $date_error;
+        // MODIFIED: retained for diagnostic reference only; dates must never block import.
+        if(false && !$ignore_errors){
+            $date_error = self::checkImportDates($res, $field_types, $recordTypeStructure,
+                $idx_fieldtype, $imp_session, $csv_enclosure, $csv_mvsep,
+                $mapping_keys_values, $field_indexes);
+            if ($date_error !== null) {
+                $res->close();
+                mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
+                return $date_error;
+            }
         }
 
         $previos_recordId = null;
@@ -3289,6 +3303,9 @@ public static function performImport($params, $mode_output){
                         foreach ($values as $idx=>$r_value)
                         {
                             $value = null;
+                            // MODIFIED for CSV import: retain the original date text before
+                            // trimming or interpretation so it remains recoverable.
+                            $source_value = $r_value;
                             $r_value = super_trim($r_value);
 
                             if($fieldtype_type == "enum" || $fieldtype_type == "relationtype"){
@@ -3313,15 +3330,18 @@ public static function performImport($params, $mode_output){
                                     if(!($value>0)){
                                         $value = VerifyValue::isValidTermCode($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
                                     }
+                                    if(!($value>0) && $ignore_errors){
+                                        // MODIFIED: a confirmed import-anyway action must not discard
+                                        // a term label which still was not recognised after term creation.
+                                        $value = $source_value;
+                                    }
                                 }
                             }
                             elseif($fieldtype_type == "resource"){
 
-                                if(!VerifyValue::isValidPointer(null, $r_value)){
-                                     $value  = null;
-                                }else{
-                                     $value = $r_value;
-                                }
+                                // MODIFIED: retain invalid pointer IDs when the user explicitly imports anyway;
+                                // Admin > Verify integrity will identify references to missing records.
+                                $value = $r_value;
 
 
                             }
@@ -3432,7 +3452,10 @@ public static function performImport($params, $mode_output){
                                     $ulf_ID = $entity->registerURL( $r_value );
                                 }
 
-                                $value = $ulf_ID;
+                                // MODIFIED: never silently discard an unresolved supplied file value.
+                                // Numeric missing IDs are retained as IDs; other values are retained as text
+                                // by recordModify's import fallback and reported by Verify integrity.
+                                $value = $ulf_ID ?: $r_value;
 
                             }
                             else{
@@ -3442,9 +3465,12 @@ public static function performImport($params, $mode_output){
 
                                 if($value!='' && $value!='NULL') {
                                     if($fieldtype_type == "date") {
-                                        // Preflight checked this value. Convert with the saved
-                                        // CSV order before recordSave's shared temporal parser.
-                                        $value = ImportDate::normalise($value, $imp_session['csv_dateformat'] ?? 1);
+                                        // Dates never block import. Convert unambiguous dates;
+                                        // preserve all others verbatim with a visible integrity marker.
+                                        $normalised_date = ImportDate::normalise($value, $imp_session['csv_dateformat'] ?? 1);
+                                        $value = $normalised_date === null
+                                            ? ImportDate::markUninterpretable($value)
+                                            : $normalised_date;
                                     }else{
                                         //replace \\r to\r \\n to \n
                                         $value = str_replace("\\r", "\r", $value);
@@ -3529,6 +3555,11 @@ public static function performImport($params, $mode_output){
                                     }
                                     if($need_add){
                                         $details["t:".$field_type][$cnt] = $value;
+                                        // MODIFIED for CSV import: annotate every date value
+                                        // with the source text used to produce the stored date.
+                                        if($fieldtype_type === 'date'){
+                                            $details['_annotations'][$field_type][$cnt] = mb_substr((string)$source_value, 0, 250);
+                                        }
                                     }
                                 }
 
@@ -3633,7 +3664,8 @@ public static function performImport($params, $mode_output){
 
 
         if(!$id_field){
-            array_push($imp_session['uniqcnt'], self::$rep_added);
+            $imp_session['uniqcnt'][] = self::$rep_added;
+            $imp_session['column_counts'][] = self::$rep_added;
         }
 
         //reassign record ids to keep in session
@@ -3951,6 +3983,7 @@ public static function insertNewColumns($params){
 
     $imp_session['columns'][] = $col_name;
     $imp_session['uniqcnt'][] = "1";
+    $imp_session['column_counts'][] = "1";
 
     $column_size = mb_strlen($col_data) + 5;
 
@@ -4044,6 +4077,10 @@ public static function verifyDatabaseAgainstSource($params){
     if(!$csv_mvsep || $csv_mvsep==='none'){
         $csv_mvsep = null;
     }
+    // Use exactly the date order saved by the importer for this upload.  The
+    // value currently displayed by the browser may have returned to its default
+    // after a saved import session is reopened.
+    $csv_dateformat = ImportDate::order($imp_session['csv_dateformat'] ?? 1);
 
     $groups = array();
     $select_fields = array($id_field);
@@ -4118,15 +4155,14 @@ public static function verifyDatabaseAgainstSource($params){
         return false;
     }
 
-    $fp = fopen('php://temp', 'r+');
-    // MODIFIED for verifyDBAgainstSource: TSV output and Field type column.
-    // MODIFIED for verifyDBAgainstSource: requested output column order; duplicate reporting removed.
-    $report_header = array('Source row','Heurist record ID','Status','Fieldtype','Source column(s)',
+    // Verification report column order; Batch is conditional on its presence
+    // in the source file.
+    // MODIFIED for verifyDBAgainstSource: concise standard name for the Heurist identifier column
+    $report_header = array('Source row','H-ID (Heurist ID)','Status','Fieldtype','Source column(s)',
                            'Heurist field','Source value(s)','Database value(s)');
     if($batch_field!==null){
         array_splice($report_header, 2, 0, array('Batch'));
     }
-    fputcsv($fp, $report_header, "\t", '"');
     $record_cache = array();
     $term_cache = array();
     $term_label_cache = array();
@@ -4195,15 +4231,22 @@ public static function verifyDatabaseAgainstSource($params){
         }
 
         foreach($groups as $base_type=>$group){
+            $field_kind = @$definitions[$base_type]['dty_Type'];
             $source_values = array();
             $latitude = null;
             $longitude = null;
             foreach($group['fields'] as $field_name=>$mapped_type){
-                // MODIFIED for verifyDBAgainstSource: pipe and dollar signs
-                // are equivalent source repeat-value separators, irrespective
-                // of the separator retained by an older import session.
                 $source_cell = (string)@$source_row[$field_name];
-                $raw_values = preg_split('/\s*[|$]\s*/', $source_cell);
+                // Pipe and dollar are accepted as repeat separators. Encoded
+                // Heurist temporals can contain structural pipes, so they must
+                // remain one date value.
+                $trimmed_source_cell = ltrim($source_cell);
+                $is_encoded_temporal = $field_kind==='date'
+                    && (substr($trimmed_source_cell, 0, 5)==='|VER='
+                        || substr($trimmed_source_cell, 0, 1)==='{' || substr($trimmed_source_cell, 0, 1)==='[');
+                $raw_values = $is_encoded_temporal
+                    ? array($source_cell)
+                    : preg_split('/\s*(?:\||\$)\s*/u', $source_cell);
                 $raw_values = array_map('super_trim', $raw_values);
                 if(substr($mapped_type, -4)==='_lat'){
                     $latitude = trim((string)reset($raw_values));
@@ -4220,22 +4263,58 @@ public static function verifyDatabaseAgainstSource($params){
             $database_values = $base_type==='url' || $base_type==='scratchpad'
                 ? $record_cache[$record_id][$base_type]
                 : (@$record_cache[$record_id]['details'][$base_type] ?: array());
-            $field_kind = @$definitions[$base_type]['dty_Type'];
+
+            // Normally repeated DB details already arrive as separate array
+            // elements.  Expand delimiters as well so a delimited value on
+            // either side is compared as the same unordered set.
+            $expanded_database_values = array();
+            foreach($database_values as $database_value){
+                $database_value = (string)$database_value;
+                $trimmed_database_value = ltrim($database_value);
+                $is_encoded_temporal = $field_kind==='date'
+                    && (substr($trimmed_database_value, 0, 5)==='|VER='
+                        || substr($trimmed_database_value, 0, 1)==='{' || substr($trimmed_database_value, 0, 1)==='[');
+                $parts = $is_encoded_temporal
+                    ? array($database_value)
+                    : preg_split('/\s*(?:\||\$)\s*/u', $database_value);
+                $expanded_database_values = array_merge($expanded_database_values, $parts);
+            }
+            $database_values = array_map('super_trim', $expanded_database_values);
 
             // MODIFIED for verifyDBAgainstSource: term labels and codes are
             // resolved with the record field's permitted vocabulary.
-            $normalise = function($value) use ($field_kind, $base_type, &$term_cache, &$file_cache, $term_constraints){
+            $normalise = function($value) use ($field_kind, $base_type, &$term_cache, &$file_cache,
+                                                $term_constraints, $csv_dateformat){
                 $value = super_trim((string)$value);
                 // verifyDBAgainstSource: language-tagged repeat values such as
                 // IND:value and FRE: value compare by their value, regardless
                 // of source-column or repeat-value order.
-                $value = preg_replace('/^[A-Z]{3}:\s*/', '', $value);
+                $value = preg_replace('/^\s*[A-Z]{3}\s*:\s*/u', '', $value);
                 // verifyDBAgainstSource: normalise regular, non-breaking and
                 // other Unicode spacing, then trim again after prefix removal.
                 $value = preg_replace('/[\p{Z}\s]+/u', ' ', $value);
                 $value = trim($value);
                 if($value==='' || strcasecmp($value, 'NULL')===0){
                     return null;
+                }
+                // Apply the same strict interpretation used when the CSV value
+                // is inserted.  Equivalent source and stored representations
+                // therefore compare equally (for example 20/12/1987 and
+                // 1987-12-20, using the saved day/month selection).
+                if($field_kind==='date'){
+                    $interpreted_date = ImportDate::normalise($value, $csv_dateformat);
+                    if($interpreted_date!==null){
+                        $first_character = substr(ltrim($interpreted_date), 0, 1);
+                        // ImportDate returns simple dates as ISO strings and
+                        // complex/qualified dates as canonical temporal JSON.
+                        // Put simple dates into the same canonical structure so
+                        // that a year stored as a legacy temporal equals the
+                        // corresponding year in the source.
+                        $value = ($first_character==='{' || $first_character==='[')
+                            ? $interpreted_date
+                            : json_encode(array('timestamp'=>array('in'=>$interpreted_date, 'type'=>'s')),
+                                          JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                    }
                 }
                 // verifyDBAgainstSource: leading zeroes are insignificant for
                 // numeric-looking values, including values held in text fields.
@@ -4293,8 +4372,9 @@ public static function verifyDatabaseAgainstSource($params){
 
             $source_normal = array_values(array_filter(array_map($normalise, $source_values), function($value){return $value!==null;}));
             $database_normal = array_values(array_filter(array_map($normalise, $database_values), function($value){return $value!==null;}));
-            // MODIFIED for verifyDBAgainstSource: compare sets only; order and
-            // duplicate counts on either side are deliberately ignored.
+            // Compare sets only. Values from every source column mapped to this
+            // field are combined; source/DB order and duplicate counts are not
+            // significant.
             $source_normal = array_values(array_unique($source_normal, SORT_STRING));
             $database_normal = array_values(array_unique($database_normal, SORT_STRING));
             sort($source_normal, SORT_STRING);
@@ -4348,11 +4428,29 @@ public static function verifyDatabaseAgainstSource($params){
                 };
                 $source_display_values = $unique_display_values($source_display_values);
                 $database_display_values = $unique_display_values($database_display_values);
+                // MODIFIED for verifyDBAgainstSource: language indicators are
+                // comparison metadata, not part of the value shown to users.
+                $clean_display_value = function($value){
+                    $value = preg_replace('/^\s*[A-Z]{3}\s*:\s*/u', '', (string)$value);
+                    return trim($value);
+                };
+                $source_display_values = array_map($clean_display_value, $source_display_values);
+                $database_display_values = array_map($clean_display_value, $database_display_values);
+
+                // MODIFIED for verifyDBAgainstSource: repeated text values are
+                // easier to compare when both sides use alphabetical order and
+                // one value per line. Other data types retain their old display.
+                $display_separator = ' | ';
+                if($field_kind==='freetext' || $field_kind==='blocktext'){
+                    usort($source_display_values, 'strnatcasecmp');
+                    usort($database_display_values, 'strnatcasecmp');
+                    $display_separator = "\n";
+                }
                 // MODIFIED for verifyDBAgainstSource: distinguish missing values from unequal values.
                 if(empty($source_normal) && !empty($database_normal)){
                     $difference_status = 'NoSourceValue';
                 }elseif(!empty($source_normal) && empty($database_normal)){
-                    $difference_status = 'NoDBValue';
+                    $difference_status = 'NoDatabaseValue';
                 }else{
                     $difference_status = 'DIFF';
                 }
@@ -4366,46 +4464,332 @@ public static function verifyDatabaseAgainstSource($params){
                 // MODIFIED for verifyDBAgainstSource: requested column order and TSV writer.
                 $write_report_row($imp_id, $make_report_row($imp_id, $record_id, $batch_value,
                     $difference_status, ($field_kind ?: $base_type), implode(' + ', $source_column_labels),
-                    $field_label, implode(' | ', $source_display_values),
-                    implode(' | ', $database_display_values)));
+                    $field_label, implode($display_separator, $source_display_values),
+                    implode($display_separator, $database_display_values)));
             }
         }
     }
     $source_result->close();
-    // verifyDBAgainstSource: Batch ascending (when present), Status descending,
-    // then Source column ascending, with source row as a deterministic final key.
+    // Sort by target database field. Retain the previous useful ordering inside
+    // each field group: status descending, Batch, source value and source row.
     $status_index = $batch_field===null ? 2 : 3;
-    $source_column_index = $batch_field===null ? 4 : 5;
-    usort($report_rows, function($a, $b) use ($batch_field, $status_index, $source_column_index){
-        // verifyDBAgainstSource: Batch is the primary ascending sort key when present.
+    $target_field_index = $batch_field===null ? 5 : 6;
+    $source_value_index = $batch_field===null ? 6 : 7;
+    usort($report_rows, function($a, $b) use ($batch_field, $status_index, $target_field_index, $source_value_index){
+        $field_order = strnatcasecmp((string)$a['row'][$target_field_index], (string)$b['row'][$target_field_index]);
+        if($field_order!==0){
+            return $field_order;
+        }
+        $status_order = strcasecmp($b['row'][$status_index], $a['row'][$status_index]);
+        if($status_order!==0){
+            return $status_order;
+        }
         if($batch_field!==null){
             $batch_order = strnatcasecmp((string)$a['row'][2], (string)$b['row'][2]);
             if($batch_order!==0){
                 return $batch_order;
             }
         }
-        $status_order = strcasecmp($b['row'][$status_index], $a['row'][$status_index]);
-        if($status_order!==0){
-            return $status_order;
-        }
-        $column_order = strcasecmp((string)$a['row'][$source_column_index], (string)$b['row'][$source_column_index]);
-        if($column_order!==0){
-            return $column_order;
+        $source_value_order = strnatcasecmp((string)$a['row'][$source_value_index], (string)$b['row'][$source_value_index]);
+        if($source_value_order!==0){
+            return $source_value_order;
         }
         return intval($a['source_id']) <=> intval($b['source_id']);
     });
+
+    // ODS is the normal verification output. Reorder presentation columns only;
+    // comparison, row contents and sorting above remain unchanged.
+    if(@$params['output']==='ods'){
+        $source_column_index = $batch_field===null ? 4 : 5;
+        $database_value_index = $batch_field===null ? 7 : 8;
+        $fieldtype_index = $batch_field===null ? 3 : 4;
+        $batch_index = $batch_field===null ? null : 2;
+
+        // Requested standard order: identifier and comparison information first;
+        // source row, Batch, Status and Field type at the end.
+        $base_order = array(1, $source_column_index, $target_field_index,
+                            $source_value_index, $database_value_index, 0);
+        if($batch_index!==null){
+            $base_order[] = $batch_index;
+        }
+        $base_order[] = $status_index;
+        $base_order[] = $fieldtype_index;
+
+        $reorder = function($values, $order){
+            $result = array();
+            foreach($order as $index){
+                $result[] = @$values[$index];
+            }
+            return $result;
+        };
+        // NoSourceValue: put the database value directly after H-ID.
+        $no_source_order = $base_order;
+        $database_order_position = array_search($database_value_index, $no_source_order, true);
+        array_splice($no_source_order, $database_order_position, 1);
+        array_splice($no_source_order, 1, 0, array($database_value_index));
+
+        // NoDatabaseValue: put the source value directly after H-ID.
+        $no_database_order = $base_order;
+        $source_order_position = array_search($source_value_index, $no_database_order, true);
+        array_splice($no_database_order, $source_order_position, 1);
+        array_splice($no_database_order, 1, 0, array($source_value_index));
+
+        $sheets = array(
+            'NoSourceValue'=>array(
+                'header'=>$reorder($report_header, $no_source_order),
+                'rows'=>array(),
+                'target_field_index'=>array_search($target_field_index, $no_source_order, true),
+                'separate_fields'=>true,
+                'wide_columns'=>array()
+            )
+        );
+        $used_sheet_names = array('NoSourceValue'=>true);
+        $field_sheet_names = array();
+        $make_field_sheet_name = function($prefix, $field_label) use (&$used_sheet_names){
+            $field_name = preg_replace('/\s*\[\d+\]\s*$/', '', trim((string)$field_label));
+            $field_name = preg_replace('/[\\\/:*?\[\]]+/', ' ', $field_name);
+            $field_name = trim(preg_replace('/\s+/u', ' ', $field_name));
+            if($field_name===''){
+                $field_name = 'Field';
+            }
+            if(mb_strlen($field_name)>20){
+                $field_name = rtrim(mb_substr($field_name, 0, 17)).'...';
+            }
+            $base_name = $prefix.$field_name;
+            $sheet_name = $base_name;
+            $suffix = 2;
+            while(isset($used_sheet_names[$sheet_name])){
+                $suffix_text = ' '.$suffix;
+                $sheet_name = mb_substr($base_name, 0, 31-mb_strlen($suffix_text)).$suffix_text;
+                $suffix++;
+            }
+            $used_sheet_names[$sheet_name] = true;
+            return $sheet_name;
+        };
+
+        foreach($report_rows as $report_item){
+            $status = $report_item['row'][$status_index];
+            if($status==='NoSourceValue'){
+                $sheets['NoSourceValue']['rows'][] = $reorder($report_item['row'], $no_source_order);
+                continue;
+            }
+
+            $field_label = (string)@$report_item['row'][$target_field_index];
+            $field_key = $status.'|'.$field_label;
+            if(!isset($field_sheet_names[$field_key])){
+                $is_no_database = $status==='NoDatabaseValue';
+                $sheet_name = $make_field_sheet_name($is_no_database ? 'NoDBVal-' : 'DIFF-', $field_label);
+                $field_sheet_names[$field_key] = $sheet_name;
+                $sheet_order = $is_no_database ? $no_database_order : $base_order;
+                $sheet_header = $reorder($report_header, $sheet_order);
+                if($is_no_database){
+                    $display_field_name = preg_replace('/\s*\[\d+\]\s*$/', '', trim($field_label));
+                    $sheet_header[1] = $display_field_name;
+                }
+                $sheets[$sheet_name] = array(
+                    'header'=>$sheet_header,
+                    'rows'=>array(),
+                    'target_field_index'=>array_search($target_field_index, $sheet_order, true),
+                    'separate_fields'=>false,
+                    'wide_columns'=>$is_no_database ? array(1) : array()
+                );
+            }
+            $sheet_name = $field_sheet_names[$field_key];
+            $row_order = $status==='NoDatabaseValue' ? $no_database_order : $base_order;
+            $sheets[$sheet_name]['rows'][] = $reorder($report_item['row'], $row_order);
+        }
+        return self::createVerificationOds($sheets);
+    }
+
+    // Retain tab-separated output for old direct calls. Insert a visible field
+    // divider as requested for the non-ODS fallback.
+    $fp = fopen('php://temp', 'r+');
+    fputcsv($fp, $report_header, "\t", '"');
     $last_reported_source = null;
+    $last_reported_field = null;
     foreach($report_rows as $report_item){
-        if($last_reported_source!==null && $last_reported_source!==$report_item['source_id']){
-            fwrite($fp, PHP_EOL);
+        $current_field = (string)$report_item['row'][$target_field_index];
+        if($last_reported_field!==null && $last_reported_field!==$current_field){
+            fputcsv($fp, array('**********'), "\t", '"');
         }
         fputcsv($fp, $report_item['row'], "\t", '"');
         $last_reported_source = $report_item['source_id'];
+        $last_reported_field = $current_field;
     }
     rewind($fp);
     $csv = stream_get_contents($fp);
     fclose($fp);
     return $csv;
+}
+
+/**
+ * Build an OpenDocument spreadsheet for verification results.
+ *
+ * @param array $sheets Sheet name => header, rows and presentation options.
+ * @return string|false ODS bytes, or false after recording an error.
+ */
+private static function createVerificationOds($sheets){
+
+    $escape_xml = function($value){
+        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', (string)$value);
+        return htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
+    };
+    $cell_xml = function($value, $style='ceText') use ($escape_xml){
+        $escaped_value = $escape_xml($value);
+        // MODIFIED for verifyDBAgainstSource: preserve intentional newlines
+        // inside ODS cells as actual OpenDocument line-break elements.
+        $escaped_value = str_replace(array("\r\n", "\r", "\n"), '<text:line-break/>', $escaped_value);
+        return '<table:table-cell table:style-name="'.$style.'" office:value-type="string">'
+              .'<text:p>'.$escaped_value.'</text:p></table:table-cell>';
+    };
+
+    $automatic_styles = '';
+    $automatic_styles .=
+        '<style:style style:name="ceText" style:family="table-cell">'
+        .'<style:table-cell-properties fo:border="0.01in solid #D0D0D0" fo:padding="0.04in" fo:wrap-option="wrap" style:vertical-align="top"/>'
+        .'</style:style>'
+        .'<style:style style:name="ceHeader" style:family="table-cell">'
+        .'<style:table-cell-properties fo:background-color="#D9EAF7" fo:border="0.01in solid #808080" fo:padding="0.05in"/>'
+        .'<style:text-properties fo:font-weight="bold"/>'
+        .'</style:style>'
+        .'<style:style style:name="ceBlack" style:family="table-cell">'
+        .'<style:table-cell-properties fo:background-color="#000000"/>'
+        .'</style:style>'
+        .'<style:style style:name="roBlack" style:family="table-row">'
+        .'<style:table-row-properties style:row-height="0.16in"/>'
+        .'</style:style>';
+
+    $tables_xml = '';
+    $settings_tables_xml = '';
+    foreach($sheets as $sheet_number=>$sheet){
+        $sheet_name = is_string($sheet_number) ? $sheet_number : 'Sheet'.($sheet_number+1);
+        $header = $sheet['header'];
+        $rows = $sheet['rows'];
+        $target_field_index = $sheet['target_field_index'];
+        $separate_fields = !empty($sheet['separate_fields']);
+        $wide_columns = @$sheet['wide_columns'] ?: array();
+
+        $column_declarations = '';
+        foreach($header as $idx=>$heading){
+            $width = ($heading==='Source value(s)' || $heading==='Database value(s)' || in_array($idx, $wide_columns, true))
+                ? '6.0in'
+                : (($heading==='Heurist field' || $heading==='Source column(s)') ? '2.8in'
+                : ($heading==='Status' ? '1.7in' : '1.35in'));
+            $style_name = 'co'.substr(md5($idx.'|'.$heading.'|'.$width), 0, 12);
+            if(strpos($automatic_styles, 'style:name="'.$style_name.'"')===false){
+                $automatic_styles .= '<style:style style:name="'.$style_name.'" style:family="table-column">'
+                    .'<style:table-column-properties style:column-width="'.$width.'"/>'
+                    .'</style:style>';
+            }
+            $column_declarations .= '<table:table-column table:style-name="'.$style_name.'"/>';
+        }
+        $tables_xml .= '<table:table table:name="'.$escape_xml($sheet_name).'">'.$column_declarations;
+        $tables_xml .= '<table:table-header-rows><table:table-row>';
+        foreach($header as $heading){
+            $tables_xml .= $cell_xml($heading, 'ceHeader');
+        }
+        $tables_xml .= '</table:table-row></table:table-header-rows>';
+
+        $last_field = null;
+        foreach($rows as $row){
+            $current_field = (string)@$row[$target_field_index];
+            if($separate_fields && $last_field!==null && $last_field!==$current_field){
+                $tables_xml .= '<table:table-row table:style-name="roBlack">';
+                for($column=0; $column<count($header); $column++){
+                    $tables_xml .= '<table:table-cell table:style-name="ceBlack"/>';
+                }
+                $tables_xml .= '</table:table-row>';
+            }
+            $tables_xml .= '<table:table-row>';
+            foreach($row as $value){
+                $tables_xml .= $cell_xml($value);
+            }
+            $tables_xml .= '</table:table-row>';
+            $last_field = $current_field;
+        }
+        $tables_xml .= '</table:table>';
+
+        // Freeze the first row in LibreOffice-compatible ODS view settings.
+        $settings_tables_xml .= '<config:config-item-map-entry config:name="'.$escape_xml($sheet_name).'">'
+            .'<config:config-item config:name="HorizontalSplitMode" config:type="short">0</config:config-item>'
+            .'<config:config-item config:name="HorizontalSplitPosition" config:type="int">0</config:config-item>'
+            .'<config:config-item config:name="VerticalSplitMode" config:type="short">2</config:config-item>'
+            .'<config:config-item config:name="VerticalSplitPosition" config:type="int">1</config:config-item>'
+            .'<config:config-item config:name="ActiveSplitRange" config:type="short">2</config:config-item>'
+            .'<config:config-item config:name="PositionTop" config:type="int">0</config:config-item>'
+            .'<config:config-item config:name="PositionBottom" config:type="int">1</config:config-item>'
+            .'</config:config-item-map-entry>';
+    }
+
+    $content_xml = '<?xml version="1.0" encoding="UTF-8"?>'
+        .'<office:document-content office:version="1.2" '
+        .'xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+        .'xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" '
+        .'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" '
+        .'xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" '
+        .'xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0">'
+        .'<office:automatic-styles>'.$automatic_styles.'</office:automatic-styles>'
+        .'<office:body><office:spreadsheet>'.$tables_xml.'</office:spreadsheet></office:body>'
+        .'</office:document-content>';
+
+    $styles_xml = '<?xml version="1.0" encoding="UTF-8"?>'
+        .'<office:document-styles office:version="1.2" '
+        .'xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+        .'xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" '
+        .'xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0">'
+        .'<office:styles><style:default-style style:family="table-cell">'
+        .'<style:text-properties fo:font-family="Liberation Sans" fo:font-size="10pt"/>'
+        .'</style:default-style></office:styles></office:document-styles>';
+
+    $settings_xml = '<?xml version="1.0" encoding="UTF-8"?>'
+        .'<office:document-settings office:version="1.2" '
+        .'xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+        .'xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0">'
+        .'<office:settings><config:config-item-set config:name="ooo:view-settings">'
+        .'<config:config-item-map-indexed config:name="Views"><config:config-item-map-entry>'
+        .'<config:config-item config:name="ViewId" config:type="string">view1</config:config-item>'
+        .'<config:config-item-map-named config:name="Tables">'.$settings_tables_xml
+        .'</config:config-item-map-named>'
+        .'</config:config-item-map-entry></config:config-item-map-indexed>'
+        .'</config:config-item-set></office:settings></office:document-settings>';
+
+    $manifest_xml = '<?xml version="1.0" encoding="UTF-8"?>'
+        .'<manifest:manifest manifest:version="1.2" '
+        .'xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0">'
+        .'<manifest:file-entry manifest:full-path="/" manifest:version="1.2" '
+        .'manifest:media-type="application/vnd.oasis.opendocument.spreadsheet"/>'
+        .'<manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>'
+        .'<manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/>'
+        .'<manifest:file-entry manifest:full-path="settings.xml" manifest:media-type="text/xml"/>'
+        .'</manifest:manifest>';
+
+    $ods_path = tempnam(HEURIST_SCRATCH_DIR, 'verify_ods_');
+    if($ods_path===false){
+        self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create temporary verification spreadsheet');
+        return false;
+    }
+    $zip = new ZipArchive();
+    $zip_result = $zip->open($ods_path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+    if($zip_result!==true){
+        unlink($ods_path);
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot create verification spreadsheet archive');
+        return false;
+    }
+    $zip->addFromString('mimetype', 'application/vnd.oasis.opendocument.spreadsheet');
+    $zip->setCompressionName('mimetype', ZipArchive::CM_STORE);
+    $zip->addFromString('content.xml', $content_xml);
+    $zip->addFromString('styles.xml', $styles_xml);
+    $zip->addFromString('settings.xml', $settings_xml);
+    $zip->addFromString('META-INF/manifest.xml', $manifest_xml);
+    $zip->close();
+
+    $ods = file_get_contents($ods_path);
+    unlink($ods_path);
+    if($ods===false){
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot read generated verification spreadsheet');
+        return false;
+    }
+    return $ods;
 }
 
 private static function _isRecordUpdating($rec_ID, $record){
@@ -4466,6 +4850,42 @@ private static function _isRecordUpdating($rec_ID, $record){
     }
 
     return $rtn;
+}
+
+public static function seekNextValue(array $params){
+
+    self::initialize();
+
+    $imp_session = ImportSession::load(@$params['imp_ID']);
+    if($imp_session==false){
+        return false;
+    }
+
+    $currentID = prepareIds(@$params['currentID']);
+    $importTable = $imp_session['import_table'];
+    $seekDirection = @$params['direction'] === 'prev' ? '<' : '';
+    $seekDirection = @$params['direction'] === 'next' ? '>' : $seekDirection;
+    $fieldIndex = prepareIds(@$params['field'], true);
+
+    if(empty($importTable) || $seekDirection === ''){
+        self::$system->addError(HEURIST_INVALID_REQUEST, $seekDirection === '' ? 'Missing seek direction' : 'Missing import table');
+        return false;
+    }elseif($currentID === [] || $fieldIndex === []){
+        self::$system->addError(HEURIST_ACTION_BLOCKED, $currentID === [] ? 'Invalid current row provided' : 'Invalid field index provided');
+        return false;
+    }
+    $currentID = $currentID[0];
+    $fieldIndex = $fieldIndex[0];
+
+    $orderBy = $seekDirection === '<' ? " ORDER BY imp_ID DESC" : '';
+    $seekQuery = "SELECT imp_ID FROM {$importTable} WHERE field_{$fieldIndex} != '' AND imp_ID {$seekDirection} {$currentID}{$orderBy} LIMIT 1";
+    $nextID = mysql__select_value(self::$mysqli, $seekQuery);
+
+    if(!$nextID){
+        $nextID = -1;
+    }
+
+    return $nextID;
 }
 } //end class
 ?>

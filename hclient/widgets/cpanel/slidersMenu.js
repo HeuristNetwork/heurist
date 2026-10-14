@@ -1495,16 +1495,26 @@ $.widget( "heurist.slidersMenu", {
                         that._explorer_menu_locked = is_locked; 
                     }
                 },
-                handle_favourites: function(filter_id, filter_name, is_drop=false){
+                handle_favourites: function(filter_id, filter_name, is_drop = false, placeBelow = -1){
 
                     let hasChanged = false;
 
                     let cur_favs = window.hWin.HAPI4.get_prefs_def('favourite_filters', ['']);
                     if(cur_favs[0] == '' || cur_favs.findIndex(filter => filter[0] == filter_id) == -1){ // add new
+
+                        const newFavFilter = [filter_id, filter_name];
                         if(cur_favs[0] == ''){
-                            cur_favs[0] = [filter_id, filter_name];
+                            cur_favs[0] = newFavFilter;
                         }else{
-                            cur_favs.push([filter_id, filter_name]);
+
+                            if(placeBelow === -1){
+                                cur_favs.push(newFavFilter);
+                            }else if(placeBelow === 0){
+                                cur_favs.unshift(newFavFilter);
+                            }else{
+                                let index = cur_favs.findIndex(filter => filter[0] == placeBelow);
+                                index === -1 ? cur_favs.push(newFavFilter) : cur_favs.splice(index + 1, 0, newFavFilter);
+                            }
                         }
 
                         hasChanged = true;

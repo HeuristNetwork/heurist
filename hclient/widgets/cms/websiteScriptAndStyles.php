@@ -245,7 +245,7 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
 
 <script>
 // global
-var RT_CMS_HOME, RT_CMS_MENU, DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
+var RT_CMS_HOME, RT_CMS_PAGE, RT_CMS_MENU, DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
 var timeout_count = 0;
 
 //
@@ -266,7 +266,8 @@ function onPageInit(success)
     }
 
     RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-    RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+    RT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'];
+    RT_CMS_MENU = RT_CMS_PAGE; //deprecated alias for custom website scripts
     DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
     DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
     DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
@@ -479,7 +480,7 @@ function loadPageContent(pageid, eventdata){
                                 response['records'] && response['records'].length>0) {
                                
                                    var res = response['records'][0]['rec_RecTypeID'];
-                                   if(res == RT_CMS_MENU || res == RT_CMS_HOME){
+                                   if(res == RT_CMS_PAGE || res == RT_CMS_HOME){
                                        if(!eventdata) eventdata = {};
                                        eventdata['isMenuItem'] = true;
                                        loadPageContent(pageid, eventdata);

@@ -294,7 +294,7 @@ class DbSysUsers extends DbEntityBase
             }
 
             $orcid = @$fieldvalues['ugr_ORCID'];
-            if(!empty($orcid) && preg_match('/^\d{4}\-\d{4}\-\d{4}\-\d{4}&/', $orcid) === false){
+            if(!empty($orcid) && preg_match('/^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/', $orcid) !== 1){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'ORCID is not valid, ensure it is in the format of XXXX-XXXX-XXXX-XXXX');
                 return false;
             }

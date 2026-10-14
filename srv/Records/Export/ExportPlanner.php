@@ -32,6 +32,7 @@ use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\QueryExecutor;
 use Heurist\Records\Query\RecordSearchService;
 use Heurist\Records\Query\SearchRequest;
+use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\RuntimeContext;
 use InvalidArgumentException;
 
@@ -120,21 +121,16 @@ final class ExportPlanner
         $set = array_fill_keys($ids, true);
         $links = array();
         foreach(array_chunk($ids, self::LINK_BATCH) as $chunk){
-            $rows = $this->database->fetchRows(
-                'SELECT rl_SourceID,rl_TargetID,rl_DetailTypeID,rl_RelationTypeID,rl_RelationID FROM recLinks '
-                .'WHERE rl_SourceID IN ('.implode(',', array_fill(0, count($chunk), '?')).') ORDER BY rl_ID',
-                $chunk
-            );
-            foreach($rows as $row){
-                $source = intval($row[0]);
-                $target = intval($row[1]);
+            foreach(RecordRepository::shared($this->database)->links($chunk, array('order' => 'id')) as $row){
+                $source = $row[2];
+                $target = $row[3];
                 if(!isset($set[$target]) || $source === $target){ continue; }
                 $links[] = array(
                     'source' => $source,
                     'target' => $target,
-                    'field' => intval($row[2]),
-                    'relType' => intval($row[3]),
-                    'relation' => intval($row[4])
+                    'field' => $row[4],
+                    'relType' => $row[5],
+                    'relation' => $row[6]
                 );
             }
         }

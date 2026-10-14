@@ -25,7 +25,7 @@
  * @returns {Object} An object with public methods for controlling the site menu editor.
  *
  * @property {string} _className - Internal class name identifier.
- * @property {number} RT_CMS_MENU - Record Type ID for CMS Menu.
+ * @property {number} RT_CMS_PAGE - Record Type ID for CMS Menu.
  * @property {number} DT_NAME - Detail Type ID for Name.
  * @property {number} DT_EXTENDED_DESCRIPTION - Detail Type ID for Extended Description.
  * @property {number} DT_CMS_TOP_MENU - Detail Type ID for CMS Top Menu (links from CMS Home to menu items).
@@ -39,7 +39,7 @@ function editCMS_SiteMenu( $container, editCMS2 ){
 
     const _className = 'editCMS_SiteMenu';
     
-    const RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+    const RT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'],
         DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
         DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
         DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
@@ -611,7 +611,7 @@ title: "Overview"
             //add new record
             let request = {a: 'save', 
                 ID:0, //new record
-                RecTypeID: RT_CMS_MENU,
+                RecTypeID: RT_CMS_PAGE,
                 details: details };     
 
             window.hWin.HAPI4.RecordMgr.saveRecord(request, 
@@ -732,7 +732,7 @@ title: "Overview"
             edit_mode: 'popup',
             selectOnSave: true, //it means that select popup will be closed after add/edit is completed
             title: window.hWin.HR('Select or create a website menu record'),
-            rectype_set: RT_CMS_MENU,
+            rectype_set: RT_CMS_PAGE,
             parententity: 0,
             default_palette_class: 'ui-heurist-publish',
             onselect:function(event, data){

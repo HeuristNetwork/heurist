@@ -19,39 +19,25 @@
 namespace Heurist\Records\Query\Compiler;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Query\QueryValidationException;
 
 /** Term closure, inverse terms and relation-marker constraints, cached per instance. */
 final class RelationTermResolver
 {
-    private const CHUNK_SIZE = 500;
-    private $database;
+    private DefinitionLookup $definitions;
     /** @var array<int,array{types:?array,recordTypes:array}> */
     private $markers = array();
 
     public function __construct(DatabaseInterface $database)
     {
-        $this->database = $database;
+        $this->definitions = DefinitionLookup::shared($database);
     }
 
-    /** Terms plus every descendant through defTermsLinks. */
+    /** Terms plus every descendant (DefinitionLookup::termDescendants). */
     public function expand(array $termIds): array
     {
-        $all = array_fill_keys(self::ids($termIds), true);
-        $frontier = array_keys($all);
-        while(!empty($frontier)){
-            $next = array();
-            foreach(array_chunk($frontier, self::CHUNK_SIZE) as $chunk){
-                $sql = 'SELECT DISTINCT trl_TermID FROM defTermsLinks WHERE trl_ParentID IN ('
-                    .implode(',', array_fill(0, count($chunk), '?')).')';
-                foreach($this->database->fetchRows($sql, $chunk) as $row){
-                    $id = intval(array_values($row)[0]);
-                    if($id>0 && !isset($all[$id])){ $all[$id] = true; $next[] = $id; }
-                }
-            }
-            $frontier = $next;
-        }
-        return array_map('intval', array_keys($all));
+        return $this->definitions->termDescendants($termIds);
     }
 
     /**
@@ -61,21 +47,7 @@ final class RelationTermResolver
      */
     public function inverse(array $termIds): array
     {
-        $inverse = array();
-        foreach(array_chunk(self::ids($termIds), self::CHUNK_SIZE) as $chunk){
-            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
-            $sql = 'SELECT trm_ID, trm_InverseTermID FROM defTerms'
-                .' WHERE trm_ID IN ('.$placeholders.') OR trm_InverseTermID IN ('.$placeholders.')';
-            $found = array_fill_keys($chunk, false);
-            foreach($this->database->fetchRows($sql, array_merge($chunk, $chunk)) as $row){
-                list($termId, $inverseId) = array_map('intval', array_values($row));
-                if(isset($found[$termId]) && $inverseId>0){ $inverse[] = $inverseId; $found[$termId] = true; }
-                if(isset($found[$inverseId]) && $termId>0){ $inverse[] = $termId; $found[$inverseId] = true; }
-            }
-            foreach($found as $termId=>$hasInverse){
-                if(!$hasInverse){ $inverse[] = intval($termId); }
-            }
-        }
+        $inverse = $this->definitions->termInverse($termIds);
         return empty($inverse) ? array() : $this->expand($inverse);
     }
 
@@ -87,23 +59,15 @@ final class RelationTermResolver
     public function marker(int $fieldId): array
     {
         if(isset($this->markers[$fieldId])){ return $this->markers[$fieldId]; }
-        $rows = $this->database->fetchRows(
-            'SELECT dty_JsonTermIDTree,dty_PtrTargetRectypeIDs,dty_Type FROM defDetailTypes WHERE dty_ID=?',
-            array($fieldId)
-        );
-        if(empty($rows)){ throw new QueryValidationException('Unknown relationship field ID: '.$fieldId); }
-        $row = array_values($rows[0]);
-        if(isset($row[2]) && $row[2] !== 'relmarker'){
+        $field = $this->definitions->field($fieldId);
+        if($field === null){ throw new QueryValidationException('Unknown relationship field ID: '.$fieldId); }
+        if($field['type'] !== 'relmarker'){
             throw new QueryValidationException('Field '.$fieldId.' is not a relationship field');
         }
-        $rootTypes = self::idsFromText($row[0] ?? '');
-        $owners = $this->database->fetchRows(
-            'SELECT DISTINCT rst_RecTypeID FROM defRecStructure WHERE rst_DetailTypeID=?', array($fieldId)
-        );
         $this->markers[$fieldId] = array(
-            'types' => empty($rootTypes) ? null : $this->expand($rootTypes),
-            'ownerTypes' => self::ids(array_map(static function($owner){ return array_values($owner)[0]; }, $owners)),
-            'recordTypes' => self::idsFromText($row[1] ?? '')
+            'types' => empty($field['vocabulary']) ? null : $this->expand($field['vocabulary']),
+            'ownerTypes' => $this->definitions->fieldOwnerTypes($fieldId),
+            'recordTypes' => $field['targetTypes']
         );
         return $this->markers[$fieldId];
     }
@@ -168,18 +132,5 @@ final class RelationTermResolver
             }
         }
         return $legs;
-    }
-
-    private static function ids(array $values): array
-    {
-        return array_values(array_unique(array_filter(array_map('intval', $values), static function($id){
-            return $id>0;
-        })));
-    }
-
-    private static function idsFromText($value): array
-    {
-        preg_match_all('/(?<![0-9])[1-9][0-9]*(?![0-9])/', (string)$value, $matches);
-        return self::ids($matches[0] ?? array());
     }
 }

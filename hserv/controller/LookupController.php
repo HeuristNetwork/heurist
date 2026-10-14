@@ -159,7 +159,7 @@ class LookupController{
         ],
 
         'orcid' => [
-            'id' => '/^\d{4}\-\d{4}\-\d{4}\-\d{4}$/'
+            'id' => '/^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/'
         ],
 
         'isni' => [
@@ -1505,7 +1505,10 @@ class LookupController{
         $this->lookupResponse = is_array($this->lookupResponse) ? $this->lookupResponse : json_decode($this->lookupResponse, true);
         $record = [];
 
-        if(json_last_error() !== JSON_ERROR_NONE){ // no result
+        // An ORCID error/empty response is not a researcher record. Do not fabricate
+        // a successful result from the requested identifier and lookup URL.
+        if(!is_array($this->lookupResponse) || !isset($this->lookupResponse['person'])
+            || !is_array($this->lookupResponse['person'])){
             $this->lookupResponse = $record;
             return;
         }

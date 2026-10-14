@@ -148,7 +148,8 @@ $editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$c
         if(!success) {return;}
         
         //set global constants
-        window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+        window.hWin.RT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'];
+        window.hWin.RT_CMS_MENU = window.hWin.RT_CMS_PAGE; //deprecated alias
         window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         window.hWin.DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
         window.hWin.DT_VERSION = window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'];

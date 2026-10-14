@@ -142,6 +142,11 @@ class DbVerify {
                 //foreach ($resList as $row) {
                 $resMsg = '';
                 $idx++;
+                if(@$row['wkt']){
+                    $dtl_value = $row['wkt'];
+                }else{
+                    $dtl_value = strip_tags($row['dtl_Value'],'<span>');
+                }
                 if($rec_id==null || $rec_id!=$row['rec_ID']) {
 
                     $rec_id = $row['rec_ID'];
@@ -150,11 +155,6 @@ class DbVerify {
                     $url_icon = @$row['rec_RecTypeID']?HEURIST_RTY_ICON.$row['rec_RecTypeID']:'';
                     $url_rec =  $this->getEditURL($rec_id);
                     $rec_title = @$row['rec_Title']?strip_tags($row['rec_Title']):'';
-                    if(@$row['wkt']){
-                        $dtl_value = $row['wkt'];
-                    }else{
-                        $dtl_value = strip_tags($row['dtl_Value'],'<span>');
-                    }
 
                     $rollover = str_replace('"', "&quot;", "#$rec_id $rec_title");
                     $resMsg .= <<<EOT
@@ -1239,6 +1239,169 @@ ORDER BY child.dtl_RecID";
         }
 
         return array('status'=>$resStatus,'message'=>$resMsg);
+    }
+
+    /**
+     * Finds duplicate record detail rows and malformed uploaded-file IDs.
+     *
+     * Detail rows are duplicates only when dtl_RecID, dtl_DetailTypeID,
+     * dtl_Value, dtl_UploadedFileID and dtl_Geo are all identical. Text and
+     * geometry comparisons are binary so that values which differ only by
+     * case, accents or geometry representation are not removed. NULL values
+     * compare equal to other NULL values.
+     *
+     * In fix mode, fix_operation may be:
+     * - duplicate_values: delete duplicate rows, retaining the lowest dtl_ID.
+     * - invalid_uploaded_file_ids: set malformed IDs to NULL.
+     *
+     * The malformed-ID test is normally redundant because the standard
+     * schema defines dtl_UploadedFileID as MEDIUMINT UNSIGNED. It remains
+     * useful for databases with an old or damaged column definition.
+     *
+     * @param array|null $params Optional verification/fix parameters.
+     * @return array Verification status and HTML report.
+     */
+    public function check_duplicate_values($params=null){
+
+        $resStatus = true;
+        $resMsg = '';
+        $mysqli = $this->mysqli;
+        $duplicatesDeleted = 0;
+        $uploadedFileIdsCleared = 0;
+
+        $invalidUploadedFileWhere = 'dtl_UploadedFileID IS NOT NULL AND ('
+            .'CAST(dtl_UploadedFileID AS CHAR) NOT REGEXP \'^[0-9]+$\' '
+            .'OR CAST(dtl_UploadedFileID AS UNSIGNED) = 0)';
+
+        if($this->isFixMode($params)){
+            $fixOperation = @$params['fix_operation'];
+            mysql__safe_updatess($mysqli, false);
+
+            if($fixOperation === 'invalid_uploaded_file_ids'){
+                $res = $mysqli->query('UPDATE recDetails SET dtl_UploadedFileID = NULL '
+                    .'WHERE '.$invalidUploadedFileWhere);
+                if($res){
+                    $uploadedFileIdsCleared = $mysqli->affected_rows;
+                }else{
+                    $resStatus = false;
+                    $resMsg .= errorDiv('Cannot clear malformed uploaded file IDs. SQL error: '
+                        .htmlspecialchars($mysqli->error));
+                }
+            }elseif($fixOperation === 'duplicate_values' || !$fixOperation){
+                $query = <<<'QUERY'
+                    DELETE duplicate
+                    FROM recDetails AS duplicate
+                    INNER JOIN recDetails AS keeper
+                        ON keeper.dtl_RecID = duplicate.dtl_RecID
+                       AND keeper.dtl_DetailTypeID = duplicate.dtl_DetailTypeID
+                       AND BINARY keeper.dtl_Value <=> BINARY duplicate.dtl_Value
+                       AND keeper.dtl_UploadedFileID <=> duplicate.dtl_UploadedFileID
+                       AND HEX(keeper.dtl_Geo) <=> HEX(duplicate.dtl_Geo)
+                       AND keeper.dtl_ID < duplicate.dtl_ID
+                    QUERY;
+                $res = $mysqli->query($query);
+                if($res){
+                    $duplicatesDeleted = $mysqli->affected_rows;
+                }else{
+                    $resStatus = false;
+                    $resMsg .= errorDiv('Cannot remove duplicate field values. SQL error: '
+                        .htmlspecialchars($mysqli->error));
+                }
+            }
+
+            mysql__safe_updatess($mysqli, true);
+        }
+
+        if($uploadedFileIdsCleared > 0){
+            $resMsg .= '<div>'.$uploadedFileIdsCleared
+                .' malformed uploaded file ID(s) were set to NULL</div>';
+        }
+        if($duplicatesDeleted > 0){
+            $resMsg .= '<div>'.$duplicatesDeleted
+                .' duplicate field value(s) were removed; the value with the lowest detail ID was retained</div>';
+        }
+
+        $invalidFileIds = $mysqli->query(
+            'SELECT dtl_ID, rec_ID, rec_RecTypeID, rec_Title, dtl_DetailTypeID AS dty_ID, '
+            .'IF(rst_DisplayName IS NULL, dty_Name, rst_DisplayName) AS dty_Name, '
+            .'CAST(dtl_UploadedFileID AS CHAR) AS dtl_Value '
+            .'FROM recDetails '
+            .'INNER JOIN Records ON rec_ID = dtl_RecID '
+            .'LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
+            .'LEFT JOIN defRecStructure ON rst_RecTypeID = rec_RecTypeID '
+                .'AND rst_DetailTypeID = dtl_DetailTypeID '
+            .'WHERE '.$invalidUploadedFileWhere.' ORDER BY rec_ID, dtl_ID'
+        );
+
+        if(!$invalidFileIds){
+            return array('status'=>false, 'message'=>$resMsg.errorDiv(
+                'Cannot check uploaded file IDs. SQL error: '.htmlspecialchars($mysqli->error)));
+        }
+
+        $duplicateQuery = <<<'QUERY'
+            SELECT duplicate.dtl_ID, rec_ID, rec_RecTypeID, rec_Title,
+                   duplicate.dtl_DetailTypeID AS dty_ID,
+                   IF(rst_DisplayName IS NULL, dty_Name, rst_DisplayName) AS dty_Name,
+                   duplicate.dtl_Value
+            FROM recDetails AS duplicate
+            INNER JOIN Records ON rec_ID = duplicate.dtl_RecID
+            LEFT JOIN defDetailTypes ON dty_ID = duplicate.dtl_DetailTypeID
+            LEFT JOIN defRecStructure ON rst_RecTypeID = rec_RecTypeID
+                AND rst_DetailTypeID = duplicate.dtl_DetailTypeID
+            WHERE EXISTS (
+                SELECT 1
+                FROM recDetails AS keeper
+                WHERE keeper.dtl_RecID = duplicate.dtl_RecID
+                  AND keeper.dtl_DetailTypeID = duplicate.dtl_DetailTypeID
+                  AND BINARY keeper.dtl_Value <=> BINARY duplicate.dtl_Value
+                  AND keeper.dtl_UploadedFileID <=> duplicate.dtl_UploadedFileID
+                  AND HEX(keeper.dtl_Geo) <=> HEX(duplicate.dtl_Geo)
+                  AND keeper.dtl_ID < duplicate.dtl_ID
+            )
+            ORDER BY rec_ID, duplicate.dtl_ID
+            QUERY;
+        $duplicates = $mysqli->query($duplicateQuery);
+
+        if(!$duplicates){
+            $invalidFileIds->close();
+            return array('status'=>false, 'message'=>$resMsg.errorDiv(
+                'Cannot check duplicate field values. SQL error: '.htmlspecialchars($mysqli->error)));
+        }
+
+        $invalidFileIdCount = $invalidFileIds->num_rows;
+        $duplicateCount = $duplicates->num_rows;
+
+        $this->_outStreamInit();
+        fwrite($this->out, $resMsg);
+
+        if($invalidFileIdCount === 0){
+            fwrite($this->out,
+                '<h3 class="res-valid">OK: All uploaded file IDs are NULL or positive unsigned integers</h3>');
+            $invalidFileIds->close();
+        }else{
+            $resStatus = false;
+            $fixMsg = '<div style="padding:20px 0px">Malformed uploaded file IDs cannot identify a file. '
+                .'<button data-fix="duplicate_values" data-fix-operation="invalid_uploaded_file_ids">'
+                .'Set all malformed uploaded file IDs to NULL</button></div>';
+            $this->printList('Records with malformed uploaded file IDs', $fixMsg,
+                $invalidFileIds, 'recCBDuplicateFileIDs');
+        }
+
+        if($duplicateCount === 0){
+            fwrite($this->out,
+                '<h3 class="res-valid">OK: No exactly duplicated field values</h3>');
+            $duplicates->close();
+        }else{
+            $resStatus = false;
+            $fixMsg = '<div style="padding:20px 0px">The duplicate rows shown below can be removed safely. '
+                .'For each identical set, the row with the lowest detail ID will be retained. '
+                .'<button data-fix="duplicate_values" data-fix-operation="duplicate_values">'
+                .'Remove all duplicate field values</button></div>';
+            $this->printList('Exactly duplicated field values', $fixMsg,
+                $duplicates, 'recCBDuplicateValues');
+        }
+
+        return array('status'=>$resStatus, 'message'=>$this->_outStreamRes());
     }
 
 

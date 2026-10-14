@@ -244,7 +244,7 @@ final class QueryTrace
             'length'=>strlen($sql),
             'exists'=>substr_count($upper, 'EXISTS ('),
             'joins'=>substr_count($upper, ' JOIN '),
-            'recLinks'=>substr_count($sql, 'recLinks'),
+            'subqueries'=>substr_count($upper, '(SELECT '),
             'or'=>substr_count($upper, ' OR ')
         );
     }

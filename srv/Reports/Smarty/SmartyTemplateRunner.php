@@ -29,6 +29,7 @@ namespace Heurist\Reports\Smarty;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Jobs\JobInterruptedException;
 use Heurist\Records\Data\RecordDataService;
+use Heurist\Utilities\LanguageCodes;
 use Throwable;
 
 /** Executes templates with the srv data services. */
@@ -86,7 +87,8 @@ final class SmartyTemplateRunner
      *
      * @param array $source ['file' => template file name] or ['body' => template text].
      * @param array $ids Record ids (in report order).
-     * @param array $options mode (html), purpose (preview|file|render), replevel (0-3).
+     * @param array $options mode (html), purpose (preview|file|render), replevel (0-3),
+     *        record (true: $r is the first record, as for calculated fields).
      * @param callable|null $tick fn(int $done, int $total): void - progress; may throw to stop.
      * @return array{output:string,error:?string,records:int}
      */
@@ -133,6 +135,9 @@ final class SmartyTemplateRunner
             $smarty->assign('heurist', $api);
             $smarty->assign('results', $ids);
             $smarty->assign('template_file', $templateFile);
+            if(!empty($options['record'])){
+                $smarty->assign('r', $api->getRecord($ids[0]));
+            }
             $output = $smarty->fetch($template);
         }catch(JobInterruptedException $exception){
             throw $exception;
@@ -162,7 +167,7 @@ final class SmartyTemplateRunner
     public function templateApi(?LanguageCodes $languages = null): TemplateApi
     {
         $languages = $languages ?? new LanguageCodes($this->environment->languageCodesFile);
-        $definitions = new ReportDefinitions($this->database, $this->environment->registeredDbId);
+        $definitions = new ReportDefinitions($this->database);
         $assembler = new ReportRecordAssembler($this->data, $this->database, $definitions, $this->environment,
             $languages, $this->visibleIds, $this->userId, $this->codes);
         return new TemplateApi(array(

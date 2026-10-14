@@ -17,6 +17,10 @@ namespace Heurist\Records\Query\Compiler;
 
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Store\RecordAccess;
+use Heurist\Records\Store\RecordRepository;
+use Heurist\Users\UserGroupRepository;
 use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\SearchExecutionException;
 use Heurist\Records\Query\UnsupportedQueryException;
@@ -27,7 +31,20 @@ final class RecordPredicateCompiler
     private DatabaseInterface $database;
     private $fields;
     /** Initialise record predicates with database name resolution. */
-    public function __construct(DatabaseInterface $database, FieldPredicateCompiler $fields){ $this->database=$database; $this->fields=$fields; }
+    private RecordRepository $repository;
+
+    public function __construct(DatabaseInterface $database, FieldPredicateCompiler $fields, ?RecordRepository $repository = null)
+    {
+        $this->database = $database;
+        $this->fields = $fields;
+        $this->repository = $repository ?? RecordRepository::shared($database);
+    }
+
+    /** Definitions of the database (record types by concept code or name). */
+    private function definitions(): DefinitionLookup
+    {
+        return DefinitionLookup::shared($this->database);
+    }
 
     public function compile(string $base, string $suffix, $value, SqlBuildContext $state, string $r): ?string
     {
@@ -50,10 +67,10 @@ final class RecordPredicateCompiler
             case 'access': return $this->accessCondition($r.'.rec_NonOwnerVisibility', $value, $state);
             case 'user': case 'usr':
                 $state->bind($this->resolveUserId($value, $state), 'i');
-                return 'EXISTS (SELECT 1 FROM usrBookmarks ub WHERE ub.bkm_recID='.$r.'.rec_ID AND ub.bkm_UGrpID=?)';
+                return 'EXISTS (SELECT 1 FROM {bookmarks} ub WHERE ub.bkm_recID='.$r.'.rec_ID AND ub.bkm_UGrpID=?)';
             case 'ws': case 'workset':
                 $state->bind($this->resolveUserId($value, $state), 'i');
-                return 'EXISTS (SELECT 1 FROM usrWorkingSubsets wss WHERE wss.wss_RecID='.$r.'.rec_ID AND wss.wss_OwnerUGrpID=?)';
+                return 'EXISTS (SELECT 1 FROM {worksets} wss WHERE wss.wss_RecID='.$r.'.rec_ID AND wss.wss_OwnerUGrpID=?)';
             case 'tag': case 'keyword': case 'kwd': return $this->tagCondition($r, $value, $state);
         }
         return null;
@@ -61,22 +78,10 @@ final class RecordPredicateCompiler
 
     public function appendAccessConditions(array &$where, SqlBuildContext $state, array $context, string $r='r'): void
     {
-        $userId=max(0,intval($context['userId']??0));
-        $groupIds=array_values(array_unique(array_filter(array_map('intval',is_array($context['groupIds']??null)?$context['groupIds']:array()),static function($id){return $id>=0;})));
-        if($userId>0&&!in_array($userId,$groupIds,true)){$groupIds[]=$userId;}
-        if(!in_array(0,$groupIds,true)){$groupIds[]=0;}
-        $where[]=$r.'.rec_FlagTemporary=0';
-        if($userId<1){$where[]=$r.'.rec_NonOwnerVisibility IN ("public","pending")';return;}
-        if(!empty($context['isDbOwner'])){return;}
-        $visibility=array($r.'.rec_NonOwnerVisibility IN ("public","pending")');
-        if(!empty($groupIds)){
-            $ph=implode(',',array_fill(0,count($groupIds),'?'));
-            foreach($groupIds as $id){$state->bind($id,'i');}
-            $visibility[]=$r.'.rec_OwnerUGrpID IN ('.$ph.')';
-            foreach($groupIds as $id){$state->bind($id,'i');}
-            $visibility[]='('.$r.'.rec_NonOwnerVisibility="viewable" AND (NOT EXISTS (SELECT 1 FROM usrRecPermissions rp0 WHERE rp0.rcp_RecID='.$r.'.rec_ID) OR EXISTS (SELECT 1 FROM usrRecPermissions rp WHERE rp.rcp_RecID='.$r.'.rec_ID AND rp.rcp_UGrpID IN ('.$ph.'))))';
-        }
-        $where[]='('.implode(' OR ',$visibility).')';
+        // the one visibility rule (RecordRepository::accessSql, plan 15)
+        list($condition, $values) = $this->repository->accessSql($r, RecordAccess::fromContext($context));
+        foreach($values as $value){ $state->bind($value, 'i'); }
+        $where[] = $condition;
     }
 
     /**
@@ -86,10 +91,10 @@ final class RecordPredicateCompiler
     private function accessCondition(string $column, $value, SqlBuildContext $state): string
     {
         $text = is_array($value) ? implode(',', $value) : trim((string)$value);
-        if(!preg_match('/^(-?)s*([a-z]+(?:s*,s*[a-z]+)+)$/i', $text, $match)){
+        if(!preg_match('/^(-?)\s*([a-z]+(?:\s*,\s*[a-z]+)+)$/i', $text, $match)){
             return $this->fields->scalarCondition($column, $value, $state);
         }
-        $items = array_values(array_unique(array_map('strtolower', preg_split('/s*,s*/', $match[2]))));
+        $items = array_values(array_unique(array_map('strtolower', preg_split('/\s*,\s*/', $match[2]))));
         $allowed = array('hidden','viewable','pending','public');
         $unknown = array_diff($items, $allowed);
         if(!empty($unknown)){
@@ -120,13 +125,7 @@ final class RecordPredicateCompiler
     }
     private function lookupUserIds(array $names): array
     {
-        if(empty($names)){ return array(); }
-        $names = array_values(array_unique($names));
-        $sql = 'SELECT ugr_ID FROM sysUGrps WHERE ugr_Name IN ('
-            .implode(',', array_fill(0, count($names), '?')).')';
-        return array_values(array_filter(array_map(
-            'intval', $this->database->fetchColumn($sql, $names)
-        )));
+        return UserGroupRepository::shared($this->database)->idsByName($names);
     }
 
     /**
@@ -153,10 +152,10 @@ final class RecordPredicateCompiler
         $values = array_values(array_filter(array_map(static function($v){ return trim((string)$v); }, $values),
             static function($v){ return $v !== ''; }));
         if(count($values) === 1 && strtoupper($values[0]) === 'NULL'){
-            return 'NOT EXISTS (SELECT 1 FROM usrRecTagLinks rtl WHERE rtl.rtl_RecID='.$recordAlias.'.rec_ID)';
+            return 'NOT EXISTS (SELECT 1 FROM {tagLinks} rtl WHERE rtl.rtl_RecID='.$recordAlias.'.rec_ID)';
         }
         if(empty($values) || (count($values) === 1 && strtoupper($values[0]) === '-NULL')){
-            return 'EXISTS (SELECT 1 FROM usrRecTagLinks rtl WHERE rtl.rtl_RecID='.$recordAlias.'.rec_ID)';
+            return 'EXISTS (SELECT 1 FROM {tagLinks} rtl WHERE rtl.rtl_RecID='.$recordAlias.'.rec_ID)';
         }
         $negate = false;
         foreach($values as &$tag){ if(strpos($tag, '-') === 0){ $negate = true; $tag = substr($tag, 1); } }
@@ -168,14 +167,14 @@ final class RecordPredicateCompiler
             if($cut !== false && $cut > 0 && $cut < strlen($tag) - 1){
                 $state->bind(trim(substr($tag, 0, $cut)), 's');
                 $state->bind(trim(substr($tag, $cut + 1)), 's');
-                return 'rtl.rtl_TagID IN (SELECT ut.tag_ID FROM usrTags ut INNER JOIN sysUGrps ug ON ug.ugr_ID=ut.tag_UGrpID'
+                return 'rtl.rtl_TagID IN (SELECT ut.tag_ID FROM {tags} ut INNER JOIN {groups} ug ON ug.ugr_ID=ut.tag_UGrpID'
                     .' WHERE ug.ugr_Name=? AND ut.tag_Text=?)';
             }
             $state->bind($tag, 's');
-            return 'rtl.rtl_TagID IN (SELECT ut.tag_ID FROM usrTags ut WHERE ut.tag_Text=?)';
+            return 'rtl.rtl_TagID IN (SELECT ut.tag_ID FROM {tags} ut WHERE ut.tag_Text=?)';
         };
         $tagged = static function(string $condition) use ($recordAlias): string {
-            return $recordAlias.'.rec_ID IN (SELECT rtl.rtl_RecID FROM usrRecTagLinks rtl WHERE '.$condition.')';
+            return $recordAlias.'.rec_ID IN (SELECT rtl.rtl_RecID FROM {tagLinks} rtl WHERE '.$condition.')';
         };
         if($all && count($values) > 1){
             $parts = array();
@@ -205,12 +204,11 @@ final class RecordPredicateCompiler
         $current = array_values(array_unique(array_map('intval', $recordIds)));
         $seen = array_fill_keys($current, true);
         for($level=0; $level<10; $level++){
-            $sql = 'SELECT rfw_OldRecID,rfw_NewRecID FROM recForwarding WHERE rfw_OldRecID IN ('
-                .implode(',', array_fill(0, count($current), '?')).')';
             $next = array();
-            foreach($this->database->fetchRows($sql, $current) as $row){
-                $id = intval($row[1]);
-                if($id > 0 && !isset($seen[$id])){ $seen[$id] = true; $next[] = $id; }
+            foreach($this->repository->forwarding($current) as $newIds){
+                foreach($newIds as $id){
+                    if($id > 0 && !isset($seen[$id])){ $seen[$id] = true; $next[] = $id; }
+                }
             }
             if(empty($next)){ break; }
             $current = array_values(array_unique($next));
@@ -231,13 +229,13 @@ final class RecordPredicateCompiler
         }
         if(preg_match('/^\d+(?:\s*,\s*\d+)*$/', $text)){
             $condition = $this->fields->inCondition($column, $this->fields->numericList($text, 'record type'), $state);
-        }elseif(preg_match('/^(\d+)-(\d+)$/', $text, $matches)){
-            $state->bind(intval($matches[1]), 'i'); $state->bind(intval($matches[2]), 'i');
-            $condition = $column.' = (SELECT rty_ID FROM defRecTypes '
-                .'WHERE rty_OriginatingDBID=? AND rty_IDInOriginatingDB=? LIMIT 1)';
+        }elseif(preg_match('/^\d+-\d+$/', $text)){
+            // concept code to the local id (DefinitionLookup, one rule); unknown: no match
+            $state->bind($this->definitions()->localId('rty', $text), 'i');
+            $condition = $column.' = ?';
         }else{
-            $state->bind($text, 's');
-            $condition = $column.' = (SELECT rty_ID FROM defRecTypes WHERE rty_Name=? LIMIT 1)';
+            $state->bind($this->definitions()->rectypeIdByName($text), 'i');
+            $condition = $column.' = ?';
         }
         return $negate ? 'NOT ('.$condition.')' : $condition;
     }

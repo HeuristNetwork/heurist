@@ -32,6 +32,7 @@ use Heurist\Records\Presentation\QuerySourcePresentationService;
 use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\RecordSearchService;
 use Heurist\Records\Query\SearchRequest;
+use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Runtime\SystemCode;
 use InvalidArgumentException;
@@ -277,11 +278,11 @@ final class ReportJobPlanner
     /** Query text of a Query Source regardless of visibility (cron). */
     private function querySourceQueryForCron(int $recordId)
     {
-        $value = $this->database->fetchValue(
-            'SELECT dtl_Value FROM recDetails JOIN Records ON rec_ID=dtl_RecID '
-            .'WHERE dtl_RecID=? AND dtl_DetailTypeID=? AND rec_FlagTemporary=0 LIMIT 1',
-            array($recordId, $this->codes->id('DT_QUERY_STRING'))
-        );
+        $records = RecordRepository::shared($this->database);
+        $header = $records->header($recordId, array('rec_FlagTemporary'));
+        $field = $this->codes->id('DT_QUERY_STRING');
+        $value = $header === null || intval($header['rec_FlagTemporary']) !== 0 ? null
+            : ($records->values(array($recordId), array($field))[$recordId][$field][0] ?? null);
         if($value === null || trim((string)$value) === ''){ return null; }
         $decoded = json_decode((string)$value, true);
         return is_array($decoded) ? $decoded : ltrim(trim((string)$value), '?');
@@ -290,10 +291,8 @@ final class ReportJobPlanner
     /** Template file of a report record regardless of visibility (cron). */
     private function reportFileForCron(int $reportId): string
     {
-        $value = $this->database->fetchValue(
-            'SELECT dtl_Value FROM recDetails WHERE dtl_RecID=? AND dtl_DetailTypeID=? LIMIT 1',
-            array($reportId, $this->codes->id('DT_FILE_NAME'))
-        );
+        $field = $this->codes->id('DT_FILE_NAME');
+        $value = RecordRepository::shared($this->database)->values(array($reportId), array($field))[$reportId][$field][0] ?? null;
         $file = trim((string)$value);
         if($file === ''){ return ''; }
         return strtolower(substr($file, -4)) === '.tpl' ? $file : $file.'.tpl';

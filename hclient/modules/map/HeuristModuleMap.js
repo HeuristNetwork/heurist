@@ -171,11 +171,6 @@ class HeuristModuleMap extends HeuristModuleRecordset {
             },
             editExtent: function(bounds, options) {
                 return that._editExtent(bounds, options || {});
-            },
-            // Legacy Heurist editors remain entirely in the parent application.
-            // heurist-map passes/receives JSON only and never touches HAPI4 directly.
-            editSymbology: function(value, options) {
-                return that._editSymbology(value, options || {});
             }
         };
     }
@@ -856,8 +851,8 @@ class HeuristModuleMap extends HeuristModuleRecordset {
     }
     // _openRecordEdit and _addRecordEdit are inherited unchanged from
     // HeuristModuleRecordset; MapDocument/MapLayer are ordinary Heurist records.
-    // _editSymbology, _saveLayerSymbology and _editExtent are inherited unchanged
-    // from HeuristModuleViewer, shared with HeuristModuleExplorer.
+    // _editExtent is inherited unchanged from HeuristModuleViewer, shared with
+    // HeuristModuleExplorer. Symbology is edited by heurist-map itself (plan 17).
 
     _destroy() {
         var that = this;

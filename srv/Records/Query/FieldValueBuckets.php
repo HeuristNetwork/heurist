@@ -176,8 +176,8 @@ final class FieldValueBuckets
             $where = array_merge($where, $chunk === null
                 ? $this->builder->compileConditions($source['query'], $state, $context)
                 : array(FieldValueRange::idCondition($chunk, $state)));
-            $result = $this->executor->executeRows(
-                'SELECT b.k, COUNT(DISTINCT r.rec_ID) FROM Records r '.$parts['joins']
+            $result = $this->executeRows(
+                'SELECT b.k, COUNT(DISTINCT r.rec_ID) FROM {records} r '.$parts['joins']
                     .' JOIN ('.implode(' UNION ALL ', $rows).') b ON '.$this->matchCondition($field)
                     .' WHERE '.implode(' AND ', $where).' GROUP BY b.k',
                 $state->types(), $state->values()
@@ -234,8 +234,8 @@ final class FieldValueBuckets
             $where = array_merge($parts['where'], $chunk === null
                 ? $this->builder->compileConditions($source['query'], $state, $context)
                 : array(FieldValueRange::idCondition($chunk, $state)));
-            $rows = $this->executor->executeRows(
-                'SELECT DISTINCT '.$parts['min'].', '.$parts['max'].' FROM Records r '.$parts['joins']
+            $rows = $this->executeRows(
+                'SELECT DISTINCT '.$parts['min'].', '.$parts['max'].' FROM {records} r '.$parts['joins']
                     .' WHERE '.implode(' AND ', $where).' LIMIT 100000',
                 $state->types(), $state->values()
             );
@@ -349,5 +349,11 @@ final class FieldValueBuckets
     private static function formatNumber(float $value)
     {
         return FieldValueRange::number(round($value, 10));
+    }
+
+    /** Execute SQL text of the compiler; the builder resolves its table keys. */
+    private function executeRows(string $sql, string $types = '', array $values = array()): array
+    {
+        return $this->executor->executeRows($this->builder->sql($sql), $types, $values);
     }
 }

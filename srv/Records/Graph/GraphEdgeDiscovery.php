@@ -82,37 +82,21 @@ final class GraphEdgeDiscovery
         ?string $linkKey,
         int $edgeLimit
     ): bool {
+        $options = array('side' => 'source');
+        if($def !== null && !empty($def['relation'])){
+            $options['kind'] = 'relationship';
+            if(!empty($def['relationTypeId'])){ $options['relationTypes'] = array(intval($def['relationTypeId'])); }
+        }elseif($def !== null){
+            $options['kind'] = 'pointer';
+            if(!empty($def['detailTypeId'])){ $options['fields'] = array(intval($def['detailTypeId'])); }
+        }
         foreach(array_chunk($recordIds, self::CHUNK_SIZE) as $chunk){
-            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
-            $types = str_repeat('i', count($chunk));
-            $values = $chunk;
-            $conditions = array('rl.rl_SourceID IN ('.$placeholders.')');
-
-            if($def !== null && !empty($def['relation'])){
-                $conditions[] = 'rl.rl_RelationID IS NOT NULL';
-                if(!empty($def['relationTypeId'])){
-                    $conditions[] = 'rl.rl_RelationTypeID=?';
-                    $types .= 'i';
-                    $values[] = intval($def['relationTypeId']);
-                }
-            }elseif($def !== null){
-                $conditions[] = 'rl.rl_RelationID IS NULL';
-                if(!empty($def['detailTypeId'])){
-                    $conditions[] = 'rl.rl_DetailTypeID=?';
-                    $types .= 'i';
-                    $values[] = intval($def['detailTypeId']);
-                }
-            }
-
-            $sql = 'SELECT rl.rl_SourceID,rl.rl_TargetID,COALESCE(rl.rl_DetailTypeID,0),'
-                .'COALESCE(rl.rl_RelationTypeID,0) FROM recLinks rl WHERE '.implode(' AND ', $conditions);
-
-            foreach($this->executor->executeRows($sql, $types, $values) as $row){
-                $source = intval($row[0]);
-                $target = intval($row[1]);
+            foreach($this->executor->records()->links($chunk, $options) as $row){
+                $source = $row[2];
+                $target = $row[3];
                 if($source < 1 || $target < 1 || !isset($idSet[$target])){ continue; }
-                $field = intval($row[2]);
-                $relationship = intval($row[3]);
+                $field = $row[4];
+                $relationship = $row[5];
                 $id = $source.':'.$target.':'.$field.':'.$relationship
                     .($linkKey !== null ? ':'.$linkKey : '');
                 if(isset($edges[$id])){ continue; }

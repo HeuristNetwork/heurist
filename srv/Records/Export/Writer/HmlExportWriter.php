@@ -35,6 +35,7 @@ declare(strict_types=1);
 namespace Heurist\Records\Export\Writer;
 
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Users\UserGroupRepository;
 use Heurist\Records\Export\ValueFormatter;
 
 /** Writes one HML document. */
@@ -43,6 +44,7 @@ final class HmlExportWriter implements ExportWriterInterface
     private const GEO_TYPES = array('r' => 'bounds', 'c' => 'circle', 'pl' => 'polygon', 'l' => 'path', 'p' => 'point', 'm' => 'multi');
 
     private DefinitionLookup $definitions;
+    private UserGroupRepository $users;
     private ValueFormatter $formatter;
     private string $path;
     private int $relationTypeField;
@@ -61,16 +63,18 @@ final class HmlExportWriter implements ExportWriterInterface
 
     /**
      * @param DefinitionLookup $definitions Names and concept codes.
+     * @param UserGroupRepository $users Workgroup names.
      * @param ValueFormatter $formatter File URLs, record URLs.
      * @param string $workDir Folder for the file.
      * @param int $relationTypeField DT_RELATION_TYPE (inverse term attributes).
      * @param bool $names Local ids and names besides the concept codes.
      */
-    public function __construct(DefinitionLookup $definitions, ValueFormatter $formatter, string $workDir,
+    public function __construct(DefinitionLookup $definitions, UserGroupRepository $users, ValueFormatter $formatter, string $workDir,
         int $relationTypeField, bool $names = false)
     {
         $this->names = $names;
         $this->definitions = $definitions;
+        $this->users = $users;
         $this->formatter = $formatter;
         $this->path = rtrim($workDir, '/\\').'/export.xml';
         $this->relationTypeField = $relationTypeField;
@@ -173,7 +177,7 @@ final class HmlExportWriter implements ExportWriterInterface
         if(!empty($record['rec_Modified'])){ $this->xml->element('modified', array(), (string)$record['rec_Modified']); }
         if(array_key_exists('rec_OwnerUGrpID', $record)){
             $owner = intval($record['rec_OwnerUGrpID']);
-            $this->xml->element('workgroup', array('id' => (string)$owner), $owner > 0 ? $this->definitions->groupName($owner) : 'public');
+            $this->xml->element('workgroup', array('id' => (string)$owner), $owner > 0 ? $this->users->name($owner) : 'public');
         }
 
         foreach($record['details'] ?? array() as $fieldId => $values){

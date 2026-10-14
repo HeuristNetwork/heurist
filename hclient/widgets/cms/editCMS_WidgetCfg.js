@@ -641,7 +641,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         dtFields:{
                             dty_Type:"resource", rst_MaxValues:0,
                             rst_DisplayName: 'Top level menu items', rst_DisplayHelpText:'',
-                            rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+                            rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'],
                                 window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']],
                             rst_FieldConfig: {entity:'records', csv:false}
                         },

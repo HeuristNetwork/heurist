@@ -16,19 +16,22 @@ namespace Heurist\Records\Query\Compiler;
 
 use Heurist\Database\DatabaseInterface;
 use Heurist\Records\Query\QueryValidationException;
-use Heurist\Records\Query\SearchExecutionException;
+use Heurist\Definitions\DefinitionLookup;
+use Heurist\Users\UserGroupRepository;
 use Heurist\Records\Query\Parser\RecordQueryParser;
 
 /** Resolves record types, fields, users, and enum values to IDs. */
 final class QueryValueResolver
 {
     private DatabaseInterface $database;
+    private DefinitionLookup $definitions;
     private $parser;
     private $cache = array();
 
     public function __construct(DatabaseInterface $database, RecordQueryParser $parser)
     {
         $this->database = $database;
+        $this->definitions = DefinitionLookup::shared($database);
         $this->parser = $parser;
     }
 
@@ -105,17 +108,14 @@ final class QueryValueResolver
         foreach($items as $item){
             $item = trim((string)$item);
             if(ctype_digit($item)){ $ids[] = intval($item); continue; }
-            $rows = $this->rows(
-                'SELECT rty_ID,rty_Name,rty_Plural FROM defRecTypes WHERE LOWER(rty_Name)=LOWER(?) OR LOWER(rty_Plural)=LOWER(?)',
-                'ss', array($item, $item)
-            );
-            if(empty($rows)){
-                $like = '%'.$item.'%';
-                $rows = $this->rows(
-                    'SELECT rty_ID,rty_Name,rty_Plural FROM defRecTypes WHERE rty_Name LIKE ? OR rty_Plural LIKE ? ORDER BY rty_ID',
-                    'ss', array($like, $like)
-                );
+            if(preg_match('/^\d+-\d+$/', $item)){
+                // concept code (one rule, DefinitionLookup)
+                $id = $this->definitions->localId('rty', $item);
+                if($id < 1){ throw new QueryValidationException('Unknown record type: '.$item); }
+                $ids[] = $id;
+                continue;
             }
+            $rows = $this->definitions->findRectypes($item);
             $row = $this->uniqueMatch($rows, 'record type', $item, 0, array(1,2));
             $ids[] = intval($row[0]);
         }
@@ -127,19 +127,7 @@ final class QueryValueResolver
     {
         $cacheKey = 'field:'.implode(',', $recordTypes).':'.strtolower($name);
         if(isset($this->cache[$cacheKey])){ return $this->cache[$cacheKey]; }
-        $params = array($name, $name); $types = 'ss';
-        $scope = '';
-        if(!empty($recordTypes)){
-            $scope = ' AND rst.rst_RecTypeID IN ('.implode(',', array_fill(0, count($recordTypes), '?')).')';
-            foreach($recordTypes as $id){ $types .= 'i'; $params[] = $id; }
-        }
-        $select = 'SELECT DISTINCT dty.dty_ID,dty.dty_Name,rst.rst_DisplayName FROM defDetailTypes dty '
-            .'INNER JOIN defRecStructure rst ON rst.rst_DetailTypeID=dty.dty_ID WHERE ';
-        $rows = $this->rows($select.'(LOWER(dty.dty_Name)=LOWER(?) OR LOWER(rst.rst_DisplayName)=LOWER(?))'.$scope.' ORDER BY dty.dty_ID', $types, $params);
-        if(empty($rows)){
-            $like = '%'.$name.'%'; $params[0] = $like; $params[1] = $like;
-            $rows = $this->rows($select.'(dty.dty_Name LIKE ? OR rst.rst_DisplayName LIKE ?)'.$scope.' ORDER BY dty.dty_ID', $types, $params);
-        }
+        $rows = $this->definitions->findFields($name, $recordTypes);
         if(empty($rows) && !empty($recordTypes)){
             throw new QueryValidationException('Field "'.$name.'" is not present in record type(s) '.implode(', ', $recordTypes));
         }
@@ -159,7 +147,7 @@ final class QueryValueResolver
         if($lookup === '' || ctype_digit($lookup) || in_array(strtolower($lookup), array('current','currentuser','current_user'), true)){
             return $value;
         }
-        $rows = $this->rows('SELECT ugr_ID,ugr_Name FROM sysUGrps WHERE LOWER(ugr_Name)=LOWER(?)', 's', array($lookup));
+        $rows = UserGroupRepository::shared($this->database)->findByName($lookup);
         $row = $this->uniqueMatch($rows, 'user', $lookup, 0, array(1));
         return $negative ? '-'.(string)intval($row[0]) : intval($row[0]);
     }
@@ -194,10 +182,7 @@ final class QueryValueResolver
         if(preg_match('/^\d+(\s*,\s*\d+)+$/', $label)){ return $value; }
         $path = array_values(array_filter(array_map('trim', explode('.', $label)), static function($part){ return $part !== ''; }));
         $leaf = count($path)>1 ? $path[count($path)-1] : $label;
-        $rows = $this->rows(
-            'SELECT trm_ID,trm_Label,trm_Code FROM defTerms WHERE LOWER(trm_Label)=LOWER(?) OR LOWER(trm_Code)=LOWER(?) ORDER BY trm_ID',
-            'ss', array($leaf, $leaf)
-        );
+        $rows = $this->definitions->termsByLabelOrCode($leaf);
         $roots = $metadata['roots'];
         if(!empty($roots)){
             $allowed = array_fill_keys($this->termDescendants($roots), true);
@@ -219,54 +204,38 @@ final class QueryValueResolver
         $seen = array();
         while($termId>0 && !isset($seen[$termId])){
             $seen[$termId] = true;
-            $rows = $this->rows(
-                'SELECT trm_Label,IFNULL(trm_ParentTermID,0) FROM defTerms WHERE trm_ID=?',
-                'i', array($termId)
-            );
-            if(empty($rows)){ return false; }
-            $parentId = intval($rows[0][1]);
+            $term = $this->definitions->term($termId);
+            if($term === null){ return false; }
+            $parentId = $term['parent'];
             // The top-level row is the vocabulary name and is not part of the
             // public hierarchical term label used by legacy queries.
-            if($parentId>0){ array_unshift($labels, (string)$rows[0][0]); }
+            if($parentId>0){ array_unshift($labels, $term['term']); }
             $termId = $parentId;
         }
         $actual = strtolower(implode('.', $labels));
         return $actual === strtolower(implode('.', $path));
     }
 
+    /** Field type and the roots of its term tree (the filtered tree of the record types when set). */
     private function fieldMetadata(int $fieldId, array $recordTypes): array
     {
         $key = 'metadata:'.$fieldId.':'.implode(',', $recordTypes);
         if(isset($this->cache[$key])){ return $this->cache[$key]; }
-        $rows = $this->rows(
-            'SELECT dty_Type,dty_JsonTermIDTree FROM defDetailTypes WHERE dty_ID=?',
-            'i', array($fieldId)
-        );
-        if(empty($rows)){ throw new QueryValidationException('Unknown field ID: '.$fieldId); }
-        $tree = $rows[0][1];
-        if(!empty($recordTypes)){
-            $sql = 'SELECT rst_FilteredJsonTermIDTree FROM defRecStructure WHERE rst_DetailTypeID=? AND rst_RecTypeID IN ('
-                .implode(',', array_fill(0, count($recordTypes), '?')).')';
-            $filtered = $this->rows($sql, 'i'.str_repeat('i', count($recordTypes)), array_merge(array($fieldId), $recordTypes));
-            $filtered = array_values(array_filter(array_column($filtered, 0), static function($value){ return trim((string)$value) !== ''; }));
-            if(!empty($filtered)){ $tree = implode(',', $filtered); }
+        $field = $this->definitions->field($fieldId);
+        if($field === null){ throw new QueryValidationException('Unknown field ID: '.$fieldId); }
+        $roots = $field['vocabulary'];
+        $filtered = array();
+        foreach($recordTypes as $rectypeId){
+            $row = $this->definitions->structureRows(intval($rectypeId))[$fieldId] ?? null;
+            if($row !== null && !empty($row['termFilter'])){ $filtered = array_merge($filtered, $row['termFilter']); }
         }
-        preg_match_all('/\d+/', (string)$tree, $matches);
-        return $this->cache[$key] = array('type'=>(string)$rows[0][0], 'roots'=>array_map('intval', $matches[0]));
+        if(!empty($filtered)){ $roots = $filtered; }
+        return $this->cache[$key] = array('type'=>$field['type'], 'roots'=>array_map('intval', $roots));
     }
 
     private function termDescendants(array $roots): array
     {
-        sort($roots); $cacheKey = 'terms:'.implode(',', $roots);
-        if(isset($this->cache[$cacheKey])){ return $this->cache[$cacheKey]; }
-        $all = array_fill_keys($roots, true); $level = $roots;
-        while(!empty($level)){
-            $sql = 'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID IN ('.implode(',', array_fill(0, count($level), '?')).')';
-            $rows = $this->rows($sql, str_repeat('i', count($level)), $level); $next = array();
-            foreach($rows as $row){ $id=intval($row[0]); if(!isset($all[$id])){ $all[$id]=true; $next[]=$id; } }
-            $level = $next;
-        }
-        return $this->cache[$cacheKey] = array_map('intval', array_keys($all));
+        return $this->definitions->termDescendants($roots);
     }
 
     private function uniqueMatch(array $rows, string $kind, string $input, int $idColumn, array $nameColumns): array
@@ -281,14 +250,6 @@ final class QueryValueResolver
             $matches[] = $row[$idColumn].' ('.implode(' / ', $names).')';
         }
         throw new QueryValidationException('Ambiguous '.$kind.' "'.$input.'". Matches: '.implode(', ', $matches));
-    }
-
-    private function rows(string $sql, string $types, array $values): array
-    {
-        if($types !== '' && strlen($types) !== count($values)){
-            throw new SearchExecutionException('Query value parameter count does not match bind types');
-        }
-        return $this->database->fetchRows($sql, array_values($values));
     }
 
     private function splitFieldSuffix(string $suffix): array

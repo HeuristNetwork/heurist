@@ -116,26 +116,18 @@ final class RecordSearchService
             $passParents = $pass['seedTypes'] === null || empty($parents) ? $parents
                 : $this->search(new SearchRequest(array(array('t'=>$pass['seedTypes']), array('ids'=>$parents)),
                     array('limit'=>10000)))->ids;
+            $options = array('side'=>$direction === 'to' ? 'source' : 'target',
+                'kind'=>$isRelation ? 'relationship' : 'pointer', 'distinct'=>true, 'order'=>'ends');
+            if($isRelation && $types !== null){
+                $options['relationTypes'] = $types;
+            }elseif(!$isRelation && $suffix !== ''){
+                $options['fields'] = array($this->positiveSuffix($suffix, 'Resource-link field ID'));
+            }
             foreach(array_chunk($passParents, self::SQL_CHUNK_SIZE) as $chunk){
-                $parentColumn = $direction === 'to' ? 'rl_SourceID' : 'rl_TargetID';
-                $childColumn = $direction === 'to' ? 'rl_TargetID' : 'rl_SourceID';
-                $values = $chunk;
-                $conditions = array('rl.'.$parentColumn.' IN ('.implode(',', array_fill(0, count($chunk), '?')).')',
-                    'rl.rl_RelationID IS '.($isRelation ? 'NOT NULL' : 'NULL'));
-                if($isRelation && $types !== null){
-                    $conditions[] = 'rl.rl_RelationTypeID IN ('.implode(',', array_fill(0, count($types), '?')).')';
-                    $values = array_merge($values, $types);
-                }elseif(!$isRelation && $suffix !== ''){
-                    $conditions[] = 'rl.rl_DetailTypeID=?';
-                    $values[] = $this->positiveSuffix($suffix, 'Resource-link field ID');
-                }
                 $remaining = 10001 - count($rows);
                 if($remaining < 1){ $truncated = true; break 2; }
-                $sql = 'SELECT DISTINCT rl.'.$parentColumn.',rl.'.$childColumn
-                    .',rl.rl_SourceID,rl.rl_TargetID,COALESCE(rl.rl_DetailTypeID,0),'
-                    .'COALESCE(rl.rl_RelationTypeID,0),COALESCE(rl.rl_RelationID,0) FROM recLinks rl WHERE '
-                    .implode(' AND ', $conditions).' ORDER BY rl.'.$parentColumn.',rl.'.$childColumn.' LIMIT '.$remaining;
-                $passRows = $this->executor->executeRows($sql, str_repeat('i', count($values)), $values);
+                // parent, child, source, target, field, relation type, relationship record
+                $passRows = $this->executor->records()->links($chunk, $options + array('limit'=>$remaining));
                 if($pass['childTypes'] !== null && !empty($passRows)){
                     $typed = array_fill_keys($this->search(new SearchRequest(array(array('t'=>$pass['childTypes']),
                         array('ids'=>$this->uniqueIds(array_column($passRows, 1)))), array('limit'=>10000)))->ids, true);
@@ -489,33 +481,17 @@ final class RecordSearchService
         if($childIds === array()){ return array(); }
 
         $kind = in_array($base, array_merge(self::RESOURCE_TO, self::RESOURCE_FROM, array('links')), true)
-            ? ' AND rl_RelationID IS NULL'
-            : (in_array($base, array('connected'), true) ? '' : ' AND rl_RelationID IS NOT NULL');
-        $toSource = !in_array($base, self::RESOURCE_FROM, true); // r is rl_SourceID
-        $toTarget = !in_array($base, self::RESOURCE_TO, true);   // r is rl_TargetID
+            ? 'pointer' : ($base === 'connected' ? 'any' : 'relationship');
+        $sides = array();
+        if(!in_array($base, self::RESOURCE_FROM, true)){ $sides[] = 'source'; } // r is rl_SourceID
+        if(!in_array($base, self::RESOURCE_TO, true)){ $sides[] = 'target'; }   // r is rl_TargetID
         $cap = self::MAX_PRECOMPUTED_CANDIDATES + 1;
 
         $result = array();
         $chunks = $childIds === null ? array(null) : array_chunk($childIds, self::SQL_CHUNK_SIZE);
         foreach($chunks as $chunk){
-            $parts = array();
-            $values = array();
-            foreach(array('rl_SourceID'=>$toSource, 'rl_TargetID'=>$toTarget) as $column=>$enabled){
-                if(!$enabled){ continue; }
-                $other = $column === 'rl_SourceID' ? 'rl_TargetID' : 'rl_SourceID';
-                $where = '1=1'.$kind;
-                if($chunk !== null){
-                    $where .= ' AND '.$other.' IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
-                    $values = array_merge($values, $chunk);
-                }
-                $parts[] = 'SELECT '.$column.' AS id FROM recLinks WHERE '.$where;
-            }
-            $values[] = $cap;
-            $rows = $this->executor->executeRows(
-                'SELECT DISTINCT id FROM ('.implode(' UNION ', $parts).') AS link_candidates LIMIT ?',
-                '', $values
-            );
-            foreach($rows as $row){ $result[] = intval($row[0]); }
+            $result = array_merge($result, $this->executor->records()->linkEnds($chunk,
+                array('sides'=>$sides, 'kind'=>$kind, 'limit'=>$cap)));
             if(count($result) >= $cap){ return null; }
         }
         return $this->uniqueIds($result);
@@ -681,23 +657,12 @@ final class RecordSearchService
             $fieldId = (!$isRelation && $base !== 'connected') ? $this->positiveSuffix($suffix, 'Resource-link field ID') : null;
             $parents = array();
             foreach($passes[$base] as list($relation, $direction)){
-                $parentColumn = $direction === 'to' ? 'rl_SourceID' : 'rl_TargetID';
-                $childColumn = $direction === 'to' ? 'rl_TargetID' : 'rl_SourceID';
-                $conditions = array('rl_RelationID IS '.($relation ? 'NOT NULL' : 'NULL'));
-                $types = ''; $values = array();
-                if($fieldId !== null && !$relation){
-                    $conditions[] = 'rl_DetailTypeID=?'; $types .= 'i'; $values[] = $fieldId;
-                }
+                $options = array('sides'=>array($direction === 'to' ? 'source' : 'target'),
+                    'kind'=>$relation ? 'relationship' : 'pointer');
+                if($fieldId !== null && !$relation){ $options['fields'] = array($fieldId); }
                 foreach($children === null ? array(null) : array_chunk($children, self::SQL_CHUNK_SIZE) as $chunk){
-                    $where = $conditions; $chunkTypes = $types; $chunkValues = $values;
-                    if($chunk !== null){
-                        $where[] = $childColumn.' IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
-                        $chunkTypes .= str_repeat('i', count($chunk));
-                        $chunkValues = array_merge($chunkValues, $chunk);
-                    }
-                    $sql = 'SELECT DISTINCT '.$parentColumn.' FROM recLinks WHERE '.implode(' AND ', $where);
-                    foreach($this->executor->executeRows($sql, $chunkTypes, $chunkValues) as $row){
-                        $parents[intval($row[0])] = true;
+                    foreach($this->executor->records()->linkEnds($chunk, $options) as $id){
+                        $parents[$id] = true;
                         if(count($parents) > self::MAX_PRECOMPUTED_CANDIDATES){ return null; }
                     }
                 }
@@ -817,26 +782,16 @@ final class RecordSearchService
     private function loadResourceEdges(array $parentIds, string $direction, ?int $fieldId): array
     {
         $edges = array();
+        $options = array('side'=>$direction === 'to' ? 'source' : 'target', 'kind'=>'pointer', 'distinct'=>true);
+        if($fieldId !== null){ $options['fields'] = array($fieldId); }else{ $options['anyField'] = true; }
         foreach(array_chunk($this->uniqueIds($parentIds), self::SQL_CHUNK_SIZE) as $chunk){
-            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
-            $types = str_repeat('i', count($chunk)); $values = $chunk;
-            $linkSql = ' AND rl.rl_RelationID IS NULL';
-            if($fieldId !== null){
-                $linkSql .= ' AND rl.rl_DetailTypeID=?';
-                $types .= 'i'; $values[] = $fieldId;
-            }else{
-                $linkSql .= ' AND rl.rl_DetailTypeID>0';
-            }
-            if($direction === 'to'){
-                $sql = 'SELECT DISTINCT rl.rl_SourceID,rl.rl_TargetID FROM recLinks rl'
-                    .' WHERE rl.rl_SourceID IN ('.$placeholders.')'.$linkSql;
-            }else{
-                $sql = 'SELECT DISTINCT rl.rl_TargetID,rl.rl_SourceID FROM recLinks rl'
-                    .' WHERE rl.rl_TargetID IN ('.$placeholders.')'.$linkSql;
-            }
-            foreach($this->executor->executeRows($sql, $types, $values) as $row){
-                $parent = intval($row[0]); $child = intval($row[1]);
-                if($parent>0 && $child>0){ $edges[] = array($parent, $child); }
+            $seen = array();
+            foreach($this->executor->records()->links($chunk, $options) as $row){
+                $parent = $row[0]; $child = $row[1];
+                if($parent>0 && $child>0 && !isset($seen[$parent.':'.$child])){
+                    $seen[$parent.':'.$child] = true;
+                    $edges[] = array($parent, $child);
+                }
             }
         }
         return $edges;
@@ -913,27 +868,18 @@ final class RecordSearchService
     {
         if(is_array($relationTypes) && empty($relationTypes)){ return array(); }
         $edges = array();
+        $options = array('side'=>$direction === 'to' ? 'source' : 'target', 'kind'=>'relationship', 'distinct'=>true,
+            'relationTypes'=>is_array($relationTypes) ? $relationTypes : null);
         foreach(array_chunk($this->uniqueIds($parentIds), self::SQL_CHUNK_SIZE) as $chunk){
-            $parentPlaceholders = implode(',', array_fill(0, count($chunk), '?'));
-            $types = str_repeat('i', count($chunk)); $values = $chunk; $typeSql = '';
-            if(is_array($relationTypes)){
-                $typeSql = ' AND rl.rl_RelationTypeID IN ('
-                    .implode(',', array_fill(0, count($relationTypes), '?')).')';
-                $types .= str_repeat('i', count($relationTypes));
-                $values = array_merge($values, $relationTypes);
-            }
-            if($direction === 'to'){
-                $sql = 'SELECT DISTINCT rl.rl_SourceID,rl.rl_TargetID,rl.rl_RelationID,rl.rl_RelationTypeID'
-                    .' FROM recLinks rl WHERE rl.rl_SourceID IN ('.$parentPlaceholders.')'
-                    .' AND rl.rl_RelationID IS NOT NULL'.$typeSql;
-            }else{
-                $sql = 'SELECT DISTINCT rl.rl_TargetID,rl.rl_SourceID,rl.rl_RelationID,rl.rl_RelationTypeID'
-                    .' FROM recLinks rl WHERE rl.rl_TargetID IN ('.$parentPlaceholders.')'
-                    .' AND rl.rl_RelationID IS NOT NULL'.$typeSql;
-            }
-            foreach($this->executor->executeRows($sql, $types, $values) as $row){
-                $edge = array_map('intval', array_slice($row, 0, 4));
-                if($edge[0]>0 && $edge[1]>0 && $edge[2]>0){ $edges[] = $edge; }
+            $seen = array();
+            foreach($this->executor->records()->links($chunk, $options) as $row){
+                // parent, child, Relationship record, relation type
+                $edge = array($row[0], $row[1], $row[6], $row[5]);
+                $key = implode(':', $edge);
+                if($edge[0]>0 && $edge[1]>0 && $edge[2]>0 && !isset($seen[$key])){
+                    $seen[$key] = true;
+                    $edges[] = $edge;
+                }
             }
         }
         return $edges;

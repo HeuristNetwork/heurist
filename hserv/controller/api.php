@@ -104,6 +104,16 @@ if(@$_REQUEST['method']){
     }
 }
 
+// Real HTTP verb of record writes (plan 14): never the ?method= parameter, and
+// PATCH stays PATCH ($method above turns it into PUT for the other resources).
+$http_verb = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+if($http_verb === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD'])){
+    $verb_override = strtoupper((string)$_SERVER['HTTP_X_HTTP_METHOD']);
+    if(in_array($verb_override, array('PUT', 'PATCH', 'DELETE'), true)){
+        $http_verb = $verb_override;
+    }
+}
+
 //allowed entities for entityScrud
 $entities = array(
 
@@ -375,7 +385,7 @@ if($is_record_query){
     }
     if($http_method === 'POST' && is_array($json)
         && !isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
-        $contractKeys = array('limit','offset','fields','detail','resolveDetails','sort','filter','debug');
+        $contractKeys = array('limit','offset','fields','detail','resolveDetails','defs','sort','filter','debug');
         $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
         if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
             $req_params['query'] = $json;
@@ -402,6 +412,19 @@ if($is_query_cancel){
     }
     if(is_array($json) && array_key_exists('rid', $json)){ $req_params['rid'] = $json['rid']; }
     $method = 'search';
+}
+
+// Record writes (plan 14): POST (insert), PUT, PATCH, DELETE /records/{id} and
+// POST /records/{id}/duplicate|validate. See srv/Controller/RecordEditController.php.
+// Logged-in users only; GET /records/{id} stays the read route below.
+$is_record_edit = ($resource === 'records'
+    && isset($requestUri[4]) && preg_match('/^-?\d+$/', (string)$requestUri[4])
+    && $http_verb !== 'GET');
+if($is_record_edit){
+    if(!in_array($http_verb, array('POST', 'PUT', 'PATCH', 'DELETE'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, PATCH, DELETE'));
+    }
+    $method = 'save'; // authentication required
 }
 
 // The modern graph collection returns renderer-neutral graph documents for the
@@ -595,6 +618,23 @@ if($is_def_query){
 
     $controller = ServiceFactory::fromLegacySystem($system)->queryCancelController();
     $controller->output($req_params);
+    $system->dbclose();
+    exit;
+
+}elseif($is_record_edit){
+
+    $controller = ServiceFactory::fromLegacySystem($system)->recordEditController();
+    $controller->handleRequest(
+        $http_verb,
+        array_slice($requestUri, 4),
+        $req_params,
+        is_array($json) ? $json : null,
+        array(
+            'contentType' => $contentType,
+            'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+            'host' => $_SERVER['HTTP_HOST'] ?? ''
+        )
+    );
     $system->dbclose();
     exit;
 
@@ -843,7 +883,7 @@ else
             // fields object. Restore its explicit query parameters from JSON.
             if(is_array($json)){
                 foreach(array(
-                    'query','q','ids','fields','detail','resolveDetails','limit','offset',
+                    'query','q','ids','fields','detail','resolveDetails','defs','limit','offset',
                     'sort','filter','debug'
                 ) as $key){
                     if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
@@ -851,6 +891,15 @@ else
             }
             $controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
             $controller->output($req_params);
+            $system->dbclose();
+            exit;
+        }
+
+        if($method=='search' && is_numeric($requestUri[4]) && intval($requestUri[4]) > 0){
+            // GET /records/{id}: the /records record object and meta (srv), with
+            // fields (default _all), detail=ids, resolveDetails and defs.
+            $controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
+            $controller->outputItem($req_params, intval($requestUri[4]));
             $system->dbclose();
             exit;
         }

@@ -1937,7 +1937,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
             foreach($parents as $rec_ID){
                 $isWebPage = false;
                 $rec = recordSearchByID($system, $rec_ID, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
-                if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
+                if(@$rec['rec_RecTypeID']==RT_CMS_PAGE && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
                     //get term id by concept code
                     $val = recordGetField($rec, DT_CMS_PAGETYPE);
                     $isWebPage = ($val==$webpage);//standalone
@@ -2012,7 +2012,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                 if($system->defineConstant('DT_CMS_PAGETYPE')){
                     //check that this is single web page (for embed)
                     $rec = recordSearchByID($system, $root_rec_id, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
-                    if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
+                    if(@$rec['rec_RecTypeID']==RT_CMS_PAGE && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
                         //get term id by concept code
                         $val = recordGetField($rec, DT_CMS_PAGETYPE);
                         $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254'));//standalone
@@ -2381,7 +2381,7 @@ function recordSearch($system, $params, $relation_query=null)
     }
     $savedSearchName .= empty($savedSearchName) ? '' : 'It is probably best to delete this saved filter and re-create it.<br>';
 
-    $system->defineConstant('RT_CMS_MENU');
+    $system->defineConstant('RT_CMS_PAGE');
     $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 
     $useNewTemporalFormatInRecDetails = $system->settings->isDbVersionAtLeast('1.3.14');
@@ -3288,7 +3288,7 @@ function recordSearch($system, $params, $relation_query=null)
                             if( !array_key_exists('d', $records[$recID]) ){
                                 $records[$recID]['d'] = array();
                                 $need_Concatenation = $need_Concatenation ||
-                                (defined('RT_CMS_MENU') && $records[$recID][4]==RT_CMS_MENU);
+                                (defined('RT_CMS_PAGE') && $records[$recID][4]==RT_CMS_PAGE);
                             }
                             $dtyID = $row[0];
 
@@ -3423,13 +3423,13 @@ function recordSearch($system, $params, $relation_query=null)
                                 }
                             }
                         }//$istimemap_request
-                        //it has RT_CMS_MENU - need concatenate all DT_EXTENDED_DESCRIPTION
+                        //it has RT_CMS_PAGE - need concatenate all DT_EXTENDED_DESCRIPTION
 
                         if($need_Concatenation){
 
                             foreach ($chunk_rec_ids as $recID) {
                                 $record = $records[$recID];
-                                if($record[4]==RT_CMS_MENU
+                                if($record[4]==RT_CMS_PAGE
                                 && is_array(@$record['d'][DT_EXTENDED_DESCRIPTION]))
                                 {
                                     $records[$recID]['d'][DT_EXTENDED_DESCRIPTION] = array(implode('',$record['d'][DT_EXTENDED_DESCRIPTION]));
@@ -4013,9 +4013,9 @@ function recordSearchDetails($system, &$record, $detail_types, $expanded=true) {
             }
         }
 
-        //special case for RT_CMS_MENU - JOIN all descriptions
+        //special case for RT_CMS_PAGE - JOIN all descriptions
         $system->defineConstant('DT_EXTENDED_DESCRIPTION');
-        if($system->defineConstant('RT_CMS_MENU') && RT_CMS_MENU==@$record['rec_RecTypeID']
+        if($system->defineConstant('RT_CMS_PAGE') && RT_CMS_PAGE==@$record['rec_RecTypeID']
         && is_array(@$details[DT_EXTENDED_DESCRIPTION]))
         {
             $details[DT_EXTENDED_DESCRIPTION] = array(implode('',$details[DT_EXTENDED_DESCRIPTION]));

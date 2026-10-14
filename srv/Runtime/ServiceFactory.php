@@ -24,6 +24,7 @@ use Heurist\Controller\JobController;
 use Heurist\Controller\MapDataController;
 use Heurist\Controller\PublicationController;
 use Heurist\Controller\QueryCancelController;
+use Heurist\Controller\RecordEditController;
 use Heurist\Controller\RecordPresentationController;
 use Heurist\Controller\RecordQueryController;
 use Heurist\Controller\ReportController;
@@ -33,6 +34,7 @@ use Heurist\Database\DatabaseFactory;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Database\MysqlDatabase;
 use Heurist\Database\QueryTrace;
+use Heurist\Database\WritableDatabaseInterface;
 use Heurist\Jobs\JobHandlerInterface;
 use Heurist\Jobs\JobRunner;
 use Heurist\Jobs\JobStore;
@@ -45,7 +47,21 @@ use Heurist\Records\Export\ExportSettings;
 use Heurist\Records\Presentation\QuerySourcePresentationService;
 use Heurist\Records\Presentation\MapPresentationService;
 use Heurist\Records\Presentation\PresentationRecordRepository;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Definitions\DefinitionSnapshotService;
+use Heurist\Records\Edit\RecordDeleteService;
+use Heurist\Records\Edit\RecordDuplicateService;
+use Heurist\Records\Edit\RecordPermissionService;
+use Heurist\Records\Edit\RecordSaveService;
+use Heurist\Records\Store\RecordAccess;
+use Heurist\Records\Store\RecordRepository;
+use Heurist\Records\Store\RecordStore;
+use Heurist\Records\Edit\RecordTitle;
+use Heurist\Records\Edit\TitleMask;
+use Heurist\Records\Edit\CalculatedFields;
+use Heurist\Records\Files\FileRepository;
+use Heurist\Records\Edit\RecordValidator;
+use Heurist\Records\Edit\WritableRecordTypes;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\RecordSearchService;
@@ -64,6 +80,7 @@ use Heurist\Reports\ReportService;
 use Heurist\Reports\ReportTemplateStore;
 use Heurist\Records\Time\TimeDataService;
 use Heurist\System\Query\SystemQueryService;
+use Heurist\Utilities\LanguageCodes;
 
 /** Creates one consistent service graph for an initialized request. */
 final class ServiceFactory
@@ -76,6 +93,8 @@ final class ServiceFactory
     private string $entityDirectory;
     /** @var array{templates?:string,generated?:string,generatedUrl?:string,jobs?:string,settings?:array} */
     private array $reportEnvironment;
+    /** @var (\Closure():array)|null Database setting "Languages" (translations), read when needed. */
+    private ?\Closure $translationLanguages = null;
 
     /** Build the PDO and runtime boundary from the current legacy initialization. */
     public static function fromLegacySystem($system): self
@@ -103,9 +122,11 @@ final class ServiceFactory
             'RT_CUSTOM_REPORT', 'RT_REPORT_SCHEDULE', 'DT_FILE_NAME',
             'DT_IS_CARD_VIEW', 'DT_REPORT', 'DT_INTERVAL_MINUTES',
             // srv Smarty engine (plan 12, Phase 6): relationships, CMS menu descriptions
-            'RT_RELATION', 'RT_CMS_MENU', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
+            'RT_RELATION', 'RT_CMS_PAGE', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
             // record export (plan 13): KML time span
-            'DT_DATE'
+            'DT_DATE',
+            // record editing (plan 14)
+            'RT_CMS_HOME', 'DT_WORKFLOW_STAGE', 'DT_CMS_EXTFILES'
         );
         $codeIds = array();
         foreach($codeNames as $codeName){
@@ -127,7 +148,7 @@ final class ServiceFactory
         }
         $reportSettings = $system->settings->getDatabaseSetting('Reports');
         $exportSettings = $system->settings->getDatabaseSetting('Export');
-        return new self(
+        $factory = new self(
             $database,
             $runtime,
             new SystemCode($codeIds),
@@ -149,6 +170,12 @@ final class ServiceFactory
                 }
             )
         );
+        // languages offered for translations (record editor): the database setting (db_languages.json)
+        $factory->translationLanguages = static function() use ($system): array {
+            $languages = $system->settings->getDatabaseSetting('Languages');
+            return is_array($languages) ? $languages : array();
+        };
+        return $factory;
     }
 
     /**
@@ -191,8 +218,7 @@ final class ServiceFactory
             'registeredDbId' => (string)($settings->get('sys_dbRegisteredID') ?: ''),
             'language' => (string)$system->userGetPreference('layout_language', ''),
             'currentUser' => is_array($user) ? $user : array(),
-            // from this folder: HEURIST_DIR is not the Heurist folder in CLI scripts (cron)
-            'languageCodesFile' => dirname(__DIR__, 2).'/hclient/assets/language-codes-active-list.json',
+            'languageCodesFile' => self::languageCodesFile(),
             'recordLink' => static function(string $reference) use ($system): string {
                 return (string)$system->recordLink($reference);
             },
@@ -227,6 +253,54 @@ final class ServiceFactory
         return new RecordQueryController($this->database, $this->runtime);
     }
 
+    /**
+     * Create the record write controller (plan 14): POST/PUT/PATCH/DELETE /records/{id}.
+     */
+    public function recordEditController(): RecordEditController
+    {
+        if(!($this->database instanceof WritableDatabaseInterface)){
+            throw new \LogicException('The database adapter does not support writes');
+        }
+        $definitions = DefinitionLookup::shared($this->database);
+        $languages = new LanguageCodes(self::languageCodesFile());
+        $store = new RecordStore($this->database);
+        $permissions = new RecordPermissionService($this->database, $this->runtime);
+        $writable = new WritableRecordTypes($this->codes);
+        $title = new RecordTitle($languages, $this->codes->id('DT_NAME'));
+        $titleMask = new TitleMask($definitions, $store->records(), FileRepository::shared($this->database), $languages);
+        $calculated = new CalculatedFields($definitions, $store, function(string $formula, int $recordId): array {
+            return $this->smartyRunner()->run(array('body' => $formula), array($recordId),
+                array('mode' => 'txt', 'purpose' => 'render', 'record' => true));
+        });
+        $validator = new RecordValidator($this->database, $definitions, $languages, array(
+            'name' => $this->codes->id('DT_NAME'),
+            'shortSummary' => $this->codes->id('DT_SHORT_SUMMARY'),
+            'extendedDescription' => $this->codes->id('DT_EXTENDED_DESCRIPTION'),
+            'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
+            'cmsExtFiles' => $this->codes->id('DT_CMS_EXTFILES')
+        ));
+        return new RecordEditController(
+            new RecordSaveService($store, $validator, $permissions, $definitions, $writable, $this->runtime, $title, array(
+                'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
+                'workflowStage' => $this->codes->id('DT_WORKFLOW_STAGE')
+            ), $titleMask, $calculated),
+            new RecordDeleteService($store, $permissions, $definitions, $writable, $this->runtime),
+            new RecordDuplicateService($store, $permissions, $definitions, $writable, $this->runtime, $title, $languages, array(
+                'name' => $this->codes->id('DT_NAME'),
+                'cmsPage' => $this->codes->id('RT_CMS_PAGE')
+            ), $titleMask),
+            $this->recordQueryController(),
+            $this->runtime
+        );
+    }
+
+    /** Language codes list of value prefixes ("fre:") of this installation. */
+    public static function languageCodesFile(): string
+    {
+        // from this folder: HEURIST_DIR is not the Heurist folder in CLI scripts (cron)
+        return dirname(__DIR__, 2).'/hclient/assets/language-codes-active-list.json';
+    }
+
     /** Create the controller that cancels a running query (POST /records/cancel). */
     public function queryCancelController(): QueryCancelController
     {
@@ -243,7 +317,8 @@ final class ServiceFactory
     public function definitionController(): DefinitionController
     {
         return new DefinitionController(
-            new DefinitionSnapshotService($this->database, $this->runtime, $this->entityDirectory),
+            new DefinitionSnapshotService($this->database, $this->runtime, $this->entityDirectory,
+                $this->translationLanguages ? ($this->translationLanguages)() : array()),
             $this->runtime
         );
     }
@@ -261,7 +336,7 @@ final class ServiceFactory
     public function recordPresentationController(): RecordPresentationController
     {
         $maps = new MapPresentationService(
-            $this->presentations, $this->runtime, new ConceptCode($this->database)
+            $this->presentations, $this->runtime, DefinitionLookup::shared($this->database)
         );
         return new RecordPresentationController(
             new QuerySourcePresentationService($this->presentations), $maps
@@ -431,7 +506,7 @@ final class ServiceFactory
             return array_map('intval', $service->search(new SearchRequest($request, array('limit' => 100000)))->ids);
         };
         $codes = array();
-        foreach(array('RT_RELATION', 'RT_CMS_MENU', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
+        foreach(array('RT_RELATION', 'RT_CMS_PAGE', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
             'DT_SHORT_SUMMARY', 'DT_START_DATE', 'DT_END_DATE', 'DT_EXTENDED_DESCRIPTION') as $name){
             $codes[$name] = $this->codes->id($name);
         }
@@ -450,20 +525,10 @@ final class ServiceFactory
     /** Filter of record ids by the access rules of the current user (order kept). */
     private function visibleIdsFilter(): callable
     {
-        $database = $this->database;
-        $presentations = $this->presentations;
-        return static function(array $ids) use ($database, $presentations): array {
-            $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static function($id){ return $id > 0; })));
-            $visible = array();
-            foreach(array_chunk($ids, 1000) as $chunk){
-                $parameters = $chunk;
-                $sql = 'SELECT rec_ID FROM Records WHERE rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).') AND ';
-                $sql .= $presentations->accessCondition($parameters);
-                foreach($database->fetchColumn($sql, $parameters) as $id){
-                    $visible[intval($id)] = true;
-                }
-            }
-            return array_values(array_filter($ids, static function($id) use ($visible){ return isset($visible[$id]); }));
+        $records = RecordRepository::shared($this->database);
+        $access = RecordAccess::fromRuntime($this->runtime);
+        return static function(array $ids) use ($records, $access): array {
+            return $records->visibleIds($ids, $access);
         };
     }
 

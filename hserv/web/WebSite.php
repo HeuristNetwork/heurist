@@ -76,7 +76,7 @@ class WebSite
         }
 
         $this->system->defineConstant('RT_CMS_HOME');
-        $this->system->defineConstant('RT_CMS_MENU');
+        $this->system->defineConstant('RT_CMS_PAGE');
         
         $this->system->defineConstant('DT_NAME');
         $this->system->defineConstant('DT_SHORT_SUMMARY');
@@ -211,7 +211,7 @@ class WebSite
         if($rec==null){
             $err_message = 'Webpage with given ID not found';
             
-        }elseif(!($isMainRecord && $rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_MENU)){
+        }elseif(!($isMainRecord && $rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_PAGE)){
             $err_message = 'Record is not a Webpage';
         }else {
             
@@ -297,7 +297,7 @@ class WebSite
             // Load website settings (details of CMS_HOME record): logo, title, langs, bg images, keywords
             $this->loadWebHomePage();
             
-            if($this->siteRecord['rec_RecTypeID']==RT_CMS_MENU){
+            if($this->siteRecord['rec_RecTypeID']==RT_CMS_PAGE){
                 $this->isWebPage = (defined('DT_CMS_PAGETYPE') &&
                         $this->getVal(DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254'));//TRM_PAGETYPE_WEBPAGE
                         

@@ -19,7 +19,7 @@
  * It also provides methods for creating new websites or pages.
  * @property {object|null} cms_home_counts Stores counts related to CMS home pages.
  * @property {number} RT_CMS_HOME Record Type ID for CMS Home.
- * @property {number} RT_CMS_MENU Record Type ID for CMS Menu.
+ * @property {number} RT_CMS_PAGE Record Type ID for CMS Menu.
  * @property {number} DT_CMS_TOP_MENU Detail Type ID for CMS Top Menu.
  * @property {number} DT_CMS_MENU Detail Type ID for CMS Menu field.
  * @property {number} DT_NAME Detail Type ID for Name.
@@ -32,7 +32,7 @@ class CmsManager {
     cms_home_counts = null;    
     
     RT_CMS_HOME;
-    RT_CMS_MENU;
+    RT_CMS_PAGE;
 
     DT_CMS_TOP_MENU;
     DT_CMS_MENU;
@@ -57,7 +57,7 @@ class CmsManager {
      */
     #initDefCodes() {
         this.RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-        this.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+        this.RT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'];
 
         this.DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'];
         this.DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'];
@@ -142,7 +142,7 @@ class CmsManager {
         
         let missing = '';
 
-        if (!(this.RT_CMS_HOME > 0 && this.RT_CMS_MENU > 0)) {
+        if (!(this.RT_CMS_HOME > 0 && this.RT_CMS_PAGE > 0)) {
             missing = 'You will need record types 99-51 (Web home) and 99-52 (Web menu/content)';
         } else if (!(this.DT_LANGUAGE > 0) || !$Db.rst(this.RT_CMS_HOME, this.DT_LANGUAGE)) {
             missing = 'You will need record types 99-51 (Web home) with field 2-967 (Languages)';
@@ -186,7 +186,7 @@ class CmsManager {
 
         let is_view_mode = (action == 'menu-cms-view-page');
 
-        let query_search_pages = { t: this.RT_CMS_MENU, sort: '-id' };
+        let query_search_pages = { t: this.RT_CMS_PAGE, sort: '-id' };
         query_search_pages['f:' + this.DT_CMS_PAGETYPE] = window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_WEBPAGE'];
 
         this.#openCMSlist(window.hWin.HR('Select Web page'), query_search_pages, is_view_mode, false);
@@ -424,7 +424,7 @@ class CmsManager {
             //create duplication for the existing website
             window.hWin.HEURIST4.msg.bringCoverallToFront();
             window.hWin.HAPI4.RecordMgr.duplicate({id: recId, 
-                permissions:{owner_grps:[2], access:'hidden'}, likedRtyID:this.RT_CMS_MENU, namePrefix:'BACKUP'}, 
+                permissions:{owner_grps:[2], access:'hidden'}, likedRtyID:this.RT_CMS_PAGE, namePrefix:'BACKUP'}, 
                 response=>{
                     
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -570,7 +570,7 @@ class CmsManager {
     #getCountWebPageRecords(callback) {
         let DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
 
-        let query_search_pages = { t: this.RT_CMS_MENU };
+        let query_search_pages = { t: this.RT_CMS_PAGE };
         query_search_pages['f:' + DT_CMS_PAGETYPE] = window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_WEBPAGE'];
 
         let request = { q: query_search_pages, w: 'a', detail: 'count', source: 'getCountWebPageRecords' };

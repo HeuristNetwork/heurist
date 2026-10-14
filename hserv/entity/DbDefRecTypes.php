@@ -15,6 +15,7 @@
 */
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
+use hserv\entity\DbSysWorkflowRules;
 use hserv\utilities\USanitize;
 use hserv\structure\ConceptCode;
 
@@ -280,6 +281,8 @@ class DbDefRecTypes extends DbEntityBase
             return false;
         }
 
+        $swfRules = new DbSysWorkflowRules($this->system);
+
         $rtyID = $this->recordIDs[0];
 
         $mysqli = $this->system->getMysqli();
@@ -346,6 +349,11 @@ class DbDefRecTypes extends DbEntityBase
         }
 
         if($res){
+
+            // Remove deleted record type's Workflow stages
+            $swfRules->setData(['rty_ID' => $rtyID, 'clearRulesByRty' => 1]);
+            $swfRules->batch_action();
+
             $res = parent::delete(true);
         }
 
@@ -788,7 +796,7 @@ class DbDefRecTypes extends DbEntityBase
     //
     //
     /**
-     * Counts usage of CMS-specific record types (RT_CMS_HOME, RT_CMS_MENU).
+     * Counts usage of CMS-specific record types (RT_CMS_HOME, RT_CMS_PAGE).
      *
      * Returns total count of RT_CMS_HOME records, counts of private home and menu pages,
      * and IDs of private home pages.
@@ -800,7 +808,7 @@ class DbDefRecTypes extends DbEntityBase
     private function countsUsageCMS(){
 
             $this->system->defineConstant('RT_CMS_HOME');
-            $this->system->defineConstant('RT_CMS_MENU');
+            $this->system->defineConstant('RT_CMS_PAGE');
 
             $query = 'SELECT count(r0.rec_ID) as cnt FROM Records r0 ';
             $where = 'WHERE (r0.rec_RecTypeID='.RT_CMS_HOME.') ';
@@ -824,7 +832,7 @@ class DbDefRecTypes extends DbEntityBase
 
             $query = 'SELECT r0.rec_ID FROM Records r0 ';
             $where = 'WHERE (r0.rec_NonOwnerVisibility!="public") '
-                                .'AND (r0.rec_RecTypeID='.RT_CMS_MENU.')';
+                                .'AND (r0.rec_RecTypeID='.RT_CMS_PAGE.')';
 
             $res3 = mysql__select_list2($this->system->getMysqli(), $query.$conds[0].$where.$conds[1]);
             if($res3==null) {$res3 = array();}

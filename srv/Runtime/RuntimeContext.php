@@ -30,6 +30,8 @@ final class RuntimeContext
     public bool $isDbOwner;
     public bool $hasAccess;
     public bool $isAdmin;
+    /** Groups the user administers, plus the user itself (legacy getUserGroupIds('admin')). */
+    public array $adminGroupIds;
 
     /** Initialise the context with already validated runtime values. */
     public function __construct(
@@ -40,7 +42,8 @@ final class RuntimeContext
         array $groupIds = array(),
         bool $isDbOwner = false,
         bool $hasAccess = false,
-        bool $isAdmin = false
+        bool $isAdmin = false,
+        array $adminGroupIds = array()
     ) {
         $this->databaseName = $databaseName;
         $this->databaseNameFull = $databaseNameFull;
@@ -50,6 +53,7 @@ final class RuntimeContext
         $this->isDbOwner = $isDbOwner;
         $this->hasAccess = $hasAccess;
         $this->isAdmin = $isAdmin;
+        $this->adminGroupIds = array_values(array_unique(array_filter(array_map('intval', $adminGroupIds))));
     }
 
     /**
@@ -71,7 +75,8 @@ final class RuntimeContext
             method_exists($system, 'getUserGroupIds') ? (array)$system->getUserGroupIds() : array(),
             method_exists($system, 'isDbOwner') && $system->isDbOwner(),
             method_exists($system, 'hasAccess') && $system->hasAccess(),
-            method_exists($system, 'isAdmin') && $system->isAdmin()
+            method_exists($system, 'isAdmin') && $system->isAdmin(),
+            method_exists($system, 'getUserGroupIds') ? (array)$system->getUserGroupIds('admin') : array()
         );
     }
 }
