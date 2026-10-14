@@ -33,25 +33,56 @@ final class DefinitionSnapshotService
     /**
      * Snapshot format; a cached snapshot of an older format is rebuilt
      * (2: structure rows have "max"; 3: terms named as the report field tree -
-     * term, code, conceptid, desc - by DefinitionLookup).
+     * term, code, conceptid, desc - by DefinitionLookup; 4: dbconst DT_DATA_SOURCE).
      */
-    private const FORMAT = 3;
+    private const FORMAT = 4;
 
-    /** @param string $cacheDirectory Absolute path of the database "entity" dir, or '' to disable caching. */
+    /** Languages offered for translations when the database has no own list (legacy default). */
+    private const TRANSLATION_LANGUAGES = array('ENG', 'FRE', 'CHI', 'SPA', 'ITA', 'ARA', 'GER', 'POR', 'LAT', 'GRE', 'GRC', 'IND');
+
+    /** @var array<int,string> Languages of the database setting "Languages" (db_languages.json). */
+    private array $translationLanguages;
+
+    /**
+     * @param string $cacheDirectory Absolute path of the database "entity" dir, or '' to disable caching.
+     * @param array<int,string> $translationLanguages The database setting "Languages" (3-letter codes),
+     *        offered for translations in the record editor; empty: the legacy default list.
+     */
     public function __construct(
         DatabaseInterface $database,
         RuntimeContext $runtime,
-        string $cacheDirectory = ''
+        string $cacheDirectory = '',
+        array $translationLanguages = array()
     ) {
         $this->database = $database;
         $this->runtime = $runtime;
         $this->cacheDirectory = $cacheDirectory === ''
             ? ''
             : rtrim(str_replace('\\', '/', $cacheDirectory), '/').'/';
+        $this->translationLanguages = array_values(array_unique(array_filter(array_map(
+            static function($code){ return strtoupper(trim((string)$code)); },
+            $translationLanguages
+        ), static function($code){ return preg_match('/^[A-Z]{3}$/', $code) === 1; })));
     }
 
     /** Return the snapshot payload, using or refreshing the on-disk cache. */
     public function get(array $params = array()): array
+    {
+        return $this->withTranslationLanguages($this->snapshot());
+    }
+
+    /**
+     * The database setting can change without a definition change: added to every
+     * response, not cached (2026-10-14, plan 18).
+     */
+    private function withTranslationLanguages(array $snapshot): array
+    {
+        $snapshot['meta']['translationLanguages'] = $this->translationLanguages ?: self::TRANSLATION_LANGUAGES;
+        return $snapshot;
+    }
+
+    /** The cached snapshot, rebuilt when missing or of an older format. */
+    private function snapshot(): array
     {
         $file = $this->cacheFile();
         if($file !== '' && is_readable($file)){
@@ -182,6 +213,9 @@ final class DefinitionSnapshotService
             'DT_TABLE_FIELDS'          => $this->concept('dty', 2, 1164),
             'DT_FILTER_FORM'           => $this->concept('dty', 2, 1165),
             'DT_SYMBOLOGY'             => $this->concept('dty', 3, 1092),
+            // the Map Layer's data source: Style of an image source = image filters, Thematic
+            // maps need its Query Source query (plan 17; was missing, 2026-10-14)
+            'DT_DATA_SOURCE'           => $this->concept('dty', 3, 1083),
             // other Query Source fields written by the Query Source editor
             'DT_GEO_FIELDS'            => $this->concept('dty', 2, 1161),
             'DT_TIMELINE_FIELDS'       => $this->concept('dty', 2, 1105),

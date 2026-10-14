@@ -93,6 +93,8 @@ final class ServiceFactory
     private string $entityDirectory;
     /** @var array{templates?:string,generated?:string,generatedUrl?:string,jobs?:string,settings?:array} */
     private array $reportEnvironment;
+    /** @var (\Closure():array)|null Database setting "Languages" (translations), read when needed. */
+    private ?\Closure $translationLanguages = null;
 
     /** Build the PDO and runtime boundary from the current legacy initialization. */
     public static function fromLegacySystem($system): self
@@ -146,7 +148,7 @@ final class ServiceFactory
         }
         $reportSettings = $system->settings->getDatabaseSetting('Reports');
         $exportSettings = $system->settings->getDatabaseSetting('Export');
-        return new self(
+        $factory = new self(
             $database,
             $runtime,
             new SystemCode($codeIds),
@@ -168,6 +170,12 @@ final class ServiceFactory
                 }
             )
         );
+        // languages offered for translations (record editor): the database setting (db_languages.json)
+        $factory->translationLanguages = static function() use ($system): array {
+            $languages = $system->settings->getDatabaseSetting('Languages');
+            return is_array($languages) ? $languages : array();
+        };
+        return $factory;
     }
 
     /**
@@ -309,7 +317,8 @@ final class ServiceFactory
     public function definitionController(): DefinitionController
     {
         return new DefinitionController(
-            new DefinitionSnapshotService($this->database, $this->runtime, $this->entityDirectory),
+            new DefinitionSnapshotService($this->database, $this->runtime, $this->entityDirectory,
+                $this->translationLanguages ? ($this->translationLanguages)() : array()),
             $this->runtime
         );
     }
