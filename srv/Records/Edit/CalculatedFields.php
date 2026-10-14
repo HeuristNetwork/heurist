@@ -70,8 +70,21 @@ final class CalculatedFields
             }
             $value = trim((string)($result['output'] ?? ''));
             if(in_array($value, array('NAN', 'INF', 'NULL'), true)){ $value = ''; }
-            $current = (string)($this->store->records()->values(array($recordId), array($fieldId))[$recordId][$fieldId][0] ?? '');
-            if($current === $value){ continue; }
+            if($value !== '' && $this->definitions->fieldType($fieldId) === 'resource'){
+                $target = ctype_digit($value) && intval($value)>0
+                    ? $this->store->records()->header(intval($value), array('rec_ID', 'rec_RecTypeID', 'rec_FlagTemporary')) : null;
+                $types = $this->definitions->fieldConstraints($fieldId)['targetTypes'];
+                if($target === null || !empty($target['rec_FlagTemporary'])
+                    || (!empty($types) && !in_array(intval($target['rec_RecTypeID']), $types))){
+                    $errors[$fieldId] = 'Calculated record link must be one existing record ID of an allowed target type';
+                    continue;
+                }
+            }
+            $currentValues = $this->store->records()->values(array($recordId), array($fieldId))[$recordId][$fieldId] ?? array();
+            $current = (string)($currentValues[0] ?? '');
+            $pointerCardinalityValid = $this->definitions->fieldType($fieldId) !== 'resource'
+                || count($currentValues) === ($value === '' ? 0 : 1);
+            if($current === $value && $pointerCardinalityValid){ continue; }
             $this->store->setFieldValue($recordId, $fieldId, $value === '' ? null : $value);
         }
         return $errors;
