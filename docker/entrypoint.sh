@@ -58,7 +58,7 @@ done
 # 4. Composer vendor directory for bind-mounted repos that don't have one
 #    (baked into the image at build time as /opt/heurist_vendor)
 if [[ ! -e "$APP/vendor/autoload.php" && -d /opt/heurist_vendor ]]; then
-    cp -a /opt/heurist_vendor "$APP/vendor"
+    cp -a /opt/heurist_vendor/. "$APP/vendor/"
 fi
 
 # 4b. Fill gaps in the external_h5 support bundle: the distribution tarball
