@@ -110,6 +110,8 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
             describeRules: function(rules) { return that._describeRules(rules); },
             selectFieldset: function(value, options) { return that._selectFieldset(value, options || {}); },
             editSavedFilter: function(svsID, squery) { return that._editSavedFilter(svsID, squery); },
+            // new faceted Saved Filter in the faceted search wizard (resolves when saved)
+            editFacetedFilter: function() { return that._editSavedFilter(null, null, 'faceted'); },
             saveDatasourceAsSource: function(source, options) {
                 return that._saveDatasourceAsSource(source, options || {});
             },
@@ -227,12 +229,12 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
         return Promise.resolve(ui.showRulesBuilderDialog(value, options));
     }
 
-    _editSavedFilter(svsID, squery) {
+    _editSavedFilter(svsID, squery, mode) {
         var ui = window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.ui;
         if (!ui || typeof ui.editSavedFilter !== 'function') {
             return Promise.reject(new Error('Saved Filter editor is not available'));
         }
-        return Promise.resolve(ui.editSavedFilter(svsID, squery));
+        return Promise.resolve(ui.editSavedFilter(svsID, squery, mode));
     }
 
     _saveDatasourceAsSource(source, options) {

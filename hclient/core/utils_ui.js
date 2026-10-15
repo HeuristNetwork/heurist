@@ -94,9 +94,12 @@ window.hWin.HEURIST4.ui = {
      * Opens the legacy saved-filter editor without requiring an svs_list widget.
      * @param {?number} svsID Existing saved-filter id, or null to create one.
      * @param {string|Object} [squery] Initial executable query for a new filter.
+     * @param {string} [mode='saved'] 'faceted' opens the faceted search wizard for a new
+     *        faceted filter (squery is not used); it resolves when the filter is saved.
      * @returns {Promise<{saved:boolean, id:?number, request:?Object}>}
      */
-    editSavedFilter: function(svsID, squery){
+    editSavedFilter: function(svsID, squery, mode){
+        const faceted = (mode === 'faceted');
         let id = Number(svsID);
         id = Number.isInteger(id) && id > 0 ? id : null;
         const hapi = window.hWin && window.hWin.HAPI4;
@@ -121,9 +124,10 @@ window.hWin.HEURIST4.ui = {
                     const editor = new HSvsEdit();
                     const position = {my:'center', at:'center', of:window, collision:'fit'};
                     const dialog = editor.showSavedFilterEditDialog(
-                        'saved', null, id, id ? null : squery, true, position,
+                        faceted ? 'faceted' : 'saved', null, id, (id || faceted) ? null : squery, true, position,
                         function(error, request){
-                            if(error){
+                            // the faceted wizard calls back (event, request) on save
+                            if(error && !faceted){
                                 if(!settled){ settled = true; reject(error); }
                                 return;
                             }
@@ -132,7 +136,7 @@ window.hWin.HEURIST4.ui = {
                         },
                         true
                     );
-                    if(dialog && typeof dialog.one === 'function'){
+                    if(dialog && typeof dialog.one === 'function' && !faceted){
                         dialog.one('dialogclose.heuristEditSavedFilter', function(){
                             setTimeout(function(){ finish({saved:false, id:id, request:null}); }, 0);
                         });
