@@ -121,7 +121,7 @@ if (!$system->init(null, false, false)) {
 // Setup server name
 if (!defined('HEURIST_SERVER_NAME') && isset($serverName)) {
 	define('HEURIST_SERVER_NAME', $serverName); // 'heurist.huma-num.fr'
-	}
+}
 	
 // Validate server name
 if (!defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME)) {

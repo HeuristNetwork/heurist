@@ -26,6 +26,7 @@ This directory contains a suite of scripts for database verification, integrity 
 - `rebuildLuceneIndices.php`: Rebuilds all Lucene (Elasticsearch) indices for the current database.
 - `rebuildRecordTitles.php`: Rebuilds constructed record titles based on their title masks.
 - `repairUploadedFiles.php`: Server-side script to repair uploaded file entries.
+- `verifyAllDatabases.php`: Performs the quicker verify integrity checks on all databases.
 - `verifyConceptCodes.php`: Checks for duplicate concept codes within each database.
 - `verifyConceptCodes2.php`: Checks for missing `xxx_IDInOriginatingDB` values in definitions.
 - `verifyConceptCodes3.php`: Checks for definitions lacking concept codes in registered databases.
