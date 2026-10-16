@@ -3368,7 +3368,8 @@ function recordSearch($system, $params, $relation_query=null)
 
                                         if(!$field_error){ // has been indexed
                                             $row = $check_res->fetch_row();
-                                            $field_error = intval($row[0]) === 0 && intval($row[1]) === 0 ? 'This date has been indexed, but it couldn\'t be interpreted' : null;
+                                            $field_error = intval($row[0]) === 0 && intval($row[1]) === 0 && preg_match('/\|CIR=[1-3]/', $val) !== 1
+                                                ? 'This date has been indexed, but it couldn\'t be interpreted' : null;
                                         }
 
                                     } // else mysql error
