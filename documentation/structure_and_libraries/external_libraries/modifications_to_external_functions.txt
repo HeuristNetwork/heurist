@@ -102,6 +102,8 @@ external/php/phpZotero.php (114-121) support proxy settings
 2023-09-11 external/php/tileserver.php (32) allows simplified url if it goes from mbtiles.php
 
 2024-10-29 jquery v3 compatibility
+
+2026-10-08  external/jquery.widget/jquery.layout.js Line 1558 Replace not supported 'unload' event with custom one
         
 -----------------------------------------------------------------------------------------------------------------------------------
 
