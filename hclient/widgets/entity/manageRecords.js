@@ -1093,14 +1093,49 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             css:{'margin-left':'1em'},
                             click: function(event) { 
 
-                                function duplicate_record(){ 
+                                function duplicate_record(includeRelations){
+
+                                    let hasRelations = that.editFormSummary.find('.summary-content [data-relid]:not([data-relid=""])').length;
+                                    if(includeRelations === undefined && hasRelations > 0){ // check relationships
+
+                                        let checkboxDefaultState = sessionStorage.getItem('heurist_dup_relations') ?? 1;
+
+                                        let $dlg;
+                                        let content = `<div>
+                                            <label>
+                                                <input type="checkbox" name="dup_relations" ${checkboxDefaultState == 1 ? 'checked="checked"' : ''} />
+                                                 Duplicate ${hasRelations} relationships in this record
+                                            </label>
+                                            <span class="heurist-helper2" style="display: block; padding-top: 0.5em; padding-left: 0.2em; font-size: 1em;">
+                                                Note: if you do not have record deletion rights you will not be able to delete these relationships
+                                            </span>
+                                        </div>`;
+
+                                        let btns = {};
+                                        btns[window.hWin.HR('Duplicate record')] = () => {
+
+                                            let checkboxState = $dlg.find('[name="dup_relations"]').is(':checked') ? 1 : 0;
+                                            sessionStorage.setItem('heurist_dup_relations', checkboxState);
+
+                                            $dlg.dialog('close');
+                                            duplicate_record(checkboxState);
+                                        };
+                                        btns[window.hWin.HR('Cancel')] = () => {
+                                            $dlg.dialog('close');
+                                        };
+
+                                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Include relationships in duplicated record'}, {default_palette_class: 'ui-heurist-explore', dialogId: 'dup-include-rels'});
+
+                                        return;
+                                    }
+
                                     let btn = $(event.target);                        
                                     btn.hide();
 
                                     let dlged = that._getEditDialog();
                                     if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
 
-                                    window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID}, 
+                                    window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID, includeRelations: includeRelations}, 
                                         function(response){
 
                                             window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -1907,8 +1942,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }    
             case 3:   //find all reverse links
             {
-                let relations = that._currentEditRecordset.getRelations();    
-                
+                let relations = that._currentEditRecordset.getRelations();
+
                 if(!relations) break;
                 
                 let direct = relations.direct;

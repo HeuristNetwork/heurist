@@ -119,7 +119,8 @@
                 
                 $processedIds = [];
                 $response = recordDuplicate($system, $_REQUEST['id'], $processedIds,
-                    $_REQUEST['permissions']??null, $_REQUEST['likedRtyID']??null, $_REQUEST['namePrefix']??null);
+                    $_REQUEST['permissions']??null, $_REQUEST['likedRtyID']??null, $_REQUEST['namePrefix']??null,
+                    $_REQUEST['includeRelations'] ?? true);
 
                 $isOK = $response && @$response['status']==HEURIST_OK;
 
