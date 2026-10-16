@@ -797,6 +797,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         let entity_configs = {};
         let entity_data = {};
         let entity_timestamp = 0;
+        let entity_revision = '';
         let _msgOnRefreshEntityData = 0;
 
         let that = {
@@ -944,7 +945,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             relevanceEntityData: function (callback, errorCallback = null) {
                 
                 if(entity_timestamp>0){
-                    window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', callback, errorCallback);
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', false, callback, errorCallback);
                 }else if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     callback(this, true);
                 }
@@ -964,7 +965,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
                 let entities = (params)?params:'all';
 
-                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
+                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, false, function(){
                     let res = false;
                     if(arguments){
                         if(arguments[1]){
@@ -988,23 +989,30 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
             
             //
-            // refresh several entity data at once
+            // Refresh several entities; verbose controls the delayed progress message.
+            // Signature: (entityName, verbose, callback, errorCallback).
             // 
-            refreshEntityData: function (entityName, callback, errorCallback = null) {
+            refreshEntityData: function (entityName, verbose = true, callback = null, errorCallback = null) {
+                // Compatibility with (entityName, callback, errorCallback).
+                if (typeof verbose !== 'boolean') {
+                    errorCallback = callback;
+                    callback = verbose;
+                    verbose = true;
+                }
 
                 let params = { a: 'structure', 'details': 'full'};
                 params['entity'] = entityName;
+                params['revision'] = entity_revision || '';
                 params['timestamp'] = entity_timestamp; //db defitions time on client side
 
                 let s_time = new Date().getTime() / 1000;
                 if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
-                _msgOnRefreshEntityData = setTimeout(function(){
+                _msgOnRefreshEntityData = verbose ? setTimeout(function(){
                     window.hWin.HEURIST4.msg.showMsgFlash('Database definitions refresh', false, null, { position: {my: 'left+100 top+100', at: 'left top', of: $(document)} });
-                }, 1000);
+                }, 1000) : 0;
 
                  
-                _callserver('entityScrud', params,
-                    function (response) {
+                const onResponse = function (response) {
 
                         if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
                         _msgOnRefreshEntityData = 0;
@@ -1015,12 +1023,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             entity_timestamp = response['uptodate'];
                             if (window.hWin.HEURIST4.util.isFunction(callback)) callback(this, true);
                             
-                        }else if (response && response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
+                        }else if (response && (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes'])) {
 
                             let fin_time = new Date().getTime() / 1000;
                             console.log('definitions are loaded: '+(fin_time-s_time)+' sec');
                             
                             let dbdefs = (response['defRecTypes']?response:response['data']);
+                            entity_revision = dbdefs.revision || '';
                             for (let entityName in dbdefs) {
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
@@ -1032,9 +1041,24 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             if(window.hWin.HEURIST4.util.isFunction(errorCallback)){ errorCallback.call(this, response); }
                             else{ window.hWin.HEURIST4.msg.showMsgErr(response); }
                         }
-                    }
+                    };
 
-                );
+                if (entityName === 'all') {
+                    // A stable GET lets the browser revalidate its cached JSON using ETag.
+                    const url = new URL(HAPI4.baseURL + 'hserv/controller/entityScrud.php', window.location.href);
+                    url.search = new URLSearchParams({db: _database, a: 'structure', entity: 'all', details: 'full'});
+                    fetch(url.toString(), {credentials: 'include', headers: {Accept: 'application/json'}})
+                        .then(response => {
+                            if (!response.ok) throw new Error('HTTP ' + response.status);
+                            return response.json();
+                        })
+                        .then(onResponse, error => onResponse({
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
+                            message: 'Cannot obtain database definitions: ' + error.message
+                        }));
+                } else {
+                    _callserver('entityScrud', params, onResponse);
+                }
             },
 
 
@@ -1100,7 +1124,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 
                 if(!data) return;
                 
-                if(entityName=='timestamp'){ 
+                if(entityName=='revision'){
+                    return; // Snapshot metadata, not an entity.
+                }else if(entityName=='timestamp'){
                     entity_timestamp = Number(data[entityName]); //db structure cache file last update time
                 }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 

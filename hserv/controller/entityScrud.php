@@ -53,13 +53,7 @@
     // relevance - compare filetime with timestamp,
     //                      if filetime is later - returns definitions
     //                      otherwise file time
-    if( @$req_params['a']=='structure' && @$req_params['entity']=='relevance' &&
-            ($dbdef_cache==null || !file_exists($dbdef_cache)) ){
-            //ignore relevance check if file is missed
-            header(CTYPE_JSON);
-                print json_encode( array('uptodate'=>1, 'cachefile'=>$dbdef_cache));
-            exit;
-    }
+    // A missing cache must fall through to entityRefreshDefs(), including relevance checks.
     
     if( @$req_params['a']=='structure'
         && (@$req_params['entity']=='all' || @$req_params['entity']=='relevance')
@@ -73,7 +67,10 @@
                     $req_params['entity'] = 'all';
                     $file_time = filemtime($dbdef_cache);
 
-                    if($file_time - intval($req_params['timestamp']) < 100){
+                    $same_revision = !empty($req_params['revision'])
+                        ? hash_equals(hash_file('sha256', $dbdef_cache), (string)$req_params['revision'])
+                        : $file_time === intval($req_params['timestamp']);
+                    if($same_revision){
                         //compare file time with time of db defs on client side
                         //defintions are up to date on client side
                         header(CTYPE_JSON);
@@ -104,26 +101,9 @@
                 }
 
                 if($dbdef_cache_is_uptodate){
-                    //download db def cache or direct access
-                    if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
-                    {
-                        $host_params = USystem::getHostParams();
-                        //
-                        if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
-                            $url = $defaultRootFileUploadURL;
-                        }else{
-                            //replace server name to avoid CORS issues
-                            $parts = explode('/',$defaultRootFileUploadURL);
-                            $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
-                        }
-
-                        //rawurlencode - required for security reports only
-                        $url = $url.rawurlencode($dbname).'/entity/dbdef_cache.json';
-                        redirectURL($url);
-
-                    }else{
-                        downloadFile(MIMETYPE_JSON, $dbdef_cache);
-                    }
+                    // Serve through this endpoint so redirects/static-server headers cannot
+                    // bypass compression or freshness validation.
+                    outputDefinitionCache($dbdef_cache);
                     exit;
                 }
             }else{
@@ -166,8 +146,13 @@
             if(@$req_params['entity']=='all' && $res!==false && $dbdef_cache!=null){
                 //$res['db_time'] = $db_time;
                 //update db defintion cache file
-                file_put_contents($dbdef_cache, json_encode($res));
+                $cache_written = file_put_contents($dbdef_cache, json_encode($res), LOCK_EX);
+                clearstatcache(true, $dbdef_cache);
                 $res['timestamp'] = filemtime($dbdef_cache);//it will be stored on client side
+                if($cache_written !== false && empty($req_params['restapi'])){
+                    outputDefinitionCache($dbdef_cache);
+                    exit;
+                }
             }
 
         }else {
@@ -411,4 +396,30 @@ Description Of Usual Server Responses:
 404 Not Found - resource was not found.
 405 Method Not Allowed - requested method is not supported for resource.
 */
-?>
+/** Serve a legacy snapshot consistently for both cache hits and newly rebuilt files. */
+function outputDefinitionCache(string $file): void
+{
+    $json = (string)file_get_contents($file);
+    $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+    $data['timestamp'] = filemtime($file);
+    $data['revision'] = hash('sha256', $json);
+    $body = json_encode($data);
+    $etag = 'W/"'.hash('sha256', $body).'"';
+    header(CTYPE_JSON);
+    header('Vary: Accept-Encoding');
+    if(($_SERVER['REQUEST_METHOD'] ?? 'POST') === 'GET'){
+        header('Cache-Control: private, no-cache');
+        header('ETag: '.$etag);
+        foreach(explode(',', (string)($_SERVER['HTTP_IF_NONE_MATCH'] ?? '')) as $candidate){
+            if(trim($candidate) === '*' || preg_replace('/^W\//', '', trim($candidate)) === substr($etag, 2)){
+                http_response_code(304);
+                return;
+            }
+        }
+    }
+    if(!ini_get('zlib.output_compression') && function_exists('ob_gzhandler')
+        && !in_array('ob_gzhandler', ob_list_handlers(), true)){
+        ob_start('ob_gzhandler');
+    }
+    echo $body;
+}

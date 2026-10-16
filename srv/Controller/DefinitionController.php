@@ -60,16 +60,21 @@ final class DefinitionController
     {
         try{
             $result = $this->execute($params, $type);
-            $etag = '"'.($result['meta']['version'] ?? '0').'"';
+            $etag = 'W/"'.hash('sha256', (string)json_encode($result)).'"';
 
             if(defined('HEADER_CORS_POLICY')){ header(HEADER_CORS_POLICY); }
             header('ETag: '.$etag);
-            header('Cache-Control: no-cache, must-revalidate');
+            header('Cache-Control: private, no-cache');
+            header('Vary: Accept-Encoding');
 
             $ifNoneMatch = (string)($_SERVER['HTTP_IF_NONE_MATCH'] ?? '');
-            if($ifNoneMatch !== '' && $this->normalizeEtag($ifNoneMatch) === $this->normalizeEtag($etag)){
+            if($this->matchesEtag($ifNoneMatch, $etag)){
                 http_response_code(304);
                 return;
+            }
+            if(!ini_get('zlib.output_compression') && function_exists('ob_gzhandler')
+                && !in_array('ob_gzhandler', ob_list_handlers(), true)){
+                ob_start('ob_gzhandler');
             }
             $this->response->send($result);
         }catch(QueryValidationException $error){
@@ -78,6 +83,16 @@ final class DefinitionController
             $this->errors->report($error, $this->runtime);
             $this->response->sendError(500, 'server_error', 'Definition query execution failed');
         }
+    }
+
+    private function matchesEtag(string $value, string $etag): bool
+    {
+        foreach(explode(',', $value) as $candidate){
+            if(trim($candidate) === '*' || $this->normalizeEtag($candidate) === $this->normalizeEtag($etag)){
+                return true;
+            }
+        }
+        return false;
     }
 
     private function normalizeEtag(string $value): string

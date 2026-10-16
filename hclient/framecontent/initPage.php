@@ -469,7 +469,7 @@ if (!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS'))
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
                 var entities = (params)?params:'all';
 
-                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
+                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, false, function(){
                     if(arguments){
                     if(arguments[1]){
 

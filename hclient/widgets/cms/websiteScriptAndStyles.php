@@ -1397,7 +1397,7 @@ if(isset($customTemplateNotFound)){
         }
     }
 
-    window.hWin.HAPI4.EntityMgr.refreshEntityData('all', __init_completed);
+    window.hWin.HAPI4.EntityMgr.refreshEntityData('all', false, __init_completed);
 }
 
 //

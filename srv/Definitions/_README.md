@@ -17,7 +17,10 @@ GET /api/{db}/def/snapshot
 
 Read-only, anonymous-allowed (definitions are already public). Returns the
 standard modern envelope via `Heurist\Runtime\ApiResponse`. Sends an `ETag`
-(cache-file mtime) and answers `304` to a matching `If-None-Match`.
+(hash of the complete response, including translation-language settings) and answers
+`304` to a matching `If-None-Match`. Responses use `Cache-Control: private,
+no-cache` and negotiated gzip compression; browsers store the JSON and revalidate
+it on each load. Weak validators cover both compressed and uncompressed responses.
 
 ## Caching
 
@@ -33,7 +36,7 @@ See `documentation/development/query-language-filter-builder-plan.md` §4 for th
 full shape. Summary:
 
 - `meta` — `db`, `format` (2; a cached snapshot of an older format is rebuilt),
-  `dbId` (registered ID, for concept codes), `version` (== ETag),
+  `dbId` (registered ID, for concept codes), `version` (cache-file mtime; HTTP ETag hashes the complete response),
   `generated`, `language`, `languages`, `dbconst`
   (`RT_RELATION`, `DT_PRIMARY_RESOURCE`, `DT_TARGET_RESOURCE`, `DT_RELATION_TYPE`).
 - `rectypeGroups`, `fieldGroups` — `{id: {name, order}}`.
