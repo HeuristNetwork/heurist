@@ -30,6 +30,9 @@ namespace hserv\controller;
  *  http://127.0.0.1/osmak_1/rty/10     - returns definitions (xml) for record type 10 
  *  http://127.0.0.1/db/dty/2-4         - returns definitions for field type 4 from database #2
  * 
+ *  http://127.0.0.1/db/record/2-8/1,28 - means return only rec_ID and fields with IDs 1 and 28
+ * 
+ * 
  *  See conversion of pretty path to $params in ReuestRouter->paramsFromDbResolverPath and paramsFromPrettyRoute
  * 
  * Returned format:
@@ -54,7 +57,7 @@ final class RecordResolver
     public static function resolve(string $version, array $params, string $serverRoot=null): ?array
     {
         
-        self:$version = $version;
+        self::$version = $version;
         
         if(!defined('HEURIST_INVALID_REQUEST')){
             define('HEURIST_INVALID_REQUEST', 'invalid');
@@ -92,6 +95,8 @@ final class RecordResolver
                 
             }
         }
+        
+        $fields = $params['fields']??null;
         
         // Determine fmt/action
         $fmt = $params['fmt'] ?? ($params['format'] ?? null);
@@ -134,6 +139,7 @@ final class RecordResolver
             if ($remote) {
                 // Remote endpoints expect parameterized URL (as per legacy resolver.php)
                 $q = ['recID' => $recid, 'fmt' => $fmt];
+                if (isset($fields)) $q['fields'] = $fields;
                 if (!empty($params['depth']))    $q['depth'] = (int)$params['depth'];
                 if (!empty($params['noheader'])) $q['noheader'] = 1;
                 if (!empty($params['action']))   $q['action'] = (string)$params['action'];
@@ -190,6 +196,11 @@ final class RecordResolver
                 'db'   => $db,
                 'q'    => $query ?? ('ids:' . $recid),
             ];
+            
+            if(isset($fields)){
+                $q['detail']='rec_ID,'.$fields;
+            }
+            
             if (!empty($params['depth'])) $q['depth'] = (int)$params['depth'];
             return ['url' => "/{$version}/hserv/controller/record_output.php?" . http_build_query($q), 'status' => 302];
         }

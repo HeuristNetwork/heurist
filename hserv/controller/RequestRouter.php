@@ -603,12 +603,17 @@ final class RequestRouter
             return $params;
         }
 
-        // Build concept id
-        $concept = '';
-        if (isset($segments[3])) {
-            $concept = $segments[2] . '-' . $segments[3];
-        } else {
-            $concept = $segments[2] ?? '';
+        // Records accept a field list after either DBID-RECID or DBID/RECID.
+        $isRecord = !in_array($kind, ['rty','dty','rst','trm'], true);
+        $concept = $segments[2] ?? '';
+        $fieldsIndex = 3;
+        if (isset($segments[3]) && (!$isRecord || strpos($concept, '-') === false)) {
+            $concept .= '-' . $segments[3];
+            $fieldsIndex = 4;
+        }
+        if ($isRecord && isset($segments[$fieldsIndex])) {
+            $params['fields'] = $segments[$fieldsIndex];
+            $params['fmt'] = 'json';
         }
         
         [$concept, $ext] = self::stripKnownExtensions($concept);
@@ -682,9 +687,11 @@ final class RequestRouter
             case 'record':
             case 'rec':
                 $params['fmt'] = $params['fmt'] ?? 'html';
-                if (isset($rest[0])) { $params['recid'] = $rest[0]; }
+                if (isset($rest[0])) { 
+                    $params['recid'] = $rest[0]; 
+                    if (isset($rest[1])) { $params['fields'] = $rest[1]; $params['fmt'] = 'json';}
+                }
                 break;
-
 
             case 'edit':
                 if (isset($rest[0])) $params['recid'] = $rest[0];
