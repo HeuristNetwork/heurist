@@ -327,11 +327,11 @@ if($imageURL !== ''){
                 OSDErrorCoverall.style.left = `${Math.ceil(rectBounds.x + 8)}px`;
                 OSDErrorCoverall.style.top = `${Math.ceil(rectBounds.y)}px`;
 
-                OSDErrorCoverall.style.opacity = 1;
+                OSDErrorCoverall.style.display = '';
             }
             function hideError(){
                 const OSDErrorCoverall = document.getElementById('osd-error-coverall');
-                OSDErrorCoverall.style.opacity = 0;
+                OSDErrorCoverall.style.display = 'none';
             }
 
             function loadFile(){
@@ -698,7 +698,7 @@ if($imageURL !== ''){
         <div id="osd-coverall" class="osd-coveralls">
             <div id="osd-coverall-msg">Loading Resource ...</div>
         </div>
-        <div id="osd-error-coverall" class="osd-coveralls">
+        <div id="osd-error-coverall" class="osd-coveralls" style="display: none;">
             <div id="osd-error-coverall-msg">An error has happened ...</div>
         </div>
 

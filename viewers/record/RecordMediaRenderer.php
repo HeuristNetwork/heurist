@@ -449,7 +449,7 @@ class RecordMediaRenderer
 
     private function canOpenInOpenSeadragon(array $thumb): bool
     {
-        return $this->isImage($thumb) || $this->isIiifImage($thumb);
+        return $this->isImage($thumb) || $this->isIiifImage($thumb) || $this->isPdf($thumb);
     }
 
     private function fileUrl(array $thumb): string
