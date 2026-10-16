@@ -80,6 +80,8 @@ class ExportRecordsGEOJSON extends ExportRecords {
     private $offset = 0;
     private $returnedFeatures = 0;
 
+    private $outputJSONL = false;
+
     /**
      * Prepares for GeoJSON export, extending the parent method.
      *
@@ -88,6 +90,7 @@ class ExportRecordsGEOJSON extends ExportRecords {
      * - `simplify`: Sets `$this->simplify_wkt`.
      * - `detail_mode`: Sets `$this->detail_mode`.
      * - `separate`: Sets `$this->separate_entity` (for Leaflet).
+     * - `jsonl`: Sets `$this->outputJSONL`.
      * - `geofields`, `suppress_linked_places`: Configure how geographic data is found,
      *   populating `$this->find_geo_by_pointer_rty`, `$this->find_geo_by_pointer_dty`,
      *   `$this->find_by_geofields`, and `$this->search_all_geofields`.
@@ -98,6 +101,8 @@ class ExportRecordsGEOJSON extends ExportRecords {
      * @return bool True if preparation is successful, false otherwise.
      */
 protected function _outputPrepare($data, $params){
+
+    $this->outputJSONL = intval(@$params['jsonl']) > 0;
 
     $res = parent::_outputPrepare($data, $params);
     if($res){
@@ -243,13 +248,16 @@ protected function _outputPrepareFields($params){
      */
 protected function _outputHeader(){
 
-    if($this->is_leaflet && $this->is_full_envelope){
-        fwrite($this->fd, '{"geojson":');
-    }else{
-        fwrite($this->fd, '{"type":"FeatureCollection","features":');
-    }
+    if(!$this->outputJSONL){
 
-    fwrite($this->fd, '[');
+        if($this->is_leaflet && $this->is_full_envelope){
+            fwrite($this->fd, '{"geojson":');
+        }else{
+            fwrite($this->fd, '{"type":"FeatureCollection","features":');
+        }
+
+        fwrite($this->fd, '[');
+    }
 
     $this->comma = '';
 
@@ -344,7 +352,7 @@ protected function _outputRecord($record){
                 $feature['properties']['rec_GeoField'] = $geoms_dty[$idx];//dty_ID
                 fwrite($this->fd, $this->comma.json_encode($feature));
                 $this->returnedFeatures++;
-                $this->comma = ',';
+                $this->comma = $this->outputJSONL ? "\n" : ',';
 
                 if(!in_array($geoms_dty[$idx], $this->geojson_dty_ids)){
                     $this->geojson_dty_ids[] = $geoms_dty[$idx];//unique list of all geofields
@@ -357,7 +365,7 @@ protected function _outputRecord($record){
         $this->returnedFeatures++;
     }
 
-    $this->comma = ',';
+    $this->comma = $this->outputJSONL ? "\n" : ',';
 
     return true;
 
@@ -378,6 +386,9 @@ protected function _outputRecord($record){
      */
 protected function _outputFooter(){
 
+    if($this->outputJSONL){
+        return;
+    }
 
     fwrite($this->fd, ']');//close
 

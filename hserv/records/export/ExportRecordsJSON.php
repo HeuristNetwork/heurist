@@ -92,9 +92,8 @@ class ExportRecordsJSON extends ExportRecords {
      */
     private $maplayer_extents = array();
 
-//
-//
-//
+    private $outputJSONL = false;
+
     /**
      * Prepares for JSON export.
      *
@@ -107,6 +106,8 @@ class ExportRecordsJSON extends ExportRecords {
      * @return bool True if preparation was successful, false otherwise.
      */
 protected function _outputPrepare($data, $params){
+
+    $this->outputJSONL = (intval(@$params['jsonl']) ?? 0) !== 0;
 
     $res = parent::_outputPrepare($data, $params);
     if($res){
@@ -268,7 +269,9 @@ protected function _outputPrepareFields($params){
      */
 protected function _outputHeader(){
 
-    if($this->datatable_session_id>1){ //session id
+    if($this->outputJSONL){
+
+    }elseif($this->datatable_session_id>1){ //session id
 
             //"recordsTotal": 57,"recordsFiltered":'.count($this->records).',
             fwrite($this->fd, '{"draw": '.$this->datatable_draw
@@ -370,7 +373,7 @@ protected function _outputRecord($record){
         }
         fwrite($this->fd, $this->comma.json_encode($record));//as is
     }
-    $this->comma = ',';
+    $this->comma = $this->outputJSONL ? "\n" : ',';
 
     return true;
 }
@@ -390,7 +393,9 @@ protected function _outputRecord($record){
      */
 protected function _outputFooter(){
 
-    if($this->datatable_session_id>0){ //session id
+    if($this->outputJSONL){
+
+    }elseif($this->datatable_session_id>0){ //session id
 
         fwrite($this->fd, ']}');
 

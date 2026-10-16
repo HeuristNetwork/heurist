@@ -454,6 +454,7 @@ function hexportMenu( container ) {
     +(opts.format=='hml'?'<p style="margin-bottom:8px"><label><input type="checkbox" name="include_uploaded_files"/>Include uploaded files and deliver as a single zip file for download</label></p>':'')
     +(opts.format=='hml'?'<p><input type="checkbox" name="human_readable_names"/>Include human-readable names and local IDs for everything '
     +'<div class="heurist-helper3">(NOT RECOMMENDED except for small subset troubleshooting.If checked this will result in a VERY large file and VERY long export time)</div>':'')
+    +(opts.format=='json'||opts.format=='geojson'?'<p><label><input type="checkbox" name="as_jsonl" />Format output as JSON Lines, this will output each record/feature onto separate lines with "\n" as line breaks</label></p>':'')
     +(opts.format=='rdf'?'<p>Since, RDF export is experimental please specify the access word: <input type="password" name="rdfpwd"/>':'')
 
                     , function(){
@@ -468,6 +469,8 @@ function hexportMenu( container ) {
 
                         opts.showHumanReadableNames = $expdlg.find('input[name="human_readable_names"]').is(':checked');
                         opts.includeUploadedFiles = $expdlg.find('input[name="include_uploaded_files"]').is(':checked');
+
+                        opts.jsonl = $expdlg.find('input[name="as_jsonl"]:checked').length > 0;
 
                         _exportRecords( opts );
                     },
@@ -566,7 +569,6 @@ function hexportMenu( container ) {
 
                 }else if(opts.format=='geojson'){
                     newURLParams.set('detail_mode', $('input[name="detail_mode"]:checked').val());
-
                 }else if(opts.format=='rdf'){
                     newURLParams.set('vers', '2');
                     newURLParams.set('serial_format', $('input[name="serial_format"]:checked').val());
@@ -593,6 +595,9 @@ function hexportMenu( container ) {
 
         if(opts.save_as_file===true){
             newURLParams.set('file', '1'); // save as file
+        }
+        if(opts.jsonl){
+            newURLParams.set('jsonl', '1');
         }
 
         if(window.hWin.HEURIST4.util.isPositiveInt(preparedSessionID)){

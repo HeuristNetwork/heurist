@@ -395,7 +395,11 @@ abstract class ExportRecords {
 
         $format = @$params['format'];
         if($format==null) {$format = 'xml';}
-        if($format=='json' || $format=='geojson' || $format=='iiif' || @$params['serial_format']=='json'){
+        if(@$params['jsonl'] == 1 && $format == 'json' || $format == 'geojson'){
+            $mimeType = $format === 'json' ? 'application/jsonl' : 'application/x-ndjson';
+            $mimeType = "Content-type: {$mimeType};charset=UTF-8";
+            $format = $format === 'json' ? 'jsonl' : 'geojsonl';
+        }elseif($format=='json' || $format=='geojson' || $format=='iiif' || @$params['serial_format']=='json'){
             $mimeType = CTYPE_JSON;
         }elseif(@$params['serial_format']=='ntriples' || @$params['serial_format']=='turtle'){ //$format=='rdf'
             $mimeType = CTYPE_HTML;
