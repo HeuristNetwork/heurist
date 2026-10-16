@@ -56,7 +56,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
      * Initializes UI controls for the Nakala lookup widget.
      * - Applies specific CSS styling to header and button container elements.
      * - Fetches metadata (types, licenses, years) from a Nakala helper endpoint
-     *   via `HAPI4.RecordMgr.lookup_external_service` (service `nakala_get_metadata`).
+     *   via `HAPI4.RecordMgr.lookupService` (service `nakala_get_metadata`).
      * - Populates dropdowns for Type (`#inpt_type`), License (`#inpt_license`),
      *   and Year (`#inpt_year`) with the fetched metadata.
      * - Hides dropdowns if their respective metadata is not available.
@@ -73,43 +73,43 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
         let that = this;
 
         // Extra field styling
-        this.element.find('#search_container > div > div > .header.recommended').css({width:'120px', 'min-width':'120px', display: 'inline-block'});
-        this.element.find('#search_container > div > div > .header.optional').css({width:'60px', 'min-width':'60px', display: 'inline-block'});
-        this.element.find('#btn_container').position({my: 'left bottom', at: 'right bottom', of: '#search_container'});
+        this._$('#search_container > div > div > .header.recommended').css({width:'120px', 'min-width':'120px', display: 'inline-block'});
+        this._$('#search_container > div > div > .header.optional').css({width:'60px', 'min-width':'60px', display: 'inline-block'});
+        this._$('#btn_container').position({my: 'left bottom', at: 'right bottom', of: '#search_container'});
 
         let request = {
             serviceType: 'nakala',
             metadata: 'types,licenses'
         };
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+        this.HAPI.RecordMgr.lookupService(request, (data) => {
 
-            data = window.hWin.HEURIST4.util.isJSON(data);
+            data = that.$H.isJSON(data);
 
             if(data.status && data.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(data);
+                that.$Hmsg.showMsgErr(data);
                 return;
             }
 
-            let $select = that.element.find('#inpt_type');
+            let $select = that._$('#inpt_type');
             if(Object.hasOwn(data,'types')){
                 $.each(data['types'], (idx, type) => {
-                    window.hWin.HEURIST4.ui.addoption($select[0], type[1], type[0]);
+                    that.$Hui.addoption($select[0], type[1], type[0]);
                 });
-                window.hWin.HEURIST4.ui.initHSelect($select, false);
+                that.$Hui.initHSelect($select, false);
             }else{
                 $select.hide();
-                that.element.find('[for="inpt_type"]').hide();
+                that._$('[for="inpt_type"]').hide();
             }
 
-            $select = that.element.find('#inpt_license');
+            $select = that._$('#inpt_license');
             if(Object.hasOwn(data,'licenses')){
                 $.each(data['licenses'], (idx, license) => {
-                    window.hWin.HEURIST4.ui.addoption($select[0], license, license);
+                    that.$Hui.addoption($select[0], license, license);
                 });
-                window.hWin.HEURIST4.ui.initHSelect($select, false);
+                that.$Hui.initHSelect($select, false);
             }else{
                 $select.hide();
-                that.element.find('[for="inpt_license"]').hide();
+                that._$('[for="inpt_license"]').hide();
             }
         });
 
@@ -132,6 +132,8 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
      */
     _rendererResultList: function(recordset, record){
 
+        let that = this;
+
         /**
          * Inner helper function to format a field's value for display.
          * It handles empty values, converts objects to string arrays, joins arrays,
@@ -144,14 +146,14 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
         function fld(fldname, width){
             let s = recordset.fld(record, fldname);
 
-            if(window.hWin.HEURIST4.util.isempty(s) && s !== ''){ // Handle various empty states
+            if(that.$H.isempty(s) && s !== ''){ // Handle various empty states
                 s = '';
             }
 
-            s = window.hWin.HEURIST4.util.isObject(s) ? Object.values(s) : s; // Convert object to array of values
+            s = that.$H.isObject(s) ? Object.values(s) : s; // Convert object to array of values
             s = Array.isArray(s) ? s.join('; ') : s; // Join array elements with semicolon
 
-            let title = window.hWin.HEURIST4.util.htmlEscape(s || ''); // Tooltip is the escaped full string
+            let title = that.$H.htmlEscape(s || ''); // Tooltip is the escaped full string
 
             if(fldname == 'rec_url'){ // Special formatting for the record URL
                 s = `<a href="${s}" target="_blank" rel="noopener"> view record </a>`;
@@ -199,7 +201,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
      *     Type values are prefixed with `http://purl.org/coar/resource_type/` if not already a URL.
      * - If no general query term and no filters are set, a message prompts the user.
      * - Appends `size` parameter based on `#rec_limit` input.
-     * - Makes a HAPI call to `RecordMgr.lookup_external_service` with the constructed URL
+     * - Makes a HAPI call to `RecordMgr.lookupService` with the constructed URL
      *   and `serviceType: 'nakala'`.
      * - Calls `_onSearchResult` with the response.
      *
@@ -219,21 +221,21 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
         
         // Construct query portion of url
         // any field
-        if(this.element.find('#inpt_any').val()!=''){
-            sURL += encodeURIComponent(this.element.find('#inpt_any').val());
+        if(this._$('#inpt_any').val()!=''){
+            sURL += encodeURIComponent(this._$('#inpt_any').val());
         }
 
-        if(this.element.find('#inpt_license').val() != 'all'){
-            filter_query += `;license=${this.element.find('#inpt_license').val()}`;
+        if(this._$('#inpt_license').val() != 'all'){
+            filter_query += `;license=${this._$('#inpt_license').val()}`;
         }
-        if(!window.hWin.HEURIST4.util.isempty(this.element.find('#inpt_year').val())){
+        if(!this.$H.isempty(this._$('#inpt_year').val())){
 
             let years = this.getYear();
             filter_query += `;year=${years}`;
         }
-        if(this.element.find('#inpt_type').val() != 'all'){
+        if(this._$('#inpt_type').val() != 'all'){
 
-            let type = this.element.find('#inpt_type').val();
+            let type = this._$('#inpt_type').val();
 
             if(type.indexOf('http') === -1){
                 type = `http://purl.org/coar/resource_type/${type}`;
@@ -247,16 +249,16 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
         }
 
         // Check that something has been entered
-        if(this.element.find('#inpt_any').val()=='' && filter_query == ''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value in the search field or select a filter...', 1000);
+        if(this._$('#inpt_any').val()=='' && filter_query == ''){
+            this.$Hmsg.showMsgFlash('Please enter a value in the search field or select a filter...', 1000);
             return;
         }
 
-        let maxRecords = $('#rec_limit').val(); // limit number of returned records
+        let maxRecords = this._$('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
         sURL += `&size=${maxRecords}`;
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // show loading cover
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent()); // show loading cover
 
         // for LookupController.php
         let request = {
@@ -265,14 +267,14 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
         };
 
         // calls /heurist/hserv/controller/LookupController.php
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+        this.HAPI.RecordMgr.lookupService(request, function(response){
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover
+            that.$Hmsg.sendCoverallToBack(); // hide loading cover
 
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            response = that.$H.isJSON(response);
 
             if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                that.$Hmsg.showMsgErr(response);
             }
 
             that._onSearchResult(response);
@@ -305,10 +307,10 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
      */
     _onSearchResult: function(json_data){
 
-        let maxRecords = $('#rec_limit').val(); // Get max records from UI
+        let maxRecords = this._$('#rec_limit').val(); // Get max records from UI
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords; // Default to 20
 
-        json_data = window.hWin.HEURIST4.util.isJSON(json_data); // Ensure JS object
+        json_data = this.$H.isJSON(json_data); // Ensure JS object
 
         // Handle cases with no or invalid data
         if(!json_data || !Object.hasOwn(json_data, 'records') || Object.keys(json_data.records).length == 0){
@@ -338,7 +340,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
         // Warn if more results are available than shown
         if(json_data.count > maxRecords){
-            window.hWin.HEURIST4.msg.showMsgDlg(
+            this.$Hmsg.showMsgDlg(
                 `There are ${json_data.count} records satisfying these criteria, only the first ${maxRecords} are shown.<br>Please narrow your search.`
             );
         }
@@ -359,9 +361,9 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
      */
     getYear: function(){
 
-        let years = this.element.find('#inpt_year').val();
+        let years = this._$('#inpt_year').val();
 
-        if(!window.hWin.HEURIST4.util.isempty(years)){
+        if(!this.$H.isempty(years)){
             if(years.indexOf(',') === -1 && years.indexOf(' ') === -1){
                 years = years.replace(/.{4}/g, '$&,');
             }

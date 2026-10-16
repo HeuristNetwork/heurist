@@ -597,9 +597,8 @@ class UImage {
             $img = UImage::gd_orient_image($img, $orientation);
         }
 
-        $no_enlarge = false;
         // calculate image size
-        // note - we never change the aspect ratio of the image!
+        // note - we never change the aspect ratio or enlarge the source image
         $orig_x = imagesx($img);
         $orig_y = imagesy($img);
 
@@ -607,8 +606,7 @@ class UImage {
         $ry = $y / $orig_y;
 
         $scale = $rx ? ($ry ? min($rx, $ry) : $rx) : $ry;
-
-        if ($no_enlarge  &&  $scale > 1) {
+        if ($scale > 1) {
             $scale = 1;
         }
 
@@ -765,11 +763,13 @@ class UImage {
         //https://fragmentarium.ms/metadata/iiif/F-hsd6/manifest.json  or info.json
         //https://purl.stanford.edu/sn904cj3429/iiif/manifest
         //https://fragmentarium.ms:443/loris/F-hsd6/fol_2r.jp2/full/full/0/default.jpg
+        
+        //https://ids.lib.harvard.edu/ids/iiif/10908787/full/400,/0/default.jpg
 
-        if(strpos($image_url,'/full/full/')>0){
-            $thumb_url = str_replace('/full/full/', '/full/'.$new_x.','.$new_y.'/', $image_url);
+        if(preg_match('~/full/(full|max)/~', $image_url)){
+            $thumb_url = preg_replace('~/full/(full|max)/~', '/full/'.$new_x.','.$new_y.'/', $image_url, 1);
         }else{
-            $thumb_url = $image_url.'/full/'.$new_x.','.$new_y.'/0/default.jpg';
+            $thumb_url = rtrim($image_url, '/').'/full/'.$new_x.','.$new_y.'/0/default.jpg';
         }
 
         return $thumb_url;
@@ -847,16 +847,29 @@ class UImage {
                     }
                 }
 
-            }elseif(@$iiif_manifest['@context'] && (@$iiif_manifest['@id'] || @$iiif_manifest['id'])
-            && substr($iiif_url, 0, -9) == 'info.json' )
-            {   //IIIF image
+            }elseif(@$iiif_manifest['@context']
+                && (@$iiif_manifest['@id'] || @$iiif_manifest['id'])
+                && @$iiif_manifest['width']
+                && @$iiif_manifest['height'])
+            {   // IIIF Image API info.json
 
-                //create url for thumbnail
-                //remove info.json
-                $thumb_url = substr($iiif_url, 0, -9).'full/full/0/default.jpg';
-                $thumbUrl = UImage::composeThumbnailIIIF($thumb_url,
-                    @$iiif_manifest['width'],
-                    @$iiif_manifest['height']);
+                $serviceId = $iiif_manifest['id'] ?? ($iiif_manifest['@id'] ?? '');
+                if(!$serviceId && is_string($iiif_url)){
+                    $serviceId = preg_replace('~/info\.json$~', '', rtrim($iiif_url, '/'));
+                }
+                $serviceId = preg_replace('~/info\.json$~', '', rtrim((string)$serviceId, '/'));
+
+                if($serviceId){
+                    $contextText = is_array($iiif_manifest['@context'])
+                        ? json_encode($iiif_manifest['@context'])
+                        : (string)$iiif_manifest['@context'];
+                    $fullSize = strpos($contextText, '/api/image/3/') !== false ? 'max' : 'full';
+
+                    $thumb_url = $serviceId.'/full/'.$fullSize.'/0/default.jpg';
+                    $thumbUrl = UImage::composeThumbnailIIIF($thumb_url,
+                        @$iiif_manifest['width'],
+                        @$iiif_manifest['height']);
+                }
             }
 
         }
@@ -874,51 +887,324 @@ class UImage {
         
     }
 
+    public static function getIiifThumbnailFromUrl( $iiif_url, $thumbnail_file ){
+
+        $thumbUrl = UImage::composeThumbnailIIIF($iiif_url,0,0);
+
+        if($thumbUrl && $thumbnail_file){
+            $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
+            if(saveURLasFile($thumbUrl, $temp_path)){ //save to temp in scratch folder
+                UImage::createScaledImageFile($temp_path, $thumbnail_file);//create thumbnail for iiif image
+                unlink($temp_path);
+            }
+        }
+
+        return $thumbUrl;
+    }
+
+
     /**
-     * Creates a thumbnail image from the first page of a PDF file.
-     * Uses ImageMagick's `convert` command if Imagick extension is not loaded, otherwise uses Imagick.
+     * Download a rectangular region from a IIIF Image API service.
      *
-     * @param string $filename Path to the source PDF file.
-     * @param string $thumbnail_file Path to save the generated thumbnail image (typically PNG).
-     * @return bool True on success, false on failure.
+     * $region must be a pixel region in x,y,width,height form. The server performs
+     * the crop and constrains the result to the requested thumbnail dimensions.
+     * The downloaded response is stored directly in $thumbnail_file.
+     *
+     * @return string|null The IIIF request URL, or null on failure.
      */
-    public static function getPdfThumbnail( $filename, $thumbnail_file ){
-        global $system;
+    public static function getIiifRegionThumbnail(
+        string $serviceUrl,
+        string $region,
+        string $thumbnailFile,
+        int $maxWidth=200,
+        int $maxHeight=200
+    ): ?string {
+        $serviceUrl = preg_replace('~/info\.json$~i', '', rtrim(trim($serviceUrl), '/'));
+        $region = trim($region);
+        $maxWidth = max(1, $maxWidth);
+        $maxHeight = max(1, $maxHeight);
 
-        if(!extension_loaded('imagick')){
+        if($serviceUrl==='' || !preg_match('/^\d+,\d+,\d+,\d+$/', $region)){
+            return null;
+        }
 
-            $cmd = 'convert -thumbnail x200 -flatten ';//-background white -alpha remove
-            $cmd .= ' '.escapeshellarg($filename.'[0]');
-            $cmd .= ' '.escapeshellarg($thumbnail_file);
-            exec($cmd, $output, $error);
+        $requestUrl = $serviceUrl.'/'.rawurlencode($region)
+            .'/!'.$maxWidth.','.$maxHeight.'/0/default.jpg';
 
-            if ($error) {
-                USanitize::errorLog('ERROR on pdf thumbnail creation: '.$filename.'  '.$cmd.'   '.implode('\n', $output));
-                return false;
-            }
+        if(!$thumbnailFile){
+            return $requestUrl;
+        }
 
-        }else{
-            //Imagic
-            try {
+        if(file_exists($thumbnailFile)){
+            @unlink($thumbnailFile);
+        }
+        $saved = saveURLasFile($requestUrl, $thumbnailFile);
+        return ($saved && file_exists($thumbnailFile) && filesize($thumbnailFile)>0)
+            ? $requestUrl
+            : null;
+    }
+    
+    /**
+     * Crop a Canvas selector region from a normal local or remote image and scale
+     * it to the requested thumbnail bounds. Selector coordinates are rescaled
+     * when Canvas dimensions differ from the physical image dimensions.
+     */
+    public static function createRegionThumbnail(
+        string $source,
+        string $region,
+        string $thumbnailFile,
+        float $canvasWidth=0,
+        float $canvasHeight=0,
+        int $maxWidth=200,
+        int $maxHeight=200,
+        bool $isRemote=false
+    ): bool {
+        if($source==='' || $thumbnailFile==='' ||
+            !preg_match('/^(\d+),(\d+),(\d+),(\d+)$/', trim($region), $m)){
+            return false;
+        }
 
-                $im =  new \Imagick($filename.'[0]');
-                $im->setImageFormat('png');
-                $im->thumbnailImage(200,200);
-
-                if(file_exists($thumbnail_file)){
-                    unlink($thumbnail_file);
+        $sourceFile = $source;
+        $temporarySource = null;
+        if($isRemote){
+            $temporarySource = tempnam(HEURIST_SCRATCH_DIR, 'annotation_source_');
+            if(!$temporarySource || !saveURLasFile($source, $temporarySource)){
+                if($temporarySource && file_exists($temporarySource)){
+                    @unlink($temporarySource);
                 }
-                $im->writeImage($thumbnail_file);
+                return false;
+            }
+            $sourceFile = $temporarySource;
+        }
 
-            } catch(\ImagickException $e) {
-                USanitize::errorLog($e . ', From Database: ' . $system->dbname());
+        try{
+            $imageInfo = @getimagesize($sourceFile);
+            if(!is_array($imageInfo) || empty($imageInfo[0]) || empty($imageInfo[1])){
                 return false;
             }
 
+            $imageWidth = intval($imageInfo[0]);
+            $imageHeight = intval($imageInfo[1]);
+            $scaleX = $canvasWidth>0 ? $imageWidth/$canvasWidth : 1;
+            $scaleY = $canvasHeight>0 ? $imageHeight/$canvasHeight : 1;
+
+            $x = max(0, intval(round(intval($m[1])*$scaleX)));
+            $y = max(0, intval(round(intval($m[2])*$scaleY)));
+            $width = max(1, intval(round(intval($m[3])*$scaleX)));
+            $height = max(1, intval(round(intval($m[4])*$scaleY)));
+            if($x >= $imageWidth || $y >= $imageHeight){
+                return false;
+            }
+            $width = min($width, $imageWidth-$x);
+            $height = min($height, $imageHeight-$y);
+            $maxWidth = max(1, $maxWidth);
+            $maxHeight = max(1, $maxHeight);
+
+            if(file_exists($thumbnailFile)){
+                @unlink($thumbnailFile);
+            }
+
+            if(extension_loaded('imagick')){
+                try{
+                    $image = new \Imagick($sourceFile);
+                    $image->setIteratorIndex(0);
+                    $image->cropImage($width, $height, $x, $y);
+                    $image->setImagePage(0, 0, 0, 0);
+                    $image->thumbnailImage($maxWidth, $maxHeight, true);
+                    $image->setImageFormat('jpeg');
+                    $image->setImageCompressionQuality(85);
+                    $image->writeImage($thumbnailFile);
+                    $image->clear();
+                    $image->destroy();
+                    return file_exists($thumbnailFile) && filesize($thumbnailFile)>0;
+                }catch(\ImagickException $e){
+                    USanitize::errorLog('Cannot crop annotation thumbnail with Imagick: '.$e->getMessage());
+                    return false;
+                }
+            }
+
+            $memoryError = UImage::checkMemoryForImage($sourceFile, $imageInfo['mime'] ?? '');
+            if($memoryError){
+                USanitize::errorLog('Cannot crop annotation thumbnail: '.$memoryError);
+                return false;
+            }
+
+            $image = UImage::safeLoadImage($sourceFile, $imageInfo['mime'] ?? '');
+            if(!$image){
+                return false;
+            }
+            $crop = imagecrop($image, array('x'=>$x, 'y'=>$y, 'width'=>$width, 'height'=>$height));
+            imagedestroy($image);
+            if(!$crop){
+                return false;
+            }
+
+            $ratio = min($maxWidth/$width, $maxHeight/$height, 1);
+            $newWidth = max(1, intval(round($width*$ratio)));
+            $newHeight = max(1, intval(round($height*$ratio)));
+            $thumb = imagecreatetruecolor($newWidth, $newHeight);
+            $white = imagecolorallocate($thumb, 255, 255, 255);
+            imagefilledrectangle($thumb, 0, 0, $newWidth, $newHeight, $white);
+            imagecopyresampled($thumb, $crop, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+            imagedestroy($crop);
+            $saved = imagejpeg($thumb, $thumbnailFile, 85);
+            imagedestroy($thumb);
+            return $saved && file_exists($thumbnailFile) && filesize($thumbnailFile)>0;
+        }finally{
+            if($temporarySource && file_exists($temporarySource)){
+                @unlink($temporarySource);
+            }
+        }
+    }
+
+    /**
+     * Render only the first PDF page as a PNG thumbnail, preserving aspect ratio.
+     * Shared by upload previews and fileCreateThumbnail (including HML imports).
+     * Uses already installed Poppler pdftoppm or ImageMagick convert, in bounded
+     * child processes; no new PHP library. ImageMagick needs a PDF delegate
+     * (usually Ghostscript) and a policy allowing PDF reads. GD cannot render PDFs.
+     * Failure is logged and returns false; callers may keep their normal placeholder.
+     * The original PDF is never modified. No global System object is required.
+     *
+     * @param string $filename Local source PDF path.
+     * @param string $thumbnail_file Destination PNG path.
+     * @param int $max_width Maximum thumbnail width.
+     * @param int $max_height Maximum thumbnail height.
+     * @param string|null $errorMessage Receives a diagnostic on failure.
+     * @return bool Whether a non-empty PNG was written successfully.
+     */
+    public static function getPdfThumbnail($filename, $thumbnail_file, $max_width=200, $max_height=200, &$errorMessage=null){
+        $errorMessage = null;
+        if(!is_callable('proc_open')){
+            $errorMessage = 'PDF thumbnail rendering requires PHP proc_open to be enabled so renderer execution can be time-limited.';
+            return false;
+        }
+        if(!is_file($filename) || !is_readable($filename)){
+            $errorMessage = 'PDF source does not exist or is not readable: '.$filename;
+            return false;
+        }
+        $max_width = max(1, intval($max_width));
+        $max_height = max(1, intval($max_height));
+        $directory = dirname($thumbnail_file);
+        if(!is_dir($directory) || !is_writable($directory)){
+            $errorMessage = 'PDF thumbnail folder does not exist or is not writable: '.$directory;
+            return false;
+        }
+        $temporary = @tempnam($directory, 'pdf_thumb_');
+        if($temporary===false){
+            $errorMessage = 'Cannot create temporary PDF thumbnail in '.$directory;
+            return false;
+        }
+        $problems = [];
+        try {
+            // Run existing server renderers in child processes. Rendering inside
+            // PHP/Imagick cannot be interrupted reliably if a PDF delegate hangs.
+            // Poppler is tried first: it does not depend on ImageMagick PDF policy.
+            $commands = [
+                ['pdftoppm', '-f', '1', '-l', '1', '-singlefile', '-png', '-scale-to',
+                    (string)min($max_width, $max_height), $filename, $temporary],
+                ['convert', '-density', '72', $filename.'[0]', '-background', 'white',
+                    '-alpha', 'remove', '-alpha', 'off', '-thumbnail',
+                    $max_width.'x'.$max_height, 'png:'.$temporary]
+            ];
+            foreach($commands as $command){
+                $problem = null;
+                if(self::runPdfThumbnailCommand($command, $problem)){
+                    $output = $command[0]==='pdftoppm' ? $temporary.'.png' : $temporary;
+                    clearstatcache(true, $output);
+                    $info = @getimagesize($output);
+                    // Header inspection alone can accept a truncated PNG.
+                    // Decode when GD is available before publishing the result.
+                    $valid = $info && $info[0]>0 && $info[1]>0 && $info[2]===IMAGETYPE_PNG;
+                    if($valid && is_callable('imagecreatefrompng')){
+                        $decoded = @imagecreatefrompng($output);
+                        $valid = $decoded!==false;
+                        if($decoded!==false){ imagedestroy($decoded); }
+                    }
+                    if($valid){
+                        // Set serving permissions BEFORE publishing the file.
+                        // Rename within the destination folder atomically swaps
+                        // a complete image; never unlink the previous thumbnail.
+                        if(@chmod($output, 0644) && @rename($output, $thumbnail_file)){
+                            return true;
+                        }
+                    }
+                    $problem = 'Renderer returned no valid PNG or the thumbnail could not be saved.';
+                }
+                $problems[] = $command[0].': '.$problem;
+            }
+            $errorMessage = 'PDF thumbnail could not be created. '.implode(' | ', $problems);
+            USanitize::errorLog($errorMessage.' Source: '.$filename);
+            return false;
+        }catch(\Throwable $e){
+            $errorMessage = 'PDF thumbnail failed: '.$e->getMessage();
+            USanitize::errorLog($errorMessage);
+            return false;
+        }finally{
+            foreach([$temporary, $temporary.'.png'] as $path){
+                if(file_exists($path)){ @unlink($path); }
+            }
+        }
+    }
+
+    /**
+     * Execute an existing PDF renderer without a shell, with a 15-second deadline.
+     * Nonblocking output avoids pipe deadlock. No server package is installed here.
+     * A failed or timed-out process is reported to the caller, rather than leaving
+     * thumbnail-refresh requests waiting indefinitely for a PDF delegate.
+     */
+    private static function runPdfThumbnailCommand(array $command, &$errorMessage){
+        $pipes = [];
+        $process = @proc_open($command, [0=>['pipe','r'], 1=>['pipe','w'], 2=>['pipe','w']], $pipes);
+        if(!is_resource($process)){
+            $errorMessage = 'Cannot start renderer; check PHP process permissions.';
+            return false;
+        }
+        fclose($pipes[0]);
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+        $deadline = microtime(true)+15;
+        $diagnostic = '';
+        $exitCode = -1;
+        $timedOut = false;
+        try {
+            do {
+                $diagnostic .= stream_get_contents($pipes[1]).stream_get_contents($pipes[2]);
+                $diagnostic = substr($diagnostic, -4096);
+                $status = proc_get_status($process);
+                if(!$status['running']){ $exitCode = $status['exitcode']; break; }
+                if(microtime(true)>=$deadline){
+                    $timedOut = true;
+                    proc_terminate($process, 9);
+                    break;
+                }
+                usleep(20000);
+            }while(true);
+            $diagnostic .= stream_get_contents($pipes[1]).stream_get_contents($pipes[2]);
+        }finally{
+            fclose($pipes[1]); fclose($pipes[2]);
+            $closedCode = proc_close($process);
+        }
+        if($timedOut){ $errorMessage = 'Timed out after 15 seconds.'; return false; }
+        if($exitCode<0){ $exitCode = $closedCode; }
+        if($exitCode!==0){
+            // Exit 127 indicates a missing executable (or a missing delegate,
+            // interpreter or runtime dependency). Keep a stable code marker for
+            // the refresh UI; stderr alone may omit the exit code entirely.
+            if($exitCode===127){
+                $errorMessage = 'Renderer exited with code 127: the PDF rendering command or one of its dependencies could not be found or started. Ask your server administrator to check the installed renderer and the PHP worker PATH.';
+                if(trim($diagnostic)!==''){
+                    $errorMessage .= ' Details: '.trim($diagnostic);
+                }
+            }else{
+                $errorMessage = 'Renderer exited with code '.$exitCode.'.';
+                if(trim($diagnostic)!==''){
+                    $errorMessage .= ' '.trim($diagnostic);
+                }
+            }
+            return false;
         }
         return true;
-        //$resized = file_get_contents($thumbnail_file);
-        //return $resized;
     }
 
     /**

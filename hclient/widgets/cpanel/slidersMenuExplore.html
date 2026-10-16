@@ -40,11 +40,11 @@
         </li>
         <li class="menu-explore fancytree-node" data-action-popup="search_filters" style="padding:6px">
             <span class="ui-icon ui-icon-filter-explore"></span><span class="menu-text slocale">Saved Filters</span>
-            <span class="ui-icon ui-icon-pin-w" style="float:right;cursor:pointer" id="search_filters_pin"></span>
+            <span class="ui-icon ui-icon-pin-w" style="cursor:pointer;transform:rotate(180deg)" id="search_filters_pin"></span>
         </li>
     </ul>
     
-    <ul style="list-style-type:none;margin:0;padding:12px;">
+    <ul class="explore-build-menu" style="list-style-type:none;margin:0;padding:12px;">
 
         <li style="padding:0px 8px 6px;" class="ui-heurist-title slocale">Build</li>
     
@@ -71,7 +71,14 @@
         </li>
         <li class="menu-explore fancytree-node" data-action="menu-subset-set"></li>
         
-        <li class="menu-explore fancytree-node" data-action="menu-magic-tool"></li>
+        <!-- Reserved for the future workspace.  This is deliberately a stub:
+             no data-action attribute means that it cannot trigger an action. -->
+        <li class="menu-explore fancytree-node workspace-stub" aria-disabled="true"
+            title="Workspace is not yet available">
+            <span class="ui-icon ui-icon-grid"></span>
+            <span class="menu-text slocale">Workspace</span>
+            <span class="workspace-stub-badge">Coming later</span>
+        </li>
     </ul>
 
     <ul style="list-style-type:none;margin:0;padding:12px;border-top: 1px solid #4477B9;" class="favourite-filters-container">

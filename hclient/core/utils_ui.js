@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global showLoginDialog,editSymbology,imgFilter,editTheme,HPublishDialog */
+/* global showLoginDialog,editTheme,HPublishDialog */
 
 /*
 Selectors:
@@ -74,14 +74,11 @@ createRecordLinkInfo - return ui for link and relationship
 
 onInactive invokes cb after ms user inactivity
 
-For mapping:
-
-prepareMapSymbol
-
-showEditSymbologyDialog
-showImgFilterDialog
-
 initGalleryContainer
+
+
+showRulesBuilderDialog
+describeExpansionRule
 */
 
 if (!window.hWin.HEURIST4){
@@ -92,6 +89,154 @@ if (!window.hWin.HEURIST4.ui)
 {
 
 window.hWin.HEURIST4.ui = {
+
+    /**
+     * Opens the legacy saved-filter editor without requiring an svs_list widget.
+     * @param {?number} svsID Existing saved-filter id, or null to create one.
+     * @param {string|Object} [squery] Initial executable query for a new filter.
+     * @param {string} [mode='saved'] 'faceted' opens the faceted search wizard for a new
+     *        faceted filter (squery is not used); it resolves when the filter is saved.
+     * @returns {Promise<{saved:boolean, id:?number, request:?Object}>}
+     */
+    editSavedFilter: function(svsID, squery, mode){
+        const faceted = (mode === 'faceted');
+        let id = Number(svsID);
+        id = Number.isInteger(id) && id > 0 ? id : null;
+        const hapi = window.hWin && window.hWin.HAPI4;
+        if(!hapi || !hapi.baseURL){
+            return Promise.reject(new Error('Saved Filter editor is not available'));
+        }
+
+        return new Promise(function(resolve, reject){
+            let settled = false;
+            const finish = function(result){
+                if(!settled){
+                    settled = true;
+                    resolve(result);
+                }
+            };
+            const open = function(){
+                if(typeof HSvsEdit !== 'function'){
+                    reject(new Error('Saved Filter editor did not load'));
+                    return;
+                }
+                try{
+                    const editor = new HSvsEdit();
+                    const position = {my:'center', at:'center', of:window, collision:'fit'};
+                    const dialog = editor.showSavedFilterEditDialog(
+                        faceted ? 'faceted' : 'saved', null, id, (id || faceted) ? null : squery, true, position,
+                        function(error, request){
+                            // the faceted wizard calls back (event, request) on save
+                            if(error && !faceted){
+                                if(!settled){ settled = true; reject(error); }
+                                return;
+                            }
+                            const savedID = Number(request && (request.new_svs_ID || request.svs_ID || id)) || null;
+                            finish({saved:true, id:savedID, request:request || null});
+                        },
+                        true
+                    );
+                    if(dialog && typeof dialog.one === 'function' && !faceted){
+                        dialog.one('dialogclose.heuristEditSavedFilter', function(){
+                            setTimeout(function(){ finish({saved:false, id:id, request:null}); }, 0);
+                        });
+                    }
+                }catch(error){
+                    reject(error);
+                }
+            };
+
+            if(typeof HSvsEdit === 'function'){
+                open();
+            }else if(typeof $.getScript === 'function'){
+                $.getScript(hapi.baseURL+'hclient/widgets/search/svsEdit.js')
+                    .done(open)
+                    .fail(function(_xhr, _status, error){
+                        reject(error instanceof Error ? error : new Error('Cannot load Saved Filter editor'));
+                    });
+            }else{
+                reject(new Error('Saved Filter editor loader is not available'));
+            }
+        });
+    },
+
+    /** Edit a ruleset without persisting it. Existing _editRules callers are unchanged. */
+    showRulesBuilderDialog: function(value, options){
+        options = options || {};
+        let rules = typeof value === 'string' ? JSON.parse(value || '[]') : (value || []);
+        if(!Array.isArray(rules)) throw new Error('Expansion rules must be an array');
+
+        const openDialog = function(rectypeIds){
+            let url = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/ruleBuilderDialog.php?db='
+                + encodeURIComponent(window.hWin.HAPI4.database) + '&allowEmpty=1&rules='
+                + encodeURIComponent(JSON.stringify(rules));
+            if(rectypeIds && rectypeIds.length){
+                url += '&rty_ID=' + encodeURIComponent(rectypeIds.join(','));
+            }
+            return new Promise(function(resolve){
+                let settled = false;
+                window.hWin.HEURIST4.msg.showDialog(url, {
+                    isPopupDlg:true, closeOnEscape:true, width:1200, height:600,
+                    title: options.title || 'Define expansions',
+                    callback:function(result){
+                        if(settled) return;
+                        settled = true;
+                        resolve(result && Array.isArray(result.rules) ? result : null);
+                    },
+                    afterclose:function(){
+                        // showDialog may invoke the result callback during close.
+                        setTimeout(function(){ if(!settled){ settled=true; resolve(null); } }, 0);
+                    }
+                });
+            });
+        };
+
+        // Preferred rectypes only matter when starting a fresh (empty) ruleset -
+        // an existing ruleset already carries its own starting type per rule.
+        if(options.query && rules.length===0){
+            return new Promise(function(resolve){
+                window.hWin.HEURIST4.dbs.getRectypeCountsForQuery(options.query, function(rectypeIds){
+                    openDialog(rectypeIds).then(resolve);
+                });
+            });
+        }
+
+        return openDialog(null);
+    },
+
+    /** Generate reusable labels while keeping the executable query untouched. */
+    describeExpansionRule: function(rule){
+        const db = window.hWin.HEURIST4.dbs;
+        const predicates = value => Array.isArray(value) ? Object.assign({}, ...value) : (value || {});
+        const typeName = id => id ? (db.rty(id, 'rty_Name') || 'Record type '+id) : 'Records';
+        const step = value => {
+            const q = predicates(value.query);
+            const key = Object.keys(q).find(k => /^(lf|lt|rf|rt|links|related)(:|$)/.test(k));
+            const parent = predicates(q[key]);
+            const arrow = /^(lf|rf)(:|$)/.test(key) ? ' → ' : /^(lt|rt)(:|$)/.test(key) ? ' ← ' : ' ↔ ';
+            const fieldId = key && key.split(':')[1];
+            const field = fieldId ? (db.dty(fieldId, 'dty_Name') || 'Field '+fieldId) : 'Links';
+            return { source:typeName(parent.t), target:typeName(q.t), arrow, field };
+        };
+        const continuation = value => {
+            const s = step(value), children = value.levels || [];
+            let tail = '';
+            if(children.length === 1) tail = continuation(children[0]);
+            else if(children.length > 1){
+                const parts = children.map(continuation), arrows = children.map(c => step(c).arrow);
+                tail = arrows.every(a => a === arrows[0])
+                    ? arrows[0]+'('+parts.map(p => p.slice(arrows[0].length)).join(', ')+')'
+                    : ' ('+parts.map(p => p.trim()).join(', ')+')';
+            }
+            return s.arrow+s.target+tail;
+        };
+        const paths = (value, prefix) => {
+            const s = step(value), text = prefix+s.arrow+s.field+s.arrow+s.target;
+            return value.levels && value.levels.length ? value.levels.flatMap(c => paths(c, text)) : [text];
+        };
+        return { name:step(rule).source+continuation(rule),
+            description:paths(rule, step(rule).source).join('\n') };
+    },
     
     isVisible: function(ele){
         return ele && $(ele).is(':visible');
@@ -1347,7 +1492,7 @@ window.hWin.HEURIST4.ui = {
         let hasContextHelp =  !window.hWin.HEURIST4.util.isempty(helpcontent_url);
         hideExpLevelButton = true; //always hide
         
-        let titlebar = $dialog.parent().find('.ui-dialog-titlebar');
+        let titlebar = $dialog.dialog('instance') ? $dialog.dialog('titlebar') : $dialog.parent().find('.ui-dialog-titlebar');
         if(titlebar.length==0){
             titlebar = $dialog.find(button_container_id);
         } 
@@ -1765,23 +1910,109 @@ window.hWin.HEURIST4.ui = {
     //
     checkAndLogin: function(isforsed, callback){
 
-        if(!window.hWin.HAPI4.has_access()){
-            // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
-            if(typeof showLoginDialog !== 'undefined' && window.hWin.HEURIST4.util.isFunction(showLoginDialog)){  // already loaded in index.php
-                
-                showLoginDialog(isforsed, callback);
-            }else{
-                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profileLogin.js', function(){
-                    window.hWin.HEURIST4.ui.checkAndLogin(isforsed, callback);
-                }); 
-            }
-            return false;
-        }else{
+        return window.hWin.HEURIST4.ui.checkAndLoginInFrame(isforsed, callback);
+        
+/*        
+        if(window.hWin.HAPI4.has_access()){
             return true;
         }
-        
+        // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
+        if(typeof showLoginDialog !== 'undefined' && window.hWin.HEURIST4.util.isFunction(showLoginDialog)){  // already loaded in index.php
+            
+            showLoginDialog(isforsed, callback);
+        }else{
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profileLogin.js', function(){
+                window.hWin.HEURIST4.ui.checkAndLogin(isforsed, callback);
+            }); 
+        }
+        return false;
+*/        
     },
 
+    //
+    // show login popup dialog in an isolated iframe
+    // Use this from user/custom websites where the host CSS may distort profileLogin.html.
+    //
+    checkAndLoginInFrame: function(isforsed, callback){
+
+        if(window.hWin.HAPI4.has_access()){
+            return true;
+        }
+
+        const frameId = 'checkloginInFrame';
+        const overlayId = 'checkloginInFrameOverlay';
+
+        let $overlay = $('#' + overlayId);
+        if($overlay.length === 0){
+            $overlay = $('<div>', {id: overlayId})
+                .css({
+                    position: 'fixed',
+                    left: 0,
+                    top: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: 60000,
+                    background: 'rgba(0,0,0,0.35)'
+                })
+                .appendTo($('body'));
+        }
+
+        let $frame = $('#' + frameId);
+        if($frame.length === 0){
+            $frame = $('<iframe>', {
+                    title: 'login',
+                    id: frameId,
+                    name: frameId
+                })
+                .css({
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 0,
+                    background: 'transparent'
+                })
+                .appendTo($overlay);
+        }else if($frame.parent()[0] !== $overlay[0]){
+            $frame.appendTo($overlay);
+        }
+
+        const closeFrame = function(is_logged){
+            $('#' + frameId).attr('src', 'about:blank');
+            $('#' + overlayId).hide();
+        };
+
+        window.hWin.HEURIST4.ui.closeLoginFrame = closeFrame;
+
+        $overlay.show();
+
+        $frame.off('load.checklogin').on('load.checklogin', function(){
+            const frame = this;
+            try{
+                if(frame.contentWindow && typeof frame.contentWindow.assignLoginCallback === 'function'){
+                    frame.contentWindow.assignLoginCallback(callback, window.hWin, !!isforsed);
+                }else if(frame.contentWindow){
+                    // Fallback if the frame has loaded but scripts are not ready yet.
+                    frame.contentWindow.parentLoginCallback = callback;
+                    frame.contentWindow.parentLoginWindow = window.hWin;
+                    frame.contentWindow.isForcedLogin = isforsed ? 1 : 0;
+                }
+            }catch(e){
+                if(window.console) console.error(e);
+            }
+        });
+
+        const url = window.hWin.HAPI4.baseURL
+            + 'hclient/framecontent/initPageLogin.php?db='
+            + encodeURIComponent(window.hWin.HAPI4.database)
+            + '&isforced=' + (isforsed ? 1 : 0)
+            + '&t=' + window.hWin.HEURIST4.util.random();
+
+        $frame.attr('src', url);
+        return false;
+    },
+    
     //
     // important manageRecords.js and selectRecords.js must be loaded
     // 
@@ -1799,7 +2030,11 @@ window.hWin.HEURIST4.ui = {
                 })){
             return;
         }
-        
+
+        if(!window.hWin.HAPI4.SystemMgr.verifyRecordEditorScripts(window.hWin.HEURIST4.ui.openRecordEdit, [rec_ID, query_or_recordset, popup_options])){
+            return;
+        }
+
         if(popup_options && 
             $.isPlainObject(popup_options.new_record_params) && 
                 (popup_options.new_record_params['rt']>0 || popup_options.new_record_params['RecTypeID']>0)){
@@ -2656,68 +2891,6 @@ window.hWin.HEURIST4.ui = {
     },
 
     //
-    //
-    //
-    initEditSymbologyControl: function(element, value){
-
-                element.attr('readonly','readonly');
-                
-                value = window.hWin.HEURIST4.util.isJSON(value);
-                if (value) {
-                    element.val(JSON.stringify(value));   
-                }
-                
-                let parent_div = element.parent(); //$dlg.find(sname+'_div')
-        
-                $('<span>')
-                .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
-                .attr('tabindex', '-1')
-                .attr('title', 'Reset default symbology')
-                .appendTo( parent_div )
-                .css({'line-height': '20px',cursor:'pointer',
-                    outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'})
-                    .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                        function(){element.val('');}); }});
-                
-                let $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
-                    .addClass('smallbutton btn_add_term')
-                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                    .appendTo( parent_div );
-                
-                $btn_edit_switcher.on( { click: function(){
-                        let current_val = window.hWin.HEURIST4.util.isJSON( element.val() );
-                        if(!current_val) current_val = {};
-                        window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, function(new_value){
-                            element.val(JSON.stringify(new_value));
-                        });
-                }});
-        
-    },
-
-    
-    //
-    // show map style edit dialog
-    //
-    showEditSymbologyDialog: function(current_value, mode_edit, callback){
-        //todo optionally load dynamically editing_exts.js
-        editSymbology(current_value, mode_edit, callback);
-    },
-
-    //
-    // show map style edit dialog
-    //
-    showImgFilterDialog: function(current_value, callback){
-        //todo optionally load dynamically editing_exts.js
-        if(typeof imgFilter !== 'undefined' && window.hWin.HEURIST4.util.isFunction(imgFilter)){  // already loaded
-            imgFilter( current_value, callback );    
-        }else{
-            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/imgFilter.js', function(){
-                window.hWin.HEURIST4.ui.showImgFilterDialog(current_value, callback);
-            }); 
-        }
-    },
-    
-    //
     // show heurist theme dialog
     //
     showEditThemeDialog: function(current_value, needName, callback){
@@ -2897,12 +3070,11 @@ window.hWin.HEURIST4.ui = {
         if(window.hWin.HAPI4.sysinfo.use_redirect){
 
             let extraSlash = surl.endsWith('/') ? '' : '/';
-            surl += `${extraSlash}${window.hWin.HAPI4.database}/tpl/${smarty_template}/`+encodeURIComponent(query);
 
             // check for Huma-Num custom sub-domain (e.g. DB_NAME.huma-num.fr), otherwise it won't redirect to report
             let leadingURI = surl.indexOf('huma-num.fr') > 0 && surl.indexOf('heurist.huma-num.fr') < 0 ? extraSlash : `${extraSlash}${window.hWin.HAPI4.database}/`;
 
-            surl += `${leadingURI}tpl/${smarty_template}/${query}`;
+            surl += `${leadingURI}tpl/${smarty_template}/${encodeURIComponent(query)}`;
 
         }else{
             if(window.hWin.HEURIST4.util.isPositiveInt(query)){
@@ -3000,8 +3172,6 @@ window.hWin.HEURIST4.ui = {
             let scripts = [ path+actionName+'.js'];
             if(actionName=='recordAdd'){
                 scripts = [path+'recordAccess.js', path+'recordAdd.js'];
-            }else if( actionName=='thematicMapping'){
-                scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/popups/'+actionName+'.js'];
             }else if(actionName=='dbCreate'){
                 scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/baseAction.js', 
                            window.hWin.HAPI4.baseURL + 'hclient/widgets/database/dbAction.js'];
@@ -3605,54 +3775,6 @@ window.hWin.HEURIST4.ui = {
 
     },
     
-    //
-    //
-    //    
-    prepareMapSymbol: function(style, def_style){
-            
-        if(!def_style){
-            //'#00b0f0' - lighty blue
-            def_style = {iconType:'rectype', color:'#ff0000', fillColor:'#ff0000', weight:3, opacity:1, 
-                    dashArray: '',
-                    fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
-        }
-        
-        if(!style) style = {};
-        if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
-        if(!(style.iconType=='url' && typeof style.iconSize == 'string' && style.iconSize.indexOf(',')>0)){
-            style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize;
-        }
-        style.color = (style.color?style.color:def_style.color);   //light blue
-        style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
-        style.weight = (window.hWin.HEURIST4.util.isNumber(style.weight) && style.weight>=0) ?style.weight :def_style.weight;
-        style.opacity = (window.hWin.HEURIST4.util.isNumber(style.opacity) && style.opacity>=0) ?style.opacity :def_style.opacity;
-        style.fillOpacity = (window.hWin.HEURIST4.util.isNumber(style.fillOpacity) && style.fillOpacity>=0) ?style.fillOpacity :def_style.fillOpacity;
-        
-        style.fill = window.hWin.HEURIST4.util.isnull(style.fill)?def_style.fill:style.fill;
-        style.fill = window.hWin.HEURIST4.util.istrue(style.fill);
-        style.stroke = window.hWin.HEURIST4.util.isnull(style.stroke)?def_style.stroke :style.stroke;
-        style.stroke = window.hWin.HEURIST4.util.istrue(style.stroke);
-
-        if(style.stroke){
-            style.dashArray = window.hWin.HEURIST4.util.isnull(style.dashArray)?def_style.dashArray:style.dashArray;
-        }
-        
-        if(!style.iconFont && def_style.iconFont){
-            style.iconFont = def_style.iconFont;
-        }
-        
-        //opacity accepts values 0~1 so need to 
-        if(style.fillOpacity>1){
-            style.fillOpacity = style.fillOpacity/100;
-        }
-        if(style.opacity>1){
-            style.opacity = style.opacity/100;
-        }
-        
-        return style;        
-    },
-    
-  
     /**
     * ptr_mode: browseonly, dropdown, addonly, addorbrowse
     */
@@ -3685,37 +3807,154 @@ window.hWin.HEURIST4.ui = {
         };
         
         ele.editing_input(ed_options);
-  },
-  
-  /*
-  *  IntersectionObserver should be used instead of this method 
-  *  see HRecordList for example
-  */
-  isElementInViewport: function(element, container) {
+    },
 
-      const elRect = element.getBoundingClientRect();
-      let conRect;
-      if(container){
-          conRect = container.getBoundingClientRect();    
-      }else{
-          conRect = {x:0, y:0, 
-                    width: window.innerWidth || document.documentElement.clientWidth,
-                    height: window.innerHeight || document.documentElement.clientHeight};
-      }
+    /*
+    *  IntersectionObserver should be used instead of this method 
+    *  see HRecordList for example
+    */
+    isElementInViewport: function(element, container) {
 
-      let result = false;
+        const elRect = element.getBoundingClientRect();
+        let conRect;
+        if(container){
+            conRect = container.getBoundingClientRect();    
+        }else{
+            conRect = {
+                x:0, y:0,
+                width: window.innerWidth || document.documentElement.clientWidth,
+                height: window.innerHeight || document.documentElement.clientHeight
+            };
+        }
 
-      if(elRect.x >= conRect.x && elRect.y >= conRect.y
+        let result = false;
+
+        if(elRect.x >= conRect.x && elRect.y >= conRect.y
           && elRect.x + elRect.width <= conRect.x + conRect.width 
           && elRect.y + elRect.height <= conRect.y + conRect.height)
-      {
-          result = true
-      }
+        {
+            result = true
+        }
 
-      return result;
-  },
+        return result;
+    },
 
-    
+    popupSortableList: function(itemMap, dialogSettings, callback){
+
+        if(!itemMap instanceof Map){
+            //console.error(`Items map is invalid, got ${itemsMap.constructor.name} expected a Map`);
+            throw new Error(`Items map is invalid, got ${itemMap.constructor.name} expected a Map`);
+        }else if(window.hWin.HEURIST4.util.isempty(callback) || typeof callback !== 'function'){
+            throw new Error('Invalid callback provided');
+        }
+
+        let $dialog, dialogContent = '', dialogButtons = {};
+
+        const hasSettings = window.hWin.HEURIST4.util.isObject(dialogSettings);
+
+        const useDefaultText = !hasSettings || !Object.hasOwn(dialogSettings, 'text');
+        const helpText = useDefaultText || !Object.hasOwn(dialogSettings.text, 'help') ? 'drag and drop items to re-arrange them' : dialogSettings.text.help;
+        const titleText = useDefaultText || !Object.hasOwn(dialogSettings.text, 'title') ? 'Re-arrange items' : dialogSettings.text.title;
+        const saveBtnText = useDefaultText || !Object.hasOwn(dialogSettings.text, 'save') ? 'Save order' : dialogSettings.text.save;
+
+        const dialogWidth = hasSettings && Object.hasOwn(dialogSettings, 'width') ? dialogSettings.width : '450px';
+        const dialogTheme = hasSettings && Object.hasOwn(dialogSettings, 'palette') ? dialogSettings.palette : 'ui-heurist-design';
+
+        /*
+        const sortingButtons = hasSettings && Object.hasOwn('sorting', dialogSettings) ? dialogSettings.sorting : null;
+        {
+            'label': 'Alphabetic',
+            'function': () => { return items.sort(); }
+        }
+        $btn.button({label: button['label']}).on('click', () => { let sorted = button['function'](); $__fillInList(sorted); })
+        */
+
+        const buttonStyle = 'margin-left: 10px;padding: 1px 10px;';
+        dialogContent = `<div style="padding-bottom: 5px">
+            <div class="btn-plane" style="margin-bottom: 10px;">Apply order:
+                <button id="reoder-id" style="${buttonStyle}">ID</button>
+                <button id="reoder-alphabetic" style="${buttonStyle}">Alphabetic</button>
+                <button id="reoder-reset" title="Reset the item order to it's original order" style="${buttonStyle}display: none;">Original</button>
+            </div>
+            <span class="heurist-helper3">${helpText}</span><br>
+            <div class="div-result-list-content list" style="font-size: larger; max-height: 500px; overflow: hidden auto; margin: 10px 0;">
+            </div>
+        </div>`;
+
+        let $__fillInList = (map) => {
+
+            let $list = $dialog.find('.list');
+            $list.empty();
+
+            for(const [id, title] of map){
+                $('<div>', {
+                    class: 'recordDiv truncate',
+                    'data-id': id,
+                    title: title,
+                    text: title
+                }).appendTo($list);
+            }
+
+            $dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window});
+        };
+
+        dialogButtons[saveBtnText] = () => {
+
+            let $items = $dialog.find('.recordDiv');
+            let returningOrder = [];
+
+            $items.each((idx, item) => {
+                returningOrder.push(item.getAttribute('data-id'));
+            });
+
+            callback.call(this, returningOrder, (closeDialog) => {
+                if(closeDialog){
+                    $dialog.dialog('close');
+                }
+            });
+        };
+
+        dialogButtons[window.hWin.HR('Close')] = () => {
+            $dialog.dialog('close');
+        };
+
+        $dialog = window.hWin.HEURIST4.msg.showMsgDlg(dialogContent, dialogButtons, {title: titleText}, {default_palette_class: dialogTheme, width: dialogWidth, dialogId: 'reorder-items-popup'});
+
+        $__fillInList(itemMap);
+
+        let $resetBtn = $dialog.find('#reoder-reset');
+
+        $dialog.find('div.list').sortable({
+            axis: 'y',
+            containment: $dialog.find('div.list').parent(),
+            forcePlaceholderSize: true,
+            placeholder: 'ui-drag-drop',
+            cursor: 'grabbing',
+            update: () => {
+                $resetBtn.show();
+            }
+        });
+
+        const originalMap = new Map(itemMap);
+        $dialog.find('#reoder-id').button().on('click', () => {
+            $resetBtn.show();
+            const newMap = new Map([...itemMap].sort((a, b) => a[0] - b[0]));
+            $__fillInList(newMap);
+        });
+        $dialog.find('#reoder-alphabetic').button().on('click', () => {
+            $resetBtn.show();
+            const newMap = new Map([...itemMap].sort((a, b) => {
+                const nameA = a[1].toLocaleUpperCase();
+                const nameB = b[1].toLocaleUpperCase();
+                return nameA.localeCompare(nameB);
+            }));
+            $__fillInList(newMap);
+        });
+        $dialog.find('#reoder-reset').button().on('click', () => {
+            $resetBtn.hide();
+            $__fillInList(originalMap);
+        });
+    }
 }//end ui
 
 }
@@ -4133,6 +4372,8 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
             value.length === 0 || this.openAllGroupings();
 
+            this._position();
+
             return;
         }
 
@@ -4257,6 +4498,8 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         }
 
         this._searchNoResults.css('display', showingOptions.length === 0 ? 'block' : 'none');
+
+        this._position();
 
         this._searchTimeout = setTimeout(() => {
             this.menu.find('.ui-menu-item-wrapper').css('cursor','default');

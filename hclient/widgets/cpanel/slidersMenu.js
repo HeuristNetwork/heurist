@@ -44,7 +44,7 @@ $.widget( "heurist.slidersMenu", {
     options: {
     },
     
-    sections: ['design','populate','explore','publish','admin'],
+    sections: ['design','populate','explore','publish','admin','heurist8'],
     
     menues:{}, //section menu - div with menu actions
     containers:{}, //operation containers (next to section menu)
@@ -68,6 +68,8 @@ $.widget( "heurist.slidersMenu", {
     _is_prevent_expand_mainmenu: false,
     _explorer_menu_locked: false,
     _svsListPinned: false,
+    _explore_popup_fixed: false,
+    _fixed_explore_action: null,
     _active_section: null,
     _current_explore_action: null,
     
@@ -161,6 +163,21 @@ $.widget( "heurist.slidersMenu", {
                 that._on(that.divMainMenu.find('.ui-heurist-header'),{
                     click: that._openSectionMenu
                 });
+
+                // The visible H8 button styles Explore. The faint minus below
+                // still opens the original experimental Heurist8 layout.
+                const h8Link = that.divMainMenu.find('.h8-interface-link');
+                if(!that._h8ExperimentalAllowed()){
+                    that._markExperimentalUnavailable(h8Link);
+                    that._markExperimentalUnavailable(that.divMainMenu.find('.ui-heurist-heurist8'));
+                }
+                that._on(h8Link, {click: function(){
+                    if(!that._h8ExperimentalAllowed()){
+                        return;
+                    }
+                    const isActive = $(window.hWin.document.body).hasClass('heurist-modern');
+                    that.switchContainer('explore', true, !isActive);
+                }});
                 
                 const urlParams = new URLSearchParams(window.hWin.location.search);
                 
@@ -181,8 +198,7 @@ $.widget( "heurist.slidersMenu", {
                     mouseleave: function(e){
                         if($(e.target).parent('#filter_by_groups').length==0){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                            
-                            if (!this._isCurrentActionFilter()) { //close on mouse exit
+                            if (!this._isExplorePopupSticky()) { //close ephemeral popup on mouse exit
                             
                                 //this._resetCloseTimers();//reset
                                 this._myTimeoutId2 = setTimeout(function(){
@@ -212,6 +228,9 @@ $.widget( "heurist.slidersMenu", {
                 //forcefully hide coverAll on click
                 that._on(that.coverAll, {
                     click: function(){
+                            if(that._isClickOnlyExplorePopupVisible()){
+                                return;
+                            }
                             that._closeExploreMenuPopup();
                             that._collapseMainMenuPanel(true);
                     }
@@ -406,6 +425,115 @@ $.widget( "heurist.slidersMenu", {
     },
 
     /**
+     * @function _isFixableExplorePopup
+     * @description Returns true for Explore popups that can switch between ephemeral, fixed, and pinned states.
+     * @param {string} action_name - The Explore action popup name.
+     * @returns {boolean}
+     * @private
+     */
+    _isFixableExplorePopup: function(action_name){
+        return (action_name=='searchByEntity' || action_name=='search_filters' || action_name=='search_rules');
+    },
+
+    /**
+     * @function _isClickOnlyExplorePopup
+     * @description Returns true for Explore actions that are dialogs rather than hover popups.
+     * These actions are opened only by explicit click and are closed only by their own
+     * close/apply/cancel controls.
+     * @param {string} action_name - The Explore action popup name.
+     * @returns {boolean}
+     * @private
+     */
+    _isClickOnlyExplorePopup: function(action_name){
+        return (action_name=='searchBuilder' || action_name=='svsAdd' || action_name=='svsAddFaceted');
+    },
+
+    /**
+     * @function _isClickOnlyExplorePopupVisible
+     * @description Returns true while a click-only dialog popup is visibly open.
+     * @returns {boolean}
+     * @private
+     */
+    _isClickOnlyExplorePopupVisible: function(){
+
+        if(!this._isClickOnlyExplorePopup(this._current_explore_action)){
+            return false;
+        }
+
+        if(this._current_explore_action=='searchBuilder'){
+            return this.menues_explore_popup
+                    && this.menues_explore_popup.is(':visible')
+                    && this.menues_explore_popup.find('#searchBuilder:visible').length>0;
+        }
+
+        if(this._current_explore_action=='svsAddFaceted'){
+            let faceted_search_wiz = $('#heurist-search-faceted-dialog');
+            return faceted_search_wiz.length>0 && faceted_search_wiz.is(':visible');
+        }
+
+        if(this._current_explore_action=='svsAdd'){
+            return $('.save-filter-dialog:visible').length>0;
+        }
+
+        return false;
+    },
+
+    /**
+     * @function _resetClickOnlyExplorePopupState
+     * @description Clears transient state for click-only dialog popups without disturbing
+     * pinned saved filters.
+     * @private
+     */
+    _resetClickOnlyExplorePopupState: function(){
+
+        if(this._isClickOnlyExplorePopup(this._current_explore_action)){
+            this._current_explore_action = null;
+        }
+        if(this._isClickOnlyExplorePopup(this._fixed_explore_action)){
+            this._explore_popup_fixed = false;
+            this._fixed_explore_action = null;
+        }
+        this._explorer_menu_locked = false;
+        this._delayOnCollapse_ExploreMenu = 600;
+    },
+
+    /**
+     * @function _isExplorePopupSticky
+     * @description Returns true when the current Explore popup should not close on hover/mouseleave.
+     * @returns {boolean}
+     * @private
+     */
+    _isExplorePopupSticky: function(){
+        return (this._explore_popup_fixed || this._svsListPinned || this._isClickOnlyExplorePopupVisible());
+    },
+
+    /**
+     * @function _fixExplorePopup
+     * @description Marks a fixable Explore popup as fixed after a menu click.
+     * @param {string} action_name - The Explore action popup name.
+     * @private
+     */
+    _fixExplorePopup: function(action_name){
+        if(this._isFixableExplorePopup(action_name)){
+            this._explore_popup_fixed = true;
+            this._fixed_explore_action = action_name;
+            this._resetCloseTimers();
+        }
+    },
+
+    /**
+     * @function _closeCurrentExplorePopupBeforeSwitch
+     * @description Closes the current fixed/pinned Explore popup before opening another Explore action.
+     * @param {string} next_action - The Explore action popup name that is about to be opened.
+     * @private
+     */
+    _closeCurrentExplorePopupBeforeSwitch: function(next_action){
+        if(this._current_explore_action && this._current_explore_action != next_action){
+            this._closeExploreMenuPopup(true);
+        }
+    },
+
+    /**
      * @function _updateSaveFilterButton
      * @description Updates the state and appearance of the "Save Filter" button.
      * @param {number} mode - The mode to set for the button: 0 (disabled), 1 (in progress), 2 (ready to save).
@@ -560,7 +688,7 @@ $.widget( "heurist.slidersMenu", {
     _isExplorerMenu_locked: function(){
         
         return (this._explorer_menu_locked
-                || this.element.find('.ui-selectmenu-open').length>0
+                //|| this.element.find('.ui-selectmenu-open').length>0
                 || $('.list_div').is(':visible')      //tag selector dropdown
                 || $('.ui-widget-overlay.ui-front').is(':visible')   //some modal dialog is open
                 );
@@ -701,7 +829,7 @@ $.widget( "heurist.slidersMenu", {
         
         if(e){
             this._resetCloseTimers();//reset
-            if (!this._isCurrentActionFilter()){
+            if (!this._isExplorePopupSticky()){
                 this._myTimeoutId2 = setTimeout(function(){
                                                 that._closeExploreMenuPopup();
                                                 that._collapseMainMenuPanel();                                        
@@ -749,6 +877,31 @@ $.widget( "heurist.slidersMenu", {
 
         if (target.attr('id') === 'filter_by_groups' || hasAction === 'search_recent' || hasAction === 'databaseOverview') {
             return;
+        }
+
+        if(this._isClickOnlyExplorePopup(hasAction) && e.type !== 'click'){
+            if(this._current_explore_action && !this._isExplorePopupSticky()){
+                this._closeExploreMenuPopup();
+            }
+            return;
+        }
+
+        if(this._isExplorePopupSticky() && e.type !== 'click'){
+            return;
+        }
+
+        if(e.type === 'click'){
+            this._closeCurrentExplorePopupBeforeSwitch(hasAction);
+            if(this._isClickOnlyExplorePopup(hasAction)){
+                this._explore_popup_fixed = false;
+                this._fixed_explore_action = null;
+                this._resetCloseTimers();
+            }else{
+                this._fixExplorePopup(hasAction);
+            }
+        }else if(!this._isFixableExplorePopup(hasAction)){
+            this._explore_popup_fixed = false;
+            this._fixed_explore_action = null;
         }
 
         if (ele?.parents('.ui-heurist-quicklinks').length > 0) {
@@ -871,12 +1024,16 @@ $.widget( "heurist.slidersMenu", {
             let { explore_top, explore_left, explore_height, explore_width } = that._getMenuPosition(menu_item, action_name, position);
             if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
+                that._current_explore_action = action_name;
+                that._resetCloseTimers();
                 that.addSavedSearch( 'saved', false, explore_left, explore_top );
                 return;
             }
             else if(action_name=='svsAddFaceted'){
                 that._closeExploreMenuPopup();
-                that.addSavedSearch( 'faceted', false, explore_left );
+                that._current_explore_action = action_name;
+                that._resetCloseTimers();
+                that.addSavedSearch( 'faceted', false, explore_left, explore_top );
                 return;
             }
 
@@ -890,7 +1047,7 @@ $.widget( "heurist.slidersMenu", {
                 top: explore_top,
                 height: explore_height,
                 width: expandRecordAddSetting?'500px':explore_width,
-                'z-index': (action_name=='search_filters')?10:103,
+                'z-index': that._isClickOnlyExplorePopup(action_name) ? 105 : ((action_name=='search_filters')?10:103),
                 overflow: action_name === 'searchBuilder' ? 'hidden' : 'hidden auto',
             });
             
@@ -943,14 +1100,9 @@ $.widget( "heurist.slidersMenu", {
         let explore_height = 'auto';
         let explore_width = '300px';
 
-        if (action_name === 'searchBuilder') {
-            explore_height = 450;
-            explore_width = '850px';
-        }
-        
         if(position){
             explore_top = position.top;
-            explore_height = position.left;
+            explore_left = position.left;
             return { explore_top, explore_left, explore_height, explore_width };
         }
         
@@ -964,7 +1116,10 @@ $.widget( "heurist.slidersMenu", {
         }
 
         if (action_name === 'searchBuilder') {
-            
+            explore_height = 450;
+            explore_width = '62.5em';
+            explore_top = 40;
+            /*
             let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
             if(widget){
                 explore_top = widget.position().top + 100;
@@ -975,6 +1130,16 @@ $.widget( "heurist.slidersMenu", {
             if(this.element.innerHeight()>0 && explore_top+explore_height>this.element.innerHeight()){
                 explore_top = this.element.innerHeight() - explore_height;
             }
+            */
+        }
+
+        if(this._isClickOnlyExplorePopup(action_name)){
+            // Dialog-style popups cover/overlap the slider menu itself,
+            // rather than opening to the right of it.  Use the actual
+            // menu position instead of hard-coded 0, because this widget
+            // may be embedded with a non-zero left offset.
+            explore_left = this._left_position; //this.divMainMenu.position()?.left || 0;
+            explore_top = 40;
         }
         
         explore_top = Math.max(0, explore_top);
@@ -997,12 +1162,13 @@ $.widget( "heurist.slidersMenu", {
         
             if(action_name=='searchByEntity'){
 
-                if(!cont.searchByEntity('instance'))
+                if(!cont.searchByEntity('instance')){
                     cont.searchByEntity({use_combined_select:true, 
                         mouseover: function(){that._resetCloseTimers()}, //NOT USED
                         onClose: function() { 
                                 //start search on close
-                                that.switchContainer('explore'); 
+                                that.switchContainer('explore');
+                                that._closeExploreMenuPopup();
                         },
                         menu_locked: function(is_locked, is_mouseleave){ 
                             if(!is_mouseleave){
@@ -1011,6 +1177,7 @@ $.widget( "heurist.slidersMenu", {
                             }
                         }
                     });    
+                }
             }
             else if(action_name=='searchBuilder'){
                 
@@ -1069,6 +1236,9 @@ $.widget( "heurist.slidersMenu", {
                             }
                     }  });  
                 }else{
+                    // This popup is reused. A record type may have been added or edited
+                    // since its first opening, so rebuild its list from current definitions.
+                    cont.recordAdd('refreshRecordTypes');
                     cont.recordAdd('doExpand', expandRecordAddSetting);                        
                 }
                
@@ -1284,7 +1454,6 @@ $.widget( "heurist.slidersMenu", {
                 container_width: 300,
                 filter_by_type: mode,
                 onClose: function(noptions) { 
-
                     if(noptions==null){
                         //forcefully close saved_filters panel
                         that._pinSvsList(true);
@@ -1314,7 +1483,8 @@ $.widget( "heurist.slidersMenu", {
                         
                         that._closeExploreMenuPopup();
                         that._collapseMainMenuPanel(true);
-                    }else if(!that._svsListPinned){
+                    }else if(!that._isExplorePopupSticky()){
+                        that._pinSvsList(true);
                         that._closeExploreMenuPopup();
                     } 
                 },
@@ -1325,16 +1495,26 @@ $.widget( "heurist.slidersMenu", {
                         that._explorer_menu_locked = is_locked; 
                     }
                 },
-                handle_favourites: function(filter_id, filter_name, is_drop=false){
+                handle_favourites: function(filter_id, filter_name, is_drop = false, placeBelow = -1){
 
                     let hasChanged = false;
 
                     let cur_favs = window.hWin.HAPI4.get_prefs_def('favourite_filters', ['']);
                     if(cur_favs[0] == '' || cur_favs.findIndex(filter => filter[0] == filter_id) == -1){ // add new
+
+                        const newFavFilter = [filter_id, filter_name];
                         if(cur_favs[0] == ''){
-                            cur_favs[0] = [filter_id, filter_name];
+                            cur_favs[0] = newFavFilter;
                         }else{
-                            cur_favs.push([filter_id, filter_name]);
+
+                            if(placeBelow === -1){
+                                cur_favs.push(newFavFilter);
+                            }else if(placeBelow === 0){
+                                cur_favs.unshift(newFavFilter);
+                            }else{
+                                let index = cur_favs.findIndex(filter => filter[0] == placeBelow);
+                                index === -1 ? cur_favs.push(newFavFilter) : cur_favs.splice(index + 1, 0, newFavFilter);
+                            }
                         }
 
                         hasChanged = true;
@@ -1396,11 +1576,12 @@ $.widget( "heurist.slidersMenu", {
         }
         if(this._svsListPinned){
             this.containers['explore'].css('left',608);
-            this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-w');
-            this.menues['explore'].find('#search_filters_pin').addClass('ui-icon-pin-s');
+            this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-w').css( 'transform', '').addClass('ui-icon-pin-s');
+            //this.menues['explore'].find('#search_filters_pin').addClass('ui-icon-pin-s');
+            this.menues_saved_filters_popup.show();
         }else{
-            this.menues['explore'].find('#search_filters_pin').addClass('ui-icon-pin-w');
-            this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-s');
+            this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-s').addClass('ui-icon-pin-w').css( 'transform', 'rotate(180deg)');;
+            //this.menues['explore'].find('#search_filters_pin').removeClass('ui-icon-pin-s');
             this.containers['explore'].css('left',302);
             if(!isForced){ this._closeExploreMenuPopup(); }
         }
@@ -1446,9 +1627,12 @@ $.widget( "heurist.slidersMenu", {
      * @private
      * @memberof Widgets.Navigation.slidersMenu
      */
-    _closeExploreMenuPopup: function(){
+    _closeExploreMenuPopup: function(forcePinned){
 
         if(this.menues_saved_filters_popup && this.menues_explore_popup){
+            if(forcePinned && this._svsListPinned){
+                this._pinSvsList(true);
+            }
             if(!this._svsListPinned){
                 this.menues_saved_filters_popup.hide();
                 this.closeFacetedWizard();    
@@ -1457,6 +1641,8 @@ $.widget( "heurist.slidersMenu", {
             this.menues_explore_popup.hide(); 
                
             this._current_explore_action = null;
+            this._explore_popup_fixed = false;
+            this._fixed_explore_action = null;
             this.closeSavedSearch();
         }
         
@@ -1530,18 +1716,52 @@ $.widget( "heurist.slidersMenu", {
      * @private
      * @memberof Widgets.Navigation.slidersMenu
      */
-    _openSectionMenu: function(e){
+    _h8ExperimentalAllowed: function(){
+        const pageSetting = window.hWin.heuristExperimentalAllowed;
+        return typeof pageSetting === 'boolean'
+            ? pageSetting
+            : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
+    },
 
+    _markExperimentalUnavailable: function(element){
+        // Keep the element hoverable so its explanation remains accessible.
+        element.addClass('ui-state-disabled')
+            .attr({'aria-disabled': 'true', title: window.hWin.heuristExperimentalUnavailableMessage})
+            .css({opacity: 0.5, cursor: 'not-allowed'});
+    },
+
+    _openSectionMenu: function(e){
+        
         let section = this._getSectionName(e);
 
-        if(window.hWin.HEURIST4.util.isFunction(this._beforeSwitch.handler) && this._beforeSwitch.menu !== section && !this._beforeSwitch.handler()){
+        if(section=='heurist8' && !this._h8ExperimentalAllowed()){
             return;
         }
         
-        this.switchContainer( section );
+        if(window.hWin.HEURIST4.util.isFunction(this._beforeSwitch.handler) 
+            && this._beforeSwitch.menu !== section 
+            && !this._beforeSwitch.handler())
+        {
+            return;
+        }
+        
+        // The original Heurist8 layout has no section menu: display its app
+        // container even while the app is completing initialization.
+        if(section === 'heurist8'){
+            this._initH8Layout();
+        }
+        this.switchContainer( section, section === 'heurist8' );
         
         this._collapseMainMenuPanel(true, 200);
 
+    },
+
+    _initH8Layout: function(){
+        if(this._h8LayoutInitialized || !this._h8ExperimentalAllowed()){
+            return;
+        }
+        this._h8LayoutInitialized = true;
+        window.hWin.HAPI4.LayoutMgr.appInitAll('Heurist8', this.containers.heurist8);
     },
 
     /**
@@ -1562,6 +1782,12 @@ $.widget( "heurist.slidersMenu", {
             .addClass('ui-menu6-widgets ui-menu6-container ui-heurist-'+section) //ui-menu6-widgets to distinguish with introduction
             .appendTo( this.element );
             
+        if(section=='heurist8'){
+            this.containers[section].css({'left':this._left_position+'px'});
+            this.menues[section].css({width:0}).hide();
+            return;
+        }
+        
         this.containers[section].css('left',(this._left_position+211)+'px');
             
         if(section=='explore'){
@@ -1579,19 +1805,23 @@ $.widget( "heurist.slidersMenu", {
                     .appendTo( this.element );
 
                     
-            this._on(this.menues_explore_popup,{
-                mouseover: function(e){
-                    that._resetCloseTimers();
-                    //clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //prevent collapse of section menu popup
-                },
-                mouseleave: function(e){
-                    if(this._active_section=='explore' || this._active_section=='populate'){
-                        this._mouseout_SectionMenu(e);       
-                    }else{
-                        this._collapseMainMenuPanel()    
+            const bindExplorePopupHover = ($popup) => {
+                this._on($popup, {
+                    mouseenter: function(e){
+                        that._resetCloseTimers();
+                    },
+                    mouseleave: function(e){
+                        if(this._active_section === 'explore' || this._active_section === 'populate'){
+                            this._mouseout_SectionMenu(e);
+                        }else{
+                            this._collapseMainMenuPanel();
+                        }
                     }
-                }
-            });
+                });
+            };
+
+            bindExplorePopupHover(this.menues_explore_popup);
+            bindExplorePopupHover(this.menues_saved_filters_popup);            
             
             this.menues_explore_gap = $('<div>')
                     .css({'width':'4px', position:'absolute', opacity: '0.8', 'z-index':103, left:this._widthMenu+'px'}) //200
@@ -1651,10 +1881,15 @@ $.widget( "heurist.slidersMenu", {
                 mouseleave: function(e){
                         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
                         //this._resetCloseTimers();//reset
-                        this._myTimeoutId2 = setTimeout(function(){
-                                    that._closeExploreMenuPopup();
-                                },  this._delayOnCollapse_ExploreMenu); //600
+                        if (!this._isExplorePopupSticky()) {
+                            this._myTimeoutId2 = setTimeout(function(){
+                                        that._closeExploreMenuPopup();
+                                    },  this._delayOnCollapse_ExploreMenu); //600
+                        }
                 }
+            });
+            this._on(this.menues['explore'].find('li[data-action-popup="searchByEntity"], li[data-action-popup="search_filters"], li[data-action-popup="search_rules"], li[data-action-popup="searchBuilder"], li[data-action-popup="svsAdd"], li[data-action-popup="svsAddFaceted"]'), {
+                click: this._mousein_ExploreMenu
             });
             this._on(this.menues['explore'].find('li[data-action-popup="recordAddSettings"]'), {
                 click: this._mousein_ExploreMenu
@@ -1686,7 +1921,12 @@ $.widget( "heurist.slidersMenu", {
             
             
             this._on(this.menues['explore'].find('#search_filters_pin'), {
-                click: ()=>this._pinSvsList()
+                click: function(event){
+                    event.stopPropagation();
+                    that._explore_popup_fixed = false;
+                    that._fixed_explore_action = null;
+                    that._pinSvsList();
+                }
             });
            
             //init 
@@ -1705,6 +1945,7 @@ $.widget( "heurist.slidersMenu", {
      */
     _initSectionMenu: function( section ){
 
+        const widget = this;
         //loop by <li> elements - search action and init item        
         $.each(this.menues[section].find('li[data-action]'),
             function(i, item){
@@ -1718,6 +1959,12 @@ $.widget( "heurist.slidersMenu", {
                     
                     item.addClass('fancytree-node');
                     
+                    if(action==null && action_id=='menu-url-substitutions'){
+                        // This admin utility must still work if actions.json is cached
+                        // from before the menu entry was added.
+                        action = {text: 'URL substitutions', title: 'Edit URL substitutions',
+                            data: {icon: 'ui-icon-link'}};
+                    }
                     if(action==null){
                         return;
                     }
@@ -1725,7 +1972,9 @@ $.widget( "heurist.slidersMenu", {
                         let action_icon = action.data?.icon || '';
 
                         let action_label = window.hWin.HR( action_id ); 
-                        if(!action_label){ //localized version not found
+                        if(action_id=='menu-url-substitutions'){
+                            action_label = 'URL substitutions';
+                        }else if(!action_label || action_label === action_id){ //localized version not found
                             action_label = action.text;
                         }
                     
@@ -1743,6 +1992,13 @@ $.widget( "heurist.slidersMenu", {
                                 //window.hWin.HAPI4.sysinfo.matomo_api_key
                                 window.hWin.HEURIST4.util.setDisabled(item, true);
                             }
+
+                            if(action_id=='menu-sync-master'
+                                && window.hWin.HAPI4.sysinfo.synchronisation_role=='master'){
+                                window.hWin.HEURIST4.util.setDisabled(item, true);
+                                item.attr('title', 'This database is configured as Master. Synchronisation is triggered from satellites');
+                            }
+
                         }
 
                         let action_hint = window.hWin.HR( action_id+'-hint' ); 
@@ -1751,6 +2007,14 @@ $.widget( "heurist.slidersMenu", {
                         }
                         if(!action_hint){
                             item.attr('title',action_hint);
+                        }
+
+                        if(action_id=='menu-url-substitutions' && action_hint){
+                            item.attr('title', action_hint);
+                        }
+                        if(!widget._h8ExperimentalAllowed()
+                            && ['menu-sync-configure', 'menu-sync-master', 'menu-url-substitutions', 'menu-automatic-deposit'].includes(action_id)){
+                            widget._markExperimentalUnavailable(item);
                         }
                        
                         if(action.data?.is_association_member && window.hWin.HAPI4.sysinfo.associationMembershipStatus==='nonmember'){
@@ -1776,13 +2040,14 @@ $.widget( "heurist.slidersMenu", {
         //execute menu on click           
         this._on(this.menues[section].find('li[data-action]'),{click:function(e){
 
+            let li = $(e.target).closest('li[data-action]');
+            if(li.hasClass('ui-state-disabled')){
+                return;
+            }
             if(window.hWin.HEURIST4.util.isFunction(this._beforeSwitch.handler) && !this._beforeSwitch.handler()){
                 return;
             }
 
-            let li = $(e.target);
-            if(!li.is('li')) li = li.parents('li');
-            
             if(li.attr('data-action')=='menu-admin-server'){
                 this.menues[section].find('li').removeClass('ui-state-active');
                 li.addClass('ui-state-active');
@@ -1793,6 +2058,16 @@ $.widget( "heurist.slidersMenu", {
                         .css({left:(this._left_position+211)+'px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'});
             }
 
+            if(li.attr('data-action')=='menu-url-substitutions'){
+                // Open independently of actions.json: an older cached copy can
+                // lack the action even when the menu and editor are up to date.
+                let url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/urlSubstitutions.php'
+                    + '?db=' + encodeURIComponent(window.hWin.HAPI4.database);
+                window.hWin.HEURIST4.msg.showDialog(url, {
+                    title: 'Edit URL Substitutions file', width: 800, height: 600
+                });
+                return;
+            }
             window.hWin.HAPI4.actionHandler.executeActionById(li.attr('data-action')); 
         }});
         
@@ -1913,7 +2188,15 @@ $.widget( "heurist.slidersMenu", {
      * @param {boolean} [force_show=false] - If true, forces the container to be shown.
      * @memberof Widgets.Navigation.slidersMenu
      */
-    switchContainer: function( section, force_show ){
+    switchContainer: function( section, force_show, h8_mode ){
+
+        const isH8 = section === 'explore' && h8_mode === true;
+        $(window.hWin.document.body).toggleClass('heurist-modern', isH8);
+        if(this.divMainMenu){
+            this.divMainMenu.find('.h8-interface-link')
+                .toggleClass('active', isH8)
+                .attr('aria-pressed', isH8 ? 'true' : 'false');
+        }
 
         if(section=='explore' && this._active_section==section){
             this._onCloseSearchFaceted();
@@ -1929,6 +2212,11 @@ $.widget( "heurist.slidersMenu", {
             that.containers[section].show();    
         }else{
             return;
+        }
+
+        if(section === 'heurist8'){
+            // The Explorer iframe is created once its host becomes visible.
+            this.containers[section].find('[widgetid="heurist_Explorer"]').trigger('myOnShowEvent');
         }
         
         if(section != 'explore' || !that.containers[section]) {
@@ -1997,7 +2285,7 @@ $.widget( "heurist.slidersMenu", {
             this.edit_svs_dialog = new HSvsEdit();    
         }
         
-        if( !window.hWin.HEURIST4.util.isPositiveInt(left_position) ){
+        if( left_position!==0 && !window.hWin.HEURIST4.util.isPositiveInt(left_position) ){
             left_position = ((that.divMainMenu.width()>this._left_position)?this._widthMenu:this._left_position) + 4; 
             if(this._active_section=='explore'){
                 left_position = this._left_position + 211;
@@ -2037,7 +2325,8 @@ $.widget( "heurist.slidersMenu", {
             true, //is_h6style                                                                                                         
             function(is_locked, is_mouseleave){  //menu_locked
                 if(is_locked=='close'){
-                    that.coverAll.hide();                 
+                    that.coverAll.hide();
+                    that._resetClickOnlyExplorePopupState();
                     
                 }else if(is_mouseleave){
                     that._resetCloseTimers();
@@ -2153,8 +2442,7 @@ $.widget( "heurist.slidersMenu", {
 
             this.introductions[section] = $('<div><div class="gs-box" style="margin:10px;max-width:500px;height:100px;cursor:pointer">'
                 +'<div style="display:inline-block"><img width="110" height="60" alt="" src="'
-                +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
-
+                +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+(section === 'heurist8' ? 'explore' : section)+'.png"></div>'
                 +'<span class="ui-heurist-title header" id="start-hints" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
                     +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>'
 

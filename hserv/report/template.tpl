@@ -1,40 +1,63 @@
-<html>
-{* This is a very simple Smarty report template which you can edit into something more sophisticated.
-   Enter html for web pages or simple text for plain text formats. Use tree on right to insert fields
-   and templates for commonly used patterns. Use <!-- --> for output of html comments.
+<html>  {* See instructions at end. *}
 
-{* Text like this, enclosed in matching braces + asterisk, is a comment. We suggest you start by removing
- our comments and adding your own - plentiful comments will help with ongoing maintenance of your templates.*}
+{* ------------------------------------------------------------------------- *}
+{* This secion for any title or headings you want at the start of the report *}
 
 
-<h2>Title for report</h2> {* Text here appears at start of report *}
-<hr>
-
-{*------------------------------------------------------------*}
-{foreach $results as $r} {* Start records loop, do not remove *}
-{$r = $heurist->getRecord($r)}
-{*------------------------------------------------------------*}
+<h2>Title for report</h2> {* replace with  suitable heading or title*}
 
 
-  {* We STRONGLY advise visiting the Help link above - it will show you how to *}
-  {* use this function, as well as access all its sophisticated capabilities. *}
+
+{* DO NOT REMOVE ------------------------------ *}
+{* Start records loop          *}
+   {foreach $results as $r}
+   {$r = $heurist->getRecord($r)}
+{*----------------------------------------------*}
+
+{* Place fields you want to output for each record 
+   below (between the start and end loop instructions) *}
+
+     
+
+   {* insert content in this section *}  
+     
+     
+     
+
+   <br> {* line break between each record *}
+
+   
+{* DO NOT REMOVE --------------------------------- *}
+{* End records loop *}
+        {/foreach}
+{*-------------------------------------------------*}
 
 
-  {* Put the data you want output for each record here - insert the *}
-  {* fields using the tree of record types and fields on the right. *}
-  {* Use the pulldown of templates to insert commonly used patterns.*}
-
-  {* Examples - delete and replace with the fields you want to output: *}
-     {$r.recID}  {* the unique record ID *}
-     {$r.f1}     {* the name / title field - may or may not be present *}  
+{* -------------------------------------------------------------------------- *}
+{* This section for any title or headings you want at the end of the report *}
 
 
-<br> {* line break between each record *}
+<hr><h2>End of report</h2> {* Text here appears at end of report *} 
 
-{*------------------------------------------------------------*}
-{/foreach} {* end records loop, do not remove *}
-{*------------------------------------------------------------*}
 
-<hr>
-<h2>End of report</h2> {* Text here appears at end of report *} 
-</html>
+</html> {* END OF THE OUTPUT INSTRUCTIONS *}
+
+
+{* ------- DOCUMENTATION -------------------*}
+
+{* This is a very basic outline for a custom report template. 
+   Text enclosed in matching braces + asterisk, is a comment. 
+   Plentiful comments will help with ongoing maintenance of your templates.
+
+   We strongly advise visiting the Help link (top left) - it will show you how to
+   use this function, as well as access all its sophisticated capabilities. *}
+
+ {* Start and end the report with <html> and </html>. Omit for plain text output.
+   Enter html for web pages or simple text for plain text formats. 
+   Use tree on the left to insert fields.
+   Use the dropdown above it for commonly used patterns. 
+   Use <!-- --> for output of html comments.
+
+   Put the data you want output for each record beteeen the instructions 
+   for start and end record loop.
+ *}  

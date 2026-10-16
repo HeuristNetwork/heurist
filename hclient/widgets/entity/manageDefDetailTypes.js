@@ -118,10 +118,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             //add fields group editor
             this.element.addClass('ui-suppress-border-and-shadow');
             
-            this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',228);
+            this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',308);
             
             this.fieldtype_groups = $('<div data-container="ABBBBBB">').addClass('ui-dialog-heurist')
-                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:220, overflow: 'hidden'})
+                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:300, overflow: 'hidden'})
                 .appendTo(this.element);
                 
                 
@@ -542,9 +542,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             switch ( fields[i] ) {
                 case 'dtyid': html += fld2('dty_ID',30,null,'text-align:right'); break;
-                case 'ccode': 
-                    html += ('<div class="item truncate" style="min-width:80px;max-width:80px;text-align:center">'
-                            +$Db.getConceptID('dty',recID,true)+'</div>');
+                case 'ccode':
+                    html += `<div class="item truncate conceptID" style="min-width:80px;max-width:80px;text-align:center">${$Db.getConceptID('dty',recID,true)}</div>`;
                     break;
                 case 'group': 
                     html += __action_btn('group','ui-icon-carat-d','Change group');
@@ -847,6 +846,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             + 'and then customise the field appropriately for this record type.</div><br>').prependTo(main_container);
 
                         let btnBasefieldsList = $(main_container).find('span#btn-basefields-list').button({label: 'Choose base fields'})
+                        if(this.options.excludedFieldTypes?.length){
+                            // The general base-field picker cannot restrict types. Keep this
+                            // importer dialog within the types accepted by its mapping row.
+                            btnBasefieldsList.hide();
+                        }
                         let rty_ID = this.options.newFieldForRtyID;
                         let that = this;
 
@@ -992,6 +996,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 let ele = this._editing.getFieldByName('dty_Type');  
                 ele = ele.find('.input-div');
+
+                if(this.options.excludedFieldTypes?.length){
+                    ele.find('select option').filter((_, option) =>
+                        this.options.excludedFieldTypes.includes(option.value)).remove();
+                    ele.find('select').hSelect('refresh');
+                }
 
                 if(ele.find('select').hSelect("instance")){ 
                     let len = ele.find('select').find('option').length;
@@ -1272,6 +1282,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 if( $Db.dty(dty_ID, 'dty_ShowInLists')!='0'
                     && field_type!='separator'
+                    && !(that.options.excludedFieldTypes || []).includes(field_type)
                     && (!aUsage || !aUsage.getById(dty_ID))
                     && (field_name.toLowerCase().indexOf( entered )>=0)
                     && (field_name.toLowerCase().indexOf( entered )>=0)
@@ -1402,11 +1413,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             $('<div style="line-height:2ex;padding-top:4px">'
                     +'<div id="enumVocabulary" style="display:inline-block;">'
                         +'<select id="selVocab" class="sel_width"></select>'
-                        +'<a href="#" id="add_vocabulary_2" style="padding-left:10px">'
-                            +'<span class="ui-icon ui-icon-plus"/>add vocabulary</a>'
+                        +'<span href="#" id="add_vocabulary_2" style="margin-left:10px; padding:2.5px 5px; border:1px black solid; background:transparent;">'
+                            +'<span class="ui-icon ui-icon-plus"></span>add vocabulary</span>'
                         +'<a href="#" id="show_terms_1" style="padding-left:10px">'
                             +'<span class="ui-icon ui-icon-pencil"/>vocabularies editor</a>'
-                        +'<br><span id="termsPreview1" style="display:none;padding:10px 0px">'
+                        +'<br><span style="padding-top:10px;display:block;font-size:11px;">Note: you do not need to define terms in the vocabulary immediately</span>'
+                        +'<span id="termsPreview1" style="display:none;padding:10px 0px">'
                             +'<label style="width:60px;min-width:60px">Preview:&nbsp;</label><select id="selPreview"></select>'
                         +'</span>'
                     +'</div>'
@@ -1426,7 +1438,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 }});
             this._on(this.enum_container.find('#add_vocabulary'),{click: this._onAddVocabOrTerms});
             this._on(this.enum_container.find('#show_terms_1'),{click: this._showOtherTerms}); //manage defTerms
-            this._on(this.enum_container.find('#add_vocabulary_2'),{click: this._onAddVocabulary}); //add vocab via defTerms
+            this._on(this.enum_container.find('#add_vocabulary_2').button(),{click: this._onAddVocabulary}); //add vocab via defTerms
             this._on(this.enum_container.find('#add_terms'),{click: this._onAddVocabOrTerms});
            
             
@@ -1878,7 +1890,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 pointer_mode_inpt.hSelect('destroy');
 
                                 if(!window.hWin.HEURIST4.browseRecordMax){
-                                    window.hWin.HEURIST4.browseRecordMax = 1000;
+                                    window.hWin.HEURIST4.browseRecordMax = 5000;
                                 }
 
                                 $.each(pointer_mode_inpt.find('option'), function(idx, ele){
@@ -2501,7 +2513,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         this._on($ele.find('input'), {
             change: (event) => {
-                $typeEle.editing_input('setValue', event.target.value);
+                const type = event.target.value;
+                $typeEle.editing_input('setValue', type);
+                this._onDataTypeChange(type);
             }
         });
 
@@ -2520,6 +2534,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             const translationStub = element.getAttribute('data-translate');
             element.innerHTML = window.hWin.HR(translationStub);
         });
+
+        this.options.newFieldType = 'resource';
     },
 
     /**
@@ -2570,6 +2586,39 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                     });
                 }
+            }
+        });
+    },
+
+    _onPageRender: function(){
+
+        this._retrieveOriginalDBs = true;
+
+        this._on(this.recordList.find('.conceptID'), {
+            mouseenter: () => {
+
+                if(!this._retrieveOriginalDBs){
+                    return;
+                }
+
+                this._retrieveOriginalDBs = false;
+                this.recordList.find('.conceptID').each(async (idx, conceptLabel) => {
+
+                    const dtyID = $(conceptLabel).closest('.recordDiv').attr('recid');
+
+                    if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+                        return;
+                    }
+
+                    const originalDBID = $Db.dty(dtyID, 'dty_OriginatingDBID');
+                    if(!window.hWin.HEURIST4.util.isPositiveInt(originalDBID)){
+                        return;
+                    }
+
+                    const originalDB = await $Db.getOriginatingDBName(originalDBID);
+
+                    conceptLabel.title = `db: ${originalDB}`;
+                });
             }
         });
     }

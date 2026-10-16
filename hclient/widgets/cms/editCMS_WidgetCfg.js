@@ -47,6 +47,8 @@
 function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on_change = null ){
 
     const _className = 'editCMS_WidgetCfg';
+    
+    let _heuristMapSettings = {};
 
     const _def_labels = {
         heurist_SearchInput: {
@@ -67,8 +69,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         },
         heurist_StoryMap: {
             placeholder_def: 'Please select a story in the list',
-            elementsPlaceholder_def: 'There are no story elements to display for the selected item',
-            elementsPlaceholderSub_def: 'Story elements may exist but not be publicly visible'
+            elementsPlaceholder_def: 'There are no elements to display for the selected item',
+            elementsPlaceholderSub_def: 'Elements may exist but not be publicly visible'
         },
         heurist_Graph: {
             placeholder_def: 'recvis_placeholder',
@@ -88,7 +90,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
      * @private
      */
     function _init(){
-
+        
         let buttons= [
             {text:window.hWin.HR('Cancel'), 
                 class:'btnCancel',
@@ -251,7 +253,19 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
             $dlg.find('input[name="widget_id"]').val(opts.widget_id);    
 
-            if(widget_name=='heurist_Map'){
+            
+            if(widget_name=='heurist_Map2'){
+                
+            // New heurist-map configuration editor. mapViewer is loaded lazily.
+                $dlg.find('#btn_heurist_map_config')
+                    .button()
+                    .on( { click: function(){
+                        _openHeuristMapConfiguration();
+                    }
+                    });
+                
+                
+            }else if(widget_name=='heurist_Map'){
                 //special behaviour for map widget
                 if(!opts.layout_params){
                     opts.layout_params = {};
@@ -627,7 +641,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         dtFields:{
                             dty_Type:"resource", rst_MaxValues:0,
                             rst_DisplayName: 'Top level menu items', rst_DisplayHelpText:'',
-                            rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+                            rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'],
                                 window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']],
                             rst_FieldConfig: {entity:'records', csv:false}
                         },
@@ -736,7 +750,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         showclear_button: true,
                         dtFields:{
                             dty_Type:"resource", rst_MaxValues:0, rst_MinValues:1,
-                            rst_DisplayName: 'Select media records:', rst_DisplayHelpText:'',
+                            rst_DisplayName: 'Select Digital Media records:', rst_DisplayHelpText:'',
                             rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_MEDIA_RECORD']],
                             rst_FieldConfig: {entity:'records', csv:false}
                         },
@@ -909,13 +923,16 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }
 
                 //visible for buttons mode only
-                ele = $dlg.find('#allowed_svsIDs');
-                if(!ele.editing_input('instance')){
+                let $svsElement = $dlg.find('#allowed_svsIDs');
+                if(!$svsElement.editing_input('instance')){
+
+                    let $btnSort;
+                    const originalSavedSearches = $dlg.find('input[name="allowed_svsIDs"]').val();
 
                     const ed_options = {
                         recID: -1,
-                        dtID: ele.attr('id'), 
-                        values: [$dlg.find('input[name="allowed_svsIDs"]').val()],
+                        dtID: $svsElement.attr('id'), 
+                        values: [originalSavedSearches],
                         readonly: false,
                         showclear_button: true,
                         dtFields:{
@@ -928,12 +945,79 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             $dlg.find('#init_svsID').editing_input('setValue','');
                             __restFilterForInitSearch();
                             on_change();
+
+                            let svsIDs = $svsElement.editing_input('getValues');
+                            svsIDs[0] !== '' ? $btnSort.show() : $btnSort.hide();
                         }
                     };
 
-                    ele.editing_input(ed_options);
-                    ele.parent().css('display','block');
-                    ele.find('.header').addClass('header_wide');
+                    $svsElement.editing_input(ed_options);
+                    $svsElement.parent().css('display','block');
+                    $svsElement.find('.header').addClass('header_wide');
+
+                    let $repeaterBtn = $svsElement.find('.editint-inout-repeat-container');
+                    $btnSort = $('<button>', {
+                        text: 'Order searches',
+                        style: 'position: absolute; top: 14em; left: 17em;padding: 0.1em 0.4em;vertical-align: -0.6em;'
+                    }).insertAfter($repeaterBtn).button();
+
+                    if(window.hWin.HEURIST4.util.isempty(originalSavedSearches)){
+                        $btnSort.hide();
+                    }
+
+                    $btnSort.on('click', () => {
+
+                        let svsIDs = $svsElement.editing_input('getValues');
+                        svsIDs = svsIDs[0].split(',');
+
+                        let searches = new Map();
+                        $svsElement.find('.link-div').each((idx, element) => {
+                            searches.set(svsIDs[idx], element.innerText);
+                        });
+
+                        let opts = {
+                            text: {
+                                help: 'drag and drop the searches to re-arrange them',
+                                title: 'Reodering Searches'
+                            },
+                            palette: 'ui-heurist-publish',
+                            width: '500px'
+                        };
+                        window.hWin.HEURIST4.ui.popupSortableList(searches, opts, (svsIDs, closeCallback) => {
+                            closeCallback.call(this, true);
+                            $svsElement.editing_input('setValue', svsIDs.join(','));
+                            on_change();
+                        });
+                    });
+
+                    $repeaterBtn.hide();
+                    $svsElement.find('.input-cell').css('margin-top', '10px');
+                    $svsElement.find('.entity_selector').css('max-width', '25em');
+
+                    let observerCallback = (mutations, observer) => {
+
+                        for(const mutation of mutations){
+
+                            if(mutation.type !== 'childList' || mutation.addedNodes <= 0){
+                                continue;
+                            }
+
+                            for(const node of mutation.addedNodes){
+
+                                if(node.nodeType !== Node.ELEMENT_NODE || $(node).hasClass('truncate')){
+                                    continue;
+                                }
+
+                                $(node).addClass('truncate');
+                            }
+                        }
+                    };
+                    let observer = new MutationObserver(observerCallback);
+
+                    observer.observe($svsElement.find('.entity_selector')[0], {
+                        childList: true,
+                        subtree: false
+                    });
                 }
 
                 ele = $dlg.find('#init_svsID');
@@ -1211,7 +1295,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 if(!opts['reportElementMapMode']) opts['reportElementMapMode'] = 'linked';
 
                 
-                if(!opts['elementsPlaceholder']) opts['elementsPlaceholder'] = '<br><br>There are no story elements to display for the selected item';
+                if(!opts['elementsPlaceholder']) opts['elementsPlaceholder'] = '<br><br>There are no elements to display for the selected item';
                 if(!opts['elementsPlaceholderSub']) opts['elementsPlaceholderSub'] = '<i>Story elements may exist but not be publicly visible</i>';
 
                 $dlg.find('input[name="elementsPlaceholder"]').val(opts['elementsPlaceholder']);
@@ -1383,6 +1467,38 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         }
     }
     
+    /**
+     * Open the standalone heurist-map configuration editor without displaying a map.
+     *
+     * mapViewer runs in viewerMode "configuration", therefore heurist-map exposes only
+     * MapConfigurationDialog and does not initialise MapApplication/Leaflet. The iframe
+     * host temporarily fills the viewport so the dialog rendered inside the same-origin
+     * iframe has a normal modal viewport; the map itself is never shown.
+     *
+     * @returns {void}
+     */
+    function _openHeuristMapConfiguration(){
+
+        let opts = window.hWin.HEURIST4.util.isJSON(widget_cfg.options);
+        
+        let $button = $dlg.find('#btn_heurist_map_config');
+        $button.prop('disabled', true);
+
+        window.hWin.HEURIST4.ui.showMapConfigurationDialog({
+            mode: 'website',
+            value: opts.heuristModuleSettings ?? {},
+            onSave: function(settings){
+                _heuristMapSettings = settings;
+                on_change();
+            },
+            onError: function(error){
+                window.hWin.HEURIST4.msg.showMsgErr(error && error.message ? error.message : error);
+            }
+        }).finally(function(){
+            $button.prop('disabled', false);
+        });
+    }    
+    
    
     /**
      * Retrieves the current configuration values from the UI input fields for the widget.
@@ -1406,8 +1522,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         let widget_name = widget_cfg.appid;
 
         let opts = {};
+        
+        if(widget_name=='heurist_Map2'){
+            
+            opts.heuristModuleSettings = _heuristMapSettings;
 
-        if(widget_name=='heurist_Map'){
+        }else if(widget_name=='heurist_Map'){
 
             let layout_params = {};//special option for leaflet mapping
             //parameters for controls
@@ -1719,7 +1839,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['placeholder_text'] = placeholder;
 
         }else if(widget_name=='heurist_resultList'){
-            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'] || opts['support_collection'];
+
+            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode']
+                || opts['show_export_button'] || opts['support_collection']
+                || opts['show_result_sort'];
+
             if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
                 opts['recordview_onselect']  = 'inline'; //default value    
             }

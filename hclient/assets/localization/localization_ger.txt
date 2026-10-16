@@ -302,8 +302,7 @@
 #save_filter_hint#Aktuellen Filter und Regeln als eine Verlinkung im Navigationsbaum speichern
 #Warn_Lost_Data#Sie haben Änderungen vorgenommen. Bestätigen Sie mit "Speichern" damit die Änderungen erhalten bleiben.
 #Warn_Lost_Data_On_Structure_Edit#Auf "Daten Speichern" klicken, um die eingegebenen Daten zu speichern, "Änderungen verwerfen", um die gemachten Modifikationen abzulehnen. <br>Änderungen an der Struktur werden automatisch gespeichert - Ihre Auswahl wirkt sich darauf nicht aus.
-#manageDefRectypes_edit_fields#Datenfelder editieren
-#manageDefRectypes_edit_fields_hint#Diese Aktion wird einen leeren Datensatz dieses Typs im Strukturänderungsmodus öffnen.<br>Tipp: Um bleibende Änderungen an der Struktur vorzunehmen, können Sie den Strukturänderungsmodus jederzeit aktivieren, während Sie Daten eingeben.
+
 #manageDefRectypes_new_hint#Bevor Sie einen neuen Datentyp definieren, ist es ratsam, eine passende Definition aus den Templates (Heurist Datenbanken, die zentral registriert worden) zu importieren. Die Templates mit einer Registrierungs-ID kleiner 1000 werden vom Heurist Team kuratiert. <br><br>Dies ist insbesondere für BIBLIOGRAPHISCHE Datentypen wichtig - die Definitionen aus Template #6 (Bibliographische Definitionen) sind optimal normalisiert und stellen die Austauschbarkeit mit bibliographischen Funktionen wie der Synchronisierung mit Zotero, dem Harvard Format und zwischen den Datenbanken sicher.<br><br>Gehe zu Hauptmenü:  Design > Templates durchsuchen
 #manageDefRectypes_delete_stop#<p>Der Datentyp <b>[rtyName]</b> besteht aus den folgenden Datenfeldern:</p>[FieldList]<p>Bitte entfernen Sie diese Datenfelder vollständig oder klicken Sie den obigen Link, <br>um die Elementardatenfelder zu ändern (dies wirkt sich auf all Datentypen aus, welche diese Datentypen nutzen).</p>
 #manageDefRectypes_delete_warn#Sind Sie sicher, dass Sie diesen Datentyp löschen möchten?

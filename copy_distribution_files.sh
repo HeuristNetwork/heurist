@@ -99,6 +99,10 @@ rm ../heurist-build/$1/copy_distribution_files.sh
 rm ../heurist-build/$1/update_heurist.sh
 rm ../heurist-build/$1/install_heurist.sh
 
+# Node/npm development dependencies are not part of the distribution package.
+# The generated bundle in hclient/bundles is included, but node_modules is not.
+rm -rf ../heurist-build/$1/node_modules
+
 # Now zip it all up as a tarball for distribution on the Heurist web site
 
 echo

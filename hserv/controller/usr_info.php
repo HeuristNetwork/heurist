@@ -44,53 +44,55 @@
 
     }elseif($action=='verify_credentials'){ //just check only if logged in (db connection not required)
 
-        $res = $system->verifyCredentials($dbname);
+        $res = $system->authSession()->verifyCredentials($dbname);
 
         if( $res>0 ){ //if logged id verify that session info (especially groups) is up to date
             //if exists file with userid it means need to reload system info
+            $reloadUserFromDb = $system->userSession()->needsRefresh();
+            
             $db_full_name = $system->dbnameFull();
-            $reload_user_from_db = (@$_SESSION[$db_full_name]['need_refresh']==1);
 
             $const_toinit = true;
-            if(!$reload_user_from_db){ //check for flag file to force update user (user rights can be changed by admin)
+            if(!$reloadUserFromDb){ //check for flag file to force update user (user rights can be changed by admin)
                 $const_toinit = false;
                 $system->initPathConstants($dbname);
                 $fname = HEURIST_FILESTORE_DIR.$res;
-                $reload_user_from_db = file_exists($fname);
+                $reloadUserFromDb = file_exists($fname);
             }
 
-            if($reload_user_from_db){
+            if($reloadUserFromDb){
                 $system->init($dbname, false, $const_toinit);//session and constant are defined already
                 $res = $system->getCurrentUserAndSysInfo();
             }else{
                 $res = true;
             }
 
-            if($res && !empty(@$req_params['permissions']) && !empty(@$_SESSION[$db_full_name]['ugr_Permissions'])){
+            if($res && !empty(@$req_params['permissions'])){
                 // Check if user has the required permission
+                $permissions = $system->userSession()->getPermissions();  
+                if(!empty($permissions)){
+                    $required = $req_params['permissions'];
+                    $error_msg = "";
 
-                $required = $req_params['permissions'];
-                $permissions = $_SESSION[$db_full_name]['ugr_Permissions'];
-                $error_msg = "";
+                    if(strpos($required, 'add') !== false && $permissions['add']){
+                        $error_msg = "create";
+                    }
+                    if(strpos($required, 'delete') !== false && $permissions['delete']){
+                        $error_msg = (!empty($error_msg) ? " or " : "") . "delete";
+                    }
 
-                if(strpos($required, 'add') !== false && $permissions['add']){
-                    $error_msg = "create";
-                }
-                if(strpos($required, 'delete') !== false && $permissions['delete']){
-                    $error_msg = (!empty($error_msg) ? " or " : "") . "delete";
-                }
-
-                $res = !empty($error_msg);
-                if(!$res){
-                    $error_msg = "Your account does not have permission to $error_msg records,<br>please contact the database owner for more details.";
-                    $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+                    $res = !empty($error_msg);
+                    if(!$res){
+                        $error_msg = "Your account does not have permission to $error_msg records,<br>please contact the database owner for more details.";
+                        $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+                    }
                 }
             }
         }else{
             //logged off
             $res = array("currentUser"=>array('ugr_ID'=>0,'ugr_FullName'=>'Guest'));
         }
-
+        $system->session()->close();
     }
     elseif($action=='usr_log'){
 
@@ -106,12 +108,13 @@
             }
         }
 
-    } elseif (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
+    } elseif (false && $action == "save_prefs"){
 
-        if($system->verifyCredentials($dbname)>0){
+        if($system->authSession()->verifyCredentials($dbname)>0){
             user_setPreferences($system, $req_params);
             $res = true;
         }
+        $system->session()->close();
 
     } elseif($action == "logout"){ //save preferences into session
 
@@ -201,6 +204,63 @@
         $res = user_getNotifications($system);
     }elseif($action == 'set_user_notification_settings'){
         $res = user_blockNotifications($system, $req_params['blocking']);
+    }elseif($action == 'get_db_metadata'){
+        // Returns database metadata for Design > Properties display.
+        // Three states (Ian Johnson's revised spec, Jul 2026):
+        //   has_local_xml=false, fields=[]   → not registered, or live fetch failed
+        //   has_local_xml=false, fields=[..] → registered, no local XML yet; fields from a live
+        //                                      fetch from the Reference Index (NOT stored to disk)
+        //   has_local_xml=true,  fields=[..] → local DBMetadata.xml present (user has synced);
+        //                                      render from local file
+
+        $filestore_dir = $system->getFileStoreRootFolder() . $system->dbname() . '/';
+
+        $local = \hserv\utilities\DbMetadataReader::read($filestore_dir);
+
+        if($local['exists']){
+            // State 3 — local DBMetadata.xml present (user clicked "Sync" at some point)
+            $res = $local;
+        } else {
+            // State 2 — registered but no local XML: fetch live (display only, do not store)
+            $regID = $system->settings->get('sys_dbRegisteredID');
+            if(isPositiveInt($regID)){
+                $res = \hserv\utilities\DbMetadataReader::fetchLive(intval($regID));
+            } else {
+                // State 1 — not registered
+                $res = ['has_local_xml' => false, 'exists' => false, 'fields' => [],
+                        'all_labels' => \hserv\utilities\DbMetadataReader::ALL_LABELS];
+            }
+        }
+
+    }elseif($action == 'sync_db_metadata'){
+        // User-triggered sync: fetch the current XML for this database from the Heurist Reference
+        // Index and save it locally as DBMetadata.xml in the settings directory.
+        // Called when the user clicks "Save metadata locally" (State 2) or
+        // "Refresh from Reference Index" (State 3) in Design > Properties.
+        // Per Ian Johnson's revised spec (Jul 2026): sync is user-initiated, not automatic.
+
+        if(!$system->isDBOwner()){
+            $system->addError(HEURIST_REQUEST_DENIED, 'Only the database owner can sync metadata');
+            $res = false;
+        } else {
+            $regID = $system->settings->get('sys_dbRegisteredID');
+
+            if(!isPositiveInt($regID)){
+                $system->addError(HEURIST_INVALID_REQUEST,
+                    'This database is not registered with the Heurist Reference Index');
+                $res = false;
+            } else {
+                $filestore_dir = $system->getFileStoreRootFolder() . $system->dbname() . '/';
+                $result = \hserv\utilities\DbMetadataReader::syncToLocal(intval($regID), $filestore_dir);
+
+                if($result['ok']){
+                    $res = $result; // includes parsed fields for immediate UI update
+                } else {
+                    $system->addError(HEURIST_ERROR, $result['error']);
+                    $res = false;
+                }
+            }
+        }
     }elseif($action == 'get_tinymce_formats'){
 
         $settings = $system->settings->getDatabaseSetting('TinyMCE formats');
@@ -339,11 +399,11 @@
 
         }elseif($action == "save_prefs"){
 
-            if($system->verifyCredentials($dbname)>0){
+            if($system->authSession()->verifyCredentials($dbname)>0){
                 user_setPreferences($system, $req_params);
                 $res = true;
             }
-
+            $system->session()->close();
         }
         elseif ( $system->getUserId()<1 &&  !in_array($action,$quest_allowed)) {
 
@@ -714,7 +774,8 @@
                         'path' => HEURIST_FILESTORE_DIR . DIR_SCRATCH
                                 . USanitize::sanitizeFileName(USanitize::sanitizePath($req_params['file'][0]['name'])),
                         'type' => htmlspecialchars($req_params['file'][0]['type']),
-                        'name' => htmlspecialchars($req_params['file'][0]['original_name'])
+                        'name' => htmlspecialchars($req_params['file'][0]['original_name']),
+                        'embargoed' => @$req_params['embargo']
                     ];
 
                     // Metadata
@@ -762,15 +823,21 @@
                         $params['meta']['created'] = [
                             'value' => @$req_params['meta']['created'],
                             'lang' => null,
-                            'typeUri' => PURL_TERM_DATE,
+                            'typeUri' => null,
                             'propertyUri' => NAKALA_REPO.'terms#created'
                         ];
                     }else{
                         $params['meta']['created'] = [
-                            'value' => null,
+                            'value' => 'Unknown',
                             'lang' => null,
                             'typeUri' => null,
                             'propertyUri' => NAKALA_REPO.'terms#created'
+                        ];
+                        $params['meta']['created_backup'] = [
+                            'value' => date('Y-m-d'),
+                            'lang' => null,
+                            'typeUri' => null,
+                            'propertyUri' => 'http://purl.org/dc/terms/created'
                         ];
                     }
 
@@ -791,10 +858,31 @@
                     // User API Key
                     $params['apiKey'] = $credentials[$repo_id]['params']['writeApiKey'];
 
-                    $params['status'] = @$req_params['status'] === 'pending' || @$req_params['status'] === 'published' ? $this->data['status'] : 'published'; // publish uploaded file, return url to newly uploaded file on Nakala; @todo: default to pending
+                    $params['status'] = @$req_params['status'] === 'pending' || @$req_params['status'] === 'published' ? $this->data['status'] : 'pending'; // publish uploaded file, return url to newly uploaded file on Nakala
 
                     // Upload file
                     $res = uploadFileToNakala($system, $params);//from record edit - define file field
+
+                    if($res !== false){
+
+                        $nakalaDOI = @$res['DOI'];
+                        $res = $res['URL'];
+
+                        if($nakalaDOI){
+
+                            // Log the DOI alongside any other repository deposits for this database -
+                            // purely additive, doesn't change $res / the response sent to the client
+                            recordExternalIdentifier($system, "{$repo_id}_{$nakalaDOI}", [
+                                'Service' => 'nakala',
+                                'Label' => 'Nakala file upload (record edit)',
+                                'ID' => $nakalaDOI,
+                                'DOI' => $nakalaDOI,
+                                'DOIRegistered' => ($params['status'] === 'published'),
+                                'URL' => $res,
+                                'Date' => date('Y-m-d')
+                            ]);
+                        }
+                    }
 
                 }
 

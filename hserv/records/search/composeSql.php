@@ -1352,6 +1352,13 @@ class HPredicate {
      * @var string|int|null 
      */
     public $field_id = null;
+
+    /**
+     * Spatial match mode of a `geo[:<id>]:within|intersects` predicate, or null
+     * (then WKT means `within` and an extent means `intersects`).
+     * @var string|null
+     */
+    public $geo_mode = null;
     /** 
      * The determined Heurist field type (e.g., 'enum', 'date', 'freetext', 'resource') 
      * for the current `$field_id`. Fetched from `defDetailTypes` table.
@@ -1561,6 +1568,10 @@ class HPredicate {
 
         $key = explode(":", strtolower($key));
         $this->pred_type  = $key[0];
+        // geo[:<id>]:within|intersects - the trailing part is the match mode, not a field id
+        if($this->pred_type=='geo' && count($key)>1 && in_array(end($key), array('within','intersects'))){
+            $this->geo_mode = array_pop($key);
+        }
         $ll = count($key);
         if($ll>1){ //get field ids "f:5" -> 5
             if($this->pred_type=='f'){
@@ -1596,9 +1607,9 @@ class HPredicate {
         $this->value = $value;
         $p_type = strtolower($this->pred_type);
 
-        if(!isEmptyArray($value) &&
+        if($p_type!='geo' && !isEmptyArray($value) &&
             !(is_numeric(@$value[0]) || is_string(@$value[0])) )
-        { //subqueries
+        { //subqueries; geo may use an associative bounds object
             //special behavior for relation - extract reltypes and record ids
 
             if($p_type=='related' ||
@@ -1947,12 +1958,16 @@ class HPredicate {
      * Handles:
      * - `NULL` or `-NULL`: Checks for records where the geo field is not defined.
      * - `""` (empty string): Checks for records where the geo field has any non-null value.
-     * - WKT string: Constructs an `ST_Contains` or `MBRContains` (though `ST_Contains` is in the code)
-     *   condition to find records whose geometry is contained within the provided WKT geometry.
+     * - WKT string or `{west,south,east,north}` extent, matched by `$this->geo_mode`:
+     *   `within` -> ST_Contains (record geometry entirely inside the area),
+     *   `intersects` -> ST_Intersects (record geometry touches the area).
+     *   Without a mode, WKT means `within` and an extent means `intersects`.
      *
      * @return array An array `['where' => $sql_condition]`.
      */
     private function predicateSpatial(){
+
+        global $mysqli;
 
         $p = "rd".$this->qlevel.'.';
         $p = '';
@@ -1961,12 +1976,47 @@ class HPredicate {
 
         if($this->isEmptyValue()){
             $res = SQL_NOT.$res.$p.'dtl_Geo IS NOT NULL)';//not defined
-        }elseif($this->value==''){
+        }elseif($this->value===''){
             $res = $res.$p.'dtl_Geo IS NOT NULL)';//any not null value
         }else {
-            $res = $res
-            .$p.'dtl_Geo is not null AND ST_Contains(ST_GeomFromText(\''.$this->value.'\'), '
-            .$p.'dtl_Geo) limit 1)';//MBRContains
+            $spatialFunction = 'ST_Contains';
+            $wkt = $this->value;
+
+            // Preferred JSON-query viewport form:
+            // {"geo":{"west":-16,"south":32,"east":40,"north":72}}
+            if(is_array($this->value)){
+                $required = array('west','south','east','north');
+                foreach($required as $key){
+                    if(!array_key_exists($key, $this->value) || !is_numeric($this->value[$key])){
+                        $this->error_message = 'Invalid geo extent. Expected numeric west, south, east and north values.';
+                        return null;
+                    }
+                }
+
+                $west = (float)$this->value['west'];
+                $south = (float)$this->value['south'];
+                $east = (float)$this->value['east'];
+                $north = (float)$this->value['north'];
+
+                if($west < -180 || $west > 180 || $east < -180 || $east > 180
+                    || $south < -90 || $south > 90 || $north < -90 || $north > 90
+                    || $south > $north){
+                    $this->error_message = 'Invalid geo extent coordinates.';
+                    return null;
+                }
+
+                $wkt = "POLYGON (($west $south, $east $south, $east $north, $west $north, $west $south))";
+                $spatialFunction = 'ST_Intersects';
+            }
+            if($this->geo_mode == 'within'){
+                $spatialFunction = 'ST_Contains';
+            }elseif($this->geo_mode == 'intersects'){
+                $spatialFunction = 'ST_Intersects';
+            }
+
+            $wkt = $mysqli->real_escape_string((string)$wkt);
+            $res .= $p.'dtl_Geo is not null AND '.$spatialFunction
+                .'(ST_GeomFromText(\''.$wkt.'\'), '.$p.'dtl_Geo) limit 1)';
         }
         return array("where"=>$res);
     }
@@ -3494,7 +3544,7 @@ QUERY;
      *         Checks/creates full-text index via `checkFullTextIndex()`. Handles `++` / `--` word modifiers.
      *       - **Standard LIKE/Exact**:
      *         `LIKE '%value%'` (default) or `= 'value'` (if `$this->exact`).
-     *         Handles negation (`NOT LIKE`, `!=`). Handles case sensitivity (`COLLATE utf8_bin`).
+     *         Handles negation (`NOT LIKE`, `!=`). Handles case sensitivity with a binary comparison.
      *         Handles language filtering for freetext/blocktext fields based on `dtl_Value` prefixes (e.g., "en:").
      * 4.  **User ID Resolution**: For 'addedby'/'owner' predicates, resolves usernames in value to IDs using `getUserIds()`.
      * 5.  **Comma-Separated IDs**: If value is a list of IDs (after other processing), generates `IN (id_list)`.
@@ -3559,10 +3609,9 @@ QUERY;
 
             if(strpos($this->value, '==')===0){
                 $this->case_sensitive = true;
+                $this->exact = true;
                 $this->value = substr($this->value, 2);
-            }
-
-            if(strpos($this->value, '=')===0){
+            }elseif(strpos($this->value, '=')===0){
                 $this->exact = true;
                 $this->value = substr($this->value, 1);
             }elseif(strpos($this->value, '@')===0){ //full text search
@@ -3819,6 +3868,7 @@ QUERY;
                     $this->fulltext = false;
                 }
 
+                $valueWithLangPrefix = $this->value;
                 list($lang, $this->value) = extractLangPrefix($this->value);
 
                 if (strpos($this->value,"<>")>0) {
@@ -3893,7 +3943,13 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                         $eq = ($this->negate?'!=':'=');
                     }
                     if($this->case_sensitive){
-                            $eq = 'COLLATE utf8_bin '.$eq;
+                        // Do not impose a utf8 collation on utf8mb4 detail columns.
+                        $eq .= ' BINARY';
+                    }
+                    
+                    if($this->exact){
+                        //restore for exact search
+                        $this->value = $valueWithLangPrefix;
                     }
 
                     $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
@@ -3905,7 +3961,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
 
                     if(empty($lang)){ // default only
                         //$res = $res . " AND NOT REGEXP_LIKE(dtl_Value, '^[A-Za-z]{2,3}:') "; //since mysql v8
-                        $res = $res . " AND dtl_Value NOT RLIKE '^[A-Za-z]{2,3}:' "; 
+                        $res = $res . " AND dtl_Value NOT RLIKE '^[A-Za-z]{2,3}:' ";
                     }elseif($lang == 'ALL' && $this->exact && !$this->fulltext){ // any language, exact and not a fulltext search
                         $res = $res . " OR SUBSTRING(dtl_Value, 0, 4) = '" . $mysqli->real_escape_string($this->value) . "'";
                         $res = $res . " OR SUBSTRING(dtl_Value, 0, 3) = '" . $mysqli->real_escape_string($this->value) . "'";

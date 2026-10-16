@@ -66,6 +66,8 @@ class DbVerifyURLs {
     private $alreadyChecked = [];
     
     private $results;
+
+    private $checkingAll = false;
     
 
     /** @var int $maxRecId Maximum rec_ID in Records table (records are never deleted) */
@@ -127,7 +129,7 @@ class DbVerifyURLs {
             //session is in progress
             return array('session_id'=>$this->results['session_id']); 
         }elseif(@$this->results['total_checked']>0){
-            return array('total_checked'=>$this->results['total_checked'], 'total_bad'=>$this->results['total_bad']);
+            return array('total_checked'=>$this->results['total_checked'], 'total_bad'=>$this->results['total_bad'], 'formats' => @$this->results['formats']);
         }
         
         return array();
@@ -145,10 +147,11 @@ class DbVerifyURLs {
      *                  2: Start from scratch (resets previous results).
      *                  Defaults to 0.
      * @param int $session_id Optional. If > 0, indicates processing within a managed session. Defaults to 0.
+     * @param array|string $formats Optional. The types of URLs to check: all | {'recheaders', 'textfields', 'externalfiles'}. Defaults to 'all'
      * @return array|false Results of the URL validation as an array, or false if a fatal CURL error occurred.
      *                     The results array contains counts and lists of processed/bad URLs.
      */
-    public function checkURLs($isVerbose = false, $listOnly = false, $maxCountToCheck=150, $mode=0, $session_id=0) {
+    public function checkURLs($isVerbose = false, $listOnly = false, $maxCountToCheck=150, $mode=0, $session_id=0, $formats = 'all') {
 
         $this->passedRecIds = [];
         $this->timeoutDomains = [];
@@ -161,9 +164,12 @@ class DbVerifyURLs {
         $this->isVerbose = $isVerbose || $listOnly;
         $this->listOnly = $listOnly;
         
-        $this->maxCountToCheck = intval($maxCountToCheck)??150;
+        $this->maxCountToCheck = intval($maxCountToCheck) ?? 150;
         $this->checkedCount = 0;
-        
+        if($this->maxCountToCheck === 0 && $session_id > 0){
+            $this->setMaxCheckCount($formats);
+        }
+
         //load previous result
         $this->readResultFile($mode==2); //if 2 - reset
         
@@ -179,17 +185,24 @@ class DbVerifyURLs {
         }else{
             $session_id = 0;
         }
-        
+
+        $res = true;
+        $checkHeaders = $formats === 'all' || in_array('recheaders', $formats);
+        $checkText = $formats === 'all' || in_array('textfields', $formats);
+        $checkExternal = $formats === 'all' || in_array('externalfiles', $formats);
+
         //0. Check record URLs
-        $res = $this->checkRecordURLs();
-        
+        if($checkHeaders){
+            $res = $this->checkRecordURLs();
+        }
+
         //1. Check free text/block text fields for URLs
-        if($res && $this->checkedCount<$this->maxCountToCheck && !$this->isTerminated){
+        if($checkText && $res && $this->checkedCount < $this->maxCountToCheck && !$this->isTerminated){
             $res = $this->checkTextFieldURLs();
         }
   
         //2. Check external URLs in use (e.g., file fields)
-        if($res && $this->checkedCount<$this->maxCountToCheck && !$this->isTerminated){
+        if($checkExternal && $res && $this->checkedCount < $this->maxCountToCheck && !$this->isTerminated){
             $res = $this->checkExternalFileURLs();
         }
         
@@ -207,6 +220,8 @@ class DbVerifyURLs {
             $this->results['session_checked'] = $this->checkedCount;
             $this->results['total_checked'] += $this->checkedCount;
             $this->results['total_bad'] = $this->getTotalBad();
+
+            $this->results['formats'] = $formats;
         }
             
         $this->saveResultFile();  
@@ -494,7 +509,7 @@ class DbVerifyURLs {
     /**
      * Check URLs from records and validate.
      *
-     * @return void
+     * @return bool
      */
     private function checkRecordURLs() {
         $query = 'SELECT rec_ID, rec_URL, rec_RecTypeID FROM Records WHERE (rec_URL != "") AND (rec_URL IS NOT NULL)';
@@ -504,7 +519,7 @@ class DbVerifyURLs {
                 $query = $query.' AND rec_Modified>"'.$this->results['ts_record'].'"';    
             }
             $query = $query.' ORDER BY rec_Modified';
-            if($this->maxCountToCheck>0){
+            if($this->maxCountToCheck > 0){
                 $query = $query.' LIMIT '.$this->maxCountToCheck;
             }
         }
@@ -616,6 +631,7 @@ class DbVerifyURLs {
     * @param mixed $recId
     * @param mixed $recUrl
     * @param mixed $data
+    * @param bool $isReferenceDatabase
     */
     private function handleRecordUrl($recId, $recUrl, $data, $isReferenceDatabase){
 
@@ -645,7 +661,7 @@ class DbVerifyURLs {
     /**
      * Check free text and block text fields for URLs.
      *
-     * @return void
+     * @return bool
      */
     private function checkTextFieldURLs() {
         $query = 'SELECT dtl_RecID, dtl_Value, dtl_DetailTypeID, dtl_ID FROM recDetails ' .
@@ -659,7 +675,7 @@ class DbVerifyURLs {
                 $query = $query.' AND dtl_ID > '.intval($this->results['ts_text']);    
             }
             $query = $query.' ORDER BY dtl_ID';
-            if($this->maxCountToCheck>0){
+            if($this->maxCountToCheck > 0){
                 $query = $query.' LIMIT '.$this->maxCountToCheck;
             }
         }
@@ -679,6 +695,7 @@ class DbVerifyURLs {
 
         $this->results['session_bad_text'] = 0;
         $passed_cnt = 0;
+        $currentDtlID = 0;
         
         while ($row = $res->fetch_row()) {
             $recId = $row[0];
@@ -701,8 +718,11 @@ class DbVerifyURLs {
                 $url = $pair[0];
                 $linkText = $pair[1] ?? $pair[0];
 
-                
                 if($this->skipFieldUrl($recId, $url, $detailTypeId, 'text')){
+                    if($this->checkingAll && $dtlID !== $currentDtlID){
+                        $this->checkedCount ++;
+                        $currentDtlID = $dtlID;
+                    }
                     continue;
                 }
                 
@@ -712,17 +732,24 @@ class DbVerifyURLs {
                 
                 $this->results['ts_text'] = $dtlID;
                 $passed_cnt++;
-                $this->checkedCount++;
-            if($this->isVerbose && ($this->checkedCount % 50)==0){
-                print '<div style="color:#666">Progress: checked '.$this->checkedCount.' URL(s)...</div>';
-                if(function_exists('ob_flush')){ @ob_flush(); }
-                if(function_exists('flush')){ @flush(); }
-            }
+
+                if($this->checkingAll && $dtlID !== $currentDtlID){
+                    $passed_cnt ++;
+                    $currentDtlID = $dtlID;
+                }elseif(!$this->checkingAll){
+                    $this->checkedCount++;
+                }
+
+                if($this->isVerbose && ($this->checkedCount % 50)==0){
+                    print '<div style="color:#666">Progress: checked '.$this->checkedCount.' URL(s)...</div>';
+                    if(function_exists('ob_flush')){ @ob_flush(); }
+                    if(function_exists('flush')){ @flush(); }
+                }
 
             }
-            
+
             if($this->checkedCount >= $this->maxCountToCheck ||
-                   $this->updateSessionProgress($this->checkedCount.','.$this->maxCountToCheck))
+               $this->updateSessionProgress($this->checkedCount.','.$this->maxCountToCheck))
             {
                 break;                
             }
@@ -739,7 +766,7 @@ class DbVerifyURLs {
     /**
      * Check external file URLs in use.
      *
-     * @return void
+     * @return bool
      */
     private function checkExternalFileURLs() {
         $query = 'SELECT dtl_RecID, ulf_ExternalFileReference, dtl_DetailTypeID, dtl_ID FROM recDetails ' .
@@ -752,7 +779,7 @@ class DbVerifyURLs {
                 $query = $query.' AND dtl_ID > '.intval($this->results['ts_file']);    
             }
             $query = $query.' ORDER BY dtl_ID';
-            if($this->maxCountToCheck>0){
+            if($this->maxCountToCheck > 0){
                 $query = $query.' LIMIT '.$this->maxCountToCheck;
             }
         }
@@ -889,6 +916,7 @@ class DbVerifyURLs {
      *
      * @param int $recId
      * @param string $recUrl
+     * @param string $error_msg
      * @return true in case of fatal CURL error
      */
     private function handleBrokenRecordUrl($recId, $recUrl, $error_msg) {
@@ -937,7 +965,7 @@ class DbVerifyURLs {
      * Validates and handles URLs found in free text or block text fields or in file fields.
      *
      * @param int $recId
-     * @param string $url
+     * @param mixed $norm
      * @param int $detailTypeId
      * @param string $field_type_idx  'text' or 'file'
      * @return true in case of fatal CURL error
@@ -1005,5 +1033,53 @@ class DbVerifyURLs {
 
         return $is_fatal;
 
+    }
+
+    /**
+     * Retrieve the complete maximum amount being checked during this process,
+     * where no limit has been set
+     *
+     * @param string|array $formats
+     * @return void
+     */
+    private function setMaxCheckCount($formats){
+
+        $checkingHeaders = $formats === 'all' || in_array('recheaders', $formats);
+        $checkingText = $formats === 'all' || in_array('textfields', $formats);
+        $checkingExternal = $formats === 'all' || in_array('externalfiles', $formats);
+
+        $count = 0;
+        if($checkingHeaders){
+            $headerCount = mysql__select_value($this->mysqli, 'SELECT COUNT(DISTINCT rec_ID) FROM Records WHERE (rec_URL != "") AND (rec_URL IS NOT NULL)');
+            $count += intval($headerCount);
+        }
+        if($checkingText){
+
+            $query = <<<QUERY
+            SELECT COUNT(DISTINCT dtl_ID)
+            FROM recDetails
+            INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID
+            WHERE (dty_Type = "freetext" OR dty_Type = "blocktext") AND (dtl_Value LIKE "%http://%" OR dtl_Value LIKE "%https://%" OR dtl_Value LIKE "%href=%" OR dtl_Value LIKE "%./?%" OR dtl_Value LIKE "%?db=%")
+            QUERY;
+
+            $textCount = mysql__select_value($this->mysqli, $query);
+            $count += intval($textCount);
+        }
+        if($checkingExternal){
+
+            $query = <<<QUERY
+            SELECT COUNT(DISTINCT ulf_ExternalFileReference)
+            FROM recDetails
+            INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID
+            INNER JOIN recUploadedFiles ON ulf_ID = dtl_UploadedFileID
+            WHERE dty_Type = "file" AND ulf_ExternalFileReference != "" AND ulf_OrigFileName="_remote"
+            QUERY;
+
+            $externalCount = mysql__select_value($this->mysqli, $query);
+            $count += intval($externalCount);
+        }
+
+        $this->maxCountToCheck = $count;
+        $this->checkingAll = true;
     }
 }

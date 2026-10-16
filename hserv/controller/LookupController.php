@@ -14,6 +14,7 @@
 * Nakala
 * Opentheso
 * Wikidata SPARQL
+* ISNI
 *
 * @project     Heurist academic knowledge management system
 * @package Controller
@@ -39,16 +40,9 @@ use function count;
 use function defined;
 use function define;
 use function is_bool;
+use function is_string;
 
-require_once dirname(__FILE__).'/../../autoload.php';
-
-// BnF Constants
-define('BNF_BASE_URL', 'https://catalogue.bnf.fr/api/SRU?');
-define('BNF_XML_RECORDS_NAMESPACE', 'http' . '://www.loc.gov/zing/srw/'); // srw
-define('BNF_XML_DETAILS_NAMESPACE', 'info:lc/xmlns/marcxchange-v2'); // mxc
-
-define('NUMERIC', 'number');
-define('ALPHANUMERIC', 'mixed');
+require_once __DIR__ . '/../../autoload.php';
 
 define('ESTC_ERROR_MSG', 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.');
 
@@ -59,29 +53,39 @@ class LookupController{
     private array $request = [];
 
     private string $lookupType = '';
-    private string $lookupURL = '';
     private string $lookupMetadata = '';
     private string $lookupAction = '';
+    private string $lookupURL = '';
     private array $lookupHeaders = [];
     private int $lookupTimeout = 30;
+    /** @var mixed $lookupResponse */
     private $lookupResponse = null;
+    private bool $isPublicLookup = false;
 
     private bool $isValid = false;
     private bool $isESTC = false;
     private bool $isMetadata = false;
     private bool $isDebug = false;
 
+    // Constants
+    private const NUMERIC = 'number';
+    private const ALPHANUMERIC = 'mixed';
+
+    private const BNF_BASE_URL = 'https://catalogue.bnf.fr/api/SRU?';
+    private const XML_RECORDS_ZING_SRW = 'http://www.loc.gov/zing/srw/'; // srw
+    private const XML_DETAILS_MXC = 'info:lc/xmlns/marcxchange-v2'; // mxc
+
     private array $serviceURLs = [
         'tlcmap' => [
-            'https://tlcmap.org/ghap/search?',
+            'https://tlcmap.org/?',
             'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
         ],
 
-        'geonames' => 'http' . '://api.geonames.org/',
+        'geonames' => 'http://api.geonames.org/',
 
-        'bnflibrary_bib' => BNF_BASE_URL,
-        'bnflibrary_aut' => BNF_BASE_URL,
-        'bnf_recdump' => BNF_BASE_URL,
+        'bnflibrary_bib' => self::BNF_BASE_URL,
+        'bnflibrary_aut' => self::BNF_BASE_URL,
+        'bnf_recdump' => self::BNF_BASE_URL,
 
         'nomisma' => [
             'https://nomisma.org/apis/',
@@ -102,55 +106,90 @@ class LookupController{
             'action' => 'import_records' // 'record_output'
         ],
 
-        'wikidata_SPARQL' => 'https://query.wikidata.org/sparql?'
+        'wikidata_SPARQL' => 'https://query.wikidata.org/sparql?',
+
+        'orcid' => 'https://orcid.org/{__ORCID__}/record',
+
+        'isni' => 'https://isni.oclc.org/sru/DB=1.2/',
+        'isni_recdump' => 'https://isni.oclc.org/sru/DB=1.2/'
     ];
 
     private const SERVICE_PARAMETERS = [ // array
         'tlcmap' => [
-            'name' => ALPHANUMERIC,
-            'fuzzyname' => ALPHANUMERIC,
-            'anps_id' => ALPHANUMERIC,
-            'lga' => ALPHANUMERIC,
-            'state' => ALPHANUMERIC
+            'name' => self::ALPHANUMERIC,
+            'fuzzyname' => self::ALPHANUMERIC,
+            'anps_id' => self::ALPHANUMERIC,
+            'lga' => self::ALPHANUMERIC,
+            'state' => self::ALPHANUMERIC
         ],
 
         'geonames' => [
-            'q' => ALPHANUMERIC,
-            'country' => ALPHANUMERIC,
-            'postalcode' => ALPHANUMERIC,
-            'placename' => ALPHANUMERIC,
-            'maxRows' => NUMERIC,
-            'geonameId' => ALPHANUMERIC
+            'q' => self::ALPHANUMERIC,
+            'country' => self::ALPHANUMERIC,
+            'postalcode' => self::ALPHANUMERIC,
+            'placename' => self::ALPHANUMERIC,
+            'maxRows' => self::NUMERIC,
+            'geonameId' => self::ALPHANUMERIC
         ],
 
         'bnf' => [
-            'query' => ALPHANUMERIC,
-            'maximumRecords' => NUMERIC
+            'query' => self::ALPHANUMERIC,
+            'maximumRecords' => self::NUMERIC,
+            'startRecord' => self::NUMERIC
         ],
 
         'nomisma' => [
-            'id' => ALPHANUMERIC
+            'id' => self::ALPHANUMERIC
         ],
 
         'nakala' => [
-            'fq' => ALPHANUMERIC,
-            'q' => ALPHANUMERIC,
-            'size' => NUMERIC
+            'fq' => self::ALPHANUMERIC,
+            'q' => self::ALPHANUMERIC,
+            'size' => self::NUMERIC
         ],
 
         'opentheso' => [
-            'q' => ALPHANUMERIC,
-            'lang' => ALPHANUMERIC,
-            'group' => ALPHANUMERIC
+            'q' => self::ALPHANUMERIC,
+            'lang' => self::ALPHANUMERIC,
+            'group' => self::ALPHANUMERIC
         ],
 
         'wikidata_SPARQL' => [
-            'query' => ALPHANUMERIC
+            'query' => self::ALPHANUMERIC
+        ],
+
+        'orcid' => [
+            'id' => '/^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/'
+        ],
+
+        'isni' => [
+            'query' => self::ALPHANUMERIC,
+            'maximumRecords' => self::NUMERIC,
+            'startRecord' => self::NUMERIC,
+            'sortKeys' => self::ALPHANUMERIC
         ]
     ];
 
+    private const LOOKUP_NO_QUERY = [
+        'orcid' => [
+            'id' => '{__ORCID__}'
+        ]
+    ];
+
+    private const ALLOWED_PUBLIC_LOOKUPS = ['orcid'];
+
     private string $nakalaFile = '';
     private string $openthesoFile = '';
+    private string $marcCodesFile = '';
+
+    private const MARC_CODE_SOURCE = 'https://id.loc.gov/vocabulary/relators.json';
+
+    private const ISNI_SOURCE_CODES = [
+        'LCNACO' => 'Library of Congress',
+        'VIAF' => 'VIAF',
+        'WKP' => 'Wikidata',
+        'SUDOC' => 'Id Ref'
+    ];
 
     private string $ESTCMsg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
 
@@ -173,7 +212,7 @@ class LookupController{
 
     private function setupSystem() : bool{
 
-        if($this->system->getUserId() < 1){
+        if($this->system->getUserId() < 1 && !$this->isPublicLookup){
             $this->system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in to use the external lookup services');
             return false;
         }elseif(!defined('HEURIST_FILESTORE_ROOT')){
@@ -182,6 +221,7 @@ class LookupController{
 
         $this->nakalaFile = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/NAKALA_metadata_values.json';
         $this->openthesoFile = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/OPENTHESO_thesauruses.json';
+        $this->marcCodesFile = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/MARC_Codes_for_Relators.json';
 
         $this->metadataCleanup();
 
@@ -218,7 +258,7 @@ class LookupController{
             return false;
         }
 
-        $this->database = @$this->request['db'];
+        $this->database = @$this->request['db'] ?? '';
         $this->isDebug = @$this->request['dbg'] == 1;
 
         $this->lookupType = $this->request['serviceType'];
@@ -236,6 +276,9 @@ class LookupController{
         }elseif($this->lookupMetadata){
             $this->isValid = true;
             $this->isMetadata = true;
+        }elseif(array_key_exists($this->lookupType, self::LOOKUP_NO_QUERY)){
+            $this->isValid = true;
+            $this->lookupURL = $this->serviceURLs[$this->lookupType];
         }elseif(!is_array($serviceURLs)){
             $this->isValid = $serviceURLs == $this->lookupURL || strpos($this->lookupURL, $serviceURLs) === 0;
         }else{
@@ -263,7 +306,56 @@ class LookupController{
             $this->system->addError(HEURIST_REQUEST_DENIED, $this->ESTCMsg);
         }
 
+        $this->isPublicLookup = in_array($this->lookupType, self::ALLOWED_PUBLIC_LOOKUPS);
+
         return $this->isValid;
+    }
+
+    private function verifyRequestURI() : bool{
+
+        if(!array_key_exists($this->lookupType, self::LOOKUP_NO_QUERY)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Provided service "'. htmlspecialchars($this->lookupType) .'" is not valid');
+            return false;
+        }
+
+        $replacements = self::LOOKUP_NO_QUERY[$this->lookupType];
+        $serviceParams = self::SERVICE_PARAMETERS[$this->lookupType];
+        $hasReplacedValue = false;
+
+        foreach($serviceParams as $field => $type){
+
+            if(!array_key_exists($field, $this->request) || !array_key_exists($field, $replacements)){
+                continue;
+            }
+
+            $value = null;
+            if($type === self::NUMERIC){
+                $value = intval($this->request[$field]);
+            }elseif($type === self::ALPHANUMERIC || is_string($type) && preg_match($type, $this->request[$field]) === 1){
+                $value = htmlspecialchars($this->request[$field], ENT_NOQUOTES);
+            }
+
+            if($value !== null){
+                $this->lookupURL = str_replace($replacements[$field], $value, $this->lookupURL);
+                $hasReplacedValue = true;
+            }
+        }
+
+        $missingFields = [];
+        preg_match_all("/{__\w+__}/", $this->lookupURL, $missingFields);
+
+        if(!$hasReplacedValue || !empty($missingFields)){
+            $fields = [];
+            foreach($replacements as $field => $replace){
+                if(in_array($replace, $missingFields)){
+                    $fields[] = $field;
+                }
+            }
+            $message = !$hasReplacedValue ? 'No values have been replaced within the requested URL' : 'The following parameters are missing:<br><strong>'. implode(', ', $fields) .'</strong>';
+            $this->system->addError(HEURIST_ACTION_BLOCKED, $message);
+        }
+
+        return $hasReplacedValue;
     }
 
     private function verifyRequestParameters() : bool{
@@ -272,6 +364,10 @@ class LookupController{
 
         $lookupType = strpos($this->lookupType, 'bnf') !== false ? 'bnf' : $this->lookupType;
         $lookupType = strpos($this->lookupType, 'nakala') !== false ? 'nakala' : $lookupType;
+
+        if(array_key_exists($lookupType, self::LOOKUP_NO_QUERY)){
+            return $this->verifyRequestURI();
+        }
 
         if($this->isESTC || $this->isDebug || $this->isMetadata || !array_key_exists($lookupType, self::SERVICE_PARAMETERS) || !$this->isValid){
             $this->isValid || $this->system->addError(HEURIST_INVALID_REQUEST, 'Provided service "'. htmlspecialchars($lookupType) .'" is not valid');
@@ -298,9 +394,9 @@ class LookupController{
                 continue;
             }
 
-            if($field === NUMERIC){
+            if($type === self::NUMERIC){
                 $newQuery[$field] = intval($urlQuery[$field]);
-            }else{
+            }elseif($type === self::ALPHANUMERIC || is_string($type) && preg_match($type, $urlQuery[$field]) === 1){
                 $newQuery[$field] = htmlspecialchars($urlQuery[$field], ENT_NOQUOTES);
             }
         }
@@ -312,15 +408,25 @@ class LookupController{
             $newQuery['version'] = '1.2';
             $newQuery['operation'] = 'searchRetrieve';
             $newQuery['recordSchema'] = 'unimarcxchange';
+        }elseif($lookupType == 'isni'){
+            $newQuery['version'] = '1.1';
+            $newQuery['operation'] = 'searchRetrieve';
+            $newQuery['recordSchema'] = 'isni-b';
         }elseif($lookupType == 'wikidata_simple'){
             $newQuery['action'] = 'wbsearchentities';
             $newQuery['format'] = 'json';
         }elseif($lookupType == 'wikidata_SPARQL'){
             $this->lookupHeaders[] = 'Accept: application/sparql-results+json';
+        }elseif($lookupType == 'tlcmap'){
+            $newQuery['format'] = 'json';
+            $newQuery['searchpublicdatasets'] = 'on';
+            $newQuery['searchausgaz'] = 'on';
+            $newQuery['searchncg'] = 'on';
         }
 
         if(empty($newURL) || empty($newQuery) || !filter_var($newURL, FILTER_VALIDATE_URL)){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Invalid URL provided');
+            $message = empty($newQuery) ? 'No query parameters provided' : 'Invalid URL provided';
+            $this->system->addError(HEURIST_ACTION_BLOCKED, $message);
             return false;
         }
 
@@ -371,6 +477,7 @@ class LookupController{
             $http_code = $http_code[0];
             $heuristErrorType = HEURIST_ERROR;
 
+            $url = $this->lookupURL;
             if($this->lookupType === 'geonames'){
                 $url = preg_replace("/&?username=$accessToken_GeonamesAPI&?/", "", $this->lookupURL);
                 $_REQUEST['service'] = $url;
@@ -409,12 +516,20 @@ class LookupController{
                 $this->processBnFAuthoritySearch();
                 break;
 
+            case 'isni':
+                $this->processISNISearch();
+                break;
+
             case 'nakala':
                 $this->processNakalaIDSearch();
                 break;
 
             case 'opentheso':
                 $this->processOpenthesoSearch();
+                break;
+
+            case 'orcid':
+                $this->processORCIDSearch();
                 break;
 
             case 'geonames':
@@ -489,10 +604,29 @@ class LookupController{
                 $xml_obj = simplexml_load_string($this->lookupResponse, null, LIBXML_PARSEHUGE);
 
                 // Retrieve records from results
-                $records = $xml_obj->children(BNF_XML_RECORDS_NAMESPACE, false)->records->record;
+                $records = $xml_obj->children(self::XML_RECORDS_ZING_SRW, false)->records->record;
 
                 foreach($records as $key => $details){
-                    $record = $details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record;
+                    $record = $details->recordData->children(self::XML_DETAILS_MXC, false)->record;
+                    $results['record'] = $record->asXML();
+                    break;
+                }
+
+                $this->lookupResponse = $results;
+                break;
+
+            case 'isni_recdump':
+
+                $results = [];
+
+                // Create xml object
+                $xml_obj = simplexml_load_string($this->lookupResponse, null, LIBXML_PARSEHUGE);
+
+                // Retrieve records from results
+                $records = $xml_obj->children(self::XML_RECORDS_ZING_SRW, false)->records->record;
+
+                foreach($records as $key => $details){
+                    $record = $details->recordData->children()->responseRecord;
                     $results['record'] = $record->asXML();
                     break;
                 }
@@ -522,7 +656,7 @@ class LookupController{
         $xmlObj = simplexml_load_string($this->lookupResponse, null, LIBXML_PARSEHUGE);
 
         // Retrieve records from results
-        $records = $xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->records->record;
+        $records = $xmlObj->children(self::XML_RECORDS_ZING_SRW, false)->records->record;
 
         // Move each result's details into seperate array
         foreach ($records as $details) {
@@ -533,7 +667,7 @@ class LookupController{
             $pub_idx = 0;
             $id = '';
 
-            foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->controlfield as $key => $cf_ele) { // controlfield elements
+            foreach ($details->recordData->children(self::XML_DETAILS_MXC, false)->record->controlfield as $key => $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
 
                 if($cf_tag == '001') { // BnF ID
@@ -547,7 +681,7 @@ class LookupController{
                 }
             }
 
-            foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->datafield as $key => $df_ele) { // datafield elements
+            foreach ($details->recordData->children(self::XML_DETAILS_MXC, false)->record->datafield as $key => $df_ele) { // datafield elements
 
                 $df_tag = @$df_ele->attributes()['tag'];
 
@@ -750,7 +884,7 @@ class LookupController{
         }
 
         // Add other details
-        $results['numberOfRecords'] = intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
+        $results['numberOfRecords'] = intval($xmlObj->children(self::XML_RECORDS_ZING_SRW, false)->numberOfRecords);
 
         // Encode to json for response to JavaScript
         $this->lookupResponse = $results;
@@ -764,16 +898,16 @@ class LookupController{
         $xmlObj = simplexml_load_string($this->lookupResponse, null, LIBXML_PARSEHUGE);
 
         // Retrieve records from results
-        $records = $xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->records->record;
+        $records = $xmlObj->children(self::XML_RECORDS_ZING_SRW, false)->records->record;
 
         $dfHandled = [200, 210, 215, 216, 220, 240, 230, 250];
 
         // Move each result's details into seperate array
-        foreach ($records as $key => $details) {
+        foreach ($records as $details) {
 
             $formattedArray = [];
 
-            foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->controlfield as $key => $cf_ele) { // controlfield elements
+            foreach ($details->recordData->children(self::XML_DETAILS_MXC, false)->record->controlfield as $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
 
                 if($cf_tag == '001') { // BnF ID
@@ -786,14 +920,14 @@ class LookupController{
                 }
             }
 
-            foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->datafield as $key => $df_ele) { // datafield elements
+            foreach ($details->recordData->children(self::XML_DETAILS_MXC, false)->record->datafield as $df_ele) { // datafield elements
                 $df_tag = @$df_ele->attributes()['tag'];
 
                 if(!$df_tag || !in_array($df_tag, $dfHandled)){
                     continue;
                 }
 
-                foreach($df_ele->subfield as $sub_key => $sf_ele) {
+                foreach($df_ele->subfield as $sf_ele) {
 
                     $sf_code = @$sf_ele->attributes()['code'];
 
@@ -904,9 +1038,265 @@ class LookupController{
         }
 
         // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
-        $results['numberOfRecords'] = intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
+        $results['numberOfRecords'] = intval($xmlObj->children(self::XML_RECORDS_ZING_SRW, false)->numberOfRecords);
 
         // Encode to json for response to JavaScript
+        $this->lookupResponse = $results;
+    }
+
+    private function processISNISearch() : void{
+
+        $marcCodes = $this->getMARCCodeList();
+        $results = [
+            'result' => [],
+            'numberOfRecords' => 0
+        ];
+
+        // Create xml object
+        $xmlObj = simplexml_load_string($this->lookupResponse, null, LIBXML_PARSEHUGE);
+
+        // Retrieve records from results
+        $records = $xmlObj->children(self::XML_RECORDS_ZING_SRW, false)->records->record;
+
+        foreach($records as $record){
+
+            $isniRecord = [
+                'names' => [],
+                'titles' => [],
+                'dates' => [],
+                'locations' => [],
+                'entity_type' => [],
+                'related_persons' => [],
+                'creation_class' => [],
+                'creation_role' => [],
+                'sources' => []
+            ];
+            $details = $record->recordData->children()->responseRecord;
+
+            if(!isset($details->ISNIAssigned->ISNIMetadata->identity)){
+                continue;
+            }
+
+            $ISNIMetadata = $details->ISNIAssigned->ISNIMetadata;
+            $isniRecord['isni'] = (string)$details->ISNIAssigned->isniUnformatted[0];
+            $isniRecord['isni_uri'] = (string)$details->ISNIAssigned->isniURI[0];
+
+            $identityDetails = $ISNIMetadata->identity;
+
+            if(isset($identityDetails->personOrFiction)){
+
+                $personAndWorks = $identityDetails->personOrFiction;
+
+                foreach($personAndWorks->personalName as $personDetails){
+
+                    $surname = (string)$personDetails->surname[0] ?? '';
+                    $forename = (string)$personDetails->forename[0] ?? '';
+                    $date = (string)$personDetails->marcDate[0] ?? '';
+
+                    $fullname = $surname;
+                    if(!empty($forename)){
+                        $fullname = $fullname === '' ? $forename : "{$fullname}, {$forename}";
+                    }
+
+                    if($fullname !== '' && !in_array($fullname, $isniRecord['names'])){
+                        $isniRecord['names'][] = $fullname;
+                    }
+                    if($date !== '' && !in_array($date, $isniRecord['dates'])){
+                        $isniRecord['dates'][] = $date;
+                    }
+                }
+
+                $activities = $personAndWorks->creativeActivity;
+                if(isset($activities->creationRole)){
+
+                    foreach($activities->creationRole as $role){
+                        $roleID = (string)$role[0];
+                        $roleName = @$marcCodes[$roleID] ?? $roleID;
+                        if(!in_array($roleName, $isniRecord['creation_role'])){
+                            $isniRecord['creation_role'][] = $roleName;
+                        }
+                    }
+                }
+                if(isset($activities->creationClass)){
+
+                    foreach($activities->creationClass as $class){
+                        $classID = (string)$class[0];
+                        if(!in_array($classID, $isniRecord['creation_class'])){
+                            $isniRecord['creation_class'][] = $classID;
+                        }
+                    }
+                }
+                if(isset($activities->titleOfWork)){
+
+                    foreach($activities->titleOfWork as $workDetails){
+                        $workTitle = (string)$workDetails->title[0] ?? '';
+                        $workTitle .= (string)$workDetails->subtitle[0] ?? '';
+
+                        if(substr($workTitle, 0, 1) === '@'){
+                            $workTitle = substr($workTitle, 1);
+                        }
+                        if(!in_array($workTitle, $isniRecord['titles'])){
+                            $isniRecord['titles'][] = $workTitle;
+                        }
+                    }
+                }
+
+                $isniRecord['entity_type'][] = 'Person or Fiction';
+
+            }elseif(isset($identityDetails->organisation)){
+
+                $organisations = $identityDetails->organisation;
+
+                foreach($organisations as $organisation){
+
+                    if(!isset($organisation->organisationName->mainName) || in_array($organisation->organisationName->mainName, $isniRecord['name'])){
+                        continue;
+                    }
+
+                    $organisationName = (string)$organisation->organisationName->mainName[0] ?? '';
+                    if($organisationName === ''){
+                        continue;
+                    }elseif(!in_array($organisationName, $isniRecord['names'])){
+                        $isniRecord['names'][] = $organisationName;
+                    }
+
+                    $activities = $organisation->creativeActivity;
+                    if(isset($activities->creationRole)){
+
+                        foreach($activities->creationRole as $role){
+                            $roleID = (string)$role[0];
+                            $roleName = @$marcCodes[$roleID] ?? $roleID;
+                            if(!in_array($roleName, $isniRecord['creation_role'])){
+                                $isniRecord['creation_role'][] = $roleName;
+                            }
+                        }
+                    }
+                    if(isset($activities->creationClass)){
+
+                        foreach($activities->creationClass as $class){
+                            $classID = (string)$class[0];
+                            if(!in_array($classID, $isniRecord['creation_class'])){
+                                $isniRecord['creation_class'][] = $classID;
+                            }
+                        }
+                    }
+                    if(isset($activities->titleOfWork)){
+
+                        foreach($activities->titleOfWork as $workDetails){
+                            $workTitle = (string)$workDetails->title[0] ?? '';
+                            $workTitle .= (string)$workDetails->subtitle[0] ?? '';
+
+                            if(substr($workTitle, 0, 1) === '@'){
+                                $workTitle = substr($workTitle, 1);
+                            }
+                            if(!in_array($workTitle, $isniRecord['title'])){
+                                $isniRecord['titles'][] = $workTitle;
+                            }
+                        }
+                    }
+
+                    $additionalInfo = $organisation->additionalInformation;
+                    if(isset($additionalInfo->location)){
+
+                        foreach($additionalInfo->location as $location){
+                            $location = (string)$location->countryCode[0];
+                            if(!in_array($location, $isniRecord['location'])){
+                                $isniRecord['locations'][] = $location;
+                            }
+                        }
+                    }
+
+                    if(isset($organisation->isRelatedPerson)){
+
+                        foreach($organisation->isRelatedPerson as $person){
+                            $surname = (string)$personDetails->surname[0] ?? '';
+                            $forename = (string)$personDetails->forename[0] ?? '';
+
+                            $fullname = $surname;
+                            if(!empty($forename)){
+                                $fullname = $fullname === '' ? $forename : "{$fullname}, {$forename}";
+                            }
+
+                            if(!in_array($fullname, $isniRecord['related_persons'])){
+                                $isniRecord['related_persons'][] = $fullname;
+                            }
+                        }
+                    }
+
+                    $isniRecord['entity_type'][] = (string)$organisation->organisationType[0] ?? 'Organisation';
+                }
+            }
+
+            if(isset($ISNIMetadata->sources)){
+
+                $sources = $ISNIMetadata->sources;
+                foreach($sources as $source){
+
+                    $sourceCode = (string)$source->codeOfSource[0] ?? '';
+                    $sourceID = (string)$source->sourceIdentifier[0] ?? '';
+                    $sourceURI = (string)$source->reference->URI[0] ?? '';
+
+                    if($sourceCode === '' || $sourceID === ''){
+                        continue;
+                    }elseif($sourceURI === ''){
+
+                        $sourceID = str_replace(' ', '', $sourceID);
+                        switch($sourceCode){
+                            case 'LCNACO':
+                                $sourceURI = "http://id.loc.gov/authorities/names/{$sourceID}";
+                                break;
+                            case 'VIAF':
+                                $sourceURI = "http://viaf.org/viaf/{$sourceID}";
+                                break;
+                            case 'WKP':
+                                $sourceURI = "https://www.wikidata.org/wiki/{$sourceID}";
+                                break;
+                            case 'SUDOC':
+                                $sourceURI = "https://www.idref.fr/{$sourceID}";
+                                break;
+                            case 'DNB':
+                                $sourceURI = "http://d-nb.info/gnd/{$sourceID}";
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    if($sourceURI === ''){
+                        continue;
+                    }
+
+                    $sourceCode = array_key_exists($sourceCode, self::ISNI_SOURCE_CODES) ? self::ISNI_SOURCE_CODES[$sourceCode] : $sourceCode;
+
+                    $sourceString = "{$sourceCode}: {$sourceURI}";
+
+                    if(!in_array($sourceString, $isniRecord['sources'])){
+                        $isniRecord['sources'][] = $sourceString;
+                    }
+                }
+            }
+            if(isset($ISNIMetadata->externalInformation)){
+
+                $externalSources = $ISNIMetadata->externalInformation;
+                foreach($externalSources as $source){
+                    $sourceTitle = (string)$source->information[0] ?? '';
+                    $sourceURI = (string)$source->URI[0] ?? '';
+                    $sourceString = "{$sourceTitle}: {$sourceURI}";
+
+                    if($sourceTitle !== '' && $sourceURI !== '' && !in_array($sourceString, $isniRecord['sources'])){
+                        $isniRecord['sources'][] = $sourceString;
+                    }
+                }
+            }
+
+            if(!empty($isniRecord['names'])){
+                $results['result'][] = $isniRecord;
+            }
+        }
+
+        // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
+        $results['numberOfRecords'] = intval($xmlObj->children(self::XML_RECORDS_ZING_SRW, false)->numberOfRecords);
+
         $this->lookupResponse = $results;
     }
 
@@ -1108,6 +1498,48 @@ class LookupController{
         }
 
         $this->lookupResponse = $results;
+    }
+
+    private function processORCIDSearch() : void{
+
+        $this->lookupResponse = is_array($this->lookupResponse) ? $this->lookupResponse : json_decode($this->lookupResponse, true);
+        $record = [];
+
+        // An ORCID error/empty response is not a researcher record. Do not fabricate
+        // a successful result from the requested identifier and lookup URL.
+        if(!is_array($this->lookupResponse) || !isset($this->lookupResponse['person'])
+            || !is_array($this->lookupResponse['person'])){
+            $this->lookupResponse = $record;
+            return;
+        }
+
+        if(array_key_exists('person', $this->lookupResponse)){
+
+            $personDetails = $this->lookupResponse['person'];
+
+            $record['given-names'] = !empty(@$personDetails['name']['given-names']['value']) ? $personDetails['name']['given-names']['value'] : '';
+            $record['family-name'] = !empty(@$personDetails['name']['family-name']['value']) ? $personDetails['name']['family-name']['value'] : '';
+            $record['keywords'] = !empty(@$personDetails['keywords']['keyword']) && !empty(@$personDetails['keywords']['keyword'][0]['content'])
+                ? $personDetails['keywords']['keyword'][0]['content'] : '';
+        }
+
+        if(array_key_exists('activities-summary', $this->lookupResponse)){
+
+            $employmentDetails = $this->lookupResponse['activities-summary'];
+
+            $record['employment'] = !empty(@$employmentDetails['employments']['affiliation-group'])
+                && !empty(@$employmentDetails['employments']['affiliation-group'][0]['summaries'])
+                && !empty(@$employmentDetails['employments']['affiliation-group'][0]['summaries'][0]['employment-summary']['organization']['name'])
+                    ? $employmentDetails['employments']['affiliation-group'][0]['summaries'][0]['employment-summary']['organization']['name'] : '';
+        }
+
+        $record['orcid'] = $this->request['id'];
+        $record['url'] = $this->lookupURL;
+
+        // researcher-urls => researcher-url[] => url-name & url['value']
+        // addresses => address => country['value']
+
+        $this->lookupResponse = $record;
     }
 
     private function retrieveMetadata() : bool{
@@ -1381,12 +1813,12 @@ class LookupController{
     }
 
     /**
-     * Hardcoded Nakala metadata values for licences, data types, and property types
+     * Hardcoded Nakala metadata values for licenses, data types, and property types
      * The 'years' type is too be setup client side
      */
     private function setupNakalaMetadata() : void{
 
-        $licences = [
+        $licenses = [
             'CC-BY-4.0',
             'CC-BY-NC-SA-4.0',
             'CC-BY-NC-ND-4.0',
@@ -1799,7 +2231,7 @@ class LookupController{
 
         // years = range(1, date('Y'))
 
-        $this->lookupResponse = ['licenses' => $licences, 'types' => $dataTypes, 'fields' => $properties];
+        $this->lookupResponse = ['licenses' => $licenses, 'types' => $dataTypes, 'fields' => $properties];
     }
 
     /**
@@ -1827,6 +2259,43 @@ class LookupController{
         }
 
         return $response;
+    }
+
+
+    private function getMARCCodeList() : array{
+
+        $listOfCodes = [];
+
+        if(!file_exists($this->marcCodesFile)){
+
+            $rawList = loadRemoteURLContentWithRange(self::MARC_CODE_SOURCE, null);
+
+            if($rawList){
+
+                $jsonData = json_decode($rawList, true);
+
+                if($jsonData){
+
+                    foreach($jsonData as $relator){
+
+                        $label = @$relator['http://www.loc.gov/mads/rdf/v1#authoritativeLabel'][0]['@value'];
+                        $code = @$relator['http://www.loc.gov/mads/rdf/v1#code'][0]['@value'];
+                        if(empty($code) || empty($label)){
+                            continue;
+                        }
+                        $listOfCodes[$code] = $label;
+                    }
+                }
+            }
+
+            fileSave(json_encode($listOfCodes), $this->marcCodesFile);
+
+        }else{
+            $listOfCodes = file_get_contents($this->marcCodesFile);
+            $listOfCodes = json_decode($listOfCodes, true) ?? [];
+        }
+
+        return $listOfCodes;
     }
 
     public function output(bool $returnValue = false){
@@ -1998,7 +2467,7 @@ if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== fal
                 'mapping_defs' => @$this->request['mapping']
             ];
 
-            $res = \ImportHeurist::importRecords($scratchPath, $params2);
+            $res = \ImportHeurist::importRecords($scratchPath, $params);
             if(is_bool($res) && $res === false){
                 $response = $system->getError();
             }else{
@@ -2013,7 +2482,7 @@ if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== fal
 
     }else{
 
-        $url = $base_url.http_build_query($params);// forward request to ESTC server
+        $url = $baseURL.http_build_query($params);// forward request to ESTC server
         $response = loadRemoteURLContentWithRange($url, null, true, 60);
     }
 

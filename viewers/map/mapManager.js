@@ -86,11 +86,11 @@ L.Control.Addmapdoc = L.Control.extend({
           .disableScrollPropagation(container);
           
         $('<a>').attr('title', window.hWin.HR('Create new map document'))
-            .html('<span class="ui-icon ui-map-document" style="width:22px;margin:2px 0px">'
-+'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:0px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
+            .html('<span class="ui-icon ui-map-document" style="width: 22px;height: 22px;position: relative;top: -0.2em;left: 0.2em;">'
++'<span class="ui-icon ui-icon-plus" style="position: absolute;bottom: -2px;right: 0px;font-size: 12px;color: white;text-shadow: 1px 1px gray;" />'
                 +'</span>')
             .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
-            //.addClass('ui-icon ui-map-document')
+
             .appendTo(container);
         
         L.DomEvent

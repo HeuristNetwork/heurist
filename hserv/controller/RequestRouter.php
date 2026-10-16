@@ -9,7 +9,7 @@ namespace hserv\controller;
  *
  * RouteResult shape:
  * [
- *   'mode'     => 'INTERNAL'|'REDIRECT'|'NOT_FOUND',
+ *   'mode'     => 'INTERNAL'|'REDIRECT'|'FILE'|'NOT_FOUND',
  *   'status'   => 200|302|404,
  *   'script'   => '/abs/path/to/script.php'|null,
  *   'location' => '/heurist/?db=...'|null,
@@ -30,11 +30,16 @@ final class RequestRouter
     /** @var int|null */
     private static $mappingMTime = null;
 
-    // Adjust to add more versions
-    private const ALLOWED_VERSIONS = ['heurist','h7-alpha','h7-ao','h7-bm','h7-hn'];
+    /** @var array<string,array<int,array{pattern:string,value:string,regex:string|null}>> */
+    private static $urlSubstitutions = [];
+    /** @var array<string,int> */
+    private static $urlSubstitutionMTimes = [];
+
+    /** @var string|null */
+    private static $databaseFolder = null;
 
     // Actions supported in pretty routes
-    private const ALLOWED_ACTIONS = ['website','web','hml','tpl','view','edit','adm'];
+    private const ALLOWED_ACTIONS = ['website','web','hml','tpl','view','edit','adm','rec','record','rty','dty','trm'];
 
     // Content negotiation for /db/* when fmt not provided
     private const REQUEST_CONTENT = [
@@ -75,13 +80,12 @@ final class RequestRouter
         $mappedWebsite = $hostMap['website'] ?? null;
         $mappedVersion = $hostMap['version'] ?? null;
 
-        // Detect version prefix
+        // Detect installation/version prefix
         $versionPrefix = null;
-        if (!empty($segments) && in_array($segments[0], self::ALLOWED_VERSIONS, true)) {
+        if (!empty($segments) && self::isHeuristCodeFolder($segments[0])) {
             $versionPrefix = array_shift($segments);
         }
         $activeVersion = $mappedVersion ?: ($versionPrefix ?: $defaultVersion);
-
         
         // Normalize "/index.php" (and optionally "/index.html") to "/"
         if (count($segments) === 1) {
@@ -91,32 +95,38 @@ final class RequestRouter
             }
         }        
         
+        $query = self::queryParamsFromRequestUri();
+
         // If host is not mapped and request is root "/", show welcome page
-        if ($hostMap === null && empty($segments)) {
+        if ($hostMap === null && empty($segments) && empty($query['db'])) {
             $welcome = self::serverRoot() . "/index.html";
             if (is_file($welcome)) {
-                return self::resultInternal($welcome, []);
+                return self::resultInternal($activeVersion, [], $welcome);
             }
             // fallback: go to startup
             return self::resultRedirect("/{$activeVersion}/startup/", 302, []);
             //or 404 self::result404();
         }        
         
-        $query = self::queryParamsFromRequestUri();
-
         // Parameterized entry: /<version>/?db=...
         if (!empty($query['db']) && !self::isApiRoute($segments)) {
             // normalize / apply DBREF if you want:
             $dbResolved = self::applyDbRef($mapping, (string)$query['db']);
             $query['db'] = $dbResolved;
 
-            $script = self::serverRoot() . "/{$activeVersion}/index.php";
-            return self::resultInternal($script, $query);
+            return self::resultInternal($activeVersion, $query);
         }        
         
         // Reserved paths (either from options or mapping file)
-        $reserved = $options['reserved_paths']
-            ?? ($mapping['reserved_paths'] ?? ['heurist','h7-alpha','h7-ao','h7-bm','startup','matomo','errors','db','api']);
+        $builtinReserved = ['startup', 'matomo', 'errors', 'db', 'api'];
+
+        $configReserved = $options['reserved_paths']
+            ?? ($mapping['reserved_paths'] ?? []);
+
+        $reserved = array_values(array_unique(array_merge(
+            $builtinReserved,
+            is_array($configReserved) ? $configReserved : []
+        )));
 
         // NOTE: route() does not attempt to "serve" physical files; Apache should bypass router for -f/-d.
         // But even if it doesn't, we keep safe fallbacks.
@@ -130,14 +140,22 @@ final class RequestRouter
             return self::resultRedirect("/{$activeVersion}/startup/{$qs}", 302, []);
         }
 
-        // ---- 2) API
+        // ---- 2) API documentation
+        // Public documentation URLs are mapped to the active version's
+        // documentation/api folder. Files are served internally so the stable
+        // /api/docs and /api/openapi.yaml URLs do not expose a version folder.
+        if (self::isApiDocumentationRoute($segments)) {
+            return self::routeApiDocumentation($activeVersion, $segments);
+        }
+
+        // ---- 3) API
         // IMPORTANT: API must be executed as an entry script (do not go via index.php)
         if (self::isApiRoute($segments)) {
             $script = self::serverRoot() . "/{$activeVersion}/hserv/controller/api.php";
-            return self::resultInternal($script, $query);
+            return self::resultInternal($activeVersion, $query, $script);
         }
 
-        // ---- 3) /db/* pretty namespace (record/def/file)
+        // ---- 4) /db/* pretty namespace (record/def/file)
         // Map /db/* URLs into canonical params, then continue to version/index.php.
         if (self::isDbResolverRoute($segments)) {
             $params = self::paramsFromDbResolverPath($segments);
@@ -154,32 +172,47 @@ final class RequestRouter
             // Query wins over path-derived params
             $params = array_merge($params, $query);
 
-            $script = self::serverRoot() . "/{$activeVersion}/index.php";
-            return self::resultInternal($script, $params);
+            return self::resultInternal($activeVersion, $params);
         }
 
-        // ---- 4) Own-domain website handling (must preserve host -> never redirect)
+        // ---- 5) Own-domain website handling (must preserve host -> never redirect)
+        // Apply URL substitutions before entering the own-domain handler so
+        // idenk.net/About behaves the same as /IDENK/About.
         if ($mustPreserveHost) {
-            return self::routeOwnDomain($activeVersion, $mappedDb, $mappedWebsite, $segments);
+            $substitution = self::applyUrlSubstitution($mappedDb ?: '', $segments);
+            if ($substitution !== null) {
+                $query = array_merge($substitution['query'], $query);
+                if ($substitution['is_query']) {
+                    if (empty($query['db']) && !empty($mappedDb)) {
+                        $query['db'] = $mappedDb;
+                    } elseif (!empty($query['db'])) {
+                        $query['db'] = self::applyDbRef($mapping, (string)$query['db']);
+                    }
+                    return self::resultInternal($activeVersion, $query);
+                }
+                $segments = $substitution['segments'];
+            }
+
+            return self::routeOwnDomain($activeVersion, $mappedDb, $mappedWebsite, $segments, $query);
         }
 
-        // ---- 5) Version root (/<version>)
+        // ---- 6) Version root (/<version>)
         if ($versionPrefix !== null && empty($segments)) {
-            return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
+            return self::resultInternal($activeVersion, []);
         }
 
-        // ---- 6) Empty path (rare if root is rewritten): fall into app
+        // ---- 7) Empty path (rare if root is rewritten): fall into app
         if (empty($segments)) {
-            return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
+            return self::resultInternal($activeVersion, []);
         }
 
-        // ---- 7) Versionless /<db> and /<db>/<action>/...
+        // ---- 8) Versionless /<db> and /<db>/<action>/...
         $dbCandidate = $segments[0];
 
         // Avoid treating reserved prefixes as db
-        if (in_array($dbCandidate, $reserved, true)) {
-            return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
-        }
+        if (self::isHeuristCodeFolder($dbCandidate) || in_array($dbCandidate, $reserved, true)) {
+            return self::resultInternal($activeVersion, []);
+        }        
 
         if (!self::isValidDbToken($dbCandidate)) {
             return self::result404();
@@ -195,7 +228,7 @@ final class RequestRouter
             // For unmapped hosts, canonicalize to a pretty /web/ URL.
             if ($mustPreserveHost) {
                 $params = ['db' => $dbResolved, 'website' => (int)($mappedWebsite ?? 0)];
-                return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", array_merge($params, $query));
+                return self::resultInternal($activeVersion, array_merge($params, $query));
             }
 
             $q  = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_QUERY);
@@ -207,19 +240,34 @@ final class RequestRouter
             return self::resultRedirect("/{$dbCandidate}/web/{$qs}", 302, []);
         }
 
+        // Apply URL substitutions to /<db>/<term-or-pattern>/... before action dispatch.
+        $substitution = self::applyUrlSubstitution($dbResolved, array_slice($segments, 1));
+        if ($substitution !== null) {
+            $query = array_merge($substitution['query'], $query);
+            if ($substitution['is_query']) {
+                if (empty($query['db'])) {
+                    $query['db'] = $dbResolved;
+                } else {
+                    $query['db'] = self::applyDbRef($mapping, (string)$query['db']);
+                }
+                return self::resultInternal($activeVersion, $query);
+            }
+            $segments = array_merge([$dbCandidate], $substitution['segments']);
+        }
+
         // /<db>/<action>/...
         $action = $segments[1] ?? null;
-        if ($action !== null && in_array($action, self::ALLOWED_ACTIONS, true)) {
+        if ($action !== null && (in_array($action, self::ALLOWED_ACTIONS, true) || self::isPositiveIntToken($action))) {
             $params = self::paramsFromPrettyRoute($dbResolved, $action, array_slice($segments, 2), $defaultWebsite);
             // Query wins over path-derived params
             $params = array_merge($params, $query);
-            return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", $params);
+            return self::resultInternal($activeVersion, $params);
         }
 
         // If it looks like /<db>/<something> and <something> is not a known action, treat as 404.
         return self::result404();
         // Fallback: let app decide (db browser / 404 / etc.)
-        //return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
+        //return self::resultInternal($activeVersion, []);
         
     }
 
@@ -249,6 +297,19 @@ final class RequestRouter
                 } else {
                     echo "404 Not Found";
                 }
+                exit;
+
+            case 'FILE':
+                $file = $res['script'] ?? null;
+                if (!$file || !is_file($file)) {
+                    http_response_code(404);
+                    echo "404 Not Found";
+                    exit;
+                }
+                http_response_code($res['status'] ?? 200);
+                header('Content-Type: ' . self::contentTypeForFile($file));
+                header('X-Content-Type-Options: nosniff');
+                readfile($file);
                 exit;
 
             case 'INTERNAL':
@@ -352,14 +413,30 @@ final class RequestRouter
     
     // ----------------- Route builders -----------------
 
-    private static function resultInternal(string $script, array $params): array
+    private static function resultInternal(string $activeVersion, array $params, string $script=''): array
     {
+        if($script===''){
+            $script = self::serverRoot() . "/{$activeVersion}/index.php";
+        }
+        
         return [
             'mode'     => 'INTERNAL',
             'status'   => 200,
             'script'   => $script,
             'location' => null,
             'params'   => $params,
+            'version'  => $activeVersion
+        ];
+    }
+
+    private static function resultFile(string $file): array
+    {
+        return [
+            'mode'     => 'FILE',
+            'status'   => 200,
+            'script'   => $file,
+            'location' => null,
+            'params'   => [],
         ];
     }
 
@@ -387,7 +464,71 @@ final class RequestRouter
 
     // ----------------- Specific route handlers -----------------
 
-    private static function routeOwnDomain(string $version, ?string $db, $website, array $segments): array
+    /**
+     * Maps stable API documentation URLs to files under
+     * /<version>/documentation/api.
+     *
+     * Public routes:
+     *   /api/openapi.yaml       -> documentation/api/heurist-openapi.yaml
+     *   /api/docs/              -> documentation/api/index.html
+     *   /api/docs/<path>        -> documentation/api/<path>
+     *
+     * The same routes work with an explicit version prefix.
+     */
+    private static function routeApiDocumentation(string $version, array $segments): array
+    {
+        $base = self::serverRoot() . "/{$version}/documentation/api";
+
+        if (($segments[1] ?? '') === 'openapi.yaml') {
+            if (count($segments) !== 2) {
+                return self::result404();
+            }
+            $file = $base . '/heurist-openapi.yaml';
+            return is_file($file) ? self::resultFile($file) : self::result404();
+        }
+
+        if (($segments[1] ?? '') !== 'docs') {
+            return self::result404();
+        }
+
+        $requestPath = self::stripQueryString($_SERVER['REQUEST_URI'] ?? '/api/docs/');
+        $relative = array_slice($segments, 2);
+
+        // Directory-style URLs are required for relative links in index pages.
+        if (empty($relative)) {
+            if (substr($requestPath, -1) !== '/') {
+                return self::resultRedirect($requestPath . '/', 302, []);
+            }
+            $relative = ['index.html'];
+        }
+
+        foreach ($relative as $segment) {
+            if ($segment === '.' || $segment === '..'
+                || preg_match('/^[A-Za-z0-9._-]+$/', $segment) !== 1) {
+                return self::result404();
+            }
+        }
+
+        $file = $base . '/' . implode('/', $relative);
+        if (is_dir($file)) {
+            if (substr($requestPath, -1) !== '/') {
+                return self::resultRedirect($requestPath . '/', 302, []);
+            }
+            $file .= '/index.html';
+        }
+
+        $realBase = realpath($base);
+        $realFile = realpath($file);
+        if ($realBase === false || $realFile === false
+            || strpos($realFile, $realBase . DIRECTORY_SEPARATOR) !== 0
+            || !is_file($realFile)) {
+            return self::result404();
+        }
+
+        return self::resultFile($realFile);
+    }
+
+    private static function routeOwnDomain(string $version, ?string $db, $website, array $segments, array $query = []): array
     {
         if (!$db) return self::result404();
 
@@ -396,12 +537,11 @@ final class RequestRouter
         // Home: /
         if (empty($segments)) {
             $params['website'] = ($website !== null) ? $website : 0;
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+            return self::resultInternal($version, array_merge($params, $query));
         }
 
         // /<websiteid>
         if (count($segments) === 1 && ctype_digit($segments[0])) {
-            
             $n = (int)$segments[0];
 
             if ($website !== null && $website !== 0) {
@@ -412,27 +552,41 @@ final class RequestRouter
                 // No fixed website mapping: /<websiteid>
                 $params['website'] = $n;
                 // pageid intentionally not set
-            }            
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+            }
+            return self::resultInternal($version, array_merge($params, $query));
         }
 
         // /<websiteid>/<pageid>
         if (count($segments) >= 2 && ctype_digit($segments[0]) && ctype_digit($segments[1])) {
             $params['website'] = (int)$segments[0];
             $params['pageid']  = (int)$segments[1];
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+            return self::resultInternal($version, array_merge($params, $query));
         }
 
-        // Allow /web/... etc on own-domain too
+        // Allow /web/..., numeric shorthand, etc. on own-domain too.
         $action = $segments[0] ?? null;
-        if ($action !== null && in_array($action, self::ALLOWED_ACTIONS, true)) {
-            $params = self::paramsFromPrettyRoute($db, $action, array_slice($segments, 1), $website);
-            return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+        if ($action !== null && (in_array($action, self::ALLOWED_ACTIONS, true) || self::isPositiveIntToken($action))) {
+            $params = self::paramsFromPrettyRoute($db, $action, array_slice($segments, 1), ($website !== null ? (int)$website : null));
+            return self::resultInternal($version, array_merge($params, $query));
         }
 
-        return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
+        return self::resultInternal($version, array_merge($params, $query));
     }
 
+    /*
+     * Pretty path format:
+     *   <domain>/<database>/<record|rty|rst|dty|trm>/<resource id>
+     *   resource id - either ID or concept ID (DBID-RECID)  
+     *   If resource id is concept code, it redirects to remote server if registry entry (DBID) exists. 
+     *   <database> specified in path is ignored in this case. So user can use placeholder "db"
+     * 
+     * For example
+     *  http://127.0.0.1/osmak_1/record/184 - search for rec 184 in db osmak_1
+     *  http://127.0.0.1/osmak_1/record/2-8 - search for rec 8 in db #2 
+     *  http://127.0.0.1/db/record/2-8      - the same
+     *  http://127.0.0.1/osmak_1/rty/10     - returns definitions (xml) for record type 10 
+     *  http://127.0.0.1/db/dty/2-4         - returns definitions for field type 4 from database #2
+    */
     private static function paramsFromDbResolverPath(array $segments): array
     {
         // patterns:
@@ -449,12 +603,17 @@ final class RequestRouter
             return $params;
         }
 
-        // Build concept id
-        $concept = '';
-        if (isset($segments[3])) {
-            $concept = $segments[2] . '-' . $segments[3];
-        } else {
-            $concept = $segments[2] ?? '';
+        // Records accept a field list after either DBID-RECID or DBID/RECID.
+        $isRecord = !in_array($kind, ['rty','dty','rst','trm'], true);
+        $concept = $segments[2] ?? '';
+        $fieldsIndex = 3;
+        if (isset($segments[3]) && (!$isRecord || strpos($concept, '-') === false)) {
+            $concept .= '-' . $segments[3];
+            $fieldsIndex = 4;
+        }
+        if ($isRecord && isset($segments[$fieldsIndex])) {
+            $params['fields'] = $segments[$fieldsIndex];
+            $params['fmt'] = 'json';
         }
         
         [$concept, $ext] = self::stripKnownExtensions($concept);
@@ -475,6 +634,14 @@ final class RequestRouter
     private static function paramsFromPrettyRoute(string $db, string $action, array $rest, ?int $defaultWebsite = null): array
     {
         $params = ['db' => $db];
+
+        // Shorthand: /<db>/<websiteId>/<pageId> is equivalent to
+        // /<db>/web/<websiteId>/<pageId>. This cannot be reached by the
+        // old action gate because a numeric segment is not in ALLOWED_ACTIONS.
+        if (self::isPositiveIntToken($action)) {
+            array_unshift($rest, $action);
+            $action = 'web';
+        }
 
         switch ($action) {
             case 'web':
@@ -497,19 +664,38 @@ final class RequestRouter
                 break;
 
             case 'view':
-                if (isset($rest[0])) $params['recid'] = $rest[0];
+                if (isset($rest[0])) { $params['recid'] = $rest[0]; }
                 $params['fmt'] = $params['fmt'] ?? 'html';
+                break;
+            case 'rty':
+            case 'dty':
+            case 'rst':
+            case 'trm':
+                if (isset($rest[0])) { $params[$action] = $rest[0]; }
+                break;
+            case 'hml':
+                $params['fmt'] = 'hml';
+                if (isset($rest[0])){
+                    if(self::isPositiveIntToken($rest[0]) ){ //|| isConceptCode($rest[0])
+                        $params['recid'] = $rest[0];
+                    }else{
+                        $params['q'] = rawurldecode($rest[0]);
+                    }
+                }
+                if (isset($rest[1]) && self::isPositiveIntToken($rest[1])) {$params['depth'] = (int)$rest[1];}
+                break;
+            case 'record':
+            case 'rec':
+                $params['fmt'] = $params['fmt'] ?? 'html';
+                if (isset($rest[0])) { 
+                    $params['recid'] = $rest[0]; 
+                    if (isset($rest[1])) { $params['fields'] = $rest[1]; $params['fmt'] = 'json';}
+                }
                 break;
 
             case 'edit':
                 if (isset($rest[0])) $params['recid'] = $rest[0];
                 $params['edit'] = 1;
-                break;
-
-            case 'hml':
-                $params['fmt'] = $params['fmt'] ?? 'hml';
-                if (isset($rest[0])) $params['q'] = $rest[0];
-                if (isset($rest[1]) && ctype_digit($rest[1])) $params['depth'] = (int)$rest[1];
                 break;
 
             case 'tpl': {
@@ -530,7 +716,7 @@ final class RequestRouter
                     $params['template_id'] = (int)$first;
                 } else {
                     // /tpl/<templateName>/...
-                    $params['template'] = $first;
+                    $params['template'] = rawurldecode($first);
                 }
 
                 // Optional query segment(s)
@@ -543,7 +729,7 @@ final class RequestRouter
                     if (!empty($ids)) {
                         $params['q'] = 'ids:' . implode(',', $ids);
                     } else {
-                        $params['q'] = $rawQuery;
+                        $params['q'] = rawurldecode($rawQuery);
                     }
                 }
 
@@ -587,11 +773,311 @@ final class RequestRouter
         return $res;
     }
     
+
+    private static function isHeuristCodeFolder(string $folderName): bool
+    {
+        return $folderName === 'heurist'
+            || preg_match('/^h7-[A-Za-z0-9_-]+$/', $folderName) === 1;
+    }    
+    
+    private static function isPositiveIntToken($value): bool
+    {
+        return is_string($value) && ctype_digit($value) && (int)$value > 0;
+    }
+
+    /*
+    applyUrlSubstitution()
+    -> loadUrlSubstitutions()
+        -> urlSubstitutionPatternToRegex()
+    -> preg_match()
+    -> replaceUrlSubstitutionCaptures()
+    -> parseUrlSubstitutionReplacement()
+    */
+    private static function applyUrlSubstitution(string $db, array $segments): ?array
+    {
+        if ($db === '' || empty($segments)) {
+            return null;
+        }
+
+        $rules = self::loadUrlSubstitutions($db);
+        if (empty($rules)) {
+            return null;
+        }
+
+        $relativePath = implode('/', $segments);
+        foreach ($rules as $rule) {
+            $matches = [];
+            if ($rule['regex'] !== null) {
+                if (preg_match($rule['regex'], $relativePath, $matches) !== 1) {
+                    continue;
+                }
+            } else {
+                if ($relativePath !== $rule['pattern']) {
+                    continue;
+                }
+                $matches = [$relativePath];
+            }
+
+            $replacement = self::replaceUrlSubstitutionCaptures($rule['value'], $matches);
+            return self::parseUrlSubstitutionReplacement($replacement);
+        }
+
+        return null;
+    }
+
+    private static function loadUrlSubstitutions(string $db): array
+    {
+        $file = self::urlSubstitutionsFile($db);
+        if ($file === null || !is_file($file)) {
+            return [];
+        }
+
+        $mtime = @filemtime($file) ?: 0;
+        if (isset(self::$urlSubstitutions[$file], self::$urlSubstitutionMTimes[$file])
+            && self::$urlSubstitutionMTimes[$file] === $mtime) {
+            return self::$urlSubstitutions[$file];
+        }
+
+        $rules = [];
+        $lines = @file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || $line[0] === '#') {
+                continue;
+            }
+
+            $parts = preg_split('/\s+/', $line, 2);
+            if (!$parts || count($parts) < 2) {
+                continue;
+            }
+
+            $pattern = trim($parts[0]);
+            $value = trim($parts[1]);
+            if ($pattern === '' || $value === '') {
+                continue;
+            }
+
+            $rules[] = [
+                'pattern' => $pattern,
+                'value'   => $value,
+                'regex'   => self::urlSubstitutionPatternToRegex($pattern),
+            ];
+        }
+
+        self::$urlSubstitutions[$file] = $rules;
+        self::$urlSubstitutionMTimes[$file] = $mtime;
+        return $rules;
+    }
+
+    private static function urlSubstitutionsFile(string $db): ?string
+    {
+        $databaseFolder = self::databaseFolder($db);
+        if ($databaseFolder === null || $databaseFolder === '') {
+            return null;
+        }
+
+        return rtrim($databaseFolder, '/\\') . DIRECTORY_SEPARATOR . 'settings' . DIRECTORY_SEPARATOR . 'URLSubstitutions.txt';
+    }
+
+    private static function databaseFolder(string $db): ?string
+    {
+        //global $defaultRootFileUploadPath;
+        
+        $config = self::serverRoot() . "/HEURIST/heuristConfigIni.php";
+        if (!is_file($config)) {
+            $config = self::serverRoot() . "/heuristConfigIni.php";
+            if (!is_file($config)) {
+                return null;
+            }
+        }
+
+        // heuristConfigIni.php defines $defaultRootFileUploadPath
+        $defaultRootFileUploadPath = null;
+        require $config;
+
+        if (!is_string($defaultRootFileUploadPath) || $defaultRootFileUploadPath === '') {
+            return null;
+        }
+
+        return rtrim($defaultRootFileUploadPath, '/\\') . DIRECTORY_SEPARATOR . $db;
+    }
+
+    /**
+     * Converts a URL substitution pattern into a regular expression.
+     *
+     * Supported input formats:
+     *
+     * 1. Empty pattern
+     *    - Empty or whitespace-only strings return null.
+     *
+     * 2. Already-valid regular expression
+     *    - If the pattern starts with one of the supported delimiters:
+     *      "~", "/", "#", "%"
+     *    - And the pattern is a valid PHP regex, it is returned unchanged.
+     *
+     * 3. Simplified token pattern
+     *    - Literal text is escaped automatically.
+     *    - Tokens inside "{...}" are converted to capturing regex groups.
+     *    - The generated regex is anchored and returned as "~^...$~u".
+     *
+     * Supported simplified tokens:
+     *
+     * - "{d+}" or "{\d+}"      => "([0-9]+)"        One or more digits
+     * - "{d*}" or "{\d*}"      => "([0-9]*)"        Zero or more digits
+     * - "{w+}" or "{\w+}"      => "([A-Za-z0-9_]+)" One or more word characters
+     * - "{s+}" or "{segment}"  => "([^/]+)"         One URL/path segment
+     * - "{any}"                => "(.+)"            One or more of any character
+     *
+     * Custom tokens:
+     *
+     * - Unknown tokens are treated as raw regex fragments and wrapped in a
+     *   capturing group, for example "{[A-Z]+}" becomes "([A-Z]+)".
+     * - Custom tokens must not contain "{" or "}".
+     * - For advanced regex syntax, regex quantifiers, or nested braces, pass a
+     *   complete valid regex instead.
+     *
+     * Examples:
+     *
+     * - "orders/{d+}"     => "~^orders/([0-9]+)$~u"
+     * - "users/{w+}"      => "~^users/([A-Za-z0-9_]+)$~u"
+     * - "pages/{segment}" => "~^pages/([^/]+)$~u"
+     * - "files/{any}"     => "~^files/(.+)$~u"
+     * - "~^orders/([0-9]+)$~u" is returned unchanged.
+     *
+     * Returns null when:
+     *
+     * - The pattern is empty after trimming.
+     * - The pattern is not a valid regex and contains no "{...}" tokens.
+     * - A custom token contains braces.
+     */    
+    private static function urlSubstitutionPatternToRegex(string $pattern): ?string
+    {
+        $pattern = trim($pattern);
+        if ($pattern === '') {
+            return null;
+        }
+
+        // 1) If pattern is already a valid regex, use it as-is.
+        // Supported delimiters: ~ / # %
+        // Examples:
+        //   ~^INV-EN/([0-9]+)$~u
+        //   #^INV-EN/([0-9]+)$#u
+        $first = $pattern[0];
+        if (in_array($first, ['~', '/', '#', '%'], true)) {
+            $last = strrpos($pattern, $first);
+            if ($last !== false && $last > 0) {
+                $ok = @preg_match($pattern, '') !== false;
+                if ($ok) {
+                    return $pattern;
+                }
+            }
+        }
+
+        // 2) If there are no {...} tokens, this is an exact string rule.
+        if (strpos($pattern, '{') === false) {
+            return null;
+        }
+
+        // 3) Convert friendly pattern syntax to regex.
+        $regex = '';
+        $offset = 0;
+
+        if (preg_match_all('/\{([^}]+)\}/', $pattern, $tokens, PREG_OFFSET_CAPTURE)) {
+            foreach ($tokens[0] as $i => $token) {
+                $literal = substr($pattern, $offset, $token[1] - $offset);
+                $regex .= preg_quote($literal, '~');
+
+                $expr = trim($tokens[1][$i][0]);
+
+                switch ($expr) {
+                    case 'd+':
+                    case '\d+':
+                        $regex .= '([0-9]+)';
+                        break;
+
+                    case 'd*':
+                    case '\d*':
+                        $regex .= '([0-9]*)';
+                        break;
+
+                    case 'w+':
+                    case '\w+':
+                        $regex .= '([A-Za-z0-9_]+)';
+                        break;
+
+                    case 's+':
+                    case 'segment':
+                        $regex .= '([^/]+)';
+                        break;
+
+                    case 'any':
+                        $regex .= '(.+)';
+                        break;
+
+                    default:
+                        // Optional: allow simple raw fragments that don't contain braces.
+                        // For full regex power, use already-valid regex syntax above.
+                        if (strpos($expr, '{') !== false || strpos($expr, '}') !== false) {
+                            return null;
+                        }
+                        $regex .= '(' . $expr . ')';
+                        break;
+                }
+
+                $offset = $token[1] + strlen($token[0]);
+            }
+        }
+
+        $regex .= preg_quote(substr($pattern, $offset), '~');
+
+        return '~^' . $regex . '$~u';
+    }
+
+    private static function replaceUrlSubstitutionCaptures(string $value, array $matches): string
+    {
+        return preg_replace_callback('/\{(\d+)\}/', static function ($m) use ($matches) {
+            $idx = (int)$m[1];
+            return isset($matches[$idx]) ? (string)$matches[$idx] : $m[0];
+        }, $value);
+    }
+
+    private static function parseUrlSubstitutionReplacement(string $replacement): array
+    {
+        $replacement = trim($replacement);
+        $path = $replacement;
+        $query = [];
+        $isQuery = false;
+
+        if ($replacement !== '' && $replacement[0] === '?') {
+            $isQuery = true;
+            $path = '';
+            parse_str(substr($replacement, 1), $query);
+        } else {
+            $qpos = strpos($replacement, '?');
+            if ($qpos !== false) {
+                $path = substr($replacement, 0, $qpos);
+                parse_str(substr($replacement, $qpos + 1), $query);
+            }
+        }
+
+        return [
+            'is_query' => $isQuery,
+            'segments' => $path === '' ? [] : self::splitPath($path),
+            'query' => $query,
+        ];
+    }
+
     private static function defaultMappingFile(): string
     {
-        // This class lives under .../<version>/hserv/controller/
-        // and /HEURIST is one level above version directory.
-        return self::serverRoot() . "/HEURIST/domainWebsites.json";
+        // Prefer /HEURIST/domainWebsites.json, but support installations that
+        // keep it directly under DOCUMENT_ROOT as a reserved fallback.
+        $preferred = self::serverRoot() . "/HEURIST/domainWebsites.json";
+        if (is_file($preferred)) {
+            return $preferred;
+        }
+
+        $reserved = self::serverRoot() . "/domainWebsites.json";
+        return is_file($reserved) ? $reserved : $preferred;
     }
 
     private static function serverRoot(): string
@@ -658,9 +1144,40 @@ final class RequestRouter
         return !empty($segments) && $segments[0] === 'startup';
     }
 
+    private static function isApiDocumentationRoute(array $segments): bool
+    {
+        // api/docs
+        return count($segments) >= 2
+            && $segments[0] === 'api'
+            && in_array($segments[1], ['docs', 'openapi.yaml'], true);
+    }
+
     private static function isApiRoute(array $segments): bool
     {
         return !empty($segments) && $segments[0] === 'api';
+    }
+
+    private static function contentTypeForFile(string $file): string
+    {
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $types = [
+            'html' => 'text/html; charset=utf-8',
+            'htm'  => 'text/html; charset=utf-8',
+            'css'  => 'text/css; charset=utf-8',
+            'js'   => 'application/javascript; charset=utf-8',
+            'json' => 'application/json; charset=utf-8',
+            'yaml' => 'application/yaml; charset=utf-8',
+            'yml'  => 'application/yaml; charset=utf-8',
+            'md'   => 'text/markdown; charset=utf-8',
+            'txt'  => 'text/plain; charset=utf-8',
+            'png'  => 'image/png',
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'svg'  => 'image/svg+xml',
+            'ico'  => 'image/x-icon',
+        ];
+        return $types[$ext] ?? 'application/octet-stream';
     }
 
     private static function isDbResolverRoute(array $segments): bool

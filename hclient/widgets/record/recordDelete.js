@@ -321,7 +321,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             
             let recset = this.recordList.resultList('getRecordSet');           
             let r1 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-            let r2 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+            let r2 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'];
             let cnt = 0;
             recset.each(function(recID, record){
                 let rt = this.fld(record, 'rec_RecTypeID');
@@ -414,7 +414,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
 function(){
     that.doAction(true, true);
 },
-{title:'Deleting target records ('+response.data.source_links_count+')',yes:'Delete records',no:'Cancel'});
+{title:'Deleting target records ('+response.data.source_links_count+')',yes:'Delete records',no:'Cancel'}, {default_palette_class: 'ui-heurist-explore'});
     
   let btn = $dlg.parent().find('button:contains("Delete records")');
   let chb = $dlg.find('input[type="checkbox"]').on('change', function(){

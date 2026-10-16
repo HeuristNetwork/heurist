@@ -17,7 +17,7 @@
  * @since 4.0
  */
  
-/* global ActionHandler, HSystemMgr, HLayoutMgr */ 
+/* global ActionHandler, HSystemMgr, HLayoutMgr, HRecordSearchOpenApi */ 
 
 /**
 * Factory function for the Heurist objects.
@@ -184,57 +184,59 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     //
     // finds and assign  installDir   baseURL    baseURL_pro
     // 
-    function detectBaseURL(){
-        let installDir = '';
+    function detectBaseURL() {
+        let installDir = '/heurist/';
 
-        if(window.hWin.location.host.indexOf('.huma-num.fr')>0 && window.hWin.location.host!=='heurist.huma-num.fr'){
+        const loc = window.hWin.location;
+        const pathname = loc.pathname || '/';
+
+        // Own-domain huma-num installs always map to production heurist
+        if (loc.host.indexOf('.huma-num.fr') > 0 && loc.host !== 'heurist.huma-num.fr') {
             installDir = '/heurist/';
-        }else{
-            let script_name = window.hWin.location.pathname;
+        } else {
+            // Take only the first real path segment
+            // Examples:
+            //   /heurist/dbname/web/...       -> heurist
+            //   /h7-alpha/dbname/view/...     -> h7-alpha
+            //   /dbname/anything             -> dbname
+            //   /124/117                     -> 124
+            const firstSegment = pathname.split('/').filter(Boolean)[0] || '';
 
-            if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/';
-
-            if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit)\/.*/)>=0){
-                installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit)\/.*/, '') + '/';
-            }else{
-                installDir = script_name.replace(/(((\?|admin|documentation|export|hapi|hclient|hserv|import|startup|redirects|viewers|help|ext|external)\/.*)|(index.*|test.php))/, "");
+            // Only these first segments are valid install dirs.
+            // Everything else is considered a pretty URL where installDir is /heurist/
+            if (
+                firstSegment === 'heurist' ||
+                /^h7-[A-Za-z0-9_-]+$/.test(firstSegment)
+            ) {
+                installDir = '/' + firstSegment + '/';
             }
         }
 
-        // --- Normalize installDir for own-domain numeric routes (websiteId/pageId) ---
-        // Make sure installDir ends with "/"
-        if (installDir && !installDir.endsWith('/')) installDir += '/';
-
-        // If URL is like "/124/" or "/124/117" (own-domain website/page route),
-        // installDir must be the production folder, not the numeric path.
-        const pathOnly = window.hWin.location.pathname || '/';
-        if (/^\/\d+(\/\d+)?\/?$/.test(pathOnly)) {
-            installDir = '/heurist/';
-        }     
-                
-        
-        // critical: root pretty URLs on mapped domains must use production installDir
-        if (!installDir || installDir === '/') installDir = '/heurist/';
-        
         that.installDir = installDir;
-        if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
+
+        if (!_baseURL) {
+            _baseURL = loc.protocol + '//' + loc.host + installDir;
+        }
+
         that.baseURL = _baseURL;
 
-        //detect production version
+        // Detect production version.
+        // For dev/test installs such as /h7-alpha/, production is /heurist/.
         if (installDir && !installDir.endsWith('/heurist/')) {
-            //replace devlopment folder to production one (ie h6-ij to heurist)
-            installDir = installDir.split('/');
-            let i = installDir.length-1;
-            while(i>0 && installDir[i]=='') i--;
-            installDir[i] = 'heurist';
-            installDir = installDir.join('/');
-            
-            that.baseURL_pro = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
+            let prodInstallDir = installDir.split('/');
+            let i = prodInstallDir.length - 1;
+
+            while (i > 0 && prodInstallDir[i] === '') i--;
+
+            prodInstallDir[i] = 'heurist';
+            prodInstallDir = prodInstallDir.join('/');
+
+            that.baseURL_pro = loc.protocol + '//' + loc.host + prodInstallDir;
         } else {
             that.baseURL_pro = _baseURL;
-        } 
-        
-        //console.log(that.installDir, that.baseURL);               
+        }
+
+        // console.log(that.installDir, that.baseURL, that.baseURL_pro);
     }
     
     
@@ -443,6 +445,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     */
     function HRecordMgr() {
 
+        /** @type {HRecordSearchOpenApi|null} Experimental public API adapter. */
+        let openApiSearch = null;
+
         /**
          * @typedef Record
          * Associative array of data about a Heurist record
@@ -618,6 +623,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             */
             search: function (request, callback) {
 
+                request = request || {};
+
                 if (window.hWin.HAPI4.isAdminInterface && request['verify_credentials'] != 'ok') {
                     window.hWin.HAPI4.SystemMgr.verify_credentials(function () {
                         request['verify_credentials'] = 'ok';
@@ -629,6 +636,26 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (request['verify_credentials']) {
                     request['verify_credentials'] = null;
                     delete request['verify_credentials'];
+                }
+
+                if(request.isNewEngine === true || request.isNewEngine == 1){
+                    if(openApiSearch === null){
+                        if(typeof HRecordSearchOpenApi === 'undefined'){
+                            const response = {
+                                status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
+                                message: 'HRecordSearchOpenApi is not loaded',
+                                queryid: request.id
+                            };
+                            if(window.hWin.HEURIST4.util.isFunction(callback)){
+                                callback(response);
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                            return null;
+                        }
+                        openApiSearch = new HRecordSearchOpenApi();
+                    }
+                    return openApiSearch.search(request, callback);
                 }
 
                 if (!window.hWin.HEURIST4.util.isFunction(callback)) {
@@ -685,34 +712,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             //
             //
-            , lookup_external_service: function (request, callback) {
+            , lookupService: function (request, callback) {
                 // start search
                 _callserver('LookupController', request, callback);
-            }
-
-            //
-            // load kml in geojson format
-            // request
-            //  recID - record id that has reference to kml file or has kml snippet
-            //  simplify - reduce points
-            //
-            , load_kml_as_geojson: function (request, callback) {
-                request['format'] = 'geojson';
-                // start search
-                _callserver('record_map_source', request, callback);
-            }
-
-            //
-            // load kml in geojson format
-            // request
-            //  recID - record id that has reference to shp file
-            //  simplify - reduce points
-            //
-            , load_shp_as_geojson: function (request, callback) {
-                request['format'] = 'geojson'; //or wkt
-                request['api'] = 0; //not api request
-                // start search
-                _callserver('record_shp', request, callback);
             }
 
             /**
@@ -795,6 +797,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         let entity_configs = {};
         let entity_data = {};
         let entity_timestamp = 0;
+        let entity_revision = '';
         let _msgOnRefreshEntityData = 0;
 
         let that = {
@@ -942,7 +945,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             relevanceEntityData: function (callback, errorCallback = null) {
                 
                 if(entity_timestamp>0){
-                    window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', callback, errorCallback);
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', false, callback, errorCallback);
                 }else if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     callback(this, true);
                 }
@@ -962,7 +965,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
                 let entities = (params)?params:'all';
 
-                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
+                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, false, function(){
                     let res = false;
                     if(arguments){
                         if(arguments[1]){
@@ -986,23 +989,30 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
             
             //
-            // refresh several entity data at once
+            // Refresh several entities; verbose controls the delayed progress message.
+            // Signature: (entityName, verbose, callback, errorCallback).
             // 
-            refreshEntityData: function (entityName, callback, errorCallback = null) {
+            refreshEntityData: function (entityName, verbose = true, callback = null, errorCallback = null) {
+                // Compatibility with (entityName, callback, errorCallback).
+                if (typeof verbose !== 'boolean') {
+                    errorCallback = callback;
+                    callback = verbose;
+                    verbose = true;
+                }
 
                 let params = { a: 'structure', 'details': 'full'};
                 params['entity'] = entityName;
+                params['revision'] = entity_revision || '';
                 params['timestamp'] = entity_timestamp; //db defitions time on client side
 
                 let s_time = new Date().getTime() / 1000;
                 if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
-                _msgOnRefreshEntityData = setTimeout(function(){
+                _msgOnRefreshEntityData = verbose ? setTimeout(function(){
                     window.hWin.HEURIST4.msg.showMsgFlash('Database definitions refresh', false, null, { position: {my: 'left+100 top+100', at: 'left top', of: $(document)} });
-                }, 1000);
+                }, 1000) : 0;
 
                  
-                _callserver('entityScrud', params,
-                    function (response) {
+                const onResponse = function (response) {
 
                         if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
                         _msgOnRefreshEntityData = 0;
@@ -1013,12 +1023,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             entity_timestamp = response['uptodate'];
                             if (window.hWin.HEURIST4.util.isFunction(callback)) callback(this, true);
                             
-                        }else if (response && response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
+                        }else if (response && (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes'])) {
 
                             let fin_time = new Date().getTime() / 1000;
                             console.log('definitions are loaded: '+(fin_time-s_time)+' sec');
                             
                             let dbdefs = (response['defRecTypes']?response:response['data']);
+                            entity_revision = dbdefs.revision || '';
                             for (let entityName in dbdefs) {
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
@@ -1030,9 +1041,24 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             if(window.hWin.HEURIST4.util.isFunction(errorCallback)){ errorCallback.call(this, response); }
                             else{ window.hWin.HEURIST4.msg.showMsgErr(response); }
                         }
-                    }
+                    };
 
-                );
+                if (entityName === 'all') {
+                    // A stable GET lets the browser revalidate its cached JSON using ETag.
+                    const url = new URL(HAPI4.baseURL + 'hserv/controller/entityScrud.php', window.location.href);
+                    url.search = new URLSearchParams({db: _database, a: 'structure', entity: 'all', details: 'full'});
+                    fetch(url.toString(), {credentials: 'include', headers: {Accept: 'application/json'}})
+                        .then(response => {
+                            if (!response.ok) throw new Error('HTTP ' + response.status);
+                            return response.json();
+                        })
+                        .then(onResponse, error => onResponse({
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
+                            message: 'Cannot obtain database definitions: ' + error.message
+                        }));
+                } else {
+                    _callserver('entityScrud', params, onResponse);
+                }
             },
 
 
@@ -1098,7 +1124,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 
                 if(!data) return;
                 
-                if(entityName=='timestamp'){ 
+                if(entityName=='revision'){
+                    return; // Snapshot metadata, not an entity.
+                }else if(entityName=='timestamp'){
                     entity_timestamp = Number(data[entityName]); //db structure cache file last update time
                 }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 
@@ -1431,7 +1459,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 {
                     layout_language: 'en',
                     search_result_pagesize: 100,
-                    search_detail_limit: 500,
+                    search_detail_limit: 2000,
                     userCompetencyLevel: 2, //'beginner',
                     userFontSize: 12, //px
                     deriveMapLocation: true,
@@ -1455,7 +1483,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if ('search_detail_limit' == name) {
                     res = Math.min(Math.max(res2,500),5000);
                 } else if ('search_result_pagesize' == name) {
-                    res = Math.min(Math.max(res2,100),5000);
+                    res = Math.min(Math.max(res2,50),5000);
                 }
                 return res;
             }

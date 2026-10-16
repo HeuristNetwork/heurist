@@ -2,6 +2,7 @@
 ## Eclipse
 #################
 
+*.obsidian
 *.pydevproject
 .project
 .metadata
@@ -223,8 +224,11 @@ vendor/
 help/
 external/
 node_modules/
+hclient/bundles/heurist-*/
 tests/
 descriptors/
+*.lock
+!composer.lock
 
 *.mjs
 package.json
@@ -233,10 +237,8 @@ package-lock.json
 #PHPStorm
 .idea/*
 *.zip
-composer.lock
-*.lock
-*.lock
-composer.lock
 
 # VSCode
 .vscode
+.env
+external

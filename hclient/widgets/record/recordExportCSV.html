@@ -28,12 +28,7 @@
 
     <!-- TREE for field selection -->
     <div style="top:6.2em; bottom:11em; padding: 0 1.2em; min-width: 600px;overflow-x:hidden;overflow-y:auto" class="input ent_content">
-        <div class="export-to-bottom-button" style="display: inline-block;float: right;cursor: pointer;text-decoration: underline;color: #6A7C99;">Jump to bottom</div>
-        <div class="export-advanced-container" style="display: inline-block;float: right;clear: both;padding-bottom: 10px;">
-            <div class="export-advanced-list" style="font-size: 1em; display: inline-block;">
-                
-            </div>
-        </div>
+        <div class="export-to-bottom-button" style="float: right;cursor: pointer;text-decoration: underline;color: #6A7C99;">Jump to bottom</div>
 
         <div id="export_format_container" style="display: inline-block;margin-bottom: 15px;margin-left: 10px;">
             <label><input type="radio" name="export-format" id="chkJoinRecTypes" style="vertical-align: 0px;" checked>Single joined file</label>
@@ -51,9 +46,12 @@
         <div class="export-field-tree-container">
 
             <div class="header" style="padding: 0 16px 0 16px;display: inline-block;vertical-align:top">Select fields to export <i>(Heurist record ID is always output)</i>:</div>
-
-            <div style="display: inline-block;outline: none;">
-                <div class="detailRow rtt-tree" id="rectype_tree"></div>
+            <br>
+            <div style="display: inline-block; padding-left: 24px; max-width: 75%; overflow-x: auto;">
+                <div class="detailRow rtt-tree" id="rectype_tree" style="min-width: unset; width: 95%;"></div>
+            </div>
+            <div class="export-advanced-container" style="display: inline-block; width: 15%; padding-left: 20px;">
+                <div class="export-advanced-list" style="font-size: 1em; display: inline-block;"></div>
             </div>
         </div>
     </div>

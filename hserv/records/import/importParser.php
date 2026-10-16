@@ -17,6 +17,7 @@
 use hserv\utilities\USanitize;
 use hserv\utilities\UArchive;
 use hserv\utilities\Temporal;
+require_once __DIR__.'/importDate.php';
 
 
 /**
@@ -427,7 +428,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     if(!$datefields) {$datefields = array();}
     if(!$memofields) { $memofields = array();}
 
-    $csv_dateformat = @$params["csv_dateformat"];
+    $csv_dateformat = ImportDate::order($params['csv_dateformat'] ?? 1);
 
     $check_datefield = (!isEmptyArray($datefields));
     $check_keyfield = (!isEmptyArray($keyfields));
@@ -897,6 +898,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
             $preproc['csv_enclosure'] = $csv_enclosure;
             $preproc['csv_mvsep'] = $csv_mvsep;
+            // Keep the selection for columns mapped to date fields AFTER upload.
+            $preproc['csv_dateformat'] = $csv_dateformat;
 
             $res = self::saveToDatabase($preproc, $prepared_filename);
             //delete prepare
@@ -1017,24 +1020,17 @@ private static function _deleteEncodedFilename($encoded_filename_id){
     /**
      * Prepares a date field by converting it to ISO 8601 format.
      *
-     * Uses `Temporal::dateToISO()` for the conversion. If the conversion results
-     * in 'Temporal' (indicating an error or unparseable date by that method) or null,
-     * the original field value is retained.
+     * Uses the strict CSV parser. Uninterpretable values remain intact for
+     * validation; they must not become empty cells or guessed dates.
      *
      * @param string $field The date string to prepare.
-     * @param string|null $csv_dateformat The expected date format (e.g., 'dd/mm/yyyy', 'mm/dd/yyyy').
-     *                                    Used by `Temporal::dateToISO()`.
+     * @param int|string|null $csv_dateformat 1 = day/month/year, 2 = month/day/year.
      * @return string The prepared date string (potentially ISO 8601) or the original string.
      */
 private static function prepareDateField($field, $csv_dateformat){
 
-    $t3 = Temporal::dateToISO($field, $csv_dateformat);//@todo - parse simple range
-
-    if($t3!='Temporal' && $t3!=null){ //do not change if temporal
-        $field = $t3;
-    }
-
-    return $field;
+    $date = ImportDate::normalise($field, $csv_dateformat);
+    return $date === null ? $field : $date;
 }
 
 /**
@@ -1286,8 +1282,8 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
 
         $query = $query."`field_".$i."` ".$fieldtype.', ' ;
 
-        $columns = $columns."field_".$i.",";
-        $counts = $counts."count(distinct field_".$i."),";
+        $columns .= "field_{$i},";
+        $counts .= "count(distinct field_{$i}),count(field_{$i}),";
         //array_push($mapping,0);
     }
 
@@ -1301,7 +1297,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
     $query = $query." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";//was utf8 this is alias utf8mb3
 
     $columns = substr($columns,0,-1);
-    $counts = $counts." count(*) ";
+    $counts .= " count(*) ";
 
     $mysqli = self::$system->getMysqli();
 
@@ -1374,6 +1370,20 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
 
     $uniqcnt = $res->fetch_row();
     $reccount = array_pop ( $uniqcnt );
+    $columnCounts = [];
+
+    $uniqcnt = array_filter($uniqcnt, function($count, $key) use (&$columnCounts){
+
+        if($key % 2 === 0){
+            return true;
+        }
+
+        $columnCounts[] = $count;
+        return false;
+
+    }, ARRAY_FILTER_USE_BOTH);
+
+    $uniqcnt = array_values($uniqcnt); // reset indexes, just in case
 
     //add record to import_log
     $session = array("reccount"=>$reccount,
@@ -1384,7 +1394,9 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
         "multivals"=>$preproc['multivals'],  //columns that have multivalue separator
         "csv_enclosure"=>$preproc['csv_enclosure'],
         "csv_mvsep"=>$preproc['csv_mvsep'],
+        "csv_dateformat"=>ImportDate::order($preproc['csv_dateformat'] ?? 1),
         "uniqcnt"=>$uniqcnt,   //count of uniq values per column
+        "column_counts"=>$columnCounts,
         "indexes"=>$preproc['keyfields'] );//names of columns in import table that contains record_ID
 
     //new parameters to replace mapping and indexes_keyfields

@@ -1,7 +1,7 @@
 <?php
 namespace hserv\controller;
 
-require_once dirname(__FILE__).'/../../autoload.php';
+//require_once dirname(__FILE__).'/../../autoload.php';
 
 /**
  * RecordResolver
@@ -15,6 +15,29 @@ require_once dirname(__FILE__).'/../../autoload.php';
  *  - recID/recid/id: choose view/edit/export endpoints
  *  - rty/dty/trm/rst: choose getDBStructureAsXML endpoint
  *  - concept IDs (DBID-RECID): redirect to remote server if registry entry exists
+ * 
+ * Pretty path format:
+ *   <domain>/<database>/<record|rec|rty|rst|dty|trm|action>/<resource id>
+ *   resource id - either ID or concept ID (DBID-RECID)  
+ *   If resource id is concept code, it redirects to remote server if registry entry (DBID) exists. 
+ *   <database> specified in path is ignored in this case. So user can use placeholder "db"
+ *   "action" means the resource is "record". action can be view|edit|hml - view is default
+ * 
+ * For example
+ *  http://127.0.0.1/osmak_1/record/184 - search for rec 184 in db osmak_1
+ *  http://127.0.0.1/osmak_1/record/2-8 - search for rec 8 in db #2 
+ *  http://127.0.0.1/db/record/2-8      - the same
+ *  http://127.0.0.1/osmak_1/rty/10     - returns definitions (xml) for record type 10 
+ *  http://127.0.0.1/db/dty/2-4         - returns definitions for field type 4 from database #2
+ * 
+ *  http://127.0.0.1/db/record/2-8/1,28 - means return only rec_ID and fields with IDs 1 and 28
+ * 
+ * 
+ *  See conversion of pretty path to $params in ReuestRouter->paramsFromDbResolverPath and paramsFromPrettyRoute
+ * 
+ * Returned format:
+ *  Definitions (rst,rty,dty,trm) are salways XML
+ *  For record by default HTML
  *
  * Conventions:
  *  - query wins; the caller should pass merged params
@@ -22,43 +45,62 @@ require_once dirname(__FILE__).'/../../autoload.php';
  */
 final class RecordResolver
 {
+    private static string $version;
+    
     /**
      * @param string $version  Version folder, e.g. "heurist" or "h7-alpha".
      * @param array  $params   Merged request params (query wins).
      * @param string $serverRoot Absolute filesystem path to web root (for loading registry when needed).
      *
-     * @return array|null ['url' => string, 'status' => int]
+     * @return array|null ['url' => string, 'status' => int] or ['error' => array, 'status' => int]
      */
     public static function resolve(string $version, array $params, string $serverRoot=null): ?array
     {
+        
+        self::$version = $version;
+        
+        if(!defined('HEURIST_INVALID_REQUEST')){
+            define('HEURIST_INVALID_REQUEST', 'invalid');
+        }
+        
         // ---- Definitions (structure export)
         foreach (['rty','dty','trm','rst'] as $entity) {
             if (!empty($params[$entity])) {
                 
-                list($remote, $recid) = self::resolveRemoteDbUrl($params[$entity], $params['db']??null);
+                $params['fmt'] = 'xml';
+                list($remote, $recid, $error) = self::resolveRemoteDbUrl($params[$entity], $params['db']??null);
+                if($error){
+                    self::renderResolverError($error, $params);
+                    return ['error' => $error, 'status' => (int)($error['http_status'] ?? 502)];
+                }
+                
                 if($remote){
                     $sep = (strpos($remote, '?') === false) ? '?' : '&';
-                    $qs = [$entity => $params[$entity]];
+
+                    // Important: concept code DBID-ID has already been resolved.
+                    // The target database expects the local entity ID, not the original concept code.
+                    $qs = [$entity => $recid];
+
                     return ['url' => $remote . $sep . http_build_query($qs), 'status' => 302];
-                }else{
-                    $qs = http_build_query(['db' => $params['db'] ?? null, $entity => $params[$entity]]);
-                    return ['url' => "/{$version}/hserv/structure/export/getDBStructureAsXML.php?{$qs}", 'status' => 302];
                 }
+                
+                if(!self::isPositiveInt($params[$entity])){
+                        $error = array('status'=>HEURIST_INVALID_REQUEST, 'message'=>'Resource Id is not defined');
+                        self::renderResolverError($error, $params);
+                        return null;
+                }
+                
+                $qs = http_build_query(['db' => $params['db'] ?? null, $entity => $params[$entity]]);
+                return ['url' => "/{$version}/hserv/structure/export/getDBStructureAsXML.php?{$qs}", 'status' => 302];
+                
             }
         }
-
-        // ---- Records
-        $recToken = $params['recID'] ?? ($params['recid'] ?? ($params['id'] ?? null));
-        if ($recToken === null || $recToken === '') {
-            return null;
-        }
-
-        $db = $params['db'] ?? null;
-
+        
+        $fields = $params['fields']??null;
+        
         // Determine fmt/action
         $fmt = $params['fmt'] ?? ($params['format'] ?? null);
         $fmt = ($fmt === null || $fmt === '') ? null : strtolower((string)$fmt);
-
         $action = !empty($params['action']) ? strtolower((string)$params['action']) : null;
         if ($action === 'hml') {
             $fmt = 'hml';
@@ -67,51 +109,83 @@ final class RecordResolver
         } elseif ($action === 'edit' || ($params['edit']??null) == 1) {
             $fmt = 'edit';
         }
+        
+        $query = null;
+        if($fmt==='hml'){
+            $query = $params['q'] ?? null;    
+        }
+        
+        // ---- Records
+        $recToken = $params['recID'] ?? ($params['recid'] ?? ($params['id'] ?? null));
+        if (($recToken === null || $recToken === '') && ($query === null || $query === '')) {
+            return null; //neither query nor record id defined
+        }
+        $useRecToken = !($recToken === null || $recToken === '');
+
+        $db = $params['db'] ?? null;
+
 
         if ($fmt === null) {
             $fmt = 'hml';
         }
         // Concept ID? DBID-RECID
         // Remote registry resolution
-        list($remote, $recid) = self::resolveRemoteDbUrl($recToken, $db);
-        if ($remote) {
-            // Remote endpoints expect parameterized URL (as per legacy resolver.php)
-            $q = ['recID' => $recid, 'fmt' => $fmt];
-            if (!empty($params['depth']))    $q['depth'] = (int)$params['depth'];
-            if (!empty($params['noheader'])) $q['noheader'] = 1;
-            if (!empty($params['action']))   $q['action'] = (string)$params['action'];
+        if($useRecToken){
+            list($remote, $recid, $error) = self::resolveRemoteDbUrl($recToken, $db);
+            if($error){
+                self::renderResolverError($error, $params);
+                return ['error' => $error, 'status' => (int)($error['http_status'] ?? 502)];
+            }
+            if ($remote) {
+                // Remote endpoints expect parameterized URL (as per legacy resolver.php)
+                $q = ['recID' => $recid, 'fmt' => $fmt];
+                if (isset($fields)) $q['fields'] = $fields;
+                if (!empty($params['depth']))    $q['depth'] = (int)$params['depth'];
+                if (!empty($params['noheader'])) $q['noheader'] = 1;
+                if (!empty($params['action']))   $q['action'] = (string)$params['action'];
 
-            $sep = (strpos($remote, '?') === false) ? '?' : '&';
-            return ['url' => $remote . $sep . http_build_query($q), 'status' => 302];
-        }
+                $sep = (strpos($remote, '?') === false) ? '?' : '&';
+                return ['url' => $remote . $sep . http_build_query($q), 'status' => 302];
+            }
+        
 
-        // Local routes require db
-        if (!$db) {
-            return null;
-        }
+            // Local routes require db
+            if (!$db) {
+                $error = array('status'=>HEURIST_INVALID_REQUEST, 'message'=>'Database is not defined');
+                self::renderResolverError($error, $params);
+                return null;
+            }
 
-        // Build redirect to concrete script
-        if ($fmt === 'html') {
-            if (!empty($params['noheader'])) {
-                $q = self::pick($params, ['db','recID','recid','id','noheader']);
+            if(!self::isPositiveInt($recid)){
+                $error = array('status'=>HEURIST_INVALID_REQUEST, 'message'=>'Record Id is not defined');
+                self::renderResolverError($error, $params);
+                return null;
+            }
+                
+            // Build redirect to concrete script
+            if ($fmt === 'html') {
+                
+                if (!empty($params['noheader'])) {
+                    $q = self::pick($params, ['db','recID','recid','id','noheader']);
+                    $q['db'] = $db;
+                    $q['recID'] = $recid;
+                    $q['noheader'] = 1;
+                    return ['url' => "/{$version}/viewers/record/renderRecordData.php?" . http_build_query($q), 'status' => 302];
+                }
+                $q = self::pick($params, ['db','recID','recid','id']);
                 $q['db'] = $db;
                 $q['recID'] = $recid;
-                $q['noheader'] = 1;
-                return ['url' => "/{$version}/viewers/record/renderRecordData.php?" . http_build_query($q), 'status' => 302];
+                return ['url' => "/{$version}/viewers/record/viewRecord.php?" . http_build_query($q), 'status' => 302];
             }
-            $q = self::pick($params, ['db','recID','recid','id']);
-            $q['db'] = $db;
-            $q['recID'] = $recid;
-            return ['url' => "/{$version}/viewers/record/viewRecord.php?" . http_build_query($q), 'status' => 302];
-        }
 
-        if ($fmt === 'edit') {
-            // Preserve as many params as possible (edit surface uses many)
-            $q = $params;
-            $q['db'] = $db;
-            $q['recID'] = $recid;
-            unset($q['fmt'], $q['format']);
-            return ['url' => "/{$version}/hclient/framecontent/recordEdit.php?" . http_build_query($q), 'status' => 302];
+            if ($fmt === 'edit') {
+                // Preserve as many params as possible (edit surface uses many)
+                $q = $params;
+                $q['db'] = $db;
+                $q['recID'] = $recid;
+                unset($q['fmt'], $q['format']);
+                return ['url' => "/{$version}/hclient/framecontent/recordEdit.php?" . http_build_query($q), 'status' => 302];
+            }
         }
 
         // Export
@@ -120,8 +194,13 @@ final class RecordResolver
                 'vers' => 2,
                 'fmt'  => $fmt,
                 'db'   => $db,
-                'q'    => 'ids:' . $recid,
+                'q'    => $query ?? ('ids:' . $recid),
             ];
+            
+            if(isset($fields)){
+                $q['detail']='rec_ID,'.$fields;
+            }
+            
             if (!empty($params['depth'])) $q['depth'] = (int)$params['depth'];
             return ['url' => "/{$version}/hserv/controller/record_output.php?" . http_build_query($q), 'status' => 302];
         }
@@ -130,11 +209,105 @@ final class RecordResolver
         $q = [
             'w'  => 'a',
             'db' => $db,
-            'q'  => 'ids:' . $recid,
+            'q'  => $query ?? ('ids:' . $recid),
         ];
         if (!empty($params['depth'])) $q['depth'] = (int)$params['depth'];
         return ['url' => "/{$version}/export/xml/flathml.php?" . http_build_query($q), 'status' => 302];
     }
+    
+    
+    private static function renderResolverError(array $error, array $params=array()){
+        global $globalMessage;
+        //$status = (int)($error['http_status'] ?? 502);
+        //if($status < 400 || $status > 599){ $status = 500; }
+        //http_response_code($status);
+
+        $fmt = strtolower((string)($params['fmt'] ?? ($params['format'] ?? '')));
+        if($fmt===''){
+            $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
+            if(strpos($accept, 'application/json')!==false){
+                $fmt = 'json';
+            }elseif(strpos($accept, 'application/xml')!==false || strpos($accept, 'text/xml')!==false){
+                $fmt = 'xml';
+            }else{
+                $fmt = 'html';
+            }
+        }
+        if(!in_array($fmt, array('html','xml','json'), true)){
+            $fmt = 'html';
+        }
+
+        $message = (string)($error['message'] ?? 'Unable to resolve requested resource');
+        $sysmsg = isset($error['sysmsg']) && is_array($error['sysmsg']) ?$error['sysmsg'] :[];
+        $code = (string)($sysmsg['code'] ?? 'RESOLUTION_ERROR');
+
+        if($fmt==='json'){
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(array('status'=>'error', 'error'=>$error));
+        }elseif($fmt==='xml'){
+            header('Content-Type: application/xml; charset=utf-8');
+            $xml = new \SimpleXMLElement('<error/>');
+            $xml->addChild('code', htmlspecialchars($code, ENT_XML1));
+            $xml->addChild('message', htmlspecialchars($message, ENT_XML1));
+            if(!empty($sysmsg['stage'])) $xml->addChild('stage', htmlspecialchars((string)$sysmsg['stage'], ENT_XML1));
+            if(!empty($sysmsg['remote_url'])) $xml->addChild('remote_url', htmlspecialchars((string)$sysmsg['remote_url'], ENT_XML1));
+            echo $xml->asXML();
+        }else{
+
+            if(!defined('HEURIST_BASE_URL')){
+                define('HEURIST_BASE_URL', self::currentHeuristBaseUrl());
+            }
+            
+            header('Content-Type: text/html; charset=utf-8');
+
+            $globalMessage = self::formatResolverErrorMessage($error);
+            include_once dirname(__FILE__).'/../../hclient/framecontent/infoMessage.php';
+/*            
+            header('Content-Type: text/html; charset=utf-8');
+            echo '<!doctype html><html><head><meta charset="utf-8"><title>Heurist resolver error</title></head><body>';
+            echo '<h1>Unable to resolve requested resource</h1>';
+            echo '<p>'.htmlspecialchars($message, ENT_QUOTES, 'UTF-8').'</p>';
+            echo '<dl>';
+            echo '<dt>Code</dt><dd>'.htmlspecialchars($code, ENT_QUOTES, 'UTF-8').'</dd>';
+            if(!empty($error['stage'])) echo '<dt>Stage</dt><dd>'.htmlspecialchars((string)$error['stage'], ENT_QUOTES, 'UTF-8').'</dd>';
+            if(!empty($error['remote_url'])) echo '<dt>URL requested</dt><dd>'.htmlspecialchars((string)$error['remote_url'], ENT_QUOTES, 'UTF-8').'</dd>';
+            echo '</dl></body></html>';
+*/            
+        }
+        exit;
+    }
+    
+    private static function formatResolverErrorMessage(array $error): string{
+
+        $message = '<h2>Request could not be resolved</h2>';
+        $sysmsg = isset($error['sysmsg']) && is_array($error['sysmsg']) ?$error['sysmsg'] :[];
+
+        if(!empty($error['message'])){
+            $message .= '<p>'.strip_tags($error['message'],['p','b','br','strong']).'</p>';
+        }
+
+        if(!empty($sysmsg['remote_url'])){
+            $message .= '<p><b>URL checked:</b> '
+                .htmlspecialchars($sysmsg['remote_url'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+
+        if(!empty($sysmsg['transport_error'])){
+            $message .= '<p><b>Transport Error:</b> '
+                .htmlspecialchars($sysmsg['transport_error'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+        
+        if(!empty($sysmsg['code'])){
+            $message .= '<p><b>Error code:</b> '
+                .htmlspecialchars($sysmsg['code'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+
+        return $message;
+    }    
+
+    
 
     private static function pick(array $params, array $keys): array
     {
@@ -169,27 +342,149 @@ final class RecordResolver
         }
         
         if (!($database_id > 0)) {
-            return array(null, $recid);                
+            return array(null, $recid, null);                
         }
         
-        $dbregis = dirname(__FILE__).'/../utilities/DbRegis.php';
-        /*
-        $autoload = dirname(__FILE__).'/../../autoload.php';
-        if (is_file($autoload)) {
-            require_once $autoload;
-        }*/
-
-        if (is_file($dbregis)) {
-            require_once $dbregis;
-        }
-        if (!class_exists('hserv\\utilities\\DbRegis')) {
-            return array(null, $recid);                
-        }
-        try {
-            $url = \hserv\utilities\DbRegis::registrationGet(['dbID' => $database_id]);
-        } catch (\Throwable $e) {
-            $url = null;       
-        }
-        return array($url?:null, $recid);
+        [$url, $error] = self::resolveRegisteredDatabaseUrl($database_id);
+        return array($url ?: null, $recid, $error);
     }
+    
+    private static function isPositiveInt($val){
+        return isset($val) && (is_int($val) || ctype_digit((string)$val)) && (int)$val > 0;
+    }
+    
+    /**
+     * Resolve a registered database ID to the current database URL.
+     *
+     * RecordResolver cannot include DbRegis directly because DbRegis requires
+     * the full Heurist bootstrap. Instead, it calls indexController?action=resolve,
+     * which runs the normal DbRegis::registrationGet() workflow server-side.
+     */    
+    private static function resolveRegisteredDatabaseUrl(int $database_id): array
+    {
+        if ($database_id <= 0) {
+            return [null, null];
+        }
+
+        $remoteUrl = self::currentHeuristBaseUrl()
+            . 'hserv/controller/indexController.php?'
+            . http_build_query([
+                'dbID' => $database_id,
+                'action' => 'resolve'
+            ]);
+
+
+        [$raw, $curlError] = self::curlGet($remoteUrl, 25);
+
+        if ($raw === false) {
+            return [null, [
+                'status' => 'network',
+                'message' => 'Unable to resolve registered database ID ' . $database_id,
+                'sysmsg' => [
+                    'code' => 'REMOTE_REGISTRY_CURL_FAILED',
+                    'stage' => 'remote_db_resolution',
+                    'remote_url' => $remoteUrl,
+                    'curl_error' => $curlError
+                ],
+                'http_status' => 502
+            ]];
+        }
+
+        $raw = trim((string)$raw);
+
+        // If DbRegis endpoint returns plain URL.
+        if (filter_var($raw, FILTER_VALIDATE_URL)) {
+            return [$raw, null];
+        }
+
+        // If endpoint returns JSON.
+        $json = json_decode($raw, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
+            $url = $json['data'] ?? null;
+
+            if ($url && filter_var($url, FILTER_VALIDATE_URL)) {
+                return [$url, null];
+            }else{
+                return [null, $json];
+            }
+
+            $msg = $json['message'] ?? 'Registry response does not contain a valid URL';
+        } else {
+            $msg = 'Registry response is not a valid URL or JSON response';
+        }
+
+        return [null, [
+            'status' => 'notfound',
+            'message' => 'Registered database ID ' . $database_id . ' could not be resolved',
+            'sysmsg' => [
+                'code' => 'REMOTE_REGISTRY_BAD_RESPONSE',
+                'stage' => 'remote_db_resolution',
+                'remote_url' => $remoteUrl,
+                'response' => substr($raw, 0, 500),
+                'detail' => $msg
+            ],
+            'http_status' => 502
+        ]];
+    }
+
+    private static function curlGet(string $url, int $timeout = 25): array
+    {
+        if (!function_exists('curl_init')) {
+            return [false, 'Cannot initialise curl extension'];
+        }
+
+        $url = filter_var($url, FILTER_VALIDATE_URL);
+        if (!$url || !preg_match('~^https?://~i', $url)) {
+            return [false, 'Invalid URL'];
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Heurist RecordResolver');
+
+        $data = curl_exec($ch);
+        $err  = curl_error($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($data === false || $code < 200 || $code >= 300) {
+            return [false, $err ?: ('HTTP response code ' . $code)];
+        }
+
+        return [$data, null];
+    }
+
+    private static function currentHeuristBaseUrl(): string
+    {
+        $https = (
+            (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (($_SERVER['SERVER_PORT'] ?? null) == 443)
+            || strtolower((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https'
+        );
+
+        $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? 'localhost');
+
+        // Avoid localhost when SERVER_NAME is localhost but HTTP_HOST has the real vhost.
+        // HTTP_HOST is preferred because Apache virtual hosting depends on it.
+        $host = preg_replace('/[^A-Za-z0-9\.\-\:\[\]]/', '', $host);
+        
+        /*        
+        $path = realpath(dirname(__FILE__).'/../../');
+        $path = trim(str_replace('\\', '/', $path),'/');
+        $parts = explode('/', $path);
+        $version = end($parts) ?? '';
+        if(!($version === 'heurist'
+                || preg_match('/^h7-[A-Za-z0-9_-]+$/', $version) === 1)){
+            $version = 'h7-alpha';
+        }
+        */
+
+        return ($https ? 'https://' : 'http://') . $host . '/' . trim(self::$version, '/') . '/';
+    }
+    
 }

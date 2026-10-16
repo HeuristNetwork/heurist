@@ -37,8 +37,8 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     // default options
     options: {
 
-        height: 800,
-        width:  875,
+        height: 850,
+        width:  1100,
         modal:  true,
         title:  'Record Type Title Mask Edit',
         default_palette_class: 'ui-heurist-design', 
@@ -102,10 +102,12 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         this._loadRecordTypeTreeView();
         
         //init buttons
-        let btn = this.element.find('#btnInsertField').button();
+        let btn = this.element.find('#btnInsertField').button()
+            .addClass('ui-heurist-btn-header1 ui-button-action');
         this._on(btn, {click: this._doInsert});
 
-        btn = this.element.find('#btnTestMask').button();
+        btn = this.element.find('#btnTestMask').button()
+            .addClass('ui-heurist-btn-header1 ui-button-action');
         this._on(btn, {click: this._doTest});
 
         this._on(this.element.find('#selectAll'), {click: 
@@ -132,30 +134,44 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         this.element.find('#rty_TitleMask').val(this.options.rty_TitleMask);
         
         //load list of records for testing 
-        let request = {q: 't:'+this.options.rty_ID, w: 'all', detail:'header', limit:100 };
+        let request = { q: `t:${this.options.rty_ID}`, w: 'all', detail: 'header', limit: 1000 };
          
-        window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( recordset )
-        {
-            if(recordset!=null){
-                
-                // it returns several record of given record type to apply tests
-                //fill list of records
-                let sel = that.element.find('#listRecords')[0];
-                //clear selection list
-                while (sel.length>1){
-                    sel.remove(1);
-                }
+        window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( recordset ){
 
-                let recs = recordset.getRecords();
-                for(let rec_ID in recs) 
-                if(rec_ID>0){
-                    window.hWin.HEURIST4.ui.addoption(sel, rec_ID, 
-                        window.hWin.HEURIST4.util.stripTags(recordset.fld(recs[rec_ID], 'rec_Title')));
-                }
-
-                sel.selectedIndex = 0;
-                
+            if(!recordset){
+                return;
             }
+
+            // it returns several record of given record type to apply tests
+            //fill list of records
+            let sel = that.element.find('#listRecords')[0];
+            //clear selection list
+            while (sel.length>1){
+                sel.remove(1);
+            }
+
+            let recs = recordset.getRecords();
+            for(let rec_ID in recs) 
+            if(rec_ID>0){
+                window.hWin.HEURIST4.ui.addoption(sel, rec_ID, 
+                    window.hWin.HEURIST4.util.stripTags(recordset.fld(recs[rec_ID], 'rec_Title')));
+            }
+
+            let width = $(sel).css('width', '').width();
+            width = width > 500 ? 500 : width;
+
+            window.hWin.HEURIST4.ui.initHSelect($(sel), false, {width: `${width}px`}, {
+                onOpenMenu: function(){
+                    let $menu = $(this).hSelect('menuWidget');
+                    $menu.width(width);
+                    $menu.find('div.ui-menu-item-wrapper').addClass('truncate');
+                }
+            });
+
+            $(sel).hSelect('option', {searchable: true, searchType: 'std'});
+            $(sel).hSelect('menuWidget').css('max-width', `${width}px`);
+
+            sel.selectedIndex = 0;
         });
         
         

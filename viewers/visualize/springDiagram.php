@@ -54,7 +54,10 @@ $isMinimalVersion = intval(@$_REQUEST['mini']);
         ?>
         <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_color.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingBrowse.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingTranslation.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingHelpers.js"></script>
+        
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
         <?php } ?>
@@ -139,7 +142,6 @@ function onPageInit(success){
 function performSearch(q){
 
     let getRelationDetails = (recordIDs, query) => {
-
         //Finds all directly related (linked or via relationship records) records for a given set of record IDs.
         window.hWin.HAPI4.RecordMgr.search_related({ids:recordIDs.join(',')}, (response_related) => {
 
@@ -329,9 +331,9 @@ function expandNode(rec_ID){
 
 function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
 
-    mainRecID = parseInt(mainRecID);
-    rtyID = parseInt(rtyID);
-    parentRecID = parseInt(parentRecID);
+    mainRecID = Number.parseInt(mainRecID);
+    rtyID = Number.parseInt(rtyID);
+    parentRecID = Number.parseInt(parentRecID);
 
     const addToParentList = window.hWin.HEURIST4.util.isPositiveInt(parentRecID);
 
@@ -439,7 +441,7 @@ function addNewConnections(recordIDs, data){
                         const recTypeId = relations.headers[recId][1];
 
                         let node = {
-                            id: parseInt(recId),
+                            id: Number.parseInt(recId),
                             name: relations.headers[recId][0],  // record title
                             image: window.hWin.HAPI4.iconBaseURL+recTypeId,  // record type id for icon
                             count: 0, // Default count, might be updated later if applicable

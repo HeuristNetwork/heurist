@@ -28,6 +28,8 @@ require_once dirname(__FILE__).'/../../admin/setup/dboperations/welcomeEmail.php
 
 define('PARAM_WELCOME','?welcome=1&db=');
 
+define('DB_NAME_LIMIT', 60); // Limit database names to 60 characters, also see dbAction.js::_DB_NAME_LIMIT
+
 $system = new hserv\System();
 
 //sysadmin protection - reset from request to avoid exposure in possible error/log messages
@@ -46,6 +48,7 @@ if($action==null){
 
 $session_id = DbUtils::prepareSessionId($req_params['session']??null);
 
+$response = null;
 if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connectRemote')){ //db required, except create
     //get error and response
     $response = $system->getError();
@@ -53,15 +56,32 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
 
    $isNewUserRegistration = ($action == 'create' || $action == 'connectRemote') && !$system->hasAccess();
 
-   if(!($isNewUserRegistration || $system->hasAccess())){
+   if(in_array($action, ['create', 'rename', 'clone', 'restore'])){
+
+       $fullName = array_key_exists('uname', $req_params) ? $req_params['uname'] : '';
+       $fullName .= array_key_exists('dbname', $req_params) ? $req_params['dbname'] : '';
+
+       if($fullName === ''){
+           $response = $system->addError(HEURIST_INVALID_REQUEST, 'Please enter a database name');
+       }else if(strlen($fullName) > DB_NAME_LIMIT){
+           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Your entered database name is too long, please reduce it to the maximum of 40 characters');
+       }
+   }
+
+   if(is_array($response)){
+    // prevent further action
+   }elseif ($isNewUserRegistration && $action === 'create' && !$system->captcha()->consumeCaptcha($req_params['ugr_Captcha'] ?? null)) 
+   {
+        // return error before long-running operation
+        $response = $system->getError();
+        
+   }elseif(!($isNewUserRegistration || $system->hasAccess())){
         $response = $system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in');
         //@todo !!!!!  check for $passwordForDatabaseCreation
    }else{
        
         // IMPORTANT: allow concurrent progress.php calls from same browser session
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }       
+        $system->session()->close();
 
         $res = false;
 
@@ -104,42 +124,30 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
 
                     if($isNewUserRegistration)
                     {
-                        //check capture
-                        $captcha_code_ok = true;
-                        $captcha_code = @$req_params['ugr_Captcha'];
-                        if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != $captcha_code) {
-                            $system->addError(HEURIST_INVALID_REQUEST,
-                                'Are you a bot? Please enter the correct answer to the challenge question');
-                            $captcha_code_ok = false;
+                        unset($req_params['ugr_Captcha']);
+
+                        //get registration form fields
+                        $usr_owner = array();
+                        foreach($req_params as $name=>$val){
+                            if($name === 'ugr_ORCID' && !empty($req_params[$name])){
+                                $usr_owner[$name] = preg_match('/^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/', $req_params[$name]) === 1 ? $req_params[$name] : null;
+                            }elseif(strpos($name,'ugr_')===0){
+                                $usr_owner[$name] = $mysqli->real_escape_string($req_params[$name]);
+                            }
                         }
-                        if (@$_SESSION["captcha_code"]){
-                            unset($_SESSION["captcha_code"]);
+
+                        //mandatory fields
+                        $fld_req = array('ugr_FirstName','ugr_LastName','ugr_eMail','ugr_Name','ugr_Password');
+                        foreach($fld_req as $name){
+                            if(@$usr_owner[$name]==null || $usr_owner[$name]==''){
+                                $system->addError(HEURIST_INVALID_REQUEST, 'Mandatory data for your registration profile '
+                                    .'(first and last name, email, password) are not completed. Please fill out registration form');
+                                $usr_owner = null;
+                                break;
+                            }
                         }
-
-                        if($captcha_code_ok){
-                            unset($req_params['ugr_Captcha']);
-
-                            //get registration form fields
-                            $usr_owner = array();
-                            foreach($req_params as $name=>$val){
-                                if(strpos($name,'ugr_')===0){
-                                    $usr_owner[$name] = $mysqli->real_escape_string($req_params[$name]);
-                                }
-                            }
-
-                            //mandatory fields
-                            $fld_req = array('ugr_FirstName','ugr_LastName','ugr_eMail','ugr_Name','ugr_Password');
-                            foreach($fld_req as $name){
-                                if(@$usr_owner[$name]==null || $usr_owner[$name]==''){
-                                    $system->addError(HEURIST_INVALID_REQUEST, 'Mandatory data for your registration profile '
-                                        .'(first and last name, email, password) are not completed. Please fill out registration form');
-                                    $usr_owner = null;
-                                    break;
-                                }
-                            }
-                            if($usr_owner!=null){
-                                $usr_owner['ugr_Password'] = hash_it( $usr_owner['ugr_Password'] );
-                            }
+                        if($usr_owner!=null){
+                            $usr_owner['ugr_Password'] = hash_it( $usr_owner['ugr_Password'] );
                         }
 
                     }else{
@@ -149,7 +157,8 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
 
                     if($usr_owner!=null){
                         //it returns false or array of warnings
-                        $res = DbUtils::databaseCreateFull($database_name, $usr_owner);
+                        $res = DbUtils::databaseCreateFromRegisteredTemplate(
+                            $database_name, $usr_owner, $req_params['template_id'] ?? 0);
 
                         if($res!==false){
                             sendEmailNewDatabase($usr_owner, $database_name, null);
@@ -272,7 +281,28 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
             }else{
                 $sErrorMsg = DbUtils::databaseValidateName($db_source, 2);//exists    
             }
-            
+
+            // Perform owner and pointer checks before action
+            $dbVerify = new DbVerify($system);
+            $ownerResults = $dbVerify->check_owner_ref(['fix' => 1]);
+            $pointerResults = $dbVerify->check_pointer_targets(['fix' => 1]);
+
+            if(!$sErrorMsg && !$ownerResults['status'] || !$pointerResults['status']){
+
+                $sErrorMsg = "Unable to {$action} database.<br>Failed to verify that ";
+
+                $ownerMsg = !$ownerResults['status'] ? 'all records have owners' : '';
+                $pointerMsg = !$pointerResults['status'] ? 'that all record pointers point to existing records' : '';
+
+                if(!$ownerResults['status'] && !$pointerResults['status']){
+                    $sErrorMsg .= "{$ownerMsg} and {$pointerMsg}.";
+                }else{
+                    $sErrorMsg .= !$ownerResults['status'] ? "{$ownerMsg}." : "{$pointerMsg}.";
+                }
+
+                $sErrorMsg .= '<br>. Please run Admin > Verify integrity to see the specific issues.';
+            }
+
             if ($sErrorMsg!=null) {
                 if(strpos($sErrorMsg,'not exists')>0){
                    $sErrorMsg = 'Operation is possible when database to be cloned or renamed is on the same server. '
@@ -309,7 +339,7 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
 'To perform this action you must be logged in as Administrator of group \'Database Managers\' or as Database Owner');
                             }else{
                                 $allow_action = true;
-                                if($action=='clone' && !($sourceRegID>0)){
+                                if($action == 'clone' && $sourceRegID <= 0 && !$system->isSystemAdmin()){
                                     //check for new definitions - sysadmin protection
                                     $hasWarning = DbUtils::databaseCheckNewDefs();
                                     if($hasWarning!=false && $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
@@ -395,7 +425,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                     exit;
                     
                 }else{
-                    $res = $checker->checkURLs(@$req_params['verbose']==1, false, @$req_params['limit'], @$req_params['mode'], $session_id);
+                    $res = $checker->checkURLs(@$req_params['verbose']==1, false, @$req_params['limit'], @$req_params['mode'], $session_id, @$req_params['format'] ?? 'all');
                 }
                 
             }
@@ -483,6 +513,9 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
    }
 }
 
+if($action === 'create' && DbUtils::$creationTemplateFallbackAvailable){
+    $response['template_fallback_available'] = true;
+}
 header(CTYPE_JSON);
 print json_encode($response);
 

@@ -86,6 +86,7 @@ if($useCache && !$forceCache){
     }
 }
 
+require_once dirname(__FILE__).'/RecordMediaRenderer.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/relationshipData.php';
@@ -139,6 +140,14 @@ if(array_key_exists('useRelmarkerTitle', $_REQUEST)){
     $useRelmarkerTitle = intval($system->userGetPreference('useRelmarkerTitle', 0));
 }
 
+// Used in 'publish' (CMS Websites) mode
+// Show only one translated value, without the language prefix
+// Otherwise, show all values + language prefixes
+$publishMode = 0;
+if(array_key_exists('publish', $_REQUEST)){
+    $publishMode = intval($_REQUEST['publish']);
+}
+
 $rectypesStructure = dbs_GetRectypeStructures($system);//getAllRectypeStructures();//get all rectype names
 
 $defTerms = dbs_GetTerms($system);
@@ -171,8 +180,12 @@ $system->defineConstant('DT_PARENT_ENTITY');
 $system->defineConstant('DT_DATE');
 $system->defineConstant('DT_WORKFLOW_STAGE');
 
-$system->defineConstant('RT_CMS_MENU');
+$system->defineConstant('RT_CMS_PAGE');
 $system->defineConstant('RT_CMS_HOME');
+$system->defineConstant('RT_IIIF_MANIFEST');
+$system->defineConstant('RT_IIIF_ANNOTATION');
+$system->defineConstant('DT_ANNOTATION_MANIFEST');
+$system->defineConstant('DT_URL');
 $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 $system->defineConstant('DT_CMS_HEADER');
 $system->defineConstant('DT_CMS_FOOTER');
@@ -262,6 +275,7 @@ if(!$system->hasAccess()){
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>external/jquery.fancybox/jquery.fancybox.css" />
 
         <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/widgets/viewers/mediaViewer.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>viewers/record/recordMediaViewer.js"></script>
 
         <script type="text/javascript">
 
@@ -277,35 +291,11 @@ if(!$system->hasAccess()){
                 window.hWin.HR = (res) => res; // to allow dialog creation
             }
 
-            var rec_Files = [];
-            var rec_Files_IIIF_and_3D = [];
-            var rec_Files_IIIF_and_3D_linked = [];
             var baseURL = '<?php echo HEURIST_BASE_URL;?>';
             var database = '<?php echo $system->dbname();?>';
             var hint_popup = null, $map_frame = null;
             var connectedRecsCount = 0;
-
-            function zoomInOut(obj,thumb,url) {
-                var thumb = thumb;
-                var url = url;
-                var currentImg = obj;
-
-                if (currentImg.parentNode.className != "fullSize"){
-                    $(currentImg).hide();
-                    currentImg.src = url;
-                    currentImg.onload=function(){
-                        $(currentImg).fadeIn(500);
-                    }
-                    currentImg.parentNode.className = "fullSize";
-                    currentImg.parentNode.parentNode.style.width = '100%';
-
-                }else{
-                    currentImg.src = thumb;
-                    currentImg.parentNode.className = "thumb_image";
-                    currentImg.parentNode.parentNode.style.width = 'auto';
-                    //currentImg.parentNode.parentNode.style.float = 'right';
-                }
-            }
+            var language = '<?php echo $lang; ?>';
 
             //
             //
@@ -358,14 +348,6 @@ if(!$system->hasAccess()){
             }
 
             //
-            // not used
-            //
-            function show_record(event, rec_id)
-            {
-                $('div[data-recid]').hide();$('div[data-recid='+rec_id+']').show();
-                return false
-            }
-            //
             // catch click on a href and opens it in popup dialog for ADMIN UI
             //
             function link_open(link, is_record_viewer = true) {
@@ -392,7 +374,6 @@ if(!$system->hasAccess()){
                         }
 
                         let rec_title = link.innerHTML.indexOf('- >') === -1 ? link.innerHTML : link.innerHTML.split(' - > ')[1];
-                        let title = `${rec_title} <em style="font-size:0.9em;font-weight:normal;position:absolute;right:11em;top:25%;">${window.hWin.HR('drag to rescale')}</em>`;
                         let cover = link.innerHTML; //innerText
 
                         let cur_params = window.hWin.HEURIST4.util.getUrlParams(location.href);
@@ -416,11 +397,12 @@ if(!$system->hasAccess()){
 
                         window.hWin.HEURIST4.msg.showDialog(href,
                             {
-                                title:title,
+                                title: rec_title,
                                 width: width,
                                 height: height,
                                 modal:false,
                                 coverMsg: cover,
+                                showResizeButtons: true,
                                 onOpen: function(e, ui){
 
                                     let $dlg = $(this);
@@ -431,25 +413,16 @@ if(!$system->hasAccess()){
 
                                     window.hWin.record_viewer_popups.push($dlg);
 
-                                    // Place popup
-                                    if(pos){
-
-                                        let top = pos.top + (pos.top * 0.1);
-                                        let left = pos.left + (pos.left * 0.05);
-
-                                        $dlg.parent().css({
-                                            top: top,
-                                            left: left
-                                        });
-                                    }
-
                                     // Add 'Close all' button
                                     let $titleBar = $dlg.parent().find('.ui-dialog-titlebar');
                                     if($titleBar.length > 0){
 
-                                        $('<button>', {style: 'position: absolute;font-size: 0.8em;right: 4em;top: 0.2em;'})
+                                        let $resizeBtnContainer = $titleBar.find('.ui-dialog-resize-container');
+
+                                        // Add close all button
+                                        $('<button>', {style: 'font-size: 0.8em;width: 6.5em;margin-right: 3.5em;'})
                                             .text('Close all')
-                                            .insertBefore($titleBar.find('button'))
+                                            .insertAfter($resizeBtnContainer)
                                             .button()
                                             .on('click', () => {
 
@@ -465,7 +438,27 @@ if(!$system->hasAccess()){
                                                 }
                                             });
 
-                                        $titleBar.find('.ui-dialog-title').css('width', '73%');
+                                        $titleBar.find('.ui-dialog-title').css({width: '75%', 'margin-right': '2em'});
+                                        // Add text about drag resizing
+                                        $('<em>', {
+                                            style: 'font-size: 0.9em;font-weight: normal;width: 9em;',
+                                            text: window.hWin.HR('drag to rescale')
+                                        }).insertAfter($titleBar.find('.ui-dialog-title'));
+
+                                        $resizeBtnContainer.css('flex-basis', '20em');
+                                        $resizeBtnContainer.find('button')[1].click(); // auto resize to standard size
+                                    }
+
+                                    // Place popup
+                                    if(pos){
+
+                                        let top = pos.top + (pos.top * 0.2);
+                                        let left = pos.left + (pos.left * 0.1);
+
+                                        $dlg.parent().css({
+                                            top: top,
+                                            left: left
+                                        });
                                     }
                                 }
                             }
@@ -513,7 +506,11 @@ if(!$system->hasAccess()){
             //
             function showHidePrivateInfo( event ){
 
-                let ele = $('#link_showhide_private');
+                let ele = $('[data-recdetails] .link_showhide_private');
+
+                if(event){
+                    ele = event.target.tagName === 'A' ? $(event.target) : $(event.target).find('.link_showhide_private');
+                }
 
                 if(ele.length == 0){
                     return false;
@@ -521,72 +518,84 @@ if(!$system->hasAccess()){
 
                 let prefVal = 1;
 
-                if(event!=null){
-                    prefVal = ele.attr('data-expand')>=0?ele.attr('data-expand'):prefVal;
-                    prefVal = (prefVal!=1)?1:0;
+                if(event != null){
+
+                    prefVal = ele.attr('data-expand')>=0 ? ele.attr('data-expand') : prefVal;
+                    prefVal = prefVal != 1 ? 1 : 0;
 
                     //save in prefs
-                    if(event!=null && window.hWin?.HAPI4){
+                    if(window.hWin?.HAPI4){
                         window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);
                     }
                 }else if(window.hWin?.HAPI4){
-                    prefVal = window.hWin.HAPI4.get_prefs_def('recordData_PrivateInfo',1);
+                    prefVal = window.hWin.HAPI4.get_prefs_def('recordData_PrivateInfo', 1);
                 }
-                ele.attr('data-expand',prefVal);
+                ele.attr('data-expand', prefVal);
 
-                if(prefVal==0){
+                if(prefVal == 0){
                     ele.text('less...');
-                    $('.morePrivateInfo').show();
-                    if(event!=null){
+                    ele.closest('[data-recdetails]').find('.morePrivateInfo').show();
+                    if(event != null){
                         setTimeout(function(){
                             window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
-                            },200);
+                        },200);
                     }
                 }else{
                     ele.text('more...');
-                    $('.morePrivateInfo').hide();
+                    ele.closest('[data-recdetails]').find('.morePrivateInfo').hide();
                 }
-
 
                 return false;
             }
 
-            function addNetworkGraphLink(){
+            function addNetworkGraphLink(recID){
 
-                let $group_container = $('div#div_public_data');
+                let $parentContainer = $(`div[data-recdata="${recID}"]`);
+                let $group_container = $parentContainer.find('div.div_public_data');
 
-                if($('#network-graph-area').length > 0 || <?php echo $noclutter || $is_map_popup ? 1 : 0; ?> === 1){ // already setup or skip for no clutter/map popup
+                if($parentContainer.find('.network-graph-area').length > 0 || <?php echo $noclutter || $is_map_popup ? 1 : 0; ?> === 1){ // already setup or skip for no clutter/map popup
                     return;
                 }
 
-                let $network = $('<div>', {id: 'network-graph-area', style: 'display: none; padding: 1em 0px;'})
+                let $network = $('<div>', {class: 'network-graph-area', style: 'display: none; padding: 1em 0px;'})
                 .append($('<h4>', {
                     style: 'margin: 5px 0px 5px;font-size: 1.1em;text-transform: uppercase;',
                     text: 'Network'
                 }))
                 .append($('<span>', {
-                    id: 'show_network',
-                    class: 'fake_link',
+                    class: 'show_network fake_link',
                     style: 'padding-left: 2em; font-size: 12px;',
-                    html: `<span class="ui-icon ui-icon-network"></span>View network (<span id="connectionsPlaceholder"></span> connections)`
+                    html: `<span class="ui-icon ui-icon-network"></span>View network (<span class="connectionsPlaceholder"></span> connections)`
                 }))
                 .insertBefore($group_container.find('.detailRow.fieldRow').first());
 
-                $network.find('#show_network').on('click', () => openNetworkGraph());
+                $network.find('.show_network').on('click', () => openNetworkGraph(recID));
             }
 
+            function createRecordGroups2(recID, groups){
+            
+                document.querySelectorAll(".fieldRow").forEach(el => {
+                    el.style.display = "";
+                });
+
+                document.querySelectorAll(".moreRow").forEach(el => {
+                    el.style.display = "none";
+                });            
+                
+                createRecordGroups(recID, groups);
+            }
             //
             // Add group headers to record viewer
             //
-            function createRecordGroups(groups){
+            function createRecordGroups(recID, groups){
 
-                var $group_container = $('div#div_public_data');
+                var $group_container = $(`div[data-recdata="${recID}"] div.div_public_data`);
                 var $data = $group_container.find('div[data-order]');
 
                 var $g_ele = null, $g_header = null;
                 var current_type = null;
 
-                addNetworkGraphLink();
+                addNetworkGraphLink(recID);
 
                 if(groups == null || $data.length < 0 || $group_container.length < 0){
                     return;
@@ -621,7 +630,7 @@ if(!$system->hasAccess()){
                         }
                     });
 
-                    if(group_name != '-' && (sep_type != 'explanation' || sep_type != 'explanation_break')){
+                    if(group_name != '-'){
                         if(inner_group){
                             $('<h5>').attr('data-order', order)
                                 .css({'margin': '5px 15px 2px', 'font-size': '1em', 'font-style': 'italic'})
@@ -654,53 +663,54 @@ if(!$system->hasAccess()){
                 });
             }
 
-            function openNetworkGraph(){
+            function openNetworkGraph(recID){
 
-                let $networkElement = $('.networkGraphViewer');
+                let $parentContainer = $(`div[data-recdata="${recID}"]`);
+                let $networkElement = $parentContainer.find('.networkGraphViewer');
                 if($networkElement.length === 0){
                     $networkElement = $('<div>', {
                         class: 'networkGraphViewer',
                         style: 'height: 40em; background-color: white; box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);',
                         html: `<button class="closeVisualiser" style="position: absolute; right: 1.5em;" title="Close mini visualiser">X</button>
                         <iframe style="height: 40em;"></iframe>`
-                    }).appendTo($('#network-graph-area'));
+                    }).appendTo($parentContainer.find('.network-graph-area'));
 
                     $networkElement.find('.closeVisualiser').button({icon: 'ui-icon-close', showLabel: false}).on('click', () => {
                         $networkElement.hide();
-                        $('#show_network').show();
+                        $parentContainer.find('.show_network').show();
                     });
                 }
 
-                const recID = <?php echo intval($rec_id); ?>;
                 if(recID <= 0){
                     return;
                 }
 
-                $('#show_network').hide();
+                $parentContainer.find('.show_network').hide();
 
                 let iframe = $networkElement.find('iframe');
-                const query = `ids:${recID},${connectedRecIDs}`;
+                let connectedRecs = Array.isArray(connectedRecIDs) ? connectedRecIDs.join(',') : connectedRecIDs[recID].join(',');
+                const query = `ids:${recID},${connectedRecs}`;
                 let URL = `${baseURL}viewers/visualize/springDiagram.php?db=${database}&mini=1&q=${query}`; // mini: 1 = small, 2 = large
 
-                if($networkElement.attr('data-recid') == recID){
+                if($networkElement.attr('data-netvis') == recID){
                     $networkElement.show();
                     return;
                 }
 
                 $networkElement.find('iframe').attr('src', URL);
-                $networkElement.attr('data-recid', recID);
+                $networkElement.attr('data-netvis', recID);
             }
 
             //
             // Move related record details without particular relmarker field to the separated section
             //
-            function moveRelatedDetails(related_records){
+            function moveRelatedDetails(recID, related_records){
 
-                var $rel_section = $('div.relatedSection');
+                var $rel_section = $(`div[data-recdetails="${recID}"].relatedSection`); //target div
 
-                var $public_fields = $('div#div_public_data').find('fieldset[id], div[data-order]');
+                var $public_fields = $(`div[data-recdata="${recID}"]  div.div_public_data`).find('fieldset[id], div[data-order]');
 
-                if(related_records == null || $public_fields == null || $public_fields.length == 0){
+                if(related_records == null || $public_fields.length == 0){
                     return;
                 }
 
@@ -779,231 +789,25 @@ if(!$system->hasAccess()){
 
                     $rel_section.hide();
 
+                    let hasRelationShown = false;
                     $rel_section.find('div[data-id]').each((idx, element) => {
                         if($(element).css('display') !== 'none'){
                             $rel_section.show();
+                            hasRelationShown = true;
                             return false;
                         }
                     });
+
+                    if(!hasRelationShown){
+                        $rel_section.remove();
+                    }
                 }
             }//end moveRelatedDetails
-
-            //
-            // Init thumbnails and assign mediaViewer
-            //
-            function showMediaViewer(){
-                //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif and 3dhop
-                if(rec_Files_IIIF_and_3D.length>0){
-
-                    if(window.hWin?.HAPI4){
-                        $('.thumbnail2.main-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D,
-                                showLink:true, database:database, baseURL:baseURL});
-                    }else{
-                        $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
-                            $('.thumbnail2.main-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D,
-                                showLink:true, database:database, baseURL:baseURL});
-                        });
-                    }
-                }
-                if(rec_Files_IIIF_and_3D_linked.length>0){
-
-                    if(window.hWin?.HAPI4){
-                        $('.thumbnail2.linked-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D_linked,
-                                showLink:true, database:database, baseURL:baseURL});
-                    }else{
-                        $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
-                            $('.thumbnail2.linked-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D_linked,
-                                showLink:true, database:database, baseURL:baseURL});
-                        });
-                    }
-                }
-            }
-
-            //
-            // Init fancybox for "full screen" links
-            //
-            function initMediaViewer(){
-
-                if(!$('.thumbnail').mediaViewer('instance')){
-                    $('.thumbnail').mediaViewer({selector:'.mediaViewer_link',
-                        rec_Files:rec_Files, showLink:false, database:database, baseURL:baseURL });
-
-                    //setTimeout(function(){$('.thumbnail').mediaViewer('show');},1000);
-                }
-                //init open in mirador links
-                function __openMiradorViewer(event){
-
-                    //verify annotation record type
-                    let evt = event;
-
-                    if(evt.already_checked!==true && window.hWin.HAPI4?.has_access()){
-                        window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
-                            'In order to add Annotation to image you have to import "Annotation" record type',
-                            function(){
-                                evt.already_checked = true;
-                                __openMiradorViewer(evt);
-                            });
-                        return;
-                    }
-
-                    var ele = $(event.target)
-
-                    if(!ele.attr('data-id')){
-                        ele = ele.parents('[data-id]');
-                    }
-                    var obf_recID = ele.attr('data-id');
-
-                    var url =  baseURL
-                    + 'hclient/widgets/viewers/miradorViewer.php?db='
-                    +  database
-                    + '&recID='<?php echo $bib['rec_ID'];?>
-                    + '&iiif_image=' + obf_recID;
-
-                    if(false && window.hWin && window.hWin.HEURIST4){
-                        //borderless:true,
-                        window.hWin.HEURIST4.msg.showDialog(url,
-                            {dialogid:'mirador-viewer',
-                                //resizable:false, draggable: false,
-                                //maximize:true,
-                                default_palette_class: 'ui-heurist-explore',
-                                width:'90%',height:'95%',
-                                allowfullscreen:true,'padding-content':'0px'});
-
-                        $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
-
-                        $dlg.parent().css('top','50px');
-                    }else{
-                        window.open(url, '_blank');
-                    }
-
-                    //data-id
-                };
-
-                function __openOpenSeadragonViewer(event){
-
-                    let ele = $(event.target);
-                    if(!ele.attr('data-id')){
-                        ele = ele.parents('[data-id]');
-                    }
-                    let ulf_recID = ele.attr('data-id');
-
-                    let url = `${baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${database}&recID=${ulf_recID}`;
-
-                    window.open(url, '_blank');
-                };
-
-                $('.miradorViewer_link').on('click', __openMiradorViewer);
-                $('.openSeadragonViewer_link').on('click', __openOpenSeadragonViewer);
-
-                $('.popupMedia_link').on('click', (e) => {
-
-                    let $ele = $(e.target);
-
-                    let file_nonce = $ele.attr('data-id');
-                    let file = rec_Files.find((file) => file.id === file_nonce);
-                    let file_url = `${baseURL}?db=${database}&file=${file_nonce}`;
-
-                    let file_desc = $ele.closest('.download_link').find('span.media-desc').attr('title');
-                    file_desc = window.hWin.HEURIST4.util.isempty(file_desc) ? '' : file_desc;
-                    file_desc = file_desc.replace('"', '&quote;').replace("'", '&apos;');
-
-                    let msg = `<img src='${file_url}' alt='${file_desc}' style='height:99%;width:99%;object-fit:contain' />`;
-                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                        msg, null, {title: file.filename},
-                        {default_palette_class: 'ui-heurist-explore', resizable: true, width: 'auto', height: 'auto'}
-                    );
-                    $dlg.css('max-width', 'none');
-                });
-            }
-
-            /**
-             * Show/Hide media and linked media
-             *
-             * @param {boolean} [show_all=false] Force the display of all images
-             */
-            function displayImages(show_all = false){
-
-                // 0 - show all (default), 1 - hide linked, 2 - hide all
-                let hide_images = show_all || $('#show-linked-media').length==0 || $('#show-linked-media').is(':checked') ? 0 : 1;
-
-                $('.media-content').show();
-                if(hide_images == 1){ // hide linked media
-                    let selector = $('.media_container:not(.linked-media)').length == 0 ? '.linked-media:not(:first)' : '.linked-media';
-                    $(selector).hide();
-                }else{
-                    $('.linked-media').show();
-                }
-
-                sessionStorage.setItem('Heurist_RecView_LinkedMedia', hide_images);
-
-                if(show_all){ // set checkbox to checked
-                    $('#show-linked-media').attr('checked', true);
-                }
-            }
-
-            function mediaTooltips(){
-
-                $('span.media-desc, span.media-right').on('mouseenter focusin', (event) => {
-
-                    let $ele = $(event.target);
-                    $ele.tooltip({
-                        content: function(){
-                            return $(this).attr('title');
-                        },
-                        open: function(event, ui){
-
-                            ui.tooltip.css({
-                                background: '#D4DBEA',
-                                "font-size": '1em',
-                                padding: '5px',
-                                width: '85%',
-                                cursor: 'default'
-                            });
-
-                            let $ele = $(this);
-                            let $tooltip = ui.tooltip;
-
-                            $tooltip.off('mouseenter mouseleave');
-
-                            $tooltip.on('mouseleave', function(){
-                                $ele.attr('data-tooltip', 0);
-                                setTimeout(function(){
-                                    if($ele.attr('data-tooltip') != 1 && $ele.tooltip('instance') !== undefined){
-                                        $ele.tooltip('close');
-                                    }
-                                }, 1000);
-                            }).on('mouseenter', function(){
-                                $ele.attr('data-tooltip', 1);
-                            });
-                        },
-                        position: {
-                            my: "left top+5",
-                            at: "left bottom",
-                            collision: "flipfit"
-                        }
-                    });
-                    $ele.tooltip('open');
-                }).on('mouseleave focusout', function(event){
-
-                    window.hWin.HEURIST4.util.stopEvent(event);
-                    event.stopImmediatePropagation();
-
-                    let $ele = $(event.target);
-
-                    let int_id = setInterval(function(){
-                        if($ele.attr('data-tooltip') != 1 && $ele.tooltip('instance') !== undefined){
-                            $ele.tooltip('destroy');
-                        }
-                        clearInterval(int_id);
-                    }, 1000);
-                });
-
-            }
 
             // Toggle the visibility of hidden fields
             function toggleHiddenFields(){
 
-                let show_hidden_fields = $('#toggleHidden').is(':checked') ? 1 : 0;
+                let show_hidden_fields = $('.toggleHidden').is(':checked') ? 1 : 0;
 
                 if(show_hidden_fields == 0){
                     $('.hiddenField').hide();
@@ -1012,10 +816,10 @@ if(!$system->hasAccess()){
                 }
 
                 if($('.hiddenField').length == 0){ // remove hidden field toggler
-                    $('#toggleHidden').parents('.detailRow').remove();
+                    $('.toggleHidden').parents('.detailRow').remove();
                 }
 
-                let $group_container = $('div#div_public_data');
+                let $group_container = $('div.div_public_data');
 
                 $.each($group_container.find('fieldset'), function(idx, fieldset){
 
@@ -1046,7 +850,7 @@ if(!$system->hasAccess()){
             function onWindowResize(){
 
                 const doc_width = $(document).width();
-                let $fld_names = $('#div_public_data .detailType');
+                let $fld_names = $('.div_public_data .detailType');
 
                 if($fld_names.length == 0){
                     return;
@@ -1062,18 +866,17 @@ if(!$system->hasAccess()){
                     $fld_names.addClass('row20');
                 }
             }
-
-
+            
             function recviewer_showMap(event, rec_id){
 
                 if(!hint_popup){
-                    hint_popup = new HintDiv('mapPopup', 300, 300, '<div id="recviewer_map_popup" style="width:100%;height:100%;"></div>');
+                    hint_popup = new HintDiv('mapPopup', 300, 300, '<div class="recviewer_map_popup" style="width:100%;height:100%;"></div>');
                 }
 
                 hint_popup.showAt(event);
 
                 if(!$map_frame || $map_frame.length == 0){ // create iframe
-                    $map_frame = $('<iframe>', {id: 'recviewer_map_frame'}).appendTo($('#recviewer_map_popup'));
+                    $map_frame = $('<iframe>', {id: 'recviewer_map_frame'}).appendTo($('.recviewer_map_popup'));
                 }else{// reset source
                     $map_frame.attr('src', null);
                 }
@@ -1084,53 +887,6 @@ if(!$system->hasAccess()){
                 $map_frame.attr('src', URL);
             }
 
-            function initImageRefreshLink(){
-
-                let refreshing = false;
-
-                $('.refreshThumb_link').on('click', (event) => {
-
-                    if(refreshing){
-                        window.hWin.HEURIST4.msg.showMsgErr('A thumbnail is already being refreshed, please wait for it to complete before refreshing another thumbnail.');
-                        return;
-                    }
-                    refreshing = true;
-
-                    let ulf_ObfuscatedFileID = $(event.target).attr('data-id');
-                    let $thumb = $(event.target).parent().next().find('img');
-
-                    if(window.hWin.HEURIST4.util.isempty(ulf_ObfuscatedFileID) || $thumb.length === 0){
-                        return;
-                    }
-
-                    let refreshURL = `${baseURL}hserv/controller/fileDownload.php`;
-                    let request = {
-                        db: database,
-                        thumb: ulf_ObfuscatedFileID,
-                        refresh: 1
-                    };
-
-                    window.hWin.HEURIST4.msg.showMsgFlash('Refreshing thumbnail...', 2500);
-
-                    window.hWin.HEURIST4.util.sendRequest(refreshURL, request, null, (response) => {
-
-                        refreshing = false;
-
-                        if(response.message.startsWith('Error_')){
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                            return;
-                        }
-
-                        window.hWin.HEURIST4.msg.showMsgFlash('Thumbnail has been refreshed', 3000);
-
-                        let url = `${baseURL}?db=${database}&offer_download=1&thumb=${ulf_ObfuscatedFileID}&${window.hWin.HEURIST4.util.random()}`;
-                        $thumb.attr('src', url);
-
-                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, {type: 'ulf'}); // refresh thumbnails
-                    });
-                });
-            }
-            
             function openReportSelector(){
             
                 let popup_dialog_options = {path: 'widgets/report/', 
@@ -1149,24 +905,54 @@ if(!$system->hasAccess()){
                 
             }
 
+            function downloadRecordAsPDF(event){
+
+                /*
+                https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js
+                let options = {margin: 1, filename: `${recordTitle}-viewer.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }};
+                html2pdf().set(options).from(document.querySelector('.print-container')).save();
+                */
+
+                const originalTitle = document.title;
+                let togglePrivateInfo = document.querySelector('.link_showhide_private');
+                const originalInfoState = togglePrivateInfo.textContent;
+
+                const recID = event.target.closest('div[data-recdata]').getAttribute('data-recdata');
+                let containers = document.querySelectorAll(`[data-recdata="${recID}"],[data-recdetails="${recID}"]`);
+                const title = event.target.closest('div[data-recdata]').querySelector('.HeaderRow h2').innerText;
+
+                if(!window.setupPrintHandlers){
+
+                    window.addEventListener('beforeprint', () => {
+                        containers.forEach(container => {
+                            container.classList.add('print-container');
+                        });
+                        document.title = title;
+                        togglePrivateInfo.textContent = '';
+                    });
+
+                    window.addEventListener('afterprint', () => {
+                        containers.forEach(container => {
+                            container.classList.remove('print-container');
+                        });
+                        document.title = originalTitle;
+                        togglePrivateInfo.textContent = originalInfoState;
+                    });
+
+                    window.setupPrintHandlers = true;
+                }
+
+                window.print();
+            }
+
             $(document).ready(function() {
                 showHidePrivateInfo(null);
 
-                initMediaViewer();
-
-                showMediaViewer();//init thumbs for iiif
-
-                initImageRefreshLink();
-
-                // Set default setting for show linked media, stored within session
-                let def_ImageSettings = sessionStorage.getItem('Heurist_RecView_LinkedMedia');
-                //let param_ImageSetting = window.hWin.HEURIST4.util.getUrlParameter('hideImages', location.search);
-                def_ImageSettings = def_ImageSettings != 0 && def_ImageSettings != 1 ? 1 : def_ImageSettings;
-                if($('#show-linked-media').length > 0){
-                    $('#show-linked-media').prop('checked', def_ImageSettings == 0).trigger('change');
+                if(window.HeuristRecordMedia){
+                    window.HeuristRecordMedia.init({baseURL: baseURL, database: database, language: language});
                 }
 
-                mediaTooltips();
+                //mediaTooltips();
 
                 toggleHiddenFields();
 
@@ -1180,24 +966,37 @@ if(!$system->hasAccess()){
                     $login_icon.hide();
                 }
 
-                if(connectedRecsCount > 0){
+                if(connectedRecIDs.length > 0){
 
-                    if($('#network-graph-area').length === 0){
-                        addNetworkGraphLink();
+                    connectedRecIDs = typeof connectedRecIDs === 'string' ? JSON.parse(connectedRecIDs) : connectedRecIDs;
+
+                    if(Array.isArray(connectedRecIDs)){
+                        $('.network-graph-area').show();
+                        $(`.connectionsPlaceholder`).text(connectedRecIDs.length);
+                    }else if(typeof connectedRecIDs === 'object'){
+                        $.each(connectedRecIDs, (recID, connectedRecs) => {
+
+                            if(connectedRecs.length === 0){
+                                $(`div[data-recdata="${recID}"] .network-graph-area`).hide();
+                                return;
+                            }
+
+                            $(`div[data-recdata="${recID}"] .network-graph-area`).show();
+                            $(`div[data-recdata="${recID}"] .connectionsPlaceholder`).text(connectedRecs.length);
+                        });
                     }
 
-                    $('#network-graph-area').show();
-                    $('#connectionsPlaceholder').text(connectedRecsCount);
-                }
-
-                if(isAdminInterface){
-                    $('#custom-report-link').show();
-                    $('#custom-report-link').on('click', () => openReportSelector());    
                 }
                 
+                if(isAdminInterface){
+                    $('#custom-report-link').show();
+                    $('#custom-report-link').on('click', () => openReportSelector());
+                }
+
+                $('#pdf-download-link').button().on('click', (event) => downloadRecordAsPDF(event));
 
             });
-            
+
             /*NOT USED
             //on document load onLoad="add_sid();"
             function add_sid() {
@@ -1224,6 +1023,42 @@ if(!empty($import_webfonts)){
 }
 ?>
         <style>
+            @media print{
+
+                @page{
+                    margin: 0px;
+                }
+
+                *{
+                    print-color-adjust: exact;
+                    -webkit-print-color-adjust: exact;
+                }
+
+                body *{
+                    visibility: hidden;
+                }
+
+                .print-container{
+
+                    width: 90vw;
+
+                    padding: 1.6em;
+                }
+                .print-container, .print-container *{
+                    visibility: visible;
+                }
+
+                .record-media-controls, .download_link, #custom-report-link, #pdf-download-link, .network-graph-area{
+                    display: none;
+                }
+
+                .detailRow{
+                    break-inside: avoid;
+                }
+                h4{
+                    break-before: auto;
+                }
+            }
         .detailRowHeader{
             padding: 20px 0 20px;
             text-align: left;
@@ -1264,7 +1099,7 @@ if(!empty($import_webfonts)){
         }
 
         div.thumbnail img {
-            width: 80px;
+            max-width: 200px;
             border: 2px solid #FFF;
             -moz-box-shadow: 0 2px 4px #BBB;
             -webkit-box-shadow: 0 2px 4px #bbb;
@@ -1380,13 +1215,14 @@ if(defined('FONT_SIZE') && FONT_SIZE!==''){
             width: 20%;
         }
 
-        @media print {
-          .download_link {
-            visibility: hidden;
-          }
-          h4 {
-            page-break-before:auto;
-          }
+        #pdf-download-link{
+            font-size: 0.9em;
+
+            margin-left: 1em;
+            padding: 3px 5px;
+
+            border: none;
+            text-decoration: none !important;;
         }
         </style>
     </head>
@@ -1424,26 +1260,44 @@ if($noclutter){
 $writeToCacheRes = 0; //0 - OK, 1 - not found, 2 - not public 
 $writeToCache = false;
 
+$bibInfo = [];
 if ($bkm_ID>0 || $rec_id>0) {
 
-        if ($bkm_ID>0) {
-            $bibInfo = mysql__select_row_assoc($system->getMysqli(),
-            'select * from usrBookmarks left join Records on bkm_recID=rec_ID '
-            .'left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='
-            .$bkm_ID.' and bkm_UGrpID='.$system->getUserId()
-            .' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
+    if ($bkm_ID>0) {
+        $bibInfo = mysql__select_row_assoc($system->getMysqli(),
+        'select * from usrBookmarks left join Records on bkm_recID=rec_ID '
+        .'left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='
+        .$bkm_ID.' and bkm_UGrpID='.$system->getUserId()
+        .' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
 
-        } elseif($rec_id>0) {
-            $bibInfo = mysql__select_row_assoc($system->getMysqli(),
-            'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
-            .$rec_id.' and not rec_FlagTemporary');
+        if($bibInfo===null){
+            print 'Bookmark Id '.$rec_id.' not found'; 
+            $writeToCacheRes = 1;
         }
+        
+    } elseif($rec_id>0) {
+        $bibInfo = mysql__select_row_assoc($system->getMysqli(),
+        'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
+        .$rec_id.' and not rec_FlagTemporary');
+        
+        if($bibInfo===null){
+            print 'Record Id '.$rec_id.' not found'; 
+            $writeToCacheRes = 1;
+        }
+    }
+}else{
+    print 'Resource (record or bookmark) Id not defined'; 
+    $writeToCacheRes = 1;
+}
+        
+if(is_array($bibInfo) && count($bibInfo) > 0){
+        
             $writeToCache = $useCache && $bibInfo['rec_NonOwnerVisibility']==='public' && $forceCache;
             if($bibInfo['rec_NonOwnerVisibility']!=='public'){
                 $writeToCacheRes = 2;
             }
 
-            print '<div data-recid="'.intval($bibInfo['rec_ID']).'">';// style="font-size:0.8em"
+            print '<div data-recdata="'.intval($bibInfo['rec_ID']).'">';// style="font-size:0.8em"
             print_details($bibInfo);
             print DIV_E;
             
@@ -1463,21 +1317,21 @@ if ($bkm_ID>0 || $rec_id>0) {
                             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID'
                             .' where rec_ID='.$id.' and not rec_FlagTemporary');
 
-                    if($id!=$rec_id){  //print details for linked records - hidden
-                        print '<div data-recid="'.intval($id).'" style="display:none">';//font-size:0.8em;
+                    if($id != $rec_id){  //print details for linked records - hidden
+                        print '<div data-recdata="'.intval($id).'" style="display:none">';//font-size:0.8em;
+                        $bibInfo['hideDetails'] = true;
                         print_details($bibInfo);
                         print DIV_E;
                     }
                     $opts = $opts . '<option value="'.$id.'">(#'.$id.') '.$bibInfo['rec_Title'].'</option>';
 
-                    $list = $list  //$id==$rec_id || $cnt>3
-                        .'<div class="detailRow placeRow" style="'.($cnt>2?CSS_HIDDEN:'').'">'
+                    $list .= '<div class="detailRow placeRow" style="'.($cnt > 2 ? CSS_HIDDEN : '').'">'
                             .'<div style="display:table-cell;padding-right:4px"><img class="rft" style="background-image:url('
                                 .HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'
                                 .strip_tags($rectypesStructure['names'][$bibInfo['rec_RecTypeID']])
-                                .'" src="'.ICON_PLACEHOLDER.DIV_E
-                        .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a '
-.'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
+                                .'" src="'.ICON_PLACEHOLDER.'">'.DIV_E
+                        .'<div style="display: table-cell;vertical-align:top;max-width:490px;cursor: pointer;" class="truncate"><a '
+.'oncontextmenu="return false;" onclick="$(\'div[data-recdata],[data-recdetails]\').hide();$(\'div[data-recdata='.$id.'],[data-recdetails='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
 .USanitize::sanitizeString($bibInfo['rec_Title'],ALLOWED_TAGS).'</a></div></div>';//htmlspecialchars
@@ -1500,10 +1354,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                 print DIV_E;
 
             }
-        } else {
-            $writeToCacheRes = 1;
-            print 'No details found';
-        }
+        } 
         
  if(!$noclutter && $is_map_popup || $without_header){
 //    print DIV_E;
@@ -1565,7 +1416,7 @@ exit(0);
 /***** END OF OUTPUT *****/
 
 // this functions outputs common info.
-function print_details($bib) {
+function print_details(array $bib) {
     global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system, $group_details, $show_private_details, $connectedRecIDs;
 
     print_header_line($bib);
@@ -1582,10 +1433,11 @@ function print_details($bib) {
         $link_cnt = print_relation_details($bib);
         $link_cnt = print_linked_details($bib, $link_cnt);//links from
         if($is_map_popup){ // && $link_cnt>3 //linkRow
+/* createRecordGroups2(<?php echo intval($bib['rec_ID']); ?>,  <?php echo json_encode($group_details, JSON_FORCE_OBJECT);?> ); */
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
             <a href="#more" oncontextmenu="return false;"
-                onClick='$(".fieldRow").css("display","");$(".moreRow").hide();createRecordGroups(<?php echo json_encode($group_details, JSON_FORCE_OBJECT);?>);return false;' style="color:blue">
+                onClick='document.querySelectorAll(".fieldRow").forEach(el => {el.style.display = "";});document.querySelectorAll(".moreRow").forEach(el => {el.style.display = "none";});return false;' style="color:blue">
                 more...
             </a>
             </div><div class="detail"></div></div></div>
@@ -1606,7 +1458,7 @@ function print_details($bib) {
     $connectedRecIDCount = count($connectedRecIDs);
     if($connectedRecIDCount > 0){
         ?>
-        <script>connectedRecsCount = <?php echo $connectedRecIDCount;?>; connectedRecIDs='<?php echo implode(',',$connectedRecIDs);?>';</script>
+        <script>connectedRecIDs='<?php echo json_encode($connectedRecIDs);?>';</script>
         <?php
     }
 
@@ -1614,7 +1466,7 @@ function print_details($bib) {
 
 
 // this functions outputs the header line of icons and links for managing the record.
-function print_header_line($bib) {
+function print_header_line(array $bib) {
 
     global $is_map_popup, $without_header, $is_production, $system;
 
@@ -1647,14 +1499,16 @@ function print_header_line($bib) {
                 target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=$system->dbname()?>&recID=<?= $bib['rec_ID'] ?>">
                 <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" alt="Edit record" title="Edit record" style="vertical-align: top"></a>
             </span>
-            
+
         <?php }else{ ?>
             <span class="login-viewer ui-icon ui-icon-sign-in" title="Sign-in to gain full access" style="cursor: pointer;"></span>
         <?php }
         if(!($is_map_popup || $without_header)){
         ?>
             <span class="link"><a id="custom-report-link" class="normal" style="font-size:0.9em;display:none" href="#">Custom report</a></span>
+            <span class="link"><a id="pdf-download-link" class="normal" style="font-size:0.9em;margin-left:10px;" href="#">Download PDF</a></span>
         <?php }
+
         if(!empty($wfs_details)){
 
             $wfs_icon = HEURIST_BASE_URL . '?db=' . $system->dbname() . '&entity=defTerms&icon=' . intval($wfs_details[0]);
@@ -1676,8 +1530,11 @@ function print_header_line($bib) {
 //this  function displays private info if there is any.
 // ownereship, viewability, dates, tags, rate
 //
-function print_private_details($bib) {
+function print_private_details(array $bib) {
+
     global $system, $is_map_popup, $is_production, $show_hidden_fields, $show_private_details;
+
+    $recordID = intval($bib['rec_ID']);
 
     if($bib['rec_OwnerUGrpID']==0){
 
@@ -1685,9 +1542,9 @@ function print_private_details($bib) {
 
     }else{
 
-        $permissions = recordSearchPermissions($system, $bib['rec_ID']);
+        $permissions = recordSearchPermissions($system, $recordID);
         if($permissions['status']==HEURIST_OK){
-            $groups = @$permissions['edit'][$bib['rec_ID']];
+            $groups = @$permissions['edit'][$recordID];
             if(is_array($groups)){
                 array_unshift($groups, $bib['rec_OwnerUGrpID']);
             }else{
@@ -1701,7 +1558,7 @@ function print_private_details($bib) {
 
             $row = mysql__select_row($system->getMysqli(),
                 'select grp.ugr_Name,grp.ugr_Type,concat(grp.ugr_FirstName," ",grp.ugr_LastName) from Records, '
-                    .'sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and rec_ID='.$bib['rec_ID']);
+                    .'sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and rec_ID='.$recordID);
 
             $workgroup_name = null;
             // check to see if this record is owned by a workgroup
@@ -1715,15 +1572,18 @@ function print_private_details($bib) {
     $kwds = mysql__select_all($system->getMysqli(),
         'select grp.ugr_Name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '
         .'sysUGrps grp on tag_UGrpID=grp.ugr_ID left join sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='
-        .$system->getUserId().' where rtl_RecID='.$bib['rec_ID']
+        .$system->getUserId().' where rtl_RecID='.$recordID
         .' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order',0,0);
 
     //show or hide private details depends on preferences
     //0 collapsed 1 show
+    $default_mode = $show_private_details - 1;
+    $style = $bib['hideDetails'] ? ' style="display: none;" ' : '';
     ?>
+    <div data-recdetails="<?php echo $recordID; ?>"<?php echo $style; ?>>
     <div class="detailRowHeader" style="float:left;padding:10px">
-        <a href="#more"  id="link_showhide_private"
-            data-expand="<?php echo $show_private_details -= 1; ?>"
+        <a href="#more" class="link_showhide_private"
+            data-expand="<?php echo $default_mode; ?>"
             oncontextmenu="return false;"
             onClick="showHidePrivateInfo(event)">more...</a>
     </div>
@@ -1737,10 +1597,10 @@ function print_private_details($bib) {
 
     <div class="detailRow fieldRow">
         <div class="detailType">
-            <input type="checkbox" onchange="toggleHiddenFields();" id="toggleHidden" <?php echo $chkbox_state; ?>>
+            <input type="checkbox" onchange="toggleHiddenFields(event);" class="toggleHidden" <?php echo $chkbox_state; ?>>
         </div>
         <div class="detail" style="vertical-align: middle;">
-            <label for="toggleHidden">Show hidden fields (marked with <span style="text-decoration: line-through;">strikethrought</span>)</label>
+            <span>Show hidden fields (marked with <span style="text-decoration: line-through;">strikethrought</span>)</span>
         </div>
     </div>
 
@@ -1750,19 +1610,19 @@ function print_private_details($bib) {
     <div class="detailRow fieldRow" style="<?php echo $is_map_popup?CSS_HIDDEN:''?>">
         <div class=detailType>Cite as</div><div class="detail<?php echo $is_map_popup?' truncate" style="max-width:400px;"':'"';?>>
             <a target=_blank class="external-link"
-                href="<?php echo $system->recordLink($bib['rec_ID'], 'hml');?>">XML
+                href="<?php echo $system->recordLink($recordID, 'hml');?>">XML
             </a>
             &nbsp;&nbsp;
             <a target=_blank class="external-link"
-            href="<?php echo $system->recordLink($bib['rec_ID']);?>">HTML</a>
+            href="<?php echo $system->recordLink($recordID);?>">HTML</a>
                 <?php echo $is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>';?>
         </div>
     </div>
     <?php
 
-    $add_date = DateTime::createFromFormat(DATE_8601, $bib['rec_Added']);//get form database in server time
-
     //zero date not allowed by default since MySQL 5.7 default date changed to 1000
+    $add_date = DateTime::createFromFormat(DATE_8601, $bib['rec_Added']);//get form database in server time
+    $add_date_local = '';
     if($add_date && $bib['rec_Added']!='0000-00-00 00:00:00' && $bib['rec_Added']!='1000-01-01 00:00:00') {
         $add_date = htmlspecialchars($add_date->setTimezone(new DateTimeZone('UTC'))->format(DATE_8601));//convert to UTC
         $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
@@ -1773,6 +1633,7 @@ function print_private_details($bib) {
     }
 
     $mod_date = DateTime::createFromFormat(DATE_8601, $bib['rec_Modified']);//get form database in server time
+    $mod_date_local = '';
     if($mod_date){
         $mod_date = htmlspecialchars($mod_date->setTimezone(new DateTimeZone('UTC'))->format(DATE_8601));//convert to UTC
         $mod_date_local = ' (<span id="lt1"></span><script type="text/javascript">printLTime("'.  //output in js in local time
@@ -1865,12 +1726,12 @@ function print_private_details($bib) {
     if (is_array($bib) && array_key_exists('bkm_ID', $bib)) {
                 print_personal_details($bib);
     }
-    print DIV_E;
+    print DIV_E . DIV_E;
 }
 
 
 //this function outputs the personal information from the bookmark
-function print_personal_details($bkmk) {
+function print_personal_details(array $bkmk) {
     global $system;
 
     $bkm_ID = $bkmk['bkm_ID'];
@@ -1905,16 +1766,95 @@ function print_personal_details($bkmk) {
 }
 
 //
+// Returns true when a registered file represents an IIIF manifest/IIIF resource.
+// Used by the record media section to avoid displaying a raw JSON placeholder
+// for RT_IIIF_MANIFEST records and to use the IIIF logo thumbnail consistently.
+//
+function recviewer_is_iiif_file($sourceType, $originalFileName): bool {
+    $sourceType = (string)$sourceType;
+    $originalFileName = (string)$originalFileName;
+
+    return $sourceType==='iiif' || (defined('ULF_IIIF') && $originalFileName===ULF_IIIF);
+    
+    /*
+    return strpos($sourceType, 'iiif') === 0
+        || (defined('ULF_IIIF') && strpos($originalFileName, ULF_IIIF) === 0)
+        || (defined('ULF_IIIF_IMAGE') && $originalFileName === ULF_IIIF_IMAGE);
+    */
+}
+
+function recviewer_is_iiif_image_file($sourceType, $originalFileName): bool {
+    $sourceType = (string)$sourceType;
+    $originalFileName = (string)$originalFileName;
+
+    return $sourceType==='iiif_image'
+        || (defined('ULF_IIIF_IMAGE') && $originalFileName===ULF_IIIF_IMAGE);
+}
+
+function recviewer_iiif_image_default_jpg_url($infoUrl, int $maxSize=600): string {
+    $infoUrl = rtrim(trim((string)$infoUrl), '/');
+    if($infoUrl===''){
+        return '';
+    }
+
+    $serviceId = preg_replace('~/info\.json(?:\?.*)?$~', '', $infoUrl);
+    $size = $maxSize > 0 ? '!'.$maxSize.','.$maxSize : 'full';
+    return rtrim((string)$serviceId, '/').'/full/'.$size.'/0/default.jpg';
+}
+
+//
+// Fake media entry for RT_IIIF_MANIFEST records. It lets the record viewer show
+// a single Mirador/IIIF entry even when the record has no visible file thumbnail,
+// and avoids showing the original manifest JSON file as a separate media item.
+//
+function recviewer_add_iiif_manifest_thumb(array &$thumbs, array $bib): void {
+    if(!defined('RT_IIIF_MANIFEST') || intval(@$bib['rec_RecTypeID']) !== intval(RT_IIIF_MANIFEST)){
+        return;
+    }
+
+    foreach($thumbs as $thumb){
+        if(!empty($thumb['iiif_manifest_record']) && intval(@$thumb['manifest_rec_id']) === intval($bib['rec_ID'])){
+            return;
+        }
+    }
+
+    array_unshift($thumbs, array(
+        'id' => 0,
+        'external_url' => '',
+        'params' => null,
+        'orig_name' => 'IIIF Manifest',
+        'sourceType' => 'iiif_manifest_record',
+        'mimeType' => 'application/json',
+        'file_size' => 0,
+        'mode_3d_viewer' => null,
+        'thumb' => HEURIST_BASE_URL.'hclient/assets/iiif_logo200.png',
+        'player' => null,
+        'nonce' => '',
+        'linked' => false,
+        'description' => '',
+        'caption' => @$bib['rec_Title'] ?: 'IIIF Manifest',
+        'rights' => '',
+        'owner' => '',
+        'iiif_manifest_record' => true,
+        'manifest_rec_id' => intval($bib['rec_ID'])
+    ));
+}
+
+//
 // prints recDetails
 //
-function print_public_details($bib) {
+function print_public_details(array $bib) {
 
-    global $system, $defTerms, $is_map_popup, $noclutter, $without_header, $is_production, $primary_language,
+    global $system, $defTerms, $is_map_popup, $noclutter, $without_header, $is_production, $primary_language, $publishMode,
         $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $connectedRecIDs, $group_details, $hide_images;
 
     $has_thumbs = false;
 
     $mysqli = $system->getMysqli();
+    $recordID = intval($bib['rec_ID']);
+
+    $already_linked_ids[$recordID] = [];
+    $connectedRecIDs[$recordID] = [];
 
     $query = 'select rst_DisplayOrder, dtl_RecID, dtl_ID, dty_ID,
         IF(rdr.rst_DisplayName is NULL OR rdr.rst_DisplayName=\'\', dty_Name, rdr.rst_DisplayName) as name,
@@ -1925,12 +1865,13 @@ function print_public_details($bib) {
         if(dtl_Geo is not null, ST_asWKT(ST_Envelope(dtl_Geo)), null) as bd_geo_envelope,
         dtl_HideFromPublic,
         rst_NonOwnerVisibility,
-        rst_RequirementType
+        rst_RequirementType,
+        null as linked_RecTypeID
         from recDetails
         left join defDetailTypes on dty_ID = dtl_DetailTypeID
         left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
         and rdr.rst_RecTypeID = '.intval($bib['rec_RecTypeID']).'
-        where dtl_RecID = ' . intval($bib['rec_ID']);
+        where dtl_RecID = ' . $recordID;
 
     $rec_visibility = $bib['rec_NonOwnerVisibility'];
     $rec_owner  = $bib['rec_OwnerUGrpID'];
@@ -1965,6 +1906,19 @@ function print_public_details($bib) {
     $bds_temp = array();
     $thumbs = array();
 
+    // If this record is an IIIF annotation, keep its Canvas URI so linked
+    // Manifest media can open Mirador focused on the annotated canvas.
+    $annotationCanvasUri = '';
+    if(defined('RT_IIIF_ANNOTATION') && defined('DT_URL')
+        && intval(@$bib['rec_RecTypeID']) === intval(RT_IIIF_ANNOTATION)){
+            
+        $annotationCanvasUri = (new \hserv\entity\DbAnnotations($system))->getCanvasUrl( intval($recordID) );
+      
+        if($annotationCanvasUri==null){
+            $annotationCanvasUri = '';
+        }
+    }
+
     $bds_res = $mysqli->query($query);//0.8 sec
 
     $translations = [];
@@ -1986,9 +1940,10 @@ function print_public_details($bib) {
                 .'d2.dtl_UploadedFileID, '
                 .'dt2.dty_Type, '
                 .'null as dtl_Geo, '
-                .'null as bd_geo_envelope '
+                .'null as bd_geo_envelope, '
+                .'rec_RecTypeID as linked_RecTypeID '
         .' from recDetails d1, defDetailTypes dt1, recDetails d2, defDetailTypes dt2, Records '
-        .' where d1.dtl_RecID = '. intval($bib['rec_ID']).' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
+        .' where d1.dtl_RecID = '. $recordID .' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
         .' AND d2.dtl_RecID = d1.dtl_Value and d2.dtl_DetailTypeID = dt2.dty_ID and dt2.dty_Type = "file" '
         .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.intval($relRT)
         .SQL_AND.$ACCESS_CONDITION;
@@ -2040,12 +1995,13 @@ function print_public_details($bib) {
             }elseif($bd['dty_Type'] == 'blocktext') {
 
                 $bd['val'] = html_entity_decode($bd['val']);// @todo: get translation
-                list($lang, $value) = output_chunker($bd['val'], true);
+                [$lang, $value] = output_chunker($bd['val'], true);
+                $value = $publishMode === 0 && !empty($lang) ? "{$lang}:{$value}" : $value;
                 if($value == strip_tags($value)){
                     $bd['val'] = nl2br(str_replace('  ', NBSP, $value));
                 }
 
-                if(!empty($primary_language)){
+                if($publishMode !== 0 && !empty($primary_language)){
 
                     if(!array_key_exists($bd['dty_ID'], $translations)){
                         $translations[$bd['dty_ID']] = [ 'lang' => $lang, 'values' => [] ];
@@ -2065,7 +2021,6 @@ function print_public_details($bib) {
                     }
                 }
 
-                
                 // replace href="[numeric]" or href="[numeric]/something.tpl" to record view links
                 $bd['val'] = preg_replace_callback(
                     '/\bhref=(["\'])(\d+(?:\/[^"\']+\.tpl)?)\1/i',
@@ -2075,17 +2030,6 @@ function print_public_details($bib) {
                     },
                     $bd['val']
                 );
-                
-                /* OLD
-                $bd['val'] = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
-                        function($matches){
-                            global $system;
-
-                            return 'onclick="return (typeof link_open === \'function\')?link_open(this, false):true;" href="'
-                                    .$system->recordLink($matches[1]).'"';
-                        },
-                        $bd['val']);
-                */
 
             }elseif($bd['dty_Type'] == 'resource') {
 
@@ -2123,8 +2067,8 @@ function print_public_details($bib) {
                         $bd['order_by_date'] = htmlspecialchars($row[0]);
                     }
 
-                    $connectedRecIDs[] = $rec_id;
-                    $already_linked_ids[] = $rec_id;
+                    $connectedRecIDs[$recordID][] = $rec_id;
+                    $already_linked_ids[$recordID][] = $rec_id;
                 }
 
             }
@@ -2132,7 +2076,8 @@ function print_public_details($bib) {
 
                 $fileinfo = null;
 
-                //|| ($hide_images == 1 && $bd['dtl_RecID'] != $bib['rec_ID'])){ // skip linked media
+                //|| ($hide_images == 1 && $bd['dtl_RecID'] != $recordID)){ // skip linked media
+                //DISABLED $hide_images =  2;
                 if($hide_images == 2){ // skip all images
                     continue;
                 }
@@ -2142,9 +2087,9 @@ function print_public_details($bib) {
                      $ruf_entity = new DbRecUploadedFiles($system);
                      $fileinfo = $ruf_entity->registerURL($bd['val'], false, $bd['dtl_ID']);
                 }else{
-                    $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']);//see recordFile.php
+                    $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID'], $primary_language);//see recordFile.php
                     if(is_array($listpaths) && !empty($listpaths)){
-                        $fileinfo = $listpaths[0];//
+                        $fileinfo = $listpaths[0];
                     }
                 }
 
@@ -2163,26 +2108,57 @@ function print_public_details($bib) {
                     $file_thumbURL  = HEURIST_BASE_URL.'?db='.$system->dbname().'&offer_download=1&thumb='.$file_nonce;
                     $file_URL   = HEURIST_BASE_URL.'?db='.$system->dbname()."&file=$file_nonce"; //download
 
-                    array_push($thumbs, array(
-                        'id' => $bd['dtl_UploadedFileID'],
-                        //'url' => $file_URL, //download
-                        'external_url' => $external_url,      //external url
-                        //'mediaType'=>$filedata['mediaType'],
-                        'params'=>null,
-                        'orig_name'=>$originalFileName,
-                        'sourceType'=>$sourceType,
-                        'mimeType'=>$mimeType,
-                        'file_size'=>$fileSize,
-                        'mode_3d_viewer' => detect3D_byExt($file_Ext),
-                        'thumb' => $file_thumbURL,
-                        'player' => $file_playerURL,
-                        'nonce' => $file_nonce,
-                        'linked' => ($bd['dtl_RecID'] != $bib['rec_ID']),
-                        'description' => $fileinfo['ulf_Description'],
-                        'caption' => $fileinfo['ulf_Caption'],
-                        'rights' => $fileinfo['ulf_Copyright'],
-                        'owner' => $fileinfo['ulf_Copyowner']
-                    ));
+                    $isIiif = recviewer_is_iiif_file($sourceType, $originalFileName);
+                    $isIiifImage = recviewer_is_iiif_image_file($sourceType, $originalFileName);
+                    if($isIiif){
+                        $file_thumbURL = HEURIST_BASE_URL.'hclient/assets/iiif_logo200.png';
+                    }elseif($isIiifImage && $external_url){
+                        // IIIF Image API file records store the service info.json URL.
+                        // In the record view, display/open a raster derivative instead
+                        // of the JSON service document.
+                        $file_thumbURL = recviewer_iiif_image_default_jpg_url($external_url, 600);
+                    }
+
+                    // RT_IIIF_MANIFEST records get one synthetic media entry for the record itself.
+                    // Do not also show the source manifest JSON file as a separate media thumbnail.
+                    $skipMediaThumb = defined('RT_IIIF_MANIFEST')
+                        && intval($bib['rec_RecTypeID']) === intval(RT_IIIF_MANIFEST)
+                        && $isIiif
+                        && $bd['dtl_RecID'] == $recordID;
+
+                    $isLinkedIiifManifestRecord = defined('RT_IIIF_MANIFEST')
+                        && intval(@$bd['dtl_RecID']) !== $recordID
+                        && intval(@$bd['linked_RecTypeID']) === intval(RT_IIIF_MANIFEST)
+                        && $isIiif;
+
+                    if(!$skipMediaThumb){
+                        array_push($thumbs, array(
+                            'id' => $bd['dtl_UploadedFileID'],
+                            //'url' => $file_URL, //download
+                            'external_url' => $external_url,      //external url
+                            //'mediaType'=>$filedata['mediaType'],
+                            'params'=>null,
+                            'orig_name'=>$originalFileName,
+                            'sourceType'=>$sourceType,
+                            'mimeType'=>$mimeType,
+                            'file_size'=>$fileSize,
+                            'mode_3d_viewer' => detect3D_byExt($file_Ext),
+                            'thumb' => $file_thumbURL,
+                            'player' => $file_playerURL,
+                            'nonce' => $file_nonce,
+                            'linked' => ($bd['dtl_RecID'] != $recordID),
+                            'rec_ID' => intval($bd['dtl_RecID']),
+                            'linked_rec_id' => intval($bd['dtl_RecID']),
+                            'linked_rec_type_id' => intval(@$bd['linked_RecTypeID']),
+                            'iiif_manifest_record' => $isLinkedIiifManifestRecord,
+                            'manifest_rec_id' => $isLinkedIiifManifestRecord ? intval($bd['dtl_RecID']) : 0,
+                            'canvas_uri' => $isLinkedIiifManifestRecord ? $annotationCanvasUri : '',
+                            'description' => $fileinfo['ulf_Description'],
+                            'caption' => $fileinfo['ulf_Caption'],
+                            'rights' => $fileinfo['ulf_Copyright'],
+                            'owner' => $fileinfo['ulf_Copyowner']
+                        ));
+                    }
 
 
                     $bd['val'] = '<a target="_surf" href="'.htmlspecialchars($external_url?$external_url:$file_URL).'">';
@@ -2192,9 +2168,11 @@ function print_public_details($bib) {
                         $bd['val'] = $bd['val'].htmlspecialchars($file_description).'<br>';
                     }*/
                     $bd['val'] .= '<span class="external-link" style="vertical-align: bottom;"></span>';
-                    if(strpos($originalFileName,ULF_IIIF)===0){
+                    if($isIiif){
                         $bd['val'] = $bd['val'].'<img src="'.HEURIST_BASE_URL.'hclient/assets/iiif_logo.png" style="width:16px"/>';
-                        $originalFileName = null;
+                        if(defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF) === 0){
+                            $originalFileName = null; // hide only old artificial marker names
+                        }
                     }
 
 
@@ -2218,6 +2196,9 @@ function print_public_details($bib) {
                 } elseif($bd['dtl_Geo']){
 
                     $minX = null;
+                    $minY = null;
+                    $maxX = null;
+                    $maxY = null;
 
                     if (preg_match("/^POLYGON\s?[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/",
                                 $bd["bd_geo_envelope"], $poly))
@@ -2232,12 +2213,6 @@ function print_public_details($bib) {
                     {
                         list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
                     }
-                    /*   redundant
-                    $minX = intval($minX*10)/10;
-                    $minY = intval($minY*10)/10;
-                    $maxX = intval($maxX*10)/10;
-                    $maxY = intval($maxY*10)/10;
-                    */
 
                     switch ($bd["val"]) {
                         case "p": $type = "Point"; break;
@@ -2257,15 +2232,16 @@ function print_public_details($bib) {
                     }
                     $geoimage =
                     "<img class='geo-image' style='vertical-align:top;' src='".HEURIST_BASE_URL
-                    ."hclient/assets/geo.gif' onmouseout='{if(typeof recviewer_hideMap === \"function\"){recviewer_hideMap();}else if(typeof mapViewer !== 'undefined'){mapViewer.hide();}}' "
-                    ."onmouseover='{if(typeof recviewer_showMap === \"function\"){recviewer_showMap(event,".$bib['rec_ID'].");}else if(typeof mapViewer !== 'undefined'){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
+                    ."hclient/assets/geo.gif' onmouseout='{if(typeof recviewer_hideMap === \"function\"){recviewer_hideMap();}else if(typeof mapViewer !== \"undefined\"){mapViewer.hide();}}' "
+                    ."onmouseover='{if(typeof recviewer_showMap === \"function\"){recviewer_showMap(event,".$recordID.");}else if(typeof mapViewer !== \"undefined\"){mapViewer.showAtStatic(event, ".$recordID.");}}'>&nbsp;";
 
                     $bd['val'] = $geoimage.$bd['val'];
 
                 } else {
-                    list($lang, $bd['val']) = output_chunker($bd['val'], true);
+                    [$lang, $bd['val']] = output_chunker($bd['val'], true);
+                    $bd['val'] = $publishMode === 0 && !empty($lang) ? "{$lang}:{$bd['val']}" : $bd['val'];
 
-                    if(!empty($primary_language)){
+                    if($publishMode !== 0 && !empty($primary_language)){
 
                         if(!array_key_exists($bd['dty_ID'], $translations)){
                             $translations[$bd['dty_ID']] = [ 'lang' => $lang, 'values' => [] ];
@@ -2311,217 +2287,23 @@ function print_public_details($bib) {
         }
     }
 
-    print '<div id="div_public_data">';
+    print '<div class="div_public_data">';
 
-    //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif
-    if(!($is_map_popup || $without_header)){
-        print '<script>try{';
-        foreach ($thumbs as $thumb) {
-            if(strpos($thumb['orig_name'], ULF_IIIF)===0 || $thumb['mode_3d_viewer']!=''){
+    recviewer_add_iiif_manifest_thumb($thumbs, $bib);
 
-                $to_array = 'rec_Files_IIIF_and_3D' . ($thumb['linked'] ? '_linked' : '');
-                print $to_array.'.push({rec_ID:'.$bib['rec_ID']
-                                            .', id:"'.htmlspecialchars($thumb['nonce'])
-                                            .'",mimeType:"'.htmlspecialchars($thumb['mimeType'])
-                                            .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
-                                            .'",filename:"'.htmlspecialchars($thumb['orig_name'])
-                                            .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-            }else{
-                print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.htmlspecialchars($thumb['nonce']).'",mimeType:"'.htmlspecialchars($thumb['mimeType']).'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-            }
-        }
-        print '}catch(e){console.error("error fill rec_Files for record# '.$bib['rec_ID'].'")}</script>';
-    }           
-    print '<div class="thumbnail2 main-media" style="text-align:center"></div>';
+    $has_thumbs = !empty($thumbs) && $hide_images != 2;
+    print RecordMediaRenderer::render($system, [
+        'recordID' => $recordID,
+        'thumbs' => $thumbs,
+        'hideImages' => $hide_images,
+        'isProduction' => $is_production,
+        'isMapPopup' => $is_map_popup,
+        'withoutHeader' => $without_header,
+        'noclutter' => $noclutter,
+        'language' => $lang
+    ]);
 
-    $hasAudioVideo = '';
-    if($is_production){
-        print '<div class="thumbnail production">';
-    }else{
-        print '<div class="thumbnail">';
-    }
-        $has_thumbs = (!empty($thumbs));
-
-    $several_media = count($thumbs);
-    $added_linked_media_cont = false;
-
-    if($hide_images != 2){ // use/hide all thumbnails
-        foreach ($thumbs as $k => $thumb) {
-
-            if(strpos($thumb['orig_name'],ULF_IIIF)===0 || $thumb['mode_3d_viewer'] != '' ){
-
-                if($thumb['linked'] && !$added_linked_media_cont){
-                    print '<div class="thumbnail2 linked-media" style="text-align:center"></div>';
-                    $added_linked_media_cont = true;
-                }
-
-                continue;
-            }
-
-            $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);
-
-            $isImageOrPdf = (strpos($thumb['mimeType'],DIR_IMAGE)===0 || $thumb['mimeType']=='application/pdf');
-
-            if($thumb['player'] && !$is_map_popup && $isAudioVideo){
-                print '<div class="fullSize media-content" style="text-align:left;'
-                    .($is_production?'margin-left:100px':'')
-                    .($k>0?CSS_HIDDEN:'').'">';
-            }else{
-                print '<div class="thumb_image media-content media_container'. ($thumb['linked'] === true ? ' linked-media' : '') .'"  style="'.($isImageOrPdf?'':'cursor:default;')
-                    .($k>0?CSS_HIDDEN:'').'">';
-            }
-
-            $media_control_chkbx = '';
-            if($k == 0 && !$is_production && !$is_map_popup && $several_media>1){
-                $checked_status = $hide_images == 0 ? ' checked="checked"' : '';
-                $media_control_chkbx = " <label class='media-control'><input type='checkbox' id='show-linked-media' onchange='displayImages(false);' $checked_status> show all linked media</label>";
-
-                if($thumb['linked'] === true){
-                    print "<h5 style='margin-block:1.5em'>Linked Media Only: $media_control_chkbx</h5>";
-                    $media_control_chkbx = '';
-                }
-            }
-
-            $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0)
-                        ?$thumb['external_url']            //direct for https
-                        :(HEURIST_BASE_URL.'?db='.$system->dbname().'&file='.$thumb['nonce']);
-            $download_url = HEURIST_BASE_URL.'?db='.$system->dbname().'&debug=3&download=1&file='.$thumb['nonce'];
-
-            if(!$is_map_popup){
-                print '<div class="download_link">';
-
-                if($k==0 && $several_media>1){
-                    print '<a href="#" onclick="displayImages(true);">'
-                    .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a>';
-                }
-                if(!empty($thumbs) && !$isAudioVideo){
-                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="mediaViewer_link">'
-                    .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a>';
-                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="popupMedia_link">'
-                    .'<span class="ui-icon ui-icon-popup" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;view in popup</a>';
-                }
-
-                if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
-                    ( strpos($thumb['mimeType'],'youtube')===false &&
-                    strpos($thumb['mimeType'],'vimeo')===false &&
-                    strpos($thumb['mimeType'],'soundcloud')===false)) )
-                {
-                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="miradorViewer_link">'
-                        .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
-                        .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
-                        .'"></span>&nbsp;Mirador</a>';
-                }
-
-                if(strpos($thumb['mimeType'], 'image/') === 0 || $thumb['orig_name'] == ULF_IIIF_IMAGE){
-
-                    print '<a href="#" data-id="'. $thumb['id'] .'" class="openSeadragonViewer_link">'
-                        .'<span class="ui-icon ui-icon-image" style="display: inline-block;"></span>&nbsp;OpenSeadragon</a>';
-                }
-
-                if(@$thumb['external_url']){
-                    print '<a href="' . htmlspecialchars($thumb['external_url'])
-                                    . '" class="external-link" target=_blank>open in new tab'
-                                    . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
-
-                    if($system->hasAccess()){
-                        print '<a href="#" data-id="'. htmlspecialchars($thumb['nonce']) .'" class="refreshThumb_link">'
-                            . '<span class="ui-icon ui-icon-refresh" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;refresh thumbnail</a>';
-                    }
-                }else{
-                    print '<a href="' . htmlspecialchars($download_url)
-                                    . '" class="image_tool" target="_surf">'
-                                    . '<span class="ui-icon ui-icon-download" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;'
-                                    . 'download' . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
-                }
-
-                $caption = !empty(@$thumb['caption']) ? linkifyValue($thumb['caption']) : '';
-                $description = !empty(@$thumb['description']) ? linkifyValue($thumb['description']) : '';
-                $rights = !empty(@$thumb['rights']) ? linkifyValue($thumb['rights']) : '';
-                $owner = !empty(@$thumb['owner']) ? linkifyValue($thumb['owner']) : '';
-
-                if(!empty($caption) || !empty($description)){
-
-                    $val = !empty($caption) ? $caption : '';
-                    $val = !empty($description) && !empty($val) ? $val . BR2 . $description : $val;
-                    $val = empty($val) ? $description : $val;
-
-                    print '<span class="media-desc" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                            . 'title="'.addslashes(htmlspecialchars($val)).'">'
-                            . 'description</span>';
-                }
-
-                if(!empty($rights) || !empty($owner)){
-
-                    $val = !empty($rights) ? $rights : '';
-                    $val = !empty($owner) && !empty($val) ? $val . BR2 . $owner : $val;
-                    $val = empty($val) ? $owner : $val;
-
-                    print '<span class="media-right" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                            . 'title="'.addslashes(htmlspecialchars($val)).'">'
-                            . 'rights</span>';
-                }
-
-                if($thumb['player'] && !$without_header){
-                    print '<a id="lnk'.htmlspecialchars($thumb['id'])
-                            .'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
-                            .htmlspecialchars($thumb['id']).', this.parentNode)">show thumbnail</a>';
-                }
-
-                print '</div><!-- CLOSE download_link -->';//CLOSE download_link
-            }
-
-            if($thumb['player'] && !$is_map_popup && $isAudioVideo){
-                print '<div class="fullSize media-content" style="text-align:left;'
-                    .($is_production?'margin-left:100px':'')
-                    .($k>0?CSS_HIDDEN:'').'">';
-            }else{
-                //'. ($thumb['linked'] == true ? ' linked-media' : '') .'
-                print '<div class="thumb_image media-content"  style="min-height:140px;'.($isImageOrPdf?'':'cursor:default;')
-                    .($k>0?CSS_HIDDEN:'').'">';
-            }
-
-            if($thumb['linked'] === true){
-                print "<h5 style='margin-block:0.5em;'>LINKED MEDIA</h5>";
-            }else{
-                print "<h5 style='margin-block:0.5em;'>MEDIA $media_control_chkbx</h5>";
-            }
-
-            if($thumb['player'] && ($noclutter || !$is_map_popup)){
-
-                if($isAudioVideo){
-                    //audio or video is maximized at once
-
-                    print '<div id="player'.htmlspecialchars($thumb['id']).'" style="min-height:100px;min-width:200px;text-align:left;">';
-
-                    print fileGetPlayerTag($system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']);//see recordFile.php
-
-                    //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null);
-                    print DIV_E;
-                }else{
-                    print '<img id="img'.htmlspecialchars($thumb['id']).'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
-                    if($isImageOrPdf && !$without_header){
-                        print ' onClick="window.hWin.HEURIST4.ui.showPlayer(this,this.parentNode,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')"';
-                    }
-                    print '><div id="player'.htmlspecialchars($thumb['id']).'" style="min-height:240px;min-width:320px;display:none;"></div>';
-                }
-            }else{  //for usual image
-                print '<img src="'.htmlspecialchars($thumb['thumb']).'" '
-                    .($is_map_popup || $without_header
-                        ?''
-                        :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
-            }
-            print DIV_E;
-            print '</div><!--CLOSE THUMB SECTION-->';
-            if(!$noclutter && $is_map_popup){
-                print '<br>';
-                break; //in map popup show the only thumbnail
-            }
-
-        }//for
-    }
-    print '</div><!--CLOSE ALL thumbnails-->';
-
-//<div id="div_public_data" style="float:left; echo (($has_thumbs)?'max-width:900px':'')">
+//<div class="div_public_data" style="float:left; echo (($has_thumbs)?'max-width:900px':'')">
 
     //print url first
     $url = $bib['rec_URL'];
@@ -2531,7 +2313,7 @@ function print_public_details($bib) {
     /*
     $webIcon = mysql__select_value($system->getMysqli(),
                     'select dtl_Value from recDetails where dtl_RecID='
-                    .$bib['rec_ID'].' and dtl_DetailTypeID=347');//DT_WEBSITE_ICON);
+                    .$recordID.' and dtl_DetailTypeID=347');//DT_WEBSITE_ICON);
     if ($webIcon) {print "<img id=website-icon src='" . $webIcon . "'>";}
     */
     if (@$url) {
@@ -2571,7 +2353,7 @@ function print_public_details($bib) {
         }
 
         $is_cms_content = !$is_map_popup &&
-                          (defined('RT_CMS_MENU') && $bib['rec_RecTypeID']==RT_CMS_MENU ||
+                          (defined('RT_CMS_PAGE') && $bib['rec_RecTypeID']==RT_CMS_PAGE ||
                            defined('RT_CMS_HOME') && $bib['rec_RecTypeID']==RT_CMS_HOME) &&
                            (defined('DT_EXTENDED_DESCRIPTION') && $bd['dty_ID']==DT_EXTENDED_DESCRIPTION ||
                             defined('DT_CMS_HEADER') && $bd['dty_ID']==DT_CMS_HEADER ||
@@ -2601,7 +2383,7 @@ function print_public_details($bib) {
                     || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
 
         print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.htmlspecialchars($bd['rollover']).'"':'')
-                .'>' . strip_tags($bd['val'], ALLOWED_TAGS.'<p><a><em><img><figure><figcaption>') . '</span>';// add value
+                .'>' . strip_tags($bd['val'], ALLOWED_TAGS.'<p><a><em><img><figure><figcaption><ul><ol><li>') . '</span>';// add value
         $prevLbl = $bd['name'];
     }
 
@@ -2633,7 +2415,7 @@ function print_public_details($bib) {
         echo '<script>$(".fieldRow").css("display","");$(".moreRow").hide();</script>';
         
         if(is_array($group_details) && !empty($group_details)){
-            echo '<script>createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');handleCMSContent();</script>';
+            echo '<script>createRecordGroups(', $recordID,', ', json_encode($group_details, JSON_FORCE_OBJECT), ');handleCMSContent();</script>';
         }
 
         echo '<div class="detailRow fieldRow">&nbsp;</div>';
@@ -2651,27 +2433,28 @@ function print_other_tags($bib) {
 //
 //
 //
-function print_relation_details($bib) {
+function print_relation_details(array $bib) {
 
     global $system, $relRT,$relSrcDT,$relTrgDT,
         $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $useRelmarkerTitle,
         $is_map_popup, $is_production, $rectypesStructure, $defTerms,$connectedRecIDs;
 
     $mysqli = $system->getMysqli();
+    $recordID = intval($bib['rec_ID']);
 
     $from_res = $mysqli->query('select recDetails.*
         from recDetails
         left join Records on rec_ID = dtl_RecID
         where dtl_DetailTypeID = '.$relSrcDT.
         ' and rec_RecTypeID = '.$relRT.
-        ' and dtl_Value = ' . intval($bib['rec_ID']));//primary resource
+        ' and dtl_Value = ' . $recordID);//primary resource
 
     $to_res = $mysqli->query('select recDetails.*
         from recDetails
         left join Records on rec_ID = dtl_RecID
         where dtl_DetailTypeID = '.$relTrgDT.
         ' and rec_RecTypeID = '.$relRT.
-        ' and dtl_Value = ' . intval($bib['rec_ID']));//linked resource
+        ' and dtl_Value = ' . $recordID);//linked resource
 
     if (($from_res==false || $from_res->num_rows <= 0)  &&
          ($to_res==false || $to_res->num_rows<=0)){
@@ -2684,9 +2467,11 @@ function print_relation_details($bib) {
         print '<div class="detailType fieldRow" style="display:none;line-height:21px">Related</div>';
         print DIV_MAP_POPUP;
     }else{
-        print '<div class="detailRowHeader relatedSection">Related';
+        $style = $bib['hideDetails'] ? ' style="display: none;" ' : ' ';
+        print '<div data-recdetails="'. $recordID .'"'. $style .'class="detailRowHeader relatedSection">Related';
     }
 
+    //relmarker fields for current record type
     $relfields_details = mysql__select_all($mysqli,
             'SELECT rst_DisplayName, rst_DisplayOrder, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree
              FROM defRecStructure
@@ -2694,7 +2479,7 @@ function print_relation_details($bib) {
              WHERE dty_Type = "relmarker" AND rst_RequirementType != "forbidden" AND rst_RecTypeID = '. $bib['rec_RecTypeID'] .'
              ORDER BY rst_DisplayOrder');
 
-    $move_details = array();
+    $move_details = array(); //array of related records without particular relmarker field
 
     $extra_styling = (!$is_map_popup) ? 'style="max-width: max-content;"' : '';
 
@@ -2721,9 +2506,9 @@ function print_relation_details($bib) {
 
                 for($i = 0; $i < count($relfields_details); $i++){
 
-                    $ptrtarget_ids = explode(',', $relfields_details[$i][2]);
-                    $fld_name = $relfields_details[$i][0];
-                    $vocab_id = $relfields_details[$i][3];
+                    $ptrtarget_ids = explode(',', $relfields_details[$i][2]); //dty_PtrTargetRectypeIDs
+                    $fld_name = $relfields_details[$i][0]; //rst_DisplayName
+                    $vocab_id = $relfields_details[$i][3]; //dty_JsonTermIDTree
 
                     $is_in_vocab = in_array($bd['RelTermID'], $defTerms->treeData($vocab_id, 3));
 
@@ -2787,8 +2572,8 @@ function print_relation_details($bib) {
                 print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
             }
 
-            if(!in_array($relatedRecID, $connectedRecIDs)){
-                $connectedRecIDs[] = $relatedRecID;
+            if(!in_array($relatedRecID, $connectedRecIDs[$recordID])){
+                $connectedRecIDs[$recordID][] = $relatedRecID;
             }
 
             print DIV_E.DIV_E;
@@ -2882,8 +2667,8 @@ function print_relation_details($bib) {
                 print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
             }
 
-            if(!in_array($relatedRecID, $connectedRecIDs)){
-                $connectedRecIDs[] = $relatedRecID;
+            if(!in_array($relatedRecID, $connectedRecIDs[$recordID])){
+                $connectedRecIDs[$recordID][] = $relatedRecID;
             }
 
             print DIV_E.DIV_E;
@@ -2895,16 +2680,21 @@ function print_relation_details($bib) {
 
     //$move_details - array of related records without particular relmarker field
     if(is_array($move_details) && !empty($move_details)){
-        echo '<script>if(typeof moveRelatedDetails === "function"){ moveRelatedDetails(', json_encode($move_details, JSON_FORCE_OBJECT), '); }</script>';
+        echo '<script>if(typeof moveRelatedDetails === "function"){ moveRelatedDetails(', $recordID, ',', json_encode($move_details, JSON_FORCE_OBJECT), '); }</script>';
     }
 
     return $link_cnt;
 }
 
 
-function print_linked_details_header($bib){
-   global $is_map_popup, $is_production, $system;
+function print_linked_details_header(array $bib){
 
+    global $is_map_popup, $is_production, $system;
+
+    $recordID = intval($bib['rec_ID']);
+    $style = $bib['hideDetails'] ? ' style="display: none;" ' : '';
+
+    print '<div data-recdetails="'. $recordID .'"'. $style .'>';
     if($is_map_popup){
        print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
        print DIV_MAP_POPUP;//
@@ -2914,35 +2704,68 @@ function print_linked_details_header($bib){
     ?>
         <div style="position: relative;top: -7px;margin-bottom: 5px;">
             <div class=detailType style="width: auto;">Referenced by</div>
-            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=$system->dbname()?>&w=all&q=linkedto:<?=$bib['rec_ID']?>"
+            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=$system->dbname()?>&w=all&q=linkedto:<?=$recordID?>"
                     onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
-                <!--  <br> <i>Search = linkedto:<?=$bib['rec_ID']?> <br>(returns records pointing TO this record)</i> -->
+                <!--  <br> <i>Search = linkedto:<?=$recordID?> <br>(returns records pointing TO this record)</i> -->
             </div>
         </div>
     <?php
        }
     }
 
-
+    print DIV_E;
 }
 
 //
 // print reverse link
 //
-function print_linked_details($bib, $link_cnt)
+function print_linked_details(array $bib, int $link_cnt)
 {
     global $system, $relRT, $ACCESS_CONDITION,
         $is_map_popup, $rectypesStructure, $already_linked_ids,$connectedRecIDs;
 
+    $mysqli = $system->getMysqli();
+    $recordID = intval($bib['rec_ID']);
+        
+    $isIiifManifest = defined('RT_IIIF_MANIFEST')
+            && intval(@$bib['rec_RecTypeID']) === intval(RT_IIIF_MANIFEST);
+            
+    $skipAnnotationBacklinks = $isIiifManifest && defined('RT_IIIF_ANNOTATION');
+    
+    if($skipAnnotationBacklinks){
+        $annotationCount = mysql__select_value(
+            $mysqli,
+            'SELECT COUNT(*) FROM recLinks, Records '
+            .'WHERE rl_TargetID = '.$recordID
+            .' AND rl_RelationID IS NULL'
+            .' AND rl_SourceID = rec_ID'
+            .' AND rec_RecTypeID = '.intval(RT_IIIF_ANNOTATION)
+            .SQL_AND.$ACCESS_CONDITION
+        );
+
+        if($annotationCount > 0){
+            print_linked_details_header($bib);
+            print '<div class="detailRow fieldRow">';
+            print '<div class="detailType">Annotations</div>';
+            print '<div class="detail">'
+                .intval($annotationCount)
+                .' annotation records link to this manifest. '
+                .'<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname()
+                .'&w=all&q=linkedto:'.$recordID.'%20t:'.RT_IIIF_ANNOTATION
+                .'" onclick="top.location.href=this.href; return false;">Show as search results</a>';
+            print '</div></div>';
+            print DIV_E;
+        }
+        return $annotationCount;
+    }        
+        
     $ignored_ids = '';
-    if(!empty($already_linked_ids)){
-        $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids).')';
+    if(!empty($already_linked_ids[$recordID])){
+        $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids[$recordID]).')';
     }
 
-    $mysqli = $system->getMysqli();
-
     $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
-                .'where rl_TargetID = '.intval($bib['rec_ID'])
+                .'where rl_TargetID = '.$recordID
                 .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
                 .$ignored_ids
     .SQL_AND.$ACCESS_CONDITION
@@ -2956,7 +2779,7 @@ function print_linked_details($bib, $link_cnt)
 
     while ($row = $res->fetch_assoc()) {
 
-        if(in_array($row['rec_ID'], $already_linked_ids)){
+        if(in_array($row['rec_ID'], $already_linked_ids[$recordID])){
             continue;
         }
 
@@ -2972,9 +2795,9 @@ function print_linked_details($bib, $link_cnt)
 
         print DIV_E;
 
-        $already_linked_ids[] = $row['rec_ID'];
-        if(!in_array($row['rec_ID'], $connectedRecIDs)){
-            $connectedRecIDs[] = $row['rec_ID'];
+        $already_linked_ids[$recordID][] = $row['rec_ID'];
+        if(count($connectedRecIDs[$recordID]) < 1000 && !in_array($row['rec_ID'], $connectedRecIDs[$recordID])){
+            $connectedRecIDs[$recordID][] = $row['rec_ID'];
         }
     }
 
@@ -2983,7 +2806,7 @@ function print_linked_details($bib, $link_cnt)
 
 }
 
-function output_chunker($val, $return_lang = false) {
+function output_chunker(string $val, bool $return_lang = false) {
 
     list($lang, $val) = extractLangPrefix($val);// remove possible language prefix
     // chunk up the value so that it will be able to line-break if necessary
@@ -2995,7 +2818,7 @@ function output_chunker($val, $return_lang = false) {
 }
 
 //sort array by order_by_date for resource (record pointer) details
-function __sortResourcesByDate($a, $b)
+function __sortResourcesByDate(array $a, array $b)
 {
     if($a['rst_DisplayOrder'] == $b['rst_DisplayOrder']){
 
@@ -3017,7 +2840,7 @@ function __sortResourcesByDate($a, $b)
     return $ret;
 }
 
-function linkifyValue($value){
+function linkifyValue(string $value){
 
     $new_value = str_replace(array("\r\n", "\n\r", "\r", "\n"), '<br>', $value);// "%0A", "%0D"
 
@@ -3027,30 +2850,30 @@ function linkifyValue($value){
         return $new_value;
     }
 
-        foreach($url_matches[0] as $url){
-            if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
-                $url = explode('<br>', $url)[0];
-            }
-            if(strpos($new_value, 'href=\'' . $url)!==false || strpos($new_value, 'href="' . $url)!==false || strpos($new_value, 'href=`' . $url)!==false){ // check if already part of element
-                continue;
-            }
-            if(ctype_punct(mb_substr($url, -1)) && mb_substr($url, -1) != ')'){ // ensure last character isn't punctuation or a closing bracket
-                $url = mb_substr($url, 0, -1);
-            }
-
-            if(!isEmptyStr($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
-                $linked_url = '<a href='. $url .' target="_blank">'. $url .'</a>';
-                $new_value = str_replace($url, $linked_url, $new_value);
-            }
+    foreach($url_matches[0] as $url){
+        if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
+            $url = explode('<br>', $url)[0];
+        }
+        if(strpos($new_value, 'href=\'' . $url)!==false || strpos($new_value, 'href="' . $url)!==false || strpos($new_value, 'href=`' . $url)!==false){ // check if already part of element
+            continue;
+        }
+        if(ctype_punct(mb_substr($url, -1)) && mb_substr($url, -1) != ')'){ // ensure last character isn't punctuation or a closing bracket
+            $url = mb_substr($url, 0, -1);
         }
 
-        return $new_value;
+        if(!isEmptyStr($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
+            $linked_url = '<a href='. $url .' target="_blank">'. $url .'</a>';
+            $new_value = str_replace($url, $linked_url, $new_value);
+        }
+    }
+
+    return $new_value;
 }
 
 //
 //
 //
-function composeRecTypeIcon($rty_ID){
+function composeRecTypeIcon(int $rty_ID){
     global $rectypesStructure;
 
     $rty_Name = $rectypesStructure['names'][$rty_ID];
@@ -3062,11 +2885,11 @@ function composeRecTypeIcon($rty_ID){
 //
 //
 //
-function composeRecLink($rec_ID, $rec_Title){
+function composeRecLink(int $rec_ID, string $rec_Title){
     global $system;
 
     return '<a target="_popup" href="'.$system->recordLink($rec_ID)
-                            .'" onclick="return (typeof link_open === \'function\')?link_open(this, false):true;">'
+                            .'" onclick="return (typeof link_open === \'function\')?link_open(this, true):true;">'
                             .USanitize::sanitizeString($rec_Title,ALLOWED_TAGS).'</a>';
 }
 

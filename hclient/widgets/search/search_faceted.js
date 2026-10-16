@@ -891,7 +891,7 @@ $.widget( "heurist.search_faceted", {
        
        if(this.facets_list) this.facets_list.empty();
        
-       let $fieldset = $("<fieldset>").css({'font-size':'0.9em','background-color':'white', padding:'0 5px'})
+       let $fieldset = $("<fieldset>").css({'background-color':'white', padding:'0 5px'})
                     .addClass('fieldset_search').appendTo(this.facets_list);
 
        //hide submit button will be displayed in case all fields are input fields (not facets)
@@ -1042,24 +1042,18 @@ $.widget( "heurist.search_faceted", {
                 if(rect_wkt && rect_wkt['geo']){
                     rect_wkt = rect_wkt['geo'];
                 }
-                let url = window.hWin.HAPI4.baseURL 
-                +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
-
                 let wkt_params = {wkt: rect_wkt, geofilter:true, need_screenshot:true};
 
-                window.hWin.HEURIST4.msg.showDialog(url, {height:'540', width:'600',
-                    window: window.hWin,  //opener is top most heurist window
+                window.hWin.HEURIST4.ui.showMapDrawDialog(wkt_params, {height:'540', width:'800',
                     dialogid: 'map_digitizer_filter_dialog',
-                    params: wkt_params,
                     title: window.hWin.HR('filter_facet_spatial_search'),
-                    class:'ui-heurist-bg-light',
                     callback: function(location){
                         if( !window.hWin.HEURIST4.util.isempty(location) ){
                             __setUiSpatialFilter(location.wkt, location.imgData);
                             that.doSearch();
                         }
                     }
-                } );
+                });
            }});   
            
            if(that.options.params.ui_spatial_filter_init && !that.options.params.spatial_filter){
@@ -3395,16 +3389,16 @@ $.widget( "heurist.search_faceted", {
                                 //window.hWin.HEURIST4.msg.showMsgDlg('Define data range <>',
                                 that._date_range_dialog_instance = window.hWin.HEURIST4.msg.showElementAsDialog(
                                 {
-                                   element: that._date_range_dialog[0], 
-                                   close: function(){
-                                        //let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();      
-                                   },
-                                   buttons: buttons,
-                                   title:'Define selection range',
-                                   resizable: false,
-                                   width:300,
-                                   height:212,
-                                   position:{my:'bottom left',at:'top left',of:$(event.target)} 
+                                    element: that._date_range_dialog[0], 
+                                    close: function(){
+                                        //let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                    },
+                                    buttons: buttons,
+                                    title:'Define selection range',
+                                    resizable: false,
+                                    width: 320,
+                                    height: 262,
+                                    position:{my: 'center left', at: 'center right', of: $(event.target)} 
                                 });
                             }
 

@@ -72,8 +72,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.options.use_cache = false;
        
         this.options.edit_need_load_fullrecord = true;
-        this.options.edit_height = 700;
-        this.options.edit_width = 950;
+        this.options.edit_height = 800;
+        this.options.edit_width = 1000;
         this.options.height = 800;
         
         //this.options.edit_addrecordfirst = true; //special behaviour - show editor first
@@ -116,7 +116,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     // invoked from _init after load entity config    
     //
     _initControls: function() {
-        
+
+        let fileTranslations = window.hWin.HAPI4.EntityMgr.getEntityData2('ulf_Translation');
+        if(this.options.select_mode === 'manager' && !fileTranslations){
+            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('recUploadedFiles', 'ulf', null, () => this._initControls);
+            return;
+        }
+
         if(this.options.edit_addrecordfirst){
             this._additionMode = this.options.additionMode?this.options.additionMode:'any'; 
             this.addEditRecord(-1);
@@ -1428,83 +1434,106 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
         switch (selected_repo) {
             case 'Nakala':
             {
+
                 let $dlg;
-                let content = '<div style="margin-bottom: 15px;">' // Warning text
-                                + '<strong>Please note</strong>, that in order for Heurist to utilise the uploaded file as a remote resource from Nakala that it will be published on Nakala.<br>'
-                                + 'Please <strong>DO NOT</strong> upload personal or private files, or any documents you do not wish to be publicly available.<br>'
-                                + 'We also recommend that you check the uploaded file\'s metadata on the Nakala website afterwards.'
-                            + '</div>'
+                let content = `
+                <div class="public-warning" style="display: none; margin-bottom: 1em; color: red;">
+                    <strong>Please note</strong>, that setting the file's status to public will make the file permanent.<br>
+                    Please <strong>DO NOT</strong> upload personal or private files, or any documents you do not wish to be publicly available.<br>
+                    We also recommend that you check the uploaded file's metadata on the Nakala website afterwards.
+                </div>
 
-                            // Form content
-                            + '<fieldset>'
+                <fieldset>
+                    <div>
+                        <div class="header required" style="vertical-align: top; display: table-cell;"><label>Account:</label></div>
+                        <span class="editint-inout-repeat-button" style="min-width: 22px;"></span>
+                        <div class="input-cell" style="padding-bottom: 12px;">
+                            <select class="text ui-widget-content ui-corner-all" id="account"></select>
+                            <span id="acc-helper" class="heurist-helper1" style="display:inline-block;width:300px;padding-bottom:5px;">
+                                Please use one of these for testing purposes. If you use a personal login and API code the data will be permanently stored in Nakala
+                            </span><br>
+                            <span class="heurist-helper1">Select a Nakala account to use</span>
+                        </div>
+                    </div>
 
-                                + '<div>'
-                                    + '<div class="header required" style="vertical-align: top; display: table-cell;"><label>Account:</label></div>'
-                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px;"></span>'
-                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
-                                        + '<select class="text ui-widget-content ui-corner-all" id="account"></select>'
-                                        + '<span id="acc-helper" class="heurist-helper1" style="display:inline-block;width:300px;padding-bottom:5px;">'
-                                            + 'Please use one of these for testing purposes. If you use a personal login and API code the data will be permanently stored in Nakala'
-                                        + '</span>'
-                                        + '<br>'
-                                        + '<span class="heurist-helper1">Select a Nakala account to use</span>'
-                                    + '</div>'
-                                + '</div>'
+                    <div>
+                        <div class="header required" style="vertical-align: top; display: table-cell;"><label>Upload status:</label></div>
+                        <span class="editint-inout-repeat-button" style="min-width: 22px;"></span>
+                        <div class="input-cell" style="padding-bottom: 12px;">
+                            <label style="display: block; margin-bottom: 0.5em;">
+                                <input type="radio" name="nakalaStatus" value="pending" checked="checked" />
+                                Private (viewable only by the uploader, will use the API key for Heurist)
+                            </label>
+                            <label>
+                                <input type="radio" name="nakalaStatus" value="published" />
+                                Public (publishes and mints the file with Nakala)
+                            </label>
+                        </div>
+                    </div>
 
-                                + '<div>'
-                                    + '<div class="header required" style="vertical-align: top; display: table-cell;"><label>File title:</label></div>'
-                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
-                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
-                                        + '<input class="text ui-widget-content ui-corner-all" id="title">'
-                                        + '<span class="heurist-helper1">Nakala record title</span>'
-                                    + '</div>'
-                                + '</div>'
+                    <div>
+                        <div class="header required" style="vertical-align: top; display: table-cell;"><label>File title:</label></div>
+                        <span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>
+                        <div class="input-cell" style="padding-bottom: 12px;">
+                            <input class="text ui-widget-content ui-corner-all" id="title">
+                            <span class="heurist-helper1">Nakala record title</span>
+                        </div>
+                    </div>
 
-                                + '<div>'
-                                    + '<div class="header recommended" style="vertical-align: top; display: table-cell;"><label>Creator\'s name:</label></div>'
-                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
-                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
-                                        + '<label>First name: <input class="text ui-widget-content ui-corner-all" id="fcreator"></label>'
-                                        + '<label style="margin-left: 10px;">Last name: <input class="text ui-widget-content ui-corner-all" id="lcreator"></label> <br><br>'
-                                        + '<label>Author ID: <input class="text ui-widget-content ui-corner-all" id="idcreator" style="margin-left:5px;"></label>'
-                                        + '<span class="ui-icon ui-icon-search" id="lookup_author" style="vertical-align:bottom;padding-left:10px;cursor:pointer;">&nbsp;</span>'
-                                        + '<label style="display: none !important;">orcid <input id="orcid"></label>'
-                                        + '<br><span class="heurist-helper1">Full name of the person who created this file<br>Can be blank</span>'
-                                    + '</div>'
-                                + '</div>'
+                    <div>
+                        <div class="header recommended" style="vertical-align: top; display: table-cell;"><label>Creator's name:</label></div>
+                        <span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>
+                        <div class="input-cell" style="padding-bottom: 12px;">
+                            <label>First name: <input class="text ui-widget-content ui-corner-all" id="fcreator"></label>
+                            <label style="margin-left: 10px;">Last name: <input class="text ui-widget-content ui-corner-all" id="lcreator"></label><br><br>
+                            <label>Author ID: <input class="text ui-widget-content ui-corner-all" id="idcreator" style="margin-left:5px;"></label>
+                            <span class="ui-icon ui-icon-search" id="lookup_author" style="vertical-align:bottom;padding-left:10px;cursor:pointer;">&nbsp;</span>
+                            <label style="display: none !important;">orcid <input id="orcid"></label>
+                            <br><span class="heurist-helper1">Full name of the person who created this file<br>Can be blank</span>
+                        </div>
+                    </div>
 
-                                + '<div>'
-                                    + '<div class="header recommended" style="vertical-align: top; display: table-cell;"><label>Year/date created:</label></div>'
-                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
-                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
-                                        + '<input class="text ui-widget-content ui-corner-all" id="created">'
-                                        + '<br><span class="heurist-helper1">Date of file creation (YYYY-MM-DD, YYYY-MM, or YYYY)<br>Can be blank</span>'
-                                    + '</div>'
-                                + '</div>'
+                    <div>
+                        <div class="header recommended" style="vertical-align: top; display: table-cell;"><label>Year/date created:</label></div>
+                        <span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>
+                        <div class="input-cell" style="padding-bottom: 12px;">
+                            <input class="text ui-widget-content ui-corner-all" id="created">
+                            <br><span class="heurist-helper1">Date of file creation (YYYY-MM-DD, YYYY-MM, or YYYY)<br>Can be blank</span>
+                        </div>
+                    </div>
 
-                                + '<div>'
-                                    + '<div class="header required" style="vertical-align: top; display: table-cell;"><label>File type:</label></div>'
-                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
-                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
-                                        + '<select class="text ui-widget-content ui-corner-all" id="type"></select>'
-                                        + '<br><span class="heurist-helper1">Type of file being uploaded</span>'
-                                    + '</div>'
-                                + '</div>'
+                    <div>
+                        <div class="header required" style="vertical-align: top; display: table-cell;"><label>File type:</label></div>
+                        <span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>
+                        <div class="input-cell" style="padding-bottom: 12px;">
+                            <select class="text ui-widget-content ui-corner-all" id="type"></select>
+                            <br><span class="heurist-helper1">Type of file being uploaded</span>
+                        </div>
+                    </div>
 
-                                + '<div>'
-                                    + '<div class="header required" style="vertical-align: top; display: table-cell;"><label>License:</label></div>'
-                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
-                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
-                                        + '<select class="text ui-widget-content ui-corner-all" id="license"></select>'
-                                        + '<br><span class="heurist-helper1">License for file being uploaded</span>'
-                                    + '</div>'
-                                + '</div>'
+                    <div>
+                        <div class="header required" style="vertical-align: top; display: table-cell;"><label>License:</label></div>
+                        <span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>
+                        <div class="input-cell" style="padding-bottom: 12px;">
+                            <select class="text ui-widget-content ui-corner-all" id="license"></select>
+                            <br><span class="heurist-helper1">License for file being uploaded</span>
+                        </div>
+                    </div>
 
-                            + '</fieldset>';
+                    <div>
+                        <div class="header optional" style="vertical-align: top; display: table-cell;"><label>Embargo:</label></div>
+                        <span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>
+                        <div class="input-cell" style="padding-bottom: 12px;">
+                            <input class="text ui-widget-content ui-corner-all datepicker" id="embargo">
+                        </div>
+                    </div>
+
+                </fieldset>`;
 
                 let btns = {};
                 btns['Proceed'] = () => {
 
+                    let status = $dlg.find('[name="nakalaStatus"]:checked').val();
                     let title = $dlg.find('#title').val();
                     let type = $dlg.find('#type').val();
                     let fname = $dlg.find('#fcreator').val();
@@ -1514,6 +1543,7 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
                     let created = $dlg.find('#created').val();
                     let license = $dlg.find('#license').val();
                     let account = $dlg.find('#account').val();
+                    let embargoDate = $dlg.find('#embargo').val();
 
                     if(window.hWin.HEURIST4.util.isempty(account)){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select an account to use...', 3000);
@@ -1576,6 +1606,8 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
                             type: type,
                             license: license
                         },
+                        status: status,
+                        embargoed: embargoDate,
                         apiKey: account
                     };
 
@@ -1585,13 +1617,6 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
 
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         if(response.status == window.hWin.ResponseStatus.OK){ // returned URL
-
-                            /*that._editing.setFieldValueByName2('ulf_ExternalFileReference', response.data, false);
-                            let ele = that._editing.getFieldByName('ulf_ExternalFileReference');
-                            if(ele.editing_input('instance') !== undefined){ // trigger blur event
-                                ele.editing_input('getInputs')[0].trigger('blur');
-                            }*/
-
                             that._afterExternalUpload(response.data, account);
                             $dlg.dialog('close');
                         }else{
@@ -1604,6 +1629,11 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
                 };
 
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Prepare file metadata'}, {default_palette_class: 'ui-heurist-publish', dialogId: 'nakala_metadata'});
+
+                // Setup datepicker
+                $dlg.find('.datepicker').datepicker({
+                    dateFormat: 'yy-mm-dd'
+                }).attr('readonly', true);
 
                 // Click handler for author search
                 $dlg.find('#lookup_author').on('click',() => {
@@ -1629,7 +1659,7 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
 
                 window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
 
-                window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+                window.hWin.HAPI4.RecordMgr.lookupService(request, (data) => {
 
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
 
@@ -1698,6 +1728,14 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
                         value != '' && value.indexOf('_') >= 0 ? $dlg.find('#acc-helper').hide() : $dlg.find('#acc-helper').show();
                     }
                 });
+
+                $dlg.find('[name="nakalaStatus"]').on('change', () => {
+                    if($dlg.find('[name="nakalaStatus"]:checked').val() === 'published'){
+                        $dlg.find('.public-warning').show();
+                    }else{
+                        $dlg.find('.public-warning').hide();
+                    }
+                })
 
                 $accounts.trigger('change');
 
@@ -2106,7 +2144,8 @@ window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer
 
                     $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, del_func, {title: 'Deleting files'}, {default_palette_class: 'ui-heurist-admin'});
 
-                    $dlg.parent().css('min-width', '250px');
+                    $dlg.css('max-height', 640);
+                    $dlg.parent().css({'min-width': '250px', 'max-height': '80%'});
                     $dlg.find('span.file-line').css({'display': 'inline-block', 'margin-bottom': '5px', 'text-decoration': 'underline', 'cursor': 'pointer'}).on('click', function(event){
                         const id = $(this).attr('data-fid');
 

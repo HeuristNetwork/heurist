@@ -312,7 +312,7 @@ console.log(item);
             this._selectorInput = $('<div>').uniqueId();
         
             //constraint
-            let rty_IDs = [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']]; 
+            let rty_IDs = [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE']]; 
             if(window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_ACTION']){ //not used
                 rty_IDs.push(window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_ACTION']);
             }
@@ -415,7 +415,7 @@ console.log(item);
             
             let that = this;
         
-            //see editing_exts.js    
+            //see editingBrowse.js    
             selectEntity(
                 {entity:'usrSavedSearches', csv:true, title:'Select saved filters', default_palette_class:'ui-heurist-publish'},
                 (sel)=>{

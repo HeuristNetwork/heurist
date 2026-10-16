@@ -38,12 +38,20 @@
         <li style="padding:0px 6px 8px;" class="ui-heurist-title slocale">Upload Files</li>
 
         <li data-action="menu-import-csv"/>
+        <!-- verifyDBAgainstSource: make the registered verification action visible -->
+        <li data-action="menu-import-verify-csv"/>
         <li data-action="menu-import-zotero"/>
         <li data-action="menu-import-xml"/>
         <li data-action="menu-import-get-template"/>
         <li data-action="menu-import-kml"/>
     </ul>
         
+    <!-- New menu additions 18 sep 26 for master-satellite synchronisation -->
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title slocale">DB synchronisation</li>
+        <li data-action="menu-sync-master"/>
+    </ul>
+
     <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
     
         <li style="padding:0px 8px 6px;" class="ui-heurist-title slocale">Media Files</li>
@@ -55,6 +63,9 @@
         <!-- <li data-action="menu-files-data"/> -->
         <li data-action="menu-files-index"/>
         <li data-action="menu-files-index-and-records"/>
+    </ul>
+        
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
         <li data-action="menu-files-annotations"/>
     </ul>
 

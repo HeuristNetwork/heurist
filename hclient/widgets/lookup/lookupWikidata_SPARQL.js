@@ -635,7 +635,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
 
         for(const rec_ID_idx in response.data.results.bindings){ // Iterate through each result binding
 
-            let local_rec_ID = parseInt(rec_ID_idx); // Use array index as local ID for display
+            let local_rec_ID = Number.parseInt(rec_ID_idx); // Use array index as local ID for display
             let wikidata_binding = response.data.results.bindings[rec_ID_idx]; // Current SPARQL result object
 
             let record_values = this._processSPARQLRow(wikidata_binding);
@@ -673,7 +673,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
                 this.url_field = field_var;
             } else if (cell_data && cell_data['type'] === 'literal' && Object.hasOwn(cell_data, 'xml:lang')){
                 // Prepend language code if literal has a language tag
-                let language = window.hWin.HAPI4.getLangCode3(cell_data['xml:lang'], 'MUL');
+                let language = this.HAPI.getLangCode3(cell_data['xml:lang'], 'MUL');
                 cell_value = language !== 'MUL' ? `${language}:${cell_value}` : cell_value;
             }
             values.push(cell_value);

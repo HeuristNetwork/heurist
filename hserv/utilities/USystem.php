@@ -65,7 +65,6 @@ class USystem {
 
         $installDir = '';
         $installDir_pro = '';
-        $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao','h7-alpha-gpl');//need to cli and short url
 
         if (php_sapi_name() == 'cli'){
 
@@ -74,7 +73,7 @@ class USystem {
             }
 
             $k = strpos($serverName,":");
-            $host_params['domain'] = ($k>0)?substr($serverName,0,$k-1):$serverName;
+            $host_params['domain'] = ($k>0)?substr($serverName,0,$k):$serverName;
             $isSecure = true;
 
             if($argv==null || !is_array($argv)){
@@ -86,15 +85,25 @@ class USystem {
 
             $sDir = str_replace('\\','/',$sDir);
 
+            
             $iDir = explode('/', $sDir);
-            $cntDir = count($iDir)-1;
+            $cntDir = count($iDir) - 1;
             $path = [];
-            for ($i=$cntDir; $i>=0; $i--){
-                if(in_array($iDir[$i], $codeFolders)) {
-                    $installDir = '/'.$iDir[$i].'/';
+
+            for ($i = $cntDir; $i >= 0; $i--) {
+                $segment = $iDir[$i];
+                if(self::isHeuristCodeFolder($segment)){
+                    $installDir = '/' . $segment . '/';
                     $path = array_slice($iDir, 0, $i);
                     break;
                 }
+            }   
+            
+            if ($installDir === '') {
+                exit(
+                    'Sorry, it is not possible to detect heurist installation folder from CLI path: '
+                    . $sDir
+                );
             }
 
             $installDir_pro = '/heurist/';
@@ -120,7 +129,7 @@ class USystem {
                     $host_params['domain'] = $localhost;
                 }
 
-            }else{
+            }else if(!empty($serverName)){
                 $k = strpos($serverName,":");
                 $host_params['domain'] = ($k>0)?substr($serverName,0,$k-1):$serverName;
                 $host_params['server_name'] = $serverName;
@@ -182,85 +191,120 @@ class USystem {
     * if $heuristBaseURL is not defined in configuration detect installation folder and base url
     *
     */
-    private static function detectInstalltionDir(){
-        $installDir = '/heurist';
-        $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["SERVER_NAME"]!='heurist.huma-num.fr');
-        if(!$is_own_domain){
+    private static function detectInstalltionDir()
+    {
+        $installDir = '/heurist/';
+        $installDir_pro = '/heurist/';
 
-            $rewrite_actions = 'website|web|hml|tpl|view|edit|adm';//actions for redirection https://hist/heurist/[dbname]/web/
+        $wasExplicitInstallDir = false;
 
-            if(@$_SERVER["SCRIPT_NAME"] &&
-            (substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web' || substr($_SERVER["SCRIPT_NAME"], -8 ) === '/website')){
-                $_SERVER["SCRIPT_NAME"] .= '/';//add last slash
+        $path = realpath(dirname(__FILE__).'/../../');
+        $path = trim(str_replace('\\', '/', $path),'/');
+        $parts = explode('/', $path);
+        $version = end($parts) ?? '';
+        if(self::isHeuristCodeFolder($version)){
+           $installDir = '/'.$version.'/';
+           $wasExplicitInstallDir = true;
+        }
+        
+        
+        /*
+        $serverName = $_SERVER['SERVER_NAME'] ?? '';
+        $is_own_domain = (
+            strpos($serverName, '.huma-num.fr') > 0
+            && $serverName !== 'heurist.huma-num.fr'
+        );
+        
+        if (!$is_own_domain) {
+
+             * Detect installation folder from the first path segment only.
+             *
+             * Valid installation folders:
+             *   /heurist/
+             *   /h7-alpha/
+             *   /h7-test/
+             *   /h7-<anything made of letters, numbers, _, ->
+             *
+             * Anything else is treated as a pretty URL:
+             *   /dbname/anything
+             *   /123/117
+             *   /web/page
+             *   /documentation/...
+             *
+             * In these cases the real installation folder is /heurist/.
+            $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+            $path = parse_url($scriptName, PHP_URL_PATH) ?: '';
+            $path = trim($path, '/');
+
+            $segments = $path === '' ? array() : explode('/', $path);
+            $firstSegment = $segments[0] ?? '';
+
+            if (self::isHeuristCodeFolder($firstSegment)) {
+                $installDir = '/' . $firstSegment . '/';
+                $wasExplicitInstallDir = true;
             }
+        }
+        */
+        
+        /*
+         * Production installation is always /heurist/.
+         * This is intentionally no longer calculated from $installDir.
+         */
+        
+        // Validate detected installation folder.
+        if (!empty($_SERVER['DOCUMENT_ROOT'])) {
 
-            $regex_actions = "/\/([A-Za-z0-9_]+)\/($rewrite_actions)\/.*/";
+            $documentRoot = rtrim($_SERVER['DOCUMENT_ROOT'], '/');
+            $testFile = $documentRoot . $installDir . 'configIni.php';
 
-            $matches = array();
-            preg_match($regex_actions, @$_SERVER["SCRIPT_NAME"], $matches);
-            if($matches){
-                $installDir = preg_replace($regex_actions, '', @$_SERVER["SCRIPT_NAME"]);
-            }else{
+            if (!is_file($testFile)) {
 
-                // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
-                // removed root folders: pi|applications|common|search|records|
-                $topdirs = 'admin|documentation|export|hapi|hclient|hserv|import|startup|redirects|viewers|help|ext|external';
-
-                $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
-                if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
-                    $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]);// strip away everything past the last slash "/index.php" if it's there
+                if ($wasExplicitInstallDir) {
+                    exit(
+                        'Sorry, detected Heurist installation folder does not exist: '
+                        . htmlspecialchars($installDir)
+                    );
                 }
 
-            }
+                $found = false;
+                $entries = @scandir($documentRoot);
 
-        }
+                if (is_array($entries)) {
+                    foreach ($entries as $entry) {
 
-        // this should be the path difference between document root $_SERVER["DOCUMENT_ROOT"] and heurist code root
-        if ($installDir == @$_SERVER["SCRIPT_NAME"]) {
-            $installDir = '/';
-            $installDir_pro = '/';
-        }else{
-            $installDir = $installDir.'/';
+                        if (!self::isHeuristCodeFolder($entry)) {
+                            continue;
+                        }
 
-            $iDir = explode('/',$installDir);
-            $cntDir = count($iDir)-1;
-            for ($i=$cntDir; $i>=0; $i--){
-                if($iDir[$i]!='') {
-                    $iDir[$i] = 'heurist';
-                    break;
-                }
-            }
-            $installDir_pro = implode('/', $iDir);
-        }
+                        $candidateInstallDir = '/' . $entry . '/';
+                        $candidateFile = $documentRoot . $candidateInstallDir . 'configIni.php';
 
-        //validate
-        if(@$_SERVER["DOCUMENT_ROOT"]){
-            $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao','h7-alpha-gpl');//need to cli and short url
-
-            $i = 0;
-            while ($i<=count($codeFolders)) {
-                $test_file = @$_SERVER["DOCUMENT_ROOT"].$installDir.'configIni.php';
-                if(file_exists($test_file)){
-                    if($installDir_pro!=$installDir){
-                        $test_file = @$_SERVER["DOCUMENT_ROOT"].$installDir_pro.'configIni.php';
-                        if(!file_exists($test_file)){
-                            $installDir_pro = $installDir;
+                        if (is_file($candidateFile)) {
+                            $installDir = $candidateInstallDir;
+                            $found = true;
+                            break;
                         }
                     }
-                    break;
                 }
-                if($i==count($codeFolders)){
-                    exit('Sorry, it is not possible to detect heurist installation folder. '
-                        .'Please ask system administrator to verify server configuration.');
+
+                if (!$found) {
+                    exit(
+                        'Sorry, it is not possible to detect heurist installation folder. '
+                        . 'Please ask system administrator to verify server configuration.'
+                    );
                 }
-                $installDir = '/'.$codeFolders[$i].'/';
-                $i++;
             }
         }
 
         return array($installDir, $installDir_pro);
     }
-
+    
+    private static function isHeuristCodeFolder(string $folderName): bool
+    {
+        return $folderName === 'heurist'
+            || preg_match('/^h7-[A-Za-z0-9_-]+$/', $folderName) === 1;
+    }  
+    
     /**
      * Checks if a specified amount of memory can be allocated within PHP's memory_limit.
      * Considers current memory usage and leaves a 10MB buffer.
@@ -505,38 +549,7 @@ class USystem {
        
 
     //======================= session routines =================================
-    /**
-     * Returns an array of database names where the current user was recently logged in.
-     * Iterates through the $_SESSION global to find matching user IDs.
-     *
-     * @param array|null $currentUser An associative array representing the current user, must contain 'ugr_ID'.
-     * @return array An array of database names (without HEURIST_DB_PREFIX).
-     */
-    public static function sessionRecentDatabases($currentUser){
-        $dbrecent = array();
-        if($currentUser && @$currentUser['ugr_ID']>0){
-            foreach ($_SESSION as $db=>$session){
-
-                $user_id = @$_SESSION[$db]['ugr_ID'];
-                if($user_id == $currentUser['ugr_ID']){
-                    $dbname = $db;
-                    if(strpos($db, HEURIST_DB_PREFIX)===0){
-                        $dbname = substr($db,strlen(HEURIST_DB_PREFIX));
-                    }
-                    $dbWithHost = $dbname;
-                    if(isset($_SESSION[$db]['dbHostName'])){
-                        $dbWithHost = $_SESSION[$db]['dbHostName'].': '.$dbWithHost;                        
-                    }
-                    if(isset($_SESSION[$db]['dbHostCode'])){
-                        $dbname = $_SESSION[$db]['dbHostCode'].'-'.$dbname;
-                    }
-                    array_push($dbrecent, ['key'=>$dbname, 'title'=>$dbWithHost]);
-                }
-            }
-        }
-        return $dbrecent;
-    }
-    
+   
     /**
     * Requests heuristref.net membership for current user or server+database
     */
@@ -552,9 +565,26 @@ class USystem {
      */
     public static function sessionCheckFolder(){
 
-        if(!ini_get('session.save_handler')=='files') { return true; }
+        if(ini_get('session.save_handler') != 'files') { return true; }
 
         $folder = session_save_path();
+
+        // Empty session.save_path is valid configuration: PHP then stores
+        // sessions in the system temporary directory (sys_get_temp_dir).
+        // Previously an empty path failed this check unconditionally, which
+        // made every session-dependent page (incl. opening a database)
+        // fail with "sessions folder has become inaccessible".
+        if($folder===null || trim($folder)===''){
+            $folder = sys_get_temp_dir();
+        }else{
+            // Path may carry an argument part, eg "5;/tmp" (N;mode;/path) -
+            // the writable location is only the final segment.
+            if(strpos($folder, ';')!==false){
+                $parts = explode(';', $folder);
+                $folder = array_pop($parts);
+            }
+        }
+
         if(file_exists($folder) && is_writeable($folder)){ return true; }
 
         sendEmailToAdmin('Session folder access', 'The sessions folder has become inaccessible', true);
@@ -586,9 +616,9 @@ class USystem {
                 'expires' => $lifetime,
                 'path' => '/',
                 'domain' => '',
-                'Secure' => $is_https,
-                'HttpOnly' => true,
-                'SameSite' => 'Strict' //'Lax'
+                'secure' => $is_https,
+                'httponly' => true,
+                'samesite' => 'Strict' //'Lax'
             ));
         }else{
             //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax")
@@ -637,10 +667,75 @@ class USystem {
         //add functions for other daily tasks
         self::sendDailyErrorReport();
         self::heuristVersionCheck();// Check if different local and server code versions are different
-        self::updateDeeplLanguages();// Get list of allowed target languages from Deepl API
+        self::updateDeeplLanguages($system);// Get list of allowed target languages from Deepl API
         self::removePreparedParameters($system);// Remove potential leftover prepared parameters
+        self::sendDailyReportToMainServer( $system );
     }
 
+    /**
+     * Sends a daily report to main server
+     * Short report (server,ip,admin email,number of database) to main server (heuristref)
+     *
+     * @param \hserv\System $system Initialised Heurist system instance
+     * @return void
+     */
+    private static function sendDailyReportToMainServer( $system ){
+        
+        if(isLocalHost()){
+            //return;
+        }
+        
+        $mysqli = $system->getMysqli();
+        $databases = mysql__getdatabases4($mysqli);
+        $db_count = count($databases);
+        
+        if($db_count<10){
+            return;
+        }
+        
+        $script = HEURIST_MAIN_SERVER . '/h7-alpha/admin/describe/allServerStats.php';
+        //DEBUG $script = 'http://127.0.0.1/heurist/admin/describe/allServerStats.php';
+        
+        $serverName = !defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME) ? gethostbyname(gethostname()) : HEURIST_SERVER_NAME;
+        
+        
+        $ch = curl_init($script);
+
+        curl_setopt($ch, CURLOPT_POST, true);
+        $server_host = preg_replace('/:\d+$/', '', (string)$serverName);
+        $resolved_ip = gethostbyname($server_host);
+        $server_ip = filter_var($resolved_ip, FILTER_VALIDATE_IP) ? $resolved_ip : '';
+
+        if($server_ip === ''){
+            $server_ip = $_SERVER['SERVER_ADDR'] ?? '';
+        }
+        if(!filter_var($server_ip, FILTER_VALIDATE_IP)){
+            $server_ip = 'Unknown';
+        }
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, [
+            'type' => 'server_activity',
+            'server' => $serverName,
+            'server_ip' => $server_ip,
+            'server_admin' => defined('HEURIST_MAIL_TO_ADMIN')?HEURIST_MAIL_TO_ADMIN:'',
+            'server_db_count' => $db_count
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+        curl_setopt($ch, CURLOPT_POSTREDIR, 3);
+
+        $response = curl_exec($ch);
+        if($response === false){
+            error_log('Unable to send daily server activity report: '.curl_error($ch));
+        }
+
+        unset($ch);
+    }
+    
     /**
      * Sends a daily error report by email to the admin.
      * Consolidates error log files from the past 30 days, archives them, and emails the content.
@@ -753,51 +848,33 @@ class USystem {
      * Fetches the list from DeepL and saves it to a JSON file (DEEPL_languages.json) in HEURIST_FILESTORE_ROOT.
      * Requires $accessToken_DeepLAPI to be globally defined.
      *
-     * @global string|null $accessToken_DeepLAPI The DeepL API authentication key.
+     * @param \hserv\System $system
      * @return void
      */
-    private static function updateDeeplLanguages(){
+    private static function updateDeeplLanguages($system){
 
-        global $accessToken_DeepLAPI;
-
-        if(empty($accessToken_DeepLAPI)){
+        global $accessToken_DeepLAPI, $serverName_DeepL;
+        $DeepL = null;
+        
+        if(!(isset($accessToken_DeepLAPI) && isset($serverName_DeepL))){
             return;
         }
 
-        $target_url = 'https://api-free.deepl.com/v2/languages?type=target';
+        try{
+            $DeepL = new DeepL($system, $accessToken_DeepLAPI, $serverName_DeepL);
+        }catch(\Exception $e){
+            return;
+        }
 
-        $language_file = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/DEEPL_languages.json';
-        if(folderExists(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', true) !== true){
+        $languages = $DeepL->getDeepLLanguages();
+
+        $languageFile = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/DEEPL_languages.json';
+        if(folderExists(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', true) !== 1){
             folderCreate2(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', '');
             fileDelete(HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json');
         }
 
-        $target_res = loadRemoteURLContentWithRange($target_url, false, true, 60, array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI));
-
-        $target_languages = array();
-
-        if(!empty($target_res)){
-
-            $target_res = json_decode($target_res, true);
-            $target_res = json_last_error() !== JSON_ERROR_NONE ? array() : $target_res;
-
-            // Extra processing needed, some target languages have multiple versions; e.g. ENG-GB and ENG-US
-            foreach ($target_res as $lang) {
-
-                $lang_name = $lang['language'];
-                if(strpos($lang_name, '-') !== false){
-                    $lang_name = explode('-', $lang_name)[0];
-                }
-
-                if(array_search($lang_name, $target_languages) !== false){
-                    continue;
-                }
-
-                array_push($target_languages, $lang_name);
-            }
-        }
-
-        fileSave(json_encode($target_languages), $language_file);
+        fileSave(json_encode($languages), $languageFile);
     }
 
     /**
@@ -884,10 +961,11 @@ class USystem {
         
         $membershipStatus = checkHeuristNetworkMembership($dbowner['ugr_eMail'], $currentUser['ugr_eMail'], $server, $database, $context??'');
         //$isMember = 'individual';
-        if(session_status() === PHP_SESSION_ACTIVE){
+        if(session_status() !== PHP_SESSION_ACTIVE){
+            ini_set('session.gc_maxlifetime', (string)(30 * 24 * 60 * 60));
             @session_start();
-            $_SESSION[$database]['isAssociationMember'] = $membershipStatus;
         }
+        $_SESSION[$database]['isAssociationMember'] = $membershipStatus;
         
         return $membershipStatus;
         
@@ -955,6 +1033,7 @@ class USystem {
             'timestamp' => time()
         ];
 
+        $rawdata = null;
         if(strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL)) === 0){
             //the same version
             $mysql_indexdb = mysql__init(HEURIST_INDEX_DATABASE);
@@ -1096,7 +1175,10 @@ class USystem {
         $replace = $replace > 2 || $replace < 0 ? 0 : $replace;
 
         if(!defined('HEURIST_PREPARED_PARAMS_DIR')){
-            $system->getSysDir('prepared-parameters');
+            define('HEURIST_PREPARED_PARAMS_DIR', $system->getSysDir('prepared-parameters'));
+        }
+        if(!\defined('HEURIST_SCRATCH_DIR')){
+            define('HEURIST_SCRATCH_DIR', $dir = $system->getSysDir(DIR_SCRATCH));
         }
 
         $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";
@@ -1171,7 +1253,10 @@ class USystem {
         $deleteFile = true;
 
         if(!\defined('HEURIST_PREPARED_PARAMS_DIR')){
-            $system->getSysDir('prepared-parameters');
+            define('HEURIST_PREPARED_PARAMS_DIR', $system->getSysDir('prepared-parameters'));
+        }
+        if(!\defined('HEURIST_SCRATCH_DIR')){
+            define('HEURIST_SCRATCH_DIR', $dir = $system->getSysDir(DIR_SCRATCH));
         }
 
         $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";
@@ -1205,6 +1290,9 @@ class USystem {
         foreach($storedParameters as $key => $value){
             if(\array_key_exists($key, $parameters)){
                 continue;
+            }elseif($key === 'ids' && \is_string($value) && strpos($value, '[') === 0 && substr($value, -1) === ']'){
+                $values = json_decode($value, true);
+                $value = json_last_error() === JSON_ERROR_NONE ? $values : $value;
             }
             $parameters[$key] = $value;
         }

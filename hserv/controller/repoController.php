@@ -85,6 +85,7 @@ see dbsUserGroups.php for repository credentials methods
 */
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
+use hserv\utilities\SafeguardBackup;
 
 $need_compress = false;
 
@@ -129,9 +130,159 @@ if(!$system->init(@$_REQUEST['db'])){
 
             $res = user_saveRepositoryCredentials($system, $to_edit, $to_delete);
 
-        //}elseif($action=='upload'){
-            //upload and register file to external repository
+        }elseif($action=='backup_settings'){
+            if(!SafeguardBackup::isEnabled()){
+                $res = ['enabled' => false];
+            }elseif(!$system->isAdmin()){
+                $system->addError(HEURIST_REQUEST_DENIED, 'Only an administrator in the owners group may configure safeguarding');
+                $res = false;
+            }else{
+                $config = SafeguardBackup::settings($system);
+                $available = user_getRepositoryList($system, $ugr_ID, true);
+                $res = [
+                    'enabled' => true,
+                    'interval_days' => (int)($config['interval_days'] ?? 30),
+                    'accounts' => $config['accounts'] ?? [],
+                    'available' => array_values(array_filter($available, function($entry) {
+                        return (bool)preg_match('/^(nakala|zenodo)_[0-9]+$/', $entry[0] ?? '');
+                    })),
+                    'email_file' => !empty($config['email_file']),
+                    'last_backup' => $config['last_backup'] ?? null
+                ];
+            }
 
+        }elseif($action=='backup_save'){
+            if(!SafeguardBackup::requireEnabled($system)){
+                $res = false;
+            }else{
+                try {
+                    $accounts = json_decode($_REQUEST['accounts'] ?? '[]', true);
+                    SafeguardBackup::saveConfig($system, (int)($_REQUEST['interval_days'] ?? 0),
+                        $accounts, ($_REQUEST['email_file'] ?? '0') === '1');
+                    $res = true;
+                }catch(Throwable $e){
+                    $system->addError(HEURIST_INVALID_REQUEST, $e->getMessage());
+                    $res = false;
+                }
+            }
+
+        }elseif($action=='backup_check'){
+            // Called after login/Explore startup. Never perform a large export in the HTTP worker.
+            if(!SafeguardBackup::isEnabled()){
+                $res = ['enabled' => false, 'configured' => false, 'show_introduction' => false, 'notice' => null];
+            }else{
+                $config = SafeguardBackup::settings($system);
+                $accounts = $config['accounts'] ?? [];
+                $configured = !empty($config['interval_days']) && (!empty($accounts) || !empty($config['email_file']));
+                $res = ['enabled' => true, 'configured' => $configured,
+                    'show_introduction' => !$configured, 'notice' => null];
+                if(!empty($config['email_file'])){
+                    $accounts[] = 'email_owner'; // Independent destination, also valid without a repository.
+                }
+                if($system->isAdmin() && !empty($config['notice']['id'])
+                    && empty($config['notice']['seen'][$ugr_ID])){
+                    $res['notice'] = $config['notice']['text'];
+                    $config['notice']['seen'][$ugr_ID] = true;
+                    $system->settings->setDatabaseSetting('Safeguard backups', $config);
+                }
+                if($accounts){
+                    $days = max(1, (int)($config['interval_days'] ?? 30));
+                    $due = false;
+                    foreach($accounts as $account){
+                        $last = strtotime($config['deposits'][$account]['date'] ?? '') ?: 0;
+                        if(!$last || $last + $days * 86400 <= time()){
+                            $due = true;
+                            break;
+                        }
+                    }
+                    // Limit failed-job launches to one per hour; success is tracked per account.
+                    $attempt = strtotime($config['last_attempt'] ?? '') ?: 0;
+                    if($due && $attempt + 3600 <= time()){
+                        $php = PHP_BINDIR.'/php';
+                        $worker = dirname(__FILE__).'/../../export/dbbackup/automaticSafeguard.php';
+                        if(is_executable($php) && function_exists('exec')){
+                            $config['last_attempt'] = gmdate('c');
+                            if($system->settings->setDatabaseSetting('Safeguard backups', $config)){
+                                $command = escapeshellarg($php).' '.escapeshellarg($worker).' '
+                                    .escapeshellarg($system->dbname()).' >/dev/null 2>&1 &';
+                                exec($command);
+                            }
+                        }else{
+                            $res['notice'] = 'Automatic safeguarding requires a PHP CLI executable and process launching on this server.';
+                        }
+                    }
+                }
+            }
+
+        }elseif($action=='publish' && !SafeguardBackup::requireEnabled($system)){
+            $res = false;
+
+        }elseif($action=='publish' && !$system->isAdmin()){
+            $system->addError(HEURIST_REQUEST_DENIED, 'Only a database administrator may publish a safeguard');
+            $res = false;
+
+        }elseif($action=='getdoi' || $action=='publish'){
+            // (Re)confirm, or publish-and-register, the DOI for a record already deposited in an
+            // external repository. Works for any service with a get<Name>DOI() implementation
+            // wired into getRepositoryDOI() (see hserv/utilities/UFile.php).
+            //
+            // Params: service_id (eg. "nakala_1"), identifier (the repository's data identifier,
+            // as returned at upload time / stored in this database's external_IDs.json)
+            //
+            // 'publish' makes the deposit PUBLIC and PERMANENT (for Nakala, this cannot be undone) -
+            // the client MUST get explicit user confirmation before sending this action.
+
+            $serviceID = @$_REQUEST['service_id'];
+            $identifier = @$_REQUEST['identifier'];
+
+            if(empty($serviceID) || empty($identifier)){
+
+                $system->addError(HEURIST_INVALID_REQUEST, 'service_id and identifier are both required');
+                $res = false;
+
+            }else{
+
+                $credentials = user_getRepositoryCredentials2($system, $serviceID);
+                $cred = is_array($credentials) ? (@$credentials[$serviceID] ?: null) : null;
+
+                if($cred == null || empty($cred['params']['writeApiKey'])){
+
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Credentials for the specified repository/account were not found');
+                    $res = false;
+
+                }else{
+
+                    $apiKey = $cred['params']['writeApiKey'];
+                    $service = $cred['service'];
+
+                    if($action == 'publish'){
+
+                        if(strpos(strtolower($service), 'nakala') === false){
+                            $system->addError(HEURIST_INVALID_REQUEST, "Publishing is not yet implemented for repository service '{$service}'");
+                            $res = false;
+                        }elseif(!publishNakalaData($system, $apiKey, $identifier)){
+                            $res = false;
+                        }else{
+                            $res = getNakalaDataDetails($system, $apiKey, $identifier);
+                        }
+
+                    }else{
+                        $res = getRepositoryDOI($system, $service, $apiKey, $identifier);
+                    }
+
+                    if($res !== false){
+                        // Keep this database's external_IDs.json in sync with whatever we just confirmed/published
+                        recordExternalIdentifier($system, $serviceID.'_'.$identifier, [
+                            'Service' => $service,
+                            'ID' => $identifier,
+                            'DOI' => $res['doi'],
+                            'DOIRegistered' => $res['doiRegistered'],
+                            'Status' => $res['status'],
+                            'URL' => $res['link']
+                        ]);
+                    }
+                }
+            }
 
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");

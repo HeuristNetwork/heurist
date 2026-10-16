@@ -148,6 +148,20 @@ $.widget( "heurist.searchByEntity", {
                     +'<ul class="by-usage" style="list-style-type:none;margin:0;padding:6px"></ul>'
                     )
                 .appendTo(this.element);
+           
+            this._on(    
+            $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+                .addClass('entity-popup-close')
+                .css({'position':'absolute', 'right':'4px', 'top':'6px', height:20, width:20})
+                .appendTo(this.combined_select),
+                {click:function(e){
+                    e.stopPropagation();
+                    if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
+                        this.options.onClose();
+                    }
+                }});
+                
+                
 
             this.config_btn = $('<span>').addClass('ui-icon ui-icon-gear')
                 .css({'margin-left':'10px'})   //'font-size':'0.8em',

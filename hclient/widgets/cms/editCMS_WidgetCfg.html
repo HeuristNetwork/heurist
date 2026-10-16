@@ -364,7 +364,7 @@
                     </div>
 
                     <input name="search_initial" size="45"/>
-                    <i class="help-text-block">Heurist search query to retrieve media records</i>
+                    <i class="help-text-block">Heurist search query to retrieve digital media records</i>
 
                 </div>
 
@@ -382,7 +382,7 @@
                 <div class="heurist_mediaViewer mv-src-list" style="display:none">
 
                     <div class="header header_wide">
-                        Media records
+                        Digital Media records
                     </div>
 
                     <input type="hidden" name="mediaViewer_recIDs" value=""/>
@@ -490,8 +490,9 @@
 
                     <label>show record count&nbsp;<input type="checkbox" name="show_counter" checked="checked"/></label>&nbsp;&nbsp;
                     <label>view mode selector&nbsp;<input type="checkbox" name="show_viewmode" checked="checked"/></label><br>
-                    <label>allow collection&nbsp;<input name="support_collection" type="checkbox"/>&nbsp;&nbsp;</label>
-                    <label>export button&nbsp;<input name="show_export_button" type="checkbox"/></label>
+                    <label>allow collection&nbsp;<input name="support_collection" type="checkbox"/></label>&nbsp;&nbsp;
+                    <label>export button&nbsp;<input name="show_export_button" type="checkbox"/></label><br>
+                    <label>result sort dropdown&nbsp;<input name="show_result_sort" type="checkbox"/></label>
 
                 </div>
 
@@ -582,6 +583,16 @@
 
                 </div>
 
+                <div class="heurist_Map2">
+                    <div class="header header_narrow">
+                        General behaviours
+                    </div>
+                   
+                    <div>
+                        <button type="button" id="btn_heurist_map_config">Mapping Configuration</button>
+                    </div>
+                </div>
+                    
                 <div class="heurist_Map">
 
                     <div class="header header_narrow">
@@ -1676,7 +1687,7 @@
 
                 </div>
         
-                <div class="heurist_Navigation heurist_Search heurist_SearchTree heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_resultListCollection heurist_Map">
+                <div class="heurist_Navigation heurist_Search heurist_SearchTree heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_resultListCollection heurist_Map heurist_Map2 heurist_SearchInput">
 
                     <div class="header header_narrow">
                         Search group&nbsp;

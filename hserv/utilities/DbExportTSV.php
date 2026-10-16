@@ -1,7 +1,7 @@
 <?php
 /**
 * DbExportTSV.php - Class DbExportTSV
-* 
+*
 * Exports entire database to TSV
 *
 * @project     Heurist academic knowledge management system
@@ -13,70 +13,98 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       6.0
 */
-  
+
 namespace hserv\utilities;
 use hserv\records\export\RecordsExportCSV;
 use hserv\structure\ConceptCode;
+use hserv\System;
 
 /**
 * Class DbExportTSV
-* 
+*
 * Exports entire database to TSV
 */
 class DbExportTSV {
-    
-    private $mysqli = null;
-    private $system = null;    
-    
-    private $backupFolder = null;
-    
-    private $warnings = [];
-    
-    private $record_fields;
-    
+
+    private ?\mysqli $mysqli;
+    private ?System $system;
+
+    private ?string $backupFolder;
+    private ?string $backupTablesFolder;
+    private ?string $backupRecordsFolder;
+
+    private ?string $recordsFilenameTemplate = '{ConceptCode}_{RTYID}_{RTYNAME}';
+    private ?array $recordsFilenamePlaceholders = ['{ConceptCode}', '{RTYID}', '{RTYNAME}'];
+
+    private array $warnings = [];
+    private array $fileOutput = [];
+
+    private array $recordFields = [];
+
     /**
      * Constructor for DbExportTSV.
-     * Initializes the exporter with the given system context.
-     *
-     * @param mixed $system The system instance/context.
      */
-    public function __construct($system) {
-        $this->setSession($system);
-    }
-   
+    public function __construct(){}
+
     /**
      * Sets the session system instance, initializes the database connection, and sets up the backup folder.
      *
-     * @param mixed $system System instance.
-     * @param string|null $folder Optional. The specific folder to use for backup. Defaults to a path derived from system settings.
+     * @param System $system System instance.
+     * @param string|null $recordsFilenameTemplate Optional. Template naming scheme for records. Defaults to ConceptCode_RTYID_RTYName.
      */
-    public function setSession($system, $folder=null) {
+    public function setSession($system, $recordsFilenameTemplate = null){
+
         $this->system = $system;
         $this->mysqli = $system->getMysqli();
 
         ConceptCode::setSystem($system);
-        RecordsExportCSV::setSession($this->system);
-        
-        $this->setBackupFolder($folder);
-    }   
-    
+        RecordsExportCSV::setSession($system);
+
+        if(!empty($recordsFilenameTemplate) && is_string($recordsFilenameTemplate)){
+
+            $hasPlaceholder = false;
+            foreach($this->recordsFilenamePlaceholders as $placeholder){
+                if(strpos($recordsFilenameTemplate, $placeholder) !== false){
+                    $hasPlaceholder = true;
+                    break;
+                }
+            }
+
+            $this->recordsFilenameTemplate = $hasPlaceholder ? $recordsFilenameTemplate : $this->recordsFilenameTemplate;
+        }
+    }
+
     /**
      * Sets the backup folder path for TSV exports and creates it if it doesn't exist.
      *
-     * @param string|null $folder Optional. The specific folder to use for backup. 
+     * @param string|null $folder Optional. The specific folder to use for backup.
      *                            If null, a default path is generated based on system settings and database name.
+     * @param string|null $tableDirectory Optional. The specific sub-directory name where the database tables will be placed.
+     *                            If null, the default sub directory is 'tsv-output'.
+     * @param string|null $recordDirectory Optional. The specific sub-directory name where the database records will be placed.
+     *                            If null, the default sub directory is 'tsv-output/records'.
      * @return bool True on success (folder created or exists), false on failure to create.
      */
-    public function setBackupFolder($folder=null){
-        $this->backupFolder = $folder ?? ($this->system->getSysDir(DIR_BACKUP).$this->system->dbname().'/');
-        $this->backupFolder .= 'tsv-output/';
-        return folderCreate("{$this->backupFolder}records", true);
+    public function setBackupFolder($folder=null, $tableDirectory = 'tsv-output', $recordDirectory = 'tsv-output/records'){
+
+        $tableDirectory = rtrim($tableDirectory, '/\\');
+        $recordDirectory = rtrim($recordDirectory, '/\\');
+
+        $this->backupFolder = $folder ?? ($this->system->getSysDir(DIR_BACKUP).$this->system->dbname());
+        $this->backupFolder = rtrim($this->backupFolder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        $this->backupTablesFolder = "{$this->backupFolder}{$tableDirectory}" . DIRECTORY_SEPARATOR;
+        $this->backupTablesFolder = str_replace(['/','\\'], DIRECTORY_SEPARATOR, $this->backupTablesFolder);
+
+        $this->backupRecordsFolder = "{$this->backupFolder}{$recordDirectory}" . DIRECTORY_SEPARATOR;
+        $this->backupRecordsFolder = str_replace(['/','\\'], DIRECTORY_SEPARATOR, $this->backupRecordsFolder);
+
+        return folderCreate($this->backupTablesFolder, true) && folderCreate($this->backupRecordsFolder, true);
     }
-    
-    
+
     /**
     * Exporting database tables as TSV
-    *     
+    *
     */
     private function exportDefinitions(){
 
@@ -90,15 +118,13 @@ class DbExportTSV {
         $tables = mysql__select_list2($this->mysqli, "SHOW TABLES");
 
         $field_types = [];
-        $record_types = [];
-
-        //echo_flush2("Exporting database tables as TSV<br>");
+        $tableDirectory = str_replace($this->backupFolder, DIRECTORY_SEPARATOR, $this->backupTablesFolder);
 
         foreach ($tables as $table) {
-        
+
             $table_lc = strtolower($table);
 
-            if(strpos($table_lc, 'woot') !== false || strpos($table_lc, 'import') === 0 || 
+            if(strpos($table_lc, 'woot') !== false || strpos($table_lc, 'import') === 0 ||
                strpos($table_lc, 'index') !== false || in_array($table_lc, $skip_tables)){
                 continue;
             }
@@ -112,7 +138,7 @@ class DbExportTSV {
                 continue;
             }
 
-            $filename = "{$this->backupFolder}{$table}.tsv";
+            $filename = "{$this->backupTablesFolder}{$table}.tsv";
             $fd = fopen($filename, 'w');
             if(!$fd){
                 $msg = error_get_last();
@@ -136,11 +162,11 @@ class DbExportTSV {
                         continue;
                     }
 
-                    if(!array_key_exists($rty_ID, $this->record_fields)) {
-                        $this->record_fields[$rty_ID] = [ 'rec_ID', 'rec_Title' ];// add id + title by default
+                    if(!array_key_exists($rty_ID, $this->recordFields)) {
+                        $this->recordFields[$rty_ID] = [ 'rec_ID', 'rec_Title' ];// add id + title by default
                     }
 
-                    $this->record_fields[$rty_ID][] = "$dty_ID";
+                    $this->recordFields[$rty_ID][] = (string)$dty_ID;
                 }
 
                 if($get_headers){ // get table field names
@@ -174,20 +200,24 @@ class DbExportTSV {
 
             if(filesize($filename) == 0){ // remove empty files
                 fileDelete($filename);
+            }else{
+                $this->fileOutput['tables'][] = "{$tableDirectory}{$table}.tsv";
             }
         }//foreach
-        
+
         return true;
-    } 
-    
-    
+    }
+
+
     /**
     * Export Records, recDetails
     */
     private function exportRecords(){
 
+        $recordDirectory = str_replace($this->backupFolder, DIRECTORY_SEPARATOR, $this->backupRecordsFolder);
+
         // Export records per rectype
-        foreach ($this->record_fields as $rty_ID => $field_codes) {
+        foreach ($this->recordFields as $rty_ID => $field_codes) {
 
             $rty_CC_ID = ConceptCode::getRecTypeConceptID($rty_ID);
             $rty_CC_ID = preg_replace('/^0000\-/', '0', $rty_CC_ID);
@@ -207,6 +237,10 @@ class DbExportTSV {
                 continue;
             }
 
+            $replacements = [$rty_CC_ID, $rty_ID, $rty_Name];
+
+            $filename = str_replace($this->recordsFilenamePlaceholders, $replacements, $this->recordsFilenameTemplate);
+
             $options = [
                 'prefs' => [
                     'main_record_type_ids' => $rty_ID,
@@ -218,22 +252,24 @@ class DbExportTSV {
                 ],
                 'save_to_file' => 1,
                 'file' => [
-                    'directory' => "{$this->backupFolder}records",
-                    'filename' => "{$rty_CC_ID}_{$rty_ID}_{$rty_Name}.tsv"
+                    'directory' => $this->backupRecordsFolder,
+                    'filename' => "{$filename}.tsv"
                 ]
             ];
 
             $res = RecordsExportCSV::output($response, $options);
             if($res <= 0){
 
-                $msg = $res == 0 ? "Failed to write to TSV file for record type #$rty_ID" 
+                $msg = $res == 0 ? "Failed to write to TSV file for record type #$rty_ID"
                                  : "An error occurred while handling the record type #$rty_ID, error was placed within TSV file";
 
                 $this->warnings[] = "<span style='color: red;margin-left: 5px;'>$msg</span><br>";
+            }else{
+                $this->fileOutput['records'][] = "{$recordDirectory}{$filename}.tsv";
             }
         }//for
     }
-    
+
 
     /**
      * Executes the TSV export process.
@@ -242,19 +278,25 @@ class DbExportTSV {
      * @return array An array of warning messages generated during the export process. Empty if no warnings.
      */
     public function output(){
-        
-        if(!file_exists("{$this->backupFolder}records")){
-            return ["Destination folder does not exist {$this->backupFolder}record"];
+
+        if(!file_exists($this->backupTablesFolder) || !file_exists($this->backupRecordsFolder)){
+            return ["Destination folder for records does not exist."];
         }
-        
-        $this->record_fields = []; //reset
-        
+
+        // Reset
+        $this->recordFields = [];
+        $this->warnings = [];
+        $this->fileOutput = [
+            'tables' => [],
+            'records' => []
+        ];
+
         if($this->exportDefinitions()){
             $this->exportRecords();
         }
-        
-        return $this->warnings;   
+
+        return [$this->warnings, $this->fileOutput];
     }
-    
+
 }
 ?>

@@ -525,7 +525,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 }else if(dtyid && dtyid > 0){
 
                     ids = $Db.dty(event.dtyid, 'dty_PtrTargetRectypeIDs');
-                    ids = ids.indexOf(',') !== -1 ? ids.replaceAll(/,/g, ', #') : ids;
+                    ids = ids.indexOf(',') !== -1 ? ids.replaceAll(',', ', #') : ids;
 
                     ids = !window.hWin.HEURIST4.util.isempty(ids) ? `#${ids}` : '';
                 }

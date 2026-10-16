@@ -1,0 +1,35 @@
+{
+    "entityName": "defTermsLinks",
+    "tableName": "defTermsLinks",
+    "tablePrefix": "trl",
+    "entityTitle": "Term link",
+    "entityTitlePlural": "Term links",
+    "reference_query": {},
+    "fields": [
+        {
+            "dtID": "trl_LinkID",
+            "keyField": true,
+            "dtFields": {
+                "dty_Type": "integer",
+                "dty_Role": "primary",
+                "rst_Display": "hidden"
+            }
+        },
+        {
+            "dtID": "trl_ParentID",
+            "dtFields": {
+                "dty_Type": "integer",
+                "rst_DisplayName": "Parent term ID:",
+                "rst_Display": "readonly"
+            }
+        },
+        {
+            "dtID": "trl_TermID",
+            "dtFields": {
+                "dty_Type": "integer",
+                "rst_DisplayName": "Term ID:",
+                "rst_Display": "readonly"
+            }
+        }
+    ]
+}

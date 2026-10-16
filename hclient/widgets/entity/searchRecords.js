@@ -208,7 +208,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 if(that.selectRectype.val().indexOf(',') === -1){
                     that._trigger( "onaddrecord", null, {'_rectype_id': that.selectRectype.val(), 'fill_in_data': search_val} );
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
+                    window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of All types, please select type from tabs', 5000);
                 }
             }
         });
@@ -217,14 +217,14 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         this._on( this.btn_select_rt, {
             click:  function(){
                 this._select_mode = 0;
-                this.selectRectype.hSelect('open'); console.log(this.selectRectype.hSelect('menuWidget'));
+                this.selectRectype.hSelect('open');
                 this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
                 return false;
             }
         });
 
         if(is_browse){
-            this.element.find('#lbl_add_record').text('Select in list');
+            this.element.find('#lbl_add_record').text('');
             this.btn_add_record.hide();
         }else{
             this.btn_add_record.show();
@@ -298,7 +298,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     if(that.selectRectype.val().indexOf(',') === -1){
                         that._trigger( "onaddrecord", null, {'_rectype_id': that.selectRectype.val(), 'fill_in_data': search_val} );
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
+                        window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of All types, please select type from tabs', 5000);
                     }
                 }
             }else if(is_addonly){
@@ -330,11 +330,11 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
 
             if(is_browse){
-                that.element.find('#lbl_add_record').text('Select in list');
+                that.element.find('#lbl_add_record').text('');
             }else if(is_addonly){
                 that.element.find('#lbl_add_record').text('Add new');
             }else{
-                that.element.find('#lbl_add_record').text('Select in list or add new');
+                that.element.find('#lbl_add_record').html('<span style="padding: 0px 5px;">OR</span> Add a new record');
             }
         }
         //force search if rectype_set is defined
@@ -426,22 +426,26 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         
         this.input_search.trigger('focus');
 
+        this.element.find('#fill_in_data').parent().hide();
         if(!window.hWin.HEURIST4.util.isempty(this.options.fill_data) || !window.hWin.HEURIST4.util.isempty(this.options.init_filter)){
 
-            this.input_search.val(this.options.init_filter).css({'max-width': '20em', 'width': '20em'}); // enter value
+            this.input_search.val(this.options.init_filter); // enter value
 
-            //move search box
-            this.input_search.parent().css({
-                'display': 'block',
-                'position': 'relative',
-                'z-index': 1,
-                'text-align': ''
-            });
+            if(!window.hWin.HEURIST4.util.isempty(this.options.fill_data)){
 
-            let fill_in = !window.hWin.HEURIST4.util.isempty(this.options.fill_data) ? this.options.fill_data : this.options.init_filter;
-            this.element.find('#fill_in_data').val(fill_in).css({'max-width': '20em', 'width': '20em'}).parent().show();
-        }else{
-            this.element.find('#fill_in_data').parent().hide();
+                //move search box
+                this.input_search.css({'max-width': '20em', 'width': '20em'}).parent().css({
+                    'display': 'block',
+                    'position': 'relative',
+                    'z-index': 1,
+                    'text-align': ''
+                });
+
+                let fill_in = !window.hWin.HEURIST4.util.isempty(this.options.fill_data) ? this.options.fill_data : this.options.init_filter;
+                this.element.find('#fill_in_data').val(fill_in).css({'max-width': '20em', 'width': '20em'}).parent().show();
+            }else{
+                this.options.init_filter = '';
+            }
         }
 
         this._trigger( "onstart" ); //trigger ajust          
@@ -486,7 +490,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             if(this.options.pointer_field_id>0 && this.options.pointer_source_rectype>0){
                 if(this.element.find('#cb_getcounts').is(':checked')){
                     links_count = {source:this.options.pointer_source_rectype, 
-                                   target:this.rectype_filter, // Note: this.rectype_filter is not explicitly defined, likely meant rectype_filter
+                                   target:rectype_filter,
                                    dty_ID:this.options.pointer_field_id};
                 }            
             }    

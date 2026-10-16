@@ -134,7 +134,7 @@ $failed_exts = array();
         <p>Note: Use with caution, this function can create a lot of extra records if there are many images</p>
 
         <p>This function creates, updates and reads XML manifest files in the folders (and their descendants)
-            listed in Design > Properties (Paths which contain files to be indexed as multimedia records)
+            listed in Design > Properties (Paths which contain files to be indexed as Digital Media records)
             and creates Digital Media records for all files uploaded to the database, with pointers back to the files.
             New files are added to existing manifests. </p>
 
@@ -144,7 +144,7 @@ $failed_exts = array();
             <i>Note (in case of need): If you get the message that your folders are not writeable, ask your system adminstrator to adjust the permissions on the HEURIST_FILESTORE directory and its descendants. The folders in the filestore must be writeable by the PHP system - normally they should belong to and be writable by the group heurist (which should be set up to include apache and any administrators who have access to the backend), or be owned and writable by apache or www-data (as appropriate).</i>
         </p>
         <p>
-            Files should be uploaded through Populate > Upload media files/images (limited normally to 30M) or by direct sftp access to the file_uploads directory, or sub-directories, on the server for larger files or very large bulk uploads (available to system administrators only).
+            Files should be uploaded through Populate > Upload files from local (limited normally to 30M) or by direct sftp access to the file_uploads directory, or sub-directories, on the server for larger files or very large bulk uploads (available to system administrators only).
         </p>
         <?php
 

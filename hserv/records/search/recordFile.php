@@ -228,14 +228,12 @@ function fileRenameToOriginal($system, $orig_name, $new_name=null){
  * @param \hserv\System $system The Heurist system object.
  * @param int|string|array $file_ids A single file ID (numeric or obfuscated string),
  *                                   a comma-separated string of IDs, or an array of IDs.
- * @param bool $all_fields (Currently not fully implemented for specific field selection,
- *                         though original comment mentioned `ulf_Thumbnail` which is no longer in DB).
- *                         If true, might imply fetching more fields in future, but currently fetches a fixed set.
+ * @param string|null $language Language for translatable values
  * @return array|false An array of associative arrays, each representing a file's record,
  *                     or false if no file IDs provided or a database error occurs.
  *                     Returns an empty array if no files are found matching the IDs.
  */
-function fileGetFullInfo($system, $file_ids, $all_fields=false){
+function fileGetFullInfo($system, $file_ids, $language = 'def'){
 
     // @todo Use prepareIds() for numeric IDs and a similar function for string IDs if needed.
     if(is_string($file_ids)){
@@ -243,6 +241,8 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
     }elseif(!is_array($file_ids)){
         $file_ids = array($file_ids);
     }
+
+    $language = getLangCode3($language) ?? 'def';
 
     if(!isEmptyArray($file_ids)){
 
@@ -310,20 +310,18 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
             $result = array();
 
             while ($row = $res->fetch_assoc()){
-                array_push($result, $row);
 
-                /*
-                $filename = $row[0];
-                $extURL = $row[1];
-                $mimeType = $row[2];
+                $ulfID = $row['ulf_ID'];
+                if($language && $language !== 'def'){
 
-                if( $filename && file_exists($filename) ){
-                array_push($result, $filename);
-                }elseif($extURL && $type!='local'){
-                array_push($result, $extURL);
+                    $translatedCaption = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Caption' AND trn_Code = {$ulfID} AND trn_LanguageCode = '{$language}'");
+                    $translatedDesc = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Description' AND trn_Code = {$ulfID} AND trn_LanguageCode = '{$language}'");
+
+                    $row['ulf_Caption'] = !empty($translatedCaption) ? $translatedCaption : $row['ulf_Caption'];
+                    $row['ulf_Description'] = !empty($translatedDesc) ? $translatedDesc : $row['ulf_Description'];
                 }
-                */
 
+                array_push($result, $row);
             }
             $res->close();
             return $result;
@@ -384,6 +382,8 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
     if($fileid == null){
         $suitable_media_condition = " and (rd.dtl_UploadedFileID is not null)" // Ensure there's an uploaded file linked
                                   ." and (fxm.fxm_MimeType like 'image%'"
+                                  ." OR fxm.fxm_MimeType='application/pdf'"
+                                  ." OR LOWER(ruf.ulf_MimeExt) IN ('pdf','application/pdf')"
                                   ." OR fxm.fxm_MimeType='video/youtube'"
                                   ." OR fxm.fxm_MimeType='video/vimeo'"
                                   ." OR fxm.fxm_MimeType='audio/soundcloud'" // Soundcloud also considered for thumb
@@ -575,6 +575,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
     if (file_exists($filename)) {
 
         $range = @$_SERVER['HTTP_RANGE'];
+        $range_min = 0;
         $range_max = 0;
         if($range!=null){
             //get bytes range  bytes=0-88
@@ -584,10 +585,28 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             $range_max = intval($range_max);
         }
 
-        header('Content-Description: File Transfer');
+        $is_compressible = !$mimeType || $mimeType == 'application/octet-stream' || $mimeType == MIMETYPE_JSON;
         $is_zip = false;
-        if(!$mimeType || $mimeType == 'application/octet-stream' || $mimeType == MIMETYPE_JSON){
-            $is_zip = true;
+        $output = null;
+        if($range==null && $is_compressible
+            && preg_match(
+                    '/(?:^|,)\s*gzip\s*(?:;\s*q=(?!0(?:\.0*)?(?:\s|,|$))[^,]*)?(?:,|$)/i',
+                    $_SERVER['HTTP_ACCEPT_ENCODING'] ?? ''
+            ))
+        {
+            $contents = file_get_contents($filename);
+            if($contents!==false){
+                $output = gzencode($contents, 6);
+                $is_zip = $output!==false;
+            }
+            unset($contents);
+        }
+
+        header('Content-Description: File Transfer');
+        if($is_compressible){
+            header('Vary: Accept-Encoding');
+        }
+        if($is_zip){
             header('Content-Encoding: gzip');
         }
         if ($mimeType) {
@@ -615,15 +634,14 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
-        header('Content-Length: ' . ($range_max>0?($range_max-$range_min+1):filesize($filename))); //CONTENT_LENGTH
+        $content_length = $is_zip
+            ? strlen($output)
+            : ($range_max>0 ? ($range_max-$range_min+1) : filesize($filename));
+        header('Content-Length: ' . $content_length); //CONTENT_LENGTH
         @ob_clean();
         ob_end_flush();//flush();
 
         if($is_zip){
-            ob_start();
-            readfile($filename);
-            $output = gzencode(ob_get_contents(),6); //memory overflow may happen here
-            ob_end_clean();
             echo $output;
             unset($output);
         }else{
@@ -891,11 +909,18 @@ EXP;
 
         $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.$system->dbnameEnv();
         
+        /* PRE 2026-06-28 
         if(($iiif_type==ULF_IIIF_IMAGE || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
             && @$params['var'][0]['rec_ID']>0){
             $miradorViewer = $miradorViewer.'&q=ids:'.intval($params['var'][0]['rec_ID']);
         }else{
             $miradorViewer = $miradorViewer.'&'.substr($iiif_type,1).'='.$fileid;
+        }
+        */
+        if(@$params['var'][0]['rec_ID']>0){
+            $miradorViewer = $miradorViewer.'&id='.intval($params['var'][0]['rec_ID']);
+        }else{
+            $miradorViewer = $miradorViewer.'&id='.$fileid;
         }
 
         $result = "<iframe $size $style src=\"$miradorViewer\" frameborder=\"0\"></iframe>";
@@ -1037,7 +1062,7 @@ function getWebImageCache($system, $fileinfo, $returnURL = true, $forceRefresh =
 
     $skip_file = isNotLocalFile(@$fileinfo['ulf_OrigFileName']);
 
-    if($skip_file || @$fileinfo['ulf_FileSizeKB'] < 500){ // skip
+    if($skip_file || @$fileinfo['ulf_FileSizeKB'] < 200){ // skip
         $system->addError(HEURIST_ACTION_BLOCKED, 'File skipped');
         return false;
     }
@@ -1073,16 +1098,18 @@ function getWebImageCache($system, $fileinfo, $returnURL = true, $forceRefresh =
     }
 
     if(!$fileExists){ // already exists
-        $res = UImage::createScaledImageFile($file_path, $file_path_cached, 1000, 1000, false, 'jpg');
+        $res = UImage::createScaledImageFile($file_path, $file_path_cached, 400, 400, false, 'jpg');
+    }else{
+        $res = true;
     }
-
+/* AO 2026-05-12    
     $scaledFileSize = $res === true ? filesize($file_path_cached) : 0;
     $fileSizeLimit = floor(($fileinfo['ulf_FileSizeKB'] * 1024) / 2);
-    if($res === true && !$forceRefresh && $scaledFileSize >= $fileSizeLimit){
+    if($res === true && !$forceRefresh  && $scaledFileSize >= $fileSizeLimit){
         // if scaled image is more than half the size of original, use original
         $res = false;
     }
-
+*/
     if($res===true){
         return $returnURL ? $file_url_cached : $file_path_cached;
     }else{
@@ -1315,7 +1342,9 @@ function fileGetMetadata($fileinfo){
     }
 
     // Populate common metadata
-    $res['mimetype'] = $mimeType;
+    $isPdf = $mimeType==='application/pdf' || in_array(strtolower($fileinfo['ulf_MimeExt'] ?? ''), ['pdf','application/pdf']);
+    $res['has_thumbnail'] = $isPdf;
+    $res['mimetype'] = $isPdf ? 'application/pdf' : $mimeType;
     $res['original_name'] = $originalFileName;
     $res['size_KB'] = $fileinfo['ulf_FileSizeKB'] ?? null;
     $res['description'] = $fileinfo['ulf_Description'] ?? null;
@@ -1345,12 +1374,41 @@ function fileGetMetadata($fileinfo){
  * @param int|string $fileid The `ulf_ID` (numeric) or `ulf_ObfuscatedFileID` (string) of the file.
  * @param bool $is_download If true, outputs the thumbnail image directly to the browser.
  *                          Otherwise, saves it to the thumbnail directory.
- * @return void Outputs image or redirects if `$is_download` is true.
+ * @return bool|string|null For PDFs, true on success or an error string on failure;
+ *                         other file types retain their existing return behaviour.
  */
+/**
+ * Serve the last available PDF thumbnail, or a visible PDF label on failure.
+ * The label is a response only: never cache it over a real thumbnail. Keeping
+ * the existing file readable during rendering avoids blank refresh previews.
+ */
+function fileOutputPdfThumbnailOrPlaceholder($thumbnail_file){
+    clearstatcache(true, $thumbnail_file);
+    $info = is_readable($thumbnail_file) ? @getimagesize($thumbnail_file) : false;
+    if($info && $info[2]===IMAGETYPE_PNG){
+        $content = @file_get_contents($thumbnail_file);
+        if($content!==false && $content!==''){
+            header('Content-type: image/png');
+            echo $content;
+            return;
+        }
+    }
+    // Reuse Heurist's existing file-label drawing capability. No placeholder
+    // is written to disk, so a later request can retry the PDF renderer.
+    $image = UImage::createFromString('PDF');
+    if($image){
+        header('Content-type: image/png');
+        imagepng($image);
+        imagedestroy($image);
+    }else{
+        http_response_code(503);
+    }
+}
+
 function fileCreateThumbnail( $system, $fileid, $is_download ){
 
     $img = null; //image to be resized
-    $file = fileGetFullInfo($system, $fileid, true); // Request all fields just in case
+    $file = fileGetFullInfo($system, $fileid);
     $placeholder = '../../hclient/assets/100x100.gif';
     $thumbnail_file = null;
     $orientation = 0;
@@ -1387,10 +1445,37 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             }
 
             //special case for pdf
-            if($mimeExt=='application/pdf' || $mimeExt=='pdf'){
-                UImage::getPdfThumbnail($filename, $thumbnail_file);
+            if(strtolower($mimeExt)=='application/pdf' || strtolower($mimeExt)=='pdf'){
+                // Shared lazy generation covers data entry and imported/HML files.
+                $created = UImage::getPdfThumbnail($filename, $thumbnail_file, 200, 200, $pdfError);
+                if($is_download){
+                    // A failed refresh must not replace an existing thumbnail
+                    // in the browser with the generic blank placeholder.
+                    fileOutputPdfThumbnailOrPlaceholder($thumbnail_file);
+                }
+                return $created ? true : $pdfError;
                 
+            }else if(($file['ulf_PreferredSource'] ?? '')==='iiif'){ //locally uploaded manifest json
+
+                $jsonContent = file_get_contents($filename);
+                $jsonContent = json_decode($jsonContent, true);
+                if($jsonContent){
+                    UImage::getIiifThumbnail(null, $jsonContent, $thumbnail_file);                
+                }
+            
+                if($is_download){
+                    if(file_exists($thumbnail_file)){
+                        header('Content-type: image/png');
+                        echo file_get_contents($thumbnail_file);
+                    }else{
+                        redirectURL($placeholder);
+                    }
+                }
+                return;            
+            
             }else{
+                
+
 
                 //get real image type from exif
                 $mimeExt = UImage::getImageType($filename);
@@ -1432,9 +1517,16 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
                 $img = UImage::createFromString('tiled images stack');//from string
                 
-            }else if($file['ulf_MimeExt']=='json' &&  strpos($file['ulf_OrigFileName'],ULF_IIIF)===0){
+            }else if( strpos((string)($file['ulf_PreferredSource'] ?? ''),'iiif')===0 || 
+                      strpos((string)($file['ulf_OrigFileName'] ?? ''),ULF_IIIF)===0  ||
+                      (strpos($file['ulf_ExternalFileReference'], '/iiif/')>0 && 
+                       strpos($file['ulf_ExternalFileReference'], '/0/default.jpg')>0) ){
                 
-                $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);
+                if($file['ulf_MimeExt']!=='json'){
+                    $thumbUrl = UImage::getIiifThumbnailFromUrl($file['ulf_ExternalFileReference'], $thumbnail_file);    
+                }else{
+                    $thumbUrl = UImage::getIiifThumbnail($file['ulf_ExternalFileReference'], null, $thumbnail_file);
+                }
                 
                 if($is_download){
                     if(file_exists($thumbnail_file)){
@@ -1446,6 +1538,32 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 }
                 
                 return;
+
+            }elseif(strtolower($file['ulf_MimeExt'] ?? '')==='pdf'
+                    || strtolower($file['ulf_MimeExt'] ?? '')==='application/pdf'
+                    || ($file['fxm_MimeType'] ?? '')==='application/pdf'){
+                // HML can register a PDF as a remote reference. Download a temporary
+                // copy for the same first-page renderer, then always remove it.
+                $temporary = tempnam(HEURIST_SCRATCH_DIR, 'pdf_source_');
+                $created = false;
+                $pdfError = 'Cannot download remote PDF for thumbnail generation.';
+                if($temporary!==false){
+                    try {
+                        if(saveURLasFile($file['ulf_ExternalFileReference'], $temporary)){
+                            $created = UImage::getPdfThumbnail($temporary, $thumbnail_file, 200, 200, $pdfError);
+                        }
+                    }finally{
+                        if(file_exists($temporary)){
+                            unlink($temporary);
+                        }
+                    }
+                }
+                if($is_download){
+                    // A failed refresh must not replace an existing thumbnail
+                    // in the browser with the generic blank placeholder.
+                    fileOutputPdfThumbnailOrPlaceholder($thumbnail_file);
+                }
+                return $created ? true : $pdfError;
 
             }elseif(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
                 //@todo for image services (flikr...) take thumbnails directly

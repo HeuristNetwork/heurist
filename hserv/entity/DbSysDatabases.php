@@ -63,12 +63,126 @@ class DbSysDatabases extends DbEntityBase
         if(@$this->data['ugr_eMail']){
             $email_filter = $this->data['ugr_eMail'];
         }
+        $databases = mysql__getdatabases4($mysqli, false, $database_filter, $email_filter, 'user');
+        
+        
+        if(@$this->data['restapi']==1){
 
+            if(parent::search()===false){
+                return false;
+            }
+
+            $predReg = $this->searchMgr->getPredicate('sys_dbRegisteredID');
+            $requestedDatabase = $this->data['sys_Database'] ?? null;
+
+            // "id" returns database names only. Any other details value returns
+            // the same row/field structure produced by DbEntitySearch::execute().
+            $is_ids_only = (($this->data['details'] ?? 'id') === 'id');
+            $fields = array(
+                'sys_Database',
+                'sys_dbRegisteredID',
+                'sys_dbName',
+                'sys_dbRights',
+                'sys_dbDescription'
+            );
+
+            $matched = array();
+
+            foreach($databases as $database){
+                if($requestedDatabase!==null && $requestedDatabase!==''
+                    && strcmp($database, $requestedDatabase)!==0){
+                    continue;
+                }
+
+                if($is_ids_only && $predReg===null){
+                    $matched[] = $database;
+                    continue;
+                }
+
+                $databaseIdentifier = str_replace('`', '``', HEURIST_DB_PREFIX.$database);
+                $databaseLiteral = '"'.$mysqli->real_escape_string($database).'"';
+
+                if($is_ids_only){
+                    $query = 'SELECT '.$databaseLiteral.' AS sys_Database FROM `'
+                        .$databaseIdentifier.'`.`sysIdentification`';
+                }else{
+                    $query = 'SELECT '.$databaseLiteral.' AS sys_Database, '
+                        .'sys_dbRegisteredID,sys_dbName,sys_dbRights,sys_dbDescription FROM `'
+                        .$databaseIdentifier.'`.`sysIdentification`';
+                }
+
+                if($predReg!==null){
+                    $query .= ' WHERE '.$predReg;
+                }
+
+                $record = mysql__select_row_assoc($mysqli, $query);
+                if($record){
+                    $matched[] = $is_ids_only ? $database : $record;
+                }
+            }
+
+            $total = count($matched);
+            $offset = max(0, intval($this->data['offset'] ?? 0));
+            $limit = intval($this->data['limit'] ?? 1000);
+            if($limit<1){
+                $limit = 1000;
+            }
+            $matched = array_slice($matched, $offset, $limit);
+
+            if($is_ids_only){
+                return array(
+                    'queryid' => $this->data['request_id'] ?? null,
+                    'offset' => $offset,
+                    'count' => $total,
+                    'reccount' => count($matched),
+                    'records' => array_values($matched)
+                );
+            }
+
+            $records = array();
+            $order = array();
+            foreach($matched as $record){
+                $database = $record['sys_Database'];
+                $records[$database] = array_values($record);
+                $order[] = $database;
+            }
+
+            $response = array(
+                'queryid' => $this->data['request_id'] ?? null,
+                'entityName' => $this->config['entityName'],
+                'pageno' => $this->data['pageno'] ?? null,
+                'offset' => $offset,
+                'count' => $total,
+                'reccount' => count($records),
+                'records' => $records,
+                'order' => $order,
+                'fields' => $fields
+            );
+
+            // Preserve the legacy REST response for direct entityScrud callers.
+            // The public API supplies api_response_context and formats this full
+            // result at the controller boundary, exactly as for other entities.
+            if(empty($this->data['api_response_context'])){
+                $legacyResponse = array();
+                foreach($records as $row){
+                    $item = array();
+                    foreach($fields as $idx=>$field){
+                        $item[$field] = $row[$idx] ?? null;
+                    }
+                    $legacyResponse[] = $item;
+                }
+                if($requestedDatabase!==null && count($legacyResponse)===1){
+                    return $legacyResponse[0];
+                }
+                return $legacyResponse;
+            }
+
+            return $response;
+        }//restapi
+        
         $order = [];
         $records = [];
-
-        $databases = mysql__getdatabases4($mysqli, false, $database_filter, $email_filter, 'user');
-
+        
         foreach($databases as $database){
             $records[$database] = [$database];
             $order[] = $database;

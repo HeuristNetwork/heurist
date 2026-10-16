@@ -15,15 +15,16 @@
 */
 -->
 <div style="display: table">
-    <div style="margin-bottom: 10px">
+    <div class="format-selector" style="margin-bottom: 1em;">
         <div class="header" style="display: table-cell;max-width: 125px; min-width: 125px;">Download template: </div>
         <div style="display: table-cell">
             <label for="template-xml"><input name="template-type" id="template-xml" type="radio" value="xml" checked="checked"> XML</label>
             <label for="template-json"><input name="template-type" id="template-json" type="radio" value="json"> JSON</label>
+            <label for="structure-xml" style="display: none;"><input name="template-type" id="structure-xml" type="radio" value="xml-structure"> XML (Structure)</label>
         </div>
     </div>
 
-    <div>
+    <div class="rectype-selector" style="margin-bottom: 1em;">
         <div class="header" style="display: table-cell;max-width: 125px; min-width: 125px;">Record types: </div>
         <div style="display: table-cell">
             <label for="rectypes-all"><input id="rectypes-all" type="checkbox" checked="checked"> All Rectypes</label>
@@ -35,6 +36,14 @@
                 id="rectypes-list" data-ids="">
                 <span style="display: inline-block;margin: 5px 0px;"> None </span>
             </div>
+        </div>
+    </div>
+
+    <div class="sturcture-extra-details" style="display: none;">
+        <div class="header" style="display: table-cell;max-width: 125px; min-width: 125px;">Extra options: </div>
+        <div style="display: table-cell">
+            <label for="include-connected-rty"><input name="include-connected-rty" id="include-connected-rty" type="checkbox" checked="checked"> Connected Record Types</label><br>
+            <label for="include-terms"><input name="include-terms" id="include-terms" type="checkbox"> Include vocabulary and terms</label>
         </div>
     </div>
 </div>

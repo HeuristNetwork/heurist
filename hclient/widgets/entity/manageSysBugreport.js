@@ -47,6 +47,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
     _program_area: null,
 
+    _editorPasteEvent: false,
+
     /**
      * @brief Initializes the widget.
      * @override
@@ -257,6 +259,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
         this._setupMembershipField();
         this._setupProgramArea();
+
+        this._setupFilePasteHandling();
     },
 
     _setupMembershipField: function(){
@@ -507,6 +511,78 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         if(added_element?.detailType === 'file'){
             this._formatBugImageField();
         }
+    },
+
+    _setupFilePasteHandling: function(){
+
+        if(this._editorPasteEvent){
+            return;
+        }
+
+        this._on(this.element, {
+            paste: (event) => {
+
+                let clipboardData = event.originalEvent.clipboardData || window.clipboardData;
+
+                if(!clipboardData || !clipboardData.items){
+                    return;
+                }
+
+                let files = clipboardData.files; //clipboardData.items
+                let filesToUpload = [];
+                for(let file of files){
+
+                    let fileDetails = file;
+                    if(file?.kind === 'file'){
+                        fileDetails = file[0].getAsFile();
+                    }
+
+                    filesToUpload.push(fileDetails);
+                }
+
+                if(filesToUpload.length > 0){
+
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    event.stopPropagation();
+
+                    let $input = this._editing.getFieldByName('bug_Image');console.log($input);
+                    if(!$input || $input.length === 0){
+                        return;
+                    }
+
+                    $input.editing_input('addPastedFiles', filesToUpload);
+                }
+            },
+            dragover: (event) => {
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.preventDefault();
+            },
+            drop: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.preventDefault();
+
+                // Retrieve data from original event
+                event = event.originalEvent;
+                if(!event.dataTransfer || event.dataTransfer.files.length === 0){
+                    return;
+                }
+
+                // Setup paste event
+                const pasteEvent = new ClipboardEvent('paste', {
+                    bubbles: true,
+                    cancelable: true
+                });
+
+                Object.defineProperty(pasteEvent, 'clipboardData', {
+                    value: event.dataTransfer,
+                    writable: false
+                });
+
+                // Trigger paste event
+                event.target.dispatchEvent(pasteEvent);
+            }
+        });
     }
     
 });

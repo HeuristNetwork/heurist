@@ -15,7 +15,9 @@
 */
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
+use hserv\entity\DbSysWorkflowRules;
 use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../records/edit/recordTitleMask.php';
 
@@ -31,6 +33,19 @@ class DbDefRecTypes extends DbEntityBase
     private $where_for_count = null;
     private $rty_counts = null;
 
+    
+    public function setData($data){
+        parent::setData($data);
+        if($this->isvalid()){
+           if(is_string(@$this->data[$this->primaryField]) && strpos($this->data[$this->primaryField],'-')>0){
+               $this->data[$this->primaryField] = ConceptCode::getRecTypeLocalID($this->data[$this->primaryField]);
+               if(!$this->data[$this->primaryField]){ //conept id not found
+                   $this->data[$this->primaryField] = PHP_INT_MAX;
+               }
+           }
+        }        
+    }    
+    
     /**
      * Searches for Record Type definitions based on criteria in `$this->data`.
      *
@@ -88,6 +103,10 @@ class DbDefRecTypes extends DbEntityBase
         //find rectype belong to group
         $pred = $this->searchMgr->getPredicate('rty_RecTypeGroupID');
         if($pred!=null) {array_push($where, $pred);}
+        
+        $pred = $this->searchMgr->getPredicate('rty_OriginatingDBID');
+        if($pred!=null) {array_push($where, $pred);}
+        
 
         if(@$this->data['details']==null) {$this->data['details'] = 'full';}
 
@@ -110,6 +129,11 @@ class DbDefRecTypes extends DbEntityBase
             $this->data['details'] = 'rty_ID,rty_Name,rty_Description,rty_ShowInLists,rty_Status,rty_RecTypeGroupID';
             //$needCount = true;  //need count only for all groups
 
+        }elseif(@$this->data['details']=='raw'){
+            
+            $this->data['details'] = ['*'];
+            $needCheck = false;
+            
         }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'rty_ID,rty_Name,rty_OrderInGroup,rty_Description,rty_TitleMask,'
@@ -209,7 +233,7 @@ class DbDefRecTypes extends DbEntityBase
 
         }
 
-        $is_ids_only = (count($this->data['details'])==1);
+        $is_ids_only = (count($this->data['details'])==1 && $this->data['details'][0]!=='*');
 
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
@@ -256,6 +280,8 @@ class DbDefRecTypes extends DbEntityBase
             $this->system->addError(HEURIST_INVALID_REQUEST, 'It is not possible to remove record types in batch');
             return false;
         }
+
+        $swfRules = new DbSysWorkflowRules($this->system);
 
         $rtyID = $this->recordIDs[0];
 
@@ -323,6 +349,11 @@ class DbDefRecTypes extends DbEntityBase
         }
 
         if($res){
+
+            // Remove deleted record type's Workflow stages
+            $swfRules->setData(['rty_ID' => $rtyID, 'clearRulesByRty' => 1]);
+            $swfRules->batch_action();
+
             $res = parent::delete(true);
         }
 
@@ -765,7 +796,7 @@ class DbDefRecTypes extends DbEntityBase
     //
     //
     /**
-     * Counts usage of CMS-specific record types (RT_CMS_HOME, RT_CMS_MENU).
+     * Counts usage of CMS-specific record types (RT_CMS_HOME, RT_CMS_PAGE).
      *
      * Returns total count of RT_CMS_HOME records, counts of private home and menu pages,
      * and IDs of private home pages.
@@ -777,7 +808,7 @@ class DbDefRecTypes extends DbEntityBase
     private function countsUsageCMS(){
 
             $this->system->defineConstant('RT_CMS_HOME');
-            $this->system->defineConstant('RT_CMS_MENU');
+            $this->system->defineConstant('RT_CMS_PAGE');
 
             $query = 'SELECT count(r0.rec_ID) as cnt FROM Records r0 ';
             $where = 'WHERE (r0.rec_RecTypeID='.RT_CMS_HOME.') ';
@@ -801,7 +832,7 @@ class DbDefRecTypes extends DbEntityBase
 
             $query = 'SELECT r0.rec_ID FROM Records r0 ';
             $where = 'WHERE (r0.rec_NonOwnerVisibility!="public") '
-                                .'AND (r0.rec_RecTypeID='.RT_CMS_MENU.')';
+                                .'AND (r0.rec_RecTypeID='.RT_CMS_PAGE.')';
 
             $res3 = mysql__select_list2($this->system->getMysqli(), $query.$conds[0].$where.$conds[1]);
             if($res3==null) {$res3 = array();}

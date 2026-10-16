@@ -34,6 +34,8 @@ use hserv\utilities\Temporal;
 use hserv\structure\ConceptCode;
 use hserv\report\ReportRecord;
 use hserv\records\export\ExportRecordsHTML;
+use hserv\entity\DbAnnotations;
+use hserv\entity\DbIiifCanvas;
 
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
@@ -230,7 +232,7 @@ function recordAdd($system, $record, $return_id_only=false){
     }
 
     // for CMS rectypes by default public and owner is Database owners group
-    if ($system->defineConstant('RT_CMS_MENU') && $rectype==RT_CMS_MENU)
+    if ($system->defineConstant('RT_CMS_PAGE') && $rectype==RT_CMS_PAGE)
     {
         $access= 'public';
         $owner_grps = array(1);//database manager group
@@ -390,26 +392,22 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     global $block_swf_email, $useNewTemporalFormatInRecDetails;
 
     //check capture for newsletter subscription
-    if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
+    if (!empty($record['Captcha'])) {
+        $captchaOk = $system->captcha()->consumeCaptcha($record['Captcha']);
 
-        $is_InValid = (@$_SESSION["captcha_code"] != @$record['Captcha']);
+        unset($record['Captcha']);
 
-        if (@$_SESSION["captcha_code"]){
-            unset($_SESSION["captcha_code"]);
-        }
-        if(@$record['Captcha']){
-            unset($record['Captcha']);
+        if (!$captchaOk) {
+            return $system->getError();
         }
 
-        if($is_InValid) {
-            return $system->addError(HEURIST_ACTION_BLOCKED,
-                'Are you a bot? Please enter the correct answer to the challenge question');
-        }else{
-            if($system->getUserId()<1){ //if captcha is valid allow
-                $system->setCurrentUser(array('ugr_ID'=>5, 'ugr_FullName'=>'Guest'));
-            }
+        if ($system->getUserId() < 1) {
+            $system->setCurrentUser([
+                'ugr_ID' => 5,
+                'ugr_FullName' => 'Guest'
+            ]);
         }
-    }
+    }    
 
     // Check that the user is allowed to edit records
     $is_allowed = userCheckPermissions($system, 'edit');
@@ -432,7 +430,12 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
     }
 
-    $useNewTemporalFormatInRecDetails = ($system->settings->get('sys_dbSubSubVersion')>=14);
+    // MODIFIED for mixed h7 deployments: some installations have not yet
+    // received SystemSettings::isDbVersionAtLeast(). Use the shared schema
+    // version helper as a backward-compatible fallback.
+    $useNewTemporalFormatInRecDetails = method_exists($system->settings, 'isDbVersionAtLeast')
+        ? $system->settings->isDbVersionAtLeast('1.3.14')
+        : version_compare((string)getDbVersion($mysqli), '1.3.14', '>=');
 
 
     //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)
@@ -827,6 +830,29 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
     }
 
+    
+    // Normal Heurist record-editor saves of IIIF annotation records make Heurist fields authoritative.
+    // DbAnnotations::save() sets skip_iiif_annotation_state_update for import/Mirador API saves.
+    if(empty($record['skip_iiif_annotation_state_update'])
+        && $rectype>0
+        && $system->defineConstant('RT_IIIF_ANNOTATION')
+        && $rectype==RT_IIIF_ANNOTATION)
+    {
+        $dbAnno = new DbAnnotations($system);
+        $dbAnno->markSavedFromHeuristEditor(intval($recID));
+    }
+
+    // Normal Heurist record-editor saves of IIIF Canvas records make Heurist fields authoritative.
+    // DbIiifCanvas::ensureFromCanvas() sets skip_iiif_canvas_state_update for import saves.
+    if(empty($record['skip_iiif_canvas_state_update'])
+        && $rectype>0
+        && $system->defineConstant('RT_IIIF_CANVAS')
+        && $rectype==RT_IIIF_CANVAS)
+    {
+        $dbCanvas = new DbIiifCanvas($system);
+        $dbCanvas->markSavedFromHeuristEditor(intval($recID));
+    }
+    
     $rtn = [
         'status' => HEURIST_OK,
         'data' => intval($recID),
@@ -1084,7 +1110,10 @@ function recordDelete($system, $recids, $need_transaction=true,
             mysql__update_progress(null, $progress_session_id, true, '0,'.$tot_count);
         }
 
+        $allowed_recids = array_unique($allowed_recids);
+
         foreach ($allowed_recids as $recID) {
+
             //$stat = array('deleted'=>array($recID), 'rels_count'=>0, 'bkmk_count'=>0);
             $stat = deleteOneRecord($system, $recID, $rectypes[$recID]);
 
@@ -1092,7 +1121,7 @@ function recordDelete($system, $recids, $need_transaction=true,
                 $msg_error = $stat['error'];
                 break;
             }else{
-                $deleted = array_merge($deleted, $stat['deleted']);
+                $deleted = array_merge_unique($deleted, $stat['deleted']);
                 $rels_count += $stat['rels_count'];
                 $bkmk_count += $stat['bkmk_count'];
                 
@@ -1298,7 +1327,10 @@ function recordUpdateOwnerAccess($system, $params){
             $params['OwnerUGrpID'] = $system->getUserId();
         }
 
-        $owner_grps = prepareIds( @$params['OwnerUGrpID'], true);
+        // Owner 0 means "Any logged-in user". Wrap scalar values so prepareIds'
+        // legacy loose null check cannot discard a numeric zero.
+        $requested_owner = @$params['OwnerUGrpID'];
+        $owner_grps = prepareIds(is_array($requested_owner) ? $requested_owner : [$requested_owner], true);
         $access = @$params['NonOwnerVisibility'];
 
         if((isEmptyArray($owner_grps) || $access==null) && !$system->isAdmin()){
@@ -1405,7 +1437,8 @@ function recordUpdateOwnerAccess($system, $params){
         $fields = ['rec_Modified=?'];
         $data = [$rec_mod];
         $types = 's';
-        if($main_owner && $main_owner >= 0){
+        // Null means ownership was not requested; zero is a valid owner ID.
+        if($main_owner !== null && $main_owner >= 0){
             $fields[] = 'rec_OwnerUGrpID=?';
             $data[] = $main_owner;
             $types .= 'i';
@@ -2204,7 +2237,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             $rec_count = mysql__select_value($mysqli, 'SELECT count(rec_ID) FROM Records '
             .'WHERE (rec_RecTypeID IN ('.implode(',',$rty_ID).')) AND (NOT rec_FlagTemporary)');
             
-            if($rec_count>$limitOnUpdate){
+            if($limitOnUpdate>0 && $rec_count>$limitOnUpdate){
                 //
                 return ['skipped' => "There are {$rec_count} records that have dependent calculation fields based type of updated record. To avoid slowdown, please use Admin > Rebuild calculation fields."];
             }
@@ -2349,7 +2382,9 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                         }
                         $stmt->close();
 
-                        $updates[] = $recID;
+                        if(!in_array($recID, $updates)){
+                            $updates[] = $recID;
+                        }
                         $updated_count++;
                     }else{
                         $cleared[] = $recID;
@@ -2562,8 +2597,8 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
         $new_title = mb_substr($new_title,0,1023);
     }
 
-    $params = ['ss', $new_title, date(DATE_8601)];
-    $res = mysql__exec_param_query($mysqli, "UPDATE Records set rec_Title=?, rec_Modified=? where rec_ID={$recID}", $params );
+    $params = ['ssis', $new_title, date(DATE_8601), $recID, $new_title];
+    $res = mysql__exec_param_query($mysqli, "UPDATE Records SET rec_Title=?, rec_Modified=? WHERE rec_ID=? AND CAST(rec_Title AS BINARY) <> CAST(? AS BINARY)", $params );
     if($res!==true){
         $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $res);
         return false;
@@ -2826,7 +2861,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     //$stmt_size = $mysqli->prepare($query_size);
 
     $system->defineConstant('RT_CMS_HOME');
-    $system->defineConstant('RT_CMS_MENU');
+    $system->defineConstant('RT_CMS_PAGE');
     $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 
     //list of field ids that will not html purified
@@ -2864,6 +2899,10 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
             $dval = array('dtl_DetailTypeID'=>$dtyID);
 
+            // MODIFIED for CSV import: retain the original imported date text
+            // on the same detail row as its interpreted/stored value.
+            $dval['dtl_Annotation'] = @$record['details_annotation'][$dtyID][$eltID];
+
             $dtl_UploadedFileID = null;
             $dtl_Geo = null;
             $isValid = false;
@@ -2874,7 +2913,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
 
                 //special case: split huge web content
-                if(defined('RT_CMS_MENU') && $rectype==RT_CMS_MENU && $dtyID==DT_EXTENDED_DESCRIPTION){
+                if(defined('RT_CMS_PAGE') && $rectype==RT_CMS_PAGE && $dtyID==DT_EXTENDED_DESCRIPTION){
                     $lim = checkMaxLength2($rval);
                     //TEST $lim = 100;
                     if($lim>0){
@@ -2937,7 +2976,35 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                         $err_msg = 'Value is empty';
                     }else{
 
-                        $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
+                        // MODIFIED for CSV import: an ambiguous/uninterpretable date is
+                        // intentionally stored verbatim for Admin > Verify integrity.
+                        // Do not pass the marker text to Temporal, whose parser only
+                        // accepts date syntax and may fail before the raw value is saved.
+                        $date_before_storage_conversion = $dtl_Value;
+                        $uninterpretable_marker = ' (ambiguous or uninterpretable)';
+                        $is_marked_import_date = $modeImport>0 && is_string($dtl_Value)
+                            && substr($dtl_Value, -strlen($uninterpretable_marker)) === $uninterpretable_marker;
+                        // MODIFIED for CSV import: ImportDate has already validated and
+                        // canonicalised JSON temporals. Re-parsing them here can fail in
+                        // the legacy Temporal parser and is unnecessary.
+                        $has_import_source_annotation = $modeImport>0
+                            && @$dval['dtl_Annotation'] !== null;
+                        $trimmed_import_date = is_string($dtl_Value) ? ltrim($dtl_Value) : '';
+                        $is_prepared_import_temporal = $has_import_source_annotation
+                            && ($trimmed_import_date !== '')
+                            && ($trimmed_import_date[0] === '{' || $trimmed_import_date[0] === '[');
+                        if(!$is_marked_import_date && !$is_prepared_import_temporal){
+                            try{
+                                $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
+                            }catch(\Throwable $date_conversion_error){
+                                if(!$has_import_source_annotation){
+                                    throw $date_conversion_error;
+                                }
+                                // CSV dates must never abort the import. Keep the strictly
+                                // interpreted value and original annotation for recovery.
+                                $dtl_Value = $date_before_storage_conversion;
+                            }
+                        }
 
 /* Use old plain temporals
                         }else{
@@ -3112,7 +3179,17 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                     $dtl_Value = null;
                     $isValid = ($dtl_UploadedFileID>0);
 
-                    if($validation_mode==0 && !$isValid) {$isValid = 'ignore';}
+                    // MODIFIED for CSV import: preserve an unresolved file reference as text
+                    // instead of silently dropping the supplied value when importing anyway.
+                    if($validation_mode==0 && !$isValid && $modeImport==1){
+                        $dval['dtl_Value'] = $values[$eltID];
+                        $dval['dtl_UploadedFileID'] = null;
+                        $dval['dtl_Geo'] = null;
+                        array_push($insertValues, $dval);
+                        $isValid = 'ignore';
+                    }elseif($validation_mode==0 && !$isValid){
+                        $isValid = 'ignore';
+                    }
 
                     break;
 
@@ -3376,7 +3453,7 @@ function prepareGeoValue($mysqli, $dtl_Value){
 //
 //  $likedRtyID is used to duplicate records of sepcified type linked to given record $id
 //
-function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null, $likedRtyID=null, $namePrefix=null){
+function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null, $likedRtyID=null, $namePrefix=null, $includeRelationships = true){
 
     // Check that the user is allowed to create records
     $is_allowed = userCheckPermissions($system, 'add');
@@ -3433,7 +3510,7 @@ function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null
         //duplicate record header
         $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null);
 
-        $query = 'UPDATE Records set rec_Modified=NOW(), rec_Added=NOW(), rec_AddedByUGrpID='.$currentUserId;
+        $query = "UPDATE Records set rec_Modified=NOW(), rec_Added=NOW(), rec_AddedByUGrpID={$currentUserId}, rec_FlagTemporary=1";
         if(is_numeric($new_owner) && intval($new_owner)>=0){
             $query = $query.', rec_OwnerUGrpID='.$new_owner;
         }
@@ -3528,43 +3605,45 @@ function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null
 
         mysql__foreign_check($mysqli, true);
 
-        //add special kind of record - relationships
-        $refs_res = mysql__select_list($mysqli, 'recLinks', 'rl_RelationID',
-            '(rl_RelationTypeID is not null) and  (rl_SourceID='.$id.' or rl_TargetID='.$id.')');
+        if($includeRelationships){
 
-
-        foreach ($refs_res as $rel_recid){
-
-            if( in_array($rel_recid, $processedIds) ){
-                continue;    
-            }
-
-            $res = recordDuplicate($system, $rel_recid, $processedIds);
-
-            if($res && @$res['status']==HEURIST_OK){
-
-                $new_rel_recid = intval(@$res['data']['added']);
-
-                if($new_rel_recid>0){
-
-                    //change reference to old record id to new one
-                    $query = 'UPDATE recDetails set dtl_Value='.$new_id
-                    .' where dtl_RecID='.$new_rel_recid
-                    .' and dtl_Value='.$id   //old record id
-                    .' and (dtl_DetailTypeID='.DT_TARGET_RESOURCE.' or dtl_DetailTypeID='.DT_PRIMARY_RESOURCE.')';
-
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $error = $prefixDbErrorMsg .$mysqli->error;
-                        break;
-                    }else{
-                        $rels_count++;
-                    }
+            //add special kind of record - relationships
+            $refs_res = mysql__select_list($mysqli, 'recLinks', 'rl_RelationID',
+                '(rl_RelationTypeID is not null) and  (rl_SourceID='.$id.' or rl_TargetID='.$id.')');
+    
+            foreach ($refs_res as $rel_recid){
+    
+                if( in_array($rel_recid, $processedIds) ){
+                    continue;    
                 }
-            }else{
-                $error = @$res['message'];
-            }
-        } //foreach
+    
+                $res = recordDuplicate($system, $rel_recid, $processedIds);
+    
+                if($res && @$res['status']==HEURIST_OK){
+    
+                    $new_rel_recid = intval(@$res['data']['added']);
+    
+                    if($new_rel_recid>0){
+    
+                        //change reference to old record id to new one
+                        $query = 'UPDATE recDetails set dtl_Value='.$new_id
+                        .' where dtl_RecID='.$new_rel_recid
+                        .' and dtl_Value='.$id   //old record id
+                        .' and (dtl_DetailTypeID='.DT_TARGET_RESOURCE.' or dtl_DetailTypeID='.DT_PRIMARY_RESOURCE.')';
+    
+                        $res = $mysqli->query($query);
+                        if(!$res){
+                            $error = $prefixDbErrorMsg .$mysqli->error;
+                            break;
+                        }else{
+                            $rels_count++;
+                        }
+                    }
+                }else{
+                    $error = @$res['message'];
+                }
+            } //foreach
+        }
         
         
         if(!isset($likedRtyID) || !isPositiveInt($likedRtyID)){
@@ -4400,6 +4479,9 @@ function updateMaskFields($type, $value, $length, $range){
     return [$value, $reason];
 }
 
+//
+// Checks language prefixes for text field for given record
+//
 function recordCheckLanguages($system, $recID, $recTypeID){
 
     global $glb_lang_codes;
@@ -4408,7 +4490,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
     $isAdmin = $system->isAdmin();
 
     $system->defineConstant('RT_CMS_HOME');
-    $system->defineConstant('DT_LANGUAGES');
+    $system->defineConstant('DT_LANGUAGE');
     $allowedLanguages = $system->settings->getDatabaseSetting('Languages');
 
     if(empty($allowedLanguages)){
@@ -4419,7 +4501,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
 
     $query = "SELECT rst_DetailTypeID FROM defRecStructure INNER JOIN defDetailTypes ON dty_ID = rst_DetailTypeID WHERE rst_RecTypeID = {$recTypeID} AND (dty_Type = 'freetext' OR dty_Type = 'blocktext')";
     $textFields = mysql__select_list2($mysqli, $query, 'intval');
-    $isCMSHome = defined('RT_CMS_HOME') && defined('DT_LANGUAGES') && $recTypeID == RT_CMS_HOME;
+    $isCMSHome = defined('RT_CMS_HOME') && defined('DT_LANGUAGE') && $recTypeID == RT_CMS_HOME;
 
     if(empty($textFields) && !$isCMSHome){
         return [];
@@ -4464,7 +4546,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
 
     if($isCMSHome){
 
-        $webLanguages = mysql__select_list2($mysqli, "SELECT dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = ". DT_LANGUAGES, 'intval');
+        $webLanguages = mysql__select_list2($mysqli, "SELECT dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = ". DT_LANGUAGE, 'intval');
         $languageCodes = getTermCodes($mysqli, $webLanguages);
         $languageLabels = getTermLabels($mysqli, $webLanguages);
 
@@ -4624,8 +4706,9 @@ function detailsInsert($system, $recID, $rectype, $detailValues, $modeImport, $s
     $mysqli = $system->getMysqli();
     $addedByImport = ($modeImport?1:0);
 
-    $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo, dtl_HideFromPublic) '.
-    "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?), ?)";
+    // MODIFIED for CSV import: dtl_Annotation preserves the original date text.
+    $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo, dtl_HideFromPublic, dtl_Annotation) '.
+    "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?), ?, ?)";
     $stmt = $mysqli->prepare($query);
 
     if ($stmt) {
@@ -4639,8 +4722,9 @@ function detailsInsert($system, $recID, $rectype, $detailValues, $modeImport, $s
             $dtl_UploadedFileID = @$values['dtl_UploadedFileID'];
             $dtl_Geo = @$values['dtl_Geo'];
             $dtl_HideFromPublic = @$values['dtl_HideFromPublic'];
+            $dtl_Annotation = @$values['dtl_Annotation'];
 
-            $stmt->bind_param('isisi', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo, $dtl_HideFromPublic);
+            $stmt->bind_param('isisis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo, $dtl_HideFromPublic, $dtl_Annotation);
             if(!$stmt->execute()){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding or invalid date format (System error: '.$mysqli->error.').', $mysqli->error);
                 return false;

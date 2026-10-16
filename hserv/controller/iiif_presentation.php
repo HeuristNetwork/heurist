@@ -2,13 +2,13 @@
 /**
 * iiif_presentation.php - Handler to produce IIIF presentation for registered Heurist file
 * 
-* It uses ExportRecordsIIIF to produce json output as a representations of iiif objects in Presentation API v3 
+* It uses IiifPresentationService to produce JSON output as IIIF Presentation API v3 resources 
 * .(see https://iiif.io/api/presentation/3.0/)
 * 
 * parameters
 * db - The target Heurist database name.
-* resource - The name/type of the IIIF resource to generate (e.g., Canvas, AnnotationPage, Annotation, Image).
-* id - Unique identifier of the object, typically the obfuscated ID of a registered image file in Heurist.
+* resource - The IIIF Presentation resource to generate: manifest, canvas, page, annotation, or annotations.
+* id - Unique identifier of the object, typically the obfuscated ID of a registered Heurist file.
 *
 * @project     Heurist academic knowledge management system
 * @package Controller
@@ -49,10 +49,14 @@ require_once dirname(__FILE__).'/../../autoload.php';
     if(!(array_key_exists('resource',$params)
         && $params['resource']!='' && $params['resource']!=null)){
 
-
+        $params['resource'] = 'manifest';
     }
 
-    $res = hserv\records\export\ExportRecordsIIIF::getIiifResource($system, null, 3, $params['id'], @$params['resource']);
+    $omitAnnotationPages = !empty($params['omit_annotation_pages']) && intval($params['omit_annotation_pages']) === 1;
+    $service = new hserv\iiif\IiifPresentationService($system);
+    $res = $service->getResourceJson($params['resource'], $params['id'], array(
+        'omit_annotation_pages' => $omitAnnotationPages
+    ));
 
     $system->dbclose();
 

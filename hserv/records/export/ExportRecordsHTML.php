@@ -56,7 +56,7 @@ class ExportRecordsHTML extends ExportRecords {
         $publicHost = defined('HEURIST_DOMAIN') ? HEURIST_DOMAIN : 'heuristau.net';
 
         // Local URL to avoid Cloudflare/network
-        $publishUrl = 'https://127.0.0.1/h7-alpha/viewers/record/renderRecordData.php'
+        $publishUrl = 'https://127.0.0.1/heurist/viewers/record/renderRecordData.php'
             .'?forceCache=1'
             .'&db='.rawurlencode($this->system->dbname())
             .'&lang='.rawurlencode($lang)
@@ -105,7 +105,7 @@ class ExportRecordsHTML extends ExportRecords {
 
         // --- Preflight check before processing records ---
         // Use a lightweight request; we just want to confirm the endpoint is reachable.
-        $testRecId = 1; // any integer; the goal is reachability
+        $testRecId = 183; // any integer; the goal is reachability
         $testUrl   = $publishUrl.$testRecId;
 
         curl_setopt($ch, CURLOPT_URL, $testUrl);

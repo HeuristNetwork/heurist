@@ -273,7 +273,7 @@ function HMapLayer( _options ) {
 
                 if(layer_url.indexOf('{q}')<0 && layer_url.indexOf('{x}')<0){
                     layer_url = layer_url 
-                                + (layer_url[layer_url.length-1]=='/'?'':'/') + '{q}'
+                                + (layer_url[layer_url.length-1]=='/'?'':'/') + '{z}/{x}/{y}'  //'{q}'
                                 + ext;
                 }
                 
@@ -337,7 +337,7 @@ function HMapLayer( _options ) {
                         'georaster-layer-for-leaflet.min.js'
                         ];
         let  that = this;
-        $.getMultiScripts2(scripts, path)
+        $.getMultiScriptsSequental(scripts, path)
         .then(function() {  //OK! js has been loaded
             _addImage();
         }).catch(function(error) {
@@ -360,7 +360,7 @@ function HMapLayer( _options ) {
             return;
         }
 
-        let image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
+        let image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&fullres=1&file='+
                 file_info[0];
                 
         if(file_info[1]=='tif' || file_info[1]=='tiff'){
@@ -422,10 +422,10 @@ function HMapLayer( _options ) {
         
         let layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         let rec_ID = _recordset.fld(_record, 'rec_ID');
-                    
-        const request = {recID:rec_ID};             
-        //perform loading kml as geojson
-        window.hWin.HAPI4.RecordMgr.load_shp_as_geojson(request,
+          
+        const url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+rec_ID;  // ?format=geojson
+        //perform loading shp as geojson
+        $.getJSON(url, 
             function(response){
                 if(response){
                     let dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
@@ -467,12 +467,10 @@ function HMapLayer( _options ) {
         let layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         const rec_ID = _recordset.fld(_record, 'rec_ID');
             
-        //let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_map_source.php?db='
-        //            +window.hWin.HAPI4.database+'&format=geojson&recID='+rec_ID;
-                    
-        const request = {recID:rec_ID};             
+        const url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+rec_ID;  // ?format=geojson
+
         //perform loading kml as geojson
-        window.hWin.HAPI4.RecordMgr.load_kml_as_geojson(request,
+        $.getJSON(url, 
             function(response){
                 if(response){
                     let dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
@@ -528,6 +526,22 @@ function HMapLayer( _options ) {
     //
     // query layer
     //
+    /**
+     * Normalize vector DT_SYMBOLOGY into separate base symbol and thematic renderers.
+     *
+     * Accepted persisted formats:
+     *  - simple symbol object;
+     *  - legacy array containing a base symbol plus thematic renderer objects;
+     *  - canonical {symbol:{...}, thematic:[...]} object.
+     *
+     * Used only by recordset/query vector layers. Raster/tile DT_SYMBOLOGY remains
+     * an image-filter definition.
+     */
+    function _normalizeVectorSymbology(value){
+        return window.hWin.HEURIST4.map.splitSymbology(value);
+    }
+
+
     function _addQueryLayer(){
 
         let layer_popup_template = _recordset.fld(options.rec_layer || _record, 
@@ -537,67 +551,44 @@ function HMapLayer( _options ) {
         let layer_timefields = _recordset.fld(options.rec_layer || _record, 
                         window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']);
         let layer_default_style = null;
-        if(window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']>0){
-            let layer_themes = _recordset.fld(options.rec_layer || _record, 
-                                        window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
-  
-/*            
-        {   //additional filter and default layer symbol
-            "geofield": "2-134"//2-134 (birth) or 1161-254 (death) Field id for pointer to Place, optional    
-            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
-        },  
-        OR "symbol":{"geofield":...., }
-        {
-            "title": "First theme ever",
-            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
-            "rules": {}, //find records linked to place
-            "fields": []
-        }
-        
-{
-            "title": "Death",
-            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#000000","iconSize":"6"}
-}        
-*/            
-           
-            //find "geofield" in thematic maps - download geodata from these fields only
-            layer_themes = window.hWin.HEURIST4.util.isJSON(layer_themes);
-            
-            if(layer_themes){
-                
-                if($.isPlainObject(layer_themes)){
-                    layer_themes = [layer_themes];
-                }
 
-                $.each(layer_themes, function(i,item){
-                    if(item.geofield){
-                        //geo field can be 2 types
-                        //1. code request (rt:dt:rt:dt) that alows to drill for geo values in linked records
-                        //2. dty_ID - record pointer/resource field 
-                        let geofields = item.geofield.split(',');
-                        for(let k=0; k<geofields.length; k++){
-                            let geofield = geofields[k];
-                            if(geofield.indexOf(':')>0){
-                                //1. code request
-                                let field = window.hWin.HEURIST4.query.createFacetQuery(geofield, true, false);
-                                if(field['facet'] && field['facet']=='$IDS'){
-                                    layer_geofields.push({id:field['id']}); //in main record
-                                }else{
-                                    layer_geofields.push({id:field['id'],q:field['facet']}); //in linked records
-                                }
-                            }else{
-                                //2. pointer field
-                                layer_geofields.push(geofield);    
-                            }
-                        }
-                        
-                        layer_default_style = item.symbol?item.symbol:item;
-                        return false;       
-                    }else if(!item.fields){
-                        layer_default_style = item.symbol?item.symbol:item;
+        // DT_GEO_FIELDS is the canonical source of mapping field paths.
+        // The field is repeatable: each value is one complete coded path.
+        const geo_fields_dty = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'];
+        if(geo_fields_dty>0){
+            let geo_fields = _recordset.fld(_record, geo_fields_dty);
+            if(!window.hWin.HEURIST4.util.isempty(geo_fields)){
+                if(!Array.isArray(geo_fields)) geo_fields = [geo_fields];
+                $.each(geo_fields, function(i, value){
+                    if(typeof value !== 'string') return;
+                    value = value.trim();
+                    if(value && layer_geofields.indexOf(value)<0){
+                        layer_geofields.push(value);
                     }
                 });
+            }
+        }
 
+        let layer_thematic = [];
+        if(window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']>0){
+            const symbology = _normalizeVectorSymbology(
+                _recordset.fld(options.rec_layer || _record,
+                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'])
+            );
+
+            layer_default_style = symbology.symbol;
+            layer_thematic = symbology.thematic;
+
+            // Backward compatibility: older MapLayers stored geofield in
+            // DT_SYMBOLOGY. Use it only when DT_GEO_FIELDS is not defined.
+            if(layer_geofields.length===0 && layer_default_style && layer_default_style.geofield){
+                let geofields = String(layer_default_style.geofield).split(',');
+                for(let k=0; k<geofields.length; k++){
+                    let geofield = geofields[k].trim();
+                    if(geofield && layer_geofields.indexOf(geofield)<0){
+                        layer_geofields.push(geofield);
+                    }
+                }
             }
         }
         if(layer_geofields.length==0) layer_geofields = null;
@@ -699,9 +690,13 @@ function HMapLayer( _options ) {
                                 );
                             }//for
                             
-                            _recordset.setFld(_record, 
+                            const current_symbology = {
+                                symbol: layer_default_style || {},
+                                thematic: thematic_map
+                            };
+                            _recordset.setFld(_record,
                                         window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'],
-                                        JSON.stringify(thematic_map)
+                                        JSON.stringify(current_symbology)
                                             );
                         }
                         
@@ -746,8 +741,11 @@ function HMapLayer( _options ) {
     //
     function _addRecordSet(){
         
-        let layer_style = _recordset.fld(options.rec_layer || _record, 
-                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        const symbology = _normalizeVectorSymbology(
+            _recordset.fld(options.rec_layer || _record,
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'])
+        );
+        let layer_style = symbology.symbol;
         let layer_popup_template = _recordset.fld(options.rec_layer || _record, 
                     window.hWin.HAPI4.sysinfo['dbconst']['DT_SMARTY_TEMPLATE']);
                     
@@ -1213,25 +1211,19 @@ function HMapLayer( _options ) {
     // find what theme fit for given feature
     //
     function _defineThematicMapSymbol(feature, themes){
-        
-        let recID = feature.rec_ID;
-        let new_symbol = false;
-        
+        const layerStyle = that.getStyle() || {};
+        const effectiveLayerStyle = options.mapwidget.mapping(
+            'setStyleDefaultValues', window.hWin.HEURIST4.util.cloneJSON(layerStyle));
+        let new_symbol = window.hWin.HEURIST4.util.cloneJSON(effectiveLayerStyle);
+        let matched = false;
+
         for(let k=0; k<themes.length; k++)
             for(let i=0; i<themes[k].fields.length; i++)
             {
-                
                 let theme = themes[k];
                 let ftheme = theme.fields[i];
-                
                 let tfield = ftheme.code;
-                /*
-                if(typeof tfield == 'string' && tfield.indexOf(':')>0){
-                    let codes = tfield.split(':');
-                    tfield = codes[codes.length-1];
-                }
-                */
-                
+
                 let value = feature[tfield];
                 if(ftheme.isNumeric && window.hWin.HEURIST4.util.isNumber(feature[tfield])){
                     value = Number(feature[tfield]);
@@ -1247,10 +1239,10 @@ function HMapLayer( _options ) {
                         if(Array.isArray(range.value))
                         {
                             if(window.hWin.HEURIST4.util.findArrayIndex(value, range.value)>-1){
-                                fsymb = range.symbol;       
+                                fsymb = range.symbol;
                                 break;
                             }
-                        }else if(!window.hWin.HEURIST4.util.isnull(range.min) && 
+                        }else if(!window.hWin.HEURIST4.util.isnull(range.min) &&
                             !window.hWin.HEURIST4.util.isnull(range.max)){
 
                                 if(value>=range.min && value<=range.max){
@@ -1263,35 +1255,29 @@ function HMapLayer( _options ) {
                             }
                     }//for
                     if(fsymb!=null){
-                        //if theme.symbol is not defined it takes def_layer_style)
-                        if(new_symbol){
-                            new_symbol = _mergeThematicSymbol(new_symbol, fsymb);
-                        }else{
-                            new_symbol = _mergeThematicSymbol(theme.symbol?theme.symbol:that.getStyle(), fsymb);
-                        }
+                        // Explicit theme properties inherit the effective layer symbol;
+                        // the matching range/facet then overrides the effective theme.
+                        // With several active themes, only explicit properties from the
+                        // later theme/range override the already-resolved result.
+                        new_symbol = _mergeThematicSymbol(new_symbol, theme.symbol || {});
+                        new_symbol = _mergeThematicSymbol(new_symbol, fsymb || {});
+                        matched = true;
                     }
                 }
             }
-            
-        return new_symbol;        
-        
+
+        return matched ? new_symbol : false;
     }
-    
-    //
-    //
-    //
-    function _mergeThematicSymbol(basesymbol, fsymb){
-        
-            let use_style = window.hWin.HEURIST4.util.cloneJSON( basesymbol );
-        
-            let keys = Object.keys(fsymb);
-            for(let j=0; j<keys.length; j++){
-                use_style[keys[j]] = fsymb[keys[j]];
-            }
-            
-            return use_style;
-    }    
-    
+
+    function _mergeThematicSymbol(basesymbol, override){
+        const result = window.hWin.HEURIST4.util.cloneJSON(basesymbol || {});
+        const local = window.hWin.HEURIST4.map.canonicalizeMapSymbol(override || {});
+        Object.keys(local).forEach(function(key){
+            result[key] = local[key];
+        });
+        return result;
+    }
+
     //public members
     let that = {
 
@@ -1358,7 +1344,8 @@ function HMapLayer( _options ) {
         },
         
         //
-        //  sends request for map data (json, kml or shp) and text file with links (to record view and hml) 
+        //  Sends request for map data (json, kml or shp) and text file with links (to record view and hml) 
+        //  to download map data
         //
         getMapData: function(){
             
@@ -1421,20 +1408,26 @@ function HMapLayer( _options ) {
             }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] ||
                      rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){  //csv
 
+                url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+dataset_ID+'?format=rawfile'
+                        + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
+                /*
                 url = window.hWin.HAPI4.baseURL 
                         + 'hserv/controller/record_map_source.php?db='+ window.hWin.HAPI4.database
                         + '&format=rawfile&recID='+dataset_ID
                         + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
-
+                */
                 window.open(url, '_blank');
                 
             }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE']){
                 
+                url = window.hWin.HAPI4.baseURL+'api/'+window.hWin.HAPI4.database+'/map/data/'+dataset_ID+'?format=rawfile'
+                        + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
+                /*
                 url = window.hWin.HAPI4.baseURL 
                         + 'hserv/controller/record_shp.php?db='+ window.hWin.HAPI4.database
                         + '&format=rawfile&recID='+dataset_ID
                         + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
-
+                */
                 window.open(url, '_blank');
             }
             

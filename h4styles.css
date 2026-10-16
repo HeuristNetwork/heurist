@@ -339,6 +339,14 @@ img.image_input{
     max-width: 200px;
     min-width: 200px;
 }
+.fieldset_search{
+    font-size:1.1em !important;        
+} 
+.fieldset_search h4{
+    font-weight: bold;
+    font-size:1.1em !important;    
+}
+
 
 /* margin-bottom:2px; */
 input.text, select.text {
@@ -360,9 +368,18 @@ input.text, select.text {
     padding: 5px 0 0 20px;
     text-align:left;
 }
-.explanation-separator,
-.explanation_break-separator{
+.explanation-separator-header,
+.explanation_break-separator-header{
     border-top: none !important;
+    text-transform: none !important;
+}
+.explanation-separator-header,
+.explanation-separator-helper,
+.explanation_break-separator-header,
+.explanation_break-separator-helper{
+    background-color: #E6E6E6;
+    color: black !important;
+    font-size: larger !important;
 }
 
 .smallbutton, .smallicon{
@@ -456,6 +473,10 @@ div.recordDiv.selected .selection_pointer{
 
 div.recordDiv.white-borderless{
     background: white;
+    border: none;
+}
+div.recordDiv.grey-borderless{
+    background: lightgrey;
     border: none;
 }
 .list div.recordDiv.densed{
@@ -1042,6 +1063,17 @@ div.div-result-list-content.icons_list{
     display: inline;
 }
 
+.list.show-record-owners div.recordDiv:not(.public) .recordTitle{
+    left: 16.5em !important;
+}
+.show-record-owners div.recordDiv:not(.public) .rec_owner{
+    width: 19ch !important;
+}
+.thumbs.show-record-owners div.recordDiv:not(.public) .rec_visibility{
+    top: -2px;
+    left: -1px !important;
+}
+
 .list .recordDiv .recTypeThumb {
     display: none;
 }
@@ -1053,9 +1085,6 @@ div.div-result-list-content.icons_list{
     vertical-align: middle;
     white-space: nowrap;
     text-overflow: ellipsis;
-}
-.list .recordDiv.rl-not-logged-in .recordTitle{
-    left: 46px;
 }
 .list .recordDiv.public .recordTitle {
     left: 38px;
@@ -1284,7 +1313,7 @@ div.div-result-list-content.icons_list{
 }
 
 .horizontal .recordDiv:hover,
-.vertical .recordDiv:hover,
+.vertical .recordDiv:hover
  {
     z-index:10;
     -moz-box-shadow:0px 3px 8px #666;
@@ -1497,6 +1526,54 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     margin:0px;
 }
 
+.horizontalmenu-toggle {
+    display: none;
+}
+
+/* Narrow screen mode */
+@media (max-width: 740px) {
+
+    .responsive-horizontal-menu {
+        position: relative;
+    }
+
+    .responsive-horizontal-menu .horizontalmenu-toggle {
+        display: inline-block;
+        cursor: pointer;
+        padding: 0.35em 0.75em;
+    }
+
+    .responsive-horizontal-menu > .horizontalmenu {
+        display: none;
+        position: absolute;
+        z-index: 9999;
+        top: 100%;
+        right: 0;
+        min-width: 220px;
+        background: var(--responsive-menu-bg, lightgray) !important;
+        border: 1px solid #ccc !important;
+        padding: 0.25em 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .responsive-horizontal-menu.horizontalmenu-open > .horizontalmenu {
+        display: block;
+    }
+
+    .responsive-horizontal-menu > .horizontalmenu > .ui-menu-item {
+        float: none;
+        display: block;
+        width: 100%;
+        margin: 0;
+    }
+
+    .responsive-horizontal-menu > .horizontalmenu > .ui-menu-item > a {
+        display: block;
+        padding: 0.45em 1em !important;
+        white-space: normal;
+    }
+}
+
 /* List view - Datatable */
 table.dataTable th{
     text-align: left;
@@ -1601,7 +1678,7 @@ span.fancytree-checkbox{
     margin-left:0px;
 }
 .tree-map .fancytree-expander{
-    width:14px*;
+    width:14px;
 }
 .tree-map ul.fancytree-container ul{
     padding: 0px 0px 0px 8px !important;
@@ -1732,6 +1809,18 @@ ul.fancytree-container ul{
 }
 .heurist-helper1{
     font-style:normal;
+}
+
+/* Guidance above the two column groups in the delimited file field mapping table. */
+#tblFieldMapping tr.csv-id-group > td{
+    background-color:#eaf7fc;
+}
+#tblFieldMapping .csv-mapping-help .heurist-helper1{
+    color:#3D9946;
+    font-size:0.8em;
+    line-height:1.25;
+    padding:10px 6px;
+    vertical-align:top;
 }
 
 
@@ -1904,6 +1993,32 @@ background: #8ea9b9
 .ent_footer{bottom:0px;height:2.6em;}
 /* Additional stylings for CSS footers */
 .static_footer{position: static;}
+#page-footer {
+    box-sizing: border-box;
+}
+
+#page-footer .footer-flex,
+#main-host {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 1rem;
+    justify-content: center;
+}
+
+#page-footer .footer-item,
+#main-host > div {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    white-space: normal;
+}
+
+#page-footer img {
+    max-height: 50px;
+    width: auto;
+}
+/*
 .ent_footer #main-host,
 .static_footer #main-host {
     display: flex;
@@ -1919,6 +2034,7 @@ background: #8ea9b9
 .static_footer #main-host {
     justify-content: center;
 }
+*/
 
 
 .ent_wrapper.editor fieldset > div{
@@ -1951,6 +2067,9 @@ background: #8ea9b9
 .div-result-list-toolbar{
     padding:0px;
     /*padding:0.2em 0.5em*/
+}
+.div-result-list-toolbar #sel-recordset-sortby .ui-selectmenu-text{
+    min-height: 1em !important;
 }
 /*
 .ent_editor{position:absolute; top:0;bottom:0;left:1px;right:1px;font-size:0.9em;overflow:auto;
@@ -2241,7 +2360,7 @@ div.coverall-div {
     /*filter: progid:DXImageTransform.Microsoft.Alpha(opacity=60);*/
     background-image: url(hclient/assets/loading-animation-white.gif);
     background-repeat: no-repeat;
-    background-position: center;     
+    background-position: center;
     cursor:wait;
     user-select: none;
     -webkit-user-select: none;
@@ -2688,6 +2807,10 @@ li.edit-form-tab > a{
     min-width: 115px !important;
 
     text-align: right;
+
+    line-height: 1.5;
+
+    padding-top: 5px;
 }
 .cms-widget-config .header.header_narrow{
     width: 100px !important;
@@ -2762,4 +2885,18 @@ li.edit-form-tab > a{
 }
 .rts-editor-actions .rts-editor-action:hover{
     background: lightblue;
+}
+
+/* Calendar picker, fix for jump button widths */
+.calendars-month{
+    width: 20em;
+}
+
+.calendars-month .calendars-month-header .calendars-cmd{
+    display: inline-block;
+    width: 10%;
+}
+
+.calendars-extended-header .calendars-month-header{
+    height: 3.5em;
 }

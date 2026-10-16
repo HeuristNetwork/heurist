@@ -65,6 +65,10 @@ $.widget( "heurist.manageServer", $.heurist.baseAction, {
             $.each(this._$('a'), function(i,item){
                 
                 let href = $(item).attr('href');
+
+                if(!href || href=='#'){
+                    return;
+                }
                 
                 // Ensure href is absolute, prepending baseURL if it's relative
                 if(!(href.indexOf('http://')==0 || href.indexOf('https://')==0)){
@@ -77,24 +81,60 @@ $.widget( "heurist.manageServer", $.heurist.baseAction, {
             this._on(this._$('a'),{click:function(event){
                     let surl = $(event.target).attr('href'); // Get the URL from the clicked link
                     
-                    let subform = this._$('#mainForm'); // Find the hidden form
-                    
-                    // If a password was entered/provided, set it in the form
-                    if(this.options.entered_password){
-                        subform.find('input[name="pwd"]').val(this.options.entered_password);   
+                    if(!surl || surl=='#'){
+                        return false;
                     }
-                    // Set the current database name in the form
-                    subform.find('input[name="db"]').val(window.hWin.HAPI4.database);
-                    // Set the form's action URL to the link's href
-                    subform.attr('action',surl);
-                    // Submit the form
-                    subform.trigger('submit');
 
+                    this.submitForm(surl);
                     window.hWin.HEURIST4.util.stopEvent(event); // Prevent default link behavior and stop event propagation
                     return false; // Prevent default link behavior
                 }});
+                
+            this._on(this._$('#fieldUsage'),{click:(event)=>{
+                let that = this;
+                window.hWin.HEURIST4.msg.showPrompt(
+                    window.hWin.HR('Define concept code for field') + ':',
+                    (value)=>{
+                        if (!window.hWin.HEURIST4.util.isempty(value)) {
+                            const re = /^([1-9][0-9]*)-([1-9][0-9]*)$/;
+                            const matches = value.match(re);
+                            if (!matches) {
+                                window.hWin.HEURIST4.msg.showMsgFlash('Invalid concept code', 1000);
+                            }else{
+                                const surl = window.hWin.HAPI4.baseURL+'admin/verification/verifyFieldUsage.php'
+                                that.submitForm(surl, value);
+                                window.hWin.HEURIST4.util.stopEvent(event); // Prevent default link behavior and stop event propagation
+                            }
+                            return false; // Prevent default link behavior
+                        }
+                    },
+                    { title: window.hWin.HR('Concept code'), yes: window.hWin.HR('Search'), no: window.hWin.HR('Cancel') }
+                    //,{ default_palette_class: 'ui-heurist-publish' }
+                );  
+            }});              
         
         return this._super(); // Call parent's _initControls
+    },
+    
+    submitForm: function(surl, code){
+
+        let subform = this._$('#mainForm'); // Find the hidden form
+        // If a password was entered/provided, set it in the form
+        if(this.options.entered_password){
+            subform.find('input[name="pwd"]').val(this.options.entered_password);   
+        }
+        // Set the current database name in the form
+        subform.find('input[name="db"]').val(window.hWin.HAPI4.database);
+        
+        if(code){ //concept code
+            subform.find('input[name="code"]').val(code);
+        }
+        
+        // Set the form's action URL to the link's href
+        subform.attr('action',surl);
+        
+        // Submit the form
+        subform.trigger('submit');
     },
 
     /**

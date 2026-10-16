@@ -1,0 +1,564 @@
+#language#Indonesian
+#Databases#BasisData
+#Close#Tutup
+#Settings#Pengaturan
+#Help#Bantuan
+#Error#Kesalahan
+#records#rekaman
+#loading#memuat
+#preparing#mempersiapkan
+#explanations#penjelasan
+#Show data#Tampilkan data
+#Actions#Tindakan
+#Embed#Sematkan
+#Clear#Hapus
+#Warning#Peringatan
+#Cancel#Batal
+#Record Info#Info Rekaman
+#Add#Tambah
+#Assign#Tetapkan
+#Apply#Terapkan
+#Abort#Batalkan
+#Define#Definisikan
+#Edit#Edit
+#Delete#Hapus
+#Create#Buat
+#Confirm#Konfirmasi
+#Proceed#Lanjutkan
+#Continue#Lanjutkan
+#Go#Pergi
+#Yes#Ya
+#OK#OK
+#No#Tidak
+#Save#Simpan
+#Save data#Simpan data
+#Ignore and close#Abaikan dan tutup
+#Drop data changes#Hapus perubahan data
+#Manage#Kelola
+#Select#Pilih
+#Configure#Konfigurasi
+#all#semua
+#Discard changes?#Buang perubahan?
+#Back#Kembali
+#Next#Berikutnya
+#Show context help#Tampilkan bantuan kontekstual
+#Heurist context help#Bantuan konteks Heurist
+#Sorry context help was not found#Maaf, bantuan kontekstual tidak ditemukan
+#Admin#Admin
+#Design#Desain
+#Populate#Isi
+#Explore#Jelajahi
+#Publish#Terbitkan
+#Profile#Profil
+#add_new_record#Baru
+#add_new_record2#Baru
+#Filters#Filter
+#Recent#Terbaru
+#All#Semua berdasarkan tanggal
+#Entities#Entitas
+#Saved filters#Filter tersimpan
+#Build#Bangun
+#Filter builder#filter
+#Facets builder#Pembuat faset
+#Save filter for re-use#Simpan filter untuk digunakan kembali
+#Advanced#Lanjutan
+#Rules#Aturan
+#Favourites#Favorit
+#Overview#Ikhtisar
+#Database#Basis Data
+#menu-database-browse#Buka
+#menu-database-create#Baru
+#menu-database-clone#Kloning
+#menu-database-rename#Ganti nama
+#menu-database-delete#Hapus
+#menu-database-clear#Bersihkan
+#menu-database-rollback#Kembalikan
+#menu-database-register#Daftar
+#menu-database-properties#Properti
+#menu-database-restore#Pulihkan
+#menu-database-browse-hint#Buka dan masuk ke basis data Heurist lain - basis data saat ini tetap terbuka
+#menu-database-create-hint#Buat Basis data baru di server saat ini - elemen struktur penting diisi secara otomatis
+#menu-database-clone-hint#Mengkloning basis data identik dari basis data saat ini dengan semua data, pengguna, file terlampir, templat, dll.
+#menu-database-rename-hint#Mengganti nama basis data saat ini, melakukan fungsi kloning dan penghapusan
+#menu-database-delete-hint#Menghapus basis data saat ini sepenuhnya - tidak dapat dibatalkan, meskipun data disalin ke cadangan yang dapat dimuat ulang oleh administrator sistem
+#menu-database-clear-hint#Menghapus semua data (rekaman, nilai, file terlampir) dari basis data saat ini. Struktur basis data - tipe data, kolom, istilah, batasan - tidak terpengaruh
+#menu-database-rollback-hint#Kembalikan data dalam basis data secara selektif ke tanggal dan waktu tertentu
+#menu-database-register-hint#Daftarkan basis data ini ke Indeks Referensi Heurist - ini membuat struktur (tetapi bukan data) tersedia untuk diimpor oleh basis data lain
+#menu-database-properties-hint#Edit metadata internal yang menjelaskan basis data dan atur beberapa perilaku global. Disarankan untuk menyediakan basis data yang terdokumentasi sendiri
+#menu-database-restore-hint#Pulihkan basis data dari file pengaman (format zip)
+#menu-database-verify#Verifikasi integritas
+#menu-database-verify-hint#Temukan kesalahan dalam struktur basis data (tipe record, field, dan kode term yang tidak valid) dan record dengan struktur yang salah atau nilai yang tidak konsisten (pointer tidak valid, data hilang, dll.)
+#Manage Users#Kelola Pengguna
+#menu-profile-groups#Grup Kerja
+#menu-profile-users#Pengguna
+#menu-profile-import#Impor pengguna
+#menu-profile-groups-hint#Daftar grup tempat Anda menjadi anggota
+#menu-profile-users-hint#Tambah dan edit pengguna basis data, termasuk otorisasi pengguna baru. Gunakan Kelola Grup Kerja untuk mengalokasikan pengguna ke grup kerja dan menentukan peran dalam grup kerja
+#menu-profile-import-hint#Impor pengguna satu per satu dari basis data lain di sistem, termasuk nama pengguna, kata sandi, dan alamat email - pengguna TIDAK ditugaskan ke grup kerja
+#Utilities#Utilitas
+#menu-profile-files#Kelola file
+#menu-profile-preferences#Preferensi saya
+#menu-structure-duplicates#Temukan catatan duplikat
+#menu-manage-rectitles#Bangun ulang judul catatan
+#menu-manage-calcfields#Bangun ulang bidang perhitungan
+#menu-interact-log#Log interaksi
+#menu-clear-rec-cache#Bersihkan cache tampilan catatan
+#menu-profile-files-hint#Kelola file yang diunggah dan sumber daya media jarak jauh yang terdaftar
+#menu-profile-preferences-hint#Preferensi tampilan yang berkaitan dengan perilaku yang terkait dengan basis data ini
+#menu-structure-duplicates-hint#Pencarian fuzzy untuk mengidentifikasi catatan yang mungkin berisi data duplikat
+#menu-manage-rectitles-hint#Membangun ulang judul rekaman yang tercantum dalam hasil pencarian, untuk semua rekaman
+#menu-interact-log-hint#Unduh log interaksi
+#Server Manager#Manajer Server
+#menu-admin-server#Kelola basis data
+#menu-admin-server-hint#Kelola basis data
+#Modify#Ubah
+#menu-structure-rectypes#Tipe rekaman
+#menu-import-csv-rectypes#Impor dari CSV
+#menu-structure-vocabterms#Kosakata
+#menu-structure-fieldtypes#Bidang dasar
+#menu-import-csv-fieldtypes#Impor dari CSV
+#menu-structure-import#Jelajahi templat
+#menu-structure-workflowstages#Tahap alur kerja
+#menu-lookup-config#Pencarian eksternal
+#menu-repository-config#Repositori eksternal
+#menu-structure-summary#Visualisasikan
+#menu-structure-refresh#Segarkan memori
+#menu-structure-rectypes-hint#Tambahkan tipe rekaman baru dan ubah tipe rekaman yang sudah ada
+#menu-structure-vocabterms-hint#Tambahkan dan modifikasi Kosakata & Istilah baru &amp;
+#menu-structure-fieldtypes-hint#Jelajahi dan edit definisi bidang dasar yang dirujuk oleh tipe rekaman (seringkali digunakan bersama oleh beberapa tipe rekaman)
+#menu-structure-import-hint#Impor tipe rekaman, bidang, istilah, dan tipe rekaman terkait secara selektif dari basis data Heurist lainnya
+#menu-structure-summary-hint#Visualisasikan koneksi internal antara tipe rekaman dalam basis data dan tambahkan koneksi (penunjuk rekaman dan penanda hubungan) di antara mereka
+#menu-structure-refresh-hint#Bersihkan dan muat ulang memori kerja internal Heurist di browser Anda. Gunakan ini untuk memperbaiki dropdown, dll. jika penambahan dan perubahan terbaru tidak muncul.
+#Setup#Penyiapan
+#menu-manage-dashboards#Bilah pintasan
+#menu-manage-archive#File pengaman - unduh
+#menu-manage-archive-upload#File pengaman - ke repositori
+#menu-manage-dashboards-hint#Mendefinisikan daftar pintasan yang dapat diedit ke fungsi yang akan ditampilkan pada bilah alat saat startup kecuali dimatikan
+#menu-manage-archive-hint#Menulis semua data dalam basis data sebagai file SQL dan XML, ditambah semua file terlampir, skema, dan dokumentasi, ke file ZIP yang dapat Anda unduh dari hyperlink
+#Download#Download
+#menu-manage-structure-asxml#Struktur (XML)
+#menu-manage-structure-assql#Struktur (Teks)
+#menu-manage-structure-asxml-hint#Mencantumkan tipe rekaman dan definisi bidang dalam format XML (HML - Heurist Markup Language)
+#menu-manage-structure-assql-hint#Mencantumkan tipe rekaman dan definisi bidang dalam format yang dapat dibaca komputer terkait SQL (usang sejak 2014)
+#Upload Files#Unggah File
+#menu-import-csv#Teks yang dipisahkan / CSV
+#menu-import-zotero#Sinkronisasi bibliografi Zotero
+#menu-import-xml#Heurist XML/JSON
+#menu-import-kml#KML
+#menu-import-get-template#Unduh templat
+#menu-import-csv-hint#Impor data dari file teks yang dipisahkan. Mendukung pencocokan, pembuatan catatan, pembaruan catatan.
+#menu-import-zotero-hint#Sinkronkan dengan pustaka web Zotero - catatan baru ditambahkan ke Heurist, catatan yang ada diperbarui
+#menu-import-xml-hint#Impor catatan dari basis data lain
+#menu-import-kml-hint#Impor file KML (data geografis di WKT dapat diimpor dari file CSV & tab delimited) &amp;
+#menu-import-get-template-hint#Dapatkan templat untuk membuat file data XML atau JSON yang dapat diimpor ke Heurist
+#Media Files#Berkas Media
+#menu-files-upload#Unggah file dari lokal
+#menu-files-index#Daftarkan transfer eksternal
+#menu-files-index-and-records#Buat catatan dari file
+#menu-files-annotations#Proses Manifest IIIF
+#menu-files-csv#Unggah file dari URL
+#menu-files-upload-hint#Unggah beberapa file dan/atau file besar ke ruang kerja sementara atau gambar direktori, hapus dan ganti nama file yang diunggah
+#menu-files-index-hint#Daftarkan file di server dan buat catatan Media Digital untuknya (membaca dan membuat manifes FieldHelper)
+#menu-files-data#Impor data file dari CSV
+#Website#Website
+#menu-cms-create#Buat
+#menu-cms-edit#Edit
+#menu-cms-view#Lihat
+#menu-statistics-cms#Statistik
+#menu-cms-embed#Halaman web mandiri
+#menu-cms-create-hint#Buat situs web CMS baru, disimpan dalam basis data ini, dengan widget untuk mengakses data dalam basis data
+#menu-cms-edit-hint#Edit situs web CMS yang didefinisikan dalam basis data ini
+#menu-cms-view-hint#Lihat situs web CMS yang didefinisikan dalam basis data ini
+#menu-cms-embed-hint#Buat atau edit halaman web mandiri dalam basis data ini. Mungkin berisi widget Heurist. Menyediakan kode untuk menyematkan halaman dalam iframe eksternal.
+#Website Editor#Editor Situs Web
+#Sitewide Settings#Pengaturan Seluruh Situs
+#Current Page#Halaman Saat Ini
+#Page Editor#Editor Halaman
+#Standalone web page#Halaman web mandiri
+#menu-cms-create-page#Buat
+#menu-cms-edit-page#Edit
+#menu-cms-view-page#Lihat
+#Export#Ekspor
+#menu-export-csv#CSV
+#menu-export-hml-resultset#XML
+#menu-export-json#JSON
+#menu-export-geojson#GeoJSON
+#menu-export-kml#KML
+#menu-export-gephi#GEPHI
+#menu-export-iiif#IIIF
+#menu-export-csv-hint#Ekspor catatan sebagai teks yang dipisahkan (koma/tab), menerapkan tipe catatan
+#menu-export-hml-resultset-hint#Hasilkan HML (format XML Heurist) untuk kumpulan hasil pencarian saat ini (kueri saat ini + perluasan)
+#menu-export-json-hint#Hasilkan JSON untuk kumpulan hasil pencarian saat ini (kueri saat ini)
+#menu-export-geojson-hint#Hasilkan GeoJSON-T untuk kumpulan hasil pencarian saat ini (kueri saat ini)
+#menu-export-kml-hint#Hasilkan KML untuk kumpulan hasil pencarian saat ini (kueri saat ini + perluasan)
+#menu-export-gephi-hint#Hasilkan GEPHI untuk kumpulan hasil pencarian saat ini (kueri saat ini + perluasan)
+#menu-export-iiif-hnt#Hasilkan manifes IIIF untuk kumpulan hasil pencarian saat ini
+#Safeguard#Safeguard
+#menu-profile-tags#Kelola tag
+#menu-profile-reminders#Kelola pengingat
+#menu-profile-info#Info pengguna saya
+#menu-profile-logout#Keluar
+#menu-profile-tags-hint#Hapus, gabungkan, ganti nama tag pribadi dan grup kerja Anda
+#menu-profile-reminders-hint#Lihat dan hapus email pemberitahuan otomatis yang dikirim dari catatan yang telah Anda tandai
+#menu-profile-info-hint#Informasi pribadi pengguna
+#menu-profile-logout-hint#menu-profile-logout-hint
+#HELP#BANTUAN
+#menu-help-roadmap#Peta jalan
+#menu-help-devhist#Riwayat fitur
+#menu-help-issues#Masalah terkini
+#menu-help-quick-tips#Memahami Heurist
+#menu-help-online#Dokumentasi
+#menu-help-tour#Tur Terpandu
+#menu-help-website#Situs web Jaringan Heurist
+#menu-help-online-hint#Dokumentasi online komprehensif untuk sistem Heurist
+#menu-help-website-hint#Situs web Jaringan Heurist - sumber untuk berbagai informasi, layanan, dan kontak
+#CONTACT#KONTAK
+#menu-help-bugreport#Tiket (laporan bug/permintaan fitur)
+#menu-help-emailteam#Tim Heurist
+#menu-help-emailadmin#Administator Sistem
+#menu-help-acknowledgements#Ucapan Terima Kasih
+#menu-help-about#Tentang
+#menu-help-bugreport-hint#Kirim email ke tim Heurist untuk informasi bug tambahan, komentar, atau permintaan fitur baru
+#menu-help-emailteam-hint#Kirim email ke tim Heurist jika Anda memiliki pertanyaan lebih lanjut
+#menu-help-emailadmin-hint#Kirim email ke Administrator Sistem untuk instalasi Heurist ini - biasanya untuk masalah dengan instalasi ini
+#menu-help-acknowledgements-hint#Ucapan Terima Kasih
+#menu-help-about-hint#Versi, Kredit, Hak Cipta, Lisensi
+#menu-magic-tool#Alat ajaib
+#menu-subset-set#Tetapkan sebagai subset
+#menu-subset-set-hint#Jadikan filter saat ini sebagai subset aktif yang akan diterapkan pada semua tindakan selanjutnya
+#Click to revert to whole database#Klik untuk kembali ke seluruh basis data
+#SUBSET ACTIVE#SUBSET AKTIF
+#Current subset#Saat Ini subset
+#Selected#Terpilih
+#menu-selected-select-all#Pilih semua
+#menu-selected-select-all-hint#Pilih Semua di halaman
+#menu-selected-select-none#Tidak ada yang dipilih
+#menu-selected-select-none-hint#Hapus pilihan
+#menu-selected-select-insearch#Tampilkan yang dipilih
+#menu-selected-select-show#Tampilkan sebagai tab baru
+#menu-selected-select-show-hint#Luncurkan catatan yang dipilih di jendela pencarian baru
+#menu-selected-tag#Tag
+#menu-selected-tag-hint#Pilih satu atau lebih catatan, lalu klik untuk menambahkan atau menghapus tag
+#menu-selected-rate#Beri peringkat
+#menu-selected-rate-hint#Pilih satu atau lebih catatan, lalu klik untuk mengatur peringkat
+#menu-selected-bookmark#Bookmark
+#menu-selected-bookmark-hint#Pilih satu atau lebih catatan, lalu klik untuk menambahkan bookmark
+#menu-selected-unbookmark#Hapus Bookmark
+#menu-selected-unbookmark-hint#Pilih satu atau lebih catatan, lalu klik untuk menghapus bookmark
+#menu-selected-merge#Gabungkan
+#menu-selected-merge-hint#Pilih satu atau lebih catatan, lalu klik untuk mengidentifikasi/memperbaiki duplikat
+#menu-selected-delete#Hapus
+#menu-selected-delete-hint#Pilih satu atau lebih catatan, lalu klik untuk menghapus
+#Collected#Terkumpul
+#Collect#Kumpulkan
+#menu-collected-add#Tambah
+#menu-collected-add-hint#Pilih satu atau lebih catatan, lalu klik untuk menambahkan ke koleksi
+#menu-collected-del#Hapus
+#menu-collected-del-hint#Pilih satu atau lebih catatan, lalu klik untuk menghapus catatan dari koleksi
+#menu-collected-clear#Hapus Semua
+#menu-collected-clear-hint#Kosongkan catatan dari koleksi
+#menu-collected-save#Simpan sebagai ...
+#menu-collected-save-hint#Simpan kumpulan catatan saat ini dalam koleksi
+#menu-collected-show#Tampilkan sebagai pencarian
+#menu-collected-show-hint#Tampilkan kumpulan catatan saat ini dalam koleksi
+#menu-collected-tab#Tampilkan di tab baru
+#menu-collected-tab-hint#Tampilkan kumpulan catatan saat ini dalam koleksi di tab baru
+#collection_limit#Jumlah catatan yang dipilih melebihi batas
+#collection_select_hint#Silakan pilih setidaknya satu catatan untuk ditambahkan ke keranjang koleksi
+#collection_select_hint2#Silakan pilih setidaknya satu catatan untuk dihapus dari keranjang koleksi
+#collection_url_hint#Koleksi disimpan sebagai daftar ID catatan. URL yang dihasilkan oleh koleksi ini akan melebihi panjang URL maksimum yang diizinkan sebesar 2083 karakter. Harap simpan koleksi saat ini sebagai pencarian tersimpan (yang memungkinkan jumlah catatan yang jauh lebih besar), atau tambahkan lebih sedikit catatan.
+#Recode#Kode ulang
+#menu-selected-value-add#Tambahkan Nilai Bidang
+#menu-selected-value-add-hint#Tambahkan nilai bidang ke catatan yang difilter
+
+#menu-selected-value-replace#Ganti Nilai Bidang
+#menu-selected-value-replace-hint#Ganti nilai bidang dalam catatan yang difilter
+
+#menu-selected-value-delete#Hapus Nilai Bidang
+#menu-selected-value-delete-hint#Hapus nilai bidang dari catatan yang difilter
+
+#menu-selected-add-link#Hubungkan: Tautan
+#menu-selected-add-link-hint#Tambahkan tautan atau buat hubungan antara catatan yang difilter
+
+#menu-selected-add-link-match#Pencocokan Kunci Asing
+#menu-selected-add-link-match-hint#Buat tautan antar catatan dengan mencocokkan nilai bidang
+
+#menu-selected-rectype-change#Ubah tipe catatan
+#menu-selected-rectype-change-hint#Ubah tipe catatan dari catatan yang difilter
+
+#menu-selected-extract-pdf#Ekstrak teks dari file PDF
+#menu-selected-extract-pdf-hint#Ekstrak teks dari file PDF yang terhubung ke catatan yang difilter (Eksperimental)
+
+#menu-selected-url-to-file#URL jarak jauh ke file lokal
+#menu-selected-url-to-file-hint#Unduh file jarak jauh dan daftarkan sebagai file lokal
+
+#menu-selected-local-to-repository#File lokal ke repositori jarak jauh
+#menu-selected-local-to-repository-hint#Unggah file lokal ke repositori jarak jauh yang dikonfigurasi
+
+#menu-selected-reset-thumbs#Reset thumbnail
+#menu-selected-reset-thumbs-hint#Reset thumbnail untuk file yang terhubung ke catatan yang difilter; Gambar mini akan dibuat ulang secara otomatis saat diminta berikutnya
+
+#menu-selected-case-conversion#Konversi huruf besar/kecil
+#menu-selected-case-conversion-hint#Ubah huruf besar/kecil pada nilai teks di catatan yang difilter
+
+#menu-selected-increment#Masukkan nilai inkremental
+#menu-selected-increment-hint#Masukkan nilai numerik berurutan ke dalam catatan yang difilter
+
+#menu-selected-nl2br#Teks multi-baris ke HTML
+#menu-selected-nl2br-hint#Konversi jeda baris dalam teks multi-baris ke elemen jeda HTML
+
+#menu-selected-translation#Terjemahan
+#menu-selected-translation-hint#Terjemahkan nilai teks di catatan yang difilter
+
+#menu-selected-iiif-thumbs#Buat gambar mini anotasi IIIF
+#menu-selected-iiif-thumbs-hint#Buat atau buat ulang gambar mini untuk catatan anotasi IIIF
+#Share#Bagikan
+#menu-selected-notify#Beri tahu (email)
+#menu-selected-notify-hint#Pilih satu atau lebih catatan, lalu klik untuk mengirim pemberitahuan
+#menu-selected-email#Kirim email
+#menu-selected-email-hint#Kirim pesan email ke individu atau organisasi yang dijelaskan dalam catatan yang dipilih
+#menu-selected-ownership#Kepemilikan / visibilitas
+#menu-selected-ownership-hint#Pilih satu atau lebih catatan, lalu klik untuk mengatur kepemilikan dan visibilitas grup kerja
+#Reorder#Urutkan ulang
+#menu-reorder-hint#Memungkinkan pengurutan ulang manual hasil saat ini dan menyimpan sebagai daftar tetap catatan yang diurutkan
+#menu-reorder-title#Seret catatan ke atas dan ke bawah untuk memposisikannya, lalu Simpan urutan untuk menyimpan sebagai daftar tetap dalam urutan ini
+#menu-reorder-save#Simpan Urutan
+#resultList_select_record#Silakan pilih setidaknya satu catatan untuk tindakan
+#resultList_select_record2#Silakan pilih setidaknya dua catatan untuk mengidentifikasi/menggabungkan catatan duplikat
+#resultList_select_limit#Jumlah catatan yang dipilih melebihi batas di
+#resultList_noresult#Tidak ada hasil yang ditemukan. Harap ubah pencarian/filter untuk mengembalikan setidaknya satu catatan hasil.
+#resultList_empty_remark#Tidak ada entri yang sesuai dengan kriteria filter (entri mungkin ada tetapi mungkin belum ditampilkan kepada publik atau profil pengguna Anda)
+#resultList_private_record#Catatan ini tidak terlihat secara publik - pengguna harus masuk untuk melihatnya
+#resultListExt_empty_remark#Widget laporan kustom tidak menerima data untuk rendering menggunakan format laporan __REPORTNAME__.<br>Ini mungkin karena tidak ada data yang memenuhi filter atau karena tidak ada filter yang telah ditentukan.
+#resultListExt_placeholder_text#Silakan pilih catatan di sebelah kiri untuk melihatnya di sini...
+#private - hidden from non-owners#private - tersembunyi dari bukan pemilik
+#visible to any logged-in user#terlihat oleh setiap pengguna yang masuk
+#pending (viewable by anyone, changes pending)#pending (dapat dilihat oleh siapa pun, perubahan tertunda)
+#public (viewable by anyone)#public (dapat dilihat oleh siapa pun)
+#show selected only#tampilkan hanya yang dipilih
+#Single lines#Baris tunggal
+#Single lines with icon#Baris tunggal dengan ikon
+#Small images#Gambar kecil
+#Large image#Gambar besar
+#Record contents#Isi catatan
+#resultList_view_content_hint1#Peringatan ini dipicu jika ada lebih dari 10 catatan
+#resultList_view_content_hint2#Anda telah memilih
+#resultList_view_content_hint3#catatan. Mode tampilan ini memuat informasi lengkap untuk setiap catatan dan akan membutuhkan waktu lama untuk memuat dan menampilkan semua data ini.
+#resultList_action_edit#Klik untuk mengedit catatan
+#resultList_action_edit2#Klik untuk mengedit catatan (membuka di tab baru)
+#resultList_action_view#Klik untuk melihat catatan (membuka di popup)
+#resultList_action_view2#Klik untuk melihat tautan eksternal (membuka di jendela baru)
+#resultList_action_map#Klik untuk menampilkan/menyembunyikan di peta
+#resultList_action_dataset#Unduh dataset
+#resultList_action_embded#Klik untuk menyematkan
+#resultList_action_delete#Klik untuk menghapus
+#resultList_action_delete_hint#Hapus dokumen peta. Lapisan peta dan sumber data terkait tetap ada
+#Password reminder#Pengingat kata sandi
+#resultList_reorder_list_changed#Daftar urutan ulang telah diubah.
+#Warn_Lost_Data#Anda telah membuat perubahan pada data. Klik "Simpan", jika tidak semua perubahan akan hilang.
+#Warn_Lost_Data_On_Structure_Edit#Klik "Simpan data" untuk menyimpan data yang dimasukkan, "Batalkan perubahan data" untuk membatalkan modifikasi.<br>Perubahan struktur disimpan secara otomatis - perubahan tersebut tidak dipengaruhi oleh pilihan Anda.
+#manageDefRectypes_edit_fields#Ubah struktur rekaman (bidang, tab, dll.)
+#manageDefRectypes_edit_fields_hint#membuat rekaman kosong baru
+#manageDefRectypes_edit_fields_hint_extra#Untuk menambahkan atau memodifikasi bidang, tab, urutan bidang, dll., tidak perlu kembali ke mode Desain.<br>Cukup edit rekaman apa pun (baru atau yang sudah ada) dan klik <strong>Ubah struktur</strong> di bagian atas formulir.<br>Modifikasi struktural yang dilakukan pada suatu rekaman akan langsung berlaku untuk semua rekaman dari jenis tersebut.
+#manageDefRectypes_new_hint#Sebelum mendefinisikan tipe record (entitas) baru, kami menyarankan untuk mengimpor definisi yang sesuai dari template (basis data Heurist yang terdaftar di Heurist clearinghouse). Template dengan ID registrasi kurang dari 1000 adalah template yang dikelola oleh tim Heurist. <br><br>Hal ini sangat penting khususnya untuk tipe data BIBLIOGRAFI - definisi dalam templat #6 (Definisi Bibliografi) dinormalisasi secara optimal dan memastikan kompatibilitas dengan fungsi bibliografi seperti sinkronisasi Zotero, format Harvard, dan kompatibilitas antar-basis data.<br><br>Gunakan menu utama: Desain > Jelajahi templat
+#manageDefRectypes_delete_stop#<p>Tipe data <b>[rtyName]</b> dirujuk oleh bidang-bidang berikut:</p>[FieldList]<p>Harap hapus bidang-bidang ini seluruhnya, atau klik tautan di atas <br>untuk memodifikasi bidang dasar (akan memengaruhi semua tipe data yang menggunakannya).</p>
+#manageDefRectypes_delete_warn#Apakah Anda yakin ingin menghapus tipe rekaman ini?
+#manageDefRectypes_duplicate_warn#Apakah Anda benar-benar ingin menduplikasi tipe data rekaman?
+#Click to add new#Klik untuk menambahkan yang baru
+#Click to launch search for#Klik untuk memulai pencarian
+#Click to edit record type#Klik untuk mengedit tipe data rekaman
+#Click to hide in lists#Klik untuk menyembunyikan dalam daftar
+#Click to show in lists#Klik untuk menampilkan dalam daftar
+#Duplicate record type#Duplikat tipe data rekaman
+#List of fields#Daftar kolom
+#manageDefRectypes_reserved#Ini adalah tipe data rekaman yang dicadangkan dan umum untuk semua basis data Heurist. Tidak dapat dihapus.
+#manageDefRectypes_hasrecs#Untuk mengizinkan penghapusan, gunakan Jelajahi > Entitas untuk menemukan dan menghapus semua catatan.
+#manageDefRectypes_delete#Klik untuk menghapus tipe catatan ini
+#manageDefRectypes_referenced#Tipe catatan ini direferensikan. Klik untuk menampilkan referensi
+#manageDefRectypes_longrequest#Ini membutuhkan waktu lama, ada kemungkinan basis data tidak dapat dijangkau di [url], akan terus mencoba selama 10 detik lagi
+#Filter by Group#Filter berdasarkan Grup
+#Show All#Tampilkan Semua
+#Sort by#Urutkan berdasarkan
+#All Find#Temukan Semua
+#Not finding the record type you require?#Tidak menemukan tipe catatan yang Anda butuhkan?
+#Define new record type#Tentukan tipe catatan baru
+#Find by name, ID or concept code#Temukan berdasarkan nama, ID, atau kode konsep
+#Show record types for all groups#Tampilkan tipe catatan untuk semua grup
+#All Groups#Semua Grup
+#All record type groups#Semua grup tipe catatan
+#Edit Title Mask#Edit Masker Judul
+#Define Symbology#Tentukan Simbologi
+#Define Heurist Theme#Tentukan Tema Heurist
+#Configure Interface#Konfigurasikan Antarmuka
+#Mark columns to be visible. Drag to re-order#Tandai kolom agar terlihat. Seret untuk menyusun ulang
+#Add Record#Tambah Rekaman
+#Record addition settings#Pengaturan penambahan rekaman
+#Permission settings#Pengaturan izin
+#Save Settings#Simpan Pengaturan
+#Add Record in New Window#Tambah Rekaman di Jendela Baru
+#Type of record to add#Jenis rekaman yang akan ditambahkan
+#Get Parameters#Dapatkan Parameter
+#Select record type for record to be added#Pilih jenis rekaman untuk rekaman yang akan ditambahkan
+#select record type#pilih jenis rekaman
+#add_record_settings_hint#Pengaturan ini akan diterapkan dan diingat saat Anda memilih jenis rekaman dari daftar
+#Processed records#Rekaman yang diproses
+#recordAction_select_lbl#Cakupan rekaman:
+#recordAction_select_hint#silakan pilih rekaman yang akan terpengaruh …
+#All records#Semua rekaman
+#Selected results set (count=#Kumpulan hasil yang dipilih (jumlah=
+#Current results set (count=#Kumpulan hasil saat ini (jumlah=
+#only:#hanya:
+#Add or Remove Tags for Records#Tambah atau Hapus Tag untuk Rekaman
+#Add tags#Tambah tag
+#Remove tags#Hapus tag
+#Bookmark#Bookmark
+#recordTag_hint0#Pilih tag yang akan ditambahkan ke bookmark untuk URL yang dipilih<br>
+#recordTag_hint1#Pilih tag yang akan ditambahkan ke bookmark untuk cakupan rekaman yang dipilih<br>
+#recordTag_hint2#Pilih tag Untuk ditambahkan atau dihapus untuk cakupan rekaman yang dipilih<br>
+#recordTag_hint3#Tag yang cocok ditampilkan saat Anda mengetik. Klik pada tag yang terdaftar untuk menambahkannya.<br>Tag yang tidak dikenali ditambahkan secara otomatis sebagai tag khusus pengguna<br>(tag grup harus ditambahkan secara eksplisit oleh administrator grup). Tag dapat berisi spasi.
+#No tags were affected#Tidak ada tag yang terpengaruh
+#Bookmarks added#Bookmark ditambahkan
+#Tags added#Tag ditambahkan
+#Tags removed#Tag dihapus
+#Unbookmark selected records#Hapus bookmark dari rekaman yang dipilih
+#recordUnbookmark_hint#Pilih cakupan rekaman dengan bookmark yang akan dihapus.<br>Tag pribadi apa pun untuk rekaman ini akan dilepas<br>Operasi ini HANYA menghapus bookmark dari sumber daya Anda,<br>ini tidak menghapus entri rekaman<br>
+#Remove Bookmarks#Hapus Bookmark
+#Bookmarks removed#Bookmark dihapus
+#Set Record Rating#Atur Peringkat Rekaman
+#Set Rating#Atur Peringkat
+#Please specify rating value#Harap tentukan nilai peringkat
+#Rating updated#Peringkat diperbarui
+#No Rating#Tidak ada peringkat
+#Delete Records#Hapus Rekaman
+#Record type not defined or wrong#Jenis rekaman tidak ditentukan atau salah
+#Error_Title#Heurist
+#Error_Empty_Message#Tidak ada pesan kesalahan yang diberikan, harap laporkan ke pengembang Heurist. <br><br>Jika ini terjadi setelah lama tidak aktif, coba muat ulang halaman.
+#Error_Report_Code#Laporkan kode ini ke tim Heurist
+#Error_Report_Team#Jika kesalahan ini terjadi berulang kali, harap hubungi administrator sistem Anda (#sysadmin_email#) atau kirim email kepada kami (support at HeuristNetwork dot org) dan jelaskan keadaan terjadinya agar kami/mereka dapat menemukan solusinya
+#Error_Wrong_Request#Nilai, jumlah, dan/atau kumpulan parameter permintaan tidak valid.
+#Error_System_Config#Mungkin disebabkan oleh gangguan jaringan, atau karena sistem tidak dikonfigurasi dengan benar. Jika masalah berlanjut, harap laporkan ke administrator sistem Anda
+#Error_Json_Parse#Tidak dapat mengurai respons server
+#Filter#Filter
+#filter_start_hint#Terapkan filter/pencarian di kolom pencarian dan tampilkan hasilnya di panel tengah di bawah ini
+#filter_placeholder#definisikan filter
+#Filtered Result#Hasil yang Difilter
+#Save Filter#Simpan Filter
+#Filter help#Bantuan Filter
+#filter_help_hint#Tampilkan sintaks dan contoh bahasa kueri/filter Heurist
+#save_filter_hint#Simpan filter dan aturan saat ini sebagai tautan di pohon navigasi
+#search_filter_hint#masukkan pencarian/filter atau gunakan "Pembuat Filter"
+#filter_builder_hint#Buat ekspresi filter menggunakan pendekatan berbasis formulir
+#Facet builder#Pembuat Faset
+#filter_facetbuilder_hint#Buat pencarian faset baru
+#filter_save_hint#Simpan filter saat ini
+#filter_facet_processing#memproses faset...
+#filter_facet_submit#Kirim
+#filter_facet_interrupt#Interupsi
+#filter_facet_exit#Tutup
+#filter_facet_exit_hint#Tutup pencarian faset ini dan kembali ke daftar pencarian yang tersimpan
+#filter_facet_resetall#Reset semua
+#filter_facet_resetall_hint#Hapus semua kolom / Atur ulang semua filter ke keadaan awalnya
+#filter_facet_reset#Untuk menghapus pencarian sebelumnya, klik tombol RESET
+#filter_facet_savestate#Simpan status
+#filter_facet_titleprefix#
+#filter_facet_apply_preliminary#Terapkan filter pendahuluan
+#filter_facet_mapsearch#Pencarian Peta
+#filter_facet_mapsearch_hint#Klik tombol ini untuk mengatur dan menerapkan batasan pencarian spasial
+#filter_facet_general_search#Cari semuanya
+#filter_facet_spatial_search#Pencarian spasial Heurist
+#facet_search_no_values#tidak ada nilai
+#facet_search_select#pilih...
+#facet_search_expand_dropdown#dropdown
+#facet_wizard_select_field#Pilih kolom yang berfungsi sebagai facet
+#facet_wizard_define_field#Tentukan judul, kiat bantuan, dan jenis facet
+#Legend#Legenda
+#Result Sets#Kumpulan Hasil
+#Map Documents#Peta Dokumen
+#Temp Map#Peta Sementara
+#Base Maps#Peta Dasar
+#map_print_note#Setelah mengklik Cetak, Anda perlu menyeret kotak pada peta untuk menentukan area yang ingin Anda cetak. Sampai Anda melakukan ini, dialog cetak tidak akan ditampilkan.
+#Design database#Desain basis data
+#Import data#Impor data
+#Please log in#Silakan Masuk atau Daftar untuk menggunakan semua fitur Heurist.
+#Session expired#Sepertinya Anda belum masuk atau sesi Anda telah kedaluwarsa. Silakan muat ulang halaman untuk masuk lagi.
+#Please contact to register#Silakan hubungi pemilik basis data untuk mendaftar dan menggunakan semua fitur Heurist.
+#My Searches#Filter Saya
+#My Bookmarks#Bookmark Saya
+#Password_Reset#Kata sandi Anda telah direset. Anda akan segera menerima email dengan kata sandi baru Anda.
+#Error_Password_Reset#Operasi tidak dapat diselesaikan.
+#Error_Mail_Recovery#Email pemulihan kata sandi Anda tidak dapat dikirim karena sistem email smtp belum diinstal dengan benar di server ini. Silakan minta administrator sistem Anda untuk memperbaiki instalasi.
+#Error_Mail_Registration#Informasi pendaftaran Anda telah ditambahkan ke basis data. Namun, tidak mungkin untuk menyetujuinya karena email pendaftaran tidak dapat dikirim.
+#Error_Mail_Approvement#Tidak dapat mengirim email persetujuan pendaftaran - silakan hubungi pengembang Heurist.
+#Error_Server_Side#Server merespons dengan status 500 (Kesalahan Server Internal).<br><br>Ini mungkin disebabkan oleh pengecualian yang tidak tertangkap dalam kode sisi server. Jika masalah berlanjut, silakan kirim email tiket/laporan bug ke tim Heurist agar kami dapat menyelidikinya.
+#Error_Connection_Reset#Timeout pada respons dari server Heurist.<br><br><b>Ini akan terjadi setelah periode tidak aktif: muat ulang halaman untuk melanjutkan</b><br><br>Ini mungkin disebabkan oleh gangguan internet (sumber yang paling umum), atau karena beban server atau karena meminta kumpulan hasil yang terlalu besar, atau kueri yang gagal diselesaikan. Jika masalah berlanjut, silakan kirim email tiket/laporan bug ke tim Heurist agar kami dapat menyelidikinya. selidiki.
+#New_Function_Conversion#Fungsi ini belum dikonversi dari Heurist versi 4 ke versi 5 (2018).
+#New_Function_Contact_Team#Jika Anda memerlukan fungsi ini, silakan kirim email ke heuristnetwork.org atau klik entri Buat permintaan tiket di menu Bantuan - kami mungkin sudah memiliki versi alpha yang dapat Anda gunakan atau dapat memprioritaskan pengembangan.
+#mailto_fail#Anda belum mengatur penanganan email untuk tautan mailto:. <br>Silakan atur ini di browser Anda (biasanya ada di pengaturan konten di bawah Privasi).
+#add_record#Tambahkan rekaman baru
+#add_detail#Tambahkan nilai bidang
+#replace_detail#Ganti nilai bidang
+#delete_detail#Hapus nilai bidang
+#rectype_change#Ubah tipe rekaman (entitas)
+#ownership#Ubah akses dan kepemilikan rekaman
+#add_link#Tambahkan tautan baru atau buat hubungan antar rekaman
+#extract_pdf#Ekstrak teks dari PDF
+#url_to_file#Kirim file jarak jauh ke lokal (milik Anda) (basis data)
+#local_to_repository#File lokal ke repositori jarak jauh
+#reset_thumbs#Reset thumbnail
+#case_conversion#Koreksi kapitalisasi bidang
+#nl2br#Teks multi-baris ke HTML
+#translation#Terjemahkan bidang teks
+#increment#Masukkan nilai inkremental
+#iiif_thumbs#Buat thumbnail anotasi IIIF
+#record_action_terminated#Operasi telah dihentikan
+#record_action_add_record#
+#record_action_add_detail#Fungsi ini menambahkan nilai baru untuk bidang tertentu ke kumpulan catatan yang dipilih di dropdown. Nilai yang ada tidak terpengaruh. Penambahan akan menambahkan nilai meskipun ini melebihi jumlah pengulangan yang valid (misalnya, lebih dari satu nilai untuk bidang nilai tunggal) - periksa basis data setelahnya untuk validitas menggunakan Verifikasi > Verifikasi integritas.
+#record_action_replace_detail#Fungsi ini mengganti nilai yang ditentukan dalam bidang tertentu untuk kumpulan catatan yang dipilih di dropdown. Bidang/nilai lain tidak terpengaruh.
+#record_action_delete_detail#Fungsi ini menghapus nilai tertentu dalam bidang tertentu untuk kumpulan catatan yang dipilih di menu tarik-turun. Bidang/nilai lain tidak terpengaruh. Penghapusan akan menghapus nilai termasuk nilai terakhir dalam bidang yang wajib diisi - periksa basis data setelahnya untuk validitas menggunakan Verifikasi > Verifikasi integritas.
+#record_action_rectype_change#Fungsi ini mengubah tipe catatan (entitas) dari kumpulan catatan yang dipilih di menu tarik-turun. Semua catatan yang dipilih akan dikonversi ke tipe baru.<br><br><b>Peringatan</b>: Sangat mungkin bahwa data yang dicatat untuk banyak atau semua catatan ini tidak akan memenuhi kondisi yang ditetapkan untuk tipe catatan yang dikonversi.<br><br>Silakan gunakan Verifikasi > Verifikasi integritas untuk menemukan dan memperbaiki catatan yang tidak valid yang dihasilkan oleh proses ini.
+#record_action_ownership#&nbsp;
+#record_action_extract_pdf#Fungsi ini mengekstrak teks (hingga 64.000 karakter) dari file PDF apa pun yang dilampirkan ke catatan dan menempatkan teks yang diekstrak di bidang yang ditentukan (oleh default "Teks yang diekstrak" (2-652), jika didefinisikan). Karakter yang salah akan diabaikan.<br><br>Jika terdapat lebih dari satu file PDF, teks akan ditempatkan pada nilai berulang di bidang tersebut.<br><br>Teks hanya diekstrak jika (nilai yang sesuai) dari bidang tersebut kosong untuk menghindari penimpaan teks yang dimasukkan secara manual.
+#record_action_url_to_file#Fungsi ini mengambil file yang ditunjukkan oleh URL jarak jauh di bidang File yang ditentukan,<br>menempatkannya di dalam basis data, dan mengganti URL jarak jauh dengan referensi ke file di dalam basis data. Bidang lain tidak terpengaruh.
+#record_action_local_to_repository#Fungsi ini akan mengunggah file lokal dalam bidang yang dipilih yang digunakan oleh catatan ke repositori yang dipilih.<br>Catatan file kemudian diperbarui untuk digunakan sebagai sumber daya jarak jauh, yang mengarah ke catatan repositori.
+#record_action_reset_thumbs#Fungsi ini menghapus thumbnail untuk file dan sumber daya eksternal untuk cakupan catatan yang dipilih. Thumbnail akan dibuat ulang pada permintaan berikutnya.
+#record_action_case_conversion#Fungsi ini mengkonversi bidang yang dipilih untuk catatan yang dipilih di menu tarik-turun ke format huruf besar/kecil yang ditunjukkan, sambil menerapkan aturan khusus ke daftar kata/frasa dengan kapitalisasi yang ditentukan. <br>
+#case_conversion_add#Tempelkan daftar kata/frasa pengecualian di bawah ini, satu per baris (dapat mencakup tanda baca termasuk spasi)<br>Kata/frasa ini akan dikonversi ke bentuk huruf besar/kecil yang ditunjukkan. Berlaku hanya untuk kata/frasa utuh.
+#record_action_nl2br#Fungsi ini mengonversi baris baru menjadi tag HTML &lt;br&gt; dan &lt;p&gt; untuk bidang yang dipilih pada rekaman yang dipilih di menu tarik-turun.
+#record_action_increment#Fungsi ini memasukkan nilai inkremental untuk bidang yang diakhiri dengan akhiran numerik, misalnya xxx-0075 yang memiliki nilai yang hilang di beberapa catatan.<br><br>Fungsi ini akan menemukan nilai akhiran numerik terbesar dan menambahkan akhiran dari titik tersebut, atau Fungsi ini menemukan nilai akhiran yang hilang dari urutan dan menggunakannya terlebih dahulu.
+#record_action_iiif_thumbs#Fungsi ini membuat ulang thumbnail untuk catatan Anotasi IIIF.
+#record_action_fails_iiif_thumbs#Catatan yang gagal membuat thumbnail
+#record_action_passed#Catatan yang diteruskan untuk diproses
+#record_action_noaccess#Catatan yang tidak dapat diedit ditemukan (mungkin karena izin)
+#record_action_processed#Catatan yang diproses
+#record_action_undefined_add_detail#Catatan dengan bidang yang tidak terdefinisi
+#record_action_undefined_replace_detail#Dilewati karena tidak ada yang cocok
+#record_action_undefined_delete_detail#Dilewati karena tidak ada yang cocok
+#record_action_limited_add_detail#Dilewati karena melebihi batas nilai pengulangan
+#record_action_limited_delete_detail#Dilewati karena bidang yang diperlukan tidak dapat dihapus
+#record_action_undefined_extract_pdf#Rekaman tanpa PDF terkait
+#record_action_parseexception_extract_pdf#Rekaman dengan PDF terkunci (ekstraksi dilarang)
+#record_action_parseempty_extract_pdf#Rekaman tanpa teks untuk diekstrak (misalnya, (gambar)
+#record_action_limited_extract_pdf#Catatan dengan bidang yang sudah terisi
+#record_action_fails_url_to_file#Catatan dengan URL yang gagal diunduh
+#record_action_fails_local_to_repository#Berkas yang gagal diunggah ke repositori yang dipilih
+#record_action_undefined_case_conversion#Catatan tanpa nilai untuk dikonversi
+#record_action_undefined_nl2br#Catatan dengan nilai yang tidak berubah atau tidak ada untuk dikonversi
+#record_action_translation#Terjemahkan nilai untuk bidang yang dipilih
+#record_action_undefined_translation#Catatan dengan bidang yang tidak terdefinisi
+#record_action_translated_translation#Catatan dengan bidang yang sudah diterjemahkan
+#record_action_undefined_increment#Catatan dengan nilai yang ditetapkan (dilewati)
+#record_action_undefined_iiif_thumbs#Catatan yang dilewati (thumbnail sudah ada)
+#record_action_errors#Kesalahan
+#thumbs3#preview
+#feature_request#Silakan ajukan permintaan ke tim Heurist jika diperlukan atau tambahkan ke kode dan lakukan pull request
+#recvis_placeholder#Pilih atau cari catatan untuk divisualisasikan sebagai grafik
+#recvis_nodata#Tidak ada data untuk grafik
+#fieldDesc_enum#Daftar kategori datar atau hierarkis, umumnya dari satu kosakata, misalnya negara, bahasa, sumber, kondisi, material, warna. Gunakan jika daftar relatif statis dan kategori tidak ada sebagai catatan terpisah dalam basis data (dalam hal ini gunakan penunjuk catatan).
+#fieldDesc_numeric#Angka positif atau negatif, dengan atau tanpa desimal. Karakter non-numerik selain tanda minus, titik desimal, atau koma diabaikan.
+#fieldDesc_freetext#Satu baris teks biasa, biasanya digunakan untuk nama, judul, dan deskripsi singkat. Gunakan teks multi-baris untuk deskripsi yang lebih panjang. Maksimal 250 karakter.
+#fieldDesc_blocktext#Bidang teks biasa yang dapat menampung beberapa baris teks. Gunakan untuk deskripsi yang lebih panjang.
+#fieldDesc_datetime#Tanggal kalender dengan atau tanpa waktu. Tahun penuh dapat digunakan. Tanggal SM dinyatakan sebagai negatif. Dapat juga mengakomodasi rentang tanggal dan ketidakpastian.
+#fieldDesc_geo#Objek spasial vektor yang menggambarkan lokasi di permukaan bumi. Lokasi dapat didigitalkan dengan mengklik peta atau dimasukkan sebagai koordinat.
+#fieldDesc_file#Berkas seperti foto, PDF, dokumen yang dipindai, spreadsheet, atau XML, diunggah dan disimpan dalam basis data atau URL ke berkas jarak jauh atau konten yang dialirkan.
+#fieldDesc_resource#Koneksi sederhana ke rekaman lain, biasanya dibatasi pada tipe rekaman target tertentu. Gunakan jika bidang tersebut mewakili koneksi langsung dan permanen, misalnya induk, penulis, komponen, tempat, atau periode.
+#fieldDesc_relmarker#Koneksi yang lebih kompleks yang memungkinkan spesifikasi jenis hubungan dan periode validitas. Gunakan di mana terdapat banyak kemungkinan jenis koneksi dan/atau koneksi memiliki rentang waktu, misalnya peran dalam suatu acara, hubungan sosial, kepemilikan, pernikahan, alamat.

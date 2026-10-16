@@ -319,20 +319,25 @@ class DbEntitySearch
      */
     public function composeAndExecute($orderBy, $sup_tables=null, $sup_where=null){
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
+        if($this->data['details']==='*'){
+            $this->data['details'] = ['*'];
+        }else{
+        
+            if(!is_array($this->data['details'])){ //specific list of fields
+                $this->data['details'] = explode(',', $this->data['details']);
+            }
 
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search($this->primaryField, $this->data['details']);
-        if($idx>0){ //remove from list if not on first place
-            unset($this->data['details'][$idx]);
-            $idx = false;
+            //ID field is mandatory and MUST be first in the list
+            $idx = array_search($this->primaryField, $this->data['details']);
+            if($idx>0){ //remove from list if not on first place
+                unset($this->data['details'][$idx]);
+                $idx = false;
+            }
+            if($idx===false){
+                array_unshift($this->data['details'], $this->primaryField); //insert first
+            }
+            $is_ids_only = (count($this->data['details'])==1);
         }
-        if($idx===false){
-            array_unshift($this->data['details'], $this->primaryField); //insert first
-        }
-        $is_ids_only = (count($this->data['details'])==1);
 
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
@@ -636,7 +641,7 @@ class DbEntitySearch
      * - If `$is_ids_only` is true: Returns an array of record IDs.
      * - Otherwise: Returns a structured array including field names, record data (potentially with
      *   calculated fields and multi-language translations), total count, offset, etc.
-     * - Supports a `restapi` format for simpler output.
+     * - Supports the legacy `restapi=1` simplified output. When explicit `api_response_context` is supplied, the full internal result is retained for API controller formatting.
      *
      * @param string $query The SQL query to execute.
      * @param bool $is_ids_only If true, only primary key IDs are fetched and returned.
@@ -714,7 +719,7 @@ class DbEntitySearch
                     $res->close();
 
 
-                    if(@$this->data['restapi']==1){
+                    if(@$this->data['restapi']==1 && empty($this->data['api_response_context'])){
 
                        //converts records to [fieldname=>value,... ]
                        $response = array();

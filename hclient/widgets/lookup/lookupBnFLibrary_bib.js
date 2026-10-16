@@ -95,8 +95,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
     _initControls: function(){
 
         // Extra field styling
-        this.element.find('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'});
-        this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '7.5px'});
+        this._$('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'});
+        this._$('.bnf_form_field').css({display:'inline-block', 'margin-top': '7.5px'});
 
         return this._super();
     },
@@ -139,8 +139,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
      */
     _getRoleCodes: function(){
 
-        let author_codes = this.element.find('#author_codes').text();
-        let contributor_codes = ''; //this.element.find('#contributor-codes').text() // Currently not used
+        let author_codes = this._$('#author_codes').text();
+        let contributor_codes = ''; //this._$('#contributor-codes').text() // Currently not used
         const regex = /\d+/g; // Regular expression to match numeric codes
 
         // Extract and join numeric codes for authors
@@ -231,7 +231,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
             }else{
                 // For simple fields, join if array, then HTML escape
                 s = Array.isArray(s) ? s.join('; ') : s;
-                s = window.hWin.HEURIST4.util.htmlEscape(s || '');
+                s = that.$H.htmlEscape(s || '');
             }
 
             let title = s; // Use the processed string for the tooltip by default
@@ -275,10 +275,10 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
 
         let contributor = recordset.fld(record, 'contributor');
         if(contributor !== undefined){
-            value = window.hWin.HEURIST4.util.isempty(value) ? contributor : {...contributor, ...value};
+            value = this.$H.isempty(value) ? contributor : {...contributor, ...value};
         }
 
-        if(window.hWin.HEURIST4.util.isempty(value)){
+        if(this.$H.isempty(value)){
             return 'No provided creator';
         }
 
@@ -289,7 +289,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
             let cur_obj = value[idx];
             let cur_string = cur_obj;
 
-            if(window.hWin.HEURIST4.util.isObject(cur_obj)){
+            if(this.$H.isObject(cur_obj)){
                 cur_string = this._extractAuthorValue(cur_obj, false);
             }
 
@@ -328,7 +328,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
      */
     _extractAuthorValue: function(cur_value, returning_search = false){
 
-        if(window.hWin.HEURIST4.util.isempty(cur_value)){
+        if(this.$H.isempty(cur_value)){
             return cur_value;
         }
 
@@ -336,13 +336,13 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
 
         value = cur_value['firstname'] ?? '';
 
-        if(!window.hWin.HEURIST4.util.isempty(cur_value['surname'])){
-            value = !window.hWin.HEURIST4.util.isempty(value) ? `${value} ${cur_value['surname']}` : cur_value['surname'];
+        if(!this.$H.isempty(cur_value['surname'])){
+            value = !this.$H.isempty(value) ? `${value} ${cur_value['surname']}` : cur_value['surname'];
         }
 
         search = value;
 
-        if(!window.hWin.HEURIST4.util.isempty(cur_value['active'])){
+        if(!this.$H.isempty(cur_value['active'])){
             value += ` [${cur_value['active']}]`;
         }
 
@@ -350,9 +350,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
             return value;
         }
 
-        value = !window.hWin.HEURIST4.util.isempty(value) ? `${value} (id: ${cur_value['id']})` : `id: ${cur_value['id']}`;
+        value = !this.$H.isempty(value) ? `${value} (id: ${cur_value['id']})` : `id: ${cur_value['id']}`;
 
-        let role = !window.hWin.HEURIST4.util.isempty(value) ? cur_value['role'] : '';
+        let role = !this.$H.isempty(value) ? cur_value['role'] : '';
 
         return [value, search, role];
     },
@@ -375,7 +375,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
      */
     getPublisherHTML: function(value){
 
-        if(window.hWin.HEURIST4.util.isempty(value)){
+        if(this.$H.isempty(value)){
             return 'No provided publisher';
         }
 
@@ -386,7 +386,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
             let cur_obj = value[idx];
             let cur_string = cur_obj;
 
-            if(window.hWin.HEURIST4.util.isObject(cur_obj)){
+            if(this.$H.isObject(cur_obj)){
                 [cur_string] = this._extractPublisherValue(cur_obj);
             }
 
@@ -422,11 +422,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
 
         let value = '', search = '';
 
-        if(!window.hWin.HEURIST4.util.isempty(cur_value['name'])){
+        if(!this.$H.isempty(cur_value['name'])){
             value = cur_value['name'];
             search = value;
         }
-        if(!window.hWin.HEURIST4.util.isempty(cur_value['location'])){
+        if(!this.$H.isempty(cur_value['location'])){
             value = (value != '') ? `${value} ${cur_value['location']}` : cur_value['location'];
             search = (search != '') ? search : value;
         }
@@ -464,7 +464,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
      */
     doAction: function(){
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+        this.$Hmsg.bringCoverallToFront(this.element);
 
         // get selected recordset
         let [recset, record] = this._getSelection(true);
@@ -496,7 +496,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
 
             val = this.valueToArray(val);
 
-            if(window.hWin.HEURIST4.util.isempty(val)){
+            if(this.$H.isempty(val)){
                 continue;
             }
 
@@ -521,7 +521,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
             }
 
             // Check that val and id are valid, add to response object
-            if(window.hWin.HEURIST4.util.isempty(val)){
+            if(this.$H.isempty(val)){
                 continue;
             }
             if(!Object.hasOwn(res, dty_ID)){
@@ -596,7 +596,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
         for(let idx = 0; idx < values.length; idx++){
 
             const cur_val = values[idx];
-            let is_object = window.hWin.HEURIST4.util.isObject(cur_val);
+            let is_object = this.$H.isObject(cur_val);
             
             let value = cur_val;
             let search = cur_val;
@@ -606,7 +606,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
                 [value, search, role] = this._extractAuthorValue(cur_val, true);
             }
 
-            if(window.hWin.HEURIST4.util.isempty(value) || Array.isArray(value) || window.hWin.HEURIST4.util.isObject(value)){
+            if(this.$H.isempty(value) || Array.isArray(value) || this.$H.isObject(value)){
                 continue;
             }
 
@@ -645,11 +645,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
             let search = '';
             const cur_val = values[idx];
 
-            if(window.hWin.HEURIST4.util.isObject(cur_val)){
+            if(this.$H.isObject(cur_val)){
                 [value, search] = this._extractPublisherValue(cur_val, true);
             }
 
-            if(window.hWin.HEURIST4.util.isempty(value) || Array.isArray(value) || window.hWin.HEURIST4.util.isObject(value)){
+            if(this.$H.isempty(value) || Array.isArray(value) || this.$H.isObject(value)){
                 continue;
             }
 
@@ -683,7 +683,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
     getLanguageValues: function(values){
 
         for(let idx = 0; idx < values.length; idx++){
-            values[idx] = window.hWin.HEURIST4.util.isempty(values[idx])
+            values[idx] = this.$H.isempty(values[idx])
                         || values[idx] == '###'
                         || values[idx] == 'und'
                         ? 'unknown' : values[idx];
@@ -728,7 +728,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
      */
     _doSearch: function(){
 
-        let maxRecords = this.element.find('#rec_limit').val(); // Limit number of returned records
+        let maxRecords = this._$('#rec_limit').val(); // Limit number of returned records
         let params = {
             version: '1.2',
             operation: 'searchRetrieve',
@@ -738,13 +738,13 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
         };
 
         // Filter for any text input fields (excluding type inputs) that have a value
-        let has_filter = this.element.find('input.text:not(type)').filter((idx, input) => {
-            return !window.hWin.HEURIST4.util.isempty($(input).val());
+        let has_filter = this._$('input.text:not(type)').filter((idx, input) => {
+            return !this.$H.isempty($(input).val());
         });
 
         // Check that something has been entered
         if(has_filter.length == 0){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value in any of the search fields...', 1000);
+            this.$Hmsg.showMsgFlash('Please enter a value in any of the search fields...', 1000);
             return;
         }
         
@@ -753,40 +753,40 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
         let last_logic = ''; // Stores the last boolean operator used
 
         // Check which input fields have values
-        let titleHasValue = this.element.find('#inpt_title').val() != '';
-        let authorHasValue = this.element.find('#inpt_author').val() != '';
-        let recidHasValue = this.element.find('#inpt_recordid').val() != '';
+        let titleHasValue = this._$('#inpt_title').val() != '';
+        let authorHasValue = this._$('#inpt_author').val() != '';
+        let recidHasValue = this._$('#inpt_recordid').val() != '';
 
         // Build query from each input field that has a value
         // Each field has a value input, a link type selector (all, any, adj),
         // and a logic operator selector (AND, OR, NOT)
 
         // Any field (bib.anywhere)
-        if(this.element.find('#inpt_any').val()!=''){
-            last_logic = ` ${this.element.find('#inpt_any_logic').val()} `;
-            query += `bib.anywhere ${this.element.find('#inpt_any_link').val()} "${this.element.find('#inpt_any').val()}"${last_logic}`;
+        if(this._$('#inpt_any').val()!=''){
+            last_logic = ` ${this._$('#inpt_any_logic').val()} `;
+            query += `bib.anywhere ${this._$('#inpt_any_link').val()} "${this._$('#inpt_any').val()}"${last_logic}`;
         }
 
         // Work title field (bib.title)
         if(titleHasValue){
-            last_logic = ` ${this.element.find('#inpt_title_logic').val()} `;
-            query += `bib.title ${this.element.find('#inpt_title_link').val()} "${this.element.find('#inpt_title').val()}"${last_logic}`;
+            last_logic = ` ${this._$('#inpt_title_logic').val()} `;
+            query += `bib.title ${this._$('#inpt_title_link').val()} "${this._$('#inpt_title').val()}"${last_logic}`;
         }
 
         // Author field (bib.author)
         if(authorHasValue){
-            last_logic = ` ${this.element.find('#inpt_author_logic').val()} `;
-            query += `bib.author ${this.element.find('#inpt_author_link').val()} "${this.element.find('#inpt_author').val()}"${last_logic}`;
+            last_logic = ` ${this._$('#inpt_author_logic').val()} `;
+            query += `bib.author ${this._$('#inpt_author_link').val()} "${this._$('#inpt_author').val()}"${last_logic}`;
         }
 
         // Record ID field (bib.recordid) - this is typically the last field, so no logic operator follows
         if(recidHasValue){
             last_logic = ''; // No boolean operator after the last term
-            query += `bib.recordid ${this.element.find('#inpt_recordid_link').val()} "${this.element.find('#inpt_recordid').val()}"`;
+            query += `bib.recordid ${this._$('#inpt_recordid_link').val()} "${this._$('#inpt_recordid').val()}"`;
         }
 
         // Remove last trailing logic operator if it exists
-        if(!window.hWin.HEURIST4.util.isempty(last_logic)){
+        if(!this.$H.isempty(last_logic)){
             let regex = new RegExp(`${last_logic}$`);
             query = query.replace(regex, '');
         }

@@ -75,8 +75,15 @@
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 use hserv\utilities\UJwt;
+use hserv\controller\MapDataController as LegacyMapDataController;
+use Heurist\Runtime\ServiceFactory;
+use Heurist\Database\QueryTrace;
 
 require_once dirname(__FILE__).'/../../autoload.php';
+$composerAutoload = dirname(__FILE__).'/../../vendor/autoload.php';
+if(is_readable($composerAutoload)){
+    require_once $composerAutoload;
+}
 
 if(@$_REQUEST['method']){
     $method = $_REQUEST['method'];
@@ -97,6 +104,16 @@ if(@$_REQUEST['method']){
     }
 }
 
+// Real HTTP verb of record writes (plan 14): never the ?method= parameter, and
+// PATCH stays PATCH ($method above turns it into PUT for the other resources).
+$http_verb = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+if($http_verb === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD'])){
+    $verb_override = strtoupper((string)$_SERVER['HTTP_X_HTTP_METHOD']);
+    if(in_array($verb_override, array('PUT', 'PATCH', 'DELETE'), true)){
+        $http_verb = $verb_override;
+    }
+}
+
 //allowed entities for entityScrud
 $entities = array(
 
@@ -106,7 +123,9 @@ $entities = array(
 'rty'=>'DefRecTypes',
 'dty'=>'DefDetailTypes',
 'trm'=>'DefTerms',
+'trl'=>'DefTermsLinks', 'termlinks'=>'DefTermsLinks',
 'rst'=>'DefRecStructure',
+'recstructure'=>'DefRecStructure',
 'rem'=>'UsrReminders',
 'swf'=>'SysWorkflowRules',
 'tag'=>'UsrTags',
@@ -118,6 +137,7 @@ $entities = array(
 'terms'=>'DefTerms',
 'reminders'=>'DbUsrReminders',
 
+'dbs'=>'SysDatabases', 'databases'=>'SysDatabases',
 'users'=>'SysUsers',
 'groups'=>'SysGroups',
 'records'=>'Records', //only search allowed
@@ -211,6 +231,9 @@ echo "</pre>";
 exit;
 */
 
+// debug=1|2: modern srv/ endpoints add a "debug" section with SQL timings
+QueryTrace::enableFromRequest($req_params);
+
 if(@$requestUri[1]!== 'api' || @$req_params['ent']!=null){
     //takes all parameters from $req_params
 
@@ -218,7 +241,7 @@ if(@$requestUri[1]!== 'api' || @$req_params['ent']!=null){
     if(@$entities[$req_params['ent']] != null ){
         $requestUri = array(0, 'api', $req_params['db'], $req_params['ent'], @$req_params['id']);
     }else{
-        exitWithError('API Not Found', 400);
+        exitWithError('API route not found', 404);
     }
 
 }
@@ -227,18 +250,32 @@ elseif(@$req_params['db'] && @$requestUri[2]!=null){ //backward when database is
     if(@$entities[$requestUri[2]]!=null){
         $requestUri = array(0, 'api', $req_params['db'], $requestUri[2], @$requestUri[3]);
     }else{
-        exitWithError('API Not Found', 400);
+        exitWithError('API route not found', 404);
     }
 
+}elseif(@$requestUri[2]==='dbs' || @$requestUri[2]==='databases'){
+    $req_params['db'] = null;    
+    if(@$requestUri[3]!=='dbs'){
+        array_splice( $requestUri, 3, 0, 'dbs' );
+    }
 }elseif(@$requestUri[2]!=null){
     $req_params['db'] = $requestUri[2];
 }
 
+// Database listing is a server-level resource and never belongs to the
+// database segment in the URL. Treat both /api/dbs and /api/{db}/dbs
+// (and their /databases aliases) identically.
+if(in_array(@$requestUri[3], array('dbs', 'databases'), true)){
+    $req_params['db'] = null;
+}
+
 $allowed_methods = array('search','add','save','delete');
 
+// Preserve the normalised HTTP verb for route-specific method checks.
+$http_method = strtoupper((string)$method);
 $method = getAction($method);
 if($method == null || !in_array($method, $allowed_methods)){
-    exitWithError('Method Not Allowed CCC', 405);
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, PATCH, DELETE'));
 }
 
 if($method=='save' || $method=='add'){
@@ -258,8 +295,9 @@ if($method=='save' || $method=='add'){
     }*/
 }else{
 
-    if(@$req_params['limit']==null || $req_params['limit']>100 || $req_params['limit']<1){
-        $req_params['limit']=100;
+    $params['limit'] = isset($params['limit']) ? intval($params['limit']) : 1000;
+    if($params['limit'] < 1 || $params['limit'] > 5000){
+        $params['limit'] = 5000;
     }
 
 }
@@ -269,17 +307,267 @@ if($method=='save' || $method=='add'){
 // ----------------------------------------------------
 $resource = @$requestUri[3];
 
+// Specialised, read-only representations of record-type-backed entities.
+// These canonical routes are handled before ordinary /records/{id} output.
+$recordPresentationTypes = array('querysource', 'document', 'layer');
+$recordPresentation = ($resource === 'records'
+    && in_array(@$requestUri[4], $recordPresentationTypes, true))
+        ? (string)$requestUri[4]
+        : null;
+$is_record_presentation = ($recordPresentation !== null);
+
+if($is_record_presentation){
+    if($http_method !== 'GET'){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
+    }
+    if(!isset($requestUri[5]) || !is_numeric($requestUri[5]) || intval($requestUri[5]) < 1){
+        exitWithError('Record presentation id is not defined', 400);
+    }
+}
+
+// Map and timeline routes have method rules that differ from generic entities.
+// Presentation definitions and file-backed datasource output are GET-only.
+// POST is accepted only for ordinary map record/query searches and timeline searches.
+$is_map_record_query = ($resource === 'map'
+    && !in_array(@$requestUri[4], array('document', 'layer', 'data'), true));
+$is_timeline_query = ($resource === 'time');
+
+if($resource === 'map'){
+    if(in_array(@$requestUri[4], array('document', 'layer', 'data'), true)){
+        if($http_method !== 'GET'){
+            exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
+        }
+    }elseif(!in_array($http_method, array('GET', 'POST'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+    }
+}elseif($resource === 'time' && !in_array($http_method, array('GET', 'POST'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+}
+
+if($is_timeline_query && $http_method === 'POST'){
+    if(stripos($contentType, 'application/json') === 0 && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if(is_array($json)){
+        foreach(array(
+            'query','q','ids','timefields','timeFields','fields','resolveDetails',
+            'rules','limit','offset','sort','filter'
+        ) as $key){
+            if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
+        }
+        if(!array_key_exists('fields', $json)){ unset($req_params['fields']); }
+        if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
+            $contractKeys = array(
+                'timefields','timeFields','fields','resolveDetails','rules','limit','offset','sort','filter','debug'
+            );
+            $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
+            if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
+                $req_params['query'] = $json;
+            }
+        }
+    }
+}
+
+if(($is_map_record_query || $is_timeline_query) && $http_method === 'POST'){
+    $method = 'search';
+}
+
+// The modern records collection search is read-only for both GET and POST.
+$is_record_query = ($resource === 'records' && !isset($requestUri[4]));
+if($is_record_query){
+    if(!in_array($http_method, array('GET','POST'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+    }
+    if($http_method === 'POST'
+        && stripos($contentType, 'application/json') === 0
+        && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if($http_method === 'POST' && is_array($json)
+        && !isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
+        $contractKeys = array('limit','offset','fields','detail','resolveDetails','defs','sort','filter','debug');
+        $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
+        if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
+            $req_params['query'] = $json;
+        }
+    }
+    if($http_method === 'POST' && is_array($json)){
+        if(array_key_exists('fields', $json)){
+            $req_params['fields'] = $json['fields'];
+        }else{
+            // api.php's generic JSON handler temporarily places the whole body
+            // in fields; that is not the records search output-field option.
+            unset($req_params['fields']);
+        }
+    }
+    $method = 'search';
+}
+
+// POST /api/{db}/records/cancel {"rid":...} stops a running query of the same
+// user (KILL QUERY on the connection registered for that request id).
+$is_query_cancel = ($resource === 'records' && @$requestUri[4] === 'cancel');
+if($is_query_cancel){
+    if($http_method !== 'POST'){
+        exitWithError('Method not allowed', 405, array('Allow' => 'POST'));
+    }
+    if(is_array($json) && array_key_exists('rid', $json)){ $req_params['rid'] = $json['rid']; }
+    $method = 'search';
+}
+
+// Record writes (plan 14): POST (insert), PUT, PATCH, DELETE /records/{id} and
+// POST /records/{id}/duplicate|validate. See srv/Controller/RecordEditController.php.
+// Logged-in users only; GET /records/{id} stays the read route below.
+$is_record_edit = ($resource === 'records'
+    && isset($requestUri[4]) && preg_match('/^-?\d+$/', (string)$requestUri[4])
+    && $http_verb !== 'GET');
+if($is_record_edit){
+    if(!in_array($http_verb, array('POST', 'PUT', 'PATCH', 'DELETE'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, PATCH, DELETE'));
+    }
+    $method = 'save'; // authentication required
+}
+
+// The modern graph collection returns renderer-neutral graph documents for the
+// heurist-graph client. It is read-only for both GET and POST and has its own
+// request contract (query, links, rule, limits) separate from /records.
+$is_graph_query = ($resource === 'graph' && !isset($requestUri[4]));
+if($is_graph_query){
+    if(!in_array($http_method, array('GET','POST'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+    }
+    if($http_method === 'POST'
+        && stripos($contentType, 'application/json') === 0
+        && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if($http_method === 'POST' && is_array($json)){
+        $graphContractKeys = array('query','q','ids','links','rule','rules','limit','offset','limits','debug');
+        if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
+            $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
+            if($isList || empty(array_intersect(array_keys($json), $graphContractKeys))){
+                $req_params['query'] = $json;
+            }
+        }
+        foreach($graphContractKeys as $key){
+            if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
+        }
+        // api.php's generic JSON handler temporarily places the whole body in fields.
+        unset($req_params['fields']);
+    }
+    $method = 'search';
+}
+
+// The modern system collection is also a read contract. The optional entity
+// segment selects a mapped system record type: /sys/filter or /sys/user.
+$is_system_query = ($resource === 'sys');
+if($is_system_query){
+    $hasSystemItem = isset($requestUri[5]) && $requestUri[5] !== '';
+    if($hasSystemItem && (!is_numeric($requestUri[5]) || intval($requestUri[5]) < 1)){
+        exitWithError('System record id is invalid', 400);
+    }
+    $allowedSystemMethods = $hasSystemItem ? array('GET') : array('GET','POST');
+    if(!in_array($http_method, $allowedSystemMethods, true)){
+        exitWithError('Method not allowed', 405, array('Allow'=>implode(', ', $allowedSystemMethods)));
+    }
+    if($http_method === 'POST'
+        && stripos($contentType, 'application/json') === 0
+        && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if($http_method === 'POST' && is_array($json)){
+        foreach(array(
+            'query','q','ids','fields','detail','resolveDetails','rules','limit','offset','sort','filter'
+        ) as $key){
+            if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
+        }
+        if(!array_key_exists('fields', $json)){ unset($req_params['fields']); }
+        if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
+            $contractKeys = array('rules','limit','offset','fields','detail','resolveDetails','sort','filter','debug');
+            $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
+            if($isList || empty(array_intersect(array_keys($json), $contractKeys))){
+                $req_params['query'] = $json;
+            }
+        }
+    }
+    $method = 'search';
+}
+
+// The modern definitions collection returns one cached database-structure
+// snapshot for client query builders and the query-language describer.
+// GET /api/{db}/def/snapshot  (read-only; will supersede /rty|/dty|/trm|/rst|/trl)
+$is_def_query = ($resource === 'def');
+if($is_def_query){
+    if($http_method !== 'GET'){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
+    }
+    $defType = isset($requestUri[4]) && $requestUri[4] !== '' ? (string)$requestUri[4] : 'snapshot';
+    if($defType !== 'snapshot'){
+        exitWithError('Unknown definition resource: '.$defType, 404);
+    }
+    $method = 'search';
+}
+
+// Reports manager (plan 12): /api/{db}/reports[/{ref}[/{action}]]
+// See srv/Controller/ReportController.php for the routes. Anonymous users may
+// only list card reports and render one record; the controller checks the rest.
+$is_reports_query = ($resource === 'reports');
+if($is_reports_query && !in_array($http_method, array('GET','POST','PUT','DELETE'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, DELETE'));
+}
+
+// Background jobs (plan 12): /api/{db}/jobs[/{id}[/cancel|result]], logged-in users only.
+// See srv/Controller/JobController.php.
+$is_jobs_query = ($resource === 'jobs');
+if($is_jobs_query && !in_array($http_method, array('GET','POST','DELETE'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
+}
+
 // Routes where auth processing is not needed here
+$is_public_annotation_read =
+    ($resource === 'annotations'
+        && $method === 'search'
+        && (
+            // Canvas AnnotationPage, used by Mirador:
+            //   /api/{db}/annotations/pages?uri={canvasUri}
+            in_array(@$requestUri[4], array('pages', 'page'), true)
+
+            // Single annotation record:
+            //   /api/{db}/annotations/{annotationId}
+            || (isset($requestUri[4]) && is_numeric($requestUri[4]) && !isset($requestUri[5]))
+
+            // Manifest-scoped Canvas AnnotationPage:
+            //   /api/{db}/annotations/{manifestRecID}/pages?uri={canvasUri}
+            || (isset($requestUri[4]) && is_numeric($requestUri[4])
+                && in_array(@$requestUri[5], array('pages', 'page'), true))
+
+            // Manifest-scoped single annotation:
+            //   /api/{db}/annotations/{manifestRecID}/{annotationId}
+            || (isset($requestUri[4]) && is_numeric($requestUri[4])
+                && isset($requestUri[5]) && is_numeric($requestUri[5]))
+        ));
+
 $skip_auth_processing =
     ($resource === 'login') ||
     ($resource === 'logout') ||
-    ($resource === 'iiif');
+    $is_public_annotation_read ||
+    ($resource === 'iiif') ||
+    in_array($resource, ['dbs','databases'], true);
 
 // Routes that may be used anonymously, but should still use
 // current session/JWT if provided
 $allow_anonymous = false;
 if($method === 'search'){
-    $allow_anonymous = ($resource === 'records' || $resource === 'groups' || $resource === 'users');
+    $publicSearchResources = array(
+        'records', 'graph', 'groups', 'users', 'dbs', 'databases',
+        'rty', 'rectypes',
+        'dty', 'fields',
+        'trm', 'terms', 'trl', 'termlinks',
+        'rst', 'recstructure',
+        'def',
+        'map', 'time',
+        'reports'
+    );
+    $allow_anonymous = in_array($resource, $publicSearchResources, true);    
 }
 
 if(!$skip_auth_processing){
@@ -304,16 +592,150 @@ if(!$skip_auth_processing){
 }
 // ----------------------------------------------------
 
-if (@$requestUri[3]=='iiif') {
+if($is_def_query){
 
-    if($method=='search'){
+    $req_params['restapi'] = 1;
+    $defType = isset($requestUri[4]) && $requestUri[4] !== ''
+        ? (string)$requestUri[4] : 'snapshot';
+    $controller = ServiceFactory::fromLegacySystem($system)->definitionController();
+    $controller->output($req_params, $defType);
+    $system->dbclose();
+    exit;
+
+}elseif($is_system_query){
+
+    $req_params['restapi'] = 1;
+    $systemType = isset($requestUri[4]) && $requestUri[4] !== ''
+        ? (string)$requestUri[4] : null;
+    $systemId = isset($requestUri[5]) && $requestUri[5] !== ''
+        ? intval($requestUri[5]) : null;
+    $controller = ServiceFactory::fromLegacySystem($system)->systemQueryController();
+    $controller->output($req_params, $systemType, $systemId);
+    $system->dbclose();
+    exit;
+
+}elseif($is_query_cancel){
+
+    $controller = ServiceFactory::fromLegacySystem($system)->queryCancelController();
+    $controller->output($req_params);
+    $system->dbclose();
+    exit;
+
+}elseif($is_record_edit){
+
+    $controller = ServiceFactory::fromLegacySystem($system)->recordEditController();
+    $controller->handleRequest(
+        $http_verb,
+        array_slice($requestUri, 4),
+        $req_params,
+        is_array($json) ? $json : null,
+        array(
+            'contentType' => $contentType,
+            'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+            'host' => $_SERVER['HTTP_HOST'] ?? ''
+        )
+    );
+    $system->dbclose();
+    exit;
+
+}elseif($is_graph_query){
+
+    $req_params['restapi'] = 1;
+    $controller = ServiceFactory::fromLegacySystem($system)->graphController();
+    $controller->output($req_params);
+    $system->dbclose();
+    exit;
+
+}elseif($is_jobs_query){
+
+    $factory = ServiceFactory::fromLegacySystem($system);
+    // srv Smarty engine; the legacy renderer only converts templates on import/export.
+    // Job types: report-preview, report-generate (plan 12) and export (plan 13).
+    $controller = $factory->jobController(array_merge($factory->reportJobHandlers(
+        $factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)),
+        new hserv\report\ReportRecordWriter($system)
+    ), $factory->exportJobHandlers()));
+    $controller->handleRequest(
+        $http_method,
+        array_slice($requestUri, 4),
+        $req_params,
+        is_array($json) ? $json : null
+    );
+    $system->dbclose();
+    exit;
+
+}elseif($is_reports_query){
+
+    $factory = ServiceFactory::fromLegacySystem($system);
+    $controller = $factory->reportController(
+        $factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)),
+        new hserv\report\ReportRecordWriter($system)
+    );
+    $controller->handleRequest(
+        $http_method,
+        array_slice($requestUri, 4),
+        $req_params,
+        is_array($json) ? $json : null,
+        $_FILES
+    );
+    $system->dbclose();
+    exit;
+
+}elseif($is_record_presentation){
+
+    $req_params['restapi'] = 1;
+    $controller = ServiceFactory::fromLegacySystem($system)->recordPresentationController();
+    $controller->handleRequest($recordPresentation, intval($requestUri[5]));
+
+}elseif(in_array(@$requestUri[3], array('map', 'time'), true)) {
+
+    $req_params['restapi'] = 1;
+
+    if($requestUri[3]==='time'){
+        $controller = ServiceFactory::fromLegacySystem($system)->timeDataController();
+        $controller->output($req_params);
+
+    }elseif(in_array(@$requestUri[4], array('document', 'layer'), true)){
+
+        $controller = ServiceFactory::fromLegacySystem($system)->recordPresentationController();
+        $controller->handleRequest((string)$requestUri[4], intval(@$requestUri[5]));
+
+    }elseif(@$requestUri[4] === 'data'){
+        // File-backed datasource: KML/KMZ/CSV/TSV/GeoJSON/SHP.
+        // GET /api/{db}/map/data/{recID}?format=geojson|rawfile|source
+        $controller = new LegacyMapDataController($system, $req_params);
+        $controller->outputDataSource(intval(@$requestUri[5]));
+
+    }else{
+        // Ordinary Heurist record/query GeoJSON.
+        $controller = ServiceFactory::fromLegacySystem($system)->mapDataController();
+        $recordId = isset($requestUri[4]) && is_numeric($requestUri[4])
+            ? intval($requestUri[4])
+            : null;
+        $controller->outputRecordGeoJson($req_params, $recordId);
+    }
+
+}elseif (@$requestUri[3]=='iiif') {
+    
+    // IIIF Presentation API routes, for example:
+    //   /api/{db}/iiif/manifest/{manifestRecID}
+    //   /api/{db}/iiif/manifest/{ulf_ObfuscatedFileID}
+    //   /api/{db}/iiif/canvas/{ulf_ObfuscatedFileID}
+    //   /api/{db}/iiif/canvas/{canvasRecID}       // alias; output id is canonical
+    //   /api/{db}/iiif/annotations/{ulf_ObfuscatedFileID}
+    //
+    // Do not confuse /iiif/annotations/{fileObfuscatedId}, which is a linked
+    // IIIF AnnotationPage for a Canvas/file, with /annotations/{annotationRecID},
+    // which is the annotation-record REST API handled below by DbAnnotations.
+
+    if($method=='search'){ //GET method
         $req_params['resource'] = @$requestUri[4];
         $req_params['id'] = @$requestUri[5];
         $req_params['restapi'] = 1; //set http response code
 
         include_once '../../hserv/controller/iiif_presentation.php';
     }else{
-        exitWithError('Method Not Allowed DDD', 405);
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
     }
 
 }elseif (@$entities[@$requestUri[3]]=='System') {
@@ -326,7 +748,6 @@ if (@$requestUri[3]=='iiif') {
     }
 
     if($requestUri[3]==='login'){
-
         if(!$system->doLogin(filter_var($req_params['fields']['login']??$req_params['login']??null, FILTER_SANITIZE_STRING),
                              $req_params['fields']['password']??$req_params['password']??null, 'shared'))
         {
@@ -345,19 +766,158 @@ if (@$requestUri[3]=='iiif') {
 else
 {
     //action
-    $req_params['entity'] = @$entities[@$requestUri[3]];
+    $requestedResource = @$requestUri[3];
+    $req_params['entity'] = @$entities[$requestedResource];
     $req_params['a'] = $method;
     $req_params['restapi'] = 1; //set http response code
 
-    if(@$requestUri[4]!=null){
+    // Modern public response format is initially limited to the four
+    // definition resources. Explicit API response context tells the shared
+    // entity search layer to retain its full internal result for formatting
+    // at the entityScrud.php controller boundary.
+    $definitionResources = array(
+        'dbs' => 'databases',
+        'databases' => 'databases',
+        'rty' => 'rectypes',
+        'rectypes' => 'rectypes',
+        'dty' => 'fields',
+        'fields' => 'fields',
+        'trm' => 'terms',
+        'terms' => 'terms',
+        'trl' => 'termlinks',
+        'termlinks' => 'termlinks',
+        'rst' => 'recstructure',
+        'recstructure' => 'recstructure'
+    );
+
+    if($method === 'search' && isset($definitionResources[$requestedResource])){
+        $apiResponseContext = array(
+            'mode' => 'collection',
+            'entity' => $definitionResources[$requestedResource]
+        );
+
+        if($apiResponseContext['entity'] === 'recstructure'){
+            // /recstructure/{recordTypeId} returns all fields for a record type.
+            // /recstructure/{recordTypeId}/{detailTypeId} returns one field.
+            if(isset($requestUri[4]) && $requestUri[4] !== ''){
+                $req_params['rst_RecTypeID'] = $requestUri[4];
+                $apiResponseContext['recordTypeId'] = intval($requestUri[4]);
+            }
+            if(isset($requestUri[5]) && $requestUri[5] !== ''){
+                $req_params['rst_DetailTypeID'] = $requestUri[5];
+                $apiResponseContext['detailTypeId'] = intval($requestUri[5]);
+                $apiResponseContext['mode'] = 'item';
+            }
+            if(!isset($req_params['details'])){
+                $req_params['details'] = 'structure';
+            }
+        }elseif(isset($requestUri[4]) && $requestUri[4] !== ''){
+            $primaryFields = array(
+                'rectypes' => 'rty_ID',
+                'fields' => 'dty_ID',
+                'terms' => 'trm_ID',
+                'databases' => 'sys_Database'
+            );
+            $req_params[$primaryFields[$apiResponseContext['entity']]] = $requestUri[4];
+            $apiResponseContext['mode'] = 'item';
+        }
+
+        $req_params['api_response_context'] = $apiResponseContext;
+    }
+
+    // Public term-link filters use concise API parameter names.
+    if(in_array($requestedResource, array('trl', 'termlinks'), true)){
+        if(isset($req_params['parentId'])){
+            $req_params['trl_ParentID'] = $req_params['parentId'];
+        }
+        if(isset($req_params['termId'])){
+            $req_params['trl_TermID'] = $req_params['termId'];
+        }
+    }
+
+    if(@$requestUri[3]=='annotations'){
+        // Supported annotation API paths:
+        //   /api/{db}/annotations/pages?uri={canvasUri}
+        //   /api/{db}/annotations/{annotationId}
+        //   /api/{db}/annotations/{manifestRecID}/pages?uri={canvasUri}
+        //   /api/{db}/annotations/{manifestRecID}/{annotationId}
+        if(isset($requestUri[5])){
+            if($method!=='search'){ //temporary remarked - to show all annotations per canvas
+                $req_params['manifestRecID'] = intval($requestUri[4]);    
+            }
+            $req_params['recID'] = $requestUri[5];
+        }elseif(isset($requestUri[4])){
+            // A single path segment after /annotations is the annotation id,
+            // not a Manifest id. Manifest-scoped routes always have two
+            // segments: /annotations/{manifestRecID}/pages or
+            // /annotations/{manifestRecID}/{annotationId}.
+            $req_params['recID'] = $requestUri[4];
+        }
+
+        if(intval(@$req_params['manifestRecID'])>0){
+            if(!isset($req_params['fields']) || !is_array($req_params['fields'])){
+                $req_params['fields'] = array();
+            }
+            $req_params['fields']['manifestRecID'] = intval($req_params['manifestRecID']);
+        }
+
+        if($method=='add' || $method=='save'){
+            if(!isset($req_params['fields']) || !is_array($req_params['fields'])){
+                $req_params['fields'] = array();
+            }
+            // This API route is used by the Mirador annotation adapter.
+            // DbAnnotations decides the actual state from this source marker.
+            if(!isset($req_params['fields']['source'])){
+                $req_params['fields']['source'] = 'mirador';
+            }
+        }
+    }elseif(@$requestUri[4]!=null && !isset($definitionResources[$requestedResource])){
       $req_params['recID'] = $requestUri[4];
     }
 
     if($req_params['entity']=='Records'){
+        $isRecordQueryRequest = !isset($requestUri[4]);
+
+        if($isRecordQueryRequest){
+            // POST /records uses a read contract, not the generic entity-write
+            // fields object. Restore its explicit query parameters from JSON.
+            if(is_array($json)){
+                foreach(array(
+                    'query','q','ids','fields','detail','resolveDetails','defs','limit','offset',
+                    'sort','filter','debug'
+                ) as $key){
+                    if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
+                }
+            }
+            $controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
+            $controller->output($req_params);
+            $system->dbclose();
+            exit;
+        }
+
+        if($method=='search' && is_numeric($requestUri[4]) && intval($requestUri[4]) > 0){
+            // GET /records/{id}: the /records record object and meta (srv), with
+            // fields (default _all), detail=ids, resolveDetails and defs.
+            $controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
+            $controller->outputItem($req_params, intval($requestUri[4]));
+            $system->dbclose();
+            exit;
+        }
+
         if($method=='search'){
+            // Public records API always returns the stable JSON representation.
+            // Export-specific options remain available to direct/internal
+            // record_output.php callers but are not part of this API contract.
+            $req_params['format'] = 'json';
+            unset($req_params['fmt'], $req_params['extended'], $req_params['depth'], $req_params['linkmode']);
+
+            $apiResponseContext = array(
+                'entity' => 'records',
+                'mode' => isset($requestUri[4]) && $requestUri[4] !== '' ? 'item' : 'collection'
+            );
             include_once '../../hserv/controller/record_output.php';
         }else{
-            exitWithError('Method Not Implemented', 405);
+            exitWithError('Method not allowed', 405, array('Allow' => 'GET'));
         }
     }else{
         include_once '../../hserv/controller/entityScrud.php';
@@ -432,7 +992,21 @@ function authenticateApiRequestWithJwt($system){
  * @param array $headers Optional response headers.
  * @return void
  */
-function exitWithError($message, $code, $headers = array()){
+function exitWithError($message, $code, $headers = array(), $error_code = null){
+
+    if($error_code === null){
+        if($code === 401 || $code === 403){
+            $error_code = HEURIST_REQUEST_DENIED;
+        }elseif($code === 404){
+            $error_code = HEURIST_NOT_FOUND;
+        }elseif($code === 409){
+            $error_code = HEURIST_ACTION_BLOCKED;
+        }elseif($code >= 500){
+            $error_code = HEURIST_SYSTEM_FATAL;
+        }else{
+            $error_code = HEURIST_INVALID_REQUEST;
+        }
+    }
 
     header(HEADER_CORS_POLICY);
     header(CTYPE_JSON);
@@ -442,7 +1016,11 @@ function exitWithError($message, $code, $headers = array()){
     }
 
     http_response_code($code);
-    print json_encode(array("status"=>'invalid', "message"=>$message));
+    print json_encode(array(
+        'status' => $code,
+        'error' => $error_code,
+        'message' => $message
+    ));
     exit;
 }
 

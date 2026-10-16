@@ -193,40 +193,31 @@ function hMapDocument( _options )
                         } 
 
                         if(DT_SYMBOLOGY>0){
-                            let layer_themes = resdata.fld(record, DT_SYMBOLOGY);
-                            layer_themes = window.hWin.HEURIST4.util.isJSON(layer_themes);
-                            
-                            if(layer_themes){
-                                
+                            const symbology = window.hWin.HEURIST4.map.splitSymbology(
+                                resdata.fld(record, DT_SYMBOLOGY)
+                            );
+                            const layer_themes = symbology.thematic;
+
+                            if(layer_themes.length>0){
                                 let $themes = [];
-                            
-                                if($.isPlainObject(layer_themes)){
-                                    layer_themes = [layer_themes];
-                                }
-                                
+
                                 $.each(layer_themes, function(i, theme){
-                                    if(theme && theme.fields){ //object with field is theme
-                                        
+                                    if(theme && theme.fields){
                                         let themeName = theme.title?theme.title:'Thematic map';
 
-                                        let $theme = {};  
+                                        let $theme = {};
                                         $theme['key'] = 'theme'+recID+'_'+i;
                                         $theme['title'] = "<span style='font-style:italic;'>" + themeName + "</span>";
                                         $theme['type'] = 'theme';
-                                        $theme['layer_id'] = recID; //reference to parent layer
-                                        $theme['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
-                                        $theme['theme'] = theme;     
+                                        $theme['layer_id'] = recID;
+                                        $theme['mapdoc_id'] = mapdoc_id;
+                                        $theme['theme'] = theme;
                                         $theme['selected'] = (theme.active===true);
-                                        
-                                        
-                                        
-                                        
 
                                         $themes.push($theme);
-                                        
                                     }
                                 });
-                                
+
                                 if($themes.length>0){
                                     if(mapdoc_id==0 && $themes.length==1){
                                         //do not add the only theme for current search
@@ -234,7 +225,6 @@ function hMapDocument( _options )
                                         $res['expanded'] = true;
                                         $res['children'] = $themes;
                                     }
-                                
                                 }
                             }
                         }
@@ -605,24 +595,7 @@ console.log(treedata);
     function _getSymbology( mapdoc_id, rec_id ){
         
         function __extractStyle( def_style ){
-            
-            let layer_themes = window.hWin.HEURIST4.util.isJSON(def_style);
-            let layer_default_style = null;
-            
-            if(layer_themes!==false){
-                if($.isPlainObject(layer_themes)){
-                    layer_themes = [layer_themes];
-                }
-
-                $.each(layer_themes, function(i, theme){
-                    if(!theme.fields){
-                        //object without fields is layer's default symbol
-                        layer_default_style = theme.symbol?theme.symbol:theme;
-                        return false;
-                    }
-                });
-            }
-            return layer_default_style;
+            return window.hWin.HEURIST4.map.splitSymbology(def_style).symbol;
         }
         
         
@@ -672,36 +645,25 @@ console.log(treedata);
         
         let layer_title = _recset.fld(_record, 'rec_Title');
         let layer_style = _getSymbology(  mapdoc_id, rec_id );
+        let parent_style = options.mapwidget.mapping('setStyleDefaultValues', {}, false, false);
 
-        let current_value = layer_style;//affected_layer.options.default_style;
-        current_value.sym_Name = layer_title; //affected_layer.options.layer_name;
+        let current_value = window.hWin.HEURIST4.util.cloneJSON(layer_style || {});//affected_layer.options.default_style;
         //open edit dialog to specify symbology
         window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, 1, function(new_value){
-
-            let new_title = null, new_style = null;
-            
-            //rename in list
-            if(!window.hWin.HEURIST4.util.isempty(new_value.sym_Name)
-                && current_value.sym_Name!=new_value.sym_Name)
-            {
-                new_title = new_value.sym_Name;
-                _recset.setFld(_record, 'rec_Title', new_value.sym_Name);
-
-                //update label in timeline                                                
-                options.mapwidget.mapping('updateTimelineLayerName', (_record['layer']).getNativeId(), new_value.sym_Name);
-                
-                delete new_value.sym_Name;
-            }
-            
-            //update style
-            _recset.setFld(_record, DT_SYMBOLOGY, new_value);
+           
+            //update style without discarding thematic renderers
+            const current_symbology = window.hWin.HEURIST4.map.splitSymbology(_recset.fld(_record, DT_SYMBOLOGY));
+            const persisted_style = current_symbology.thematic.length>0
+                ? {symbol:new_value, thematic:current_symbology.thematic}
+                : new_value;
+            _recset.setFld(_record, DT_SYMBOLOGY, persisted_style);
             (_record['layer']).applyStyle(new_value);
             
            //callback to update ui in mapManager
             if(window.hWin.HEURIST4.util.isFunction(callback)){
                 callback( new_title, new_style );
             }
-        });        
+        }, null, parent_style);        
     }
 
     function _editImageFilter( mapdoc_id, layer_id, callback ){
@@ -822,10 +784,10 @@ console.log(treedata);
                     original_heurist_query = recset.getRequest(); //keep for possible 'save as layer'
                     
                     if(recset.length()<2001){ //limit query by id otherwise use current query
+                        curr_request = original_heurist_query;
+                    }else{
                         let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
                         curr_request = { w:'all', q:'ids:'+recset.getIds(MAXITEMS).join(',') };
-                    }else{
-                        curr_request = original_heurist_query;
                     }            
                 
             }else if( window.hWin.HEURIST4.util.isObject(data)&& data['q']) {

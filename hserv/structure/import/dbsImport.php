@@ -899,8 +899,6 @@ foreach ($this->imp_fieldtypes as $ftId){
         $def_field[$idx_name-1] = $this->doDisambiguate($def_field[$idx_name-1], $trg_detailtypes['names']);
         $res = createDetailTypes($columnNames, array("common"=>$def_field));
     }
-    
-    
 
     if(is_numeric($res)){
         $new_dtyID = abs($res);
@@ -920,7 +918,7 @@ foreach ($this->imp_fieldtypes as $ftId){
         //$ftId
         $this->error_exit2('Can\'t add base field "'.$def_field[$idx_name-1]
             .'" (global code '.$def_field[$idx_ccode-1]
-            .') defined in  template. This may be due to a name conflict caused by unrecognised accents on similar names. <br><br>'
+            .') defined in template. This may be due to a name conflict caused by unrecognised accents on similar names. <br><br>'
             .CONTACT_HEURIST_TEAM_PLEASE.' for advice'
             .'<br><br>MySQL message:'.$res);
         return false;
@@ -938,6 +936,7 @@ $idx_terms_tree     = $def_rts2['rst_FilteredJsonTermIDTree'];//value is the sam
 $idx_terms_disabled = $def_rts2['dty_TermIDTreeNonSelectableIDs'];
 $idx_constraints    = $def_rts2['rst_PtrFilteredIDs'];
 $idx_defaultvalue   = $def_rts2['rst_DefaultValue'];
+$idx_maymodify      = $def_rts2['rst_MayModify'];
 
 $idx_name = $def_rts2['rst_DisplayName'];
 $idx_desc = $def_rts2['rst_DisplayHelpText'];
@@ -978,6 +977,9 @@ foreach ($this->imp_recordtypes as $rtyID){
                 $fields[$trg_dty_id][$idx_desc] = $def_field[$idx_desc];
                 $fields[$trg_dty_id][$idx_desc2] = $def_field[$idx_desc2];
                 $fields[$trg_dty_id][$idx_ref] = $def_field[$idx_ref]==null?'':$def_field[$idx_ref];
+                if($idx_maymodify>0){
+                    $fields[$trg_dty_id][$idx_maymodify] = @$def_field[$idx_maymodify]==null?'':$def_field[$idx_maymodify];
+                }
             }
 
             $cfn_ID = $def_field[$idx_calcfield];

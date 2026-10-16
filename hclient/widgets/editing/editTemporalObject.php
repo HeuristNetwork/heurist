@@ -62,6 +62,30 @@
         ?>
         <script type="text/javascript" src="../../core/detectHeurist.js"></script>
 
+        
+        <!-- Calendar picker -->
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.plus.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker.css"> 
+        <!-- Original picker CSS was 1.2.1, using 2.1.1 path now -->
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.picker.js"></script>
+
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.taiwan.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.thai.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.julian.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.persian.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.islamic.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ummalqura.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.hebrew.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ethiopian.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.coptic.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.nepali.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.mayan.js"></script>
+        <script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
+        
+        
         <style type="text/css">
             .display-tab{
                 padding-top: 10px !important;

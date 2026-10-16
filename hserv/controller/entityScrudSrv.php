@@ -26,7 +26,27 @@ function entityExecute($system, $params){
     $entity = null;
 
     $entity_name = entityResolveName(@$params['entity']);
+    
 
+    // Code by ChatGPT added 18 sep 26 for master-satellite synchronisation
+    $structureEntities = [
+        'defRecTypes', 'defDetailTypes', 'defRecStructure', 'defRecTypeGroups',
+        'defDetailTypeGroups', 'defVocabularyGroups', 'defRelationshipConstraints',
+        'sysWorkflowRules'
+    ];
+    $writeActions = ['add', 'save', 'delete', 'batch', 'action', 'files'];
+    if (in_array($entity_name, $structureEntities, true)
+        && in_array((string)($params['a'] ?? ''), $writeActions, true)
+        && \hserv\synchronisation\SyncFeature::isStructureLocked($system)) {
+        $system->addError(
+            HEURIST_ACTION_BLOCKED,
+            'Database structure is controlled by the master and cannot be changed on a satellite.'
+        );
+        return false;
+    }
+    // end of code added 18 sep 26 for master-satellite synchronisation
+    
+    
     if($entity_name!=null){
         $classname = 'hserv\entity\Db'.ucfirst($entity_name);
         if($classname=='hserv\entity\DbRecords'){
@@ -153,6 +173,7 @@ function entityResolveName($entity_name)
     elseif($entity_name=='rty') {$entity_name = 'defRecTypes';}
     elseif($entity_name=='dty') {$entity_name = 'defDetailTypes';}
     elseif($entity_name=='trm' || $entity_name=='term' || $entity_name=='vocabulary') {$entity_name = 'defTerms';}
+    elseif($entity_name=='trl' || $entity_name=='termlinks') {$entity_name = 'defTermsLinks';}
     elseif($entity_name=='vcg') {$entity_name = 'defVocabularyGroups';}
     elseif($entity_name=='rst') {$entity_name = 'defRecStructure';}
     elseif($entity_name=='rem') {$entity_name = 'dbUsrReminders';}

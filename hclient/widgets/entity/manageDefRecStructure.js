@@ -63,6 +63,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _calculated_usages: false, // has field usages been calculated (re-calculate on reload)
 
     create_sub_record: false, // is the new field for creating sub records (child record(s)) automatically
+
+    _closeDlgAfterSave: null, // dialog to close after successful save
     
     /**
      * @brief Initializes the manageDefRecStructure widget.
@@ -399,7 +401,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         treeData = [];
         
-        let available_outer_groups = ['tabs', 'tabs_new', 'group_break', 'explanation_break', 'accordion', 'expanded'];
+        let available_outer_groups = ['tabs', 'tabs_new', 'group_break', 'accordion', 'expanded'];
         let outer_group = {};
         let inner_group = {}; // simple dividers or accordions placed within tabs
 
@@ -408,8 +410,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             let sType = $Db.dty(dty_ID, 'dty_Type');
             let isSep = (sType=='separator');
             let sepType = isSep ? recset.fld(record, 'rst_DefaultValue') : '';
+            const isExplanation = sepType == 'explanation' || sepType == 'explanation_break';
             let title = recset.fld(record,'rst_DisplayName');
             let req = recset.fld(record,'rst_RequirementType');
+
             if(isSep){
                 let extraStyle = '';
                 if(title == '-'){
@@ -426,10 +430,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
             }
 
-            let node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req, folder:isSep, expanded:isSep};
+            let node = {title: title, key: dty_ID, extraClasses: isSep && !isExplanation ? 'separator2' : req, folder: isSep, expanded: isSep};
             node['data'] = {header:isSep, type:isSep?sepType:sType};
 
-            if(isSep){
+            if(isSep && !isExplanation){
 
                 if(available_outer_groups.includes(sepType)){ // new outer group
                     if(!$.isEmptyObject(inner_group)){
@@ -516,7 +520,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                 if(data.node.key < 1){
                     return;
-                }else if(that.previewEditor){
+                }else if(that.previewEditor && that.previewEditor.manageRecords('instance')){
                     that.previewEditor.manageRecords('focusField', data.node.key);
                 }
             },
@@ -528,7 +532,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 if(data.node.key>0){
                     that.selectedRecords([data.node.key]);
                     if(!that._lockDefaultEdit){
-                    
+
                         if(that.options.external_preview){
                             that.options.external_preview.manageRecords('saveQuickWithoutValidation',
                                 function(){
@@ -1649,7 +1653,11 @@ console.log('onEditFormChange @todo check buttons!!!');
                                     //that2.editField( that2._open_formlet_for_recID); does not open formlet, seems to be called too early
                                     setTimeout(function(id){ that2.editField(id); }, 2000, that2._open_formlet_for_recID);
                                 }else{
-                                    setTimeout(function(id){ that.manageRecords('focusField', id); }, 2000, that2._open_formlet_for_recID);
+                                    setTimeout(function(id){ 
+                                         if(that.manageRecords('instance')){
+                                            that.manageRecords('focusField', id);  
+                                         }
+                                    }, 2000, that2._open_formlet_for_recID);
                                 }
                             }
                             that2._show_optional = false;
@@ -1758,21 +1766,11 @@ console.log('onEditFormChange @todo check buttons!!!');
                         ele.tabs( 'option', 'active', tabIndex);
                     }
                 }
-                
+
                 //adjust preview editor position
-                let ele_ed = this.previewEditor.find('.editForm'); //editFormDialog
-                setTimeout(function(){
-                    ele_ed.scrollTop(0);
-                    let top = $(ed_cont).position().top - 60;
-                    
-                    let ele = that.editForm.parents('.ui-tabs');
-                    if(ele.length>0){
-                        top = top + $(ele).position().top;
-                    }
-                    ele_ed.scrollTop(top);
-                    
-                },200); //without timeout preview form scrolls to kept position
-                
+                if(this.previewEditor && this.previewEditor.manageRecords('instance')){
+                    this.previewEditor.manageRecords('focusField', this._currentEditID);    
+                }
             }
             
             let v = that._editing.getValue('rst_CreateChildIfRecPtr');
@@ -1851,13 +1849,21 @@ console.log('onEditFormChange @todo check buttons!!!');
             }); 
         }
 
+        const dt_type = this._editing.getValue('dty_Type');
+
         // Add horizontal rules
         edit_ele = this._editing.getFieldByName('rst_SemanticReferenceURL');
         if(edit_ele){
 
-            let $hr = $('<hr>', {style: 'border-color: black; width: 95%;'});
-            $hr.clone().insertBefore(edit_ele);
-            $hr.clone().appendTo(this.editForm);
+            if(dt_type == 'separator'){
+                edit_ele.hide();
+                this._editing.getFieldByName('rst_NonOwnerVisibility').hide();
+                this._editing.getFieldByName('rst_MayModify').hide();
+            }else{
+                let $hr = $('<hr>', {style: 'border-color: black; width: 95%;'});
+                $hr.clone().insertBefore(edit_ele);
+                $hr.clone().appendTo(this.editForm);
+            }
         }
 
         //fill init values of virtual fields
@@ -1874,15 +1880,23 @@ console.log('onEditFormChange @todo check buttons!!!');
             window.hWin.HEURIST4.util.setDisabled(ele, true);
             this._onDetailTypeChange();
         }
-        
-        const dt_type = this._editing.getValue('dty_Type');
 
         // Always show help text
         this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3').show();
 
+        let top_div = $('<div style="width:100%;min-height:26px">').prependTo(this.editForm);
         let bottom_div = $('<div style="width:100%;min-height:26px">').appendTo(this.editForm);
         let $height_header = null;
         let $width_header = null;
+
+        let $helpText = this._editing.getFieldByName('rst_DisplayHelpText');
+        let $helpCounter = $('<div>', {
+            style: 'padding: 0.2em 0px;',
+            html: `5000 characters allowed, <span class="charCount">${$helpText.find('textarea').val().length}</span> used`
+        }).insertAfter($helpText.find('.input-div'));
+        this._on($helpText.find('textarea'), {
+            input: () => $helpCounter.find('.charCount').text($helpText.find('textarea').val().length)
+        });
 
         if(dt_type=='separator'){
             
@@ -1911,7 +1925,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             this._editing.getFieldByName('rst_DisplayName').find('.header > label').text(window.HR('Heading:'));
 
             // Change help text label
-            this._editing.getFieldByName('rst_DisplayHelpText').find('.header > label').text(window.HR('Description (optional):'));
+            $helpText.find('.header > label').text(window.HR('Description (optional):'));
 
         }else{
 
@@ -2018,9 +2032,9 @@ console.log('onEditFormChange @todo check buttons!!!');
             }
 
             // Place width and height fields on the same line
-            let width_fld = (dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float') ? 
+            let width_fld = dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float' ? 
                             this._editing.getFieldByName('rst_DisplayWidth_ext') : this._editing.getFieldByName('rst_DisplayWidth');
-            let height_fld = this._editing.getFieldByName('rst_DisplayHeight');
+            let height_fld = dt_type=='blocktext' ? this._editing.getFieldByName('rst_DisplayHeight') : null;
             if(width_fld && height_fld){
 
                 // Change display + hide height help
@@ -2043,6 +2057,8 @@ console.log('onEditFormChange @todo check buttons!!!');
                         of: height_fld
                     });
                 }, 500);
+            }else if(width_fld){
+                width_fld.find('.header label').text('Width:');
             }
         }
 
@@ -2057,6 +2073,7 @@ console.log('onEditFormChange @todo check buttons!!!');
                 .css({'font-weight':'bold','float':'right',display:'none','margin-top':'2px','margin-right':'15px'})
                 .addClass('ui-button-action btnRecSaveAndClose_rts')
                 .appendTo(bottom_div);
+        btnSave.clone().appendTo(top_div);
             
         this._on( btnCancel,{click: function() { 
             that.previewEditor.find('div[data-dtid='+that._currentEditID+']')
@@ -2083,7 +2100,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             }
 		}});
                 
-		this._on( btnSave, {click: function() { 
+		this._on( this.editForm.find('.btnRecSaveAndClose_rts'), {click: function() { 
             that.previewEditor.find('div[data-dtid='+that._currentEditID+']')
                     .find('div.header').removeClass('ui-heurist-design-fade');
 
@@ -2600,9 +2617,11 @@ console.log('onEditFormChange @todo check buttons!!!');
         if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
             fields['rst_DisplayOrder'] = '0';
         }
-        
+
         if(fields['rst_DisplayWidth']>255) fields['rst_DisplayWidth'] = 255;
         else if(fields['rst_DisplayWidth']=='') fields['rst_DisplayWidth'] = 40;
+
+        if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayHeight']) || fields['rst_DisplayHeight'] < 0) fields['rst_DisplayHeight'] = 0;
 
         this._stillNeedUpdateForRecID = recID;    
 
@@ -2610,6 +2629,9 @@ console.log('onEditFormChange @todo check buttons!!!');
             //after save on server - close edit form and refresh preview
             afterAction = function( recID ){
                 window.hWin.HAPI4.EntityMgr.refreshEntityData('rst', () => {
+                    if(that._closeDlgAfterSave && this._closeDlgAfterSave.dialog('instance') !== undefined){
+                        that._closeDlgAfterSave.dialog('close');
+                    }
                     that._stillNeedUpdateForRecID = 0;
                     that._afterSaveEventHandler( recID ); //to update definitions and tree
                     if(refresh_tree) { that._initTreeView(); } // refresh tree if separator type has been changed
@@ -2697,6 +2719,10 @@ console.log('onEditFormChange @todo check buttons!!!');
         
         this._dragIsAllowed = true;
 
+        let calculatedFormula = this._editing?.getValue('rst_CalcFunctionID');
+        if(calculatedFormula){
+            this._updateCalculatedField(calculatedFormula);
+        }
         if(this.create_sub_record){
             this._createSubRecords(recID);
         }
@@ -3008,7 +3034,7 @@ console.log('onEditFormChange @todo check buttons!!!');
         inpt.parent().addClass('selectmenu-parent');
 
         if(!window.hWin.HEURIST4.browseRecordMax){
-            window.hWin.HEURIST4.browseRecordMax = 1000;
+            window.hWin.HEURIST4.browseRecordMax = 5000;
         }
 
         $.each(inpt.find('option'), function(idx, ele){
@@ -3548,7 +3574,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             $(node.span).removeClass('ui-state-active');
         }else{
             $(node.span).addClass('ui-state-active');
-            this.element.parents('.editStructure').animate({scrollTop: $(node.span).offset().top}, 1);
+            setTimeout(() => this.element.parents('.editStructure').animate({scrollTop: $(node.span).offset().top}, 1), 2500);
         }
     },
 
@@ -3838,8 +3864,11 @@ console.log('onEditFormChange @todo check buttons!!!');
             </div>
         </div>
         <div>
-            <div class="required" style="margin-bottom: 7.5px;">Enter html formatted text here</div>
-            <textarea id="rst_DisplayHelpText" class="text ui-corner-all" style="border:none;" cols="100" rows="10"></textarea>
+            <div class="required" style="margin-bottom: 7.5px;">
+                Enter html formatted text here
+                <span style="display: inline-block;color: black;font-weight: normal;float: right;"><span id="explainCharCount">5000</span> characters remaining</span>
+            </div>
+            <textarea id="rst_DisplayHelpText" class="text ui-corner-all" style="border:none;" cols="100" rows="10" maxlength="5000"></textarea>
         </div>`;
 
         const btns = {};
@@ -3860,8 +3889,8 @@ console.log('onEditFormChange @todo check buttons!!!');
 
             this._skip_title_clear = true;
 
+            this._closeDlgAfterSave = $dlg;
             this.addNewSeparator(afterDTYID, 'explanation', true, {rst_DisplayName: rstName, rst_DisplayHelpText: rstHelp});
-            $dlg.dialog('close');
         };
 
         btns[window.hWin.HR('Cancel')] = () => {
@@ -3870,7 +3899,54 @@ console.log('onEditFormChange @todo check buttons!!!');
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Adding new explanation'}, {dialogId: 'new-explanation', default_palette_class: 'ui-heurist-design'});
 
-        $dlg.parent().find('.ui-dialog-buttonpane button').first().addClass('ui-button-action');
+        $dlg.dialog('buttonpane').find('button').first().addClass('ui-button-action');
+
+        let $textarea = $dlg.find('textarea');
+        let $charCounter = $dlg.find('#explainCharCount');
+        this._on($textarea, {
+            input: () => $charCounter.text(5000 - $textarea.val().length)
+        });
+    },
+
+    _updateCalculatedField: function(cfn_ID){
+
+        if(!window.hWin.HEURIST4.util.isPositiveInt(cfn_ID)){
+            return;
+        }
+
+        let request = {};
+
+        request['rst_CalcFunctionID']  = cfn_ID;
+        request['a'] = 'search';
+        request['entity'] = 'defRecStructure';
+        request['details'] = 'rectype';
+        request['request_id'] = window.hWin.HEURIST4.util.random();
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => { // Renamed to avoid conflict
+
+            if(response.status != window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            let rectypes = null;
+            let recset = new HRecordSet(response.data); // Renamed
+            if(recset.length() > 0){
+                rectypes = [];
+                recset.each2(function(id, rec){
+                    rectypes.push(rec['rst_RecTypeID']);
+                });
+            }
+
+            let sURL = `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=calcfields&db=${window.hWin.HAPI4.database}&recTypeIDs=${rectypes.join(',')}`;
+
+            window.hWin.HEURIST4.msg.showDialog(sURL, {
+                'close-on-blur': false,
+                'no-resize': true,
+                height: 400,
+                width: 550
+            });
+        });
     }
 
 });

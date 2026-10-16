@@ -32,14 +32,22 @@ use hserv\utilities\Temporal;
 */
 class ExportRecordsGEOJSON extends ExportRecords {
 
-    /** @var bool Indicates if the output should be Leaflet-compatible (includes separate timeline data). */
+    /** Legacy mapping envelope mode: {geojson, timeline, ...}. */
+    public const LEAFLET_FULL_ENVELOPE = 1;
+    /** New map API mode: strict GeoJSON FeatureCollection with meta. */
+    public const LEAFLET_FEATURE_COLLECTION = 2;
+
+    /** @var bool Indicates  */
     private $is_leaflet = false;
+    
+    /** @var bool Indicates if the output should be mapping v1 Leaflet-compatible (includes separate timeline data). */
+    private $is_full_envelope = false;
 
     /** @var array|bool List of record type IDs to consider as sources for geographic data via pointers, or true to enable generic place searching. */
     private $find_geo_by_pointer_rty = false;
     /** @var array|null List of specific detail type IDs (resource pointers) to use for finding linked geographic data. */
     private $find_geo_by_pointer_dty = null;
-    /** @var array|null List of specific geo-detail type IDs to use for fetching geometry. Can include query conditions for linked records. */
+    /** @var array|null Legacy geo-field selectors. Can include direct dty IDs or pre-built {id,q} linked queries. */
     private $find_by_geofields = null;
     /** @var bool If true, all geo-fields are searched for geometry; if false, only those specified or linked via `find_geo_by_pointer_rty` are used. */
     private $search_all_geofields = true;
@@ -65,6 +73,14 @@ class ExportRecordsGEOJSON extends ExportRecords {
     private $detail_mode = 0;
     /** @var bool If true and a record has multiple geometries, create separate GeoJSON features for each. Otherwise, use GeometryCollection. */
     private $separate_entity = false;
+    
+    private $totalRecords = 0;
+    private $returnedRecords = 0;
+    private $limit = 0;
+    private $offset = 0;
+    private $returnedFeatures = 0;
+
+    private $outputJSONL = false;
 
     /**
      * Prepares for GeoJSON export, extending the parent method.
@@ -74,6 +90,7 @@ class ExportRecordsGEOJSON extends ExportRecords {
      * - `simplify`: Sets `$this->simplify_wkt`.
      * - `detail_mode`: Sets `$this->detail_mode`.
      * - `separate`: Sets `$this->separate_entity` (for Leaflet).
+     * - `jsonl`: Sets `$this->outputJSONL`.
      * - `geofields`, `suppress_linked_places`: Configure how geographic data is found,
      *   populating `$this->find_geo_by_pointer_rty`, `$this->find_geo_by_pointer_dty`,
      *   `$this->find_by_geofields`, and `$this->search_all_geofields`.
@@ -85,17 +102,27 @@ class ExportRecordsGEOJSON extends ExportRecords {
      */
 protected function _outputPrepare($data, $params){
 
+    $this->outputJSONL = intval(@$params['jsonl']) > 0;
+
     $res = parent::_outputPrepare($data, $params);
     if($res){
 
+
+        $this->totalRecords = $data['data']['count'];
+        $this->returnedRecords = $data['data']['reccount'];
+        $this->limit = $params['limit']??0;
+        $this->offset = $data['data']['offset'];
+
         $this->search_all_geofields = true;
 
-        $this->is_leaflet = @$params['leaflet'];
+        $this->is_leaflet = intval(@$params['leaflet']) > 0;
+        // leaflet=1 keeps the legacy mapping envelope; leaflet=2 emits a strict
+        // FeatureCollection with map API metadata.
+        $this->is_full_envelope = (intval(@$params['leaflet']) === self::LEAFLET_FULL_ENVELOPE);
 
         $this->simplify_wkt = intval(@$params['simplify'])==1;
         $this->detail_mode = $this->is_leaflet ?0:intval(@$params['detail_mode']);
         $this->separate_entity = $this->is_leaflet && (intval(@$params['separate'])==1);
-
 
         $this->find_geo_by_pointer_dty = null;
         $this->find_by_geofields = null;
@@ -139,6 +166,8 @@ protected function _outputPrepare($data, $params){
                                 //search all geofields
                                 $this->search_all_geofields = true;
                             }elseif(is_array($code)){
+                                // Legacy client format: either a direct detail id or a
+                                // pre-built query for a detail on linked records.
                                 if(!@$code['q']){
                                     array_push($this->find_by_geofields,$code['id']);
                                 }else{
@@ -146,6 +175,8 @@ protected function _outputPrepare($data, $params){
                                 }
 
                             }else{
+                                // Legacy detail type id / concept code. Preserve the
+                                // existing pointer-to-place behaviour unchanged.
                                 $dty_ID = ConceptCode::getDetailTypeLocalID($code);
                                 if($dty_ID>0){
                                     array_push($this->find_geo_by_pointer_dty, $dty_ID);
@@ -162,7 +193,6 @@ protected function _outputPrepare($data, $params){
                 if(isEmptyArray($this->find_by_geofields)){
                     $this->find_by_geofields = null;
                 }
-
             }
         }
 
@@ -218,13 +248,16 @@ protected function _outputPrepareFields($params){
      */
 protected function _outputHeader(){
 
-    if($this->is_leaflet){
-        fwrite($this->fd, '{"geojson":');
-    }else{
-        fwrite($this->fd, '{"type":"FeatureCollection","features":');
-    }
+    if(!$this->outputJSONL){
 
-    fwrite($this->fd, '[');
+        if($this->is_leaflet && $this->is_full_envelope){
+            fwrite($this->fd, '{"geojson":');
+        }else{
+            fwrite($this->fd, '{"type":"FeatureCollection","features":');
+        }
+
+        fwrite($this->fd, '[');
+    }
 
     $this->comma = '';
 
@@ -235,6 +268,7 @@ protected function _outputHeader(){
     $this->timeline_dty_ids = array();//unique list of all date fields
     $this->timeline_data = array();
     $this->layers_record_ids = array();
+    $this->returnedFeatures = 0;
 }
 
 //
@@ -317,7 +351,8 @@ protected function _outputRecord($record){
                 $feature['geometry'] = $geom;
                 $feature['properties']['rec_GeoField'] = $geoms_dty[$idx];//dty_ID
                 fwrite($this->fd, $this->comma.json_encode($feature));
-                $this->comma = ',';
+                $this->returnedFeatures++;
+                $this->comma = $this->outputJSONL ? "\n" : ',';
 
                 if(!in_array($geoms_dty[$idx], $this->geojson_dty_ids)){
                     $this->geojson_dty_ids[] = $geoms_dty[$idx];//unique list of all geofields
@@ -327,9 +362,10 @@ protected function _outputRecord($record){
 
     }else{
         fwrite($this->fd, $this->comma.json_encode($feature));
+        $this->returnedFeatures++;
     }
 
-    $this->comma = ',';
+    $this->comma = $this->outputJSONL ? "\n" : ',';
 
     return true;
 
@@ -350,10 +386,13 @@ protected function _outputRecord($record){
      */
 protected function _outputFooter(){
 
+    if($this->outputJSONL){
+        return;
+    }
 
     fwrite($this->fd, ']');//close
 
-    if($this->is_leaflet){ //return 2 array - pure geojson and timeline items
+    if($this->is_leaflet && $this->is_full_envelope){ //return 2 array - pure geojson and timeline items
 
         fwrite($this->fd, ',"timeline":'.json_encode($this->timeline_data));
         fwrite($this->fd, ',"timeline_dty_ids":'.json_encode($this->timeline_dty_ids));//unique list of all date fields
@@ -362,6 +401,16 @@ protected function _outputFooter(){
         fwrite($this->fd, ',"geojson_rty_ids":'.json_encode($this->geojson_rty_ids));
         fwrite($this->fd, ',"layers_ids":'.json_encode($this->layers_record_ids).'}');
     }else{
+        fwrite($this->fd, 
+        ',"meta":'.json_encode(array(
+            'database'=>$this->system->dbname(),
+            //'recordId'=>$id ?: null,
+            "totalRecords" => $this->totalRecords,
+            "returnedRecords" => $this->returnedRecords,
+            "returnedFeatures" => $this->returnedFeatures,
+            "offset" => $this->offset,
+            "limit" => $this->limit,
+            "isPartial" => ($this->offset > 0 || ($this->offset + $this->returnedRecords) < $this->totalRecords) )));
         fwrite($this->fd, '}');//close for FeatureCollection
     }
 
@@ -446,7 +495,8 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                     $val = $value['id'];
                 }elseif(@$value['geo']){
 
-                    if($this->find_by_geofields==null || in_array($dty_ID, $this->find_by_geofields)){
+                    if($this->find_by_geofields==null
+                        || in_array($dty_ID, $this->find_by_geofields)){
 
                         $wkt = $value['geo']['wkt'];
 
@@ -541,7 +591,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
     }
 
     if(!isEmptyArray($this->find_by_geofields)){
-        //find geo values in linked records
+        // Explicit geo fields were requested in the legacy {id,q} format.
         foreach ($this->find_by_geofields as $idx => $code){
             if(is_array($code) && @$code['id'] && @$code['q']){
                 //@todo group details by same queries
@@ -558,15 +608,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                         }
                     }
                 }
-            }/*elseif (is_numeric($code) && intval($code)>0){
-                if(@$record['details'][$code]['geo']){
-                            $wkt = $record['details'][$code]['geo']['wkt'];
-                            $json = self::_getJsonFromWkt($wkt, $simplify);
-                            if($json){
-                               $geovalues[] = $json;
-                            }
-                }
-            }*/
+            }
         }
 
     }elseif( (isEmptyArray($geovalues)) &&

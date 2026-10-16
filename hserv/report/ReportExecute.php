@@ -202,9 +202,7 @@ class ReportExecute
 
         $this->smartySessionId = DbUtils::prepareSessionId($params['session']?? null);
         // IMPORTANT: allow concurrent progress.php calls from same browser session
-        if (!empty($this->smartySessionId) && session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }               
+        $this->system->session()->close();
 
         $this->outputmode = isset($params['mode']) ? preg_replace('/[^a-z]/', "", $params["mode"]) : 'html';
         $allowed_exts = array('html','js','txt','text','csv','xml','json','css');
@@ -233,6 +231,10 @@ class ReportExecute
             $this->replevel = isset($params['replevel']) ? intval($params['replevel']) : 0;
             
             $this->testForWidgetTemplate = isset($params['testwidget']);
+        }
+
+        if(!empty($this->params['q']) && is_string($this->params['q'])){
+            $this->params['q'] = urldecode($this->params['q']);
         }
     }
 
@@ -440,13 +442,6 @@ class ReportExecute
         $templateFile = isset($this->params['template']) ? $this->params['template'] : null;
         $template_body = isset($this->params['template_body']) ? $this->params['template_body'] : null;
 
-        if ($templateFile) {
-            $content = $this->loadTemplateFile($templateFile);
-        } else {
-            $content = $template_body;
-        }
-
-
         if(!isset($this->params["output"]) && $this->publishmode != 2){
             $this->outputfile = null;
             if($this->publishmode==1 ){
@@ -458,6 +453,13 @@ class ReportExecute
             $this->outputfile = $this->prepareOutputFile();
         }
 
+        if ($templateFile) {
+            $content = $this->loadTemplateFile($templateFile);
+        } else {
+            $content = $template_body;
+        }
+
+        
         if($content!==false && ($content==null || strlen(trim($content))==0)){
             $this->outputError('Template content is empty');
             return false;
@@ -634,6 +636,9 @@ class ReportExecute
         if ($this->templateFile==null){  //execution from $this->params['template_body']
 
                 $temp_templateFile = $this->saveTemporaryTemplate($content);
+                // the temporary file name is per user and file times have 1 s resolution:
+                // without this a second test within the same second runs the old compiled body
+                $this->smarty->setForceCompile(true);
 
                 if($this->publishmode == 4){
                     try{
@@ -1607,8 +1612,17 @@ Javascript wrap:<br>
                     $value = $params['var'];
                     $result = '';
 
-                    if($value && $value['wkt']){
-                        $geom = \geoPHP::load($value['wkt'],'wkt');
+                    if(is_array($value) && array_key_exists(0, $value)){
+                        $value = $value[0];
+                    }
+                    $wkt = is_array($value) ? ($value['wkt'] ?? '') : (is_string($value) ? $value : '');
+
+                    // the same readable text as the client and the srv engine (Heurist\Utilities\GeoText)
+                    if($wkt && $mode != 'link' && class_exists('\Heurist\Utilities\GeoText')){
+                        $result = ($label != '' ? $label.': ' : '')
+                            .htmlspecialchars(\Heurist\Utilities\GeoText::summary($wkt));
+                    }elseif($wkt){
+                        $geom = \geoPHP::load($wkt,'wkt');
                         if(!$geom->isEmpty()){
                                 $point = $geom->centroid();
                                 if($label=="") {$label = "on map";}
@@ -1696,7 +1710,10 @@ Javascript wrap:<br>
 
             if($mode=="link") {
 
-                $sname = (!$originalFileName || $originalFileName==ULF_REMOTE || strpos($originalFileName,ULF_IIIF)===0)
+                $preferredSource = $fileinfo['ulf_PreferredSource'] ?? '';
+                $isIiif = strpos((string)$preferredSource, 'iiif') === 0
+                    || (defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF) === 0);
+                $sname = (!$originalFileName || $originalFileName==ULF_REMOTE || (defined('ULF_IIIF') && strpos((string)$originalFileName, ULF_IIIF)===0))
                 ?$external_url:$originalFileName;
 
                 if(@$params['fancybox']){

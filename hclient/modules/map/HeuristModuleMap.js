@@ -1,0 +1,894 @@
+/**
+ * HeuristModuleMap.js - Heurist Map module host class
+ *
+ * Provides an iframe-based host class around the standalone heurist-map
+ * application. The class translates HRecordSet/query/selection state into the
+ * stable HeuristMapPublicApi without exposing Leaflet or standalone internals.
+ *
+ * @project     Heurist academic knowledge management system
+ * @package     hclient.modules
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       8.0
+ */
+
+/**
+ * Map-specific implementation of the reusable HeuristModuleViewer host.
+ */
+const HEURIST_MODULE_MAP_DEFAULTS = {
+        presentationMode: 'iframe',
+        viewerMode: 'map',              // map | configuration | draw
+        configurationMode: 'preferences',  // preferences | website | publish
+        runtimeMode: null,              // main | website | standalone; inferred from configurationMode when omitted
+        configurationValue: null,       
+
+        database: window.hWin.HAPI4.database,
+        apiBaseUrl: window.hWin.HAPI4.baseURL + 'api',
+        mapApplicationUrl: window.hWin.HAPI4.baseURL+'hclient/modules/map/mapViewer.html', 
+        //mapApplicationUrl: '/heurist/hclient/bundles/heurist-map/index.html',
+
+        accessToken: null,
+        requestHeaders: null,
+        baseMapProviderOptions: null, // e.g. {MapTilesAPI:{apikey:'...'}}
+
+        heuristModuleSettings: null,  // persisted {format,version,options,config}
+        heuristModuleState: null,     // initial reproducible map state
+        mapDocument: null,
+        drawParameters: null,
+
+        query: null,
+        recordset: null, // Compatibility input only; immediately converted and discarded.
+        selection: null,
+
+        eventbased: true,
+        search_realm: null,
+        // LEGACY/UNUSED. Retained only so existing website configurations still load.
+        current_search_filter: null,
+
+        currentResultsLayer: {
+            id: 'current-results',
+            title: null,
+            visible: true,
+            selectable: true
+        },
+
+        onready: null,
+        onconfiguration: null,
+        oncancelconfiguration: null,
+        onselect: null,
+        onerror: null,
+        oneditdocument: null,
+        oneditlayer: null,
+        ondrawchange: null,
+        ondrawfinish: null,
+        ondrawcancel: null
+    };
+
+/** Host-side class for the standalone heurist-map application. */
+class HeuristModuleMap extends HeuristModuleRecordset {
+
+    constructor(element, options) {
+        super(element, $.extend(true, {}, HEURIST_MODULE_MAP_DEFAULTS, options || {}));
+        this._create();
+    }
+
+    _create() {
+        this._mapApi = null;
+        this._isReady = false;
+        this._isDestroyed = false;
+        this._pendingOperations = [];
+        this._currentQuery = null;
+        this._currentLayerCreated = false;
+        this._suppressSelectionSync = false;
+        this._readyTimer = 0;
+        this._resizeTimer = 0;
+        this._resizeObserver = null;
+        this._moduleBootstrap = null;
+        this._mapEventHandlers = {};
+        this._events = null;
+
+        this.element
+            .addClass('heurist-map-viewer')
+            .css({ position: 'relative', overflow: 'hidden' });
+
+        this._frameContainer = $('<div>')
+            .addClass('heurist-map-viewer-frame-container')
+            .css({ position: 'absolute', inset: 0 })
+            .appendTo(this.element);
+
+        if (this.options.presentationMode !== 'iframe') {
+            this._reportError(new Error(
+                'Only iframe presentationMode is implemented by mapViewer'
+            ), 'initialize');
+            return;
+        }
+
+        this._bindHostEvents();
+        this._bindShowEvent();
+        this._observeResize();
+        this._ensureIframeWhenVisible();
+    }
+    /** Initialize the iframe when the Heurist host makes this widget visible. */
+    _createIframe() {
+        if (this._mapFrame || this._isDestroyed) return;
+        this._moduleBootstrap = this._buildBootstrap();
+
+        this._mapFrame = $('<iframe>')
+            .addClass('heurist-map-viewer-frame')
+            .attr({
+                title: 'Heurist map',
+                frameborder: '0'
+            })
+            .css({ width: '100%', height: '100%', border: 0, display: 'block' })
+            .appendTo(this._frameContainer);
+
+        // The bridge is stored on the iframe DOM element (owned by the parent),
+        // not inside the child window. It therefore survives iframe navigation/reload.
+        this._installIframeBridge();
+
+        this._mapFrame.on('load.heuristModuleMap', function() {
+                // Reassign defensively in case external code replaced the property.
+                this._installIframeBridge();
+                this._mapApi = null;
+                this._isReady = false;
+                this._waitForMapApi();
+            }.bind(this));
+
+        this._mapFrame.attr('src', this._buildIframeUrl());
+    }
+    /** Install the direct parent-to-child bridge on the persistent iframe element. */
+    _installIframeBridge() {
+        var frame = this._mapFrame && this._mapFrame[0];
+        if (!frame) return;
+        var that = this;
+        frame.heuristMapHost = {
+            getConfiguration: function() {
+                return that._getConfiguration();
+            },
+            updateSettings: function(settings) {
+                return that._updateSettings(settings);
+            },
+            updateState: function(state) {
+                return that._updateState(state);
+            },
+            // Generic host editing bridge. MapDocument and MapLayer are both ordinary
+            // Heurist records, so the child only needs to provide the persisted record ID.
+            editRecord: function(recordId) {
+                return that._openRecordEdit(recordId);
+            },
+            canEditRecords: function() { return that._canEditRecords(); },
+            viewRecord: function(recordId) {
+                return that._openRecordView(recordId);
+            },
+            addRecord: function(recordTypeId) {
+                return that._addRecordEdit(recordTypeId);
+            },
+            doSearch: function(request) {
+                return that._doSearch(request);
+            },
+            editExtent: function(bounds, options) {
+                return that._editExtent(bounds, options || {});
+            }
+        };
+    }
+    /** Build the single bootstrap contract consumed by heurist-map. */
+    _buildBootstrap() {
+        var hapi = window.hWin && window.hWin.HAPI4;
+            
+        const lang = hapi
+            ? hapi.getLangCode3(hapi.get_prefs_def('layout_language', 'eng'), 'eng')
+            : 'eng';            
+            
+        var explicit = this._cloneMapSettings(this.options.heuristModuleSettings);
+        var runtimeMode = this._getRuntimeMode();
+
+        // The host no longer reads the "heurist-map" preference itself (that used
+        // to go through HAPI4.get_prefs(), an in-memory cache that heurist-map's
+        // own HostAdapter.savePreferences() never refreshes, since it saves via a
+        // direct FrontController request rather than HAPI4.save_pref()). Forward
+        // only explicit widget settings and the website/draw restrictions below;
+        // heurist-map fetches its own preference itself (loadPreferencesOnInit)
+        // whenever nothing is supplied here, always from the live server value.
+        var settings = this._mergeMapSettings(
+            runtimeMode === 'website' ? this._websiteMapDefaults() : null,
+            this.options.viewerMode === 'draw' ? this._drawMapDefaults() : null,
+            explicit
+        );
+        if (this.options.viewerMode === 'configuration' && this.options.configurationValue) {
+            settings = this._mergeMapSettings(settings, this.options.configurationValue);
+        }
+        if (runtimeMode === 'website') {
+            // Website maps must never expose host-only configuration actions.
+            settings.options.ui.showOptions = false;
+            settings.options.ui.showPublish = false;
+        }
+        if (this.options.viewerMode === 'draw') {
+            settings = this._forceDrawMapSettings(settings);
+        }
+
+        var database = this.options.database || (hapi ? hapi.database : null);
+        var apiBaseUrl = this.options.apiBaseUrl || (hapi ? hapi.baseURL + 'api' : null);
+
+        return {
+            runtime: {
+                viewerMode: ['configuration', 'draw'].indexOf(this.options.viewerMode) >= 0
+                    ? this.options.viewerMode : 'map',
+                configurationMode: this.options.configurationMode || 'preferences',
+                runtimeMode: runtimeMode,
+                language: lang,
+                database: database,
+                apiBaseUrl: apiBaseUrl,
+                accessToken: this.options.accessToken || null,
+                requestHeaders: $.extend({}, this.options.requestHeaders || {}),
+                baseMapProviderOptions: $.extend(true, {}, this.options.baseMapProviderOptions || {}),
+                baseUrl: hapi ? hapi.baseURL : null,
+                readonly: false
+            },
+            settings: settings,
+            state: this.options.heuristModuleState
+                || (this.options.viewerMode === 'draw' ? this._getSavedDrawState() : null)
+        };
+    }
+
+    /** Patch the cached bootstrap's state in place. */
+    _updateState(state) {
+        this._moduleBootstrap = this._moduleBootstrap || this._buildBootstrap();
+        this._moduleBootstrap.state = state == null ? null : $.extend(true, {}, state);
+        this.options.heuristModuleState = state == null ? null : $.extend(true, {}, state);
+    }
+
+    /** Resolve host environment independently from the settings envelope format. */
+    _getRuntimeMode() {
+        var mode = String(this.options.runtimeMode || '').toLowerCase();
+        if (['main', 'website', 'standalone'].indexOf(mode) >= 0) return mode;
+        if (this.options.configurationMode === 'website') return 'website';
+        if (this.options.configurationMode === 'publish') return 'standalone';
+        return 'main';
+    }
+    /** Defaults applied after user preferences but before explicit website settings. */
+    _websiteMapDefaults() {
+        return {
+            options: {
+                ui: {
+                    showBaseMaps: false,
+                    showOptions: false,
+                    showPublish: false
+                },
+                nativeControls: {
+                    bookmark: false,
+                    print: false
+                }
+            }
+        };
+    }
+    /** Drawing is an isolated workspace with no result or persisted document. */
+    _drawMapDefaults() {
+        return {
+            options: {
+                ui: {
+                    enabled: true,
+                    initiallyExpanded: false,
+                    showCurrentDocument: false,
+                    showMapDocuments: true,
+                    showBaseMaps: true,
+                    showOptions: false,
+                    showPublish: false
+                },
+                nativeControls: {
+                    zoom: true,
+                    scale: true,
+                    bookmark: true,
+                    print: false,
+                    selector: false,
+                    search: true
+                }
+            },
+            config: { dynamicDocument: { enabled: false } }
+        };
+    }
+    _forceDrawMapSettings(settings) {
+        settings = this._mergeMapSettings(settings, this._drawMapDefaults());
+        return settings;
+    }
+    _getSavedDrawState() {
+        var hapi = window.hWin && window.hWin.HAPI4;
+        var state = null;
+        try {
+            if (hapi && typeof hapi.get_prefs_def === 'function') {
+                state = hapi.get_prefs_def('heurist-map-draw-state', null);
+                if (typeof state === 'string' && state) state = JSON.parse(state);
+            }
+            if (!state && window.localStorage) {
+                state = JSON.parse(window.localStorage.getItem(this._drawStateStorageKey()) || 'null');
+            }
+        } catch (ignore) { state = null; }
+        return state && typeof state === 'object' ? state : null;
+    }
+    _saveDrawState() {
+        if (this.options.viewerMode !== 'draw' || !this._mapApi) return null;
+        var state = this._mapApi.captureState();
+        var hapi = window.hWin && window.hWin.HAPI4;
+        try {
+            if (hapi && typeof hapi.save_pref === 'function') {
+                hapi.save_pref('heurist-map-draw-state', JSON.stringify(state));
+            } else if (window.localStorage) {
+                window.localStorage.setItem(this._drawStateStorageKey(), JSON.stringify(state));
+            }
+        } catch (ignore) { /* State persistence must not block closing the editor. */ }
+        return state;
+    }
+    _drawStateStorageKey() {
+        return 'heurist-map:draw-state:' + String(this.options.database || 'default');
+    }
+    _cloneMapSettings(value) {
+        if (!value || typeof value !== 'object') return null;
+        return {
+            format: value.format || 'heurist-map-settings',
+            version: Number(value.version) || 1,
+            options: $.extend(true, {}, value.options || {}),
+            config: $.extend(true, {}, value.config || {})
+        };
+    }
+    _mergeMapSettings() {
+        var provided = Array.prototype.slice.call(arguments).filter(function(value) {
+            return value && typeof value === 'object';
+        });
+        // Return nothing rather than a synthetic "empty" envelope when there is
+        // nothing real to merge, so heurist-map's own bootstrap normalizer sees
+        // a genuinely empty settings object and knows to fetch its own saved
+        // preference (loadPreferencesOnInit) instead of treating this shape as
+        // an authoritative-but-blank host-supplied configuration.
+        if (!provided.length) return null;
+        var result = { format: 'heurist-map-settings', version: 1, options: {}, config: {} };
+        provided.forEach(function(value) {
+            if (value.options) result.options = $.extend(true, result.options, value.options);
+            if (value.config) result.config = $.extend(true, result.config, value.config);
+        });
+        return result;
+    }
+    /** Return the configured standalone application URL. */
+    _buildIframeUrl() {
+        return this.options.mapApplicationUrl || '/heurist/hclient/bundles/heurist-map/index.html';
+    }
+    /** Wait until the standalone bootstrap exposes its public API. */
+    _waitForMapApi() {
+        var that = this;
+        var attempts = 0;
+        var maxAttempts = 100;
+
+        if (this._readyTimer) {
+            clearInterval(this._readyTimer);
+        }
+
+        function inspect() {
+            if (that._isDestroyed) return;
+
+            try {
+                var frameWindow = that._mapFrame && that._mapFrame[0].contentWindow;
+                var mapApi = frameWindow && frameWindow.heuristMap;
+                if (mapApi) {
+                    clearInterval(that._readyTimer);
+                    that._readyTimer = 0;
+                    that._completeInitialization(mapApi);
+                    return;
+                }
+            } catch (error) {
+                clearInterval(that._readyTimer);
+                that._readyTimer = 0;
+                that._reportError(error, 'access-iframe-api');
+                return;
+            }
+
+            attempts += 1;
+            if (attempts >= maxAttempts) {
+                clearInterval(that._readyTimer);
+                that._readyTimer = 0;
+                that._reportError(
+                    new Error('heurist-map public API was not created by the iframe'),
+                    'wait-for-ready'
+                );
+            }
+        }
+
+        inspect();
+        if (!this._mapApi && !this._readyTimer) {
+            this._readyTimer = setInterval(inspect, 50);
+        }
+    }
+    /** Finish common initialization after the iframe API becomes available. */
+    _completeInitialization(mapApi) {
+        var that = this;
+        this._mapApi = mapApi;
+
+        Promise.resolve(mapApi.ready())
+            .then(function() {
+                if (that._isDestroyed) return;
+                that._isReady = true;
+
+                if (that.options.viewerMode === 'configuration') {
+                    that._openConfigurationNow({
+                        mode: that.options.configurationMode,
+                        value: that.options.configurationValue || that._moduleBootstrap?.settings || null
+                    }).catch(function(error) {
+                        that._reportError(error, 'open-configuration');
+                    });
+                    return null;
+                }
+
+                that._bindMapEvents();
+                return that._initializeContent();
+            })
+            .then(function() {
+                if (that._isDestroyed) return;
+                return that._flushPendingOperations();
+            })
+            .then(function() {
+                if (that._isDestroyed) return;
+                if (that.options.viewerMode !== 'configuration') that.resize();
+                that._invokeCallback('onready', {
+                    mapApi: that._mapApi,
+                    widget: that
+                });
+            })
+            .catch(function(error) {
+                that._reportError(error, 'initialize-map');
+            });
+    }
+    /** Apply initial document, current result set, and host selection. */
+    _initializeContent() {
+        var that = this;
+        if (this.options.viewerMode === 'draw') {
+            return this._beginDrawingNow(this.options.drawParameters || {});
+        }
+        var query = this.options.query;
+        var operation;
+
+        if (this.options.mapDocument != null) {
+            operation = Promise.resolve(
+                this._mapApi.activateMapDocument(this.options.mapDocument)
+            ).then(function() {
+                return query ? that._setQueryNow(query, {}) : null;
+            });
+        } else {
+            // heurist-map has already activated the configured default document.
+            // Updating the current-results query must never change that activation.
+            operation = query ? this._setQueryNow(query, {}) : Promise.resolve(null);
+        }
+
+        return operation.then(function() {
+            var selection = that._normalizeRecordIds(that.options.selection);
+            return selection.length ? that._setSelectionNow(selection, {}) : null;
+        });
+    }
+    _activateDynamicDocument() {
+        return Promise.resolve(this._mapApi.activateMapDocument('dynamic'));
+    }
+    /** Subscribe only to stable public map events. */
+    _bindMapEvents() {
+        var that = this;
+
+        this._mapEventHandlers.selection = function(event) {
+            if (that._suppressSelectionSync) return;
+
+            var features = event.detail && event.detail.selection &&
+                event.detail.selection.features;
+            var recordIds = [];
+
+            if (Array.isArray(features)) {
+                recordIds = that._normalizeRecordIds(features.map(function(item) {
+                    return item.recordId;
+                }));
+            }
+
+            that.options.selection = recordIds;
+
+            if (that.options.eventbased) {
+                var hapi = window.hWin && window.hWin.HAPI4;
+                if (hapi && hapi.Event && hapi.Event.ON_REC_SELECT) {
+                    $(that.document).trigger(hapi.Event.ON_REC_SELECT, {
+                        selection: recordIds,
+                        source: that.element.attr('id'),
+                        search_realm: that.options.search_realm,
+                        reset: recordIds.length === 0
+                    });
+                }
+            }
+
+            that._invokeCallback('onselect', recordIds, event.detail || {});
+        };
+
+        this._mapEventHandlers.error = function(event) {
+            var detail = event.detail || {};
+            var error = detail.error || detail;
+            that._reportError(error, detail.operation || 'map-event', detail);
+        };
+
+        this._mapEventHandlers.editDocument = function(event) {
+            var detail = event.detail || {};
+            if (that._invokeCallback('oneditdocument', detail) !== false) {
+                that._openRecordEdit(detail.documentId);
+            }
+        };
+
+        this._mapEventHandlers.editLayer = function(event) {
+            var detail = event.detail || {};
+            if (that._invokeCallback('oneditlayer', detail) !== false) {
+                that._openRecordEdit(detail.recordId);
+            }
+        };
+
+        this._mapEventHandlers.documentActivated = function(event) {
+            var documentInfo = event.detail && event.detail.document;
+            if (documentInfo && String(documentInfo.id) === 'dynamic') {
+                that._applyCachedSelectionNow();
+            }
+        };
+
+        this._mapEventHandlers.layerVisibility = function(event) {
+            var detail = event.detail || {};
+            var layerId = String((that.options.currentResultsLayer || {}).id || 'current-results');
+            if (String(detail.layerId) === layerId && detail.visible === true) {
+                that._applyCachedSelectionNow();
+            }
+        };
+
+        this._mapEventHandlers.layerLoaded = function(event) {
+            var layer = event.detail && event.detail.layer;
+            var layerId = String((that.options.currentResultsLayer || {}).id || 'current-results');
+            if (layer && String(layer.id) === layerId) {
+                that._applyCachedSelectionNow();
+            }
+        };
+
+        this._mapEventHandlers.drawing = function(event) {
+            that._invokeCallback('ondrawchange', event.detail || {});
+        };
+        this._mapEventHandlers.drawingFinished = function(event) {
+            that._saveDrawState();
+            that._invokeCallback('ondrawfinish', event.detail && event.detail.result, event.detail || {});
+        };
+        this._mapEventHandlers.drawingCancelled = function(event) {
+            that._saveDrawState();
+            that._invokeCallback('ondrawcancel', event.detail || {});
+        };
+
+        this._mapApi.addEventListener(
+            'heurist-map-selection-changed', this._mapEventHandlers.selection
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-error', this._mapEventHandlers.error
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-edit-document-requested', this._mapEventHandlers.editDocument
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-edit-layer-requested', this._mapEventHandlers.editLayer
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-document-activated', this._mapEventHandlers.documentActivated
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-layer-visibility-changed', this._mapEventHandlers.layerVisibility
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-layer-loaded', this._mapEventHandlers.layerLoaded
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-drawing-changed', this._mapEventHandlers.drawing
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-drawing-finished', this._mapEventHandlers.drawingFinished
+        );
+        this._mapApi.addEventListener(
+            'heurist-map-drawing-cancelled', this._mapEventHandlers.drawingCancelled
+        );
+    }
+    _unbindMapEvents() {
+        if (!this._mapApi) return;
+        var handlers = this._mapEventHandlers;
+        if (handlers.selection) this._mapApi.removeEventListener(
+            'heurist-map-selection-changed', handlers.selection
+        );
+        if (handlers.error) this._mapApi.removeEventListener(
+            'heurist-map-error', handlers.error
+        );
+        if (handlers.editDocument) this._mapApi.removeEventListener(
+            'heurist-map-edit-document-requested', handlers.editDocument
+        );
+        if (handlers.editLayer) this._mapApi.removeEventListener(
+            'heurist-map-edit-layer-requested', handlers.editLayer
+        );
+        if (handlers.documentActivated) this._mapApi.removeEventListener(
+            'heurist-map-document-activated', handlers.documentActivated
+        );
+        if (handlers.layerVisibility) this._mapApi.removeEventListener(
+            'heurist-map-layer-visibility-changed', handlers.layerVisibility
+        );
+        if (handlers.layerLoaded) this._mapApi.removeEventListener(
+            'heurist-map-layer-loaded', handlers.layerLoaded
+        );
+        if (handlers.drawing) this._mapApi.removeEventListener(
+            'heurist-map-drawing-changed', handlers.drawing
+        );
+        if (handlers.drawingFinished) this._mapApi.removeEventListener(
+            'heurist-map-drawing-finished', handlers.drawingFinished
+        );
+        if (handlers.drawingCancelled) this._mapApi.removeEventListener(
+            'heurist-map-drawing-cancelled', handlers.drawingCancelled
+        );
+        this._mapEventHandlers = {};
+        this._events = null;
+    }
+    /** Open the generalized configuration editor through the iframe API. */
+    openConfiguration(options) {
+        return this._enqueueOrRun('_openConfigurationNow', [options || {}]);
+    }
+    beginDrawing(options) {
+        this.options.drawParameters = $.extend(true, {}, options || {});
+        return this._enqueueOrRun('_beginDrawingNow', [this.options.drawParameters]);
+    }
+    _beginDrawingNow(options) {
+        if (!this._mapApi || typeof this._mapApi.beginDrawing !== 'function') {
+            return Promise.reject(new Error('Map drawing API is not available'));
+        }
+        return Promise.resolve(this._mapApi.beginDrawing(options || {}));
+    }
+    getDrawing() {
+        return this._enqueueOrRun('_getDrawingNow', []);
+    }
+    _getDrawingNow() { return this._mapApi.getDrawing(); }
+
+    finishDrawing() {
+        return this._enqueueOrRun('_finishDrawingNow', []);
+    }
+    _finishDrawingNow() { return this._mapApi.finishDrawing(); }
+
+    clearDrawing() {
+        return this._enqueueOrRun('_clearDrawingNow', []);
+    }
+    _clearDrawingNow() { return this._mapApi.clearDrawing(); }
+
+    zoomToDrawing() {
+        return this._enqueueOrRun('_zoomToDrawingNow', []);
+    }
+    _zoomToDrawingNow() { return this._mapApi.zoomToDrawing(); }
+
+    _openConfigurationNow(options) {
+        var that = this;
+        if (!this._mapApi || typeof this._mapApi.openConfigurationDialog !== 'function') {
+            return Promise.reject(new Error('Map configuration API is not available'));
+        }
+
+        var mode = options.mode || this.options.configurationMode || 'preferences';
+        var value = options.value !== undefined
+            ? options.value : this.options.configurationValue;
+        var configurationOnly = this.options.viewerMode === 'configuration';
+
+        return new Promise(function(resolve) {
+            that._mapApi.openConfigurationDialog({
+                mode: mode,
+                value: value || null,
+                onSave: function(settings, context) {
+                    that.options.configurationValue = context.serialized;
+                    that._mapFrame?.[0]?.heuristMapHost?.updateSettings?.(context.serialized);
+                    that._invokeCallback('onconfiguration', context.serialized, context);
+                    if (typeof options.onSave === 'function') {
+                        options.onSave(context.serialized, context);
+                    }
+
+                    // Configuration-only viewer has no MapApplication/Leaflet runtime.
+                    // Saving here only returns the serialized settings to the caller;
+                    // live application is intentionally handled only by the normal map mode.
+                    if (configurationOnly) {
+                        resolve(context.serialized);
+                        return true;
+                    }
+
+                    resolve(context.serialized);
+                    return true;
+                },
+                onCancel: function(settings, context) {
+                    that._invokeCallback('oncancelconfiguration', settings, context);
+                    if (typeof options.onCancel === 'function') options.onCancel(settings, context);
+                    resolve(null);
+                }
+            });
+        });
+    }
+    /** Set or replace the stable current-results query layer. */
+    _setQueryNow(query, options) {
+        // HeuristModuleRecordset supplies effectiveQuery. This module does not
+        // inspect HRecordSet/response formats; the current-results layer calls
+        // /api/{db}/map with its feature limit and optional viewport extent.
+        var that = this;
+        var layerOptions = this.options.currentResultsLayer || {};
+        var layerId = String(layerOptions.id || 'current-results');
+        var normalizedQuery = this._normalizeQuery(query);
+
+        this._currentQuery = normalizedQuery;
+
+        var storedLayer = typeof this._mapApi.getDocumentLayer === 'function'
+            ? this._mapApi.getDocumentLayer(layerId, 'dynamic')
+            : this._mapApi.getLayer(layerId);
+
+        if (!normalizedQuery) {
+            this._currentLayerCreated = false;
+            if (!storedLayer) return Promise.resolve(null);
+            // Remove only the dynamic current-results layer definition. This avoids
+            // retaining a stale query while never activating the dynamic document.
+            return Promise.resolve(this._mapApi.removeLayer(layerId, { documentId: 'dynamic' }));
+        }
+
+        if (storedLayer) {
+            this._currentLayerCreated = true;
+            return Promise.resolve(this._mapApi.setQueryForLayer(layerId, normalizedQuery, {
+                reload: true,
+                zoom: options.zoom === true
+            }));
+        }
+
+        return Promise.resolve(this._mapApi.addQueryLayer(normalizedQuery, {
+            id: layerId,
+            title: options.title || layerOptions.title || that._currentResultsTitle(),
+            visible: layerOptions.visible !== false,
+            selectable: layerOptions.selectable !== false,
+            zoom: options.zoom === true
+        })).then(function(result) {
+            that._currentLayerCreated = true;
+            return result;
+        });
+    }
+    /** Convert and apply an HRecordSet without leaking it into heurist-map. */
+    setSelection(recordIds, options) {
+        var ids = this._normalizeRecordIds(recordIds);
+        this.options.selection = ids;
+        return this._enqueueOrRun('_setSelectionNow', [ids, options || {}]);
+    }
+    _setSelectionNow(recordIds, options) {
+        var that = this;
+        var layerId = String(
+            (this.options.currentResultsLayer || {}).id || 'current-results'
+        );
+        var ids = this._normalizeRecordIds(recordIds);
+
+        var activeDocument = this._mapApi.getActiveMapDocument();
+        if (!activeDocument || String(activeDocument.id) !== 'dynamic') {
+            return Promise.resolve(null);
+        }
+
+        if (ids.length === 0) {
+            this._suppressSelectionSync = true;
+            return Promise.resolve(this._mapApi.clearSelection()).finally(function() {
+                that._suppressSelectionSync = false;
+            });
+        }
+
+        var layer = this._mapApi.getLayer(layerId);
+        if (!layer || layer.visible === false || layer.loadState !== 'loaded' || layer.selectable === false) {
+            return Promise.resolve(null);
+        }
+
+        this._suppressSelectionSync = true;
+        return Promise.resolve(this._mapApi.selectRecords(layerId, ids, {
+            replace: options.replace !== false,
+            zoom: options.zoom === true
+        })).finally(function() {
+            that._suppressSelectionSync = false;
+        });
+    }
+    _applyCachedSelectionNow() {
+        var that = this;
+        var ids = this._normalizeRecordIds(this.options.selection);
+        if (!ids.length) return Promise.resolve(null);
+        return this._setSelectionNow(ids, { replace: true, zoom: false }).catch(function(error) {
+            // A document/layer can change again while an activation or deferred
+            // layer load is completing. Treat that race as another deferred sync.
+            var active = that._mapApi && that._mapApi.getActiveMapDocument();
+            var layerId = String((that.options.currentResultsLayer || {}).id || 'current-results');
+            var layer = that._mapApi && that._mapApi.getLayer(layerId);
+            if (!active || String(active.id) !== 'dynamic' || !layer || layer.visible === false || layer.loadState !== 'loaded') {
+                return null;
+            }
+            throw error;
+        });
+    }
+    clearSelection() {
+        return this.setSelection([], {});
+    }
+    /** Activate a persisted MapDocument. */
+    setMapDocument(documentId, options) {
+        var that = this;
+        this.options.mapDocument = documentId;
+        return this._enqueueOrRun('_setMapDocumentNow', [documentId, options || {}])
+            .then(function(result) {
+                if ((documentId == null || documentId === '')
+                    && that._hostQueryPending && that._isWidgetVisible()) {
+                    return that._applyPendingHostQueryWhenVisible(false);
+                }
+                return result;
+            });
+    }
+    _setMapDocumentNow(documentId, options) {
+        if (documentId == null || documentId === '') {
+            return this._activateDynamicDocument();
+        }
+        return Promise.resolve(this._mapApi.activateMapDocument(documentId, options));
+    }
+    /** Reload the current query layer, or the active persisted document. */
+    refresh() {
+        var that = this;
+        return this._enqueueOrRun('_refreshNow', []).then(function(result) {
+            that.resize();
+            return result;
+        });
+    }
+    _refreshNow() {
+        var layerId = String(
+            (this.options.currentResultsLayer || {}).id || 'current-results'
+        );
+        if (this._currentQuery) {
+            return this._setQueryNow(this._currentQuery, {});
+        }
+
+        var active = this._mapApi.getActiveMapDocument();
+        if (active && active.id !== 'dynamic') {
+            return Promise.resolve(this._mapApi.reloadMapDocument(active.id));
+        }
+
+        if (this._mapApi.getLayer(layerId)) {
+            return Promise.resolve(this._mapApi.reloadLayer(layerId));
+        }
+        return Promise.resolve(null);
+    }
+    _currentResultsTitle() {
+        if (window.hWin && window.hWin.HR) {
+            return window.hWin.HR('Current results');
+        }
+        return 'Current results';
+    }
+    // _openRecordEdit and _addRecordEdit are inherited unchanged from
+    // HeuristModuleRecordset; MapDocument/MapLayer are ordinary Heurist records.
+    // _editExtent is inherited unchanged from HeuristModuleViewer, shared with
+    // HeuristModuleExplorer. Symbology is edited by heurist-map itself (plan 17).
+
+    _destroy() {
+        var that = this;
+        this._saveDrawState();
+        this._isDestroyed = true;
+        this._isReady = false;
+
+        if (this._readyTimer) clearInterval(this._readyTimer);
+        if (this._resizeTimer) clearTimeout(this._resizeTimer);
+        if (this._resizeObserver) this._resizeObserver.disconnect();
+        this.element.off('.mapViewer .heuristModuleViewer');
+
+        this._unbindHostEvents();
+        this._unbindMapEvents();
+
+        this._pendingOperations.splice(0).forEach(function(operation) {
+            operation.reject(new Error('mapViewer was destroyed'));
+        });
+
+        var destroyPromise = this._mapApi
+            ? Promise.resolve(this._mapApi.destroy()).catch(function(error) {
+                that._reportError(error, 'destroy');
+            })
+            : Promise.resolve();
+
+        this._mapApi = null;
+        if (this._mapFrame) this._mapFrame.remove();
+        if (this._frameContainer) this._frameContainer.remove();
+        this.element.removeClass('heurist-map-viewer');
+
+        return destroyPromise;
+    }
+
+    getMapApi() { return this.getModuleApi(); }
+    destroy() { return this._destroy(); }
+}
+
+HeuristModuleMap.defaults = $.extend(true, {}, HEURIST_MODULE_MAP_DEFAULTS);
+window.HeuristModuleMap = HeuristModuleMap;

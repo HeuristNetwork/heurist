@@ -150,7 +150,27 @@ if(!$system->init(@$_REQUEST['db'])){
 
         }elseif($action=='step5'){ // perform import
 
-            $res = ImportAction::performImport($_REQUEST, 'json');
+            // MODIFIED for CSV import diagnostics: do not reduce a PHP runtime
+            // exception to an opaque HTTP 500. Log the complete trace and return
+            // the immediate cause and source location through Heurist's normal
+            // JSON error response so the faulty import path can be corrected.
+            try{
+                $res = ImportAction::performImport($_REQUEST, 'json');
+            }catch(\Throwable $import_error){
+                error_log('CSV import step5 exception: '.$import_error->__toString());
+                $system->addError(
+                    HEURIST_ERROR,
+                    'CSV import failed: '.$import_error->getMessage()
+                        .' ('.basename($import_error->getFile()).':'.$import_error->getLine().')',
+                    $import_error->getMessage()
+                );
+                $res = false;
+            }
+
+        // verifyDBAgainstSource: additions only
+        }elseif($action=='verify_database_against_source'){
+
+            $res = ImportAction::verifyDatabaseAgainstSource($_REQUEST);
 
         }elseif(@$_REQUEST['content']){ //for import terms
 
@@ -272,13 +292,49 @@ if(!$system->init(@$_REQUEST['db'])){
 // ----------------------- OUTPUT ----------------------------------
 //
 //
-if(@$_REQUEST['output']=='csv'){
+if(@$_REQUEST['output']=='csv' || @$_REQUEST['output']=='ods'){
 
 
-    if($_REQUEST['output']=='csv'){
+    if($_REQUEST['output']=='csv' || $_REQUEST['output']=='ods'){
         header('Content-Type: text/plain;charset=UTF-8');
         header('Pragma: public');
-        header('Content-Disposition: attachment; filename="import.csv"');//import_name
+        // MODIFIED for verifyDBAgainstSource: determine one filename first and
+        // emit only one Content-Disposition header.
+        $download_filename = 'import.csv';
+        // verifyDBAgainstSource: override the generic import filename with the
+        // same source filename/date/time shown in the uploaded-files list.
+        if(@$_REQUEST['action']=='verify_database_against_source'){
+            $verification_is_ods = $_REQUEST['output']==='ods';
+            header('Content-Type: '.($verification_is_ods
+                ? 'application/vnd.oasis.opendocument.spreadsheet'
+                : 'text/tab-separated-values;charset=UTF-8'));
+            $verification_session = ImportSession::load(intval(@$_REQUEST['imp_ID']));
+            // verifyDBAgainstSource: sif_TempDataTable is the authoritative
+            // filename/date/time string displayed in the uploaded-files list.
+            $verification_name = mysql__select_value($system->getMysqli(),
+                'SELECT sif_TempDataTable FROM sysImportFiles WHERE sif_ID='.intval(@$_REQUEST['imp_ID']));
+            // MODIFIED for verifyDBAgainstSource: prefer the exact description
+            // displayed by the client, with session values retained as fallbacks.
+            $verification_name = trim((string)$verification_name);
+            if($verification_name===''){
+                $verification_name = trim((string)@$_REQUEST['report_name']);
+            }
+            if($verification_name===''){
+                $verification_name = @$verification_session['import_name'] ?: @$verification_session['import_file'];
+            }
+            if(trim((string)$verification_name)===''){
+                $verification_name = 'source';
+            }
+            $verification_name = preg_replace('/\s{2,}/', '_', trim((string)$verification_name));
+            $verification_name = str_replace(':', '-', $verification_name);
+            $verification_name = preg_replace('/[\\\/\"\r\n]+/', '_', $verification_name);
+            $download_filename = 'Checking_'.$verification_name.($verification_is_ods ? '.ods' : '.csv');
+            // verifyDBAgainstSource: expose the authoritative filename to the
+            // fetch/Blob download path; URL encoding keeps this header ASCII-safe.
+            header('X-Heurist-Report-Filename: '.rawurlencode($download_filename));
+        }
+        // verifyDBAgainstSource: the single definitive download filename.
+        header('Content-Disposition: attachment; filename="'.$download_filename.'"');
     }
 
     if($response['status']==HEURIST_OK){

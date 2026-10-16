@@ -303,8 +303,7 @@
 #save_filter_hint#Guarde o filtro e as regras atuais como um link na árvore de navegação
 #Warn_Lost_Data#Fez alterações nos dados. Clique em "Guardar", caso contrário todas as alterações serão perdidas.
 #Warn_Lost_Data_On_Structure_Edit#Clique em "Guardar os dados" para guardar os dados introduzidos ou em "Descartar as alterações de dados" para abandonar as modificações.<br>As alterações de estrutura são guardadas automaticamente - não são afetadas pela sua escolha.
-#manageDefRectypes_edit_fields#Editar campos
-#manageDefRectypes_edit_fields_hint#Isto abrirá um registo em branco deste tipo no modo de modificação da estrutura.<br>Sugestão: Pode ligar o modo de modificação da estrutura a qualquer momento enquanto introduz os dados para então fazer alterações estruturais instantâneas
+
 #manageDefRectypes_new_hint#Antes de definir novos tipos de registo (entidade) sugerimos importar entre os adequados definições de modelos (bases de dados Heurist registadas no centro de coordenação Heurist). Aqueles modelos cujos ID de registo são menores do que 1000, são modelos geridos pela equipa Heurist. <br><br>Isto é particularmente importante para os tipos de registo BIBLIOGRAPHIC - as definições no modelo n.º 6 (definições bibliográficas) são normalizados de maneira ótima e garantem a compatibilidade com funções bibliográficas tais como a sincronização com o Zotero, o formato Harvard e a compatibilidade entre bases de dados.<br><br>Use o menu principal: Desenho > Navegar nos modelos
 #manageDefRectypes_delete_stop#<p>O tipo de <b>registo [rtyName]</b> é referenciado pelos seguintes campos:</p>[FieldList]<p>Por favor, remova estes campos completamente, ou clique nos links acima <br>para modificar o campo base (afetará todos os tipos de registo que o utilizam).</p>
 #manageDefRectypes_delete_warn#Tem a certeza de que deseja eliminar este tipo de registo?

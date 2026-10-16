@@ -425,7 +425,7 @@ if(!($max_size>0)) {$max_size = 0;}
                 if(files.length > 0){
 
                     var msg = `You have uploaded ${files.length} new media files.<br><br>`
-                            + "They will not be visible as records in the database until you create media<br>records using Create media records.";
+                            + "They will not be visible as records in the database until you create Digital Media<br>records using Create records from files.";
 
                     var btns = {};
                     btns[window.hWin.HR('Create Media Records')] = function(){
@@ -445,7 +445,7 @@ if(!($max_size>0)) {$max_size = 0;}
                             setTimeout(function(){ window.close();}, 100);
                         }
 
-                        // Open Create media records window
+                        // Open Create Digital Media records window
                         setTimeout(function(){ $(parent.document).find('li[data-action="menu-files-index-and-records"]').trigger('click');}, 500);
                     };
                     btns[window.hWin.HR('Exit without Indexing')] = function(){
@@ -465,8 +465,8 @@ if(!($max_size>0)) {$max_size = 0;}
                         }
                     }
 
-                    window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title:'Indexing Uploaded Media Files',
-                        yes:window.hWin.HR('Create Media Records'), no:window.hWin.HR('Exit without Indexing')});
+                    window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title:'Creating Digital Media from uploaded files',
+                        yes:window.hWin.HR('Create Digital Media records'), no:window.hWin.HR('Exit without creating Digital Media records')});
 
                     return false;
                 }else if($(event?.target).is('button')){

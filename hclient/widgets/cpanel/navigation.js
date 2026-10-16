@@ -16,7 +16,7 @@
 /**
 * @class navigation
 * @memberof Widgets.Navigation
-* @description This widget creates a navigation menu based on Heurist RT_CMS_MENU records.
+* @description This widget creates a navigation menu based on Heurist RT_CMS_PAGE records.
  * It is primarily used for Content Management System (CMS) navigation.
  * The menu can be horizontal, vertical, or a tree view.
  * It handles fetching menu data, rendering the menu, and actions upon menu item selection.
@@ -168,8 +168,50 @@ $.widget( "heurist.navigation", {
                     //.css({'float':'left', 'padding-right':'4em', 'margin-top': '1.5em'})
                     .appendTo( this.divMainMenu );
                     
-            if(this.options.orientation=='horizontal'){
+            this.divMainMenuToggle = null;
+
+            if (this.options.orientation == 'horizontal') {
+                this.divMainMenu.addClass('responsive-horizontal-menu');
+                
+                // find nearest header container
+                let $header = this.element.parents('.ui-heurist-header2').first();
+
+                let menuBg = 'lightgray';
+
+                if ($header.length > 0) {
+
+                    menuBg = $header.css('background-color');
+
+                    // fallback if transparent
+                    if (!menuBg ||
+                        menuBg === 'transparent' ||
+                        menuBg === 'rgba(0, 0, 0, 0)') {
+
+                        menuBg = 'lightgray';
+                    }
+                }
+
+                // expose via css variable
+                this.divMainMenu[0].style.setProperty('--responsive-menu-bg', menuBg);                
+
+                this.divMainMenuToggle = $('<button>', {
+                    type: 'button',
+                    class: 'horizontalmenu-toggle',
+                    'aria-expanded': 'false',
+                    'aria-label': 'Open navigation menu',
+                    html: '&#9776; Menu'
+                }).appendTo(this.divMainMenu);
+
                 this.divMainMenuItems.addClass('horizontalmenu');
+
+                this.divMainMenuToggle.on('click', function(event) {
+                    event.preventDefault();
+
+                    const isOpen = that.divMainMenu.toggleClass('horizontalmenu-open')
+                        .hasClass('horizontalmenu-open');
+
+                    $(this).attr('aria-expanded', isOpen ? 'true' : 'false');
+                });
             }
         }
 
@@ -741,6 +783,13 @@ $.widget( "heurist.navigation", {
         //hide submenu
         $target.parents('.ui-menu[data-level!=0]').hide();
 
+        if (this.options.orientation == 'horizontal' && this.divMainMenu) {
+            this.divMainMenu.removeClass('horizontalmenu-open');
+            if (this.divMainMenuToggle) {
+                this.divMainMenuToggle.attr('aria-expanded', 'false');
+            }
+        }
+
         const record = this.menuData.getRecord(data.page_id);
         const DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
               DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
@@ -764,9 +813,15 @@ $.widget( "heurist.navigation", {
 
             window.open(this.menu_item_urls[data.page_id], '_blank', 'noopener');
             return;
-        }else if(!is_selectable && $target.parent().find('ul').length != 0){ // stop click if a submenu exists
+        }else if(!is_selectable && $target.parent().find('ul').length > 0){ // stop click if a submenu exists
+
+            // Prevent menu from closing
+            let $item = $target.hasClass('ui-menu-item') ? $target : $target.closest('.ui-menu-item');
+            $item.trigger('mouseenter');
+
             return;
         }
+
         if(!data.hasContent && !window.hWin.HEURIST4.util.isFunction(this.options.onmenuselect)){
             //no action if content is not defined
 

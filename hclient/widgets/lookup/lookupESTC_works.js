@@ -103,7 +103,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupESTC, {
     _initControls: function () {
 
         // Position the search button group relative to the header
-        this.element.find('#btnStartSearch').parent().parent().position({
+        this._$('#btnStartSearch').parent().parent().position({
             my: 'left center',
             at: 'right center',
             of: '#ent_header > fieldset'

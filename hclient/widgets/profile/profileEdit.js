@@ -161,6 +161,8 @@ $.widget( "heurist.profileEdit", {
 
         }else{
 
+            window.hWin.HEURIST4.util.detectCapsLock(this.edit_form);
+
             this._fromDataToUI();
 
         }

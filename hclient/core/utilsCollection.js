@@ -1,13 +1,11 @@
 /**
  * @file utilsCollection.js
- * @brief Utilities for managing a user's session-based record collection.
- * @fileOverview This file provides a set of utility functions under the `window.hWin.HEURIST4.collection`
- * namespace for managing a user's collection of records. The collection is typically stored in the
- * user's session on the server. Functions include adding records to the collection, removing records,
- * clearing the collection, showing the collection (which opens a new window with a search for the
- * collected record IDs), saving the collection as a saved search/filter, and updating the collection
- * state by communicating with the `collectionController.php` on the server. It also triggers the
- * `ON_REC_COLLECT` event when the collection changes.
+ * @brief Utilities for managing a user's browser-local record collection.
+ * @fileOverview This file provides utility functions under the
+ * `window.hWin.HEURIST4.collection` namespace for managing a collection of
+ * record IDs. The collection is stored in browser localStorage separately for
+ * each Heurist database. Functions include adding, removing, clearing, showing,
+ * saving and loading the collection. Changes trigger the `ON_REC_COLLECT` event.
  * @project     Heurist academic knowledge management system
  *
  * @link https://HeuristNetwork.org
@@ -21,13 +19,71 @@
 if (!window.hWin.HEURIST4){
     window.hWin.HEURIST4 = {};
 }
-//init only once
-if (!window.hWin.HEURIST4.collection) 
+
+// Init only once.
+if (!window.hWin.HEURIST4.collection)
 {
     window.hWin.HEURIST4.collection = {
 
         _collection: null,
-        _collectionURL: 'hserv/controller/collectionController.php',
+        _storagePrefix: 'heurist-record-collection:',
+
+        /**
+         * Returns the localStorage key for a database.
+         * @param {string} [database] Heurist database name.
+         * @returns {string} Storage key.
+         */
+        _getStorageKey: function(database){
+            database = database || window.hWin.HAPI4.database || '';
+            return this._storagePrefix + database;
+        },
+
+        /**
+         * Loads and validates the collection stored for a database.
+         * @param {string} [database] Heurist database name.
+         * @returns {Array<string>} Stored record IDs.
+         */
+        _loadCollection: function(database){
+            let collection = [];
+
+            try{
+                let storedValue = window.localStorage.getItem(this._getStorageKey(database));
+                if(storedValue){
+                    let storedCollection = JSON.parse(storedValue);
+                    if(Array.isArray(storedCollection)){
+                        collection = storedCollection
+                            .map(function(id){ return String(id); })
+                            .filter(function(id){ return /^\d+$/.test(id); });
+                    }
+                }
+            }catch(error){
+                // localStorage may be unavailable or contain invalid legacy data.
+                collection = [];
+            }
+
+            return Array.from(new Set(collection));
+        },
+
+        /**
+         * Stores the current collection for a database.
+         * @param {string} [database] Heurist database name.
+         * @returns {boolean} True when stored successfully.
+         */
+        _storeCollection: function(database){
+            try{
+                window.localStorage.setItem(
+                    this._getStorageKey(database),
+                    JSON.stringify(this._collection || [])
+                );
+                return true;
+            }catch(error){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Unable to save the record collection in browser local storage.',
+                    error: error
+                });
+                return false;
+            }
+        },
 
         /**
          * Retrieves a list of record IDs from a selection, shows a message if empty or limit exceeded.
@@ -46,39 +102,34 @@ if (!window.hWin.HEURIST4.collection)
                 window.hWin.HEURIST4.msg.showMsg(msg, {default_palette_class:'ui-heurist-explore'});
                 return null;
             }else if (limit>0 && recIDs_list.length > limit) {
-                window.hWin.HEURIST4.msg.showMsg( window.hWin.HR('collection_limit') + limit, {default_palette_class:'ui-heurist-explore'});
-                // Should ideally return null or handle the limit exceeded case more explicitly here
+                window.hWin.HEURIST4.msg.showMsg(window.hWin.HR('collection_limit') + limit,
+                    {default_palette_class:'ui-heurist-explore'});
             }else{
                 return recIDs_list;
             }
-            return null; // Explicitly return null if limit exceeded and message shown
+            return null;
         },
 
         /**
          * Adds records to the user's collection.
-         * Records can be specified by a list of IDs or taken from the current selection.
-         * @param {string|Array<string|number>} [recIDs] - A comma-separated string or an array of record IDs to add.
-         *                                                If not provided, uses `_selection`.
-         * @param {HRecordSet|null} [_selection] - The HRecordSet from which to get record IDs if `recIDs` is not provided.
+         * @param {string|Array<string|number>} [recIDs] Record IDs to add.
+         * @param {HRecordSet|null} [_selection] Selection used when recIDs is omitted.
          * @returns {void}
          */
         collectionAdd: function(recIDs, _selection){
             if(!recIDs){
-                let recIDs_list = window.hWin.HEURIST4.collection.getSelectionIds(_selection, 
+                let recIDs_list = this.getSelectionIds(_selection,
                     window.hWin.HR('collection_select_hint'));
                 if(window.hWin.HEURIST4.util.isempty(recIDs_list)) return;
-                recIDs = recIDs_list.join(',')
+                recIDs = recIDs_list.join(',');
             }
-            let params = {db:window.hWin.HAPI4.database, fetch:1, add:recIDs};
-            window.hWin.HEURIST4.collection.collectionUpdate(params);
+            this.collectionUpdate({db:window.hWin.HAPI4.database, add:recIDs});
         },
 
         /**
          * Removes records from the user's collection.
-         * Records can be specified by a list of IDs or taken from the current selection.
-         * @param {string|Array<string|number>} [recIDs] - A comma-separated string or an array of record IDs to remove.
-         *                                                If not provided, uses `_selection`.
-         * @param {HRecordSet|null} [_selection] - The HRecordSet from which to get record IDs if `recIDs` is not provided.
+         * @param {string|Array<string|number>} [recIDs] Record IDs to remove.
+         * @param {HRecordSet|null} [_selection] Selection used when recIDs is omitted.
          * @returns {void}
          */
         collectionDel: function(recIDs, _selection){
@@ -86,10 +137,9 @@ if (!window.hWin.HEURIST4.collection)
                 let recIDs_list = this.getSelectionIds(_selection,
                     window.hWin.HR('collection_select_hint2'));
                 if(window.hWin.HEURIST4.util.isempty(recIDs_list)) return;
-                recIDs = recIDs_list.join(',')
+                recIDs = recIDs_list.join(',');
             }
-            let params = {db:window.hWin.HAPI4.database, fetch:1, remove:recIDs};
-            window.hWin.HEURIST4.collection.collectionUpdate(params);
+            this.collectionUpdate({db:window.hWin.HAPI4.database, remove:recIDs});
         },
 
         /**
@@ -97,22 +147,21 @@ if (!window.hWin.HEURIST4.collection)
          * @returns {void}
          */
         collectionClear: function(){
-            let params = {db:window.hWin.HAPI4.database, clear:1};
-            window.hWin.HEURIST4.collection.collectionUpdate(params);
+            this.collectionUpdate({db:window.hWin.HAPI4.database, clear:1});
         },
 
         /**
          * Opens a new window/tab displaying the records currently in the user's collection.
-         * Warns if the generated URL might be too long.
          * @returns {void}
          */
         collectionShow: function(){
-            if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.collection._collection)){
-                let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"
-                    +window.hWin.HEURIST4.collection._collection.join(',');
-                if(url.length>2083){ // URL length limit, common for IE
+            if(!window.hWin.HEURIST4.util.isempty(this._collection)){
+                let url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&q=ids:'
+                    + this._collection.join(',');
+                if(url.length>2083){
                     window.hWin.HEURIST4.msg.showMsgDlg(
-                        window.hWin.HR('collection_url_hint'), null, window.hWin.HR('Warning'), {default_palette_class:'ui-heurist-explore'}
+                        window.hWin.HR('collection_url_hint'), null, window.hWin.HR('Warning'),
+                        {default_palette_class:'ui-heurist-explore'}
                     );
                 }else{
                     window.open(url, '_blank');
@@ -121,46 +170,65 @@ if (!window.hWin.HEURIST4.collection)
         },
 
         /**
-         * Saves the current collection of records as a new saved search/filter.
-         * Uses the 'svs_list' widget to handle the save operation.
+         * Saves the current collection as a saved search/filter.
          * @returns {void}
          */
         collectionSave: function(){
-            if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.collection._collection)){
+            if(!window.hWin.HEURIST4.util.isempty(this._collection)){
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
                 if(widget){
-                    widget.svs_list('editSavedSearch', 'saved', null, null, 'ids:'
-                        +window.hWin.HEURIST4.collection._collection.join(","));
+                    widget.svs_list('editSavedSearch', 'saved', null, null,
+                        'ids:' + this._collection.join(','));
                 }
             }
         },
 
         /**
-         * Updates the collection on the server and then updates the local `_collection` state.
-         * Triggers the `ON_REC_COLLECT` event.
-         * @param {Object} params - Parameters to send to the collection controller.
-         *                          Should include `db` and action (e.g., `add`, `remove`, `clear`, `fetch`).
+         * Loads or modifies the browser-local collection and triggers ON_REC_COLLECT.
+         * The params signature is retained for compatibility with existing callers.
+         * @param {Object} [params] Database and action parameters: add, remove or clear.
          * @returns {void}
          */
         collectionUpdate: function(params){
-            // Internal callback, JSDoc not needed as per rules
-            function __collectionOnUpdate(that, results) {
-                if(!window.hWin.HEURIST4.util.isnull(results)){
-                    if(results.status == window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        window.hWin.HEURIST4.msg.showMsgErr(results);
-                    }else{
-                        window.hWin.HEURIST4.collection._collection = window.hWin.HEURIST4.util.isempty(results.ids)?[]:results.ids;
-                        $(window.hWin.document).trigger( window.hWin.HAPI4.Event.ON_REC_COLLECT, 
-                            {collection:window.hWin.HEURIST4.collection._collection} );
-                    }
+            params = params || {db:window.hWin.HAPI4.database, fetch:1};
+
+            let database = params.db || window.hWin.HAPI4.database;
+            let collection = this._loadCollection(database);
+            let hasChanges = false;
+
+            if(params.clear !== undefined){
+                collection = [];
+                hasChanges = true;
+            }else{
+                if(params.add !== undefined){
+                    let addIDs = (Array.isArray(params.add) ? params.add : String(params.add).split(','))
+                        .map(function(id){ return String(id).trim(); })
+                        .filter(function(id){ return /^\d+$/.test(id); });
+                    collection = Array.from(new Set(collection.concat(addIDs)));
+                    hasChanges = true;
+                }
+
+                if(params.remove !== undefined){
+                    let removeIDs = new Set(
+                        (Array.isArray(params.remove) ? params.remove : String(params.remove).split(','))
+                            .map(function(id){ return String(id).trim(); })
+                            .filter(function(id){ return /^\d+$/.test(id); })
+                    );
+                    collection = collection.filter(function(id){ return !removeIDs.has(id); });
+                    hasChanges = true;
                 }
             }
-            if(!params){
-                params = {db:window.hWin.HAPI4.database, fetch:1};
+
+            this._collection = collection;
+
+            if(hasChanges && !this._storeCollection(database)){
+                this._collection = this._loadCollection(database);
             }
-            window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + window.hWin.HEURIST4.collection._collectionURL, 
-                params, this, 
-                __collectionOnUpdate);
+
+            $(window.hWin.document).trigger(
+                window.hWin.HAPI4.Event.ON_REC_COLLECT,
+                {collection:this._collection}
+            );
         }
-    }
+    };
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * configIni.php - Configuration file for a Heurist instance.
  *
@@ -74,9 +75,15 @@ of the codebase and rename it to index.html
 // ---------------------------------------------------------------------------------
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "7.1.1";// sets current program version number, determined by Heurist development lead
+$version = "7.3.0";// sets current program version number, determined by Heurist development lead
+
+$experimental = false; // do not change, false blocks execution of untested experimental code
 
 // ---------------------------------------------------------------------------------
+// 7.3.0  06 Oct 2026 Improve metadata/DOI handling, API, mapping, Zotero, draft H8 Explorer
+// 7.2.1  14 July 2026 IIIF annotation management, update API, update metadata management
+// 7.1.3  05 June 2026 Website optimisation, on-demand load of many components & image rescaling fixes
+// 7.1.2  22 May 2026 Improve custom report building and use, optimise PID resolver, interface improvements
 // 7.1.1  13 March 2026 Improved network viualiser and website generation speed fixes
 // 7.1.0  9 March 2026 New egoNetwork visualiser, working draft
 // 7.0.3  1 Feb 2026 Tidy up custom domains and simplified db names
@@ -132,37 +139,37 @@ $indexServerPort = '';
 $httpProxyAlwaysActive = false; // if true - always use proxy for CURL, otherwise proxy will be used for non heurist resources mostly
 $httpProxy = '';
 $httpProxyAuth = '';
-$indexServerAddress='';
-$indexServerPort='';
+$indexServerAddress = '';
+$indexServerPort = '';
 
 // Functions normally available only to the system adminstrator. Password(s) must be > 14 characters or they are treated as blank
 // If DatabaseDeletion password set, system administrator can delete up to 10 at a time (with password challenge)
-$passwordForDatabaseCreation ='';// normally blank = any logged in user can create, otherwise password challenge
-$passwordForDatabaseDeletion ='';// if blank = no one can delete db except db owner (to delete from server management)
-$passwordForReservedChanges  ='';// if blank = no-one can modify reserved fields, otherwise password challenge
-$passwordForServerFunctions  ='';// if blank = no-one can run server analysis functions - risk of overload - otherwise password challenge
+$passwordForDatabaseCreation = '';// normally blank = any logged in user can create, otherwise password challenge
+$passwordForDatabaseDeletion = '';// if blank = no one can delete db except db owner (to delete from server management)
+$passwordForReservedChanges  = '';// if blank = no-one can modify reserved fields, otherwise password challenge
+$passwordForServerFunctions  = '';// if blank = no-one can run server analysis functions - risk of overload - otherwise password challenge
 
 // The default root pathname of a directory where Heurist can store uploaded files eg. images, pdfs, as well as record type icons, templates,
 // output files, scratch space and so forth.
-$defaultRootFileUploadPath ='';
+$defaultRootFileUploadPath = '';
 $defaultRootFileUploadURL = '';
 
-// [server]                 
+// [server]
 // enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
 // you may set this value if several domains point to your server. It will unify urls across links, web pages, reports
 // for example $serverName = "heurist.huma-num.fr";  Be sure to include the port if not port 80
 $serverName = null; // if not 'null', overrides default taken from request header SERVER_NAME
 $mailDomain = null; // set mail domain if it does not use server domain
 
-// if base $heuristBaseURL is null, heurist detects it automatically 
+// if base $heuristBaseURL is null, heurist detects it automatically
 // Although it may differ from desired url you wish to see (because web server settings: aliases, rewrite rules etc)
 // Set this value explicitely to avoid possible issues
-$heuristBaseURL = null;     // base url ( ie server url+optional folder https://heurist.eu/heurist )  
+$heuristBaseURL = null;     // base url ( ie server url+optional folder https://heurist.eu/heurist )
 // if you have several heurist instances of heurist, set this value to production instance
 //
 // if $heuristBaseURL is set and $heuristBaseURL_pro is null, then production version is the same as $heuristBaseURL
 // if both $heuristBaseURL and $heuristBaseURL_pro are null, heurist detects it automatically, default folder for pro version is /heurist
-$heuristBaseURL_pro = null;  //url for production version  
+$heuristBaseURL_pro = null;  //url for production version
 
 $sysAdminEmail = '';
 $infoEmail = '';
@@ -204,7 +211,7 @@ $matomoSiteId = null; // ID of tracked heurist domain in matomo configuration
 // the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files
 // to exist in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
 
-$parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
+$parentIni = dirname(__FILE__) . "/../heuristConfigIni.php";
 
 
 //configuration for JWT authentication
@@ -214,21 +221,23 @@ $jwt_TTL    = 600; // 10 minutes
 /* Use the parameters above for JWT authentication
  curl -sS -X POST https://your.api.example/auth.php -H "Content-Type: application/json" -d '{"db":"database name", "username":"your login","password":"your password"}'
 
-to use token use curl parm -H 
+to use token use curl parm -H
 
 */
 
 // detect database server from database parameter
-[$envVersion, $dbFromRequest] = detectServerAndDatabase( $params['db'] ?? $_REQUEST['db'] ?? $GLOBALS['HEURIST_ROUTE_PARAMS']['db'] ?? null);
-if(isset($params) && is_array($params)){
+//[$envVersion, $dbFromRequest] = detectServerAndDatabase( $params['db'] ?? $_REQUEST['db'] ?? $GLOBALS['HEURIST_ROUTE_PARAMS']['db'] ?? null);
+$envVersion = null;
+$dbFromRequest = $params['db'] ?? $_REQUEST['db'] ?? $GLOBALS['HEURIST_ROUTE_PARAMS']['db'] ?? null;
+if (isset($params) && is_array($params)) {
     $params['db'] = $dbFromRequest;
 }
 $_REQUEST['db'] = $dbFromRequest;
 
 // parent directory configuration file is optional, hence include not required
 // heuristConfigIni.php in parent directory overrides empty values in current file
-if (is_file($parentIni)){
-    include_once $parentIni;
+if (is_file($parentIni) && file_exists($parentIni)) {
+    include $parentIni; //include_once
 }
 
 $branchVersionFile = __DIR__ . '/configVersion.local.php';
@@ -241,23 +250,24 @@ define('HEURIST_IS_V8', version_compare($version, '8.0', '>='));
 
 /**
 * Returns a pair - server code and short database name
-* 
+*
 * @param mixed $dbName
 */
+/*
 function detectServerAndDatabase( $dbName ){
     global $dbPrefix;
-    
+
     $envVersion = null; // server environment (detected from database prefix for example HN-mydabase, HN is code for huma-num.fr)
     if(!$dbName){
-        return [null, null];    
+        return [null, null];
     }
-    
+
     $dbHostCode = null;
-    
+
     if(strpos($dbName,'-')>1){
         [$dbHostCode, $dbName] = explode('-', $dbName);
     }
-    
+
     if($dbHostCode){ //defined in request
         $envVersion = strtoupper($dbHostCode);
     }else{
@@ -274,8 +284,9 @@ function detectServerAndDatabase( $dbName ){
         if(isset($_SESSION[$dbnameFull]['dbHostCode'])){
             $envVersion = $_SESSION[$dbnameFull]['dbHostCode'];
         }
+        session_write_close();
     }
-    
+
     return [$envVersion, $dbName];
 }
-
+*/

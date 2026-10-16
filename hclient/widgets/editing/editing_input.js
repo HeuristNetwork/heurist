@@ -17,7 +17,7 @@
  */
 
 /*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinyMCE, EditorCodeMirror,
-translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile */
+translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile, selectGeoOrTimeField */
 
 /**
  * @namespace heurist.editing_input
@@ -421,8 +421,10 @@ $.widget( "heurist.editing_input", {
 
         }
 
-        if(window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'] &&
-           this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']){
+        if( window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'] &&
+            this.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'] &&
+            window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'] &&
+            this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'] ){
 
             this.options.detailtype = 'resource';
             this.options['dtFields']['rst_FieldConfig']= {entity:'DefDetailTypes',csv:true};
@@ -527,10 +529,10 @@ $.widget( "heurist.editing_input", {
 
             //hardcoded list of fields and record types where multivalues mean translation (multilang support)
             let is_translation = this.f('rst_MultiLang') || 
-               ((that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+               ((that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] ||
                 that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'])
                 && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
-            
+                
             //saw TODO this really needs to check many exist
             let repeatable = (Number(this.f('rst_MaxValues')) != 1  || is_translation)? true : false;
             
@@ -553,7 +555,10 @@ $.widget( "heurist.editing_input", {
 
                 //translation for text field only    
                 let rec_translate = this._isForRecords && !is_translation
-                                    && (this.detailType == 'freetext' || this.detailType == 'blocktext');
+                                    && (this.detailType == 'freetext' || this.detailType == 'blocktext')
+                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_TABLE_FIELDS'])
+                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'])
+                                    && (that.options.dtID !== window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']);
 
                 let styles = {
                     display:'block', 
@@ -571,7 +576,7 @@ $.widget( "heurist.editing_input", {
                     .appendTo( btn_cont )
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
-                .attr('title', 'Add another ' + window.hWin.HEURIST4.util.stripTags(lblTitle) +(is_translation?' translation':' value' ))                    
+                .attr('title', 'Add another ' + window.hWin.HEURIST4.util.stripTags(lblTitle) +(is_translation?' translation':' value' ))
                 .css(styles);
 
                 if(rec_translate){ // add translate icon
@@ -604,7 +609,7 @@ $.widget( "heurist.editing_input", {
                         if(is_translation){
 
                             if(typeof translationSupport!=='undefined' && window.hWin.HEURIST4.util.isFunction(translationSupport)){
-                                translationSupport(this); //see editing_exts
+                                translationSupport(this); //see editingTranslation.js
                             }
                             
                         }else if($(event.target).hasClass('ui-icon-translate') && (that.detailType == 'freetext' || that.detailType == 'blocktext')){ // request language, then create new input with language prefix
@@ -692,7 +697,7 @@ $.widget( "heurist.editing_input", {
 
                             window.hWin.HEURIST4.ui.createLanguageSelect($dlg.find('#selLang'), null, null, true);
 
-                            $dlg.parent().find('.ui-dialog-buttonpane button').css({
+                            $dlg.dialog('buttonpane').css({
                                 'margin-left': '10px', 'margin-right': '10px'
                             });
 
@@ -744,11 +749,15 @@ $.widget( "heurist.editing_input", {
                 delay: 250,
                 items: '.input-div',
                 axis: 'y',
-                stop:function(event, ui){
+                stop: function(event, ui){
                     
                     let isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
                     if(isparententity){ //remove parent entity flag to avoid autosave
                         that.fset('rst_CreateChildIfRecPtr', 0);
+                    }
+
+                    if(that.isFileForRecord){ // re-order inline images
+                        that._setImageOrder();
                     }
                     
                     //reorganize
@@ -759,7 +768,7 @@ $.widget( "heurist.editing_input", {
                     if(isparententity){//restore parent entity flag
                         that.fset('rst_CreateChildIfRecPtr', 1);
                     }
-                    
+
                 }});            
                 
                 
@@ -867,54 +876,57 @@ $.widget( "heurist.editing_input", {
         if(this.f('rst_MayModify') == 'discouraged'){ // && !window.hWin.HAPI4.is_admin()
 
             this.block_editing = true;
-            that.setDisabled(true);
+            this.is_disabled = true;
 
-            this.input_cell.find('.ui-state-disabled').removeClass('ui-state-disabled'); // remove gray 'cover'
+            let $typableElements = this.element.find('input.text, textarea.text');
+            let $clickableElements = this.element.find('input.text, textarea.text, span.ui-selectmenu-button, .enum_input, .btn_input_clear, .field-visibility, .editint-inout-repeat-button');
 
-            if(this.input_cell.sortable('instance') !== undefined){ // disable sorting, if sortable
-                this.input_cell.sortable('disable');
-            }
+            let blockEditing = (event) => {
 
-            let $eles = this.element.find('.input-cell, .editint-inout-repeat-button');
-            this._on($eles, {
-                click: function(event){
+                const allowedKeys = event.type === 'keydown' && (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || event.key === 'Tab');
 
-                    if(!that.block_editing || $(event.target).hasClass('ui-icon-extlink')){
-                        return;
-                    }
-
-                    window.hWin.HEURIST4.util.stopEvent(event);
-                    event.preventDefault();
-
-                    let msg = 'The designer of this database suggests that you do not edit the value in this field (<strong>'+ lblTitle +'</strong>)<br>'
-                        + 'unless you are very sure of what you are doing.<br><br>'
-                        + '<label><input type="checkbox" id="allow_edit"> Let me edit this value</label>';
-
-                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, function(){
-
-                        that.block_editing = false;
-                        //that._off($eles, 'click'); - Also removes click from repeat button
-                        that.setDisabled(false);
-                        if(that.input_cell.sortable('instance') !== undefined){ // re-enable sorting inputs
-                            that.input_cell.sortable('enable');
-                        }
-                        that.element.find('.ui-selectmenu-button').removeClass('ui-state-disabled');
-                    }, {title: 'Editing is discouraged', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-populate'});
-
-                    window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), true);
-                    $dlg.find('#allow_edit').on('change', function(){
-                        window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), !$dlg.find('#allow_edit').is(':checked'));
-                    });
+                if(!that.block_editing || allowedKeys){
+                    return;
                 }
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.preventDefault();
+                event.stopPropagation();
+
+                let msg = 'The designer of this database suggests that you do not edit the value in this field (<strong>'+ lblTitle +'</strong>)<br>'
+                    + 'unless you are very sure of what you are doing.<br><br>'
+                    + '<label><input type="checkbox" id="allow_edit"> Let me edit this value</label>';
+
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, function(){
+
+                    that.block_editing = false;
+                    that.is_disabled = false;
+                    that.setDisabled(false);
+
+                    that._off($clickableElements, 'mousedown');
+                    that._off($typableElements, 'keydown');
+
+                }, {title: 'Editing is discouraged', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-populate'});
+
+                window.hWin.HEURIST4.util.setDisabled($dlg.dialog('buttonpane').find('button:first-child'), true);
+                $dlg.find('#allow_edit').on('change', function(){
+                    window.hWin.HEURIST4.util.setDisabled($dlg.dialog('buttonpane').find('button:first-child'), !$dlg.find('#allow_edit').is(':checked'));
+                });
+            };
+
+            this._on($clickableElements, {
+                mousedown: blockEditing
+            });
+            this._on($typableElements, {
+                keydown: blockEditing
             });
 
-            this.element.find('.ui-selectmenu-button').addClass('ui-state-disabled');
         }else if(this.isReadonly()){
 
             this.input_cell.attr('title', 'This field has been marked as non-editable');
 
             if(this._isForRecords){
-                $('<span>', {text: 'Read-only field', style: 'color: limegreen; cursor: default; padding-left: 20px;'}).insertAfter(this.input_cell);
+                $('<span>', {text: '(read only)', style: 'color: limegreen;cursor: default;display: inline-block;padding-left: 0.5em;font-weight: normal;'}).appendTo(this.header);
             }
         }
     }, //end _create------------------------------------------------------------
@@ -1320,22 +1332,48 @@ $.widget( "heurist.editing_input", {
             
             if(this.configMode && this.configMode['thematicmap']){ //-----------------------------------------------
 
-                    let $btn_edit_switcher = $( '<span>themes editor</span>', {title: 'Open thematic maps editor'})
-                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                    // The JSON value is an implementation detail. Keep it available for
+                    // advanced/debug use, but hide it by default.
+                    $input.hide();
+
+                    // Keep controls in a separate row below the raw textarea. This avoids
+                    // awkward wrapping when the textarea is made visible.
+                    let $thematic_controls = $('<span>')
+                        .css({display:'inline-block','vertical-align':'top','margin-left':'4px'})
+                        .insertAfter($input);
+
+                    let $btn_edit_switcher = $('<button type="button">Thematic maps configuration</button>',
+                            {title: 'Open thematic maps editor'})
+                        .appendTo($thematic_controls)
+                        .button();
+
+                    let $btn_raw_switcher = $('<span>show raw</span>', {title: 'Show/hide raw thematic map JSON'})
                         .addClass('smallbutton btn_add_term')
-                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                        .appendTo( $inputdiv );
+                        .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                              'text-decoration':'underline','margin-left':'10px'})
+                        .appendTo($thematic_controls);
+
+                    this._on($btn_raw_switcher, {click:function(){
+                        if($input.is(':visible')){
+                            $input.hide();
+                            $btn_raw_switcher.text('show raw');
+                        }else{
+                            $input.show();
+                            $btn_raw_switcher.text('hide raw');
+                            __adjustTextareaHeight();
+                        }
+                    }});
                     
                     this._on( $btn_edit_switcher, { click: function(){
                         
                             let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
                             if(!current_val) current_val = [];
-                            window.hWin.HEURIST4.ui.showRecordActionDialog(
-                            'thematicMapping',
+                            window.hWin.HEURIST4.ui.showThematicMappingDialog(
                             {maplayer_query: this.configMode['thematicmap']===true?null:this.configMode['thematicmap'], //query from map layer
-                            thematic_mapping: current_val,
+                            symbology: current_val,
+                                parentSymbol: window.hWin.HEURIST4.map.getDefaultMapSymbol(),
                                 onClose: function(context){
-                                    if(context){
+                                    if(context!==null && context!==undefined){
                                         let newval = window.hWin.HEURIST4.util.isJSON(context);
                                         newval = (!newval)?'':JSON.stringify(newval);
                                         $input.val(newval);
@@ -1346,12 +1384,16 @@ $.widget( "heurist.editing_input", {
                     }});
             }else
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_TABLE_FIELDS']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']
+             && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
-            && this.options.dtID > 0)
+             && this.options.dtID > 0 || this.options.dtID === 'bug_Description')
             {
-             
+
                 const isCMS_record = 
-                        (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+                        (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] ||
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']);
              
                 
@@ -1403,14 +1445,14 @@ $.widget( "heurist.editing_input", {
                         .css({cursor: 'pointer', 'margin-left': '10px'})
                         .appendTo($btn_edit_switcher);
 
-                    if(codeEditor){
+                    if(codeEditor && window.hWin.HEURIST4.util.isPositiveInt(this.options.dtID)){
                         $('<span>codeeditor</span>')
                             .attr('title', 'direct edit html in code editor')
                             .addClass('smallbutton')
                             .css({cursor: 'pointer', 'margin-left': '10px'})
                             .appendTo($btn_edit_switcher);
                     }
-                        
+
                     $('<span>table</span>')
                         .attr('title', 'treats the text as a table/spreadsheet and opens a lightweight spreadsheet editor')
                         .addClass('smallbutton')
@@ -1861,7 +1903,7 @@ $.widget( "heurist.editing_input", {
                 
                 //hide wyswyg options for custom js and css fields
                 if (isCMS_record && (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'] || 
-                    this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])){
+                    this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])) {
                 
                     isCMS_content = true;
                     $btn_edit_switcher.find('span.wysiwyg').hide();
@@ -2195,7 +2237,7 @@ $.widget( "heurist.editing_input", {
             this.child_terms = this.child_terms ? this.child_terms : allTerms;
 
             // Display term selector as radio buttons/checkboxes
-            if(this.f('rst_TermsAsButtons') == 1 && this.child_terms && this.child_terms.length<=20){
+            if(this.f('rst_TermsAsButtons') == 1 && !this.options.is_faceted_search && this.child_terms && this._enumButtonsAllowed(this.f('rst_FilteredJsonTermIDTree'))){
 
                 this.enum_buttons = Number.parseInt(this.f('rst_MaxValues')) != 1 ? 'checkbox' : 'radio';
                 let inpt_id = $input.attr('id');
@@ -2654,7 +2696,7 @@ $.widget( "heurist.editing_input", {
             
             let __show_select_function = null;
             if(typeof browseRecords!=='undefined' && window.hWin.HEURIST4.util.isFunction(browseRecords)){
-                __show_select_function = browseRecords(that, $input);//see editing_exts
+                __show_select_function = browseRecords(that, $input);//see editingBrowse.js
             }
             
             that._findAndAssignTitle($input, value, __show_select_function);
@@ -2698,6 +2740,9 @@ $.widget( "heurist.editing_input", {
                 }
                 if(this.options.selectSubRecord){
                     rg_options['skipFieldAdditions'] = true;
+                }
+                if(this.options.filters?.ids){
+                    rg_options['filters'] = {ids: this.options.filters.ids};
                 }
 
                 window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, rg_options);
@@ -3074,546 +3119,9 @@ $.widget( "heurist.editing_input", {
             }
             else 
             if(this.isFileForRecord){ //----------------------------------------------------
-                
-                let $input_img;
-                
-                let select_return_mode = 'recordset';
 
-                // File IDs, needed for processes below
-                let f_id = value.ulf_ID;
-                let f_nonce = value.ulf_ObfuscatedFileID;
-                const dtyID = this.options.dtID ?? this.f('rst_DetailTypeID');;
+                this._setupImageInput($inputdiv, value);
 
-                // urls for downloading and loading the thumbnail
-                let dwnld_link = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&debug=1&download=1&file=${f_nonce}`;
-                let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}&mode=tag&origin=recview`;
-
-                let $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
-                
-                $input.css({'padding-left': '30px', 'padding-right': '30px', cursor:'hand'});
-                //folder icon in the begining of field
-                let $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
-                    .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input );
-                $('<span>', {class: 'file-vis ui-icon', style: 'position: absolute; margin: 3px 0px 0px -24px'}).insertAfter( $input );
-
-                $inputdiv.append('<br>');
-
-                // Image and Player (enalrged image) container
-                $input_img = $('<div>', {
-                    class: 'image_input ui-widget-content ui-corner-all thumb_image',
-                    style: 'margin: 5px 0px 1em; border: none; background: transparent; min-height: unset;'
-                }).appendTo($inputdiv).hide();
-
-                if(this.options?.values?.length > 1){
-                    $input_img.css({
-                        'border-bottom': '1px solid darkgrey',
-                        'padding-bottom': '1em'
-                    });
-                }
-
-                // Thumbnail container
-                $('<img>', {
-                    id: `img${dtyID}_${f_id}`,
-                    class: 'image_input',
-                    style: 'max-width: none; position: relative;'
-                }).appendTo($input_img);
-
-                // File 'player' container
-                $('<div>', {
-                    id: `player${dtyID}_${f_id}`,
-                    style: 'min-height: 100px; min-width: 200px; display: none;'
-                }).appendTo($input_img);
-
-                // Controls
-                let $img_controls = $('<div>', {
-                    class: 'preview_controls',
-                    style: 'display: none; font-size: smaller; padding-top: 0.5em;'
-                }).appendTo($input_img);
-
-                // Record Type help text for Record Editor
-                $('<br><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
-                    + 'Click image to freeze in place</div>')
-                .clone()
-                .insertAfter( $clear_container )
-                .hide();
-
-                // Add download, show thumbnail and show in popup links
-                $('<a>', {
-                    href: '#',
-                    class: `mode_switcher`,
-                    style: 'display: inline-block; padding-right: 1.5em; text-decoration: underline; color: blue;',
-                    text: 'click to zoom'
-                }).appendTo($img_controls);
-
-                $('<a>', {
-                    href: dwnld_link,
-                    target: '_surf',
-                    id: `dwn${dtyID}_${f_id}`,
-                    class: 'external-link image_tool',
-                    title: 'Download image',
-                    style: 'display: inline-block; color: blue;',
-                    html: '<span class="ui-icon ui-icon-download" />'
-                }).appendTo($img_controls);
-
-                $('<a>', {
-                    href: '#',
-                    class: 'popup_viewer',
-                    title: 'Full view in a popup',
-                    style: 'display: inline-block; text-decoration: underline; color: blue; padding-left: 5px;',
-                    html: '<span class="ui-icon ui-icon-popup" />popup'
-                }).appendTo($img_controls);
-                
-                // Edit file's metadata
-                let $edit_details = $('<span class="ui-icon ui-icon-pencil edit_metadata" title="Edit image metadata" style="cursor: pointer;padding-left:5px;">')
-                        .insertBefore($clear_container);
-                this._on($edit_details, {
-                    click: function(event){
-
-                        let popup_opts = {
-                            isdialog: true, 
-                            select_mode: 'manager',
-                            edit_mode: 'editonly',
-                            rec_ID: f_id,
-                            default_palette_class: 'ui-heurist-populate',
-                            width: 950,
-                            onClose: function(recordset){
-
-                                // update external reference, if necessary
-                                if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
-
-                                    let record = recordset.getFirstRecord();
-
-                                    let newvalue = {
-                                        ulf_ID: recordset.fld(record,'ulf_ID'),
-                                        ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
-                                        ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
-                                        ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
-                                        ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
-                                        ulf_Caption: recordset.fld(record,'ulf_Caption'),
-                                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView')
-                                    };
-
-                                    that.newvalues[$input.attr('id')] = newvalue;
-                                    that._findAndAssignTitle($input, newvalue);
-                                }
-                            }
-                        };
-
-                        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
-                    }
-                }); // edit details click
-                if(!window.hWin.HEURIST4.util.isPositiveInt(f_id)){
-                    $edit_details.hide();
-                }
-
-                // Use camera
-                let $camera = $('<span>', {class: 'ui-icon ui-icon-camera use_camera', title: 'Take a photo with your camera', style: 'cursor: pointer; padding-left: 5px;'})
-                    .insertBefore($clear_container);
-                this._on($camera, {
-                    click: this._photoMode
-                });
-                let check_camera = typeof navigator?.mediaDevices?.enumerateDevices === 'function' && window.self === window.top;
-                if(check_camera){ // check for camera input
-                    navigator.mediaDevices.enumerateDevices()
-                    .then((devices) => {
-                        let show_camera = false;
-                        for(const device of devices){
-                            if(device.kind === 'videoinput'){
-                                show_camera = true;
-                                break;
-                            }
-                        }
-                        if(!show_camera){
-                            $camera.hide();
-                            this._off($camera, 'click');
-                        }
-                    }).catch(() => {
-                        $camera.hide();
-                        this._off($camera, 'click');
-                    });
-                }else{
-                    $camera.hide();
-                    this._off($camera, 'click');
-                }
-
-                // Change Handler
-                this._on($input,{change: 
-                function(event){
-
-                    // new file values
-                    let val = that.newvalues[$input.attr('id')];
-
-                    if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
-                        $input.val('');
-                    }else{
-                        let n_id = val['ulf_ID'];
-                        let n_nonce = val['ulf_ObfuscatedFileID'];
-                        let n_dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&debug=2&download=1&file='+n_nonce;
-                        let n_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+n_nonce+'&mode=tag&origin=recview';
-                    
-                        if(f_id != n_id){// If the image has been changed from original/or has been newly added
-
-                            let $container = $(event.target.parentNode);
-
-                            let $dwnld = $($container.find(`a#dwn${dtyID}_${f_id}`)[0]);
-                            let $player = $($container.find(`div#player${dtyID}_${f_id}`)[0]);
-                            let $thumbnail = $($container.find(`img#img${dtyID}_${f_id}`)[0]);
-                            let $edit_metadata = $($container.find('.edit_metadata')[0]);
-                            $($container.find(`[data-id="${f_id}"]`)).attr('data-id', n_id);
-
-                            $dwnld.attr({id: `dwn${dtyID}_${n_id}`, href: n_dwnld_link});
-                            $player.attr({id: `player${dtyID}_${n_id}`});
-                            $thumbnail.attr({id: `img${dtyID}_${n_id}`});                       
-
-                            f_id = n_id;
-                            f_nonce = n_nonce;
-                            dwnld_link = n_dwnld_link;
-                            url = n_url;
-
-                            if(!n_id || n_id < 1){
-                                $edit_metadata.hide();
-                            }else{
-                                $edit_metadata.show();
-                            }
-                        }
-                        
-                    }
-                    
-                    //clear thumb rollover
-                    if(window.hWin.HEURIST4.util.isempty($input.val())){
-                        $input_img.find('img').attr('src','');
-                    }
-
-                    that.onChange(); 
-                } }); // input change
-                
-                // Handler Variables
-                let hideTimer = 0, showTimer = 0;  //  Time for hiding thumbnail
-                let isClicked = 0;  // Number of image clicks, one = freeze image inline, two = enlarge/srink
-
-                // Input element's hover handler
-                function __showImagePreview(event){
-                    let imgAvailable = !window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'));
-                    let invalidURL = $inputdiv.find('div.smallText').hasClass('invalidImg');
-
-                    if((imgAvailable || invalidURL) && isClicked === 0){
-                        if (hideTimer) {
-                            window.clearTimeout(hideTimer);
-                            hideTimer = 0;
-                        }
-                        
-                        if($input_img.is(':visible')){
-                            $input_img.stop(true, true).show();    
-                        }else{
-                            if(showTimer==0){
-                                showTimer = window.setTimeout(function(){
-                                    $input_img.show();
-                                    $inputdiv.find('div.smallText').show();
-                                    showTimer = 0;
-                                },500);
-                            }
-                        }
-                    }
-                }
-                this._on($input,{mouseover: __showImagePreview});
-                this._on($input_img,{mouseover: __showImagePreview});
-
-                // Input element's mouse out handler, attached and dettached depending on user preferences
-                function __hideImagePreview(event){
-                    if (showTimer) {
-                        window.clearTimeout(showTimer);
-                        showTimer = 0;
-                    }
-
-                    if($input_img.is(':visible')){
-                        
-                        let ele = event.toElement || event.relatedTarget;
-                        ele = $(ele);
-                        if(ele.hasClass('image_input') || ele.parent().hasClass('image_input')){
-                            return;
-                        }
-                                                
-                        hideTimer = window.setTimeout(function(){
-                            if(isClicked === 0){
-                                $input_img.fadeOut(1000);
-                                $inputdiv.find('div.smallText').hide(1000);
-                            }
-                        }, 500);
-                    }
-                }
-                this._on($input, {mouseout:__hideImagePreview});
-                this._on($input_img, {mouseout:__hideImagePreview});
-
-                // Thumbnail's click handler
-                this._on($input_img, {
-                    click: (event) => {
-
-                        let elem = event.target;
-
-                        if(isClicked === 0 && !$inputdiv.find('div.smallText').hasClass('invalidImg')){
-
-                            isClicked = 1;
-                            
-                            that._off($input_img,'mouseout');
-
-                            $inputdiv.find('div.smallText').hide(); // Hide image help text
-
-                            let $controls = $input_img.parent().find('div.preview_controls'); // Find the download anchors
-
-                            $controls.show();
-
-                            if($controls.find(`a#dwn${dtyID}_undefined`)){  // Need to ensure the links are setup
-                                $controls.find(`a#dwn${dtyID}_undefined`).attr({id: `dwn${dtyID}_${f_id}`, href: dwnld_link});
-                            }
-
-                            $input_img.css('cursor', 'zoom-in');
-
-                            window.hWin.HAPI4.save_pref('imageRecordEditor', 1);
-                        }
-                        else if(isClicked === 1){
-
-                            // Enlarge Image, display player
-                            if($input_img.hasClass('thumb_image') && (elem.tagName !== 'IMG' || elem.classList.contains('image_input'))){
-
-                                $input_img.css('cursor', 'zoom-out');
-
-                                window.hWin.HEURIST4.ui.showPlayer($input_img.find('img')[0], $input_img[0], `${dtyID}_${f_id}`, url);
-                            }
-                            else{  // Srink Image, display thumbnail
-
-                                $input_img.css('cursor', 'zoom-in');
-
-                                if(elem.tagName !== 'IMG'){
-                                    window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
-                                }
-                            }
-
-                            $input_img.find('.mode_switcher').text(!$input_img.hasClass('thumb_image') ? 'show thumbnail' : 'click to zoom');
-                        }
-                    }
-                });
-
-                // for closing inline image when 'frozen'
-                let $hide_thumb = $('<a>', {
-                    href: '#',
-                    class: 'hideTumbnail',
-                    style: 'padding-left: 1.5em; color: blue; cursor: pointer;',
-                    title: 'Hide image thumbnail',
-                    text: 'close'
-                }).appendTo($img_controls).show();
-
-                this._on($hide_thumb, {
-                    click: (event) => {
-
-                        window.hWin.HEURIST4.util.stopEvent(event);
-
-                        isClicked = 0;
-
-                        this._on($input,{mouseover: __showImagePreview});
-                        this._on($input_img,{mouseover: __showImagePreview});
-
-                        this._on($input, {mouseout:__hideImagePreview});
-                        this._on($input_img, {mouseout:__hideImagePreview});
-
-                        $img_controls.hide();
-
-                        if($inputdiv.find('div.smallText').find('div.smallText').hasClass('invalidImg')){
-                            $input_img.hide().css('cursor', '');
-                        }else{
-                            $input_img.hide().css('cursor', 'pointer');
-                        }
-
-                        window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
-                    }
-                });
-
-                // Show Thumbnail handler
-                this._on($input_img.find('.mode_switcher'), {
-                    click: (event) => {
-                        window.hWin.HEURIST4.util.stopEvent(event);
-                        $input_img.trigger('click');
-                    }
-                });
-
-                // 'popup' viewer handler
-                this._on($img_controls.find('.popup_viewer'), {
-                    click: (event) => {
-
-                        window.hWin.HEURIST4.util.stopEvent(event);
-
-                        let filename = $input.val();
-                        let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}`;
-                        let msg = `<img src='${url}' alt='${filename.replace('"', '&quote;').replace("'", '&apos;')}' style='height:99%;width:99%;object-fit:contain' />`;
-                        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                            msg, null, {title: filename}, {default_palette_class: 'ui-heurist-explore', resizable: true, width: 'auto', height: 'auto'}
-                        );
-                        $dlg.css('max-width', 'none');
-                    }
-                });
-                
-                let $mirador_link = $(`<a href="#" data-id="${f_nonce}" class="miradorViewer_link" style="color: blue;" title="Open in Mirador">`
-                    +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
-                    +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
-                    +'"></span>&nbsp;Mirador</a>').insertBefore( $hide_thumb ).hide();
-                    
-                this._on($mirador_link, {
-                    click:function(event){
-
-                        window.hWin.HEURIST4.util.stopEvent(event);
-
-                        let ele = $(event.target)
-
-                        if(!ele.attr('data-id')){
-                            ele = ele.parents('[data-id]');
-                        }
-                        let obf_recID = ele.attr('data-id');
-                        let is_manifest = (ele.attr('data-manifest')==1);
-
-                        let url =  window.hWin.HAPI4.baseURL
-                        + 'hclient/widgets/viewers/miradorViewer.php?db=' 
-                        +  window.hWin.HAPI4.database
-                        + '&recID=' + that.options.recID
-                        + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
-
-                        const show_mirador_in_popup = true;
-                        if(show_mirador_in_popup){
-                            //borderless:true, 
-                            window.hWin.HEURIST4.msg.showDialog(url, 
-                                {dialogid:'mirador-viewer',
-                                    //resizable:false, draggable: false, 
-                                    //maximize:true, 
-                                    default_palette_class: 'ui-heurist-explore',
-                                    width:'90%',height:'95%',
-                                    allowfullscreen:true,'padding-content':'0px'});   
-
-                            let $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
-
-                            $dlg.parent().css('top','50px');
-                        }else{
-                            window.open(url, '_blank');        
-                        }                      
-
-                        //data-id
-                    }
-                });
-
-                let $openseadragon_link = $('<a>', {
-                    href: '#', 'data-id': f_id, class: 'openseadragon_link', style: 'color: blue; padding-left: 0.75em;', title: 'Open in OpenSeadragon',
-                    html: '<span class="ui-icon ui-icon-image"></span>&nbsp;OpenSeadragon'
-                }).insertAfter($mirador_link);
-
-                this._on($openseadragon_link, {
-                    click: (event) => {
-
-                        window.hWin.HEURIST4.util.stopEvent(event);
-
-                        let ele = $(event.target)
-
-                        if(!ele.attr('data-id')){
-                            ele = ele.parents('[data-id]');
-                        }
-
-                        let fileID = ele.attr('data-id');
-
-                        let url = `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${window.hWin.HAPI4.database}&recID=${fileID}`;
-
-                        window.hWin.HEURIST4.msg.showDialog(url, {
-                            dialogid: 'openseadragon-viewer', default_palette_class: 'ui-heurist-explore',
-                            width: '90%', height: '95%', allowfullscreen: true, 'padding-content': '0px'
-                        });
-                    }
-                });
-
-                // Check User Preferences, displays thumbnail inline by default if set
-                if(window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0) != 0 && value.ulf_ID){
-
-                    $input_img.show();
-                    $img_controls.show();
-
-                    $input_img.css('cursor', 'zoom-in');
-
-                    $input.off("mouseout");
-
-                    isClicked = 1;
-                }
-
-                const isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
-                    && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
-                 
-                let popup_options = {
-                    isdialog: true,
-                    select_mode: 'select_single',
-                    additionMode: isTiledImage?'tiled':'any',  //AAAA
-                    edit_addrecordfirst: true, //show editor at once
-                    select_return_mode:select_return_mode, //ids or recordset(for files)
-                    filter_group_selected:null,
-                    filter_groups: this.configMode.filter_group,
-                    default_palette_class: 'ui-heurist-populate',
-                    onselect:function(event, data){
-
-                        if(data && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
-
-                            let recordset = data.selection;
-                            let record = recordset.getFirstRecord();
-
-                            let newvalue = {
-                                ulf_ID: recordset.fld(record,'ulf_ID'),
-                                ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
-                                ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
-                                ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
-                                ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
-                                ulf_Caption: recordset.fld(record,'ulf_Caption'),
-                                ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView')
-                            };
-
-                            that.newvalues[$input.attr('id')] = newvalue;
-                            that._findAndAssignTitle($input, newvalue);
-
-                        }//data
-
-                    }
-                };//popup_options
-
-                that._findAndAssignTitle($input, value);
-
-                let __show_select_dialog = function(event){
-                    
-                        if(that.is_disabled) return;
-
-                        event.preventDefault();
-                        
-                        let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
-                            {width: null,  //null triggers default width within particular widget
-                            height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-            
-                        popup_options.width = usrPreferences.width;
-                        popup_options.height = usrPreferences.height;
-                        let sels = this.newvalues[$(event.target).attr('id')];
-                        if(!sels && this.options.values && this.options.values[0]){
-                             sels = this.options.values[0];    //take selected value from options
-                        } 
-
-                        if($.isPlainObject(sels)){
-                            popup_options.selection_on_init = sels;
-                        }else if(!window.hWin.HEURIST4.util.isempty(sels)){
-                            popup_options.selection_on_init = sels.split(',');
-                        } else {
-                            popup_options.selection_on_init = null;    
-                        }                                                                                       
-                        //init dialog to select related uploaded files
-                        window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
-                }
-                
-                if(__show_select_dialog!=null){
-                   
-                    this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
-                    this._on( $gicon, { click: __show_select_dialog } );
-                }
-                
-                if(this.isFileForRecord && value){
-                    //assign value at once
-                    this.newvalues[$input.attr('id')] = value;
-                }
             }
             else
             if( this.detailType=='folder' ){ //----------------------------------------------------
@@ -3659,7 +3167,7 @@ $.widget( "heurist.editing_input", {
                         if(this.configMode.entity === 'sysBugreport'
                             && !window.hWin.HEURIST4.util.isempty(value)
                             && value.indexOf(this.configMode.entity) > 0
-                            && value.match(/~\d{10}(?:%20%28\d+%29)?\.(?:png|gif|jpg)\?\d{13}$/)){
+                            && value.match(/~\d{10}(?:%20%28\d+%29)?\.(?:png|gif|jpg)/)){
 
                             urlThumb = value;
                             using_temp_file = true;
@@ -3789,23 +3297,52 @@ $.widget( "heurist.editing_input", {
     max_file_size: max_file_size,
     sequentialUploads: true,
     dataType: 'json',
-    pasteZone: $input_img,
-    dropZone: $input_img,
+    pasteZone: this.configMode?.entity !== 'sysBugreport' ? $input_img : null,
+    dropZone: this.configMode?.entity !== 'sysBugreport' ? $input_img : null,
     paste: function(e, data){
+
+        if(that.config?.entity === 'sysBugreport'){ // removing pasteZone isn't enough
+            return false;
+        }
+
         upload_count = that.f('rst_MaxValues') != 1 ? data.files.length : 1;
+        uploaded_urls = [];
         keep_existing = that.f('rst_MaxValues') != 1 && Object.keys(that.newvalues).length > 0;
     },
     drop: function(e, data){
+
+        if(that.config?.entity === 'sysBugreport'){ // removing dropZone isn't enough
+            return false;
+        }
+
         upload_count = that.f('rst_MaxValues') != 1 ? data.files.length : 1;
+        uploaded_urls = [];
         keep_existing = that.f('rst_MaxValues') != 1 && Object.keys(that.newvalues).length > 0;
     },
     always: function(){
+
         if(upload_count > 0 && uploaded_urls.length === upload_count){
 
             let values = Object.values(that.newvalues).concat(...uploaded_urls);
             that.setValue(values);
 
+            $.each(that.inputs, (idx, input) => {
+
+                input = $(input);
+
+                const inputID = input.attr('id');
+                const thumbURL = input.parent().find('img.image_input').attr('src');
+
+                if(!Object.hasOwn(that.newvalues, inputID) || that.newvalues[inputID] != thumbURL){
+                    that.newvalues[inputID] = thumbURL;
+                }
+
+            });
+
+            that.onChange();
+
             upload_count = 0;
+            uploaded_urls = [];
         }
         keep_existing = false;
     },
@@ -3839,10 +3376,10 @@ $.widget( "heurist.editing_input", {
             modal: true,
             closeOnEscape: false,
             resizable: false,
-            buttons: []
+            buttons: [],
+            showTitlebar: false
           });                        
-        $progress_dlg.dialog('open'); 
-        $progress_dlg.parent().find('.ui-dialog-titlebar-close').hide();
+        $progress_dlg.dialog('open');
     },
     done: function (e, response) {
 
@@ -3877,7 +3414,7 @@ $.widget( "heurist.editing_input", {
 
                     let urlThumb =
                     (that.configMode.entity=='recUploadedFiles'
-                        ?file.url
+                        ? file.url
                         :file[(that.configMode.version=='icon')?'iconUrl':'thumbnailUrl'])
                         +'?'+(new Date()).getTime();
 
@@ -3948,8 +3485,8 @@ $.widget( "heurist.editing_input", {
        
         $progress_bar.progressbar( "value", progress );        
     }                            
-                        };      
-                        
+};
+
     if(window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1){
         fileupload_opts['multipart'] = true;
         fileupload_opts['maxChunkSize'] = 10485760; //10M
@@ -3963,8 +3500,8 @@ $.widget( "heurist.editing_input", {
         fileupload_opts['formData'].push({name: 'acceptFileTypes', value:'zip|mbtiles'});
         
         $input.attr('accept','.zip, .mbtiles');
-    }                
-       
+    }
+
                         //init upload widget
                         $input.addClass('fileupload');
                         $input.fileupload( fileupload_opts );
@@ -4059,15 +3596,12 @@ $.widget( "heurist.editing_input", {
                         
                         if(that.is_disabled) return;
                     
-                        let url = window.hWin.HAPI4.baseURL 
-                            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
-                       
                         let wkt_params = {'wkt': that.newvalues[$input.attr('id')] };
                         if(that.options.is_faceted_search){
                             wkt_params['geofilter'] = true;
                         }
 
-                        if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
+                        if(that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
                             let ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
                             let vals = ele.editing_input('getValues');
@@ -4086,10 +3620,10 @@ $.widget( "heurist.editing_input", {
                             }
                         }
 
-                        if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE'] || 
-                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'] || 
-                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] || 
-                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']) {
+                        if(that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] || that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE'] || 
+                        that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE'] || that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'] || 
+                        that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] || that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] || 
+                        that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']) {
                             // assume bounding box, rectangle tool only
                             wkt_params['tool_option'] = 'rectangle';
                         }
@@ -4097,15 +3631,10 @@ $.widget( "heurist.editing_input", {
                         let d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         d_height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95;
 
-                        window.hWin.HEURIST4.msg.showDialog(url, {
+                        window.hWin.HEURIST4.ui.showMapDrawDialog(wkt_params, {
                             height:that.options.is_faceted_search?540:d_height,
-                            width:that.options.is_faceted_search?600:d_width,
-                            window: window.hWin,  //opener is top most heurist window
-                            dialogid: 'map_digitizer_dialog',
-                            default_palette_class: 'ui-heurist-populate',
-                            params: wkt_params,
+                            width:that.options.is_faceted_search?800:d_width,
                             title: window.hWin.HR('Heurist map digitizer'),
-                            //class:'ui-heurist-bg-light',
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
                                     //that.newvalues[$input.attr('id')] = location
@@ -4125,7 +3654,7 @@ $.widget( "heurist.editing_input", {
                                     //$input.val(location.type+' '+location.wkt)
                                 }
                             }
-                        } );
+                        });
                 };
 
                
@@ -4182,9 +3711,6 @@ $.widget( "heurist.editing_input", {
                     let popele = $(pdiv);
 
                     popele.find('input[class="bkm_points"]').on('click', function(e){
-                        let url = window.hWin.HAPI4.baseURL 
-                            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
-
                         let wkt_points = $('input[id="bkm_long"]').val() + ',' + $('input[id="bkm_lat"]').val();
                         let points = wkt_points.split(/[\s,]+/);
 
@@ -4196,13 +3722,9 @@ $.widget( "heurist.editing_input", {
                         let d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         d_height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95;
 
-                        window.hWin.HEURIST4.msg.showDialog(url, {
+                        window.hWin.HEURIST4.ui.showMapDrawDialog(wkt_params, {
                             height:that.options.is_faceted_search?540:d_height,
-                            width:that.options.is_faceted_search?600:d_width,
-                            window: window.hWin,  //opener is top most heurist window
-                            dialogid: 'map_digitizer_dialog',
-                            default_palette_class: 'ui-heurist-populate',
-                            params: wkt_params,
+                            width:that.options.is_faceted_search?800:d_width,
                             title: window.hWin.HR('Heurist map digitizer'),
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
@@ -4219,7 +3741,7 @@ $.widget( "heurist.editing_input", {
                                     $('input[id="bkm_lat"]').val(points[1] + ',' + points[3]).trigger('change');
                                 }
                             }
-                        } );
+                        });
                     });
 
                     popele.find('input[id="bkm_name"]').val(setup_val[0]);
@@ -4299,137 +3821,515 @@ $.widget( "heurist.editing_input", {
             
         }//end if by detailType
 
-        //----------------- color or symbology editor
-        if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
+        // Read the query this field's sibling DT_QUERY_STRING field currently holds (if any).
+        // Used to scope rule-builder / field-set / geo-field pickers to the record types the query returns.
+        function __getSiblingQueryString(){
+            const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+            const queryField = that.options.editing
+                ? that.options.editing.getFieldByName(DT_QUERY_STRING)
+                : null;
+            if(!queryField){ return null; }
+            const values = queryField.editing_input('getValues');
+            return values && values.length ? values[0] : null;
+        }
 
-                if(that.options.rectypeID!=window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
-                    $input.attr('readonly','readonly');
-                }
-                
-                if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){
-                    
-                        //custom/user heurist theme
-                        let $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open color sheme editor'})
-                            .addClass('smallbutton btn_add_term')
-                            .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                            .appendTo( $inputdiv );
-
-                        let $btn_edit_clear2 = $( '<span>reset colors</span>', {title: 'Reset default color settings'})
-                            .addClass('smallbutton btn_add_term')
-                            .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                            .appendTo($inputdiv )
-                            .on( { click: function(){ $input.val('');that.onChange(); } });
-                            
-                        function __openThemeDialog(){
-                                let current_val = window.hWin.HEURIST4.util.isJSON( $input.val() );
-                                if(!current_val) current_val = {};
-                                window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
-                                    $input.val(JSON.stringify(new_value));
-                                    that.onChange();
-                                });
-                        }                
-                        
-                        $input.css({'max-width':'400px'}).on({ click: __openThemeDialog });
-                        $btn_edit_switcher2.on( { click: __openThemeDialog });
-                    
+        // Populate the query field with the builder result; do not execute a search.
+        if(this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo.dbconst.DT_QUERY_STRING){
+            const queryButton = $('<button type="button">').text(window.hWin.HR('Build query'))
+                .css({'vertical-align':'top','margin-left':'6px'}).insertAfter($input).button();
+            this._on(queryButton, {click:function(){
+                const openBuilder = function(){
+                    const originalValue = $input.val();
+                    showSearchBuilder({is_modal:true, isForEdit:true, rty_ID:null,
+                        input_element:$input, menu_locked:null, onClose:null, beforeClose:null});
+                    $('#heurist-searchBuilder').one('dialogclose.buildQuery', function(){
+                        $(this).searchBuilder('option', 'input_element', null);
+                        if($input.val() !== originalValue) that.onChange();
+                    });
+                };
+                if(typeof showSearchBuilder === 'function'){
+                    openBuilder();
                 }else{
-                
-                    let $btn_edit_switcher = $( '<span>style editor</span>', {title: 'Open symbology editor'})
-                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                        .addClass('smallbutton btn_add_term')
-                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                        .appendTo( $inputdiv );
-                    
-                    this._on( $btn_edit_switcher, { click: function(){
-                        
-                            let mode_edit = 0;
-                            let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
-                            if(!current_val) current_val = {};
-                        
-                            if(that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
-                                
-                                //get query from linked datasource
-                                let ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']);
-                                let vals = ele.editing_input('getValues');
-                                let dataset_record_id = vals[0];
-                                
-                                if(dataset_record_id>0){
-                                    
-                                    const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
-                                
-                                    let server_request = {
-                                        q: 'ids:'+dataset_record_id,
-                                        restapi: 1,
-                                        columns: 
-                                        ['rec_ID', 'rec_RecTypeID', DT_QUERY_STRING],
-                                        zip: 1,
-                                        format:'json'};
-                    
-                                    //perform search see record_output.php       
-                                    window.hWin.HAPI4.RecordMgr.search_new(server_request,
-                                        function(response){
-                                               if(window.hWin.HEURIST4.util.isJSON(response)) {
-                                                    let hquery = null;
-                                                    mode_edit = 3;
-                                                    if(response['records'] && response['records'].length>0){
-                                                        let rectype = response['records'][0]['rec_RecTypeID']; 
-                                                        
-                                                        if (rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE']
-                                                        || rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
-                                                            //show image filter dialogue
-                                                            window.hWin.HEURIST4.ui.showImgFilterDialog(current_val, function(new_value){
-                                                                $input.val(JSON.stringify(new_value));
-                                                                that.onChange();
-                                                            });
-                                                            return;                                                            
-                                                        }else if (rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
-                                                            
-                                                            let res = response['records'][0]['details'];
-                                                            if(res[DT_QUERY_STRING]){
-                                                                //{12:{4407:"t:10"}}
-                                                                hquery = res[DT_QUERY_STRING][ Object.keys(res[DT_QUERY_STRING])[0] ];
-                                                            }
-                                                            
-                                                        }
-                                                    }
-                                                    
-                                                    current_val.maplayer_query = hquery;
-                                                    
-                                                    window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 
-                                                            hquery==null?1:3, function(new_value){
-                                                        $input.val(JSON.stringify(new_value));
-                                                        that.onChange();
-                                                    });
-                                                    
-                                                }
-                                            });
-                                    return;        
-                                }
-                            }
-                        
-                            window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, function(new_value){
-                                $input.val(JSON.stringify(new_value));
-                                that.onChange();
-                            });
-                    }});
-            
+                    const path = window.hWin.HAPI4.baseURL+'hclient/widgets/search/';
+                    queryButton.button('disable');
+                    $.getMultiScripts([path+'searchBuilder.js', path+'searchBuilderItem.js', path+'searchBuilderSort.js'])
+                        .done(openBuilder)
+                        .fail(function(){ window.hWin.HEURIST4.msg.showMsg_ScriptFail(); })
+                        .always(function(){ queryButton.button('enable'); });
                 }
-             
-        }//end color/symbol editor
-        
-        else if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
-
-            let $btn_edit_switcher = $( '<span>calculate extent</span>', 
-                {title: 'Get image extent based on worldfile parameters and image width and height'})
-                    .addClass('smallbutton btn_add_term')
-                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                    .appendTo( $inputdiv );
-
-            this._on( $btn_edit_switcher, { click: function(){
-                calculateImageExtentFromWorldFile( that.options.editing );
             }});
         }
 
+        // Dataset rules are edited as one ruleset; normal form saving persists it.
+        if(this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo.dbconst.DT_EXPANSION_RULES){
+            $input.hide();
+            const expansionRow = $('<div>').css({'display':'flex','align-items':'flex-start','gap':'6px'})
+                .insertBefore($input);
+            const preview = $('<div class="dataset-expansion-preview">')
+                .css({'flex':'1','min-width':0}).appendTo(expansionRow);
+            const refresh = function(){
+                preview.empty();
+                try{
+                    const rules = JSON.parse($input.val() || '[]');
+                    if(!Array.isArray(rules)) throw new Error('Expansion rules must be an array');
+                    rules.forEach(function(rule){
+                        const labels = rule.name ? rule : window.hWin.HEURIST4.ui.describeExpansionRule(rule);
+                        $('<div>').text(labels.name).attr('title', labels.description || '').appendTo(preview);
+                    });
+                    if(!rules.length) preview.text(window.hWin.HR('No expansion rules'));
+                }catch(error){ preview.text(error.message); }
+            };
+            $input.on('change.expansionPreview input.expansionPreview heuristFieldSetRefresh', refresh);
+            refresh();
+            const button = $('<span role="button" tabindex="0">').text(window.hWin.HR('Define expansions'))
+                .addClass('smallbutton btn_add_term')
+                .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                    'text-decoration':'underline','margin-left':'6px','white-space':'nowrap','flex-shrink':0})
+                .appendTo(expansionRow);
+            this._on(button, {keydown:function(event){
+                if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); button.trigger('click'); }
+            }});
+            this._on(button, {click:async function(){
+                try{
+                    const query = __getSiblingQueryString();
+                    const result = await window.hWin.HEURIST4.ui.showRulesBuilderDialog(
+                        $input.val(), {query: query});
+                    if(result){ $input.val(JSON.stringify(result.rules)); refresh(); that.onChange(); }
+                }catch(error){ window.hWin.HEURIST4.msg.showMsgErr(error.message); }
+            }});
+        }
+
+        //----------------- Query Source geo field-path selector / Dataset field-set editor / Timeline fields selector
+        if(this.options.dtID > 0){
+            
+           let RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
+
+           if((window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'] &&
+              this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_FIELDS'])
+              ||
+              (window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'] &&
+              this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']) )
+           {
+
+               const fieldType = (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'])?'temporal':'geo';
+               
+                // For RT_QUERY_SOURCE DT_GEO_FIELDS, DT_TIMELINE_FIELDS remains a repeatable geo path.
+                // Keep the existing selector and human-readable hierarchy title.
+                $input.hide();
+
+                let $field_titles = $('<span>')
+                    .css({'line-height':'20px','vertical-align':'top','margin-right':'8px'})
+                    .insertBefore($input);
+
+                function __refreshFieldTitle(){
+                    let code = $.trim($input.val() || '');
+                    let title = '';
+
+                    if(code){
+                        let hierarchy = $Db.getHierarchyTitles(code);
+                        if(hierarchy && hierarchy.harchy){
+                            title = hierarchy.harchy.join('');
+                        }
+                    }
+
+                    $field_titles.html(title || '<i>'+window.hWin.HR(`No ${fieldType} fields selected`)+'</i>');
+                }
+
+                $input.on('change.geoFieldPreview input.geoFieldPreview heuristFieldSetRefresh',
+                    __refreshFieldTitle);
+                __refreshFieldTitle();
+
+                let $btn_select_fields = $(`<span>Select ${fieldType} field</span>`,
+                        {title:`Select a ${fieldType} field from the query result or linked records`})
+                    .addClass('smallbutton btn_add_term')
+                    .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                          'text-decoration':'underline','margin-left':'6px'})
+                    .appendTo($inputdiv);
+
+                this._on($btn_select_fields, {click:function(){
+                    let DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+                    let queryField = that.options.editing
+                        ? that.options.editing.getFieldByName(DT_QUERY_STRING)
+                        : null;
+                    let query = null;
+
+                    if(queryField){
+                        let values = queryField.editing_input('getValues');
+                        query = values && values.length ? values[0] : null;
+                    }
+
+                    selectGeoOrTimeField(query, fieldType, function(value){
+                        $input.val(value);
+                        __refreshFieldTitle();
+                        that.onChange();
+                    }, that.element.closest('div[role="dialog"]'));
+                }});
+
+                  
+           }
+
+           if(window.hWin.HAPI4.sysinfo['dbconst']['DT_TABLE_FIELDS'] &&
+              this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_TABLE_FIELDS']){
+                  
+                // The textarea is retained as the actual form value but hidden.
+                $input.hide();
+
+                let $field_preview = $('<div class="dataset-fieldset-preview">')
+                    .css({'display':'inline-block','vertical-align':'top','min-width':'24em',
+                          'max-width':'55em','line-height':'1.5em','margin-right':'8px'})
+                    .insertBefore($input);
+
+                function __parseDatasetFields(){
+                    let value = $.trim($input.val() || '');
+                    if(!value){ return []; }
+                    try{
+                        let parsed = JSON.parse(value);
+                        let fields = Array.isArray(parsed) ? parsed : parsed.fields;
+                        return Array.isArray(fields) ? fields : [];
+                    }catch(ignore){
+                        return value.split(',');
+                    }
+                }
+
+                function __fieldTitle(code){
+                    if(String(code).indexOf('rec_')===0){
+                        return String(code).replace(/^rec_/,'').replace(/_/g,' ');
+                    }
+                    let hierarchy = $Db.getHierarchyTitles(code);
+                    if(hierarchy && hierarchy.harchy){
+                        return $('<div>').html(hierarchy.harchy.join('')).text();
+                    }
+                    return code;
+                }
+
+                function __refreshFieldSetPreview(){
+                    let fields = __parseDatasetFields();
+                    $field_preview.empty();
+                    if(fields.length===0){
+                        $('<i>').text(window.hWin.HR('No fields selected')).appendTo($field_preview);
+                        return;
+                    }
+                    let $list = $('<ol>').css({'margin':'0','padding-left':'22px'}).appendTo($field_preview);
+                    $.each(fields, function(index, item){
+                        item = typeof item==='string' ? {field:item} : item;
+                        if(!item || !item.field){ return; }
+                        let caption = item.title || __fieldTitle(item.field);
+                        let options = [];
+                        if(item.visible===false){ options.push(window.hWin.HR('hidden')); }
+                        if(item.ext){ options.push(item.ext); }
+                        if(item.aggregation){ options.push(item.aggregation); }
+                        let $li = $('<li>').text(caption).attr('title',item.field).appendTo($list);
+                        if(options.length){
+                            $('<small>').css({'color':'#777','margin-left':'0.5em'})
+                                .text('('+options.join(', ')+')').appendTo($li);
+                        }
+                    });
+                }
+
+                function __inferDatasetRecordType(fields, query){
+                    for(let idx=0; idx<fields.length; idx++){
+                        let item = typeof fields[idx]==='string' ? fields[idx] : fields[idx].field;
+                        let match = String(item || '').match(/^(\d+):/);
+                        if(match){ return match[1]; }
+                    }
+
+                    if(query){
+                        try{
+                            let parsed = typeof query==='string' ? JSON.parse(query) : query;
+                            if(Array.isArray(parsed)){
+                                for(let pos=0; pos<parsed.length; pos++){
+                                    if(parsed[pos] && parsed[pos].t){ return String(parsed[pos].t); }
+                                }
+                            }
+                        }catch(ignore){
+                            let match = String(query || '').match(/(?:^|[?&])t=(\d+)/);
+                            if(match){ return match[1]; }
+                        }
+                    }
+                    return null;
+                }
+
+                function __openFieldSetEditor(recordTypeIds){
+                    let currentFields = __parseDatasetFields();
+                    $('<div>').appendTo('body').recordFieldSetEditor({
+                        isdialog:true,
+                        value:{fields:currentFields},
+                        recordTypeId:__inferDatasetRecordType(currentFields, __getSiblingQueryString()),
+                        recordTypeIds:recordTypeIds,
+                        onClose:function(context){
+                            if(context && Array.isArray(context.fields)){
+                                $input.val(JSON.stringify(context.fields));
+                                __refreshFieldSetPreview();
+                                that.onChange();
+                            }
+                        }
+                    });
+                }
+
+                // Find the record types actually present in the source query's results
+                // (legacy count_by_rty search - see selectGeoOrTimeField for the same pattern),
+                // then restrict the field-set editor's record type selector to those.
+                function __openFieldSetEditorForCurrentQuery(){
+                    let query = __getSiblingQueryString();
+                    if(query){
+                        window.hWin.HEURIST4.dbs.getRectypeCountsForQuery(query, function(rectypeIds){
+                            __openFieldSetEditor(rectypeIds);
+                        });
+                    }else{
+                        __openFieldSetEditor(null);
+                    }
+                }
+
+                let $btn_fields = $('<span>Define field set</span>',
+                        {title:'Select direct or linked fields and define their table presentation'})
+                    .addClass('smallbutton btn_add_term')
+                    .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                          'text-decoration':'underline','margin-left':'6px'})
+                    .appendTo($inputdiv);
+
+                this._on($btn_fields, {click:function(){
+                    if($.fn.recordFieldSetEditor){
+                        __openFieldSetEditorForCurrentQuery();
+                    }else{
+                        $.getScript(window.hWin.HAPI4.baseURL+
+                            'hclient/widgets/record/recordFieldSetEditor.js')
+                            .done(__openFieldSetEditorForCurrentQuery)
+                            .fail(function(){
+                                window.hWin.HEURIST4.msg.showMsgErr(
+                                    'Unable to load the field-set editor');
+                            });
+                    }
+                }});
+
+                $input.on('change.datasetFieldSet input.datasetFieldSet heuristFieldSetRefresh',
+                    __refreshFieldSetPreview);
+                __refreshFieldSetPreview();
+           }
+
+           //----------------- color or symbology editor
+           else if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
+
+                    if(that.options.rectypeID!=window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
+                        $input.attr('readonly','readonly');
+                    }
+                    
+                    if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){
+                        
+                            //custom/user heurist theme
+                            let $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open color sheme editor'})
+                                .addClass('smallbutton btn_add_term')
+                                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                                .appendTo( $inputdiv );
+
+                            let $btn_edit_clear2 = $( '<span>reset colors</span>', {title: 'Reset default color settings'})
+                                .addClass('smallbutton btn_add_term')
+                                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                                .appendTo($inputdiv )
+                                .on( { click: function(){ $input.val('');that.onChange(); } });
+                                
+                            function __openThemeDialog(){
+                                    let current_val = window.hWin.HEURIST4.util.isJSON( $input.val() );
+                                    if(!current_val) current_val = {};
+                                    window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
+                                        $input.val(JSON.stringify(new_value));
+                                        that.onChange();
+                                    });
+                            }                
+                            
+                            $input.css({'max-width':'400px'}).on({ click: __openThemeDialog });
+                            $btn_edit_switcher2.on( { click: __openThemeDialog });
+                        
+                    }else{
+
+                        const isMapLayer =
+                            that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
+
+                        // For Map Layer records the raw DT_SYMBOLOGY JSON is an advanced
+                        // editing option. Hide it initially and keep all editor controls in
+                        // a separate row below the textarea so the layout remains stable
+                        // when raw JSON is shown.
+                        let $symbology_controls = $inputdiv;
+                        if(isMapLayer){
+                            $input.hide();
+                            $symbology_controls = $('<span>')
+                                .css({display:'inline-block','white-space':'nowrap','margin-left':'4px'})
+                                .insertAfter($input);
+                        }
+
+                        /**
+                         * Resolve the datasource currently selected in the Map Layer editor.
+                         * This must be evaluated on every action because the user may change
+                         * DT_DATA_SOURCE while the record edit form remains open.
+                         */
+                        function __getMapLayerDataSource(callback){
+                            if(!isMapLayer){
+                                callback(null);
+                                return;
+                            }
+
+                            let ele = that.options.editing.getFieldByName(
+                                window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']);
+                            if(!ele){
+                                callback(null);
+                                return;
+                            }
+
+                            let vals = ele.editing_input('getValues');
+                            let dataset_record_id = vals ? vals[0] : null;
+                            if(!(dataset_record_id>0)){
+                                callback(null);
+                                return;
+                            }
+
+                            const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+                            let server_request = {
+                                q: 'ids:'+dataset_record_id,
+                                restapi: 1,
+                                columns: ['rec_ID', 'rec_RecTypeID', DT_QUERY_STRING],
+                                zip: 1,
+                                format:'json'
+                            };
+
+                            window.hWin.HAPI4.RecordMgr.search_new(server_request, function(response){
+                                let source = {recordId:dataset_record_id, recTypeId:null, query:null};
+
+                                if(window.hWin.HEURIST4.util.isJSON(response) &&
+                                   response['records'] && response['records'].length>0){
+                                    let record = response['records'][0];
+                                    source.recTypeId = record['rec_RecTypeID'];
+
+                                    if(source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
+                                        let details = record['details'];
+                                        if(details && details[DT_QUERY_STRING]){
+                                            source.query = details[DT_QUERY_STRING][Object.keys(details[DT_QUERY_STRING])[0]];
+                                        }
+                                    }
+                                }
+
+                                callback(source);
+                            });
+                        }
+
+                        function __currentSymbology(){
+                            let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                            return current_val || {};
+                        }
+
+                        function __storeSymbology(new_value){
+                            $input.val(JSON.stringify(new_value));
+                            that.onChange();
+                        }
+
+                        let $btn_edit_switcher = $('<span>style editor</span>',
+                                {title:'Open symbology editor'})
+                            .addClass('smallbutton btn_add_term')
+                            .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                                  'text-decoration':'underline'})
+                            .appendTo($symbology_controls);
+
+                        this._on($btn_edit_switcher, {click:function(){
+                            let current_val = __currentSymbology();
+
+                            if(!isMapLayer){
+                                window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, __storeSymbology);
+                                return;
+                            }
+
+                            __getMapLayerDataSource(function(source){
+                                if(source &&
+                                   (source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE'] ||
+                                    source.recTypeId==window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'])){
+                                    window.hWin.HEURIST4.ui.showImgFilterDialog(current_val, __storeSymbology);
+                                    return;
+                                }
+
+                                let mode_edit = source ? 1 : 0;
+                                let hquery = source ? source.query : null;
+                                if(hquery) mode_edit = 3;
+
+                                current_val.maplayer_query = hquery;
+                                window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, mode_edit, __storeSymbology, null,
+                                    window.hWin.HEURIST4.map.getDefaultMapSymbol());
+                            });
+                        }});
+
+                        // Direct access from a Map Layer record. Availability cannot be
+                        // determined when the form is created because DT_DATA_SOURCE may be
+                        // changed by the user, so validate it on click.
+                        if(isMapLayer){
+                            let $btn_thematic = $('<span>thematic maps</span>',
+                                    {title:'Open thematic maps editor'})
+                                .addClass('smallbutton btn_add_term')
+                                .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                                      'text-decoration':'underline','margin-left':'10px'})
+                                .appendTo($symbology_controls);
+
+                            this._on($btn_thematic, {click:function(){
+                                __getMapLayerDataSource(function(source){
+                                    if(!source ||
+                                       source.recTypeId!=window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] ||
+                                       !source.query){
+                                        window.hWin.HEURIST4.msg.showMsgFlash(
+                                            'Not supported for current data source', 2000);
+                                        return;
+                                    }
+
+                                    let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                                    if(!current_val) current_val = [];
+
+                                    window.hWin.HEURIST4.ui.showThematicMappingDialog(
+                                        {
+                                            maplayer_query: source.query,
+                                            symbology: current_val,
+                                            parentSymbol: window.hWin.HEURIST4.map.getDefaultMapSymbol(),
+                                            onClose: function(context){
+                                                if(context!==null && context!==undefined){
+                                                    let newval = window.hWin.HEURIST4.util.isJSON(context);
+                                                    newval = (!newval)?'':JSON.stringify(newval);
+                                                    $input.val(newval);
+                                                    that.onChange();
+                                                }
+                                            }
+                                        }
+                                    );
+                                });
+                            }});
+
+                            let $btn_raw_symbology = $('<span>show raw</span>',
+                                    {title:'Show/hide raw symbology JSON'})
+                                .addClass('smallbutton btn_add_term')
+                                .css({'line-height':'20px','vertical-align':'top',cursor:'pointer',
+                                      'text-decoration':'underline','margin-left':'10px'})
+                                .appendTo($symbology_controls);
+
+                            this._on($btn_raw_symbology, {click:function(){
+                                if($input.is(':visible')){
+                                    $input.hide();
+                                    $btn_raw_symbology.text('show raw');
+                                }else{
+                                    $input.show();
+                                    $btn_raw_symbology.text('hide raw');
+                                    __adjustTextareaHeight();
+                                }
+                            }});
+                        }
+                    }             
+           }//end color/symbol editor
+           else if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
+
+                let $btn_edit_switcher = $( '<span>calculate extent</span>', 
+                    {title: 'Get image extent based on worldfile parameters and image width and height'})
+                        .addClass('smallbutton btn_add_term')
+                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                        .appendTo( $inputdiv );
+
+                this._on( $btn_edit_switcher, { click: function(){
+                    calculateImageExtentFromWorldFile( that.options.editing );
+                }});
+            }
+
+        }
+        
         // Freetext value that is a url
         let freetext_url = this.detailType=="freetext" && $input.val().match(/^https?:\/\//) !== null;
         // Semantic url links, separated by semi-colons, for RecTypes, Vocab+Terms, DetailTypes
@@ -4600,7 +4500,7 @@ $.widget( "heurist.editing_input", {
                     click: function(e){
                                                 
                         if(that.is_disabled) return;
-                        
+
                         //if empty
                         if(that.getValues()[0] == '') { 
 
@@ -4649,6 +4549,7 @@ $.widget( "heurist.editing_input", {
                         }
                         
                         
+                        $input.trigger('heuristFieldSetRefresh');
                         that.onChange(); 
                     }
                 });
@@ -5077,6 +4978,46 @@ $.widget( "heurist.editing_input", {
         
     },
 
+    _isIiifImageFileValue: function(fileValue, checkImageData){
+        if(!fileValue && !checkImageData){
+            return false;
+        }
+        return fileValue?.ulf_PreferredSource === 'iiif_image'
+            || fileValue?.ulf_OrigFileName === '_iiif_image'
+            || checkImageData?.original_name === '_iiif_image'
+            || (typeof fileValue?.ulf_ExternalFileReference === 'string'
+                && fileValue.ulf_ExternalFileReference.match(/\/info\.json(?:[?#].*)?$/));
+    },
+
+    _iiifImageServiceUrlFromValue: function(fileValue){
+        if(!fileValue || typeof fileValue.ulf_ExternalFileReference !== 'string'){
+            return '';
+        }
+        return fileValue.ulf_ExternalFileReference.replace(/\/info\.json(?:[?#].*)?$/, '').replace(/\/$/, '');
+    },
+
+    _iiifImageRasterUrlFromValue: function(fileValue, size){
+        let serviceUrl = this._iiifImageServiceUrlFromValue(fileValue);
+        return serviceUrl ? `${serviceUrl}/full/${size}/0/default.jpg` : '';
+    },
+
+    _applyIiifImagePreviewControls: function(ele, fileValue, checkImageData){
+        let isIiifImage = this._isIiifImageFileValue(fileValue, checkImageData);
+        let $image_container = this.element.find(`div[image-divid="${ele.attr('id')}"]`);
+        let $preview = $image_container.find('.image_input').first();
+        let $controls = $image_container.find('div.preview_controls');
+
+        $controls.find('.mode_switcher').toggle(!isIiifImage);
+        $controls.find('.image_tool').toggle(!isIiifImage);
+        $controls.find('.popup_viewer').toggle(!isIiifImage);
+
+        if(isIiifImage){
+            $preview.removeClass('thumb_image').css('cursor', 'pointer');
+        }else{
+            $preview.addClass('thumb_image');
+        }
+    },
+
     //
     // assign title of resource record or file name or related entity
     //
@@ -5092,6 +5033,8 @@ $.widget( "heurist.editing_input", {
             }
 
             if($.isPlainObject(value) && value.ulf_ObfuscatedFileID){
+
+                let $image_container = this.element.find(`div[image-divid="${ele.attr('id')}"]`);
 
                 // Setup file title
                 let rec_Title = value.ulf_Caption;
@@ -5117,89 +5060,92 @@ $.widget( "heurist.editing_input", {
 
                     if(youtube_id){
 
-                        ele.parent().find('.image_input > img').attr('src', 'https://img.youtube.com/vi/'+ youtube_id +'/default.jpg');
-                        ele.parent().find('.smallText').text("Click image to freeze in place").css({
-                            "font-size": "smaller", 
-                            "color": "grey", 
-                            "position": "", 
-                            "top": ""
+                        $image_container.find('.image_input > img').attr('src', `https://img.youtube.com/vi/${youtube_id}/default.jpg`);
+                        $image_container.find('.smallText').text('Click image to freeze in place').css({
+                            'font-size': 'smaller',
+                            color: 'grey',
+                            position: '',
+                            top: ''
                         })
                         .removeClass('invalidImg');
 
                         that.newvalues[ele.attr('id')] = value;
                     }else{
 
-                        ele.parent().find('.image_input > img').removeAttr('src');
-                        ele.parent().find('.smallText').text("Unable to retrieve youtube thumbnail").css({
-                            "font-size": "larger", 
-                            "color": "black", 
-                            "position": "relative", 
-                            "top": "60px"
+                        $image_container.find('.image_input > img').removeAttr('src');
+                        $image_container.find('.smallText').text('Unable to retrieve youtube thumbnail').css({
+                            'font-size': 'larger',
+                            color: 'black',
+                            position: 'relative',
+                            top: '60px'
                         })
                         .addClass('invalidImg');
 
-                        ele.parent().find('.hideTumbnail').trigger('click');
+                        $image_container.find('.hideTumbnail').trigger('click');
                     }
 
                     ele.trigger('change');
                 }else{ // check if image that can be rendered
 
-                    window.hWin.HAPI4.checkImage("Records", value["ulf_ObfuscatedFileID"], null, function(response) {
+                    window.hWin.HAPI4.checkImage('Records', value['ulf_ObfuscatedFileID'], null, function(response) {
 
                         if(response.data && response.status == window.hWin.ResponseStatus.OK) {
-                            
-                            ele.attr('data-mimetype', response.data.mimetype);
-                            
-                            const isMiradorManifest = response.data.original_name=='_iiif';
-                            
-                            if ((response.data.mimetype && response.data.mimetype.indexOf('image/')===0)
-                                || isMiradorManifest)
-                            {
-                                ele.parent().find('.image_input > img').attr('src',
-                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                                        value.ulf_ObfuscatedFileID);
-                                        
-                                if((response.data.width > 0 && response.data.height > 0) || isMiradorManifest) {
 
-                                    ele.parent().find('.smallText').text('Click image to freeze in place').css({
-                                        "font-size": "smaller", 
-                                        "color": "grey", 
-                                        "position": "", 
-                                        "top": ""
+                            ele.attr('data-mimetype', response.data.mimetype);
+
+                            const isMiradorManifest = response.data.original_name == '_iiif';
+                            const isIiifImage = that._isIiifImageFileValue(value, response.data);
+
+                            if ((response.data.mimetype && response.data.mimetype.indexOf('image/')===0)
+                                || response.data.has_thumbnail || isMiradorManifest || isIiifImage)
+                            {
+                                $image_container.find('.image_input > img')
+                                    .attr('src', `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&offer_download=1&thumb=${value.ulf_ObfuscatedFileID}`);
+
+                                that._applyIiifImagePreviewControls(ele, value, response.data);
+                                        
+                                if((response.data.width > 0 && response.data.height > 0) || response.data.has_thumbnail || isMiradorManifest || isIiifImage) {
+
+                                    $image_container.find('.smallText').text('Click image to freeze in place').css({
+                                        'font-size': 'smaller',
+                                        color: 'grey',
+                                        position: '',
+                                        top: ''
                                     })
                                     .removeClass('invalidImg');
 
                                     that.newvalues[ele.attr('id')] = value;
                                 }else{
 
-                                    ele.parent().find('.image_input > img').removeAttr('src');
-                                    ele.parent().find(".smallText").text("This file cannot be rendered").css({
-                                        "font-size": "larger", 
-                                        "color": "black", 
-                                        "position": "relative", 
-                                        "top": "60px"
+                                    $image_container.find('.image_input > img').removeAttr('src');
+                                    $image_container.find('.smallText').text('This file cannot be rendered').css({
+                                        'font-size': 'larger',
+                                        color: 'black',
+                                        position: 'relative',
+                                        top: '60px'
                                     })
                                     .addClass('invalidImg');
 
-                                    ele.parent().find('.hideTumbnail').trigger('click');
-                                    ele.parent().find('.hideTumbnail').hide();
+                                    $image_container.find('.hideTumbnail').trigger('click');
+                                    $image_container.find('.hideTumbnail').hide();
                                 }
-                                
+
                             }else{
-                                ele.parent().find('.image_input').hide();
-                                ele.parent().find('.hideTumbnail').hide();
+                                $image_container.hide();
+                                $image_container.find('.hideTumbnail').hide();
                             }
-                            
-                            let mirador_link = ele.parent().find('.miradorViewer_link');
+
+                            let mirador_link = $image_container.find('.miradorViewer_link');
                             let mimetype = response.data.mimetype;
-                            if(response.data.original_name.indexOf('_iiif')===0){
+                            if(response.data.original_name.indexOf('_iiif')===0 || isIiifImage){
 
                                 if(isMiradorManifest){
                                     mirador_link.attr('data-manifest', '1');
+                                }else{
+                                    mirador_link.removeAttr('data-manifest');
                                 }
 
                                 mirador_link.show();
-                                ele.parent().find('div.preview_controls').show();                                
                             }else
                             if(mimetype.indexOf('image/')===0 || (
                                     (mimetype.indexOf('video/')===0 || mimetype.indexOf('audio/')===0) &&
@@ -5207,14 +5153,13 @@ $.widget( "heurist.editing_input", {
                                    mimetype.indexOf('vimeo')<0 && 
                                    mimetype.indexOf('soundcloud')<0)) ){
                                    
-                                mirador_link.show();
-                                ele.parent().find('div.preview_controls').show();                                
+                                mirador_link.show();                                
                             }else{
                                 mirador_link.hide();
                             }
 
-                            let openseadragon_link = ele.parent().find('.openseadragon_link');
-                            if(mimetype.indexOf('image/') === 0 || response.data.original_name.indexOf('_iiif_image') === 0){
+                            let openseadragon_link = $image_container.find('.openseadragon_link');
+                            if(mimetype.indexOf('image/') === 0 || isIiifImage){
                                 openseadragon_link.show();
                             }else{
                                 openseadragon_link.hide();
@@ -5252,7 +5197,8 @@ $.widget( "heurist.editing_input", {
                                         ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
                                         ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
                                         ulf_Caption: recordset.fld(record,'ulf_Caption'),
-                                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView')
+                                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
+                                        ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
                                     };
 
                                     that.newvalues[ele.attr('id')] = newvalue;
@@ -5442,7 +5388,7 @@ $.widget( "heurist.editing_input", {
 
             window.hWin.HEURIST4.util.isFunction($('body')['manageDefGroups']) || scripts.unshift('manageDefGroups.js');
 
-            $.getMultiScripts2(scripts, `${window.hWin.HAPI4.baseURL}hclient/widgets/entity/`).then(() => {
+            $.getMultiScriptsSequental(scripts, `${window.hWin.HAPI4.baseURL}hclient/widgets/entity/`).then(() => {
                 that._openManageTerms(vocab_id);
             }).catch(() => {
                 window.hWin.HEURIST4.msg.showMsgErr({
@@ -5932,7 +5878,7 @@ $.widget( "heurist.editing_input", {
                 res = this.detailType == 'freetext' ? res.replaceAll(/  +/g, ' ') : res;
             }
         }else {
-            res = this.newvalues[$input.attr('id')];    
+            res = this.newvalues[$input.attr('id')];
             if(!res && $input.attr('data-value')){
                 res = $input.attr('data-value');
             }
@@ -5966,7 +5912,11 @@ $.widget( "heurist.editing_input", {
             let ele = this.inputs[idx].parents('.input-div');
             ele.insertAfter(ele_after);
             ele_after = ele;
-        }    
+        }
+
+        if(this.isFileForRecord){
+            this._setImageOrder();
+        }
     },
     
     //
@@ -6384,6 +6334,10 @@ $.widget( "heurist.editing_input", {
             disp_value = ''; //not used 
 
             //@todo NEW datatypes
+        } else if(this.detailType=="date"){
+            
+            disp_value = temporalToHumanReadableString(value);
+            
         } else if(this.detailType=="geo"){
 
             /*if(detailType=="query")
@@ -6414,6 +6368,11 @@ $.widget( "heurist.editing_input", {
 
         if(this.detailType=="blocktext"){
             this.input_cell.css({'padding-top':'0.4em'});
+        }
+
+        if(window.hWin.HEURIST4.util.isempty(disp_value)){
+            disp_value = 'no value';
+            $inputdiv.css('color', 'lightgrey');
         }
 
         $inputdiv.html(disp_value);
@@ -6534,7 +6493,7 @@ $.widget( "heurist.editing_input", {
     //
     //
     _createDateInput: function($input, $inputdiv){
-      
+
         $input.css('width', this.options.is_faceted_search?'13ex':'20ex');
         
         let that = this;
@@ -6705,7 +6664,7 @@ $.widget( "heurist.editing_input", {
             let minDate = '';
             let maxDate = '';
 
-            let $japanese_era = $('<select>', {class: 'calendars-eras'});
+            let $japanese_era = $('<select>', {class: 'calendars-eras', style: 'max-width: 100%;'});
             let eras = $.calendars.instance('japanese').getEras();
             for(let i = 0; i < eras.length; i ++){
                 window.hWin.HEURIST4.ui.addoption($japanese_era[0], i, eras[i]);
@@ -6727,10 +6686,13 @@ $.widget( "heurist.editing_input", {
                 onShow: function($calendar, calendar_locale, config){
                     config.div.css('z-index', 9999999);
 
+                    let $header = $calendar.find('.calendars-month-header');
+                    let $year_dropdown = $($header.find('.calendars-month-year')[1]);
+
                     if(calendar_locale.local.name.toLowerCase() === 'japanese'){ // Add eras dropdown to calendar
 
-                        let $year_dropdown = $($calendar.find('.calendars-month-year')[1]);
-                        let $era_sel = $japanese_era.clone().insertAfter($year_dropdown);
+                        $calendar.addClass('calendars-extended-header');
+                        let $era_sel = $japanese_era.clone().appendTo($header);
 
                         function updateYearTitle(){ // update year's rollover
 
@@ -7117,14 +7079,46 @@ $.widget( "heurist.editing_input", {
     //
     // Recreate dropdown or checkboxes|radio buttons, called by adding new term and manage terms onClose
     //
-    _recreateEnumField: function(vocab_id){
+    // Keep the normal 20-value limit, with an explicit override below 100.
+    // The override belongs to this field editor and does not change its definition.
+    _enumButtonsAllowed: function(vocab_id){
+        const count = this.child_terms.length;
+        this.input_cell.find('.enum_buttons_warning').remove();
+        if(count <= 20 || (count < 100 && this._enumButtonsOverride)){
+            return true;
+        }
+
+        const $warning = $('<div>', {'class': 'enum_buttons_warning'})
+            .css({'max-width': '48em', 'margin': '6px 0', 'white-space': 'normal'})
+            .append($('<div>').text('Sorry, there are too many values (' + count
+                + ') to display this field as buttons.'))
+            .appendTo(this.input_cell);
+
+        if(count < 100){
+            $('<div>').text('If you really insist on buttons we can try ...')
+                .css('margin-top', '6px').appendTo($warning);
+            const $try = $('<button>', {type: 'button', text: 'Try buttons anyway'})
+                .css('margin-top', '6px').appendTo($warning).button();
+            $try.button('option', 'disabled', !!this.is_disabled);
+            this._on($try, {click: function(){
+                if(this.is_disabled) return;
+                this._enumButtonsOverride = true;
+                this._recreateEnumField(vocab_id, true);
+            }});
+        }
+        return false;
+    },
+
+    _recreateEnumField: function(vocab_id, keepTerms){
 
         let that = this;
 
-        this.child_terms = $Db.trm_TreeData(vocab_id, 'set'); //refresh
+        if(!keepTerms){
+            this.child_terms = $Db.trm_TreeData(vocab_id, 'set'); //refresh
+        }
         let asButtons = this._isForRecords && this.f('rst_TermsAsButtons') == 1;
 
-        if(asButtons && this.child_terms.length <= 20){ // recreate buttons/checkboxes
+        if(asButtons && this._enumButtonsAllowed(vocab_id)){ // recreate buttons/checkboxes
 
             this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
             let dtb_res = this._createEnumButtons(true);
@@ -7738,5 +7732,831 @@ $.widget( "heurist.editing_input", {
                 $output.text(output);
             }
         });
+    },
+
+    _setupImageInput: function($inputdiv, value){
+
+        if(!this.isFileForRecord){
+            return;
+        }
+
+        const $input = $inputdiv.find('input');
+
+        // File IDs, needed for processes below
+        let f_id = value.ulf_ID;
+        let f_nonce = value.ulf_ObfuscatedFileID;
+        const rtyID = Number.parseInt(this.options.rectypeID);
+        const dtyID = Number.parseInt(this.options.dtID ?? this.f('rst_DetailTypeID'));
+        const fieldKey = `${rtyID}.${dtyID}`;
+
+        // urls for downloading and loading the thumbnail
+        let dwnld_link = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&debug=1&download=1&file=${f_nonce}`;
+        let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}&mode=tag&origin=recview`;
+        let $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
+        
+        $input.css({'padding-left': '30px', 'padding-right': '30px', cursor:'hand'});
+
+        //folder icon in the begining of field
+        let $gicon = $('<span>', {
+            class: 'ui-icon ui-icon-folder-open',
+            style: 'position: absolute; margin: 5px 0px 0px 8px; cursor: hand;'
+        }).insertBefore( $input );
+
+        $('<span>', {class: 'file-vis ui-icon', style: 'position: absolute; margin: 3px 0px 0px -24px'}).insertAfter( $input );
+
+        let $imageContainer = this._getInlineImageContainer();
+        if(!$imageContainer || $imageContainer.length === 0){
+            return;
+        }
+
+        let $image_div = $('<div>', {
+            class: 'image-div',
+            'image-divid': $input.attr('id')
+        }).appendTo($imageContainer);
+
+        let $input_img, $img_controls;
+        [$input_img, $img_controls] = this._addImageControls($image_div, f_id, f_nonce, dwnld_link);
+
+        this._addImageActions($clear_container, f_id);
+
+        // Change Handler
+        this._on($input,{
+            change: (event) => {
+
+                // new file values
+                let val = this.newvalues[$input.attr('id')];
+
+                if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
+                    $input.val('');
+                }else{
+                    let n_id = val['ulf_ID'];
+                    let n_nonce = val['ulf_ObfuscatedFileID'];
+                    let n_dwnld_link = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&debug=2&download=1&file=${n_nonce}`;
+                    let n_url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${n_nonce}&mode=tag&origin=recview`;
+
+                    if(f_id != n_id){// If the image has been changed from original/or has been newly added
+
+                        let $container = this.element.find(`div[image-divid="${event.target.id}"]`);
+
+                        const originalIDStub = f_id === '' ? `${dtyID}_${f_id}` : `${dtyID}_undefined`;
+
+                        let $dwnld = $container.find(`a#dwn${originalIDStub}`);
+                        let $player = $container.find(`div#player${originalIDStub}`);
+                        let $thumbnail = $container.find(`img#img${originalIDStub}`);
+                        let $edit_metadata = $container.find('.edit_metadata');
+                        let $openSeadragon = $container.find('.openseadragon_link');
+                        let $miradorViewer = $container.find('.miradorViewer_link');
+
+                        $($container.find(`[data-id="${f_id}"]`)).attr('data-id', n_id);
+
+                        $dwnld.attr({id: `dwn${dtyID}_${n_id}`, href: n_dwnld_link});
+                        $player.attr('id', `player${dtyID}_${n_id}`);
+                        $thumbnail.attr('id', `img${dtyID}_${n_id}`);
+                        $openSeadragon.attr('data-id', n_id);
+                        $miradorViewer.attr('data-id', n_nonce);
+
+                        f_id = n_id;
+                        f_nonce = n_nonce;
+                        dwnld_link = n_dwnld_link;
+                        url = n_url;
+                        this._applyIiifImagePreviewControls($input, val);
+
+                        if(!n_id || n_id < 1){
+                            $edit_metadata.hide();
+                        }else{
+                            $edit_metadata.show();
+                        }
+
+                        $input_img.show();
+                        $image_div.hide();
+                    }
+                    
+                }
+                
+                //clear thumb rollover
+                if(window.hWin.HEURIST4.util.isempty($input.val())){
+                    $input_img.find('img').attr('src','');
+                }
+
+                this.onChange(); 
+            }
+        }); // input change
+        
+        // Handler Variables
+        let hideTimer = 0, showTimer = 0;  //  Time for hiding thumbnail
+        let isClicked = 0;  // Number of image clicks, one = freeze image inline, two = enlarge/srink
+
+        // Input element's hover handler
+        function __showImagePreview(){
+
+            let imgAvailable = !window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'));
+            let invalidURL = $image_div.find('div.smallText').hasClass('invalidImg');
+
+            if((imgAvailable || invalidURL) && isClicked === 0){
+
+                if (hideTimer) {
+                    window.clearTimeout(hideTimer);
+                    hideTimer = 0;
+                }
+                
+                if($input_img.is(':visible')){
+                    $image_div.stop(true, true).show();
+                    $image_div.find('div.image_input').stop(true, true).show();
+                }else if (showTimer == 0){
+                    showTimer = window.setTimeout(() => {
+                        $image_div.show();
+                        $image_div.find('div.image_input').show();
+                        $image_div.find('div.smallText').show();
+                        showTimer = 0;
+                    }, 500);
+                }
+            }
+        }
+        this._on($input,{mouseover: __showImagePreview});
+        this._on($input_img,{mouseover: __showImagePreview});
+
+        // Input element's mouse out handler, attached and dettached depending on user preferences
+        function __hideImagePreview(event){
+            if (showTimer) {
+                window.clearTimeout(showTimer);
+                showTimer = 0;
+            }
+
+            if($input_img.is(':visible') || $image_div.find('div.smallText').is(':visible')){
+
+                let ele = event.toElement || event.relatedTarget;
+                ele = $(ele);
+                if(ele.hasClass('image_input') || ele.parent().hasClass('image_input')){
+                    return;
+                }
+
+                hideTimer = window.setTimeout(function(){
+                    if(isClicked === 0){
+                        $image_div.fadeOut(1000);
+                        $image_div.find('div.image_input').fadeOut(1000);
+                        $image_div.find('div.smallText').hide(1000);
+                    }
+                }, 1000);
+            }
+        }
+        this._on($input, {mouseout:__hideImagePreview});
+        this._on($input_img, {mouseout:__hideImagePreview});
+
+        // Thumbnail's click handler
+        this._on($input_img, {
+            click: (event) => {
+
+                let elem = event.target;
+
+                if(isClicked === 0 && !$image_div.find('div.smallText').hasClass('invalidImg')){
+
+                    isClicked = 1;
+                    
+                    this._off($input_img, 'mouseout');
+
+                    $image_div.find('div.smallText').hide(); // Hide image help text
+
+                    let $controls = $input_img.parent().find('div.preview_controls'); // Find the download anchors
+
+                    this._applyIiifImagePreviewControls($input, this.newvalues[$input.attr('id')]);
+                    $controls.show();
+
+                    if($controls.find(`a#dwn${dtyID}_undefined`)){  // Need to ensure the links are setup
+                        $controls.find(`a#dwn${dtyID}_undefined`).attr({id: `dwn${dtyID}_${f_id}`, href: dwnld_link});
+                    }
+
+                    $input_img.css('cursor', 'zoom-in');
+
+                }
+                else if(isClicked === 1){
+
+                    if(this._isIiifImageFileValue(this.newvalues[$input.attr('id')])){
+                        return;
+                    }
+
+                    // Enlarge Image, display player
+                    if($input_img.hasClass('thumb_image') && (elem.tagName !== 'IMG' || elem.classList.contains('image_input'))){
+
+                        $input_img.css('cursor', 'zoom-out');
+
+                        window.hWin.HEURIST4.ui.showPlayer($input_img.find('img')[0], $input_img[0], `${dtyID}_${f_id}`, url);
+                    }
+                    else{  // Srink Image, display thumbnail
+
+                        $input_img.css('cursor', 'zoom-in');
+
+                        if(elem.tagName !== 'IMG'){
+                            window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
+                        }
+                    }
+
+                    $input_img.find('.mode_switcher').text(!$input_img.hasClass('thumb_image') ? 'thumbnail' : 'larger');
+                }
+
+                let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+                showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+                const fieldKeyIndex = showAllImagesPrefs.allowed.indexOf(fieldKey);
+                if(!showAllImagesPrefs.allowed.includes(fieldKey)){
+
+                    showAllImagesPrefs.allowed.push(fieldKey);
+                    showAllImagesPrefs.blocked.splice(fieldKeyIndex, 1);
+
+                    window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
+                }
+            }
+        });
+
+        this._on($img_controls.find('.hideTumbnail'), {
+            click: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                isClicked = 0;
+
+                this._on($input,{mouseover: __showImagePreview});
+                this._on($input_img,{mouseover: __showImagePreview});
+
+                this._on($input, {mouseout:__hideImagePreview});
+                this._on($input_img, {mouseout:__hideImagePreview});
+
+                $img_controls.hide();
+
+                if($image_div.find('div.smallText').find('div.smallText').hasClass('invalidImg')){
+                    $input_img.css('cursor', '');
+                }else{
+                    $input_img.css('cursor', 'pointer');
+                }
+
+                $image_div.hide();
+
+                window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
+
+                let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+                showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+                const fieldKeyIndex = showAllImagesPrefs.allowed.indexOf(fieldKey);
+                if(showAllImagesPrefs.allowed.includes(fieldKey)){
+
+                    showAllImagesPrefs.allowed.splice(fieldKeyIndex, 1);
+                    showAllImagesPrefs.blocked.push(fieldKey);
+
+                    window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
+                }
+            }
+        });
+
+        // Show Thumbnail handler
+        this._on($input_img.find('.mode_switcher'), {
+            click: (event) => {
+                window.hWin.HEURIST4.util.stopEvent(event);
+                $input_img.trigger('click');
+            }
+        });
+
+        // 'popup' viewer handler
+        this._on($img_controls.find('.popup_viewer'), {
+            click: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                let filename = $input.val();
+                let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}`;
+                let msg = `<img src='${url}' alt='${filename.replace('"', '&quote;').replace("'", '&apos;')}' style='height:99%;width:99%;object-fit:contain' />`;
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    msg, null, {title: filename}, {default_palette_class: 'ui-heurist-explore', resizable: true, width: 'auto', height: 'auto'}
+                );
+                $dlg.css('max-width', 'none');
+            }
+        });
+            
+        this._on($img_controls.find('.miradorViewer_link'), {
+            click:function(event){
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                let ele = $(event.target)
+
+                if(!ele.attr('data-id')){
+                    ele = ele.parents('[data-id]');
+                }
+                let obf_recID = ele.attr('data-id');
+                let is_manifest = (ele.attr('data-manifest')==1);
+
+                let url =  `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/miradorViewer.php?db=${window.hWin.HAPI4.database}&${is_manifest ? `manifest=${this.options.recID}` : `id=${obf_recID}`}`;
+
+                const show_mirador_in_popup = true;
+                if(show_mirador_in_popup){
+                    //borderless:true, 
+                    window.hWin.HEURIST4.msg.showDialog(url, 
+                        {dialogid:'mirador-viewer',
+                            //resizable:false, draggable: false, 
+                            //maximize:true, 
+                            default_palette_class: 'ui-heurist-explore',
+                            width:'90%',height:'95%',
+                            allowfullscreen:true,'padding-content':'0px'});   
+
+                    let $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+
+                    $dlg.parent().css('top','50px');
+                }else{
+                    window.open(url, '_blank');        
+                }                      
+
+                //data-id
+            }
+        });
+
+        this._on($img_controls.find('.openseadragon_link'), {
+            click: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                let ele = $(event.target)
+
+                if(!ele.attr('data-id')){
+                    ele = ele.parents('[data-id]');
+                }
+
+                let fileID = ele.attr('data-id');
+                let currentValue = this.newvalues[$input.attr('id')];
+                let imageUrl = this._isIiifImageFileValue(currentValue) ? this._iiifImageRasterUrlFromValue(currentValue, 'full') : '';
+
+                let url = `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${window.hWin.HAPI4.database}`
+                    + (imageUrl ? `&image=${encodeURIComponent(imageUrl)}` : `&recID=${fileID}`);
+
+                window.hWin.HEURIST4.msg.showDialog(url, {
+                    dialogid: 'openseadragon-viewer', default_palette_class: 'ui-heurist-explore',
+                    width: '90%', height: '95%', allowfullscreen: true, 'padding-content': '0px'
+                });
+            }
+        });
+
+        // Thumbnail preview is initially closed for all media.
+        // It opens on mouseover only, becomes fixed on thumbnail click,
+        // and closes again via the close link.
+
+        const isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
+            && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
+            
+        let popup_options = {
+            isdialog: true,
+            select_mode: 'select_single',
+            additionMode: isTiledImage ? 'tiled' : 'any',
+            edit_addrecordfirst: true, //show editor at once
+            select_return_mode: 'recordset',
+            filter_group_selected: null,
+            filter_groups: this.configMode.filter_group,
+            default_palette_class: 'ui-heurist-populate',
+            onselect: (event, data) => {
+
+                if(data && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
+
+                    let recordset = data.selection;
+                    let record = recordset.getFirstRecord();
+
+                    let newvalue = {
+                        ulf_ID: recordset.fld(record,'ulf_ID'),
+                        ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                        ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                        ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
+                        ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
+                        ulf_Caption: recordset.fld(record,'ulf_Caption'),
+                        ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
+                        ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
+                    };
+
+                    this.newvalues[$input.attr('id')] = newvalue;
+                    this._findAndAssignTitle($input, newvalue);
+
+                }//data
+
+            }
+        };//popup_options
+
+        this._findAndAssignTitle($input, value);
+
+        let __show_select_dialog = (event) => {
+            
+            if(this.is_disabled) return;
+
+            event.preventDefault();
+            
+            let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
+                {width: null,  //null triggers default width within particular widget
+                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
+            popup_options.width = usrPreferences.width;
+            popup_options.height = usrPreferences.height;
+            let sels = this.newvalues[$(event.target).attr('id')];
+            if(!sels && this.options.values && this.options.values[0]){
+                sels = this.options.values[0];    //take selected value from options
+            } 
+
+            if($.isPlainObject(sels)){
+                popup_options.selection_on_init = sels;
+            }else if(!window.hWin.HEURIST4.util.isempty(sels)){
+                popup_options.selection_on_init = sels.split(',');
+            } else {
+                popup_options.selection_on_init = null;    
+            }
+            //init dialog to select related uploaded files
+            window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
+        }
+        
+        if(__show_select_dialog!=null){
+            
+            this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
+            this._on( $gicon, { click: __show_select_dialog } );
+        }
+        
+        if(this.isFileForRecord && value){
+            //assign value at once
+            this.newvalues[$input.attr('id')] = value;
+        }
+    },
+
+    _getInlineImageContainer: function(){
+
+        let $imageContainer = this.element.find('.image-containers');
+        const rtyID = Number.parseInt(this.options.rectypeID);
+        const dtyID = Number.parseInt(this.options.dtID ?? this.f('rst_DetailTypeID'));
+        const valueKey = `${rtyID}.${dtyID}`;
+
+        let __showAllInlineImages = (event) => {
+
+            const forcedShow = event.isForced;
+
+            let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+            showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+            if(!window.hWin.HEURIST4.util.isObject(showAllImagesPrefs)){
+                console.error(`showAllImagesPrefs is not an array, found: ${showAllImagesPrefs}`);
+                return;
+            }
+
+            const valueKeyIndex = showAllImagesPrefs.allowed.indexOf(valueKey);
+            const blockedKeyIndex = showAllImagesPrefs.blocked.indexOf(valueKey);
+
+            if(valueKeyIndex === -1 || forcedShow){
+
+                this.element.find('div.image-div').each((idx, div) => {
+
+                    let $div = $(div);
+                    const hasImage = !window.hWin.HEURIST4.util.isempty($div.find('img').attr('src'));
+                    const isInvalid = $div.find('div.smallText').hasClass('invalidImg');
+
+                    if(!hasImage || isInvalid){
+                        return;
+                    }
+
+                    $div.show();
+                    $div.find('div.image_input').trigger('click').show();
+                });
+
+                if(!forcedShow){
+                    showAllImagesPrefs.allowed.push(valueKey);
+                    showAllImagesPrefs.blocked.splice(blockedKeyIndex, 1);
+                }
+
+            }else{
+
+                this.element.find('div.image_input .hideTumbnail').trigger('click');
+                showAllImagesPrefs.allowed.splice(valueKeyIndex, 1);
+                showAllImagesPrefs.blocked.push(valueKeyIndex);
+            }
+
+            if(!forcedShow){
+                window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
+            }
+        };
+
+        if($imageContainer.length > 0){
+            return $imageContainer;
+        }
+
+        if(window.hWin.HEURIST4.util.isPositiveInt(rtyID) && window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+
+            let $showAllImages = $('<span>', {
+                class: 'showAllImages smallbutton ui-icon ui-icon-eye-open',
+                title: 'Turn on/off display of thumbnail images (applies to this field for all records)',
+                style: 'cursor: pointer;'
+            }).appendTo(this.element.find('.editint-inout-repeat-container'));
+
+            $imageContainer = $('<div>', {class: 'image-containers', style: 'display:grid;grid-template-columns:repeat(3, 1fr);gap:2em;'}).insertAfter(this.error_message);
+
+            if(this.element.find('.editint-inout-repeat-button').length > 0){
+
+                this.element.find('.editint-inout-repeat-button').css({
+                    'margin-left': '0px',
+                    display: 'inline-block'
+                });
+
+                $showAllImages.css('margin', '1px 0px 0px 2px');
+            }
+
+            this._on($showAllImages, {
+                click: __showAllInlineImages
+            });
+        }
+
+        return $imageContainer;
+    },
+
+    _addImageControls: function($image_div, fileID, fileObfuscatedID, fileDownload){
+
+        const dtyID = this.options.dtID ?? this.f('rst_DetailTypeID');
+
+        // Image and Player (enalrged image) container
+        let $input_img = $('<div>', {
+            class: 'image_input ui-widget-content ui-corner-all thumb_image',
+            style: 'margin: 5px 0px 1em; border: none; background: transparent; min-height: unset;'
+        }).appendTo($image_div).hide();
+
+        // Thumbnail container
+        $('<img>', {
+            id: `img${dtyID}_${fileID}`,
+            class: 'image_input',
+            style: 'max-width: none; position: relative;'
+        }).appendTo($input_img);
+
+        // File 'player' container
+        $('<div>', {
+            id: `player${dtyID}_${fileID}`,
+            style: 'min-height: 100px; min-width: 200px; display: none;'
+        }).appendTo($input_img);
+
+        // Controls
+        let $img_controls = $('<div>', {
+            class: 'preview_controls',
+            style: 'display: none; font-size: smaller; padding-top: 0.5em;'
+        }).appendTo($input_img);
+
+        // Record Type help text for Record Editor
+        $('<div>', {
+            class: 'smallText',
+            style: 'display:block;color:gray;font-size:smaller;',
+            text: 'Click image to freeze in place'
+        }).prependTo($image_div).hide();
+
+        // Viewers
+        $('<a>', {
+            href: '#',
+            class: `mode_switcher`,
+            style: 'display: inline-block; padding-right: 0.5em; text-decoration: underline; color: blue;',
+            text: 'larger'
+        }).appendTo($img_controls);
+
+        $('<a>', {
+            href: '#', 'data-id': fileID,
+            class: 'openseadragon_link',
+            style: 'color: blue; padding-left: 0.75em; padding-right: 1.0em;',
+            title: 'Open in OpenSeadragon (simple IIIF viewer))',
+            html: '<span class="ui-icon ui-icon-image"></span>&nbsp;OSD viewer'
+        }).appendTo($img_controls);
+
+        $('<a>', {
+            href: '#',
+            'data-id': fileObfuscatedID,
+            class: 'miradorViewer_link',
+            style: 'color: blue;',
+            title: 'Open in Mirador (multi-image IIIF viewer and annotator))',
+            html: '<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);"></span>&nbsp;Mirador'
+        }).appendTo($img_controls).hide();
+
+        $('<a>', {
+            href: fileDownload,
+            target: '_surf',
+            id: `dwn${dtyID}_${fileID}`,
+            class: 'external-link image_tool',
+            title: 'Download image',
+            style: 'display: inline-block; color: blue; padding-left: 0.75em;',
+            html: '<span class="ui-icon ui-icon-download" />'
+        }).appendTo($img_controls);
+
+        // for closing inline image when 'frozen'
+        $('<a>', {
+            href: '#',
+            class: 'hideTumbnail',
+            style: 'padding-left: 1.5em; color: blue; cursor: pointer;',
+            title: 'Hide image thumbnail',
+            text: 'close'
+        }).appendTo($img_controls).show();
+
+        return [$input_img, $img_controls];
+    },
+
+    _addImageActions: function($clear_container, fileID){
+
+        // Edit file's metadata
+        let $edit_details = $('<span>', {
+            class: 'ui-icon ui-icon-pencil edit_metadata',
+            title: 'Edit image metadata',
+            style: 'cursor: pointer;padding-left:5px;'
+        }).insertBefore($clear_container);
+
+        this._on($edit_details, {
+            click: () => {
+
+                let popup_opts = {
+                    isdialog: true, 
+                    select_mode: 'manager',
+                    edit_mode: 'editonly',
+                    rec_ID: fileID,
+                    default_palette_class: 'ui-heurist-populate',
+                    width: 950,
+                    onClose: function(recordset){
+
+                        // update external reference, if necessary
+                        if(window.hWin.HEURIST4.util.isRecordSet(recordset)){
+
+                            let record = recordset.getFirstRecord();
+
+                            let newvalue = {
+                                ulf_ID: recordset.fld(record,'ulf_ID'),
+                                ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                                ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                                ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
+                                ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID'),
+                                ulf_Caption: recordset.fld(record,'ulf_Caption'),
+                                ulf_WhoCanView: recordset.fld(record,'ulf_WhoCanView'),
+                                ulf_PreferredSource: recordset.fld(record,'ulf_PreferredSource')
+                            };
+
+                            this.newvalues[$input.attr('id')] = newvalue;
+                            this._findAndAssignTitle($input, newvalue);
+                        }
+                    }
+                };
+
+                window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+            }
+        }); // edit details click
+        if(!window.hWin.HEURIST4.util.isPositiveInt(fileID)){
+            $edit_details.hide();
+        }
+
+        // Use camera
+        let $camera = $('<span>', {
+            class: 'ui-icon ui-icon-camera use_camera',
+            title: 'Take a photo with your camera',
+            style: 'cursor: pointer; padding-left: 5px;'
+        }).insertBefore($clear_container);
+
+        this._on($camera, {
+            click: this._photoMode
+        });
+
+        let check_camera = typeof navigator?.mediaDevices?.enumerateDevices === 'function' && window.self === window.top;
+        if(check_camera){ // check for camera input
+            navigator.mediaDevices.enumerateDevices()
+            .then((devices) => {
+                let show_camera = false;
+                for(const device of devices){
+                    if(device.kind === 'videoinput'){
+                        show_camera = true;
+                        break;
+                    }
+                }
+                if(!show_camera){
+                    $camera.hide();
+                    this._off($camera, 'click');
+                }
+            }).catch(() => {
+                $camera.hide();
+                this._off($camera, 'click');
+            });
+        }else{
+            $camera.hide();
+            this._off($camera, 'click');
+        }
+    },
+
+    _setImageOrder: function(){
+
+        let $image_container = this.element.find('.image-containers');
+        let $lastItem = null;
+
+        this.element.find('input[id]').each((idx, element) => {
+            const ID = element.id;
+            if(!$lastItem){
+                this.element.find(`div[image-divid="${ID}"]`).prependTo($image_container);
+            }else{
+                this.element.find(`div[image-divid="${ID}"]`).insertAfter($lastItem);
+            }
+            $lastItem = this.element.find(`div[image-divid="${ID}"]`);
+        });
+    },
+
+    addPastedFiles: function(files){
+
+        const isBugReporter = this.configMode?.entity === 'sysBugreport';
+        const isHandling = this.isFileForRecord || isBugReporter && this.detailType === 'file'; 
+        if(!isHandling){
+            return;
+        }
+
+        if(this.input_cell.find('.hidden_image_uploader').length > 0){
+
+            this.input_cell.find('.hidden_image_uploader').fileupload('add', {
+                files: files
+            });
+
+            return;
+        }
+
+        let uploadedFiles;
+
+        const registerAtOnce = this.isFileForRecord || this.configMode?.registerAtOnce ? 1 : 0;
+        const max_file_size = Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']);
+
+        let fileupload_opts = {
+
+            url: `${window.hWin.HAPI4.baseURL}hserv/controller/fileUpload.php`,
+            formData: [
+                {name:'db', value: window.hWin.HAPI4.database}, 
+                {name:'entity', value: this.configMode?.entity ? this.configMode?.entity : 'recUploadedFiles'},
+                {name:'registerAtOnce', value: registerAtOnce},
+                {name:'version', value: this.configMode?.version},
+                {name:'maxsize', value: this.configMode?.size},
+                {name:'recID', value: this.options.recID},
+                {name:'usetempname', value: 1}
+            ],
+
+            max_file_size: max_file_size,
+            sequentialUploads: true,
+            dataType: 'json',
+
+            start: () => {
+                uploadedFiles = new Set([...this.getValues()]); // get current values
+            },
+
+            stop: () => {
+
+                if(!isBugReporter){
+                    return;
+                }
+
+                // Bug reporter has special handling, all values at once (some can be missed if set within done event) and update newvalues
+                const cleanedFiles = [...uploadedFiles].filter(file => !window.hWin.HEURIST4.util.isempty(file));
+                this.setValue(cleanedFiles);
+
+                $.each(this.inputs, (idx, input) => {
+
+                    input = $(input);
+
+                    const inputID = input.attr('id');
+                    const thumbURL = input.parent().find('img.image_input').attr('src');
+
+                    if(!Object.hasOwn(this.newvalues, inputID) || this.newvalues[inputID] != thumbURL){
+                        this.newvalues[inputID] = thumbURL;
+                    }
+
+                });
+            },
+
+            done: (e, response) => {
+
+                if(response.result){
+                    response = response.result;
+                }
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(response.data?.files)){
+                    return;
+                }
+
+                let hasNewFiles = false;
+                for(let idx = 0; idx < response.data.files.length; idx ++){
+
+                    let file = registerAtOnce ? response.data.files[idx].ulf_ID : response.data.files[idx].url;
+                    if(window.hWin.HEURIST4.util.isPositiveInt(file) || !window.hWin.HEURIST4.util.isempty(file)){
+                        uploadedFiles.add(file);
+                        hasNewFiles = true;
+                    }
+                }
+
+                if(!hasNewFiles || isBugReporter){
+                    return;
+                }
+
+                // Cleanup values and then set values
+                const cleanedFiles = [...uploadedFiles].filter(file => window.hWin.HEURIST4.util.isPositiveInt(file) || !window.hWin.HEURIST4.util.isempty(file));
+                this.setValue(cleanedFiles);
+            },
+            fail: function(e, response){
+                response = response.message ? response : {message: response, error_title: 'File upload error'};
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        };
+
+        $('<input>', {
+            type: 'file',
+            style: 'display: none;',
+            class: 'hidden_image_uploader'
+        }).fileupload(fileupload_opts).appendTo(this.input_cell);
+
+        this.addPastedFiles(files);
     }
 });

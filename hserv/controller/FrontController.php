@@ -16,12 +16,19 @@
 namespace hserv\controller;
 
 use hserv\controller\ReportController;
-use hserv\records\import\ImportAnnotations;
+use Heurist\Runtime\ServiceFactory;
+use hserv\controller\UserController;
+use hserv\records\import\IiifManifestImporter;
 use hserv\System;
 use hserv\utilities\USanitize;
 use hserv\structure\ConceptCode;
 use hserv\web\WebSite;
 use hserv\utilities\UJwt;
+
+$composerAutoload = dirname(__FILE__).'/../../vendor/autoload.php';
+if(is_readable($composerAutoload)){
+    require_once $composerAutoload;
+}
 
 /**
  * Class FrontController
@@ -93,7 +100,25 @@ class FrontController
         }
 
         // Detect controller class
-        if (@$this->req_params['controller'] == 'ReportController'  // $this->req_params['controller']
+        if (@$this->req_params['controller'] == 'PublicationController' || @$this->req_params['pub_id']) {
+            
+            if(!@$this->req_params['action']){
+                $this->req_params['action'] = 'show';    
+            }
+
+            $controller = ServiceFactory::fromLegacySystem($this->system)->publicationController();
+            $controller->handleRequest(
+                @$this->req_params['action'],
+                $this->req_params['type'] ?? 'map',
+                $this->req_params
+            );
+
+        }elseif (@$this->req_params['controller'] == 'UserController') {
+
+            $controller = new UserController($this->system, $this->req_params);
+            $controller->handleRequest(@$this->req_params['action']);
+
+        }elseif (@$this->req_params['controller'] == 'ReportController'  // $this->req_params['controller']
             || @$this->req_params['template']
             || @$this->req_params['template_body']
             || @$this->req_params['template_id']) {
@@ -133,7 +158,7 @@ class FrontController
             
         }elseif(@$this->req_params['controller'] == 'ImportAnnotations'){
             
-            $controller = new ImportAnnotations($this->system, $this->req_params);
+            $controller = new IiifManifestImporter($this->system, $this->req_params);
             $result = $controller->execute();
             
             if (is_bool($result) && $result == false) {

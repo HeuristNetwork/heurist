@@ -51,7 +51,7 @@ $.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
         /*
         if(!uiInput.editing_input('instance')){
             
-            let rty_IDs = [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']];
+            let rty_IDs = [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE']];
             if(window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']){ //for Digital Harlem
                 rty_IDs.push(window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']);
             }

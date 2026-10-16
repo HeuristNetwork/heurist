@@ -189,7 +189,10 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFile.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingBrowse.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingTranslation.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingHelpers.js"></script>
+        
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
@@ -327,7 +330,6 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                                 function( response ){
 
                                     if(response.status == window.hWin.ResponseStatus.OK){
-
                                         var recset = new HRecordSet(response.data);
                                         if(recset.length()>0){
                                             $container.manageRecords('updateRecordList', null, {recordset:recset});

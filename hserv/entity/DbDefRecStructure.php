@@ -68,12 +68,15 @@ class DbDefRecStructure extends DbEntityBase
         $is_structure = false;
 
         $this->searchMgr->addPredicate('rst_ID');
-        $this->searchMgr->addPredicate('rst_RecTypeID');
-        $this->searchMgr->addPredicate('rst_DetailTypeID');
+        $this->searchMgr->addPredicate('rst_RecTypeID', true);
+        $this->searchMgr->addPredicate('rst_DetailTypeID', true);
         $this->searchMgr->addPredicate('rst_CalcFunctionID');
+        $this->searchMgr->addPredicate('rst_OriginatingDBID');
 
         switch (@$this->data['details']){
-            case 'id': $this->searchMgr->setSelFields('rst_ID'); break;
+            case 'id': 
+                $this->searchMgr->setSelFields('rst_ID'); 
+                break;
             case 'name': $this->searchMgr->setSelFields('rst_ID,rst_DisplayName'); break;
             case 'rectype': $this->searchMgr->setSelFields('rst_ID,rst_RecTypeID,rst_DetailTypeID'); break;
             case 'listshort':
@@ -90,6 +93,9 @@ class DbDefRecStructure extends DbEntityBase
                 break;
             case 'full':
                 $this->searchMgr->setSelFields(implode(',', $this->fieldNames));
+                break;
+            case 'raw':
+                $this->searchMgr->setSelFields('*');
                 break;
             case 'structure':
                 $is_structure = true;
@@ -127,6 +133,7 @@ class DbDefRecStructure extends DbEntityBase
                 }else{
                     $fields = @$this->data['details'];
                 }
+                $is_structure = strpos($fields, 'dty_') !== false;
                 if(isEmptyStr($fields)){
                     $fields =  implode(',', $this->fieldNames);
                 }
@@ -186,6 +193,9 @@ class DbDefRecStructure extends DbEntityBase
 
             if(isEmptyStr(@$this->records[$idx]['rst_Status'])) {
                 $this->records[$idx]['rst_Status'] = 'open';
+            }
+            if(isEmptyStr(@$this->records[$idx]['rst_MayModify'])) {
+                $this->records[$idx]['rst_MayModify'] = 'open';
             }
 
             if($this->records[$idx]['rst_DefaultValue']=='tabs' && isEmptyStr(@$this->records[$idx]['rst_DisplayName'])){

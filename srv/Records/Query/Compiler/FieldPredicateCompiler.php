@@ -1,0 +1,861 @@
+<?php
+/**
+* FieldPredicateCompiler.php - Typed detail-field predicate compiler
+*
+* @project     Heurist academic knowledge management system
+* @package     Records\Search\Query
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2026 Heurist Network Association. All rights reserved.
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       8.0
+*/
+
+namespace Heurist\Records\Query\Compiler;
+
+
+
+use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Query\QueryValidationException;
+use Heurist\Records\Query\SearchExecutionException;
+use Heurist\Utilities\Temporal;
+
+/** Compiles typed detail, file, date, enum, geo, and text predicates. */
+final class FieldPredicateCompiler
+{
+    /** Columns with a FULLTEXT index (blankDBStructure.sql), by column name → table. */
+    /** Columns with a FULLTEXT index => table key (SqlTables). */
+    private const FULLTEXT_COLUMNS = array('dtl_Value'=>'details', 'rec_Title'=>'records');
+
+    private DatabaseInterface $database;
+    private DefinitionLookup $definitions;
+    private $fulltextIndexCache = array();
+    /** Initialise the field compiler with definition-table access. */
+    private SqlTables $tables;
+
+    public function __construct(DatabaseInterface $database, ?SqlTables $tables = null)
+    {
+        $this->database = $database;
+        $this->tables = $tables ?? new SqlTables();
+        $this->definitions = DefinitionLookup::shared($database);
+    }
+
+    public function fieldCondition(
+        int $fieldId,
+        $value,
+        SqlBuildContext $state,
+        string $recordAlias = 'r',
+        ?string $termField = null
+    ): string
+    {
+        if($fieldId < 1){ throw new QueryValidationException('Field ID must be positive'); }
+        $nullValue = $value === null ? 'NULL' : strtoupper(trim((string)$value));
+        if($nullValue === 'NULL'){
+            $state->bind($fieldId, 'i');
+            return 'NOT EXISTS (SELECT 1 FROM {details} d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND d.dtl_DetailTypeID=?)';
+        }
+        if($nullValue === '-NULL'){
+            $state->bind($fieldId, 'i');
+            return 'EXISTS (SELECT 1 FROM {details} d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND d.dtl_DetailTypeID=?)';
+        }
+        $state->bind($fieldId, 'i');
+        if((string)$value === ''){
+            return 'EXISTS (SELECT 1 FROM {details} d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND d.dtl_DetailTypeID=? AND (d.dtl_Value IS NOT NULL AND d.dtl_Value<>""))';
+        }
+
+        $fieldType = $this->fieldType($fieldId);
+        // Known issue (found 2026-09-26, not fixed): 'year' fields fall through to scalarCondition,
+        // which compares strings ('900' > '1850'); integer/float compare as DECIMAL. detail=minmax and
+        // detail=ranges compare year fields as numbers, so they can disagree for years that are not 4 digits.
+        if($fieldType === 'date'){
+            $condition = $this->detailDateCondition($value, $state);
+            return 'EXISTS (SELECT 1 FROM {dateIndex} di INNER JOIN {details} d ON d.dtl_ID=di.rdi_DetailID '
+                .'WHERE di.rdi_RecID='.$recordAlias.'.rec_ID AND di.rdi_DetailTypeID=? AND '.$condition.')';
+        }
+        if(in_array($fieldType, array('integer','float','resource'), true)){
+            $condition = $this->numericCondition('CAST(d.dtl_Value AS DECIMAL(65,20))', $value, $state);
+        }elseif(in_array($fieldType, array('enum','relationtype'), true)){
+            $condition = $this->termCondition('d.dtl_Value', $value, $state, $termField);
+        }elseif(in_array($fieldType, array('freetext','blocktext'), true)){
+            $condition = $this->languageTextCondition('d.dtl_Value', $value, $state);
+        }else{
+            $condition = $this->scalarCondition('d.dtl_Value', $value, $state);
+        }
+        return 'EXISTS (SELECT 1 FROM {details} d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
+            .'AND d.dtl_DetailTypeID=? AND '.$condition.')';
+    }
+
+    /** Apply Heurist's language-prefix rules for freetext and blocktext details. */
+    public function languageTextCondition(string $column, $value, SqlBuildContext $state): string
+    {
+        $text = (string)$value; $prefix = '';
+        foreach(array('==','>=','<=','!=','>','<','=','@+','@-','@','-') as $candidate){
+            if(strpos($text, $candidate) === 0){ $prefix = $candidate; $text = substr($text, strlen($candidate)); break; }
+        }
+        $language = null;
+        if(preg_match('/^([a-z]{2,3}|all):(.*)$/iu', $text, $matches)){
+            $language = strtolower($matches[1]); $text = $matches[2];
+        }
+        $comparisonValue = $prefix.$text;
+        if(($prefix === '=' || $prefix === '==') && $language !== null && $language !== 'all'){
+            $comparisonValue = $prefix.$language.':'.$text;
+        }
+        $condition = $this->scalarCondition($column, $comparisonValue, $state, true);
+        if($language === null){
+            return '('.$condition.' AND '.$column.' NOT RLIKE "^[A-Za-z]{2,3}:")';
+        }
+        if($language === 'all'){ return $condition; }
+        $state->bind($language.':%', 's');
+        return '('.$condition.' AND '.$column.' LIKE ?)';
+    }
+
+    /**
+     * Search title, non-resource detail values, enum labels/codes and linked titles.
+     * This is the modern equivalent of legacy f/field without a detail type ID.
+     */
+    public function anyFieldCondition($value, SqlBuildContext $state, string $recordAlias = 'r'): string
+    {
+        if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
+        $text = (string)$value;
+        $exclude = strpos($text, '@-') === 0;
+        $candidates = $this->anyFieldCandidateSource($text, $state);
+        return $recordAlias.'.rec_ID '.($exclude ? 'NOT IN' : 'IN').' ('.$candidates.')';
+    }
+
+    /**
+     * Build the positive, index-driven candidate-ID UNION for an any-field value.
+     * For @- the caller applies negation to this positive result as a whole.
+     */
+    public function anyFieldCandidateSource($value, SqlBuildContext $state): string
+    {
+        if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
+        $text = (string)$value;
+
+        // @+ (all words) across any field is record-level: each word may be in a
+        // different field (given and family names live in separate fields), so the
+        // record must be a candidate for every word. A single field (f:<id>:@+…)
+        // still needs all words in that field - see textCondition.
+        if(strpos($text, '@+') === 0){
+            preg_match_all('/"[^"]*"|\S+/u', trim(substr($text, 2)), $matches);
+            $words = $matches[0] ?? array();
+            if(count($words) > 1){
+                $sources = array();
+                foreach($words as $word){
+                    $sources[] = $this->anyFieldCandidateSource('@+'.$word, $state);
+                }
+                $first = array_shift($sources);
+                $where = array_map(static function($source, $index){
+                    return 'aw.rec_ID IN (SELECT aw'.$index.'.rec_ID FROM ('.$source.') aw'.$index.')';
+                }, $sources, array_keys($sources));
+                return 'SELECT aw.rec_ID FROM ('.$first.') aw WHERE '.implode(' AND ', $where);
+            }
+        }
+        $positiveExclusion = strpos($text, '@-') === 0;
+        $queries = array();
+
+        $detailCondition = $this->textCondition('ad.dtl_Value', $text, $state, $positiveExclusion);
+        $queries[] = 'SELECT ad.dtl_RecID AS rec_ID FROM {details} ad '
+            .'INNER JOIN {fieldTypes} adt ON adt.dty_ID=ad.dtl_DetailTypeID '
+            .'WHERE adt.dty_Type<>"resource" AND adt.dty_Type<>"enum" '
+            .'AND '.$detailCondition;
+
+        $termText = $text;
+        if(strpos($termText, '@+') === 0 || strpos($termText, '@-') === 0){ $termText = substr($termText, 2); }
+        elseif(strpos($termText, '@') === 0){ $termText = substr($termText, 1); }
+        $termCondition = $this->termCondition('ae.dtl_Value', $termText, $state);
+        $queries[] = 'SELECT ae.dtl_RecID AS rec_ID FROM {details} ae '
+            .'INNER JOIN {fieldTypes} aet ON aet.dty_ID=ae.dtl_DetailTypeID '
+            .'WHERE aet.dty_Type="enum" '
+            .'AND '.$termCondition;
+
+        $linkedTitleCondition = $this->textCondition('alr.rec_Title', $text, $state, $positiveExclusion);
+        $queries[] = 'SELECT al.rl_SourceID AS rec_ID FROM {links} al '
+            .'INNER JOIN {records} alr ON alr.rec_ID=al.rl_TargetID '
+            .'INNER JOIN {details} ald ON ald.dtl_ID=al.rl_DetailID '
+            .'WHERE al.rl_RelationID IS NULL AND al.rl_DetailTypeID>0 '
+            .'AND '.$linkedTitleCondition;
+
+        return 'SELECT anyfield.rec_ID FROM ('.implode(' UNION ALL ', $queries).') anyfield';
+    }
+
+    /** A suffixed link with NULL/-NULL is the corresponding field-presence query. */
+    public function isLinkFieldPresenceTest(string $suffix, $value): bool
+    {
+        if($suffix === '' || !ctype_digit($suffix) || is_array($value)){ return false; }
+        $value = strtoupper(trim((string)$value));
+        return $value === 'NULL' || $value === '-NULL';
+    }
+    public function isValidFieldSuffix(string $suffix): bool
+    {
+        return preg_match('/^[1-9]\d*(?::(?:term|label|concept|conceptid|desc|code))?$/', $suffix) === 1;
+    }
+
+    /** Return [detail type ID, optional enum metadata selector]. */
+    public function fieldSuffixParts(string $suffix): array
+    {
+        $parts = explode(':', strtolower($suffix), 2);
+        return array(intval($parts[0]), $parts[1] ?? null);
+    }
+
+    /** Registered-file predicate used by file or file:fieldID. */
+    public function fileCondition(string $suffix, $value, SqlBuildContext $state, string $recordAlias): string
+    {
+        if($suffix !== '' && (!ctype_digit($suffix) || intval($suffix)<1)){
+            throw new QueryValidationException('File predicate field ID must be positive');
+        }
+        $fieldSql = '';
+        if($suffix !== ''){ $state->bind(intval($suffix), 'i'); $fieldSql = ' AND fd.dtl_DetailTypeID=?'; }
+        $text = trim((string)$value); $upper = strtoupper($text);
+        if($value === null || $upper === 'NULL'){
+            return 'NOT EXISTS (SELECT 1 FROM {details} fd WHERE fd.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND fd.dtl_UploadedFileID IS NOT NULL'.$fieldSql.')';
+        }
+        if($upper === '-NULL' || $text === ''){
+            return 'EXISTS (SELECT 1 FROM {details} fd WHERE fd.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND fd.dtl_UploadedFileID IS NOT NULL'.$fieldSql.')';
+        }
+        if(strpos($text, '@') === 0){
+            $state->bind(substr($text, 1), 's');
+            $fileWhere = 'fu.ulf_ObfuscatedFileID=?';
+        }elseif(strpos($text, '^') === 0){
+            list($operator, $number) = $this->comparison(substr($text, 1));
+            if(!is_numeric($number)){ throw new QueryValidationException('File size predicate requires a numeric value'); }
+            if($operator === 'LIKE'){ $operator = '='; }
+            $state->bind((float)$number, 'd');
+            $fileWhere = 'fu.ulf_FileSizeKB '.$operator.' ?';
+        }else{
+            $pattern = $this->likePattern(ltrim($text, '='));
+            $operator = strpos($text, '=') === 0 ? '=' : 'LIKE';
+            if($operator === '='){ $pattern = substr($text, 1); }
+            foreach(array(1,2,3) as $_){ $state->bind($pattern, 's'); }
+            $fileWhere = '(fu.ulf_OrigFileName '.$operator.' ? OR fu.ulf_ExternalFileReference '.$operator.' ? '
+                .'OR fu.ulf_Description '.$operator.' ?)';
+        }
+        return 'EXISTS (SELECT 1 FROM {details} fd INNER JOIN {files} fu '
+            .'ON fu.ulf_ID=fd.dtl_UploadedFileID WHERE fd.dtl_RecID='.$recordAlias.'.rec_ID'
+            .$fieldSql.' AND '.$fileWhere.')';
+    }
+
+    /** Owner/creator accepts IDs, current-user aliases, or login names. */
+    public function fieldCountCondition(int $fieldId, $value, SqlBuildContext $state, string $recordAlias = 'r'): string
+    {
+        $state->bind($fieldId, 'i');
+        list($operator, $cleanValue) = $this->comparison((string)$value);
+        if($operator === 'LIKE'){ $operator = '='; }
+        if($operator === 'NOT LIKE'){ $operator = '<>'; }
+        if(!is_numeric($cleanValue)){ throw new QueryValidationException('Field count requires a numeric value'); }
+        $count = intval($cleanValue);
+        $state->bind($count, 'i');
+        return '(SELECT COUNT(*) FROM {details} dc WHERE dc.dtl_RecID='.$recordAlias.'.rec_ID '
+            .'AND dc.dtl_DetailTypeID=?) '
+            .$operator.' ?';
+    }
+    /**
+     * Spatial predicate `geo[:<fieldId>][:within|intersects]`.
+     *
+     * The value is WKT or a `{west,south,east,north}` extent. The match mode is
+     * `within` (ST_Contains(area, geometry): the record lies entirely inside the
+     * area) or `intersects` (ST_Intersects: the record touches the area). Without
+     * a mode, WKT means `within` and an extent means `intersects` - the long-standing
+     * behaviour of the two value forms.
+     */
+    public function geoCondition(string $suffix, $value, SqlBuildContext $state, string $recordAlias = 'r'): string
+    {
+        list($fieldId, $mode) = self::geoSuffixParts($suffix);
+        $fieldSql = '';
+        if($fieldId !== null){
+            $state->bind($fieldId, 'i');
+            $fieldSql = ' AND gd.dtl_DetailTypeID=?';
+        }
+        if($value === null || (!is_array($value) && strtoupper(trim((string)$value)) === 'NULL')){
+            return 'NOT EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql
+                .')';
+        }
+        if(!is_array($value) && strtoupper(trim((string)$value)) === '-NULL'){
+            return 'EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql
+                .')';
+        }
+        $text = is_array($value) ? '' : trim((string)$value);
+        if($text === ''){
+            if(is_array($value)){
+                foreach(array('west','south','east','north') as $key){
+                    if(!array_key_exists($key, $value) || !is_numeric($value[$key])){
+                        throw new QueryValidationException('Invalid geo extent. Expected numeric west, south, east and north values');
+                    }
+                }
+                $west = (float)$value['west']; $south = (float)$value['south'];
+                $east = (float)$value['east']; $north = (float)$value['north'];
+                if($west < -180 || $west > 180 || $east < -180 || $east > 180
+                    || $south < -90 || $south > 90 || $north < -90 || $north > 90
+                    || $south > $north){
+                    throw new QueryValidationException('Invalid geo extent coordinates');
+                }
+                $wkt = "POLYGON (($west $south, $east $south, $east $north, $west $north, $west $south))";
+                $state->bind($wkt, 's');
+                return 'EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+                    .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.' '
+                    .'AND '.self::geoSqlFunction($mode ?? 'intersects').'(ST_GeomFromText(?),gd.dtl_Geo))';
+            }
+            return 'EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+                .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql
+                .')';
+        }
+        $state->bind($text, 's');
+        return 'EXISTS (SELECT 1 FROM {details} gd WHERE gd.dtl_RecID='.$recordAlias.'.rec_ID '
+            .'AND gd.dtl_Geo IS NOT NULL'.$fieldSql.' '
+            .'AND '.self::geoSqlFunction($mode ?? 'within').'(ST_GeomFromText(?),gd.dtl_Geo))';
+    }
+
+    /**
+     * Split a geo suffix `[<fieldId>][:within|intersects]` (either part optional).
+     *
+     * @return array{0:?int,1:?string} [field id or null, mode or null]
+     * @throws QueryValidationException for anything else
+     */
+    public static function geoSuffixParts(string $suffix): array
+    {
+        $fieldId = null;
+        $mode = null;
+        foreach($suffix === '' ? array() : explode(':', $suffix) as $part){
+            $lower = strtolower(trim($part));
+            if($mode === null && ($lower === 'within' || $lower === 'intersects')){
+                $mode = $lower;
+            }elseif($fieldId === null && $mode === null && ctype_digit($lower) && intval($lower) > 0){
+                $fieldId = intval($lower);
+            }else{
+                throw new QueryValidationException(
+                    'Geo predicate must be geo[:<field ID>][:within|intersects], got geo:'.$suffix);
+            }
+        }
+        return array($fieldId, $mode);
+    }
+
+    /** SQL spatial function for a geo match mode (area first, record geometry second). */
+    private static function geoSqlFunction(string $mode): string
+    {
+        return $mode === 'intersects' ? 'ST_Intersects' : 'ST_Contains';
+    }
+    public function textCondition(
+        string $column,
+        $value,
+        SqlBuildContext $state,
+        bool $positiveFulltext = false
+    ): string
+    {
+        $text = (string)$value;
+        if(strpos($text, '@') === 0){
+            return $this->fulltextCondition($column, $text, $state, $positiveFulltext);
+        }
+        if(strpos($text, '==') === 0){
+            return $this->caseSensitiveEquals($column, substr($text, 2), $state);
+        }
+        if(strpos($text, '=') === 0){
+            return $this->forcedComparison($column, '=', substr($text, 1), $state);
+        }
+        if(strpos($text, '-') === 0){
+            return $this->containsCondition($column, substr($text, 1), $state, true);
+        }
+        return $this->containsCondition($column, $text, $state);
+    }
+
+    /**
+     * "Contains": word-prefix MATCH where the column has a FULLTEXT index, otherwise LIKE.
+     * Values with % or _ are legacy LIKE patterns (starts with, ends with) and stay LIKE.
+     */
+    public function containsCondition(string $column, string $text, SqlBuildContext $state, bool $negate = false): string
+    {
+        if(strpos($text, '%') === false && strpos($text, '_') === false){
+            $match = $this->wordPrefixMatch($column, $text, $state);
+            if($match !== null){ return $negate ? 'NOT ('.$match.')' : $match; }
+        }
+        $state->bind($this->likePattern($text), 's');
+        return $column.($negate ? ' NOT' : '').' LIKE ? ESCAPE "\\\\"';
+    }
+
+    /**
+     * MATCH ... AGAINST('+word1* +word2*' IN BOOLEAN MODE): every word, as a word or
+     * the start of a word ("Orange" finds "Orange", "Oranges", not "Blood-range").
+     * When the text is more than one indexable word, a LIKE on the narrowed rows keeps
+     * the phrase and the short words / stopwords the index skips. Returns null when
+     * the column has no FULLTEXT index or the text has no indexable word.
+     */
+    public function wordPrefixMatch(string $column, string $text, SqlBuildContext $state): ?string
+    {
+        $text = trim($text);
+        if(!preg_match('/(?:^|\.)(\w+)$/', $column, $name) || !isset(self::FULLTEXT_COLUMNS[$name[1]])){ return null; }
+        $words = $this->indexableFulltextWords($text);
+        if(empty($words) || !$this->hasFulltextIndex($this->tables->table(self::FULLTEXT_COLUMNS[$name[1]]), $name[1])){ return null; }
+        $state->bind(implode(' ', array_map(static function($word){ return '+'.$word.'*'; }, $words)), 's');
+        $condition = 'MATCH('.$column.') AGAINST (? IN BOOLEAN MODE)';
+        if(count($words) === 1 && $words[0] === $text){ return $condition; }
+        $state->bind($this->likePattern($text), 's');
+        return '('.$condition.' AND '.$column.' LIKE ? ESCAPE "\\\\")';
+    }
+
+    /** Whether the FULLTEXT index exists (purgeFullTextIndexes.php drops it on inactive databases). */
+    private function hasFulltextIndex(string $table, string $column): bool
+    {
+        $key = $table.'.'.$column;
+        if(!array_key_exists($key, $this->fulltextIndexCache)){
+            $this->fulltextIndexCache[$key] = intval($this->database->fetchValue(
+                'SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE()'
+                .' AND TABLE_NAME=? AND COLUMN_NAME=? AND INDEX_TYPE="FULLTEXT"',
+                array($table, $column), 0
+            )) > 0;
+        }
+        return $this->fulltextIndexCache[$key];
+    }
+    /**
+     * Exact, case-sensitive equality. The plain comparison (column collation) uses the
+     * value index to find the candidates; BINARY then keeps only the exact match.
+     * BINARY alone hides the column from the index (f:1:"==Johnson": 9.9 s -> 1 ms).
+     */
+    private function caseSensitiveEquals(string $column, string $text, SqlBuildContext $state): string
+    {
+        $state->bind($text, 's');
+        $state->bind($text, 's');
+        return '('.$column.' = ? AND BINARY '.$column.' = BINARY ?)';
+    }
+
+    /** $contains: plain values use containsCondition() (text fields) instead of LIKE. */
+    public function scalarCondition(string $column, $value, SqlBuildContext $state, bool $contains = false): string
+    {
+        $text = trim((string)$value);
+        if(strpos($text, '@') === 0){ return $this->fulltextCondition($column, $text, $state); }
+        if(strpos($text, '==') === 0){
+            return $this->caseSensitiveEquals($column, substr($text, 2), $state);
+        }
+        if(($range = $this->splitRange($text, '<>')) !== null){
+            $state->bind($range[0], 's'); $state->bind($range[1], 's');
+            return $column.' BETWEEN ? AND ?';
+        }
+        list($operator, $cleanValue) = $this->comparison((string)$value);
+        if($contains && ($operator === 'LIKE' || $operator === 'NOT LIKE')){
+            return $this->containsCondition($column, $cleanValue, $state, $operator === 'NOT LIKE');
+        }
+        if($operator === 'LIKE' || $operator === 'NOT LIKE'){
+            $state->bind($this->likePattern($cleanValue), 's');
+            return $column.' '.$operator.' ? ESCAPE "\\\\"';
+        }
+        return $this->forcedComparison($column, $operator, $cleanValue, $state);
+    }
+    public function integerCondition(string $column, $value, SqlBuildContext $state): string
+    {
+        list($operator, $cleanValue) = $this->comparison((string)$value);
+        if(!is_numeric($cleanValue)){
+            throw new QueryValidationException('Numeric value required for '.$column);
+        }
+        $state->bind(intval($cleanValue), 'i');
+        return $column.' '.$operator.' ?';
+    }
+    public function forcedComparison(
+        string $column,
+        string $operator,
+        $value,
+        SqlBuildContext $state
+    ): string {
+        $type = is_int($value) ? 'i' : (is_float($value) ? 'd' : 's');
+        $state->bind($value, $type);
+        return $column.' '.$operator.' ?';
+    }
+    public function comparison(string $value): array
+    {
+        $value = trim($value);
+        foreach(array('>=','<=','<>','!=','>','<','=') as $operator){
+            if(strpos($value, $operator) === 0){
+                $sqlOperator = $operator === '!=' ? '<>' : $operator;
+                return array($sqlOperator, substr($value, strlen($operator)));
+            }
+        }
+        if(strpos($value, '-') === 0){ return array('NOT LIKE', substr($value, 1)); }
+        return array('LIKE', $value);
+    }
+    public function inCondition(string $column, array $values, SqlBuildContext $state): string
+    {
+        if(count($values) === 1){
+            $state->bind(reset($values), 'i');
+            return $column.' = ?';
+        }
+        $placeholders = implode(',', array_fill(0, count($values), '?'));
+        foreach($values as $value){ $state->bind($value, 'i'); }
+        return $column.' IN ('.$placeholders.')';
+    }
+    public function numericList($value, string $label): array
+    {
+        $items = is_array($value) ? $value : preg_split('/\s*,\s*/', trim((string)$value));
+        $result = array();
+        foreach($items as $item){
+            if(!is_numeric($item) || intval($item)<1){
+                throw new QueryValidationException('Invalid '.$label.' ID: '.(string)$item);
+            }
+            $result[] = intval($item);
+        }
+        $result = array_values(array_unique($result));
+        if(empty($result)){ throw new QueryValidationException('Empty '.$label.' ID list'); }
+        return $result;
+    }
+    public function escapeLike(string $value): string
+    {
+        return str_replace('\\', '\\\\', $value);
+    }
+
+    /** Preserve legacy % and _ wildcards and add contains wildcards when absent. */
+    public function likePattern(string $value): string
+    {
+        $value = $this->escapeLike($value);
+        return strpos($value, '%') === false && strpos($value, '_') === false
+            ? '%'.$value.'%'
+            : $value;
+    }
+
+    /** Type of a field (DefinitionLookup), null when unknown. */
+    public function fieldType(int $fieldId): ?string
+    {
+        $type = $this->definitions->fieldType($fieldId);
+        return $type === '' ? null : $type;
+    }
+
+    /** Numeric exact/comparison and legacy low<>high range. */
+    public function numericCondition(string $column, $value, SqlBuildContext $state): string
+    {
+        $text = trim((string)$value);
+        $range = $this->numericRange($text);
+        if($range !== null){
+            if(!is_numeric($range[0]) || !is_numeric($range[1])){
+                throw new QueryValidationException('Numeric range requires two numeric values');
+            }
+            $state->bind((float)$range[0], 'd'); $state->bind((float)$range[1], 'd');
+            return $column.' BETWEEN ? AND ?';
+        }
+        list($operator, $cleanValue) = $this->comparison($text);
+        if(!is_numeric($cleanValue)){ throw new QueryValidationException('Numeric field requires a numeric value'); }
+        if($operator === 'LIKE'){ $operator = '='; }
+        if($operator === 'NOT LIKE'){ $operator = '<>'; }
+        $state->bind((float)$cleanValue, 'd');
+        return $column.' '.$operator.' ?';
+    }
+
+    /** Build an index-driven candidate query for one integer or float field. */
+    public function numericFieldCandidateSource(
+        int $fieldId,
+        $value,
+        SqlBuildContext $state
+    ): string {
+        $fieldType = $this->fieldType($fieldId);
+        if(!in_array($fieldType, array('integer','float'), true)){
+            throw new QueryValidationException('Field '.$fieldId.' is not numeric');
+        }
+        $state->bind($fieldId, 'i');
+        $condition = $this->numericCondition(
+            'CAST(nd.dtl_Value AS DECIMAL(65,20))',
+            $value,
+            $state
+        );
+        return 'SELECT nd.dtl_RecID AS rec_ID FROM {details} nd'
+            .' WHERE nd.dtl_DetailTypeID=? AND '.$condition
+            ;
+    }
+
+    /** Whether the detail definition is an integer or float field. */
+    public function isNumericField(int $fieldId): bool
+    {
+        return in_array($this->fieldType($fieldId), array('integer','float'), true);
+    }
+
+    /** Parse both low<>high and leading <>low/high or ><low/high forms. */
+    private function numericRange(string $text): ?array
+    {
+        if(preg_match('/^\s*(?:<>|><)\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(?:\/|,|\bto\b)\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*$/iu', $text, $matches)){
+            return array($matches[1], $matches[2]);
+        }
+        foreach(array('<>','><') as $separator){
+            if(($range = $this->splitRange($text, $separator)) !== null){ return $range; }
+        }
+        return null;
+    }
+
+    /** Enum IDs include descendants unless an exact (=) match was requested. */
+    public function termCondition(string $column, $value, SqlBuildContext $state, ?string $termField = null): string
+    {
+        $text = trim((string)$value); $exact = false; $caseSensitive = false; $negate = false;
+        if(strpos($text, '==') === 0){
+            $exact = true; $caseSensitive = true; $text = trim(substr($text, 2));
+        }elseif(strpos($text, '=') === 0){ $exact = true; $text = trim(substr($text, 1)); }
+        elseif(strpos($text, '-') === 0){ $negate = true; $text = trim(substr($text, 1)); }
+
+        $ids = preg_split('/\s*,\s*/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        if(!empty($ids) && count(array_filter($ids, static function($id){ return ctype_digit($id) && intval($id)>0; })) === count($ids)){
+            $ids = array_values(array_unique(array_map('intval', $ids)));
+            if(!$exact){ $ids = array_values(array_unique(array_merge($ids, $this->termChildrenAll($ids)))); }
+            $condition = $this->inCondition($column, $ids, $state);
+            return $negate ? 'NOT ('.$condition.')' : $condition;
+        }
+
+        $language = null;
+        if(preg_match('/^([a-z]{2,3}|all):(.*)$/iu', $text, $matches)){
+            $language = strtolower($matches[1]); $text = $matches[2];
+        }
+        $termField = $termField ?? 'label';
+        if(in_array($termField, array('concept','conceptid'), true)){
+            // concept code to the local term id (DefinitionLookup, one rule); unknown: no match
+            $state->bind($this->definitions->localId('trm', $text), 'i');
+            $condition = $column.' = ?';
+            return $negate ? 'NOT ('.$condition.')' : $condition;
+        }
+        $termColumns = array('term'=>'trm_Label','label'=>'trm_Label','desc'=>'trm_Description','code'=>'trm_Code');
+        $termColumn = $termColumns[$termField] ?? 'trm_Label';
+        if($caseSensitive){
+            $comparison = $this->caseSensitiveEquals($termColumn, $text, $state);
+        }else{
+            $state->bind($exact ? $text : $this->likePattern($text), 's');
+            $comparison = $exact ? $termColumn.'=?' : $termColumn.' LIKE ? ESCAPE "\\\\"';
+        }
+        $subqueries = array('SELECT trm_ID FROM {terms} WHERE '.$comparison);
+        if($termField === 'label' && $language !== null){
+            $state->bind('trm_Label', 's');
+            $translation = 'SELECT CAST(trn_Code AS UNSIGNED) FROM {translations} WHERE trn_Source=?';
+            if($language !== 'all'){
+                $state->bind($language, 's'); $translation .= ' AND trn_LanguageCode=?';
+            }
+            $state->bind($exact ? $text : $this->likePattern($text), 's');
+            $translation .= ' AND '.($exact ? 'trn_Translation=?' : 'trn_Translation LIKE ? ESCAPE "\\\\"');
+            $subqueries[] = $translation;
+        }elseif($termField === 'label'){
+            $state->bind($text, 's');
+            $subqueries[0] .= ' OR trm_Code=?';
+        }
+        $condition = $column.' IN ('.implode(' UNION ', $subqueries).')';
+        return $negate ? 'NOT ('.$condition.')' : $condition;
+    }
+
+    /** Descendant term ids of terms, without the terms themselves (DefinitionLookup). */
+    public function termChildrenAll(array $parentIds): array
+    {
+        if(empty($parentIds)){ return array(); }
+        $parents = array_fill_keys(array_map('intval', $parentIds), true);
+        return array_values(array_filter($this->definitions->termDescendants($parentIds), static function($id) use ($parents){
+            return !isset($parents[$id]);
+        }));
+    }
+
+    /**
+     * Header dates use ISO values and legacy slash/<> BETWEEN syntax. The detail-date
+     * range forms `<>a/b` (overlaps) and `><a/b` (within) are accepted too: a header
+     * date is a single point, so both mean BETWEEN.
+     *
+     * A value covers its whole period: `1900/2000` is 1900-01-01 00:00:00 to
+     * 2000-12-31 23:59:59, and `<=2000` / `>2000` compare against the end of 2000.
+     */
+    public function headerDateCondition(string $column, $value, SqlBuildContext $state): string
+    {
+        $text = $this->normalizeRelativeDate(trim((string)$value));
+        if(strpos($text, '<>') === 0 || strpos($text, '><') === 0){
+            $text = trim(substr($text, 2));
+        }
+        $operator = null;
+        foreach(array('>=','<=','>','<','=') as $candidate){
+            if(strpos($text, $candidate) === 0){ $operator = $candidate; $text = trim(substr($text, strlen($candidate))); break; }
+        }
+        // `2000/02` is a month, not the range 2000..02
+        $isSlashMonth = preg_match('/^\d{4}\/\d{1,2}$/', $text) === 1;
+        $range = $this->splitRange($text, '<>') ?? ($isSlashMonth ? null : $this->splitRange($text, '/'));
+        if($range !== null){
+            $from = Temporal::dateToISO($range[0]); $to = Temporal::dateToISO($range[1]);
+            if($from === null || $to === null){ throw new QueryValidationException('Invalid date range'); }
+            $state->bind($from, 's'); $state->bind($this->headerPeriodEnd($range[1], $to), 's');
+            return $column.' BETWEEN ? AND ?';
+        }
+        $iso = Temporal::dateToISO($text);
+        if($iso === null){ throw new QueryValidationException('Invalid date value: '.$text); }
+        if($operator !== null){
+            // "up to and including" / "after" a period compare against its last moment
+            $bound = ($operator === '<=' || $operator === '>') ? $this->headerPeriodEnd($text, $iso) : $iso;
+            $state->bind($bound, 's');
+            return $column.' '.$operator.' ?';
+        }
+        $pattern = preg_match('/^\d{4}[-\/]\d{2}$/', $text) ? str_replace('/', '-', $text).'%' : $iso.'%';
+        $state->bind($pattern, 's');
+        return $column.' LIKE ?';
+    }
+
+    /**
+     * Last moment of the period a header-date value names, from its written
+     * precision: a year (`2000`) ends on 31 December, a month (`2000-02`, `2000/02`)
+     * on its last day, a day at 23:59:59; a value with a time is used as is.
+     *
+     * @param string $raw Value as written.
+     * @param string $iso Its `Temporal::dateToISO()` form (start of the period).
+     */
+    private function headerPeriodEnd(string $raw, string $iso): string
+    {
+        $raw = trim($raw);
+        if(preg_match('/^\d{4}$/', $raw)){
+            return $raw.'-12-31 23:59:59';
+        }
+        if(preg_match('/^(\d{4})[-\/](\d{1,2})$/', $raw, $m)){
+            $month = new \DateTimeImmutable(sprintf('%04d-%02d-01', $m[1], $m[2]));
+            return $month->format('Y-m-t').' 23:59:59';
+        }
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $iso) ? $iso.' 23:59:59' : $iso;
+    }
+
+    /**
+     * Detail dates are compared through recDetailsDateIndex estimated bounds.
+     *
+     * Ranges: `<>from/to` (overlaps), `><from/to` (within) or plain `from/to` (falls in, as
+     * overlap). The infix forms `from<>to` / `from><to` (numbers' syntax) mean the same as the
+     * prefix forms.
+     *
+     * Search values cover whole periods (Temporal search mode, fixed 2026-09-26): `2026` finds every
+     * date within 2026, `2026-07` every date in July 2026, `-100` every date of the year -100, and a
+     * range from January 1 / to December 31 includes values stored as a plain year.
+     *
+     * Known issue (not fixed; see Temporal::getMinMax): month/day ranges inside a negative year do not
+     * order correctly (the decimal encoding runs backwards within years before 1).
+     */
+    public function detailDateCondition($value, SqlBuildContext $state): string
+    {
+        $text = $this->normalizeRelativeDate(trim((string)$value)); $operator = null;
+        // infix "from<>to" / "from><to" -> prefix "<>from/to" / "><from/to", which Temporal reads
+        foreach(array('<>','><') as $separator){
+            if(strpos($text, $separator) > 0 && ($range = $this->splitRange($text, $separator)) !== null){
+                $text = $separator.$range[0].'/'.$range[1];
+                break;
+            }
+        }
+        $within = strpos($text, '><') !== false;
+        $overlap = strpos($text, '<>') !== false;
+        if(!$within && !$overlap){
+            foreach(array('>=','<=','>','<','=') as $candidate){
+                if(strpos($text, $candidate) === 0){ $operator = $candidate; $text = trim(substr($text, strlen($candidate))); break; }
+            }
+        }
+        $temporal = new Temporal($text, !($within || $overlap));
+        if(!$temporal->isValid()){ throw new QueryValidationException('Invalid temporal value: '.$text); }
+        $timespan = $temporal->getMinMax();
+        $min = (float)$timespan[0]; $max = (float)$timespan[1];
+        if($within){
+            $state->bind($min, 'd'); $state->bind($max, 'd');
+            return '? <= di.rdi_estMinDate AND di.rdi_estMaxDate <= ?';
+        }
+        if($operator === '='){
+            $state->bind($min, 'd'); $state->bind($max, 'd');
+            return '(di.rdi_estMinDate = ? OR di.rdi_estMaxDate = ?)';
+        }
+        if($operator === '<' || $operator === '<='){
+            $state->bind($max, 'd'); return 'di.rdi_estMaxDate '.$operator.' ?';
+        }
+        if($operator === '>' || $operator === '>='){
+            $state->bind($min, 'd'); return 'di.rdi_estMinDate '.$operator.' ?';
+        }
+        $state->bind($min, 'd'); $state->bind($max, 'd');
+        return 'di.rdi_estMaxDate >= ? AND di.rdi_estMinDate <= ?';
+    }
+    public function splitRange(string $value, string $separator): ?array
+    {
+        $position = strpos($value, $separator);
+        if($position === false){ return null; }
+        $left = trim(substr($value, 0, $position));
+        $right = trim(substr($value, $position + strlen($separator)));
+        return $left !== '' && $right !== '' ? array($left, $right) : null;
+    }
+
+    /** @, @+ and @- mean any word, all usable words and no words respectively. */
+    public function fulltextCondition(
+        string $column,
+        string $value,
+        SqlBuildContext $state,
+        bool $positiveOnly = false
+    ): string
+    {
+        $mode = strpos($value, '@+') === 0 ? '@+' : (strpos($value, '@-') === 0 ? '@-' : '@');
+        $text = trim(substr($value, $mode === '@' ? 1 : 2));
+        if($text === ''){ throw new QueryValidationException('Full-text search value cannot be empty'); }
+
+        if($mode === '@+' || $mode === '@-'){
+            $words = $this->indexableFulltextWords($text);
+            if(empty($words)){
+                $state->bind($this->likePattern($text), 's');
+                $condition = $column.' LIKE ? ESCAPE "\\\\"';
+                return $mode === '@-' && !$positiveOnly ? 'NOT ('.$condition.')' : $condition;
+            }
+            if($mode === '@+'){
+                $text = implode(' ', array_map(static function($word){ return '+'.$word; }, $words));
+                $state->bind($text, 's');
+                return 'MATCH('.$column.') AGAINST (? IN BOOLEAN MODE)';
+            }
+            $text = implode(' ', $words);
+        }
+        $state->bind($text, 's');
+        $boolean = $mode === '@' && preg_match('/(?:^|\s)[+-]\S/u', $text);
+        $condition = 'MATCH('.$column.') AGAINST (?'.($boolean ? ' IN BOOLEAN MODE' : '').')';
+        return $mode === '@-' && !$positiveOnly ? 'NOT ('.$condition.')' : $condition;
+    }
+
+    /** Apply the same indexability limits used by legacy InnoDB full-text search. */
+    private function indexableFulltextWords(string $text): array
+    {
+        preg_match_all('/(\w+)/u', $text, $matches);
+        $stopwords = array(
+            'a','about','an','are','as','at','be','by','com','de','en','for','from','how','i',
+            'in','is','it','la','of','on','or','that','the','this','to','und','was','what',
+            'when','where','who','will','with','www'
+        );
+        $words = array();
+        foreach($matches[0] ?? array() as $word){
+            $length = strlen($word);
+            if($length>2 && $length<85 && !in_array(strtolower($word), $stopwords, true)){
+                $words[] = $word;
+            }
+        }
+        return $words;
+    }
+
+    /** Convert convenient relative expressions to deterministic ISO values/ranges. */
+    private function normalizeRelativeDate(string $value): string
+    {
+        $prefix = '';
+        foreach(array('><','<>','>=','<=','>','<','=') as $operator){
+            if(strpos($value, $operator) === 0){
+                $prefix = $operator; $value = trim(substr($value, strlen($operator))); break;
+            }
+        }
+        $phrase = strtolower(trim($value));
+        $today = new \DateTimeImmutable('today');
+        if($phrase === 'today'){ $value = $today->format('Y-m-d'); }
+        elseif($phrase === 'now'){ $value = (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s'); }
+        elseif($phrase === 'yesterday'){ $value = $today->modify('-1 day')->format('Y-m-d'); }
+        elseif($phrase === 'tomorrow'){ $value = $today->modify('+1 day')->format('Y-m-d'); }
+        elseif($phrase === 'month'){
+            $value = $prefix === ''
+                ? $today->format('Y-m-01').'/'.$today->format('Y-m-t')
+                : $today->format('Y-m-01');
+        }elseif($phrase === 'year'){
+            $value = $prefix === ''
+                ? $today->format('Y-01-01').'/'.$today->format('Y-12-31')
+                : $today->format('Y-01-01');
+        }elseif($phrase === 'last month'){
+            $date = $today->modify('first day of last month');
+            $value = $prefix === '' ? $date->format('Y-m-01').'/'.$date->format('Y-m-t') : $date->format('Y-m-01');
+        }elseif($phrase === 'last year'){
+            $date = $today->modify('-1 year');
+            $value = $prefix === '' ? $date->format('Y-01-01').'/'.$date->format('Y-12-31') : $date->format('Y-01-01');
+        }elseif(preg_match('/^(?:(\d+|a|one)\s+)?(day|week|month|year)s?\s+ago$/', $phrase, $match)){
+            $amount = isset($match[1]) && ctype_digit($match[1]) ? intval($match[1]) : 1;
+            $value = $today->modify('-'.$amount.' '.$match[2])->format('Y-m-d');
+        }
+        return $prefix.$value;
+    }
+    public function isAssociative(array $value): bool
+    {
+        if(empty($value)){ return false; }
+        return array_keys($value) !== range(0, count($value)-1);
+    }
+}

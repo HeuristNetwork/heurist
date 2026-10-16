@@ -76,7 +76,13 @@ class DbSysImportFiles extends DbEntityBase
      * @return bool True if the entity is valid, false otherwise.
      */
     public function isvalid(){
-        return $this->is_table_exists && parent::isvalid();
+
+        $isValid = $this->is_table_exists && parent::isvalid();
+        if(!$isValid){
+            return false;
+        }
+
+        return $this->_checkProcessingInfo();
     }
 
 
@@ -271,6 +277,44 @@ class DbSysImportFiles extends DbEntityBase
 
     }
 
+    private function _checkProcessingInfo(){
 
+        $mysqli = $this->system->getMysqli();
+
+        $query = <<<QUERY
+        SELECT sif_ID, sif_ProcessingInfo
+        FROM sysImportFiles
+        WHERE sif_ProcessingInfo LIKE '%"uniqcnt":[%' AND sif_ProcessingInfo NOT LIKE '%"column_counts":[%'
+        QUERY;
+
+        $importDetails = mysql__select_assoc($mysqli, $query, 1);
+
+        foreach($importDetails as $sifID => $import){
+
+            $importDetail = json_decode($import['sif_ProcessingInfo'], true);
+            if(json_last_error() !== JSON_ERROR_NONE || !$importDetail || !\array_key_exists('import_table', $importDetail)){
+                continue;
+            }
+
+            $importTable = $importDetail['import_table'];
+            $fieldCount = mysql__select_value($mysqli, "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{$importTable}' AND COLUMN_NAME != 'imp_ID'");
+
+            $selectString = '';
+            for($i = 0; $i < $fieldCount; $i++){
+                $selectString .= "COUNT(field_{$i}),";
+            }
+            $selectString = substr($selectString, 0, -1);
+
+            $query = "SELECT {$selectString} FROM {$importTable}";
+
+            $counts = mysql__select_row($mysqli, "SELECT {$selectString} FROM {$importTable}");
+
+            $importDetail['column_counts'] = $counts;
+
+            mysql__insertupdate($mysqli, 'sysImportFiles', 'sif', ['sif_ID' => $sifID, 'sif_ProcessingInfo' => json_encode($importDetail)]);
+        }
+
+        return true;
+    }
 }
 ?>

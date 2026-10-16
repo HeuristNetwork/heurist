@@ -96,15 +96,15 @@ $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
      */
     _initControls: function(){
 
-        let $select = this.element.find('#rty_flds');
+        let $select = this._$('#rty_flds');
         let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
 
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, {useHtmlSelect: false});
+        this.$Hui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, {useHtmlSelect: false});
 
-        this._on(this.element.find('input[name="dump_field"]'), {
+        this._on(this._$('input[name="dump_field"]'), {
             change: function(){
-                let opt = this.element.find('input[name="dump_field"]:checked').val();
-                window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), opt == 'rec_ScratchPad');
+                let opt = this._$('input[name="dump_field"]:checked').val();
+                this.$H.setDisabled(this._$('#rty_flds'), opt == 'rec_ScratchPad');
             }
         });
 
@@ -140,34 +140,34 @@ $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
         let options = this.options.mapping?.options;
         let need_save = false;
 
-        if(window.hWin.HEURIST4.util.isempty(options)){
+        if(this.$H.isempty(options)){
             options = def_options;
             need_save = true;
         }
 
-        if(!window.hWin.HEURIST4.util.isempty(options['dump_record'])){
-            this.element.find('input[name="dump_record"]').prop('checked', options['dump_field']);
+        if(!this.$H.isempty(options['dump_record'])){
+            this._$('input[name="dump_record"]').prop('checked', options['dump_field']);
         }
 
-        if(this.element.find('#author-codes').length > 0 && !window.hWin.HEURIST4.util.isempty(options['author_codes'])){
-            this.element.find('#author-codes').text(options['author_codes']);
+        if(this._$('#author-codes').length > 0 && !this.$H.isempty(options['author_codes'])){
+            this._$('#author-codes').text(options['author_codes']);
         }
 
-        if(!window.hWin.HEURIST4.util.isempty(options['dump_field'])){
+        if(!this.$H.isempty(options['dump_field'])){
             const selected = options['dump_field'];
 
             if(selected === 'rec_ScratchPad'){
-                this.element.find('input[name="dump_field"][value="rec_ScratchPad"]').prop('checked', true);
+                this._$('input[name="dump_field"][value="rec_ScratchPad"]').prop('checked', true);
             }else{
-                this.element.find('input[name="dump_field"][value="dty_ID"]').prop('checked', true);
-                this.element.find('#rty_flds').val(selected);
+                this._$('input[name="dump_field"][value="dty_ID"]').prop('checked', true);
+                this._$('#rty_flds').val(selected);
 
-                if(this.element.find('#rty_flds').hSelect('instance') !== undefined){
-                    this.element.find('#rty_flds').hSelect('refresh');
+                if(this._$('#rty_flds').hSelect('instance') !== undefined){
+                    this._$('#rty_flds').hSelect('refresh');
                 }
             }
 
-            window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), selected == 'rec_ScratchPad');
+            this.$H.setDisabled(this._$('#rty_flds'), selected == 'rec_ScratchPad');
         }
 
         if(need_save){
@@ -204,10 +204,10 @@ $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
      */
     _onSearchResult: function(json_data){
 
-        let maxRecords = this.element.find('#rec_limit').val(); // limit number of returned records
+        let maxRecords = this._$('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
-        json_data = window.hWin.HEURIST4.util.isJSON(json_data);
+        json_data = this.$H.isJSON(json_data);
 
         if(json_data?.numberOfRecords === 0){
             json_data.result = [];

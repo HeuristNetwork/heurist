@@ -99,6 +99,15 @@
     }else{
 
         if(@$req_params["import"]){ //this is import
+        
+            // added 18/9/2026 for master-satellite synchronisation
+            if(\hserv\synchronisation\SyncFeature::isStructureLocked($system)){
+                $system->errorExit(
+                    'Database structure is controlled by the master and cannot be imported manually on a satellite.',
+                    HEURIST_ACTION_BLOCKED
+                );
+            }
+            
             if(!$system->isAdmin()){
                 $system->errorExit('To perform this action you must be logged in as '
                         .'Administrator of group \'Database Managers\'',
@@ -116,6 +125,7 @@ ini_set('max_execution_time', 0);
             $options = [
                 'defType' => @$req_params["import"],
                 'databaseID' => @$req_params["databaseID"],
+                'databaseURL' => @$req_params["databaseURL"],
                 'definitionID' => @$req_params["definitionID"],
                 'is_rename_target' => @$req_params["is_rename_target"] == 1,
                 'conservative' => @$req_params["conservative"] == 1,
@@ -148,7 +158,7 @@ ini_set('max_execution_time', 0);
 
                 sendEmail(HEURIST_MAIL_TO_BUG, 'Import terms report', $sText);
 
-                $response['report']['broken_terms_reason'] = null;
+                //$response['report']['broken_terms_reason'] = null;
             }
             if(@$response['report'] && $response['report']['rectypes']){
 

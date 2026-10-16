@@ -41,6 +41,7 @@ if(isLocalHost()){
 ?>
 <script type="text/javascript"  src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js" integrity="sha384-w7CXHFrOIXSmCXYnTQGa05l+TdEU+qxHtOaPqyTojic8o3wGz3rfRGuNNOKU0uDW" crossorigin="anonymous"></script>
 
+
 <!-- leaflet plugins -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-tileLayerPixelFilter.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/geocoder/Control.Geocoder.js"></script>
@@ -79,7 +80,10 @@ if(isLocalHost()){
 <!-- this scripts can be omitted for publishing -->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
+
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingBrowse.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingTranslation.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingHelpers.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
@@ -355,9 +359,9 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     //
     // Add group headers to record viewer
     //
-    function createRecordGroups(groups){
+    function createRecordGroups(recID, groups){
 
-        var $group_container = $('div#div_public_data');
+        var $group_container = $(`div[data-recid="${recID}"] div.div_public_data`);
         var $data = $group_container.find('div[data-order]');
 
         var $g_ele = null, $g_header = null;

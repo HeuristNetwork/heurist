@@ -23,7 +23,8 @@
  *
  * @param {string} _action_type - The type of action to perform (e.g., 'add_detail', 'replace_detail',
  *                                'delete_detail', 'rectype_change', 'extract_pdf', 'url_to_file',
- *                                'local_to_repository', 'case_conversion', 'nl2br', 'translation', 'reset_thumbs').
+ *                                'local_to_repository', 'case_conversion', 'nl2br', 'translation', 
+ *                                'reset_thumbs', 'increment' ,'iiif_thumbs').
  *                                This determines the UI and server-side handling.
  * @param {string|number} [_scope_type] - The initial scope of records to act upon.
  *                                     Can be a string like 'All', 'Current', 'Selected', 'Collected',
@@ -36,7 +37,30 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     const _className = "RecordAction",
     _version   = "0.4";
 
-    let selectRecordScope, allSelectedRectypes;
+    let selectRecordScope, allSelectedRectypes,
+        iiifAnnotationRtyID = 0,
+        iiifThumbsAvailable = true,
+        progressSessionId = null,
+        progressWidgetActive = false,
+        progressOwnerAction = null,
+        progressWidgetContainer = null;
+
+    const progressStorageKey = 'heurist-recordAction-progress-' + window.hWin.HAPI4.database;
+    const progressThresholds = {
+        extract_pdf: 1,
+        url_to_file: 1,
+        local_to_repository: 1,
+        reset_thumbs: 10,
+        iiif_thumbs: 1,
+        translation: 10,
+        rectype_change: 50,
+        add_detail: 50,
+        replace_detail: 50,
+        delete_detail: 50,
+        case_conversion: 50,
+        nl2br: 50,
+        increment: 50
+    };
 
     let action_type = _action_type,
         init_scope_type = _scope_type,
@@ -62,7 +86,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     function _init(){
         
         //fill header with description
-        $('#div_header').html(window.hWin.HR('record_action_'+action_type));
+        $('#div_header').html(action_type === 'dms_to_decimal' ? '<h3>Convert DMS coordinates to decimal</h3><p>Replaces values in the selected latitude and longitude fields with decimal degrees. Invalid values are left unchanged and reported.</p>' : window.hWin.HR('record_action_'+action_type));
         
         let btn_start_action = $('#btn-ok').button({label:window.hWin.HR('Go')});
         
@@ -77,6 +101,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         _fillSelectRecordScope();
         
         $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).on('click', function(){window.close();});
+
+        $(window).on('beforeunload.recordAction', function(){
+            _stopProgressWidget();
+        });
+
+        window.setTimeout(_restoreProgressSession, 0);
     }
 
     //
@@ -97,7 +127,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), null, 'Retrieving available licenses...');
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+        window.hWin.HAPI4.RecordMgr.lookupService(request, (data) => {
 
             window.hWin.HEURIST4.msg.sendCoverallToBack();
 
@@ -191,14 +221,38 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         //$(selScope)
         selectRecordScope.val(inititally_selected);
         
-        _onRecordScopeChange();
-        
         if(action_type=='rectype_change'){
             $('#div_sel_rectype').show();
             _fillSelectRecordTypes();
-        }else if(action_type=='reset_thumbs'){
+        }else if(action_type=='reset_thumbs' || action_type=='iiif_thumbs'  || action_type=='increment'){
             $('#cb_add_tags').parent().hide();
         }
+        
+        if(action_type=='iiif_thumbs'){
+            $('#sel_record_scope').parent().hide();
+
+            iiifAnnotationRtyID = Number($Db.getLocalID('rty', '2-109'));
+            let currentRectypes = window.hWin.HAPI4.currentRecordset.getRectypes();
+            iiifThumbsAvailable = iiifAnnotationRtyID>0 && currentRectypes.includes(iiifAnnotationRtyID);
+
+            if(!iiifThumbsAvailable){
+                
+                $('#div_header').html($('#div_header').html()+'<br>'+
+                '<p style="color:red">The current result set does not contain IIIF Annotation records.</p>');
+            }
+
+            let $fieldset = $('#div_widget>fieldset');
+            $fieldset.empty();
+            
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+
+                + '<label><input id="cb_iiif_thumbs_missedonly" type="checkbox" name="cb_iiif_thumbs_missedonly" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Create thumbnails for missed only</label><br>'
+                
+            + '</div>').appendTo($fieldset);
+            
+        }
+        
+        _onRecordScopeChange();
     }
 
     //
@@ -206,8 +260,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     function _onRecordScopeChange() {
         
-        let isdisabled = (selectRecordScope.val()=='');
-        
+        let isdisabled = (selectRecordScope.val()==''
+            || (action_type=='iiif_thumbs' && !iiifThumbsAvailable));
+
+
         let ele = $('#btn-ok');
         ele.off('click');
         if(isdisabled){
@@ -226,6 +282,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             case 'case_conversion':
             case 'nl2br':
             case 'translation':
+            case 'dms_to_decimal':
+            case 'increment':
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
                 break;
@@ -308,12 +366,19 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 allowed = ['file'];    
             }else if(action_type=='case_conversion' || action_type=='translation'){
                 allowed = ['freetext','blocktext'];
+            }else if(action_type=='dms_to_decimal'){
+                allowed = ['freetext'];
+            }else if(action_type=='increment'){
+                allowed = ['freetext','integer','float'];
             }
 
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
         }
         
-        fieldSelect.onchange = _createInputElements;
+        fieldSelect.onchange = action_type === 'dms_to_decimal' ? function(){} : _createInputElements;
+        if(action_type === 'dms_to_decimal'){
+            $('#div_sel_fieldtype label').text('Latitude (Y):');
+        }
         _createInputElements();
     }
     
@@ -324,6 +389,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     function _createInputElements(){
 
         let $fieldset = $('#div_widget>fieldset');
+        if(action_type === 'dms_to_decimal'){
+            // Keep the existing tagging control alive while rebuilding the widget.
+            $('#cb_add_tags').parent().insertAfter($('#div_sel_fieldtype'));
+            $('#dms_longitude_row').remove();
+        }
         $fieldset.empty();
 
         if(action_type=='add_detail'){
@@ -368,7 +438,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _createInputElement('fld-1', window.hWin.HR('Value to find'));
             _createInputElement('fld-2', window.hWin.HR('Replace with'));
             
-        }else if(action_type=='delete_detail'){
+        }
+        else if(action_type=='delete_detail'){
             
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 +'<div class="header">'
@@ -421,6 +492,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             + '</div>').appendTo($fieldset);
 
             $('<div style="padding: 0.2em; width: 100%;display: none;" class="input">'
+                + '<div class="header" style="padding-right: 16px;"><label>Upload Status</label></div>'
+                + '<div id="nakala_status_container">'
+                + '<label style="display: block; margin: 1em 0px 0.5em;"><input name="nakala_status" value="pending" type="radio" checked="checked" />Private (viewable only by the uploader, will use the API key for Heurist)</label>'
+                + '<label style="display: block; margin-bottom: 1em;"><input name="nakala_status" value="published" type="radio" />Public (publishes and mints the file with Nakala)</label></div>'
+            + '</div>').appendTo($fieldset);
+
+            $('<div style="padding: 0.2em; width: 100%;display: none;" class="input">'
                 + '<div class="header" style="padding-right: 16px;"><label for="sel_license">License</label></div>'
                 + '<select id="sel_license" style="max-width:30em" data-init="0"></select>'
             + '</div>').appendTo($fieldset);
@@ -455,7 +533,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             let repo = $sel_repos.val();
                             if(repo.indexOf('nakala')===0 || repo.indexOf('nakala')===1){
                                 $('#sel_license').parent().show();
-                                _popuplateNakalaLicense();
+                                $('#nakala_status_container').parent().show();
+                                _popuplateNakalaLicense ();
                             }
                         });
                         
@@ -564,8 +643,44 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             window.hWin.HEURIST4.ui.createLanguageSelect($fieldset.find('#sel_language'), null, null, true);
 
             _check_field_repeat = true;
-        }
+            
+        }else if(action_type=='dms_to_decimal'){
+            $('<div id="dms_longitude_row" class="input" style="padding:0.2em;min-width:600px"><div class="header" style="padding:0 16px"><label for="dms_longitude">Longitude (X):</label></div><select id="dms_longitude" class="ui-widget-content ui-corner-all" style="max-width:30em"></select></div>').insertBefore($('#div_sel_fieldtype'));
+            $('#dms_longitude').html($('#sel_fieldtype').html()).val('');
+            $('#sel_fieldtype, #dms_longitude').prop('selectedIndex', -1);
+            $('<p id="dms_field_note" class="heurist-helper1">Only single line text fields are shown. Repeat values are supported</p>').appendTo($fieldset);
+            $('#cb_add_tags').parent().insertAfter($('#dms_field_note'));
+            $('<div class="dms-options" style="line-height:2;padding-right:30px;box-sizing:border-box;width:100%">'
+                + '<label><input type="radio" name="dms_method" value="quadrant" checked> Coordinates within a single quadrant (N or S of equator, E or W of Greenwich meridian)</label>'
+                + '<fieldset id="dms_quadrants" style="margin-left:24px;border:0"><legend style="display:none">Quadrant</legend>'
+                + ['NE','NW','SE','SW'].map(q => '<label style="margin-right:20px"><input type="radio" name="dms_quadrant" value="'+q+'" '+(q==='NE'?'checked':'')+'> '+q+'</label>').join('') + '</fieldset>'
+                + '<label><input type="radio" name="dms_method" value="indicators"> Coordinates use N/S/E/W indicators (local alternatives supported)</label>'
+                + '<fieldset id="dms_indicators" style="margin-left:24px;border:0"><legend style="display:none">Direction indicators</legend>Direction indicators: '
+                + [['north','N'],['south','S'],['east','E'],['west','W']].map(d => '<label style="margin-right:10px">'+d[0]+' <input id="dms_'+d[0]+'" value="'+d[1]+'" maxlength="1" style="width:2em"></label>').join('') + '</fieldset>'
+                + '<label><input type="radio" name="dms_method" value="sign"> Coordinates preceded by a minus sign are south of the equator or west of the meridian</label>'
+                + '<p>Example: latitude 0° 57\' 49.5&quot; S; longitude 101° 35\' 57&quot; E.<br>For Indonesian indicators, enter north U, south S, east T, west B.</p></div>').appendTo($fieldset);
+            const updateDmsOptions = function(){
+                const method = $('input[name="dms_method"]:checked').val();
+                $('#dms_quadrants').prop('disabled', method !== 'quadrant').css('opacity', method === 'quadrant' ? 1 : 0.45);
+                $('#dms_indicators').prop('disabled', method !== 'indicators').css('opacity', method === 'indicators' ? 1 : 0.45);
+            };
+            $('input[name="dms_method"]').on('change', updateDmsOptions);
+            updateDmsOptions();
+        }else if(action_type=='increment'){
 
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+
+                + '<label><input id="cb_increment_fillgaps" type="radio" name="increment_fillgaps" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Fill gaps in the sequence and then continue from the largest existing value</label><br>'
+                + '<label><input type="radio" name="increment_fillgaps" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Ignore gaps and continue from the largest existing value</label>'
+                + '<div style="padding: 0.2em; min-width: 600px;" class="input">'
+                + '<label for="increment_prefix">Default prefix (if a text field): </label> <input id="increment_prefix" style="max-width:30em"/>'
+                + '</div>'
+                + '<div style="padding: 0.2em; min-width: 600px;" class="input">'
+                + '<label for="increment_digits">Digits in numeric suffix (text fields only): </label> <input id="increment_digits" type="number" min="1" max="8" value="4" style="width:5em"/>'
+                + '</div>'
+            + '</div>').appendTo($fieldset);
+
+        }
     }
 
     //
@@ -712,6 +827,239 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
     }
 
+    function _getStoredProgress(){
+        try {
+            const value = window.hWin.localStorage.getItem(progressStorageKey);
+            return value ? JSON.parse(value) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function _storeProgress(data){
+        try {
+            window.hWin.localStorage.setItem(progressStorageKey, JSON.stringify(data));
+        } catch (e) {
+            // Progress still works for the current dialog even when storage is unavailable.
+        }
+    }
+
+    function _clearStoredProgress(){
+        try {
+            window.hWin.localStorage.removeItem(progressStorageKey);
+        } catch (e) {
+        }
+    }
+
+    function _stopProgressWidget(){
+        if(progressWidgetActive){
+            window.hWin.HEURIST4.msg.hideProgress(progressWidgetContainer);
+            progressWidgetActive = false;
+        }
+        if(progressWidgetContainer){
+            progressWidgetContainer.hide();
+        }
+    }
+
+    function _recordCount(request){
+        if(!request || !request.recIDs){
+            return 0;
+        }
+        if(request.recIDs === 'ALL'){
+            return Number.MAX_SAFE_INTEGER;
+        }
+        return String(request.recIDs).split(',').filter(Boolean).length;
+    }
+
+    function _needsProgress(request){
+        const threshold = progressThresholds[action_type] || 50;
+        return _recordCount(request) > threshold;
+    }
+
+    function _startProgressWidget(sessionId, ownerAction){
+        _stopProgressWidget();
+        progressSessionId = sessionId;
+        progressOwnerAction = ownerAction || action_type;
+        $('#div_parameters').hide();
+        $('#div_result').hide();
+        progressWidgetContainer = $('#div_progress').show();
+        window.hWin.HEURIST4.msg.showProgress({
+            container: progressWidgetContainer,
+            session_id: sessionId,
+            interval: 900,
+            persistentState: true,
+            onAbort: function(api){
+                const endpoint = api.options.endpoint;
+                window.hWin.HEURIST4.util.sendRequest(
+                    endpoint,
+                    {terminate:1, t:Date.now(), session:api.getSessionId()},
+                    null,
+                    function(){
+                        api.destroy();
+                    },
+                    'text'
+                );
+            },
+            onComplete: function(state){
+                progressWidgetActive = false;
+                if(progressWidgetContainer){
+                    progressWidgetContainer.hide();
+                }
+                if(state && state.status === 'completed' && state.result){
+                    if(progressOwnerAction === action_type){
+                        _displayActionResult(state.result);
+                        _clearStoredProgress();
+                    }
+                }else if(state && state.status === 'terminated'){
+                    _clearStoredProgress();
+                    window.hWin.HEURIST4.msg.showMsgFlash('The record batch action was terminated.', 3000);
+                }else if(state && state.status === 'error'){
+                    _clearStoredProgress();
+                    window.hWin.HEURIST4.msg.showMsgErr(state.error || 'The record batch action failed.');
+                }
+            }
+        });
+        progressWidgetActive = true;
+    }
+
+    function _restoreProgressSession(){
+        const stored = _getStoredProgress();
+        if(!stored || !stored.session_id){
+            return;
+        }
+
+        if(stored.action_type && stored.action_type !== action_type){
+            action_type = stored.action_type;
+            $('#div_header').html(window.hWin.HR('record_action_'+action_type));
+            _fillSelectRecordScope();
+
+            let actionLabel = window.hWin.HR('record_action_'+action_type);
+            window.hWin.HEURIST4.msg.showMsgFlash(
+                'The previous action &quot;'+actionLabel+'&quot; is in progress.',
+                2000
+            );
+        }
+
+        _startProgressWidget(stored.session_id, action_type);
+    }
+
+    function _displayActionResult(response){
+        $('#div_parameters').hide();
+        $('.ui-selectmenu-menu').remove();
+        $('#div_result').empty();
+
+        let sResult = '';
+        if(action_type==='reset_thumbs'){
+            sResult = '<div style="padding:4px">Thumbnail refresh diagnostics v7</div>'
+                + '<div style="padding:4px">Files matched: '+(response.filesmatched ?? 'unavailable: server action has not been updated')+'</div>'
+                + '<div style="padding:4px">PDF file references matched: '+(response.pdfmatched ?? 'unavailable')+'</div>'
+                + '<div style="padding:4px">PDF thumbnails rebuilt: '+(response.pdfrebuilt ?? 0)+'</div>'
+                + '<div style="padding:4px">Errors: '+(response.errors ?? 0)+'</div>';
+            if(response.filesmatched===0){
+                sResult += '<p>No file references were found for these editable records. No thumbnails were rebuilt.</p>';
+            }
+        }
+        if(action_type === 'dms_to_decimal'){
+            sResult += '<div style="padding:4px">Records already containing decimal values: '+(response.already_decimal ?? 0)+'</div>'
+                + '<div style="padding:4px">Records with no values: '+(response.no_values ?? 0)+'</div>'
+                + '<div style="padding:4px">Records with uninterpretable values: '+(response.uninterpretable_values ?? 0)+'</div>';
+        }
+        for(let key in response){
+            if(action_type === 'dms_to_decimal' && ['undefined','already_decimal','no_values','uninterpretable_values','csv_rows'].includes(key)){continue;}
+            if(action_type === 'dms_to_decimal' && key === 'errors'){
+                if(response.errors_list){
+                    sResult += '<div style="background-color:#ffcccc;padding:4px">';
+                    for(const id in response.errors_list){
+                        sResult += 'id:'+id+' : '+response.errors_list[id]+'<br>';
+                    }
+                    sResult += '</div>';
+                }
+                continue;
+            }
+            if(action_type==='reset_thumbs' && ['filesmatched','pdfmatched','pdfrebuilt'].includes(key)){ continue; }
+            if(key && key.indexOf('_')<0 && response[key]>0){
+                const lbl_key = 'record_action_'+key;
+                let lbl = window.hWin.HR(lbl_key);
+                if(lbl==lbl_key){
+                    lbl = window.hWin.HR(lbl_key+'_'+action_type);
+                }
+                if(action_type==='reset_thumbs' && key==='pdfrebuilt'){ lbl = 'PDF thumbnails rebuilt'; }
+                let tag_link = '';
+                if(response[key+'_tag']){
+                    tag_link = '<span><a href="'+
+                    encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +'&q=tag:"'+response[key+'_tag']+'"')+
+                    '" target="_blank">view</a></span>';
+                }else if(response[key+'_tag_error']){
+                    tag_link = '<span>'+response[key+'_tag_error']['message']+'</span>';
+                }else if(key=="processed"){
+                    if(action_type!='reset_thumbs'){
+                        tag_link = '<span><a href="'+
+                        encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                            +'&q=sortby:-m after:"5 minutes ago"')+
+                        '" target="_blank">view recent changes</a></span>';
+                    }
+                }else if(key=='fails' && response['fails_list'] && response['fails_list'].length>0){
+                    tag_link = '<span style="background-color:#ffcccc"><a href="'+
+                    encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +'&q=ids:'+response['fails_list'].join(','))+
+                    '" target="_blank">view</a></span>';
+                }else if(key == 'limited' && action_type == 'add_detail' && response[key] > 0){
+                    tag_link = `<span style="display: block; font-size: 0.9em; padding: 5px 5px;">
+                                    For single value fields which were skipped because they already have a value,<br>
+                                    use "Recode > Replace field value" to replace all, or selected, existing values with the new value.
+                                </span>`;
+                }
+
+                sResult += '<div style="padding:4px"><span>'+lbl+'</span><span>&nbsp;&nbsp;'
+                    +response[key]+'</span>'+tag_link+'</div>';
+
+                if(key=='errors' && response['errors_list']){
+                    const recids = Object.keys(response['errors_list']);
+                    if(recids && recids.length>0){
+                        sResult += '<div style="background-color:#ffcccc">';
+                        for(let key2 in response['errors_list']){
+                            let text = response['errors_list'][key2];
+                            if(Array.isArray(text)){
+                                text = text.join('<br>');
+                            }
+                            sResult += (key2+': '+ text + '<br>');
+                        }
+                        sResult += '</div>';
+                    }
+                }
+            }
+        }
+
+        // Show deployment help once, collapsed by default. Match the stable
+        // renderer exit marker, including older v3 responses. Keep help text
+        // static: renderer diagnostics must never be interpolated into it.
+        if(action_type==='reset_thumbs' && response.errors_list
+                && Object.values(response.errors_list).some(function(error){
+                    return /\bcode\s+127\b/i.test(Array.isArray(error) ? error.join(' ') : String(error));
+                })){
+            sResult += "<details class=\"pdf-thumbnail-admin-help\" style=\"margin-top:18px;max-width:780px\">\n<summary style=\"cursor:pointer;font-weight:bold\">Instructions for server administrator</summary>\n<div class=\"pdf-thumbnail-admin-help-body\" tabindex=\"0\" role=\"region\" aria-label=\"PDF thumbnail administrator instructions\" style=\"padding:8px 12px;line-height:1.5;overflow-wrap:anywhere;box-sizing:border-box\">\n<p>Ask your server administrator to install or repair a PDF renderer and make it available to the PHP process. Exit code 127 normally means that the command, a required delegate, interpreter or runtime dependency could not be found or started. A command may work over SSH but be unavailable to Apache or PHP-FPM because its PATH, permissions or execution environment differ.</p>\n<p><b>1. Recommended: install Poppler.</b> Heurist first tries <code>pdftoppm</code>, supplied by <code>poppler-utils</code>. This renders PDF pages without Ghostscript or ImageMagick PDF-policy changes. Install using the command appropriate to the server:</p>\n<pre style=\"white-space:pre-wrap\"># CentOS 7 / RHEL 7\nsudo yum install poppler-utils\n\n# Rocky Linux / AlmaLinux / current RHEL or Fedora\nsudo dnf install poppler-utils\n\n# Debian / Ubuntu\nsudo apt-get update\nsudo apt-get install poppler-utils\n\n# openSUSE\nsudo zypper install poppler-tools\n\n# Arch Linux\nsudo pacman -S poppler</pre>\n<p><b>CentOS 7: mirrorlist errors or HTTP 404.</b> CentOS 7 reached end of life on 30 June 2024. Its retired mirrors can prevent any package installation. Stop the failed yum command with Ctrl+C. The following commands use a separate temporary repository directory and the official Vault archive for this installation only; existing CentOS, EPEL and Remi repository configuration is not changed. Package signature verification remains enabled.</p>\n<pre style=\"white-space:pre-wrap\">pdf_repo_dir=$(mktemp -d /tmp/heurist-pdf-repos.XXXXXX)\ncat > \"$pdf_repo_dir/CentOS-Vault.repo\" <<'EOF'\n[pdf-vault-base]\nname=CentOS 7.9.2009 Vault Base\nbaseurl=https://vault.centos.org/7.9.2009/os/$basearch/\nenabled=1\ngpgcheck=1\ngpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7\n\n[pdf-vault-updates]\nname=CentOS 7.9.2009 Vault Updates\nbaseurl=https://vault.centos.org/7.9.2009/updates/$basearch/\nenabled=1\ngpgcheck=1\ngpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7\nEOF\nsudo yum --setopt=reposdir=\"$pdf_repo_dir\" --disableplugin=fastestmirror install poppler-utils\npdftoppm -v</pre>\n<p>Run these commands in the same shell. Check that <code>/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7</code> exists. If the command reports a missing key, obtain and verify the official CentOS signing key; do not bypass signature checks. If Vault itself cannot resolve or HTTPS fails, have the administrator check DNS, outbound access, proxy settings, the system clock and CA certificates. Do not disable TLS verification. After installation, test rendering as the PHP worker below. Vault contains archived packages with no new security fixes; plan migration to a supported OS.</p>\n<p><b>2. Check the actual PHP worker environment.</b> Find the executable and verify that it starts:</p>\n<pre style=\"white-space:pre-wrap\">command -v pdftoppm\n/usr/bin/pdftoppm -v\n\n# Example for an Apache/PHP worker running as apache:\nsudo -u apache /usr/bin/pdftoppm -f 1 -l 1 -singlefile -png -scale-to 200 /path/to/test.pdf /path/to/writable/test-thumbnail</pre>\n<p>Replace <code>apache</code> with the PHP-FPM pool user (often <code>apache</code> or <code>www-data</code>) and replace both example paths. The test creates <code>test-thumbnail.png</code>. The PHP worker must be able to read the PDF, traverse its folders and write the thumbnail folder. A sudo test checks Unix permissions but does not reproduce all PHP-FPM restrictions or SELinux confinement; also test through Heurist.</p>\n<p>Ensure the renderer directory, normally <code>/usr/bin</code>, is in the web PHP process PATH. For PHP-FPM, check the relevant pool's <code>env[PATH]</code> setting, chroot/container mounts and systemd service restrictions. Restart the affected service after configuration changes. Heurist requires <code>proc_open</code> to be callable in the web PHP configuration; check <code>disable_functions</code> and the PHP version (array-based process commands require PHP 7.4 or later). PHP CLI settings can differ from web PHP settings. Check missing shared libraries if an installed executable still will not start.</p>\n<p><b>3. Alternative: ImageMagick with Ghostscript.</b> If Poppler is unavailable, Heurist tries ImageMagick's <code>convert</code>. Install both the renderer and its PDF delegate:</p>\n<pre style=\"white-space:pre-wrap\"># CentOS 7 / RHEL 7\nsudo yum install ImageMagick ghostscript\n\n# Rocky Linux / AlmaLinux / current RHEL or Fedora\nsudo dnf install ImageMagick ghostscript\n\n# Debian / Ubuntu\nsudo apt-get install imagemagick ghostscript\n\n# Inspect availability, delegates and policies:\ncommand -v convert\ncommand -v gs\nconvert -version\ngs --version\nconvert -list delegate\nconvert -list policy\n\n# Render only the first page (quote the page selector):\nconvert -density 72 '/path/to/test.pdf[0]' -background white -alpha remove -alpha off -thumbnail 200x200 /path/to/writable/test-thumbnail.png</pre>\n<p>If ImageMagick 7 provides only <code>magick</code> and no <code>convert</code>, use Poppler for this Heurist version, or install the distribution's supported compatibility command. Do not simply rename the binary. Ghostscript must be executable in the PHP worker's environment as well as the administrator's shell.</p>\n<p><b>4. If ImageMagick reports a PDF security-policy denial.</b> This is a separate problem from exit 127. Use <code>convert -list policy</code> to locate the active policy.xml (commonly under <code>/etc/ImageMagick/</code>, <code>/etc/ImageMagick-6/</code> or <code>/etc/ImageMagick-7/</code>). Prefer Poppler so the PDF restriction can remain in place. If the administrator approves ImageMagick PDF reading, keep ImageMagick and Ghostscript patched and adjust only the relevant PDF coder rule to allow reading:</p>\n<pre style=\"white-space:pre-wrap\">&lt;policy domain=\"coder\" rights=\"read\" pattern=\"PDF\" /&gt;</pre>\n<p>Check for other matching PDF, grouped-coder or delegate restrictions; this single rule may not override every policy. Preserve unrelated restrictions and resource limits. Do not disable the whole security policy or enable all delegates. On CentOS 7, archived versions may lack current security fixes, making Poppler with a server upgrade the preferred route.</p>\n<p><b>5. If rendering still fails.</b> Inspect Apache/PHP-FPM logs and SELinux audit denials, filesystem permissions, available memory/disk space, and encrypted or damaged PDFs. Correct the specific permission or policy issue; do not disable SELinux or use world-writable folders. Re-run <b>Recode &gt; Refresh thumbnails</b> after the server correction. Existing thumbnails are retained when a rebuild fails.</p>\n<p>Reference: <a href=\"https://www.centos.org/centos-linux/\" target=\"_blank\" rel=\"noopener noreferrer\">CentOS lifecycle</a>; <a href=\"https://imagemagick.org/security-policy/\" target=\"_blank\" rel=\"noopener noreferrer\">ImageMagick security policy</a>.</p>\n</div></details>";
+        }
+
+        // The popup body has overflow:hidden, so the result must own its scroll.
+        // Keep one scrollbar for the entire report, including expanded help.
+        // Nested help/error containers must not have their own scroll bounds.
+        if(action_type === 'dms_to_decimal' && Array.isArray(response.csv_rows)){
+            const rows = [['H-ID','Original Longitude','Converted Longitude','Original Latitude','Converted Latitude'], ...response.csv_rows];
+            const csv = '\uFEFF'+rows.map(row => row.map(v => '"'+String(v ?? '').replace(/"/g, '""')+'"').join('\t')).join('\r\n')+'\r\n';
+            const url = URL.createObjectURL(new Blob([csv], {type:'text/tab-separated-values;charset=utf-8'}));
+            const previous = $('#div_result').data('dmsCsvUrl');
+            if(previous){URL.revokeObjectURL(previous);}
+            $('#div_result').data('dmsCsvUrl', url);
+            sResult += '<p><a href="'+url+'" download="DMS_original_and_converted_values.tsv"><i>Download TSV of original values plus converted values</i></a></p>';
+        }
+        $('#div_result').html(sResult).css({padding:'10px', overflowY:'auto',
+            overflowX:'hidden', maxHeight:'calc(100vh - 90px)', bottom:'3.5em',
+            boxSizing:'border-box'}).show();
+        $('#btn-ok').button('option','label',window.hWin.HR('New Action'));
+        $('#btn-cancel').button('option','label',window.hWin.HR('Close'));
+    }
+
     // 
     //  Main action 
     //
@@ -733,14 +1081,17 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         let request = { tag: $('#cb_add_tags').is(':checked')?1:0 };
 
-        if(action_type=='reset_thumbs'){
-           request['a'] = action_type; 
+        if(action_type=='reset_thumbs' || action_type=='iiif_thumbs'){
+           request['a'] = action_type;
+           if(action_type=='iiif_thumbs' && $('#cb_iiif_thumbs_missedonly').is(':checked')){
+               request['missedonly'] = 1;
+           }
         }else
         if(action_type!='rectype_change'){
 
             let dtyID = $('#sel_fieldtype').val();
             if(window.hWin.HEURIST4.util.isempty(dtyID) && action_type!='extract_pdf') {
-                alert('Field is not defined');
+                alert('You must select fields for both longitude and latitude');
                 return;
             }
 
@@ -822,6 +1173,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select a license', 3000);
                         return;
                     }
+                    request['status'] = $('[name="nakala_status"]:checked').val();
                 }
 
             }else if(action_type=='delete_detail'){
@@ -864,6 +1216,36 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         request['replace'] = 1;
                 }
                 
+            }else if(action_type=='dms_to_decimal'){
+                request.a = action_type;
+                request.longitudeID = $('#dms_longitude').val();
+                if(!request.longitudeID || request.longitudeID === dtyID){
+                    alert('Select two different latitude and longitude fields');
+                    return;
+                }
+                request.method = $('input[name="dms_method"]:checked').val();
+                request.quadrant = $('input[name="dms_quadrant"]:checked').val();
+                ['north','south','east','west'].forEach(d => {request[d] = $('#dms_'+d).val().trim().toUpperCase();});
+                if(request.method === 'indicators' && (['north','south','east','west'].some(d => !/^[A-Z]$/.test(request[d]))
+                        || new Set([request.north,request.south,request.east,request.west]).size !== 4)){
+                    alert('Enter four different direction letters');
+                    return;
+                }
+            }else if(action_type=='increment'){
+
+                request['a'] = action_type;
+
+                if($('#cb_increment_fillgaps').is(':checked')){
+                    request['fillgaps'] = 1;
+                }
+
+                const incrementPrefix = $('#increment_prefix').val();
+                if(incrementPrefix){
+                    request['prefix'] = incrementPrefix;
+                }
+
+                const incrementDigits = parseInt($('#increment_digits').val(), 10);
+                request['digits'] = incrementDigits>0 ? incrementDigits : 4;
             }
 
             if(_check_field_repeat && _check_field_repeatability()){
@@ -875,6 +1257,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         let scope_type = selectRecordScope.val();
         let scope;
 
+        if(action_type=='iiif_thumbs'){
+            scope_type = iiifAnnotationRtyID;
+        }
+        
         if(scope_type=="Selected" || scope_type=="Collected"){
             scope = scope_type == 'Selected' ? window.hWin.HAPI4.currentRecordsetSelection : window.hWin.HAPI4.currentRecordsetCollected;
         }else{
@@ -884,6 +1270,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }
         }
         request['recIDs'] = scope.join(',');
+
 
         if(action_type=='rectype_change'){
             
@@ -927,118 +1314,50 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     */
      function _startAction_continue(request)
      {   
+        if(_needsProgress(request)){
+            const stored = _getStoredProgress();
+            if(stored && stored.session_id){
+                _restoreProgressSession();
+                return;
+            }
 
-        // show hourglass/wait icon
-        $('body > div:not(.loading)').hide();
-        $('.loading').show();
+            progressSessionId = String(window.hWin.HEURIST4.util.random());
+            request.session = progressSessionId;
+            _storeProgress({
+                session_id: progressSessionId,
+                action_type: action_type,
+                started: Date.now()
+            });
+            _startProgressWidget(progressSessionId, action_type);
+        }else{
+            // show hourglass/wait icon
+            $('body > div:not(.loading)').hide();
+            $('.loading').show();
+        }
         
-       
+        $('#btn-ok').addClass('ui-state-disabled').off('click')
+
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
 
-            $('body > div:not(.loading)').show();
+            //$('body > div:not(.loading)').show();
             $('body > #ui-datepicker-div').hide();
             $('.loading').hide();
-            let  success = (response.status == window.hWin.ResponseStatus.OK);
+            $('#btn-ok').removeClass('ui-state-disabled').on('click',_startAction);
+            
+            let success = (response.status == window.hWin.ResponseStatus.OK);
             if(success){
-                $('#div_parameters').hide();
-                
-                /*
-                $('select').each(function(idx, item){
-                   if($(item).hSelect('instance')!==undefined) $(item).hSelect('destroy'); //destroy all hSelects 
-                });
-                */
-                $('.ui-selectmenu-menu').remove();
-
-                $('#div_result').empty();
-
-                response = response['data'];
- 
-                /*
-                *       passed - count of given rec ids
-                *       noaccess - no rights to edit
-                *       processed - success
-                _tag   _tag_error
-                *       undefined - value not found (no assosiated pdf files)
-                *       limited - skipped
-                *       errors     - sql error on search or updata
-                errors_list
-                */
-                let sResult = '';
-                for(let key in response){
-                    if(key && key.indexOf('_')<0 && response[key]>0){
-                        //main report entry
-                        const lbl_key = 'record_action_'+key;
-                        let lbl = window.hWin.HR(lbl_key);
-                        if(lbl==lbl_key){ //not translated
-                            //not found - try to find specified for particular action
-                            lbl = window.hWin.HR(lbl_key+'_'+action_type);
-                        }
-                        let tag_link = '';
-                        if(response[key+'_tag']){
-                            tag_link = '<span><a href="'+
-                            encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                +'&q=tag:"'+response[key+'_tag']+'"')+
-                            '" target="_blank">view</a></span>';
-                            
-                        }else if(response[key+'_tag_error']){
-                            tag_link = '<span>'+response[key+'_tag_error']['message']+'</span>';
-                            
-                        }else if(key=="processed"){
-                            
-                            if(action_type!='reset_thumbs'){
-                                tag_link = '<span><a href="'+
-                                encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                    +'&q=sortby:-m after:"5 minutes ago"')+
-                                '" target="_blank">view recent changes</a></span>';
-                            }
-                            
-                        }else if(key=='fails' && response['fails_list'] && response['fails_list'].length>0){
-
-                            tag_link = '<span style="background-color:#ffcccc"><a href="'+
-                            encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                +'&q=ids:'+response['fails_list'].join(','))+
-                            '" target="_blank">view</a></span>';
-                        }else if(key == 'limited' && action_type == 'add_detail' && response[key] > 0){
-                            tag_link = `<span style="display: block; font-size: 0.9em; padding: 5px 5px;">
-                                            For single value fields which were skipped because they already have a value,<br>
-                                            use "Recode > Replace field value" to replace all, or selected, existing values with the new value.
-                                        </span>`;
-                        }
-                        
-                        sResult = sResult + '<div style="padding:4px"><span>'+lbl+'</span><span>&nbsp;&nbsp;'
-                        +response[key]+'</span>'
-                        +tag_link+'</div>';
-                        
-                        if(key=='errors' && response['errors_list']){
-                            let recids = Object.keys(response['errors_list']);
-                            if(recids && recids.length>0){
-                                sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
-                                for(let key2 in response['errors_list']){
-                                    let text = response['errors_list'][key2];
-                                    if(Array.isArray(text)){
-                                        text = text.join('<br>');
-                                    }
-                                    sResult += (key2+': '+ text + '<br>');   
-                                }
-                                sResult += '</div>';   
-                            }
-                        }
-                        
-                        
-                        
-                    }
-                }
-
-                $('#div_result').html(sResult);
-                $('#div_result').css({padding:'10px'}).show();
-                $('#btn-ok').button('option','label',window.hWin.HR('New Action'));
-                $('#btn-cancel').button('option','label',window.hWin.HR('Close'));
-
+                _stopProgressWidget();
+                _clearStoredProgress();
+                _displayActionResult(response['data']);
             }else{
+                _stopProgressWidget();
+                _clearStoredProgress();
                 $('#div_result').hide();
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
         });
 
     }

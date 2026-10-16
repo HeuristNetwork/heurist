@@ -241,60 +241,41 @@ chmod +x /srv/scripts/sync_code_repo.sh
 
 ---
 
-## 6. Cronjob setup (log file + email notifications)
+## 6. Cronjob setup (log every run, email failures only)
 
-We want:
+The script now writes routine output directly to:
 
-- A log file on disk: `/var/log/heurist_sync.log`
-- Cron to email the output of each run (success or failure) to a chosen address
-
-> Note: For email delivery to work, the server must have a mail transfer agent (MTA) configured (e.g. `postfix`, `sendmail`, etc.).  
-
-If you really want to run the script as root via cron, you must tell Git (for root) that these directories are safe
-
-```bash
-git config --global --add safe.directory /var/www/html/HEURIST/h7-alpha-assoc
-git config --global --add safe.directory /var/www/html/HEURIST/h7-alpha-gpl
+```text
+/var/log/heurist_sync.log
 ```
 
-You can check later with:
+It produces output for cron only when the run fails. Therefore, with `MAILTO` set, cron sends email only for errors. The email contains a short failure heading and the last 30 lines of the failed run rather than the complete accumulated log.
+
+> Email delivery requires a configured mail transfer agent such as Postfix or Sendmail.
+
+If cron runs as root, mark the repository as safe for that user:
+
 ```bash
-git config --global --get-all safe.directory
+git config --global --add safe.directory /var/www/html/HEURIST/h7-alpha
 ```
 
 ### 6.1 Open crontab
-
-For the user that should run the sync (commonly `root`):
 
 ```bash
 crontab -e
 ```
 
-### 6.2 Set `MAILTO` and add the cron entry
-
-At the top of the file, set your email address:
+### 6.2 Set the recipient and hourly job
 
 ```cron
 MAILTO="you@example.com"
+00 * * * * /srv/scripts/sync_code_repo.sh
 ```
 
-Then add the cron job, e.g. to run daily at 03:00:
+Do **not** append `2>&1 | tee -a /var/log/heurist_sync.log`. The script already manages its log. Using `tee` would copy successful output to cron and cause an email after every run.
 
-```cron
-0 3 * * * /srv/scripts/sync_code_repo.sh 2>&1 | tee -a /var/log/heurist_sync.log
-```
+Behaviour:
 
-Explanation:
-
-- `0 3 * * *` → run at 03:00 every day  
-- `/srv/scripts/sync_code_repo.sh` → executes the synchronisation script  
-- `2>&1` → sends stderr into stdout  
-- `tee -a /var/log/heurist_sync.log`:
-  - appends all output to `/var/log/heurist_sync.log`  
-  - also passes it through to cron  
-- Because cron sees the output and `MAILTO` is set, it **emails the output** to `you@example.com` after each run.
-
-So you get:
-
-- A persistent log at `/var/log/heurist_sync.log`  
-- An email summary of each run (including errors, if any)
+- Successful run: details are appended to `/var/log/heurist_sync.log`; no email is sent.
+- Git, filesystem, permission, npm, or bundle-build error: details are appended to the log; cron emails a short report with the final 30 lines.
+- The script returns exit status `0` only after a completely successful run.

@@ -29,3 +29,4 @@ This directory contains the core functionalities and building blocks of the hcli
 -   `utils_msg.js`: Utilities for handling messages or notifications.
 -   `utils_query.js`: Utilities for building or handling queries.
 -   `utils_ui.js`: Utilities related to user interface elements or interactions.
+-   `utils_map.js`: Shared map symbology utilities and dynamic map-editor launchers.

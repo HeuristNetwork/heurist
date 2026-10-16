@@ -427,6 +427,10 @@ class BulkEmailSystem {
 
         foreach($db_list as $db){
 
+            if (!preg_match('/^[a-zA-Z0-9_-]+$/', $db)) {
+                continue; // Skip database names with invalid characters
+            }
+
             // Required tables  are 'Records', 'recDetails', 'sysUGrps', and 'sysUsrGrpLinks'
             $query = "SHOW TABLES IN {$db} WHERE Tables_in_{$db} = 'Records' OR Tables_in_{$db} = 'recDetails' OR Tables_in_{$db} = 'sysUGrps' OR Tables_in_{$db} = 'sysUsrGrpLinks'";
 

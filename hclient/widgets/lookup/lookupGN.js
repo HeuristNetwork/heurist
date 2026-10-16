@@ -65,6 +65,8 @@ $.widget("heurist.lookupGN", $.heurist.lookupGeonames, {
      */
     _rendererResultList: function(recordset, record){
         
+        let that = this;
+
         /**
          * Inner helper function to format a field's value for display.
          * It HTML escapes the value and wraps it in a div with a specified width for truncation.
@@ -75,7 +77,7 @@ $.widget("heurist.lookupGN", $.heurist.lookupGeonames, {
          */
         function fld(fldname, width){
             let s = recordset.fld(record, fldname);
-            s = window.hWin.HEURIST4.util.htmlEscape(s || '');
+            s = that.$H.htmlEscape(s || '');
             let title = s;
 
             if(fldname == 'geoname_link'){
@@ -120,24 +122,24 @@ $.widget("heurist.lookupGN", $.heurist.lookupGeonames, {
      */
     _doSearch: function(){
         
-        if(this.element.find('#inpt_query').val()=='' && this.element.find('#inpt_id').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a geoname id or a search term to perform a search', 1000);
+        if(this._$('#inpt_query').val()=='' && this._$('#inpt_id').val()==''){
+            this.$Hmsg.showMsgFlash('Please enter a geoname id or a search term to perform a search', 1000);
             return;
         }
 
         let URL = 'http'+'://api.geonames.org/'; // Base GeoNames API URL
-        let is_id_lookup = !window.hWin.HEURIST4.util.isempty(this.element.find('#inpt_id').val());
+        let is_id_lookup = !this.$H.isempty(this._$('#inpt_id').val());
         let params = {}; // Parameters for the GeoNames API call
         let base_request = {}; // Parameters for the Heurist HAPI proxy call (_super)
 
         if(is_id_lookup){ // If GeoNames ID is provided
             URL += 'get?'; // Use the 'get' endpoint (returns XML)
-            params['geonameId'] = this.element.find('#inpt_id').val();
+            params['geonameId'] = this._$('#inpt_id').val();
             base_request['is_XML'] = true; // Signal to Heurist proxy that response is XML
         }else{ // General search
             URL += 'searchJSON?'; // Use the 'searchJSON' endpoint
-            params['q'] = this.element.find('#inpt_query').val();
-            params['country'] = this._getCountryCode(this.element.find('#inpt_country').val()); // Get standardized country code
+            params['q'] = this._$('#inpt_query').val();
+            params['country'] = this._getCountryCode(this._$('#inpt_country').val()); // Get standardized country code
         }
 
         this.baseURL = URL; // Set the specific endpoint URL (parent might use this or it might be overridden)
@@ -177,7 +179,7 @@ $.widget("heurist.lookupGN", $.heurist.lookupGeonames, {
      */
     _onSearchResult: function(json_data){
 
-        json_data = window.hWin.HEURIST4.util.isJSON(json_data); // Ensure json_data is a JS object
+        json_data = this.$H.isJSON(json_data); // Ensure json_data is a JS object
 
         if(!json_data){ // If parsing failed or data is empty
             this._super(false); // Clear results via parent

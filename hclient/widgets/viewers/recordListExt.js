@@ -77,7 +77,7 @@ $.widget( "heurist.recordListExt", {
 
         //display range for current result set - all, page or selection
         is_single_selection: false, //work with the only record - reloads content on every selection event
-        is_multi_selection: false, //work with all selectd records
+        is_multi_selection: false, //work with all selected records
         show_page: false, //work with current page only
         show_all: true,
         
@@ -301,53 +301,7 @@ $.widget( "heurist.recordListExt", {
             this.export_button[0].style.setProperty('color', '#FFF', 'important');
 
             this._on(this.export_button, {
-                click: function(){
-
-                    if(!this.options.recordset || this.options.recordset.length() == 0){
-                        window.hWin.HEURIST4.msg.showMsgFlash('No records to export...', 3000);
-                        return;
-                    }
-
-                    // Set current query and current recordset
-                    if(!this._query_request && this.options.selection && this.options.selection.length > 0){
-                        window.hWin.HEURIST4.current_query_request = {
-                            q: `[{"ids":"${this.options.selection.join(',')}"}]`,
-                            w: 'a',
-                            db: window.hWin.HAPI4.database,
-                            search_realm: this.options.search_realm
-                        };
-                    }else{
-                        window.hWin.HEURIST4.current_query_request = this._query_request;
-                    }
-
-                    if(this.options.selection && this.options.selection.length > 0){ // filter complete subset by selected records
-
-                        let records = this.options.recordset.getSubSetByIds(this.options.selection);
-                        window.hWin.HAPI4.currentRecordset = records;
-                    }else{
-                        window.hWin.HAPI4.currentRecordset = this.options.recordset;
-                    }
-
-                    // open export menu in dialog/popup
-                    let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
-                    
-                    if(typeof this.options.export_options !== 'string'){
-                        this.options.export_options = 'all';
-                    }
-
-                    let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
-                    if(handle_formats){
-                        url += `&output=${this.options.export_options}`
-                    }
-
-                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
-                        onpopupload: function(){
-                            if(handle_formats){
-                                $('#export_record_popup').dialog('widget').hide();
-                            }
-                        }
-                    });
-                }
+                click: this._exportRecords
             });
 
         }
@@ -372,9 +326,15 @@ $.widget( "heurist.recordListExt", {
                 if(!that._isSameRealm(data)) return;
                 
                 that.options.recordset = data.recordset; //HRecordSet
+                let ignoreSelectionSetting = false;
 
-                if(that.options.show_all){
-                    that._run_initial = true;
+                if(that.options.is_multi_selection && Object.hasOwn(data, 'showing_collection')){
+                    that.options.selection = data.showing_collection && that.options.recordset && that.options.recordset.length() > 0 ? data.recordset.getIds() : null;
+                    ignoreSelectionSetting = true;
+                }
+
+                if(that.options.show_all || ignoreSelectionSetting){
+                    that._run_initial = !ignoreSelectionSetting;
 
                     that._refresh();
                 }
@@ -411,7 +371,7 @@ $.widget( "heurist.recordListExt", {
                         that.options.selection = sel;
                        
                     }
-             
+
                     let smarty_template = window.hWin.HAPI4.get_prefs_def('main_recview', 'default'); // default = standard record viewer
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(that.options.selection) && that.options['url'] 
                         && that.options['url'].indexOf('renderRecordData') != -1 && smarty_template != 'default'){
@@ -462,8 +422,6 @@ $.widget( "heurist.recordListExt", {
            
         });
 
-       
-
         this.element.on("myOnShowEvent", function(event){
             if( event.target.id == that.element.attr('id')){
                 that._refresh();
@@ -475,20 +433,18 @@ $.widget( "heurist.recordListExt", {
                 that.onLoadComplete();
             });
         }
-        
-        if(this.options.search_initial){
-            this.doSearch( this.options.search_initial );
-            this.options.search_initial = null;
-        }        
 
         this.placeholder_ele = $('<div>')
                 .css({'white-space': 'pre-wrap', 'padding-top': '20px'})
                 .prependTo(this.element)
-                .html(this.options.empty_remark);
+                .html(this.options.empty_remark)
+                .hide();
 
-        // Force single selection for normal record viewer
-        if(!window.hWin.HEURIST4.util.isempty(this.options.url) && this.options.url.indexOf('renderRecordData.php') != -1){
-            this.options.is_single_selection = true;
+        if(this.options.search_initial){
+            this.doSearch( this.options.search_initial );
+            this.options.search_initial = null;
+        }else{
+            this.placeholder_ele.show();
         }
 
     }, //end _create
@@ -800,14 +756,16 @@ $.widget( "heurist.recordListExt", {
                 if(recIDs_list.length>0){
                     
                     let recID = recIDs_list;
+                    let mainRecID = recIDs_list[0];
                     if(!show_all){
                         recID = this.options.is_single_selection ? recIDs_list[recIDs_list.length-1] : recIDs_list.join(',');
                     }
-                    
+
                     newurl = this.options.url;
                     
-                    if(newurl.indexOf('[recID]')>0){
-                        newurl = newurl.replace("[recID]", recID);
+                    if(newurl.indexOf('[recID]') > 0){
+                        newurl = newurl.replace("[recID]", recIDs_list[0]);
+                        newurl += this.options.is_multi_selection && recIDs_list.length > 1 ? `&ids=${recIDs_list.join(',')}` : '';
                     }else{
                         newurl = newurl.replace("[query]", ('q=ids:'+recID));
                     }
@@ -825,13 +783,16 @@ $.widget( "heurist.recordListExt", {
                     }
                     
                     if(this.options.record_with_custom_styles){
-                        newurl = newurl + '&cssid=' + this.options.record_with_custom_styles;
+                        newurl += `&cssid=${this.options.record_with_custom_styles}`;
                     }
                     if(this.options.fontsize>0){
-                        newurl = newurl + '&fontsize=' + this.options.fontsize;
+                        newurl += `&fontsize=${this.options.fontsize}`;
                     }
                     if(this.options.useRelmarkerTitle != 0){
                         newurl += `&useRelmarkerTitle=1`;
+                    }
+                    if(this._is_publication){
+                        newurl += '&publish=1';
                     }
                 }
             }
@@ -1108,6 +1069,76 @@ $.widget( "heurist.recordListExt", {
 
         crosstabs.assignRecordset(recordset);
 
+    },
+
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Allows the user to export the current record set.
+     */
+    _exportRecords: function(){
+
+        if(this._retrievingMissingScripts){
+            return;
+        }
+
+        if(!this.options.recordset || this.options.recordset.length() == 0){
+            window.hWin.HEURIST4.msg.showMsgFlash('No records to export...', 3000);
+            return;
+        }
+
+        if(typeof $.heurist?.recordAction !== 'function'){
+
+            this._retrievingMissingScripts = true;
+
+            $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/record/recordAction.js`).then(() => {
+                this._retrievingMissingScripts = false;
+                this._exportRecords();
+            });
+
+            return;
+        }
+
+        // Set current query and current recordset
+        if(!this._query_request && this.options.selection && this.options.selection.length > 0){
+            window.hWin.HEURIST4.current_query_request = {
+                q: `[{"ids":"${this.options.selection.join(',')}"}]`,
+                w: 'a',
+                db: window.hWin.HAPI4.database,
+                search_realm: this.options.search_realm
+            };
+        }else{
+            window.hWin.HEURIST4.current_query_request = this._query_request;
+        }
+
+        if(this.options.selection && this.options.selection.length > 0){ // filter complete subset by selected records
+
+            let records = this.options.recordset.getSubSetByIds(this.options.selection);
+            window.hWin.HAPI4.currentRecordset = records;
+        }else{
+            window.hWin.HAPI4.currentRecordset = this.options.recordset;
+        }
+
+        // open export menu in dialog/popup
+        let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
+        
+        if(typeof this.options.export_options !== 'string'){
+            this.options.export_options = 'all';
+        }
+
+        let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
+        if(handle_formats){
+            url += `&output=${this.options.export_options}`
+        }
+
+        window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
+            onpopupload: function(){
+                if(handle_formats){
+                    $('#export_record_popup').dialog('widget').hide();
+                }
+            }
+        });
     }
     
 

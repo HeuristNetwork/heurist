@@ -125,8 +125,8 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
     _initControls: function(){
 
         // Example: Apply specific styling or positioning to elements within this lookup's HTML
-        this.element.find('#search_container > div > div > .header.recommended').css({width:'100px', 'min-width':'100px', display: 'inline-block'});
-        this.element.find('#btn_container').position({my: 'left top', at: 'right top', of: '#search_container'});              
+        this._$('#search_container > div > div > .header.recommended').css({width:'100px', 'min-width':'100px', display: 'inline-block'});
+        this._$('#btn_container').position({my: 'left top', at: 'right top', of: '#search_container'});              
 
         // Note: If your HTML includes an element with id 'div_result', the parent _initControls
         // will initialize a resultList widget on it using this.options.resultList.
@@ -320,12 +320,12 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
      */
     doAction: function(){
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
 
         let [recset, record] = this._getSelection(true); // Get the first selected record
 
         if(!record){ // No record selected or error in _getSelection
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            this.$Hmsg.sendCoverallToBack();
             return;
         }
 
@@ -471,7 +471,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
      * Example `_doSearch` method.
      * This method should construct the appropriate URL and parameters for the external service API
      * and then call `this._super(params, request_options)` to execute the search via the
-     * Heurist proxy (`HAPI4.RecordMgr.lookup_external_service`).
+     * Heurist proxy (`HAPI4.RecordMgr.lookupService`).
      *
      * - `this.baseURL` should be set to the base API endpoint for the service.
      * - `params` should be an object of query parameters for the API.
@@ -500,7 +500,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
         };
 
         // Get search term from UI
-        let query_term = this.element.find('#inpt_any').val();
+        let query_term = this._$('#inpt_any').val();
         if(this.$H.isempty(query_term)){
             this.$Hmsg.showMsgFlash('Please enter a value in the search field...', 1000);
             return;
@@ -522,7 +522,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
     
     /**
      * Example `_onSearchResult` method.
-     * This method is the callback for the `lookup_external_service` HAPI call made by `_doSearch`.
+     * This method is the callback for the `lookupService` HAPI call made by `_doSearch`.
      * It processes the response from the Heurist proxy (which contains data from the external service).
      *
      * - Parse `json_data` (the response from the proxy).
@@ -590,7 +590,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
         }
 
         // Example: Handle pagination info from service if available
-        let maxRecords = this.element.find('#rec_limit').val() || 20; // Get from UI or default
+        let maxRecords = this._$('#rec_limit').val() || 20; // Get from UI or default
         if (json_data.numberOfRecords && json_data.numberOfRecords > maxRecords && res_orders.length == maxRecords) {
             this.$Hmsg.showMsgDlg(
                 `There are ${json_data.numberOfRecords} records satisfying these criteria, only the first ${maxRecords} are shown.<br>Please narrow your search.`

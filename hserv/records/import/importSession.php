@@ -73,23 +73,30 @@ public static function load($import_id){
 
     self::initialize();
 
-    if($import_id && is_numeric($import_id)){
-
-        $res = mysql__select_row(self::$mysqli,
-            "select sif_ProcessingInfo , sif_TempDataTable from sysImportFiles where sif_ID=".intval($import_id));
-
-        $session = json_decode($res[0], true);
-        $session["import_id"] = $import_id;
-        $session["import_file"] = $res[1];
-        if(!@$session["import_table"]){ //backward capability
-            $session["import_table"] = $res[1];
-        }
-
-        return $session;
-    }else{
+    if(!$import_id || !is_numeric($import_id)){
         self::$system->addError(HEURIST_NOT_FOUND, 'Import session #'.$import_id.' not found');
         return false;
     }
+
+    $res = mysql__select_row(self::$mysqli,
+        "select sif_ProcessingInfo , sif_TempDataTable from sysImportFiles where sif_ID=".intval($import_id));
+
+    $session = json_decode($res[0], true);
+    if(!$session || json_last_error() !== JSON_ERROR_NONE){
+        self::$system->addError(HEURIST_ERROR, 'Import details are not in JSON format, for import #' . $import_id);
+        return false;
+    }
+    $session["import_id"] = $import_id;
+    $session["import_file"] = $res[1];
+    if(!@$session["import_table"]){ //backward capability
+        $session["import_table"] = $res[1];
+    }
+
+    if(!@$session['column_counts'] && @$session['uniqcnt']){
+        self::_getColumnCounts($session);
+    }
+
+    return $session;
 }
 
 /**
@@ -342,7 +349,34 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
     return $res;
 }
 
+    private static function _getColumnCounts(array &$session){
 
+        $mysqli = self::$mysqli;
+
+        if(!array_key_exists('import_table', $session)){
+            return;
+        }
+
+        $importTable = $session['import_table'];
+        $numberOfColumns = mysql__select_value($mysqli, "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{$importTable}' AND COLUMN_NAME != 'imp_ID'");
+
+        $selectString = '';
+        for($i = 0; $i < $numberOfColumns; $i++){
+            $selectString .= "COUNT(field_{$i}),";
+        }
+        $selectString = substr($selectString, 0, -1);
+
+        $query = "SELECT {$selectString} FROM {$importTable}";
+
+        $results = mysql__select_row($mysqli, $query);
+        if(!$results){
+            return;
+        }
+
+        $session['column_counts'][] = $results;
+
+        self::save($session);
+    }
 
 } //end class
 ?>

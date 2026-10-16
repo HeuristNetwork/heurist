@@ -115,7 +115,7 @@ class EditorCodeMirror {
     /**
      * Dynamically loads the CodeMirror library and required mode scripts.
      * This method is called by `showEditor` if CodeMirror is not yet available globally.
-     * It uses `$.getMultiScripts2` (expected to be a utility function provided by the environment,
+     * It uses `$.getMultiScriptsSequental` (expected to be a utility function provided by the environment,
      * likely from `hWin.HEURIST4` or similar) for loading scripts from a path derived from `hWin.HAPI4.baseURL`.
      * On successful load, it calls `this.showEditor()` again to proceed with editor initialization.
      * On failure, it displays an error message using `hWin.HEURIST4.msg.showMsg_ScriptFail()`.
@@ -133,15 +133,18 @@ class EditorCodeMirror {
                         'mode/xml/xml.js',        // Dependency for htmlmixed
                         'mode/htmlmixed/htmlmixed.js' // Default mode
                         ];
+        $.getStyles(`${path}lib/codemirror.css`);
+        
         let that = this;
-        // See getMultiScripts2 in utils.js
-        $.getMultiScripts2(scripts, path)
+        // See getMultiScriptsSequental in utils.js
+        $.getMultiScriptsSequental(scripts, path)
         .then(function() {  //OK! widget script js has been loaded
             that.showEditor(); // Retry showing editor now that scripts are loaded
         }).catch(function() {
             window.hWin.HEURIST4.msg.showMsg_ScriptFail(); // Show generic script failure message.
         });
     }
+    
     
     /**
      * Hides the CodeMirror editor container if it has been initialized and is visible.

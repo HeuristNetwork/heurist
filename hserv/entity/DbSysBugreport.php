@@ -50,23 +50,28 @@ class DbSysBugreport extends DbEntityBase
 
     /** @var string Email template for ticket/bug report notifications. Placeholders like __LINK__, __DESC__ are replaced. */
     private $reportEmail = <<<EMAIL
-    Your ticket has been added to, or updated in, the Heurist Job tracker database. 
+    Your ticket has been recorded in the Heurist Job tracker database. 
+    <br>Your feedback is very much appreciated, it helps us improve Heurist for everyone. 
+    <br>We review tickets rapidly, and fix issues as quickly as ressources permit.
     <br>
+    <hr>
+    <b>__TITLE__</b>
     <br>
-    Description:__DESC__
+    __DESC__
  
     <hr>
-    
-    You can test in the hx-alpha version which is updated nightly (it may therefore not be updated until tomorrow). 
+    <br>
+    View your ticket at: <a href="__LINK__">__LINK__</a>  (For developers: <a href="__EDIT__">Edit</a>)
+    <br>
+    <br>
+    For current and resolved tickets: <a href="__DB_JOBTRAK__/web/64/1526">__DB_JOBTRAK__</a><br><br>
+    <br>
+    <br>    
+    You can test in the hx-alpha version which is updated nightly (CET). 
     <br>The standard /heurist/ version is updated infrequently (our target is monthly).
-    <br>If you are not running the alpha version, replace /heurist/ in the URL with /hx-alpha/ where x is the version required (7 as of 2026).
+    <br>If you are not running the alpha version, replace /heurist/ in the URL  
+    <br>with /hx-alpha/ where x is the version required (7 as of 2026).
     <br>
-    <br>
-    You can view your ticket at: <a href="__LINK__">__LINK__</a><br><br>
-
-    Heurist development team only: <a href="__EDIT__">Edit</a><br><br>
-    
-    For current and resolved tickets see: <a href="__DB_JOBTRAK__/web/64/1526">__DB_JOBTRAK__</a><br><br>
     <br>
     Reporter: __NAME__ [__EMAIL__]<br>
     Database: __DBLINK__<br>
@@ -403,12 +408,26 @@ class DbSysBugreport extends DbEntityBase
             // loadRemoteURLContentWithRange() fetches the JSON response (with timeout 60s).
             $url = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php?' . http_build_query($params);
 
+            global $glb_curl_code, $glb_curl_error;
             $res = loadRemoteURLContentWithRange($url, null, true, 60);
 
-            $json = json_decode($res, true);
-            $res = json_last_error() === JSON_ERROR_NONE
-                    ? $json
-                    : ['status' => HEURIST_UNKNOWN_ERROR, 'message' => 'An unknown response was returned from the main Heurist server.<br>Please, ' . CONTACT_HEURIST_TEAM . ' directly'];
+            if($res === false){
+                $status = in_array($glb_curl_code, [
+                    HEURIST_INVALID_REQUEST,
+                    HEURIST_SYSTEM_FATAL,
+                    HEURIST_NETWORK_ERROR
+                ], true) ? $glb_curl_code : HEURIST_NETWORK_ERROR;
+
+                $message = !empty($glb_curl_error)
+                    ? 'Unable to contact the main Heurist server: ' . $glb_curl_error
+                    : 'Unable to contact the main Heurist server.';
+                $res = ['status' => $status, 'message' => $message . '<br>Please, ' . CONTACT_HEURIST_TEAM . ' directly'];
+            }else{
+                $json = json_decode($res, true);
+                $res = json_last_error() === JSON_ERROR_NONE
+                        ? $json
+                        : ['status' => HEURIST_ERROR, 'message' => 'An invalid response was returned from the main Heurist server.<br>Please, ' . CONTACT_HEURIST_TEAM . ' directly'];
+            }
         }
 
         // If we auto-logged-in as 'extern' earlier, we now logout to avoid persisting that session.
@@ -443,9 +462,9 @@ class DbSysBugreport extends DbEntityBase
                 }
 
                 // Compose HTML email by replacing placeholders in the $reportEmail template.
-                $truncatedDesc = mb_substr($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 100) . '...';
-                $res = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
-                    [$report_link, $truncatedDesc, $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
+                $truncatedDesc = mb_substr($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 250) . '...';
+                $res = str_replace(['__LINK__', '__TITLE__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
+                    [$report_link, $record['bug_Title'], $truncatedDesc, $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
                     $this->reportEmail);
 
             }elseif(\is_array($res)){
@@ -466,8 +485,8 @@ class DbSysBugreport extends DbEntityBase
         }else{
 
             // Generic failure path: if no email was sent, surface an error encouraging direct contact.
-            $error_msg = 'An unknown error has prevented Heurist from creating the ticket.<br>If you do not receive an email confirming the ticket, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
-            $email_already_sent || $this->system->addError(HEURIST_UNKNOWN_ERROR, $error_msg);
+            $error_msg = 'Failed to process bug report request.<br>If you do not receive an email confirming the ticket, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
+            $email_already_sent || $this->system->addError(HEURIST_ERROR, $error_msg);
             return false;
         }
     }
@@ -601,13 +620,13 @@ class DbSysBugreport extends DbEntityBase
         // Post-save: force AddedBy (extern) and Owner group to a known admin group (hardcoded as 2).
         mysql__insertupdate($mysqli, 'Records', 'rec', ['rec_ID' => $res, 'rec_AddedByUGrpID' => $uid, 'rec_OwnerUGrpID' => self::DB_ADMIN_ID]);
 
-        $title = $record['details'][self::DTY_FIELD_MAPPING['bug_Title']];
-        recordUpdateTitle($report_system, $res, $record['RecTypeID'], "Heurist ticket: {$title}");
+        $bugTitle = $record['details'][self::DTY_FIELD_MAPPING['bug_Title']];
+        recordUpdateTitle($report_system, $res, $record['RecTypeID'], "Heurist ticket: {$bugTitle}");
 
         // If we have a reporter email (detail 956), send confirmation email (To: reporter, BCC: tracker admins).
         if(!empty($record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Email']])){
 
-            $title = "H#$res: {$title}";
+            $title = "H#$res: {$bugTitle}";
 
             $report_link = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$res";
             $report_edit = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$res";
@@ -624,9 +643,9 @@ class DbSysBugreport extends DbEntityBase
                 $memberString = '';
             }
 
-            $truncateDesc = mb_substr($record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 100) . '...';
-            $msg = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
-             [$report_link, $truncateDesc, $user_name, $user_email, $db_link, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
+            $truncateDesc = mb_substr($record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 250) . '...';
+            $msg = str_replace(['__LINK__', '__TITLE__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
+             [$report_link, $bugTitle, $truncateDesc, $user_name, $user_email, $db_link, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
               $this->reportEmail);
 
             $user_query = "SELECT ugr_eMail FROM sysUsrGrpLinks LEFT JOIN sysUGrps ON ugr_ID = ugl_UserID WHERE ugl_GroupID = 1 AND ugl_Role='admin'";
@@ -835,19 +854,12 @@ class DbSysBugreport extends DbEntityBase
         // CAPTCHA validation relies on $_SESSION['captcha_code'] being set by the form generator.
         // ChatGPT:ToDo Consider rate-limiting / throttling in addition to CAPTCHA to reduce abuse.
         //1. verify captcha
-        if (@$fields['captcha'] && @$_SESSION["captcha_code"]){
+        if (!empty($fields['captcha'])) {
 
-            $is_InValid = (@$_SESSION["captcha_code"] != @$fields['captcha']);
-
-            if (@$_SESSION["captcha_code"]){
-                unset($_SESSION["captcha_code"]);
-            }
-
-            if($is_InValid) {
-                $this->system->addError(HEURIST_ACTION_BLOCKED,
-                   'Are you a bot? Please enter the correct answer to the challenge question');
+            if (!$this->system->captcha()->consumeCaptcha($fields['captcha'] ?? null)) {
                 return false;
             }
+            
         }else {
             $this->system->addError(HEURIST_ACTION_BLOCKED,
                     'Captcha is not defined. Please provide correct value');

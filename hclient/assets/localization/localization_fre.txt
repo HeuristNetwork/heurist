@@ -293,6 +293,8 @@
 #menu-manage-structure-assql-hint#Liste les types d'enregistrements et les définitions de champs dans un format SQL plein texte (non maintenu depuis 2014)
 #Upload Files#
 #menu-import-csv#Données tabulaires / CSV
+#menu-import-verify-csv#Vérifier la base par rapport à un CSV/TSV
+#menu-import-verify-csv-hint#Comparer un fichier source délimité aux notices correspondantes sans modifier la base
 #menu-import-zotero#Synchronisation Zotero
 #menu-import-xml#XML Heurist (HML) / JSon
 #menu-import-kml#KML
@@ -307,7 +309,7 @@
 #menu-files-index#Indexer les médias
 #menu-files-upload-hint#Téléchargement de plusieurs fichiers et/ou de fichiers volumineux dans l'espace de stockage ou les répertoires d'images, suppression et renommage des fichiers téléchargés
 #menu-files-index-hint#Indexe les fichiers médias sur le server et crée des enregistrements spécifiques pour chacin (reads and creates FieldHelper manifests)
-#Upload media from URLs#Télecharger depuis URLs
+#Upload files from URLs#Télecharger depuis URLs
 #Website#Site web
 #menu-cms-create#Créer
 #menu-cms-edit#Éditer
@@ -341,7 +343,7 @@
 #menu-export-kml-hint#Générer un fichier KML d'après les résultats (requête/filtre en cours + requête étendue)
 #menu-export-gephi-hint#Générer un fichier GEPHI d'après les résultats (requête/filtre en cours + requête étendue)
 #menu-export-iiif-hnt#Générer un manifeste IIIF d'après les résultats
-#Please see the Export tab on the right under Explore#Voir l'onglet Export (à droite sur le menu Explorer)
+#See the Export tab in the Explore menu#Voir l'onglet Export (à droite sur le menu Explorer)
 #Safeguard#Sauvegarde
 #menu-profile-tags#Gérer les tags
 #menu-profile-reminders#Gérer les rappels
@@ -468,8 +470,7 @@
 #resultList_reorder_list_changed#La liste de réorganisation a été modifiée.
 #Warn_Lost_Data#Vous avez fait des modifications dans les données. Cliquez sur "Sauvegarder", autrement tous vos changements seront perdus.
 #Warn_Lost_Data_On_Structure_Edit#Cliquer sur "Sauvegarder les données" pour enregsitrer les mofications ou "Annuler les modifications".<br>Les changements de structure sont enregistrés automatiquement - ils ne sont pas affectés par ce choix.
-#manageDefRectypes_edit_fields#Editer les champs
-#manageDefRectypes_edit_fields_hint#Cela ouvrira un enregistrement vierge en mode "modification de structure".<br>Astuce  : vous pouvez activer le mode "modification de structure" à tout moment pendant la saisie des données pour effectuer des changements structurels.
+
 #manageDefRectypes_new_hint#Avant de définir de nouveaux types d'enregistrements (entités), nous vous suggérons de regarder du coté. des structures proposées par les modèles (bases de données Heurist publiées dans le catalogue dédié). Les bases de données possédant un ID inférieur à 1000 proposent des modèles réalisés par l'équipe Heurist. <br><br>Ceci est tout particulièrement important pour les enregistrements de type "BIBLIOGRAPHIC" - les structures du modèle #6 ("Bibliographic definitions") sont normalisées et optimisées pour assurer une compatibilité maximale avec des fonctions telles que la synchronisation avec Zotero, mais aussi le format Harvard ou encore entre entre bases de données.<br><br>Utilisez le menu principal : Conception > Parcourir les modèles
 #manageDefRectypes_delete_stop#<p>Le type d'enregistrement <b>[rtyName]</b> est utilisé par les champs suivants :</p>[FieldList]<p>Veuillez supprimer ces champs, ou cliquez sur les liens ci-dessous <br>pour modifier pour modifier le champ de base (modifiera tous les types d'enresgitrements qui l'utilise).</p>
 #manageDefRectypes_delete_warn#Êtes vous sûr de vouloir supprimer ce type d'enregistrement ?

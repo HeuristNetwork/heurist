@@ -14,7 +14,7 @@
  * (versionCompare), array utilities (uniqueArray), date/time utilities (parseDates,
  * getTimeForLocalTimeZone), and clipboard operations (copyStringToClipboard).
  * It also extends String.prototype with `htmlEscape` and `capitalize`, `lpad`, and adds jQuery
- * extensions `$.getStyles`, `selectorExists`, `$.getMultiScripts2`, `$.getMultiScripts`.
+ * extensions `$.getStyles`, `selectorExists`, `$.getMultiScriptsSequental`, `$.getMultiScripts`.
  * A function `tinymceURLConverter` for TinyMCE is also included.
  * Some functions are noted with @todo for future refactoring.
  * @see editing_input.js
@@ -570,7 +570,7 @@ window.hWin.HEURIST4.util = {
         if (jqXHR && jqXHR.status === 0 && jqXHR.readyState === 0) {
             return {
                 status: window.hWin.ResponseStatus.CANCELLED,
-                message: 'Request aborted',
+                message: navigator.onLine ? 'Request aborted' : 'Sorry, you do not have a network connection',
                 aborted: true,
                 request_code: request_code
             };
@@ -1331,8 +1331,83 @@ window.hWin.HEURIST4.util = {
     getParentWinProperty: function(prop) {
        return prop && window.hWin.HEURIST4.util.canAccessParentWinProperty(prop) ?window.parent[prop] :null;
     },
+
+    detectCapsLock: function($container, inputSelector, warningSelector){
+
+        inputSelector = !window.hWin.HEURIST4.util.isempty(inputSelector) ? inputSelector : 'input[type="password"]';
+        warningSelector = !window.hWin.HEURIST4.util.isempty(warningSelector) ? warningSelector : '.capslock-warning';
+
+        let $inputs = $container.find(inputSelector);
+        let $capsWarning = $container.find(warningSelector);
+
+        if($inputs.length === 0){
+            return;
+        }
+
+        if($capsWarning.length === 0){
+            $capsWarning = $('<span>', {
+                class: 'capslock-warning ui-state-error',
+                style: 'margin-left: 1em; display: inline-block; padding: 0.3em 0.4em 0.2em;',
+                text: 'Warning: Caps lock is on'
+            }).appendTo($container).hide();
+        }
+
+        let $__checkForCapsLock = (event) => {
+
+            // was: let isCapsLockOn = event.type === 'blur' ? false : event.originalEvent.getModifierState('CapsLock');
+            // ChatGPT mod: Some click or synthetic events do not provide getModifierState.
+            // Blur always clears the Caps Lock warning.
+            let originalEvent = event.originalEvent || event;
+            let isCapsLockOn = event.type !== 'blur'
+            && typeof originalEvent.getModifierState === 'function'
+            && originalEvent.getModifierState('CapsLock');
     
-    
+            let $input = $(event.target);
+
+            if(isCapsLockOn){
+                $capsWarning.insertAfter($input).show();
+            }else{
+                $capsWarning.hide();
+            }
+        };
+
+        $inputs.on({
+            click: $__checkForCapsLock,
+            keyup: $__checkForCapsLock,
+            blur: $__checkForCapsLock
+        });
+    },
+
+    arrayIntersection: function(arrays, ...additionalArrays){
+
+        if(arrays.length <= 1 && additionalArrays.length === 0){ // nothing to check
+
+            let returnArray = arrays.length === 1 && Array.isArray(arrays[0]) ? arrays[0] : arrays;
+            return returnArray ?? [];
+
+        }
+
+        if(Array.isArray(arrays[0])){ // first arguement is array of arrays
+            arrays = [...arrays];
+        }
+        if(additionalArrays.length > 0){ // append remaining argument arrays to original
+            arrays = [arrays, ...additionalArrays];
+        }
+
+        // Remove duplicates and sort based on lengths, use the smallest set as the base
+        let sortedSets = arrays.map(array => new Set(array))
+                                 .sort((a, b) => a.size - b.size);
+        let baseSet = sortedSets.shift();
+
+        // Get intersections
+        let intersections = [...baseSet].filter((dtyID) => 
+            sortedSets.every((set) => 
+                set.has(dtyID)
+            )
+        );
+
+        return intersections;
+    },
     
     //constants for saved searches\
     _NAME: 0, 
@@ -1434,7 +1509,7 @@ function selectorExists(selector) {
 }
 
 
-$.getMultiScripts2 = function(arr, path) {
+$.getMultiScriptsSequental = function(arr, path) {
     
     return new Promise(function(_resolve, _reject){
     

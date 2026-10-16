@@ -70,6 +70,7 @@ function addNodes() {
                  .on("dragend", dragend);
      
    let entitycolor = getSetting('setting_entitycolor');
+   let nodesCnt = 0;
       
    // Details for each node            
    nodes.each(function(d, i) {
@@ -189,7 +190,10 @@ function addNodes() {
          })
          .call(drag);
 
-     });            
+        nodesCnt++; 
+     });   
+     
+console.log('DBG. Nodes: ',nodesCnt);              
      return nodes;
 }
 
@@ -488,7 +492,7 @@ function toggleRecordViewer(action){
 function updateNodes() {
     window.d3.selectAll(".node").attr("transform", function(d) { 
         // Store new position
-        if(d.x==null || d.y==null || isNaN(d.x) || isNaN(d.y)){
+        if(d.x==null || d.y==null || Number.isNaN(d.x) || Number.isNaN(d.y)){
             d.x=0;
             d.y=0;
         }

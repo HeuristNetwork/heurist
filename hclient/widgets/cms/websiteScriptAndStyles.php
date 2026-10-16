@@ -44,21 +44,6 @@ use hserv\utilities\USystem;
  define('APOSTROPHE','&#039;');
 
  includeJQuery();
-
-if (isLocalHost() && !@$_REQUEST['embed'])  {
-?>
-    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/js/datatable/datatables.min.js"></script>
-<?php
-}else{
-?>
-
-    <link href="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" integrity="sha384-VFQrHzqBh5qiJIU0uGU5CIW3+OWpdGGJM9LBnGbuIH2mkICcFZ7lPd/AAtI7SNf7" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" integrity="sha384-/RlQG9uf0M2vcTw3CX7fbqgbj/h8wKxw7C3zu9/GxcBPRKOEcESxaxufwRXqzq6n" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.js" integrity="sha384-naBmfwninIkPENReA9wreX7eukcSAc9xLJ8Kov28yBxFr8U5dzgoed1DHwFAef4y" crossorigin="anonymous"></script>
-<?php
-}
 ?>
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
@@ -104,6 +89,15 @@ if (isLocalHost() && !@$_REQUEST['embed'])  {
     var record_view_target = '<?php echo $record_view_target!=null?$record_view_target:'';?>';
 </script>
 
+
+<?php
+    if(file_exists(__DIR__.'/../../../hclient/bundles/heurist-core.bundle.min.js')){
+?>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/bundles/heurist-core.bundle.min.js"></script>
+<?php
+    }else{
+?>
+
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/baseAction.js"></script>
@@ -111,11 +105,13 @@ if (isLocalHost() && !@$_REQUEST['embed'])  {
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_map.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HSystemMgr.js"></script>
@@ -127,17 +123,28 @@ if (isLocalHost() && !@$_REQUEST['embed'])  {
 <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/navigation.js"></script>
+
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/progressReport.js"></script>
+<?php
+    }
+?>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
+    
+<!-- All Heuritst widgets can be loaded dynamically - remove this remarks for debug only
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svsEdit.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchInput.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/search_faceted.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectMultiValues.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/app_storymap.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
+-->
+
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
 
 <!--
 <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
@@ -145,16 +152,6 @@ if (isLocalHost() && !@$_REQUEST['embed'])  {
 <?php
 if($_is_new_cms_editor){
 ?>
-<!-- @todo load these scripts dynamically if edit mode is ON -->
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS2.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SelectElement.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
-
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
-<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
-
 <style>
 .tox-toolbar{
     background-color: #b4eeff !important;
@@ -176,55 +173,8 @@ if(!isEmptyArray($external_files)){
     }
 }
 
-//do not include edit stuff for embed
-if(!array_key_exists('embed', $_REQUEST)){
-?>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
-
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
-
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFile.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/ui.tabs.paging.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
-    <link href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet" type="text/css">
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.ui-contextmenu.js"></script>
-
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecUploadedFiles.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrTags.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchUsrTags.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/mediaViewer.js"></script>
-
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
-
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/progressReport.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/importStructure.js"></script>
-<?php
-}
-
 if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in websiteRecord.php - if true we use old CMS editor
 ?>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
-
-    <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
-
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/util/formatting.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/xml/xml.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/javascript/javascript.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
-
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>hclient/assets/css/marching_ants.css" />
 
     <style>
@@ -295,7 +245,7 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
 
 <script>
 // global
-var RT_CMS_HOME, RT_CMS_MENU, DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
+var RT_CMS_HOME, RT_CMS_PAGE, RT_CMS_MENU, DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
 var timeout_count = 0;
 
 //
@@ -316,7 +266,8 @@ function onPageInit(success)
     }
 
     RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-    RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+    RT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'];
+    RT_CMS_MENU = RT_CMS_PAGE; //deprecated alias for custom website scripts
     DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
     DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
     DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
@@ -529,7 +480,7 @@ function loadPageContent(pageid, eventdata){
                                 response['records'] && response['records'].length>0) {
                                
                                    var res = response['records'][0]['rec_RecTypeID'];
-                                   if(res == RT_CMS_MENU || res == RT_CMS_HOME){
+                                   if(res == RT_CMS_PAGE || res == RT_CMS_HOME){
                                        if(!eventdata) eventdata = {};
                                        eventdata['isMenuItem'] = true;
                                        loadPageContent(pageid, eventdata);
@@ -575,9 +526,11 @@ function loadPageContent(pageid, eventdata){
         //after load event listener
         function __loadPageContent(){
 
+            current_page_id = pageid;
+            
             window.hWin.HEURIST4.msg.sendCoverallToBack();
             $('body').find('#main-content').css('min-height', '');// remove min height
-
+            
             if(!window.hWin.HAPI4.is_admin()){
                 isCMS_active = false;
             }
@@ -585,28 +538,12 @@ function loadPageContent(pageid, eventdata){
             $('#btnOpenCMSeditor').html(isCMS_active?'close editor':'website editor');
 
             if(isCMS_active){
-                if(!editCMS_instance2) {
-                    editCMS_instance2 = editCMS2(this.document);//editCMS_Init
-                }
-
-                if (! editCMS_instance2.startCMS({
-                                record_id:pageid,
-                                container:'#main-content',
-                                isCMS_NewWebsite: isCMS_NewWebsite,
-                                close: function(){
-                                    isCMS_active = false;
-                                    $('#btnOpenCMSeditor').html('website editor');
-                                }})) //see editCMS2.js
-                {
-                    //page is not loaded (previous page has been modified and not saved
-                    return;
-                }
-
+                isCMS_active = false;
+                _openCMSeditor();
             }else{
                 window.hWin.HAPI4.layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );
             }
 
-            current_page_id = pageid;
 
             var page_footer = page_target.find('#page-footer');
             if(page_footer.length>0){  //adjust page footer height
@@ -936,156 +873,7 @@ function afterPageLoad(document, pageid, eventdata){
     $('#main-content-container').scrollTop(0);// reset scroll
 
     // add current page as url parameter in browser url
-    if(!is_embed){
-
-        var spath = location.pathname;
-
-        while (spath.substring(0, 2) === '//') spath = spath.substring(1);
-
-        var surl;
-
-        if(spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/';//add last slash
-
-        // Own-domain numeric pretty URLs:
-        //   "/"                (home)
-        //   "/<pageid>"        (page under fixed website)
-        //   "/<websiteid>/<pageid>" (site+page when website not fixed)
-        const isOwnDomainNumeric =
-            spath === '/' ||
-            /^\/\d+\/?$/.test(spath) ||
-            /^\/\d+\/\d+\/?$/.test(spath);
-
-        // If this is an own-domain website (no db/web prefix), keep numeric pretty URLs
-        if (isOwnDomainNumeric && !/\/([A-Za-z0-9_]+)\/(website|web)\//.test(spath)) {
-
-            // Always produce "/<website>/<pageid>" for own-domain numeric routes,
-            // except when current page is the home page, then "/<website>/".
-            //
-            // This avoids ambiguity: a single numeric segment "/<n>" can be interpreted as "website" by RequestRouter.
-            const pathIsTwoNums = /^\/\d+\/\d+\/?$/.test(spath);
-            const pathIsOneNum  = /^\/\d+\/?$/.test(spath);
-
-            // Determine website id to use:
-            //  - If current URL already contains website id (two-number form), preserve it.
-            //  - Else fallback to home_page_record_id as website id (your code uses it as website id in web-folder mode).
-            let webId = home_page_record_id;
-
-            if (pathIsTwoNums) {
-                const parts = spath.replace(/^\/|\/$/g,'').split('/');
-                if (parts[0] && /^\d+$/.test(parts[0])) webId = parseInt(parts[0], 10);
-            } else if (pathIsOneNum) {
-                // If URL is "/<n>" we cannot know if it was website or page.
-                // Treat it as website id (to match router) when forming canonical "/<website>/..."
-                const parts = spath.replace(/^\/|\/$/g,'').split('/');
-                if (parts[0] && /^\d+$/.test(parts[0])) webId = parseInt(parts[0], 10);
-            }
-
-            // Build canonical URL
-            if (pageid === home_page_record_id) {
-                surl = `/${webId}/`;
-            } else {
-                surl = `/${webId}/${pageid}`;
-            }
-
-            // add optional lang/q as query params
-            let operator = '/?';
-            if (eventdata?.event_type === window.hWin.HAPI4.Event.ON_REC_SEARCHSTART && eventdata?.q) {
-                surl += `${operator}q=${encodeURIComponent(eventdata.q)}`;
-                operator = '&';
-            }
-            if (current_language && current_language !== default_language) {
-                surl += `${operator}lang=${encodeURIComponent(current_language)}`;
-                operator = '&';
-            }
-
-        } else if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 ){
-            //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
-
-            const org_spath = spath;
-
-            //remove after web
-            if(spath.indexOf('/website/')>0){
-                spath = spath.substring(0,spath.indexOf('/website/')+9);
-            }else{
-                spath = spath.substring(0,spath.indexOf('/web/')+5);
-            }
-            
-            surl = spath + home_page_record_id;
-            if(pageid!=home_page_record_id){
-                surl = surl + '/' + pageid;
-            }
-
-            let remaining_path = org_spath.replace(surl, '');
-            remaining_path = remaining_path.length > 0 ? remaining_path.split('/') : [];
-
-            const handle_query = eventdata?.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-                              && eventdata?.q;
-            const handle_recids = remaining_path.length > 0;
-
-            let operator = '/?';
-
-            if(handle_query){
-                surl += `${operator}q=${eventdata.q}`;
-                operator = '&';
-            }
-
-            if(handle_recids && false){
-                remaining_path = remaining_path.filter((rec_id) => !window.hWin.HEURIST4.util.isempty(rec_id) && rec_id > 0);
-                if(remaining_path.length>0){
-                    surl += `${operator}rec_id=${remaining_path.join(',')}`;
-                    operator = '&';
-                }
-            }
-
-            if(current_language && current_language!=default_language){
-                surl += `${operator}lang=${current_language}`;
-                operator = '&';
-            }
-            //surl += `${operator}edit=2`;
-
-        }else{
-            //usual url parameters
-
-            var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
-
-            params['db'] = window.hWin.HAPI4.database;
-            params['website'] = home_page_record_id;
-            //remove deprecated parameter
-            params['id'] = '';
-            delete params['id'];
-            
-            if(current_language && current_language!=default_language){
-                params['lang'] = current_language;
-            }
-
-            /* IJ Oct 2021 - Hide page id in URL, and cause reloads to move back to website homepage */
-            if(pageid!=home_page_record_id){
-                params['pageid'] = pageid;
-            }
-
-            s = [];
-
-            $.each(Object.keys(params),function(i,key){
-                if(key){
-                    var v = encodeURIComponent(params[key]);
-                    if(v!='') v = '=' + v;
-                    if(key!='q'){
-                        s.push(key + v);
-                    }
-                }
-            });
-            if(eventdata &&
-                eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART &&
-                eventdata.q){
-                s.push('q=' + eventdata.q);
-            }
-            surl = spath + '?' + s.join('&');
-
-        }
-
-        window.history.pushState({}, "Title", surl);
-
-    }
+    updateBrowserAddressLine( pageid, eventdata );
 
     // add listeners for internal links and images
     initLinksAndImages();
@@ -1148,6 +936,203 @@ function afterPageLoad(document, pageid, eventdata){
     const web_page_id = home_page_record_id+(pageid!=home_page_record_id?('/'+pageid):'');
     window.hWin.HAPI4.SystemMgr.user_log('VisitPage', web_page_id);
 } //afterPageLoad
+
+//
+// add current page as url parameter in browser url
+//
+function updateBrowserAddressLine( pageid, eventdata ){
+    
+    
+    if (is_embed) {
+        return;
+    }
+
+    let spath = location.pathname || '/';
+
+    while (spath.substring(0, 2) === '//') {
+        spath = spath.substring(1);
+    }
+
+    const INSTALL_RE = /^(heurist|h7-[A-Za-z0-9_-]+)$/;
+    const WEB_RE = /^(web|website)$/;
+    const NUM_RE = /^\d+$/;
+    const ALIAS_RE = /^[A-Za-z0-9_-]+$/;
+
+    const trimSlashes = (s) => String(s || '').replace(/^\/+|\/+$/g, '');
+    const segments = trimSlashes(spath) === ''
+        ? []
+        : trimSlashes(spath).split('/');
+
+    const hasInstallSegment = segments.length > 0 && INSTALL_RE.test(segments[0]);
+
+    /*
+     * Rule 1:
+     * If path is only:
+     *   /heurist
+     *   /heurist/
+     *   /h7-alpha
+     *   /h7-alpha/
+     *
+     * then do not use pretty path, because there is no database/path context.
+     * Use URL parameters instead.
+     */
+    const isOnlyInstallSegment = hasInstallSegment && segments.length === 1;
+
+    /*
+     * Detect page alias.
+     *
+     * Database position:
+     *   /heurist/<database>/...
+     *   /h7-alpha/<database>/...
+     *   /<database>/...
+     *
+     * Therefore page alias position is:
+     *   /heurist/<database>/<alias>
+     *   /h7-alpha/<database>/<alias>
+     *   /<database>/<alias>
+     *
+     * Alias is not:
+     *   web
+     *   website
+     *   numeric
+     */
+    const dbIndex = hasInstallSegment ? 1 : 0;
+    const aliasIndex = dbIndex + 1;
+
+    const lastSegment = segments.length > 0 ? segments[segments.length - 1] : '';
+
+    const isPageAliasPath =
+        segments.length === aliasIndex + 1 &&
+        segments[dbIndex] &&
+        ALIAS_RE.test(lastSegment) &&
+        !WEB_RE.test(lastSegment) &&
+        !NUM_RE.test(lastSegment);
+
+    /*
+     * Rule 3:
+     * Page alias URLs are canonical/user-readable URLs.
+     * Do not add website/page ids and do not rewrite the browser address.
+     */
+    if (isPageAliasPath) {
+        return;
+    }
+
+    let surl = '';
+
+    function addCommonParams(params) {
+
+        params = params || {};
+
+        if (current_language && current_language !== default_language) {
+            params.lang = current_language;
+        }
+
+        if (
+            eventdata &&
+            eventdata.event_type === window.hWin.HAPI4.Event.ON_REC_SEARCHSTART &&
+            eventdata.q
+        ) {
+            params.q = eventdata.q;
+        }
+
+        return params;
+    }
+
+    function buildQueryString(params) {
+
+        const parts = [];
+
+        $.each(Object.keys(params), function (i, key) {
+            if (!key) return;
+
+            const value = params[key];
+
+            if (window.hWin.HEURIST4.util.isempty(value)) {
+                return;
+            }
+
+            parts.push(
+                encodeURIComponent(key) + '=' + encodeURIComponent(value)
+            );
+        });
+
+        return parts.length > 0 ? '?' + parts.join('&') : '';
+    }
+
+    if (isOnlyInstallSegment) {
+
+        /*
+         * Rule 1:
+         * Only install folder is present, so use URL parameters.
+         */
+        const params = window.hWin.HEURIST4.util.getUrlParams(location.href);
+
+        params.db = window.hWin.HAPI4.database;
+        params.website = home_page_record_id;
+
+        // remove deprecated parameter
+        delete params.id;
+
+        if (pageid !== home_page_record_id) {
+            params.pageid = pageid;
+        } else {
+            delete params.pageid;
+        }
+
+        addCommonParams(params);
+
+        surl = spath.replace(/\/+$/, '') + buildQueryString(params);
+
+    } else {
+
+        /*
+         * Rule 2:
+         * Use pretty path.
+         *
+         * Existing trailing numeric path:
+         *   /.../123
+         *   /.../123/456
+         *
+         * is replaced with:
+         *   /.../<website>
+         *   /.../<website>/<page>
+         *
+         * If there is no trailing numeric path, append it.
+         */
+        const newSegments = segments.slice();
+
+        // Remove trailing numeric website/page ids if they exist.
+        if (
+            newSegments.length >= 2 &&
+            NUM_RE.test(newSegments[newSegments.length - 2]) &&
+            NUM_RE.test(newSegments[newSegments.length - 1])
+        ) {
+            newSegments.splice(newSegments.length - 2, 2);
+        } else if (
+            newSegments.length >= 1 &&
+            NUM_RE.test(newSegments[newSegments.length - 1])
+        ) {
+            newSegments.splice(newSegments.length - 1, 1);
+        }
+
+        // Add current website id.
+        newSegments.push(String(home_page_record_id));
+
+        // Add page id only when it is not the website home page.
+        if (pageid !== home_page_record_id) {
+            newSegments.push(String(pageid));
+        }
+
+        surl = '/' + newSegments.join('/');
+
+        const params = addCommonParams({});
+        surl += buildQueryString(params);
+    }
+    
+    window.history.pushState({}, 'Title', surl);
+    
+}
+
 
 //
 // Adds listeners for all "a" elements with href="pageid" for inter page website links (converts links)
@@ -1331,7 +1316,7 @@ function initLinksAndImages($container, search_data){
     let $btn_signin = $($container[0].querySelectorAll('#btn_signin:not(.cms-button)'));
     if($btn_signin.length>0){
         $btn_signin.on('click', () => {
-            window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+            window.hWin.HEURIST4.ui.checkAndLoginInFrame(true, () => {location.reload();});
         });
 
         $('#btn_signin.cms-button').hide();
@@ -1356,7 +1341,7 @@ function onHapiInit(success){
 
     if(!success){
         window.hWin.HEURIST4.msg.showMsgErr({
-            message: 'Cannot initialize system on client side, most likely due to outdated version number in bookmarked URL (version 7 from 2026). Consult Heurist developers if necessary.',
+            message: 'Cannot initialize system on client side, most likely due to outdated version number eg. 6. in bookmarked URL. Consult Heurist developers if necessary.',
             error_title: 'Unable to initialise Heurist'
         });
         window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -1412,7 +1397,7 @@ if(isset($customTemplateNotFound)){
         }
     }
 
-    window.hWin.HAPI4.EntityMgr.refreshEntityData('all', __init_completed);
+    window.hWin.HAPI4.EntityMgr.refreshEntityData('all', false, __init_completed);
 }
 
 //
@@ -1498,7 +1483,7 @@ $website_languages_options ->#main-languages-sel
     // Setup login button, if needed
     if($('#btn_signin').length>0){
         $('#btn_signin').on('click', () => {
-            window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+            window.hWin.HEURIST4.ui.checkAndLoginInFrame(true, () => {location.reload();});
         });
     }
 
@@ -1602,11 +1587,34 @@ function performCaptcha(){
 //  opens/hides side panel with NEW CMS editor controls  (see link #btnOpenCMSeditor in cmsTemplate.php)
 //
 function _openCMSeditor(event){
+    
+    if(!window.hWin.HEURIST4.util.isFunction(window['editCMS2'])){
+        
+        let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/cms/';
+        let scripts = [
+                        'editCMS2.js',
+                        'editCMS_SelectElement.js',
+                        'editCMS_WidgetCfg.js',
+                        'editCMS_ElementCfg.js',
+                        'editCMS_SiteMenu.js'
+                        ];
+        let  that = this;
+        $.getMultiScriptsSequental(scripts, path)
+        .then(function() {  //OK! js has been loaded
+            window.hWin.HAPI4.SystemMgr.verifyRecordEditorScripts(_openCMSeditor, [event]);
+            //_openCMSeditor(event);
+        }).catch(function(error) {
+            window.hWin.HEURIST4.msg.showMsg_ScriptFail();
+        });
 
-    var btn = $(event.target);
+        return;
+    }
+    
+
+    var btn = $('#btnOpenCMSeditor'); //$(event.target);
 
     if(!window.hWin.HAPI4.has_access()){
-        window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+        window.hWin.HEURIST4.ui.checkAndLoginInFrame(true, () => {location.reload();});
     }else if(window.hWin.HAPI4.is_admin()){
 
         if(isCMS_active){
@@ -1619,14 +1627,17 @@ function _openCMSeditor(event){
             $('#main-content').show();
 
             isCMS_active = true;
-            if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document);//editCMS_Init
+            if(!editCMS_instance2) {
+                editCMS_instance2 = editCMS2(this.document);//editCMS_Init    
+            }
+            
             editCMS_instance2.startCMS({
                 record_id: current_page_id,
-                //content: page_cache[current_page_id],  //html or json
                 isCMS_NewWebsite: isCMS_NewWebsite,
                 container:'#main-content',
                 close: function(){
                     isCMS_active = false;
+                    $('#btnOpenCMSeditor').html('website editor');
             }});//see editCMS2.js
         }
 

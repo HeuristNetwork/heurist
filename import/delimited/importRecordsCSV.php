@@ -130,6 +130,38 @@ if(!$format){ $format='csv';}
                 cursor: pointer;
                 color: #0070E0;
             }
+
+            /* verifyDBAgainstSource: additions only */
+            body:not(.verification-mode) .verification-only,
+            body.verification-mode #btnPrepareStart,
+            body.verification-mode #btnImportStart,
+            body.verification-mode #btnNextRecType2,
+            body.verification-mode #divInsertUpdateSetting,
+            body.verification-mode .importIgnoreErrors {
+                display:none !important;
+            }
+
+            /* verifyDBAgainstSource: verification-specific presentation */
+            body.verification-mode #divheader {
+                background:rgba(218, 207, 239, 0.95) !important;
+            }
+            body.verification-mode .csv-mapping-help {
+                display:none !important;
+            }
+            body.verification-mode #divFieldMapping2,
+            body.verification-mode #divFieldMapping2 .tbresults {
+                background:rgba(218, 207, 239, 0.95) !important;
+            }
+            body.verification-mode #btnVerifyDatabase {
+                background:#3f9b4b !important;
+                border-color:#2f7939 !important;
+                color:#fff !important;
+                font-weight:bold !important;
+            }
+            body.verification-mode #btnVerifyDatabase:hover,
+            body.verification-mode #btnVerifyDatabase:focus {
+                background:#32823d !important;
+            }
         </style>
     </head>
 
@@ -194,9 +226,10 @@ if(!$format){ $format='csv';}
     <div class="ent_header" style="height:30em;padding-top:1em;">
 
         <div id="btnBackToStart2"
-                style="margin-left:2em;"
-                title="Return to the upload screen to select a new delimited file to upload to the server for processing">
-                Back to start</div>
+            style="margin-left:2em;"
+            title="Return to the upload screen to select a new delimited file to upload to the server for processing">
+                <span style="font-weight: 900;font-size: 1.1em;">Back to start</span>
+        </div>
 
         <div id="file_name2" style="display: inline-block;">
             <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span>
@@ -286,11 +319,14 @@ if(!$format){ $format='csv';}
                     <div class="header" style="min-width: 50px;">Date format:</div>
                     <div class="input-cell">
                         <select id="csv_dateformat" class="text ui-widget-content ui-corner-all" style="width:120px;">
-                            <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select>
+                            <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option>
                         </select>
                         <div class="heurist-helper1" style="display: block;">
                             Also supports ISO yyyy-mm-dd (and optional hh:mm:ss)
                             and human friendly dates such as 1827, 1st Sept 1827, 1 sep 1827
+                            <br>The selected order applies throughout import, including fields mapped later.
+                            Use four digits for years before 100 (e.g. 0078) in full dates.
+                            Ambiguous or impossible dates are reported for correction; no date is guessed.
                         </div>
                     </div>
                 </div>
@@ -344,7 +380,8 @@ if(!$format){ $format='csv';}
             <div style="max-width: 500;float:left;">
                 <div id="btnBackToStart"
                     title="Return to the upload screen to select a new delimited file to upload to the server for processing">
-                    Back to start</div>
+                    <span style="font-weight: 900;font-size: 1.1em;">Back to start</span>
+                </div>
 
                 <div style="font-size:1.1em;padding: 7px 10px;border: 2px blue solid;margin: 8px 0;">
                     Target entity type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;">&nbsp;</h2>
@@ -448,10 +485,21 @@ if(!$format){ $format='csv';}
                     title="Start real import data into Heurist database">
                     Start Insert/Update</div>
 
+                <!-- verifyDBAgainstSource: additions only -->
+                <div id="btnVerifyDatabase" class="step4 step5 verification-only"
+                    title="Compare the mapped source values with the matched Heurist records and download all differences">
+                    Download verification report</div>
+
                 <div style="display:none" class="skip_step prompt">
                     Click on list of record types to skip steps
                 </div>
 
+                <div class="importIgnoreErrors">
+                    <label>
+                        <input type="checkbox" id="ignoreErrors" class="text" onchange="{importRecordsCSV.onIgnoreErrors()}" />&nbsp;
+                        Ignore data errors, import anyway
+                    </label>
+                </div>
 
             </div>
         </div>
@@ -478,9 +526,6 @@ if(!$format){ $format='csv';}
             <label><input type="checkbox" checked="checked" id="sa_update" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             Update existing records</label>
 
-            <label><input type="checkbox" id="sa_ignore_errors" class="text">&nbsp;
-            Ignore validation. Add data "as is"</label>
-
             <span style="padding-left: 230px;display:none;" id="presetMapping">Use previous mapping: <select id="sel_presetMapping"></select></span>
         </div>
         <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none;top:220px">
@@ -496,7 +541,8 @@ if(!$format){ $format='csv';}
             <label for="sa_upd0">Add new values without deletion of existing values (duplicates are ignored)</label><br>
 
             <input type="radio"  name="sa_upd" id="sa_upd21" value="21" class="text">&nbsp;
-            <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>
+            <!-- MODIFIED: clarify that replacement is limited to each currently processed record and mapped field -->
+            <label for="sa_upd21">Load new values, replacing all existing values for the record and field in question</label><br>
 
             <a href="#imp3" style="margin: 0.3em;line-height: 17px;text-decoration:none"
             onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">
@@ -539,12 +585,18 @@ if(!$format){ $format='csv';}
         </div>
 <!-- end radiogroup setting divs -->
 
-        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:31px">
+        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:25px">
             <table role="presentation" class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
-                                        <td rowspan="3" width="250">
+                                        <td rowspan="3" width="250" class="first-cell">
                                             <h2 id="mrr_big">Existing: 0&nbsp;&nbsp;&nbsp;New: 0</h2>
+                                        </td>
+                                        <td rowspan="3">
+                                            <div style="color: red; display: none;" class="warningMessage">Click to correct, then<br>click <strong>Prepare again</strong></div>
+                                        </td>
+                                        <td rowspan="3">
+                                            <span style="color: red; transform: scaleX(3); left: 1em; display: none;" class="ui-icon ui-icon-arrowthick-1-e warningMessage"></span>
                                         </td>
                                         <td rowspan="3">
                                             <div id="prepareWarnings"
@@ -588,13 +640,15 @@ if(!$format){ $format='csv';}
         </div>
 
 
-        <table class="tbmain" style="width:99%;position:absolute;bottom:0px;" cellspacing="0" cellpadding="2">
+        <table class="tbmain" style="width:99%;position:absolute;bottom: -2px;" cellspacing="0" cellpadding="2">
             <caption></caption>
             <thead><tr>
                 <th style="width:75px;">Use value<br><a href="#" class="lnk_SelectAll link_styling">Select all</a></th>
+                <th style="width:75px;">Total&nbsp;<br>values</th>
                 <th style="width:75px;">Unique&nbsp;<br>values</th>
                 <th style="width:300px;">Column</th>
-                <th style="width:300px;" id="mapping_column_header">Column to Field Mapping</th>
+                <th style="width:430px;" id="mapping_column_header">Column to Field Mapping</th>
+                <th style="width:50px;">Seek&nbsp;<br>values</th>
                 <!-- last column allows step through imported data records-->
                 <th style="text-align: left;padding-left: 16px;">
                     <a href="#" class="navigation" style="display: inline-block;"><span data-dest="0" class="ui-icon ui-icon-seek-first"></span></a>

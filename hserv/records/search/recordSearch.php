@@ -203,9 +203,9 @@ function recordSearchDistinctValue($system, $params){
  *
  * @param \hserv\System $system The Heurist system object.
  * @param array $params An associative array of parameters:
- *                      - 'dty_src' (int): The Detail Type ID for the source records' values.
+ *                      - 'dty_src' (array|int): The Detail Type ID for the source records' values.
  *                      - 'rty_trg' (int): The Record Type ID for the target records.
- *                      - 'dty_trg' (int): The Detail Type ID for the target records' values.
+ *                      - 'dty_trg' (array|int): The Detail Type ID for the target records' values.
  *                      - 'rec_IDs' (array|string): An array or comma-separated string of source Record IDs.
  *                      - 'nonmatch' (int, Optional): If 1, reports source records/values with no matches. Defaults to 0.
  *                      - 'pairs' (int, Optional): If 1 (and 'nonmatch' is 0), returns pairs of matching (sourceRecID, targetRecID).
@@ -219,108 +219,160 @@ function recordSearchDistinctValue($system, $params){
  */
 function recordSearchMatchedValues($system, $params){
 
-    if(intval(@$params['dty_src'])>0 &&
-       intval(@$params['rty_trg'])>0 && intval(@$params['dty_trg'])>0){ // rty_src was commented out, assuming it's not strictly needed if rec_IDs are given
+    $dtySources = prepareIds(@$params['dty_src']);
+    $dtyTargets = prepareIds(@$params['dty_trg']);
+    $rtyTarget = intval(@$params['rty_trg']);
+
+    $rec_IDs = prepareIds($params['rec_IDs']);
+    $total_cnt = count($rec_IDs);
+
+    if(empty($dtySources) || empty($dtyTargets) || count($dtySources) !== count($dtyTargets) || $rtyTarget <= 0 || $total_cnt <= 0){
+        $message = $total_cnt <= 0 ? 'Source records are not defined as matching query parameter' : 'Matching query parameters are invalid';
+        $message = count($dtySources) !== count($dtyTargets) ? 'Number of matching parameters needs to be the same' : $message;
+        return $system->addError(HEURIST_INVALID_REQUEST, $message);
+    }
+
+    $need_nonmatches = @$params['nonmatch'] == 1; // Report non-matches
+    $need_ids = @$params['pairs'] == 1; //return pairs - otherwise just count
+
+    $offset = 0;
+    $iteration = 1;
+
+    $finalResults = $need_ids ? [] : 0;
+    $finalResults = $need_nonmatches ? array_fill_keys($dtySources, []) : $finalResults;
+
+    $error = ['mysql' => '', 'query' => ''];
+
+    $__getRecordResults = function(array $recIDs, int $dtyIDSource, int $dtyIDTarget, bool $needIDs, bool $needNoMatch) use ($system, $rtyTarget, &$error){
+
         $mysqli = $system->getMysqli();
 
+        $recIDList = implode(',', $recIDs);
+        if($needNoMatch){
 
-        $need_nonmatches = (@$params['nonmatch']==1); // Report non-matches
-        $need_ids = (@$params['pairs']==1); //return pairs - otherwise just count
+            $query = <<<QUERY
+            select distinct d1.dtl_RecID, r1.rec_Title, d1.dtl_Value FROM Records r1, recDetails d1
+            LEFT JOIN recDetails d2 on d1.dtl_Value=d2.dtl_Value and d1.dtl_RecID!=d2.dtl_RecID
+            LEFT JOIN Records r2 on d2.dtl_RecID=r2.rec_ID and r2.rec_RecTypeID=$rtyTarget and d2.dtl_DetailTypeID=$dtyIDTarget
+            WHERE r1.rec_ID IN ($recIDList) and d1.dtl_DetailTypeID=$dtyIDSource and d1.dtl_RecID=r1.rec_ID and d2.dtl_Value is null
+            QUERY;
 
-        $rec_IDs = prepareIds($params['rec_IDs']);
+        }else{
 
-        $total_cnt = count($rec_IDs);
-        $offset = 0;
+            $query = $needIDs ? 'select distinct d1.dtl_RecID, d2.dtl_RecID ' : 'select count(distinct d1.dtl_RecID, d2.dtl_RecID) ';
 
-        if($total_cnt>0){
+            $query .= ' from recDetails d1, recDetails d2, Records r2'
+            .' where d1.dtl_RecID IN ('.implode(',',$recIDs).')'
+            .' and d1.dtl_DetailTypeID='.$dtyIDSource
+            .' and d2.dtl_RecID=r2.rec_ID and r2.rec_RecTypeID='.$rtyTarget
+            .' and d2.dtl_DetailTypeID='.$dtyIDTarget
+            .' and d1.dtl_RecID!=d2.dtl_RecID and d1.dtl_Value=d2.dtl_Value';
+        }
 
-            //'distinct d1.dtl_RecID, d2.dtl_RecID '
-            //d1.dtl_Value, d2.dtl_Value,
-            if($need_nonmatches || $need_ids){
-                $result = array();
-            }else{
-                $result = 0;
-            }
+        if($needNoMatch){
+            $query .= ' ORDER BY d1.dtl_RecID';
+            $res = mysql__select_all($mysqli, $query, 0, 100);
+        }elseif($needIDs){
+            $query .= ' ORDER BY d1.dtl_RecID';
+            $res = mysql__select_all($mysqli, $query);
+        }else{
+            $res = mysql__select_value($mysqli, $query);
+        }
 
-            $iteration = 1;
-            $is_completed_without_error = true;
+        if($res === null){
+            $error = ['mysql' => $mysqli->error, 'query' => $query];
+            return false;
+        }
 
-            while ($offset<$total_cnt){
+        return $res;
+    };
 
-                $rec_IDs_chunk = array_slice($rec_IDs, $offset, 500);
+    $is_completed_without_error = true;
 
-                if($need_nonmatches){
+    while ($offset < $total_cnt){
 
-                    $query = 'select distinct d1.dtl_RecID, r1.rec_Title, d1.dtl_Value FROM Records r1, recDetails d1 '
-                    .' LEFT JOIN recDetails d2 on d1.dtl_Value=d2.dtl_Value and d1.dtl_RecID!=d2.dtl_RecID'
-                    .' LEFT JOIN Records r2 on d2.dtl_RecID=r2.rec_ID and r2.rec_RecTypeID='
-                    .intval($params['rty_trg']).' and d2.dtl_DetailTypeID='.intval($params['dty_trg'])
-                    .' WHERE r1.rec_ID IN ('
-                    .implode(',',$rec_IDs_chunk).') and d1.dtl_DetailTypeID='
-                    .intval($params['dty_src'])
-                    .' and d1.dtl_RecID=r1.rec_ID and d2.dtl_Value is null';
+        $rec_IDs_chunk = array_slice($rec_IDs, $offset, 500);
 
-                }else {
-                    if($need_ids){
-                        $query = 'select distinct d1.dtl_RecID, d2.dtl_RecID ';
-                    }else{
-                        $query = 'select count(distinct d1.dtl_RecID, d2.dtl_RecID) ';
-                    }
-                    $query = $query
-                    .' from recDetails d1, recDetails d2, Records r2'   //Records r1,
-                    .' where d1.dtl_RecID IN ('.implode(',',$rec_IDs_chunk).')'      //=r1.rec_ID and r1.rec_RecTypeID='.intval($params['rty_src'])
-                    .' and d1.dtl_DetailTypeID='.intval($params['dty_src'])
-                    .' and d2.dtl_RecID=r2.rec_ID and r2.rec_RecTypeID='.intval($params['rty_trg'])
-                    .' and d2.dtl_DetailTypeID='.intval($params['dty_trg'])
-                    .' and d1.dtl_RecID!=d2.dtl_RecID and d1.dtl_Value=d2.dtl_Value';
-                }
+        $recordResults = $need_ids ? [] : 0;
+        $recordResults = $need_nonmatches ? array_fill_keys($dtySources, []) : $recordResults;
 
-                if($need_nonmatches){
-                    $query .= ' ORDER BY d1.dtl_RecID';
-                    $res = mysql__select_all($mysqli, $query, 0, 100);
-                }elseif($need_ids){
-                    $query .= ' ORDER BY d1.dtl_RecID';
-                    $res = mysql__select_all($mysqli, $query);
-                }else{
-                    $res = mysql__select_value($mysqli, $query);
-                }
+        if(count($dtySources) === 1){
 
-                if ($res == null) {
-                    if(is_array($res)){
-                        //error_log('Empty array on interation '.$iteration);
-                    }else{
-                        $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on matching values. '
-                            .'<br> Records given: '.$total_cnt
-                            .'<br> Iteration: '.$iteration
-                            .'<br> Found so far '.(is_array($result)?count($result):$result)
-                            //.'<br>Res: '.print_r($res,true)
-                            .'<br>Query '.$query, $mysqli->error);
-                        $is_completed_without_error = false;
-                        break;
-                    }
-                }else{
-                    if($need_nonmatches || $need_ids){
-                        if(!empty($res)){
-                            $result = array_merge($result, $res);
-                        }
-                    }else{
-                        $result = $result + $res;
-                    }
-                }
+            $recordResults = $__getRecordResults($rec_IDs_chunk, $dtySources[0], $dtyTargets[0], $need_ids, $need_nonmatches);
 
-                $offset = $offset+500;
-                $iteration++;
-            }//wile
-
-            if ($is_completed_without_error){
-                $response = array('status'=>HEURIST_OK, 'data'=> $result);
+            if($need_nonmatches && $recordResults){
+                $recordResults = [$dtySources[0] => $recordResults];
             }
 
         }else{
-            $response = $system->addError(HEURIST_INVALID_REQUEST, 'Source records are not defined as matching query parameter');
+
+            $fieldCount = count($dtySources);
+            $originalNeedIDs = $need_ids;
+            $need_ids |= !$need_nonmatches;
+            $recIDsList = $rec_IDs_chunk;
+
+            for($idx = 0; $idx < $fieldCount; $idx++){
+
+                $lastRun = $idx + 1 === $fieldCount;
+                if($lastRun){
+                    $need_ids = $originalNeedIDs;
+                }
+
+                $dtySource = $dtySources[$idx];
+                $currentResults = $__getRecordResults($recIDsList, $dtySource, $dtyTargets[$idx], $need_ids, $need_nonmatches);
+
+                if($currentResults === false){
+                    $recIDsList = false;
+                    break;
+                }
+
+                if($need_nonmatches){
+                    $recordResults[$dtySource] = array_merge($recordResults[$dtySource], $currentResults);
+                }else{
+                    $recIDsList = $lastRun ? $currentResults : array_column($currentResults, 0);
+                }
+
+            }
+
+            if(!$need_nonmatches){
+                $recordResults = $recIDsList;
+            }
         }
-    }else{
-        $response = $system->addError(HEURIST_INVALID_REQUEST, 'Matching query parameters are invalid');
+
+        if ($recordResults === false) {
+
+            $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on matching values. '
+                .'<br> Records given: '.$total_cnt
+                .'<br> Iteration: '.$iteration
+                .'<br> Found so far ' . is_array($finalResults) ? count($finalResults) : $finalResults
+                .'<br>Query '.$error['query'], $error['mysql']);
+
+            $is_completed_without_error = false;
+            break;
+        }else{
+
+            if($need_nonmatches || $need_ids){
+                if(!empty($recordResults)){
+
+                    if($need_nonmatches){
+                        foreach($recordResults as $dtyID => $results){
+                            $finalResults[$dtyID] = array_merge($finalResults[$dtyID], $results);
+                        }
+                    }else{
+                        $finalResults = array_merge($finalResults, $recordResults);
+                    }
+                }
+            }else{
+                $finalResults += $recordResults;
+            }
+        }
+
+        $offset += 500;
+        $iteration++;
+    }//wile
+
+    if ($is_completed_without_error){
+        $response = ['status' => HEURIST_OK, 'data' => $finalResults];
     }
 
     return $response;
@@ -1239,8 +1291,6 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     }
 
     return array("status"=>HEURIST_OK, "data"=>$intervals);
-
-    //return $system->addError(HEURIST_UNKNOWN_ERROR, "An unknown error has occurred with attempting to retrieve the date data for DB => " . $system->dbname() . ", record ids => " . implode(',', $rec_ids));
 }
 
 /**
@@ -1887,7 +1937,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
             foreach($parents as $rec_ID){
                 $isWebPage = false;
                 $rec = recordSearchByID($system, $rec_ID, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
-                if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
+                if(@$rec['rec_RecTypeID']==RT_CMS_PAGE && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
                     //get term id by concept code
                     $val = recordGetField($rec, DT_CMS_PAGETYPE);
                     $isWebPage = ($val==$webpage);//standalone
@@ -1962,7 +2012,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                 if($system->defineConstant('DT_CMS_PAGETYPE')){
                     //check that this is single web page (for embed)
                     $rec = recordSearchByID($system, $root_rec_id, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
-                    if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
+                    if(@$rec['rec_RecTypeID']==RT_CMS_PAGE && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
                         //get term id by concept code
                         $val = recordGetField($rec, DT_CMS_PAGETYPE);
                         $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254'));//standalone
@@ -2331,10 +2381,10 @@ function recordSearch($system, $params, $relation_query=null)
     }
     $savedSearchName .= empty($savedSearchName) ? '' : 'It is probably best to delete this saved filter and re-create it.<br>';
 
-    $system->defineConstant('RT_CMS_MENU');
+    $system->defineConstant('RT_CMS_PAGE');
     $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 
-    $useNewTemporalFormatInRecDetails = ($system->settings->get('sys_dbSubSubVersion')>=14);
+    $useNewTemporalFormatInRecDetails = $system->settings->isDbVersionAtLeast('1.3.14');
 
     $fieldtypes_in_res = null;
     //search for geo and time fields and remove non timemap records - for rules we need all records
@@ -2919,7 +2969,7 @@ function recordSearch($system, $params, $relation_query=null)
             return $system->addError(HEURIST_ERROR, 'Invalid search request; unable to construct valid SQL query', null);
         }
 
-        if($is_count_only || ($is_ids_only && @$params['needall']) || !$system->hasAccess() ){ //not logged in
+        if($is_count_only || ($is_ids_only && @$params['needall']) ){
             $search_detail_limit = PHP_INT_MAX;
             $aquery['limit'] = '';
             if($is_count_only) {$aquery['sort'] = '';}
@@ -3238,7 +3288,7 @@ function recordSearch($system, $params, $relation_query=null)
                             if( !array_key_exists('d', $records[$recID]) ){
                                 $records[$recID]['d'] = array();
                                 $need_Concatenation = $need_Concatenation ||
-                                (defined('RT_CMS_MENU') && $records[$recID][4]==RT_CMS_MENU);
+                                (defined('RT_CMS_PAGE') && $records[$recID][4]==RT_CMS_PAGE);
                             }
                             $dtyID = $row[0];
 
@@ -3318,7 +3368,8 @@ function recordSearch($system, $params, $relation_query=null)
 
                                         if(!$field_error){ // has been indexed
                                             $row = $check_res->fetch_row();
-                                            $field_error = intval($row[0]) === 0 && intval($row[1]) === 0 ? 'This date has been indexed, but it couldn\'t be interpreted' : null;
+                                            $field_error = intval($row[0]) === 0 && intval($row[1]) === 0 && preg_match('/\|CIR=[1-3]/', $val) !== 1
+                                                ? 'This date has been indexed, but it couldn\'t be interpreted' : null;
                                         }
 
                                     } // else mysql error
@@ -3373,13 +3424,13 @@ function recordSearch($system, $params, $relation_query=null)
                                 }
                             }
                         }//$istimemap_request
-                        //it has RT_CMS_MENU - need concatenate all DT_EXTENDED_DESCRIPTION
+                        //it has RT_CMS_PAGE - need concatenate all DT_EXTENDED_DESCRIPTION
 
                         if($need_Concatenation){
 
                             foreach ($chunk_rec_ids as $recID) {
                                 $record = $records[$recID];
-                                if($record[4]==RT_CMS_MENU
+                                if($record[4]==RT_CMS_PAGE
                                 && is_array(@$record['d'][DT_EXTENDED_DESCRIPTION]))
                                 {
                                     $records[$recID]['d'][DT_EXTENDED_DESCRIPTION] = array(implode('',$record['d'][DT_EXTENDED_DESCRIPTION]));
@@ -3963,9 +4014,9 @@ function recordSearchDetails($system, &$record, $detail_types, $expanded=true) {
             }
         }
 
-        //special case for RT_CMS_MENU - JOIN all descriptions
+        //special case for RT_CMS_PAGE - JOIN all descriptions
         $system->defineConstant('DT_EXTENDED_DESCRIPTION');
-        if($system->defineConstant('RT_CMS_MENU') && RT_CMS_MENU==@$record['rec_RecTypeID']
+        if($system->defineConstant('RT_CMS_PAGE') && RT_CMS_PAGE==@$record['rec_RecTypeID']
         && is_array(@$details[DT_EXTENDED_DESCRIPTION]))
         {
             $details[DT_EXTENDED_DESCRIPTION] = array(implode('',$details[DT_EXTENDED_DESCRIPTION]));

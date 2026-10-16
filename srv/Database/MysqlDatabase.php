@@ -1,0 +1,81 @@
+<?php
+/**
+* MysqlDatabase.php - MySQL implementation of modern database access
+*
+* Executes parameterised queries (reads, and writes of srv/Records/Edit).
+* Driver-specific record SQL remains in the query compiler, not in this class.
+*
+* @project     Heurist academic knowledge management system
+* @package     Database
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2026 Heurist Network Association. All rights reserved.
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       8.0
+*/
+
+declare(strict_types=1);
+
+namespace Heurist\Database;
+
+use PDO;
+use PDOException;
+
+/** MySQL-backed database adapter used by all new record services. */
+final class MysqlDatabase extends AbstractDatabase
+{
+    /** Configure a PDO connection for exception-based parameterised access. */
+    public function __construct(PDO $pdo)
+    {
+        parent::__construct($pdo);
+    }
+
+    /**
+     * Create a MySQL connection using the currently loaded Heurist settings.
+     *
+     * @param string $databaseName Full physical database name.
+     * @throws DatabaseException When configuration is unavailable or connection fails.
+     */
+    public static function fromHeuristConfiguration(string $databaseName): self
+    {
+        $required = array('HEURIST_DBSERVER_NAME', 'HEURIST_DB_PORT', 'ADMIN_DBUSERNAME', 'ADMIN_DBUSERPSWD');
+        foreach($required as $constant){
+            if(!defined($constant)){
+                throw new DatabaseException('Missing database configuration: '.$constant);
+            }
+        }
+        $dsn = 'mysql:host='.HEURIST_DBSERVER_NAME
+            .';port='.intval(HEURIST_DB_PORT ?: 3306)
+            .';dbname='.$databaseName.';charset=utf8mb4';
+        try{
+            $pdo = new PDO($dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+            StatementLimit::apply($pdo);
+            return new self($pdo);
+        }catch(PDOException $exception){
+            throw new DatabaseException('Unable to connect to the Heurist database', 0, $exception);
+        }
+    }
+
+    /** Server thread id of this connection (used to cancel its running query). */
+    public function connectionId(): int
+    {
+        return intval($this->pdo->query('SELECT CONNECTION_ID()')->fetchColumn());
+    }
+
+    /**
+     * Stop the statement running on another connection (KILL QUERY).
+     * The connection itself stays open; its query fails with error 1317.
+     */
+    public function killQuery(int $connectionId): bool
+    {
+        if($connectionId < 1){ return false; }
+        try{
+            $this->pdo->exec('KILL QUERY '.$connectionId);
+            return true;
+        }catch(PDOException $exception){
+            return false; // already finished or not ours
+        }
+    }
+
+}

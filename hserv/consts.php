@@ -26,8 +26,10 @@ use \hserv\utilities\USystem;
 
 /** @const string Current Heurist code version. Value sourced from $version in configIni.php. */
 define('HEURIST_VERSION', $version);
+/** Message shown when a server has not enabled experimental functions. */
+define('HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE', 'Sorry, this function is not yet available on this server. Contact support@HeuristNetwork.org for further information.');
 /** @const string Minimal database version required for this code version. */
-define('HEURIST_MIN_DBVERSION', "1.3.18");
+define('HEURIST_MIN_DBVERSION', "1.4.0");
 
 // Heurist Reference Server Configuration
 // The reference server hosts the Heurist Reference Index, Help database, templates, and code updates.
@@ -101,7 +103,9 @@ if(!defined('HEURIST_DIR'))  {
 }
 
 /** @const string Base URL for general Heurist application access (e.g., "https://myheurist.net/heurist/"). */
-define('HEURIST_BASE_URL', $host_params['baseURL'] );
+if(!defined('HEURIST_BASE_URL')){
+    define('HEURIST_BASE_URL', $host_params['baseURL'] );
+}
 /** @const string Base URL for production Heurist access, often shorter (e.g., "https://myheurist.net/heurist/"). */
 define('HEURIST_BASE_URL_PRO', $host_params['baseURL_pro'] );
 
@@ -154,26 +158,30 @@ $date = new DateTime(); // Unused in current scope, potentially for future use o
 define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION);
 
 // API Response Status Constants (align with ResponseStatus in hapi.js)
-/** @const string API Status: Invalid request (HTTP 400). */
-define("HEURIST_INVALID_REQUEST", "invalid");
-/** @const string API Status: Resource not found (HTTP 404). */
-define("HEURIST_NOT_FOUND", "notfound");
-/** @const string API Status: General error (e.g., wrong data, file I/O) (HTTP 500). */
-define("HEURIST_ERROR", "error");
 /** @const string API Status: Request successful (HTTP 200). */
 define("HEURIST_OK", "ok");
+/** @const string API Status: Invalid request (HTTP 400). */
+if(!defined('HEURIST_INVALID_REQUEST')){ define("HEURIST_INVALID_REQUEST", "invalid"); }
+/** @const string API Status: Resource not found (HTTP 404). */
+define("HEURIST_NOT_FOUND", "notfound");
 /** @const string API Status: Request denied (insufficient rights, etc.) (HTTP 403). */
 define("HEURIST_REQUEST_DENIED", "denied");
 /** @const string API Status: Action blocked due to conflict (HTTP 409). */
 define("HEURIST_ACTION_BLOCKED", "blocked");
-/** @const string API Status: Unknown server error (HTTP 500). */
-define("HEURIST_UNKNOWN_ERROR", "unknown");
+
+/** @const string API Status: General error (e.g., wrong data, file I/O) (HTTP 500). */
+define("HEURIST_ERROR", "error");
 /** @const string API Status: Database error on server (HTTP 500). */
 define("HEURIST_DB_ERROR", "database");
 /** @const string API Status: System configuration error (non-fatal) (HTTP 500). */
 define("HEURIST_SYSTEM_CONFIG", "syscfg");
 /** @const string API Status: System configuration error (fatal) (HTTP 500). */
 define("HEURIST_SYSTEM_FATAL", "system");
+/** @const string API Status: Network (CURL requests) outage error (fatal) (HTTP 500). */
+define("HEURIST_NETWORK_ERROR", "network");
+/** @const string API Status: Unknown server error (HTTP 500). TO BE REMOVED */
+define("HEURIST_UNKNOWN_ERROR", "unknown");
+
 
 // Email Configuration (values from configIni.php or defaults)
 /** @const string Email address for bug reports. */
@@ -310,7 +318,7 @@ $glb_lang_codes = null;
 // Default common languages for translation of database definitions (ISO 639-2 codes).
 // Value from $commonLanguagesForTranslation in configIni.php or defaults here.
 if(!isset($commonLanguagesForTranslation)){
-    $commonLanguagesForTranslation = ['ENG','FRE','CHI','SPA','ITA','ARA','GER','POR','LAT','GRE','GRC'];
+    $commonLanguagesForTranslation = ['ENG','FRE','CHI','SPA','ITA','ARA','GER','POR','LAT','GRE','GRC','IND'];
 }
 
 // Common languages for translation database definitions (ISO639-2 codes) 3 char in upper case
@@ -433,7 +441,7 @@ $rtDefines = array(
     'RT_KML_SOURCE' => array(3, 1014),
     'RT_FILE_SOURCE' => array(2, 53), //csv tsv or dbf source
     'RT_SHP_SOURCE' => array(3, 1017),
-    'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
+    'RT_QUERY_SOURCE' => array(3, 1021),
     'RT_TLCMAP_DATASET' => array(1271, 54),
 
     'RT_IMAGE_SOURCE' => array(3, 1018),
@@ -444,9 +452,19 @@ $rtDefines = array(
     'RT_WEB_CONTENT' => array(1147, 25),
 
     'RT_CMS_HOME' => array(99, 51),
-    'RT_CMS_MENU' => array(99, 52),
+    'RT_CMS_PAGE' => array(99, 52),
+    'RT_CMS_MENU' => array(99, 52), // deprecated alias of RT_CMS_PAGE (kept for custom website scripts)
 
-    'RT_BUG_REPORT' => array(8, 23)
+    'RT_BUG_REPORT' => array(8, 23),
+    
+    'RT_IIIF_ANNOTATION' => array(2, 109),
+    'RT_IIIF_MANIFEST' => array(2, 110),
+    'RT_IIIF_CANVAS' => array(2, 111),
+    
+    // Smarty reports (plan 12)
+    'RT_CUSTOM_REPORT' => array(2, 1104),
+    'RT_REPORT_SCHEDULE' => array(2, 1105)
+    
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -468,7 +486,17 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_GIVEN_NAMES' => array(2, 18),
     'DT_GENDER' => array(2, 20),
     'DT_EMAIL' => array(2, 23),
-    'DT_GEO_OBJECT' => array(2, 28),
+    'DT_GEO_OBJECT' => array(2, 28),  //extent
+    // for MapSource - geo fields from linked record to be used to gather mapping data to be used as geogields parameter to api/map
+    // for Dataset - fields and linked paths to be used as field parameter to api/records    
+    'DT_IS_LOADED_BY_EXTENT' => array(2, 1160),   //is layer loads features for current extent only
+    'DT_GEO_FIELDS' => array(2, 1161),
+    'DT_GEO_OUTPUTMODE' => array(2, 1162),  //combined map features per record or individual features
+    'DT_EXPANSION_RULES' => array(2, 1163),
+    'DT_TABLE_FIELDS' => array(2, 1164),
+    'DT_FILTER_FORM' => array(2, 1165), // QuerySource Filter Form layout JSON
+    'DT_TIMELINE_FIELDS' => array(2, 1105),
+    
     'DT_MIME_TYPE' => array(2, 29),
     'DT_IMAGE_TYPE' => array(2, 30),
     'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2, 31),
@@ -483,10 +511,24 @@ $dtDefines = array('DT_NAME' => array(2, 1),
 
     'DT_SERVICE_URL' => array(2, 34),
     'DT_URL' => array(3, 1058),
+    'DT_COPYRIGHT' => array(2, 35),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
     'DT_ANNOTATION_INFO' => array(2, 1098), //for iiif and map annotations
+    'DT_ANNOTATION_MOTIVATION' => array(2, 1150), //commenting, tagging, supplementing etc
+    'DT_ANNOTATION_MANIFEST' => array(2, 1151),  //ref to parent manifest
+    'DT_IIIF_CANVAS' => array(2, 1152), //ref to canvas  former DT_ANNOTATION_TARGET
+    'DT_ANNOTATION_STATE' => array(2, 1153),
+    'DT_ANNOTATION_SELECTOR_TYPE' => array(2, 1154),   
+    'DT_ANNOTATION_SELECTOR_VALUE' => array(2, 1155),
+    'DT_IIIF_ID' => array(2, 1156),
+    'DT_ORIGINAL_IIIF_ID' => array(2, 1158),
+    'DT_IIIF_IMAGE_SERVICE' => array(2, 1159), //iiif image service from manifest - specific for particular canvas
+    
+    'DT_HEIGHT' => array(3, 1041),
+    'DT_WIDTH' => array(3, 1040),
+    'DT_DURATION' => array(2, 66),
 
     //xslt not used
     'DT_FILTER_STRING' => array(2, 40),
@@ -500,7 +542,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_LAYOUT_STRING' => array(2, 48),
     'DT_TRANSFORM_RESOURCE' => array(2, 50),
     'DT_PROPERTY_VALUE' => array(2, 51),
-    'DT_TOOL_TYPE' => array(2, 52),
     'DT_RECORD_TYPE' => array(2, 53),
     'DT_DETAIL_TYPE' => array(2, 54),
     'DT_COMMAND' => array(2, 55),
@@ -532,7 +573,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3, 1043),
     'DT_MAP_IMAGE_WORLDFILE' => array(3, 1095),
     'DT_ALTERNATE_NAME' => array(3, 1009),
-    'DT_TIMELINE_FIELDS' => array(2, 1105),
     // Map document
     'DT_MAP_LAYER' => array(3, 1081),
     'DT_MAP_BOOKMARK' => array(3, 1082),
@@ -545,6 +585,10 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_OPACITY' => array(3, 1090),         // outdated
     'DT_ORDERING_HIERARCHY' => array(2, 1082), // field used to define drag-drop ordering of records
     'DT_DATA_SOURCE' => array(3, 1083),
+    // Smarty reports (plan 12)
+    'DT_IS_CARD_VIEW' => array(2, 1182), // Flag Yes|No: report for a single record (popups, cards, record view)
+    'DT_REPORT' => array(2, 1183), // pointer to Custom Report
+    'DT_INTERVAL_MINUTES' => array(2, 1184), // regeneration interval of a report schedule
     // Shape
     'DT_ZIP_FILE' => array(3, 1072),
     'DT_SHAPE_FILE' => array(3, 1069),
@@ -574,7 +618,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_EXTFILES' => array(2, 939), //external links and scripts
     'DT_CMS_FOOTER' => array(2, 940),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
-    'DT_LANGUAGES' => array(2, 967),
+    'DT_LANGUAGE' => array(2, 967),
     'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only
     'DT_CMS_MENU_HOME' => array(2, 1149),  //show home entry in main menu 
     'DT_CMS_ACTION' => array(2, 1148),
@@ -725,6 +769,26 @@ function findInArray(array $arr, string $key, $keyvalue): ?int {
 function isPositiveInt($val){
     return isset($val) && (is_int($val) || ctype_digit((string)$val)) && (int)$val > 0;
 }
+/* implemented - but not used
+function isConceptCode($val, $parse=false){
+    $database_id = 0;
+    $recid = 0;
+    if (is_string($val) && (strpos((string)$val, '-') !== false)){
+        [$database_id, $recid] = explode('-', (string)$val, 2);
+        $database_id = (int)isPositiveInt($database_id)?$database_id:0;
+        $recid = (int)isPositiveInt($database_id)?$recid:0;
+    }
+    $res = $recid>0 && $database_id>0;
+    if($parse){
+       $res = [$database_id, $recid];
+    }
+    return $res;
+}
+
+function getConceptCode($val):array{
+    return isConceptCode($val, true);
+}
+*/
 
 /**
  * Checks if the current server name is 'localhost' or '127.0.0.1'.
@@ -812,15 +876,11 @@ function includeJQuery($useBootstrap=false){
 <?php
    }else{
 ?>
-        <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
-<!--        
-        <script src="https://code.jquery.com/jquery-migrate-3.5.2.js" integrity="sha384-v0gmY8lRWAAaI20hT2ehyGAhsZiQpB+ZMpRHg/ipfVinhY4zxJXPjV8zaVW3kq4W" crossorigin="anonymous"></script>
--->        
-        <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-/L7+EN15GOciWSd0nb17+43i1HKOo5t8SFtgDKGqRJ2REbp8N6fwVumuBezFc4qC" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.js"  crossorigin="anonymous"></script>
+       
+        <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
         
-<!-- integrity="sha384-uJ1kv5AM1PIf6IknvFka0Bz6fhImzrMsIoiUoYwy+Sf5DgJs59ODm+4HAae4TVbh" -->
-
         <script src="https://js-de.sentry-cdn.com/bd493ee1a58acc612b6cc71d055d8ff9.min.js" 
                 crossorigin="anonymous"></script>
                 
@@ -842,29 +902,6 @@ function includeJQuery($useBootstrap=false){
         </script>        
 <?php
    }
-?>
-        <!-- Calendar picker -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.plus.js"></script>
-
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker.css"> <!-- Original picker CSS was 1.2.1, using 2.1.1 path now -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.picker.js"></script>
-
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.taiwan.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.thai.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.julian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.persian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.islamic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ummalqura.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.hebrew.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ethiopian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.coptic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.nepali.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.mayan.js"></script>
-        <script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
-        
-<?php
         if($useBootstrap){
             if(isLocalHost()){
 ?>            

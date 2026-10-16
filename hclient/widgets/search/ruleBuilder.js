@@ -911,6 +911,7 @@ $.widget( "heurist.ruleBuilder", {
             });
 
             this.options.rules = {query:query, levels:sub_rules};
+            Object.assign(this.options.rules, window.hWin.HEURIST4.ui.describeExpansionRule(this.options.rules));
             return this.options.rules;
         }
     }

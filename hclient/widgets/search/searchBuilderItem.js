@@ -139,21 +139,21 @@ $.widget( "heurist.searchBuilderItem", {
         // 3. comparison selector or relationtype selector
         // 4. value input
         // 5. OR button
-        
-        
+
+
         // 0. Label (header)
         this.label_token = $( "<div>" )
-            .css({"font-size":"smaller",'padding-left':'94px',width:'95%','margin-top':'4px'})
+            .css({'font-size': 'smaller', 'padding-left': '94px',width: '95%', 'margin-top': '4px'})
             .appendTo( this.element ); //10px 0 10px 20px,'border-top':'1px solid lightgray' 
 
         // selector container - for fields and comparison
         this.sel_container = $('<div>')
-            .css({'display':'inline-block','vertical-align':'top','padding-top':'3px'})
+            .css({display: 'inline-block', 'vertical-align': 'top', 'padding-top': '3px'})
             .appendTo(this.element);
 
         // values container - consists of set of inputs (editing_input) and add/remove buttons
         this.values_container = $( '<fieldset>' )
-            .css({'display':'inline-block','padding':0}) //,'margin-bottom': '2px'
+            .css({display: 'inline-block', padding: 0, 'max-width': '30em'}) //,'margin-bottom': '2px'
             .appendTo( this.element );
 
             
@@ -356,7 +356,7 @@ $.widget( "heurist.searchBuilderItem", {
                     if(this.options.enum_field!=null){
                         lbl_text = lbl_text + '.'+this.options.enum_field;
                     }
-                    
+
                     this.element
                         .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
                         .text(lbl_text);
@@ -372,17 +372,25 @@ $.widget( "heurist.searchBuilderItem", {
                 }
                 
             }else if(this.options.reverse_RtyID>0){
+
                 let lbl_text = '< '+$Db.rty(this.options.reverse_RtyID, 'rty_Name');
-                    this.element
-                        .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
-                        .text(lbl_text);
-                
+                this.element
+                    .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
+                    .text(lbl_text);
+
             }else{
                 this.label_token.text('broken!');
             }
-        }else if(this.options.dty_ID > 0){
+        }else if(!window.hWin.HEURIST4.util.isempty(this.options.dty_ID)){
 
-            let lbl_text = $Db.dty(this.options.dty_ID,'dty_Name');
+            let lbl_text = '';
+            if(window.hWin.HEURIST4.util.isPositiveInt(this.options.dty_ID)){
+                lbl_text = $Db.dty(this.options.dty_ID,'dty_Name');
+            }else{
+                let res = $Db.parseHierarchyCode(`any:${this.options.dty_ID}`);
+                lbl_text = res !== false ? res['harchy_fields'][0] : `${this.options.dty_ID.charAt(0).toUpperCase()}${str.slice(1)}`;
+            }
+
             if(this.options.enum_field!=null){
                 lbl_text = lbl_text + '.' + this.options.enum_field;
             }
@@ -734,6 +742,9 @@ Whole value = EQUAL
                             rst_DefaultValue: '',
                             rst_MaxValues:100};
             ed_options['dtFields'] = dtFields;
+
+            ed_options.dtFields.rst_Display = 'visible';
+            ed_options.dtFields.rst_MayModify = 'open';
             
             this._predicate_reltype_ele = $("<div>").editing_input(ed_options).appendTo(this.values_container);
             let ele = this._predicate_reltype_ele.find('.editint-inout-repeat-button')
@@ -770,6 +781,19 @@ Whole value = EQUAL
             ed_options.dtFields['rst_PointerMode'] = 'browseonly';
         }else if(field_type=='freetext' || field_type=='blocktext' || field_type==prev_type){
             ed_options.values = prev_value;
+        }
+
+        if(!ed_options.dtFields){
+            ed_options.dtFields = {};
+        }
+        ed_options.dtFields.rst_Display = 'visible';
+        ed_options.dtFields.rst_MayModify = 'open';
+
+        if(field_type === 'enum'){
+            ed_options.dtFields.rst_FilteredJsonTermIDTree = $Db.dty(ed_options.dtID, 'dty_JsonTermIDTree');
+        }
+        if(field_type === 'resource'){
+            ed_options.dtFields.rst_PtrFilteredIDs = $Db.dty(ed_options.dtID, 'dty_PtrTargetRectypeIDs');
         }
 
         //init input elements

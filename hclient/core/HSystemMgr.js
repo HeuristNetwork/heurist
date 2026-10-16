@@ -31,6 +31,7 @@
 class HSystemMgr {
     /** @private */
   hapi4;
+  _verifyRecordEditorScriptsStart;
     
   /**
    * Creates an instance of HSystemMgr.
@@ -38,6 +39,7 @@ class HSystemMgr {
    */
   constructor(hapi4) {
     this.hapi4 = hapi4; 
+    this._verifyRecordEditorScriptsStart = false;
   }
   
   /**
@@ -1008,6 +1010,27 @@ class HSystemMgr {
   }
 
   /**
+  * Update the user's blocked notification list.
+  *
+  * @param {Object} [request={a: 'set_user_notification_settings', blocking: []}] - Request object.
+  * @param {function(Object): void} callback - Callback to handle server response.
+  *        Response `data` will be true on success.
+  * @returns {void}
+  */
+  block_user_notifications(request, callback){
+      if(!request || !request.blocking){
+          if(typeof callback === 'function'){
+            callback({status: window.hWin.ResponseStatus.INVALID_REQUEST, message: 'Blocking list is missing'});
+          }
+          return false;
+      }
+      if(!request.a){
+          request.a = 'set_user_notification_settings';
+      }
+      window.hWin.HAPI4.callserver('usr_info', request, callback);
+  }
+
+  /**
   * Retrieves custom formats for the TinyMCE rich text editor, configured for the Heurist instance.
   *
   * @param {Object} [request={a: 'get_tinymce_formats'}] - Request object.
@@ -1258,9 +1281,10 @@ class HSystemMgr {
   * @param {boolean} [is_conservative=true] - If true (conservative mode), the import process might be more cautious about overwriting
   *                                           or may have specific behavior for handling conflicts (server-side logic).
   * @param {function(Object): void} [callback] - Optional callback to handle the server response after the import attempt.
+  * @param {string} [source_databaseURL] - Known source URL, including the db query parameter.
   * @returns {void}
   */
-  import_definitions(source_databaseID, definition_ids, entity_type, is_rename_target, is_conservative, callback) {
+  import_definitions(source_databaseID, definition_ids, entity_type, is_rename_target, is_conservative, callback, source_databaseURL) {
       
       let request = {
           a: 'import', // Server-side action might be different, this seems like a sub-parameter for sys_structure
@@ -1271,6 +1295,12 @@ class HSystemMgr {
           db: window.hWin.HAPI4.database, // Current database context
           import: entity_type // Specifies what kind of entity to import (e.g., 'rectype')
       };
+
+      // Browse templates already knows the source location used to list its definitions.
+      // Keep ID-only callers using the existing registration resolver.
+      if (source_databaseURL) {
+          request.databaseURL = source_databaseURL;
+      }
 
       window.hWin.HAPI4.callserver('sys_structure', request, function (response) {
           if (response.status == window.hWin.ResponseStatus.OK) {
@@ -1479,6 +1509,173 @@ class HSystemMgr {
 
             chunkValue(key, value);
         }
+    }
+
+    /**
+     * Loads the necessary scripts for editing records.
+     * Checks and loads any missing scripts from the following:
+     *  jquery.fileupload.js, wellknown.js, ui-tabs-paging.js, evol.colorpicker.js,
+     *  editing2.js, editing_inputs.js, editingBrowse.js, mapSymbolEditor.js, editingHelpers.js,
+     *  temporalObjectLibrary.js and utils_geo.js
+     *
+     * @param {function} callback callback function after all the scripts have been loaded
+     * @param {array} callbackParams any parameters to be sent to the callback function
+     * @returns {boolean} whether the scripts are already loaded
+     */
+    verifyRecordEditorScripts(callback, callbackParams){
+        
+        if(this._verifyRecordEditorScriptsStart){
+            return true;
+        }
+        
+        this._verifyRecordEditorScriptsStart = true;
+
+        if(typeof callback !== 'function'){
+            callback = () => {};
+        }
+        if(!window.hWin.HEURIST4.util.isArray(callbackParams)){
+            callbackParams = [];
+        }
+
+        let scripts = [];
+        const editingBase = `${window.hWin.HAPI4.baseURL}hclient/widgets/editing/`;
+        const coreBase = `${window.hWin.HAPI4.baseURL}hclient/core/`;
+        const externalBase = `${window.hWin.HAPI4.baseURL}external/`;
+        const widgetBase = `${window.hWin.HAPI4.baseURL}hclient/widgets/`;
+
+        // External
+        if(typeof $.blueimp?.fileupload === 'undefined'){ // File upload handler
+            scripts.push(`${externalBase}jquery-file-upload/js/jquery.fileupload.js`);
+            scripts.push(`${externalBase}jquery-file-upload/js/jquery.iframe-transport.js`);
+        }
+        if(typeof parseWKT === 'undefined'){ // WKT parser
+            scripts.push(`${externalBase}js/wellknown.js`);
+        }
+        if(typeof $.ui.tabs.prototype.paging === 'undefined'){ // UI Tabs paging
+            scripts.push(`${externalBase}jquery.widgets/ui.tabs.paging.js`);
+        }
+        if(typeof $.evol?.colorpicker === 'undefined'){ // Colorpicker
+            scripts.push(`${externalBase}jquery.widgets/evol.colorpicker.js`);
+            $.getStyles(`${externalBase}jquery.widgets/evol.colorpicker.css`);
+        }
+        if(typeof $.moogle?.contextmenu === 'undefined'){ // Context Menu
+            scripts.push(`${externalBase}jquery.widgets/jquery.ui-contextmenu.js`);
+        }
+
+        // Core + Utils
+        if(typeof TDate === 'undefined'){ // Date values
+            scripts.push(`${coreBase}temporalObjectLibrary.js`);
+        }
+        if(typeof window.hWin.HEURIST4.geo === 'undefined'){ // Geospatial values
+            scripts.push(`${coreBase}utils_geo.js`);
+        }
+
+        // Editing
+        if(typeof HEditing === 'undefined'){
+            scripts.push(`${editingBase}editing2.js`);
+        }
+        if(typeof $.heurist.editing_input === 'undefined'){
+            scripts.push(`${editingBase}editing_input.js`);
+        }
+        if(typeof openSearchMenu === 'undefined'){
+            scripts.push(`${editingBase}editingBrowse.js`);
+            scripts.push(`${editingBase}editingTranslation.js`);
+            scripts.push(`${editingBase}editingHelpers.js`);
+        }
+        if(typeof EditorCodeMirror === 'undefined'){
+            scripts.push(`${editingBase}editorCodeMirror.js`);
+        }
+        
+
+        //widgets
+        if(typeof $.heurist?.manageEntity === 'undefined'){
+            scripts.push(`${widgetBase}entity/manageEntity.js`);
+        }
+        if(typeof $.heurist?.searchEntity === 'undefined'){
+            scripts.push(`${widgetBase}entity/searchEntity.js`);
+        }
+        if(typeof $.heurist?.configEntity === 'undefined'){
+            scripts.push(`${widgetBase}entity/configEntity.js`);
+        }
+        if(typeof $.heurist?.manageRecords === 'undefined'){
+            scripts.push(`${widgetBase}entity/manageRecords.js`);
+        }
+        if(typeof $.heurist?.searchRecords === 'undefined'){
+            scripts.push(`${widgetBase}entity/searchRecords.js`);
+        }
+        if(typeof $.heurist?.manageRecUploadedFiles === 'undefined'){
+            scripts.push(`${widgetBase}entity/manageRecUploadedFiles.js`);
+        }
+        if(typeof $.heurist?.searchRecUploadedFiles === 'undefined'){
+            scripts.push(`${widgetBase}entity/searchRecUploadedFiles.js`);
+        }
+        if(typeof $.heurist?.manageUsrTags === 'undefined'){
+            scripts.push(`${widgetBase}entity/manageUsrTags.js`);
+        }
+        if(typeof $.heurist?.searchUsrTags === 'undefined'){
+            scripts.push(`${widgetBase}entity/searchUsrTags.js`);
+        }
+        if(typeof $.heurist?.mediaViewer === 'undefined'){
+            scripts.push(`${widgetBase}viewers/mediaViewer.js`);
+        }
+        if(typeof $.heurist?.progressReport === 'undefined'){
+            scripts.push(`${widgetBase}admin/progressReport.js`);
+        }
+        if(typeof $.heurist?.importStructure === 'undefined'){
+            scripts.push(`${widgetBase}admin/importStructure.js`);
+        }
+        if(typeof $.heurist?.recordAction === 'undefined'){
+            scripts.push(`${widgetBase}record/recordAction.js`);
+        }
+        if(typeof $.heurist?.recordAccess === 'undefined'){
+            scripts.push(`${widgetBase}record/recordAccess.js`);
+        }
+        if(typeof HSvsEdit === 'undefined'){
+            scripts.push(`${widgetBase}search/svsEdit.js`);
+        }        
+        
+        if(!(
+        $.calendars && typeof $.calendars.instance === 'function' &&
+        $.calendars.calendars && $.calendars.calendars.gregorian
+        )){
+            
+            const calendarBase = `${window.hWin.HAPI4.baseURL}external/jquery.calendars-2.1.1/js/`;
+            
+            scripts.push(`${calendarBase}jquery.plugin.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.plus.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.picker.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.taiwan.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.thai.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.julian.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.persian.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.islamic.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.ummalqura.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.hebrew.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.ethiopian.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.coptic.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.nepali.min.js`);
+            scripts.push(`${calendarBase}jquery.calendars.mayan.min.js`);
+            scripts.push(`${coreBase}jquery.calendars.japanese.js`);
+            
+            $.getStyles(`${externalBase}jquery.calendars-2.1.1/css/jquery.calendars.picker.css`);
+        }
+        
+
+        if(scripts.length > 0){
+            $.getMultiScriptsSequental(scripts)
+                .then(() => {
+                    this._verifyRecordEditorScriptsStart = false;
+                    callback(...callbackParams);
+                })
+                .catch((e) => {
+                    this._verifyRecordEditorScriptsStart = false;
+                    console.error(e);                    
+                    window.hWin.HEURIST4.msg.showMsg_ScriptFail()   
+                });
+        }
+
+        return (scripts.length === 0);
     }
   
 }

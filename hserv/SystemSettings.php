@@ -64,7 +64,15 @@ class SystemSettings {
         'Invalid URLs' => 'invalid_urls.json',
         'Notifications' => 'user_notifications.json',
         'Languages' => 'db_languages.json',
-        'External IDs' => 'external_IDs.json'
+        'External IDs' => 'external_IDs.json',
+        'Safeguard backups' => 'safeguard_backups.json',
+        'DOIs' => 'DOIs.json',
+        // added 18/9/26 for master-satellite synchronisation
+        'Synchronisation' => 'synchronisation.json',
+        // added 4/10/26 for Smarty reports (allowDynamicReports)
+        'Reports' => 'reports.json',
+        // added 6/10/26 for record export (maxRecords, timeLimit)
+        'Export' => 'export.json'
     ];
 
     /**
@@ -320,6 +328,26 @@ class SystemSettings {
 
         //returns all or particular value
         return ($fieldname) ?@$this->settingsInDb[$fieldname] :$this->settingsInDb;
+    }
+
+    /**
+     * Checks whether the database schema version is equal to or newer than the given version.
+     *
+     * @param string $version Version to compare against (e.g. "1.3.14").
+     * @return bool True if database version >= $version.
+     */
+    public function isDbVersionAtLeast($version){
+
+        $settings = $this->get();
+        if(!is_array($settings)){
+            return false;
+        }
+
+        $db_version = intval(@$settings['sys_dbVersion']).'.'
+                     .intval(@$settings['sys_dbSubVersion']).'.'
+                     .intval(@$settings['sys_dbSubSubVersion']);
+
+        return version_compare($db_version, $version, '>=');
     }
 
     /**

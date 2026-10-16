@@ -865,7 +865,7 @@ $mysqli = $system->getMysqli();
                     <h3>Non-registered files</h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_notreg);?> entries</div>
                     <div>
-                    Use Populate > Create media records to register and add these to the database as Digital Media records. Or
+                    Use Populate > Create records from files to register and add these to the database as Digital Media records. Or
                     select all or some entries and click the button
                     <button onclick="doRepairAction('files_notreg')">Remove non-registered files</button>
                     to delete files from system.</div>

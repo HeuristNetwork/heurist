@@ -31,15 +31,21 @@
             
                 
             <div>
-                <div class="header">Field to be matched (in current query result):</div>
-                <select id="sel_fieldtype_source" class="ui-widget-content ui-corner-all" style="min-height: 24px;"></select>
-                <span id="count_source_unique" style="padding-left:5px;font-weight:bold"></span>
+                <div class="header" style="padding-bottom: 10px;">Field to be matched (in current query result):</div>
+                <div style="width: 2em; display: table-cell;">
+                    <span id="repeat_source_input" style="cursor: pointer;" class="ui-icon ui-icon-circlesmall-plus"></span>
+                </div>
+                <div class="fieldtype_sources input-cell">
+                </div>
             </div>
 
             <!-- link field selector -->
             <div>
-                <div class="header">Record pointer field to update with ID of matched records:</div>
-                <select id="sel_pointer_field" class="text ui-widget-content ui-corner-all"></select>
+                <div class="header" style="padding-bottom: 10px;">Record pointer field to update with ID of matched records:</div>
+                <div style="width: 2em; display: table-cell;"></div>
+                <div>
+                    <select id="sel_pointer_field" class="text ui-widget-content ui-corner-all"></select>
+                </div>
                 <!-- <div id="source_field"  style="margin-bottom:15px;max-height: 40%;overflow: auto;border:none;"></div> -->
             </div>
                 
@@ -48,17 +54,21 @@
             </div>
             
             <div>
-                <div class="header">Entity type in which to seek matches:</div>
-                <select id="target_record_type" class="text ui-widget-content ui-corner-all"></select>
-                <span id="count_target_rty" style="padding-left:5px;font-weight:bold"></span>
-                <div class="heurist-helper2">Only entity types compatible with the selected record pointer field are shown</div>
+                <div class="header" style="padding-bottom: 10px;">Entity type in which to seek matches:</div>
+                <div style="width: 2em; display: table-cell;"></div>
+                <div>
+                    <select id="target_record_type" class="text ui-widget-content ui-corner-all"></select>
+                    <span id="count_target_rty" style="padding-left:5px;font-weight:bold"></span>
+                    <div class="heurist-helper2">Only entity types compatible with the selected record pointer field are shown</div>
+                </div>
             </div>
             
             <!-- target field selector -->
             <div>
-                <div class="header">Field in which to seek matches:</div>
-                <select id="sel_fieldtype_target" class="ui-widget-content ui-corner-all" style="margin-top:15px;margin-bottom:15px;min-height: 24px;"></select>
-                <span id="count_target_matches" style="padding-left:5px;font-weight:bold"></span>
+                <div class="header" style="padding-bottom: 10px;">Field in which to seek matches:</div>
+                <div style="width: 2em; display: table-cell;"></div>
+                <div class="fieldtype_targets input-cell">
+                </div>
             </div>
 
 
@@ -66,9 +76,12 @@
                 <div class="header">
                     Existing values behaviour:
                 </div>
-                <label><input name="to_replace" type="radio" checked value="add"/>add value (no duplication)</label>
-                <label><input name="to_replace" type="radio" value="replace"/>replace existing value(s)</label>
-                <label><input name="to_replace" type="radio" value="nonmatch"/>non-match report only</label>
+                <div style="width: 2em; display: table-cell;"></div>
+                <div>
+                    <label><input name="to_replace" type="radio" checked value="add"/>add value (no duplication)</label>
+                    <label><input name="to_replace" type="radio" value="replace"/>replace existing value(s)</label>
+                    <label><input name="to_replace" type="radio" value="nonmatch"/>non-match report only</label>
+                </div>
             </div>
 
 </fieldset>            

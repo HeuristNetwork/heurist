@@ -49,9 +49,7 @@ if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
     {
         
         // IMPORTANT: allow concurrent progress.php calls from same browser session
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }               
+        $system->session()->close();
         
         $rty_IDs = null;
         if(@$_REQUEST['recTypeIDs']!=null){
@@ -59,7 +57,7 @@ if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
         }
 
         $system->setResponseHeader();
-        $res = recordUpdateCalcFields($system, null, $rty_IDs, $sessionId);
+        $res = recordUpdateCalcFields($system, null, $rty_IDs, $sessionId, 0);
 
         //2b. response to client side
         if( is_bool($res) && !$res ){
@@ -78,7 +76,7 @@ if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
             $rty_IDs = null;
         }
 
-        $res = recordUpdateCalcFields($system, null, $rty_IDs);
+        $res = recordUpdateCalcFields($system, null, $rty_IDs, null, 0);
     }
 }
 
@@ -132,7 +130,9 @@ if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
                 $('#rec_total').text(response.data['rec_total']);
                 $('#rec_processed').text(response.data['rec_processed']);
                 $('#fld_changed').text(response.data['fld_changed']);
+                $('#rec_updates').text(response.data['rec_updates']);
                 $('#fld_cleared').text(response.data['fld_cleared']);
+                $('#rec_cleared').text(response.data['rec_cleared']);
                 $('#fld_same').text(response.data['fld_same']);
 
                 if(response.data['q_updates']){

@@ -460,18 +460,18 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         if(outputMode === 'feed'){
 
-            let settings = {
+            let request = {
                 ids: scope,
                 prefs: JSON.stringify(settings),
                 output_raw: 1
             };
 
             if(rec_RecTypeID > 0){
-                settings['rec_RecTypeID'] = rec_RecTypeID;
+                request['rec_RecTypeID'] = rec_RecTypeID;
             }
 
             const ID = Math.floor(Math.random() * 90000);
-            window.hWin.HAPI4.SystemMgr.prepareParameters('export-feed', settings, 0, ID, {format: 'csv'});
+            window.hWin.HAPI4.SystemMgr.prepareParameters('export-feed', request, 0, ID, {format: 'csv'});
 
             let url = `${window.hWin.HAPI4.baseURL}hserv/controller/record_output.php?db=${window.hWin.HAPI4.database}&format=csv&preparedID=${ID}`;
 
@@ -978,8 +978,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             let pos_top = item.offsetTop;
             $ele.css({
                 'position': 'absolute',
-                'top': pos_top+'px',
-                'left': '20px'
+                'top': pos_top+'px'
             });
         }
     },
@@ -1028,8 +1027,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         let pos_top = item.offsetTop;
         fieldElement.css({
             'position': 'absolute',
-            'top': pos_top+'px',
-            'left': '20px'
+            'top': pos_top+'px'
         });
 
         this._on(fieldElement.find('.ui-icon'), {

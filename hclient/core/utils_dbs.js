@@ -322,7 +322,48 @@ window.hWin.HEURIST4.dbs = {
     },
 
     //========================================================================
-    
+
+    /**
+     * Finds the record types present in the results of a query, with their record counts,
+     * using the legacy record_search 'count_by_rty' detail (same call used by selectGeoOrTimeField).
+     * The new /api/{db}/records endpoint has no client-side support for a rectype-counts
+     * response yet, so this deliberately reuses the proven legacy path.
+     *
+     * @function getRectypeCountsForQuery
+     * @memberof HEURIST4.dbs
+     * @param {string} query - Heurist search query string. If empty, callback is invoked with an empty array.
+     * @param {function(number[], Object<string,number>)} callback - Receives (rectypeIds sorted by count desc, raw counts map).
+     */
+    getRectypeCountsForQuery: function(query, callback){
+
+        if(window.hWin.HEURIST4.util.isempty(query)){
+            callback([], {});
+            return;
+        }
+
+        let request = {
+            q: query,
+            w: 'a',
+            detail: 'count_by_rty'
+        };
+
+        window.HAPI4.RecordMgr.search(request, function(response){
+
+            if(response.status != window.hWin.ResponseStatus.OK){
+                callback([], {});
+                return;
+            }
+
+            let counts = (response.data && $.isPlainObject(response.data.recordtypes))
+                ? response.data.recordtypes : {};
+
+            let rectypeIds = Object.keys(counts).sort(function(a,b){
+                return (Number(counts[b])||0) - (Number(counts[a])||0);
+            });
+
+            callback(rectypeIds, counts);
+        });
+    },
 
     /**
      * Legacy wrapper for `createRectypeStructureTree_new`.
@@ -1018,7 +1059,7 @@ window.hWin.HEURIST4.dbs = {
                                 $dt_title = ' <span style="font-style:italic">' + $dt_title + '</span>';
                             }
 
-                            $res = {};                            
+                            $res = {};
                             
                             if($pointerRecTypeId=="" || $rectype_ids.length==0){ //unconstrainded
                                                     //
@@ -2863,9 +2904,16 @@ window.hWin.HEURIST4.dbs = {
             
             if(rtid!=''){
                 if(rtid=='any'){
-                    harchy.push('');    
-                    if(top_rty_ID>0) rtid = top_rty_ID; // Use top_rty_ID for context if 'any'
-                    
+
+                    harchy.push('');
+                    if(dtid === 'exists'){
+                        rtid = window.hWin.HEURIST4.util.isempty(harchy[harchy.length - 2])
+                            ? 'Value exists'
+                            : `${harchy[harchy.length - 2].replace(/ > $/, '').replace(/^ \. /, '')} values`;
+                    }else if(top_rty_ID>0){
+                        rtid = top_rty_ID; // Use top_rty_ID for context if 'any'
+                    }
+
                 }else if($Db.rty(rtid)==null){
                     //record type was removed - remove facet
                     removeFacet = true;
@@ -2904,7 +2952,7 @@ window.hWin.HEURIST4.dbs = {
             }else if(dtid=='anyfield'){
                 rec_header = "Any field"; 
             }else if(dtid=='exists'){
-                rec_header = `${$Db.rty(rtid, 'rty_Name')} records`;
+                rec_header = !window.hWin.HEURIST4.util.isPositiveInt(rtid) ? rtid : `${$Db.rty(rtid, 'rty_Name')} records`;
             }
             
             if( rec_header ){ // If it's a recognized header field
@@ -3447,16 +3495,25 @@ window.hWin.HEURIST4.dbs = {
             return dty_IDs;
         }
 
+        rty_IDs = rty_IDs.map(id => Number.parseInt(id));
+        ignored_dty_id = ignored_dty_id.map(id => Number.parseInt(id));
+
+        let allDtyIDs = [];
+
         for(const rty_ID of rty_IDs){
 
-            let fields_for_rty = $Db.rst(rty_ID).getIds(); // Get all dty_IDs for this rty_ID
-            if(dty_IDs.length == 0){ // First record type, so all its fields are potential shared fields
-                dty_IDs = fields_for_rty;
+            let rstFields = $Db.rst(rty_ID);
+            if(!rstFields || rstFields.length() === 0){
                 continue;
             }
-            // Intersect current dty_IDs with fields_for_rty
-            dty_IDs = dty_IDs.filter(fld_id => fields_for_rty.includes(fld_id));
+
+            let fieldsForRty = rstFields.getIds(); // Get all dty_IDs for this rty_ID
+            fieldsForRty = fieldsForRty.map(id => Number.parseInt(id));
+
+            allDtyIDs.push(fieldsForRty);
         }
+
+        dty_IDs = window.hWin.HEURIST4.util.arrayIntersection(allDtyIDs);
 
         if(dty_IDs.length > 0 && ignored_dty_id.length > 0){
             dty_IDs = dty_IDs.filter(fld_id => !ignored_dty_id.includes(fld_id));
@@ -3832,6 +3889,113 @@ window.hWin.HEURIST4.dbs = {
         }
 
         return parts.join(trm_separator);
+    },
+
+    getRegisteredDatabases: async function(){
+
+        window.hWin.getReigsteredDBs = true;
+
+        return new Promise((resolve) => {
+
+            const request = {remote:'master', detail: 'header'};
+
+            window.hWin.HAPI4.RecordMgr.search(request, (response) => {
+
+                if(response.status !== window.hWin.ResponseStatus.OK){
+                    window.hWin.getReigsteredDBs = false;
+                    resolve(false);
+                    return;
+                }
+
+                const recordSet = new HRecordSet(response.data);
+
+                recordSet.each((recID, record) => {
+
+                    const recURL = recordSet.fld(record, 'rec_URL');
+                    const parameters = window.hWin.HEURIST4.util.getUrlParams(recURL === '' ? null : recURL);
+                    recID = Number.parseInt(recID);
+
+                    if(window.hWin.HEURIST4.util.isempty(parameters?.db) || !window.hWin.HEURIST4.util.isPositiveInt(recID)){
+                        return;
+                    }
+
+                    window.hWin.HEURIST4.registeredDatabases[recID] = parameters.db;
+                });
+
+                window.hWin.getReigsteredDBs = false;
+                resolve(true);
+            });
+        });
+    },
+
+    getOriginatingDBName: async function(originatingDBID){
+
+        if(window.hWin.HEURIST4.util.isPositiveInt(originatingDBID)){
+            originatingDBID = Number.parseInt(originatingDBID);
+        }else if(typeof originatingDBID === 'string' && originatingDBID.indexOf('-') < 0){
+            originatingDBID = Number.parseInt(originatingDBID.split('-')[0]);
+        }
+
+        if(window.hWin.getReigsteredDBs){
+
+            return new Promise((resolve) => {
+                let interval = setInterval(() => {
+                    if(Object.hasOwn(window.hWin.HEURIST4.registeredDatabases, originatingDBID) || !window.hWin.getReigsteredDBs){
+                        clearInterval(interval);
+                        resolve(Object.hasOwn(window.hWin.HEURIST4.registeredDatabases, originatingDBID) ? window.hWin.HEURIST4.registeredDatabases[originatingDBID] : 'Unknown');
+                    }
+                }, 1000);
+            });
+        }
+
+        const regID = Number.parseInt(window.hWin.HAPI4.sysinfo.db_registeredid);
+        if(!window.hWin.HEURIST4.registeredDatabases){
+
+            window.hWin.HEURIST4.registeredDatabases = { [regID]: window.hWin.HAPI4.database };
+
+            let result = await $Db.getRegisteredDatabases();
+            if(!result || !Number.isNaN(originatingDBID) && !Object.hasOwn(window.hWin.HEURIST4.registeredDatabases, originatingDBID)){
+                window.hWin.HEURIST4.registeredDatabases[originatingDBID] = 'Unknown';
+            }
+        }
+
+        if(window.hWin.HEURIST4.util.isempty(originatingDBID) || originatingDBID == 0){
+            return originatingDBID == 0 ? window.hWin.HAPI4.database : 'Unknown';
+        }
+
+        if(Number.isNaN(originatingDBID) || Object.hasOwn(window.hWin.HEURIST4.registeredDatabases, originatingDBID)){
+            return Number.isNaN(originatingDBID) ? 'Unknown' : window.hWin.HEURIST4.registeredDatabases[originatingDBID];
+        }
+
+        try{
+
+            //https://heuristref.net/api/Heurist_Reference_Index/records/2?method=GET
+            const baseURL = window.hWin.HAPI4.sysinfo.referenceServerURL.replace('/heurist/', '/api/');
+            const URL = `${baseURL}${window.hWin.HAPI4.sysinfo.referenceServerIndexDatabase}/records/${originatingDBID}`;
+
+            let response = await fetch(URL);
+            if(!response.ok){
+                window.hWin.HEURIST4.registeredDatabases[originatingDBID] = 'Unknown';
+                return 'Unknown';
+            }
+
+            let json = await response.json();
+            if(json.records.length === 0){
+                window.hWin.HEURIST4.registeredDatabases[originatingDBID] = 'Unknown';
+                return 'Unknown';
+            }
+
+            let record = json.records.shift();
+            let database = record?.details?.[1091];
+            database = database === undefined ? 'Unknown' : Object.values(database)[0];
+
+            window.hWin.HEURIST4.registeredDatabases[originatingDBID] = database;
+
+            return database;
+
+        }catch{
+            return 'Unknown';
+        }
     }
 
 }//end dbs

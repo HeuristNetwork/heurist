@@ -84,6 +84,10 @@ require_once dirname(__FILE__).'/../records/edit/recordsBatch.php';
 
             $res = $dbRecDetails->resetThumbnails();
 
+        }elseif(@$_REQUEST['a'] == 'iiif_thumbs'){
+
+            $res = $dbRecDetails->createIiifAnnotationThumbnails();
+
         }elseif(@$_REQUEST['a'] == 'create_sub_records'){
 
             $res = $dbRecDetails->createSubRecords();
@@ -99,6 +103,12 @@ require_once dirname(__FILE__).'/../records/edit/recordsBatch.php';
         }elseif(@$_REQUEST['a'] == 'translation'){
 
             $res = $dbRecDetails->fieldTranslation();
+
+        }elseif(@$_REQUEST['a'] == 'dms_to_decimal'){
+            $res = $dbRecDetails->coordinatesToDecimal();
+        }elseif(@$_REQUEST['a'] == 'increment'){
+
+            $res = $dbRecDetails->fieldIncrementValue();
 
         }else {
 

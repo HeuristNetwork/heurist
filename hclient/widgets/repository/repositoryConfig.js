@@ -36,7 +36,8 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
         htmlContent: 'repositoryConfig.html',
         helpContent: null,
 
-        type: 'repository'
+        type: 'repository',
+        backupOnly: false
     },
 
     /**
@@ -47,7 +48,8 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      */
     _init: function() {
 
-        let _services = ['Nakala','Flickr','Zenodo','Isidore','MediHAL','DSpace'];
+        let _services = ['Nakala','Zenodo'];
+        // Future services: Flickr, Isidore, MediHAL, DSpace.
         this._available_services = [];
         for(let idx in _services){
             this._available_services.push({service:_services[idx].toLowerCase(),label:_services[idx]});
@@ -71,6 +73,21 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      * @private
      */
     _initControls:function(){
+
+        this._$('#safeguard_section').toggle(this.options.backupOnly);
+        this._$('.repository-credentials').toggle(!this.options.backupOnly);
+        this._$('.btnSave').toggle(!this.options.backupOnly);
+
+        const pageSetting = window.hWin.heuristExperimentalAllowed;
+        const experimentalAllowed = typeof pageSetting === 'boolean'
+            ? pageSetting
+            : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
+        if(this.options.backupOnly && experimentalAllowed){
+            this._loadBackupSettings();
+        }else if(this.options.backupOnly){
+            this._markSafeguardUnavailable();
+        }
+        this._on(this._$('#backup_save_settings'), {click: this._saveBackupSettings});
 
         //fill record type selector
         this.selectUserGroups = this._$('#sel_usergroup').css({'list-style-type': 'none'});
@@ -161,11 +178,83 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
 
                 window.hWin.HEURIST4.util.setDisabled(that.save_btn, !that._services_modified);
                 window.hWin.HEURIST4.msg.showMsgFlash('Saved repositories configurations...', 3000);
+                if(that.options.backupOnly) that._loadBackupSettings();
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
 
+    },
+
+    _getActionButtons: function(){
+        const buttons = this._super();
+        return this.options.backupOnly ? buttons.filter(button => button.class === 'btnClose') : buttons;
+    },
+
+    _markSafeguardUnavailable: function(){
+        const section = this._$('#safeguard_section');
+        const message = window.hWin.heuristExperimentalUnavailableMessage;
+        section.addClass('ui-state-disabled')
+            .attr({'aria-disabled':'true', title:message});
+        section.find('input, button').prop('disabled', true);
+        if(!section.find('.safeguard-hover-overlay').length){
+            $('<div class="safeguard-hover-overlay">')
+                .attr({title:message, 'aria-label':message})
+                .appendTo(section);
+        }
+    },
+
+    _loadBackupSettings: function(){
+        window.hWin.HAPI4.SystemMgr.repositoryAction({a:'backup_settings'}, (response) => {
+            if(response.status == window.hWin.ResponseStatus.OK && response.data.enabled === false){
+                this._markSafeguardUnavailable();
+                return;
+            }
+            if(response.status != window.hWin.ResponseStatus.OK){
+                this._$('#backup_save_settings, #backup_interval_days, #backup_email_file').prop('disabled', true);
+                return;
+            }
+            const config = response.data;
+            this._$('#backup_interval_days').val(config.interval_days);
+            this._$('#backup_email_file').prop('checked', config.email_file);
+            this._$('#backup_last_date').text(config.last_backup ? ' Last backup: '+config.last_backup : ' No successful automatic backup yet');
+            const list = this._$('#backup_accounts').empty();
+            if(!config.available.length){
+                list.append($('<p>').text('Configure repository credentials in Design > External repositories to add a repository.'));
+            }
+            for(const account of config.available){
+                const label = $('<label>').css({display:'block', margin:'10px 0'});
+                $('<input type="checkbox" class="backup-account">').val(account[0])
+                    .prop('checked', config.accounts.includes(account[0])).appendTo(label);
+                label.append(document.createTextNode(' '+account[1]+' ('+account[3]+')'));
+                list.append(label);
+            }
+            const email = $('<label>').css({display:'block', margin:'10px 0'});
+            $('<input id="backup_email_file" type="checkbox">')
+                .prop('checked', config.email_file === true).appendTo(email);
+            email.append(document.createTextNode(' Email file to database owner'));
+            list.append(email);
+        });
+    },
+
+    _saveBackupSettings: function(){
+        const days = Number(this._$('#backup_interval_days').val());
+        if(!Number.isInteger(days) || days < 1 || days > 365){
+            window.hWin.HEURIST4.msg.showMsgFlash('Choose an interval from 1 to 365 days');
+            return;
+        }
+        const accounts = this._$('#backup_accounts .backup-account:checked').map((_, el) => el.value).get();
+        window.hWin.HAPI4.SystemMgr.repositoryAction({
+            a:'backup_save', interval_days:days, accounts:JSON.stringify(accounts),
+            email_file:this._$('#backup_email_file').is(':checked') ? 1 : 0
+        }, (response) => {
+            if(response.status == window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgFlash('Safeguarding settings saved', 3000);
+                window.hWin.HAPI4.SystemMgr.repositoryAction({a:'backup_check'}, () => {});
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
     },
 
     /**

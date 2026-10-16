@@ -200,7 +200,7 @@ class USanitize {
             $message = '';
         }else{
             if($allowed_tags==null) {
-                $allowed_tags = '<a><u><i><div><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><h5><h6><p><ul><li><img><blockquote><pre><span><bibl><persName><audio><video><iframe><source><table><th><tr><td><article><aside><details><figcaption><figure><footer><header><main><mark><nav><section><summary><time>';
+                $allowed_tags = '<a><u><i><div><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><h5><h6><p><ol><ul><li><img><blockquote><pre><span><bibl><persName><audio><video><iframe><source><table><th><tr><td><article><aside><details><figcaption><figure><footer><header><main><mark><nav><section><summary><time>';
                 
             }elseif($allowed_tags===false){
                 $allowed_tags = null;
@@ -419,18 +419,22 @@ class USanitize {
      * Removes leading, trailing, and multiple consecutive spaces/tabs from a string or an array of strings.
      *
      * @param string|array $value The input string or array of strings to clean up.
+     * @param bool $removeSpaces Whether to completely remove the spaces
      * @return string|array The cleaned string or array of strings.
      */
-    public static function cleanupSpaces($value){
+    public static function cleanupSpaces($value, $removeSpaces = false){
 
-        if(is_string($value)){
-            $value = mb_ereg_replace('[ \t]{2,}', ' ', $value);// strip double spaces and tabs
+        $regex = $removeSpaces ? '\s' : '[ \t]{2,}';
+        $replace = $removeSpaces ? '' : ' ';
+
+        if(\is_string($value)){
+            $value = mb_ereg_replace($regex, $replace, $value);// strip double spaces and tabs
             return function_exists('super_trim') ? super_trim($value) : trim($value);
         }
 
-        if(is_array($value)){ // need to traverse through the array
+        if(\is_array($value)){ // need to traverse through the array
             foreach($value as $idx => $val){
-                $value[$idx] = self::cleanupSpaces($val);
+                $value[$idx] = self::cleanupSpaces($val, $removeSpaces);
             }
         }
 

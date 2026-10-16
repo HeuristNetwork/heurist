@@ -125,9 +125,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
             
             if(response.status==window.hWin.ResponseStatus.SYSTEM_FATAL
-            || response.status==window.hWin.ResponseStatus.SYSTEM_CONFIG){
+            || response.status==window.hWin.ResponseStatus.SYSTEM_CONFIG
+            || response.status==window.hWin.ResponseStatus.NETWORK_ERROR){
 
-                let def_title = window.hWin.ResponseStatus.SYSTEM_CONFIG ? 'System misconfiguration' : 'Fatal error';
+                let def_title = window.hWin.ResponseStatus.SYSTEM_FATAL ? 'Fatal error' :'System misconfiguration';
                 dlg_title = window.hWin.HEURIST4.util.isempty(dlg_title) ? def_title : dlg_title;
                 msg = msg + '<br><br>'+window.hWin.HR('Error_System_Config');
 
@@ -297,6 +298,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * @returns {jQuery} The jQuery object representing the dialog element.
      */
     showPrompt: function(message, callbackFunc, sTitle, ext_options){
+
+        ext_options = ext_options || {};
+        // Prompt validation callbacks may return false to keep the prompt open.
+        ext_options.keepOpenOnFalse = true;
         
         if(message.indexOf('dlg-prompt-value')<0){
             const value = window.hWin.HEURIST4.util.htmlEscape(ext_options?.value??'');
@@ -318,7 +323,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(ele.attr('type')!='checkbox' || ele.is(':checked')){ // Also handles checkbox type input
                     val =  ele.val();
                 }
-                callbackFunc.call(this, val); // Call the user-provided callback with the value
+                return callbackFunc.call(this, val); // false keeps a validating prompt open
             }
         },
         window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle, ext_options);
@@ -511,6 +516,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         options.position.collision = 'none'; //FF fix
 
+        options.showTitlebar = !hideTitle;
+
         $dlg.dialog(options);
         
         if(!(options.height>0)){
@@ -518,14 +525,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
            
             $dlg.dialog({height:height});
         }
-           
-        
+
         content.position({ my: "center center", at: "center center", of: $dlg });
-        
-        if(hideTitle){
-            $dlg.parent().find('.ui-dialog-titlebar').hide();
-        }
-    
+
         $dlg.parent().css({background: '#95A7B7', 'border-radius': '6px',   //#7092BE
                     'outline-style':'none', outline:'none'})
         $dlg.css({color:'white', border:'none !important', overflow:'hidden' });
@@ -553,8 +555,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(window.hWin.HEURIST4.msg.coverallKeep===true) return;
         
         let $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
-        if($dlg.dialog('instance')) $dlg.dialog('close');
-        $dlg.parent().find('.ui-dialog-titlebar').show(); // Ensure title bar is visible for next time
+        if($dlg.dialog('instance')){
+            $dlg.dialog('option', 'showTitlebar', true); // Ensure title bar is visible for next time
+            $dlg.dialog('close');
+        }
     },
 
     /**
@@ -926,6 +930,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 modal: (options['modal']!==false),
                 resizable: (options.resizable!==false),
                 draggable: (options.draggable!==false),
+                showResizeButtons: (options.showResizeButtons === true),
                 title: options["title"],
                 resizeStop: function( event, ui ) {
                     $dosframe.css('width','100%');
@@ -1568,11 +1573,17 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if (window.hWin.HEURIST4.util.isFunction(buttons)){ //}typeof buttons === "function"){
 
             let callback = buttons;
+            const keepOpenOnFalse = ext_options.keepOpenOnFalse===true;
+            delete ext_options.keepOpenOnFalse;
 
             buttons = {};
             buttons[lblYes] = function() {
-                $dlg.dialog( "close" );
-                callback.call();
+                if(keepOpenOnFalse){
+                    if(callback.call()!==false) $dlg.dialog( "close" );
+                }else{
+                    $dlg.dialog( "close" );
+                    callback.call();
+                }
             };
             buttons[lblNo] = function() {
                 $dlg.dialog( "close" );
@@ -2155,3 +2166,170 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         return $dlg;
     }
 };
+
+$.widget('ui.dialog', $.ui.dialog, {
+
+    options: {
+        showTitlebar: true,
+        showCloseButton: true,
+        showResizeButtons: false,
+        showWindowButtons: false,
+        resizeButtons: {
+            full: {text: 'Fullscreen', icon: '', style: 'margin-right: 0.5em;'},
+            medium: {text: 'Standard', icon: '', style: 'margin-right: 0.5em;'},
+            small: {text: 'Small', icon: '', style: 'margin-right: 0.5em;'}
+        },
+        resizeCallback: () => {}
+    },
+
+    titlebar: function(){
+        return this.uiDialogTitlebar;
+    },
+    buttonpane: function(){
+        return this.uiDialogButtonPane;
+    },
+
+    _setOption: function(key, value){
+
+        this._super(key, value);
+
+        if(key === 'resizeButtons'){
+            this._updateResizeButtons();
+        }
+        if(key === 'showTitlebar'){
+            this._handleTitlebarDisplay();
+        }
+        if(key === 'showCloseButton'){
+            this._handleCloseButtonDisplay();
+        }
+        if(key === 'showResizeButtons'){
+            this._handleResizeButtonsDisplay();
+        }
+    },
+
+    _createTitlebar: function(){
+
+        this._super();
+
+        this._handleCloseButtonDisplay();
+
+        this._handleResizeButtonsDisplay();
+
+        this._handleTitlebarDisplay();
+    },
+
+    _handleTitlebarDisplay: function(){
+
+        if(!this.uiDialogTitlebar || this.uiDialogTitlebar.length === 0){
+            return;
+        }
+
+        this.options.showTitlebar ? this.uiDialogTitlebar.show() : this.uiDialogTitlebar.hide();
+    },
+
+    _handleCloseButtonDisplay: function(){
+
+        if(!this.uiDialogTitlebarClose || this.uiDialogTitlebarClose.length === 0){
+            return;
+        }
+
+        this.options.showCloseButton ? this.uiDialogTitlebarClose.show() : this.uiDialogTitlebarClose.hide();
+    },
+
+    uiDialogResizingContainer: null,
+    uiDialogResizingButtons: {
+        full: null,
+        medium: null,
+        small: null
+    },
+    defaultResizeButtons: {
+        full: {text: 'Fullscreen', icon: '', style: 'margin-right: 0.5em;'},
+        medium: {text: 'Standard', icon: '', style: 'margin-right: 0.5em;'},
+        small: {text: 'Small', icon: '', style: 'margin-right: 0.5em;'}
+    },
+
+    _createResizingButtons: function(){
+
+        if(this.uiDialogResizingContainer && this.uiDialogResizingContainer.length > 0){
+            return;
+        }
+
+        this.uiDialogResizingContainer = $('<span>', {
+            class: 'ui-dialog-resize-container',
+            style: 'flex: 1 0 21em'
+        }).appendTo(this.uiDialogTitlebar).uniqueId();
+
+        this.uiDialogTitlebar.css({
+            display: 'flex',
+            'flex-direction': 'row',
+            'align-items': 'center'
+        });
+
+        for(const type in this.uiDialogResizingButtons){
+
+            this.uiDialogResizingButtons[type] = $('<button>', {
+                class: 'ui-dialog-resize-button',
+                style: this.options.resizeButtons[type].style ?? this.defaultResizeButtons[type].style
+            }).button({
+                label: this.options.resizeButtons[type].text ?? this.defaultResizeButtons[type].text,
+                icon: this.options.resizeButtons[type].icon ?? this.defaultResizeButtons[type].icon
+            }).appendTo(this.uiDialogResizingContainer);
+
+            this._on(this.uiDialogResizingButtons[type], {
+                click: () => this._resizeDialog(type)
+            });
+        }
+    },
+
+    _updateResizeButtons: function(){
+
+        for(const type in this.uiDialogResizingButtons){
+
+            this.uiDialogResizingButtons[type].attr('style', this.options.resizeButtons[type].style ?? this.defaultResizeButtons[type].style);
+
+            this.uiDialogResizingButtons[type].button({
+                label: this.options.resizeButtons[type].text ?? this.defaultResizeButtons[type].text,
+                icon: this.options.resizeButtons[type].icon ?? this.defaultResizeButtons[type].icon
+            });
+        }
+    },
+
+    _resizeDialog: function(size){
+
+        if(!Object.hasOwn(this.uiDialogResizingButtons, size)){
+            return;
+        }
+
+        let resizeAmount = size === 'full' ? 0.95 : 0.8;
+        resizeAmount = size === 'small' ? 0.75 : resizeAmount;
+
+        const width = window.innerWidth * resizeAmount;
+        const height = window.innerHeight * resizeAmount;
+
+        if(width <= 0 || height <= 0){
+            return;
+        }
+
+        this._setOptions({width: width, height: height});
+        this._position();
+
+        if(typeof this.options.resizeCallback === 'function'){
+            this.options.resizeCallback.call(this, {width: width, height: height});
+        }
+    },
+
+    _handleResizeButtonsDisplay: function(){
+
+        let missingResizingContainer = !this.uiDialogResizingContainer || this.uiDialogResizingContainer.length === 0;
+        if(missingResizingContainer && this.options.showResizeButtons){
+            this._createResizingButtons();
+            missingResizingContainer = !this.uiDialogResizingContainer || this.uiDialogResizingContainer.length === 0;
+        }
+
+        if(missingResizingContainer){
+            return;
+        }
+
+        this.options.showResizeButtons ? this.uiDialogResizingContainer.show() : this.uiDialogResizingContainer.hide();
+    }
+});

@@ -21,7 +21,7 @@ if (!defined('PDIR')){
     $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     $reqPath = preg_replace('~/index\.php$~i', '/', $reqPath);
 
-    if (preg_match('~^/(heurist|h7-alpha|h7-[A-Za-z0-9_-]+)/startup/~', $reqPath, $m)) {
+    if (preg_match('~^/(heurist|h7-[A-Za-z0-9_-]+)/startup/~', $reqPath, $m)) {
         define('PDIR', '/' . $m[1] . '/');
     } else {
         define('PDIR', '/');
@@ -163,7 +163,6 @@ if (!defined('PDIR')){
                     $('#btnRegisterDo').button().on({click: _validateRegistration});
                     $('#btnRegisterCancel').button().on({click: _showStep});
 
-
                     $("#contactDetails").html('Email to: System Administrator<br>'+
                         '<a style="padding-left: 60px;" href="mailto:'+sysadmin_email+'">'+sysadmin_email+'</a>');
 
@@ -188,11 +187,83 @@ if (!defined('PDIR')){
                     $('#btnTermsOK').button().on({click: function(){ $('#cbAgree').prop('checked',true).trigger('change'); _showStep(2);}});
                     $('#btnTermsCancel').button().on({click: function(){ $('#cbAgree').prop('checked',false).trigger('change'); _showStep(2);}});
 
+                    const updateORCIDHint = () => {
+                        const isValid = _isValidORCID();
+                        $('#orcid-data-link').toggle(isValid);
+                        $('#orcid-hint').toggle(!isValid).text(
+                            window.hWin.HEURIST4.util.isempty($('#ugr_ORCID').val())
+                                ? 'optional'
+                                : 'A link will be shown here when the ORCID is valid'
+                        );
+                    };
+                    $('#ugr_ORCID').on('input change', updateORCIDHint);
+                    updateORCIDHint();
+                    $('#orcid-data-link').on({click: _getDataFromORCID});
+
+                    window.hWin.HEURIST4.util.detectCapsLock(screen);
+
                     refreshCaptcha();
                     _showStep(2);
                 });
         }
 
+    }
+
+    /** Return whether the registration form contains a correctly formatted ORCID. */
+    function _isValidORCID(){
+        const orcid = $('#ugr_ORCID').val();
+        return !window.hWin.HEURIST4.util.isempty(orcid)
+            && /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/.test(orcid);
+    }
+
+    function _getDataFromORCID(){
+
+        const ORCID = $('#ugr_ORCID').val();
+        if(!_isValidORCID()){
+            window.hWin.HEURIST4.msg.showMsgFlash('Invalid ORCID...', 3000);
+            return;
+        }
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront($('.center-box.screen2'), null, '<span style="color: white;">Retrieving data from ORCID...</span>');
+
+        const URL = `${baseURL}hserv/controller/LookupController.php`;
+        let request = {
+            serviceType: 'orcid',
+            id: ORCID
+        };
+
+        window.hWin.HEURIST4.util.sendRequest(URL, request, null, (response) => {
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            response = window.hWin.HEURIST4.util.isJSON(response);
+
+            if(!response || (Object.hasOwn(response, 'status') && response.status !== window.hWin.ResponseStatus.OK)
+                || window.hWin.HEURIST4.util.isempty(response['orcid'])){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    status: window.hWin.ResponseStatus.INVALID_REQUEST,
+                    message: 'Sorry, this ORCID is not valid'
+                });
+                return;
+            }
+
+            const ORCID_FIELD_MAPPING = {
+                ugr_FirstName: 'given-names',
+                ugr_LastName: 'family-name',
+                ugr_Name: 'orcid',
+                ugr_Organisation: 'employment',
+                ugr_Interests: 'keywords',
+                ugr_URLs: 'url'
+            };
+
+            for(const field in ORCID_FIELD_MAPPING){
+
+                if(!Object.hasOwn(ORCID_FIELD_MAPPING, field) || !Object.hasOwn(response, ORCID_FIELD_MAPPING[field])){
+                    continue;
+                }
+
+                $(`#${field}`).val(response[ORCID_FIELD_MAPPING[field]]);
+            }
+        });
     }
 
     /**
@@ -300,6 +371,11 @@ if (!defined('PDIR')){
                     err_text = err_text + ', '+ss;
                 }
 
+            }
+
+            const orcid = regform.find('#ugr_ORCID').val();
+            if(!window.hWin.HEURIST4.util.isempty(orcid) && !_isValidORCID()){
+                err_text += ', ORCID needs to be in format XXXX-XXXX-XXXX-XXXX';
             }
 
             if(err_text!=''){
@@ -918,7 +994,7 @@ a{
     margin: 3% auto;
 }
 .center-box.screen2{
-    height: 600px;
+    height: 700px;
 }
 .center-box h1, .center-box h3, .center-box .header{
     color: #7B4C98;
@@ -1044,6 +1120,31 @@ a{
 .setup-db-list .list-row:hover {
     background:-moz-linear-gradient(center top, #EFEFEF, #DDDDDD) repeat scroll 0 0 transparent;
     background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
+}
+
+div.coverall-div {
+
+    position: absolute;
+    left:0px;
+    top: 0px;
+    height:100%;
+    width:100%;
+
+    border: 0;
+    padding: 0px;
+    margin: 0px;
+
+    background-color: rgb(0, 0, 0);
+    opacity: 0.6;
+
+    background-image: url(../hclient/assets/loading-animation-white.gif);
+    background-repeat: no-repeat;
+    background-position: center;
+
+    cursor:wait;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 </style>
 

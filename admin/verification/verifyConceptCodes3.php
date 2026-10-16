@@ -28,11 +28,86 @@ define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Missing concept codes in registered Heurist databases</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="robots" content="noindex,nofollow">
 
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>
+    <link rel="icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
-<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
-            <p>This list shows definitions without concept codes for registered databases</p>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 0 0 8px 0;
+            color: #333;
+        }
+
+        .report-description {
+            max-width: 980px;
+            margin: 0 0 18px 0;
+            padding: 10px 12px;
+            border-left: 4px solid #666;
+            background: #f5f5f5;
+            line-height: 1.45;
+        }
+
+        table {
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        td {
+            padding: 3px 8px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        tr:first-child td {
+            font-weight: bold;
+            background: #eee;
+        }
+
+        h4 {
+            margin: 0;
+            padding-top: 20px;
+            font-size: 15px;
+        }
+
+        .end-report {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<script>
+window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>');
+</script>
+
+<h1>Missing concept codes in registered Heurist databases</h1>
+
+<div class="report-description">
+    This report checks all registered Heurist databases on this server and identifies
+    record types, detail types and terms that are missing concept-code information.
+    A definition is reported when its originating database ID or ID-in-originating-database
+    value is empty, zero or null. For registered databases, the script also attempts to
+    localise unlinked definitions by assigning the database's own registered ID as the
+    originating database ID where the current value is zero.
+</div>
+
+<div>
+
 <?php
 
 $registered = array();
@@ -58,7 +133,7 @@ $mysqli = $system->getMysqli();
         $query = 'SELECT sys_dbRegisteredID from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
         $ver = intval($ver);
-        if(!isPositiveInt($var)) {continue;} 
+        if(!isPositiveInt($ver)) {continue;} 
 /* assign values for unregistered databases
         if($db_name=='hdb_johns_test_028') {continue;}
         $query = 'UPDATE '.$db_name
@@ -247,5 +322,8 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
 
     }
 
-    print '[end report]</div>';
+    print '<div class="end-report">[end report]</div>';
 ?>
+</div>
+</body>
+</html>

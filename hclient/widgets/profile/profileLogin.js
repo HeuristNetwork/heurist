@@ -83,111 +83,51 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         let sel = $dlg.find('#saml_sp');
         if(sel.val()){
             
-        let sp_entity = sel.val();
-        
-        let surl = window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database;
-        
-        let isFrameAllowed = false;
-        if(!isFrameAllowed){
-            surl = surl + '&noframe=1';
-            window.hWin.location = surl;
-            return;
-        }
-
-
-        //loads saml dialog into iframe
-        window.hWin.HEURIST4.msg.showDialog(
-        surl,
-        {
-            title: 'External Authentification',
-            width: 980,
-            height: 420,
-            //noClose: true,
+            let sp_entity = sel.val();
             
-            afterclose: function(context) {
-                //$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-               
-                /*
-                if(!window.hWin.HAPI4.has_access() ){
-                    //redirects to startup page - list of all databases
-                    window.hWin.location  = window.HAPI4.baseURL; //startup page 
-                }
-                */
+            let surl = window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database;
+            
+            let isFrameAllowed = false;
+            if(!isFrameAllowed){
+                surl = surl + '&noframe=1';
+                window.hWin.location = surl;
+                return;
+            }
+
+
+            //loads saml dialog into iframe
+            window.hWin.HEURIST4.msg.showDialog(
+            surl,
+            {
+                title: 'External Authentification',
+                width: 980,
+                height: 420,
+                //noClose: true,
                 
-                //if not logged in - reopen login dialogue
-            },
-            callback:function(user_id){
-    console.log('callback on close saml dialog', user_id);            
-
-                toggleLoginFormControls(login_dialog, true);
-                if(user_id>0){
-                    doAuthentication({username: user_id, password:null, saml_entity:sp_entity}, login_dialog);
-                }else{
-                    //reopen login dialogue
-                    alert('Saml authentication returned:\n'+user_id+'\n Login dialog will be reopened');
-                }
-
-    /* 
-                    if(context>0){
-
-
-    console.log('current user: ',window.hWin.HAPI4.currentUser['ugr_ID']);                            
-                        
-                            if(window.hWin.HAPI4.currentUser && window.hWin.HAPI4.currentUser['ugr_ID']==context){
-                                
-                                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                                                [window.hWin.HAPI4.currentUser]);
-
-                                    
-                                    if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
-                                        //version is old 
-                                        return;
-                                    }
-                                    return true;
-                            }else{
-                        
-                            window.hWin.HAPI4.SystemMgr.sys_info(function (success) {
-
-    console.log('getting sysinfo ',success);                            
-                                if (success) {
-                                    
-    console.log(window.hWin.HAPI4.currentUser);                                
-    console.log(window.hWin.HAPI4.sysinfo);                                
-                                    
-                                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                                                [window.hWin.HAPI4.currentUser]);
-
-                                    
-                                    if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
-                                        //version is old 
-                                        return;
-                                    }
-                                    
-                                }
-                            });            
-                                                    
-                            }
-                    }else
-                    if(context && context.currentUser && context.sysinfo){
-                        
-                            window.hWin.HAPI4.setCurrentUser(context.currentUser);
-                            window.hWin.HAPI4.sysinfo = context.sysinfo;
-                            
-                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                                                [window.hWin.HAPI4.currentUser]);
-
-                                    
-                            if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
-                                        //version is old 
-                                        return;
-                            }
-
-                        return true;
-                    }else{
-                        return false;
+                afterclose: function(context) {
+                    //$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+                
+                    /*
+                    if(!window.hWin.HAPI4.has_access() ){
+                        //redirects to startup page - list of all databases
+                        window.hWin.location  = window.HAPI4.baseURL; //startup page 
                     }
-    */        
-        }});
+                    */
+                    
+                    //if not logged in - reopen login dialogue
+                },
+                callback:function(user_id){
+                    //console.log('callback on close saml dialog', user_id);            
+
+                    toggleLoginFormControls(login_dialog, true);
+                    if(user_id>0){
+                        doAuthentication({username: user_id, password:null, saml_entity:sp_entity}, login_dialog);
+                    }else{
+                        //reopen login dialogue
+                        alert('Saml authentication returned:\n'+user_id+'\n Login dialog will be reopened');
+                    }
+                }
+            });
         }
         
     } //__onSamlLogin
@@ -377,6 +317,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 }
             }, id:'btn_close'});
 
+                window.hWin.HEURIST4.util.detectCapsLock($dlg, 'input.text');
 
             // login dialog definition
             $dlg.dialog({
@@ -394,7 +335,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             });
             
             login_dialog = $dlg.dialog("open");
-            if(is_secondary_parent)$dlg.addClass('ui-dialog-heurist').css({'font-size':'0.8em'});
+
             $dlg.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
             login_dialog.dialog('option','close', function(){__onDialogClose($dlg)});
@@ -585,7 +526,7 @@ function setupAccountResetPin($dlg){
         return;
     }
 
-    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'),null,'sending pin...');
+    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'), null, 'Sending pin...');
 
     window.hWin.HAPI4.SystemMgr.reset_password({username: username.val(), pin: 1, captcha: captcha_code}, function(response){
 
@@ -617,7 +558,7 @@ function validateAccountResetPin($dlg){
     let username = $dlg.find('#reset_username').val();
     let pin = $dlg.find('#reset_pin').val();
 
-    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'),null,'validating pin...');
+    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'), null, 'Validating pin...');
 
     window.hWin.HAPI4.SystemMgr.reset_password({username: username, pin: pin}, function(response){
 
@@ -660,7 +601,7 @@ function resetAccountPassword($dlg){
         return;
     }
 
-    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'),null,'validating pin...');
+    window.hWin.HEURIST4.msg.bringCoverallToFront($dlg.parents('.ui-dialog'), null, 'Verifying password reset...');
 
     window.hWin.HAPI4.SystemMgr.reset_password({username: username, pin: pin, new_password: pwd}, function(response){
 
@@ -930,13 +871,7 @@ function doAuthentication(login_data, login_dialog)
                     //version is old 
                     return;
                 }
-                /*
-                if(window.hWin.HEURIST4.util.isFunction(callback)){
-                        callback(true);
-                }
-                */
-                
-               
+
             }else if(response.status == window.hWin.ResponseStatus.REQUEST_DENIED){
                 if(login_dialog){
                     updateLoginPopupStatus(login_dialog, false, response.message);
@@ -1038,7 +973,7 @@ function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
             //if not logged in - reopen login dialogue
         },
         callback:function(user_id){
-console.log('callback on close saml dialog', user_id);            
+            //console.log('callback on close saml dialog', user_id);            
 
             toggleLoginFormControls(login_dialog, true);
             if(user_id>0){
@@ -1047,69 +982,7 @@ console.log('callback on close saml dialog', user_id);
                 //reopen login dialogue
                 alert(user_id+'.  todo: Open login dialog');
             }
+        }
+    });
 
-/* 
-                if(context>0){
-
-
-console.log('current user: ',window.hWin.HAPI4.currentUser['ugr_ID']);                            
-                    
-                        if(window.hWin.HAPI4.currentUser && window.hWin.HAPI4.currentUser['ugr_ID']==context){
-                            
-                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                                            [window.hWin.HAPI4.currentUser]);
-
-                                
-                                if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
-                                    //version is old 
-                                    return;
-                                }
-                                return true;
-                        }else{
-                    
-                        window.hWin.HAPI4.SystemMgr.sys_info(function (success) {
-
-console.log('getting sysinfo ',success);                            
-                            if (success) {
-                                
-console.log(window.hWin.HAPI4.currentUser);                                
-console.log(window.hWin.HAPI4.sysinfo);                                
-                                
-                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                                            [window.hWin.HAPI4.currentUser]);
-
-                                
-                                if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
-                                    //version is old 
-                                    return;
-                                }
-                                
-                            }
-                        });            
-                                                
-                        }
-                }else
-                if(context && context.currentUser && context.sysinfo){
-                    
-                        window.hWin.HAPI4.setCurrentUser(context.currentUser);
-                        window.hWin.HAPI4.sysinfo = context.sysinfo;
-                        
-                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                                            [window.hWin.HAPI4.currentUser]);
-
-                                
-                        if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
-                                    //version is old 
-                                    return;
-                        }
-
-                    return true;
-                }else{
-                    return false;
-                }
-*/        
-    }});
-    
-    
 }
-

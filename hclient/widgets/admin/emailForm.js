@@ -386,7 +386,7 @@ $.widget( "heurist.emailForm", {
                 this._element_form.addClass('ui-heurist-bg-light');
             }
 
-            if(this.options.supress_dialog_title) $dlg.parent().find('.ui-dialog-titlebar').hide();
+            if(this.options.supress_dialog_title) $dlg.dialog('titlebar').hide();
 
             if(this.options.helpContent){
                 let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';

@@ -151,7 +151,9 @@ class DbDefTerms extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('trm_ParentTermID', true);
         if($pred!=null) {array_push($where, $pred);}
 
-
+        $pred = $this->searchMgr->getPredicate('trm_OriginatingDBID');
+        if($pred!=null) {array_push($where, $pred);}
+        
         $needCheck = false;
 
         //compose SELECT it depends on param 'details' ------------------------
@@ -169,6 +171,10 @@ class DbDefTerms extends DbEntityBase
             .'trm_Domain,IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
             .',trm_VocabularyGroupID,trm_OrderInBranch,trm_Code,trm_Status';
 
+        }elseif(@$this->data['details']=='raw'){
+            
+            $this->data['details'] = ['*'];
+            
         }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'trm_ID,trm_Label,trm_Description,trm_InverseTermID,'
@@ -195,16 +201,18 @@ class DbDefTerms extends DbEntityBase
             }
         }
 
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search('trm_ID', $this->data['details']);
-        if($idx>0){
-            unset($this->data['details'][$idx]);
-            $idx = false;
+        if($this->data['details'][0]!=='*'){
+            //ID field is mandatory and MUST be first in the list
+            $idx = array_search('trm_ID', $this->data['details']);
+            if($idx>0){
+                unset($this->data['details'][$idx]);
+                $idx = false;
+            }
+            if($idx===false){
+                array_unshift($this->data['details'], 'trm_ID');
+            }
+            $is_ids_only = (count($this->data['details'])==1);
         }
-        if($idx===false){
-            array_unshift($this->data['details'], 'trm_ID');
-        }
-        $is_ids_only = (count($this->data['details'])==1);
 
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM defTerms';
@@ -488,9 +496,8 @@ class DbDefTerms extends DbEntityBase
                 //already exists
                 continue;
             }else{
-                $query = 'select trm_ID from defTerms where trm_ParentTermID='
-                .$parentID.' and trm_Label="'.$mysqli->real_escape_string($trmLabel).'"';
-                $trmID = mysql__select_value($mysqli, $query);
+                $query = 'select trm_ID from defTerms where trm_ParentTermID=? and trm_Label="?"';
+                $trmID = mysql__select_value($mysqli, $query, ['is', $parentID, $trmLabel]);
                 if($trmID>0){
                     //already exists
                     $this->records_all[$record_idx]['trm_ID'] = $trmID;
@@ -1077,7 +1084,7 @@ class DbDefTerms extends DbEntityBase
                 $ids = '';
             }
 
-            return $this->_getTermTranslations(false, $ids);//see dbsData.php
+            return $this->getTranslations($ids, @$this->data['field']);
 
         }
         elseif(@$this->data['set_translations']){
@@ -1093,59 +1100,6 @@ class DbDefTerms extends DbEntityBase
         mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
-    }
-
-    /**
-     * Retrieves term translations from the `defTranslations` table.
-     *
-     * @param bool $label_only If true, only retrieves translations for 'trm_Label'. Otherwise, for all 'trm_%' sources.
-     * @param string|array|null $trm_ids A single term ID, an array of term IDs, or a comma-separated string of term IDs
-     *                                   to filter translations. If null, retrieves for all terms matching $label_only criteria.
-     * @return array An associative array representing a recordset of translations,
-     *               with keys 'reccount', 'fields', 'records', 'order', 'entityName'.
-     */
-    private function _getTermTranslations($label_only = true, $trm_ids = null){
-
-        $mysqli = $this->system->getMysqli();
-
-        $fields = array('trn_ID', 'trn_Code', 'trn_Source', 'trn_LanguageCode', 'trn_Translation');
-        $records = array();
-
-        $where_clause = $label_only ? 'trn_Source = "trm_Label"' : 'trn_Source LIKE "trm_%"';
-
-        if(!empty($trm_ids)){ // add term id filter
-
-            $code_clause = '';
-            if(is_array($trm_ids)){
-                $trm_ids = prepareIds($trm_ids);
-
-                $code_clause = !empty($trm_ids) ? 'trn_Code IN (' . implode(',', $trm_ids) . ')' : '';
-            }elseif(is_int($trm_ids) && $trm_ids > 0){
-                $code_clause = 'trn_Code = ' . intval($trm_ids);
-            }
-
-            $where_clause .= empty($code_clause) ? '' : SQL_AND . $code_clause;
-        }
-
-        $query = 'SELECT trn_ID, trn_Code, trn_Source, trn_LanguageCode, trn_Translation '
-        . 'FROM defTranslations '
-        . 'WHERE ' . $where_clause;
-
-        $res = $mysqli->query($query);
-        if($res){
-
-            while($row = $res->fetch_row()){
-                $records[$row[0]] = $row;
-            }
-        }
-
-        return array(
-            'reccount'=>count($records),
-            'fields'=>$fields,
-            'records'=>$records,
-            'order'=>array_keys($records),
-            'entityName'=>$this->config['entityName']
-        );
     }
 
     /**
@@ -1506,24 +1460,27 @@ class DbDefTerms extends DbEntityBase
                 }
                 $trm_ID = $mysqli->real_escape_string($trm_ID);
 
-                $query = 'SELECT trm_ID, COUNT(DISTINCT dtl_RecID) '
-                . 'FROM recDetails '
-                . 'INNER JOIN defTerms ON trm_ID = dtl_Value '
-                . 'INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
-                . 'WHERE dtl_Value IN ('. $trm_ID .') AND dty_Type="enum" '
-                . 'GROUP BY trm_ID';
+                $query = <<<QUERY
+                SELECT dtl_Value, COUNT(DISTINCT dtl_RecID) 
+                FROM recDetails 
+                INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID 
+                INNER JOIN Records ON rec_ID = dtl_RecID 
+                WHERE dtl_Value IN ({$trm_ID}) AND dty_Type="enum" AND rec_FlagTemporary != 1
+                GROUP BY dtl_Value
+                QUERY;
+
                 $trm_usage = mysql__select_assoc2($mysqli, $query);// [ trm_ID1 => count1, ... ]
                 if($trm_usage){
                     $res = $trm_usage;
                 }elseif(empty($mysqli->error)){
-                    $res = explode(',', $trm_ID);
+                    $res = array_fill_keys(explode(',', $trm_ID), 0);
                 }else{
                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve term usages', $mysqli->error);
                     return false;
                 }
 
                 // Retrieve terms used in relmarkers
-                $query = 'SELECT rl_RelationTypeID, count(rl_ID) FROM recLinks WHERE rl_RelationTypeID IN (' . $trm_ID . ') GROUP BY rl_RelationTypeID';
+                $query = "SELECT rl_RelationTypeID, count(rl_ID) FROM recLinks WHERE rl_RelationTypeID IN ({$trm_ID}) GROUP BY rl_RelationTypeID";
                 $reltype_usage = mysql__select_assoc2($mysqli, $query);// [ trm_ID1 => count1, ... ]
                 if($reltype_usage){
                     // Add results to $res

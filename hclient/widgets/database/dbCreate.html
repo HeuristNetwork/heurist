@@ -12,7 +12,7 @@
 * @since        6.0
 */
 -->
-<div id="div_header" class="ent_wrapper" style="margin-left:40px;width:640px;font-size:0.95em">
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;max-width:900px;right:20px;font-size:0.95em;overflow-y:auto">
     <div class="heurist-helper1" style="margin-top:50px">       
         As creator of a database you become the database owner and can manage the database and other
         <br>database users, including creation of workgroups and modification of database structure.
@@ -34,15 +34,21 @@
         </div>
     </div>
 
+    <div id="new_database_templates" style="margin:24px 0;">
+        <h3>Choose a structure template</h3>
+        <p class="heurist-helper1">The new database will contain the selected database's entity types, fields and vocabularies. Records are not copied.</p>
+        <div id="database_template_list" aria-live="polite">Loading curated templates…</div>
+    </div>
+
     <div class="entry-box">
         <h3>Enter a name for the new database</h3>
         
         <div>
             <span class="dbprefix">hdb_</span>
             <input type="text" id="uname"  name="uname" class="text ui-widget-content ui-corner-all" 
-                    maxlength="30" size="6" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
+                    maxlength="20" size="6" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
             _<input type="text" id="dbname"  name="dbname" class="text ui-widget-content ui-corner-all"
-                    maxlength="64" size="40" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
+                    maxlength="60" size="40" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
 
             <button class="ui-button-action" id="btnCreateDb">Create Database</button>
         </div>

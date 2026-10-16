@@ -85,7 +85,7 @@
                 "dty_Type": "file",
                 "rst_DisplayName": "Screenshot",
                 "rst_DisplayHelpText": "Upload a screen capture or document showing the bug or describing the feature in more detail", 
-                "rst_FieldConfig":{"entity": "sysBugreport", "accept": ".png,.jpg,.gif", "size":1200},
+                "rst_FieldConfig":{"entity": "sysBugreport", "accept": ".png,.jpg,.gif", "size": 1200},
                 "dty_Role": "virtual",
                 "rst_MaxValues": 0
             }

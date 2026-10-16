@@ -1,0 +1,73 @@
+services:
+  # Bind mounts are created by Docker as root when they do not already exist.
+  # Initialize only the application-managed writable directories before the
+  # non-root web container starts. The database has its own image-managed
+  # ownership and is intentionally not included here.
+  data-permissions:
+    image: alpine:3.20
+    user: "0:0"
+    restart: "no"
+    volumes:
+      - ${HEURIST_DATA_ROOT:-./data}/filestore:/mnt/filestore
+      - ${HEURIST_DATA_ROOT:-./data}/support:/mnt/support
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        mkdir -p /mnt/filestore /mnt/support
+        chown -R 33:33 /mnt/filestore /mnt/support
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${HEURIST_MYSQL_ROOT_PASSWORD:-heurist_root}
+      MYSQL_USER: heurist
+      MYSQL_PASSWORD: ${HEURIST_DB_ADMIN_PASSWORD:-heurist}
+    command:
+      # Heurist creates stored functions/triggers in its databases;
+      # without this flag MySQL 8 binary logging blocks that for non-SUPER users.
+      - --log_bin_trust_function_creators=1
+      # Heurist's legacy search SQL (e.g. SELECT DISTINCT rec_ID ... ORDER BY
+      # rec_Title) is incompatible with ONLY_FULL_GROUP_BY, which is in MySQL 8's
+      # default sql_mode. The app tries to relax it at runtime via
+      # "SET GLOBAL sql_mode" (hserv/System.php), but the restricted 'heurist'
+      # user lacks the SUPER/SYSTEM_VARIABLES_ADMIN privilege, so set it here.
+      - --sql-mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
+    volumes:
+      - ${HEURIST_DATA_ROOT:-./data}/db:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      # Public access is provided by the host Apache HTTPS reverse proxy.
+      # Keep the container web port unreachable from the network directly.
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      data-permissions:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+    environment:
+      HEURIST_DB_ADMIN_USERNAME: heurist
+      HEURIST_DB_ADMIN_PASSWORD: ${HEURIST_DB_ADMIN_PASSWORD:-heurist}
+      HEURIST_JWT_SECRET: ${HEURIST_JWT_SECRET:-dev-only-secret-change-me}
+      HEURIST_SERVER_NAME: ${HEURIST_SERVER_NAME:-}
+      HEURIST_BASE_URL: ${HEURIST_BASE_URL:-}
+      HEURIST_PUBLIC_PATH: ${HEURIST_PUBLIC_PATH:-}
+    volumes:
+      # Live codebase (local dev: edits in the repo show up immediately)
+      - .:/var/www/html/HEURIST/heurist
+      # Parent-level configuration (mounted read-only, kept out of the repo root)
+      - ./docker/heuristConfigIni.php:/var/www/html/HEURIST/heuristConfigIni.php:ro
+      # Uploaded files survive container rebuilds
+      - ${HEURIST_DATA_ROOT:-./data}/filestore:/var/www/html/HEURIST/HEURIST_FILESTORE
+      # Downloaded support bundles survive container rebuilds
+      - ${HEURIST_DATA_ROOT:-./data}/support:/var/www/html/HEURIST/HEURIST_SUPPORT

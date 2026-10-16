@@ -7,7 +7,7 @@ set -euo pipefail
 
 # MySQL connection
 MYSQL_USER="heurist"
-MYSQL_PASSWORD="SpeakEasy~1935"        # leave empty if using ~/.my.cnf
+MYSQL_PASSWORD="<MySQL password here>"        # leave empty if using ~/.my.cnf
 MYSQL_HOST="localhost"
 DB_PREFIX="hdb_"
 

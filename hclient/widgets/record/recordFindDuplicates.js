@@ -670,11 +670,14 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             s += `<ul style="padding: 10px 30px;" class="group_${i}">`;
             for(let j=0; j<rec_ids.length; j++) {
 
-                s += '<li>'
-                + `<input type="radio" name="instant_merge_${i}" value="${rec_ids[j]}" style="display: none;">`
-                + `<a target="_new" href="${window.hWin.HAPI4.baseURL}viewers/record/viewRecord.php?db=${window.hWin.HAPI4.database}`
-                + `&recID=${rec_ids[j]}">${rec_ids[j]}`
-                + `: ${window.hWin.HEURIST4.util.stripTags(dupes[i][rec_ids[j]])}</a></li>`;
+                const recTitle = window.hWin.HEURIST4.util.stripTags(dupes[i][rec_ids[j]]);
+
+                s += `<li>
+                    <input type="radio" name="instant_merge_${i}" value="${rec_ids[j]}" style="display: none;">
+                    <a target="_new" href="${window.hWin.HAPI4.baseURL}viewers/record/viewRecord.php?db=${window.hWin.HAPI4.database}
+                    &recID=${rec_ids[j]}"><span style="width: 10ch; text-decoration: underline; display: inline-block;">${rec_ids[j]}:</span>
+                    <span style="display: inline-block; width: 85%; text-decoration: underline; vertical-align: bottom;" class="truncate" title="${recTitle}">${recTitle}
+                </a></li>`;
 
             }
             s = s + '</ul></div>';

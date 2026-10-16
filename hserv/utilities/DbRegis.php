@@ -48,6 +48,8 @@ class DbRegis {
     private static $system = null;
     private static $initialized = false;
 
+    private static $lastError = null;
+
     private static $isOutSideRequest = false;
 
     /**
@@ -98,7 +100,7 @@ class DbRegis {
     * @param mixed $params
     * @param string|null $serverBaseUrl Base Heurist URL, e.g. https://host/heurist/
     */
-    private static function registrationRemoteCall($params, $serverBaseUrl=null){
+    private static function registrationRemoteCall($params, $serverBaseUrl=null, $stage=null){
 
         if(@$params['db']!=null){
             unset($params['db']);//reset to avoid recursion
@@ -107,7 +109,7 @@ class DbRegis {
         $reg_record = null;
 
         if($serverBaseUrl==null || $serverBaseUrl==''){
-            $serverBaseUrl = HEURIST_MAIN_SERVER.'/h7-alpha/'; //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
+            $serverBaseUrl = HEURIST_MAIN_SERVER.'/heurist/'; //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
         }else{
             $serverBaseUrl = rtrim($serverBaseUrl, '/').'/';
         }
@@ -116,27 +118,70 @@ class DbRegis {
                 .'hserv/controller/indexController.php?'
                 .http_build_query($params);
 
-        $data = loadRemoteURLContentWithRange($remote_url, null, true);
+        $data = loadRemoteURLContentWithRange($remote_url, null, true, 20);
 
         if (!isset($data) || $data==null) {
             global $glb_curl_error;
-            $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
+            $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'no error code provided (curl)';
 
-            //transfer error into global system
-            self::addError(HEURIST_UNKNOWN_ERROR,
-                'Unable to connect Heurist reference server, possibly due to timeout or proxy setting<br><br>'
-                . $error_code . '<br>'
-                ."URL requested: ".htmlspecialchars($remote_url));
+            $serverType = ($stage==='registered_database_server_lookup')?'database':'reference';
+            
+            $error = self::makeError(
+                HEURIST_NETWORK_ERROR,
+                'Unable to connect Heurist '.$serverType.' server, possibly due to timeout or proxy setting',
+                array(
+                    'code' => 'REMOTE_CONNECT_FAILED',
+                    'stage' => $stage ?: 'remote_registry_call',
+                    'remote_url' => $remote_url,
+                    'transport_error' => $error_code
+                )
+            );
+
+            self::addError($error);
             return false;
         }else{
-            //add error
-            $data = json_decode($data, true);
-            if(@$data['status']==HEURIST_OK){
-               $reg_record =  $data['data'];
+            $decoded = json_decode($data, true);
+            if(!is_array($decoded)){
+                $error = self::makeError(
+                    HEURIST_UNKNOWN_ERROR,
+                    'Heurist reference server returned an invalid response',
+                    array(
+                        'code' => 'REMOTE_INVALID_RESPONSE',
+                        'stage' => $stage ?: 'remote_registry_call',
+                        'remote_url' => $remote_url
+                    )
+                );
+                self::addError($error);
+                return false;
+            }elseif (count($decoded)==0){
+                $error = self::makeError(
+                    HEURIST_NOT_FOUND,
+                    'Database server URL is not found in central index database',
+                    array(
+                        'code' => 'REMOTE_NOT_FOUND',
+                        'stage' => $stage ?: 'remote_registry_call',
+                        'remote_url' => $remote_url
+                    )
+                );
+                self::addError($error);
+                return false;
+            }
+
+            if(@$decoded['status']==HEURIST_OK){
+               $reg_record =  $decoded['data'];
             }else{
-                //transfer error into global syst+em
-                $data['message'] = 'Heurist reference server returns error message: '.@$data['message'];
-                self::addError($data);//transfer error to global $system
+                $message = @$decoded['message'] ?: 'Heurist reference server returned an error';
+                $error = self::makeError(
+                    @$decoded['status'] ?: HEURIST_UNKNOWN_ERROR,
+                    'Heurist reference server returns error message: '.$message,
+                    array(
+                        'code' => @$decoded['code'] ?: 'REMOTE_APPLICATION_ERROR',
+                        'stage' => $stage ?: 'remote_registry_call',
+                        'remote_url' => $remote_url,
+                        'remote_error' => $decoded
+                    )
+                );
+                self::addError($error);//transfer error to global $system
                 return false;
             }
         }
@@ -147,14 +192,50 @@ class DbRegis {
     /**
     * Adds/transfers error into global system variable
     */
+    private static function makeError($error, $msg=null, $extra=array())
+    {
+        if(is_array($error)){
+            $out = $error;
+        }else{
+            $out = array('status'=>$error, 'sysmsg'=>$extra, 'message'=>$msg);
+        }
+        /*
+        if(is_array($extra) && !empty($extra)){
+            $out = array_merge($out, $extra);
+        }*/
+        return $out;
+    }
+
+    /**
+    * Returns last error raised by this class in a resolver-friendly shape.
+    */
+    public static function getLastError()
+    {
+        if(self::$lastError!=null){
+            return self::$lastError;
+        }
+        if(self::$system!=null){
+            $err = self::$system->getError();
+            if(!empty($err)){
+                return $err;
+            }
+        }
+        return null;
+    }
+
+    /**
+    * Adds/transfers error into global system variable
+    */
     private static function addError($error=null, $msg=null)
     {
-        //global $system;
         if($error==null){
-            self::$system->addErrorArr(self::$system->getError());//transfer from this $system
+            self::$lastError = self::$system->getError();
+            self::$system->addErrorArr(self::$lastError);//transfer from this $system
         }elseif (is_array($error)){
+            self::$lastError = $error;
             self::$system->addErrorArr($error);
         }else{
+            self::$lastError = self::makeError($error, $msg);
             self::$system->addError($error, $msg);
         }
     }
@@ -199,7 +280,7 @@ class DbRegis {
         return $scheme.'://'.$host . ($withPortAndPath? $port.$path.'/' :'');
     }
 
-    public static function extractServerUrl($url){
+    private static function extractServerUrl($url){
         $url = trim((string)$url);
         if($url=='') {return '';}
 
@@ -287,7 +368,7 @@ class DbRegis {
         return true;
     }
 
-    public static function rebuildRegisteredDatabaseIndexFile($force=false){
+    private static function rebuildRegisteredDatabaseIndexFile($force=false){
 
         $filename = self::getLocalIndexFilePath();
         if(!$force && !self::isFileOutdated($filename, 24*3600)){
@@ -393,7 +474,7 @@ class DbRegis {
         if(!isset($rows[$dbID])){
             return null;
         }
-        if((time() - intval($rows[$dbID]['ts'])) > 3600){
+        if((time() - intval($rows[$dbID]['ts'])) > 600){ // 10 min
             unset($rows[$dbID]);
             self::writeUrlCacheFile($rows);
             return null;
@@ -405,7 +486,7 @@ class DbRegis {
         $rows = self::readUrlCacheFile();
         $now = time();
         foreach($rows as $id=>$row){
-            if(($now - intval($row['ts'])) > 3600){
+            if(($now - intval($row['ts'])) > 600){
                 unset($rows[$id]);
             }
         }
@@ -428,6 +509,8 @@ class DbRegis {
     * @param mixed $params
     */
     public static function getDatabaseUrlLocal($params){
+        
+        if(!self::initialize()) {return false;} //can not connect to index database
         
         $dbID = self::checkDbId($params);
         if(!$dbID){
@@ -570,7 +653,7 @@ class DbRegis {
         if(!self::initialize()) {return false;} //can not connect to index database
 
         if(self::$isOutSideRequest){
-            return self::registrationRemoteCall($params);
+            return self::registrationRemoteCall($params, null, 'remote_registry_call');
         }
 
         $mysqli = self::$mysqli;
@@ -633,7 +716,7 @@ class DbRegis {
         if(!self::initialize()) {return false;} //can not connect to index database
 
         if(self::$isOutSideRequest){
-            return self::registrationRemoteCall($params);
+            return self::registrationRemoteCall($params, null, 'remote_registry_call');
         }
 
         $sys = self::$system;
@@ -694,8 +777,19 @@ class DbRegis {
 
         ConceptCode::setSystem($sys);
 
-        if($dbTitle){
+        $dbDisplayName = @$params['dbDisplayName'];
+        $dbRights = @$params['dbRights'];
+
+        if($dbDisplayName){
+           self::recordUpdateField($sys, $dbID, '2-1', $dbDisplayName);
+        }elseif($dbTitle){
            self::recordUpdateField($sys, $dbID, '2-1', $dbTitle);
+        }
+        if($dbTitle){
+           self::recordUpdateField($sys, $dbID, '2-12', $dbTitle);
+        }
+        if($dbRights){
+           self::recordUpdateField($sys, $dbID, '2-311', $dbRights);
         }
         if($dbName){
            self::recordUpdateField($sys, $dbID, '1176-469', $dbName);
@@ -712,7 +806,11 @@ class DbRegis {
     /**
     * Get URL for registered database by its $dbID
     * 
-    * 1. Ar first it checks local cache file 
+    *  Actions:
+    *  1) checks local URL cache
+    *  2) checks _INDEX_OF_REGISTERED_DATABASES
+    *  3) central index lookup via action=info
+    *  4) target server local lookup via action=url   
     * 
     * @param mixed $server
     * @param mixed $dbID
@@ -747,16 +845,37 @@ class DbRegis {
         $dburl = false;
         $server = null;
         
-        if(@$params['action']!=='url'){
-            // returns url from central index database
-            // it can be incorrect - because db name is not reliable
-            // we have to extract server and check the presence ot this db on given server by id
+        if(@$params['action']!=='resolve_local'){
+            
+            // Ask the central Heurist Reference Index which server is registered
+            // for this database ID. The URL stored in the central index is used only
+            // to identify the likely server. It is not treated as the final database URL,
+            // because the database name or version path may have changed on that server.
+            //
+            // Once the server is known, ask that server to resolve the database ID
+            // locally via _INDEX_OF_REGISTERED_DATABASES. This gives the current
+            // canonical URL for the database on that server.
             $resServer = self::registrationGetFromCentralIndexDb($params);
             if($resServer){
                 $server = self::normalizeServerUrl($resServer);
             }
             if($server===null || $server===''){
-                self::addErrorToCache($dbID, 'Database server URL is not defined in central index database');
+                
+                $err = self::getLastError();
+                $errorStatus = $err['status'] ?? null;
+                
+                if(is_array($err)){
+                    $errorMsg = self::formatErrorMessage($err);
+                }else{
+                    $errorMsg = 'Database server URL is not defined in central index database';    
+                }
+                
+                if($errorStatus===HEURIST_NOT_FOUND){
+                    self::setCachedDatabaseUrl($dbID, 'failure:'.$errorMsg);
+                }elseif($errorStatus===null){
+                    self::addErrorToCache($dbID, $errorMsg);    
+                }
+                
                 return false;
             }
 
@@ -766,11 +885,15 @@ class DbRegis {
                 //we already checked it on previos step - database missed on this server
                 self::addErrorToCache($dbID, 'Database with ID#'.$dbID.' is not found in Heurist Reference Index database');
                 
+            }elseif(strpos($resServer, 'https://heurist-usyd.cloud.edu.au/heurist/?db=') === 0){
+                // special case, USYD server is out of date
+                $dburl = self::checkUSYDServer($resServer);
+
             }else{
                 //request to server where database can reside
                 $server = self::normalizeServerUrl($resServer, true);
-                $server = str_replace('/heurist/','/h7-alpha/',$server); //TEMPORARY
-                $dburl = self::registrationRemoteCall(array('action'=>'url', 'dbID'=>$dbID), $server);
+                //REMOVE THIS REMARK IF PRODUCTION VERSION FAR BEHIND $server = str_replace('/heurist/','/h7-alpha/',$server); 
+                $dburl = self::registrationRemoteCall(array('action'=>'resolve_local', 'dbID'=>$dbID), $server, 'registered_database_server_lookup');
             }
         }
         
@@ -778,20 +901,58 @@ class DbRegis {
         if($dburl){
             self::setCachedDatabaseUrl($dbID, $dburl);
         }else{
-            self::setCachedDatabaseUrl($dbID, 'failure:'.self::$system->getErrorMsg());
+            $err = self::getLastError();
+            if(is_array($err)){
+                $errorMsg = self::formatErrorMessage($err);
+            }else{
+                $errorMsg = 'Database with ID#'.$dbID.' is not found';
+            }
+            self::setCachedDatabaseUrl($dbID, 'failure:'.$errorMsg);
         }
 
         return $dburl;
-    }        
+    } 
+    
+    private static function formatErrorMessage(array $error): string{
+
+        $message = ''; //'<h2>Request could not be resolved</h2>';
+        $sysmsg = isset($error['sysmsg']) && is_array($error['sysmsg']) ?$error['sysmsg'] :[];
+
+        if(!empty($error['message'])){
+            $message .= '<p>'.strip_tags($error['message'],['p','b','br','strong']).'</p>';
+        }
+
+        if(!empty($sysmsg['remote_url'])){
+            $message .= '<p><b>URL checked:</b> '
+                .htmlspecialchars($sysmsg['remote_url'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+
+        if(!empty($sysmsg['transport_error'])){
+            $message .= '<p><b>Transport Error:</b> '
+                .htmlspecialchars($sysmsg['transport_error'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+        
+        if(!empty($sysmsg['code'])){
+            $message .= '<p><b>Error code:</b> '
+                .htmlspecialchars($sysmsg['code'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                .'</p>';
+        }
+
+        return $message;
+    }     
         
     /**
-     * Retrieves registration information for a database from the Heurist reference index.
-     * Handles remote calls if necessary.
+     * Looks up the server registered for a database ID in the central
+     * Heurist Reference Index.
      *
-     * @param array $params Parameters for fetching registration info. Expected key:
-     *                      'dbID' (int) - The ID of the database registration to retrieve.
-     *                      'action' (string, optional) - Set to 'info' for remote calls.
-     * @return string|false|array The database URL (string) on success, false on failure, or an array from remote call.
+     * This returns the registered server/base URL, not necessarily the final
+     * current database URL. The caller should subsequently ask that server
+     * to resolve the database ID locally.
+     *
+     * @param array $params Expected key: dbID.
+     * @return string|false Server/base URL on success, false on failure.
      */
     public static function registrationGetFromCentralIndexDb($params){
 
@@ -804,43 +965,43 @@ class DbRegis {
 
         
         if(self::$isOutSideRequest){ //request goes not from index server
-            $params['action'] = 'info';
-            return self::registrationRemoteCall($params); //send request to index server
+            $params['action'] = 'central_index_lookup';
+            return self::registrationRemoteCall($params, null, 'central_index_lookup'); //send request to index server
         }
 
-            $database_url = null;
+        $database_url = null;
 
-            $sys = self::$system;
-            $mysqli = $sys->getMysqli();
+        $sys = self::$system;
+        $mysqli = $sys->getMysqli();
 
-            ConceptCode::setSystem($sys);
-            $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
+        ConceptCode::setSystem($sys);
+        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 
-            $rec = mysql__select_row_assoc($mysqli,
-                'select rec_Title, rec_URL from Records where rec_RecTypeID='
-                .$rty_ID_registered_database.' and rec_ID='  //1-22
-                .$dbID);
+        $rec = mysql__select_row_assoc($mysqli,
+            'select rec_Title, rec_URL from Records where rec_RecTypeID='
+            .$rty_ID_registered_database.' and rec_ID='  //1-22
+            .$dbID);
 
-            if ($rec!=null){
-                $database_url = @$rec['rec_URL'];
-                if(isEmptyStr($database_url)){
-                    self::addError(HEURIST_NOT_FOUND,
-                        'Database URL is not set in Heurist Reference Index database for database ID#'.$dbID);
-                    return false;
-                }
-                return $database_url;
-            }
-
-
-            $err = $mysqli->error;
-            if($err){
-                self::addError(HEURIST_DB_ERROR,
-                     'Heurist Reference Index database is not accessible at the moment. Please try later');
-            }else{
+        if ($rec!=null){
+            $database_url = @$rec['rec_URL'];
+            if(isEmptyStr($database_url)){
                 self::addError(HEURIST_NOT_FOUND,
-                     'Database with ID#'.$dbID.' is not found in Heurist Reference Index database');
+                    'Database URL is not set in Heurist Reference Index database for database ID#'.$dbID);
+                return false;
             }
-            return false;
+            return $database_url;
+        }
+
+
+        $err = $mysqli->error;
+        if($err){
+            self::addError(HEURIST_DB_ERROR,
+                 'Heurist Reference Index database is not accessible at the moment. Please try later');
+        }else{
+            self::addError(HEURIST_NOT_FOUND,
+                 'Database with ID#'.$dbID.' is not found in Heurist Reference Index database');
+        }
+        return false;
     }
 
 
@@ -896,6 +1057,8 @@ class DbRegis {
         $dbName = @$params['dbReg'];
         $dbTitle = @$params['dbTitle'];//DT_NAME
         $dbVersion = @$params['dbVer'];
+        $dbDisplayName = @$params['dbDisplayName'];
+        $dbRights = @$params['dbRights'];
 
         $usrEmail = @$params['usrEmail'];
         $usrPassword = @$params['usrPassword'];//hashed
@@ -1015,8 +1178,22 @@ class DbRegis {
             $mysqli->query('set @logged_in_user_id = '.$sys->getUserId());
 
             if($dbID>0){
-                if($dbTitle){
+                // Heurist_Reference_Index field mapping (Ian Johnson's metadata strategy, June 2026):
+                //  Display name (sysIdentification.sys_dbName)        -> Database title, concept 2-1
+                //  Database rights statement (sys_dbRights)           -> concept 2-311
+                //  Long description entered on Design > Register      -> concept 2-12
+                //    (>=40 chars, prefilled from sys_dbDescription but editable at registration time)
+                if($dbDisplayName){
+                    self::recordUpdateField($sys, $dbID, '2-1', $dbDisplayName, false);
+                }elseif($dbTitle){
+                    // fallback if no Display Name has been set in Design > Properties
                     self::recordUpdateField($sys, $dbID, '2-1', $dbTitle, false);
+                }
+                if($dbTitle){
+                    self::recordUpdateField($sys, $dbID, '2-12', $dbTitle, false);
+                }
+                if($dbRights){
+                    self::recordUpdateField($sys, $dbID, '2-311', $dbRights, false);
                 }
                 if($dbName){
                     self::recordUpdateField($sys, $dbID, '1176-469', $dbName, false);
@@ -1115,4 +1292,26 @@ class DbRegis {
         mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $detail);
     }
 
+    /**
+     * Simple check for University of Sydney database, as it's version of Heurist is out of date
+     *
+     * @param string $url URL to Heurist database on USYD server
+     * @return string|false False on failure, otherwise URL to database
+     */
+    private static function checkUSYDServer($url){
+
+        if(!filter_var($url, FILTER_VALIDATE_URL)){
+            self::addError(HEURIST_INVALID_REQUEST, 'Invalid URL to University of Sydney server.');
+            return false;
+        }
+
+        $headers = get_headers($url);
+
+        if(!$headers || strpos($headers[0], '200') === false){
+            self::addError(HEURIST_ACTION_BLOCKED, 'Unable to find Heurist database on University of Sydney server.');
+            return false;
+        }
+
+        return $url;
+    }
 }

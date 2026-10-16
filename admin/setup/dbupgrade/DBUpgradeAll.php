@@ -1,12 +1,12 @@
 <?php
 /**
-* DBUpgradeAll.php - Upgrades all Heurist databases on the server to schema version 1.3.
+* DBUpgradeAll.php - Upgrades all Heurist databases on the server to schema version HEURIST_MIN_DBVERSION.
 *
 * @fileOverview This script iterates through all databases prefixed with `HEURIST_DB_PREFIX`
-*               on the current MySQL server. For each database found to be on a version
-*               less than 1.3 (specifically, major version 1, minor version less than 3),
-*               it attempts to upgrade it to version 1.3 using the `doUpgradeDatabase` function.
-*               It outputs a report of databases processed, upgraded, or any errors encountered.
+*               on the current MySQL server and upgrades each of them with `doUpgradeDatabase`
+*               in automatic mode. Databases older than DBUPGRADE_MIN_AUTO_VERSION are not upgraded
+*               and must be upgraded manually (upgradeDatabase.php).
+*               It outputs a report of databases upgraded, up to date, requiring manual update and failed.
 *               This script requires owner-level access.
 *
 * @project     Heurist academic knowledge management system
@@ -50,65 +50,60 @@ $mysqli = $system->getMysqli();
     }
 
     $db_undef = array();//it seems this is not heurist db
+    $reports = array('upgraded'=>array(), 'uptodate'=>array(), 'manual'=>array(), 'error'=>array());
 
-    $db = array();
-    $cnt = 0;
+    //2. upgrade databases one by one
+    foreach ($databases as $db_name){
 
-    foreach ($databases as $idx=>$db_name){
-
-        $query = 'SELECT sys_dbSubVersion from '.$db_name.'.sysIdentification';
-        $ver = mysql__select_value($mysqli, $query);
-
-
-        if( (!isPositiveInt($ver)) || $ver<3){
-
-            if(!hasTable($mysqli, 'sysIdentification',$db_name)){
-                $db_undef[] = $db_name;
-                continue;
-            }
-
-            if(!@$db[$ver]){
-                $db[$ver] = array($db_name);
-            }else{
-                array_push($db[$ver], $db_name);
-            }
-
-            $res = doUpgradeDatabase($system, $db_name, 1, 3, false);
-            if(!$res){
-
-                print errorDiv('Error: Unable upgrade '.htmlspecialchars($db_name));
-
-                $error = $system->getError();
-                if($error){
-                    print errorDiv($error['message'].BR.@$error['sysmsg']);
-                }
-                break;
-            }
-
-            $cnt++;
-
-        }else{
-            //check that v1.3 has
-
-
+        if(!hasTable($mysqli, 'sysIdentification', $db_name)){
+            $db_undef[] = $db_name;
+            continue;
         }
 
+        $system->clearError();
 
-    }//while  databases
+        $res = doUpgradeDatabase($system, $db_name);
 
+        $status = $res['status'];
+        if($status=='upgraded'){
+            $info = $res['from'].' => '.$res['to'];
+        }elseif($status=='uptodate'){
+            $info = $res['from'];
+        }elseif($status=='manual'){
+            $info = $res['from'].' need manual update';
+        }else{
+            $info = $res['from'].' '.end($res['report']);
+        }
+        $reports[$status][$db_name] = $info;
+    }//foreach databases
+
+    //restore current database
+    $system->clearError();
+    mysql__usedatabase($mysqli, $system->dbname());
+    $system->settings->get(null, true);
+
+    //3. report
+    $titles = array(
+        'error' => 'Failed to upgrade',
+        'manual' => 'Need manual update (version older than '.DBUPGRADE_MIN_AUTO_VERSION.'). Open database and follow upgrade instructions',
+        'upgraded' => 'Upgraded to '.HEURIST_MIN_DBVERSION,
+        'uptodate' => 'Up to date'
+    );
+    foreach ($titles as $status => $title){
+        $dbs = $reports[$status];
+        print '<p><b>'.$title.'</b>   Cnt: '.count($dbs).'</p>';
+        if($status=='uptodate'){
+            continue; //no need to list them
+        }
+        foreach ($dbs as $db_name => $info){
+            print ($status=='error') ?errorDiv($db_name.'   '.$info) :htmlspecialchars($db_name.'   '.$info).'<br>';
+        }
+    }
 
     if(!isEmptyArray($db_undef)){
         print '<p>It seems these are not Heurist databases</p>';
         foreach ($db_undef as $db_name){
             print htmlspecialchars($db_name).'<br>';
-        }
-    }
-    if(!isEmptyArray($db)){
-        foreach ($db as $ver => $dbs){
-           print '<p>List of databases with v 1.'.$ver.'   Cnt: '.count($dbs).'</p>';
-           foreach ($dbs as $db_name){
-                print htmlspecialchars($db_name).'<br>';
-           }
         }
     }
 

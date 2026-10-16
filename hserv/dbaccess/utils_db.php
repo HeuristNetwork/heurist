@@ -471,6 +471,29 @@ $mysqli->kill($thread_id);
         return $matches;
     }
 
+    
+    function mysql__select_assoc_grouped($mysqli, $query):array{
+
+        $matches = array();
+        if($mysqli && $query){
+
+            $curVal = null;
+            $res = $mysqli->query($query);
+            if ($res){
+                while ($row = $res->fetch_row()){
+                    if($curVal!==$row[0]){
+                        $curVal = $row[0];
+                        $matches[$row[0]] = [];
+                    }
+                    $matches[$row[0]][] = $row[1];
+                }
+                $res->close();
+            }
+        }
+        return $matches;
+    }
+    
+    
     /**
     * returns array  key_column(first filed)=>array(field=>val,....)
     *
@@ -1139,6 +1162,7 @@ $mysqli->kill($thread_id);
             }
 
             if(!$res){
+                error_log('Error: '.$error);
                 $res = 'Unable to execute script '.htmlspecialchars(basename($script_file)).' for database '.$database_name_full;
             }
         }
@@ -2305,6 +2329,28 @@ $mysqli->kill($thread_id);
             }
 
 
+            $res->close();
+        }
+        return $row_cnt>0;
+    }
+
+    /**
+     * Checks if an index (key) exists in a given table of the current database.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $table_name The name of the table.
+     * @param string $key_name The name of the index.
+     * @return bool True if the index exists, false otherwise.
+     */
+    function hasIndex($mysqli, $table_name, $key_name){
+
+        $table_name = preg_replace(REGEX_ALPHANUM, "", $table_name);
+
+        $res = $mysqli->query("SHOW INDEX FROM `$table_name` WHERE Key_name='"
+                .$mysqli->real_escape_string($key_name)."'");
+        $row_cnt = 0;
+        if($res){
+            $row_cnt = $res->num_rows;
             $res->close();
         }
         return $row_cnt>0;

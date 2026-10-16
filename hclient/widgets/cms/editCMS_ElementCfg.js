@@ -802,7 +802,32 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
      * @private
      */
     function _initCodeEditor() {
+
+        if(typeof CodeMirror !== 'function'){ // Check if CodeMirror is loaded
         
+            let path = window.hWin.HAPI4.baseURL + 'external/codemirror-5.61.0/';
+            let scripts = [ //'lib/codemirror.css', CSS is included in index.php
+                            'lib/codemirror.js',
+                            'lib/util/formatting.js', // For autoFormatRange
+                            'mode/css/css.js',        
+                            'mode/javascript/javascript.js',        
+                            'mode/xml/xml.js',        // Dependency for htmlmixed
+                            'mode/htmlmixed/htmlmixed.js' // Default mode
+                            ];
+            $.getStyles(`${path}lib/codemirror.css`);
+            
+            let that = this;
+            // See getMultiScriptsSequental in utils.js
+            $.getMultiScriptsSequental(scripts, path)
+            .then(function() {  //OK! widget script js has been loaded
+                _initCodeEditor(); // Retry showing editor now that scripts are loaded
+            }).catch(function() {
+                window.hWin.HEURIST4.msg.showMsg_ScriptFail(); // Show generic script failure message.
+            });        
+            
+            return;
+        }
+
         let $dlg;
         
         let ce_container = $container.find('#codemirror-body');

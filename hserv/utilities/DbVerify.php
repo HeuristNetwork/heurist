@@ -34,17 +34,22 @@ class DbVerify {
     private $mysqli = null;
     private $system = null;
 
+    private $simplifiedOutput = false; // whether to include checkboxes and items needing JS
     private $out = null; //output stream
     private $keep_autocommit = null;
+
+    private const SIMPLIFIED_OUTPUT_LIMIT = 10;
 
     /**
      * Constructor for DbVerify.
      *
      * @param \hserv\System $system The system instance.
+     * @param bool $useSimplifiedOutput Keep the results as simple as possible, for mass runs/emailing results
      */
-    public function __construct($system) {
+    public function __construct($system, $useSimplifiedOutput = false) {
        $this->system = $system;
        $this->mysqli = $system->getMysqli();
+       $this->simplifiedOutput = $useSimplifiedOutput;
     }
 
     //
@@ -98,11 +103,28 @@ class DbVerify {
     //
     private function printList($title, $sub_title, $resList, $marker){
 
-        if(!$sub_title) {$sub_title = '';}
+        if(!$sub_title || $this->simplifiedOutput) {$sub_title = '';}
 
-        if($title!=null){
+        if($title != null){
 
-            $resMsg = <<<HEADER
+            if($this->simplifiedOutput){
+
+                $resMsg = <<<HEADER
+                <table role="presentation">
+                    <tr>
+                        <td colspan="7"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"></td>
+                        <td><strong>Record title</strong></td>
+                        <td><strong>ID</strong></td>
+                        <td><strong>Field name</strong></td>
+                        <td><strong>Field value</strong></td>
+                    </tr>
+                HEADER;
+            }else{
+
+                $resMsg = <<<HEADER
                 <div>
                     <h3>$title</h3>
                     $sub_title
@@ -125,10 +147,14 @@ class DbVerify {
                         <td><strong>Field value</strong></td>
                     </tr>
                 HEADER;
+            }
 
             fwrite($this->out, $resMsg);
         }
 
+        $addSubText = false;
+        $idx = 0;
+        $total = 0;
         if($resList!=null){
 
             $url_icon_placeholder = ICON_PLACEHOLDER;
@@ -136,12 +162,22 @@ class DbVerify {
 
             //$ids = array();
             $rec_id = null;
-            $idx = 0;
+            $total = is_array($resList) ? count($resList) : $resList->num_rows;
 
-            while ($row = is_array($resList)?@$resList[$idx]:$resList->fetch_assoc()){
-                //foreach ($resList as $row) {
+            while($row = is_array($resList) ? @$resList[$idx] : $resList->fetch_assoc()){
+
+                if($this->simplifiedOutput && $idx === self::SIMPLIFIED_OUTPUT_LIMIT){
+                    $addSubText = true;
+                    break;
+                }
+
                 $resMsg = '';
                 $idx++;
+                if(@$row['wkt']){
+                    $dtl_value = $row['wkt'];
+                }else{
+                    $dtl_value = strip_tags($row['dtl_Value'],'<span>');
+                }
                 if($rec_id==null || $rec_id!=$row['rec_ID']) {
 
                     $rec_id = $row['rec_ID'];
@@ -150,16 +186,15 @@ class DbVerify {
                     $url_icon = @$row['rec_RecTypeID']?HEURIST_RTY_ICON.$row['rec_RecTypeID']:'';
                     $url_rec =  $this->getEditURL($rec_id);
                     $rec_title = @$row['rec_Title']?strip_tags($row['rec_Title']):'';
-                    if(@$row['wkt']){
-                        $dtl_value = $row['wkt'];
-                    }else{
-                        $dtl_value = strip_tags($row['dtl_Value'],'<span>');
-                    }
+
+                    $checkbox = $this->simplifiedOutput ? '' : <<<CHECKBOX
+                    <input type=checkbox name="$marker" value={$rec_id}>
+                    CHECKBOX;
 
                     $rollover = str_replace('"', "&quot;", "#$rec_id $rec_title");
                     $resMsg .= <<<EOT
                         <tr title="$rollover">
-                            <td><input type=checkbox name="$marker" value={$rec_id}></td>
+                            <td>{$checkbox}</td>
                             <td><img alt class="rft" style="background-size:contain;background-image:url($url_icon)" src="$url_icon_placeholder"></td>
                             <td style="white-space: nowrap;"><a target=_new href="$url_rec">
                                     {$rec_id} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
@@ -179,9 +214,13 @@ class DbVerify {
 
             }//foreach
 
-
             if($title!=null){
                 fwrite($this->out, TABLE_E);
+            }
+
+            if($addSubText){
+                $remainder = $total - $idx;
+                fwrite($this->out, "<br>and {$remainder} more records...");
             }
 
             //$url_all = $this->getAllURL($ids);
@@ -262,9 +301,8 @@ class DbVerify {
             if($wasassigned2>0){
                 $resMsg .= "<div>$wasassigned2 records were attributed to owner # 2 Database Manager</div>";
             }
-        }
-        else
-        {
+        }else{
+
             // If invalid references are found, display a warning and provide an option to fix the issues.
             $resStatus = false;
             $resMsg .= DIV_S;
@@ -275,7 +313,7 @@ class DbVerify {
                 $resMsg .= "<h3> $wrongUser_Owner records are owned by non-existent users</h3>";
             }
 
-            $resMsg .= '<br><br><button data-fix="owner_ref">Attribute them to owner # 2 Database Manager</button></div>';
+            $resMsg .= $this->simplifiedOutput ? '' : '<br><br><button data-fix="owner_ref">Attribute them to owner # 2 Database Manager</button></div>';
         }
 
         // Return the status and message as an associative array.
@@ -387,62 +425,77 @@ class DbVerify {
         }
 
         if(empty($trmWithWrongParents) && empty($trmWithWrongInverse)){
-                $resMsg .= '<div><h3 class="res-valid">OK: All terms have valid inverse and parent term references</h3></div>';
+            $resMsg .= '<div><h3 class="res-valid">OK: All terms have valid inverse and parent term references</h3></div>';
 
-                if($wasassigned1>0){
-                    $resMsg .= "<div>$wasassigned1 terms with wrong parent terms moved to 'Trash' group as vocabularies</div>";
-                }
-                if($wasassigned2>0){
-                    $resMsg .= "<div>$wasassigned2 wrong inverse term references are cleared</div>";
-                }
+            if($wasassigned1>0){
+                $resMsg .= "<div>$wasassigned1 terms with wrong parent terms moved to 'Trash' group as vocabularies</div>";
             }
-            else
-            {
+            if($wasassigned2>0){
+                $resMsg .= "<div>$wasassigned2 wrong inverse term references are cleared</div>";
+            }
+        }else{
 
-                $resMsg .= DIV_S;
-                if(!empty($trmWithWrongParents)){
+            $resMsg .= DIV_S;
+            if(!empty($trmWithWrongParents)){
 
-                    $resMsg .= '<h3>'.count($trmWithWrongParents).' terms have wrong parent term references</h3>';
-                    $cnt = 0;
-                    foreach ($trmWithWrongParents as $trm_ID) {
-                        $resMsg .= ('<br>'.$trm_ID.'  '.$trmLookup[$trm_ID]['trm_Label']);
-                        if($cnt>30){
-                          $resMsg .= ('<br>'.count($trmWithWrongParents)-$cnt.' more...');
-                          break;
-                        }
-                        $cnt++;
+                $resMsg .= '<h3>'.count($trmWithWrongParents).' terms have wrong parent term references</h3>';
+
+                $cnt = 0;
+                foreach ($trmWithWrongParents as $trm_ID) {
+                    $resMsg .= ('<br>'.$trm_ID.'  '.$trmLookup[$trm_ID]['trm_Label']);
+                    if($cnt > 30 || $this->simplifiedOutput && $cnt > 10){
+                        $resMsg .= ('<br>'.count($trmWithWrongParents)-$cnt.' more...');
+                        break;
                     }
-                    $resStatus = false;
-                }
-                if(!empty($trmWithWrongInverse)){
-
-                    $resMsg .= '<h3>'.count($trmWithWrongInverse).' terms have wrong inverse term references</h3>';
-                    $cnt = 0;
-                    foreach ($trmWithWrongInverse as $trm_ID) {
-                        $resMsg .= '<br>'.$trm_ID.'  '.$trmLookup[$trm_ID]['trm_Label'];
-                        if($cnt>30){
-                          $resMsg .= '<br>'.count($trmWithWrongInverse)-$cnt.' more...';
-                          break;
-                        }
-                        $cnt++;
-                    }
-                    $resStatus = false;
+                    $cnt++;
                 }
 
-                $resMsg .= '<br><br><button data-fix="dup_terms">Correct wrong parent and inverse term references</button></div>';
+                $resStatus = false;
+            }
+            if(!empty($trmWithWrongInverse)){
+
+                $resMsg .= '<h3>'.count($trmWithWrongInverse).' terms have wrong inverse term references</h3>';
+
+                $cnt = 0;
+                foreach ($trmWithWrongInverse as $trm_ID) {
+                    $resMsg .= '<br>'.$trm_ID.'  '.$trmLookup[$trm_ID]['trm_Label'];
+                    if($cnt > 30 || $this->simplifiedOutput && $cnt > 10){
+                        $resMsg .= '<br>'.count($trmWithWrongInverse)-$cnt.' more...';
+                        break;
+                    }
+                    $cnt++;
+                }
+                $resStatus = false;
+            }
+
+            $resMsg .= $this->simplifiedOutput ? '' : '<br><br><button data-fix="dup_terms">Correct wrong parent and inverse term references</button></div>';
         }
 
         if(!empty($trmDuplicates)){
+
             $resStatus = false;
 
             $resMsg .= '<h3>Terms are duplicated or ending in a number: these may be the result of automatic duplicate-avoidance. '
             .'If so, we suggest deleting the numbered term or using Design > Vocabularies to merge it with the un-numbered version.</h3>';
             foreach ($trmDuplicates as $parent_ID=>$dupes) {
+
                 $resMsg .= '<div style="padding-top:10px;font-style:italic">parent '.intval($parent_ID).'  '
                     .htmlspecialchars($trmLookup[$parent_ID]['trm_Label']).DIV_E;
+
+                $dupCount = 0;
+
                 foreach ($dupes as $trm_ID) {
+
+                    if($this->simplifiedOutput && $dupCount === self::SIMPLIFIED_OUTPUT_LIMIT){
+                        $remainder = count($dupes) - $dupCount;
+                        $resMsg .= "<br>and {$remainder} more duplicate terms...";
+                        break;
+                    }
+
                     $resMsg .= '<div style="padding-left:60px">'.intval($trm_ID).'  '
                     .htmlspecialchars($trmLookup[$trm_ID]['trm_Label']).DIV_E;
+
+                    $dupCount ++;
                 }
             }
         }
@@ -505,7 +558,7 @@ class DbVerify {
         }else{
 
             $contact_us = CONTACT_HEURIST_TEAM;
-            $resMsg = <<<HEADER
+            $resMsg = $this->simplifiedOutput ? '' : <<<HEADER
             <br><h3>Warning: Inconsistent field definitions</h3><br>&nbsp;<br>
             The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please $contact_us<br><br>
             To fix the inconsistencies, please click here: <button data-fix="field_type">Auto Repair</button>  <br>&nbsp;<br>
@@ -562,19 +615,32 @@ class DbVerify {
      * @param string $msgType The type of message to generate (term ID, record type constraint, etc.).
      * @return string The generated HTML error messages for each invalid field.
      */
-    private function generateFieldMessages($fieldList, $invalid_ids, $msgType)
-    {
-        $resMsg = '';
-        if (is_array($fieldList)) {
-            foreach ($fieldList as $row) {
-                $cnt = count($row[$invalid_ids]);
+    private function generateFieldMessages($fieldList, $invalid_ids, $msgType){
 
-                $resMsg .= '<div class="msgline"><b>' . htmlspecialchars($row['dty_Name']) . '</b> field (code ' .
-                            intval($row['dty_ID']) . ') has ' . $cnt . ' invalid ' . $msgType
-                            . ($cnt>1?'s':'')
-                            . ' (code: ' . htmlspecialchars(implode(',', $row[$invalid_ids])) . ')</div>';
-            }
+        $resMsg = '';
+        if (!is_array($fieldList)) {
+            return '';
         }
+
+        $lineCount = 0;
+        foreach($fieldList as $row){
+
+            $cnt = count($row[$invalid_ids]);
+
+            if($this->simplifiedOutput && $lineCount === self::SIMPLIFIED_OUTPUT_LIMIT){
+                $remainder = count($fieldList) - $lineCount;
+                $resMsg .= "<br>and {$remainder} more fields...";
+                break;
+            }
+
+            $resMsg .= '<div class="msgline"><b>' . htmlspecialchars($row['dty_Name']) . '</b> field (code ' .
+                        intval($row['dty_ID']) . ') has ' . $cnt . ' invalid ' . $msgType
+                        . ($cnt>1?'s':'')
+                        . ' (code: ' . htmlspecialchars(implode(',', $row[$invalid_ids])) . ')</div>';
+
+            $lineCount ++;
+        }
+
         return $resMsg;
     }
 
@@ -606,15 +672,24 @@ class DbVerify {
 
         if (!isEmptyArray($rstWithInvalidDefaultValues)){
 
+            if($this->simplifiedOutput){ // Report to user/recipient default values that were removed
 
-            $resMsg = <<<'HEADER'
-            <br><h3>Warning: Wrong field default values for record type structures</h3><br>&nbsp;<br>
-            The following fields use unknown terms as default values. <u>These default values have been removed</u>.
-            <br>&nbsp;<br>
-            HEADER;
-// <br>You can define new default value by clicking on the name in the list below and editing the field definition.<br>&nbsp;<br>
+                $invalidDefValueCount = count($rstWithInvalidDefaultValues);
+                $pural = $invalidDefValueCount > 1 ? 's' : '';
+                $resMsg = "{$invalidDefValueCount} field{$pural} had the wrong default values in their record type structures (<strong>these have been removed</strong>).<br>";
+                $resStatus = false;
+
+            }else{
+
+                $resMsg = <<<HEADER
+                <br><h3>Warning: Wrong field default values for record type structures</h3><br>&nbsp;<br>
+                The following fields use unknown terms as default values. <u>These default values have been removed</u>.
+                <br>&nbsp;<br>
+                HEADER;
+            }
 
             foreach ($rstWithInvalidDefaultValues as $row) {
+
                 $resMsg .= '<div class="msgline"><b>'
                     .htmlspecialchars($row['rst_DisplayName'])
                     .'</b> field (code '.intval($row['dty_ID']).' ) in record type '
@@ -622,6 +697,7 @@ class DbVerify {
                     .' had invalid default value ('.($row['dty_Type']=='resource'?'record ID ':'term ID ')
                     .htmlspecialchars($row['rst_DefaultValue'])
                     .'<span style="font-style:italic">'.htmlspecialchars($row['reason']).'</span></div>';
+
             }//for
 
         }else{
@@ -680,6 +756,7 @@ class DbVerify {
         $res->close();
 
         if(empty($bibs)){
+
             $resMsg = '<div><h3 class="res-valid">OK: All record pointers point to a valid record</h3></div>';
 
             if($wasdeleted>0){
@@ -689,11 +766,13 @@ class DbVerify {
         else
         {
             $resStatus = false;
+            $resMsg = $this->simplifiedOutput ? '' : $resMsg;
 
             $this->_outStreamInit();
             fwrite($this->out, $resMsg);
 
             $fixMsg = '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="pointer_targets">Delete ALL faulty pointers</button></div>';
+
             $this->printList('Records record pointers to non-existent records', $fixMsg, $bibs, 'recCB0');
 
             $resMsg = $this->_outStreamRes();
@@ -743,11 +822,10 @@ class DbVerify {
         else
         {
             $resStatus = false;
-            $this->_outStreamInit();
-            fwrite($this->out, $resMsg);
 
-            $fixMsg = null;
-            $this->printList('Records with record pointers to the wrong record type', $fixMsg, $bibs, 'recCB2');
+            $this->_outStreamInit();
+
+            $this->printList('Records with record pointers to the wrong record type', null, $bibs, 'recCB2');
 
             $resMsg = $this->_outStreamRes();
         }
@@ -911,7 +989,7 @@ ORDER BY child.dtl_RecID";
         $url_icon_extlink = ICON_EXTLINK;
 
         if(empty($bibs1)){
-            $resMsg .= '<div><h3>OK: All parent records are correctly referenced by their child records</h3></div>';
+            $resMsg .= $this->simplifiedOutput ? '' : '<div><h3>OK: All parent records are correctly referenced by their child records</h3></div>';
 
             if($wasdeleted1>1){
                 $resMsg .= "<div>$wasdeleted1 invalid pointer(s) were removed from database</div>";
@@ -919,94 +997,117 @@ ORDER BY child.dtl_RecID";
             if($wasadded1>0){
                 $resMsg .= "<div>$wasadded1 reverse pointers were added to child records</div>";
             }
-        }
+        }else{
 
-        else
-        {
             $resStatus = false;
+            $resMsg = $this->simplifiedOutput ? '' : $resMsg;
 
             $url_all = $this->getAllURL(array_keys($prec_ids1));
 
+            $fixButton = $this->simplifiedOutput ? '' : <<<FIXBTN
+            <div>To fix the inconsistencies, please click here:
+                <button data-fix="target_parent">Add missing parent record pointers to child records</button>
+            </div>
+            FIXBTN;
+
+            $searchSelected = $this->simplifiedOutput ? '' : <<<SEARCHLINK
+            <a target=_new href="#selected_link" data-show-selected="recCB3">(show selected as search)</a>
+            SEARCHLINK;
+
+            $markAll = $this->simplifiedOutput ? '' : <<<MARKALL
+            <label><input type="checkbox" data-mark-all="recCB3">Mark all</label>
+            MARKALL;
+
             $resMsg .= <<<HEADER
-                <br><h3>Parent records which are not correctly referenced by their child records (missing pointer to parent)</h3>
+            <br><h3>Parent records which are not correctly referenced by their child records (missing pointer to parent)</h3>
 
-                <div>To fix the inconsistencies, please click here:
-                    <button data-fix="target_parent">Add missing parent record pointers to child records</button>
-                </div>
+            $fixButton
 
-                <a target=_new href="$url_all">(show results as search)</a>
-                <a target=_new href="#selected_link" data-show-selected="recCB3">(show selected as search)</a>
-                <table role="presentation">
+            <a target=_new href="$url_all">(show results as search)</a>
+            $searchSelected
+            <table role="presentation">
+            <tr>
+                <td colspan="7">
+                    $markAll
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3"></td>
+                <td><strong>Parent record title</strong></td>
+                <td colspan="2"></td>
+                <td><strong>Child record title</strong></td>
+            </tr>
+            HEADER;
+
+            $url_icon_placeholder = ICON_PLACEHOLDER;
+            $url_icon_extlink = ICON_EXTLINK;
+
+            foreach ($bibs1 as $row) {
+
+                $url_icon_parent = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
+                $url_rec_parent = $this->getEditURL($row['rec_ID']);
+                $url_rec_child =  $this->getEditURL($row['dtl_Value']);
+                $rec_title_parent = substr(strip_tags($row['p_title']),0,50);
+                $rec_title_child = substr(strip_tags($row['c_title']),0,50);
+
+                $markCheckbox = $this->simplifiedOutput ? '' : <<<MARKBOX
+                <input type=checkbox name="recCB3" value={$row['rec_ID']}>
+                MARKBOX;
+
+                $resMsg .= <<<EOT
                 <tr>
-                    <td colspan="7">
-                        <label><input type="checkbox" data-mark-all="recCB">Mark all</label>
-                    </td>
+                    <td>{$markCheckbox}</td>
+                    <td><img alt class="rft" style="background-image:url($url_icon_parent)" src="$url_icon_placeholder"></td>
+                    <td style="white-space: nowrap;"><a target=_new href="$url_rec_parent">
+                            {$row['rec_ID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                        </a></td>
+                    <td class="truncate" style="max-width:400px">$rec_title_parent</td>
+
+                    <td>points to</td>
+
+                    <td style="white-space: nowrap;"><a target=_new href="$url_rec_child">
+                            {$row['dtl_Value']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                        </a></td>
+                    <td class="truncate" style="max-width:400px">$rec_title_child</td>
                 </tr>
-                <tr>
-                    <td colspan="3"></td>
-                    <td><strong>Parent record title</strong></td>
-                    <td colspan="2"></td>
-                    <td><strong>Child record title</strong></td>
-                </tr>
-                HEADER;
+                EOT;
 
-                $url_icon_placeholder = ICON_PLACEHOLDER;
-                $url_icon_extlink = ICON_EXTLINK;
-
-                foreach ($bibs1 as $row) {
-
-                    $url_icon_parent = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
-                    $url_rec_parent = $this->getEditURL($row['rec_ID']);
-                    $url_rec_child =  $this->getEditURL($row['dtl_Value']);
-                    $rec_title_parent = substr(strip_tags($row['p_title']),0,50);
-                    $rec_title_child = substr(strip_tags($row['c_title']),0,50);
-
-                    $resMsg .= <<<EOT
-                    <tr>
-                        <td><input type=checkbox name="recCB3" value={$row['rec_ID']}></td>
-                        <td><img alt class="rft" style="background-image:url($url_icon_parent)" src="$url_icon_placeholder"></td>
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec_parent">
-                                {$row['rec_ID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td class="truncate" style="max-width:400px">$rec_title_parent</td>
-
-                        <td>points to</td>
-
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec_child">
-                                {$row['dtl_Value']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td class="truncate" style="max-width:400px">$rec_title_child</td>
-                    </tr>
-                    EOT;
-
-                }//foreach
-                $resMsg .= TABLE_E."\n";
+            }//foreach
+            $resMsg .= TABLE_E."\n";
         }
 
 
         if (empty($bibs2)) {
-            $resMsg .= '<br><h3 class="res-valid">OK: All parent records correctly reference records which believe they are their children</h3><br>';
+            $resMsg .= $this->simplifiedOutput ? '' : '<br><h3 class="res-valid">OK: All parent records correctly reference records which believe they are their children</h3><br>';
 
             if($wasdeleted2>1){
                 $resMsg .= "<div>$wasdeleted2 invalid pointer(s) were removed from database</div>";
             }
-        }
-        else
-        {
+
+        }else{
+
             $resStatus = false;
 
             $url_all = $this->getAllURL(array_keys($prec_ids2));
+
+            $searchSelected = $this->simplifiedOutput ? '' : <<<SEARCHLINK
+            <a target=_new href="#selected_link" data-show-selected="recCB4">(show selected as search)</a>
+            SEARCHLINK;
+
+            $markAll = $this->simplifiedOutput ? '' : <<<MARKALL
+            <label><input type="checkbox" data-mark-all="recCB4">Mark all</label>
+            MARKALL;
 
             $resMsg .= <<<HEADER
             <br><h3>Child records indicate a parent which does not identify them as their child. </h3>
 
                 <a target=_new href="$url_all">(show results as search)</a>
-                <a target=_new href="#selected_link" data-show-selected="recCB4">(show selected as search)</a>
+                $searchSelected
 
             <table role="presentation">
                 <tr>
                     <td colspan="6">
-                        <label><input type="checkbox" data-mark-all="recCB4">Mark all</label>
+                        $markAll
                     </td>
                 </tr>
                 <tr>
@@ -1026,27 +1127,31 @@ ORDER BY child.dtl_RecID";
 
             foreach ($bibs2 as $row) {
 
-                    $url_rec_parent = $this->getEditURL($row['dtl_Value']);
-                    $url_rec_child = $this->getEditURL($row['child_id']);
-                    $rec_title_parent = substr(strip_tags($row['p_title']),0,50);
-                    $rec_title_child = substr(strip_tags($row['c_title']),0,50);
+                $url_rec_parent = $this->getEditURL($row['dtl_Value']);
+                $url_rec_child = $this->getEditURL($row['child_id']);
+                $rec_title_parent = substr(strip_tags($row['p_title']),0,50);
+                $rec_title_child = substr(strip_tags($row['c_title']),0,50);
 
-                    $resMsg .= <<<EOT
-                    <tr>
-                        <td><input type=checkbox name="recCB4" value={$row['dtl_Value']}></td>
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec_child">
-                                {$row['child_id']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td class="truncate" style="max-width:400px">$rec_title_child</td>
+                $markCheckbox = $this->simplifiedOutput ? '' : <<<MARKBOX
+                <input type=checkbox name="recCB4" value={$row['dtl_Value']}>
+                MARKBOX;
 
-                        <td>has reverse 'pointer to parent' in </td>
+                $resMsg .= <<<EOT
+                <tr>
+                    <td>{$markCheckbox}</td>
+                    <td style="white-space: nowrap;"><a target=_new href="$url_rec_child">
+                            {$row['child_id']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                        </a></td>
+                    <td class="truncate" style="max-width:400px">$rec_title_child</td>
 
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec_parent">
-                                {$row['dtl_Value']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td class="truncate" style="max-width:400px">$rec_title_parent</td>
-                    </tr>
-                    EOT;
+                    <td>has reverse 'pointer to parent' in </td>
+
+                    <td style="white-space: nowrap;"><a target=_new href="$url_rec_parent">
+                            {$row['dtl_Value']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                        </a></td>
+                    <td class="truncate" style="max-width:400px">$rec_title_parent</td>
+                </tr>
+                EOT;
             }
             $resMsg .= TABLE_E."\n";
 
@@ -1106,15 +1211,18 @@ ORDER BY child.dtl_RecID";
             $resMsg .= "<div>$wascorrected empty fields were deleted</div>";
         }
 
-        if($total_count_rows>0)
-        {
+        if($total_count_rows > 0){
+
             $resStatus = false;
+            $resMsg = $this->simplifiedOutput ? '' : $resMsg;
+
             $this->_outStreamInit();
             fwrite($this->out, $resMsg);
 
-            $fixMsg =
+            $fixMsg = 
             '<div>NULL values are not useful in Heurist, as Heurist handles NULLs by storing no value. It is therefore perfectly safe to delete them</div>'
             .'<div style="padding:20px 0px">To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button></div>';
+
             $this->printList('Records with empty fields', $fixMsg, $res, 'recCB5');
 
             $resMsg = $this->_outStreamRes();
@@ -1180,13 +1288,15 @@ ORDER BY child.dtl_RecID";
             $resMsg .= "<div>$wasdeleted invalid term value(s) were removed from database</div>";
         }
 
-        if($total_count_rows>0)
-        {
+        if($total_count_rows > 0){
+
             $resStatus = false;
+            $resMsg = $this->simplifiedOutput ? '' : $resMsg;
+
             $this->_outStreamInit();
             fwrite($this->out, $resMsg);
 
-            $fixMsg  = '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="term_values">Delete ALL faulty term values</button></button></div>';
+            $fixMsg = '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="term_values">Delete ALL faulty term values</button></button></div>';
             $this->printList('Records with non-existent term values', $fixMsg, $res, 'recCB6');
 
             $resMsg = $this->_outStreamRes();
@@ -1227,18 +1337,182 @@ ORDER BY child.dtl_RecID";
 
         if($total_count_rows<1){
             $resMsg = '<div><h3 class="res-valid">OK: No single value fields exceed 1 value</h3></div>';
-        }else
-        {
+        }else{
+
             $resStatus = false;
+
             $this->_outStreamInit();
-            fwrite($this->out, $resMsg);
 
             $this->printList('Single value fields with multiple values', null, $res, 'recCB7');
 
             $resMsg = $this->_outStreamRes();
+
         }
 
         return array('status'=>$resStatus,'message'=>$resMsg);
+    }
+
+    /**
+     * Finds duplicate record detail rows and malformed uploaded-file IDs.
+     *
+     * Detail rows are duplicates only when dtl_RecID, dtl_DetailTypeID,
+     * dtl_Value, dtl_UploadedFileID and dtl_Geo are all identical. Text and
+     * geometry comparisons are binary so that values which differ only by
+     * case, accents or geometry representation are not removed. NULL values
+     * compare equal to other NULL values.
+     *
+     * In fix mode, fix_operation may be:
+     * - duplicate_values: delete duplicate rows, retaining the lowest dtl_ID.
+     * - invalid_uploaded_file_ids: set malformed IDs to NULL.
+     *
+     * The malformed-ID test is normally redundant because the standard
+     * schema defines dtl_UploadedFileID as MEDIUMINT UNSIGNED. It remains
+     * useful for databases with an old or damaged column definition.
+     *
+     * @param array|null $params Optional verification/fix parameters.
+     * @return array Verification status and HTML report.
+     */
+    public function check_duplicate_values($params=null){
+
+        $resStatus = true;
+        $resMsg = '';
+        $mysqli = $this->mysqli;
+        $duplicatesDeleted = 0;
+        $uploadedFileIdsCleared = 0;
+
+        $invalidUploadedFileWhere = 'dtl_UploadedFileID IS NOT NULL AND ('
+            .'CAST(dtl_UploadedFileID AS CHAR) NOT REGEXP \'^[0-9]+$\' '
+            .'OR CAST(dtl_UploadedFileID AS UNSIGNED) = 0)';
+
+        if($this->isFixMode($params)){
+            $fixOperation = @$params['fix_operation'];
+            mysql__safe_updatess($mysqli, false);
+
+            if($fixOperation === 'invalid_uploaded_file_ids'){
+                $res = $mysqli->query('UPDATE recDetails SET dtl_UploadedFileID = NULL '
+                    .'WHERE '.$invalidUploadedFileWhere);
+                if($res){
+                    $uploadedFileIdsCleared = $mysqli->affected_rows;
+                }else{
+                    $resStatus = false;
+                    $resMsg .= errorDiv('Cannot clear malformed uploaded file IDs. SQL error: '
+                        .htmlspecialchars($mysqli->error));
+                }
+            }elseif($fixOperation === 'duplicate_values' || !$fixOperation){
+                $query = <<<'QUERY'
+                    DELETE duplicate
+                    FROM recDetails AS duplicate
+                    INNER JOIN recDetails AS keeper
+                        ON keeper.dtl_RecID = duplicate.dtl_RecID
+                       AND keeper.dtl_DetailTypeID = duplicate.dtl_DetailTypeID
+                       AND BINARY keeper.dtl_Value <=> BINARY duplicate.dtl_Value
+                       AND keeper.dtl_UploadedFileID <=> duplicate.dtl_UploadedFileID
+                       AND HEX(keeper.dtl_Geo) <=> HEX(duplicate.dtl_Geo)
+                       AND keeper.dtl_ID < duplicate.dtl_ID
+                    QUERY;
+                $res = $mysqli->query($query);
+                if($res){
+                    $duplicatesDeleted = $mysqli->affected_rows;
+                }else{
+                    $resStatus = false;
+                    $resMsg .= errorDiv('Cannot remove duplicate field values. SQL error: '
+                        .htmlspecialchars($mysqli->error));
+                }
+            }
+
+            mysql__safe_updatess($mysqli, true);
+        }
+
+        if($uploadedFileIdsCleared > 0){
+            $resMsg .= '<div>'.$uploadedFileIdsCleared
+                .' malformed uploaded file ID(s) were set to NULL</div>';
+        }
+        if($duplicatesDeleted > 0){
+            $resMsg .= '<div>'.$duplicatesDeleted
+                .' duplicate field value(s) were removed; the value with the lowest detail ID was retained</div>';
+        }
+
+        $invalidFileIds = $mysqli->query(
+            'SELECT dtl_ID, rec_ID, rec_RecTypeID, rec_Title, dtl_DetailTypeID AS dty_ID, '
+            .'IF(rst_DisplayName IS NULL, dty_Name, rst_DisplayName) AS dty_Name, '
+            .'CAST(dtl_UploadedFileID AS CHAR) AS dtl_Value '
+            .'FROM recDetails '
+            .'INNER JOIN Records ON rec_ID = dtl_RecID '
+            .'LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
+            .'LEFT JOIN defRecStructure ON rst_RecTypeID = rec_RecTypeID '
+                .'AND rst_DetailTypeID = dtl_DetailTypeID '
+            .'WHERE '.$invalidUploadedFileWhere.' ORDER BY rec_ID, dtl_ID'
+        );
+
+        if(!$invalidFileIds){
+            return array('status'=>false, 'message'=>$resMsg.errorDiv(
+                'Cannot check uploaded file IDs. SQL error: '.htmlspecialchars($mysqli->error)));
+        }
+
+        $duplicateQuery = <<<'QUERY'
+            SELECT duplicate.dtl_ID, rec_ID, rec_RecTypeID, rec_Title,
+                   duplicate.dtl_DetailTypeID AS dty_ID,
+                   IF(rst_DisplayName IS NULL, dty_Name, rst_DisplayName) AS dty_Name,
+                   duplicate.dtl_Value
+            FROM recDetails AS duplicate
+            INNER JOIN Records ON rec_ID = duplicate.dtl_RecID
+            LEFT JOIN defDetailTypes ON dty_ID = duplicate.dtl_DetailTypeID
+            LEFT JOIN defRecStructure ON rst_RecTypeID = rec_RecTypeID
+                AND rst_DetailTypeID = duplicate.dtl_DetailTypeID
+            WHERE EXISTS (
+                SELECT 1
+                FROM recDetails AS keeper
+                WHERE keeper.dtl_RecID = duplicate.dtl_RecID
+                  AND keeper.dtl_DetailTypeID = duplicate.dtl_DetailTypeID
+                  AND BINARY keeper.dtl_Value <=> BINARY duplicate.dtl_Value
+                  AND keeper.dtl_UploadedFileID <=> duplicate.dtl_UploadedFileID
+                  AND HEX(keeper.dtl_Geo) <=> HEX(duplicate.dtl_Geo)
+                  AND keeper.dtl_ID < duplicate.dtl_ID
+            )
+            ORDER BY rec_ID, duplicate.dtl_ID
+            QUERY;
+        $duplicates = $mysqli->query($duplicateQuery);
+
+        if(!$duplicates){
+            $invalidFileIds->close();
+            return array('status'=>false, 'message'=>$resMsg.errorDiv(
+                'Cannot check duplicate field values. SQL error: '.htmlspecialchars($mysqli->error)));
+        }
+
+        $invalidFileIdCount = $invalidFileIds->num_rows;
+        $duplicateCount = $duplicates->num_rows;
+
+        $this->_outStreamInit();
+        fwrite($this->out, $resMsg);
+
+        if($invalidFileIdCount === 0){
+            fwrite($this->out,
+                '<h3 class="res-valid">OK: All uploaded file IDs are NULL or positive unsigned integers</h3>');
+            $invalidFileIds->close();
+        }else{
+            $resStatus = false;
+            $fixMsg = '<div style="padding:20px 0px">Malformed uploaded file IDs cannot identify a file. '
+                .'<button data-fix="duplicate_values" data-fix-operation="invalid_uploaded_file_ids">'
+                .'Set all malformed uploaded file IDs to NULL</button></div>';
+            $this->printList('Records with malformed uploaded file IDs', $fixMsg,
+                $invalidFileIds, 'recCBDuplicateFileIDs');
+        }
+
+        if($duplicateCount === 0){
+            fwrite($this->out,
+                '<h3 class="res-valid">OK: No exactly duplicated field values</h3>');
+            $duplicates->close();
+        }else{
+            $resStatus = false;
+            $fixMsg = '<div style="padding:20px 0px">The duplicate rows shown below can be removed safely. '
+                .'For each identical set, the row with the lowest detail ID will be retained. '
+                .'<button data-fix="duplicate_values" data-fix-operation="duplicate_values">'
+                .'Remove all duplicate field values</button></div>';
+            $this->printList('Exactly duplicated field values', $fixMsg,
+                $duplicates, 'recCBDuplicateValues');
+        }
+
+        return array('status'=>$resStatus, 'message'=>$this->_outStreamRes());
     }
 
 
@@ -1274,11 +1548,11 @@ ORDER BY child.dtl_RecID";
 
         if($total_count_rows<1){
             $resMsg = '<div><h3 class="res-valid">OK: No required fields with missing or empty values</h3></div>';
-        }else
-        {
+        }else{
+
             $resStatus = false;
+
             $this->_outStreamInit();
-            fwrite($this->out, $resMsg);
 
             $this->printList('Records with missing or empty required values', null, $res, 'recCB8');
 
@@ -1335,11 +1609,11 @@ ORDER BY child.dtl_RecID";
 
         if($total_count_rows<1){
             $resMsg = '<div><h3 class="res-valid">OK: No extraneous fields (fields not defined in the list for the record type)</h3></div>';
-        }else
-        {
+        }else{
+
             $resStatus = false;
+
             $this->_outStreamInit();
-            fwrite($this->out, $resMsg);
 
             $this->printList('Records with extraneous fields (not defined in the list of fields for the record type)', null, $res, 'recCB9');
 
@@ -1484,15 +1758,15 @@ ORDER BY child.dtl_RecID";
         if($resStatus){
                 $resMsg = '<div><h3 class="res-valid">OK: All records have valid characters in freetext and blocktext fields.</h3></div>';
         }else{
-                if($is_error){
-                    $mysqli->rollback();
-                }else{
-                    $mysqli->commit();
-                }
+            if($is_error){
+                $mysqli->rollback();
+            }else{
+                $mysqli->commit();
+            }
 
-                $resMsg = '<div><h3>'.$cnt.' Records with invalid characters in '.$cnt2
-                    .' freetext and blocktext fields</h3></div><table role="presentation">'
-                    .$resMsg.TABLE_E;
+            $resMsg = '<div><h3>'.$cnt.' Records with invalid characters in '.$cnt2
+                .' freetext and blocktext fields</h3></div><table role="presentation">'
+                .$resMsg.TABLE_E;
         }
 
         if($this->keep_autocommit===true) {$mysqli->autocommit(true);}
@@ -1512,6 +1786,7 @@ ORDER BY child.dtl_RecID";
         $resMsg = '';
 
         $mysqli = $this->mysqli;
+        $errorCount = 0;
 
         $rectypes = mysql__select_assoc($mysqli, 'select rty_ID, rty_Name, rty_TitleMask from defRecTypes order by rty_ID');
         //check all rectypes
@@ -1529,9 +1804,15 @@ ORDER BY child.dtl_RecID";
 
             if(is_array($res)){ //error
                 $resStatus = false;
+                if($this->simplifiedOutput && $errorCount === self::SIMPLIFIED_OUTPUT_LIMIT){
+                    $remainder = count($rectypes) - $errorCount;
+                    $resMsg .= "<br>and {$remainder} more invalid title masks...";
+                    break;
+                }
                 $resMsg .= "<div style=\"padding:15px 0px 10px 4px;\"><b> $rty_ID : <i>".htmlspecialchars($rectype['rty_Name'])."</i></b> <br> </div>";
                 $resMsg .= '<div class="maskCell">Mask: <i>'.htmlspecialchars($mask).'</i></div>';
                 $resMsg .= '<div class="errorCell" style="padding:10px 40px"><b>'.(@$res['message']?$res['message']:$res[0]).'</b>'.DIV_E;
+                $errorCount ++;
             }
 
         }//for
@@ -1708,6 +1989,7 @@ ORDER BY child.dtl_RecID";
                 }
 
                 if($cnt_dates > $cnt_index || $cnt_empty>0){
+
                     if($cnt_dates > $cnt_index){
 
                         $query = "SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID IN ($fld_dates) AND dtl_ID NOT IN (SELECT rdi_DetailID FROM recDetailsDateIndex)";
@@ -1731,11 +2013,12 @@ ORDER BY child.dtl_RecID";
                 }
 
             }else{
-                    $resStatus = false;
-                    $resMsg .= '<div><h3 class="error">Record Details Date Index table does not exist</h3></div>';
+                $resStatus = false;
+                $resMsg .= '<div><h3 class="error">Record Details Date Index table does not exist</h3></div>';
             }
 
-            $resMsg .= '<div><button data-fix="dateindex">Recreate Date Index</button></div>';
+            $resMsg .= $this->simplifiedOutput ? '' : '<div><button data-fix="dateindex">Recreate Date Index</button></div>';
+
         }
 
         return array('status'=>$resStatus, 'message'=>$resMsg);
@@ -1778,7 +2061,7 @@ ORDER BY child.dtl_RecID";
                 $resMsg .= '<div><h3 class="error">Cannot find record type "Trash" group. </h3></div>';
             }
         }else{
-            $resMsg .= '<div><h3 class="res-valid">OK: All Record Types belong to existing groups</h3></div>';
+            $resMsg .= $this->simplifiedOutput ? '' : '<div><h3 class="res-valid">OK: All Record Types belong to existing groups</h3></div>';
         }
 
         // fields types =========================
@@ -1801,7 +2084,7 @@ ORDER BY child.dtl_RecID";
                 $resMsg .= '<div><h3 class="error">Cannot find field type "Trash" group.</h3></div>';
             }
         }else{
-            $resMsg .= '<div><h3 class="res-valid">OK: All Base Field Types belong to existing groups</h3></div>';
+            $resMsg .= $this->simplifiedOutput ? '' : '<div><h3 class="res-valid">OK: All Base Field Types belong to existing groups</h3></div>';
         }
 
         // vocabularies =========================
@@ -1823,7 +2106,7 @@ ORDER BY child.dtl_RecID";
                 $resMsg .= '<div><h3 class="error">Cannot vocabularies "Trash" group.</h3></div>';
             }
         }else{
-            $resMsg .= '<div><h3 class="res-valid">OK: All Vocabularies belong to existing groups</h3></div>';
+            $resMsg .= $this->simplifiedOutput ? '' : '<div><h3 class="res-valid">OK: All Vocabularies belong to existing groups</h3></div>';
         }
 
         return array('status'=>$resStatus, 'message'=>$resMsg);
@@ -1859,14 +2142,11 @@ ORDER BY child.dtl_RecID";
 
         // missing dtl_Geo value or values missing geoType
         $bibs1 = array();
-        //$ids1 = array();
         // values that are out of bounds (out of bounds abs(lat)>90 abs(lng)>180)
         $bibs2 = array();
-        //$ids2 = array();
         $ids2_lng = array();//with wrong longitudes - because wrong digitizing in continual word
         // invalid coordinates
         $bibs3 = array();
-        //$ids3 = array();
 
         $need_correct_long = (@$params['fix']=="1");
         $geojson_adapter = null;
@@ -1890,7 +2170,6 @@ ORDER BY child.dtl_RecID";
 
             if($row['dtl_Geo'] == null){ // Missing geo data
                 array_push($bibs1, $row);
-                array_push($ids1, $row['rec_ID']);
                 continue;
             }
 
@@ -1921,7 +2200,6 @@ ORDER BY child.dtl_RecID";
 
             if(!$hasGeoType){ // invalid geo type
                 array_push($bibs1, $row);
-                array_push($ids1, $row['rec_ID']);
                 continue;
             }
 
@@ -1963,7 +2241,6 @@ ORDER BY child.dtl_RecID";
                                 }
                         }else{
                             array_push($bibs2, $row);
-                            //array_push($ids2, $row['rec_ID']);
                             if( $is_wrong_long ){
                                 array_push($ids2_lng, $row['rec_ID']);
                             }
@@ -1973,12 +2250,10 @@ ORDER BY child.dtl_RecID";
                     }
                 }else{ // is invalid
                     array_push($bibs3, $row);
-                    //array_push($ids3, $row['rec_ID']);
                     continue;
                 }
             }catch(\Exception $e){ // it is invalid, viewed as a string without numbers/numbers separated with a comma + no spaces
                 array_push($bibs3, $row);
-                //array_push($ids3, $row['rec_ID']);
                 continue;
             }
         } //while
@@ -1989,38 +2264,38 @@ ORDER BY child.dtl_RecID";
         }
         if($this->keep_autocommit===true) {$mysqli->autocommit(true);}
 
+        $resMsg = $this->simplifiedOutput ? '' : $resMsg;
+
         $this->_outStreamInit();
         fwrite($this->out, $resMsg);
 
         // Invalid wkt values
-        if(empty($bibs3)){
-            fwrite($this->out, '<h3 class="res-valid">OK: No invalid geospatial values</h3><br>');
-        }else{
+        if(!empty($bibs3)){
             $resStatus = false;
             $this->printList('Records with invalid geospatial values', null, $bibs3, 'recCB10');
+        }elseif(!$this->simplifiedOutput){
+            fwrite($this->out, '<h3 class="res-valid">OK: No invalid geospatial values</h3><br>');
         }
 
-
         // Missing wkt or general invalid value
-        if(empty($bibs1)){
-            fwrite($this->out, '<h3 class="res-valid">OK: No missing geospatial values</h3><br>');
-        }else{
+        if(!empty($bibs1)){
             $resStatus = false;
             $this->printList('Records with missing geospatial values', null, $bibs1, 'recCB11');
+        }elseif(!$this->simplifiedOutput){
+            fwrite($this->out, '<h3 class="res-valid">OK: No missing geospatial values</h3><br>');
         }
 
         // Value that is out of bounds, i.e. -90 > lat || lat > 90 || -180 > long || long > 180
-        if(empty($bibs2)){
-            fwrite($this->out, '<h3 class="res-valid">OK: All geospatial data is within bounds</h3>');
-        }else{
+        if(!empty($bibs2)){
             $resStatus = false;
             $fixMsg = null;
             if(!empty($ids2_lng)){
-                $fixMsg = '<div style="padding:20px 0px">There are '.count($ids2_lng)
-                        .' geo values with wrong longitudes. To fix longitudes (less than -180 or greater than 180 deg) click here:'
-                        .' <button data-fix="geo_values">Fix longitudes</button></div>';
+                $fixMsg = '<div style="padding:20px 0px">There are '.count($ids2_lng) . ' geo values with wrong longitudes.'
+                    .'To fix longitudes (less than -180 or greater than 180 deg) click here: <button data-fix="geo_values">Fix longitudes</button></div>';
             }
             $this->printList('Records with geospatial data that is out of bounds', $fixMsg, $bibs2, 'recCB12');
+        }elseif(!$this->simplifiedOutput){
+            fwrite($this->out, '<h3 class="res-valid">OK: All geospatial data is within bounds</h3>');
         }
 
         $resMsg = $this->_outStreamRes();
@@ -2298,11 +2573,15 @@ ORDER BY child.dtl_RecID";
         if(empty($completedRecords)){
             $resMsg = '<h3 class="res-valid">OK: All records have single values for their workflow stage</h3>';
         }else{
+
             $resStatus = false;
+
             $this->_outStreamInit();
+
             $this->printList('Records were found to have multiple workflow stages',
                 '<div style="padding:20px 0px">There workflow stage has been set to the newest available value, that is not the importing stage (unless it is the only value found).</div>',
                 $completedRecords, 'recCB15');
+
             $resMsg = $this->_outStreamRes();
         }
 
@@ -2347,6 +2626,8 @@ ORDER BY child.dtl_RecID";
 
         $this->keep_autocommit = mysql__begin_transaction($mysqli);
 
+        $addSubText = '';
+
         while(true){
 
             $is_finished = true;
@@ -2379,6 +2660,11 @@ ORDER BY child.dtl_RecID";
                         continue;   //valid term
                     }
 
+                    if($this->simplifiedOutput && $cnt === self::SIMPLIFIED_OUTPUT_LIMIT){
+                        $remainder = $res->num_rows - $cnt;
+                        $addSubText = "<br>and {$remainder} more unexpected terms...";
+                        break;
+                    }
 
                     if($is_first){
                         $is_first = false;
@@ -2453,11 +2739,12 @@ ORDER BY child.dtl_RecID";
 
         if($resStatus){
 
-
-            if ($cnt == 0) {
-                fwrite($this->out, '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>');
-            }else{
+            if($cnt != 0){
                 fwrite($this->out, TABLE_E);
+
+                if($addSubText !== ''){
+                    fwrite($this->out, $addSubText);
+                }
 
                 if($err_count>0){
                     $resStatus = false;
@@ -2467,7 +2754,7 @@ ORDER BY child.dtl_RecID";
                 if($fix_count>0){
                     fwrite($this->out, '<h3>'.$fix_count.' terms referenced in incorrect vocabulary changed to terms in the vocabulary specified for the field</h3>');
 
-                }elseif($suggest_cnt>0){
+                }elseif(!$this->simplifiedOutput && $suggest_cnt > 0){
                     $resStatus = false;
 
                     fwrite($this->out, 
@@ -2480,6 +2767,8 @@ FIXMSG
 );
 
                 }
+            }elseif(!$this->simplifiedOutput){
+                fwrite($this->out, '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>');
             }
 
             $resMsg = $this->_outStreamRes();

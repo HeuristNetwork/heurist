@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains JavaScript files and HTML templates used for creating and managing popup dialogs within the Heurist entity management interface. These popups handle specific tasks like term correction, merging, record type templating, title mask editing, field type selection, multi-field selection, and thematic mapping.
+This directory contains JavaScript files and HTML templates used for creating and managing popup dialogs within the Heurist entity management interface. These popups handle specific tasks like term correction, merging, record type templating, title mask editing, field type selection, and multi-field selection.
 
 ## Key Files
 
@@ -13,7 +13,6 @@ Below is a list of key JavaScript (.js) and HTML (.html) files in this directory
 -   **rectypeTemplate.js**: Handles downloading XML or JSON record type templates.
 -   **rectypeTitleMask.js**: Manages the interface for editing record type title masks.
 -   **selectMultiFields.js**: Provides functionality for selecting multiple base fields to add to a record type.
--   **thematicMapping.js**: Manages the definition of thematic mappings for map layers.
 
 ### HTML Files
 
@@ -23,4 +22,3 @@ Below is a list of key JavaScript (.js) and HTML (.html) files in this directory
 -   **rectypeTitleMask.html**: HTML template for the record type title mask editing popup.
 -   **selectFieldType.html**: HTML template for the field type selection popup.
 -   **selectMultiFields.html**: HTML template for the multi-field selection popup.
--   **thematicMapping.html**: HTML template for the thematic mapping definition popup.

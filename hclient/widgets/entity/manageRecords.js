@@ -107,6 +107,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     _source_def: null, // source def from source db
 
+    _autoResizeCheckbox: null,
+
+    _editorPasteEvent: false,
+
+    _ignoreAmbiguousDates: [],
+
     /**
      * @brief Initializes the manageRecords widget.
      * @override
@@ -215,42 +221,36 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         const is_create_actions_buttons = true;
         if(is_create_actions_buttons){ // || this.options.rts_editor
 
+            const plusIcon = '<span class="ui-icon ui-icon-plus" style="font-size: 1em;margin-right: 1em;vertical-align: -5px;"></span>';
+
             this.rts_actions_menu = 
             $('<div class="rts-editor-actions" style="display: none;">'
 
-                +`<div data-action="edit" class="rts-editor-action">
+                +`<div data-action="edit" class="rts-editor-action" style="margin-bottom: 5px;">
                     <span class="ui-icon ui-icon-pencil" title="Edit" style="margin-right: 0.5em;"></span>
                     edit field definition
                 </div>`
 
+                +'<div style="font-style: italic;font-size: 0.85em;font-weight: bold;padding: 5px 0px 2.5px 5px;">insert below current position</div>'
+
                 +`<div data-action="field" class="rts-editor-action" title="Add a new field to this record type">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    field
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}field
                 </div>`
 
                 +`<div data-action="connector" class="rts-editor-action" title="Add a new connecting field to this record type">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    connection
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}connection
                 </div>`
 
                 +`<div data-action="block" class="rts-editor-action" title="Add a new group/separator">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    tab or heading
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}tab / heading
                 </div>`
 
                 +`<div data-action="explain" class="rts-editor-action" title="Add a new explanation separator">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    explanatory text
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}explanatory text
                 </div>`
 
                 +`<div data-action="sub-record" class="rts-editor-action" title="Create a sub-record" class="admin-only">
-                    <span class="ui-icon ui-icon-plus"></span>
-                    sub-record
-                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                    ${plusIcon}sub-record
                 </div>`
 
                 +`<div class="edit_rts_sel" class="rts-editor-action" title="Requirement type">
@@ -395,7 +395,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         if(that.options.rts_editor){
                             that.options.rts_editor.manageDefRecStructure('highlightNode', null);
                         }
-                    }, 800);  
+                    }, 100);  
                 },
                 click: function(event){
                         let trg = $(event.target);                     
@@ -523,7 +523,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
         }
     },
-    
+
+    /**
+     * @brief Cleans up the widget, removing event listeners.
+     * @memberof heurist.manageRecords
+     * @override
+     */
+    _destroy: function(){
+        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE);
+        this._super();
+    },
+
     /**
      * @brief Hides the RTS (Record Type Structure) actions menu.
      * @memberof heurist.manageRecords
@@ -574,17 +584,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             let sep_id = $(div_ele).attr('separator-dtid');
 
-            let ele = $('<div'+(sep_id>0?(' data-dtid="'+sep_id+'"'):'')
-                    +'><span class="ui-icon ui-icon-gear"></span></div>')
-            .css({'display':(sep_id>0?'inline-block':'table-cell'),'vertical-align':'top',
-                'min-width':'32px','cursor':'pointer','padding-top':'0.4em'});
+            let ele = $(`<div${sep_id > 0 ? ` data-dtid="${sep_id}"` : ''}><span class="ui-icon ui-icon-gear"></span></div>`)
+                .css({display: sep_id > 0 ? 'inline-block' : 'table-cell','vertical-align': 'top','min-width': '32px',cursor: 'pointer','padding-top': '0.4em'});
+
             if(sep_id>0){
                 ele.insertBefore($(div_ele));    
             }else{
                 ele.prependTo($(div_ele));        
             }
-                
-           
+
             that._on(ele,{mouseover:function(event){
                 clearTimeout(that._menuTimeoutId);
                 let el = $(event.target);
@@ -634,7 +642,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that.rts_actions_menu
                     .attr('data-did', dtId)
                     .show()
-                    .position({ my:'left top', at:'left bottom', of: positionElement});
+                    .position({ my:'left top+10', at:'left bottom', of: positionElement});
 
                 that.options.rts_editor.manageDefRecStructure('highlightNode', dtId);
 
@@ -644,7 +652,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         if(that.options.rts_editor){
                             that.options.rts_editor.manageDefRecStructure('highlightNode', null); 
                         }
-                    }, 800);
+                    }, 100);
             }});
         }else{
             //placeholder
@@ -819,7 +827,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 "searchrecordsonlinkscount": function( event, data ){
                     this.recordList.resultList({
                         aggregate_values: data.links_count,
-                        aggregate_link: data.links_query
+                        aggregate_link: data.links_query,
+                        aggregate_pretext: 'n='
                     });
                 },
                 
@@ -1084,14 +1093,49 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             css:{'margin-left':'1em'},
                             click: function(event) { 
 
-                                function duplicate_record(){ 
+                                function duplicate_record(includeRelations){
+
+                                    let hasRelations = that.editFormSummary.find('.summary-content [data-relid]:not([data-relid=""])').length;
+                                    if(includeRelations === undefined && hasRelations > 0){ // check relationships
+
+                                        let checkboxDefaultState = sessionStorage.getItem('heurist_dup_relations') ?? 1;
+
+                                        let $dlg;
+                                        let content = `<div>
+                                            <label>
+                                                <input type="checkbox" name="dup_relations" ${checkboxDefaultState == 1 ? 'checked="checked"' : ''} />
+                                                 Duplicate ${hasRelations} relationships in this record
+                                            </label>
+                                            <span class="heurist-helper2" style="display: block; padding-top: 0.5em; padding-left: 0.2em; font-size: 1em;">
+                                                Note: if you do not have record deletion rights you will not be able to delete these relationships
+                                            </span>
+                                        </div>`;
+
+                                        let btns = {};
+                                        btns[window.hWin.HR('Duplicate record')] = () => {
+
+                                            let checkboxState = $dlg.find('[name="dup_relations"]').is(':checked') ? 1 : 0;
+                                            sessionStorage.setItem('heurist_dup_relations', checkboxState);
+
+                                            $dlg.dialog('close');
+                                            duplicate_record(checkboxState);
+                                        };
+                                        btns[window.hWin.HR('Cancel')] = () => {
+                                            $dlg.dialog('close');
+                                        };
+
+                                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Include relationships in duplicated record'}, {default_palette_class: 'ui-heurist-explore', dialogId: 'dup-include-rels'});
+
+                                        return;
+                                    }
+
                                     let btn = $(event.target);                        
                                     btn.hide();
 
                                     let dlged = that._getEditDialog();
                                     if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
 
-                                    window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID}, 
+                                    window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID, includeRelations: includeRelations}, 
                                         function(response){
 
                                             window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -1279,7 +1323,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog, null, helpURL, false);    
                 }
         
-                this._toolbar = this._edit_dialog.parent().find('.ui-dialog-buttonpane');
+                this._toolbar = this._edit_dialog.dialog('buttonpane');
         
             }//popup
             else { //initialize action buttons
@@ -1352,9 +1396,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     //togglerContent_open:    '&nbsp;',
                     //togglerContent_closed:  '&nbsp;',
                     north:{
-                        size: 60,
-                        maxHeight:60,
-                        minHeight:60,
+                        size: 40,
+                        maxHeight: 40,
+                        minHeight: 40,
                         initHidden:!this.options.edit_structure,
                         contentSelector: '.editStructureHeader', 
                         spacing_open: 3,
@@ -1898,8 +1942,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }    
             case 3:   //find all reverse links
             {
-                let relations = that._currentEditRecordset.getRelations();    
-                
+                let relations = that._currentEditRecordset.getRelations();
+
                 if(!relations) break;
                 
                 let direct = relations.direct;
@@ -2367,37 +2411,31 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .addClass('ui-heurist-btn-header1')
                 .css({float:'right', height: '18px'})
                 .on('click', function(){
-                    
-                        /*
-                        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
-                        this.options['width']  = this.usrPreferences['width'];
-                        this.options['height'] = this.usrPreferences['height'];
-                        */
-                    
-                        window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
-                                width: 800,
-                                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
-                                select_mode:'select_multi', 
-                                selection_ids:order,
-                                select_return_mode:'recordset', //ids by default
-                                onselect:function(event, data){
-                                    if(data && data.selection){
-                                        //assign new set of tags to record
-                                        
-                                        let request = {};
-                                        request['a']       = 'batch'; //batch action
-                                        request['entity']  = 'usrTags';
-                                        request['mode']    = 'replace';
-                                        request['tagIDs']  = data.selection.getOrder();
-                                        request['recIDs']  = that._currentEditID;
-                                        request['request_id'] = window.hWin.HEURIST4.util.random();
-                                        
-                                        window.hWin.HAPI4.EntityMgr.doRequest(request, null);
-                                        //update panel
-                                       
-                                    }
-                                }
-                        });
+
+                    window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
+                        width: 800,
+                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
+                        select_mode:'select_multi', 
+                        selection_ids:order,
+                        select_return_mode:'recordset', //ids by default
+                        onselect:function(event, data){
+                            if(data && data.selection){
+                                //assign new set of tags to record
+                                
+                                let request = {};
+                                request['a']       = 'batch'; //batch action
+                                request['entity']  = 'usrTags';
+                                request['mode']    = 'replace';
+                                request['tagIDs']  = data.selection.getOrder();
+                                request['recIDs']  = that._currentEditID;
+                                request['request_id'] = window.hWin.HEURIST4.util.random();
+                                
+                                window.hWin.HAPI4.EntityMgr.doRequest(request, null);
+                                //update panel
+                                
+                            }
+                        }
+                    });
                 })
              .appendTo(panel);        
                              
@@ -2527,9 +2565,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             let $dlg = null;
 
             let sMsg = "Click Save changes to save changes and modify the record structure.<br>"
-                        +"Or click Drop changes to continue straight to modifing the record structure.<br><br>"
-                        +"If you are unable to save changes or drop changes, click Cancel and open<br>"
-                        +"structure modification in main menu Structure > Modify / Extend";
+                        +"Or click Drop changes to modify the record structure without saving edits.<br>";
 
             let btns = {};
             btns[window.hWin.HR('Save changes')] = function(){
@@ -3375,6 +3411,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // Applies values on record edit form for individual visibility settings
             //
             that._editing.setFieldsVisibility( that._currentEditRecordset );
+
+            if(!this._editorPasteEvent){ // @todo - check whether the entities (term, rectype, db props)
+                this._setupFilePasteHandling();
+            }
             
             that._afterInitEditForm();
 
@@ -3654,39 +3694,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 if(!hasField){ // open modify structure, if able when there are no fields
                     this.editRecordType(true);
-                }else if(window.hWin.HEURIST4.util.isnull(this.options.edit_structure) && 
-                         window.hWin.HEURIST4.util.isnull(this.options.rts_editor))
-                { // check for default title mask
-
-                    let title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
-                    let match_result = title_mask?title_mask.match(/\[([^\]]+)\]/g):null; // check for fields in title mask
-
-                    if(title_mask == 'record [ID]' || !match_result){
-
-                        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                            'You have not yet selected the fields used to create the <b>Constructed title</b><br><br>'
-
-                            +'The <b>Constructed title</b> is like the reference you might find in the bibliography at the end<br>'
-                            +'it uses important fields to uniquely identify and summarise the bibliographic reference, or in this case<br>'
-                            +'the database record in question.<br><br>'
-
-                            +'<b>Constructed titles</b> are used to represent records when they are listed in search results<br>'
-                            +'and as the visible representation of the record referenced in a pointer field or relationship marker.<br>'
-                            +'They can also be used in reports and visualisations, searches, sorting or in the constructed title<br>'
-                            +'of connected records.<br><br>'
-
-                            +'We strongly recommend putting a little thought into this, as well-designed constructed titles can<br>'
-                            +'greatly improve the clarity and ease of use of the database.<br>'
-                            +'We recommend you read the <a href="'
-                                +window.hWin.HAPI4.sysinfo.referenceServerURL
-                                +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
-                                +'&website=39&pageid=773" target="_blank">help for Constructed titles</a>', 
-                            { 'Proceed': function(){ that.editRecordTypeTitle(); $dlg.dialog('close'); } },
-                            {title:'Constructed title not yet configured', yes:'Proceed'},
-                            {default_palette_class: 'ui-heurist-design'});
-
-                        return;
-                    }
                 }
             }
 
@@ -3722,6 +3729,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             if(check_for_errors.length > 0){ // Add extra error details about field values
                 that._editing.displayValueErrors(check_for_errors);
             }
+            if(this.editForm.find('.showAllImages').length > 0){
+                this._setupInlineImages();
+            }
 
             if(this.options.fill_in_data){ // force ismodified
                 that._editing.setModified(true);
@@ -3753,463 +3763,503 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      */
     _saveEditAndClose: function( fields, afterAction ){
 
-            if(!(this._currentEditID>0)) return;
-            
-            if(window.hWin.HAPI4.is_callserver_in_progress()) {
-                //prevent repeatative call
-                return;   
+        if(!(this._currentEditID>0)) return;
+
+        if(window.hWin.HAPI4.is_callserver_in_progress()) {
+            //prevent repeatative call
+            return;   
+        }
+
+        if(this.options.rts_editor && this.options.rts_editor.manageDefRecStructure('checkIfEditing')){
+            window.hWin.HEURIST4.msg.showMsgFlash('You must save or discard your strucutral changes before saving the record', 2000);
+            return;
+        }
+
+        let that = this;                                    
+    
+        if(!fields){
+            try{
+                fields = this._getValidatedValues(); 
+            }catch{
+                fields = null;
             }
-        
-            let that = this;                                    
-        
-            if(!fields){
-                try{
-                    fields = this._getValidatedValues(); 
-                }catch{
-                    fields = null;
-                }
 
-                let hasCustomJsOrCss = false, hasScriptTag = false;
-                
-                let hasValue = false, hasDtlField = false;
-                let ambig_dates = [], invalid_entries = {};
+            let hasCustomJsOrCss = false, hasScriptTag = false;
+            
+            let hasValue = false, hasDtlField = false;
+            let ambig_dates = [], invalid_entries = {};
 
-                let rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
-                //verify max lengtn in 64kB per value
-                for (let dtyID in fields){
+            let rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
+            //verify max lengtn in 64kB per value
+            for (let dtyID in fields){
 
-                    let updated_values = false;
-                    if(parseInt(dtyID)>0){
+                let updated_values = false;
+                if(parseInt(dtyID)>0){
+                    
+                    let dty_ConceptCode = $Db.getConceptID('dty', dtyID);
+                    let dt = $Db.dty(dtyID, 'dty_Type');
+                    hasDtlField = true;
+                    if(dt=='geo' || dt=='file') continue;
+                    
+                    let values = fields[dtyID];
+
+                    if(window.hWin.HEURIST4.util.isempty(values)) continue;
+
+                    hasValue = true;
+                    if(!Array.isArray(values)) values = [values];
+
+                    // Split CMS MenuPage's Page content into several values
+                    if(rty_ConceptCode == '99-52' && dty_ConceptCode == '2-4'){
+
+                        let complete_value = values.join(''); //
+
+                        let len = window.hWin.HEURIST4.util.byteLength(complete_value);
+                        let len2 = complete_value.length;
+                        let lim = (len-len2<200)?64000:32768;
+
+                        if(len > lim){ // split into parts
+
+                            lim = lim - 1000; //reduce for a bit of room
+                            let parts_count = Math.ceil(len / lim);
+                            let start = 0;
+                            let new_values = []; //new Array(parts_count)
+
+                            for (let i = 0; i < parts_count; i ++){
+                                new_values.push(complete_value.substr(start, lim));
+                                start += lim;
+                            }
+
+                            values = new_values;
+                        }
+                    }
+
+                    for (let k=0; k<values.length; k++){
                         
-                        let dty_ConceptCode = $Db.getConceptID('dty', dtyID);
-                        let dt = $Db.dty(dtyID, 'dty_Type');
-                        hasDtlField = true;
-                        if(dt=='geo' || dt=='file') continue;
+                        let len = window.hWin.HEURIST4.util.byteLength(values[k]);
+                        let len2 = values[k].length;
+                        let lim = (len-len2<200)?64000:32768;
                         
-                        let values = fields[dtyID];
-
-                        if(window.hWin.HEURIST4.util.isempty(values)) continue;
-
-                        hasValue = true;
-                        if(!Array.isArray(values)) values = [values];
-
-                        // Split CMS MenuPage's Page content into several values
-                        if(rty_ConceptCode == '99-52' && dty_ConceptCode == '2-4'){
-
-                            let complete_value = values.join(''); //
-
-                            let len = window.hWin.HEURIST4.util.byteLength(complete_value);
-                            let len2 = complete_value.length;
-                            let lim = (len-len2<200)?64000:32768;
-
-                            if(len > lim){ // split into parts
-
-                                lim = lim - 1000; //reduce for a bit of room
-                                let parts_count = Math.ceil(len / lim);
-                                let start = 0;
-                                let new_values = []; //new Array(parts_count)
-
-                                for (let i = 0; i < parts_count; i ++){
-                                    new_values.push(complete_value.substr(start, lim));
-                                    start += lim;
-                                }
-
-                                values = new_values;
+                        if(len>lim){ //65535){  32768
+                            let sMsg = `The data in field ${$Db.rst(that._currentEditRecTypeID, dtyID, 'rst_DisplayName')}`
+                            +' exceeds the maximum size for a field of 64Kbytes.<br>' //lim2
+                            +'Note that this does not mean 64K characters, ' //lim2
+                            +'as Unicode uses multiple bytes per character.<br>'
+                            +'You can store more than 64Kbytes by making the field repeating and splitting the data into two or more values for this field.';
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: sMsg,
+                                error_title: 'Field value too large'
+                            });
+                            
+                            let inpt = this._editing.getFieldByName(dtyID);
+                            if(inpt){
+                                inpt.editing_input('showErrorMsg', sMsg);
+                                $(this.editForm.find('input.ui-state-error')[0]).trigger('focus');   
+                            }
+                            return;
+                            
+                        }
+                        if(dtyID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] && typeof values[k]==='string')
+                        {
+                            let sval = (values[k]).toLowerCase();
+                            if(sval.indexOf('<script')>=0 && sval.indexOf('</script>')>0){
+                                let inpt = this._editing.getFieldByName(dtyID);
+                                if(inpt) inpt.editing_input('showErrorMsg', '&lt;sctipt&gt; tag not allowed');  
+                                hasScriptTag = true;
                             }
                         }
+                        if(!hasCustomJsOrCss && typeof values[k]==='string' && rty_ConceptCode == '99-51' &&
+                                    (dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] ||
+                                    dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'] ||
+                                    dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])  ){
+                            hasCustomJsOrCss = true;         
+                        }
 
-                        for (let k=0; k<values.length; k++){
-                            
-                            let len = window.hWin.HEURIST4.util.byteLength(values[k]);
-                            let len2 = values[k].length;
-                            let lim = (len-len2<200)?64000:32768;
-                            
-                            if(len>lim){ //65535){  32768
-                                let sMsg = `The data in field ${$Db.rst(that._currentEditRecTypeID, dtyID, 'rst_DisplayName')}`
-                                +' exceeds the maximum size for a field of 64Kbytes.<br>' //lim2
-                                +'Note that this does not mean 64K characters, ' //lim2
-                                +'as Unicode uses multiple bytes per character.<br>'
-                                +'You can store more than 64Kbytes by making the field repeating and splitting the data into two or more values for this field.';
-                                window.hWin.HEURIST4.msg.showMsgErr({
-                                    message: sMsg,
-                                    error_title: 'Field value too large'
-                                });
-                                
-                                let inpt = this._editing.getFieldByName(dtyID);
-                                if(inpt){
-                                    inpt.editing_input('showErrorMsg', sMsg);
-                                    $(this.editForm.find('input.ui-state-error')[0]).trigger('focus');   
-                                }
-                                return;
-                                
-                            }
-                            if(dtyID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] && typeof values[k]==='string')
-                            {
-                                let sval = (values[k]).toLowerCase();
-                                if(sval.indexOf('<script')>=0 && sval.indexOf('</script>')>0){
-                                    let inpt = this._editing.getFieldByName(dtyID);
-                                    if(inpt) inpt.editing_input('showErrorMsg', '&lt;sctipt&gt; tag not allowed');  
-                                    hasScriptTag = true;
-                                }
-                            }
-                            if(!hasCustomJsOrCss && typeof values[k]==='string' && rty_ConceptCode == '99-51' &&
-                                     (dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] ||
-                                      dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'] ||
-                                      dtyID==window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])  ){
-                                hasCustomJsOrCss = true;         
+                        if(fields['no_validation'] == 1){
+                            continue;
+                        }
+
+                        let entry_mask = $Db.rst(that._currentEditRecTypeID, dtyID, 'rst_EntryMask');
+
+                        if(dt == 'date'){
+
+                            if(Temporal.isValidFormat(values[k]) || that._ignoreAmbiguousDates.includes(values[k])){ // check if valid temporal string
+                                continue; // is valid, skip
                             }
 
-                            if(fields['no_validation'] == 1){
+                            const value_spaceless = values[k].replaceAll(/\s+/g, ''); // remove all whitespaces
+
+                            const approx_regex = /circa\.?|ca\.?|c\.?|approx\.?|~/; // circa 1995, ca. 1995, approx 1995, ~1995
+                            const has_range = /à|\.\.?|to|--?>|--?|>>?|,/; // range separators
+                            const range_regex = /(?:\d+|[bB][cC][eE]|[bB][cC]|[aA][cC]|[cC][eE])?(à|\.\.?|to|--?>|--?|>>?|,)(\d+)/g; // 1990-1995, 1990to1995, 1990..1995, 1990,1995 (spaces removed first)
+                            const has_named_month = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/ig; // e.g. 12Jan1995
+
+                            // Approximate date
+                            let matches = values[k].match(approx_regex);
+                            if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0){ // approx value, setup simple date with circa value
+
+                                let date_val = values[k].replace(approx_regex, '');
+
+                                try{
+
+                                    let t_date = new Temporal();
+                                    date_val = TDate.parse(date_val);
+
+                                    date_val = date_val.toString('yyyy-MM-dd');
+
+                                    t_date.setType('s');
+                                    t_date.addObjForString('DAT', date_val);
+                                    t_date.addObjForString("CIR", "1");
+                                    values[k] = t_date.toString();
+
+                                    updated_values = true;
+
+                                    continue; // done next value
+                                } catch(e) {
+                                    if(e.indexOf('ambiguous') >= 0){
+                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'approx'});
+                                        continue;
+                                    }
+                                }
+
                                 continue;
                             }
 
-                            let entry_mask = $Db.rst(that._currentEditRecTypeID, dtyID, 'rst_EntryMask');
+                            // Ranged dates
+                            matches = [...value_spaceless.matchAll(range_regex)];
+                            let splitByDash = value_spaceless.split('-');
+                            if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0 
+                                    && has_range.test(value_spaceless) && (splitByDash.length < 3 || splitByDash[1] === '') ){
 
-                            if(dt == 'date'){
+                                let is_ambig = false;
 
-                                if(Temporal.isValidFormat(values[k])){ // check if valid temporal string
-                                    continue; // is valid, skip
+                                const sep = matches[0][1];
+                                const sep_index = value_spaceless.indexOf(sep);
+
+                                let TPQ = value_spaceless.slice(0, sep_index);
+                                let TAQ = value_spaceless.slice(sep_index + sep.length);
+
+                                if(TPQ.length >= 4 && TAQ.length >= 4 && has_range.test(sep)){ // quick conversion to range needs same length dates, and at least full years
+
+                                    try {
+                                        
+                                        let t_TPQ = TDate.parse(TPQ);
+                                        TPQ = t_TPQ.toString('yyyy-MM-dd');
+                                    } catch(e) {
+                                        if(e.indexOf('ambiguous') > 0){
+                                            is_ambig = true;
+                                        }
+                                    }
+
+                                    try {
+                                        
+                                        let t_TAQ = TDate.parse(TAQ);
+                                        TAQ = t_TAQ.toString('yyyy-MM-dd');
+                                    } catch(e) {
+                                        if(e.indexOf('ambiguous') >= 0){
+                                            is_ambig = true;
+                                        }
+                                    }
+
+                                    if(is_ambig){
+                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], value: {'TPQ': TPQ, 'TAQ': TAQ}, index: k, type: 'range'});
+                                        continue;
+                                    }
+
+                                    if(new Date(TPQ).getTime() >= new Date(TAQ).getTime()){
+                                        let temp = TPQ;
+                                        TPQ = TAQ;
+                                        TAQ = temp;
+                                    }
+
+                                    let temporal = new Temporal();
+                                    temporal.setType('p');
+                                    temporal.addObjForString("TPQ", TPQ); // Earliest value
+                                    temporal.addObjForString("TAQ", TAQ); // Latest value
+                                    temporal.addObjForString("COM", values[k]); // Insert original value as comment
+
+                                    let results = Temporal.checkValidity(temporal);
+                                    if(results[0]){ // is valid
+                                        values[k] = temporal.toString();
+                                        updated_values = true;
+                                    } // else, not handled
+
+                                    continue;
                                 }
+                            }
 
-                                const value_spaceless = values[k].replaceAll(/\s+/g, ''); // remove all whitespaces
+                            // Named month
+                            matches = [...values[k].matchAll(has_named_month)];
+                            if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length == 1){
 
-                                const approx_regex = /circa.?|ca.?|approx.?|~/; // circa 1995, ca. 1995, approx 1995, ~1995
-                                const has_range = /[à|.|to|\-|,]/; // range separators
-                                const range_regex = /\d+|[à|.|to|\-|,]+/g; // 1990-1995, 1990to1995, 1990..1995, 1990,1995 (spaces removed first)
-                                const has_named_month = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/ig; // e.g. 12Jan1995
+                                let month = matches[0][0];
+                                let month_index = matches[0]['index'];
+                                let date_val = values[k].slice(0, month_index) + ' ' + month + ' ' + values[k].slice(month_index+month.length);
 
-                                // Approximate date
-                                let matches = values[k].match(approx_regex);
-                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0){ // approx value, setup simple date with circa value
+                                try {
+                                    date_val = TDate.parse(date_val).toString('yyyy-MM-dd');
 
-                                    let date_val = values[k].replace(approx_regex, '');
+                                    if(date_val.length == 4){ // unknown
+                                        continue;
+                                    }
 
-                                    try{
+                                    values[k] = date_val;
+                                    updated_values = true;
+                                } catch(e) {
+                                    if(e.indexOf('ambiguous') > 0){
+                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'simple'});
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            // Date + time value - replace '-' between date and time with ' T '
+                            matches = [...values[k].matchAll(/-\s?\d{1,2}:/g)];
+                            if(matches.length == 1){
+
+                                let new_value = matches[0][0];
+                                new_value = 'T' + new_value.substring(1);
+                                values[k] = values[k].replace(matches[0][0], new_value);
+
+                                updated_values = true;
+                                continue;
+                            }
+
+                            // Check for simple ambiguity or carbon year
+                            let ttype = 'simple';
+                            try {
+
+                                let value = values[k];
+                                ttype = value.slice(-2).toLowerCase() == 'bp' ? 'carbon' : ttype;
+                                value = ttype == 'carbon' ? value.slice(0, -2) : value;
+
+                                let tDate = TDate.parse(value);
+                                let date_val = tDate.toString('yyyy-MM-dd');
+                                let format = tDate.getDateFormat();
+
+                                if(ttype == 'carbon'){
+
+                                    if(date_val.length == 4 && value.length <= 4){
 
                                         let t_date = new Temporal();
                                         date_val = TDate.parse(date_val);
 
                                         date_val = date_val.toString('yyyy-MM-dd');
 
-                                        t_date.setType('s');
-                                        t_date.addObjForString('DAT', date_val);
-                                        t_date.addObjForString("CIR", "1");
-                                        values[k] = t_date.toString();
+                                        t_date.setType('c');
+                                        t_date.addObjForString('BPD', date_val);
 
+                                        values[k] = t_date.toString(); // toJSON()
                                         updated_values = true;
+                                    }
+                                }else if((date_val.length == 4 && values[k].length <= 4) || date_val.length == values[k].length){
 
-                                        continue; // done next value
-                                    } catch(e) {
-                                        if(e.indexOf('ambiguous') >= 0){
-                                            ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'approx'});
-                                            continue;
-                                        }
+                                    if(format == 'dmy' && tDate.getDay() < 13 && tDate.getMonth() < 13){ // only uses 'mdy' when first number has to be month
+                                        throw 'ambiguous date';
                                     }
 
                                     continue;
                                 }
-
-                                // Ranged dates
-                                matches = [...value_spaceless.matchAll(range_regex)];
-                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length > 0 
-                                        && has_range.test(value_spaceless) && (value_spaceless.split('-')<3) ){
-
-                                    let is_ambig = false;
-
-                                    const sep_match_index = Math.floor(matches.length / 2);
-                                    const sep = matches[sep_match_index][0];
-                                    const sep_index = matches[sep_match_index]['index'];
-                                    
-                                    let TPQ = value_spaceless.slice(0, sep_index);
-                                    let TAQ = value_spaceless.slice(sep_index + sep.length);
-
-                                    if(TPQ.length >= 4 && TAQ.length >= 4 && has_range.test(sep)){ // quick conversion to range needs same length dates, and at least full years
-
-                                        try {
-                                            
-                                            let t_TPQ = TDate.parse(TPQ);
-                                            TPQ = t_TPQ.toString('yyyy-MM-dd');
-                                        } catch(e) {
-                                            if(e.indexOf('ambiguous') > 0){
-                                                is_ambig = true;
-                                            }
-                                        }
-
-                                        try {
-                                            
-                                            let t_TAQ = TDate.parse(TAQ);
-                                            TAQ = t_TAQ.toString('yyyy-MM-dd');
-                                        } catch(e) {
-                                            if(e.indexOf('ambiguous') >= 0){
-                                                is_ambig = true;
-                                            }
-                                        }
-
-                                        if(is_ambig){
-                                            ambig_dates.push({dtyid: dtyID, org_value: values[k], value: {'TPQ': TPQ, 'TAQ': TAQ}, index: k, type: 'range'});
-                                            continue;
-                                        }
-
-                                        if(new Date(TPQ).getTime() >= new Date(TAQ).getTime()){
-                                            let temp = TPQ;
-                                            TPQ = TAQ;
-                                            TAQ = temp;
-                                        }                                
-
-                                        let temporal = new Temporal();
-                                        temporal.setType('p');
-                                        temporal.addObjForString("TPQ", TPQ); // Earliest value
-                                        temporal.addObjForString("TAQ", TAQ); // Latest value
-                                        temporal.addObjForString("COM", values[k]); // Insert original value as comment
-
-                                        let results = Temporal.checkValidity(temporal);
-                                        if(results[0]){ // is valid
-                                            values[k] = temporal.toString();
-                                            updated_values = true;
-                                        } // else, not handled
-
-                                        continue;
-                                    }
-                                }
-
-                                // Named month
-                                matches = [...values[k].matchAll(has_named_month)];
-                                if(!window.hWin.HEURIST4.util.isempty(matches) && matches.length == 1){
-
-                                    let month = matches[0][0];
-                                    let month_index = matches[0]['index'];
-                                    let date_val = values[k].slice(0, month_index) + ' ' + month + ' ' + values[k].slice(month_index+month.length);
-
-                                    try {
-                                        date_val = TDate.parse(date_val).toString('yyyy-MM-dd');
-
-                                        if(date_val.length == 4){ // unknown
-                                            continue;
-                                        }
-
-                                        values[k] = date_val;
-                                        updated_values = true;
-                                    } catch(e) {
-                                        if(e.indexOf('ambiguous') > 0){
-                                            ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: 'simple'});
-                                            continue;
-                                        }
-                                    }
-                                }
-
-                                // Date + time value - replace '-' between date and time with ' T '
-                                matches = [...values[k].matchAll(/-\s?\d{1,2}:/g)];
-                                if(matches.length == 1){
-
-                                    let new_value = matches[0][0];
-                                    new_value = 'T' + new_value.substring(1);
-                                    values[k] = values[k].replace(matches[0][0], new_value);
-
-                                    updated_values = true;
+                            } catch(e) {
+                                if(e.indexOf('ambiguous') >= 0 || e.indexOf('unrecognized characters') >= 0){
+                                    ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: ttype});
                                     continue;
-                                }
-
-                                // Check for simple ambiguity or carbon year
-                                let ttype = 'simple';
-                                try {
-
-                                    let value = values[k];
-                                    ttype = value.slice(-2).toLowerCase() == 'bp' ? 'carbon' : ttype;
-                                    value = ttype == 'carbon' ? value.slice(0, -2) : value;
-
-                                    let tDate = TDate.parse(value);
-                                    let date_val = tDate.toString('yyyy-MM-dd');
-                                    let format = tDate.getDateFormat();
-
-                                    if(ttype == 'carbon'){
-
-                                        if(date_val.length == 4 && value.length <= 4){
-
-                                            let t_date = new Temporal();
-                                            date_val = TDate.parse(date_val);
-
-                                            date_val = date_val.toString('yyyy-MM-dd');
-
-                                            t_date.setType('c');
-                                            t_date.addObjForString('BPD', date_val);
-
-                                            values[k] = t_date.toString(); // toJSON()
-                                            updated_values = true;
-                                        }
-                                    }else if((date_val.length == 4 && values[k].length <= 4) || date_val.length == values[k].length){
-
-                                        if(format == 'dmy' && tDate.getDay() < 13 && tDate.getMonth() < 13){ // only uses 'mdy' when first number has to be month
-                                            throw 'ambiguous date';
-                                        }
-
-                                        continue;
-                                    }
-                                } catch(e) {
-                                    if(e.indexOf('ambiguous') >= 0){
-                                        ambig_dates.push({dtyid: dtyID, org_value: values[k], index: k, type: ttype});
-                                        continue;
-                                    }
-                                }
-                            }else if(entry_mask){
-
-                                let output = $Db.rst_RunEntryMask(entry_mask, values[k]); // don't update value here, this is handled in recordModify::updateMaskFields
-                                if(output.indexOf(values[k]) === -1){
-                                    if(!Object.hasOwn(invalid_entries, dtyID)){
-                                        invalid_entries[dtyID] = [];
-                                    }
-                                    invalid_entries[dtyID].push({value: values[k], index: k, error: output});
                                 }
                             }
-                        }
+                        }else if(entry_mask){
 
-                        // Update values
-                        if(updated_values){
-                            fields[dtyID] = values; // update field value
-
-                            let $ele = that._editing.getFieldByName(dtyID);
-                            if($ele && $ele.length > 0) $ele.editing_input('setValue', values); // update field element editing_inputs
+                            let output = $Db.rst_RunEntryMask(entry_mask, values[k]); // don't update value here, this is handled in recordModify::updateMaskFields
+                            if(output.indexOf(values[k]) === -1){
+                                if(!Object.hasOwn(invalid_entries, dtyID)){
+                                    invalid_entries[dtyID] = [];
+                                }
+                                invalid_entries[dtyID].push({value: values[k], index: k, error: output});
+                            }
                         }
                     }
-                }//for verify max size
-                
-                if(fields != null && !hasDtlField){
-                    window.hWin.HEURIST4.msg.showMsgFlash("There are no details to save", 1500);
-                    return;
-                }else if(fields != null && !hasValue){
-                    window.hWin.HEURIST4.msg.showMsgFlash("Please enter a value into any field to save the record", 1500);
-                    return;
-                }else if(fields != null && hasScriptTag){
-                    window.hWin.HEURIST4.msg.showMsgFlash("Some fields have &lt;sctipt&gt; tag. It is not allowed in database", 1500);
-                    return;
-                }else if(fields != null && ambig_dates.length > 0){
-                    that._handleAmbiguousDates(ambig_dates);
-                    return;
-                }else if(fields != null && Object.keys(invalid_entries).length > 0){
-                    that._handleInvalidEntry(invalid_entries);
-                    return;
-                }
-                
-                //show warning for disabled javascript
-                if(that._showCustomJsWarningOnce &&
-                    !window.hWin.HAPI4.sysinfo['custom_js_allowed'] && hasCustomJsOrCss)
-                {
-                    that._showCustomJsWarningOnce = false;
-                    window.hWin.HEURIST4.msg.showMsg(
-'<h4>Website programming blocked</h4>'
-+'<p>Heurist blocks user-supplied Javascript by default (and strips out most user-defined CSS other than simple font changes) for security reasons.</p>'
-+'<p>In order to have your Javascript (and CSS) recognised, please ask your server administrator to authorise this for your database by adding it to js_in_database_authorised.txt</p>');
-                }
-                
-                
-                //assign workflow stage field 2-9453
-                if(fields!=null && this._swf_rules.length>0){
-                    let swf_mode = this.element.find('.sel_workflow_stages').val();
-                    if(swf_mode=='on' || (swf_mode=='new' && this._isInsert)){
-                        
-                        this._showSwfPopup(fields, afterAction);
-                        return;
+
+                    // Update values
+                    if(updated_values){
+                        fields[dtyID] = values; // update field value
+
+                        let $ele = that._editing.getFieldByName(dtyID);
+                        if($ele && $ele.length > 0) $ele.editing_input('setValue', values); // update field element editing_inputs
                     }
-                } //END assign workflow stage field 2-9453
-                
-            }
+                }
+            }//for verify max size
             
-            if(fields==null) return; //validation failed
-
-            //assign new set of tags to record
-            if(Array.isArray(that._updated_tags_selection)){
-                let request2 = {};
-                request2['a']          = 'batch'; //batch action
-                request2['entity']     = 'usrTags';
-                request2['tagIDs']  = that._updated_tags_selection;
-                request2['recIDs']  = that._currentEditID;
-                request2['mode']    = 'replace';
-                that._updated_tags_selection = null;
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request2, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            that._saveEditAndClose( fields, afterAction );
-                        }
-                    });
+            if(fields != null && !hasDtlField){
+                window.hWin.HEURIST4.msg.showMsgFlash("There are no details to save", 1500);
+                return;
+            }else if(fields != null && !hasValue){
+                window.hWin.HEURIST4.msg.showMsgFlash("Please enter a value into any field to save the record", 1500);
+                return;
+            }else if(fields != null && hasScriptTag){
+                window.hWin.HEURIST4.msg.showMsgFlash("Some fields have &lt;sctipt&gt; tag. It is not allowed in database", 1500);
+                return;
+            }else if(fields != null && ambig_dates.length > 0){
+                that._handleAmbiguousDates(ambig_dates);
+                return;
+            }else if(fields != null && Object.keys(invalid_entries).length > 0){
+                that._handleInvalidEntry(invalid_entries);
                 return;
             }
             
-            let rec_URL = fields['rec_URL'],
-                rec_OwnerUGrpID = fields['rec_OwnerUGrpID'],
-                rec_NonOwnerVisibility = fields['rec_NonOwnerVisibility'],
-                rec_NonOwnerVisibilityGroups = fields['rec_NonOwnerVisibilityGroups'],
-                rec_ScratchPad = fields['rec_ScratchPad'];
-            // Unset header fields to avoid accidental overriding                
-            for (let key in fields){
-                if( (!(parseInt(key)>0)) && (key.indexOf('rec_')==0) )
-                {
-                    fields[key] = null;
-                    delete fields[key];
+            //show warning for disabled javascript
+            if(that._showCustomJsWarningOnce &&
+                !window.hWin.HAPI4.sysinfo['custom_js_allowed'] && hasCustomJsOrCss)
+            {
+                that._showCustomJsWarningOnce = false;
+                window.hWin.HEURIST4.msg.showMsg(
+'<h4>Website programming blocked</h4>'
++'<p>Heurist blocks user-supplied Javascript by default (and strips out most user-defined CSS other than simple font changes) for security reasons.</p>'
++'<p>In order to have your Javascript (and CSS) recognised, please ask your server administrator to authorise this for your database by adding it to js_in_database_authorised.txt</p>');
+            }
+            
+            
+            //assign workflow stage field 2-9453
+            if(fields!=null && this._swf_rules.length>0){
+                let swf_mode = this.element.find('.sel_workflow_stages').val();
+                if(swf_mode=='on' || (swf_mode=='new' && this._isInsert)){
+                    
+                    this._showSwfPopup(fields, afterAction);
+                    return;
                 }
-            }
+            } //END assign workflow stage field 2-9453
             
-            //
-            // get individual visibility setting per field 
-            // See rst_NonOwnerVisibility=pending and dtl_HideFromPublic=1
-            //
-            let fields_visibility = this._editing.getFieldsVisibility(); 
-
-            let request = {ID: this._currentEditID, 
-                           RecTypeID: this._currentEditRecTypeID, 
-                           URL: rec_URL,
-                           OwnerUGrpID: rec_OwnerUGrpID,
-                           NonOwnerVisibility: rec_NonOwnerVisibility,
-                           NonOwnerVisibilityGroups: rec_NonOwnerVisibilityGroups,
-                           ScratchPad: rec_ScratchPad,
-                           details: fields, //it will be encoded in encodeRequest
-                           details_visibility: fields_visibility}; //{dty_ID:[1,1,0,0,1],.....  } 
-
-            if(fields['no_validation']){
-                request['no_validation'] = 1;
-            }
-       
-            //keep current overflow position
-            this._keepYPos = this.editForm.scrollTop();
+        }
         
-            that.onEditFormChange(true); //forcefully hide all "save" buttons
+        if(fields==null) return; //validation failed
+
+        // Prompt only when saving. Opening a record must not interrupt editing.
+        if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false &&
+           window.hWin.HEURIST4.util.isnull(this.options.edit_structure) &&
+           window.hWin.HEURIST4.util.isnull(this.options.rts_editor)){
+            let title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
+            let match_result = title_mask?title_mask.match(/\[([^\]]+)\]/g):null; // check for fields in title mask
+
+            if(title_mask == 'record [ID]' || !match_result){
+
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    'You have not yet selected the fields used to create the <b>Constructed title</b><br><br>'
+
+                    +'The <b>Constructed title</b> is like the reference you might find in the bibliography at the end<br>'
+                    +'it uses important fields to uniquely identify and summarise the bibliographic reference, or in this case<br>'
+                    +'the database record in question.<br><br>'
+
+                    +'<b>Constructed titles</b> are used to represent records when they are listed in search results<br>'
+                    +'and as the visible representation of the record referenced in a pointer field or relationship marker.<br>'
+                    +'They can also be used in reports and visualisations, searches, sorting or in the constructed title<br>'
+                    +'of connected records.<br><br>'
+
+                    +'We strongly recommend putting a little thought into this, as well-designed constructed titles can<br>'
+                    +'greatly improve the clarity and ease of use of the database.<br>'
+                    +'We recommend you read the <a href="'
+                        +window.hWin.HAPI4.sysinfo.referenceServerURL
+                        +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
+                        +'&website=39&pageid=773" target="_blank">help for Constructed titles</a>',
+                    { 'Proceed': function(){ that.editRecordTypeTitle(); $dlg.dialog('close'); } },
+                    {title:'Constructed title not yet configured', yes:'Proceed'},
+                    {default_palette_class: 'ui-heurist-design'});
+
+                return;
+            }
+        }
+
+        //assign new set of tags to record
+        if(Array.isArray(that._updated_tags_selection)){
+            let request2 = {};
+            request2['a']          = 'batch'; //batch action
+            request2['entity']     = 'usrTags';
+            request2['tagIDs']  = that._updated_tags_selection;
+            request2['recIDs']  = that._currentEditID;
+            request2['mode']    = 'replace';
+            that._updated_tags_selection = null;
             
-            let dlged = that._getEditDialog();
-            if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
-    
-            window.hWin.HAPI4.RecordMgr.saveRecord(request, 
+            window.hWin.HAPI4.EntityMgr.doRequest(request2, 
                 function(response){
-                    
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-                    
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
-                        that._editing.setModified(false); //reset modified flag after save
-                        
-                        const rec_Title = response.rec_Title;
-                        
-                        let saved_record = that._currentEditRecordset.getFirstRecord();
-                        that._currentEditRecordset.setFld(saved_record, 'rec_Title', rec_Title);
-                        const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
-                        if(DT_NAME>0 && fields && fields[DT_NAME]){
-                            that._currentEditRecordset.setFld(saved_record, DT_NAME, fields[DT_NAME]);    
-                        }
-
-                        //
-                        if(that.options.selectOnSave==true){
-                            that._additionWasPerformed = true;
-                        }
-
-                        window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been saved'));
-
-                        that._afterSaveHandler(response, afterAction);
-                        
-                    }else{
-                        that.onEditFormChange(); //restore save buttons visibility
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        that._saveEditAndClose( fields, afterAction );
                     }
+                });
+            return;
+        }
+        
+        let rec_URL = fields['rec_URL'],
+            rec_OwnerUGrpID = fields['rec_OwnerUGrpID'],
+            rec_NonOwnerVisibility = fields['rec_NonOwnerVisibility'],
+            rec_NonOwnerVisibilityGroups = fields['rec_NonOwnerVisibilityGroups'],
+            rec_ScratchPad = fields['rec_ScratchPad'];
+        // Unset header fields to avoid accidental overriding                
+        for (let key in fields){
+            if( (!(parseInt(key)>0)) && (key.indexOf('rec_')==0) )
+            {
+                fields[key] = null;
+                delete fields[key];
+            }
+        }
+        
+        //
+        // get individual visibility setting per field 
+        // See rst_NonOwnerVisibility=pending and dtl_HideFromPublic=1
+        //
+        let fields_visibility = this._editing.getFieldsVisibility(); 
+
+        let request = {ID: this._currentEditID, 
+                        RecTypeID: this._currentEditRecTypeID, 
+                        URL: rec_URL,
+                        OwnerUGrpID: rec_OwnerUGrpID,
+                        NonOwnerVisibility: rec_NonOwnerVisibility,
+                        NonOwnerVisibilityGroups: rec_NonOwnerVisibilityGroups,
+                        ScratchPad: rec_ScratchPad,
+                        details: fields, //it will be encoded in encodeRequest
+                        details_visibility: fields_visibility}; //{dty_ID:[1,1,0,0,1],.....  } 
+
+        if(fields['no_validation']){
+            request['no_validation'] = 1;
+        }
+    
+        //keep current overflow position
+        this._keepYPos = this.editForm.scrollTop();
+    
+        that.onEditFormChange(true); //forcefully hide all "save" buttons
+        
+        let dlged = that._getEditDialog();
+        if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
+
+        window.hWin.HAPI4.RecordMgr.saveRecord(request, 
+            function(response){
+                
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    that._editing.setModified(false); //reset modified flag after save
+                    
+                    const rec_Title = response.rec_Title;
+                    
+                    let saved_record = that._currentEditRecordset.getFirstRecord();
+                    that._currentEditRecordset.setFld(saved_record, 'rec_Title', rec_Title);
+                    const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+                    if(DT_NAME>0 && fields && fields[DT_NAME]){
+                        that._currentEditRecordset.setFld(saved_record, DT_NAME, fields[DT_NAME]);    
+                    }
+
+                    //
+                    if(that.options.selectOnSave==true){
+                        that._additionWasPerformed = true;
+                    }
+
+                    window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Record has been saved'));
+
+                    that._afterSaveHandler(response, afterAction);
+                    
+                }else{
+                    that.onEditFormChange(); //restore save buttons visibility
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
-            );
+            }
+        );
     },
 
     _afterSaveHandler: function(response, afterAction){
@@ -4243,6 +4293,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             return;
         }
+
+        this._ignoreAmbiguousDates = []; // reset ignore ambiguous dates setting
 
         // Message not needed right now as only one issue is handled, probably separate issues into tabs within the message dialog
 
@@ -4701,7 +4753,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         return (Number(a['swf_Order'])<Number(b['swf_Order'])?-1:1);
                 });
             }
-        
+
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:10px 0px 5px 15px;">'
 
@@ -4769,30 +4821,27 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         .on('click', function(){that._updateStructureFromSource(false);}); // update record structure from source
                 
                 let btn = this.element.find('.btn-edit-rt2');        
-                if(this.options.edit_structure){
-                    
-                    let cont = this.element.find('.editStructureHeader').css({overflow:'hidden'});
-                    btn.hide();
-                    
-                    $('<div style="float:left;">'
-                        +'<span style="margin-top: 15px;display: inline-block;font-size: 12px;">Fields for: </span>'
-                        +'<h1 style="float:right;margin:10px;">'
-                        +$Db.rty(this._currentEditRecTypeID,'rty_Name')+'</h1></div>')
-                        .appendTo(cont);      
-                    
-                    $('<span>').addClass('heurist-helper3').css({'float':'left','margin': '10px'}).html(
-                        'This is an empty record. Test data entry as you develop the structure. '
-                        +'<br>If you want to retain the data entered, hit [Save data], otherwise [Close]')  
-                            .appendTo(cont);      
-                
-                    this.element.find('.btn-edit-rt').hide(); //Attributes button next to Edit title mask
-                }else{
-                    btn.button({icon:'ui-icon-gear',label:'<span style="display:inline-block;margin-top:5px;">Modify structure</span>'})
-                            .css(btn_css)
-                            .width(130)
-                            .on('click', function(){that.editRecordType(true);});
-                }                        
-                        
+
+                let cont = this.element.find('.editStructureHeader').css({overflow:'hidden', padding: '0px 10px'});
+
+                $('<div>', {
+                    style: 'float: left;',
+                    html: `<span style="margin-top: 15px;display: inline-block;font-size: 12px;">Modify structure: </span>
+                    <h1 style="float:right;margin:10px;">${$Db.rty(this._currentEditRecTypeID,'rty_Name')}</h1>`
+                }).appendTo(cont);      
+
+                $('<span>', {
+                    class: 'heurist-helper3',
+                    style: 'float: left; margin: 10px;font-size: 1em;',
+                    html: 'This is an empty record. Test data entry as you develop the structure.<br>If you want to retain the data entered, hit [Save data], otherwise [Close]'
+                }).appendTo(cont);
+
+                this.element.find('.btn-edit-rt').hide(); //Attributes button next to Edit title mask
+                btn.button({icon:'ui-icon-gear',label:'<span style="display:inline-block;margin-top:5px;">Modify structure</span>'})
+                        .css(btn_css)
+                        .width(130)
+                        .on('click', function(){that.editRecordType(true);});
+
                 btn.find('.ui-button-icon')
                             .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
 
@@ -4900,38 +4949,51 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         if(this._as_dialog && this._as_dialog.dialog('instance')){
 
             let $dlg = this._as_dialog.dialog('widget');
-            let dlg_header = $dlg.find('.ui-dialog-titlebar');
+            let dlg_header = this._as_dialog.dialog('titlebar');
             
-            if(dlg_header.find('.btn_Fullscreen').length==0){
-            
-                $('<span>', {class: 'btn_Fullscreen'}).appendTo(dlg_header);
-                $('<span>', {class: 'btn_Standard'}).appendTo(dlg_header);
+            if(!this._autoResizeCheckbox){
 
-                dlg_header.find('.btn_Fullscreen').button({label:window.hWin.HR('Fullscreen')}).css({
-                    margin: '-0.9em 0 0 0',
-                    right: '12.5em',
-                    top: '45%',
+                this._as_dialog.dialog('option', 'showResizeButtons', true);
+                this._as_dialog.dialog('option', 'resizeCallback', () => this.editFormPopup.layout().resizeAll());
+
+                dlg_header.find('.ui-dialog-resize-container').css({
                     position: 'absolute',
+                    right: '11em'
+                });
+                dlg_header.find('.ui-dialog-resize-container button').css({
                     background: 'none',
                     color: 'white'
-                }).on('click',(e) => {
-                    that._setDialogSize(true);
                 });
 
-                dlg_header.find('.btn_Standard').button({label:window.hWin.HR('Standard')}).css({
-                    margin: '-0.9em 0 0 0',
-                    right: '5.5em',
-                    top: '45%',
-                    position: 'absolute',
-                    background: 'none',
-                    color: 'white'
-                }).on('click',(e) => {
-                    that._setDialogSize(false);
+                let autoResizePopup = this.usrPreferences.autoResizePopup;
+                let $span = $('<span>', {
+                    html: `<input type="checkbox" class="autoResizePopup" ${autoResizePopup ? 'checked="checked"' : ''} /> autoresize`,
+                    style: 'position: absolute;top: 25%;right: 4em;font-weight: normal;cursor: pointer;',
+                    title: 'Scale the form to use as much as possible of the window without losing the buttons.\nIf off, buttons may be hidden if the screen or form is resized.'
+                }).appendTo(dlg_header);
+                this._autoResizeCheckbox = $span.find('input');
+
+                this._on($span, {
+                    click: (e) => {
+
+                        if(e.target.tagName === 'SPAN'){
+
+                            this._autoResizeCheckbox.prop('checked', !this._autoResizeCheckbox.prop('checked'));
+                            this._autoResizeCheckbox.trigger('change');
+                        }
+                    }
                 });
-                
+
+                this._on(this._autoResizeCheckbox, {
+                    change: () => {
+                        this.saveUiPreferences();
+                    }
+                });
             }
 
             $dlg.css('box-shadow', '2px 3px 10px #00000080');
+
+            window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE, () => this._setDialogSize(true, 'full'));
         }
 
         //add record title at the top ======================
@@ -4940,7 +5002,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
         this.editHeader = this.element.find('.editHeader');
 
-        let sheader = '<div style="text-align:left;min-height:25px;display:inline-flex;align-items:center;" class="edit-record-title">';  ///class="ui-heurist-header2" 
+        let sheader = '<div style="text-align:left;min-height:25px;display:inline-flex;align-items:center;width:calc(100% - 350px);overflow:hidden;" class="edit-record-title">';
         
         if(this.options.edit_structure){
             
@@ -4971,8 +5033,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         if(this._as_dialog){
                 
-            let ele = this._as_dialog.parent().find('.ui-dialog-titlebar')
-                .addClass('ui-heurist-header');
+            let ele = this._as_dialog.dialog('titlebar').addClass('ui-heurist-header');
 
             if(this.options.edit_structure){
                 this._as_dialog.parent().addClass('ui-heurist-design');
@@ -5056,28 +5117,23 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             
             //extend separator help left padding
-            $(this.element).find('.separator-helper').css({'padding-left':'52px'});
+            $(this.element).find('.separator-helper:not(.explanation-separator-helper)').css({'padding-left':'52px'});
             
             //init back button - if there is opened rts editor
             let btn_close_editor = this.element.find('.btn-edit-rt-back');
                 
             if(btn_close_editor.length > 0){
-                if(that.options.edit_structure){
-                    btn_close_editor.hide();
-                }else{
-                    btn_close_editor.off('click');
-                    btn_close_editor.button({icon:'ui-icon-gear-crossed'}).show()
-                        .on('click', () => {this._switchToDataMode(false)});
-                    if(btn_css) btn_close_editor.css(btn_css);
 
-                    // Flash button
-                    btn_close_editor.fadeIn(100).fadeOut(100).effect('highlight', {color: '#307D96'}, 1000);
-                }
+                btn_close_editor.off('click');
+                btn_close_editor.button({icon:'ui-icon-gear-crossed'}).show()
+                    .on('click', () => {this._switchToDataMode(false)});
+                if(btn_css) btn_close_editor.css(btn_css);
+
+                // Flash button
+                btn_close_editor.fadeIn(100).fadeOut(100).effect('highlight', {color: '#307D96'}, 1000);
             }
-            if(!this.options.edit_structure){
-                this.element.find('.btn-edit-rt2').hide();
-            }
-            
+            this.element.find('.btn-edit-rt2').hide();
+
             //switch on optional fields, disable checckbox and hide
             this.element.find('.chb_opt_fields').prop('checked',true).attr('disabled', true).trigger('change');
             this.element.find('.lbl_opt_fields').hide();
@@ -5108,6 +5164,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             // add '+' button to end of tabs, creates new tab header
             this._addNewTabButton();
+
+            // add handling for moving separator gear icons
+            this._handleSeparatorRtsIcons();
 
             // Hide 'toggle record visibility'
             if(this.element.find('#rec_visibility').length > 0){
@@ -5167,6 +5226,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     that.options.rts_editor.manageDefRecStructure('highlightNode', null);
                 }
             });
+
+            let recTitle = this._getField('rec_Title');
+            if(window.hWin.HEURIST4.util.isempty(recTitle) || this.options.edit_structure){
+                this.editFormPopup.layout().show('north');
+            }
         }else{
 
             $(this.element).find('.separator-hidden').hide();
@@ -5199,6 +5263,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //to save space - hide all fieldsets without visible fields
             this._showHideEmptyFieldGroups();
 
+            this.editFormPopup.layout().hide('north');
         }
 
                 
@@ -5400,6 +5465,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         if(this.usrPreferences.height<300) this.usrPreferences.height=300;
         if (this.usrPreferences.width>this.defaultPrefs.width) this.usrPreferences.width=this.defaultPrefs.width;
         if (this.usrPreferences.height>this.defaultPrefs.height) this.usrPreferences.height=this.defaultPrefs.height;
+        if(!Object.hasOwn(this.usrPreferences, 'autoResizePopup')) this.usrPreferences.autoResizePopup = true;
         return this.usrPreferences;
     },
     
@@ -5477,6 +5543,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         params.optfields = optfields;
         params.summary_tabs = activeTabs;
 
+        params.autoResizePopup = this._autoResizeCheckbox ? this._autoResizeCheckbox.is(':checked') : params.autoResizePopup;
+
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         
         return true;
@@ -5486,38 +5554,42 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     /**
      * @brief Sets the size of the edit dialog (popup).
      * @memberof heurist.manageRecords
-     * @param {boolean} [is_full=false] If true, sets to 95% of window dimensions; otherwise, 80%.
+     * @param {boolean} [isAutoResize=false] If true, first checks that the user wants auto resizing.
+     * @param {string} [size='standard'] Which of the preset sizes should be used. {'standard', 'full', 'small'}
      * Adjusts the width and height of the `_as_dialog` or `_edit_dialog` and centers it.
      * Then, triggers a resize of the internal layout.
      */
-    _setDialogSize: function(is_full = false){
+    _setDialogSize: function(isAutoResize = false, size = 'standard'){
+
+        if(isAutoResize && !this._autoResizeCheckbox?.is(':checked') || !this._as_dialog && !this._edit_dialog){
+            return;
+        }
 
         let width = window.hWin.innerWidth * 0.8;
         let height = window.hWin.innerHeight * 0.8;
 
-        if(is_full){
+        if(size === 'full'){
             width = window.hWin.innerWidth * 0.95;
             height = window.hWin.innerHeight * 0.95;
+        }else if(size === 'small'){
+            width = window.hWin.innerWidth * 0.75;
+            height = window.hWin.innerHeight * 0.75;
         }
 
         // Update width + height, and reset dialog's position to center
-        if(this._as_dialog){
+        if(this._as_dialog?.dialog('instance') !== undefined){
             this._as_dialog.dialog('option', 'width', width);
             this._as_dialog.dialog('option', 'height', height);
             this._as_dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
-        }else if(this._edit_dialog){
+        }else if(this._edit_dialog?.dialog('instance') !== undefined){
             this._edit_dialog.dialog('option', 'width', width);
             this._edit_dialog.dialog('option', 'height', height);
             this._edit_dialog.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
-        }else{
-            return;
         }
 
-       
         this.editFormPopup.layout().resizeAll(); // resize layout
     },
 
-    //
     /**
      * @brief Adds a "+" button to tab groups for creating new tabs.
      * @memberof heurist.manageRecords
@@ -5541,6 +5613,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             $tabs.each(function(idx, group){
 
                 let $group = $(group);
+                if($group.tabs('instance') === undefined){
+                    return;
+                }
+
                 let $tabs = $group.find('ul[role="tablist"]');
                 let last_dtid = $group.find('fieldset.ui-tabs-panel:last-child div[data-dtid]').last().attr('data-dtid');
 
@@ -5578,8 +5654,182 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             });
         }
     },
-	
-    //
+
+    /**
+     * @brief Moves the rts icon (gear) for separators closer
+     * @memberof heurist.manageRecords
+     * This function is active when the RTS (Record Type Structure) editor is enabled.
+     * It attempts to move the various rts icons (gears) closer to their corresponding separator,
+     *  to be inline with other fields and avoid confusion over what field is controlled by the icon.
+     */
+    _handleSeparatorRtsIcons: function(){
+
+        let hiddenGroups = {};
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+
+                if(!entry.isIntersecting){
+                    return;
+                }
+
+                const dtyID = entry.target.getAttribute('data-dtid');
+
+                if(Object.hasOwn(hiddenGroups, dtyID)){
+
+                    let $group = hiddenGroups[dtyID];
+
+                    $group['icon'].position({
+                        my: $group.my ?? 'right center',
+                        at: 'left center',
+                        of: $group['header']
+                    });
+                }
+
+                observer.unobserve(entry.target);
+            });
+        });
+
+        // Tabs
+        let $tabs = this.editForm.find('div.ui-tabs[data-group-dtid]');
+        if($tabs.length > 0){
+
+            $tabs.each((idx, group) => {
+
+                let $group = $(group);
+                if($group.tabs('instance') === undefined){
+                    return;
+                }
+
+                this._on($group, {
+                    'tabsactivate': function(event, ui){
+
+                        // Move gear icon next to tab header
+                        ui.oldTab.find('a').css('margin-left', '');
+                        let $tab = ui.newTab.find('a');
+                        $tab.css('margin-left', '2em');
+
+                        const dtyID = ui.newPanel.attr('data-dtid');
+                        const $gearIcon = ui.newPanel.find(`div[data-dtid="${dtyID}"] span.ui-icon-gear`);
+                        $gearIcon.css('position', 'absolute');
+                        $gearIcon.position({
+                            my: 'right center',
+                            at: 'left center',
+                            of: $tab
+                        });
+                    }
+                });
+
+                let currentTabIndex = $group.tabs('option', 'active');
+                let $currentTab = $group.find('.ui-tabs-nav li').eq(currentTabIndex).find('a').css('margin-left', '2em');
+                let $currentPanel = $group.find('.ui-tabs-panel').eq(currentTabIndex);
+                const dtyID = $currentPanel.attr('data-dtid');
+                const $gearIcon = $currentPanel.find(`div[data-dtid="${dtyID}"] span.ui-icon-gear`).css('position', 'absolute');
+
+                observer.observe($currentPanel[0]);
+                hiddenGroups[dtyID] = {header: $currentTab.parent(), icon: $gearIcon, my: 'left center'};
+            });
+        }
+
+        // Accordion
+        let $accordions = this.editForm.find('.ui-accordion');
+        if($accordions.length > 0){
+
+            $accordions.each((idx, group) => {
+
+                let $group = $(group);
+                if($group.accordion('instance') === undefined){
+                    return;
+                }
+
+                let $header = $group.find('.ui-accordion-header');
+                let $content = $group.find('.ui-accordion-content');
+                const dtyID = $content.children().attr('data-dtid');
+                const $gearIcon = $content.find(`div[data-dtid="${dtyID}"] span.ui-icon-gear`);
+                $gearIcon.css('position', 'absolute');
+
+                if(!$content.is(':visible')){
+                    observer.observe($content.children()[0]);
+                    hiddenGroups[dtyID] = {header: $header.find('.ui-accordion-header-icon'), icon: $gearIcon};
+                    return;
+                }
+
+                $gearIcon.position({
+                    my: 'right center',
+                    at: 'left center',
+                    of: $header.find('.ui-accordion-header-icon')
+                });
+            });
+        }
+
+        // Group, break
+        let $headers = this.editForm.find('.group_break-separator-header');
+        if($headers.length > 0){
+
+            $headers.each((idx, header) => {
+
+                let $header = $(header);
+                let $fieldset = $header.next();
+                let $rtsContainer = $header.prev()
+                let $gearIcon = $rtsContainer.find('span.ui-icon-gear');
+                const dtyID = $rtsContainer.attr('data-dtid');
+
+                if($header.length === 0 || $fieldset.length === 0 || $gearIcon.length === 0){
+                    return;
+                }
+
+                $header.css('padding-left', '2em');
+
+                if(!$header.is(':visible')){
+                    observer.observe($rtsContainer[0]);
+                    hiddenGroups[dtyID] = {header: $header, icon: $gearIcon, my: 'right+15 center'};
+                    return;
+                }
+
+                $gearIcon.position({
+                    my: 'right+15 center+5',
+                    at: 'left center',
+                    of: $header
+                });
+            });
+        }
+
+        // Group & Explanation, non-break
+        $headers = this.editForm.find('.group-separator-header, .explanation-separator-header');
+        if($headers.length > 0){
+
+            $headers.each((idx, header) => {
+
+                let $header = $(header);
+                let $rtsContainer = $header.next().next();
+                let $gearIcon = $rtsContainer.find('span.ui-icon-gear');
+                const dtyID = $rtsContainer.attr('data-dtid');
+
+                if($header.length === 0 || $gearIcon.length === 0){
+                    return;
+                }
+
+                $header.css('padding-left', '2em');
+
+                if(!$header.is(':visible')){
+                    observer.observe($rtsContainer[0]);
+                    hiddenGroups[dtyID] = {header: $header, icon: $gearIcon, my: 'right+15 center'};
+                    return;
+                }
+
+                $gearIcon.position({
+                    my: 'right+15 center',
+                    at: 'left center',
+                    of: $header
+                });
+            });
+        }
+
+        if(Object.keys(hiddenGroups).length === 0){
+            observer.disconnect();
+        }
+
+    },
+
 	/**
 	 * @brief Displays extra record information at the top and bottom of the record editor form.
 	 * @memberof heurist.manageRecords
@@ -5701,7 +5951,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         if(this._duplicatedRecord && this._duplicatedRecord > 0){ // add message about being a dupe record
 
-            let $dupe_ele = $('<div>', {style: 'font-size: 12px; color: orange; cursor: default; padding-left: 35px;'})
+            let $dupe_ele = $('<div>', {style: 'font-size: 1.5em; color: red; cursor: default; padding-left: 35px;'})
                 .text(`This is a duplicate of record ${this._duplicatedRecord} - edit as required`);
 
             // Small button to remove dupe message
@@ -5735,12 +5985,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      * - Add a comment to the temporal value.
      * Upon saving from the dialog, the clarified date (potentially as a Temporal string) updates the corresponding field value.
      * Continues until all ambiguous dates are processed or the user cancels.
+     * @param {bool} continueToSave Whether to proceed with saving after handling the ambiguous dates,
+     * This will only happen if no dates where changed.
      */
-    _handleAmbiguousDates: function(ambiguous_dates){
+    _handleAmbiguousDates: function(ambiguous_dates, continueToSave = true){
 
         let that = this;
 
         if(!ambiguous_dates || ambiguous_dates.length == 0){
+            if(continueToSave){
+                this._saveEditAndClose(null, 'none');
+            }
             return;
         }
 
@@ -5754,6 +6009,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             let com = $dlg.find('#COM').val();
             let t_date = new Temporal();
             let is_temporal = false;
+
+            if($dlg.find('#remain_ambiguous:checked').length > 0){
+
+                that._ignoreAmbiguousDates.push(cur_date.org_value);
+
+                $dlg.dialog('close');
+
+                that._handleAmbiguousDates(ambiguous_dates, continueToSave);
+
+                return;
+            }
 
             if(!window.hWin.HEURIST4.util.isempty(com)){
                 t_date.addObjForString("COM", com);
@@ -5848,7 +6114,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             $dlg.dialog('close');
 
-            that._handleAmbiguousDates(ambiguous_dates);
+            that._handleAmbiguousDates(ambiguous_dates, false);
         };
         btns[window.HR('Close')] = function(){
             $dlg.dialog('close');
@@ -5861,8 +6127,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         };
 
         let options = {
-            'default_palette_class': 'ui-heurist-explore',
-            'dialogId': 'fixing_ambig_dates'
+            default_palette_class: 'ui-heurist-explore',
+            dialogId: 'fixing_ambig_dates'
         };
 
         let fld_name = $Db.rst(that._currentEditRecTypeID, cur_date.dtyid, 'rst_DisplayName');
@@ -5871,6 +6137,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         + '<span>'
                             + 'For the field <strong>' + fld_name + '</strong><br>'
                             + 'We cannot unambiguously interpret what you mean by <strong>' + cur_date.org_value + '</strong>'
+                            + 'Retain ambiguous date? <input type="checkbox" id="remain_ambiguous" name="remain_ambiguous" /> (this will ignore anything entered below)<br>'
                         + '</span><br><br>';
 
         if(cur_date.type){
@@ -5909,7 +6176,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     break;
                 }
                 default:
-                    that._handleAmbiguousDates(ambiguous_dates);
+                    that._ignoreAmbiguousDates.push(cur_date.org_value);
+                    that._handleAmbiguousDates(ambiguous_dates, continueToSave);
                     break;
             }
         }
@@ -5919,6 +6187,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 +  '</div>';
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, labels, options);
+
+        $dlg.find('#remain_ambiguous').on('change', () => {
+            let enabled = $dlg.find('#remain_ambiguous').is(':checked');
+            let $inputs = $dlg.find('input:not(#remain_ambiguous),textarea');
+            window.hWin.HEURIST4.util.setDisabled($inputs, enabled);
+        });
     },
 
     _handleInvalidEntry: function(invalid_entries){
@@ -6038,12 +6312,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             $stage_selector.trigger('change');
         });
 
-        $dlg.parent().find('.ui-dialog-buttonpane .ui-button').css('margin-right', '20px');
+        $dlg.dialog('buttonpane').find('.ui-button').css('margin-right', '20px');
 
         // Change "Continue" button label to "Save change" if a stage or mode is actually changed
         let initial_popup_mode = $swf_popup_mode_selector.val();
         let initial_stage = $stage_selector.val();
-        let $save_btn = $($dlg.parent().find('.ui-dialog-buttonpane .ui-button')[0]); // The "Continue" button
+        let $save_btn = $($dlg.dialog('buttonpane').find('.ui-button')[0]); // The "Continue" button
 
         $dlg.find('select').on('change', () => {
             let changed = $stage_selector.val() != initial_stage || $swf_popup_mode_selector.val() != initial_popup_mode;
@@ -6214,6 +6488,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             that.resource_values = []; // list of search values for recpointer fields
             that.relmarker_values = []; // list of search values and term values for relationship marker fields
 
+            const allowedRecDumps = ['bnfLibrary', 'bnfLibraryAut', 'isni'];
+
             if(!window.hWin.HEURIST4.util.isempty(recset['ext_url'])){
                 that.lookup_record_link = {url: recset['ext_url'], type: 'ext'};
             }else if(!window.hWin.HEURIST4.util.isempty(recset['heurist_url'])){
@@ -6226,7 +6502,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 const dt_id = dtyIds[k];
 
-                if(dt_id>0){
+                if(dt_id > 0){
 
                     let newval = recset[dt_id];
                     let type = $Db.dty(dt_id, 'dty_Type');
@@ -6308,68 +6584,94 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         const fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
                         if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
                     } 
-                }else if(dt_id == 'BnF_ID' && cfg.options.dump_record == true){ // retrieve record from BnF and place in record scratch pad
+                }
+                if(allowedRecDumps.includes(cfg.service) && cfg.options.dump_record == true){ // retrieve record from BnF and place in record scratch pad
 
-                    let value = recset['BnF_ID'];
+                    let requestURL = '';
+                    let requestService = '';
+                    if(dt_id == 'BnF_ID'){
 
-                    if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
-                        continue;
+                        let value = recset['BnF_ID'];
+
+                        if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
+                            continue;
+                        }
+
+                        requestURL = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
+                        let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
+
+                        requestURL += encodeURIComponent(fld_name + ' all ' + value) + ')';
+
+                        requestService = 'bnf_recdump';
+                    }else if(dt_id == 'isni'){
+
+                        let value = recset['isni'];
+
+                        if(window.hWin.HEURIST4.util.isempty(value)){ // missing | no value
+                            continue;
+                        }
+
+                        requestURL = `https://isni.oclc.org/sru/DB=1.2/?version=1.1&operation=searchRetrieve&recordSchema=isni-b&maximumRecords=1&startRecord=1&query=`;
+                        requestURL += encodeURIComponent(`pica.isn = ${value}`);
+
+                        requestService = 'isni_recdump';
                     }
 
-                    let req_url = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=1&startRecord=1&query=(';                                                        
-                    let fld_name = cfg.service == 'bnfLibrary' ? 'bib.recordid' : 'aut.recordid';
-
-                    req_url += encodeURIComponent(fld_name + ' all ' + value) + ')';
-
-                    let req = {
-                        service: req_url,
-                        serviceType: 'bnf_recdump'
-                    };
-
-                    window.hWin.HAPI4.RecordMgr.lookup_external_service(req, (response) => {
-                        if(window.hWin.HEURIST4.util.isJSON(response)){
-                            response = window.hWin.HEURIST4.util.isJSON(response);
-                            if(response.record != null){
-
-                                let scratchpad_txt = response.record + '\r\n\r\n';
-
-                                let fld_id = cfg.options.dump_field;
-                                if(isNaN(parseInt(fld_id)) || fld_id < 1 || !$Db.rst(that._currentEditRecTypeID, fld_id) || $Db.dty(fld_id, 'dty_Type') != 'blocktext'){
-                                    fld_id = 'rec_ScratchPad';   
-                                }
-                                let $fld = that._editing.getFieldByName(fld_id);
-
-                                if(fld_id == 'rec_ScratchPad'){
-
-                                    if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
-                                        scratchpad_txt += '\r\n\r\n' + $fld.text();
-                                    }
-    
-                                    $fld.editing_input('setValue',[scratchpad_txt]);
-                                    $fld.editing_input('isChanged', true);
-
-                                    that.editFormPopup.layout().open("east"); // expand panel
-                                    
-                                    let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(4));
-                                    if($acc_ele.accordion('instance') != undefined){ // expand accordion
-                                        $acc_ele.accordion('option', 'active', 0);
-                                    }
-                                }else{
-
-                                    let existing_vals = $fld.editing_input('getValues');
-                                    if(existing_vals[0] != ''){
-                                        existing_vals.push([scratchpad_txt]);
-                                    }
-                                    $fld.editing_input('setValue',[scratchpad_txt]);
-                                }
-                            }
-                        }
-                    });
+                    that._dumpExternalRecordIntoField(requestURL, requestService, cfg.options.dump_field);
                 }
             }
 
             that.processTermFields(assigned_fields, {}); // order of operations is: Terms, Files, Record pointers, Relationship markers
         }
+    },
+
+    _dumpExternalRecordIntoField: function(externalURL, serviceType, dumpingToField){
+
+        let that = this;
+        let request = {
+            service: externalURL,
+            serviceType: serviceType
+        };
+
+        window.hWin.HAPI4.RecordMgr.lookupService(request, (response) => {
+            if(window.hWin.HEURIST4.util.isJSON(response)){
+                response = window.hWin.HEURIST4.util.isJSON(response);
+                if(response.record != null){
+
+                    let scratchpad_txt = response.record + '\r\n\r\n';
+
+                    let fld_id = dumpingToField;
+                    if(isNaN(parseInt(fld_id)) || fld_id < 1 || !$Db.rst(that._currentEditRecTypeID, fld_id) || $Db.dty(fld_id, 'dty_Type') != 'blocktext'){
+                        fld_id = 'rec_ScratchPad';   
+                    }
+                    let $fld = that._editing.getFieldByName(fld_id);
+
+                    if(fld_id == 'rec_ScratchPad'){
+
+                        if(!window.hWin.HEURIST4.util.isempty($fld.text())){ // if content exists; prepend and add breaks before existing content
+                            scratchpad_txt += '\r\n\r\n' + $fld.text();
+                        }
+
+                        $fld.editing_input('setValue',[scratchpad_txt]);
+                        $fld.editing_input('isChanged', true);
+
+                        that.editFormPopup.layout().open("east"); // expand panel
+                        
+                        let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(4));
+                        if($acc_ele.accordion('instance') != undefined){ // expand accordion
+                            $acc_ele.accordion('option', 'active', 0);
+                        }
+                    }else{
+
+                        let existing_vals = $fld.editing_input('getValues');
+                        if(existing_vals[0] != ''){
+                            existing_vals.push([scratchpad_txt]);
+                        }
+                        $fld.editing_input('setValue',[scratchpad_txt]);
+                    }
+                }
+            }
+        });
     },
 	
     /**
@@ -7030,7 +7332,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
         }
 
-        this.editForm.animate({scrollTop: $ele.offset().top}, 1000); // scrollIntoView()
+        this.editForm.animate({scrollTop: $ele.position().top}, 1000);
 
         if(!isSeparator){
             $ele.editing_input('focus');
@@ -7862,5 +8164,201 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         this.editFormPopup.layout().hide('west');
         this.options.rts_editor = null;
         this.reloadEditForm( true );
+    },
+
+    _setupInlineImages: function(){
+
+        let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'});
+        let showAllImagesPrefs = window.hWin.HAPI4.get_prefs_def('edit_record_showAllImagesPerField', {allowed: [], blocked: []});
+
+        showAllImagesPrefs = window.hWin.HEURIST4.util.isJSON(showAllImagesPrefs);
+
+        if (!showAllImagesPrefs
+                || typeof showAllImagesPrefs !== 'object'
+                || Array.isArray(showAllImagesPrefs)) {
+            showAllImagesPrefs = {};
+        }
+        showAllImagesPrefs.allowed = Array.isArray(showAllImagesPrefs.allowed)
+            ? showAllImagesPrefs.allowed : [];
+        showAllImagesPrefs.blocked = Array.isArray(showAllImagesPrefs.blocked)
+            ? showAllImagesPrefs.blocked : [];
+        // end ChatGPT fix 7/10/26
+        
+        let prefUpdated = false;
+
+        for(const fileDtyID of fileFields.getOrder()){
+
+            if(!$Db.rst(this._currentEditRecTypeID, fileDtyID) || showAllImagesPrefs.blocked.includes(`${this._currentEditRecTypeID}.${fileDtyID}`)){
+                continue;
+            }
+
+            if(!showAllImagesPrefs.allowed.includes(`${this._currentEditRecTypeID}.${fileDtyID}`)){
+
+                showAllImagesPrefs.allowed.push(`${this._currentEditRecTypeID}.${fileDtyID}`);
+                window.hWin.HAPI4.currentUser.ugr_Preferences.edit_record_showAllImagesPerField = showAllImagesPrefs; // update local cache, before complete save
+
+                prefUpdated = true;
+            }
+
+            setTimeout((dtyID) => {
+
+                const event = $.Event('click');
+                event.isForced = true;
+
+                this.editForm.find(`div[data-dtid="${dtyID}"] .showAllImages`).trigger(event);
+
+            }, 500, fileDtyID);
+        }
+
+        if(prefUpdated){
+
+            // Ensure allowed and blocked are arrays
+            showAllImagesPrefs.allowed = Array.isArray(showAllImagesPrefs.allowed) ? showAllImagesPrefs.allowed : [];
+            showAllImagesPrefs.blocked = Array.isArray(showAllImagesPrefs.blocked) ? showAllImagesPrefs.blocked : [];
+
+            window.hWin.HAPI4.save_pref('edit_record_showAllImagesPerField', showAllImagesPrefs);
+        }
+    },
+
+    _setupFilePasteHandling: function(){
+
+        let fileFields = $Db.dty().getSubSetByRequest({dty_Type: 'file'}).getOrder();
+
+        this._on(this.element, {
+            paste: (event) => {
+
+                // Ensure current rectype can use files
+                let recTypeFileFields = [];
+                for(const dtyID of fileFields){
+
+                    if($Db.rst(this._currentEditRecTypeID, dtyID)){
+                        recTypeFileFields.push(dtyID);
+                    }
+                }
+
+                if(recTypeFileFields.length === 0){
+                    return;
+                }
+
+                // Retrieve clipboard data
+                let clipboardData = event.originalEvent.clipboardData || window.clipboardData;
+                if(!clipboardData || !clipboardData.items){
+                    return;
+                }
+
+                // Prepare files for upload
+                let files = clipboardData.files; //clipboardData.items
+                let filesToUpload = [];
+                for(let file of files){
+
+                    let fileDetails = file;
+                    if(file?.kind === 'file'){
+                        fileDetails = file[0].getAsFile();
+                    }
+
+                    filesToUpload.push(fileDetails);
+                }
+
+                if(filesToUpload.length > 0){
+
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    event.stopPropagation();
+
+                    this._handlePastedFiles(filesToUpload, recTypeFileFields);
+                }
+            },
+            dragover: (event) => {
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.preventDefault();
+            },
+            drop: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.preventDefault();
+
+                // Retrieve data from original event
+                event = event.originalEvent;
+                if(!event.dataTransfer || event.dataTransfer.files.length === 0){
+                    return;
+                }
+
+                // Setup paste event
+                const pasteEvent = new ClipboardEvent('paste', {
+                    bubbles: true,
+                    cancelable: true
+                });
+
+                Object.defineProperty(pasteEvent, 'clipboardData', {
+                    value: event.dataTransfer,
+                    writable: false
+                });
+
+                // Trigger paste event
+                event.target.dispatchEvent(pasteEvent);
+            }
+        });
+
+        this._editorPasteEvent = true;
+    },
+
+    _handlePastedFiles: function(files, dtyIDs){
+
+        if(!Array.isArray(files) || files.length === 0){
+            return;
+        }
+
+        let allowedFields = new Set();
+        for(const dtyID of dtyIDs){
+            if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID) || !$Db.rst(this._currentEditRecTypeID, dtyID)){
+                continue;
+            }
+            allowedFields.add(dtyID);
+        }
+
+        if(allowedFields.size === 0){
+            return;
+        }
+
+        const [dtyID] = allowedFields.size === 1 ? allowedFields : [0];
+        if(window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+
+            let $input = this._editing.getFieldByName(dtyID);
+            if(!$input || $input.length === 0){
+                return;
+            }
+
+            $input.editing_input('addPastedFiles', files);
+            return;
+        }
+
+        let fieldList = '';
+        let status = ' checked="checked"';
+        for(const dtyID of allowedFields){
+
+            fieldList += `<label style="cursor: pointer; display: block; margin: 5px 0px;">
+                <input type="radio" value="${dtyID}" name="fileField" ${status} />${$Db.rst(this._currentEditRecTypeID, dtyID, 'rst_DisplayName')}
+            </label>`;
+
+            status = '';
+        }
+
+        let $dlg;
+        let btns = {};
+        let content = `<div>
+            Please select a file field to send the pasted images to:
+            <div>${fieldList}</div>
+        </div>`;
+
+        btns[window.hWin.HR('Send to field')] = () => {
+            let dtyID = $dlg.find('[name="fileField"]:checked').val();
+            $dlg.dialog('close');
+            this._handlePastedFiles(files, [dtyID]);
+        };
+
+        btns[window.hWin.HR('Cancel')] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Pasting to multiple fields'}, {default_palette_class: 'ui-heurist-populate'});
     }
-});        
+});

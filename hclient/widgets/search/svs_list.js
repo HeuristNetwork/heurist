@@ -335,7 +335,7 @@ $.widget( "heurist.svs_list", {
             this.div_header =  $('<div class="ui-heurist-header" style="top:0px;padding:9px;">'
 +'<span>'+window.hWin.HR('Saved Filters')
 +'</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" '
-+'style="float:right;height: 17px;min-width: 17px;" title="Close">'
++'style="float:right;height: 19px;min-width: 17px;" title="Close">'
 +'<span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button>'            
             +'</div>') 
             // <span style="font-style:italic;font-size:x-small">by workgroups</span>
@@ -1104,8 +1104,26 @@ $.widget( "heurist.svs_list", {
                                 that.svs_order = response.data.order;
                                 that.loaded_saved_searches = response.data.svs; //svs_id=>array()
                             }else{
+
                                 that.loaded_saved_searches = response.data; //svs_id=>array()
                                 that.svs_order = Object.keys(that.loaded_saved_searches);
+
+                                if(that.options.allowed_svsIDs){
+
+                                    that.svs_order.sort((a, b) => {
+
+                                        let aIndex = that.options.allowed_svsIDs.indexOf(a);
+                                        let bIndex = that.options.allowed_svsIDs.indexOf(b);
+
+                                        if(aIndex < 0 && bIndex < 0){
+                                            return 0;
+                                        }else if(aIndex < 0 || bIndex < 0){
+                                            return aIndex < 0 ? 1 : -1;
+                                        }
+
+                                        return aIndex - bIndex;
+                                    })
+                                }
                             }
                             
                             let svsID = Object.keys(that.loaded_saved_searches);
@@ -1704,7 +1722,7 @@ $.widget( "heurist.svs_list", {
                             setTimeout(function(){ that.options.menu_locked.call( that, false ); }, 2000);
                         }
 
-                        let $ele = $(document.elementFromPoint(ui.position.left, ui.position.top));
+                        let $ele = $(document.elementFromPoint(ui.position.left, ui.position.top - 10));
                         let node = ui.helper.data('ftSourceNode');
 
                         let procFavourites = !node.folder && node.key && !node.data.url;
@@ -1716,14 +1734,33 @@ $.widget( "heurist.svs_list", {
                                 name = node.title;
                             }
 
-                            that.options.handle_favourites.call(that, node.key, name, true);
+                            let placement = -1; // 0 = tp top, -1 = to bottom, n = beneath listed filter
+                            let dropPositionTop = ui.position.top - 85;
+                            if($ele.is('span.truncate') || $ele.is('li.fancytree-node')){
+
+                                let $currentNode = $ele.is('span.truncate') ? $ele.parent() : $ele;
+                                let $prevNode = $currentNode.prev();
+
+                                let topPosition = $ele.is('span.truncate') ? $ele.position().top :  $ele.find('span.truncate').position().top;
+
+                                placement = topPosition <= dropPositionTop ? $currentNode.attr('data-fid') : 0;
+                                placement = topPosition > dropPositionTop && $prevNode.length > 0 ? $prevNode.attr('data-fid') : placement;
+                            }else{
+
+                                let $firstNode = $ele.is('.ui-heurist-title') ? $ele.parent().find('ul li.fancytree-node').first() : $ele.find('li.fancytree-node');
+                                let firstNodePositionTop = $firstNode.length === 0 ? dropPositionTop : $firstNode.position().top;
+                                placement = firstNodePositionTop >= dropPositionTop ? 0 : -1;
+                            }
+
+                            that.options.handle_favourites.call(that, node.key, name, true, placement);
                         }
                     },
                     appendTo: 'body',
                     containment: 'window',
                     revert: 'invalid',
                     cursorAt: {top: 0, left: 5},
-                    zIndex: 2001
+                    zIndex: 2001,
+                    scroll: false
                 };
             }
 

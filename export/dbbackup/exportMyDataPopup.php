@@ -36,6 +36,7 @@
 * @uses $_REQUEST['include_tilestacks'] If 1, includes tiled map images.
 * @uses $_REQUEST['include_hml'] If 1, includes HML export.
 * @uses $_REQUEST['include_tsv'] If 1, includes TSV export.
+* @uses $_REQUEST['include_crate'] If 1, includes RO-Crate export.
 * @uses $_REQUEST['include_docs'] If 1, includes background documentation (hidden, checked by default).
 * @uses $_REQUEST['allrecs'] If 1, includes resources from other users (hidden, checked by default).
 * @uses $_REQUEST['license'] Specifies the license for Nakala uploads.
@@ -46,6 +47,7 @@
 * @const FOLDER_SQL_BACKUP Path to the folder for storing standalone SQL backups.
 * @const FOLDER_HML_BACKUP Path to the folder for storing standalone HML backups.
 * @const FOLDER_TSV_BACKUP Path to the folder for storing standalone TSV backups.
+* @const FOLDER_CRATE_BACKUP Path to the folder for storing standalone RO-Crate backups.
 */
 
 /**
@@ -67,6 +69,8 @@ use hserv\structure\ConceptCode;
 use hserv\utilities\DbUtils;
 use hserv\utilities\UArchive;
 use hserv\utilities\DbExportTSV;
+use hserv\utilities\DbExportROCrate;
+use hserv\utilities\SafeguardBackup;
 
 // Initialize the page (minimal version for popups)
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
@@ -94,6 +98,11 @@ define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'
  * @var string
  */
 define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_tsv');
+/**
+ * Path to the temporary folder for storing a standalone RO-Crate backup.
+ * @var string
+ */
+define('FOLDER_CRATE_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_ro-crate');
 
 // --- Main script logic: Handle request parameters ---
 $mode = @$_REQUEST['mode']; // Current operation mode
@@ -122,6 +131,8 @@ if ($mode > 1) {
     } elseif ($mode == '6' && folderExists(FOLDER_TSV_BACKUP, false)) {  // Download archived TSV subdirectory
         // REMARK: Assumes FOLDER_TSV_BACKUP gets zipped/tarred with its name + .$format
         downloadFile($mime, FOLDER_TSV_BACKUP.'.'.$format);
+    } elseif ($mode == '7' && folderExists(FOLDER_CRATE_BACKUP, false)) {  // Download archived ro-crate subdirectory
+        downloadFile($mime, FOLDER_CRATE_BACKUP.'.'.$format);
     } elseif ($mode == '4') {  // Cleanup backup folder (called on exit/cancel)
         folderDelete2(HEURIST_FILESTORE_DIR.DIR_BACKUP, false); // false = do not delete parent folder itself
     }
@@ -189,6 +200,62 @@ if ($mode > 1) {
                 // Perform AJAX request to cleanup backup folder (mode=4)
                 <?php print '$.ajax("'.HEURIST_BASE_URL.'/export/dbbackup/exportMyDataPopup.php?mode=4&db='.$system->dbname().'");';?>
                 window.close(); // Close the popup window
+            }
+
+            /**
+             * Calls repoController.php (action=getdoi) to (re)confirm the status/DOI of a
+             * previously uploaded repository record, and updates the inline status text next to it.
+             * @param {string} serviceId  Repository account/service id (eg. "nakala_1")
+             * @param {string} identifier Repository data identifier (= reserved DOI string for Nakala)
+             */
+            function checkRepositoryDOI(serviceId, identifier) {
+                $.ajax({
+                    url: '<?php echo HEURIST_BASE_URL; ?>hserv/controller/repoController.php',
+                    data: {db: '<?php echo $system->dbname(); ?>', a: 'getdoi', service_id: serviceId, identifier: identifier},
+                    dataType: 'json',
+                    success: function(response) {
+                        var $status = $(document.getElementById('doi-status-' + identifier));
+                        if (window.hWin.HAPI4 && response.status == window.hWin.ResponseStatus.OK) {
+                            var d = response.data;
+                            $status.text(d.doiRegistered
+                                ? ' (live - registered with DataCite, citable at https://doi.org/' + d.doi + ')'
+                                : ' (still reserved, not yet public/citable - status: ' + d.status + ')');
+                        } else if (window.hWin.HAPI4) {
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Calls repoController.php (action=publish) to publish a pending Nakala deposit,
+             * which registers its DOI with DataCite and makes the archive PUBLIC and PERMANENT.
+             * Requires explicit confirmation from the user before sending the request.
+             * @param {string} serviceId  Repository account/service id (eg. "nakala_1")
+             * @param {string} identifier Repository data identifier (= reserved DOI string for Nakala)
+             */
+            function publishRepositoryDOI(serviceId, identifier) {
+                if (window.hWin.heuristExperimentalAllowed !== true) {
+                    return;
+                }
+                if (!confirm('Publishing makes this Nakala deposit PUBLIC and registers its DOI permanently.\n'
+                            + 'It CANNOT be undone or made private again. Continue?')) {
+                    return;
+                }
+                $.ajax({
+                    url: '<?php echo HEURIST_BASE_URL; ?>hserv/controller/repoController.php',
+                    data: {db: '<?php echo $system->dbname(); ?>', a: 'publish', service_id: serviceId, identifier: identifier},
+                    dataType: 'json',
+                    success: function(response) {
+                        var $status = $(document.getElementById('doi-status-' + identifier));
+                        if (window.hWin.HAPI4 && response.status == window.hWin.ResponseStatus.OK) {
+                            var d = response.data;
+                            $status.text(' (published - DOI is now live and citable at https://doi.org/' + d.doi + ')');
+                        } else if (window.hWin.HAPI4) {
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                });
             }
 
             /**
@@ -325,7 +392,8 @@ if ($mode > 1) {
                 window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), null, 'Retrieving Nakala licenses...'); // Show loading overlay
 
                 // API call to fetch Nakala licenses
-                window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+                window.hWin.HAPI4.RecordMgr.lookupService(request, (data) => {
+
                     window.hWin.HEURIST4.msg.sendCoverallToBack(); // Hide loading overlay
                     data = window.hWin.HEURIST4.util.isJSON(data); // Ensure data is JSON
 
@@ -340,12 +408,20 @@ if ($mode > 1) {
                     }
 
                     if (data.length > 0) { // Licenses found
+
                         $.each(data, (idx, license) => { // Populate dropdown
                             window.hWin.HEURIST4.ui.addoption($sel_license[0], license, license);
                         });
+
+                        if($sel_license.attr('data-initial-value')){
+                            $sel_license.val($sel_license.attr('data-initial-value'));
+                        }
+
                         window.hWin.HEURIST4.ui.initHSelect($sel_license, false, {'margin-left': '21px'}); // Initialize HSelect
+
                         $sel_license.attr('data-init', 'Nakala'); // Mark as initialized
                         $sel_license.parent().parent().show(); // Show license section
+
                     } else { // No licenses found or other error
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: 'An unknown error has occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.',
@@ -393,6 +469,31 @@ if ($mode > 1) {
                 font-size: larger;
                 font-weight: bold;
             }
+            .repository-upload-result{
+                max-width: 850px;
+                line-height: 1.45;
+                overflow-wrap: anywhere;
+            }
+            .repository-upload-result p{
+                margin: 10px 0;
+            }
+            .repository-upload-actions{
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                align-items: center;
+                margin-top: 12px;
+            }
+            .repository-action-unavailable{
+                position: relative;
+                display: inline-block;
+                opacity: 0.5;
+            }
+            .repository-action-unavailable .hover-explanation{
+                position: absolute;
+                inset: 0;
+                cursor: not-allowed;
+            }
         </style>
     </head>
     <body class="popup ui-heurist-admin">
@@ -401,7 +502,22 @@ if ($mode > 1) {
         // $please_advise is defined but not consistently used. It could be appended to error messages.
         $please_advise = "<br>Please consult with your system administrator for a resolution.";
 
+        $DB_LICENSE = '';
         $DB_DESCRIPTION = mysql__select_value($system->getMysqli(), "SELECT sys_dbDescription FROM sysIdentification WHERE sys_ID = 1");
+        $DB_LOCATION = '';
+        $DB_KEYWORDS = '';
+        $DB_COLLECTION = '';
+
+        // Load previous settings
+        $lastDetails = $system->settings->getDatabaseSetting('External IDs');
+        if($lastDetails && array_key_exists('data', $lastDetails)){
+
+            $DB_LICENSE = $lastDetails['data']['license'];
+            $DB_DESCRIPTION = $lastDetails['data']['desc'];
+            $DB_LOCATION = $lastDetails['data']['location'];
+            $DB_KEYWORDS = $lastDetails['data']['keywords'];
+            $DB_COLLECTION = $lastDetails['data']['collection'];
+        }
 
         // --- Display initial form if $mode is not set (i.e., initial page load) ---
         if (!$mode) {
@@ -469,6 +585,13 @@ if ($mode > 1) {
                     </label>
                 </div>
 
+                <div class="input-row">
+                    <label title="Adds a folder containing the database dump in an RO-Crate">
+                        <input type="checkbox" name="include_crate" value="1">
+                        Include database dump in an RO-Crate (includes both an SQL and TSV dump of the database)
+                    </label>
+                </div>
+
                 <!-- REMARK: BZip format option is commented out in HTML as of 2024-04-09, but PHP logic for 'tar' still exists. -->
                 <!-- 2024-04-09 - we use solely zip
                 <div class="input-row">
@@ -516,7 +639,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     <div class="header recommended" style="display: inline-block">
                         Select a license
                     </div>
-                    <select id='sel_license' name='license'> <option value="">select a license...</option> </select>
+                    <select id='sel_license' name='license' data-initial-value="<?php echo $DB_LICENSE; ?>"> <option value="">select a license...</option> </select>
                 </div>
                 <div class="input-row repo-Nakala" style="display: none;padding: 5px 0 10px 0;">
                     <div class="header recommended">
@@ -528,13 +651,13 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     <div class="header optional">
                         Keywords (<em><strong>newline for each new keyword</strong></em>)
                     </div>
-                    <textarea name='keywords' rows="10" cols="75"></textarea>
+                    <textarea name='keywords' rows="10" cols="75"><?php echo $DB_KEYWORDS; ?></textarea>
                 </div>
                 <div class="input-row repo-Nakala" style="display: none;padding: 5px 0 10px 0;">
                     <div class="header optional">
                         Location
                     </div>
-                    <input type="text" name='location' size="75" />
+                    <input type="text" name='location' size="75" value="<?php echo $DB_LOCATION; ?>" />
                     <br>
                     <span class="heurist-helper2">
                         A simple Country or "Town, Country"; or alternatively you can use a link to a <a href="https://www.geonames.org/" target="_blank">GeoNames</a> record
@@ -544,7 +667,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     <div class="header optional">
                         Collection
                     </div>
-                    <textarea name='collection' rows="4" cols="75"></textarea>
+                    <textarea name='collection' rows="4" cols="75"><?php echo $DB_COLLECTION; ?></textarea>
                     <br>
                     <span class="heurist-helper2">
                         Collection name as a description, or a Nakala URL for a collection (lookup under development)
@@ -575,6 +698,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             $separate_sql_zip = !$is_repository;
             $separate_hml_zip = !$is_repository && @$_REQUEST['include_hml'] == '1';
             $separate_tsv_zip = !$is_repository && @$_REQUEST['include_tsv'] == '1';
+            $separate_crate_zip = !$is_repository && @$_REQUEST['include_crate'] == '1';
 
             // --- Prepare backup folders ---
             if (file_exists(FOLDER_BACKUP)) { // Main backup folder
@@ -600,15 +724,23 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             if ($separate_tsv_zip && !folderCreate(FOLDER_TSV_BACKUP, true)) { // TSV-only backup folder
                 $separate_tsv_zip = false;
             }
+            if ($separate_crate_zip && !folderCreate(FOLDER_CRATE_BACKUP, true)) { // RO-Crate-only backup folder
+                $separate_crate_zip = false;
+            }
             // Folder for TSV output within the main backup package
             if (@$_REQUEST['include_tsv'] == 1 && !folderCreate(FOLDER_BACKUP . '/tsv-output/records', true)) {
                 $_REQUEST['include_tsv'] = 0; // Disable TSV if subfolder creation fails
                 echo_flush2("Failed to create sub directory for TSV output within backup directory<br>");
             }
+            // Folder for RO-Crate output within the main backup package
+            if (@$_REQUEST['include_crate'] == 1 && !folderCreate(FOLDER_BACKUP . '/ro-crate', true)) {
+                $_REQUEST['include_crate'] = 0; // Disable RO-Crate if subfolder creation fails
+                echo_flush2("Failed to create sub directory for RO-Crate output within backup directory<br>");
+            }
 
             // Validate repository if specified
             $repo = !empty(@$_REQUEST['repository']) ? htmlspecialchars($_REQUEST['repository']) : null;
-            if ($is_repository && (!$repo || $repo != 'Nakala')) { // Currently only Nakala seems fully supported
+            if ($is_repository && (!$repo || !in_array($repo, ['Nakala', 'Zenodo'], true))) {
                 // CONTACT_HEURIST_TEAM constant is defined in const.php
                 report_message('The repository ' . $repo . ' is not supported please ' . (defined('CONTACT_HEURIST_TEAM') ? CONTACT_HEURIST_TEAM : 'contact the support team'), true, false);
             }
@@ -718,11 +850,17 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             }
 
             // --- TSV Export ---
+            $tsvFiles = null;
             if (@$_REQUEST['include_tsv'] == '1') {
+
                 echo_flush2("Exporting database records as TSV<br>(may take several minutes for large databases)<br>");
-                $dbExportTSV = new DbExportTSV($system);
+
+                $dbExportTSV = new DbExportTSV();
+                $dbExportTSV->setSession($system);
+                $dbExportTSV->setBackupFolder();
                 // This should generate files in FOLDER_BACKUP . '/tsv-output/'
-                $warns = $dbExportTSV->output(); 
+                [$warns, $tsvFiles] = $dbExportTSV->output();
+
                 if (!empty($warns)) {
                     echo_flush2(implode('<br>', $warns));
                 }
@@ -744,9 +882,10 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
            saveURLasFile($url_xml, FOLDER_BACKUP."/Database_Structure.xml");
 
             // --- SQL Dump ---
+            $database_dumpfile = FOLDER_BACKUP."/{$system->dbname()}_MySQL_Database_Dump.sql";
             if ($system->isAdmin()) { // Only admins can perform full SQL dump
                 echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
-                $database_dumpfile = FOLDER_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql";
+
                 $dump_options = array('skip-triggers' => true,
                                       'single-transaction' => true,
                                       'quick' =>true,
@@ -762,6 +901,43 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
                 if ($separate_sql_zip) { // Copy SQL dump for separate archive
                     $separate_sql_zip = fileCopy($database_dumpfile, FOLDER_SQL_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql");
+                }
+            }
+
+            if(@$_REQUEST['include_crate'] == 1){
+
+                echo_flush2('Exporting database as an RO-Crate<br>(may take several minutes for large databases)<br>');
+
+                $dbExportCrate = new DbExportROCrate($system);
+
+                if(!empty($tsvFiles) && folderExists(FOLDER_BACKUP . DIRECTORY_SEPARATOR . 'tsv-output', false)){
+                    $tsvFiles['tablesDir'] = FOLDER_BACKUP . DIRECTORY_SEPARATOR . 'tsv-output';
+                    $tsvFiles['recordsDir'] = FOLDER_BACKUP . DIRECTORY_SEPARATOR . 'tsv-output/records';
+                }
+
+                try{
+
+                    $dbExportCrate->export('ro-crate', [
+                        'includeSqlDump' => true,
+                        'includeFiles' => false,// true
+                        'sqlDump' => $database_dumpfile,
+                        'tsvFiles' => $tsvFiles,
+                        'parentDir' => FOLDER_BACKUP
+                    ]);
+
+                    $separate_crate_zip = $separate_crate_zip && folderSize2(FOLDER_BACKUP . '/ro-crate') > 0;
+                    if ($separate_crate_zip) {
+                        $separate_crate_zip = folderRecurseCopy(FOLDER_BACKUP . '/ro-crate', FOLDER_CRATE_BACKUP);
+                    }
+                    if(folderExists(FOLDER_BACKUP . '/ro-crate', false)){ // cleanup folder
+                        folderDelete2(FOLDER_BACKUP . '/ro-crate');
+                    }
+                }catch(Throwable $error){
+                    echo_flush2("RO-Crate error: {$error->getMessage()}");
+                    if(folderExists(FOLDER_BACKUP . '/ro-crate', false)){ // cleanup folder
+                        folderDelete2(FOLDER_BACKUP . '/ro-crate');
+                    }
+                    $separate_crate_zip = false;
                 }
             }
 
@@ -819,6 +995,17 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     }
                 }
 
+                $res_crate_archive = false;
+                if ($separate_crate_zip) { // Create separate RO-Crate archive
+                    $destination_crate = FOLDER_CRATE_BACKUP.'.'.$format;
+                    if (file_exists($destination_crate)) unlink($destination_crate);
+                    if ($format == 'zip') {
+                        $res_crate_archive = UArchive::zip(FOLDER_CRATE_BACKUP, null, $destination_crate, true);
+                    } else {
+                        $res_crate_archive = UArchive::createBz2(FOLDER_CRATE_BACKUP, null, $destination_crate, true);
+                    }
+                }
+
                 // --- Display Download Links or Upload to Repository ---
                 if (!$is_repository) { // Provide download links
                     $param_format = ($format == 'tar' || $format == 'tar.bz2') ? '&is_tar=1' : '&is_zip=1'; // Keep original tar/zip param for download URL
@@ -865,6 +1052,17 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
     <?php
         }
     }
+    if ($separate_crate_zip) {
+        if ($res_crate_archive === true) { ?>
+        <br><br>
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_ro-crate.<?php echo $display_format; ?>?mode=7&db=<?php echo $system->dbname().$param_format;?>"
+            target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the RO-Crate <?php echo $display_format;?> only</a>
+    <?php } else { ?>
+        <br><br>
+        <div class="errorMsg">Failed to create / set up a standalone RO-Crate folder. <?php echo htmlspecialchars(is_string($res_crate_archive) ? $res_crate_archive : '');?></div>
+    <?php
+        }
+    }
     ?>
     <p class="heurist-helper1">
     Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo defined('HEURIST_MAIL_TO_ADMIN') ? HEURIST_MAIL_TO_ADMIN : 'your admin'; ?>) to send it to you via a large file transfer service.
@@ -880,7 +1078,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     $repo_details_all = user_getRepositoryCredentials2($system, $repo_account);
                     $repo_details = $repo_details_all[$repo_account] ?? null;
 
-                    echo_flush2('<hr><br>Uploading archive to ' . htmlspecialchars($repo) . '...');
+                    echo_flush2('<hr><p>Uploading archive to ' . htmlspecialchars($repo) . '...</p>');
 
                     if ($repo_details === null || empty($repo_details['params']['writeApiKey'])) {
                         $msg = $repo_details === null ?
@@ -888,8 +1086,11 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $msg .= ' Please check the credentials within Design > External repositories.';
                         report_message($msg, true, true);
                     } elseif ($repo == 'Nakala') { // Nakala specific upload logic
+
                         $date = date('Y-m-d');
                         $params = [];
+                        $data = [];
+
                         $params['file'] = [
                             'path' => FOLDER_BACKUP . '.' . $display_format, // Path to the generated archive
                             'type' => $mime,
@@ -911,19 +1112,23 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
                             $usrID = "{$usr['ugr_FullName']} [#{$usrID}]";
                         }
+
                         $params['meta']['created'] = [
                             'value' => $date, 'lang' => null,
-                            'typeUri' => PURL_TERM_DATE, 'propertyUri' => NAKALA_REPO.'terms#created'
+                            'typeUri' => null, 'propertyUri' => NAKALA_REPO.'terms#created'
                         ];
+
                         $params['meta']['type'] = [ // Default type: Dataset
                             'value' => 'http://purl.org/coar/resource_type/c_ddb1', 'lang' => null,
                             'typeUri' => PURL_TERM_URI, 'propertyUri' => NAKALA_REPO.'terms#type'
                         ];
+
                         if (array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])) {
                             $params['meta']['license'] = [
                                 'value' => $_REQUEST['license'], 'lang' => null,
                                 'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => NAKALA_REPO.'terms#license'
                             ];
+                            $data['license'] = $_REQUEST['license'];
                         }
                         if(array_key_exists('desc', $_REQUEST) && !empty($_REQUEST['desc'])){
                             $params['meta']['description'] = [
@@ -932,6 +1137,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 'typeUri' => W3_XML_SCHEMA_STRING,
                                 'propertyUri' => 'http://purl.org/dc/terms/description'
                             ];
+                            $data['desc'] = $_REQUEST['desc'];
                         }
                         if(array_key_exists('location', $_REQUEST) && !empty($_REQUEST['location'])){
 
@@ -944,11 +1150,14 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 'typeUri' => $typeURI,
                                 'propertyUri' => 'http://purl.org/dc/terms/spatial'
                             ];
+
+                            $data['location'] = $_REQUEST['location'];
                         }
                         if(array_key_exists('keywords', $_REQUEST) && !empty($_REQUEST['keywords'])){
 
                             $keywords = htmlspecialchars($_REQUEST['keywords']);
                             $keywords = array_filter(preg_split('/\r\n|\r|\n/', $keywords));
+                            $data['keywords'] = $_REQUEST['keywords'];
 
                             foreach($keywords as $keyword){
 
@@ -972,6 +1181,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 'typeUri' => W3_XML_SCHEMA_STRING,
                                 'propertyUri' => 'http://purl.org/dc/terms/isPartOf'
                             ];
+                            $data['collection'] = $_REQUEST['collection'];
                         }
 
                         $params['apiKey'] = $repo_details['params']['writeApiKey'];
@@ -986,24 +1196,75 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             echo_flush2('failed<br>');
                         } else {
 
-                            $nakalaID = htmlspecialchars($rtn_upload['id']);
-                            $nakalaURL = $rtn_upload['link'];
+                            $results = $rtn_upload['URL'];
+                            $nakalaID = htmlspecialchars($results['id']);
+                            $nakalaURL = $results['link'];
+                            $nakalaDOI = $nakalaID; // Nakala's identifier IS the DOI string from creation onward - see getNakalaDataDetails() in UFile.php
 
-                            $rtn_msg = htmlspecialchars($nakalaURL);
-                            $rtn_msg = "The uploaded archive is at <a href='{$rtn_msg}' target='_blank'>{$rtn_msg}&nbsp;<span class='ui-icon ui-icon-extlink'></span></a>";
-
-                            $system->settings->setDatabaseSetting('External IDs', ['NakalaDBBackup' => [
+                            recordExternalIdentifier($system, 'NakalaDBBackup', [
+                                'Service' => 'nakala',
+                                'Label' => 'Nakala - Database Archive',
                                 'ID' => $nakalaID,
-                                'Name' => 'Nakal - Database Archive',
+                                'DOI' => $nakalaDOI,
+                                'DOIRegistered' => false, // uploaded as 'pending' above, to keep the backup private
+                                'Status' => 'pending',
                                 'URL' => $nakalaURL,
                                 'Date' => $date,
-                                'Note' => "Nakala DOI for Database Archive backup.\nHeurist User: {$usrID}\nNakala Account: {$repo_account}"
-                            ]], 1);
+                                'Note' => "Heurist User: {$usrID}\nNakala Account: {$repo_account}\n"
+                                        . "Reserved but not yet registered with DataCite: this backup was deposited as PENDING (private). "
+                                        . "Use the 'Publish & register DOI' action to make the DOI live - this is PERMANENT and makes the archive public.",
+                                'Data' => $data
+                            ]);
 
-                            echo_flush2('finished<br>');
+                            $nakalaURLSafe = htmlspecialchars($nakalaURL, ENT_QUOTES);
+                            $rtn_msg = "<div class='repository-upload-result'>"
+                                     . "<p>The uploaded archive is at <a href='{$nakalaURLSafe}' target='_blank' rel='noopener'>{$nakalaURLSafe}</a></p>"
+                                     . "<p>Reserved DOI: <code>{$nakalaDOI}</code><br>"
+                                     . "<span id='doi-status-{$nakalaDOI}'>(not yet public/citable; the backup was kept private)</span></p>"
+                                     . "<div class='repository-upload-actions'>"
+                                     . "<input type='button' value='Check DOI status' onClick=\"checkRepositoryDOI('{$repo_account}','{$nakalaDOI}');\">";
+
+                            if(SafeguardBackup::isEnabled()){
+                                $rtn_msg .= "<input type='button' value='Publish &amp; register DOI (permanent, makes archive public)' "
+                                          . "onClick=\"publishRepositoryDOI('{$repo_account}','{$nakalaDOI}');\">";
+                            }else{
+                                $hover = htmlspecialchars(HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE, ENT_QUOTES);
+                                $rtn_msg .= "<span class='repository-action-unavailable ui-state-disabled' title='{$hover}' aria-disabled='true'>"
+                                          . "<input type='button' value='Publish &amp; register DOI (permanent, makes archive public)' disabled>"
+                                          . "<span class='hover-explanation' title='{$hover}' aria-label='{$hover}'></span></span>";
+                            }
+                            $rtn_msg .= '</div></div>';
+
+                            echo_flush2('<p>Upload finished.</p>');
 
                         }
-                        echo_flush2('<br>'. $rtn_msg .'<br>');
+                        echo_flush2($rtn_msg);
+                    } elseif ($repo == 'Zenodo') {
+                        try {
+                            $cfg = SafeguardBackup::settings($system);
+                            $previous = $cfg['deposits'][$repo_account] ?? [];
+                            $checkpoint = function($entry) use (&$cfg, $system, $repo_account) {
+                                $cfg['deposits'][$repo_account] = $entry;
+                                if (!$system->settings->setDatabaseSetting('Safeguard backups', $cfg)) {
+                                    throw new RuntimeException('Could not save Zenodo draft state');
+                                }
+                            };
+                            $result = SafeguardBackup::deposit($system, $repo_account,
+                                FOLDER_BACKUP.'.'.$display_format, $previous, $checkpoint);
+                            $cfg['deposits'][$repo_account] = $result;
+                            $system->settings->setDatabaseSetting('Safeguard backups', $cfg);
+                            $dois = $system->settings->getDatabaseSetting('DOIs');
+                            $dois = is_array($dois) ? $dois : [];
+                            $dois['database'][$repo_account] = ['doi' => $result['doi'],
+                                'version_doi' => $result['version_doi'], 'date' => gmdate('c')];
+                            $dois['database_doi'] = $dois['database_doi'] ?? $result['doi'];
+                            $system->settings->setDatabaseSetting('DOIs', $dois);
+                            echo_flush2('<br>Published on Zenodo. Database DOI: '
+                                .htmlspecialchars($result['doi']).'<br>Version DOI: '
+                                .htmlspecialchars($result['version_doi']).'<br>');
+                        } catch (Throwable $e) {
+                            report_message(htmlspecialchars($e->getMessage()), true, true);
+                        }
                     } else { // Other repositories not supported for direct upload
                         report_message('The repository ' . htmlspecialchars($repo) . ' is not supported for direct upload by this script. Please ' . (defined('CONTACT_HEURIST_TEAM') ? CONTACT_HEURIST_TEAM : 'contact the support team'), true, true);
                     }
@@ -1038,11 +1299,12 @@ function report_message($message, $is_error = true, $need_cleanup = false)
         } else {
             // Cleanup temporary folders for individual downloads
             // REMARK: Main FOLDER_BACKUP is deleted by UArchive::zip/createBz2 if successful and last param is true.
-            // These lines ensure specific SQL/HML/TSV folders are removed if they were created for separate zips.
+            // These lines ensure specific SQL/HML/TSV/RO-Crate folders are removed if they were created for separate zips.
             if (defined('FOLDER_BACKUP')) folderDelete2(FOLDER_BACKUP, true);
             if (defined('FOLDER_SQL_BACKUP')) folderDelete2(FOLDER_SQL_BACKUP, true);
             if (defined('FOLDER_HML_BACKUP')) folderDelete2(FOLDER_HML_BACKUP, true);
             if (defined('FOLDER_TSV_BACKUP')) folderDelete2(FOLDER_TSV_BACKUP, true);
+            if (defined('FOLDER_CRATE_BACKUP')) folderDelete2(FOLDER_CRATE_BACKUP, true);
         }
         // Release the action lock
         isActionInProgress('exportDB', -1, $system->dbname());

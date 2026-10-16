@@ -69,7 +69,13 @@
     <hr>
     <!-- ================================================= -->
     <h3 style="margin:0">Mapping</h3>
-                                   
+
+<!-- H8 feature. No available in this version 
+    <div>
+        <div class="header"><label for="btn_heurist_map_config">Map configuration</label></div>
+        <button type="button" id="btn_heurist_map_config">Heurist Mapping Configuration (new)</button>
+    </div>
+-->                                   
 
     <!-- Allowing this is dangerous b/c you can end up in a style which doesn't allow editing or logout, and is remembered in session -->
     <div style="display: none;">
@@ -189,11 +195,11 @@
         </div>
         <select name="search_result_pagesize" id="search_result_pagesize" class="text ui-widget-content ui-corner-all" style="min-width:50px"
             title="This limit does not apply to filter. This is just for pagination of result list">
-            <option value="50">50 (optimum)</option>
-            <option value="100">100</option>
-            <option value="500">500  (not recommended)</option>
-            <option value="1000">1,000 (very slow)</option>
-            <option value="5000">5,000 (glacial ...)</option>
+            <option value="50">50 (fast}</option>
+            <option value="100">100 (optimum)</option>
+            <option value="500">500  (good connections)</option>
+            <option value="1000">1,000 (slower)</option>
+            <option value="5000">5,000 (slow to glacial)</option>
         </select>
     </div>
 
@@ -207,10 +213,12 @@
         <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
             title="This limit does not apply to external calls or periodic report generation to file">
             <option value="50">50 (optimum)</option>
-            <option value="200">200</option>
-            <option value="500">500 (slow)</option>
-            <option value="1000">1,000 (slower)</option>
-            <option value="2000">2,000 (very slow)</option>
+            <option value="200">200 (slower))</option>
+            <option value="500">500 (unnecessary and slow)</option>
+            <!--
+            <option value="1000">1,000 (not recommended)</option>
+            <option value="2000">2,000 (not recommended)</option>
+            -->
         </select>
     </div>
 
@@ -260,9 +268,10 @@
         </select>
     </div>
 
-	<div>
-        <div class="header"><label for="imageRecordEditor">Display images inline by default in the record editor</label></div>
-        <input type="checkbox" name="imageRecordEditor" id="imageRecordEditor" class="text ui-widget-content ui-corner-all"/>
+	<div id="showAllImagesPerField">
+        <div class="header" style="vertical-align: top;"><label>Display all image thumbnails in data entry - can be turned off for individual record field by closing a thumbnail</label></div>
+        <div id="showImagesAllowed"></div>
+        <div id="showImagesBlocked"></div>
     </div>
  
     <div>
@@ -272,6 +281,7 @@
             <option value="fr">Français</option>
             <option value="de">Deutsch</option>
             <option value="pt">Portuguese</option>
+            <option value="id">Indonesian</option>
         </select>
     </div>
  </fieldset>

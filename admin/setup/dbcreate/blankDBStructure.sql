@@ -29,6 +29,7 @@
 --    * Database structure version: 1.3.6  @ 20/10/2022, 
 --    * Database structure version: 1.3.10  @ 05/04/2023, 
 --    * Database structure version: 1.3.16  @ 27/08/2024, 
+--    * Database structure version: 1.4.0  @ 02/10/2026, origin identity and sync state for Records and recUploadedFiles
 
 --    * THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
 --    * DO NOT DELETE THEM
@@ -78,7 +79,11 @@ CREATE TABLE Records (
   rec_URLErrorMessage varchar(255) default NULL COMMENT 'Error returned by URL checking script for bad/inaccessible URLs',
   rec_URLExtensionForMimeType varchar(10) default NULL COMMENT 'A mime type extension for multimedia files pointed to DIRECTLY by the record URL',
   rec_Hash varchar(60) default NULL COMMENT 'A composite truncated metaphones + numeric values hash of significant fields',
+  rec_OriginatingDBID mediumint unsigned default NULL COMMENT 'Registered ID of the database where this record originated',
+  rec_IDInOriginatingDB int unsigned default NULL COMMENT 'rec_ID assigned by the database where this record originated',
+  rec_SyncState enum('local','allocated','pending_dependencies','complete') NOT NULL default 'local' COMMENT 'Completeness state for restartable master-satellite synchronisation',
   PRIMARY KEY  (rec_ID),
+  UNIQUE KEY rec_OriginIdentity (rec_OriginatingDBID,rec_IDInOriginatingDB),
   KEY rec_URL (rec_URL(63)),
   KEY rec_Title (rec_Title(63)),
   KEY rec_RecTypeID (rec_RecTypeID),
@@ -223,7 +228,7 @@ CREATE TABLE defRecStructure (
   rst_RecTypeID smallint unsigned NOT NULL COMMENT 'The record type to which this detail is allocated, 0 = all rectypes',
   rst_DetailTypeID smallint unsigned NOT NULL COMMENT 'Detail type for this field or, if MSB set, FieldSet code + 32767',
   rst_DisplayName varchar(255) NOT NULL default 'Please enter a prompt ...' COMMENT 'Display name for this dtl type in this rectype, autofill with dty_Name',
-  rst_DisplayHelpText varchar(255) default NULL COMMENT 'The user help text to be displayed for this detail type for this record type',
+  rst_DisplayHelpText varchar(5000) default NULL COMMENT 'The user help text to be displayed for this detail type for this record type',
   rst_DisplayExtendedDescription varchar(5000) default NULL COMMENT 'The rollover text to be displayed for this detail type for this record type',
   rst_DisplayOrder smallint unsigned zerofill NOT NULL default '999' COMMENT 'A sort order for display of this detail type in the record edit form',
   rst_DisplayWidth tinyint unsigned NOT NULL default '100' COMMENT 'The field width displayed for this detail type in this record type',
@@ -580,7 +585,12 @@ CREATE TABLE recUploadedFiles (
   ulf_Parameters text COMMENT 'Parameters including source (flickr,youtube...), default player etc. used to determine special processing',
   ulf_WhoCanView enum('viewable','loginrequired') NULL COMMENT 'Defines if the file is visible when not logged in. If public or blank then file is visible to all',
   ulf_MD5Checksum text(32) NULL COMMENT 'A checksum for the uploaded file which can be used to verify integrity and to merge duplicates',
+  ulf_OriginatingDBID mediumint unsigned default NULL COMMENT 'Registered ID of the database where this file reference originated',
+  ulf_IDInOriginatingDB mediumint unsigned default NULL COMMENT 'ulf_ID assigned by the database where this file reference originated',
+  ulf_SyncState enum('local','pending_metadata','pending_content','complete') NOT NULL default 'local' COMMENT 'Completeness state for restartable master-satellite synchronisation',
+--   ulf_DOI varchar(250) default NULL COMMENT 'Persistent identifier (DOI) obtained for this file resource',
   PRIMARY KEY  (ulf_ID),
+  UNIQUE KEY ulf_OriginIdentity (ulf_OriginatingDBID,ulf_IDInOriginatingDB),
   KEY ulf_ObfuscatedFileIDKey (ulf_ObfuscatedFileID),
   KEY ulf_Description (ulf_Description(100)),
   KEY ulf_UploaderUGrpID (ulf_UploaderUGrpID),
@@ -684,6 +694,7 @@ CREATE TABLE sysIdentification (
   sys_dbOwner varchar(250) default NULL COMMENT 'Information on the owner of the database, may be a URL reference',
   sys_dbRights varchar(1000) NOT NULL default 'Please define ownership and rights here ...' COMMENT 'A statement of ownership and copyright for this database and content',
   sys_dbDescription varchar(1000) default NULL COMMENT 'A longer description of the content of this database',
+--  sys_dbDOI varchar(250) default NULL COMMENT 'Persistent identifier (DOI) obtained for this database as a whole, if any. Used in FAIR score Findability calculation',
   sys_SyncDefsWithDB varchar(1000) default NULL COMMENT 'One or more Zotero library name,userID,groupID,key combinations separated by pipe symbols, for synchronisation of Zotero libraries',
   sys_AutoIncludeFieldSetIDs varchar(63) default '0' COMMENT 'CSV list of fieldsets which are included in all rectypes',
   sys_RestrictAccessToOwnerGroup tinyint unsigned NOT NULL default '0' COMMENT 'If set, database may only be accessed by members of owners group',
@@ -752,6 +763,7 @@ CREATE TABLE sysUGrps (
   ugr_NavigationTree MEDIUMTEXT default NULL COMMENT 'JSON array that describes treeview for filters',
   ugr_Preferences MEDIUMTEXT default NULL COMMENT 'JSON array with user preferences',
   usr_ExternalAuthentication varchar(1000) default NULL COMMENT 'JSON array with external authentication preferences',
+  ugr_ORCID varchar(19) default NULL COMMENT 'An ORC ID associated with this user account, formatted as: 0000-1111-2222-3333',
   PRIMARY KEY  (ugr_ID),
   UNIQUE KEY ugr_Name (ugr_Name),
   UNIQUE KEY ugr_eMail (ugr_eMail)
@@ -973,7 +985,7 @@ CREATE TABLE usrWorkingSubsets (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior,sys_MediaFolders)
-  VALUES (1,0,1,3,18,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
+  VALUES (1,0,1,4,0,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user

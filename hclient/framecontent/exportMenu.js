@@ -438,7 +438,7 @@ function hexportMenu( container ) {
 
         if(showOptionsDialog){
 
-            if(isEntireDb){
+            if(isEntireDb && opts.format!='hml'){
                 depthValue = '0';
                 opts.linksMode = 'none';
             }else {
@@ -451,8 +451,10 @@ function hexportMenu( container ) {
     +'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
     +'<br><br><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" />Follow pointers and relationship markers in records<br><em>(recommended for XML/JSON export)</em></label>'
     +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers"<br><em>(warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</em></label></p>'
+    +(opts.format=='hml'?'<p style="margin-bottom:8px"><label><input type="checkbox" name="include_uploaded_files"/>Include uploaded files and deliver as a single zip file for download</label></p>':'')
     +(opts.format=='hml'?'<p><input type="checkbox" name="human_readable_names"/>Include human-readable names and local IDs for everything '
     +'<div class="heurist-helper3">(NOT RECOMMENDED except for small subset troubleshooting.If checked this will result in a VERY large file and VERY long export time)</div>':'')
+    +(opts.format=='json'||opts.format=='geojson'?'<p><label><input type="checkbox" name="as_jsonl" />Format output as JSON Lines, this will output each record/feature onto separate lines with "\n" as line breaks</label></p>':'')
     +(opts.format=='rdf'?'<p>Since, RDF export is experimental please specify the access word: <input type="password" name="rdfpwd"/>':'')
 
                     , function(){
@@ -466,6 +468,9 @@ function hexportMenu( container ) {
                         opts.questionResolved=true;
 
                         opts.showHumanReadableNames = $expdlg.find('input[name="human_readable_names"]').is(':checked');
+                        opts.includeUploadedFiles = $expdlg.find('input[name="include_uploaded_files"]').is(':checked');
+
+                        opts.jsonl = $expdlg.find('input[name="as_jsonl"]:checked').length > 0;
 
                         _exportRecords( opts );
                     },
@@ -506,7 +511,7 @@ function hexportMenu( container ) {
                 let start = 0;
 
                 for (let i = 0; i < paramChunks; i++) {
-                    preparedSessionID = await _preSendParameters({ [key]: value.substring(start, start + parameterLimit) }, opts.format, !opts.save_as_file);
+                    preparedSessionID = await _preSendParameters({ [key]: value.substring(start, start + parameterLimit) }, opts.format, opts.save_as_file === 'mirador' || !opts.save_as_file);
                     start += parameterLimit;
                 }
 
@@ -521,7 +526,7 @@ function hexportMenu( container ) {
         }
 
         if(Object.keys(toStoreParams).length > 0){
-            preparedSessionID = await _preSendParameters(toStoreParams, opts.format, !opts.save_as_file);
+            preparedSessionID = await _preSendParameters(toStoreParams, opts.format, opts.save_as_file === 'mirador' || !opts.save_as_file);
         }
 
         // depth/linkmode (only when showOptionsDialog true in old logic)
@@ -536,6 +541,7 @@ function hexportMenu( container ) {
         if(opts.format=='hml'){
 
             script = 'export/xml/flathml.php';
+            if (opts.includeUploadedFiles) script = 'export/xml/hmlWithFiles.php';
 
             // multifile is for HuNI
             if (opts.multifile) newURLParams.set('multifile', '1');
@@ -553,10 +559,8 @@ function hexportMenu( container ) {
                 if(opts.save_as_file==='mirador'){
                     // create dynamic manifest with given set of media
                     script = 'hclient/widgets/viewers/miradorViewer.php';
-                }else{
-                    newURLParams.set('format', 'iiif');
                 }
-
+                newURLParams.set('format', 'iiif');
             }else{
                 newURLParams.set('format', opts.format);
 
@@ -565,7 +569,6 @@ function hexportMenu( container ) {
 
                 }else if(opts.format=='geojson'){
                     newURLParams.set('detail_mode', $('input[name="detail_mode"]:checked').val());
-
                 }else if(opts.format=='rdf'){
                     newURLParams.set('vers', '2');
                     newURLParams.set('serial_format', $('input[name="serial_format"]:checked').val());
@@ -592,6 +595,9 @@ function hexportMenu( container ) {
 
         if(opts.save_as_file===true){
             newURLParams.set('file', '1'); // save as file
+        }
+        if(opts.jsonl){
+            newURLParams.set('jsonl', '1');
         }
 
         if(window.hWin.HEURIST4.util.isPositiveInt(preparedSessionID)){
@@ -773,4 +779,3 @@ function hexportMenu( container ) {
     _init( container );
     return that;  //returns object
 }
-    

@@ -53,6 +53,8 @@ function HRecordSearch() {
       * This is used to trigger events (`ON_REC_SEARCHSTART`, `ON_REC_SEARCHFINISH`) in the correct document context.
       */
      let _owner_doc = null;
+     /** @type {Object<string, Object>} Abort-compatible active search handles. */
+     let _active_requests = {};
          
     /**
      * Performs a standalone search operation and passes the results to a callback function.
@@ -154,9 +156,11 @@ function HRecordSearch() {
             }
 
             // Perform the actual search using RecordMgr
-            return window.hWin.HAPI4.RecordMgr.search(request, function(response){
+            let requestHandle = window.hWin.HAPI4.RecordMgr.search(request, function(response){
                     _onSearchResult(response); // Pass server response to the result handler
             });
+            _active_requests[request.id] = requestHandle;
+            return requestHandle;
     }
     
     /**
@@ -216,6 +220,7 @@ function HRecordSearch() {
                 // Clean up stored request and owner document context
                 delete _query_request[qid];
                 delete _owner_doc[qid];
+                delete _active_requests[qid];
             } else if (response && response.status !== window.hWin.ResponseStatus.OK) {
                 // If queryid is not found or response is an error without a matching query
                  window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -230,6 +235,13 @@ function HRecordSearch() {
     * @returns {void}
     */
     function _searchTerminate(){
+        Object.keys(_active_requests).forEach(function(queryId){
+            const requestHandle = _active_requests[queryId];
+            if(requestHandle && window.hWin.HEURIST4.util.isFunction(requestHandle.abort)){
+                requestHandle.abort();
+            }
+        });
+        _active_requests = {};
         _query_request = null;
         _owner_doc = null;
     }
@@ -294,7 +306,7 @@ function HRecordSearch() {
         * @returns {void}
         */
         doSearch:function( originator, request ){
-            _doSearch( originator, request );
+            return _doSearch( originator, request );
         },
  
         /**

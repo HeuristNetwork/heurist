@@ -30,11 +30,92 @@ define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Duplicate concept codes in Heurist definitions</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="robots" content="noindex,nofollow">
 
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>
+    <link rel="icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
-<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
-            <p>This list shows re-use of the same concept code within each database where this occurs. Re-use is an error, although it should have very little adverse effect on local operations.</p>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 0 0 8px 0;
+            color: #333;
+        }
+
+        .report-description {
+            max-width: 980px;
+            margin: 0 0 18px 0;
+            padding: 10px 12px;
+            border-left: 4px solid #666;
+            background: #f5f5f5;
+            line-height: 1.45;
+        }
+
+        table {
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        td {
+            padding: 3px 8px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        .section-row td {
+            padding-top: 10px;
+            font-style: italic;
+            font-weight: bold;
+            background: #f5f5f5;
+        }
+
+        .header-row td {
+            font-weight: bold;
+            background: #eee;
+        }
+
+        h4 {
+            margin: 0;
+            padding-top: 20px;
+            font-size: 15px;
+        }
+
+        .end-report {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<script>
+window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>');
+</script>
+
+<h1>Duplicate concept codes in Heurist definitions</h1>
+
+<div class="report-description">
+    This report checks all Heurist databases on this server and identifies duplicated
+    concept codes within each database. A duplicate concept code means that two or more
+    record types, detail types or terms share the same combination of originating database ID
+    and ID-in-originating-database. This is an error condition because it can make definition
+    matching ambiguous when importing, synchronising or comparing databases, although it may
+    have little visible effect on local database operations.
+</div>
+
+<div>
 <?php
 
 
@@ -132,34 +213,63 @@ $mysqli = $system->getMysqli();
         }
 
         if($is_found){
-            print '<h4 style="margin:0;padding-top:20px">'.htmlspecialchars(substr($db_name,4)).'</h4><table style="font-size:12px">';
+            print '<h4>'.htmlspecialchars(substr($db_name, 4)).'</h4>';
+            print '<table>';
+
             if(!isEmptyArray($rec_types)){
-                print '<tr><td colspan=4><i>Record types</i></td></tr>';
+                print '<tr class="section-row"><td colspan="4">Record types</td></tr>';
+                print '<tr class="header-row">'
+                    .'<td>Internal code</td>'
+                    .'<td>Name in this DB</td>'
+                    .'<td>Concept code</td>'
+                    .'<td>Name in origin DB</td>'
+                    .'</tr>';
+
                 foreach($rec_types as $row){
                     //snyk does not see htmlspecialchars above
-                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$row)));
+                    $list = str_replace(chr(29), TD, htmlspecialchars(implode(chr(29), $row)));
                     print TR_S.$list.TR_E;
                 }
             }
+
             if(!isEmptyArray($det_types)){
-                print '<tr><td colspan=4><i>Detail types</i></td></tr>';
+                print '<tr class="section-row"><td colspan="4">Detail types</td></tr>';
+                print '<tr class="header-row">'
+                    .'<td>Internal code</td>'
+                    .'<td>Name in this DB</td>'
+                    .'<td>Concept code</td>'
+                    .'<td>Name in origin DB</td>'
+                    .'</tr>';
+
                 foreach($det_types as $row){
                     //snyk does not see htmlspecialchars above
-                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$row)));
+                    $list = str_replace(chr(29), TD, htmlspecialchars(implode(chr(29), $row)));
                     print TR_S.$list.TR_E;
                 }
             }
+
             if(!isEmptyArray($terms)){
-                print '<tr><td colspan=4><i>Terms</i></td></tr>';
+                print '<tr class="section-row"><td colspan="4">Terms</td></tr>';
+                print '<tr class="header-row">'
+                    .'<td>Internal code</td>'
+                    .'<td>Label in this DB</td>'
+                    .'<td>Concept code</td>'
+                    .'<td>Name in origin DB</td>'
+                    .'</tr>';
+
                 foreach($terms as $row){
                     //snyk does not see htmlspecialchars above
-                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$row)));
+                    $list = str_replace(chr(29), TD, htmlspecialchars(implode(chr(29), $row)));
                     print TR_S.$list.TR_E;
                 }
             }
+
             print '</table>';
         }
 
     }//while  databases
-    print '[end report]</div>';
+print '<div class="end-report">[end report]</div>';
 ?>
+</div>
+</body>
+</html>

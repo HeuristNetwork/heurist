@@ -368,6 +368,10 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             
             this._loadRecordTypeTreeView();
             this._loadTestRecords();
+        }else if(!window.hWin.HAPI4.sysinfo['custom_js_allowed']){
+           this._$('#jsDisabledWarning').show();
+           this._$('span.sys-email').text( window.hWin.HAPI4.sysinfo['sysadmin_email'] );
+           this._$('.editForm').css({top:'40px'});
         }
         
         if(this.options.isCalcFieldTemplate){ 
@@ -396,7 +400,8 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 
         let template_body = this.codeEditor.getValue();
 
-        if(template_body?.length<=10){
+        const expectedLength = this.options.isCalcFieldTemplate ? 5 : 10;
+        if(template_body?.length <= expectedLength){
             window.hWin.HEURIST4.msg.showMsgFlash('Nothing to execute. Define code');
             return;            
         }
@@ -560,8 +565,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                                 'mode/smarty/smarty.js',
                                 'mode/smartymixed/smartymixed.js'
                 ];
-                
-                $.getMultiScripts2(scripts, path)
+                $.getStyles(`${path}lib/codemirror.css`);
+
+                $.getMultiScriptsSequental(scripts, path)
                 .then(function() {  //OK! widget script js has been loaded
                     that._initEditor( content );
                 }).catch(function(error) {
@@ -802,10 +808,25 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         }
         
         if(!window.hWin.HEURIST4.util.isPositiveInt(rty_ID)){
+
             treedivPlaceholder.show();
             treedivContainer.hide();
+
+            if(!this.is_snippet_editor){
+                this._$('.require-rectype').hide();
+                this._$('.extra-spacing').show();
+                this._$('.rtt-tree, .rtt-tree-placeholder').css('top', '115px');
+            }
+
             return;
         }
+
+        if(!this.is_snippet_editor){
+            this._$('.require-rectype').show();
+            this._$('.extra-spacing').hide();
+            this._$('.rtt-tree, .rtt-tree-placeholder').css('top', '150px');
+        }
+
         treedivPlaceholder.hide();
         treedivContainer.show();
         treediv.empty();
@@ -820,6 +841,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         if(this.is_snippet_editor){
             //hide root - record type title
             treedata = treedata[0];
+            treedivContainer.css('top','100px');
         }
         
         let that = this;
@@ -1239,61 +1261,33 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         }
 
         let field_name = _nodep.data.name;
-        if(window.hWin.HEURIST4.util.isempty(field_name)){
-            let codes = _nodep.data.code.split(':');
-
-            if(codes.length >= 3){
-                let rtyid = codes[codes.length-3];
-                let dtyid = codes[codes.length-2];
-
-                field_name = $Db.rst(rtyid, dtyid, 'rst_DisplayName');
-            }
+        let codes = _nodep.data.code.split(':');
+        let rtyid = codes.length >= 3 ? codes[codes.length-3] : codes[0];
+        let dtyid = codes.length >= 3 ? codes[codes.length-2] : codes[1];
+        if(window.hWin.HEURIST4.util.isempty(field_name) && codes.length >= 3){
+            field_name = $Db.rst(rtyid, dtyid, 'rst_DisplayName');
         }            
 
         this._closeInsertPopup();
 
         let btns = [
-            {text:window.hWin.HR('Insert'),
+            {text:window.hWin.HR('Insert field'),
                 id:'btnStartInsert',
-                click: ()=>{
-
-                const insertAll = this._addVariableDlg.find('#insAll').is(':checked');
-
-                const addLoop = this._addVariableDlg.find('#insRepeat').is(':checked');
-                const ifnull = this._addVariableDlg.find('#insIfNull').is(':checked');
-                const addCaption = this._addVariableDlg.find('#insCaption').is(':checked');
-                const addRemark = this._addVariableDlg.find('#insRemark').is(':checked');
-                const addWrap = this._addVariableDlg.find('#insWrap').is(':checked');
-                const useOwnLoop = !insertAll; // || this._addVariableDlg.find('#insOwnLoop').is(':checked');
-
-                this._closeInsertPopup();
-
-                if(insertAll){
-                    this._insertSelectedVars(index, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop);
-                    return;
-                }
-
-                for(let k=index; k<len; k++){
-                    let _nodep = fieldIds[k];
-                    _nodep.setSelected(false);
-                    $(_nodep.li).css('color','#B5FF00');
-                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(_nodep.children)){
-                        continue;
-                    }
-
-                    this._insertSelectedVars(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop);
-                    this._insertFields(index);
-                    break;
-                }
-            }
+                click: ()=> this._insertFieldStart(index, fieldIds, false),
+                    
             },
-            {text:window.hWin.HR('Cancel'),
+            {text:window.hWin.HR('Insert all'),
+                id:'btnStartInsertAll',
+                click: ()=> this._insertFieldStart(index, fieldIds, true),
+            },
+            {text:window.hWin.HR('Skip'),
+                css: {'margin-left':'20px'},
                 click: ()=>{
                     this._closeInsertPopup()
                     this._insertFields(index+1);
                 }
             },
-            {text:window.hWin.HR('Cancel All'),
+            {text:window.hWin.HR('Cancel'),
                 click: ()=>{
                     this._closeInsertPopup()
                 }
@@ -1305,34 +1299,66 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             {element: this._$('#insert-popup2')[0],
                 modal: true,
                 width:400,
-                height: 300,
+                height: 325,
                 resizable: false,
-                title:`Inserting '${field_name}'`,
+                title: 'Inserting fields in repport',  //${field_name}
                 buttons:btns,
                 open: (event, ui)=>{
-                $(event.target).find('#fieldName').text(field_name);
-                let insAll = $(event.target).find('#insAll')
-                insAll.off('click');
-                insAll.on({click:()=>{
-                    const newLabel = insAll.is(':checked')?'Insert All':'Insert';
-                    $(event.target).parent().find('#btnStartInsert').button("option", "label", newLabel);
+                    $(event.target).find('#fieldName').html('inserting <h3 style="display: inline-block;margin-top:0px;padding:8px;background:lightgray">'
+                        + window.hWin.HEURIST4.util.stripTags(field_name)+'</h3>');
 
-
-            }});
-            },
-            beforeClose:null,
-            close:function(){
-                return true; //remove
-            },
-            borderless: false,
-            default_palette_class:'ui-heurist-populate'});
+                    let isRepeatable = this._isRepeatableField(rtyid, dtyid);
+                    $(event.target).find('#insRepeat').prop('checked', isRepeatable);
+                    window.hWin.HEURIST4.util.setDisabled($(event.target).find('#insRepeat'), isRepeatable);
+                },
+                beforeClose:null,
+                close:function(){
+                    return true; //remove
+                },
+                borderless: false,
+                default_palette_class:'ui-heurist-populate'
+            });
 
 
 
     },    
 
+    _insertFieldStart: function (index, fieldIds, insertAll){
+
+        //const insertAll = this._addVariableDlg.find('#insAll').is(':checked');
+
+        const addLoop = this._addVariableDlg.find('#insRepeat').is(':checked');
+        const ifnull = this._addVariableDlg.find('#insIfNull').is(':checked');
+        const addCaption = this._addVariableDlg.find('#insCaption').is(':checked');
+        const addRemark = this._addVariableDlg.find('#insRemark').is(':checked');
+        const addWrap = this._addVariableDlg.find('#insWrap').is(':checked');
+        const useOwnLoop = !insertAll; // || this._addVariableDlg.find('#insOwnLoop').is(':checked');
+        const insLineBreak = this._addVariableDlg.find('#insLineBreak').is(':checked');
+
+        this._closeInsertPopup();
+
+        if(insertAll){
+            this._insertSelectedVars(index, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop, insLineBreak);
+            return;
+        }
+
+        for(let k=index; k<len; k++){
+            let _nodep = fieldIds[k];
+            _nodep.setSelected(false);
+            $(_nodep.li).css('color','#B5FF00');
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(_nodep.children)){
+                continue;
+            }
+
+            this._insertSelectedVars(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop, insLineBreak);
+            this._insertFields(index);
+            break;
+        }
+    },
+    
+    
     //========================
-    _insertSelectedVars: function(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop){
+    _insertSelectedVars: function(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop, insLineBreak){
 
         // single insert mode
         if(useOwnLoop){
@@ -1343,6 +1369,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 addCaption,
                 addRemark,
                 addWrap,
+                insLineBreak,
                 0,
                 'r'
             );
@@ -1390,7 +1417,8 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                     group,
                     ifnull,
                     addCaption,
-                    addRemark
+                    addRemark,
+                    insLineBreak
                 );
 
             }else{
@@ -1412,7 +1440,8 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                         ifnull,
                         addCaption,
                         addRemark,
-                        addWrap
+                        addWrap,
+                        insLineBreak
                     );
                 }else{
                     snippet = this._buildSmartySnippetForNode(
@@ -1422,6 +1451,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                         addCaption,
                         addRemark,
                         addWrap,
+                        insLineBreak,
                         0,
                         'r'
                     );
@@ -1450,7 +1480,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     /**
     * Build grouped snippet for selected nodes sharing common path prefixes
     */
-    _buildGroupedSmartySnippet: function(nodes, addLoop, ifnull, addCaption, addRemark, addWrap){
+    _buildGroupedSmartySnippet: function(nodes, addLoop, ifnull, addCaption, addRemark, addWrap, insLineBreak){
 
         if(!nodes || nodes.length === 0) return '';
 
@@ -1464,6 +1494,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             addCaption,
             addRemark,
             addWrap,
+            insLineBreak,
             indent: 0,
             parentVar: rootVar,
             loopDepth: 0
@@ -1474,14 +1505,17 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 /**
  * Build single-path snippet
  */
-_buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, indent, parentVar){
+_buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, insLineBreak, indent, parentVar){
 
     const code = _nodep?.data?.code || '';
     if(!code) return '';
     
+    
     const parsed = this._parseNodeCode(_nodep);
     if(!parsed || !parsed.segments || parsed.segments.length === 0) return '';
 
+    const nl = '\n';
+    
     // Relationship special case
     if(parsed.rootRectypeId === 'Relationship'){
         const leaf = parsed.segments[0];
@@ -1492,7 +1526,7 @@ _buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRem
             const remark = this._getRemark(_nodep);
             if(remark) res += ' {* ' + remark + ' *}';
         }
-        res += '\n';
+        res += nl;
 
         res += this._renderRelationshipLeafExpression({
             node: _nodep,
@@ -1500,10 +1534,11 @@ _buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRem
             ifnull,
             addCaption,
             addRemark,
+            insLineBreak,
             indent: 1
         });
 
-        res += '{/foreach}\n';
+        res += ('{/foreach}'+nl);
         return res;
     }    
     
@@ -1523,20 +1558,20 @@ _buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRem
             const loopVar = 'f' + fieldId;
             const loopName = 'valueloop' + (loopDepth ? (loopDepth + 1) : '');
 
-            if(addLoop && isRepeatable){
+            if(isRepeatable || addLoop){
                 snippet += pad + '{foreach $' + currentVar + '.f' + fieldId + 's as $' + loopVar + ' name=' + loopName + '}';
                 if(addRemark){
                     const remark = this._getRemarkForResource(seg, linkedRectypeId, true);
                     if(remark) snippet += ' {* ' + remark + ' *}';
                 }
-                snippet += '\n';
+                snippet += nl;
 
                 pad = this._indent(indent + 1 + loopDepth);
                 snippet += pad + '{$' + loopVar + '=$heurist->getRecord($' + loopVar + ')}';
                 if(addRemark){
                     snippet += ' {* get record by record id *}';
                 }
-                snippet += '\n';
+                snippet += nl;
 
                 currentVar = loopVar;
                 currentRectype = linkedRectypeId;
@@ -1546,7 +1581,7 @@ _buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRem
                 if(addRemark){
                     snippet += ' {* get record by record id *}';
                 }
-                snippet += '\n';
+                snippet += nl;
 
                 currentVar = loopVar;
                 currentRectype = linkedRectypeId;
@@ -1567,14 +1602,14 @@ _buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRem
                 const remark = this._getRemarkForLinkedFrom(seg, sourceRectypeId);
                 if(remark) snippet += ' {* ' + remark + ' *}';
             }
-            snippet += '\n';
+            snippet += nl;
 
             pad = this._indent(indent + 1 + loopDepth);
             snippet += pad + '{$' + itemVar + '=$heurist->getRecord($' + itemVar + ')}';
             if(addRemark){
                 snippet += ' {* get record by record id *}';
             }
-            snippet += '\n';
+            snippet += nl;
 
             currentVar = itemVar;
             currentRectype = sourceRectypeId;
@@ -1594,13 +1629,14 @@ _buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRem
         addCaption,
         addRemark,
         addWrap,
+        insLineBreak,
         indent: indent + loopDepth
     });
 
     snippet += leafNode;
 
     while(loopDepth > 0){
-        snippet += this._indent(indent + loopDepth - 1) + '{/foreach}\n';
+        snippet += this._indent(indent + loopDepth - 1) + '{/foreach}'+nl;
         loopDepth--;
     }
 
@@ -1693,7 +1729,7 @@ _buildSelectionTree: function(nodes){
  */
 _renderSelectionTree: function(tree, opts){
 
-    const { addLoop, ifnull, addCaption, addRemark, addWrap } = opts;
+    const { addLoop, ifnull, addCaption, addRemark, addWrap, insLineBreak } = opts;
     let { indent, parentVar, loopDepth } = opts;
 
     if(!tree || !tree.children || tree.children.length === 0) return '';
@@ -1711,7 +1747,7 @@ _renderSelectionTree: function(tree, opts){
             const pad = this._indent(indent);
             let openedLoop = false;
 
-            if(addLoop && isRepeatable){
+            if(isRepeatable || addLoop){ 
                 const loopName = 'valueloop' + (loopDepth ? (loopDepth + 1) : '');
                 res += pad + '{foreach $' + parentVar + '.f' + fieldId + 's as $' + varname + ' name=' + loopName + '}';
                 if(addRemark){
@@ -1744,6 +1780,7 @@ _renderSelectionTree: function(tree, opts){
                 addCaption,
                 addRemark,
                 addWrap,
+                insLineBreak,
                 indent: indent + (openedLoop ? 1 : 0),
                 parentVar: varname,
                 loopDepth: loopDepth + (openedLoop ? 1 : 0)
@@ -1786,6 +1823,7 @@ _renderSelectionTree: function(tree, opts){
                 addCaption,
                 addRemark,
                 addWrap,
+                insLineBreak,
                 indent: indent + 1,
                 parentVar: itemVar,
                 loopDepth: loopDepth + 1
@@ -1809,7 +1847,7 @@ _renderSelectionTree: function(tree, opts){
                 child.nodeRef?.parent?.data?.name ||
                 '';
 
-            if(addLoop && isRepeatable){
+            if(isRepeatable || addLoop){ 
                 const loopName = 'valueloop' + (loopDepth ? (loopDepth + 1) : '');
 
                 res += pad + '{foreach $' + parentVar + '.f' + fieldId + 's as $' + varname + ' name=' + loopName + '}';
@@ -1829,6 +1867,7 @@ _renderSelectionTree: function(tree, opts){
                         addCaption,
                         addRemark,
                         addWrap,
+                        insLineBreak,
                         indent: indent + 1
                     });
                 }
@@ -1846,6 +1885,7 @@ _renderSelectionTree: function(tree, opts){
                         addCaption,
                         addRemark,
                         addWrap,
+                        insLineBreak,
                         indent
                     });
                 }
@@ -1864,6 +1904,7 @@ _renderSelectionTree: function(tree, opts){
             addCaption, 
             addRemark, 
             addWrap,
+            insLineBreak,
             indent
         });
     }
@@ -1887,6 +1928,7 @@ _renderLeafExpression: function(cfg){
         addCaption,
         addRemark,
         addWrap,
+        insLineBreak,
         indent
     } = cfg;
 
@@ -1910,7 +1952,7 @@ _renderLeafExpression: function(cfg){
     }else if(leaf.kind === 'field'){
         const isRepeatable = this._isRepeatableField(currentRectype, leaf.fieldId);
 
-        if(addLoop && isRepeatable){
+        if(isRepeatable || addLoop){ 
             localVar = 'f' + leaf.fieldId;
             const loopName = 'valueloop' + ((indent > 0) ? (indent + 1) : '');
             res += pad + '{foreach $' + currentVar + '.f' + leaf.fieldId + 's as $' + localVar + ' name=' + loopName + '}';
@@ -1930,7 +1972,7 @@ _renderLeafExpression: function(cfg){
     }else if(leaf.kind === 'term'){
         const isRepeatable = this._isRepeatableField(currentRectype, leaf.fieldId);
 
-        if(addLoop && isRepeatable){
+        if(isRepeatable || addLoop){ 
             localVar = 'f' + leaf.fieldId;
             const loopName = 'valueloop' + ((indent > 0) ? (indent + 1) : '');
             res += pad + '{foreach $' + currentVar + '.f' + leaf.fieldId + 's as $' + localVar + ' name=' + loopName + '}';
@@ -1957,15 +1999,30 @@ _renderLeafExpression: function(cfg){
     let line = '';
 
     if(addCaption){
-        line += this._escapeSmartyText((node?.title || leaf.title || 'Value') + ': ');
+        if(inLoop){
+            line = '{if !$smarty.foreach.valueloop.first} ';
+        }
+        line += this._escapeSmartyText((node?.data?.name || node?.title || leaf.title || 'Value') + ': ');
+        if(inLoop){
+            line += '{/if}\n' + this._indent(indent + 2);
+        }
+    }else if(inLoop){
+        line = '\n' + linePad;
     }
-
-    if(addWrap && this._shouldUseWrap(node || leaf)){
+    
+    const needWrap  = addWrap && this._shouldUseWrap(node, leaf);
+    
+    if(dtype==='file' || needWrap)
+    {
         line += this._buildWrapExpression(node || leaf, expr, inLoop);
     }else{
         line += '{' + expr + '}';
     }
 
+    if(inLoop){
+        line += '\n' + (addCaption?this._indent(indent + 2):linePad) + '{if !$smarty.foreach.valueloop.last}, {/if}';
+    }
+    
     if(addRemark && remark){
         line += ' {* ' + remark + ' *}';
     }
@@ -1975,11 +2032,15 @@ _renderLeafExpression: function(cfg){
         res += this._indent((inLoop ? indent + 2 : indent + 1)) + line + '\n';
         res += linePad + '{/if}\n';
     }else{
-        res += linePad + line + '\n';
+        res += linePad + line + '\n';  // (insLineBreak?' <br> ':'') + 
     }
 
     if(inLoop){
         res += pad + '{/foreach}\n';
+    }
+    
+    if(insLineBreak){
+        res = pad + '<br>' + (ifnull || inLoop?'\n':' ') + res;
     }
 
     return res;
@@ -2165,6 +2226,9 @@ _headerSmartyName: function(headerKey){
 },
 
 _isRepeatableField: function(rectypeId, fieldId){
+    if(window.hWin.HAPI4.sysinfo.dbconst.DT_PARENT_ENTITY == fieldId && !$Db.rst(rectypeId, fieldId)){
+        return false;
+    }
     return Number.parseInt($Db.rst(rectypeId, fieldId, 'rst_MaxValues')) !== 1;
 },
 
@@ -2264,6 +2328,7 @@ _renderRelationshipLeafExpression: function(cfg){
         ifnull,
         addCaption,
         addRemark,
+        insLineBreak,
         indent
     } = cfg;
 
@@ -2307,13 +2372,13 @@ _renderRelationshipLeafExpression: function(cfg){
         res += this._indent(indent + 1) + line + '\n';
         res += pad + '{/if}\n';
     }else{
-        res += pad + line + '\n';
+        res += pad + line + '\n'; //(insLineBreak?' <br> ':'') + 
     }
 
     return res;
 }, 
 
-_buildGroupedRelationshipSnippet: function(nodes, ifnull, addCaption, addRemark){
+_buildGroupedRelationshipSnippet: function(nodes, ifnull, addCaption, addRemark, insLineBreak){
 
     if(!nodes || nodes.length === 0) return '';
 
@@ -2330,6 +2395,7 @@ _buildGroupedRelationshipSnippet: function(nodes, ifnull, addCaption, addRemark)
             ifnull,
             addCaption,
             addRemark,
+            insLineBreak,
             indent: 1
         });
     }

@@ -75,6 +75,11 @@ $.widget( "heurist.controlPanel", {
      * @property {?(jQuery|boolean)} version_message - Stores the jQuery element for the version message or `true` if initialized.*/
     version_message: null, // container for message about available alpha/stable version
 
+    /** 
+     * @memberof Widgets.Navigation.controlPanel
+     * @property {?(jQuery)} fair_score - Stores the jQuery element for the fair score message if initialized.*/
+    fair_score: null, // container for message about the database's fair score
+
     /**
      * Initializes the control panel widget.
      * Loads the HTML content for the panel from a predefined URL and then calls `_initControls`
@@ -168,18 +173,34 @@ $.widget( "heurist.controlPanel", {
         
         // current and last databases dropdown
         this.div_dbname = this.element.find('div.dblist-container');
+        
+        this.div_dbname.css({
+            'background-position': 'left center',
+            'background-repeat': 'no-repeat',
+            'background-image': `url("${window.hWin.HAPI4.baseURL}hclient/assets/database.png")`,
+            'padding-left': '25px'
+        });
+
+        if(window.hWin.HEURIST4.util.isPositiveInt(window.hWin.HAPI4.sysinfo.db_registeredid)){
+
+            let $regID = $('<span>', {
+                style: 'font-size: 10px; cursor: pointer;',
+                title: 'The unique ID of this database determined by the Heurist Reference Index',
+                text: window.hWin.HAPI4.sysinfo.db_registeredid
+            }).appendTo(this.div_dbname);
+
+            this._on($regID, {
+                click: () => {
+                    window.open(`${window.hWin.HAPI4.sysinfo.referenceServerURL}${window.hWin.HAPI4.sysinfo.referenceServerIndexDatabase}/view/${window.hWin.HAPI4.sysinfo.db_registeredid}`, '_blank');
+                }
+            });
+        }
 
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.sysinfo.dbrecent)){
 
-            this.div_dbname.css({
-                'background-position': 'left center',
-                'background-repeat': 'no-repeat',
-                'background-image': 'url("'+window.hWin.HAPI4.baseURL+'hclient/assets/database.png")'});
-
             let wasCtrl = false;
             let selObj = window.hWin.HEURIST4.ui.createSelector(null, window.hWin.HAPI4.sysinfo.dbrecent);
-            $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', outline: 'none',
-                           'min-width':'150px', 'margin-left':'25px', })
+            $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', outline: 'none', 'min-width':'150px', 'margin-left': '5px' })
             .on('click', function(event){
                 wasCtrl = event.shiftKey;
             })
@@ -216,12 +237,10 @@ $.widget( "heurist.controlPanel", {
             
         }else{
 
-            $("<div>").css({'font-size':'1em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
-                'background-position': 'left center',
-                'background-repeat': 'no-repeat',
-                'background-image': 'url("'+window.hWin.HAPI4.baseURL+'hclient/assets/database.png")' })
-            .text(window.hWin.HAPI4.database).appendTo( this.div_dbname );
-
+            $('<div>', {
+                style: 'font-size: 1em; font-weight: bold; padding-left: 5px; display: inline-block;',
+                text: window.hWin.HAPI4.database
+            }).appendTo( this.div_dbname );
         }
 
         // MAIN MENU-----------------------------------------------------
@@ -387,6 +406,8 @@ $.widget( "heurist.controlPanel", {
         }else {
             this._performInitialSearch();
             this._getUserNotifications();
+            this._showFAIRScore();
+            this._checkSafeguard();
         }
     },
 
@@ -433,6 +454,8 @@ $.widget( "heurist.controlPanel", {
                     // The user name in the menu is updated by _refresh -> this.divProfileMenu.find...
                     that._performInitialSearch();
                     that._getUserNotifications();
+                    that._showFAIRScore();
+                    that._checkSafeguard();
 
                 } else if(that.options.login_inforced){
                     window.hWin.location  = window.hWin.HAPI4.baseURL;
@@ -605,6 +628,33 @@ $.widget( "heurist.controlPanel", {
     },
 
     /**
+     * Displays the database's calculated FAIR score.
+     * Ensures this setup is performed only once.
+     * @memberof Widgets.Navigation.controlPanel
+     * @private
+     */
+    _showFAIRScore: function(){
+
+        if(!window.hWin.HAPI4.is_admin() || !window.hWin.HAPI4.sysinfo['fair_score'] || this.fair_score){
+            return;
+        }
+
+        this.fair_score = $('<div>', {
+            id: 'heuristFAIRScore',
+            style: 'float: left;cursor: pointer;margin-top: 1em;margin-left: 1em;display: flex;'
+        }).insertAfter(this.div_dbname);
+
+        if($.heurist.fairScoreIndicator){
+            this.fair_score.fairScoreIndicator();
+            return;
+        }
+
+        $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/admin/fairScoreIndicator.js`, (response) => {
+            this.fair_score.fairScoreIndicator();
+        });
+    },
+
+    /**
      * Displays messages next to the database name regarding software versions and bug reporting.
      * - Shows a "Please report bugs" message with a spinning icon.
      * - If not on an alpha version, checks for and suggests switching to an available alpha version.
@@ -619,9 +669,9 @@ $.widget( "heurist.controlPanel", {
         const SPIN_INTERVAL = 30000; // how often to spin - 30 seconds (not 5 minutes as per old comment)
         const SPIN_DURATION = 1000; // how long the spin takes - 1 second
 
-        const newestVersion = 7;
+        const NEWESTVERSION = 7;
         const isAlpha = window.hWin.HAPI4.baseURL.match(/h\d+-alpha|alpha/);
-        const isVersion7 = window.hWin.HAPI4.baseURL.match(/heurist|heurist2025/); // @todo: remove once version 7 is standard
+        const checkForNewest = window.hWin.HAPI4.sysinfo.version.match(`/^${NEWESTVERSION}\./`) === null;
 
         if(this.version_message && this.version_message !== true && this.element.find('#heuristVersionSwapper').length === 0){ // Check if it's already a jQuery object
             return;
@@ -631,7 +681,7 @@ $.widget( "heurist.controlPanel", {
          * Check whether the newest version of heurist is available, e.g. version 7
          * @param {string|int} version - newest version to check for 
          */
-        function checkVersion(version = newestVersion){
+        function checkVersion(version = NEWESTVERSION){
 
             window.hWin.HAPI4.SystemMgr.check_for_version({a:'check_for_version', ver: version}, (response) => {
 
@@ -657,10 +707,10 @@ $.widget( "heurist.controlPanel", {
             'font-size': '0.85em',
             cursor:'default',
             'margin-top': '0.9em',
-            'margin-left': '2em',
+            'margin-left': '1em',
             display: 'flex',
             'align-items': 'center',
-            width: '45em'
+            width: '37.5em'
         };
 
         this.version_message = $('<div>', {id: 'heuristVersionSwapper'})
@@ -670,7 +720,7 @@ $.widget( "heurist.controlPanel", {
         // Add message about reporting bugs
         let $bugMsg = $('<span>', {
             title: 'Click to submit Heurist ticket',
-            style: "color: #FFFF66; cursor: pointer; flex: 0 0 20em;",
+            style: "color: #FFFF66; cursor: pointer; flex: 0 0 13em;",
             html: '<span class="ui-icon ui-icon-bug" style="float: left;margin: 5px;"></span>CREATE TICKET<br><i>(we are responsive)</i>'
         }).appendTo(this.version_message);
 
@@ -704,13 +754,13 @@ $.widget( "heurist.controlPanel", {
 
                 $('<span>', {
                     title: 'Move to alpha version',
-                    style: 'flex: 0 0 22em;',
+                    style: 'flex: 0 0 18em;',
                     html: `<a style="cursor: pointer;text-decoration: underline;" href="${response.data}?db=${window.hWin.HAPI4.database}" id="lnk_Change">
                     Use the alpha (development) version</a>`
                 }).appendTo(this.version_message);
 
-                if(!isVersion7){
-                    checkVersion.call(this, newestVersion);
+                if(!checkForNewest){
+                    checkVersion.call(this, NEWESTVERSION);
                 }
             });
         }else{ // currently on alpha
@@ -761,8 +811,8 @@ $.widget( "heurist.controlPanel", {
                 }
             });
 
-            if(!isVersion7){
-                checkVersion.call(this, newestVersion);
+            if(!checkForNewest){
+                checkVersion.call(this, NEWESTVERSION);
             }
         }
     },
@@ -775,6 +825,24 @@ $.widget( "heurist.controlPanel", {
      * @private
      * @returns {void}
      */
+    _checkSafeguard: function(){
+        if(this._safeguard_checked || !window.hWin.HAPI4.has_access()
+            || window.hWin.heuristExperimentalAllowed !== true) return;
+        this._safeguard_checked = true;
+        window.hWin.HAPI4.SystemMgr.repositoryAction({a:'backup_check'}, (response) => {
+            if(window.hWin.heuristExperimentalAllowed !== true
+                || response.status != window.hWin.ResponseStatus.OK || response.data?.enabled !== true) return;
+            if(response.data.notice){
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    $('<div>').text(response.data.notice).html(), null, {title:'Database safeguard'});
+            }else if(response.data.show_introduction === true){
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Heurist can back up your database to a repository automatically at specified intervals, and obtain a DOI for your data. <br>We strongly recommend configuring this in Publish > Set up automatic deposit',
+                    null, {title:'Database safeguard'});
+            }
+        });
+    },
+
     _getUserNotifications: function(){
 
         if(this._retrieved_notifications){ return; }
@@ -785,7 +853,7 @@ $.widget( "heurist.controlPanel", {
             a: 'get_user_notifications'
         };
 
-        window.hWin.HAPI4.SystemMgr.get_user_notifications(request, function(response){
+        window.hWin.HAPI4.SystemMgr.get_user_notifications(request, (response) => {
 
             if(window.hWin.HEURIST4.util.isempty(response.data) || response.status != window.hWin.ResponseStatus.OK){
                 return;
@@ -797,9 +865,251 @@ $.widget( "heurist.controlPanel", {
             // This implies a periodic prompt for bug reports (e.g., monthly).
             if(Object.keys(notifications).length == 1 && notifications['bug_report']){
                 window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
+                return;
+            }
+
+            this._showUserNotifications(notifications);
+        });
+    },
+
+    _showUserNotifications: function(notifications){
+
+        if(!window.hWin.HEURIST4.util.isObject(notifications) || Object.keys(notifications).length === 0){
+            return;
+        }
+
+        let $dlg;
+        let hideDialog = (notifyCount) => {
+
+            let $dlgStub = $('#minimisedDialog');
+            if($dlgStub.length === 0){
+
+                $dlgStub = $('<div>', {
+                    id: 'minimisedDialog',
+                    style: 'padding: 0.5em 1em;position: absolute;bottom: 0.5em;left: 0.5em;z-index: 1000001;border: 1px solid black;font-size: 1em;background-color: white;cursor: pointer;',
+                    html: `Notifications (${notifyCount})
+                    <span title="Dismiss notifications" id="dlgStubClose" class="ui-icon ui-icon-closethick" style="margin-left: 3em;padding: 0px;border: 1px solid black;"></span>`,
+                    title: 'View your notifications'
+                }).appendTo($('body'));
+
+                this._on($dlgStub, {
+                    click: (event) => {
+
+                        $dlgStub.hide('slide', {direction: 'down'}, 400);
+                        if(event.target.id === 'dlgStubClose'){
+
+                            $dlgStub.remove();
+
+                            closeDialog();
+
+                            return;
+                        }
+
+                        $dlg.dialog('open');
+                    }
+                });
+
+                $dlgStub.find('#dlgStubClose').button();
+            }
+
+            $dlg.dialog('close');
+            $dlgStub.show('slide', {direction: 'down'}, 400);
+        };
+
+        let closeDialog = () => {
+
+            let newBlocks = [];
+
+            $dlg.find('.blockNotifications:checked').each((idx, checkbox) => {
+                newBlocks.push(checkbox.name.replace('block', ''));
+            });
+
+            if(newBlocks.length > 0){
+
+                window.hWin.HEURIST4.msg.bringCoverallToFront();
+
+                window.hWin.HAPI4.SystemMgr.block_user_notifications({a: 'set_user_notification_settings', blocking: newBlocks}, (response) => {
+
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                    if(response.status !== window.hWin.ResponseStatus.OK){
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        return;
+                    }
+
+                    $dlg.dialog('close');
+                });
+
+                return;
+            }
+
+            $dlg.dialog('close');
+        };
+
+        let messages = '';
+        let links = {};
+        for(const notifyType in notifications){
+
+            if(!Object.hasOwn(notifications, notifyType)){
+                continue;
+            }
+
+            const notifyDetails = notifications[notifyType];
+
+            const title = `<strong>${window.hWin.HR(notifyDetails.title)}</strong><br><br>`;
+            const message = window.hWin.HR(notifyDetails.message);
+
+            links = notifyDetails.links;
+
+            messages += `<div id="${notifyType}" class="notificationMessage" style="display: none;margin: 0.5em 1em 2em;">
+                ${title}
+                ${message}
+                <span style="position: absolute;bottom: 1em;right: 8em;">
+                    <input type="checkbox" name="block${notifyType}" class="blockNotifications" />
+                    block this notification
+                </span>
+            </div>`;
+        }
+
+        if(window.hWin.HEURIST4.util.isempty(messages)){
+            return;
+        }
+
+        let popupContent = `<div id="userNotification" style="cursor: default;">
+            ${messages}
+        </div>
+        <div id="notificationControls" style="position: absolute;bottom: 1.2em;right: 2em; cursor: default;">
+            <span id="notifyPrev" class="ui-icon ui-icon-arrowthick-1-w ui-state-disabled" style="cursor: pointer;"></span>
+            <span id="notifyPage" style="vertical-align: 2px;">1</span>
+            <span id="notifyNext" class="ui-icon ui-icon-arrowthick-1-e ui-state-disabled" style="cursor: pointer;"></span>
+        </div>`;
+
+        let btns = {};
+        btns[window.hWin.HR('Close')] = () => {
+            closeDialog();
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(popupContent, btns, {title: 'Notifications'}, {dialogId: 'user-notifications', default_palette_class: 'ui-heurist-explore'});
+
+        let notificationTypes = Object.keys(notifications);
+        const notificationCount = notificationTypes.length;
+
+        if(notificationCount > 1){
+
+            let idx = 0;
+            let $prev = $dlg.find('#notifyPrev');
+            let $page = $dlg.find('#notifyPage');
+            let $next = $dlg.find('#notifyNext');
+
+            this._on($prev, {
+                click: () => {
+
+                    $next.removeClass('ui-state-disabled');
+
+                    if(idx === 0){
+                        $prev.addClass('ui-state-disabled');
+                        return;
+                    }
+
+                    idx --;
+
+                    const type = notificationTypes[idx];
+
+                    $dlg.find('.notificationMessage').hide();
+                    $dlg.find(`#${type}`).show();
+                    $dlg.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
+
+                    $page.text(idx + 1);
+
+                    if(idx === 0){
+                        $prev.addClass('ui-state-disabled');
+                    }
+                }
+            });
+
+            this._on($next, {
+                click: () => {
+
+                    $prev.removeClass('ui-state-disabled');
+
+                    if(idx === notificationTypes.length - 1){
+                        $next.addClass('ui-state-disabled');
+                        return;
+                    }
+
+                    idx ++;
+
+                    const type = notificationTypes[idx];
+
+                    $dlg.find('.notificationMessage').hide();
+                    $dlg.find(`#${type}`).show();
+                    $dlg.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
+
+                    $page.text(idx + 1);
+
+                    if(idx === notificationTypes.length - 1){
+                        $next.addClass('ui-state-disabled');
+                    }
+                }
+            });
+
+            $next.removeClass('ui-state-disabled');
+        }
+
+        let shownFirst = false;
+        for(const notifyType in notifications){
+
+            if(!Object.hasOwn(notifications, notifyType) || !Object.hasOwn(notifications[notifyType], 'links')){
+                continue;
+            }
+
+            if(!shownFirst){
+                $dlg.find(`div#${notifyType}`).show();
+                $dlg.dialog('option', 'position', {my: 'center', at: 'center', of: window.hWin});
+                shownFirst = true;
+            }
+
+            for(const selector in notifications[notifyType].links){
+
+                if(!Object.hasOwn(notifications[notifyType].links, selector) || $dlg.find(selector).length === 0){
+                    continue;
+                }
+
+                const details = notifications[notifyType].links[selector];
+                this._on($dlg.find(selector), {
+                    click: () => {
+                        if(details.action === 'menu'){
+                            window.hWin.HAPI4.actionHandler.executeActionById(details.id);
+                            // minimise/close dialog
+                            hideDialog(notificationCount);
+                        }else if(details.action === 'entity'){
+                            window.hWin.HEURIST4.ui.showEntityDialog(details.id);
+                            // opens dialog on top of notifications popup
+                        }
+                    }
+                });
+
+                // Force link-like styling
+                $dlg.find(selector).css({
+                    cursor: 'pointer',
+                    'text-decoration': 'underline'
+                });
+            }
+        }
+
+        let $minimise = $('<span>', {class: 'ui-icon ui-icon-window-minimize', title: 'Minimise dialog', style: 'padding: 0px 5px; top: 0.5em; position: absolute; font-size: 1.3em;'});
+
+        let $popup = $dlg.dialog('widget');
+        $minimise.appendTo($popup.dialog('titlebar'));
+
+        this._on($minimise.button(), {
+            click: () => {
+                hideDialog(notificationCount);
             }
         });
     }
+    //${window.hWin.HAPI4.baseURL}Heurist_Development_History.html - dev log => body > p:first & body > ul:first - for latest
+    //${window.hWin.HAPI4.baseURL}Heurist_RoadMap.html - dev map
+    //https://github.com/HeuristNetwork/heurist - repo
 
 });
-

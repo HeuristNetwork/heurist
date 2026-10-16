@@ -171,6 +171,12 @@ class ActionHandler {
             href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?') >= 0 ? '&' : '?') + 'db=' + window.hWin.HAPI4.database;
         }
 
+        // Configuration must be re-read on every click, including when the
+        // Design container is already showing this same action.
+        if (action.id === 'menu-sync-configure') {
+            href += '&reload=' + Date.now();
+        }
+
         if (target) {
             window.open(href, target);
         } else {
@@ -471,10 +477,19 @@ class ActionHandler {
                 popup_dialog_options['path'] = 'widgets/lookup/';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', popup_dialog_options);
                 break;
+            case "menu-automatic-deposit":
             case "menu-repository-config":
+                if(actionid === 'menu-automatic-deposit'){
+                    const allowed = typeof window.hWin.heuristExperimentalAllowed === 'boolean'
+                        ? window.hWin.heuristExperimentalAllowed
+                        : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
+                    if(!allowed) break;
+                }
                 popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
                 popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['repository_config'];
-                popup_dialog_options['title'] = window.hWin.HR('Repository service configuration');
+                popup_dialog_options['backupOnly'] = actionid === 'menu-automatic-deposit';
+                popup_dialog_options['title'] = window.hWin.HR(actionid === 'menu-automatic-deposit'
+                    ? 'Set up automatic deposit' : 'Repository service configuration');
                 popup_dialog_options['path'] = 'widgets/repository/';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
                 break;
@@ -490,7 +505,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordUploadedFilesIndex', popup_dialog_options);
                 break;
             case "menu-files-annotations":
-                window.hWin.HEURIST4.ui.showRecordActionDialog('recordImportAnnotations', popup_dialog_options);
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordImportIIIF', popup_dialog_options);
                 break;
             case "menu-records-archive": // not used
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
@@ -502,7 +517,9 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordFindDuplicates', popup_dialog_options);
                 break;
             case "menu-import-get-template":
+            case "menu-manage-structure-asxml":
                 popup_dialog_options['path'] = 'widgets/entity/popups/';
+                popup_dialog_options['format'] = actionid == 'menu-import-get-template' ? 'xml|json' : 'xml-structure';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTemplate', popup_dialog_options);
                 break;
             case "menu-structure-refresh":
@@ -615,14 +632,14 @@ class ActionHandler {
             }
             case "menu-help-acknowledgements":
                 contentURL = window.hWin.HRes('acknowledgementsHeurist');
-                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:500});
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:550});
                 break;
             case "menu-help-about":
                 contentURL = window.hWin.HRes('aboutHeurist');
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
                     open: function( event, ui ) {
                         let $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
-                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']);
+                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']+' (2026-07-19 9:00)');
                         
                         if(window.hWin.HAPI4.sysinfo.host_logo){
                             $('<div style="height:40px;padding-left:4px;float:right"><a href="'

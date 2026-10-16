@@ -53,13 +53,7 @@
     // relevance - compare filetime with timestamp,
     //                      if filetime is later - returns definitions
     //                      otherwise file time
-    if( @$req_params['a']=='structure' && @$req_params['entity']=='relevance' &&
-            ($dbdef_cache==null || !file_exists($dbdef_cache)) ){
-            //ignore relevance check if file is missed
-            header(CTYPE_JSON);
-                print json_encode( array('uptodate'=>1, 'cachefile'=>$dbdef_cache));
-            exit;
-    }
+    // A missing cache must fall through to entityRefreshDefs(), including relevance checks.
     
     if( @$req_params['a']=='structure'
         && (@$req_params['entity']=='all' || @$req_params['entity']=='relevance')
@@ -73,7 +67,10 @@
                     $req_params['entity'] = 'all';
                     $file_time = filemtime($dbdef_cache);
 
-                    if($file_time - intval($req_params['timestamp']) < 100){
+                    $same_revision = !empty($req_params['revision'])
+                        ? hash_equals(hash_file('sha256', $dbdef_cache), (string)$req_params['revision'])
+                        : $file_time === intval($req_params['timestamp']);
+                    if($same_revision){
                         //compare file time with time of db defs on client side
                         //defintions are up to date on client side
                         header(CTYPE_JSON);
@@ -104,26 +101,9 @@
                 }
 
                 if($dbdef_cache_is_uptodate){
-                    //download db def cache or direct access
-                    if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
-                    {
-                        $host_params = USystem::getHostParams();
-                        //
-                        if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
-                            $url = $defaultRootFileUploadURL;
-                        }else{
-                            //replace server name to avoid CORS issues
-                            $parts = explode('/',$defaultRootFileUploadURL);
-                            $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
-                        }
-
-                        //rawurlencode - required for security reports only
-                        $url = $url.rawurlencode($dbname).'/entity/dbdef_cache.json';
-                        redirectURL($url);
-
-                    }else{
-                        downloadFile(MIMETYPE_JSON, $dbdef_cache);
-                    }
+                    // Serve through this endpoint so redirects/static-server headers cannot
+                    // bypass compression or freshness validation.
+                    outputDefinitionCache($dbdef_cache);
                     exit;
                 }
             }else{
@@ -140,7 +120,7 @@
     $need_config = false;
 
     if( (!$system_init_failed)  //system can be inited beforehand for getDefinitionsModTime
-        && ($system->isInited() || $system->init($dbname)))
+        && ($system->isInited() || $system->init($dbname, $req_params['api_response_context']['entity']!=='databases')))
     {
 
         //USanitize::sanitizeRequest($req_params); it brokes json strings
@@ -166,8 +146,13 @@
             if(@$req_params['entity']=='all' && $res!==false && $dbdef_cache!=null){
                 //$res['db_time'] = $db_time;
                 //update db defintion cache file
-                file_put_contents($dbdef_cache, json_encode($res));
+                $cache_written = file_put_contents($dbdef_cache, json_encode($res), LOCK_EX);
+                clearstatcache(true, $dbdef_cache);
                 $res['timestamp'] = filemtime($dbdef_cache);//it will be stored on client side
+                if($cache_written !== false && empty($req_params['restapi'])){
+                    outputDefinitionCache($dbdef_cache);
+                    exit;
+                }
             }
 
         }else {
@@ -178,7 +163,7 @@
     }
 
 
-    if(@$req_params['restapi']==1){
+    if(intval(@$req_params['restapi'])>0){
 
         if( is_bool($res) && !$res ){
 
@@ -188,18 +173,17 @@
             header(HEADER_CORS_POLICY);
             header(CTYPE_JSON);
 
-            $req = array();
-
-            if(@$req['a'] == 'search' && empty($res)){
-                $code = 404;
-            }elseif (@$req['a'] == 'save'){
-                $code = 201;
-            }else{
-                $code = 200;
+            if(isset($apiResponseContext) && is_array($apiResponseContext)){
+                $res = prepareDefinitionApiResponse($res, $req_params, $apiResponseContext);
+                if($res===null){
+                    $system->errorExitApi('Definition not found', HEURIST_NOT_FOUND);
+                }
             }
+
+            $code = (@$req_params['a'] == 'save') ? 201 : 200;
             http_response_code($code);
 
-            print json_encode($res);
+            print json_encode($res, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
     }else{
         header(CTYPE_JSON);
@@ -271,6 +255,117 @@
     }
 
     /**
+     * Converts the normal DbEntitySearch result into the public definition API format.
+     * This is used only when api.php supplies explicit definition response context.
+     *
+     * @param array $result Normal DbEntitySearch response.
+     * @param array $params Sanitized request parameters.
+     * @param array $context API route context prepared by api.php.
+     * @return array|null Collection envelope, single item, or null when an item is not found.
+     */
+    function prepareDefinitionApiResponse($result, $params, $context){
+
+        $items = definitionApiItems($result);
+        $mode = @$context['mode'] === 'item' ? 'item' : 'collection';
+
+        if($mode === 'item'){
+            return count($items)>0 ? reset($items) : null;
+        }
+
+        $offset = max(0, intval(@$params['offset']));
+        $limit = intval(@$params['limit']);
+        if($limit<1){
+            $limit = 1000;
+        }
+
+        $total = isset($result['count']) ? intval($result['count']) : count($items);
+
+        $meta = array(
+            'database' => @$params['db'],
+            'entity' => @$context['entity']
+        );
+        if(isset($context['recordTypeId'])){
+            $meta['recordTypeId'] = intval($context['recordTypeId']);
+        }
+
+        $pagination = array(
+            'total' => $total,
+            'offset' => $offset,
+            'limit' => $limit,
+            'self' => definitionApiPageUrl($offset, $limit),
+            'next' => null
+        );
+
+        $nextOffset = $offset + count($items);
+        if(count($items)>0 && $nextOffset < $total){
+            $pagination['next'] = definitionApiPageUrl($nextOffset, $limit);
+        }
+
+        return array(
+            'items' => array_values($items),
+            'meta' => $meta,
+            'pagination' => $pagination
+        );
+    }
+
+    /** Convert DbEntitySearch rows to API items while preserving the selected fields. */
+    function definitionApiItems($result){
+
+        if(!is_array($result) || !isset($result['records']) || !is_array($result['records'])){
+            return array();
+        }
+
+        // details=id produces a list of integer IDs and has no fields array.
+        if(!isset($result['fields']) || !is_array($result['fields'])){
+            return array_values($result['records']);
+        }
+
+        $fields = $result['fields'];
+        $records = $result['records'];
+        $items = array();
+
+        $orderedKeys = array();
+        if(isset($result['order']) && is_array($result['order'])){
+            $orderedKeys = $result['order'];
+        }else{
+            $orderedKeys = array_keys($records);
+        }
+
+        foreach($orderedKeys as $key){
+            if(!array_key_exists($key, $records)){
+                continue;
+            }
+            $row = $records[$key];
+            $item = array();
+            foreach($fields as $idx=>$field){
+                $item[$field] = array_key_exists($idx, $row) ? $row[$idx] : null;
+            }
+            $items[] = $item;
+        }
+
+        return $items;
+    }
+
+    /** Build an absolute paging URL, preserving all query parameters. */
+    function definitionApiPageUrl($offset, $limit){
+
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        $path = parse_url($requestUri, PHP_URL_PATH) ?: '';
+        $query = array();
+        $queryString = parse_url($requestUri, PHP_URL_QUERY);
+        if($queryString){
+            parse_str($queryString, $query);
+        }
+        $query['offset'] = intval($offset);
+        $query['limit'] = intval($limit);
+
+        $hostParams = USystem::getHostParams();
+        $base = rtrim($hostParams['server_url'], '/');
+        return $base.$path.'?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+    }
+
+
+    /**
      * Finds invalid UTF-8 strings in a recursive array walk.
      *
      * This function is typically used as a callback for array_walk_recursive.
@@ -301,4 +396,30 @@ Description Of Usual Server Responses:
 404 Not Found - resource was not found.
 405 Method Not Allowed - requested method is not supported for resource.
 */
-?>
+/** Serve a legacy snapshot consistently for both cache hits and newly rebuilt files. */
+function outputDefinitionCache(string $file): void
+{
+    $json = (string)file_get_contents($file);
+    $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+    $data['timestamp'] = filemtime($file);
+    $data['revision'] = hash('sha256', $json);
+    $body = json_encode($data);
+    $etag = 'W/"'.hash('sha256', $body).'"';
+    header(CTYPE_JSON);
+    header('Vary: Accept-Encoding');
+    if(($_SERVER['REQUEST_METHOD'] ?? 'POST') === 'GET'){
+        header('Cache-Control: private, no-cache');
+        header('ETag: '.$etag);
+        foreach(explode(',', (string)($_SERVER['HTTP_IF_NONE_MATCH'] ?? '')) as $candidate){
+            if(trim($candidate) === '*' || preg_replace('/^W\//', '', trim($candidate)) === substr($etag, 2)){
+                http_response_code(304);
+                return;
+            }
+        }
+    }
+    if(!ini_get('zlib.output_compression') && function_exists('ob_gzhandler')
+        && !in_array('ob_gzhandler', ob_list_handlers(), true)){
+        ob_start('ob_gzhandler');
+    }
+    echo $body;
+}

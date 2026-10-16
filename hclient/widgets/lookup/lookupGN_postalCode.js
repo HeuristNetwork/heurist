@@ -59,7 +59,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
      * @returns {void|*} The result of `this._super()`.
      */
     _initControls: function(){
-        this.element.find('#search_container .header').css({width:'8em','min-width':'8em', display: 'inline-block'});
+        this._$('#search_container .header').css({width:'8em','min-width':'8em', display: 'inline-block'});
         return this._super();
     },
 
@@ -80,6 +80,8 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
      */
     _rendererResultList: function(recordset, record){
         
+        let that = this;
+
         /**
          * Inner helper function to format a field's value for display.
          * It HTML escapes the value and wraps it in a div with a specified width for truncation.
@@ -90,7 +92,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
          */
         function fld(fldname, width){
             let s = recordset.fld(record, fldname);
-            s = window.hWin.HEURIST4.util.htmlEscape(s || '');
+            s = that.$H.htmlEscape(s || '');
             let title = s;
 
             if(fldname == 'googlemap_link'){ // This field is added during _onSearchResult
@@ -128,16 +130,16 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
      */
     _doSearch: function(){
         
-        if(this.element.find('#inpt_postalcode').val()=='' && this.element.find('#inpt_placename').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a place name or postal code to perform search', 1000);
+        if(this._$('#inpt_postalcode').val()=='' && this._$('#inpt_placename').val()==''){
+            this.$Hmsg.showMsgFlash('Please enter a place name or postal code to perform search', 1000);
             return;
         }
 
         // Pass parameters directly to parent _doSearch, which will use this.baseURL
         this._super({
-            postalcode: this.element.find('#inpt_postalcode').val(),
-            placename: this.element.find('#inpt_placename').val(),
-            country: this._getCountryCode(this.element.find('#inpt_country').val())
+            postalcode: this._$('#inpt_postalcode').val(),
+            placename: this._$('#inpt_placename').val(),
+            country: this._getCountryCode(this._$('#inpt_country').val())
         });
     },
 
@@ -170,7 +172,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
      */
     _onSearchResult: function(json_data){
 
-        json_data = window.hWin.HEURIST4.util.isJSON(json_data); // Ensure it's a JS object
+        json_data = this.$H.isJSON(json_data); // Ensure it's a JS object
 
         if(!json_data){ // If parsing failed or empty
             this._super(false); // Clear results

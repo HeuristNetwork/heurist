@@ -27,14 +27,14 @@ $system = new hserv\System();
 $is_inited = $system->init(null, false, false);
 
 if(!$is_inited){
-    $system->errorExit('Heurist failed to initialise', HEURIST_ERROR);
+    $system->errorExitApi('Heurist failed to initialise', HEURIST_ERROR, false);
 }
 
 $mysqli = $system->getMysqli();
 
 $databases = mysql__getdatabases4($mysqli);
 if(empty($databases)){
-    $system->errorExit('No databases', HEURIST_ACTION_BLOCKED);
+    $system->errorExitApi('No databases', HEURIST_ACTION_BLOCKED, false);
 }
 
 $req_params = USanitize::sanitizeInputArray();
@@ -44,7 +44,7 @@ define('SERVER_NAME', !defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NA
 
 $isPublic = filter_var($_SERVER['SERVER_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
 if(!$isPublic || SERVER_NAME == 'localhost' || SERVER_NAME == '127.0.0.1' || SERVER_NAME == '::1' || isLocalHost()){
-    $system->errorExitApi('Function is not for local setups', HEURIST_ACTION_BLOCKED);
+    $system->errorExitApi('Function is not for local setups', HEURIST_ACTION_BLOCKED, false);
     exit;
 }
 

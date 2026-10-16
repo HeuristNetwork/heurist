@@ -2,7 +2,7 @@
 /**
 * getDBStructureAsXML.php - Returns database definitions (rectypes, details etc.) as XML (HML)
 *
-* @param includeUgrps=1 will output user and group information in addition to definitions
+* @param int $includeUgrps=1 will output user and group information in addition to definitions
 *
 * @project     Heurist academic knowledge management system
 * @package Structure
@@ -35,30 +35,40 @@ $db_version = getDbVersion($mysqli);
 define('HEURIST_DBID', $system->settings->get('sys_dbRegisteredID'));
 
 $is_subset = false;
-$rty_ID = @$_REQUEST["rty"];
-$dty_ID = @$_REQUEST["dty"];
-$trm_ID = @$_REQUEST["trm"];
-if($rty_ID!=null){
+$rty_IDs = @$_REQUEST["rty"];
+$dty_IDs = @$_REQUEST["dty"];
+$trm_IDs = @$_REQUEST["trm"];
+$extra_term_IDs = [];
+$include_connected_rectypes = @$_REQUEST['connected_rty'] == 1;
+$include_terms = @$_REQUEST['include_term'] == 1;
+
+if($rty_IDs !== null){
     $is_subset = true;
-    $rty_ID = intval(ConceptCode::getRecTypeLocalID($rty_ID));
+    $rty_IDs = prepareMixedIds('rty', $rty_IDs);
+    if($rty_IDs !== null && $include_connected_rectypes || $include_terms){
+        getRelevantIDs($rty_IDs, $extra_term_IDs, $include_connected_rectypes, $include_terms);
+    }
 }
-if($dty_ID!=null){
+if($dty_IDs !== null){
     $is_subset = true;
-    $dty_ID = intval(ConceptCode::getDetailTypeLocalID($dty_ID));
+    $dty_IDs = prepareMixedIds('dty', $dty_IDs);
 }
-if($trm_ID!=null){
+if($trm_IDs !== null){
     $is_subset = true;
-    $trm_ID = intval(ConceptCode::getTermLocalID($trm_ID));
+    $trm_IDs = prepareMixedIds('trm', $trm_IDs);
+}
+if($is_subset && $extra_term_IDs !== []){
+    $trm_IDs = is_array($trm_IDs) ? array_unique(array_merge($trm_IDs, $extra_term_IDs), SORT_NUMERIC) : $extra_term_IDs;
 }
 if($is_subset){
-    $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
+    $is_subset = $rty_IDs !== null || $dty_IDs !== null || $trm_IDs !== null;
     if(!$is_subset){
 print XML_HEADER;
 print "\n\n<hml_structure>";
 print "\n<error>Definition not found</error>";
 print "\n</hml_structure>";// end of file
 exit;
-    } 
+    }
 }
 
 
@@ -117,27 +127,27 @@ doPrintTableXML('defOntologies');
 }
 // ------------------------------------------------------------------------------------------
 // Detail Type TERMS
-if(!$is_subset || $trm_ID>0){
+if(!$is_subset || $trm_IDs !== null){
 
-    doPrintTableXML('defTerms', $trm_ID);
+    doPrintTableXML('defTerms', $trm_IDs);
 }
 // ------------------------------------------------------------------------------------------
 // RECORD TYPES (this will be repeated for each of the tables)
-if(!$is_subset || $rty_ID>0){
+if(!$is_subset || $rty_IDs !== null){
 
-    doPrintTableXML('defRecTypes', $rty_ID);
+    doPrintTableXML('defRecTypes', $rty_IDs);
 }
 // ------------------------------------------------------------------------------------------
 // DETAIL TYPES
-if(!$is_subset || $dty_ID>0){
+if(!$is_subset || $dty_IDs !== null){
 
-    doPrintTableXML('defDetailTypes', $dty_ID);
+    doPrintTableXML('defDetailTypes', $dty_IDs);
 }
 // ------------------------------------------------------------------------------------------
 // RECORD STRUCTURE
-if(!$is_subset || $rty_ID>0){
+if(!$is_subset || $rty_IDs !== null){
 
-    doPrintTableXML('defRecStructure', $rty_ID);
+    doPrintTableXML('defRecStructure', $rty_IDs);
 
 }
 
@@ -232,13 +242,13 @@ print "\n</hml_structure>";// end of file
  * @global \mysqli $mysqli The global mysqli database connection object.
  *
  * @param string $tname The name of the database table to export (e.g., 'defRecTypes').
- * @param int $id (Optional) If provided and positive, filters the table records by this ID.
+ * @param array|null $ids (Optional) If provided and positive, filters the table records by this ID.
  *                The specific ID field used for filtering depends on the table's prefix
  *                (e.g., `rst_RecTypeID` for 'defRecStructure', or primary key for others).
  *                Defaults to 0 (no specific ID filter).
  * @return void
  */
-function doPrintTableXML( $tname, $id=0 )
+function doPrintTableXML( $tname, $ids = [] )
 {
     global $mysqli;
 
@@ -257,16 +267,13 @@ function doPrintTableXML( $tname, $id=0 )
     $prefix = substr($id_field,0,3);
     $where = '';
 
-    if($id>0){
-        if($prefix=='rst'){
-            $where = ' where rst_RecTypeID='.intval($id);
-        }else{
-            $where = " where $id_field=".intval($id);
-        }
+    if(!empty($ids)){
+        $ids = count($ids) === 1 ? "= {$ids[0]}" : 'IN (' . implode(',', $ids) . ')';
+        $where = $prefix=='rst' ? " where rst_RecTypeID {$ids}" : " where {$id_field} {$ids}";
     }
 
 
-    $query = "select $flds from $tname".$where;
+    $query = "select {$flds} from {$tname}{$where}";
     $res = $mysqli->query($query);
 
     while ($row = $res->fetch_assoc()) {
@@ -296,5 +303,89 @@ function doPrintTableXML( $tname, $id=0 )
     print "</$tname_tag>";
 
     $res->close();
+}
+
+/**
+ * @param string $entity
+ * @param string|int|array $IDs
+ * @return array|null
+ */
+function prepareMixedIds(string $entity, $IDs){
+
+    $preparedIDs = null;
+    $entityFunc = $entity === 'rty' ? 'getRecTypeLocalID' : 'getDetailTypeLocalID';
+    $entityFunc = $entity === 'trm' ? 'getTermLocalID' : $entityFunc;
+
+    if(is_array($IDs) || strpos($IDs, ',') !== false){
+
+        $IDparts = is_string($IDs) ? explode(',', $IDs) : $IDs;
+        $preparedIDs = [];
+
+        foreach($IDparts as $conceptID){
+
+            $ID = intval(ConceptCode::$entityFunc($conceptID));
+
+            if($ID > 0){
+                $preparedIDs[] = $ID;
+            }
+        }
+    }else{
+        $preparedIDs = intval(ConceptCode::$entityFunc((string)$IDs));
+        $preparedIDs = $preparedIDs > 0 ? [$preparedIDs] : null;
+    }
+
+    return empty($preparedIDs) ? null : $preparedIDs;
+}
+
+function getRelevantIDs(array &$recTypeIDs, array &$termIDs, bool $getConnectedRecTypes = false, bool $getTerms = false){
+
+    global $mysqli;
+
+    $query = <<<QUERY
+    SELECT rst_RecTypeID, dty_Type, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree 
+    FROM defDetailTypes 
+    INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID 
+    WHERE (dty_Type = 'enum' OR dty_Type = 'resource') AND rst_RecTypeID = ?
+    QUERY;
+
+    $newRtyIDs = [];
+    foreach($recTypeIDs as $rtyID){
+
+        if(!isPositiveInt($rtyID)){
+            continue;
+        }
+
+        $results = mysql__select_param_query($mysqli, $query, ['i', $rtyID]);
+
+        if(!$results){
+            continue;
+        }
+
+        while($row = $results->fetch_assoc()){
+
+            if(!empty($row['dty_PtrTargetRectypeIDs']) && $getConnectedRecTypes){
+
+                $rtyIDs = prepareIds($row['dty_PtrTargetRectypeIDs']);
+                $newRtyIDs = array_merge($newRtyIDs, $rtyIDs);
+
+                continue;
+            }
+
+            if(!empty($row['dty_JsonTermIDTree']) && $getTerms){
+
+                $trmIDs = prepareIds($row['dty_JsonTermIDTree']);
+                $termIDs = array_merge($termIDs, $trmIDs);
+
+                continue;
+            }
+        }
+    }
+
+    if(!empty($termIDs)){
+        $termIDs = array_unique($termIDs, SORT_NUMERIC);
+    }
+    if(!empty($newRtyIDs)){
+        $recTypeIDs = array_unique(array_merge($recTypeIDs, $newRtyIDs), SORT_NUMERIC);
+    }
 }
 ?>

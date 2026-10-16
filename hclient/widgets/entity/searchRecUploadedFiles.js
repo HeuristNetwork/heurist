@@ -96,7 +96,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     +'<li id="menu-file-export-csv"><a href="#">Download CSV (all info) for selection</a></li>'
                     +'<li id="menu-file-refrec-show"><a href="#">Show records referencing selection</a></li>'
                     +'<li id="menu-file-refrec-localremote"><a href="#">Transfer local files to/from remote</a></li>'
-                    +'<li id="menu-file-refrec-add"><a href="#">Create multimedia records for selection</a></li>'
+                    +'<li id="menu-file-refrec-add"><a href="#">Create Digital Media records for selection</a></li>'
                     +'<li id="menu-file-delete-selected"><a href="#">Delete files in selection</a></li>'
                     +'</ul>'
                     +'<ul title="Integrity" link-style="width:100px">'

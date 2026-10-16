@@ -58,9 +58,7 @@ $sessionId = DbUtils::prepareSessionId($_REQUEST['session']?? null);
 if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
 
     // IMPORTANT: allow concurrent progress.php calls from same browser session
-    if (!empty($sessionId) && session_status() === PHP_SESSION_ACTIVE) {
-        session_write_close();
-    }               
+    $system->session()->close();
 
     $res = doRecTitleUpdate($system, $sessionId,  $rty_ids_list);
 

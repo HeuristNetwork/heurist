@@ -74,7 +74,10 @@ if (!array_key_exists('embed', $_REQUEST)) {
         $version = $defaultVersion;
     }
     if(!defined('PDIR')){
-        define('PDIR', '/' . $version . '/');    
+        // A reverse-proxied deployment may expose this code beneath a path
+        // different from the internal Heurist version directory.
+        global $heuristPublicPath;
+        define('PDIR', !empty($heuristPublicPath) ? $heuristPublicPath : '/' . $version . '/');
     }
 }
 
@@ -168,8 +171,16 @@ if( @$_REQUEST['isalive']==1){
     redirectURL('hserv/controller/api.php?'.$query_string);
     return;
     
-}elseif (@$_REQUEST['controller']=='ReportController' || array_key_exists('template',$_REQUEST) || array_key_exists('template_id',$_REQUEST)
-        || @$_REQUEST['controller']=='ImportAnnotations'){
+}elseif (in_array(@$_REQUEST['controller'], array('ReportController','ImportAnnotations','PublicationController','UserController')) || 
+            array_key_exists('pub_id', $_REQUEST) ||
+            array_key_exists('template', $_REQUEST) || 
+            array_key_exists('template_id', $_REQUEST)){
+                
+    if(array_key_exists('pub_id', $_REQUEST)){
+        $_REQUEST['controller'] = 'PublicationController';
+    }elseif(array_key_exists('template', $_REQUEST) || array_key_exists('template_id', $_REQUEST)){
+        $_REQUEST['controller'] = 'ReportController';
+    }
 
     //execute smarty template,  $_REQUEST may be composed in resolver.php
     $controller = new FrontController($_REQUEST);
@@ -177,7 +188,11 @@ if( @$_REQUEST['isalive']==1){
     exit;
 
 }elseif ($r = RecordResolver::resolve($version, $_REQUEST)) {
-    header('Location: ' . $r['url'], true, (int)($r['status'] ?? 302));
+    if(isset($_REQUEST['debug'])){
+        echo $r['url'];    
+    }else{
+        header('Location: ' . $r['url'], true, (int)($r['status'] ?? 302));    
+    }
     exit;
 //  use FileResolver and remark array_key_exists('file',$_REQUEST)
 }elseif ($r = FileResolver::resolve($version, $_REQUEST)) {
@@ -302,7 +317,10 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFolders.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/mapSymbolEditor.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingBrowse.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingTranslation.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editingHelpers.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editTheme.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/CmsManager.js"></script>
@@ -375,11 +393,19 @@ if($isLocalHost){
 <script src="https://cdn.jsdelivr.net/npm/driver.js@0.9.8/dist/driver.min.js"></script>
 -->
 
+<!-- Styles for the opt-in H8 interface. -->
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h8styles.css" />
+
 <!-- Intro.js JS -->
 <script src="https://cdn.jsdelivr.net/npm/intro.js@8.3.2/intro.min.js"></script>
 <link href=" https://cdn.jsdelivr.net/npm/intro.js@8.3.2/minified/introjs.min.css " rel="stylesheet">
 
 <script type="text/javascript">
+    // Use the configuration loaded by this page for its experimental UI.
+    // A separate sysinfo request can resolve to another installation on a
+    // reverse-proxied or versionless URL.
+    window.hWin.heuristExperimentalAllowed = <?php echo json_encode($experimental === true); ?>;
+    window.hWin.heuristExperimentalUnavailableMessage = <?php echo json_encode(HEURIST_EXPERIMENTAL_UNAVAILABLE_MESSAGE); ?>;
 
     /**
      * Initializes the page after basic setup is complete.
@@ -459,8 +485,9 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                 modal: true,
                 resizable: false,
                 draggable: false,
-                create:function(){
-                    $(this).parent().find('.ui-dialog-titlebar').addClass('fullmode').hide();
+                showTitlebar: false,
+                classes: {
+                    'ui-dialog-titlebar': 'ui-corner-all fullmode'
                 }
                 /*hide: {
                 effect: "puff",

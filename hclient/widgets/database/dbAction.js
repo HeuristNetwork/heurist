@@ -51,6 +51,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _session_id:0,
     _select_file_dlg:null,
 
+    _DB_NAME_LIMIT: 60, // Limit database name to 60 characters, also see databaseController.php::DB_NAME_LIMIT
 
     /**
      * @function _init
@@ -91,6 +92,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
         this._$('span.dbprefix').text(window.hWin.HAPI4.sysinfo.database_prefix);
 
+        if(this.options.actionName=='create'){
+            this._loadCreationTemplates();
+        }
+
         if(this.options.actionName=='create' &&
             window.hWin.HAPI4.sysinfo['pwd_DatabaseCreation'])
         {
@@ -98,7 +103,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }
         else if(this.options.actionName=='clone')
         {
-            this._checkNewDefinitions();
+            if(!window.hWin.HEURIST4.util.isPositiveInt(window.hWin.HAPI4.sysinfo.db_registeredid) && window.hWin.HAPI4.sysinfo.sysadmin_email !== window.hWin.HAPI4?.currentUser.ugr_eMail){
+                this._checkNewDefinitions();
+            }
 
             if(window.hWin.HAPI4.sysinfo.db_total_records<50000){
                 this._$('.large-db').hide();
@@ -124,15 +131,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 return;
             }
             this._$('#div_block').hide();
-            
-
-            let that = this;
-            window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
-                if(!window.hWin.HEURIST4.util.isempty(response)){
-                    let record = response.getFirstRecord();
-                    that._$('.dbDescription').text(record[17]); // Assuming field 17 is description
-                    that._$('#dbTitle').val(record[17]).trigger('keyup');
-                }});
 
             if(window.hWin.HAPI4.sysinfo['db_registeredid']>0){
                 this._$('.dbDescription').text('');
@@ -156,13 +154,29 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 }
 
                 this._on(this._$('#dbTitle'),{keyup:
-                        function ( event ){
-                            let len = $(event.target).val().length;
-                            let ele = this._$('#cntChars').text(len);
-                            ele.parent().css('color',(len<40)?'red':'#6A7C99'); // Visual feedback for length
-                        }
+                    function ( event ){
+                        let len = $(event.target).val().length;
+                        let ele = this._$('#cntChars').text(len);
+                        ele.parent().css('color',(len<40)?'red':'#6A7C99'); // Visual feedback for length
+                    }
                 });
             }
+
+            // Retrieve Database metadata
+            let that = this;
+            window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
+                if(!window.hWin.HEURIST4.util.isempty(response)){
+                    let record = response.getFirstRecord();
+                    let description = response.fld(record, 'sys_dbDescription');
+                    let displayName = response.fld(record, 'sys_dbName');
+                    let rights      = response.fld(record, 'sys_dbRights');
+                    // Pre-fill all three fields - user can review/edit before submitting
+                    that._$('#dbDisplayName').val(displayName || '');
+                    that._$('#dbRights').val(rights || '');
+                    that._$('.dbDescription').text(description);
+                    that._$('#dbTitle').val(description).trigger('keyup');
+                }
+            });
         }
 
         // User and database name inputs
@@ -234,6 +248,67 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
      * Gathers required parameters from the form, validates them, and calls `_sendRequest`.
      * @memberof Widgets.Admin.dbAction
      */
+    /** Load the same curated catalogue used by Browse templates (IDs 1–999).
+     * A failed or timed-out catalogue request leaves creation usable with bundled definitions.
+     */
+    _loadCreationTemplates: function(){
+        this._creationTemplateID = 0;
+        this._creationTemplatesLoading = true;
+        let settled = false;
+        const finish = (response) => {
+            if(settled) return;
+            settled = true;
+            clearTimeout(timer);
+            this._creationTemplatesLoading = false;
+            const list = this._$('#database_template_list').empty();
+            let templates = [];
+            if(response?.status == window.hWin.ResponseStatus.OK && response.data){
+                const records = new HRecordSet(response.data);
+                records.each(function(id, record){
+                    id = Number(id);
+                    const url = this.fld(record, 'rec_URL');
+                    if(id > 0 && id < 1000 && url){
+                        const match = url.match(/[?&]db=([^&#]+)/);
+                        templates.push({id, name: match ? match[1] : this.fld(record, 'rec_Title'),
+                            description: this.fld(record, 'rec_ScratchPad') || this.fld(record, 'rec_Title') || ''});
+                    }
+                });
+            }
+            if(!templates.length){
+                $('<div>', {class:'heurist-helper1', text:'Unable to contact the Heurist Reference Index, using default Core Definitions database structure.'}).appendTo(list);
+                return;
+            }
+            templates.sort((a,b) => a.id - b.id);
+            if(!templates.some(template => template.id == 2)){
+                templates.unshift({id:0, name:'Core Definitions', description:'Bundled default database structure'});
+            }
+            this._creationTemplateID = templates.some(template => template.id == 2) ? 2 : 0;
+            const table = $('<table>', {style:'width:100%;table-layout:fixed;border-collapse:collapse;'}).appendTo(list);
+            const pageSetting = window.hWin.heuristExperimentalAllowed;
+            const allowed = typeof pageSetting === 'boolean' ? pageSetting : window.hWin.HAPI4.sysinfo?.isExperimentalAllowed === true;
+            templates.forEach(template => {
+                const row = $('<tr>').css({background:template.id == 2 || template.id == 0 ? '#eaf7fc' : '#f5f5f5'}).appendTo(table);
+                const radio = $('<input>', {type:'radio', name:'creation_template', value:template.id,
+                    'aria-label':template.name, checked:template.id == this._creationTemplateID});
+                $('<td>', {style:'width:28px;padding:8px;vertical-align:top;'}).append(radio).appendTo(row);
+                $('<td>', {text:template.id || '', style:'width:40px;padding:8px;vertical-align:top;'}).appendTo(row);
+                $('<td>', {text:template.name, style:'width:28%;padding:8px;vertical-align:top;overflow-wrap:anywhere;font-weight:bold;'}).appendTo(row);
+                $('<td>', {text:template.description, style:'padding:8px;vertical-align:top;overflow-wrap:anywhere;'}).appendTo(row);
+                radio.on('change', () => {
+                    if(template.id != 0 && template.id != 2 && !allowed){
+                        radio.prop('checked', false);
+                        table.find('input[value="'+this._creationTemplateID+'"]').prop('checked', true);
+                        window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.heuristExperimentalUnavailableMessage);
+                        return;
+                    }
+                    this._creationTemplateID = template.id;
+                });
+            });
+        };
+        const timer = setTimeout(() => finish(null), 20000);
+        window.hWin.HAPI4.RecordMgr.search({remote:'master', detail:'header'}, finish);
+    },
+
     doAction: function(){
         let request = {}; // Initialize with an empty object
 
@@ -249,6 +324,18 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
            let ele = this._$('#uname');
            request = {uname : (ele.length>0?ele.val().trim():''), // Use current user if uname field not present/empty
                       dbname: dbname};
+
+            if(`${request.uname}_${request.dbname}`.length > this._DB_NAME_LIMIT){
+                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR(`Database name too long, reduce to ${this._DB_NAME_LIMIT} characters at most`));
+                return;
+            }
+           if(this.options.actionName=='create'){
+                if(this._creationTemplatesLoading){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the template list to load');
+                    return;
+                }
+                request.template_id = this._creationTemplateID || 0;
+           }
 
            if(this.options.actionName=='clone'){
                 if(this._$('#nodata').is(':checked')){
@@ -278,6 +365,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of database'));
                 return;
            }
+            if(dbname.length > this._DB_NAME_LIMIT){
+                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR(`Database name too long, reduce to ${this._DB_NAME_LIMIT} characters at most`));
+                return;
+            }
            let dbarchive_file = this._$('#selectedZip').text();
            if(dbarchive_file==''){
                 window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of source zip archive'));
@@ -293,6 +384,12 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             }
            request = {dbReg: window.hWin.HAPI4.database,
                       dbTitle: description,
+                      // Heurist_Reference_Index field mapping (per Ian Johnson's metadata strategy):
+                      //  Display name (Design > Properties)           -> Database title (concept 2-1)
+                      //  Database rights statement (Design > Properties) -> concept 2-311
+                      //  This long description (>=40 chars, above)    -> concept 2-12
+                      dbDisplayName: this._$('#dbDisplayName').val() || '',
+                      dbRights: this._$('#dbRights').val() || '',
                       dbVer: window.hWin.HAPI4.sysinfo['db_version'],
                       serverURL: this._$('#serverURL').val() };
            if(window.hWin.HAPI4.user_id()!=2){ // Not superadmin
@@ -340,9 +437,30 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 if (response.status == window.hWin.ResponseStatus.OK) {
                     that._afterActionEventHandler(response.data, response.message);
                 } else {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
                     that._$('.ent_wrapper').hide(); // Hide form fields
                     that._$('#div_header').show();  // Show initial page/header again
+                    if(that.options.actionName == 'create' && response.template_fallback_available === true){
+                        const label = 'Create the database with the default Core Definitions template (which does not require access to the templates server)';
+                        const buttons = {};
+                        buttons[label] = function(){
+                            dialog.dialog('close');
+                            that._creationTemplateID = 0;
+                            that._$('#database_template_list input').prop('checked', false);
+                            that._$('#database_template_list').empty().append($('<div>', {
+                                class:'heurist-helper1', text:'Using the default Core Definitions template.'}));
+                            // Preserve the requested name and credentials; obtain a new progress session.
+                            that._sendRequest(Object.assign({}, request, {template_id:0}));
+                        };
+                        buttons.Cancel = function(){ dialog.dialog('close'); };
+                        const dialog = window.hWin.HEURIST4.msg.showMsgDlg(
+                            'The requested template could not be obtained or imported. The database has not been created.<br><br>'
+                            + 'You can create it with the default Core Definitions template instead.',
+                            buttons, {title:'Template unavailable'}, {default_palette_class:'ui-heurist-admin'});
+                        dialog.parent().find('.ui-dialog-buttonpane button').css({
+                            'white-space':'normal', 'max-width':'36em', 'height':'auto', 'line-height':'1.3'});
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
                 }
         });
     },
@@ -359,7 +477,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         let request = {action: 'check_newdefs', db: window.hWin.HAPI4.database};
         window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
                 if (response.status == window.hWin.ResponseStatus.OK) {
-                    if(response.data!=''){ // Non-empty response.data indicates new definitions found
+                    if(response.data != ''){ // Non-empty response.data indicates new definitions found
                         that._$('#div_need_password').show(); // Show password input field
                         that._$('#new_defs_warning').text(response.data); // Display warning message
                     }

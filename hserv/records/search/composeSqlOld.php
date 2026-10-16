@@ -3563,16 +3563,47 @@ class SpatialPredicate extends Predicate {
      * The search value (`$this->value`) is expected to be a WKT string.
      * Note: Negation is not directly supported by this predicate's `makeSQL`.
      *
+     * Supports:
+     *   geo:"-16,32,40,72"   => viewport extent, ST_Intersects
+     *   geo:"POLYGON (...)"  => legacy WKT, ST_Contains     * 
      * @return string The SQL condition string using an EXISTS subquery.
      */
     public function makeSQL() {
-        // Ensure $this->value is properly escaped if it's directly embedded, though ST_GeomFromText should handle WKT.
-        // For safety, one might consider escaping $this->value if it could come from untrusted input,
-        // but standard WKT is generally safe for ST_GeomFromText.
+
+        global $mysqli;
+
+        $value = trim((string)$this->value);
+        $spatialFunction = 'ST_Contains';
+        $wkt = $value;
+
+        // Legacy/plain-query viewport form: west,south,east,north
+        $extent = array_map('trim', explode(',', $value));
+        if(count($extent) === 4
+            && is_numeric($extent[0]) && is_numeric($extent[1])
+            && is_numeric($extent[2]) && is_numeric($extent[3])){
+
+            $west = (float)$extent[0];
+            $south = (float)$extent[1];
+            $east = (float)$extent[2];
+            $north = (float)$extent[3];
+
+            if($west < -180 || $west > 180 || $east < -180 || $east > 180
+                || $south < -90 || $south > 90 || $north < -90 || $north > 90
+                || $south > $north){
+                return '(1=0)';
+            }
+
+            $wkt = "POLYGON (($west $south, $east $south, $east $north, $west $north, $west $south))";
+            $spatialFunction = 'ST_Intersects';
+        }
+
+        $wkt = $mysqli->real_escape_string($wkt);
+
         return "(exists (select dtl_ID from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Contains(ST_GeomFromText('{$this->value}'), bd.dtl_Geo) limit 1))"; // MBRContains was an older alternative.
+            and {$spatialFunction}(ST_GeomFromText('{$wkt}'), bd.dtl_Geo) limit 1))";
     }
+    
 }
 
 /**

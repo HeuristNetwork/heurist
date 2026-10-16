@@ -1,0 +1,2507 @@
+diff --git a/hserv/controller/synchronisationController.php b/hserv/controller/synchronisationController.php
+index 3fab038..69cfa94 100644
+--- a/hserv/controller/synchronisationController.php
++++ b/hserv/controller/synchronisationController.php
+@@ -40,6 +40,13 @@ try {
+         } elseif ($action === 'get_config') {
+             $response = ['status' => HEURIST_OK, 'data' => $configService->load(false)];
+         } elseif ($action === 'save_config') {
++            // Use the same database lock as transfer/remapping so settings cannot
++            // change while a batch is being validated or committed.
++            $configLock = 'heurist-sync-'.substr(hash('sha256', $system->dbname()), 0, 48);
++            if ((int)mysql__select_value($system->getMysqli(), 'SELECT GET_LOCK(?,0)', ['s', $configLock]) !== 1) {
++                throw new \RuntimeException('Synchronisation is running; retry the configuration change afterwards.');
++            }
++            try {
+             $saved = $configService->save(is_array($params['config'] ?? null) ? $params['config'] : []);
+             if ($saved) {
+                 $saved = SyncSchema::ensure($system->getMysqli())
+@@ -51,6 +58,9 @@ try {
+             $response = $saved
+                 ? ['status' => HEURIST_OK, 'data' => $configService->load(false)]
+                 : $system->getError();
++            } finally {
++                mysql__select_value($system->getMysqli(), 'SELECT RELEASE_LOCK(?)', ['s', $configLock]);
++            }
+         } elseif ($action === 'list_sessions') {
+             $service = new SyncSessionService($system);
+             $response = ['status' => HEURIST_OK, 'data' => $service->listSessions()];
+@@ -79,9 +89,17 @@ try {
+             if (($config['role'] ?? '') !== 'satellite') {
+                 $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Record IDs may only be remapped on a configured satellite.');
+             } else {
++                $remapLock = 'heurist-sync-'.substr(hash('sha256', $system->dbname()), 0, 48);
++                if ((int)mysql__select_value($system->getMysqli(), 'SELECT GET_LOCK(?,0)', ['s', $remapLock]) !== 1) {
++                    throw new \RuntimeException('Another synchronisation is running; retry the record-ID remap.');
++                }
++                try {
+                 $response = (new RecordIDRemapper($system))->remap(
+                     is_array($params['mapping'] ?? null) ? $params['mapping'] : []
+                 );
++                } finally {
++                    mysql__select_value($system->getMysqli(), 'SELECT RELEASE_LOCK(?)', ['s', $remapLock]);
++                }
+             }
+         }
+         } else {
+@@ -93,6 +111,11 @@ try {
+             if ($satelliteID < 1) {
+                 $response = $system->getError();
+             } else {
++                $masterLock = 'heurist-sync-'.substr(hash('sha256', $system->dbname()), 0, 48);
++                if ((int)mysql__select_value($system->getMysqli(), 'SELECT GET_LOCK(?,0)', ['s', $masterLock]) !== 1) {
++                    throw new \RuntimeException('Another synchronisation request is running on the master; retry this batch.');
++                }
++                try {
+                 $service = new SyncSessionService($system);
+                 if ($action === 'start_session') {
+                     $response = $service->startSession($satelliteID, (int)($params['lastMasterChangeReceived'] ?? 0));
+@@ -142,6 +165,10 @@ try {
+                 } else {
+                     $response = $system->addError(HEURIST_INVALID_REQUEST, 'Unknown synchronisation action.');
+                 }
++                } finally {
++                    mysql__select_value($system->getMysqli(), 'SELECT RELEASE_LOCK(?)', ['s', $masterLock]);
++                }
++
+             }
+         }
+         }
+diff --git a/hserv/synchronisation/README.md b/hserv/synchronisation/README.md
+index 8ba0ca7..9901ef5 100644
+--- a/hserv/synchronisation/README.md
++++ b/hserv/synchronisation/README.md
+@@ -58,3 +58,300 @@ remapping, dependency transfer and record-content upload. New satellite terms
+ are accepted only below an existing master vocabulary. Structure remains under
+ master control and is refreshed on every synchronisation. Local files are
+ currently limited to 20 MB each and 40 MB per dependency batch.
++
++---
++
++## Review of 20 September 2026: current behaviour and safety contract
++
++The original description above is retained verbatim. This section is the more
++detailed description of the reviewed implementation, based on h7dev commit
++`5940d87` ("Revision of master-satellite synchronisation now bidirectional").
++
++**Historical text flagged for correction, not removed:** the earlier bullet
++"master-to-satellite change delivery and completion cursors" under "Deliberately
++not yet enabled" is obsolete: master-to-satellite delivery is implemented. The
++older description of delivery as incremental also needs qualification: this
++review deliberately uses history reconciliation on every run for correctness,
++while retaining bounded pages within a run. Saved cursors describe progress;
++they are no longer a permanent exclusion boundary. The original explanations in
++the interfaces are retained; counts labelled "updated" can therefore include
++unchanged records being rechecked.
++
++### What is and is not synchronised
++
++The master controls the shared database structure. A satellite contributes its
++own completed records, permitted vocabulary extensions and the files referenced
++by its contributed records. It can subsequently contribute additions to those
++same records. A satellite also receives master-originated records and records
++contributed by other satellites. This is not a general multi-master merge.
++
++Record IDs become canonical master IDs. Definition IDs and uploaded-file IDs do
++not have to match: concept identities translate types/fields/terms, and file maps
++translate uploaded-file references. The original implementation also retains
++same-numeric-ID plus exact-name/label compatibility fallbacks for cloned
++structures. These are weaker than provenance and do not establish that arbitrary
++independent databases have equivalent definitions. Use a shared, verified
++structure; resolve ambiguous definition identities before synchronising.
++
++**Record contents are additions-only.** A received snapshot is evidence of
++values to add, never authority to remove values already held by the recipient.
++Neither application direction deletes a record or deletes/replaces its existing
++`recDetails` rows. In particular, a missing image in an incoming snapshot leaves
++the recipient's image detail, detail ID and uploaded-file reference intact.
++Record-ID remapping changes identity columns and pointer targets while preserving
++the record and its values; it is not a delete-and-recreate operation.
++
++This contract concerns record data. Master-controlled definition and vocabulary
++metadata can still be updated, as before. An existing field's storage type cannot
++be changed by synchronisation, because that could invalidate its stored values.
++
++Existing non-empty title, URL and scratchpad headers are preserved. Empty
++headers may be filled. New records and verified temporary reservations receive
++incoming header data; established record type and ownership are not silently
++reassigned. Added details update the modification timestamp. Existing titles are
++not automatically recomputed as a conflict-resolution policy.
++
++Matching detail values includes their field, text, file reference, geometry,
++certainty, annotation and public-visibility metadata. Repeats are treated as a
++multiset: if two identical occurrences arrive and one already exists, one is
++added. Replaying the same two occurrences adds nothing. A shorter subsequent
++snapshot does not reduce the count. This cannot distinguish independently added
++identical occurrences across databases; global per-value lineage is not yet
++implemented. Different values are retained together, even if that requires later
++human reconciliation for a logically single-valued field. Changed metadata is
++also a new occurrence, not permission to overwrite the old one.
++
++### End-to-end sequence
++
++1. **Configuration and access.** The feature must be enabled on the server.
++   Both databases must be registered. Local operations require database-admin
++   access. The master verifies the enabled satellite's derived shared key, the
++   request action/body HMAC, timestamp and unused nonce. HTTPS protects transport.
++   Browser configuration responses omit the derived keys.
++2. **Local exclusion and preparation.** A database-level named lock prevents two
++   synchronisation runs on one satellite. The same lock serialises master sync
++   requests, manual sync remaps and configuration changes. Ordinary Heurist edits
++   are not globally locked by this mechanism. Private `sysSync` tables and the
++   journal triggers are installed before data transactions. Required data tables
++   must use InnoDB; no automatic engine conversion is attempted.
++3. **Inventory and discovery.** On first use, completed records predating the
++   journal are seeded once. Later runs scan the journal from zero through the
++   visible upper bound. Already allocated records and verified downloaded records
++   are excluded from new-record discovery. Previously uploaded locally owned
++   records are rechecked for additions. This deliberately catches transactions
++   whose journal IDs were allocated early but committed late.
++4. **Start or resume a master session.** The master returns the latest unfinished
++   session for that satellite, or creates one. A session identifies an exchange,
++   not record ownership. Permanent ownership comes from the satellite/database
++   and original-record mapping, so later sessions may update the same records.
++5. **Structure preflight.** The satellite describes the record types and populated
++   fields used by pending records. Unsupported types/fields are reported with
++   the existing master-template import guidance. Records depending on blocked
++   local targets are held back too. Compatible records continue; completion may
++   say that user action is still needed.
++6. **Reserve permanent IDs.** The master reuses a permanent mapping when one
++   already exists. Otherwise it creates a real hidden temporary master record
++   and stores the mapping in the same transaction. A lost response can therefore
++   be retried without allocating a second master record. The satellite saves the
++   response as `RESERVED` before changing local IDs.
++7. **Remap locally.** All old IDs first move to a disjoint high staging range;
++   then all staged IDs move to master IDs. In each phase *all parent Records IDs*
++   move first, followed by pointer values and audited references. This is needed
++   because core detail triggers can immediately write foreign-keyed `recLinks`.
++   The audited references cover details, links, dates, forwarding, comments,
++   archives, bookmarks, tags, permissions, reminders, working subsets and sync
++   state. Unknown ID-bearing columns stop the operation. Both phases and the
++   transition from `RESERVED` to `ALLOCATED` commit together.
++8. **Export a consistent batch.** The satellite reads file/term dependencies and
++   full record snapshots in one repeatable-read transaction. This prevents a
++   newly added file reference from appearing in content after dependencies were
++   read from an earlier database state. SQL snapshots do not freeze externally
++   modified filesystem bytes; file hashes validate the bytes actually read.
++9. **Send dependencies, then content.** Records are sent in groups of 100.
++   Satellite vocabulary extensions must resolve beneath existing master
++   vocabularies. Local bytes are base64 encoded and SHA-256 checked. The master
++   commits dependency registrations before accepting references to them. Content
++   validation resolves every field, term, file and resource target. The master
++   then appends missing detail occurrences and commits the payload receipt as
++   `APPLIED` in the same transaction. Only a successful acknowledgement changes
++   local outbound state to `UPLOADED`.
++10. **Read the master.** After pushing, the satellite starts a reconciliation
++    pass from journal position zero. Each master response takes a consistent
++    database snapshot and supplies at most 100 eligible records, ordered by
++    their latest visible event. This avoids repeatedly sending one record for
++    each of its individual detail events. The first page also compares structure
++    hashes. A changed structure includes base definitions and the vocabulary
++    snapshot, followed by record structures and mapped references.
++11. **Apply a received batch.** Within one satellite transaction the order is:
++    base definitions; terms; record structures; verified pointer-target shells;
++    file registrations/maps; all record headers; translated additive details.
++    Temporary pointer shells permit references to records delivered in later
++    pages. They remain temporary until their full record arrives. An occupied
++    incoming ID is accepted only when inbound provenance or an existing completed
++    outbound allocation proves it is the same master identity and its type agrees.
++12. **Checkpoint and finish.** The local data transaction must commit before
++    structure hashes or download positions are saved. Configuration updates use
++    a locked read/merge and a flushed temporary sibling followed by atomic rename.
++    Failure before saving the checkpoint leaves an older checkpoint, resulting in
++    safe replay. The progress log records success, failure or pending user action.
++    The current protocol does not have a master-side completion handshake that
++    transitions sessions to `COMPLETED`; a subsequent run can resume that session.
++
++### Interruption and retry behaviour
++
++| Interruption point | Committed state | Next run |
++| --- | --- | --- |
++| Before master ID reservation commits | No new mapping or reservation | Reserve normally |
++| After reservation commits but response is lost | Mapping and temporary master record exist | Same original identity gets the same master ID |
++| After local reservation save, before remap | Original record still exists; state is RESERVED | Resume two-stage remap |
++| During remap | InnoDB rolls back IDs, references and allocation status | Retry remap; never infer completion from half a move |
++| After dependency commit, before content | Terms/files can exist without record references | Reuse their mappings; apply record content later |
++| During content application | Entire batch, including its SQL receipt/provenance, rolls back | Retry without removing prior values |
++| Commit succeeds but response is lost | Committed data/receipt remain | Master receipt and additive matching prevent duplicate application |
++| Commit outcome is uncertain | Caller reports failure, advances no cursor, and retains file bytes | Retry and reconcile against committed mappings |
++| Data committed, checkpoint write fails | Data remain; checkpoint is old | Replay safely |
++| During file write or after DB rollback | An unreferenced attempt file can remain | Existing registered files are untouched; orphan cleanup is separate |
++
++There is deliberately no all-databases transaction. Earlier successfully committed
++batches remain committed when a later batch fails. This is resumability, not
++whole-run rollback. `SyncTransaction` checks commit results, rejects nested
++transactions and restores the sync-journal guard in `finally`. Normal Heurist
++triggers continue to run. A terminated connection causes InnoDB to roll back its
++uncommitted transaction, but cannot undo earlier committed batches or file writes.
++
++A sync lock serialises sync traffic, not all application writes. Row locks and
++foreign keys protect individual SQL operations. The record-ID staging range is
++locked before remapping. For a first deployment and for record-ID remaps, use a
++quiet maintenance window: an already-open edit form can still submit a stale old
++ID after a successful renumbering. That application-wide stale-client problem is
++not solved by a sync-local lock. Do not run schema changes, repair scripts or
++manual record deletion concurrently with the test synchronisation.
++
++### Files and image references
++
++Files are written with exclusive creation to a fresh random attempt filename.
++Every byte is checked, flushed and, where supported, fsynced before the SQL
++registration is inserted. No failed/uncertain transaction unlinks attempt files:
++a lost COMMIT response must not lead to deletion of bytes that were actually
++committed. The trade-off is possible orphan files, never deliberate removal of a
++previously registered upload. Review orphans separately; do not delete them merely
++because a sync attempt reported failure.
++
++A source file ID already mapped with a different content hash causes a stop for
++reconciliation; existing bytes and registrations are preserved. Updating a file
++in place, propagating external URL/metadata changes, and file-version merging are
++not implemented. Inbound reuse by existing MD5 checksum or external URL is
++retained from the original implementation; this is file reuse, not proof of
++record identity. The original direct-transfer limits remain 20 MB per local file
++and 40 MB per exported batch. The client/controller transport limits also apply.
++
++The image in the reported screenshot still exists physically, but no record
++references it. Before this review, both content-application paths executed
++`DELETE FROM recDetails WHERE dtl_RecID=...` before inserting the incoming
++snapshot. A snapshot omitting an existing image could therefore remove its link
++without deleting the image file, even on a successful run. That destructive path
++has been removed. The screenshot alone cannot establish which record was changed
++or whether a whole record disappeared; confirming the specific event requires
++record IDs, archive entries or a pre-sync backup. These changes do not reconstruct
++values already lost by an earlier run.
++
++### Configuration, identity and upgrading existing test databases
++
++Configuration belongs to one registered local database, role and registered
++master identity. The normal save path refuses to change those identities while
++retaining the configuration. Endpoint/name changes and secret rotation for the
++same registered identity remain possible. A copied configuration with another
++local registration number is rejected. Repointing to another master is a data
++migration requiring explicit reconciliation, not a settings-only operation.
++
++The new `sysSyncInboundRecords` table records verified incoming master IDs. Older
++versions did not keep that proof. On an already-used satellite, an older downloaded
++record can therefore collide with a new incoming record even when its ID happens
++to match. **Do not clear the database, remove its file references, or automatically
++approve every equal numeric ID.** Compare the record and its type against the
++master, the permanent outbound maps, backups and prior sync history. Only after
++establishing that it is the same logical record may an administrator record that
++identity in `sysSyncInboundRecords`. A genuinely unrelated local record needs an
++explicit safe ID reconciliation. No automatic migration guesses these identities.
++Existing completed outbound mappings already provide proof for those records.
++
++`Records`, relevant `rec*`, `def*`, `usr*`, `sysArchive` and `sysSync*` tables must
++be transactional InnoDB tables. If a legacy nontransactional table is detected,
++sync stops with its name. Review/convert it separately with a backup. The check
++cannot assess arbitrary third-party trigger side effects outside these tables.
++
++### Current limits and deliberate trade-offs
++
++- Rechecking journal history and resending candidates costs more than a simple
++  high-water cursor. It avoids permanently skipping late commits. Large databases
++  need performance measurement before broad deployment; the 10,000-page limit
++  can stop a very large run. This is correctness-first reconciliation, not a
++  claim of optimised incremental transfer.
++- Existing direction/ownership rules are retained. A satellite's own contributed
++  records are excluded from its master download. Edits made on the master to
++  those records do not currently return to that contributing satellite. Likewise,
++  local edits to a record received from another contributor are not uploaded as
++  that contributor's changes. Full shared-record editing needs a separate design.
++- There is no deletion propagation, priority-based winner selection, three-way
++  merge or per-detail origin/conflict resolution. Configured priorities do not
++  authorise replacing record data.
++- Empty incoming details do not clear anything. Conflicting values may accumulate.
++  Preserve first, then reconcile explicitly; this is the requested additions-only
++  policy rather than a conventional replace-with-latest snapshot.
++- Structure is still master-controlled. Field storage-type changes now stop,
++  but changing constraints, record structures or term labels can change how
++  retained data is displayed. Structure review remains necessary.
++- Direct SQL sync writes rely on Heurist's installed database triggers for link
++  and date indexes. They do not invoke every ordinary record-save side effect,
++  external search indexing or client-cache refresh. Validate those integrations
++  on the actual servers.
++- No code review can promise protection against disk/database failure, outside
++  deletion, unsupported custom triggers or administrators changing IDs manually.
++  The implemented invariant is that sync itself no longer deletes/replaces stored
++  record detail values and stops on unproven incoming record identities.
++
++### Components and their responsibilities
++
++| Component | Responsibility |
++| --- | --- |
++| `synchronisationController.php` | Local-admin/signed-remote dispatch, feature checks, sync locks, diagnostic responses |
++| `SatelliteSyncService.php` | Satellite inventory, preflight, allocation/remap, upload, download and progress orchestration |
++| `SyncSessionService.php` | Master sessions, compatibility checks, permanent allocation and additive upload application |
++| `RecordIDRemapper.php` | Schema audit and atomic two-stage ID/reference remapping |
++| `SatelliteInboundService.php` | Master structure/dependency/content application on a satellite, with identity checks |
++| `SyncAdditiveRecord.php` | Shared no-delete detail writer, multiplicity-aware retry matching and conservative headers |
++| `SyncTransaction.php` | Checked transaction and journal-guard lifetime |
++| `SyncFileStorage.php` | Immutable, complete file writes without truncating old uploads |
++| `SyncMasterChangeService.php` | Consistent master download pages and structure-hash comparison |
++| `SyncRecordPayload.php` | Portable record snapshots with field, term and file identities |
++| `SyncDependencyPayload.php` | Term ancestors/inverses, file bytes and pointer-shell export |
++| `SyncDependencyService.php` | Master acceptance of permitted terms and mapped files |
++| `SyncStructurePayload.php` | Definition export, identity translation, structure application |
++| `SyncChangeJournal.php` | Guarded SQL triggers, first inventory, candidate discovery |
++| `SyncConfig.php` | Validated configuration, identity guard, key redaction, atomic checkpoints |
++| `SyncSchema.php` | Private tables and transactional-engine requirements |
++| `SyncAuth.php`, `SyncHttpClient.php` | Authentication/replay protection and HTTPS request/response handling |
++| `SyncFeature.php` | Experimental feature and satellite structure-editing gate |
++| `SyncProgress.php` | Pollable phases, counts and preserved step log |
++| `configureSatellites.php`, `synchroniseWithMaster.php` | Existing configuration and run/progress interfaces |
++
++### Validation performed and remaining deployment check
++
++The package includes executable regression fixtures under `tests/synchronisation`.
++PHP syntax was checked with PHP 8.3. The actual additive writer and transaction
++helper were exercised through an in-memory mysqli test double: omitted image,
++stale snapshot, repeat multiplicity, replay, conflicting headers, injected insert
++failure, commit failure, malformed payload and nested transactions. The config
++tests use real temporary files and test checkpoint/key preservation, identity
++change rejection, corrupt JSON and redaction. Immutable file writes are tested
++against real files. A separate MariaDB 10.11 bootstrap SQL test checks the
++parent-first two-stage sequence with foreign keys and a pointer-update trigger,
++including retention of an image/detail ID and rollback of a new image.
++
++These checks do not constitute a full Heurist/MySQL 8 two-server integration test.
++This workspace cannot open the database socket needed for that test, and no live
++user database was accessed. Before deployment, use backed-up copies of master and
++satellite: compare record counts and every original detail/file reference before
++and after; repeat the run; interrupt between reservation/remap/dependencies/content;
++retry; and verify links, dates, file visibility, structure, and expected holdbacks.
++Install the matching reviewed files on both ends before enabling the test run.
+diff --git a/hserv/synchronisation/RecordIDRemapper.php b/hserv/synchronisation/RecordIDRemapper.php
+index 531b726..979d3dc 100644
+--- a/hserv/synchronisation/RecordIDRemapper.php
++++ b/hserv/synchronisation/RecordIDRemapper.php
+@@ -30,14 +30,17 @@ final class RecordIDRemapper
+         'sysSyncOutboundRecords' => ['sor_CurrentRecID']
+     ];
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system)
+     {
+         $this->system = $system;
+         $this->mysqli = $system->getMysqli();
+     }
+ 
+-    public function remap(array $mapping): array
++    /** Validate and atomically move local IDs through a disjoint staging range; optionally complete outbound reservations in the same commit. */
++    public function remap(array $mapping, bool $completeReservations = false): array
+     {
++        if (!SyncSchema::ensure($this->mysqli)) return $this->system->getError();
+         $mapping = $this->normaliseMapping($mapping);
+         if ($mapping === false) {
+             return $this->system->getError();
+@@ -45,6 +48,11 @@ final class RecordIDRemapper
+         if (!$this->auditSchema()) {
+             return $this->system->getError();
+         }
++        $transaction = new SyncTransaction($this->mysqli, true);
++        try {
++        if (!$this->mysqli->query('SELECT rec_ID FROM Records ORDER BY rec_ID DESC LIMIT 1 FOR UPDATE')) {
++            throw new \RuntimeException('Unable to lock the record-ID staging range.');
++        }
+         if (!$this->validateTargets($mapping)) {
+             return $this->system->getError();
+         }
+@@ -61,8 +69,7 @@ final class RecordIDRemapper
+             $staging[$old] = $next++;
+         }
+ 
+-        $keepAutocommit = mysql__begin_transaction($this->mysqli);
+-        $this->mysqli->query('SET @HEURIST_SYNC_APPLY=1');
++
+         $ok = $this->applyMapping($staging);
+         if ($ok) {
+             $second = [];
+@@ -71,8 +78,17 @@ final class RecordIDRemapper
+             }
+             $ok = $this->applyMapping($second);
+         }
+-        mysql__end_transaction($this->mysqli, $ok, $keepAutocommit);
+-        $this->mysqli->query('SET @HEURIST_SYNC_APPLY=NULL');
++
++        if ($ok && $completeReservations) {
++            $ok = (bool)$this->mysqli->query("UPDATE sysSyncOutboundRecords SET sor_Status='ALLOCATED' WHERE sor_Status='RESERVED'");
++        }
++        if (!$ok && $completeReservations && !$this->system->getError()) {
++            $this->system->addError(HEURIST_DB_ERROR, 'Unable to complete outbound allocation state.', $this->mysqli->error);
++        }
++        $ok = $transaction->finish($ok);
++        } finally {
++            $transaction->close();
++        }
+ 
+         if (!$ok) {
+             if (!$this->system->getError()) {
+@@ -83,6 +99,7 @@ final class RecordIDRemapper
+         return ['status' => HEURIST_OK, 'data' => ['remapped' => count($mapping), 'mapping' => $mapping]];
+     }
+ 
++    /** Accept either supported mapping shape, reject invalid/many-to-one mappings, and omit identity moves. */
+     private function normaliseMapping(array $input)
+     {
+         $mapping = [];
+@@ -108,6 +125,7 @@ final class RecordIDRemapper
+         return $mapping;
+     }
+ 
++    /** Refuse missing sources or targets occupied by records outside the remapping set. */
+     private function validateTargets(array $mapping): bool
+     {
+         if (!$mapping) {
+@@ -140,6 +158,7 @@ final class RecordIDRemapper
+         return true;
+     }
+ 
++    /** Find unrecognised record-ID columns before any move; an incomplete reference inventory must stop the remap. */
+     private function auditSchema(): bool
+     {
+         $known = [];
+@@ -149,6 +168,7 @@ final class RecordIDRemapper
+             }
+         }
+         $known['records.rec_id'] = true;
++        $known['syssyncinboundrecords.sir_masterrecid'] = true;
+         // Synchronisation provenance columns intentionally retain the original
+         // and canonical IDs; they are audited here but are not live references.
+         $known['syssyncrecordmap.srm_satellitelocalrecid'] = true;
+@@ -171,6 +191,10 @@ final class RecordIDRemapper
+             }
+             $res->close();
+         }
++        if (!$res) {
++            $this->system->addError(HEURIST_DB_ERROR, 'Unable to audit record-ID columns; remapping was stopped.', $this->mysqli->error);
++            return false;
++        }
+         if ($unknown) {
+             $this->system->addError(
+                 HEURIST_ACTION_BLOCKED,
+@@ -181,10 +205,26 @@ final class RecordIDRemapper
+         return true;
+     }
+ 
++    /** Move all parent keys first, then pointer values and audited dependent columns for one disjoint phase. */
+     private function applyMapping(array $mapping): bool
+     {
++        // Each phase uses a disjoint target range. Create ALL new parent keys
++        // before any detail pointer changes: core detail triggers update recLinks
++        // immediately, and its target foreign key must already be satisfied.
++        foreach ($mapping as $old => $new) {
++            // Change the parent key first. Heurist's foreign keys, notably
++            // recDetails.dtl_RecID -> Records.rec_ID, use ON UPDATE CASCADE.
++            // Updating those child columns first fails because the new parent
++            // ID does not yet exist. The subsequent explicit updates cover
++            // caches and other references which have no foreign key.
++            if (!$this->mysqli->query("UPDATE Records SET rec_ID=$new WHERE rec_ID=$old")) {
++                return $this->remapSqlError('updating Records.rec_ID');
++            }
++
++        }
+         foreach ($mapping as $old => $new) {
+             // Record-pointer values are stored as text and must be changed before the primary key.
++            // Superseded: the core recLinks foreign key requires all parent keys first (above).
+             $stmt = $this->mysqli->prepare(
+                 "UPDATE recDetails d JOIN defDetailTypes t ON t.dty_ID=d.dtl_DetailTypeID "
+                 ."SET d.dtl_Value=? WHERE t.dty_Type='resource' AND d.dtl_Value=?"
+@@ -202,14 +242,6 @@ final class RecordIDRemapper
+             }
+             $stmt->close();
+ 
+-            // Change the parent key first. Heurist's foreign keys, notably
+-            // recDetails.dtl_RecID -> Records.rec_ID, use ON UPDATE CASCADE.
+-            // Updating those child columns first fails because the new parent
+-            // ID does not yet exist. The subsequent explicit updates cover
+-            // caches and other references which have no foreign key.
+-            if (!$this->mysqli->query("UPDATE Records SET rec_ID=$new WHERE rec_ID=$old")) {
+-                return $this->remapSqlError('updating Records.rec_ID');
+-            }
+ 
+             foreach (self::REFERENCE_COLUMNS as $table => $columns) {
+                 if (!$this->tableExists($table)) {
+@@ -226,6 +258,7 @@ final class RecordIDRemapper
+         return true;
+     }
+ 
++    /** Attach the failing remap operation to the database error returned to the caller. */
+     private function remapSqlError(string $operation, ?string $detail = null): bool
+     {
+         $this->system->addError(
+@@ -236,6 +269,7 @@ final class RecordIDRemapper
+         return false;
+     }
+ 
++    /** Cache table availability so optional legacy reference tables can be skipped safely. */
+     private function tableExists(string $table): bool
+     {
+         static $cache = [];
+diff --git a/hserv/synchronisation/SatelliteInboundService.php b/hserv/synchronisation/SatelliteInboundService.php
+index ba99be6..4d8ace4 100644
+--- a/hserv/synchronisation/SatelliteInboundService.php
++++ b/hserv/synchronisation/SatelliteInboundService.php
+@@ -10,12 +10,14 @@ final class SatelliteInboundService
+     private \hserv\System $system;
+     private \mysqli $mysqli;
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system)
+     {
+         $this->system = $system;
+         $this->mysqli = $system->getMysqli();
+     }
+ 
++    /** Apply structure, terms, pointer shells, file registrations and additive record details in one checked local transaction. */
+     public function apply(array $dependencies, array $payload, ?array $structure = null): array
+     {
+         if (!SyncSchema::ensure($this->mysqli)) return $this->system->getError();
+@@ -26,10 +28,11 @@ final class SatelliteInboundService
+             return $this->system->addError(HEURIST_INVALID_REQUEST, 'The master returned an invalid record batch.');
+         }
+ 
++        SyncAdditiveRecord::validate($payload['records']);
+         ConceptCode::setSystem($this->system);
+         $createdFiles = [];
+-        $keepAutocommit = mysql__begin_transaction($this->mysqli);
+-        $this->mysqli->query('SET @HEURIST_SYNC_APPLY=1');
++        $transaction = new SyncTransaction($this->mysqli, true);
++        try {
+         $ok = true;
+         $structureMaps = [];
+         $definitionCount = 0;
+@@ -59,10 +62,14 @@ final class SatelliteInboundService
+         if ($fileResult === false) $ok = false;
+         $recordCount = $ok ? $this->applyRecords($payload['records'], $fileResult['mapping']) : false;
+         if ($recordCount === false) $ok = false;
+-        mysql__end_transaction($this->mysqli, $ok, $keepAutocommit);
+-        $this->mysqli->query('SET @HEURIST_SYNC_APPLY=NULL');
++
++        $ok = $transaction->finish($ok);
++        } finally {
++            $transaction->close();
++        }
+         if (!$ok) {
+-            foreach ($createdFiles as $path) if (is_file($path)) @unlink($path);
++            // Keep unreferenced attempt files for an explicit later cleanup. A lost
++            // COMMIT acknowledgement must never cause deletion of committed bytes.
+             return $this->system->getError();
+         }
+         return ['status' => HEURIST_OK, 'data' => [
+@@ -74,6 +81,7 @@ final class SatelliteInboundService
+         ]];
+     }
+ 
++    /** Resolve the portable type identity, with the retained same-ID/same-name compatibility fallback. */
+     private function resolveRecordTypeID(array $record): int
+     {
+         $recordTypeID = (int)ConceptCode::getRecTypeLocalID((string)($record['recordTypeConceptID'] ?? ''));
+@@ -88,6 +96,7 @@ final class SatelliteInboundService
+         return $recordTypeID;
+     }
+ 
++    /** Resolve parents before children and update master-controlled vocabulary metadata using local term IDs. */
+     private function applyTerms(array $terms, array $structureMaps = [])
+     {
+         $pending = [];
+@@ -200,16 +209,21 @@ final class SatelliteInboundService
+                     $ontologyID = (int)mysql__select_value($this->mysqli,
+                         'SELECT trm_OntID FROM defTerms WHERE trm_ID=?', ['i', $parentID]);
+                 }
+-                $this->mysqli->query('UPDATE defTerms SET trm_ParentTermID='.
++                if (!$this->mysqli->query('UPDATE defTerms SET trm_ParentTermID='.
+                     ($parentID > 0 ? $parentID : 'NULL').',trm_InverseTermID='.
+-                    ($inverseID > 0 ? $inverseID : 'NULL').',trm_OntID='.$ontologyID.' WHERE trm_ID='.$termID);
++                    ($inverseID > 0 ? $inverseID : 'NULL').',trm_OntID='.$ontologyID.' WHERE trm_ID='.$termID)) {
++                    throw new \RuntimeException('Unable to apply master term references: '.$this->mysqli->error);
++                }
+             } elseif ($termID > 0 && $inverseID > 0 && !empty($createdConcepts[$concept])) {
+-                $this->mysqli->query('UPDATE defTerms SET trm_InverseTermID='.(int)$inverseID.' WHERE trm_ID='.(int)$termID);
++                if (!$this->mysqli->query('UPDATE defTerms SET trm_InverseTermID='.(int)$inverseID.' WHERE trm_ID='.(int)$termID)) {
++                    throw new \RuntimeException('Unable to apply inverse term reference: '.$this->mysqli->error);
++                }
+             }
+         }
+         return $created;
+     }
+ 
++    /** Apply master term metadata after translating vocabulary, ontology, parent and inverse references. */
+     private function updateMasterTerm(int $termID, array $term, array $structureMaps): bool
+     {
+         $groupID = 0;
+@@ -237,6 +251,7 @@ final class SatelliteInboundService
+         return $ok;
+     }
+ 
++    /** Verify file hashes, reuse recorded inbound mappings and persist new immutable files before registering their IDs. */
+     private function applyFiles(array $files, array &$createdFiles)
+     {
+         $mapping = [];
+@@ -255,14 +270,22 @@ final class SatelliteInboundService
+             $localFileID = (int)mysql__select_value($this->mysqli,
+                 'SELECT sif_LocalFileID FROM sysSyncInboundFileMap WHERE sif_MasterFileID=?', ['i', $masterFileID]);
+             if ($localFileID > 0) {
++                $priorHash = mysql__select_value($this->mysqli,
++                    'SELECT sif_ContentHash FROM sysSyncInboundFileMap WHERE sif_MasterFileID=?', ['i', $masterFileID]);
++                if ((string)$priorHash !== (string)($file['contentHash'] ?? '')) {
++                    throw new \RuntimeException('An already downloaded file changed content; preserve the existing registration and reconcile the change.');
++                }
+                 $mapping[$masterFileID] = $localFileID;
+                 continue;
+             }
+ 
+             $content = $file['contentBase64'] ?? null;
+             $hash = (string)($file['contentHash'] ?? '');
++            if (!is_string($content) && trim((string)($file['ulf_ExternalFileReference'] ?? '')) === '') {
++                throw new \RuntimeException('A synchronised file has neither content nor an external reference.');
++            }
+             $bytes = null;
+-            if (is_string($content) && $content !== '') {
++            if (is_string($content)) {
+                 $bytes = base64_decode($content, true);
+                 if ($bytes === false || $hash === '' || !hash_equals($hash, hash('sha256', $bytes))) {
+                     $this->system->addError(HEURIST_INVALID_REQUEST, 'A file from the master failed its content hash check.');
+@@ -281,13 +304,13 @@ final class SatelliteInboundService
+                 $storedPath = null;
+                 if (is_string($bytes)) {
+                     $extension = preg_replace('/[^A-Za-z0-9]/', '', (string)($file['ulf_MimeExt'] ?? ''));
+-                    $storedName = 'master_'.$masterFileID.'_'.substr($hash, 0, 16).($extension !== '' ? '.'.$extension : '');
+-                    $fullPath = $uploadDir.$storedName;
+-                    if (file_put_contents($fullPath, $bytes, LOCK_EX) === false) {
+-                        $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to store a file downloaded from the master.');
++                    try {
++                        $storedName = SyncFileStorage::store($uploadDir, 'master_'.$masterFileID, $extension, $bytes);
++                    } catch (\Throwable $error) {
++                        $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to store a file downloaded from the master.', $error->getMessage());
+                         return false;
+                     }
+-                    $createdFiles[] = $fullPath;
++                    $createdFiles[] = $uploadDir.$storedName;
+                     $storedPath = DIR_FILEUPLOADS;
+                 }
+                 $nonce = sha1('master:'.$masterFileID.':'.bin2hex(random_bytes(16)));
+@@ -333,14 +356,18 @@ final class SatelliteInboundService
+         $created = 0;
+         foreach ($shells as $record) {
+             $recordID = (int)($record['rec_ID'] ?? 0);
+-            if ($recordID < 1 || mysql__select_value($this->mysqli,
+-                'SELECT rec_ID FROM Records WHERE rec_ID=?', ['i', $recordID])) continue;
++            if ($recordID < 1) {
++                $this->system->addError(HEURIST_INVALID_REQUEST, 'A pointer target has an invalid record ID.');
++                return false;
++            }
+             $recordTypeID = $this->resolveRecordTypeID($record);
+             if ($recordTypeID < 1) {
+                 $this->system->addError(HEURIST_INVALID_REQUEST,
+                     "Pointer target master record ID $recordID uses a record type missing from the satellite.");
+                 return false;
+             }
++            if (!$this->checkIncomingIdentity($recordID, $recordTypeID)) return false;
++            if (mysql__select_value($this->mysqli, 'SELECT rec_ID FROM Records WHERE rec_ID=?', ['i', $recordID])) continue;
+             $stmt = $this->mysqli->prepare('INSERT INTO Records '
+                 .'(rec_ID,rec_AddedByUGrpID,rec_RecTypeID,rec_OwnerUGrpID,rec_NonOwnerVisibility,'
+                 .'rec_Added,rec_Modified,rec_AddedByImport,rec_FlagTemporary,rec_Title) '
+@@ -353,11 +380,13 @@ final class SatelliteInboundService
+                 'MySQL '.$stmt->errno.': '.$stmt->error);
+             $stmt->close();
+             if (!$ok) return false;
++            if (!$this->rememberIncomingIdentity($recordID)) return false;
+             $created++;
+         }
+         return $created;
+     }
+ 
++    /** Create all verified record headers before resolving references, then append only missing detail occurrences. */
+     private function applyRecords(array $records, array $fileMapping)
+     {
+         $applied = 0;
+@@ -379,17 +408,13 @@ final class SatelliteInboundService
+                 $this->system->addError(HEURIST_INVALID_REQUEST, 'A master record uses a record type missing from the satellite.');
+                 return false;
+             }
+-            $stmt = $this->mysqli->prepare('UPDATE Records SET rec_RecTypeID=?,rec_URL=?,rec_Added=?,rec_Title=?,rec_ScratchPad=?,'
+-                .'rec_AddedByImport=?,rec_NonOwnerVisibility=?,rec_FlagTemporary=0,rec_Modified=UTC_TIMESTAMP() WHERE rec_ID=?');
+-            $url = $record['rec_URL'] ?? null; $added = $record['rec_Added'] ?? null;
+-            $title = (string)($record['rec_Title'] ?? ''); $scratch = $record['rec_ScratchPad'] ?? null;
+-            $byImport = (int)($record['rec_AddedByImport'] ?? 1);
+-            $visibility = (string)($record['rec_NonOwnerVisibility'] ?? 'hidden');
+-            $stmt->bind_param('issssisi', $recordTypeID, $url, $added, $title, $scratch, $byImport, $visibility, $recordID);
+-            $ok = $stmt->execute();
+-            if (!$ok) $this->system->addError(HEURIST_DB_ERROR, "Unable to update master record $recordID on the satellite.", $stmt->error);
+-            $stmt->close();
+-            if (!$ok || !$this->mysqli->query('DELETE FROM recDetails WHERE dtl_RecID='.$recordID)) return false;
++            try {
++                SyncAdditiveRecord::header($this->mysqli, $record);
++            } catch (\Throwable $error) {
++                $this->system->addError(HEURIST_DB_ERROR, "Unable to update master record $recordID on the satellite.", $error->getMessage());
++                return false;
++            }
++            $resolvedDetails = [];
+ 
+             foreach (($record['details'] ?? []) as $detail) {
+                 $dtyID = (int)ConceptCode::getDetailTypeLocalID((string)($detail['detailTypeConceptID'] ?? ''));
+@@ -408,11 +433,26 @@ final class SatelliteInboundService
+                 $value = $detail['dtl_Value'] ?? null;
+                 if (in_array($type, ['enum', 'relationtype'], true) && !empty($detail['termConceptID'])) {
+                     $value = (string)(int)ConceptCode::getTermLocalID((string)$detail['termConceptID']);
++                    if ((int)$value < 1 && (int)($detail['dtl_Value'] ?? 0) > 0) {
++                        $candidateID = (int)$detail['dtl_Value'];
++                        $candidateLabel = mysql__select_value($this->mysqli,
++                            'SELECT trm_Label FROM defTerms WHERE trm_ID=?', ['i', $candidateID]);
++                        if (is_string($candidateLabel) && hash_equals($candidateLabel, (string)($detail['termLabel'] ?? ''))) {
++                            $value = (string)$candidateID;
++                        }
++                    }
+                     if ((int)$value < 1) {
+                         $this->system->addError(HEURIST_INVALID_REQUEST, "A term in master record $recordID is missing from the satellite.");
+                         return false;
+                     }
+                 }
++                if ($type === 'resource' && (int)$value > 0) {
++                    $targetType = (int)mysql__select_value($this->mysqli,
++                        'SELECT rec_RecTypeID FROM Records WHERE rec_ID=?', ['i', (int)$value]);
++                    if ($targetType < 1 || !$this->checkIncomingIdentity((int)$value, $targetType)) {
++                        throw new \RuntimeException("Pointer target $value in record $recordID has no verified master identity.");
++                    }
++                }
+                 $fileID = null;
+                 if (!empty($detail['satelliteFileID'])) {
+                     $masterFileID = (int)$detail['satelliteFileID'];
+@@ -423,40 +463,46 @@ final class SatelliteInboundService
+                         return false;
+                     }
+                 }
+-                $stmt = $this->mysqli->prepare('INSERT INTO recDetails '
+-                    .'(dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo,dtl_Certainty,dtl_Annotation,dtl_HideFromPublic,dtl_AddedByImport) '
+-                    .'VALUES (?,?,?,?,IF(? IS NULL,NULL,ST_GeomFromText(?)),?,?,?,1)');
+-                $geo = $detail['dtl_Geo'] ?? null; $certainty = (float)($detail['dtl_Certainty'] ?? 1);
+-                $annotation = $detail['dtl_Annotation'] ?? null;
+-                $hidden = isset($detail['dtl_HideFromPublic']) ? (int)$detail['dtl_HideFromPublic'] : null;
+-                $stmt->bind_param('iisissdsi', $recordID, $dtyID, $value, $fileID, $geo, $geo, $certainty, $annotation, $hidden);
+-                $ok = $stmt->execute();
+-                if (!$ok) {
+-                    $fieldName = (string)($detail['dty_Name'] ?? mysql__select_value($this->mysqli,
+-                        'SELECT dty_Name FROM defDetailTypes WHERE dty_ID=?', ['i', $dtyID]));
+-                    $recordTitle = trim((string)($record['rec_Title'] ?? ''));
+-                    $recordDescription = 'incoming master record ID '.$recordID
+-                        .($recordTitle !== '' ? ' ("'.$recordTitle.'")' : '');
+-                    $this->system->addError(
+-                        HEURIST_ACTION_BLOCKED,
+-                        'Unable to add field "'.$fieldName.'" to '.$recordDescription.'.',
+-                        'Master field ID '.(int)($detail['dtl_DetailTypeID'] ?? 0)
++                $detail['_sourceDetailTypeID'] = $detail['dtl_DetailTypeID'] ?? 0;
++                $detail['dtl_DetailTypeID'] = $dtyID;
++                $detail['dtl_Value'] = $value;
++                $detail['dtl_UploadedFileID'] = $fileID;
++                $resolvedDetails[] = $detail;
++            }
++            $reportedInsertError = false;
++            try {
++                SyncAdditiveRecord::details($this->mysqli, $recordID, $resolvedDetails,
++                    function (array $detail, int $errno, string $error) use ($recordID, $record, &$reportedInsertError): void {
++                        $dtyID = (int)$detail['dtl_DetailTypeID'];
++                        $type = (string)($detail['dty_Type'] ?? '');
++                        $value = $detail['dtl_Value'] ?? null;
++                        $fieldName = (string)($detail['dty_Name'] ?? mysql__select_value($this->mysqli,
++                            'SELECT dty_Name FROM defDetailTypes WHERE dty_ID=?', ['i', $dtyID]));
++                        $recordTitle = trim((string)($record['rec_Title'] ?? ''));
++                        $recordDescription = 'incoming master record ID '.$recordID
++                            .($recordTitle !== '' ? ' ("'.$recordTitle.'")' : '');
++                        $this->system->addError(HEURIST_ACTION_BLOCKED,
++                            'Unable to add field "'.$fieldName.'" to '.$recordDescription.'.',
++                            'Master field ID '.(int)$detail['_sourceDetailTypeID']
+                             .'; local field ID '.$dtyID.'; field type '.$type
+                             .($type === 'resource' ? '; pointer target master record ID '.(int)$value : '')
+-                            .'; MySQL '.$stmt->errno.': '.$stmt->error
+-                    );
+-                }
+-                $stmt->close();
+-                if (!$ok) return false;
++                            .'; MySQL '.$errno.': '.$error);
++                        $reportedInsertError = true;
++                    });
++            } catch (\Throwable $error) {
++                if ($reportedInsertError) return false;
++                throw $error;
+             }
+             $applied++;
+         }
+         return $applied;
+     }
+ 
++    /** Refuse ambiguous occupied IDs; create an absent record and its provenance together in the caller transaction. */
+     private function ensureRecordExists(array $record, int $recordTypeID): bool
+     {
+         $recordID = (int)($record['rec_ID'] ?? 0);
++        if (!$this->checkIncomingIdentity($recordID, $recordTypeID)) return false;
+         if (mysql__select_value($this->mysqli, 'SELECT rec_ID FROM Records WHERE rec_ID=?', ['i', $recordID])) return true;
+         $stmt = $this->mysqli->prepare('INSERT INTO Records '
+             .'(rec_ID,rec_AddedByUGrpID,rec_RecTypeID,rec_OwnerUGrpID,rec_NonOwnerVisibility,'
+@@ -474,6 +520,35 @@ final class SatelliteInboundService
+             "Unable to create incoming master record ID $recordID on the satellite.",
+             'MySQL '.$stmt->errno.': '.$stmt->error);
+         $stmt->close();
++        if ($ok) $ok = $this->rememberIncomingIdentity($recordID);
+         return $ok;
+     }
++
++    /** An equal integer ID is not evidence that two independently created records are the same. */
++    private function checkIncomingIdentity(int $recordID, int $recordTypeID): bool
++    {
++        $row = mysql__select_row($this->mysqli,
++            'SELECT rec_RecTypeID FROM Records WHERE rec_ID=? FOR UPDATE', ['i', $recordID]);
++        if (!$row) return true;
++        $known = mysql__select_value($this->mysqli,
++            'SELECT sir_MasterRecID FROM sysSyncInboundRecords WHERE sir_MasterRecID=?', ['i', $recordID]);
++        // Own already-remapped records can serve as pointer targets, but must match type.
++        if (!$known) $known = mysql__select_value($this->mysqli,
++            "SELECT sor_MasterRecID FROM sysSyncOutboundRecords WHERE sor_CurrentRecID=? AND sor_MasterRecID=? AND sor_Status!='RESERVED'",
++            ['ii', $recordID, $recordID]);
++        if (!$known || (int)$row[0] !== $recordTypeID) {
++            $this->system->addError(HEURIST_ACTION_BLOCKED,
++                "Incoming master record ID $recordID collides with an unverified local record or a different record type. Existing data was preserved; reconcile its identity before retrying.");
++            return false;
++        }
++        return true;
++    }
++
++    /** Persist proof that this local ID was created from the configured master. */
++    private function rememberIncomingIdentity(int $recordID): bool
++    {
++        if ($this->mysqli->query('INSERT IGNORE INTO sysSyncInboundRecords (sir_MasterRecID) VALUES ('.$recordID.')')) return true;
++        $this->system->addError(HEURIST_DB_ERROR, 'Unable to save incoming record identity.', $this->mysqli->error);
++        return false;
++    }
+ }
+diff --git a/hserv/synchronisation/SatelliteSyncService.php b/hserv/synchronisation/SatelliteSyncService.php
+index 62f8445..8753862 100644
+--- a/hserv/synchronisation/SatelliteSyncService.php
++++ b/hserv/synchronisation/SatelliteSyncService.php
+@@ -14,6 +14,7 @@ final class SatelliteSyncService
+     private SyncConfig $configService;
+     private array $config;
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system, SyncConfig $configService, array $config)
+     {
+         $this->system = $system;
+@@ -22,13 +23,14 @@ final class SatelliteSyncService
+         $this->config = $config;
+     }
+ 
++    /** Orchestrate the complete push/pull run under a database lock, retaining committed stages when a later stage fails. */
+     public function runAllocationStage(): array
+     {
+         $journal = new SyncChangeJournal($this->system);
+         if (!SyncSchema::ensure($this->mysqli) || !$journal->ensureInstalled()) {
+             return $this->system->getError();
+         }
+-        $lockName = 'heurist-sync-'.$this->system->dbname();
++        $lockName = 'heurist-sync-'.substr(hash('sha256', $this->system->dbname()), 0, 48);
+         if ((int)mysql__select_value($this->mysqli, 'SELECT GET_LOCK(?,0)', ['s', $lockName]) !== 1) {
+             return $this->system->addError(HEURIST_ACTION_BLOCKED, 'Another synchronisation is already running.');
+         }
+@@ -52,7 +54,9 @@ final class SatelliteSyncService
+                 }
+                 $this->config['initialInventorySeeded'] = true;
+             }
+-            $after = (int)($this->config['lastNewRecordScanChangeID'] ?? 0);
++            // AUTO_INCREMENT is allocation order, not commit order. Reconcile all
++            // journalled candidates on every run so a late commit cannot be lost.
++            $after = 0;
+             $through = $journal->latestChangeID();
+             $newRecords = $journal->getNewRecordsBetween($after, $through);
+             $updatedRecordIDs = $journal->getUpdatedRecordIDsBetween($after, $through);
+@@ -165,8 +169,7 @@ final class SatelliteSyncService
+ 
+             $newRecordRows = mysql__select_assoc(
+                 $this->mysqli,
+-                "SELECT sor_OriginalLocalRecID,sor_CurrentRecID,sor_MasterRecID FROM sysSyncOutboundRecords WHERE sor_SessionID='".
+-                    $this->mysqli->real_escape_string($sessionID)."' AND sor_Status='ALLOCATED' ORDER BY sor_CurrentRecID",
++                "SELECT sor_OriginalLocalRecID,sor_CurrentRecID,sor_MasterRecID FROM sysSyncOutboundRecords WHERE sor_Status='ALLOCATED' ORDER BY sor_CurrentRecID",
+                 0
+             );
+             $newRecordIDs = [];
+@@ -196,7 +199,7 @@ final class SatelliteSyncService
+                 && !$this->configService->updateRuntime(['lastNewRecordScanChangeID' => $through])) {
+                 return $this->system->getError();
+             }
+-            $masterCursor = (int)($this->config['lastMasterChangeReceived'] ?? 0);
++            $masterCursor = 0; // Additive replay repairs late commits and lost acknowledgements.
+             $masterRecordsDownloaded = 0;
+             $masterTermsDownloaded = 0;
+             $masterFilesDownloaded = 0;
+@@ -225,6 +228,10 @@ final class SatelliteSyncService
+                 if (($download['status'] ?? null) !== HEURIST_OK) return $download;
+                 $downloadData = is_array($download['data'] ?? null) ? $download['data'] : [];
+                 $available = (int)($downloadData['recordsAvailable'] ?? 0);
++                if (!isset($downloadData['payload']['records']) || !is_array($downloadData['payload']['records'])
++                    || $available !== count($downloadData['payload']['records'])) {
++                    return $this->system->addError(HEURIST_INVALID_REQUEST, 'The master record count does not match its payload.');
++                }
+                 $structure = is_array($downloadData['structure'] ?? null) ? $downloadData['structure'] : null;
+                 if ($available > 0 || $structure !== null) {
+                     $progress->update(
+@@ -254,7 +261,7 @@ final class SatelliteSyncService
+                     }
+                 }
+                 $nextCursor = (int)($downloadData['nextChangeID'] ?? $masterCursor);
+-                if ($nextCursor < $masterCursor || ($available > 0 && $nextCursor === $masterCursor)) {
++                if ($nextCursor < $masterCursor || (($available > 0 || !empty($downloadData['hasMore'])) && $nextCursor === $masterCursor)) {
+                     return $this->system->addError(HEURIST_ACTION_BLOCKED, 'The master returned an invalid change cursor.');
+                 }
+                 $masterCursor = $nextCursor;
+@@ -310,6 +317,7 @@ final class SatelliteSyncService
+         }
+     }
+ 
++    /** Export a consistent dependency/content snapshot, send dependencies first, and mark local upload completion only after acknowledgement. */
+     private function uploadRecordIDs(
+         SyncHttpClient $client,
+         string $sessionID,
+@@ -330,8 +338,12 @@ final class SatelliteSyncService
+                 $newRecords ? $uploaded : $newAlreadyCompleted,
+                 $newRecords ? 0 : $uploaded);
+             try {
+-                $dependencies = SyncDependencyPayload::export($this->system, $batchIDs);
+-                $payload = SyncRecordPayload::export($this->system, $batchIDs);
++                $snapshot = new SyncTransaction($this->mysqli);
++                try {
++                    $dependencies = SyncDependencyPayload::export($this->system, $batchIDs);
++                    $payload = SyncRecordPayload::export($this->system, $batchIDs);
++                    $snapshot->finish(true);
++                } finally { $snapshot->close(); }
+             } catch (\RuntimeException $e) {
+                 $this->system->addError(HEURIST_ACTION_BLOCKED, $e->getMessage());
+                 return false;
+@@ -368,6 +380,7 @@ final class SatelliteSyncService
+         return ['records' => $uploaded, 'terms' => $termsUploaded, 'files' => $filesUploaded];
+     }
+ 
++    /** Resume pending permanent-ID moves and commit their ALLOCATED states together with the moved references. */
+     private function completeReservedMappings()
+     {
+         $rows = mysql__select_assoc(
+@@ -383,17 +396,14 @@ final class SatelliteSyncService
+         foreach ($rows as $row) {
+             $mapping[(int)$row['sor_CurrentRecID']] = (int)$row['sor_MasterRecID'];
+         }
+-        $result = (new RecordIDRemapper($this->system))->remap($mapping);
++        $result = (new RecordIDRemapper($this->system))->remap($mapping, true);
+         if (($result['status'] ?? null) !== HEURIST_OK) {
+             return false;
+         }
+-        if (!$this->mysqli->query("UPDATE sysSyncOutboundRecords SET sor_Status='ALLOCATED' WHERE sor_Status='RESERVED'")) {
+-            $this->system->addError(HEURIST_DB_ERROR, 'Unable to complete outbound allocation state.', $this->mysqli->error);
+-            return false;
+-        }
+         return count($rows);
+     }
+ 
++    /** Persist the master allocation response locally before changing any local record IDs. */
+     private function saveReservations(string $sessionID, array $records, array $mapping): bool
+     {
+         $recordByID = [];
+@@ -404,7 +414,8 @@ final class SatelliteSyncService
+             $this->system->addError(HEURIST_ERROR, 'Master returned an incomplete record-ID allocation.');
+             return false;
+         }
+-        $keepAutocommit = mysql__begin_transaction($this->mysqli);
++        $transaction = new SyncTransaction($this->mysqli, false);
++        try {
+         $ok = true;
+         $stmt = $this->mysqli->prepare(
+             'INSERT INTO sysSyncOutboundRecords '
+@@ -428,7 +439,11 @@ final class SatelliteSyncService
+             }
+         }
+         $stmt->close();
+-        mysql__end_transaction($this->mysqli, $ok, $keepAutocommit);
++
++        $ok = $transaction->finish($ok);
++        } finally {
++            $transaction->close();
++        }
+         return $ok;
+     }
+ 
+diff --git a/hserv/synchronisation/SyncAuth.php b/hserv/synchronisation/SyncAuth.php
+index 147ddec..5b44993 100644
+--- a/hserv/synchronisation/SyncAuth.php
++++ b/hserv/synchronisation/SyncAuth.php
+@@ -7,6 +7,7 @@ namespace hserv\synchronisation;
+  */
+ final class SyncAuth
+ {
++    /** Authenticate the enabled satellite, timestamp, action/body HMAC and unused nonce before allowing a master operation. */
+     public static function verifyMasterRequest(
+         \hserv\System $system,
+         array $config,
+diff --git a/hserv/synchronisation/SyncChangeJournal.php b/hserv/synchronisation/SyncChangeJournal.php
+index 8269944..040ecb0 100644
+--- a/hserv/synchronisation/SyncChangeJournal.php
++++ b/hserv/synchronisation/SyncChangeJournal.php
+@@ -12,12 +12,14 @@ final class SyncChangeJournal
+     private \mysqli $mysqli;
+     private bool $installed = false;
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system)
+     {
+         $this->system = $system;
+         $this->mysqli = $system->getMysqli();
+     }
+ 
++    /** Create missing journal storage/triggers outside data transactions; never replace existing application triggers. */
+     public function ensureInstalled(): bool
+     {
+         if ($this->installed) return true;
+@@ -80,6 +82,7 @@ final class SyncChangeJournal
+         return true;
+     }
+ 
++    /** Find completed locally-created records which have neither outbound allocation nor inbound master provenance. */
+     public function getNewRecordsBetween(int $afterChangeID, int $throughChangeID): array
+     {
+         if (!$this->ensureInstalled()) {
+@@ -89,8 +92,9 @@ final class SyncChangeJournal
+             "SELECT c.sch_RecID,r.rec_RecTypeID,MIN(c.sch_ID) AS firstChangeID "
+             ."FROM sysSyncChanges c JOIN Records r ON r.rec_ID=c.sch_RecID "
+             ."LEFT JOIN sysSyncOutboundRecords o ON o.sor_CurrentRecID=r.rec_ID "
++            ."LEFT JOIN sysSyncInboundRecords i ON i.sir_MasterRecID=r.rec_ID "
+             ."WHERE c.sch_ID>? AND c.sch_ID<=? AND c.sch_Entity='record' AND c.sch_Action='create' "
+-            ."AND r.rec_FlagTemporary=0 AND o.sor_CurrentRecID IS NULL "
++            ."AND r.rec_FlagTemporary=0 AND o.sor_CurrentRecID IS NULL AND i.sir_MasterRecID IS NULL "
+             ."GROUP BY c.sch_RecID,r.rec_RecTypeID ORDER BY firstChangeID"
+         );
+         $stmt->bind_param('ii', $afterChangeID, $throughChangeID);
+@@ -130,6 +134,7 @@ final class SyncChangeJournal
+         return $ids;
+     }
+ 
++    /** Read the greatest visible event ID; it is a progress bound, not proof of transaction commit order. */
+     public function latestChangeID(): int
+     {
+         return (int)mysql__select_value($this->mysqli, 'SELECT COALESCE(MAX(sch_ID),0) FROM sysSyncChanges');
+@@ -148,9 +153,10 @@ final class SyncChangeJournal
+         $sql = "INSERT INTO sysSyncChanges(sch_Entity,sch_Action,sch_RecID) "
+             ."SELECT 'record','create',r.rec_ID FROM Records r "
+             ."LEFT JOIN sysSyncOutboundRecords o ON o.sor_CurrentRecID=r.rec_ID "
++            ."LEFT JOIN sysSyncInboundRecords i ON i.sir_MasterRecID=r.rec_ID "
+             ."LEFT JOIN sysSyncChanges c ON c.sch_RecID=r.rec_ID "
+                 ."AND c.sch_Entity='record' AND c.sch_Action='create' "
+-            ."WHERE r.rec_FlagTemporary=0 AND o.sor_CurrentRecID IS NULL AND c.sch_ID IS NULL";
++            ."WHERE r.rec_FlagTemporary=0 AND o.sor_CurrentRecID IS NULL AND i.sir_MasterRecID IS NULL AND c.sch_ID IS NULL";
+         if (!$this->mysqli->query($sql)) {
+             $this->system->addError(
+                 HEURIST_ACTION_BLOCKED,
+@@ -162,6 +168,7 @@ final class SyncChangeJournal
+         return $this->mysqli->affected_rows;
+     }
+ 
++    /** Define guarded append-only events; inbound replay suppresses sync events but does not disable normal Heurist triggers. */
+     private function triggerDefinitions(): array
+     {
+         $guard = 'COALESCE(@HEURIST_SYNC_APPLY,0)=0';
+diff --git a/hserv/synchronisation/SyncConfig.php b/hserv/synchronisation/SyncConfig.php
+index e66f87c..6df0ceb 100644
+--- a/hserv/synchronisation/SyncConfig.php
++++ b/hserv/synchronisation/SyncConfig.php
+@@ -9,35 +9,54 @@ final class SyncConfig
+ {
+     private \hserv\System $system;
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system)
+     {
+         $this->system = $system;
+     }
+ 
++    /** Read database-specific configuration, verify the local registered identity and redact authentication keys for browser use. */
+     public function load(bool $includeSecrets = false): array
+     {
+         $config = $this->system->settings->getDatabaseSetting('Synchronisation');
+         if (!is_array($config)) {
+             return [];
+         }
++        if ($config && (int)($config['databaseID'] ?? 0) !== $this->registeredDatabaseID()) {
++            throw new \RuntimeException('Synchronisation configuration belongs to a different registered database; reconcile its mappings before use.');
++        }
+         return $includeSecrets ? $config : $this->redact($config);
+     }
+ 
++    /** Validate a locked current configuration and preserve its identity and runtime checkpoints during atomic replacement. */
+     public function save(array $config): bool
+     {
+-        $existing = $this->load(true);
+-        $normalised = $this->validateAndNormalise($config, $existing);
+-        if ($normalised === false) {
+-            return false;
+-        }
+-        return $this->system->settings->setDatabaseSetting('Synchronisation', $normalised);
++        return $this->writeAtomically(function (array $existing) use ($config) {
++            $normalised = $this->validateAndNormalise($config, $existing);
++            if ($normalised === false) return false;
++            // Permanent record/file maps belong to one role and registered pair.
++            // Changing endpoints for the same identity is allowed; silently reusing
++            // those maps with a different database is not a safe reconfiguration.
++            if ($existing && (($existing['role'] ?? '') !== $normalised['role']
++                || (int)($existing['databaseID'] ?? 0) !== $normalised['databaseID']
++                || ($normalised['role'] === 'satellite'
++                    && (int)($existing['master']['databaseID'] ?? 0) !== $normalised['master']['databaseID']))) {
++                $this->system->addError(HEURIST_ACTION_BLOCKED,
++                    'The synchronisation role or registered database identity cannot be changed while retaining its configuration. '
++                    .'Reconcile the existing record and file mappings before reconfiguring this database.');
++                return false;
++            }
++            return array_replace($existing, $normalised);
++        });
+     }
+ 
++    /** Return this database registration number used to namespace permanent identities. */
+     public function registeredDatabaseID(): int
+     {
+         return (int)$this->system->settings->get('sys_dbRegisteredID');
+     }
+ 
++    /** Validate roles, endpoints and secrets while retaining server-owned checkpoint state. */
+     private function validateAndNormalise(array $config, array $existing)
+     {
+         $registeredID = $this->registeredDatabaseID();
+@@ -76,7 +95,7 @@ final class SyncConfig
+             if ($database === '' && $databaseFromUrl !== '') {
+                 $database = $databaseFromUrl;
+             }
+-            if ($masterID < 1 || !preg_match('/^[A-Za-z0-9_$]+$/', $database)
++            if ($masterID < 1 || $masterID === $registeredID || !preg_match('/^[A-Za-z0-9_$]+$/', $database)
+                 || !filter_var($url, FILTER_VALIDATE_URL)) {
+                 $this->system->addError(
+                     HEURIST_INVALID_REQUEST,
+@@ -109,6 +128,7 @@ final class SyncConfig
+         return $result;
+     }
+ 
++    /** Validate unique registered satellite IDs, derive replacement keys and preserve omitted existing secrets. */
+     private function normaliseSatellites($satellites, array $existingSatellites)
+     {
+         if (!is_array($satellites)) {
+@@ -158,6 +178,7 @@ final class SyncConfig
+         return $result;
+     }
+ 
++    /** Remove all derived shared keys from the copy returned to an administrator browser. */
+     private function redact(array $config): array
+     {
+         if (isset($config['master']['sharedKey'])) {
+@@ -165,7 +186,9 @@ final class SyncConfig
+             unset($config['master']['sharedKey']);
+             $config['master']['sharedSecret'] = '';
+         }
+-        foreach ($config['satellites'] ?? [] as &$satellite) {
++        // Iterate the actual array: a null-coalescing temporary would leave keys exposed.
++        if (!isset($config['satellites'])) $config['satellites'] = [];
++        foreach ($config['satellites'] as &$satellite) {
+             $satellite['hasSharedSecret'] = !empty($satellite['sharedKey']);
+             unset($satellite['sharedKey']);
+             $satellite['sharedSecret'] = '';
+@@ -206,6 +229,7 @@ final class SyncConfig
+         return [rtrim($authority.'/'.ltrim($path, '/'), '/'), $database];
+     }
+ 
++    /** Merge only recognised progress fields into the current configuration without discarding keys or concurrent settings. */
+     public function updateRuntime(array $values): bool
+     {
+         $allowed = [
+@@ -220,6 +244,73 @@ final class SyncConfig
+         if (!$values) {
+             return true;
+         }
+-        return $this->system->settings->setDatabaseSetting('Synchronisation', $values, 1);
++        return $this->writeAtomically(function (array $existing) use ($values) {
++            if (!$existing || (int)($existing['databaseID'] ?? 0) !== $this->registeredDatabaseID()) {
++                $this->system->addError(HEURIST_ACTION_BLOCKED,
++                    'Synchronisation configuration is missing or belongs to another registered database.');
++                return false;
++            }
++            return array_replace($existing, $values);
++        });
++    }
++
++    /**
++     * Serialise read/merge/write on a stable sidecar lock and atomically rename a
++     * fully written, flushed sibling file. An interrupted writer leaves the old
++     * JSON intact, rather than truncating configuration or losing a checkpoint.
++     * This does not make the filesystem checkpoint part of the SQL transaction;
++     * a crash before saving it causes a safe replay of already committed data.
++     */
++    private function writeAtomically(callable $merge): bool
++    {
++        $directory = $this->system->getSysDir('settings');
++        if (!$directory || (!is_dir($directory) && !@mkdir($directory, 0775, true))) {
++            $this->system->addError(HEURIST_SYSTEM_CONFIG, 'The synchronisation settings directory is unavailable.');
++            return false;
++        }
++        $path = rtrim($directory, '/').'/synchronisation.json';
++        $lock = @fopen($path.'.lock', 'c');
++        if (!$lock) {
++            $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to open the synchronisation settings lock.');
++            return false;
++        }
++        $temporary = null;
++        try {
++            if (!flock($lock, LOCK_EX)) throw new \RuntimeException('Unable to lock synchronisation settings.');
++            $existing = [];
++            if (is_file($path)) {
++                $json = file_get_contents($path);
++                if ($json === false || trim($json) === '') throw new \RuntimeException('Synchronisation settings are unreadable or empty.');
++                $existing = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
++                if (!is_array($existing)) throw new \RuntimeException('Synchronisation settings must be a JSON object.');
++            }
++            $updated = $merge($existing);
++            if ($updated === false) return false;
++            $json = json_encode($updated, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
++            $temporary = tempnam($directory, '.synchronisation-');
++            if ($temporary === false) throw new \RuntimeException('Unable to create temporary synchronisation settings.');
++            $stream = fopen($temporary, 'wb');
++            if (!$stream) throw new \RuntimeException('Unable to open temporary synchronisation settings.');
++            try {
++                if (fwrite($stream, $json) !== strlen($json) || !fflush($stream)) {
++                    throw new \RuntimeException('Synchronisation settings were not completely written.');
++                }
++                if (function_exists('fsync') && !fsync($stream)) throw new \RuntimeException('Unable to flush synchronisation settings to disk.');
++            } finally { fclose($stream); }
++            if (!chmod($temporary, is_file($path) ? (fileperms($path) & 0777) : 0660)) {
++                throw new \RuntimeException('Unable to set synchronisation settings permissions.');
++            }
++            if (!rename($temporary, $path)) throw new \RuntimeException('Unable to replace synchronisation settings atomically.');
++            $temporary = null;
++            return true;
++        } catch (\Throwable $error) {
++            $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to save synchronisation settings.', $error->getMessage());
++            return false;
++        } finally {
++            if ($temporary !== null && is_file($temporary)) @unlink($temporary);
++            flock($lock, LOCK_UN);
++            fclose($lock);
++        }
+     }
++
+ }
+diff --git a/hserv/synchronisation/SyncDependencyPayload.php b/hserv/synchronisation/SyncDependencyPayload.php
+index e11b0c0..073d44c 100644
+--- a/hserv/synchronisation/SyncDependencyPayload.php
++++ b/hserv/synchronisation/SyncDependencyPayload.php
+@@ -10,6 +10,7 @@ final class SyncDependencyPayload
+     private const MAX_FILE_BYTES = 20 * 1024 * 1024;
+     private const MAX_BATCH_BYTES = 40 * 1024 * 1024;
+ 
++    /** Read referenced terms, pointer shells and file bytes for a batch; callers hold a consistent database read snapshot. */
+     public static function export(\hserv\System $system, array $recordIDs): array
+     {
+         $mysqli = $system->getMysqli();
+@@ -100,6 +101,7 @@ final class SyncDependencyPayload
+         return self::exportTerms($mysqli, array_map('intval', $ids), true);
+     }
+ 
++    /** Walk parent and inverse term dependencies once and express cross-database links as concept codes. */
+     private static function exportTerms(\mysqli $mysqli, array $termIDs, bool $masterControlled = false): array
+     {
+         $terms = [];
+diff --git a/hserv/synchronisation/SyncDependencyService.php b/hserv/synchronisation/SyncDependencyService.php
+index 3cff1d4..4f8f0ab 100644
+--- a/hserv/synchronisation/SyncDependencyService.php
++++ b/hserv/synchronisation/SyncDependencyService.php
+@@ -10,12 +10,14 @@ final class SyncDependencyService
+     private \hserv\System $system;
+     private \mysqli $mysqli;
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system)
+     {
+         $this->system = $system;
+         $this->mysqli = $system->getMysqli();
+     }
+ 
++    /** Validate permanent satellite ownership, then commit term/file dependencies before their record-content request. */
+     public function apply(string $sessionID, int $satelliteDBID, array $payload): array
+     {
+         if (!SyncSchema::ensure($this->mysqli)) return $this->system->getError();
+@@ -34,25 +36,29 @@ final class SyncDependencyService
+         }
+         foreach ($payload['recordIDs'] as $recordID) {
+             if (!mysql__select_value($this->mysqli,
+-                'SELECT srm_MasterRecID FROM sysSyncRecordMap WHERE srm_SatelliteDBID=? AND srm_MasterRecID=? AND srm_SessionID=?',
+-                ['iis', $satelliteDBID, (int)$recordID, $sessionID])) {
++                'SELECT srm_MasterRecID FROM sysSyncRecordMap WHERE srm_SatelliteDBID=? AND srm_MasterRecID=?',
++                ['ii', $satelliteDBID, (int)$recordID])) {
+                 return $this->system->addError(HEURIST_INVALID_REQUEST, 'A dependency batch refers to a record not reserved by this session.');
+             }
+         }
+ 
+         ConceptCode::setSystem($this->system);
+-        $keepAutocommit = mysql__begin_transaction($this->mysqli);
+-        $this->mysqli->query('SET @HEURIST_SYNC_APPLY=1');
++        $transaction = new SyncTransaction($this->mysqli, true);
++        try {
+         $createdFiles = [];
+         $ok = true;
+         $termCount = $this->applyTerms($satelliteDBID, $payload['terms']);
+         if ($termCount === false) $ok = false;
+         $fileCount = $ok ? $this->applyFiles($satelliteDBID, $payload['files'], $createdFiles) : false;
+         if ($fileCount === false) $ok = false;
+-        $this->mysqli->query('SET @HEURIST_SYNC_APPLY=0');
+-        mysql__end_transaction($this->mysqli, $ok, $keepAutocommit);
++
++        $ok = $transaction->finish($ok);
++        } finally {
++            $transaction->close();
++        }
+         if (!$ok) {
+-            foreach ($createdFiles as $path) if (is_file($path)) @unlink($path);
++            // Keep unreferenced attempt files for an explicit later cleanup. A lost
++            // COMMIT acknowledgement must never cause deletion of committed bytes.
+             return $this->system->getError();
+         }
+         return ['status' => HEURIST_OK, 'data' => [
+@@ -61,6 +67,7 @@ final class SyncDependencyService
+         ]];
+     }
+ 
++    /** Create permitted satellite vocabulary extensions only after their existing master parents can be resolved. */
+     private function applyTerms(int $satelliteDBID, array $terms)
+     {
+         $pending = [];
+@@ -146,6 +153,7 @@ final class SyncDependencyService
+         return $created;
+     }
+ 
++    /** Check source-file mappings and hashes, write immutable bytes and commit the master registration/mapping together. */
+     private function applyFiles(int $satelliteDBID, array $files, array &$createdFiles)
+     {
+         $created = 0;
+@@ -161,9 +169,15 @@ final class SyncDependencyService
+                 $this->system->addError(HEURIST_INVALID_REQUEST, 'A synchronised file has no source ID.');
+                 return false;
+             }
+-            if (mysql__select_value($this->mysqli,
+-                'SELECT sfm_MasterFileID FROM sysSyncFileMap WHERE sfm_SatelliteDBID=? AND sfm_SatelliteFileID=?',
+-                ['ii', $satelliteDBID, $sourceID])) continue;
++            $prior = mysql__select_row($this->mysqli,
++                'SELECT sfm_ContentHash FROM sysSyncFileMap WHERE sfm_SatelliteDBID=? AND sfm_SatelliteFileID=?',
++                ['ii', $satelliteDBID, $sourceID]);
++            if ($prior) {
++                if ((string)$prior[0] !== (string)($file['contentHash'] ?? '')) {
++                    throw new \RuntimeException('An already synchronised file changed content; register it as a new file before retrying.');
++                }
++                continue;
++            }
+ 
+             $content = $file['contentBase64'] ?? null;
+             if (is_string($content)) {
+@@ -174,22 +188,25 @@ final class SyncDependencyService
+                 }
+             }
+             $hash = (string)($file['contentHash'] ?? '');
++            if (!is_string($content) && trim((string)($file['ulf_ExternalFileReference'] ?? '')) === '') {
++                throw new \RuntimeException('A synchronised file has neither content nor an external reference.');
++            }
+             $storedName = null;
+             $storedPath = null;
+-            if (is_string($content) && $content !== '') {
++            if (is_string($content)) {
+                 $bytes = base64_decode($content, true);
+                 if ($bytes === false || $hash === '' || !hash_equals($hash, hash('sha256', $bytes))) {
+                     $this->system->addError(HEURIST_INVALID_REQUEST, 'A synchronised file failed its content hash check.');
+                     return false;
+                 }
+                 $extension = preg_replace('/[^A-Za-z0-9]/', '', (string)($file['ulf_MimeExt'] ?? ''));
+-                $storedName = 'sync_'.$satelliteDBID.'_'.$sourceID.'_'.substr($hash, 0, 16).($extension !== '' ? '.'.$extension : '');
+-                $fullPath = $uploadDir.$storedName;
+-                if (file_put_contents($fullPath, $bytes, LOCK_EX) === false) {
+-                    $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to store a synchronised file on the master.');
++                try {
++                    $storedName = SyncFileStorage::store($uploadDir, 'sync_'.$satelliteDBID.'_'.$sourceID, $extension, $bytes);
++                } catch (\Throwable $error) {
++                    $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Unable to store a synchronised file on the master.', $error->getMessage());
+                     return false;
+                 }
+-                $createdFiles[] = $fullPath;
++                $createdFiles[] = $uploadDir.$storedName;
+                 $storedPath = DIR_FILEUPLOADS;
+             }
+             $nonce = sha1($satelliteDBID.':'.$sourceID.':'.bin2hex(random_bytes(16)));
+diff --git a/hserv/synchronisation/SyncFeature.php b/hserv/synchronisation/SyncFeature.php
+index 348368e..bf10785 100644
+--- a/hserv/synchronisation/SyncFeature.php
++++ b/hserv/synchronisation/SyncFeature.php
+@@ -9,12 +9,14 @@ final class SyncFeature
+ {
+     public const UNAVAILABLE_MESSAGE = 'Sorry, this function is not available on this server';
+ 
++    /** Read the server experimental flag without enabling the feature implicitly. */
+     public static function isEnabled(): bool
+     {
+         global $experimental;
+         return isset($experimental) && $experimental === true;
+     }
+ 
++    /** Report the existing availability explanation when this server has not enabled the experiment. */
+     public static function requireEnabled(\hserv\System $system): bool
+     {
+         if (self::isEnabled()) {
+diff --git a/hserv/synchronisation/SyncHttpClient.php b/hserv/synchronisation/SyncHttpClient.php
+index 9990e35..58eac18 100644
+--- a/hserv/synchronisation/SyncHttpClient.php
++++ b/hserv/synchronisation/SyncHttpClient.php
+@@ -10,12 +10,14 @@ final class SyncHttpClient
+     private \hserv\System $system;
+     private array $config;
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system, array $config)
+     {
+         $this->system = $system;
+         $this->config = $config;
+     }
+ 
++    /** Request or resume the configured satellite session using authenticated HTTPS. */
+     public function startSession(): array
+     {
+         return $this->request('start_session', [
+@@ -23,26 +25,31 @@ final class SyncHttpClient
+         ]);
+     }
+ 
++    /** Ask the master to reserve permanent IDs for new local records. */
+     public function allocateIDs(string $sessionID, array $records): array
+     {
+         return $this->request('allocate_ids', ['sessionID' => $sessionID, 'records' => $records]);
+     }
+ 
++    /** Request compatibility checks before reserving or uploading records. */
+     public function validateStructureUsage(string $sessionID, array $usage): array
+     {
+         return $this->request('validate_structure_usage', ['sessionID' => $sessionID, 'usage' => $usage]);
+     }
+ 
++    /** Send portable record content after its dependency batch has been acknowledged. */
+     public function uploadRecords(string $sessionID, array $payload): array
+     {
+         return $this->request('upload_records', ['sessionID' => $sessionID, 'payload' => $payload]);
+     }
+ 
++    /** Send required terms and file bytes before sending references to them. */
+     public function uploadDependencies(string $sessionID, array $payload): array
+     {
+         return $this->request('upload_dependencies', ['sessionID' => $sessionID, 'payload' => $payload]);
+     }
+ 
++    /** Request a master batch after the current run position, optionally including changed structure. */
+     public function downloadChanges(string $sessionID, int $afterChangeID, bool $includeStructure = false,
+         string $structureHash = ''): array
+     {
+@@ -54,6 +61,7 @@ final class SyncHttpClient
+         ]);
+     }
+ 
++    /** Sign the exact request body with a fresh nonce, send it to the master and validate the JSON response. */
+     private function request(string $action, array $payload): array
+     {
+         $master = $this->config['master'] ?? [];
+@@ -123,6 +131,7 @@ final class SyncHttpClient
+         return $response;
+     }
+ 
++    /** Convert HTTP/transport failures into the existing structured Heurist error response. */
+     private function diagnosticError(string $code, string $message, string $detail): array
+     {
+         return [
+diff --git a/hserv/synchronisation/SyncMasterChangeService.php b/hserv/synchronisation/SyncMasterChangeService.php
+index 67c4c2e..d031619 100644
+--- a/hserv/synchronisation/SyncMasterChangeService.php
++++ b/hserv/synchronisation/SyncMasterChangeService.php
+@@ -8,12 +8,14 @@ final class SyncMasterChangeService
+     private \hserv\System $system;
+     private \mysqli $mysqli;
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system)
+     {
+         $this->system = $system;
+         $this->mysqli = $system->getMysqli();
+     }
+ 
++    /** Export a bounded consistent snapshot of eligible master records and dependencies; group by latest visible event to avoid repeated pages. */
+     public function download(string $sessionID, int $satelliteDBID, int $afterChangeID,
+         bool $includeStructure = false, string $satelliteStructureHash = ''): array
+     {
+@@ -28,14 +30,16 @@ final class SyncMasterChangeService
+ 
+         $journal = new SyncChangeJournal($this->system);
+         if (!$journal->ensureInstalled()) return $this->system->getError();
++        $snapshot = new SyncTransaction($this->mysqli);
++        try {
+         $snapshotChangeID = $journal->latestChangeID();
+         $stmt = $this->mysqli->prepare(
+-            "SELECT c.sch_RecID,MIN(c.sch_ID) AS firstChangeID FROM sysSyncChanges c "
++            "SELECT c.sch_RecID,MAX(c.sch_ID) AS lastChangeID FROM sysSyncChanges c "
+             ."JOIN Records r ON r.rec_ID=c.sch_RecID AND r.rec_FlagTemporary=0 "
+             ."LEFT JOIN sysSyncRecordMap m ON m.srm_MasterRecID=c.sch_RecID "
+             ."WHERE c.sch_ID>? AND c.sch_ID<=? AND c.sch_Entity IN ('record','detail') "
+             ."AND c.sch_Action!='delete' AND (m.srm_SatelliteDBID IS NULL OR m.srm_SatelliteDBID<>?) "
+-            ."GROUP BY c.sch_RecID ORDER BY firstChangeID LIMIT 100"
++            ."GROUP BY c.sch_RecID ORDER BY lastChangeID LIMIT 100"
+         );
+         $stmt->bind_param('iii', $afterChangeID, $snapshotChangeID, $satelliteDBID);
+         $stmt->execute();
+@@ -44,7 +48,7 @@ final class SyncMasterChangeService
+         $nextChangeID = $afterChangeID;
+         while ($row = $result->fetch_assoc()) {
+             $recordIDs[] = (int)$row['sch_RecID'];
+-            $nextChangeID = max($nextChangeID, (int)$row['firstChangeID']);
++            $nextChangeID = max($nextChangeID, (int)$row['lastChangeID']);
+         }
+         $result->close();
+         $stmt->close();
+@@ -105,5 +109,7 @@ final class SyncMasterChangeService
+             'dependencies' => $dependencies,
+             'payload' => $payload
+         ]];
++        } finally { $snapshot->close(); }
++
+     }
+ }
+diff --git a/hserv/synchronisation/SyncProgress.php b/hserv/synchronisation/SyncProgress.php
+index fd88c23..3f102e2 100644
+--- a/hserv/synchronisation/SyncProgress.php
++++ b/hserv/synchronisation/SyncProgress.php
+@@ -7,11 +7,13 @@ final class SyncProgress
+ {
+     private \mysqli $mysqli;
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system)
+     {
+         $this->mysqli = $system->getMysqli();
+     }
+ 
++    /** Initialise the local progress row and initial candidate counts for this run. */
+     public function begin(int $newRecords, int $updatedRecords): void
+     {
+         SyncSchema::ensureProgress($this->mysqli);
+@@ -45,6 +47,7 @@ final class SyncProgress
+         $stmt->close();
+     }
+ 
++    /** Persist the current phase and append its explanation to the pollable log. */
+     public function update(string $step, string $message, ?int $newCompleted = null, ?int $updatedCompleted = null): void
+     {
+         $newCompleted = $newCompleted ?? (int)mysql__select_value($this->mysqli,
+@@ -60,18 +63,21 @@ final class SyncProgress
+         $stmt->close();
+     }
+ 
++    /** Mark the local progress display successful after all requested stages finish. */
+     public function complete(string $message, int $newCompleted, int $updatedCompleted): void
+     {
+         $this->update('COMPLETED', $message, $newCompleted, $updatedCompleted);
+         $this->mysqli->query("UPDATE sysSyncProgress SET spr_State='COMPLETED' WHERE spr_ID=1");
+     }
+ 
++    /** Mark compatible work complete while retaining the explanation for held-back structure. */
+     public function awaitUserAction(string $message, int $newCompleted, int $updatedCompleted): void
+     {
+         $this->update('AWAITING_USER_ACTION', $message, $newCompleted, $updatedCompleted);
+         $this->mysqli->query("UPDATE sysSyncProgress SET spr_State='AWAITING_USER_ACTION' WHERE spr_ID=1");
+     }
+ 
++    /** Record an error without erasing the earlier progress log. */
+     public function fail(string $message): void
+     {
+         SyncSchema::ensureProgress($this->mysqli);
+@@ -85,6 +91,7 @@ final class SyncProgress
+         $stmt->close();
+     }
+ 
++    /** Return current progress and decoded log entries to the polling interface. */
+     public function get(): array
+     {
+         $result = $this->mysqli->query('SELECT * FROM sysSyncProgress WHERE spr_ID=1');
+diff --git a/hserv/synchronisation/SyncRecordPayload.php b/hserv/synchronisation/SyncRecordPayload.php
+index a5f91de..b5d6472 100644
+--- a/hserv/synchronisation/SyncRecordPayload.php
++++ b/hserv/synchronisation/SyncRecordPayload.php
+@@ -7,6 +7,7 @@ use hserv\structure\ConceptCode;
+ /** Builds the portable record-content payload used after permanent IDs are allocated. */
+ final class SyncRecordPayload
+ {
++    /** Export full record snapshots with portable field/term identities and source file IDs; fail on missing records or field queries. */
+     public static function export(\hserv\System $system, array $recordIDs): array
+     {
+         $mysqli = $system->getMysqli();
+@@ -20,7 +21,7 @@ final class SyncRecordPayload
+                 .'rec_AddedByImport,rec_NonOwnerVisibility FROM Records WHERE rec_ID=?', ['i', $recordID]);
+             $record = $recordResult ? $recordResult->fetch_assoc() : null;
+             if ($recordResult) $recordResult->close();
+-            if (!$record) continue;
++            if (!$record) throw new \RuntimeException("Record $recordID disappeared or could not be exported; retry the batch.");
+             $record['recordTypeConceptID'] = ConceptCode::getRecTypeConceptID((int)$record['rec_RecTypeID']);
+             $record['recordTypeName'] = (string)mysql__select_value($mysqli,
+                 'SELECT rty_Name FROM defRecTypes WHERE rty_ID=?', ['i', (int)$record['rec_RecTypeID']]);
+@@ -30,6 +31,7 @@ final class SyncRecordPayload
+                 .'d.dtl_Certainty,d.dtl_Annotation,d.dtl_HideFromPublic,t.dty_Type,t.dty_Name '
+                 .'FROM recDetails d JOIN defDetailTypes t ON t.dty_ID=d.dtl_DetailTypeID '
+                 .'WHERE d.dtl_RecID=? ORDER BY d.dtl_ID', ['i', $recordID]);
++            if (!$res) throw new \RuntimeException("Unable to export fields for record $recordID.");
+             while ($res && ($detail = $res->fetch_assoc())) {
+                 $detail['detailTypeConceptID'] = ConceptCode::getDetailTypeConceptID((int)$detail['dtl_DetailTypeID']);
+                 if (!empty($detail['dtl_UploadedFileID'])) {
+diff --git a/hserv/synchronisation/SyncSchema.php b/hserv/synchronisation/SyncSchema.php
+index d779457..871d5ad 100644
+--- a/hserv/synchronisation/SyncSchema.php
++++ b/hserv/synchronisation/SyncSchema.php
+@@ -7,11 +7,24 @@ namespace hserv\synchronisation;
+  */
+ final class SyncSchema
+ {
++    /** Reject nontransactional core tables and create missing private sync tables before beginning data transactions. */
+     public static function ensure(\mysqli $mysqli): bool
+     {
++        // Core triggers also write archives, link/date caches and user references.
++        // Rollback promises are false on legacy MyISAM tables: stop, never convert
++        // tables automatically as part of a live synchronisation request.
++        $engines = $mysqli->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() "
++            ."AND TABLE_TYPE='BASE TABLE' AND ENGINE<>'InnoDB' AND (TABLE_NAME='Records' "
++            ."OR TABLE_NAME LIKE 'rec%' OR TABLE_NAME LIKE 'def%' OR TABLE_NAME LIKE 'usr%' "
++            ."OR TABLE_NAME='sysArchive' OR TABLE_NAME LIKE 'sysSync%')");
++        if (!$engines) throw new \RuntimeException('Unable to verify synchronisation table engines.');
++        $unsafe = [];
++        while ($row = $engines->fetch_row()) $unsafe[] = $row[0];
++        $engines->close();
++        if ($unsafe) throw new \RuntimeException('Synchronisation requires InnoDB for: '.implode(', ', $unsafe));
+         $requiredTables = [
+             'sysSyncSessions', 'sysSyncRecordMap', 'sysSyncNonces', 'sysSyncOutboundRecords',
+-            'sysSyncPayloads', 'sysSyncFileMap', 'sysSyncInboundFileMap', 'sysSyncProgress'
++            'sysSyncInboundRecords', 'sysSyncPayloads', 'sysSyncFileMap', 'sysSyncInboundFileMap', 'sysSyncProgress'
+         ];
+         $quoted = "'".implode("','", $requiredTables)."'";
+         $existing = (int)mysql__select_value(
+@@ -21,6 +34,10 @@ final class SyncSchema
+         if ($existing === count($requiredTables)) return true;
+ 
+         $queries = [
++            "CREATE TABLE IF NOT EXISTS sysSyncInboundRecords (
++                sir_MasterRecID int unsigned NOT NULL,
++                PRIMARY KEY (sir_MasterRecID)
++            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Verified master identities for downloaded records and pointer shells'",
+             "CREATE TABLE IF NOT EXISTS sysSyncSessions (
+                 ssy_ID char(36) NOT NULL,
+                 ssy_SatelliteDBID int unsigned NOT NULL,
+diff --git a/hserv/synchronisation/SyncSessionService.php b/hserv/synchronisation/SyncSessionService.php
+index 6617bf5..718adab 100644
+--- a/hserv/synchronisation/SyncSessionService.php
++++ b/hserv/synchronisation/SyncSessionService.php
+@@ -12,12 +12,14 @@ final class SyncSessionService
+     private \hserv\System $system;
+     private \mysqli $mysqli;
+ 
++    /** Bind this service to the current Heurist database and connection. */
+     public function __construct(\hserv\System $system)
+     {
+         $this->system = $system;
+         $this->mysqli = $system->getMysqli();
+     }
+ 
++    /** Initialise private synchronisation storage and expose database failures to callers. */
+     public function ensureSchema(): bool
+     {
+         if (SyncSchema::ensure($this->mysqli)) {
+@@ -27,6 +29,7 @@ final class SyncSessionService
+         return false;
+     }
+ 
++    /** Resume the latest unfinished session for this satellite or allocate a new persistent session ID. */
+     public function startSession(int $satelliteDBID, int $baseMasterChangeID = 0): array
+     {
+         if (!$this->ensureSchema()) {
+@@ -206,6 +209,7 @@ final class SyncSessionService
+         ];
+     }
+ 
++    /** Accumulate valid affected record IDs while forming a compatibility report. */
+     private function collectRecordIDs(array &$target, $recordIDs): void
+     {
+         if (!is_array($recordIDs)) return;
+@@ -235,7 +239,8 @@ final class SyncSessionService
+             return $this->system->addError(HEURIST_INVALID_REQUEST, 'A single allocation request is limited to 10,000 records.');
+         }
+ 
+-        $keepAutocommit = mysql__begin_transaction($this->mysqli);
++        $transaction = new SyncTransaction($this->mysqli, false);
++        try {
+         $mapping = [];
+         $ok = true;
+         foreach ($records as $item) {
+@@ -329,7 +334,11 @@ final class SyncSessionService
+             $ok = $stmt->execute();
+             $stmt->close();
+         }
+-        mysql__end_transaction($this->mysqli, $ok, $keepAutocommit);
++
++        $ok = $transaction->finish($ok);
++        } finally {
++            $transaction->close();
++        }
+         return $ok
+             ? ['status' => HEURIST_OK, 'data' => $mapping, 'state' => 'IDS_RESERVED']
+             : $this->system->getError();
+@@ -345,6 +354,7 @@ final class SyncSessionService
+             return $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid record-content payload.');
+         }
+         $records = $payload['records'];
++        SyncAdditiveRecord::validate($records);
+         if (count($records) > 1000) {
+             return $this->system->addError(HEURIST_INVALID_REQUEST, 'A single content batch is limited to 1,000 records.');
+         }
+@@ -361,8 +371,8 @@ final class SyncSessionService
+         foreach ($records as $record) {
+             $recordID = (int)($record['rec_ID'] ?? 0);
+             $mapped = mysql__select_value($this->mysqli,
+-                'SELECT srm_MasterRecID FROM sysSyncRecordMap WHERE srm_SatelliteDBID=? AND srm_MasterRecID=? AND srm_SessionID=?',
+-                ['iis', $satelliteDBID, $recordID, $sessionID]);
++                'SELECT srm_MasterRecID FROM sysSyncRecordMap WHERE srm_SatelliteDBID=? AND srm_MasterRecID=?',
++                ['ii', $satelliteDBID, $recordID]);
+             if (!$mapped) return $this->system->addError(HEURIST_INVALID_REQUEST, "Record $recordID was not reserved by this session.");
+             $masterTypeID = (int)ConceptCode::getRecTypeLocalID((string)($record['recordTypeConceptID'] ?? ''));
+             $reservedTypeID = (int)mysql__select_value($this->mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID=?', ['i', $recordID]);
+@@ -427,51 +437,45 @@ final class SyncSessionService
+             $resolved[] = $record;
+         }
+ 
+-        $this->mysqli->query("INSERT INTO sysSyncPayloads (spl_Hash,spl_SessionID,spl_SatelliteDBID,spl_RecordCount,spl_State) VALUES ('".
++        $transaction = new SyncTransaction($this->mysqli, false);
++        try {
++        if (!$this->mysqli->query("INSERT INTO sysSyncPayloads (spl_Hash,spl_SessionID,spl_SatelliteDBID,spl_RecordCount,spl_State) VALUES ('".
+             $this->mysqli->real_escape_string($hash)."','".$this->mysqli->real_escape_string($sessionID)."',$satelliteDBID,".count($records).",'RECEIVED') "
+-            ."ON DUPLICATE KEY UPDATE spl_State='RECEIVED',spl_Error=NULL");
+-        $keepAutocommit = mysql__begin_transaction($this->mysqli);
++            ."ON DUPLICATE KEY UPDATE spl_State='RECEIVED',spl_Error=NULL")) throw new \RuntimeException('Unable to save synchronisation payload receipt.');
++
+         $ok = true;
+         foreach ($resolved as $record) {
+             $recordID = (int)$record['rec_ID'];
+-            $stmt = $this->mysqli->prepare('UPDATE Records SET rec_URL=?,rec_Added=?,rec_Title=?,rec_ScratchPad=?,rec_AddedByImport=?,'
+-                .'rec_NonOwnerVisibility=?,rec_FlagTemporary=0,rec_Modified=UTC_TIMESTAMP() WHERE rec_ID=?');
+-            $url = $record['rec_URL']; $added = $record['rec_Added']; $title = (string)$record['rec_Title'];
+-            $scratch = $record['rec_ScratchPad']; $byImport = (int)$record['rec_AddedByImport'];
+-            $visibility = (string)$record['rec_NonOwnerVisibility'];
+-            $stmt->bind_param('ssssisi', $url, $added, $title, $scratch, $byImport, $visibility, $recordID);
+-            $ok = $stmt->execute();
+-            if (!$ok) $this->system->addError(HEURIST_DB_ERROR, "Unable to update master record $recordID.", $stmt->error);
+-            $stmt->close();
+-            if (!$ok || !$this->mysqli->query('DELETE FROM recDetails WHERE dtl_RecID='.$recordID)) { $ok = false; break; }
++            // Permanent provenance, not the current session, owns this record.
++            // Never use recordSave's replacement semantics for a sync snapshot.
++            SyncAdditiveRecord::header($this->mysqli, $record);
++            $details = [];
+             foreach ($record['_details'] as $detail) {
+-                $stmt = $this->mysqli->prepare('INSERT INTO recDetails '
+-                    .'(dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo,dtl_Certainty,dtl_Annotation,dtl_HideFromPublic,dtl_AddedByImport) '
+-                    .'VALUES (?,?,?,?,IF(? IS NULL,NULL,ST_GeomFromText(?)),?,?,?,1)');
+-                $dtyID = (int)$detail['_masterDtyID']; $value = $detail['_masterValue']; $geo = $detail['dtl_Geo'] ?? null;
+-                $fileID = $detail['_masterFileID'];
+-                $certainty = (float)($detail['dtl_Certainty'] ?? 1); $annotation = $detail['dtl_Annotation'] ?? null;
+-                $hidden = isset($detail['dtl_HideFromPublic']) ? (int)$detail['dtl_HideFromPublic'] : null;
+-                $stmt->bind_param('iisissdsi', $recordID, $dtyID, $value, $fileID, $geo, $geo, $certainty, $annotation, $hidden);
+-                $ok = $stmt->execute();
+-                if (!$ok) $this->system->addError(HEURIST_DB_ERROR, "Unable to add a field to master record $recordID.", $stmt->error);
+-                $stmt->close();
+-                if (!$ok) break 2;
++                $detail['dtl_DetailTypeID'] = $detail['_masterDtyID'];
++                $detail['dtl_Value'] = $detail['_masterValue'];
++                $detail['dtl_UploadedFileID'] = $detail['_masterFileID'];
++                $details[] = $detail;
+             }
++            SyncAdditiveRecord::details($this->mysqli, $recordID, $details);
+         }
+         if ($ok) {
+-            $stmt = $this->mysqli->prepare("UPDATE sysSyncPayloads SET spl_State='APPLIED',spl_Applied=UTC_TIMESTAMP() WHERE spl_Hash=?");
+-            $stmt->bind_param('s', $hash); $ok = $stmt->execute(); $stmt->close();
++            $stmt = $this->mysqli->prepare("UPDATE sysSyncPayloads SET spl_State='APPLIED',spl_Applied=UTC_TIMESTAMP() WHERE spl_Hash=? AND spl_SessionID=?");
++            $stmt->bind_param('ss', $hash, $sessionID); $ok = $stmt->execute(); $stmt->close();
+         }
+         if ($ok) {
+             $stmt = $this->mysqli->prepare("UPDATE sysSyncSessions SET ssy_State='RECORDS_UPLOADED',ssy_Error=NULL WHERE ssy_ID=?");
+             $stmt->bind_param('s', $sessionID); $ok = $stmt->execute(); $stmt->close();
+         }
+-        mysql__end_transaction($this->mysqli, $ok, $keepAutocommit);
++
++        $ok = $transaction->finish($ok);
++        } finally {
++            $transaction->close();
++        }
+         if (!$ok) return $this->system->getError();
+         return ['status' => HEURIST_OK, 'data' => ['recordsApplied' => count($records), 'payloadHash' => $hash, 'replayed' => false]];
+     }
+ 
++    /** Return a bounded newest-first session history for the administrator interface. */
+     public function listSessions(int $limit = 100): array
+     {
+         if (!$this->ensureSchema()) {
+@@ -489,6 +493,7 @@ final class SyncSessionService
+         return array_map([$this, 'normaliseSession'], is_array($rows) ? $rows : []);
+     }
+ 
++    /** Look up a session only when owned by the authenticated satellite. */
+     private function getSession(string $sessionID, int $satelliteDBID): ?array
+     {
+         $row = $this->selectRowAssoc(
+@@ -498,6 +503,7 @@ final class SyncSessionService
+         return is_array($row) ? $this->normaliseSession($row) : null;
+     }
+ 
++    /** Translate database session columns to the wire response field names. */
+     private function normaliseSession(array $row): array
+     {
+         return [
+@@ -513,6 +519,7 @@ final class SyncSessionService
+         ];
+     }
+ 
++    /** Run a bound query and release its result after extracting one associative row. */
+     private function selectRowAssoc(string $query, array $params): ?array
+     {
+         $result = mysql__select_param_query($this->mysqli, $query, $params);
+@@ -521,6 +528,7 @@ final class SyncSessionService
+         return is_array($row) ? $row : null;
+     }
+ 
++    /** Generate a random session identifier independently of record IDs. */
+     private static function uuidV4(): string
+     {
+         $data = random_bytes(16);
+diff --git a/hserv/synchronisation/SyncStructurePayload.php b/hserv/synchronisation/SyncStructurePayload.php
+index 025db09..e5d414f 100644
+--- a/hserv/synchronisation/SyncStructurePayload.php
++++ b/hserv/synchronisation/SyncStructurePayload.php
+@@ -17,6 +17,7 @@ final class SyncStructurePayload
+         'detailTypes' => 'defDetailTypes'
+     ];
+ 
++    /** Export master definition tables and their content hash with concept identities for local-ID translation. */
+     public static function export(\hserv\System $system): array
+     {
+         $mysqli = $system->getMysqli();
+@@ -49,6 +50,7 @@ final class SyncStructurePayload
+         return $data;
+     }
+ 
++    /** Create or update groups, record types and base fields before records or structures refer to them. */
+     public static function applyBase(\hserv\System $system, array $payload): array
+     {
+         if (($payload['format'] ?? '') !== 'heurist-sync-structure-1') {
+@@ -94,6 +96,7 @@ final class SyncStructurePayload
+         return ['status' => HEURIST_OK, 'data' => ['maps' => $maps]];
+     }
+ 
++    /** Apply record structures and term links after base definitions and vocabulary identities are available. */
+     public static function applyStructure(\hserv\System $system, array $payload, array $maps): array
+     {
+         $mysqli = $system->getMysqli();
+@@ -151,13 +154,16 @@ final class SyncStructurePayload
+             $parentID = $maps['terms'][(int)($row['trl_ParentID'] ?? 0)] ?? 0;
+             $termID = $maps['terms'][(int)($row['trl_TermID'] ?? 0)] ?? 0;
+             if ($parentID > 0 && $termID > 0) {
+-                $mysqli->query('INSERT IGNORE INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES ('.
+-                    (int)$parentID.','.(int)$termID.')');
++                if (!$mysqli->query('INSERT IGNORE INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES ('.
++                    (int)$parentID.','.(int)$termID.')')) {
++                    throw new \RuntimeException('Unable to apply master term links: '.$mysqli->error);
++                }
+             }
+         }
+         return ['status' => HEURIST_OK, 'data' => ['definitionsApplied' => $applied]];
+     }
+ 
++    /** Translate IDs embedded in definition references after all primary maps exist. */
+     private static function applyReferenceMappings(\mysqli $mysqli, array $payload, array $maps): void
+     {
+         foreach (($payload['recordTypes'] ?? []) as $row) {
+@@ -173,7 +179,9 @@ final class SyncStructurePayload
+             if ($updates) {
+                 $parts = [];
+                 foreach ($updates as $column => $value) $parts[] = '`'.$column.'`='.self::literal($mysqli, $value);
+-                $mysqli->query('UPDATE defRecTypes SET '.implode(',', $parts).' WHERE rty_ID='.(int)$localID);
++                if (!$mysqli->query('UPDATE defRecTypes SET '.implode(',', $parts).' WHERE rty_ID='.(int)$localID)) {
++                    throw new \RuntimeException('Unable to remap record-type references: '.$mysqli->error);
++                }
+             }
+         }
+         foreach (($payload['detailTypes'] ?? []) as $row) {
+@@ -192,11 +200,14 @@ final class SyncStructurePayload
+             if ($updates) {
+                 $parts = [];
+                 foreach ($updates as $column => $value) $parts[] = '`'.$column.'`='.self::literal($mysqli, $value);
+-                $mysqli->query('UPDATE defDetailTypes SET '.implode(',', $parts).' WHERE dty_ID='.(int)$localID);
++                if (!$mysqli->query('UPDATE defDetailTypes SET '.implode(',', $parts).' WHERE dty_ID='.(int)$localID)) {
++                    throw new \RuntimeException('Unable to remap field-type references: '.$mysqli->error);
++                }
+             }
+         }
+     }
+ 
++    /** Translate numeric IDs embedded in definition settings while retaining their separators. */
+     private static function remapNumbers($value, array $map)
+     {
+         if ($value === null || $value === '' || !$map) return $value;
+@@ -205,6 +216,7 @@ final class SyncStructurePayload
+             (string)$value);
+     }
+ 
++    /** Match auxiliary definition groups by name and return source-to-local ID mappings. */
+     private static function applyNamedRows(\mysqli $mysqli, string $table, string $idColumn,
+         string $nameColumn, array $rows)
+     {
+@@ -224,6 +236,7 @@ final class SyncStructurePayload
+         return $map;
+     }
+ 
++    /** Resolve definition identities, reject storage-type changes and apply mapped master metadata. */
+     private static function applyConceptRows(\mysqli $mysqli, string $table, string $idColumn,
+         string $prefix, array $rows, callable $resolver, array $foreignMaps = [])
+     {
+@@ -242,6 +255,13 @@ final class SyncStructurePayload
+                     $localID = $sourceID;
+                 }
+             }
++            if ($table === 'defDetailTypes' && $localID > 0) {
++                $existingType = (string)mysql__select_value($mysqli,
++                    'SELECT dty_Type FROM defDetailTypes WHERE dty_ID=?', ['i', $localID]);
++                if ($existingType !== (string)($row['dty_Type'] ?? '')) {
++                    throw new \RuntimeException('A master field type changed storage type; reconcile the definition before synchronising.');
++                }
++            }
+             foreach ($foreignMaps as $column => $foreignMap) {
+                 if (isset($row[$column])) $row[$column] = $foreignMap[(int)$row[$column]] ?? $row[$column];
+             }
+@@ -261,6 +281,7 @@ final class SyncStructurePayload
+         return $map;
+     }
+ 
++    /** Insert or update one definition row; caller controls its transaction. */
+     private static function writeRow(\mysqli $mysqli, string $table, string $idColumn, int $localID, array $row): bool
+     {
+         if (!isset(self::$columnCache[$table])) {
+@@ -279,14 +300,17 @@ final class SyncStructurePayload
+         return (bool)$mysqli->query("INSERT INTO `$table` SET ".implode(',', $assignments));
+     }
+ 
++    /** Encode a nullable definition value as an escaped SQL literal. */
+     private static function literal(\mysqli $mysqli, $value): string
+     {
+         return $value === null ? 'NULL' : "'".$mysqli->real_escape_string((string)$value)."'";
+     }
+ 
++    /** Fetch a complete structure table snapshot or fail rather than export an incomplete definition set. */
+     private static function rows(\mysqli $mysqli, string $sql): array
+     {
+         $result = $mysqli->query($sql);
++        if (!$result) throw new \RuntimeException('Unable to export master structure: '.$mysqli->error);
+         $rows = [];
+         while ($result && ($row = $result->fetch_assoc())) $rows[] = $row;
+         if ($result) $result->close();
+diff --git a/hserv/synchronisation/SyncAdditiveRecord.php b/hserv/synchronisation/SyncAdditiveRecord.php
+new file mode 100644
+index 0000000..c56ff2f
+--- /dev/null
++++ b/hserv/synchronisation/SyncAdditiveRecord.php
+@@ -0,0 +1,130 @@
++<?php
++
++namespace hserv\synchronisation;
++
++/**
++ * Shared additions-only record writer. Call inside a SyncTransaction.
++ *
++ * A snapshot is evidence of values to retain, never authority to remove values.
++ * Existing detail IDs (including file references) are left untouched. Matching
++ * uses a multiset: two identical source values remain two values, but replaying
++ * the same snapshot does not grow that count. Local IDs must be resolved first.
++ */
++final class SyncAdditiveRecord
++{
++    /** Reject truncated/malformed snapshots instead of treating missing details as empty. */
++    public static function validate(array $records): void
++    {
++        $seen = [];
++        foreach ($records as $record) {
++            if (!is_array($record) || (int)($record['rec_ID'] ?? 0) < 1
++                || !isset($record['details']) || !is_array($record['details'])) {
++                throw new \RuntimeException('An incoming record is incomplete; no change cursor may be advanced.');
++            }
++            $id = (int)$record['rec_ID'];
++            if (isset($seen[$id])) throw new \RuntimeException("Duplicate incoming record ID $id.");
++            $seen[$id] = true;
++            foreach ($record['details'] as $detail) {
++                if (!is_array($detail) || empty($detail['detailTypeConceptID']) || empty($detail['dty_Type'])
++                    || !array_key_exists('dtl_Value', $detail)) {
++                    throw new \RuntimeException("An incoming field in record $id is incomplete.");
++                }
++                if (in_array($detail['dty_Type'], ['enum', 'relationtype'], true)
++                    && (int)$detail['dtl_Value'] > 0 && empty($detail['termConceptID'])) {
++                    throw new \RuntimeException("A term in record $id has no portable concept identity.");
++                }
++                if (!empty($detail['dtl_UploadedFileID']) && empty($detail['satelliteFileID'])) {
++                    throw new \RuntimeException("A file in record $id has no portable file identity.");
++                }
++            }
++        }
++    }
++
++    /** Lock before comparing, serialising sync writers and normal record-header saves. */
++    public static function lock(\mysqli $mysqli, int $recordID): array
++    {
++        $result = $mysqli->query('SELECT * FROM Records WHERE rec_ID='.$recordID.' FOR UPDATE');
++        if (!$result) throw new \RuntimeException('Unable to lock synchronised record: '.$mysqli->error);
++        $row = $result->fetch_assoc();
++        $result->close();
++        if (!$row) throw new \RuntimeException("Synchronised record $recordID no longer exists.");
++        return $row;
++    }
++
++    /** Fill reservations; for established records only fill empty descriptive headers. */
++    public static function header(\mysqli $mysqli, array $record): void
++    {
++        $id = (int)$record['rec_ID'];
++        $current = self::lock($mysqli, $id);
++        $updates = [];
++        $temporary = (int)$current['rec_FlagTemporary'] === 1;
++        foreach (['rec_URL', 'rec_Title', 'rec_ScratchPad', 'rec_Added', 'rec_AddedByImport', 'rec_NonOwnerVisibility'] as $column) {
++            if (!array_key_exists($column, $record)) continue;
++            $incoming = $record[$column];
++            if ($temporary || (in_array($column, ['rec_URL', 'rec_Title', 'rec_ScratchPad'], true)
++                && ($current[$column] === null || $current[$column] === '') && $incoming !== null && $incoming !== '')) {
++                $updates[] = '`'.$column.'`='.($incoming === null ? 'NULL' : "'".$mysqli->real_escape_string((string)$incoming)."'");
++            }
++        }
++        if ($temporary) $updates[] = 'rec_FlagTemporary=0';
++        if ($updates && !$mysqli->query('UPDATE Records SET '.implode(',', $updates)
++            .',rec_Modified=UTC_TIMESTAMP() WHERE rec_ID='.$id)) {
++            throw new \RuntimeException("Unable to fill record $id: ".$mysqli->error);
++        }
++    }
++
++    /** Exact stored value and metadata identity; SQL numeric strings are normalised. */
++    public static function key(array $detail): string
++    {
++        return hash('sha256', serialize([
++            (int)$detail['dtl_DetailTypeID'],
++            isset($detail['dtl_Value']) ? (string)$detail['dtl_Value'] : null,
++            empty($detail['dtl_UploadedFileID']) ? null : (int)$detail['dtl_UploadedFileID'],
++            $detail['dtl_Geo'] ?? null,
++            isset($detail['dtl_Certainty']) ? (float)$detail['dtl_Certainty'] : null,
++            $detail['dtl_Annotation'] ?? null,
++            isset($detail['dtl_HideFromPublic']) ? (int)$detail['dtl_HideFromPublic'] : null
++        ]));
++    }
++
++    /** Append missing occurrences without updating/deleting any existing detail row. */
++    public static function details(\mysqli $mysqli, int $recordID, array $details, ?callable $onInsertError = null): int
++    {
++        self::lock($mysqli, $recordID);
++        $result = $mysqli->query('SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,ST_AsText(dtl_Geo) AS dtl_Geo,'
++            .'dtl_Certainty,dtl_Annotation,dtl_HideFromPublic FROM recDetails WHERE dtl_RecID='.$recordID.' FOR UPDATE');
++        if (!$result) throw new \RuntimeException('Unable to read existing record fields: '.$mysqli->error);
++        $available = [];
++        while ($row = $result->fetch_assoc()) {
++            $key = self::key($row);
++            $available[$key] = ($available[$key] ?? 0) + 1;
++        }
++        $result->close();
++        $added = 0;
++        foreach ($details as $detail) {
++            $key = self::key($detail);
++            if (($available[$key] ?? 0) > 0) { $available[$key]--; continue; }
++            $stmt = $mysqli->prepare('INSERT INTO recDetails '
++                .'(dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo,dtl_Certainty,dtl_Annotation,dtl_HideFromPublic,dtl_AddedByImport) '
++                .'VALUES (?,?,?,?,IF(? IS NULL,NULL,ST_GeomFromText(?)),?,?,?,1)');
++            if (!$stmt) throw new \RuntimeException('Unable to prepare additive field insert: '.$mysqli->error);
++            $dtyID = (int)$detail['dtl_DetailTypeID']; $value = $detail['dtl_Value'] ?? null;
++            $fileID = $detail['dtl_UploadedFileID'] ?? null; $geo = $detail['dtl_Geo'] ?? null;
++            $certainty = isset($detail['dtl_Certainty']) ? (float)$detail['dtl_Certainty'] : null;
++            $annotation = $detail['dtl_Annotation'] ?? null; $hidden = $detail['dtl_HideFromPublic'] ?? null;
++            $stmt->bind_param('iisissdsi', $recordID, $dtyID, $value, $fileID, $geo, $geo, $certainty, $annotation, $hidden);
++            try {
++                if (!$stmt->execute()) throw new \RuntimeException("Unable to append field $dtyID to record $recordID: ".$stmt->error);
++            } catch (\Throwable $error) {
++                // Preserve caller-specific field and record diagnostics before rollback.
++                if ($onInsertError !== null) $onInsertError($detail, $stmt->errno, $stmt->error ?: $error->getMessage());
++                throw $error;
++            } finally { $stmt->close(); }
++            $added++;
++        }
++        if ($added > 0 && !$mysqli->query('UPDATE Records SET rec_Modified=UTC_TIMESTAMP() WHERE rec_ID='.$recordID)) {
++            throw new \RuntimeException('Unable to mark the synchronised record modification time.');
++        }
++        return $added;
++    }
++}
+diff --git a/hserv/synchronisation/SyncFileStorage.php b/hserv/synchronisation/SyncFileStorage.php
+new file mode 100644
+index 0000000..d04c1bc
+--- /dev/null
++++ b/hserv/synchronisation/SyncFileStorage.php
+@@ -0,0 +1,27 @@
++<?php
++
++namespace hserv\synchronisation;
++
++/** Immutable writes: an interrupted attempt may leave an orphan, never damage a referenced file. */
++final class SyncFileStorage
++{
++    /** Exclusively create a fresh file, check every byte and flush it before returning its stored name. */
++    public static function store(string $directory, string $prefix, string $extension, string $bytes): string
++    {
++        $name = $prefix.'_'.bin2hex(random_bytes(16)).($extension !== '' ? '.'.$extension : '');
++        $path = $directory.$name;
++        $handle = fopen($path, 'xb'); // Exclusive creation; never truncate an existing upload.
++        if (!$handle) throw new \RuntimeException('Unable to create a synchronised file.');
++        try {
++            $offset = 0;
++            while ($offset < strlen($bytes)) {
++                $written = fwrite($handle, substr($bytes, $offset));
++                if ($written === false || $written === 0) throw new \RuntimeException('Incomplete synchronised file write.');
++                $offset += $written;
++            }
++            if (!fflush($handle)) throw new \RuntimeException('Unable to flush synchronised file.');
++            if (function_exists('fsync') && !fsync($handle)) throw new \RuntimeException('Unable to persist synchronised file.');
++        } finally { fclose($handle); }
++        return $name;
++    }
++}
+diff --git a/hserv/synchronisation/SyncTransaction.php b/hserv/synchronisation/SyncTransaction.php
+new file mode 100644
+index 0000000..f0162d9
+--- /dev/null
++++ b/hserv/synchronisation/SyncTransaction.php
+@@ -0,0 +1,60 @@
++<?php
++
++namespace hserv\synchronisation;
++
++/**
++ * Checked, exception-safe transaction boundary for synchronisation only.
++ * The general application transaction helpers discard COMMIT failures and may
++ * commit a caller's transaction when nested. Sync must fail closed instead.
++ * Always call close() in finally; only finish(true) may acknowledge a batch.
++ */
++final class SyncTransaction
++{
++    private \mysqli $mysqli;
++    private bool $active = false;
++    private $previousGuard;
++    private static array $connections = [];
++
++    /** Reject nesting, begin a repeatable-read transaction and optionally suppress only sync journalling. */
++    public function __construct(\mysqli $mysqli, bool $suppressJournal = false)
++    {
++        $this->mysqli = $mysqli;
++        $connectionID = spl_object_id($mysqli);
++        if (isset(self::$connections[$connectionID])) throw new \RuntimeException('Nested synchronisation transactions are not allowed.');
++        // MySQL/MariaDB reject SET TRANSACTION inside an active transaction;
++        // unlike START TRANSACTION, this cannot implicitly commit a caller.
++        if (!$mysqli->query('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ')) {
++            throw new \RuntimeException('Cannot start a synchronisation snapshot inside an existing transaction.');
++        }
++        $this->previousGuard = mysql__select_value($mysqli, 'SELECT @HEURIST_SYNC_APPLY');
++        if (! $mysqli->begin_transaction()) throw new \RuntimeException('Unable to begin synchronisation transaction.');
++        $this->active = true;
++        self::$connections[$connectionID] = true;
++        if ($suppressJournal && !$mysqli->query('SET @HEURIST_SYNC_APPLY=1')) {
++            $this->close();
++            throw new \RuntimeException('Unable to suppress inbound synchronisation journalling.');
++        }
++    }
++
++    /** Commit only a successful stage; throw on failed commit so no acknowledgement or cursor is advanced. */
++    public function finish(bool $ok): bool
++    {
++        if (!$ok) { $this->close(); return false; }
++        if (!$this->mysqli->commit()) throw new \RuntimeException('Synchronisation commit failed; retry before advancing a cursor.');
++        $this->active = false;
++        return true;
++    }
++
++    /** Roll back an unfinished stage and restore the prior journal guard, including exceptional exits. */
++    public function close(): void
++    {
++        try {
++            if ($this->active) $this->mysqli->rollback();
++        } finally {
++            $this->active = false;
++            unset(self::$connections[spl_object_id($this->mysqli)]);
++            $value = $this->previousGuard === null ? 'NULL' : (string)(int)$this->previousGuard;
++            $this->mysqli->query('SET @HEURIST_SYNC_APPLY='.$value);
++        }
++    }
++}
+diff --git a/tests/synchronisation/additive_regression.php b/tests/synchronisation/additive_regression.php
+new file mode 100644
+index 0000000..7d06f45
+--- /dev/null
++++ b/tests/synchronisation/additive_regression.php
+@@ -0,0 +1,140 @@
++<?php
++/**
++ * Behavioural regression checks for the additions-only writer.
++ * Run with php -n tests/synchronisation/additive_regression.php (no mysqli extension).
++ * The in-memory database double exercises the actual production PHP helpers.
++ * It does not substitute for MySQL integration, trigger, or concurrency testing.
++ */
++if (extension_loaded('mysqli')) {
++    fwrite(STDERR, "Run using php -n without the mysqli extension.\n");
++    exit(2);
++}
++class SyncTestResult {
++    private array $rows;
++    function __construct(array $rows) { $this->rows = $rows; }
++    function fetch_assoc() { return array_shift($this->rows); }
++    function close() {}
++}
++class mysqli {
++    public array $records = [];
++    public array $details = [];
++    public string $error = '';
++    public bool $failInsert = false;
++    public bool $failCommit = false;
++    public $guard = null;
++    public int $nextID = 1;
++    private ?array $snapshot = null;
++    function query(string $sql) {
++        if (str_starts_with($sql, 'UPDATE Records SET rec_Modified=UTC_TIMESTAMP()')) return true;
++        if ($sql === 'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ') return $this->snapshot === null;
++        if (preg_match('/^SELECT \* FROM Records WHERE rec_ID=(\d+) FOR UPDATE$/', $sql, $m)) {
++            return new SyncTestResult(isset($this->records[$m[1]]) ? [$this->records[$m[1]]] : []);
++        }
++        if (str_starts_with($sql, 'SELECT dtl_DetailTypeID,dtl_Value,')) {
++            preg_match('/WHERE dtl_RecID=(\d+)/', $sql, $m);
++            return new SyncTestResult(array_values(array_filter($this->details,
++                fn($row) => $row['dtl_RecID'] == $m[1])));
++        }
++        if (preg_match('/^SET @HEURIST_SYNC_APPLY=(NULL|\d+)$/', $sql, $m)) {
++            $this->guard = $m[1] === 'NULL' ? null : (int)$m[1]; return true;
++        }
++        throw new RuntimeException('Unexpected SQL in test double: '.$sql);
++    }
++    function prepare(string $sql) {
++        if (!str_starts_with($sql, 'INSERT INTO recDetails ')) throw new RuntimeException('Unexpected prepared SQL: '.$sql);
++        return new SyncTestStatement($this);
++    }
++    function real_escape_string(string $value) { return addslashes($value); }
++    function begin_transaction() { $this->snapshot = [$this->records, $this->details]; return true; }
++    function commit() { if ($this->failCommit) return false; $this->snapshot = null; return true; }
++    function rollback() { if ($this->snapshot !== null) [$this->records, $this->details] = $this->snapshot; $this->snapshot = null; return true; }
++}
++class SyncTestStatement {
++    public string $error = '';
++    private mysqli $db;
++    private array $values = [];
++    function __construct(mysqli $db) { $this->db = $db; }
++    function bind_param($types, &...$values) { $this->values = &$values; return true; }
++    function execute() {
++        if ($this->db->failInsert) { $this->error = 'Injected write failure'; return false; }
++        [$rec,$field,$value,$file,$geo,$geo2,$certainty,$annotation,$hidden] = $this->values;
++        $this->db->details[] = [
++            'dtl_ID'=>$this->db->nextID++, 'dtl_RecID'=>$rec, 'dtl_DetailTypeID'=>$field,
++            'dtl_Value'=>$value, 'dtl_UploadedFileID'=>$file, 'dtl_Geo'=>$geo,
++            'dtl_Certainty'=>$certainty, 'dtl_Annotation'=>$annotation, 'dtl_HideFromPublic'=>$hidden
++        ];
++        return true;
++    }
++    function close() {}
++}
++function mysql__select_value(mysqli $db, $sql, $params = null) {
++    if ($sql === 'SELECT @HEURIST_SYNC_APPLY') return $db->guard;
++    throw new RuntimeException('Unexpected scalar query: '.$sql);
++}
++require_once __DIR__.'/../../hserv/synchronisation/SyncAdditiveRecord.php';
++require_once __DIR__.'/../../hserv/synchronisation/SyncTransaction.php';
++use hserv\synchronisation\SyncAdditiveRecord as Writer;
++use hserv\synchronisation\SyncTransaction;
++function check($condition, string $label): void {
++    if (!$condition) throw new RuntimeException('FAIL: '.$label);
++    echo "PASS: $label\n";
++}
++function value(string $text, ?int $file = null): array {
++    return ['dtl_DetailTypeID'=>15, 'dtl_Value'=>$text, 'dtl_UploadedFileID'=>$file,
++        'dtl_Geo'=>null, 'dtl_Certainty'=>1.0, 'dtl_Annotation'=>null, 'dtl_HideFromPublic'=>null];
++}
++$db = new mysqli();
++$db->records[88] = ['rec_ID'=>88,'rec_FlagTemporary'=>0,'rec_URL'=>'original URL',
++    'rec_Title'=>'Original record','rec_ScratchPad'=>'Local notes'];
++$image = value('', 42);
++$db->details[] = $image + ['dtl_ID'=>100,'dtl_RecID'=>88];
++check(Writer::details($db, 88, []) === 0 && $db->details[0]['dtl_UploadedFileID'] === 42,
++    'Empty source snapshot preserves existing image reference and detail ID');
++$a = value('A');
++check(Writer::details($db,88,[$a,$a]) === 2, 'Two identical incoming occurrences are retained');
++$before = $db->details;
++check(Writer::details($db,88,[$a,$a]) === 0 && $db->details === $before,
++    'Replaying the same batch adds no duplicates');
++check(Writer::details($db,88,[$a]) === 0 && count($db->details) === 3,
++    'Stale snapshot cannot reduce repeated values');
++check(Writer::details($db,88,[$image]) === 0 && $db->details[0]['dtl_ID'] === 100,
++    'Replayed image preserves original detail identity');
++$headers = $db->records;
++Writer::header($db,['rec_ID'=>88,'rec_Title'=>'Incoming title','rec_URL'=>'', 'rec_ScratchPad'=>null]);
++check($db->records === $headers, 'Existing header values survive conflicting or empty incoming values');
++$before = $db->details;
++$tx = new SyncTransaction($db,true);
++try {
++    Writer::details($db,88,[value('new value before failure')]);
++    $db->failInsert = true;
++    Writer::details($db,88,[value('must fail')]);
++    $tx->finish(true);
++    throw new RuntimeException('Expected insert failure');
++} catch (RuntimeException $e) {
++    check(str_contains($e->getMessage(),'Injected write failure'), 'Insert failure propagates');
++} finally { $tx->close(); $db->failInsert = false; }
++check($db->details === $before && $db->guard === null, 'Failure rolls back earlier additions and restores journal guard');
++$tx = new SyncTransaction($db,true);
++$db->failCommit = true;
++try {
++    Writer::details($db,88,[value('uncommitted')]);
++    $tx->finish(true);
++    throw new RuntimeException('Expected commit failure');
++} catch (RuntimeException $e) {
++    check(str_contains($e->getMessage(),'commit failed'), 'Commit failure cannot acknowledge the batch');
++} finally { $tx->close(); $db->failCommit = false; }
++check($db->details === $before && $db->guard === null, 'Failed commit leaves prior data intact in rollback model');
++try {
++    Writer::validate([['rec_ID'=>88]]);
++    throw new RuntimeException('Expected validation failure');
++} catch (RuntimeException $e) {
++    check(str_contains($e->getMessage(),'incomplete'), 'Missing detail payload is rejected');
++}
++$tx = new SyncTransaction($db, true);
++try {
++    new SyncTransaction($db);
++    throw new RuntimeException('Expected nested transaction rejection');
++} catch (RuntimeException $e) {
++    check(str_contains($e->getMessage(), 'Nested'), 'Nested transaction cannot commit its caller');
++} finally { $tx->close(); }
++echo "All additive regression checks passed.\n";
+diff --git a/tests/synchronisation/config_regression.php b/tests/synchronisation/config_regression.php
+new file mode 100644
+index 0000000..9c8f0ab
+--- /dev/null
++++ b/tests/synchronisation/config_regression.php
+@@ -0,0 +1,45 @@
++<?php
++/** Isolated real-filesystem config persistence checks; run with php -n. */
++namespace hserv {
++    class System {
++        public $settings;
++        public array $errors = [];
++        function __construct(public string $directory) { $this->settings = new TestSettings(); }
++        function getSysDir($name) { return $this->directory.'/'; }
++        function addError(...$args) { $this->errors[] = $args; return false; }
++    }
++    class TestSettings { function get($name) { return 99; } }
++}
++namespace {
++    define('HEURIST_ACTION_BLOCKED', 'blocked');
++    define('HEURIST_INVALID_REQUEST', 'invalid');
++    define('HEURIST_SYSTEM_CONFIG', 'config');
++    require_once __DIR__.'/../../hserv/synchronisation/SyncConfig.php';
++    $directory = sys_get_temp_dir().'/heurist-sync-config-test-'.bin2hex(random_bytes(8));
++    mkdir($directory);
++    $system = new \hserv\System($directory);
++    $service = new \hserv\synchronisation\SyncConfig($system);
++    function check($ok, $label) { if (!$ok) throw new \RuntimeException($label); echo "PASS: $label\n"; }
++    $config = ['role'=>'satellite','master'=>['databaseID'=>100,'database'=>'master','url'=>'https://example.org/heurist','sharedSecret'=>'test-only']];
++    try {
++        check($service->save($config),'Initial configuration saved');
++        $path = $directory.'/synchronisation.json';
++        check($service->updateRuntime(['lastMasterChangeReceived'=>25]),'Runtime cursor saved');
++        $config['master']['sharedSecret'] = '';
++        check($service->save($config),'Configuration edit preserves existing key');
++        $saved = json_decode(file_get_contents($path),true);
++        check($saved['lastMasterChangeReceived'] === 25 && $saved['master']['sharedKey'] === hash('sha256','test-only'),'Settings edit retains checkpoint and key');
++        $before = file_get_contents($path);
++        $config['master']['databaseID'] = 101;
++        check(!$service->save($config) && file_get_contents($path) === $before,'Different master cannot reuse configuration and maps');
++        file_put_contents($path,'{broken json');
++        check(!$service->updateRuntime(['lastMasterChangeReceived'=>26]) && file_get_contents($path)==='{broken json','Corrupt settings rejected without overwriting evidence');
++        $ref = new ReflectionMethod($service,'redact');
++        $redacted = $ref->invoke($service,['satellites'=>[['sharedKey'=>'must-not-leak']]]);
++        check(!isset($redacted['satellites'][0]['sharedKey']) && $redacted['satellites'][0]['hasSharedSecret'], 'Satellite keys removed from browser configuration');
++        check(count(glob($directory.'/.synchronisation-*'))===0,'Temporary files cleaned');
++    } finally {
++        foreach(glob($directory.'/*') as $file) unlink($file);
++        rmdir($directory);
++    }
++}
+diff --git a/tests/synchronisation/file_regression.php b/tests/synchronisation/file_regression.php
+new file mode 100644
+index 0000000..f510319
+--- /dev/null
++++ b/tests/synchronisation/file_regression.php
+@@ -0,0 +1,20 @@
++<?php
++/** Real-filesystem check that repeat attempts never overwrite a previous upload. */
++require_once __DIR__.'/../../hserv/synchronisation/SyncFileStorage.php';
++use hserv\synchronisation\SyncFileStorage;
++$directory = sys_get_temp_dir().'/heurist-sync-files-'.bin2hex(random_bytes(8)).'/';
++mkdir($directory);
++try {
++    $first = SyncFileStorage::store($directory, 'sync_1_42', 'jpg', 'original image bytes');
++    $second = SyncFileStorage::store($directory, 'sync_1_42', 'jpg', 'different incoming image');
++    $empty = SyncFileStorage::store($directory, 'sync_1_43', 'txt', '');
++    if ($first === $second || file_get_contents($directory.$first) !== 'original image bytes'
++        || file_get_contents($directory.$second) !== 'different incoming image'
++        || filesize($directory.$empty) !== 0) throw new RuntimeException('File preservation failed');
++    echo "PASS: Repeated source identity produces separate immutable attempt files\n";
++    echo "PASS: Existing image bytes unchanged\n";
++    echo "PASS: Complete empty file stored correctly\n";
++} finally {
++    foreach(glob($directory.'*') as $file) unlink($file);
++    rmdir($directory);
++}
+diff --git a/tests/synchronisation/remap_engine.sql b/tests/synchronisation/remap_engine.sql
+new file mode 100644
+index 0000000..575bc13
+--- /dev/null
++++ b/tests/synchronisation/remap_engine.sql
+@@ -0,0 +1,30 @@
++-- Isolated engine check of the parent-first two-stage remap order, not a full Heurist integration test.
++CREATE DATABASE IF NOT EXISTS heurist_sync_review_test;
++USE heurist_sync_review_test;
++DROP TABLE IF EXISTS test_links;
++DROP TABLE IF EXISTS test_details;
++DROP TABLE IF EXISTS test_records;
++DROP TABLE IF EXISTS test_assertions;
++CREATE TABLE test_records (id INT PRIMARY KEY) ENGINE=InnoDB;
++CREATE TABLE test_details (id INT PRIMARY KEY, record_id INT, pointer_value INT, image_id INT, FOREIGN KEY(record_id) REFERENCES test_records(id) ON UPDATE CASCADE) ENGINE=InnoDB;
++CREATE TABLE test_links (source_id INT, target_id INT, FOREIGN KEY(source_id) REFERENCES test_records(id) ON UPDATE CASCADE, FOREIGN KEY(target_id) REFERENCES test_records(id) ON UPDATE CASCADE) ENGINE=InnoDB;
++CREATE TABLE test_assertions (label VARCHAR(120), ok INT CHECK(ok=1)) ENGINE=InnoDB;
++CREATE TRIGGER sync_test_pointer AFTER UPDATE ON test_details FOR EACH ROW UPDATE test_links SET target_id=NEW.pointer_value WHERE source_id=NEW.record_id AND NEW.pointer_value IS NOT NULL;
++INSERT INTO test_records VALUES (1),(2);
++INSERT INTO test_details VALUES (100,1,2,42);
++INSERT INTO test_links VALUES (1,2);
++START TRANSACTION;
++UPDATE test_records SET id=101 WHERE id=1;
++UPDATE test_records SET id=102 WHERE id=2;
++UPDATE test_details SET pointer_value=102 WHERE pointer_value=2;
++UPDATE test_records SET id=10 WHERE id=101;
++UPDATE test_records SET id=20 WHERE id=102;
++UPDATE test_details SET pointer_value=20 WHERE pointer_value=102;
++COMMIT;
++INSERT INTO test_assertions SELECT 'Image and detail identity survive two-stage remap', COUNT(*)=1 FROM test_details WHERE id=100 AND record_id=10 AND pointer_value=20 AND image_id=42;
++INSERT INTO test_assertions SELECT 'Link target follows existing canonical parent', COUNT(*)=1 FROM test_links WHERE source_id=10 AND target_id=20;
++START TRANSACTION;
++INSERT INTO test_details VALUES (101,10,NULL,43);
++ROLLBACK;
++INSERT INTO test_assertions SELECT 'Rolled-back addition does not alter existing image', COUNT(*)=1 FROM test_details WHERE image_id=42;
++INSERT INTO test_assertions SELECT 'Rolled-back new image is absent', COUNT(*)=0 FROM test_details WHERE id=101;

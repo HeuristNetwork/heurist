@@ -31,6 +31,17 @@
                     }
                 },
                 {
+                    "dtID": "ugr_ORCID",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":20,
+                        "rst_DisplayWidth":20,
+                        "rst_DisplayName":"ORCID identifier",
+                        "rst_DisplayHelpText":"Optional. Anyone can obtain an ORCID. Formatted as: 0000-1111-2222-3333",
+                        "rst_RequirementType":"optional"
+                    }
+                },
+                {
                     "dtID": "ugr_FirstName",
                     "dtFields":{
                         "dty_Type":"freetext",

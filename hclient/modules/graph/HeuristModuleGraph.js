@@ -1,0 +1,289 @@
+/**
+ * @file HeuristModuleGraph.js
+ * @brief Host-side adapter for the independent heurist-graph application.
+ * @project     Heurist academic knowledge management system
+ * @package     hclient.modules.graph
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2026 Heurist Network Association. All rights reserved.
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       8.0
+ */
+
+const HEURIST_MODULE_GRAPH_DEFAULTS = {
+    presentationMode: 'iframe',
+    graphApplicationUrl: null,
+    runtimeMode: null,              // main | website | standalone; defaults to 'main'
+    database: window.hWin && window.hWin.HAPI4 ? window.hWin.HAPI4.database : null,
+    apiBaseUrl: window.hWin && window.hWin.HAPI4 ? window.hWin.HAPI4.baseURL + 'api' : null,
+    accessToken: null,
+    requestHeaders: null,
+    rules: [],
+    fields: ['rec_Title', 'rec_RecTypeID'],
+    query: null,
+    selection: null,
+    heuristModuleSettings: null,
+    heuristModuleState: null,
+    eventbased: true,
+    search_realm: null,
+    onready: null,
+    onselect: null,
+    onconfiguration: null,
+    onerror: null
+};
+
+/** Hosts heurist-graph in an iframe and bridges record queries and selection. */
+class HeuristModuleGraph extends HeuristModuleRecordset {
+    constructor(element, options) {
+        super(element, $.extend(true, {}, HEURIST_MODULE_GRAPH_DEFAULTS, options || {}));
+        this._create();
+    }
+
+    _create() {
+        this._dataEventHandlers = {};
+        this._suppressSelectionSync = false;
+        this._moduleApi = null;
+        this._moduleFrame = null;
+        this._isReady = false;
+        this._isDestroyed = false;
+        this._pendingOperations = [];
+        this._readyTimer = 0;
+        this._resizeTimer = 0;
+        this._resizeObserver = null;
+        this._moduleBootstrap = null;
+        this._bindHostEvents();
+        this._bindShowEvent();
+        this._observeResize();
+        this._ensureIframeWhenVisible();
+    }
+
+    _createIframe() {
+        if (this._moduleFrame || this._isDestroyed) return;
+        const url = this.options.graphApplicationUrl || this._defaultApplicationUrl();
+        if (!url) {
+            this._reportError(new Error('graphApplicationUrl is not defined'), 'initialize');
+            return;
+        }
+        this._moduleBootstrap = this._buildBootstrap();
+        this._moduleFrame = $('<iframe>').attr({
+            title: 'Heurist graph', frameborder: '0'
+        }).css({width: '100%', height: '100%', border: 0, display: 'block'}).appendTo(this.element);
+        this._installIframeBridge();
+        this._moduleFrame.on('load.heuristModuleGraph', function() {
+            this._installIframeBridge();
+            this._unbindDataEvents();
+            this._moduleApi = null;
+            this._isReady = false;
+            this._waitForGraphApi();
+        }.bind(this));
+        this._moduleFrame.attr('src', url);
+    }
+
+    _defaultApplicationUrl() {
+        const hapi = window.hWin && window.hWin.HAPI4;
+        return hapi ? hapi.baseURL + 'hclient/modules/graph/graphViewer.html' : null;
+    }
+
+    _installIframeBridge() {
+        const frame = this._moduleFrame && this._moduleFrame[0];
+        if (!frame) return;
+        const that = this;
+        frame.heuristGraphHost = {
+            getConfiguration: function() { return that._getConfiguration(); },
+            updateSettings: function(settings) { return that._updateSettings(settings); },
+            updateState: function(state) { return that._updateState(state); },
+            editRecord: function(recordId) { return that._openRecordEdit(recordId); },
+            canEditRecords: function() { return that._canEditRecords(); },
+            viewRecord: function(recordId) { return that._openRecordView(recordId); },
+            addRecord: function(recordTypeId) { return that._addRecordEdit(recordTypeId); },
+            editRules: function(value) {
+                return window.hWin.HEURIST4.ui.showRulesBuilderDialog(value);
+            },
+            describeRules: function(rules) {
+                return rules.map(function(rule){
+                    return Object.assign({}, rule, window.hWin.HEURIST4.ui.describeExpansionRule(rule));
+                });
+            },
+            doSearch: function(request) { return that._doSearch(request); }
+        };
+    }
+
+    _buildBootstrap() {
+        const hapi = window.hWin && window.hWin.HAPI4;
+        const lang = hapi
+            ? hapi.getLangCode3(hapi.get_prefs_def('layout_language', 'eng'), 'eng')
+            : 'eng';
+        // heurist-graph's own loadPreferencesOnInit self-heal (graphConfig.js)
+        // only fires for a live "main" session; it treats a missing/invalid
+        // runtimeMode as 'standalone' (a frozen publication) and skips fetching
+        // the user's saved preference. This must always resolve to a real value.
+        const runtimeMode = ['main', 'website', 'standalone'].indexOf(this.options.runtimeMode) >= 0
+            ? this.options.runtimeMode : 'main';
+        return {
+            runtime: {
+                runtimeMode: runtimeMode,
+                language: lang,
+                database: this.options.database || (hapi && hapi.database),
+                apiBaseUrl: this.options.apiBaseUrl || (hapi && hapi.baseURL + 'api'),
+                accessToken: this.options.accessToken || null,
+                requestHeaders: $.extend({}, this.options.requestHeaders || {}),
+                baseUrl: hapi ? hapi.baseURL : null,
+                source: this.element.attr('id') || null,
+                searchRealm: this.options.search_realm || null
+            },
+            settings: $.extend(true, {rules: this.options.rules, fields: this.options.fields},
+                this.options.heuristModuleSettings || {}),
+            state: this.options.heuristModuleState == null ? null
+                : $.extend(true, {}, this.options.heuristModuleState),
+            source: {
+                query: this._normalizeQuery(this.options.query),
+                selection: this._normalizeRecordIds(this.options.selection)
+            }
+        };
+    }
+
+    _waitForGraphApi() {
+        const that = this;
+        let attempts = 0;
+        if (this._readyTimer) clearInterval(this._readyTimer);
+        this._readyTimer = setInterval(function() {
+            if (that._isDestroyed) { clearInterval(that._readyTimer); return; }
+            attempts++;
+            const frameWindow = that._moduleFrame && that._moduleFrame[0].contentWindow;
+            const api = frameWindow && frameWindow.heuristGraph;
+            if (api) {
+                clearInterval(that._readyTimer);
+                that._readyTimer = 0;
+                that._completeGraphInitialization(api);
+            } else if (attempts >= 300) {
+                clearInterval(that._readyTimer);
+                that._readyTimer = 0;
+                that._reportError(new Error('heurist-graph did not expose window.heuristGraph'), 'initialize');
+            }
+        }, 100);
+    }
+
+    _completeGraphInitialization(api) {
+        const that = this;
+        Promise.resolve(api.ready ? api.ready() : api).then(function() {
+            if (that._isDestroyed) return;
+            that._unbindDataEvents();
+            that._moduleApi = api;
+            that._isReady = true;
+            that._bindDataEvents();
+            that._invokeCallback('onready', api);
+            return that._flushPendingOperations();
+        }).catch(function(error) { that._reportError(error, 'initialize'); });
+    }
+
+    /** Subscribe to engine-neutral events emitted by the public graph API. */
+    _bindDataEvents() {
+        if (!this._moduleApi || typeof this._moduleApi.addEventListener !== 'function') return;
+        var that = this;
+        this._dataEventHandlers.selection = function(event) {
+            if (that._suppressSelectionSync) return;
+            var ids = that._normalizeRecordIds(
+                event.detail && (event.detail.recordIds || event.detail.selection)
+            );
+            that.options.selection = ids;
+            var hapi = window.hWin && window.hWin.HAPI4;
+            if (that.options.eventbased && hapi && hapi.Event) {
+                $(that.document).trigger(hapi.Event.ON_REC_SELECT, {
+                    selection: ids,
+                    source: that.element.attr('id'),
+                    search_realm: that.options.search_realm,
+                    reset: ids.length === 0
+                });
+            }
+            that._invokeCallback('onselect', ids, event.detail || {});
+        };
+        this._dataEventHandlers.error = function(event) {
+            var detail = event.detail || {};
+            that._reportError(detail.error || detail, detail.operation || 'graph-event', detail);
+        };
+        this._dataEventHandlers.configuration = function(event) {
+            that._invokeCallback('onconfiguration', event.detail || {});
+        };
+        this._dataEventHandlers.editRecord = function(event) {
+            that._openRecordEdit(event.detail && event.detail.recordId);
+        };
+
+        this._moduleApi.addEventListener(
+            'heurist-graph-selection-changed', this._dataEventHandlers.selection);
+        this._moduleApi.addEventListener(
+            'heurist-graph-error', this._dataEventHandlers.error);
+        this._moduleApi.addEventListener(
+            'heurist-graph-configuration-requested', this._dataEventHandlers.configuration);
+        this._moduleApi.addEventListener(
+            'heurist-graph-edit-record-requested', this._dataEventHandlers.editRecord);
+    }
+
+    _unbindDataEvents() {
+        if (!this._moduleApi || typeof this._moduleApi.removeEventListener !== 'function') return;
+        var handlers = this._dataEventHandlers;
+        var events = {
+            selection: 'heurist-graph-selection-changed',
+            error: 'heurist-graph-error',
+            configuration: 'heurist-graph-configuration-requested',
+            editRecord: 'heurist-graph-edit-record-requested'
+        };
+        Object.keys(events).forEach(function(key) {
+            if (handlers[key]) this._moduleApi.removeEventListener(events[key], handlers[key]);
+        }, this);
+        this._dataEventHandlers = {};
+    }
+
+    setQuery(query, options) {
+        this.options.query = this._normalizeQuery(query);
+        return this._enqueueOrRun('_setQueryNow', [this.options.query, options || {}]);
+    }
+
+    _setQueryNow(query) {
+        return this._moduleApi.load({query, rules: this.options.rules});
+    }
+
+    setSelection(recordIds, options) {
+        this.options.selection = this._normalizeRecordIds(recordIds);
+        return this._enqueueOrRun('_setSelectionNow', [this.options.selection, options || {}]);
+    }
+
+    async _setSelectionNow(recordIds, options) {
+        this._suppressSelectionSync = true;
+        try {
+            return await this._moduleApi.setSelection(recordIds, options || {});
+        } finally {
+            this._suppressSelectionSync = false;
+        }
+    }
+
+    expandNode(recordId) {
+        return this._enqueueOrRun('_expandNodeNow', [recordId]);
+    }
+
+    _expandNodeNow(recordId) {
+        return this._moduleApi.expandNode(recordId);
+    }
+
+    refresh() {
+        return this.setQuery(this.options.query);
+    }
+
+    getGraphApi() { return this._moduleApi; }
+    getModuleApi() { return this._moduleApi; }
+    isReady() { return this._isReady; }
+
+    _destroy() {
+        this._isDestroyed = true;
+        if (this._readyTimer) clearInterval(this._readyTimer);
+        if (this._resizeTimer) clearTimeout(this._resizeTimer);
+        this._resizeObserver?.disconnect();
+        this._unbindHostEvents();
+        this._unbindDataEvents();
+        const api = this._moduleApi;
+        this._moduleApi = null;
+        return api ? api.destroy() : Promise.resolve();
+    }
+}
+
+window.HeuristModuleGraph = HeuristModuleGraph;

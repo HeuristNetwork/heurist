@@ -27,12 +27,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     const _className = "ImportRecordsCSV";
     const _version   = "0.4";
 
+    // verifyDBAgainstSource: additions only
+    const verifyDBAgainstSource = window.hWin.HEURIST4.util.getUrlParameter(
+        'verifyDBAgainstSource', window.location.search
+    ) == '1';
+
     let imp_ID,   //import session
     imp_session,  //json with session parameters
-    
+
     currentSeqIndex = -1,  
     
     mode_display_separate = false,
+
+    // Validation review state prevents unresolved additions from trapping the user in a Prepare loop.
+    termErrorsReviewed = false,
+    dateErrorsReviewed = false,
     
     UTMzone = 0,
 
@@ -60,6 +69,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     function _init(_imp_ID, _max_upload_size, format){
     
         imp_ID = _imp_ID;
+
+        // verifyDBAgainstSource: additions only
+        if(verifyDBAgainstSource){
+            $('body').addClass('verification-mode');
+            $('#divStep1 h2').first().text('PREVIOUSLY UPLOADED SOURCE FILE');
+            $('#lblUploadFile').text('Upload source file (CSV/TSV)');
+            $('#divStep1 .heurist-helper2').first().text(
+                'The first line must contain column names; the database will not be modified.'
+            );
+            $('#divActionsImport h2.step4').text('step 2: FIELDS TO VERIFY');
+        }
         
         let is_h6style = window.hWin.HAPI4.sysinfo['layout']=='H6Default';
         
@@ -444,6 +464,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     .on('click', function(e) {
                             _doImport();
                         });
+
+        // verifyDBAgainstSource: additions only
+        $('#btnVerifyDatabase')
+                    .button({label: window.hWin.HR('Download verification report'), iconPosition:'end', icon:'ui-icon-arrowthickstop-1-s'})
+                    .on('click', _doVerifyDatabaseAgainstSource);
+
+        // verifyDBAgainstSource: make the non-destructive action unmistakable
+        if(verifyDBAgainstSource){
+            $('#btnVerifyDatabase').button({label: window.hWin.HR('Run verification and download report')});
+        }
 
 /* repalced to help text                        
         $('#btnNextRecType1')
@@ -1681,6 +1711,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#mapping_column_header').text((currentStep==3)
                                                     ?'Column to Field mapping (record match)'
                                                     :'Fields to update');
+        if(verifyDBAgainstSource && currentStep!=3){
+            $('#mapping_column_header').text('Fields to verify');
+        }
         let stype = (currentStep==3)?'mapping_keys':'mapping_flds'; //for matching and for import
         let mapping_flds = imp_session['sequence'][currentSeqIndex][stype];  //field index=>dty_ID
         if(!mapping_flds) mapping_flds = {};
@@ -1707,7 +1740,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             ? imp_session['columns'][i].length : column_width;
         }
         column_width += 5;
-        $($('.tbmain')[0]).find('th:nth-child(3)').css({
+        $($('.tbmain')[0]).find('th:nth-child(4)').css({
             width: `${column_width}ch`,
             'max-width': `${column_width}ch`
         })
@@ -1716,13 +1749,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         if (idx_id_fieldname<0) { //id field is not created
 
-            sID_field = '<tr><td width="75px" align="center">&nbsp;'
+            sID_field = '<tr class="csv-id-group"><td width="75px" align="center">&nbsp;'
                     //+ '<input type="checkbox" checked="checked" disabled="disabled"/>'
                     + '</td>'
-                    + '<td  width="75px" align="center">0</td>' // count of unique values
+                    + '<td width="75px" align="center">0</td>' // count of total values
+                    + '<td width="75px" align="center">0</td>' // count of unique values
                     + `<td style="width:${column_width}ch;max-width:${column_width}ch;class="truncate">${imp_session['sequence'][currentSeqIndex]['field']}</td>` // column name
-                    + '<td style="width:300px;">&nbsp;New column to hold Heurist record IDs</td><td>&nbsp;</td></tr>';
-        }        
+                    + '<td style="width:300px;">&nbsp;New column to hold Heurist record IDs</td><td width="50px">&nbsp;</td><td>&nbsp;</td></tr>';
+        }
 
         for (i=0; i < len; i++) {
 
@@ -1731,12 +1765,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             let isProcessed = !(isIDfield || isIndex || all_mapped.indexOf(i)<0 ); // window.hWin.HEURIST4.util.isnull(mapping_flds[i]) );
             
             //checkbox that marks 'in use'
-            let s = '<tr><td width="75px" align="center">&nbsp;<span style="display:none">'
+            let s = `<tr${isIDfield || isIndex ? ' class="csv-id-group"' : ''}><td width="75px" align="center">&nbsp;<span style="display:none">`
                     +'<input type="checkbox" id="cbsa_dt_'+i+'" value="'+i+'" data-type="'
                     +(isIDfield?'id':(isIndex?'index':(isProcessed?'processed':'remain')))+'"/></span></td>';
 
+            // count of total values
+            s += '<td  width="75px" align="center">'+imp_session['column_counts'][i]+'</td>';
+
             // count of unique values
-            s = s + '<td  width="75px" align="center">'+imp_session['uniqcnt'][i]+'</td>';
+            s += '<td  width="75px" align="center">'+imp_session['uniqcnt'][i]+'</td>';
 
             // column names
             s += `<td style="width:${column_width}ch;max-width:${column_width}ch;${(isIndex?'color:#b36ae2;"':'')}" class="truncate">${imp_session['columns'][i]}</td>`;
@@ -1750,10 +1787,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 + (isIndex||isIDfield?'class="indexes"':'')+'></select>';
             
             // define new field button
-            s += (isIndex||isIDfield ? '' : 
-                    `<button id="btn_dt_${i}" style="margin-left:5px;padding:2px;" title="Add a new field to the record type">Add field</button>`) + '</span>';
+            s += (isIDfield ? '' :
+                    `<button id="btn_dt_${i}" style="margin-left:5px;padding:2px;" title="Add a new ${isIndex ? 'record pointer ' : ''}field to the record type">Add field</button>`) + '</span>';
 
             s = s + '</td>';
+
+            // seek value buttons
+            s += `<td width="50px" style="cursor: pointer;" class="seek-values" data-index="${i}">
+                <span data-dest="prev" title="Previous value in this field" style="position: relative;top: 1px;left: 0.5em;" class="ui-icon ui-icon-triangle-1-w"></span>
+                <span data-dest="next" title="Next value in this field" style="position: relative;top: 1px;right: -0.75em;" class="ui-icon ui-icon-triangle-1-e"></span>
+            </td>`;
 
             // cell for value
             s = s + '<td id="impval'+i+'" style="text-align: left;padding-left: 16px;" data-isindex="'+(isIndex?1:0)+'">&nbsp;</td></tr>';
@@ -1771,54 +1814,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             if(!isIDfield && !isIndex){
                 sAllFields = sAllFields + s;
             }
-            
-            /*if(!isIDfield){  //variant: put index fields above first mapping key
-                if(isIndex){
-                    var mf_idx = null;
-                    for  (var j=0; j < imp_session['sequence'].length; j++) {
-                        var id_idx = _getFieldIndexForIdentifier(j);
-                        if(id_idx==i){
-                            //get mapping keys
-                            if(imp_session['sequence'][j]['mapping_keys']){
-                                //take first
-                                mf_idx = Object.keys(imp_session['sequence'][j]['mapping_keys'])[0];
-                                
-                                mf_idx = 'value="'+mf_idx+'"';
-                                
-                                for  (var k=0; k < sAllFields.length; k++) {
-                                    if(sAllFields[k].indexOf(mf_idx)>0){
-                                        sAllFields.splice(k, 0, s);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
 
-                    if(mf_idx==null){
-                        sAllFields.push(s);
-                    }
-                    
-                }else{
-                    //for streamlining version
-                    sAllFields.push(s);
-                }
-            }*/
-            
         }//for
         
         if(mode_display_separate){
         
             if(sID_field!=''){
-                sID_field = '<tr height="40"><td class="subh" colspan="5"><br><b>Heurist ID</b></td></tr>'
+                sID_field = '<tr height="40"><td class="subh" colspan="7"><br><b>Heurist ID</b></td></tr>'
                     +sID_field;
             }
             if(sIndexes!=''){
-                sIndexes = '<tr height="40"><td class="subh" colspan="5"><br><b>Heurist identifiers (record pointers)</b></td></tr>'
+                sIndexes = '<tr height="40"><td class="subh" colspan="7"><br><b>Heurist identifiers (record pointers)</b></td></tr>'
                     +sIndexes;
             }
             if(sRemain!=''){
-                sRemain = '<tr height="40"><td class="subh" colspan="5"><br><b>'
+                sRemain = '<tr height="40"><td class="subh" colspan="7"><br><b>'
                 + ((currentStep==3) ?'Matching - not yet used'
                                     :'Not yet Imported')
                 +'</b>'
@@ -1830,7 +1840,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     +sRemain;
             }
             if(sProcessed!=''){
-                sProcessed = '<tr height="40"><td class="subh" colspan="5"><br>'
+                sProcessed = '<tr height="40"><td class="subh" colspan="7"><br>'
                 +'<b>Already used</b>'
                  + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (red in dropdown) if you plan to create new records</span>')
                 +'<br><br><a href="#" class="lnk_SelectAll_processed" style="font-size:smaller">Select all/none</a></td></tr>'
@@ -1841,20 +1851,23 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         }else{
             //without sections and separators
+            const mappingHelp = currentStep == 4 ?
+                '<tr class="csv-mapping-help csv-id-group"><td></td><td></td><td class="heurist-helper1">Only columns identified by the characters H-ID are shown here. The name can be in the source file or generated by matching records and adding any that are not matched.</td><td class="heurist-helper1">Only record pointer fields are shown here. If you do not have the required field you will need to add it to accept the values.</td><td></td></tr>' : '';
+            const ordinaryHelp = currentStep == 4 ?
+                '<tr class="csv-mapping-help"><td></td><td></td><td class="heurist-helper1">In general, do NOT select fields below which have already been used to create linked records identified by the H-IDs above.</td><td class="heurist-helper1">Record pointer fields are not shown below because they can only accept Heurist IDs (identified by H-ID in the column name).</td><td></td></tr>' : '';
             $('#tblFieldMapping > tbody').html(
-                '<tr height="40" class="helper" style="display:none"><td class="subh" colspan="5" style="padding:0 20px">'
-                    +'<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
-                    +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
-                +'</td></tr>'
-                +sID_field+sIndexes+sAllFields
+                '<tr height="40" class="helper" style="display:none"><td class="subh" colspan="5" style="padding:0 20px"></td></tr>'
+                +mappingHelp+sID_field+sIndexes+ordinaryHelp+sAllFields
                 +'<tr height="40" style="border-bottom:1px solid lightgray">'
                 + '<td class="subh" colspan="2"><a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td>'
-                + '<td class="subh" id="add_new_col" colspan="3" style="border-left: none; padding: 10px 0px;">'
+                + '<td class="subh" id="add_new_col" colspan="5" style="border-left: none; padding: 10px 0px;">'
                     + '<input id="txtColName" placeholder="Column name..." size="20">'
                     + '<button id="btnInsertData" style="margin-left: 10px; vertical-align: bottom;">Add</button><br><br>'
                     + '<input id="txtColData" placeholder="Value..." size="30">'
                 + '</td>'
                 +'</tr>');
+
+            _setTableHelperRow();
 
             $('#btnInsertData').button({icon: 'ui-icon-plus'});
 
@@ -1881,6 +1894,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 _showStep(4); //reset to prepare step
             }
         });
+
+        $('.seek-values').on('click', _seekValue);
         
         //init selectors
         _initFieldMapppingSelectors();
@@ -2331,13 +2346,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
 
         if(!mapping_flds) mapping_flds = {};
-
         
         let allowed = Object.keys($Db.baseFieldType);
         allowed.splice(allowed.indexOf("separator"),1);
         //allowed.splice(allowed.indexOf("file"),1);
         allowed.splice(allowed.indexOf("resource"),1);
-        //allowed.splice(allowed.indexOf("relmarker"),1);
+        allowed.splice(allowed.indexOf("relmarker"),1);
         if(currentStep==3){ //matching step
             allowed.splice(allowed.indexOf("geo"),1);
         }
@@ -2550,6 +2564,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 rec_ID: -1,
                 title: `Define new field for ${$Db.rty(rty_ID,'rty_Name')}`,
                 newFieldForRtyID: rty_ID,
+                // The dialog must offer the same field types as this row's selector.
+                newFieldType: $sel.hasClass('indexes') ? 'resource' : null,
+                excludedFieldTypes: $sel.hasClass('indexes') ? [] : ['resource', 'relmarker'],
                 selectOnSave: true,
                 newFieldName: imp_session['columns'][fld_idx],
                 onselect: (event, res) => {
@@ -2566,6 +2583,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                     let dty_ID = res.selection ? res.selection[0] : res.updatedRstField;
                     let dty = $Db.dty(dty_ID);
+                    let pointerRow = $sel.hasClass('indexes');
+                    if(!dty || (pointerRow ? dty.dty_Type != 'resource' :
+                        ['resource', 'relmarker'].includes(dty.dty_Type))){
+                        window.hWin.HEURIST4.msg.showMsgErr({message: 'The selected field type is not valid for this column.'});
+                        return;
+                    }
                     let record = {
                         rst_ID: dty_ID,
                         rst_RecTypeID: rty_ID,
@@ -2600,23 +2623,43 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                         // update cached record
                         let rst_ID = response.data[0];
-                        if(rst_ID>0){
-
-                            record['rst_ID'] = String(rst_ID);
-                            $Db.rst(rty_ID).addRecord(rst_ID, record);
-
-                            // Set field selection to new field
-                            if(!imp_session['sequence'][currentSeqIndex]['mapping_flds']){
-                                imp_session['sequence'][currentSeqIndex]['mapping_flds'] = {};
-                            }
-                            let fld_index = fld_id.replace('sa_dt_', '');
-                            imp_session['sequence'][currentSeqIndex]['mapping_flds'][fld_index] = rst_ID;
-
-                            let $checked_boxes = $("input[id^='cbsa_dt_']:checked"); // save checked boxes
-                            _initFieldMapppingSelectors(); // recreate selects
-
-                            $checked_boxes.prop('checked', true).trigger('change'); // re-check boxes, they get reset by the above recreate
+                        if(rst_ID <= 0){
+                            return;
                         }
+
+                        record['rst_ID'] = String(rst_ID);
+                        $Db.rst(rty_ID).addRecord(rst_ID, record);
+
+                        // Set field selection to new field
+                        if(!imp_session['sequence'][currentSeqIndex]['mapping_flds']){
+                            imp_session['sequence'][currentSeqIndex]['mapping_flds'] = {};
+                        }
+
+                        // Cache mapping before refresh
+                        let $checked_boxes = $("input[id^='cbsa_dt_']:checked:visible"); // save checked boxes
+                        let hasMapping = false;
+                        let fieldMapping = {};
+                        $.each($checked_boxes, function(idx, item){
+
+                            item = $(item);
+
+                            let field_type_id = $(`#sa_dt_${item.val()}`).val();
+                            if(field_type_id){
+                                fieldMapping[item.val()] = field_type_id;
+                                hasMapping = true;
+                            }
+                        });
+                        if(hasMapping){
+                            imp_session['sequence'][currentSeqIndex]['mapping_flds'] = fieldMapping;
+                        }
+                        // Add new mapping
+                        let fld_index = fld_id.replace('sa_dt_', '');
+                        imp_session['sequence'][currentSeqIndex]['mapping_flds'][fld_index] = rst_ID;
+
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData('dty,rst', () => {
+                            _initFieldMapppingSelectors(); // recreate selects
+                            $checked_boxes.prop('checked', true).trigger('change'); // re-check boxes, they get reset by the above recreate
+                        });
                     });
                 }
             };
@@ -3221,8 +3264,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             });
                             
                             for(let i=0; i<id_suggestions.length; i++){
-                                $('#id_field_'+id_suggestions[i]).prop('checked',true);
-                                $('#id_field_'+id_suggestions[i]).trigger('change');
+                                $('#id_field_'+id_suggestions[i]).prop('checked',true).trigger('change');
                             }
                             
                         }else if(response.data.import_id>0){
@@ -3265,7 +3307,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         $('#divFieldMapping2').hide();
         
-        if(currentSeqIndex>=0 && imp_session['sequence'][currentSeqIndex]){
+        if(currentSeqIndex >= 0 && imp_session['sequence'][currentSeqIndex]){
+
             let key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
             
             let rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
@@ -3284,8 +3327,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 //$('label[for="sa_match1"]').css('color','');
                 
             }
+
+            let mode = $('#sa_match0').is(':checked') ? 0 : 1;
+            mode = $('#sa_match2').is(':checked') ? 2 : mode;
             
-            if($('#sa_match0').is(':checked')){ // normal matching
+            if(mode === 0){ // normal matching
                 
                  shelp = 'Please select one or more columns on which to match <b>'
                  + $Db.rty(rtyID,'rty_Name')
@@ -3302,7 +3348,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 shelp = shelp + ' Matching sets this ID field for existing records and allows '
                     +'the creation of new records for unmatched rows.';
                 
-            }else if($('#sa_match1').is(':checked')){ // use id field
+            }else if(mode === 1){ // use id field
                 
                 shelp = 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be used.<br><br>';
                 
@@ -3339,7 +3385,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     
                 }
                 
-            }else if($('#sa_match2').is(':checked')){  //skip matching
+            }else if(mode === 2){  //skip matching
 
                 shelp = 'By choosing not to match the incoming data, you will create '
                     +imp_session['reccount']+' new <b>'
@@ -3351,25 +3397,48 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
             }
             
-            if($('#sa_match2').is(':checked')){  //skip matching
+            if(mode === 2){  //skip matching
                 $('#btnMatchingStart').button({label:'Import all as new'}); //Skip matching
-            }else if($('#sa_match1').is(':checked')){  //use id column
+            }else if(mode === 1){  //use id column
                 $('#btnMatchingStart').button({label:'Use <i>'+imp_session['columns'][key_idx]+'</i>'}); //Skip matching
             }else{
                 $('#btnMatchingStart').button({label:'Match against existing records'});
             }
         
-            if($('#sa_match0').is(':checked')){ // normal matching
+            if(mode === 0){ // normal matching
+
                 $("input[id^='cbsa_dt_']").show();
                 $("select[id^='sa_dt_']").css('visibility','visible');
-                $('tr.helper').show();//#divFieldRoles > .tbfields > tbody > 
+                $('tr.helper').show();
+
+                if(window.hWin.HEURIST4.util.isObject(imp_session['sequence'][currentSeqIndex]['matching_flds'])
+                    && !window.hWin.HEURIST4.util.isempty(imp_session['sequence'][currentSeqIndex]['matching_flds'])
+                    && currentStep == 3){
+
+                    for(const idx in imp_session['sequence'][currentSeqIndex]['matching_flds']){
+
+                        let $checkbox = $(`#cbsa_dt_${idx}`);
+                        let $select = $(`#sa_dt_${idx}`);
+                        if($checkbox.length === 0 || $select.length === 0){
+                            continue;
+                        }
+
+                        $checkbox.prop('checked', true).trigger('change');
+                        $select.val(imp_session['sequence'][currentSeqIndex]['matching_flds'][idx]);
+                        if($select.hSelect('instance') !== undefined){
+                            $select.hSelect('refresh');
+                        }
+                    }
+                }else{
+                    imp_session['sequence'][currentSeqIndex]['matching_flds'] = {};
+                }
+
             }else{
                 $("input[id^='cbsa_dt_']").hide();
                 $("select[id^='sa_dt_']").css('visibility','hidden');
                 $('tr.helper').hide();
             }
-        
-        
+
         }
         $('#divMatchingSettingHelp').html(shelp);
         
@@ -3391,7 +3460,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }else if($('#sa_match1').is(':checked')){
             matchMode = 1;    
         }
-        
+
         _doMatching( matchMode, null );
     }
         
@@ -3416,7 +3485,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             let sWarning = '';
             let haveMapping = false; 
             //do we have id field?
-            let key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
+            let key_idx = _getFieldIndexForIdentifier(currentSeqIndex);
             //do we have field to match?
             let field_mapping = {};
             let multifields = []; //indexes of multivalue fields
@@ -3530,7 +3599,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 request['disamb_resolv'] = JSON.stringify( disamb_resolv );          
             }
             
-            
             _showStep(0);
         
             window.hWin.HAPI4.doImportAction(request, 
@@ -3621,10 +3689,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                                 
                                                 //sel = window.hWin.HEURIST4.ui.initHSelect(sel, false);
                                                 sel.on('change', function(event){
-                                                   let sessionName = $(event.target).val();
-                                                   if(sessionName && preset_mappings[sessionName]){
-                                                       _initFieldMapppingSelectors( preset_mappings[sessionName] );
-                                                   }
+                                                    let sessionName = $(event.target).val();
+                                                    if(sessionName && preset_mappings[sessionName]){
+                                                        _initFieldMapppingSelectors( preset_mappings[sessionName] );
+                                                    }
                                                 });
 
 
@@ -3801,7 +3869,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         _showStep(4);
                         
+                        // MODIFIED: some validation responses omit the active sequence entry; preserve it for Start Update
+                        const sequenceBeforeValidation = imp_session['sequence'];
                         imp_session = response.data; //assign to global var
+                        if(!imp_session['sequence'] || !imp_session['sequence'][currentSeqIndex]){
+                            imp_session['sequence'] = sequenceBeforeValidation;
+                        }
 
                         let res = imp_session['validation'];
                         
@@ -3836,10 +3909,42 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         //reset
                         $('#prepareWarnings').css('display','none');    
                         $('#mrr_warning').text('');
+                        $('#ignoreErrors').prop('checked', false);
+                        let showingWarningsAndErrors = false;
+                        let requiresPrepareAgain = false;
+
+                        // Separate errors which can be corrected by adding terms from all other errors.
+                        res['term_error'] = [];
+                        res['other_error'] = [];
+                        $.each(res['error'] || [], function(idx, issue){
+                            let checkedField = issue['field_checked'];
+                            if(Array.isArray(checkedField)){ checkedField = checkedField[0]; }
+                            const mappedType = checkedField && res['mapped_fields']
+                                ? res['mapped_fields'][checkedField] : null;
+                            const baseType = mappedType ? $Db.dty(mappedType, 'dty_Type') : null;
+                            if(baseType === 'enum' || baseType === 'relationtype'){
+                                res['term_error'].push(issue);
+                            }else{
+                                res['other_error'].push(issue);
+                            }
+                        });
+                        let termErrorCount = res['term_error'].reduce(
+                            (total, issue) => total + Number(issue['count_error'] || 0), 0);
+                        let otherErrorCount = res['other_error'].reduce(
+                            (total, issue) => total + Number(issue['count_error'] || 0), 0);
+
+                        // If a manually repeated Prepare still finds the same term errors,
+                        // offer the normal explicit import-anyway path instead of looping.
+                        if(termErrorCount>0 && termErrorsReviewed){
+                            res['other_error'] = res['other_error'].concat(res['term_error']);
+                            otherErrorCount += termErrorCount;
+                            termErrorCount = 0;
+                        }
                             
                         if(res['utm_warning']>0){
                             $('#prepareWarnings').show();
                             $('#btnShowUTMWarnings').show();
+                            showingWarningsAndErrors = true;
                         }else{
                             $('#btnShowUTMWarnings').hide();
                         }
@@ -3849,6 +3954,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $('#mrr_warning').text('Data errors: '+res['count_warning']);
                             $('#prepareWarnings').show();//.css('display','inline-block');
                             $('#btnShowWarnings').show();
+                            showingWarningsAndErrors = true;
 
                             if(res['missed_required']==true){
                                 window.hWin.HEURIST4.msg.showMsgErr({
@@ -3861,34 +3967,37 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 });
                             }
 
-                            // auto check 'ignore errors', these errors can be picked up and fixed by verify integrity or manually
-                            $('#sa_ignore_errors').prop('checked', true).trigger('change');
                         }else{
                             $('#btnShowWarnings').hide();
                         }
-                        
-                        if(res['count_error']>0){
-                            
-                            $('#mrr_error').text('Rows with unrecognised terms: '+res['count_error']);
-                            $('#prepareErrors').show();//.css('display','inline-block');
-                            
-                            window.hWin.HEURIST4.msg.showMsgErr({
-                                message: (res['count_error']==1?'There is one row ':('There are '+res['count_error']+' ROWS '))
-                                        +'with warnings in your input (the same error may occur in many rows).'
-                                        +'<br><br>These could include unrecognised terms, invalid dates, unknown record pointers '
-                                        +'(no record with given ID), missing required values and so forth.'
-                                        + '<br><br>The data can be imported as-is and new terms can be added automatically, '
-                                        + 'but if the data has too many mistakes it may be better to fix these in the source '
-                                        + 'file and then process it again. Open Refine is a useful free tool for fixing errors.'
-                                        + '<br><br> On the other hand, Admin > Verify Integrity can be used to find many common '
-                                        + 'errors once the data is loaded. Click "Show" button for a list of errors.',
-                                error_title: 'Invalid values'
-                            });
 
-                            $('.step3 > .normal').hide();
-                            $('.step3 > .skip_step').hide();
-                            $('.step3 > .need_resolve').show();
+                        // Missing terms must be added explicitly, followed by another manual Prepare.
+                        if(termErrorCount>0){
+                            $('#mrr_error').text('Rows with unrecognised terms: '+termErrorCount);
+                            $('#prepareErrors').show();
+                            _showRecords('term_error');
+                            termErrorsReviewed = true;
+                            requiresPrepareAgain = true;
+                        }
+
+                        // Open this second so the shorter date review appears above the terms dialog.
+                        if(res['count_date_error']>0 && !dateErrorsReviewed){
+                            _showRecords('date_error');
+                            dateErrorsReviewed = true;
+                        }
+
+                        if(requiresPrepareAgain){
+                            window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), true);
+                            $('.importIgnoreErrors').hide();
                         }else{
+
+                            // From this point the generic error list contains no term or date findings.
+                            res['error'] = res['other_error'];
+                            res['count_error'] = otherErrorCount;
+                            if(otherErrorCount>0){
+                                $('#mrr_error').text('Other data errors: '+otherErrorCount);
+                                $('#prepareErrors').show();
+                            }
 
                             if(res['geo_invalid'] && (res['geo_invalid']['invalid'].length > 0 || res['geo_invalid']['outOfBounds'].length > 0)){
 
@@ -3910,8 +4019,28 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 window.hWin.HEURIST4.msg.showMsgDlg(msg, null, null, {title: 'Invalid geographical data', default_palette_class: 'ui-heurist-populate'});
                             }
 
-                            $('#prepareErrors').css('display','none');
+                            if(otherErrorCount===0){ $('#prepareErrors').css('display','none'); }
                             _showStep(5);
+
+                            // Remaining invalid values may be retained after explicit confirmation.
+                            if(otherErrorCount>0 || res['count_warning']>0 || showingWarningsAndErrors){
+                                showingWarningsAndErrors = true;
+                                window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), true);
+                            }
+                        }
+
+                        if(showingWarningsAndErrors){
+                            $('.warningMessage').hide();
+                            $('.importIgnoreErrors').css('display', 'inline-block');
+                            $('.first-cell').prop('width', '150');
+                        }else{
+                            $('.warningMessage, .importIgnoreErrors').hide();
+                            $('.first-cell').prop('width', '250');
+                        }
+                        if(requiresPrepareAgain){
+                            $('.warningMessage').show();
+                            $('.importIgnoreErrors').hide();
+                            $('.first-cell').prop('width', '150');
                         }
                     }else{
                         _showStep(4);
@@ -4005,7 +4134,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             mapping   : field_mapping,
             ignore_insert: $('#sa_insert').prop('checked')?0:1,
             ignore_update: $('#sa_update').prop('checked')?0:1,
-            ignore_errors: $('#sa_ignore_errors').prop('checked')?1:0,
+            // MODIFIED: the single confirmed "Ignore data errors" choice controls final import
+            ignore_errors: $('#ignoreErrors').prop('checked')?1:0,
 
             is_csv_import: 1, // identify this request as a CSV import
 
@@ -4029,10 +4159,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
                         _showStep(5);
-                        
-                        imp_session = response.data; //assign to global var
 
-                        let imp_result = imp_session['import_report'];
+                        // MODIFIED: do not replace the live session with a plain-text validation response
+                        const importedSession = response.data;
+                        const imp_result = importedSession && importedSession['import_report'];
+                        if(!imp_result){
+                            _showStep(5);
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: (typeof importedSession === 'string' && importedSession)
+                                    ? importedSession
+                                    : 'The server did not return an import report. The current import session has been retained.',
+                                error_title: 'Import was not completed'
+                            });
+                            return;
+                        }
+                        imp_session = importedSession; //assign only a complete import session
                         
                         let msg = ''
                           +'<table class="tbresults"><tr><td>Total rows in import table:</td><td>'+ imp_result['total']
@@ -4064,6 +4205,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             +'</div>';
                             
                             //skipped_details
+                        }
+
+                        if($('#ignoreErrors').is(':checked')){ // uncheck ignore all errors
+                            $('#ignoreErrors').prop('checked', false);
                         }
                           
                         msg = msg +'</td></tr></table>';
@@ -4107,27 +4252,28 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
      * @return {void}
      */
     function _showRecords2(mode, is_download){
-     
+
         let s = '';
         let container = $('#divPopupPreview');
-        let dlg_options = {};
+        let dlg_options = {
+            default_palette_class: 'ui-heurist-populate'
+        };
         let $dlg;
-        let offset = 0, limit=10, 
+        let offset = 0, limit = 1000,
             recCount = _getInsertUpdateCounts(currentSeqIndex),
             start_idx = 0;
-            
+
         if(recCount==null) return;
-        
+
         recCount = mode=='all'?imp_session['reccount']:recCount[mode=='insert'?3:1];
 
-        let id_field = null;         
-        
+        let id_field = null;
+
         let index_field_idx = _getFieldIndexForIdentifier(currentSeqIndex);
         if(index_field_idx>=0){
              id_field = 'field_'+index_field_idx;
         }
-     
-        
+
         let mapping_flds = null;
         if(currentStep!=3){  //import step
             mapping_flds = imp_session['sequence'][currentSeqIndex]['mapping_flds'];
@@ -4136,20 +4282,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             mapping_flds = imp_session['sequence'][currentSeqIndex]['mapping_keys'];
         }
         if(!mapping_flds) mapping_flds = {};
-        
+
         let header_flds = null;
-        
+
         if(is_download){
-            
+
             let k;
             header_flds = ['ID'];
             for(k=0; k<imp_session['columns'].length; k++){
                 header_flds.push(imp_session['columns'][k]);
             }
-                                                              
+
             let rts = Object.keys(imp_session['indexes']);
             for(k=0; k<rts.length; k++){
-                
+
                 let idx_id_fieldname = rts[k].substring(6); //'field_'
                 if(idx_id_fieldname>imp_session['columns'].length){
                     let rtyID = imp_session['indexes'][rts[k]];
@@ -4157,11 +4303,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     header_flds.push(sname);
                 }
             }
-            
+
         }else{
-        
+
             dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
-            
+
             s = ''
                 +'<div class="ent_wrapper"><div style="padding:8px 0 0 10px" class="ent_header">'
                 +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="first" class="ui-icon ui-icon-seek-first"/></a>'
@@ -4169,8 +4315,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 +'<div style="display: inline-block;vertical-align: super;">Range <span id="current_range"></span></div>'
                 +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>'
                 +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a></div>';
-            
-                
+
             s = s + '<div class="ent_content_full"><table class="tbmain" style="font-size:0.9em" width="100%"><thead><tr>'; 
 
             //HEADER - field names
@@ -4183,7 +4328,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }else{
                 start_idx = 1;
             }
-            
+
             if(fieldnames.length>0){
                 for(;i<fieldnames.length;i++){
                     let colname = imp_session['columns'][fieldnames[i]];
@@ -4192,7 +4337,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
                 }
             }else{  //all
-            
+
                 fieldnames = imp_session['columns'];
                 for(;i<fieldnames.length;i++){
                     let colname = fieldnames[i];
@@ -4202,124 +4347,224 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
             s = s + '</tr></thead><tbody></tbody></table></div></div>'
             +'<div class="loading semitransparent" style="display:none;width:100%;height:100%;poistion:absolute"></div>';
-            
+
             dlg_options['element'] = container.get(0);
             container.html(s);
-                
+
             $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
-            
+
             $.each($dlg.find('.navigation2'), function(idx, item){
                 $(item).on('click',  __loadRecordsFromImportTable );
             })
-        
+
         }
-        
+
         __loadRecordsFromImportTable();
-        
-        
+
         function __loadRecordsFromImportTable(event){
-        
+
             if(!imp_session) return;
-            
-            let currentTable = imp_session['import_table']; 
-        
+
+            let currentTable = imp_session['import_table'];
+
             if(currentTable && recCount>0){
-            
-                    let dest = 0;
-                    if(event){
-                        dest = $(event.target).attr('data-dest');  
-                    } 
-                    
-                    
-                    if(Number(dest)=='first'){
+
+                let dest = 0;
+                if(event){
+                    dest = $(event.target).attr('data-dest');
+                } 
+
+                if(Number(dest)=='first'){
+                    offset = 0;
+                }else if(dest=='last'){
+                    offset = Math.floor(recCount/limit) * limit;
+                }else{
+                    dest = Number(dest);
+                    if(isNaN(dest)){
                         offset = 0;
-                    }else if(dest=='last'){
-                        offset = Math.floor(recCount/limit) * limit;
                     }else{
-                        dest = Number(dest);
-                        if(isNaN(dest)){
-                            offset = 0;
-                        }else{
-                            offset = offset + dest*limit;
+                        offset = offset + dest*limit;
+                    }
+                }
+                if (offset>recCount){
+                    offset = Math.floor(recCount/limit) * limit;
+                }
+                if(offset<0){
+                    offset = 0;
+                }
+
+                let request = { 
+                    action: 'records',
+                    id_field: id_field,
+                    mapping: is_download ? null : mapping_flds,
+                    header_flds: header_flds,
+                    mode: mode,
+                    output: is_download ? 'csv' : 'json',
+                    offset: is_download ? 0 : offset,
+                    limit: is_download ? 0 : limit,
+                    table: currentTable,
+                    id: window.hWin.HEURIST4.util.random()
+                };
+
+                if(is_download){
+
+                    request['db'] = window.hWin.HAPI4.database;
+                    request['mapping'] = JSON.stringify(request['mapping']);
+                    request['header_flds'] = encodeURIComponent(JSON.stringify(request['header_flds']));
+
+                    let keys = Object.keys(request) 
+                    let params = [];
+                    for(let k=0;k<keys.length;k++){
+                        if(!window.hWin.HEURIST4.util.isempty(request[keys[k]])){
+                            params.push(keys[k]+'='+request[keys[k]]);
                         }
                     }
-                    if (offset>recCount){
-                        offset = Math.floor(recCount/limit) * limit;
-                    }                    
-                    if(offset<0){        
-                        offset = 0;
-                    }
+                    params = params.join('&');
+                    let url = window.hWin.HAPI4.baseURL + 'hserv/controller/importController.php?'+params;
 
-                    let request = { action: 'records',
-                                    id_field: id_field,
-                                    mapping: (is_download)?null:mapping_flds,
-                                    header_flds: header_flds,
-                                    mode: mode,
-                                    output: (is_download)?'csv':'json',
-                                    offset: is_download?0:offset,
-                                    limit: is_download?0:limit,
-                                    table:currentTable,
-                                    id: window.hWin.HEURIST4.util.random()
-                                       };
-                                       
-                    if(is_download){
+                    window.hWin.HEURIST4.util.downloadURL(url);
 
-                       request['db'] = window.hWin.HAPI4.database;
-                       request['mapping'] = JSON.stringify(request['mapping']);
-                       request['header_flds'] = encodeURIComponent(JSON.stringify(request['header_flds']));
-                        
-                       let keys = Object.keys(request) 
-                       let params = [];
-                       for(let k=0;k<keys.length;k++){
-                           if(!window.hWin.HEURIST4.util.isempty(request[keys[k]])){
-                                params.push(keys[k]+'='+request[keys[k]]);
-                           }
-                       }
-                       params = params.join('&');
-                       let url = window.hWin.HAPI4.baseURL + 'hserv/controller/importController.php?'+params;
-                        
-                       window.hWin.HEURIST4.util.downloadURL(url);
-                        
-                    }else{
-                    
-                        $dlg.find('.loading').show();
-                        $dlg.find('.ent_wrapper').hide();
-                        
-                        
-                        window.hWin.HAPI4.doImportAction(request, function( response ){
-                            
-                            $dlg.find('.loading').hide();
-                            $dlg.find('.ent_wrapper').show();
-                            
-                            if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                                    response = response.data;
-                                    
-                                    let table = $dlg.find('.tbmain > tbody');
-                                
-                                    let s = '';
-                                    $dlg.find("#current_range").html( (offset+1)+':'+(offset+limit) );
+                }else{
 
-                                    for(let i=0; i<response.length;i++){
-                                        let row = response[i];
-                                        if(start_idx>0) row.shift();
-                                        s = s+'<tr>';
-                                        s = s+'<td>'+ row.join('</td><td>') +'</td>';
-                                        s = s+'</tr>';
-                                    }
-                                    
-                                    table.html(s);
-                                
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                    $dlg.find('.loading').show();
+                    $dlg.find('.ent_wrapper').hide();
+
+                    window.hWin.HAPI4.doImportAction(request, function( response ){
+
+                        $dlg.find('.loading').hide();
+                        $dlg.find('.ent_wrapper').show();
+
+                        if(response.status == window.hWin.ResponseStatus.OK){
+
+                            response = response.data;
+
+                            let table = $dlg.find('.tbmain > tbody');
+
+                            let s = '';
+                            $dlg.find("#current_range").html( (offset+1)+':'+(offset+limit) );
+
+                            for(let i=0; i<response.length;i++){
+                                let row = response[i];
+                                if(start_idx>0) row.shift();
+                                s = s+'<tr>';
+                                s = s+'<td>'+ row.join('</td><td>') +'</td>';
+                                s = s+'</tr>';
                             }
 
-                        });        
-                    }
+                            table.html(s);
+
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+
+                    });
+                }
             }
         }
-        
-     
+
+    }
+
+    /**
+     * verifyDBAgainstSource: downloads a read-only comparison of mapped source
+     * columns and records identified by the normal matching workflow.
+     * This deliberately bypasses step4/step5, neither of which is run.
+     * @return {void}
+     */
+    function _doVerifyDatabaseAgainstSource(){
+
+        currentSeqIndex = Number(currentSeqIndex);
+        if(!(currentSeqIndex >= 0)){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to select record type'),
+                error_title: 'Missing record type'
+            });
+            return;
+        }
+
+        const rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
+        const key_idx = _getFieldIndexForIdentifier(currentSeqIndex);
+        const field_mapping = {};
+
+        $("input[id^='cbsa_dt_']").each(function(){
+            const item = $(this);
+            if(item.is(':checked')){
+                const field_type_id = $('#sa_dt_'+item.val()).val();
+                if(field_type_id && item.val()!=key_idx){
+                    field_mapping[item.val()] = field_type_id;
+                }
+            }
+        });
+
+        if(!(key_idx >= 0)){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Run matching before verification so that each source row has a Heurist record ID.',
+                error_title: 'Matching has not been completed'
+            });
+            return;
+        }
+        if(Object.keys(field_mapping).length === 0){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Select at least one source column and corresponding Heurist field to compare.',
+                error_title: 'No fields selected for verification'
+            });
+            return;
+        }
+
+        const params = new URLSearchParams({
+            db: window.hWin.HAPI4.database,
+            action: 'verify_database_against_source',
+            output: 'ods',
+            imp_ID: imp_ID,
+            sa_rectype: rtyID,
+            seq_index: currentSeqIndex,
+            recid_field: 'field_'+key_idx,
+            mapping: JSON.stringify(field_mapping),
+            report_value_order: $('#verifyReportValueOrder').is(':checked') ? 1 : 0,
+            date_format: $('#csv_dateformat').val() || 1
+        });
+        // verifyDBAgainstSource: pass the exact filename/date/time description
+        // held by the UI; the server cannot reliably reconstruct this later.
+        const sessionListLabel = $('#selImportId option[value="'+imp_ID+'"]').text();
+        const reportLabel = imp_session['import_name'] || sessionListLabel
+            || $('.curr_file_name').first().text() || upload_file_name || 'source';
+        params.set('report_name', reportLabel);
+        const reportFilename = 'Checking_'+reportLabel
+            .replace(/[\\/:*?"<>|]/g, '-')
+            .replace(/\s{2,}/g, '_')+'.ods';
+        const reportUrl = window.hWin.HAPI4.baseURL+'hserv/controller/importController.php?'+params.toString();
+
+        // MODIFIED for verifyDBAgainstSource: download through a Blob with an
+        // explicit client-side filename instead of the iframe-based generic
+        // downloader, which can lose Content-Disposition filenames.
+        fetch(reportUrl, {credentials:'same-origin'})
+            .then(function(response){
+                if(!response.ok){
+                    throw new Error('Server returned HTTP '+response.status);
+                }
+                // verifyDBAgainstSource: use the filename based on the exact
+                // saved upload-session label, as supplied by the server.
+                const encodedFilename = response.headers.get('X-Heurist-Report-Filename');
+                const serverFilename = encodedFilename ? decodeURIComponent(encodedFilename) : reportFilename;
+                return response.blob().then(function(blob){
+                    return {blob:blob, filename:serverFilename};
+                });
+            })
+            .then(function(download){
+                const objectUrl = URL.createObjectURL(download.blob);
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.download = download.filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(function(){ URL.revokeObjectURL(objectUrl); }, 1000);
+            })
+            .catch(function(error){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message:'The verification report could not be downloaded: '+error.message,
+                    error_title:'Verification download failed'
+                });
+            });
     }
     
     //
@@ -4450,7 +4695,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             +' if you have used an incomplete set of fields for matching.</div>';
 
         }
-        else if(mode=='error' || mode=='warning'){    //----------------------------------------------------------------------------------- 
+        else if(mode=='error' || mode=='warning' || mode=='date_error' || mode=='term_error'){    //-----------------------------------------------------------------------------------
 
             let is_missed = false;
             let tabs = res[mode];
@@ -4458,7 +4703,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             let dt_to_col = {};
 
             if(mode == 'warning'){
-                s = '<span style="color:red;">You MUST either change the field to a more lenient field, such as text, or check the \'Ignore validation. Add data "as is"\' box,<br>'
+                s = '<span style="color:red;">You MUST either change the field to a more lenient field, such as text, or check the \'Ignore data errors, import anyway\' box,<br>'
                   + 'otherwise the rows containing these data will not be processed.</span>';
             }
 
@@ -4512,7 +4757,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
                 }*/
                 
-                s = s + "<div><span class='error'>Values in red are invalid: </span> "+rec_tab['err_message']+"<br><br></div>";
+                s = s + "<div><span class='error'>"
+                    +(mode == 'date_error'
+                        ? 'Values in red are ambiguous or uninterpretable: '
+                        : 'Values in red are invalid: ')
+                    +"</span> "+rec_tab['err_message']+"<br><br></div>";
                 
                 let is_missed = (rec_tab['err_message'].indexOf('a value must be supplied')>0);
 
@@ -4529,11 +4778,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     ?tabs[k]['values_error'].length:0;
                     if(cnt>0){                 
                         s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;">'
-                        +'Adds '+cnt+' new terms to this field</button>';
+                        +'Add '+cnt+' new terms to this field</button>';
                             //'"'+$Db.dty(dt_id, 'dty_Name')+'"</button>';
                         
                         s = s + '&nbsp;<button class="add_all_terms" style="padding: 4px 8px !important;display:none">'
-                                +'Adds new terms to all fields</button>';
+                                +'Add all new terms to all fields</button>';
                             
                         s += '<br><br>';     
                     }
@@ -4631,7 +4880,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 s = s + '</div>';
             }
             
-            dlg_options['title'] = `Records with ${mode == 'error' ? 'warning' : 'error'}s`; // 
+            dlg_options['title'] = mode == 'date_error'
+                ? 'Dates requiring review'
+                : (mode == 'term_error' ? 'Unrecognised terms' : `Records with ${mode == 'error' ? 'warning' : 'error'}s`); //
             
         }
         else if(res['count_'+mode+'_rows']>0)
@@ -4684,7 +4935,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
 
-        const TABS = imp_session['validation']['error'];
+        const TABS = res[mode] || [];
 
         //activate add terms buttons
         let btn_ads = $dlg.find('.add_terms');
@@ -4747,14 +4998,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     idx ++;
 
                     if(fields.length > idx){
-                        _importTerms_ParentID(fields[0][1], def_ParentTermID, _handle_callback);
+                        _importTerms_ParentID(fields[idx][1], def_ParentTermID, _handle_callback);
                         return;
                     }
 
                     has_peroids ? _importTerms_Separator(fields, $dlg, true) : _importTerms_Import(fields, '', $dlg, true);
                 };
 
-                _importTerms_ParentID(fields[0][1], null, _handle_callback);
+                _importTerms_ParentID(fields[idx][1], null, _handle_callback);
             });
         }
     } 
@@ -5145,6 +5396,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 shelp = shelp + '<br>Note that no changes are made to the database when you click the Prepare button.';
                 
                 $('#divPrepareSettingHelp').html(shelp);
+
+                // verifyDBAgainstSource: replace the importer instructions, but retain this help area
+                if(verifyDBAgainstSource){
+                    $('#divPrepareSettingHelp').html(
+                        'Select columns in the <b>'
+                        +window.hWin.HEURIST4.util.htmlEscape($Db.rty(rtyID,'rty_Name') || 'selected')
+                        +'</b> records which are to be verified, then click the button above'
+                    ).show();
+                }
                 
                 window.hWin.HEURIST4.util.setDisabled($('#btnPrepareStart'), false);
                 window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), true);
@@ -5186,7 +5446,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     function _showStep(page){
         currentStep = page;
 
-        if(page>1){
+        if(page > 1){
             let container = $(window.hWin.document).find('.ui-menu6-container.ui-heurist-populate');
             if(container.find('.ui-helper-popup').is(':visible')){
                 container.find('.ui-helper-popup').hide();    
@@ -5197,25 +5457,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
         }
 
-        if(page == 5 && $('#sa_update').prop('checked')){
-            $('#divheader').css('background','rgba(200, 100, 200, 0.83)');
-
-            $('tr.helper').show().children().html(
-                '<span style="background:rgba(200, 100, 200, 0.83);display:inline-block;padding:3px;">UPDATE</span> Allocate <span style="color:purple;">purple fields</span> to '
-                +'<span style="color:purple;">record pointer fields</span> which connect to entities created in previous steps'
-            );
-        }else{
-            $('#divheader').css('background','rgba(151, 244, 128, 0.83)');
-
-            if(page != 3){
-                $('tr.helper').hide();
-            }else{
-                $('tr.helper').show().children().html(
-                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
-                    +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
-                );
-            }
-        }
+        _setTableHelperRow();
         
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
@@ -5226,26 +5468,30 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }else{
             $('#divFieldMapping2').hide();
         }
+        $('.warningMessage, .importIgnoreErrors').hide();
+        $('.first-cell').prop('width', '250');
 
-        if(page==1){
+        if(page == 1){
+
             $("#selImportId").val('');  //clear selection
-            //if(session_selector && session_selector.hSelect('instance')) session_selector.hSelect("refresh");
+
             if(session_selector && session_selector.hSelect('instance')) {
                 let sw = $("#selImportId").width();        
-                if(sw>500) sw = 500;
+                if(sw > 500) sw = 500;
                 session_selector.hSelect("refresh");
                 $("#selImportId-button").css('width', sw);   
             }
+
             imp_ID = 0;
-            
-        }else if(page>2){  //matching and import
+
+        }else if(page > 2){  //matching and import
         
             $("div[class*='step'],h2[class*='step']").hide();
             $('.step'+page).show();
             
             _redrawArrow();            
             
-            if(page==3){
+            if(page == 3){
                 $('.step3 > .normal').show();
                 $('.step3 > .need_resolve').hide();
                 _onMatchModeSet();
@@ -5255,7 +5501,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
         }
 
-        if(page>=2){
+        if(page >= 2){
 
             if((!upload_file_name || upload_file_name == undefined) && imp_session && !window.hWin.HEURIST4.util.isempty(imp_session['import_file'])){
                 let filename_parts = imp_session['import_file'].split(' ').slice(0, -2);
@@ -5283,6 +5529,42 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         _adjustTablePosition();
     }
 
+    function _setTableHelperRow(){
+
+        if(currentStep == 5 && $('#sa_update').prop('checked')){
+
+            $('#divheader').css('background','rgba(200, 100, 200, 0.83)');
+
+            $('tr.helper').show().children().html(
+                '<span style="background:rgba(200, 100, 200, 0.83);display:inline-block;padding:3px;">UPDATE</span> Allocate <span style="color:purple;">purple fields</span> to '
+                +'<span style="color:purple;">record pointer fields</span> which connect to entities created in previous steps'
+            );
+        }else{
+
+            $('#divheader').css('background','rgba(151, 244, 128, 0.83)');
+
+            if(currentStep == 3){
+                $('tr.helper').show().children().html(
+                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
+                    +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
+                );
+            }else if(currentStep == 4){
+                $('tr.helper').show().children().html(
+                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">IMPORTING</span> Choose all the fields you want to import &nbsp;&nbsp;'
+                );
+            }else if(currentStep == 5){
+
+                let stepTitle = $('#head_step3').text().replace('step 3: ', '');
+                $('tr.helper').show().children().html(
+                    `<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">${stepTitle}</span> Double check all details before proceeding with the import &nbsp;&nbsp;`
+                    +'<span style="color:green;">Note: Changing any of the field mapping below will take you back to the IMPORTING stage.</span>'
+                );
+            }else{
+                $('tr.helper').hide();
+            }
+        }
+    }
+
     /**
      * Handles the event when the "Ignore records of this type" checkbox is changed.
      * It disables or enables the "Skip matching (create all new records)" option
@@ -5301,6 +5583,73 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }else{
             $('#sa_match2, [for="sa_match2"]').attr('title', '');
         }
+    }
+
+    function _onIgnoreErrors(){
+
+        let $ignoreErrors = $('#ignoreErrors');
+        let isChecked = $ignoreErrors.is(':checked');
+        $ignoreErrors.prop('checked', false);
+
+        if(!isChecked){
+            window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), true);
+            return;
+        }
+
+        let $dlg;
+        let msg = `<div>
+            Are you sure you want to ignore the data errors / warnings reported below?<br>
+            Faulty values may be inserted into the database.<br><br>
+            After importing, run <b>Admin &gt; Verify integrity</b> to find and fix them.
+        </div>`;
+
+        let btns = {};
+        btns[window.hWin.HR('Yes')] = () => {
+            window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), false);
+            $ignoreErrors.prop('checked', true);
+            $dlg.dialog('close');
+        };
+        btns[window.hWin.HR('No')] = () => {
+            $ignoreErrors.prop('checked', false);
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: window.hWin.HR('Ignore reported data errors')}, {default_palette_class: 'ui-heurist-populate'});
+    }
+
+    function _seekValue(event){
+
+        const $target = $(event.target);
+        const currentTable = imp_session['import_table'];
+        if(!$target.hasClass('ui-icon') || window.hWin.HEURIST4.util.isempty(currentTable)){
+            return;
+        }
+
+        const direction = $target.attr('data-dest');
+        const field = $target.parent().attr('data-index');
+
+        let request = {
+            action: 'next_value',
+            imp_ID: imp_ID,
+            currentID: currentId,
+            direction: direction,
+            field: field,
+            id: window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HAPI4.doImportAction(request, (response) => {
+            
+            if(window.hWin.ResponseStatus.OK !== response.status){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }else if(!window.hWin.HEURIST4.util.isPositiveInt(response.data)){
+                window.hWin.HEURIST4.msg.showMsgFlash('No values found...', 3000);
+                return;
+            }
+
+            currentId = response.data;
+            _updatePreviewValue();
+        });
     }
     
     //public members
@@ -5359,13 +5708,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
          */
         onIgnoreRectype: function(event){
             _onIgnoreRectype();
-        }
-        
+        },
+
+        onIgnoreErrors: function(){
+            _onIgnoreErrors();
+        }        
         
     }
 
     _init(_imp_ID, _max_upload_size, _format);
     return that;  //returns object
 }
-    
-    
