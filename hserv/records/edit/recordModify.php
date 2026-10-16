@@ -3453,7 +3453,7 @@ function prepareGeoValue($mysqli, $dtl_Value){
 //
 //  $likedRtyID is used to duplicate records of sepcified type linked to given record $id
 //
-function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null, $likedRtyID=null, $namePrefix=null){
+function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null, $likedRtyID=null, $namePrefix=null, $includeRelationships = true){
 
     // Check that the user is allowed to create records
     $is_allowed = userCheckPermissions($system, 'add');
@@ -3605,43 +3605,45 @@ function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null
 
         mysql__foreign_check($mysqli, true);
 
-        //add special kind of record - relationships
-        $refs_res = mysql__select_list($mysqli, 'recLinks', 'rl_RelationID',
-            '(rl_RelationTypeID is not null) and  (rl_SourceID='.$id.' or rl_TargetID='.$id.')');
+        if($includeRelationships){
 
-
-        foreach ($refs_res as $rel_recid){
-
-            if( in_array($rel_recid, $processedIds) ){
-                continue;    
-            }
-
-            $res = recordDuplicate($system, $rel_recid, $processedIds);
-
-            if($res && @$res['status']==HEURIST_OK){
-
-                $new_rel_recid = intval(@$res['data']['added']);
-
-                if($new_rel_recid>0){
-
-                    //change reference to old record id to new one
-                    $query = 'UPDATE recDetails set dtl_Value='.$new_id
-                    .' where dtl_RecID='.$new_rel_recid
-                    .' and dtl_Value='.$id   //old record id
-                    .' and (dtl_DetailTypeID='.DT_TARGET_RESOURCE.' or dtl_DetailTypeID='.DT_PRIMARY_RESOURCE.')';
-
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $error = $prefixDbErrorMsg .$mysqli->error;
-                        break;
-                    }else{
-                        $rels_count++;
-                    }
+            //add special kind of record - relationships
+            $refs_res = mysql__select_list($mysqli, 'recLinks', 'rl_RelationID',
+                '(rl_RelationTypeID is not null) and  (rl_SourceID='.$id.' or rl_TargetID='.$id.')');
+    
+            foreach ($refs_res as $rel_recid){
+    
+                if( in_array($rel_recid, $processedIds) ){
+                    continue;    
                 }
-            }else{
-                $error = @$res['message'];
-            }
-        } //foreach
+    
+                $res = recordDuplicate($system, $rel_recid, $processedIds);
+    
+                if($res && @$res['status']==HEURIST_OK){
+    
+                    $new_rel_recid = intval(@$res['data']['added']);
+    
+                    if($new_rel_recid>0){
+    
+                        //change reference to old record id to new one
+                        $query = 'UPDATE recDetails set dtl_Value='.$new_id
+                        .' where dtl_RecID='.$new_rel_recid
+                        .' and dtl_Value='.$id   //old record id
+                        .' and (dtl_DetailTypeID='.DT_TARGET_RESOURCE.' or dtl_DetailTypeID='.DT_PRIMARY_RESOURCE.')';
+    
+                        $res = $mysqli->query($query);
+                        if(!$res){
+                            $error = $prefixDbErrorMsg .$mysqli->error;
+                            break;
+                        }else{
+                            $rels_count++;
+                        }
+                    }
+                }else{
+                    $error = @$res['message'];
+                }
+            } //foreach
+        }
         
         
         if(!isset($likedRtyID) || !isPositiveInt($likedRtyID)){
