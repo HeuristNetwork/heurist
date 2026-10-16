@@ -905,6 +905,46 @@ if(!$system->hasAccess()){
                 
             }
 
+            function downloadRecordAsPDF(event){
+
+                /*
+                https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js
+                let options = {margin: 1, filename: `${recordTitle}-viewer.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }};
+                html2pdf().set(options).from(document.querySelector('.print-container')).save();
+                */
+
+                const originalTitle = document.title;
+                let togglePrivateInfo = document.querySelector('.link_showhide_private');
+                const originalInfoState = togglePrivateInfo.textContent;
+
+                const recID = event.target.closest('div[data-recdata]').getAttribute('data-recdata');
+                let containers = document.querySelectorAll(`[data-recdata="${recID}"],[data-recdetails="${recID}"]`);
+                const title = event.target.closest('div[data-recdata]').querySelector('.HeaderRow h2').innerText;
+
+                if(!window.setupPrintHandlers){
+
+                    window.addEventListener('beforeprint', () => {
+                        containers.forEach(container => {
+                            container.classList.add('print-container');
+                        });
+                        document.title = title;
+                        togglePrivateInfo.textContent = '';
+                    });
+
+                    window.addEventListener('afterprint', () => {
+                        containers.forEach(container => {
+                            container.classList.remove('print-container');
+                        });
+                        document.title = originalTitle;
+                        togglePrivateInfo.textContent = originalInfoState;
+                    });
+
+                    window.setupPrintHandlers = true;
+                }
+
+                window.print();
+            }
+
             $(document).ready(function() {
                 showHidePrivateInfo(null);
 
@@ -953,6 +993,8 @@ if(!$system->hasAccess()){
                     $('#custom-report-link').on('click', () => openReportSelector());
                 }
 
+                $('#pdf-download-link').button().on('click', (event) => downloadRecordAsPDF(event));
+
             });
 
             /*NOT USED
@@ -981,6 +1023,42 @@ if(!empty($import_webfonts)){
 }
 ?>
         <style>
+            @media print{
+
+                @page{
+                    margin: 0px;
+                }
+
+                *{
+                    print-color-adjust: exact;
+                    -webkit-print-color-adjust: exact;
+                }
+
+                body *{
+                    visibility: hidden;
+                }
+
+                .print-container{
+
+                    width: 90vw;
+
+                    padding: 1.6em;
+                }
+                .print-container, .print-container *{
+                    visibility: visible;
+                }
+
+                .record-media-controls, .download_link, #custom-report-link, #pdf-download-link, .network-graph-area{
+                    display: none;
+                }
+
+                .detailRow{
+                    break-inside: avoid;
+                }
+                h4{
+                    break-before: auto;
+                }
+            }
         .detailRowHeader{
             padding: 20px 0 20px;
             text-align: left;
@@ -1137,13 +1215,14 @@ if(defined('FONT_SIZE') && FONT_SIZE!==''){
             width: 20%;
         }
 
-        @media print {
-          .download_link {
-            visibility: hidden;
-          }
-          h4 {
-            page-break-before:auto;
-          }
+        #pdf-download-link{
+            font-size: 0.9em;
+
+            margin-left: 1em;
+            padding: 3px 5px;
+
+            border: none;
+            text-decoration: none !important;;
         }
         </style>
     </head>
@@ -1427,7 +1506,9 @@ function print_header_line(array $bib) {
         if(!($is_map_popup || $without_header)){
         ?>
             <span class="link"><a id="custom-report-link" class="normal" style="font-size:0.9em;display:none" href="#">Custom report</a></span>
+            <span class="link"><a id="pdf-download-link" class="normal" style="font-size:0.9em;margin-left:10px;" href="#">Download PDF</a></span>
         <?php }
+
         if(!empty($wfs_details)){
 
             $wfs_icon = HEURIST_BASE_URL . '?db=' . $system->dbname() . '&entity=defTerms&icon=' . intval($wfs_details[0]);
