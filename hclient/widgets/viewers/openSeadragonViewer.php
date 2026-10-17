@@ -95,7 +95,7 @@ if($imageURL !== ''){
 
         $filename = !empty($ulfRec['ulf_ExternalFileReference']) ? $ulfRec['ulf_ExternalFileReference'] : $ulfRec['ulf_OrigFileName'];
         $files[] = [
-            'type' => strpos(strtolower($ulfRec['ulf_MimeExt']), 'pdf') >= 0 ? 'pdf': 'image',
+            'type' => strpos(strtolower($ulfRec['ulf_MimeExt']), 'pdf') !== false ? 'pdf': 'image',
             'url' => HEURIST_BASE_URL . "?db={$database}&fullres=1&file={$ulfRec['ulf_ObfuscatedFileID']}",
             'name' => $filename,
             'caption' => $caption,
@@ -188,7 +188,9 @@ if($imageURL !== ''){
             }
 
             #img-title{
+                padding-top: 0.5em;
                 padding-left: 4em;
+
                 font-size: 1.2em;
                 font-weight: bold;
             }
@@ -237,8 +239,8 @@ if($imageURL !== ''){
                 transition: background-color 0.2s ease, transform 0.1s ease;
 
                 position: absolute;
-                top: 2.5em;
-                left: 8em;
+                top: 0.4em;
+                left: 1em;
             }
 
             .osd-toggle-bg:active{
@@ -675,9 +677,9 @@ if($imageURL !== ''){
 
     <body>
 
-        <div id="img-title" style="padding-left: 4em;"></div>
-
         <button class="osd-toggle-bg" title="Toggle grey background"><i class="fa-regular fa-lightbulb"></i></button>
+
+        <div id="img-title"></div>
 
         <div id="openseadragon-img"></div>
 
