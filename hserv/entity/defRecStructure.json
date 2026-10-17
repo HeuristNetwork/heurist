@@ -380,7 +380,7 @@
                 "dtID": "rst_CalcFunctionID",
                 "dtFields":{
                     "dty_Type":"resource",
-                    "rst_Class":"freetext blocktext integer float enum date",
+                    "rst_Class":"freetext blocktext integer float enum date resource",
                     "rst_DisplayWidth":60,
                     "rst_DisplayName":"Formula:",
                     "rst_DisplayHelpText":"Define formula if value of this field will be calculated",

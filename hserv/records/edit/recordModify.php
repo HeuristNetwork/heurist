@@ -36,6 +36,7 @@ use hserv\report\ReportRecord;
 use hserv\records\export\ExportRecordsHTML;
 use hserv\entity\DbAnnotations;
 use hserv\entity\DbIiifCanvas;
+use hserv\records\edit\RelationshipCalculation;
 
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
@@ -518,6 +519,8 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     $system->defineConstant('RT_RELATION');
     $system->defineConstant('DT_PARENT_ENTITY');
 
+    $calculationSources = RelationshipCalculation::sources($system, array($recID), false);
+
     // if source of target of relationship record is temporal - relationship is temporal as well
     if($record['RecTypeID']==RT_RELATION && @$record['FlagTemporary']!=1){
         $system->defineConstant('DT_PRIMARY_RESOURCE');
@@ -719,6 +722,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         mysql__supress_trigger($mysqli, true);
         recordUpdateCalcFields( $system, $recID, $rectype );//update calculated fields in this record
         mysql__supress_trigger($mysqli, false);
+    }else{
+        // Opted-in relationship calculations also run for imported source records.
+        recordUpdateCalcFields($system, $recID, $rectype, null, 0, true);
     }
     
     $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']); //for main record on save
@@ -784,6 +790,17 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     //calculate counts
     //$rty = new DbDefRecTypes($system,array('mode'=>'record_count', 'rty_ID'=>array(1, $rectype)));
     //$rty_counts = $rty->counts();
+
+    $calculationResult = RelationshipCalculation::refresh($system, array_merge($calculationSources,
+        RelationshipCalculation::sources($system, array($recID), false)));
+    if($calculationResult === false || isset($calculationResult['message']) || !empty($calculationResult['errors'])){
+        if($use_transaction){
+            $mysqli->rollback();
+            if($keep_autocommit===true) { $mysqli->autocommit(true); }
+        }
+        return $system->addError(HEURIST_DB_ERROR, 'Cannot refresh relationship calculations',
+            is_array($calculationResult) ? json_encode($calculationResult) : '');
+    }
 
     if($use_transaction){
         $mysqli->commit();
@@ -1559,6 +1576,7 @@ function deleteOneRecord($system, $id, $rectype){
     $deleted = array();//ids of deleted records
     $msg_error = '';
     $mysqli = $system->getMysqli();
+    $calculationSources = RelationshipCalculation::sources($system, array($id));
 
     //get list if child records
     $query = 'SELECT dtl_Value FROM recDetails, defRecStructure '
@@ -1664,6 +1682,12 @@ function deleteOneRecord($system, $id, $rectype){
         $res = array("error" => $msg_error.'  '.$mysqli->error);
     }else{
         $res = array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count);
+    }
+    if(!isset($res['error'])){
+        $calculationResult = RelationshipCalculation::refresh($system, $calculationSources);
+        if($calculationResult === false || isset($calculationResult['message']) || !empty($calculationResult['errors'])){
+            $res = array('error' => 'Cannot refresh relationship calculations after deletion');
+        }
     }
     mysql__foreign_check($mysqli, true);
     return $res;
@@ -2111,7 +2135,9 @@ function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
 
     $mysqli = $system->getMysqli();
 
-    $query = 'SELECT cfn_ID FROM defCalcFunctions WHERE find_in_set('.$mysqli->real_escape_string($rty_ID).',cfn_RecTypeIDs) <> 0';
+    $marker = $mysqli->real_escape_string(RelationshipCalculation::REFRESH_MARKER);
+    $query = 'SELECT cfn_ID FROM defCalcFunctions WHERE find_in_set('.$mysqli->real_escape_string($rty_ID).',cfn_RecTypeIDs) <> 0'
+        ." AND LOCATE('$marker', cfn_FunctionSpecification)=0";
     $field_ids = mysql__select_list2($mysqli, $query);
     
     $res = null;
@@ -2156,6 +2182,8 @@ function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
  *                               If `$recID` is null, all non-temporary records of the specified type(s) in `$rty_ID` are processed.
  *                               If both `$recID` and `$rty_ID` are null, all record types and all their non-temporary records are processed.
  * @param string|null $progress_session_id Optional. A session ID for tracking progress of large update operations.
+ * @param int $limitOnUpdate Maximum records for a type-wide automatic update (0 = unlimited).
+ * @param bool $relationshipOnly Run only formulas opting into local relationship refreshes.
  *                                         If provided and the operation involves many records, progress updates will be logged.
  * @return array|false An associative array containing statistics and results of the update.
  *                     Structure for multi-record updates (`$rec_count > 1`):
@@ -2177,7 +2205,7 @@ function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
  *                     Returns `['message' => 'Smarty init error...']` or `['message' => 'Operation terminated...']`
  *                     in case of Smarty setup failure or user termination via progress session.
  */
-function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session_id=null, $limitOnUpdate=100)
+function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session_id=null, $limitOnUpdate=100, $relationshipOnly=false)
 {
     $mysqli = $system->getMysqli();
 
@@ -2248,11 +2276,8 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
         }
     }
 
-    try{
-        $smarty = smartyInit($system);
-    } catch (Exception $e) {
-        return array('message'=>'Smarty init error: '.$e->getMessage());
-    }
+    $smarty = null;
+    $heuristRec = null;
 
     if($progress_session_id>0 && $rec_count>100){
         mysql__update_progress(null, $progress_session_id, true, '0,'.$rec_count);
@@ -2270,8 +2295,6 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
     $cleared_count = 0;   // cleared fields
     $unchanged_count = 0; // unchanged fields
 
-    $heuristRec = new ReportRecord($system);//helper class - to obtain access to heurist data from smarty report
-
     foreach ($rectypes as $rty_ID => $record_ids){
 
         //find calculation fields for this record type
@@ -2280,6 +2303,10 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             'SELECT rst_DetailTypeID, cfn_FunctionSpecification FROM defRecStructure, defCalcFunctions '
             .' WHERE rst_RecTypeID='.$rty_ID
             .' AND cfn_ID=rst_CalcFunctionID');
+
+        if($relationshipOnly){
+            $formulae = array_filter($formulae ?: array(), array(RelationshipCalculation::class, 'isTargeted'));
+        }
 
         //there are not calculation fields for this record type
         if(isEmptyArray($formulae)){
@@ -2295,14 +2322,29 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             continue; //no formulae for this record type
         }
 
+        // Imports of types without an opted-in formula need no template engine.
+        if($smarty === null){
+            try{
+                $smarty = smartyInit($system);
+                $heuristRec = new ReportRecord($system);
+            }catch(Exception $e){
+                return array('message'=>'Smarty init error: '.$e->getMessage());
+            }
+        }
+
         $keep = $progress_count;
 
         //@todo calculation field can not be repeatable
         foreach($formulae  as $dty_ID => $formula){
 
+            $fieldDefinition = mysql__select_row_assoc($mysqli,
+                'SELECT dty_Type, dty_PtrTargetRectypeIDs FROM defDetailTypes WHERE dty_ID='.$dty_ID);
+            $pointerTypes = prepareIds($fieldDefinition['dty_PtrTargetRectypeIDs'] ?? '');
+
             $idx = 0;
             $rows = null;
-            $mode = null;
+            // Reuse the compiled snippet for large relationship-field rebuilds.
+            $mode = RelationshipCalculation::isTargeted($formula) ? 'string:' : null;
             if($record_ids=='*'){
                 $query = 'SELECT rec_ID FROM Records WHERE (rec_RecTypeID='.intval($rty_ID).') AND (NOT rec_FlagTemporary)';
                 $rows = $mysqli->query($query);
@@ -2337,6 +2379,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                 $params['records'] = array($recID);
 
                 $new_value = executeSmarty($system, $smarty, $params, $mode, $heuristRec);
+                $heuristRec->clearRecordCache();
 
                 if(is_array($new_value)){
                     if($new_value[0]=='fatal'){  //fatal smarty error
@@ -2354,16 +2397,31 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                     $new_value = '';
                 }
 
-                $current_value = mysql__select_value($mysqli,
-                    "SELECT dtl_Value FROM recDetails WHERE dtl_RecID=$recID AND dtl_DetailTypeID=$dty_ID");
+                $current_values = mysql__select_list2($mysqli,
+                    "SELECT dtl_Value FROM recDetails WHERE dtl_RecID=$recID AND dtl_DetailTypeID=$dty_ID ORDER BY dtl_ID");
+                $current_value = $current_values[0] ?? null;
 
                 if($new_value!=null) {$new_value = trim($new_value);}
 
-                if($current_value==$new_value){
+                // A calculated pointer is exactly one existing record of an allowed
+                // target type. Never delete the old value on invalid formula output.
+                if(($fieldDefinition['dty_Type'] ?? '') === 'resource' && $new_value !== null && $new_value !== ''){
+                    $targetType = ctype_digit($new_value) && intval($new_value)>0
+                        ? mysql__select_value($mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID='.intval($new_value).' AND NOT rec_FlagTemporary')
+                        : null;
+                    if(!$targetType || (!empty($pointerTypes) && !in_array(intval($targetType), $pointerTypes))){
+                        $errors[$rty_ID.'.'.$dty_ID] = 'Calculated record link must be one existing record ID of an allowed target type';
+                        break;
+                    }
+                }
+
+                $pointerCardinalityValid = ($fieldDefinition['dty_Type'] ?? '') !== 'resource'
+                    || count($current_values) === (($new_value !== null && $new_value !== '') ? 1 : 0);
+                if($current_value==$new_value && $pointerCardinalityValid){
                     $unchanged_count++;
                 }else{
 
-                    if($current_value!=null && $current_value!=''){
+                    if(!empty($current_values)){
                         $query = "DELETE FROM recDetails WHERE dtl_RecID=$recID AND dtl_DetailTypeID=$dty_ID";
                         $mysqli->query($query);
                     }
@@ -2418,12 +2476,12 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
         $q_cleared = '';
 
         if(count($updates)>1000){
-            $q_updates = 'ids:'.array_slice($updates, 0, 1000);
+            $q_updates = 'ids:'.implode(',', array_slice($updates, 0, 1000));
         }elseif(!empty($updates)){
             $q_updates = 'ids:'.implode(',',$updates);
         }
         if(count($cleared)>1000){
-            $q_cleared = 'ids:'.array_slice($cleared, 0, 1000);
+            $q_cleared = 'ids:'.implode(',', array_slice($cleared, 0, 1000));
         }elseif(!empty($cleared)){
             $q_cleared = 'ids:'.implode(',',$cleared);
         }
@@ -2441,9 +2499,11 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             //errors in formula  rty_ID.dty_ID - message
             'errors'=>$errors,
             //queries
-            'q_updates'=>$q_updates, 'q_cleared'=>$q_cleared);
+            'q_updates'=>$q_updates, 'q_cleared'=>$q_cleared)
+            + ($relationshipOnly ? array('updated_ids'=>$updates, 'cleared_ids'=>$cleared) : array());
     }else{
-            return array('errors'=>$errors);
+            return array('errors'=>$errors)
+                + ($relationshipOnly ? array('updated_ids'=>$updates, 'cleared_ids'=>$cleared) : array());
     }
 }
 
