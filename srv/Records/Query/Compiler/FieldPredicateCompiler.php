@@ -587,6 +587,9 @@ final class FieldPredicateCompiler
         $text = trim((string)$value); $exact = false; $caseSensitive = false; $negate = false;
         if(strpos($text, '==') === 0){
             $exact = true; $caseSensitive = true; $text = trim(substr($text, 2));
+        }elseif(strpos($text, '!=') === 0){
+            // a Filter Form list value of an "is not" template (2026-10-17)
+            $exact = true; $negate = true; $text = trim(substr($text, 2));
         }elseif(strpos($text, '=') === 0){ $exact = true; $text = trim(substr($text, 1)); }
         elseif(strpos($text, '-') === 0){ $negate = true; $text = trim(substr($text, 1)); }
 
