@@ -3,7 +3,7 @@
 ## Overview
 
 The srv Smarty report engine (plan 12, Phase 6 in heurist-explorer,
-`docs/development/12 Smarty-Reports-Plan.md`). It is a port of the legacy engine
+`docs/development/12 DONE Smarty-Reports-Plan.md`). It is a port of the legacy engine
 in `hserv/report` (`ReportExecute`, `ReportRecord`, `smartyInit.php`) on top of
 the srv data services. Templates written for the legacy engine run unchanged:
 the same `$heurist` methods, the same record arrays (`$r.f12`, `$r.f12s`,

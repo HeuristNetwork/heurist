@@ -75,7 +75,7 @@ client derives it from `fields.targetTypes` + `structure`.
 ## DefinitionLookup
 
 `DefinitionLookup.php` is the **only** srv class that queries the definition tables
-(plan 15, heurist-explorer `docs/development/15 Data-Access-Layer-Plan.md`):
+(plan 15, heurist-explorer `docs/development/15 DONE Data-Access-Layer-Plan.md`):
 defRecTypes(+Groups), defDetailTypes(+Groups), defRecStructure, defTerms,
 defTermsLinks, defTranslations, defCalcFunctions, sysWorkflowRules. A move of the
 definitions to other tables changes this class only. Do not add definition queries

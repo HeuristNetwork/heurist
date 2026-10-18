@@ -3,7 +3,7 @@
 ## Overview
 
 Export of records into a file, run as the background job type `export`
-(plan 13, heurist-explorer `docs/development/13 Export-Plan.md`). For the new
+(plan 13, heurist-explorer `docs/development/13 DONE Export-Plan.md`). For the new
 clients it replaces the legacy exporters in `hserv/records/export/`,
 `export/xml/flathml.php` and `export/xml/kml.php`; those stay for the legacy UI.
 
