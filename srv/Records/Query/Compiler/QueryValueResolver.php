@@ -71,7 +71,8 @@ final class QueryValueResolver
                     $key = $base.':'.$suffix;
                 }
                 $fieldId = intval($fieldName === (string)intval($fieldName) ? $fieldName : $this->splitFieldSuffix($suffix)[0]);
-                if(($base === 'f' || $base === 'field') && $fieldId>0){
+                // f:20:code / :term / :desc / :conceptid compare that term column in the compiler
+                if(($base === 'f' || $base === 'field') && $fieldId>0 && $qualifier === ''){
                     $value = $this->resolveEnumValue($fieldId, $value, $types);
                 }
             }
@@ -193,6 +194,9 @@ final class QueryValueResolver
                 return $this->termMatchesPath(intval($row[0]), $path);
             }));
         }
+        // no such term: the compiler compares the labels and finds no records - an empty
+        // result, not an invalid query (2026-10-17)
+        if(empty($rows)){ return $value; }
         $row = $this->uniqueMatch($rows, 'term for field '.$fieldId, $label, 0, array(1,2));
         return $operator === '' ? intval($row[0]) : $operator.(string)intval($row[0]);
     }
