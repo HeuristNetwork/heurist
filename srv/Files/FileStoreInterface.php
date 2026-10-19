@@ -24,12 +24,21 @@ namespace Heurist\Files;
 interface FileStoreInterface
 {
     /**
-     * Search: the parameters of /records (query/q, ids, filter, fields, detail=ids|count,
+     * Search: the parameters of /records (query/q, ids, filter, fields, detail=ids,
      * resolveDetails, defs, sort, limit, offset, total).
      *
-     * @return array {records, meta, pagination}, or the ids/count form of detail.
+     * @return array {records, meta, pagination}, or the ids form of detail.
      */
     public function search(array $params): array;
+
+    /**
+     * GET|POST /files/aggregate (plan 20 Phase 3): op=count|rectypes with the query
+     * parameters of search; FileController has checked op (values, minmax and ranges
+     * are not supported for files).
+     *
+     * @return array count {query, total}; rectypes {query, total, rectypes}.
+     */
+    public function aggregate(array $params): array;
 
     /**
      * One file record (fields default to _all): {records:[record], meta}; records is

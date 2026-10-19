@@ -3,8 +3,8 @@
 * RecordQueryController.php - Modern record-query HTTP adapter
 *
 * Converts public or internal request parameters into SearchRequest, invokes
-* RecordSearchService, and emits the stable IDs/count and optional expansion
-* graph response. Query parsing, SQL generation, expansion execution, and
+* RecordSearchService, and emits the stable records or IDs response, and the
+* counts, values and bounds of /{domain}/aggregate. Query parsing, SQL generation, expansion execution, and
 * record output do not belong in this class.
 *
 * @project     Heurist academic knowledge management system
@@ -121,12 +121,12 @@ final class RecordQueryController
             'filter' => $this->structuredParameter($params['filter'] ?? null)
         );
         if(strtolower(trim((string)($params['detail'] ?? ''))) === 'minmax'){
-            // detail=minmax: bounds of one numeric or date field
+            // op=minmax (aggregate): bounds of one numeric or date field
             $options['field'] = $params['field'] ?? null;
             return new SearchRequest($normalized, $options);
         }
         if(strtolower(trim((string)($params['detail'] ?? ''))) === 'ranges'){
-            // detail=ranges: record counts per range of one numeric or date field
+            // op=ranges (aggregate): record counts per range of one numeric or date field
             $options['field'] = $params['field'] ?? null;
             foreach(array('groupby','ranges','match') as $key){
                 if(array_key_exists($key, $params)){ $options[$key] = $params[$key]; }
@@ -134,7 +134,7 @@ final class RecordQueryController
             return new SearchRequest($normalized, $options);
         }
         if(strtolower(trim((string)($params['detail'] ?? ''))) === 'values'){
-            // detail=values: field + text; "sort" orders the values (count|value), not records
+            // op=values (aggregate): field + text; "sort" orders the values (count|value), not records
             $options['field'] = $params['field'] ?? null;
             $options['text'] = $params['text'] ?? '';
             $options['valueSort'] = $params['sort'] ?? 'count';
@@ -162,58 +162,73 @@ final class RecordQueryController
     /** Execute a request and return its stable DTO representation. */
     public function execute(array $params): array
     {
+        $detail = strtolower(trim((string)($params['detail'] ?? '')));
+        if(in_array($detail, SearchRequest::AGGREGATE_OPS, true)){
+            // removed in plan 20 Phase 3: counts, values and bounds are /{domain}/aggregate
+            throw new QueryValidationException(
+                'detail='.$detail.' is not supported by /'.$this->entity.'; use /'.$this->entity.'/aggregate?op='.$detail
+            );
+        }
         $request = $this->buildRequest($params);
         if($request->detail === 'graph'){
             throw new QueryValidationException(
                 'detail=graph is not supported by /records; use the /graph endpoint'
             );
         }
-        if($request->detail === 'values'){
-            if(!method_exists($this->service, 'countValues')){
-                throw new UnsupportedQueryException('detail=values is not supported by this search service');
-            }
-            return array_merge(
-                array('query'=>$this->responseQuery($params, $request)),
-                $this->service->countValues($request)
-            );
-        }
-        if($request->detail === 'ranges'){
-            if(!method_exists($this->service, 'valueBuckets')){
-                throw new UnsupportedQueryException('detail=ranges is not supported by this search service');
-            }
-            return array_merge(
-                array('query'=>$this->responseQuery($params, $request)),
-                $this->service->valueBuckets($request)
-            );
-        }
-        if($request->detail === 'minmax'){
-            if(!method_exists($this->service, 'valueRange')){
-                throw new UnsupportedQueryException('detail=minmax is not supported by this search service');
-            }
-            return array_merge(
-                array('query'=>$this->responseQuery($params, $request)),
-                $this->service->valueRange($request)
-            );
-        }
         $result = $this->service->search($request);
         if(!$result instanceof SearchResult){
             throw new SearchExecutionException('Record search service returned an invalid result');
-        }
-        if($request->detail === 'count' || $request->detail === 'rectypes'){
-            $summary = array(
-                'query'=>$this->responseQuery($params, $request),
-                'total'=>$result->total
-            );
-            if($request->detail === 'rectypes'){
-                $summary['rectypes'] = $result->rectypes ?? array();
-            }
-            return $summary;
         }
         $selection = $this->fieldSelector->parse($request->fields);
         if($request->detail === 'ids'){
             return $result->toArray();
         }
         return $this->recordsResponse($result, $request, $selection, $params);
+    }
+
+    /**
+     * GET|POST /{domain}/aggregate?op=count|rectypes|values|minmax|ranges (plan 20 Phase 3):
+     * the same query parameters as search, plus the parameters of the operation
+     * (field, text, sort, via, limit, offset for values; field, groupby, ranges, match
+     * for ranges; field for minmax).
+     *
+     * @return array count {query, total}; rectypes {query, total, rectypes};
+     *         values {query, total, values}; ranges and minmax as their services give them.
+     * @throws QueryValidationException When op is missing or unknown.
+     */
+    public function aggregate(array $params): array
+    {
+        $op = strtolower(trim((string)($params['op'] ?? '')));
+        if(!in_array($op, SearchRequest::AGGREGATE_OPS, true)){
+            throw new QueryValidationException(
+                $op === '' ? 'op is required (count, rectypes, values, minmax or ranges)'
+                    : 'Unknown aggregate op: '.$op.' (count, rectypes, values, minmax or ranges)'
+            );
+        }
+        $params['detail'] = $op;
+        $request = $this->buildRequest($params);
+        $methods = array('values'=>'countValues', 'ranges'=>'valueBuckets', 'minmax'=>'valueRange');
+        if(isset($methods[$op])){
+            if(!method_exists($this->service, $methods[$op])){
+                throw new UnsupportedQueryException('op='.$op.' is not supported by this search service');
+            }
+            return array_merge(
+                array('query'=>$this->responseQuery($params, $request)),
+                $this->service->{$methods[$op]}($request)
+            );
+        }
+        $result = $this->service->search($request);
+        if(!$result instanceof SearchResult){
+            throw new SearchExecutionException('Record search service returned an invalid result');
+        }
+        $summary = array(
+            'query'=>$this->responseQuery($params, $request),
+            'total'=>$result->total
+        );
+        if($op === 'rectypes'){
+            $summary['rectypes'] = $result->rectypes ?? array();
+        }
+        return $summary;
     }
 
     /** Preserve the caller's query representation in compact summary responses. */
@@ -335,6 +350,12 @@ final class RecordQueryController
     public function output(array $params): void
     {
         $this->send(function() use ($params){ return $this->execute($params); });
+    }
+
+    /** Execute aggregate() and write the JSON response (errors as output()). */
+    public function outputAggregate(array $params): void
+    {
+        $this->send(function() use ($params){ return $this->aggregate($params); });
     }
 
     /** Run a response builder and write its JSON, or the error response. */

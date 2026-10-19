@@ -51,6 +51,12 @@ final class RecordFileStore implements FileStoreInterface
     }
 
     /** {@inheritdoc} */
+    public function aggregate(array $params): array
+    {
+        return $this->records->aggregate($params);
+    }
+
+    /** {@inheritdoc} */
     public function item(array $params, int $fileId): array
     {
         list($params, $addedHash) = $this->withHash($params);

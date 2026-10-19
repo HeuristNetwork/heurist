@@ -39,6 +39,7 @@ use Heurist\Files\FileWriteService;
 use Heurist\Records\Edit\RecordEditException;
 use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\SearchExecutionException;
+use Heurist\Records\Query\SearchRequest;
 use Heurist\Records\Query\UnsupportedQueryException;
 use Heurist\Runtime\ApiResponse;
 use Heurist\Runtime\ErrorReporter;
@@ -91,6 +92,12 @@ final class FileController
             $this->allow($method, array('GET', 'POST'));
             $this->assertUser();
             return array(200, $this->store->search($params));
+        }
+        if($first === 'aggregate' && $second === ''){
+            $this->allow($method, array('GET', 'POST'));
+            $this->assertUser();
+            $this->assertAggregateOp($params);
+            return array(200, $this->store->aggregate($params));
         }
         if($first === 'upload'){
             return $this->upload($method, $segments, $json, $request);
@@ -160,6 +167,24 @@ final class FileController
             if($this->response->sendInterrupted($e)){ return; }
             $this->errors->report($e, $this->runtime);
             $this->response->sendError(500, 'server_error', 'The file request failed');
+        }
+    }
+
+    /**
+     * The op of /files/aggregate: count or rectypes, the same on both stores.
+     *
+     * @throws QueryValidationException When op is missing or unknown.
+     * @throws UnsupportedQueryException For values, minmax and ranges.
+     */
+    private function assertAggregateOp(array $params): void
+    {
+        $op = strtolower(trim((string)($params['op'] ?? '')));
+        if(!in_array($op, SearchRequest::AGGREGATE_OPS, true)){
+            throw new QueryValidationException($op === '' ? 'op is required (count or rectypes)'
+                : 'Unknown aggregate op: '.$op.' (count or rectypes)');
+        }
+        if($op !== 'count' && $op !== 'rectypes'){
+            throw new UnsupportedQueryException('op='.$op.' is not supported by /files (count or rectypes)');
         }
     }
 

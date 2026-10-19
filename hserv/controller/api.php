@@ -403,6 +403,30 @@ if($is_record_query){
     $method = 'search';
 }
 
+// GET|POST /api/{db}/records/aggregate?op=count|rectypes|values|minmax|ranges
+// (plan 20 Phase 3): counts, values and bounds over a query; read-only, the
+// same query parameters as the records search. See RecordQueryController::aggregate().
+$is_record_aggregate = ($resource === 'records' && @$requestUri[4] === 'aggregate' && empty($requestUri[5]));
+if($is_record_aggregate){
+    if(!in_array($http_method, array('GET','POST'), true)){
+        exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+    }
+    if($http_method === 'POST'
+        && stripos($contentType, 'application/json') === 0
+        && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if($http_method === 'POST' && is_array($json)){
+        foreach(array('query','q','ids','filter','op','field','via','text','sort','limit','offset',
+            'groupby','ranges','match','debug','rid') as $key){
+            if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
+        }
+    }
+    // api.php's generic JSON handler temporarily places the whole body in fields
+    unset($req_params['fields']);
+    $method = 'search';
+}
+
 // POST /api/{db}/records/cancel {"rid":...} stops a running query of the same
 // user (KILL QUERY on the connection registered for that request id).
 $is_query_cancel = ($resource === 'records' && @$requestUri[4] === 'cancel');
@@ -503,7 +527,9 @@ if($is_files_query){
     $fileSegment = (string)($requestUri[4] ?? '');
     $is_files_content = in_array((string)($requestUri[5] ?? ''), array('content','thumbnail'), true)
         && $fileSegment !== '' && !ctype_digit($fileSegment);
-    $is_files_search = ($fileSegment === '' && in_array($http_verb, array('GET','POST'), true));
+    // the search and /files/aggregate (op=count|rectypes) read the same JSON contract
+    $is_files_search = (($fileSegment === '' || $fileSegment === 'aggregate')
+        && empty($requestUri[5]) && in_array($http_verb, array('GET','POST'), true));
     if(!in_array($http_verb, array('GET','HEAD','POST','PUT','PATCH','DELETE'), true)){
         exitWithError('Method not allowed', 405, array('Allow'=>'GET, POST, PUT, PATCH, DELETE'));
     }
@@ -513,7 +539,7 @@ if($is_files_query){
         exitWithError('Invalid JSON request body', 400);
     }
     if($is_files_search && $http_verb === 'POST' && is_array($json)){
-        $fileContractKeys = array('query','q','ids','fields','detail','resolveDetails','defs','limit','offset','sort','filter','total');
+        $fileContractKeys = array('query','q','ids','fields','detail','op','resolveDetails','defs','limit','offset','sort','filter','total');
         foreach($fileContractKeys as $key){
             if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
         }
@@ -675,6 +701,14 @@ if($is_def_query){
             'body' => (stripos($contentType, 'application/json') === 0) ? '' : $raw_body
         )
     );
+    $system->dbclose();
+    exit;
+
+}elseif($is_record_aggregate){
+
+    $req_params['restapi'] = 1;
+    $controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
+    $controller->outputAggregate($req_params);
     $system->dbclose();
     exit;
 

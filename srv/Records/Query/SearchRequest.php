@@ -21,6 +21,12 @@ namespace Heurist\Records\Query;
 /** Immutable normalized top-level record search request. */
 final class SearchRequest
 {
+    /**
+     * Operations of /{domain}/aggregate (plan 20 Phase 3). Internally they are still
+     * detail values; the public search refuses them as detail.
+     */
+    public const AGGREGATE_OPS = array('count', 'rectypes', 'values', 'minmax', 'ranges');
+
     public array $query;
     public int $limit;
     public int $offset;
@@ -35,13 +41,13 @@ final class SearchRequest
     public bool $sortProvided;
     /** Additional query predicate/group ANDed with the base query. */
     public $filter;
-    /** detail=values: the field, a substring filter and the order (count|value). */
+    /** op=values: the field, a substring filter and the order (count|value). */
     public $valueField;
     public string $valueText;
     public string $valueSort;
-    /** detail=ranges: groupby (dates), ranges (numbers), match (overlap|within). */
+    /** op=ranges: groupby (dates), ranges (numbers), match (overlap|within). */
     public array $valueRanges = array();
-    /** detail=values: link predicates from the main records to the records carrying the field. */
+    /** op=values: link predicates from the main records to the records carrying the field. */
     public array $valueVia = array();
     /** False: a full page does not run the count query; `total` is then -1 (unknown). */
     public bool $countTotal = true;

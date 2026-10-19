@@ -27,6 +27,7 @@ use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Data\RecordFieldSelector;
 use Heurist\Records\Files\FileRepository;
+use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\SearchRequest;
 use Heurist\Records\Query\SearchResult;
 use Heurist\Records\Query\UnsupportedQueryException;
@@ -62,20 +63,15 @@ final class LegacyFileStore implements FileStoreInterface
     {
         $request = $this->request($params);
         $detail = $request->detail;
-        if(!in_array($detail, array('ids', 'count', 'rectypes', 'records'), true)){
+        if(in_array($detail, SearchRequest::AGGREGATE_OPS, true)){
+            throw new QueryValidationException('detail='.$detail.' is not supported by /files; use /files/aggregate?op='.$detail);
+        }
+        if(!in_array($detail, array('ids', 'records'), true)){
             throw new UnsupportedQueryException('detail='.$detail.' is not supported by /files');
         }
         $compiled = $this->builder->build($request->query, $request->limit, $request->offset, $request->sort);
-        $total = !$request->countTotal && $detail !== 'count' && $detail !== 'rectypes' ? -1
+        $total = !$request->countTotal ? -1
             : intval($this->database->fetchValue($compiled['count']->sql, $compiled['count']->values, 0));
-        if($detail === 'count' || $detail === 'rectypes'){
-            $summary = array('query' => $params['query'] ?? $params['q'] ?? $request->query, 'total' => $total);
-            if($detail === 'rectypes'){
-                $summary['rectypes'] = $total > 0
-                    ? array(array('rec_RecTypeID' => $this->mapping->rectypeId(), 'count' => $total)) : array();
-            }
-            return $summary;
-        }
         $ids = array_map('intval', $this->database->fetchColumn($compiled['ids']->sql, $compiled['ids']->values));
         $result = new SearchResult($ids, $total, $request->offset, $request->limit);
         if($detail === 'ids'){ return $result->toArray(); }
@@ -88,6 +84,22 @@ final class LegacyFileStore implements FileStoreInterface
             'pagination' => $this->pagination($result, $params)
         );
         return $response;
+    }
+
+    /** {@inheritdoc} */
+    public function aggregate(array $params): array
+    {
+        $op = strtolower(trim((string)($params['op'] ?? '')));
+        unset($params['detail']);
+        $request = $this->request($params);
+        $compiled = $this->builder->build($request->query, $request->limit, $request->offset, $request->sort);
+        $total = intval($this->database->fetchValue($compiled['count']->sql, $compiled['count']->values, 0));
+        $summary = array('query' => $params['query'] ?? $params['q'] ?? $request->query, 'total' => $total);
+        if($op === 'rectypes'){
+            $summary['rectypes'] = $total > 0
+                ? array(array('rec_RecTypeID' => $this->mapping->rectypeId(), 'count' => $total)) : array();
+        }
+        return $summary;
     }
 
     /** {@inheritdoc} */

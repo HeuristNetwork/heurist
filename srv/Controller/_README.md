@@ -10,7 +10,9 @@ entry points during migration.
 ## Key files
 
 - `RecordQueryController.php` — records search/retrieval response; also one record
-  (`GET /records/{id}`, `outputItem`: same record object and meta, no pagination).
+  (`GET /records/{id}`, `outputItem`: same record object and meta, no pagination);
+  counts, values and bounds (`GET|POST /records/aggregate?op=count|rectypes|values|minmax|ranges`,
+  `aggregate`/`outputAggregate`, plan 20 Phase 3). Search refuses those as `detail` values.
 - `RecordPresentationController.php` — Dataset, Map Document and Map Layer reads.
 - `MapDataController.php` — query-to-GeoJSON output only.
 - `PublicationController.php` — map/data/timeline/graph/crosstabs publication actions.
