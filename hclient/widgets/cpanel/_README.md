@@ -8,7 +8,6 @@ This directory contains widgets for the control panel interface of the Heurist a
 - `buttonsMenu.js`: UI Widget: heurist.buttonsMenu
 - `controlPanel.html`: Content for main control panel layout
 - `controlPanel.js`: UI Widget: heurist.controlPanel - main UI widget for admin interface
-- `databaseOverview.html`: Overview of database statistics and information
 - `navigation.js`: Menu widget
 - `slidersMenu.html`: Content for sliderMenu widget
 - `slidersMenu.js`: Menu for Heurist admin interface with sections as popup sliders
