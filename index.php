@@ -299,6 +299,7 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/slidersMenu.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/navigation.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/databaseOverview.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svsEdit.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>

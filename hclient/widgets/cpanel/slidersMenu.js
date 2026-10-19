@@ -106,6 +106,8 @@ $.widget( "heurist.slidersMenu", {
         menu: '' // which menu is this for
     },
 
+    _dbOverview: null, // database overview element
+
     /**
      * @function _create
      * @description The widget's constructor. Initializes the slidersMenu widget, sets up the main menu container,
@@ -980,10 +982,9 @@ $.widget( "heurist.slidersMenu", {
             action_name = 'recordAdd';
             expandRecordAddSetting = e.type === 'click';
         }
-        
-        
+
         const delay = this._getDelay(action_name, menu_item);
-            
+
         if(action_name != 'recordAdd'){
             this.menues_explore_popup
                     .removeClass('ui-heurist-populate record-addition')
@@ -2464,370 +2465,26 @@ $.widget( "heurist.slidersMenu", {
      */
     showDatabaseOverview: function(){
 
-        let that = this;
-        let editingProperties = false;
+        // Check if the page already exists
+        if(this._dbOverview?.length > 0 && this._dbOverview.dbOverview('instance') !== undefined){
+            this._dbOverview.dbOverview('show');
+            return;
+        }
 
         // Move to explore section
         if(this._active_section != 'explore'){
             this.switchContainer('explore');
         }
 
-        function openDBProperties(event){
-            if($(event.target).is('a') || editingProperties){
-                return;
-            }
-            editingProperties = true;
-            window.hWin.HAPI4.SystemMgr.verify_credentials(function(e){
-                window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', {
-                    beforeClose: function(){
-                        editingProperties = false;
-                        that.showDatabaseOverview();
-                    }
-                });
-            }, 1);
-        }
-
-        function changeFuncAccess(){
-
-            // DB Logo container
-            let $thumb_container = $('div#db-thumb')
-            .css({
-                'display': 'block',
-                'margin-left': 'auto',
-                'margin-right': 'auto'
-            })
-            .off('click');
-
-            $('#title_cont, #owner_cont, #rights_cont').off('click');
-            $('div#description, button#btnEdit').off('click');
-
-            // Check if logged in user has access to DB Props
-            if(window.hWin.HAPI4.has_access(1)){ // Has access
-
-                $('h3#title, span#owner, span#rights')
-                .parent()
-                .css('cursor', 'pointer')
-                
-                $('#title_cont, #owner_cont, #rights_cont')
-                .one('click', openDBProperties);
-
-                $('div#description')
-                .css({'cursor': 'pointer', 'white-space': 'pre-wrap'})
-                .on('click', openDBProperties);
-
-                $('button#btnEdit')
-                .prop('disabled', false)
-                .button({label: 'Edit Metadata'})
-                .addClass('ui-button-action')
-                .css({
-                    'display': 'inline-block'
-                })
-                .on('click', openDBProperties);
-
-                $thumb_container.on('click', openDBProperties);
-
-            }else{ // Has no access
-
-                $('h3#title, span#owner, span#rights')
-                .parent()
-                .css({'cursor': 'default', 'resize': 'none'});
-
-                $('button#btnEdit')
-                .hide()
-                .prop('disabled', true);
-
-                $thumb_container
-                .css('cursor', 'default');
-            }
-        }
-
-        function changeStyles(){
-
-            let owner = $('span#owner');
-            let rights = $('span#rights');
-            let desc = $('div#description');
-
-            if(!window.hWin.HEURIST4.util.isempty(owner.html()) && owner.html() != 'Database Ownership'){
-                owner.parent()
-                .css({
-                    'background': 'white',
-                    'border': 'none',
-                    'width': 'auto'
-                });
-            }else{
-                owner.parent()
-                .css({
-                    'background': '#F4F2F4',
-                    'border': '1px solid gray',
-                    'width': '90%'
-                });
-            }
-
-            if(!window.hWin.HEURIST4.util.isempty(rights.html()) && rights.html() != 'Database Rights'){
-                rights.parent()
-                .css({
-                    'background': 'white',
-                    'border': 'none',
-                    'width': 'auto'
-                });
-            }else{
-                rights.parent()
-                .css({
-                    'background': '#F4F2F4',
-                    'border': '1px solid gray',
-                    'width': '90%'
-                });
-            }
-
-            if(!window.hWin.HEURIST4.util.isempty(desc.html()) && desc.html() != 'Database Description'){
-                desc
-                .css({
-                    'background': 'white',
-                    'border': 'none', 
-                    'height': 'auto'
-                });
-
-               
-            }else{
-                desc
-                .css({
-                    'background': '#F4F2F4',
-                    'border': '1px solid gray',
-                    'height': '150px'
-                });
-            }
-        }
-        
-        function updateDetails(){
-
-            // Add DB Logo
-            let $thumb_container = $('div#db-thumb')
-            .text('')
-            .css({
-                'display': 'block',
-                'margin-left': 'auto',
-                'margin-right': 'auto',
-                'border': 'none',
-                'background': 'none'
-            });
-
-            let thumb_url = window.hWin.HAPI4.getImageUrl('sysIdentification', 1, 'thumb', 1);
-            let date = new Date();
-
-            thumb_url += '&ts=' + date.getTime();
-            $('<img src='+ thumb_url +' class="image_input"></img>').appendTo($thumb_container);
-
-            window.hWin.HAPI4.checkImage('sysIdentification', 1, 'thumb', 
-                function(response){
-
-                    if(response.status != 'ok' || response.data != 'ok'){
-                        $thumb_container.find('img').remove();
-
-                        $thumb_container
-                        .text('No Logo')
-                        .css({
-                            'border': '1px solid gray', 
-                            'background': '#F4F2F4',
-                            'display': 'flex',
-                            'justify-content': 'center',
-                            'align-items': 'center',
-                            'width': 'fit-content',
-                            'color': 'gray'
-                        });
-                    }
-                }
-            );
-
-            // Fill in System Identification info {DB Name, Owner, Copyright and Description}
-            window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
-                
-                if(!window.hWin.HEURIST4.util.isempty(response)){
-                
-                    let record = response.getFirstRecord();
-
-                    let name = record[14];
-                    let ownership = record[15];
-                    let rights = record[16];
-                    let desc = record[17];
-
-                    if(!window.hWin.HEURIST4.util.isempty(name) && name != 'Please enter a DB name ...'){
-                        $('h3#title').text(name);
-                    }else{
-                        $('h3#title').text('Database Title');
-                    }
-
-                    if(!window.hWin.HEURIST4.util.isempty(ownership)){
-                        $('span#owner').html("Owner: " + ownership);
-                    }else{
-                        $('span#owner').html('Database Ownership');
-                    }
-
-                    if(!window.hWin.HEURIST4.util.isempty(rights) && rights != 'Please define ownership and rights here ...'){
-                        $('span#rights').html("Rights: " + rights);
-                    }else{
-                        $('span#rights').html('Database Rights');
-                    }
-
-                    if(!window.hWin.HEURIST4.util.isempty(desc)){
-                        $('div#description').html(desc);
-                    }else{
-                        $('div#description').html('Database Description');
-                    }
-                }
-
-                changeStyles();
-
-            });
-        }
-
-        // Check if the page already exists
-        if(this.containers['explore'].find('div#db_overview').length>0){
-
-            this.containers['explore'].find('div#db_overview').css('z-index', '10').show();
-
-            updateDetails();
-            changeFuncAccess();
-
-            return;
-        }
-
         // Create main container
-        let $ele = $('<div id="db_overview" class="ent_wrapper" style="background: white;">')
-            .css('z-index', '10')
-            .appendTo(this.containers['explore']);
-        
-        // Load Content
-        // @later implement as widgets/admin/databaseOverview (on baseAction)
-        $ele.load(`${window.hWin.HAPI4.baseURL}hclient/widgets/cpanel/databaseOverview.html`,
-            function(){
+        this._dbOverview = $('<div>', {
+            id: 'dbOverview',
+            class: 'ent_wrapper'
+        }).appendTo(this.containers['explore']);
 
-                // Section headers within Content
-                $('div.mock-header')
-                .css({
-                    'font-weight': 'bold',
-                    'text-align': 'center',
-                    'padding': '10px 0px',
-                    'width': '85px',
-                    'display': 'inline-block',
-                    'color': 'white',
-                    'border': '1px solid lightgray',
-                    'cursor': 'pointer'
-                })
-                .on('click', function(e){
-                    let option = $(e.target).is('img') ? 'explore' : $(e.target).attr('id');
-
-                    if(window.hWin.HEURIST4.util.isempty(option)){
-                        option = $(e.target).parent().attr('id');
-                    }
-
-                    $ele.hide();
-                    
-                    if(option != 'explore'){
-                        that.switchContainer(option[0].toLowerCase() + option.slice(1));
-                    }
-                });
-                // Add image to explore header
-                let $explore_img = $('img#explore-img');
-                $explore_img.attr('src', window.hWin.HAPI4.baseURL+'hclient/assets/v6/' + $explore_img.attr('data-src'));
-                // "New" and "Add record"
-                $('div.add-new')
-                .css({
-                    'background': 'lightgray',
-                    'display': 'inline-block',
-                    'margin-left': '10px',
-                    'padding': '10px',
-                    'cursor': 'pointer'
-                })
-                .on('click', function(){
-                    $('li.menu-explore[data-action-popup="recordAdd"]').trigger('mouseover');
-                });
-
-                // Explanation Text for each section
-                $('span.flavour-text')
-                .css({
-                    'display': 'inline-block',
-                    'margin-left': '10px'
-                });
-
-                // Link to quick tips popup
-                $('div#quick_tips')
-                .css({
-                    'text-decoration': 'underline',
-                    color: 'blue',
-                    width: '100px',
-                    'text-align': 'center',
-                    'margin-left': 'auto',
-                    'margin-right': 'auto',
-                    'margin-top': '40px',
-                    cursor: 'pointer'
-                })
-                .on('click', function(){
-                    window.hWin.HAPI4.actionHandler.executeActionById('menu-help-quick-tips');
-                });
-
-                // Commonly used entities/rectypes
-                let entity_container = $('ul#entity-usage').css({
-                    'list-style-type': 'none',
-                    'padding-left': '30px',
-                    'margin-top': '0px'
-                });
-
-                let options = {
-                    select_name: 'usage_select', 
-                    useCounts: true, 
-                    useGroups: false, 
-                    useHtmlSelect: true, 
-                    useIcons: true, 
-                    useIds: true, 
-                    ancor: null
-                };
-
-                let entities_usage = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, options);
-
-                entities_usage.find('option').each(function(idx, item){
-
-                    if(idx >= 11){ // Max of 10
-                        return false;
-                    }
-
-                    let $opt = $(item);
-                    let count = $opt.attr('rt-count') >= 0 ? $opt.attr('rt-count') : '';
-
-                    $('<li data-id="'+$opt.attr('entity-id')+'" style="font-size:smaller;padding:4px 0px 2px 0px">'
-                        +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                            + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'+$opt.attr('icon-url')+ '&quot;);"/>'
-                        +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;" title="Search for '+$opt.text()+' records">'
-                        +$opt.text()+'</div>'
-                        +'<span style="float:right;min-width:20px;margin-left:10px;">'+count+'</span>'
-                       +'</li>')
-                    .appendTo(entity_container); 
-
-                });
-
-                entity_container.find('li[data-id]').on('click', function(e){
-                    let $ele = $(e.target).is('li') ? $(e.target) : $(e.target).parent('li');
-
-                    let rectype_id = $ele.attr('data-id');
-
-                    if(rectype_id > 0){
-
-                        let request = {
-                            q: 't:'+rectype_id,
-                            w: 'a',
-                            qname: $Db.rty(rectype_id, 'rty_Plural'),
-                            detail: 'ids'
-                        };
-
-                        window.hWin.HAPI4.RecordSearch.doSearch(this, request);
-
-                        that.switchContainer('explore');
-                    }
-                });
-
-                updateDetails();
-                changeFuncAccess();
-            }
-        );
+        this._dbOverview.dbOverview({
+            publishMode: false
+        });
     },
 
     /**
@@ -2837,8 +2494,8 @@ $.widget( "heurist.slidersMenu", {
      */
     hideDatabaseOverview: function(){
 
-        if(this.containers['explore'].find('div#db_overview').length > 0){
-            this.containers['explore'].find('div#db_overview').hide();
+        if(this._dbOverview?.length > 0 && this._dbOverview.dbOverview('instance') !== undefined){
+            this._dbOverview.dbOverview('hide');
         }
     },
 
