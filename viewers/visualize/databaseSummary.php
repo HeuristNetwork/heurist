@@ -217,7 +217,9 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                                     ?>
                             <tr class="t-row">
                                 <td colspan="5" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
-                                <td align="center"><input type="checkbox" class="group_chkbox" title="Check all record types within group" data-id="<?php echo $row["grp_id"];?>"></td>
+                                <td align="center" style="vertical-align: bottom;">
+                                    <input type="checkbox" class="group_chkbox" title="Check all record types within group" data-id="<?php echo $row["grp_id"];?>">
+                                </td>
                             </tr>
                                     <?php
                                 }
