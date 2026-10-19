@@ -194,8 +194,8 @@ final class DefinitionSnapshotService
             'TRM_NO'                   => $this->concept('trm', 2, 531),
             'TRM_YES'                  => $this->concept('trm', 2, 532),
 
-            // record editing (plan 14): writable system record types (the client opens
-            // the new record editor for these) and the multilingual fields
+            // record editing (plan 14): the system record types (special fields, pointer
+            // modes and the record manager, plan 21) and the multilingual fields
             'RT_CUSTOM_REPORT'         => $this->concept('rty', 2, 1104),
             'RT_REPORT_SCHEDULE'       => $this->concept('rty', 2, 1105),
             'RT_KML_SOURCE'            => $this->concept('rty', 3, 1014),

@@ -4,10 +4,10 @@
 
 Writes of records through the new API (plan 14, heurist-explorer
 `docs/development/14 Record-Editing-Plan.md`): insert, update, duplicate and
-delete, ported from `hserv/records/edit/recordModify.php`. For now only the
-system record types of `WritableRecordTypes` are written (reports, report
-schedules, map documents, map layers and their sources, query sources, website
-home and pages); other record types keep the legacy editor and `recordSave`.
+delete, ported from `hserv/records/edit/recordModify.php`, for every record
+type (heurist-explorer plan 21, 2026-10-19: the list of writable system types,
+`WritableRecordTypes`, was removed). The legacy save steps listed under *Not ported
+yet* do not run for writes of this API.
 
 Routes (`Controller/RecordEditController.php`, wired in `hserv/controller/api.php`):
 
@@ -60,12 +60,12 @@ The body is the record object of `GET /records/{id}` (input = output):
   defined, has an error or gives no text).
 - `CalculatedFields.php` — runs the Smarty formulas of calculated fields on save
   (srv Smarty engine, `$r` = the record), before the title.
-- `WritableRecordTypes.php` — hardcoded list of writable record types.
 - `RecordEditException.php` — HTTP status, error code, issues of a failed write.
 
 ## Not ported yet
 
 Checking/converting title masks, calculated fields of other records that depend on
 the saved one, ElasticSearch, HTML output cache, workflow emails,
-parent/child pointers, relationship re-titling, file upload, batch save, guest
-user rights. Test: `tests/RecordEditApiTest.php --db=NAME --user=ID [--write]`.
+parent/child pointers (child records are not created or deleted with their parent),
+relationship re-titling and re-titling of the records that point to the saved one,
+entry masks, batch save, guest user rights (plan 21 §6a: none ported for now). Test: `tests/RecordEditApiTest.php --db=NAME --user=ID [--write]`.

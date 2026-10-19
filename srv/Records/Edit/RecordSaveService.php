@@ -3,7 +3,7 @@
 * RecordSaveService.php - Insert and update of one record (POST / PUT / PATCH)
 *
 * Port of recordSave() and recordAdd() of hserv/records/edit/recordModify.php
-* for the writable system record types (WritableRecordTypes):
+* for every record type (plan 21: the list of writable system types was removed):
 *   - insert: rec_ID 0 takes the next id, a negative rec_ID is used as the id
 *     (import); owner is the current user and visibility "viewable" unless the
 *     body gives them; website pages (RT_CMS_PAGE) belong to group 1 and are public;
@@ -49,7 +49,6 @@ final class RecordSaveService
     private RecordValidator $validator;
     private RecordPermissionService $permissions;
     private DefinitionLookup $definitions;
-    private WritableRecordTypes $writable;
     private RuntimeContext $runtime;
     private RecordTitle $title;
     private ?TitleMask $titleMask;
@@ -67,7 +66,6 @@ final class RecordSaveService
         RecordValidator $validator,
         RecordPermissionService $permissions,
         DefinitionLookup $definitions,
-        WritableRecordTypes $writable,
         RuntimeContext $runtime,
         RecordTitle $title,
         array $codes = array(),
@@ -78,7 +76,6 @@ final class RecordSaveService
         $this->validator = $validator;
         $this->permissions = $permissions;
         $this->definitions = $definitions;
-        $this->writable = $writable;
         $this->runtime = $runtime;
         $this->title = $title;
         $this->codes = array_map('intval', $codes);
@@ -175,7 +172,6 @@ final class RecordSaveService
                 array('field'=>'rec_RecTypeID', 'index'=>null, 'code'=>'required', 'severity'=>'error', 'message'=>'rec_RecTypeID is required')
             ));
         }
-        $this->assertWritable($rectype);
         $recordId = abs($pathId);
         if($recordId > 0 && $this->store->records()->header($recordId) !== null){
             throw new RecordEditException(409, 'conflict', 'Record '.$recordId.' already exists');
@@ -217,7 +213,6 @@ final class RecordSaveService
         if($input->has('rec_RecTypeID') && $input->intHeader('rec_RecTypeID') !== $rectype){
             throw RecordEditException::invalid('The record type of a record cannot be changed');
         }
-        $this->assertWritable($rectype);
         $owners = $this->permissions->owners($recordId);
         if(!$this->permissions->canEditOwned($owners['owner'], $owners['editGroups'])){
             throw RecordEditException::denied('You cannot change record '.$recordId
@@ -322,16 +317,6 @@ final class RecordSaveService
             }
         }
         return $byWorkflow;
-    }
-
-    /** @throws RecordEditException 403 when the API may not write this record type */
-    private function assertWritable(int $rectype): void
-    {
-        if(!$this->writable->contains($rectype)){
-            $name = $this->definitions->rectypeName($rectype);
-            throw RecordEditException::denied('Records of type '.($name !== '' ? '"'.$name.'"' : $rectype)
-                .' cannot be changed with this API yet');
-        }
     }
 
     /** @throws RecordEditException 422 for an unknown visibility value */

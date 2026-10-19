@@ -74,7 +74,6 @@ use Heurist\Records\Edit\TitleMask;
 use Heurist\Records\Edit\CalculatedFields;
 use Heurist\Records\Files\FileRepository;
 use Heurist\Records\Edit\RecordValidator;
-use Heurist\Records\Edit\WritableRecordTypes;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\RecordSearchService;
@@ -333,7 +332,6 @@ final class ServiceFactory
         $languages = new LanguageCodes(self::languageCodesFile());
         $store = new RecordStore($this->database);
         $permissions = new RecordPermissionService($this->database, $this->runtime);
-        $writable = new WritableRecordTypes($this->codes);
         $title = new RecordTitle($languages, $this->codes->id('DT_NAME'));
         $titleMask = new TitleMask($definitions, $store->records(), FileRepository::shared($this->database), $languages);
         $calculated = new CalculatedFields($definitions, $store, function(string $formula, int $recordId): array {
@@ -348,12 +346,12 @@ final class ServiceFactory
             'cmsExtFiles' => $this->codes->id('DT_CMS_EXTFILES')
         ));
         return new RecordEditController(
-            new RecordSaveService($store, $validator, $permissions, $definitions, $writable, $this->runtime, $title, array(
+            new RecordSaveService($store, $validator, $permissions, $definitions, $this->runtime, $title, array(
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
                 'workflowStage' => $this->codes->id('DT_WORKFLOW_STAGE')
             ), $titleMask, $calculated),
-            new RecordDeleteService($store, $permissions, $definitions, $writable, $this->runtime),
-            new RecordDuplicateService($store, $permissions, $definitions, $writable, $this->runtime, $title, $languages, array(
+            new RecordDeleteService($store, $permissions, $definitions, $this->runtime),
+            new RecordDuplicateService($store, $permissions, $definitions, $this->runtime, $title, $languages, array(
                 'name' => $this->codes->id('DT_NAME'),
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE')
             ), $titleMask),
