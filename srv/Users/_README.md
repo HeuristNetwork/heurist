@@ -4,7 +4,7 @@
 
 Users and groups (sysUGrps, sysUsrGrpLinks). `UserGroupRepository.php` is the only
 srv class that reads these tables (plan 15, heurist-explorer
-`docs/development/15 Data-Access-Layer-Plan.md`). Services never query them
+`docs/development/15 DONE Data-Access-Layer-Plan.md`). Services never query them
 themselves — add a method here.
 
 ## Key files

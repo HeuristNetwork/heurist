@@ -3,7 +3,7 @@
 ## Overview
 
 Reports manager for Smarty report templates (plan 12 in heurist-explorer,
-`docs/development/12 Smarty-Reports-Plan.md`). A report is a Custom Report
+`docs/development/12 DONE Smarty-Reports-Plan.md`). A report is a Custom Report
 record (`RT_CUSTOM_REPORT` 2-1104: name, description, template file name
 `DT_FILE_NAME` 2-62, card flag `DT_IS_CARD_VIEW` 2-1182) whose template body
 stays in `smarty-templates/*.tpl`. Report Schedule records (`RT_REPORT_SCHEDULE`

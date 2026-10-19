@@ -15,7 +15,7 @@ record editing of system record types (`Edit/`, plan 14).
 - `Map/MapFeatureService.php` — GeoJSON feature production.
 - `Edit/RecordSaveService.php` — insert and update of records (see `Edit/_README.md`).
 - `Store/` — the record access layer (plan 15, heurist-explorer
-  `docs/development/15 Data-Access-Layer-Plan.md`), see below.
+  `docs/development/15 DONE Data-Access-Layer-Plan.md`), see below.
 - `Files/FileRepository.php` — the only reader of recUploadedFiles and
   defFileExtToMimetype: `files(ids)` (information with MIME type),
   `filesByObfuscatedId(ids)`, `existing(ids)`, `hasThumbnail(file)`. The file

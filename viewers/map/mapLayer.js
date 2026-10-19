@@ -541,6 +541,19 @@ function HMapLayer( _options ) {
         return window.hWin.HEURIST4.map.splitSymbology(value);
     }
 
+    //
+    // A query with parameters ($name$, filled from a Filter form) runs only in the new
+    // Explorer / Map: the legacy viewer cannot fill them (2026-10-17)
+    //
+    function _queryHasParameters(query){
+        let text = (typeof query === 'string') ? query : JSON.stringify(query==null ? '' : query);
+        return /\$[A-Za-z][A-Za-z0-9_]*\$/.test(text);
+    }
+
+    function _parametersMessage(){
+        return 'The query of this layer has parameters (Filter form). It can be shown only in the new Explorer / Map.';
+    }
+
 
     function _addQueryLayer(){
 
@@ -597,6 +610,10 @@ function HMapLayer( _options ) {
         let origination_db = null;
         
         let query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
+        if(_queryHasParameters(query)){
+            window.hWin.HEURIST4.msg.showMsgErr(_parametersMessage());
+            return;
+        }
         let request = window.hWin.HEURIST4.query.parseHeuristQuery(query);
 
         if(request.q){
@@ -1370,6 +1387,10 @@ function HMapLayer( _options ) {
                         + '&db=' + window.hWin.HAPI4.database;
                 }else{
                     let query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
+                    if(_queryHasParameters(query)){
+                        window.hWin.HEURIST4.msg.showMsgErr(_parametersMessage());
+                        return;
+                    }
                     let params = window.hWin.HEURIST4.query.parseHeuristQuery(query);
                     sQuery = window.hWin.HEURIST4.query.composeHeuristQuery2(params, true);
                     sQuery = sQuery + '&db=' + (params.db?params.db:window.hWin.HAPI4.database);

@@ -5,7 +5,7 @@
 * The one srv class (with RecordStore for writes and the search compiler for
 * search SQL) that reads the record tables: headers, detail values, links and
 * relationships, owners and access, tags and bookmarks, counts (plan 15,
-* heurist-explorer docs/development/15 Data-Access-Layer-Plan.md). Table names
+* heurist-explorer docs/development/15 DONE Data-Access-Layer-Plan.md). Table names
 * come from RecordSchema, so a move of records to other tables changes the
 * schema only. Services never query these tables themselves - add a method here.
 *

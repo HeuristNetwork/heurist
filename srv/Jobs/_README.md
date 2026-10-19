@@ -3,7 +3,7 @@
 ## Overview
 
 Generic background jobs (plan 12, Phase 2, in heurist-explorer
-`docs/development/12 Smarty-Reports-Plan.md`). First users: Smarty report test
+`docs/development/12 DONE Smarty-Reports-Plan.md`). First users: Smarty report test
 runs and generation; later records batch actions and exports.
 
 A job is started by `POST /api/{db}/jobs`. The start request answers with the
