@@ -70,6 +70,11 @@ tags:
     schedules, map documents, map layers and their sources, query sources, website home and pages.
 - name: Reports
   description: Smarty report templates, their records and schedules (reports manager)
+- name: Files
+  description: >-
+    Registered files (uploads and external resources) as records of the record type Registered file
+    (2-1106), in the JSON of /records: search, chunked upload, registration, changes, content and thumbnails.
+    Logged-in users only, except the content and thumbnail of viewable files.
 paths:
   /databases:
     get:
@@ -675,6 +680,383 @@ paths:
         '401': {$ref: '#/components/responses/Unauthorized'}
         '405': {$ref: '#/components/responses/MethodNotAllowed'}
         '500': {$ref: '#/components/responses/ServerError'}
+  /{database}/files:
+    get:
+      tags: [Files]
+      operationId: searchFiles
+      summary: Search registered files
+      description: >-
+        The request and response of GET /records, for file records. Supported predicates: ids, title (and plain
+        text), url, added, modified, owner/addedby (user ids or current), f:<field> of the file fields - MIME type
+        2-29 (term id, extension "pdf", MIME type "image/jpeg" or group "image/*"), registered file type 2-1186
+        (local, external, iiif, iiif_image, tiled), original name 2-1185, caption, description, copyright, size
+        2-67 in bytes - and any/all/not. detail = records, ids, count or rectypes. Sort names are those of
+        /records (id, title, added, modified, url, f:<field>); default by id. Logged-in users see every file.
+        The stored name (2-62) and folder (2-63) are given to database administrators only.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - name: q
+        in: query
+        schema: {type: string}
+        description: 'Heurist query, for example [{"f:29":"image/*"},{"title":"map"}].'
+      - name: ids
+        in: query
+        schema: {type: string}
+        description: Comma-separated file IDs.
+      - name: fields
+        in: query
+        schema: {type: string}
+        description: Headers, virtual headers (rec_ThumbnailURL, rec_OwnerName), field IDs or _all.
+      - name: detail
+        in: query
+        schema: {type: string, enum: [records, ids, count, rectypes], default: records}
+      - name: resolveDetails
+        in: query
+        schema: {type: boolean}
+      - name: defs
+        in: query
+        schema: {type: boolean}
+      - name: sort
+        in: query
+        schema: {type: string}
+      responses:
+        '200':
+          description: File records in the /records envelope
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordQueryResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '500': {$ref: '#/components/responses/ServerError'}
+    post:
+      tags: [Files]
+      operationId: searchFilesPost
+      summary: Search registered files with a structured request
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordSearchRequest'}
+      responses:
+        '200':
+          description: File records in the /records envelope
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordQueryResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /{database}/files/{fileId}:
+    get:
+      tags: [Files]
+      operationId: getFile
+      summary: Retrieve one registered file
+      description: >-
+        One file record, as GET /records/{recordId}: fields default to _all; records is empty when the file does
+        not exist.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      - name: fields
+        in: query
+        schema: {type: string}
+      - name: resolveDetails
+        in: query
+        schema: {type: boolean}
+      - name: defs
+        in: query
+        schema: {type: boolean}
+      responses:
+        '200':
+          description: One file record
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '500': {$ref: '#/components/responses/ServerError'}
+    post:
+      tags: [Files]
+      operationId: registerFile
+      summary: Register a file (fileId 0)
+      description: >-
+        The body is a file record (as GET /files/{fileId}) with "upload" - the token of a finished upload - or
+        rec_URL for an external resource (YouTube, Vimeo, SoundCloud, IIIF manifests and image services are
+        recognized; otherwise the type comes from a HEAD request). Writable fields: original name 2-1185,
+        caption, description, copyright, copyright owner 2-1188, configuration 2-1187; rec_NonOwnerVisibility
+        public or viewable (login required); registered file type 2-1186 "tiled" for a tiled image stack (zip,
+        mbtiles). An already registered URL gives its file (200, meta.existing) unless force=1. meta.issues lists
+        warnings such as files with the same content. Same-site requests with a JSON body only.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, enum: [0]}
+      - name: force
+        in: query
+        schema: {type: boolean}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '201':
+          description: The registered file
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '200':
+          description: The existing registration of the URL
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '400': {description: Invalid body or URL, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {description: Another site or not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: The upload is not complete, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '415': {description: File type not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    put:
+      tags: [Files]
+      operationId: replaceFile
+      summary: Change a file (writable fields missing from the body are cleared)
+      description: >-
+        Uploader or database owner. With "upload" the content is replaced (new name, size, MD5; the same key).
+        rec_Modified is a concurrency token (409 when the file was changed since, unless force=1). rec_URL can be
+        changed for external resources only.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      - name: force
+        in: query
+        schema: {type: boolean}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '200':
+          description: The changed file
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '403': {description: Not the uploader or the database owner, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: File not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Changed by someone else, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    patch:
+      tags: [Files]
+      operationId: changeFile
+      summary: Change the given fields of a file
+      description: As PUT, but only the fields in the body change.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '200':
+          description: The changed file
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '403': {description: Not the uploader or the database owner, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Changed by someone else, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    delete:
+      tags: [Files]
+      operationId: deleteFile
+      summary: Delete a file no record refers to
+      description: Uploader or database owner. The stored file, its thumbnail and cached copies are removed.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      responses:
+        '200': {description: '{"deleted": fileId}'}
+        '403': {description: Not the uploader or the database owner, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: 'Used by records: error file_in_use, records = their ids', content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/files/{fileId}/validate:
+    post:
+      tags: [Files]
+      operationId: validateFile
+      summary: The checks of a save; nothing is written
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 0}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '200': {description: '{"valid": true, "issues": [...]}'}
+        '400': {description: Invalid, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/files/upload:
+    post:
+      tags: [Files]
+      operationId: startUpload
+      summary: Start a chunked upload
+      description: >-
+        Body {name, size, type}. Gives a token and the chunk size. Refused - 415 - for file types the database
+        does not know (defFileExtToMimetype) or that are never accepted (scripts, executables); 413 when the
+        disk quota does not allow the file. Unfinished or unregistered uploads are removed after a day.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, size]
+              properties:
+                name: {type: string}
+                size: {type: integer, minimum: 1}
+                type: {type: string}
+      responses:
+        '201': {description: '{"token", "chunkSize", "received": 0, "size", "name"}'}
+        '413': {description: Disk quota, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '415': {description: File type not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/files/upload/{token}:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - name: token
+      in: path
+      required: true
+      schema: {type: string, pattern: '^[a-f0-9]{32}$'}
+    get:
+      tags: [Files]
+      operationId: uploadStatus
+      summary: Bytes received (to resume an upload)
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: '{"token", "received", "size", "complete", ...}'}
+        '404': {description: Unknown upload}
+    put:
+      tags: [Files]
+      operationId: uploadChunk
+      summary: Send one chunk
+      description: >-
+        Raw body (application/octet-stream) with Content-Range "bytes start-end/total" and the header
+        X-Heurist-Client. A chunk must start at the received size, otherwise 409 with "received". After the last
+        chunk the answer has md5, mime, ext, thumbnail and duplicates (files with the same content).
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Content-Range
+        in: header
+        required: true
+        schema: {type: string}
+      - name: X-Heurist-Client
+        in: header
+        required: true
+        schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema: {type: string, format: binary}
+      responses:
+        '200': {description: Upload state}
+        '403': {description: Another site or no X-Heurist-Client}
+        '409': {description: 'Wrong start: continue at "received"'}
+    delete:
+      tags: [Files]
+      operationId: cancelUpload
+      summary: Cancel an upload
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: '{"cancelled": token}'}
+  /{database}/files/{fileKey}/content:
+    get:
+      tags: [Files]
+      operationId: fileContent
+      summary: The content of a file, by its key (rec_Hash)
+      description: >-
+        Local files are sent with range support (206, Content-Range, Accept-Ranges); external resources are
+        redirected to; tiled stacks and files the legacy code keeps elsewhere are redirected to the legacy
+        ?file= link. Guests may read viewable files; login-required files need a login (403).
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileKey
+        in: path
+        required: true
+        schema: {type: string, pattern: '^[a-z0-9]{10,64}$'}
+      - name: download
+        in: query
+        schema: {type: boolean}
+        description: As an attachment instead of inline.
+      - name: Range
+        in: header
+        schema: {type: string}
+      responses:
+        '200': {description: The file}
+        '206': {description: A part of the file}
+        '302': {description: External resource or legacy link}
+        '403': {description: Login required}
+        '404': {description: Unknown key}
+        '416': {description: Range not satisfiable}
+  /{database}/files/{fileKey}/thumbnail:
+    get:
+      tags: [Files]
+      operationId: fileThumbnail
+      summary: The thumbnail of a file (PNG); one not made yet is redirected to the legacy ?thumb= link
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileKey
+        in: path
+        required: true
+        schema: {type: string, pattern: '^[a-z0-9]{10,64}$'}
+      responses:
+        '200': {description: PNG}
+        '302': {description: Legacy thumbnail link (made on the first request)}
+        '403': {description: Login required}
+        '404': {description: Unknown key}
   /{database}/sys/{systemType}/{systemId}:
     get:
       tags: [System records]

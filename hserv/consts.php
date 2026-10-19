@@ -463,8 +463,9 @@ $rtDefines = array(
     
     // Smarty reports (plan 12)
     'RT_CUSTOM_REPORT' => array(2, 1104),
-    'RT_REPORT_SCHEDULE' => array(2, 1105)
+    'RT_REPORT_SCHEDULE' => array(2, 1105),
     
+    'RT_REGISTERED_FILE' => array(2, 1106)
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -512,6 +513,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_SERVICE_URL' => array(2, 34),
     'DT_URL' => array(3, 1058),
     'DT_COPYRIGHT' => array(2, 35),
+    'DT_COPYOWNER' => array(2, 1188),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
@@ -625,7 +627,11 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     
 
     'DT_WORKFLOW_STAGE' => array(2, 1080),
-    'DT_VERSION' => array(2, 49)
+    'DT_VERSION' => array(2, 49),
+    
+    'DT_ORIGINAL_NAME' => array(2, 1185), 
+    'DT_REGISTERED_FILE_TYPE' => array(2, 1186),
+    'DT_CONFIGURATION' => array(2, 1187) 
 
 );
 

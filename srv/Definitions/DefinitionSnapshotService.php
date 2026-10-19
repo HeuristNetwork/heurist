@@ -33,9 +33,10 @@ final class DefinitionSnapshotService
     /**
      * Snapshot format; a cached snapshot of an older format is rebuilt
      * (2: structure rows have "max"; 3: terms named as the report field tree -
-     * term, code, conceptid, desc - by DefinitionLookup; 4: dbconst DT_DATA_SOURCE).
+     * term, code, conceptid, desc - by DefinitionLookup; 4: dbconst DT_DATA_SOURCE;
+     * 5: dbconst RT_REGISTERED_FILE, the API domain of record types, plan 21).
      */
-    private const FORMAT = 4;
+    private const FORMAT = 5;
 
     /** Languages offered for translations when the database has no own list (legacy default). */
     private const TRANSLATION_LANGUAGES = array('ENG', 'FRE', 'CHI', 'SPA', 'ITA', 'ARA', 'GER', 'POR', 'LAT', 'GRE', 'GRC', 'IND');
@@ -220,7 +221,10 @@ final class DefinitionSnapshotService
             'DT_GEO_FIELDS'            => $this->concept('dty', 2, 1161),
             'DT_TIMELINE_FIELDS'       => $this->concept('dty', 2, 1105),
             'DT_MINIMUM_ZOOM_LEVEL'    => $this->concept('dty', 2, 32),
-            'DT_MAXIMUM_ZOOM_LEVEL'    => $this->concept('dty', 2, 33)
+            'DT_MAXIMUM_ZOOM_LEVEL'    => $this->concept('dty', 2, 33),
+            // record types listed and written on another API domain than /records (plan 21):
+            // registered files on /files (plan 20)
+            'RT_REGISTERED_FILE'       => $this->concept('rty', 2, 1106)
         );
     }
 

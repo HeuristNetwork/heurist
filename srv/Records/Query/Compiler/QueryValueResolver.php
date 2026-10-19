@@ -220,21 +220,17 @@ final class QueryValueResolver
         return $actual === strtolower(implode('.', $path));
     }
 
-    /** Field type and the roots of its term tree (the filtered tree of the record types when set). */
+    /**
+     * Field type and the roots of its term tree: the base field's vocabulary
+     * (rst_FilteredJsonTermIDTree of the record types is ignored, plan 21).
+     */
     private function fieldMetadata(int $fieldId, array $recordTypes): array
     {
-        $key = 'metadata:'.$fieldId.':'.implode(',', $recordTypes);
+        $key = 'metadata:'.$fieldId;
         if(isset($this->cache[$key])){ return $this->cache[$key]; }
         $field = $this->definitions->field($fieldId);
         if($field === null){ throw new QueryValidationException('Unknown field ID: '.$fieldId); }
-        $roots = $field['vocabulary'];
-        $filtered = array();
-        foreach($recordTypes as $rectypeId){
-            $row = $this->definitions->structureRows(intval($rectypeId))[$fieldId] ?? null;
-            if($row !== null && !empty($row['termFilter'])){ $filtered = array_merge($filtered, $row['termFilter']); }
-        }
-        if(!empty($filtered)){ $roots = $filtered; }
-        return $this->cache[$key] = array('type'=>$field['type'], 'roots'=>array_map('intval', $roots));
+        return $this->cache[$key] = array('type'=>$field['type'], 'roots'=>array_map('intval', $field['vocabulary']));
     }
 
     private function termDescendants(array $roots): array

@@ -49,3 +49,5 @@ Dependency direction is Controller → Records → Database/Runtime. Classes bel
 - `Jobs/` — background job runner, JSON state files, Stop and time limits.
 - `System/Query/` — stable system entity schemas and the shared-query adapter
   for legacy `usrSavedSearches` and `sysUGrps` storage.
+- `Controller/FileController.php`, `Files/` — registered files as records
+  (`/api/{db}/files`, plan 20) on `recUploadedFiles` or `fileRecords`.

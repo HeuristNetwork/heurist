@@ -36,6 +36,8 @@ use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Data\RecordFieldSelector;
 use Heurist\Records\Data\RecordPageAssembler;
 use Heurist\Records\Expansion\ExpansionEngine;
+use Heurist\Records\Store\RecordRepository;
+use Heurist\Records\Store\RecordSchema;
 
 /** Shared request boundary for public and internal modern record searches. */
 final class RecordQueryController
@@ -60,10 +62,15 @@ final class RecordQueryController
     /** @var ExpansionEngine|object|null */
     private $expansionEngine;
 
+    /** Name of the API domain in meta.entity: records, or files for fileRecords (plan 20). */
+    private string $entity;
+
     /**
      * @param DatabaseInterface $database Modern database adapter.
      * @param RuntimeContext $runtime Current database and user context.
      * @param object|null $service Optional search service for integration tests.
+     * @param RecordSchema|null $schema Another record table pair (fileRecords/fileRecDetails); null = Records.
+     * @param string $entity meta.entity of the responses.
      */
     public function __construct(
         DatabaseInterface $database,
@@ -72,16 +79,20 @@ final class RecordQueryController
         $dataService = null,
         $expansionEngine = null,
         ?ApiResponse $response = null,
-        ?ErrorReporter $errors = null
+        ?ErrorReporter $errors = null,
+        ?RecordSchema $schema = null,
+        string $entity = 'records'
     )
     {
         $this->runtime = $runtime;
+        $this->entity = $entity;
         $this->response = $response ?? new ApiResponse();
         $this->errors = $errors ?? new ErrorReporter();
-        $this->executor = new QueryExecutor($database);
-        $this->builder = new QueryBuilder($database);
+        $records = $schema === null ? null : new RecordRepository($database, $schema);
+        $this->executor = new QueryExecutor($database, $records);
+        $this->builder = new QueryBuilder($database, $schema);
         $this->service = $service ?? new RecordSearchService($database, $runtime, $this->builder, $this->executor);
-        $this->dataService = $dataService ?? new RecordDataService($database, $runtime);
+        $this->dataService = $dataService ?? new RecordDataService($database, $runtime, $records);
         $this->fieldSelector = new RecordFieldSelector();
         $this->expansionEngine = $expansionEngine;
     }
@@ -233,7 +244,7 @@ final class RecordQueryController
 
         $meta = array(
             'database'=>$params['db'] ?? $this->databaseName(),
-            'entity'=>'records',
+            'entity'=>$this->entity,
             'fields'=>array(
                 'headers'=>array_values(array_unique(array_merge(
                     array('rec_ID','rec_RecTypeID','rec_Title'),
@@ -305,7 +316,7 @@ final class RecordQueryController
         if($detail === 'ids'){
             return array(
                 'records'=>array_map('strval', $response['ids'] ?? array()),
-                'meta'=>array('database'=>$params['db'] ?? $this->databaseName(), 'entity'=>'records')
+                'meta'=>array('database'=>$params['db'] ?? $this->databaseName(), 'entity'=>$this->entity)
             );
         }
         unset($response['pagination']);

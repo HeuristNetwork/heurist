@@ -492,6 +492,44 @@ if($is_system_query){
     $method = 'search';
 }
 
+// Registered files as records (plan 20): GET|POST /files searches with the
+// /records contract, GET /files/{id} gives one file record; uploads (/files/upload),
+// registration and changes (POST/PUT/PATCH/DELETE /files/{id}) need a logged-in user;
+// GET /files/{key}/content|thumbnail may be read by guests (viewable files).
+// See srv/Controller/FileController.php for the routes and checks.
+$is_files_query = ($resource === 'files');
+$is_files_search = false;
+if($is_files_query){
+    $fileSegment = (string)($requestUri[4] ?? '');
+    $is_files_content = in_array((string)($requestUri[5] ?? ''), array('content','thumbnail'), true)
+        && $fileSegment !== '' && !ctype_digit($fileSegment);
+    $is_files_search = ($fileSegment === '' && in_array($http_verb, array('GET','POST'), true));
+    if(!in_array($http_verb, array('GET','HEAD','POST','PUT','PATCH','DELETE'), true)){
+        exitWithError('Method not allowed', 405, array('Allow'=>'GET, POST, PUT, PATCH, DELETE'));
+    }
+    if(in_array($http_verb, array('POST','PUT','PATCH'), true)
+        && stripos($contentType, 'application/json') === 0
+        && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    if($is_files_search && $http_verb === 'POST' && is_array($json)){
+        $fileContractKeys = array('query','q','ids','fields','detail','resolveDetails','defs','limit','offset','sort','filter','total');
+        foreach($fileContractKeys as $key){
+            if(array_key_exists($key, $json)){ $req_params[$key] = $json[$key]; }
+        }
+        // api.php's generic JSON handler temporarily places the whole body in fields
+        if(!array_key_exists('fields', $json)){ unset($req_params['fields']); }
+        if(!isset($req_params['query']) && !isset($req_params['q']) && !isset($req_params['ids'])){
+            $isList = empty($json) || array_keys($json) === range(0, count($json)-1);
+            if($isList || empty(array_intersect(array_keys($json), $fileContractKeys))){
+                $req_params['query'] = $json;
+            }
+        }
+    }
+    // reads stay "search" (content and thumbnails also for guests, below); writes need a login
+    $method = ($is_files_search || $is_files_content || in_array($http_verb, array('GET','HEAD'), true)) ? 'search' : 'save';
+}
+
 // The modern definitions collection returns one cached database-structure
 // snapshot for client query builders and the query-language describer.
 // GET /api/{db}/def/snapshot  (read-only; will supersede /rty|/dty|/trm|/rst|/trl)
@@ -567,7 +605,10 @@ if($method === 'search'){
         'map', 'time',
         'reports'
     );
-    $allow_anonymous = in_array($resource, $publicSearchResources, true);    
+    $allow_anonymous = in_array($resource, $publicSearchResources, true);
+    if($is_files_query && $is_files_content){
+        $allow_anonymous = true; // file content and thumbnails; FileContent refuses login-required files
+    }
 }
 
 if(!$skip_auth_processing){
@@ -611,6 +652,29 @@ if($is_def_query){
         ? intval($requestUri[5]) : null;
     $controller = ServiceFactory::fromLegacySystem($system)->systemQueryController();
     $controller->output($req_params, $systemType, $systemId);
+    $system->dbclose();
+    exit;
+
+}elseif($is_files_query){
+
+    $req_params['restapi'] = 1;
+    $controller = ServiceFactory::fromLegacySystem($system)->fileController();
+    $controller->handleRequest(
+        $http_verb,
+        array_slice($requestUri, 4),
+        $req_params,
+        is_array($json) ? $json : null,
+        array(
+            'contentType' => $contentType,
+            'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+            'host' => $_SERVER['HTTP_HOST'] ?? '',
+            'contentRange' => $_SERVER['HTTP_CONTENT_RANGE'] ?? '',
+            'client' => $_SERVER['HTTP_X_HEURIST_CLIENT'] ?? '',
+            'range' => $_SERVER['HTTP_RANGE'] ?? '',
+            // a chunk of an upload (PUT /files/upload/{token}); JSON bodies come as $json
+            'body' => (stripos($contentType, 'application/json') === 0) ? '' : $raw_body
+        )
+    );
     $system->dbclose();
     exit;
 
