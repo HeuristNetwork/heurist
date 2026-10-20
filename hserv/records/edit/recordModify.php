@@ -1624,7 +1624,10 @@ function deleteOneRecord($system, $id, $rectype){
         mysql__foreign_check($mysqli, true);
 
         //remove special kind of record - relationship
-        $refs_res = $mysqli->query('select rec_ID from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records on rec_ID=dtl_RecID where dty_Type="resource" and dtl_Value='.$id.' and rec_RecTypeID='.RT_RELATION);
+        $refs_res = $mysqli->query('SELECT DISTINCT rl_RelationID FROM recLinks '.
+                " WHERE (rl_SourceID={$id} OR rl_TargetID={$id}) ".
+                ' AND rl_RelationID IS NOT NULL AND rl_RelationID > 0');
+        
         if($refs_res){
             while ($row = $refs_res->fetch_assoc()) {
                 $res = deleteOneRecord($system, $row['rec_ID'], RT_RELATION);
@@ -1751,22 +1754,31 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
 function removeReverseChildToParentPointer($system, $parent_id, $rectype){
 
     if($system->defineConstant('DT_PARENT_ENTITY')){
-        //get list of valid record
+        
+        $parent_id = intval($parent_id);
+        $rectype = intval($rectype);
+                
+        //get list of valid children records - they still have valid parent records
         $query = 'SELECT dtl_Value FROM recDetails, defRecStructure '
         ." WHERE dtl_RecID=$parent_id AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID=$rectype";
 
         $mysqli = $system->getMysqli();
 
         $recids = mysql__select_list2($mysqli, $query, 'intval');
-
-        $query = "DELETE FROM recDetails WHERE dtl_Value=$parent_id AND dtl_DetailTypeID=".DT_PARENT_ENTITY;
+        
+        
+        $query = "DELETE d FROM recDetails d
+            INNER JOIN recLinks rl ON rl.rl_DetailID=d.dtl_ID
+            WHERE rl.rl_DetailTypeID=".DT_PARENT_ENTITY."
+              AND rl.rl_SourceID=$parent_id";
 
         if(!isEmptyArray($recids)){
-            $recids = prepareIds($recids);//redundant for snyk
-            $query = $query.' AND dtl_RecID NOT IN ('.implode(',',$recids).')';
+            $recids = prepareIds($recids);
+            $query .= ' AND rl.rl_TargetID NOT IN ('.implode(',', $recids).')';
         }
 
         $mysqli->query($query);
+
     }
 }
 
@@ -4153,7 +4165,7 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 function validateParentRecords($system, $child_record, &$new_child_details){
 
     $mysqli = $system->getMysqli();
-    $rec_ID = $child_record['ID'];
+    $rec_ID = intval($child_record['ID']);
     $rectype_ID = $child_record['RecTypeID'];
 
     $system->defineConstant('DT_PARENT_ENTITY');
@@ -4164,9 +4176,19 @@ function validateParentRecords($system, $child_record, &$new_child_details){
     }
 
     $has_parent_entity_fld = mysql__select_value($mysqli, "SELECT rst_ID FROM defRecStructure WHERE rst_RecTypeID = ? AND rst_DetailTypeID = ?", ['ii', $rectype_ID, $parent_entity]);
-    $is_child_of = mysql__select_assoc2($mysqli, "SELECT dtl_RecID, dtl_DetailTypeID FROM recDetails WHERE dtl_Value = {$rec_ID} AND dtl_RecID != {$rec_ID}");
+    
+    if(!$has_parent_entity_fld){
+        return [];
+    }
+    
+    //this query causes mysql peek
+    //$is_child_of = mysql__select_assoc2($mysqli, "SELECT dtl_RecID, dtl_DetailTypeID FROM recDetails WHERE dtl_Value = {$rec_ID} AND dtl_RecID != {$rec_ID}");
+    
+    //find all potential parent record ids
+    $is_child_of = mysql__select_assoc2($mysqli, "SELECT rl_SourceID, rl_DetailTypeID FROM recLinks WHERE rl_TargetID={$rec_ID} AND rl_SourceID!={$rec_ID}");
+    
 
-    if(!$has_parent_entity_fld || empty($is_child_of)){
+    if(empty($is_child_of)){
         return [];
     }
 
