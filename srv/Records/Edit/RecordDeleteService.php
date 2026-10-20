@@ -3,7 +3,7 @@
 * RecordDeleteService.php - Delete of one record (DELETE /records/{id})
 *
 * Port of recordDelete() / deleteOneRecord() of hserv/records/edit/recordModify.php
-* for the writable system record types:
+* for every record type (plan 21):
 *   - without force a record with incoming references is not deleted: the result
 *     (409) lists the records that point to it (recLinks) and the relationship
 *     records it is part of;
@@ -11,7 +11,8 @@
 *     relationship records are deleted, then the record;
 *   - user references are removed with the record (reminders, forwarding, tags,
 *     comments, bookmarks, permissions).
-* Child records are not handled: none of the writable types has them (plan 14).
+* Not ported (plan 21 §6a): child records (rst_CreateChildIfRecPtr) are not deleted with
+* their parent; ElasticSearch index and HTML cache.
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Edit
@@ -38,20 +39,17 @@ final class RecordDeleteService
     private RecordStore $store;
     private RecordPermissionService $permissions;
     private DefinitionLookup $definitions;
-    private WritableRecordTypes $writable;
     private RuntimeContext $runtime;
 
     public function __construct(
         RecordStore $store,
         RecordPermissionService $permissions,
         DefinitionLookup $definitions,
-        WritableRecordTypes $writable,
         RuntimeContext $runtime
     ) {
         $this->store = $store;
         $this->permissions = $permissions;
         $this->definitions = $definitions;
-        $this->writable = $writable;
         $this->runtime = $runtime;
     }
 
@@ -110,10 +108,6 @@ final class RecordDeleteService
             throw RecordEditException::notFound('Record '.$recordId.' does not exist');
         }
         $rectype = intval($header['rec_RecTypeID']);
-        if(!$this->writable->contains($rectype)){
-            throw RecordEditException::denied('Records of type "'.$this->definitions->rectypeName($rectype)
-                .'" cannot be deleted with this API yet');
-        }
         $owners = $this->permissions->owners($recordId);
         if(!$this->permissions->canEditOwned($owners['owner'], $owners['editGroups'])){
             throw RecordEditException::denied('You cannot delete record '.$recordId

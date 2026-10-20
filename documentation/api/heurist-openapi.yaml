@@ -70,6 +70,11 @@ tags:
     schedules, map documents, map layers and their sources, query sources, website home and pages.
 - name: Reports
   description: Smarty report templates, their records and schedules (reports manager)
+- name: Files
+  description: >-
+    Registered files (uploads and external resources) as records of the record type Registered file
+    (2-1106), in the JSON of /records: search, chunked upload, registration, changes, content and thumbnails.
+    Logged-in users only, except the content and thumbnail of viewable files.
 paths:
   /databases:
     get:
@@ -238,11 +243,9 @@ paths:
       summary: Search records
       description: >-
         Anonymous requests return only publicly visible records. By default each record is an envelope containing
-        rec_ID, rec_RecTypeID and rec_Title. Use fields to add headers or native/linked details, detail=ids for the
-        IDs-only DTO, detail=count for a count-only summary, detail=rectypes for counts grouped by record type, or
-        detail=values for the distinct values of one field (with record counts) among the matching records, or
-        detail=minmax for the smallest and largest value of one numeric or date field, or detail=ranges for record
-        counts per range of one numeric or date field.
+        rec_ID, rec_RecTypeID and rec_Title. Use fields to add headers or native/linked details, or detail=ids for the
+        IDs-only DTO. Counts, distinct values and bounds of the matching records are served by
+        /{database}/records/aggregate (detail=count|rectypes|values|minmax|ranges was removed and gives 400).
         Graph documents are served by the separate /{database}/graph endpoint.
       security:
       - {}
@@ -294,81 +297,15 @@ paths:
           enum:
           - records
           - ids
-          - count
-          - rectypes
-          - values
-          - minmax
-          - ranges
           default: records
         description: >-
-          ids returns the IDs-only DTO and ignores fields. count returns only the query and total. rectypes returns
-          the query, total and counts grouped by rec_RecTypeID. values returns the distinct values of `field` among
-          the matching records with the number of records for each; limit is capped at 1000 and total is the
-          number of distinct values. minmax returns the bounds of `field` among the matching records (for "auto"
-          slider bounds) and the number of records that have a value. ranges returns the field's values grouped
-          into ranges (groupby for dates, ranges for numbers) with the number of records in each; selecting a
-          range with its from/to finds exactly that many records.
-      - name: field
-        in: query
-        schema:
-          type: string
-        example: '1'
-        description: >-
-          detail=values only (required there). A detail type ID (freetext, enum, relationtype, integer, float,
-          year, date, boolean, resource, relmarker) or one of rectype, owner, addedby, access, tag, title. Enum values are
-          term IDs (labels are resolved by the client); resource/relmarker values are linked record IDs with
-          label (title) and rty; owner/addedby values carry label and kind (user or group); tags are limited to
-          the current user and their groups. detail=minmax (required there): a detail type ID of type integer,
-          float, year or date, or added / modified. detail=ranges: the same fields.
-      - name: groupby
-        in: query
-        schema:
-          type: string
-          enum: [month, year, decade, century]
-          default: year
-        description: >-
-          detail=ranges, date fields only. Decades and centuries start at a multiple of 10 / 100 (1990-1999,
-          1900-1999).
-      - name: ranges
-        in: query
-        schema:
-          type: integer
-          minimum: 1
-          maximum: 20
-          default: 10
-        description: >-
-          detail=ranges, numeric fields only. At most this many equal ranges with round boundaries (1, 2, 2.5 or
-          5 x 10^n) between the smallest and largest value; integer fields get whole, non-overlapping ranges.
-      - name: match
-        in: query
-        schema:
-          type: string
-          enum: [overlap, within]
-          default: overlap
-        description: >-
-          detail=ranges, detail date fields. overlap (operators <> and "falls in"): a date counts in every range its
-          span overlaps. within (operator ><): only in a range that contains its whole span.
-      - name: via
-        in: query
-        schema:
-          type: string
-        description: >-
-          detail=values only. JSON array of link predicates (lt, lf, rt, rf, related), outer first, from the
-          matching records to the records carrying field, each with its own conditions, e.g.
-          [{"lt:240":[{"t":"48"}]}]. Values are then counted by the matching (main) records that reach them:
-          a main record counts once per value however many of its linked records carry it.
-      - name: text
-        in: query
-        schema:
-          type: string
-        description: detail=values only. Case-insensitive substring filter on the value or its label.
+          ids returns the IDs-only DTO and ignores fields. The former count, rectypes, values, minmax and ranges are
+          op values of /{database}/records/aggregate.
       - name: sort
         in: query
         schema:
           type: string
-        description: >-
-          Record order. With detail=values it orders the values instead - count (default, most frequent first) or
-          value (by label, else value).
+        description: Record order.
       - name: resolveDetails
         in: query
         schema:
@@ -425,7 +362,7 @@ paths:
               resolveDetails: true
       responses:
         '200':
-          description: Record envelopes, IDs-only DTO, count or record-type summary
+          description: Record envelopes or the IDs-only DTO
           content:
             application/json:
               schema:
@@ -438,6 +375,294 @@ paths:
           $ref: '#/components/responses/MethodNotAllowed'
         '500':
           $ref: '#/components/responses/ServerError'
+  /{database}/records/aggregate:
+    get:
+      tags:
+      - Records
+      operationId: aggregateRecords
+      summary: Count, list values or find bounds over a record query
+      description: >-
+        The same query parameters as GET /records (q, ids, w, filter) and the same visibility; op selects the
+        operation. count returns the query and total. rectypes returns the query, total and counts grouped by
+        rec_RecTypeID. values returns the distinct values of field among the matching records with the number of
+        records for each; limit is capped at 1000 and total is the number of distinct values. minmax returns the
+        bounds of field among the matching records (for "auto" slider bounds) and the number of records that
+        have a value. ranges returns the field's values grouped into ranges (groupby for dates, ranges for
+        numbers) with the number of records in each; selecting a range with its from/to finds exactly that many
+        records. debug=1|2 and the request id (rid, X-Heurist-Request-ID) work as for search, so a running
+        aggregate can be stopped with POST /records/cancel.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: op
+        in: query
+        required: true
+        schema:
+          type: string
+          enum: [count, rectypes, values, minmax, ranges]
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Heurist search expression, as for GET /records.
+      - name: ids
+        in: query
+        schema:
+          type: string
+        example: 123,456
+        description: Comma-separated record identifiers.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 1000
+        description: op=values only. Number of values returned.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: op=values only.
+      - name: field
+        in: query
+        schema:
+          type: string
+        example: '1'
+        description: >-
+          op=values only (required there). A detail type ID (freetext, enum, relationtype, integer, float,
+          year, date, boolean, resource, relmarker) or one of rectype, owner, addedby, access, tag, title. Enum values are
+          term IDs (labels are resolved by the client); resource/relmarker values are linked record IDs with
+          label (title) and rty; owner/addedby values carry label and kind (user or group); tags are limited to
+          the current user and their groups. op=minmax (required there): a detail type ID of type integer,
+          float, year or date, or added / modified. op=ranges: the same fields.
+      - name: groupby
+        in: query
+        schema:
+          type: string
+          enum: [month, year, decade, century]
+          default: year
+        description: >-
+          op=ranges, date fields only. Decades and centuries start at a multiple of 10 / 100 (1990-1999,
+          1900-1999).
+      - name: ranges
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 10
+        description: >-
+          op=ranges, numeric fields only. At most this many equal ranges with round boundaries (1, 2, 2.5 or
+          5 x 10^n) between the smallest and largest value; integer fields get whole, non-overlapping ranges.
+      - name: match
+        in: query
+        schema:
+          type: string
+          enum: [overlap, within]
+          default: overlap
+        description: >-
+          op=ranges, detail date fields. overlap (operators <> and "falls in"): a date counts in every range its
+          span overlaps. within (operator ><): only in a range that contains its whole span.
+      - name: via
+        in: query
+        schema:
+          type: string
+        description: >-
+          op=values only. JSON array of link predicates (lt, lf, rt, rf, related), outer first, from the
+          matching records to the records carrying field, each with its own conditions, e.g.
+          [{"lt:240":[{"t":"48"}]}]. Values are then counted by the matching (main) records that reach them:
+          a main record counts once per value however many of its linked records carry it.
+      - name: text
+        in: query
+        schema:
+          type: string
+        description: op=values only. Case-insensitive substring filter on the value or its label.
+      - name: sort
+        in: query
+        schema:
+          type: string
+          enum: [count, value]
+          default: count
+        description: op=values only. count (most frequent first) or value (by label, else value).
+      responses:
+        '200':
+          description: The result of the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordAggregateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+      - Records
+      operationId: aggregateRecordsPost
+      summary: Aggregate over a record query using a structured request
+      description: The same operation as GET, without URL-length restrictions (JSON queries, long ID lists).
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordAggregateRequest'
+            example:
+              q: [{t: '10'}]
+              op: values
+              field: '1'
+              sort: count
+      responses:
+        '200':
+          description: The result of the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordAggregateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /{database}/records/cancel:
+    post:
+      tags:
+      - Records
+      operationId: cancelRecordQuery
+      summary: Stop a running query of the current user
+      description: >-
+        Runs KILL QUERY on the database connection registered for the request id. Clients send the id with
+        their search, aggregate, graph or map request (header X-Heurist-Request-ID or parameter rid). Only
+        requests of the same user can be stopped; at most 50 ids per call.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rid]
+              properties:
+                rid:
+                  oneOf:
+                  - type: string
+                  - type: array
+                    items: {type: string}
+            example:
+              rid: q-1727791234-3
+      responses:
+        '200':
+          description: The result per request id
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [cancel]
+                properties:
+                  cancel:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+  /{database}/records/{presentationType}/{recordId}:
+    get:
+      tags:
+      - Records
+      operationId: getRecordPresentation
+      summary: Specialised representation of a query source, map document or map layer record
+      description: >-
+        querysource returns the Query Source definition stored in the record (query, rules, fields and
+        options) for the client. document and layer return the same JSON as /{database}/map/document/{recordId}
+        and /{database}/map/layer/{recordId}. A record that is missing, not visible or of another type gives 404.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: presentationType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [querysource, document, layer]
+      - name: recordId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: The representation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+  /{database}/def/snapshot:
+    get:
+      tags:
+      - Database structure
+      operationId: getDefinitionSnapshot
+      summary: All database definitions in one cached document
+      description: >-
+        Record type groups, field groups, record types, fields, record structures, terms and term links, with
+        meta (db, format, dbId, version, generated, language, languages, dbconst). Used by the client query
+        builders and the query-language describer; it will replace /rty, /dty, /trm, /trl and /rst. The
+        document is cached on the server and rebuilt when the definitions change; meta.version changes with it.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      responses:
+        '200':
+          description: Definition snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [meta, rectypeGroups, fieldGroups, rectypes, fields, structure, terms, termlinks]
+                properties:
+                  meta:
+                    type: object
+                    additionalProperties: true
+                  rectypeGroups: {}
+                  fieldGroups: {}
+                  rectypes: {}
+                  fields: {}
+                  structure: {}
+                  terms: {}
+                  termlinks: {}
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
   /{database}/graph:
     get:
       tags:
@@ -675,6 +900,444 @@ paths:
         '401': {$ref: '#/components/responses/Unauthorized'}
         '405': {$ref: '#/components/responses/MethodNotAllowed'}
         '500': {$ref: '#/components/responses/ServerError'}
+  /{database}/files:
+    get:
+      tags: [Files]
+      operationId: searchFiles
+      summary: Search registered files
+      description: >-
+        The request and response of GET /records, for file records. Supported predicates: ids, title (and plain
+        text), url, added, modified, owner/addedby (user ids or current), f:<field> of the file fields - MIME type
+        2-29 (term id, extension "pdf", MIME type "image/jpeg" or group "image/*"), registered file type 2-1186
+        (local, external, iiif, iiif_image, tiled), original name 2-1185, caption, description, copyright, size
+        2-67 in bytes - and any/all/not. detail = records or ids; counts are /files/aggregate. Sort names are those of
+        /records (id, title, added, modified, url, f:<field>); default by id. Logged-in users see every file.
+        The stored name (2-62) and folder (2-63) are given to database administrators only.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/Offset'
+      - name: q
+        in: query
+        schema: {type: string}
+        description: 'Heurist query, for example [{"f:29":"image/*"},{"title":"map"}].'
+      - name: ids
+        in: query
+        schema: {type: string}
+        description: Comma-separated file IDs.
+      - name: fields
+        in: query
+        schema: {type: string}
+        description: Headers, virtual headers (rec_ThumbnailURL, rec_OwnerName), field IDs or _all.
+      - name: detail
+        in: query
+        schema: {type: string, enum: [records, ids], default: records}
+      - name: resolveDetails
+        in: query
+        schema: {type: boolean}
+      - name: defs
+        in: query
+        schema: {type: boolean}
+      - name: sort
+        in: query
+        schema: {type: string}
+      responses:
+        '200':
+          description: File records in the /records envelope
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordQueryResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '500': {$ref: '#/components/responses/ServerError'}
+    post:
+      tags: [Files]
+      operationId: searchFilesPost
+      summary: Search registered files with a structured request
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordSearchRequest'}
+      responses:
+        '200':
+          description: File records in the /records envelope
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordQueryResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /{database}/files/aggregate:
+    get:
+      tags: [Files]
+      operationId: aggregateFiles
+      summary: Count registered files
+      description: >-
+        The query parameters of GET /files. op=count gives {query, total}; op=rectypes gives {query, total,
+        rectypes} (one entry, RT_REGISTERED_FILE). values, minmax and ranges are not supported for files (422).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: op
+        in: query
+        required: true
+        schema: {type: string, enum: [count, rectypes]}
+      - name: q
+        in: query
+        schema: {type: string}
+      - name: ids
+        in: query
+        schema: {type: string}
+      responses:
+        '200':
+          description: Count or record-type summary
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/RecordCountResponse'
+                - $ref: '#/components/schemas/RecordRectypeCountsResponse'
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '422': {description: 'op=values, minmax or ranges: not supported for files.'}
+    post:
+      tags: [Files]
+      operationId: aggregateFilesPost
+      summary: Count registered files with a structured request
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordAggregateRequest'}
+      responses:
+        '200':
+          description: Count or record-type summary
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/RecordCountResponse'
+                - $ref: '#/components/schemas/RecordRectypeCountsResponse'
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '422': {description: 'op=values, minmax or ranges: not supported for files.'}
+  /{database}/files/{fileId}:
+    get:
+      tags: [Files]
+      operationId: getFile
+      summary: Retrieve one registered file
+      description: >-
+        One file record, as GET /records/{recordId}: fields default to _all; records is empty when the file does
+        not exist.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      - name: fields
+        in: query
+        schema: {type: string}
+      - name: resolveDetails
+        in: query
+        schema: {type: boolean}
+      - name: defs
+        in: query
+        schema: {type: boolean}
+      responses:
+        '200':
+          description: One file record
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
+        '500': {$ref: '#/components/responses/ServerError'}
+    post:
+      tags: [Files]
+      operationId: registerFile
+      summary: Register a file (fileId 0)
+      description: >-
+        The body is a file record (as GET /files/{fileId}) with "upload" - the token of a finished upload - or
+        rec_URL for an external resource (YouTube, Vimeo, SoundCloud, IIIF manifests and image services are
+        recognized; otherwise the type comes from a HEAD request). Writable fields: original name 2-1185,
+        caption, description, copyright, copyright owner 2-1188, configuration 2-1187; rec_NonOwnerVisibility
+        public or viewable (login required); registered file type 2-1186 "tiled" for a tiled image stack (zip,
+        mbtiles). An already registered URL gives its file (200, meta.existing) unless force=1. meta.issues lists
+        warnings such as files with the same content. Same-site requests with a JSON body only.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, enum: [0]}
+      - name: force
+        in: query
+        schema: {type: boolean}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '201':
+          description: The registered file
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '200':
+          description: The existing registration of the URL
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '400': {description: Invalid body or URL, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {description: Another site or not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: The upload is not complete, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '415': {description: File type not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    put:
+      tags: [Files]
+      operationId: replaceFile
+      summary: Change a file (writable fields missing from the body are cleared)
+      description: >-
+        Uploader or database owner. With "upload" the content is replaced (new name, size, MD5; the same key).
+        rec_Modified is a concurrency token (409 when the file was changed since, unless force=1). rec_URL can be
+        changed for external resources only.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      - name: force
+        in: query
+        schema: {type: boolean}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '200':
+          description: The changed file
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '403': {description: Not the uploader or the database owner, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: File not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Changed by someone else, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    patch:
+      tags: [Files]
+      operationId: changeFile
+      summary: Change the given fields of a file
+      description: As PUT, but only the fields in the body change.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '200':
+          description: The changed file
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '403': {description: Not the uploader or the database owner, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Changed by someone else, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    delete:
+      tags: [Files]
+      operationId: deleteFile
+      summary: Delete a file no record refers to
+      description: Uploader or database owner. The stored file, its thumbnail and cached copies are removed.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 1}
+      responses:
+        '200': {description: '{"deleted": fileId}'}
+        '403': {description: Not the uploader or the database owner, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: 'Used by records: error file_in_use, records = their ids', content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/files/{fileId}/validate:
+    post:
+      tags: [Files]
+      operationId: validateFile
+      summary: The checks of a save; nothing is written
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileId
+        in: path
+        required: true
+        schema: {type: integer, minimum: 0}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '200': {description: '{"valid": true, "issues": [...]}'}
+        '400': {description: Invalid, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/files/upload:
+    post:
+      tags: [Files]
+      operationId: startUpload
+      summary: Start a chunked upload
+      description: >-
+        Body {name, size, type}. Gives a token and the chunk size. Refused - 415 - for file types the database
+        does not know (defFileExtToMimetype) or that are never accepted (scripts, executables); 413 when the
+        disk quota does not allow the file. Unfinished or unregistered uploads are removed after a day.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, size]
+              properties:
+                name: {type: string}
+                size: {type: integer, minimum: 1}
+                type: {type: string}
+      responses:
+        '201': {description: '{"token", "chunkSize", "received": 0, "size", "name"}'}
+        '413': {description: Disk quota, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '415': {description: File type not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/files/upload/{token}:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - name: token
+      in: path
+      required: true
+      schema: {type: string, pattern: '^[a-f0-9]{32}$'}
+    get:
+      tags: [Files]
+      operationId: uploadStatus
+      summary: Bytes received (to resume an upload)
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: '{"token", "received", "size", "complete", ...}'}
+        '404': {description: Unknown upload}
+    put:
+      tags: [Files]
+      operationId: uploadChunk
+      summary: Send one chunk
+      description: >-
+        Raw body (application/octet-stream) with Content-Range "bytes start-end/total" and the header
+        X-Heurist-Client. A chunk must start at the received size, otherwise 409 with "received". After the last
+        chunk the answer has md5, mime, ext, thumbnail and duplicates (files with the same content).
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Content-Range
+        in: header
+        required: true
+        schema: {type: string}
+      - name: X-Heurist-Client
+        in: header
+        required: true
+        schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema: {type: string, format: binary}
+      responses:
+        '200': {description: Upload state}
+        '403': {description: Another site or no X-Heurist-Client}
+        '409': {description: 'Wrong start: continue at "received"'}
+    delete:
+      tags: [Files]
+      operationId: cancelUpload
+      summary: Cancel an upload
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: '{"cancelled": token}'}
+  /{database}/files/{fileKey}/content:
+    get:
+      tags: [Files]
+      operationId: fileContent
+      summary: The content of a file, by its key (rec_Hash)
+      description: >-
+        Local files are sent with range support (206, Content-Range, Accept-Ranges); external resources are
+        redirected to; tiled stacks and files the legacy code keeps elsewhere are redirected to the legacy
+        ?file= link. Guests may read viewable files; login-required files need a login (403).
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileKey
+        in: path
+        required: true
+        schema: {type: string, pattern: '^[a-z0-9]{10,64}$'}
+      - name: download
+        in: query
+        schema: {type: boolean}
+        description: As an attachment instead of inline.
+      - name: Range
+        in: header
+        schema: {type: string}
+      responses:
+        '200': {description: The file}
+        '206': {description: A part of the file}
+        '302': {description: External resource or legacy link}
+        '403': {description: Login required}
+        '404': {description: Unknown key}
+        '416': {description: Range not satisfiable}
+  /{database}/files/{fileKey}/thumbnail:
+    get:
+      tags: [Files]
+      operationId: fileThumbnail
+      summary: The thumbnail of a file (PNG); one not made yet is redirected to the legacy ?thumb= link
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - name: fileKey
+        in: path
+        required: true
+        schema: {type: string, pattern: '^[a-z0-9]{10,64}$'}
+      responses:
+        '200': {description: PNG}
+        '302': {description: Legacy thumbnail link (made on the first request)}
+        '403': {description: Login required}
+        '404': {description: Unknown key}
   /{database}/sys/{systemType}/{systemId}:
     get:
       tags: [System records]
@@ -3892,6 +4555,9 @@ components:
       oneOf:
       - $ref: '#/components/schemas/RecordSearchResponse'
       - $ref: '#/components/schemas/RecordIdsResponse'
+    RecordAggregateResponse:
+      description: Response selected by op (count, rectypes, values, minmax, ranges).
+      oneOf:
       - $ref: '#/components/schemas/RecordCountResponse'
       - $ref: '#/components/schemas/RecordRectypeCountsResponse'
       - $ref: '#/components/schemas/RecordValuesResponse'
@@ -3900,7 +4566,7 @@ components:
     RecordValueBucketsResponse:
       type: object
       description: >-
-        detail=ranges. Non-empty ranges from the smallest to the largest value. from/to are in the form record
+        op=ranges. Non-empty ranges from the smallest to the largest value. from/to are in the form record
         search accepts (detail dates: years for year-based ranges, ISO dates for months; header dates: ISO
         dates; numbers: numbers): a filter uses <>from/to, ><from/to or from/to for dates and from<>to for
         numbers. When a grouping would give more than 1000 ranges (months across millennia, prehistoric
@@ -3959,7 +4625,7 @@ components:
     RecordValueRangeResponse:
       type: object
       description: >-
-        detail=minmax. Numeric bounds are numbers. Date bounds are ISO dates (YYYY-MM-DD; years before 1 as
+        op=minmax. Numeric bounds are numbers. Date bounds are ISO dates (YYYY-MM-DD; years before 1 as
         -YYYY-MM-DD) from the estimated span of each date, so fuzzy and ranged dates widen the bounds; a lower
         bound without month or day starts the period and an upper bound ends it. Bounds are null without values.
       required: [query, field, type, min, max, count]
@@ -4149,14 +4815,8 @@ components:
               type: string
         detail:
           type: string
-          enum: [records, ids, count, rectypes, values]
+          enum: [records, ids]
           default: records
-        field:
-          type: string
-          description: detail=values only; see the GET field parameter.
-        text:
-          type: string
-          description: detail=values only; case-insensitive substring filter.
         resolveDetails:
           type: boolean
           default: false
@@ -4173,6 +4833,70 @@ components:
           type: integer
           minimum: 0
           default: 0
+      additionalProperties: false
+    RecordAggregateRequest:
+      type: object
+      required: [op]
+      description: Body of POST /records/aggregate and /files/aggregate; see GET /records/aggregate for the parameters.
+      properties:
+        op:
+          type: string
+          enum: [count, rectypes, values, minmax, ranges]
+        query:
+          oneOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+        q:
+          description: Alias for query.
+        ids:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: integer
+              minimum: 1
+        filter:
+          description: Additional query ANDed with the query.
+        field:
+          type: string
+        text:
+          type: string
+        via:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        sort:
+          type: string
+          enum: [count, value]
+        groupby:
+          type: string
+          enum: [month, year, decade, century]
+        ranges:
+          type: integer
+          minimum: 1
+          maximum: 20
+        match:
+          type: string
+          enum: [overlap, within]
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        offset:
+          type: integer
+          minimum: 0
+        debug:
+          type: integer
+          enum: [1, 2]
+        rid:
+          type: string
+          description: Request id, for POST /records/cancel.
       additionalProperties: false
     GraphRequest:
       type: object

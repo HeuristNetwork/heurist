@@ -46,6 +46,14 @@ final class RecordSchema
         'worksets' => 'usrWorkingSubsets'
     );
 
+    /**
+     * Tables of the registered files (plan 20): the same structure as Records/recDetails/usrRecPermissions.
+     * Used by the /files domain once the database has them; new RecordSchema(RecordSchema::FILE_TABLES).
+     * The permissions table is its own: ids of files and of records overlap.
+     */
+    public const FILE_TABLES = array('records' => 'fileRecords', 'details' => 'fileRecDetails',
+        'permissions' => 'filePermissions');
+
     /** User tables that refer to a record and are cleaned when it is deleted (key => record column). */
     private const REFERENCES = array(
         'reminders' => 'rem_RecID',
@@ -58,6 +66,9 @@ final class RecordSchema
     /** @var array<string,string> */
     private array $tables;
 
+    /** @var array<string,string> Keys of REFERENCES cleaned for this schema (none for another record pair, see references()). */
+    private array $referenceKeys;
+
     /**
      * @param array<string,string> $tables Table names by key (DEFAULT_TABLES keys); others stay default.
      * @throws InvalidArgumentException For an unknown key or an invalid name.
@@ -68,6 +79,10 @@ final class RecordSchema
         if(!empty($unknown)){
             throw new InvalidArgumentException('Unknown record table '.implode(', ', $unknown));
         }
+        // The user tables (reminders, tags, bookmarks...) refer to rec_ID of Records; for another record pair
+        // (fileRecords) only the reference tables given with it are cleaned - ids of the pairs overlap.
+        $ownPair = !isset($tables['records']) || $tables['records'] === self::DEFAULT_TABLES['records'];
+        $this->referenceKeys = $ownPair ? array_keys(self::REFERENCES) : array_keys(array_intersect_key(self::REFERENCES, $tables));
         $tables = array_merge(self::DEFAULT_TABLES, $tables);
         foreach($tables as $name){
             if(!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', (string)$name)){
@@ -120,8 +135,8 @@ final class RecordSchema
     public function references(): array
     {
         $result = array();
-        foreach(self::REFERENCES as $key => $column){
-            $result[$this->tables[$key]] = $column;
+        foreach($this->referenceKeys as $key){
+            $result[$this->tables[$key]] = self::REFERENCES[$key];
         }
         return $result;
     }

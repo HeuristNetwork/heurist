@@ -2,8 +2,8 @@
 /**
 * RecordDuplicateService.php - Copy of one record (POST /records/{id}/duplicate)
 *
-* Port of recordDuplicate() of hserv/records/edit/recordModify.php for the
-* writable system record types: the header, detail values and edit/view groups
+* Port of recordDuplicate() of hserv/records/edit/recordModify.php for every
+* record type (plan 21): the header, detail values and edit/view groups
 * are copied; the copy belongs to the current user (website pages: group 1,
 * public, as on insert) and its name values without language prefix get
 * "Copy of ". Relationship records and linked records are not copied.
@@ -37,7 +37,6 @@ final class RecordDuplicateService
     private RecordStore $store;
     private RecordPermissionService $permissions;
     private DefinitionLookup $definitions;
-    private WritableRecordTypes $writable;
     private RuntimeContext $runtime;
     private RecordTitle $title;
     private LanguageCodes $languages;
@@ -53,7 +52,6 @@ final class RecordDuplicateService
         RecordStore $store,
         RecordPermissionService $permissions,
         DefinitionLookup $definitions,
-        WritableRecordTypes $writable,
         RuntimeContext $runtime,
         RecordTitle $title,
         LanguageCodes $languages,
@@ -63,7 +61,6 @@ final class RecordDuplicateService
         $this->store = $store;
         $this->permissions = $permissions;
         $this->definitions = $definitions;
-        $this->writable = $writable;
         $this->runtime = $runtime;
         $this->title = $title;
         $this->languages = $languages;
@@ -85,10 +82,6 @@ final class RecordDuplicateService
             throw RecordEditException::notFound('Record '.$recordId.' does not exist');
         }
         $rectype = intval($header['rec_RecTypeID']);
-        if(!$this->writable->contains($rectype)){
-            throw RecordEditException::denied('Records of type "'.$this->definitions->rectypeName($rectype)
-                .'" cannot be duplicated with this API yet');
-        }
         $owner = $this->runtime->userId;
         $visibility = (string)$header['rec_NonOwnerVisibility'];
         if($rectype === ($this->codes['cmsPage'] ?? -1)){

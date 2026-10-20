@@ -369,17 +369,18 @@ final class DefinitionLookup
      * per record type on first use. Separators and relmarkers are included.
      *
      * @return array<int,array{id:int,name:string,type:string,requirement:string,max:int,
-     *         default:string,targetTypes:array<int,int>,vocabulary:array<int,int>,termFilter:array<int,int>,
+     *         default:string,targetTypes:array<int,int>,vocabulary:array<int,int>,
      *         order:int,help:string,calcFunctionId:int,nonOwnerVisibility:string}> dty => row
      *         (requirement: required|recommended|optional|forbidden; max 0 = unlimited;
-     *         targetTypes: pointer constraint, empty = any; vocabulary: term tree root ids)
+     *         targetTypes: pointer constraint, empty = any; vocabulary: term tree root ids; both from
+     *         the base field - rst_PtrFilteredIDs / rst_FilteredJsonTermIDTree are ignored, plan 21)
      */
     public function structureRows(int $rectypeId): array
     {
         if(!isset($this->editStructure[$rectypeId])){
             $rows = $this->database->fetchAll(
                 'SELECT rst_DetailTypeID,rst_DisplayName,rst_RequirementType,rst_MaxValues,rst_DefaultValue,'
-                .'rst_PtrFilteredIDs,rst_FilteredJsonTermIDTree,rst_DisplayOrder,rst_DisplayHelpText,'
+                .'rst_DisplayOrder,rst_DisplayHelpText,'
                 .'rst_CalcFunctionID,rst_NonOwnerVisibility,dty_Name,dty_Type,dty_PtrTargetRectypeIDs,dty_JsonTermIDTree '
                 .'FROM defRecStructure JOIN defDetailTypes ON dty_ID=rst_DetailTypeID '
                 .'WHERE rst_RecTypeID=? ORDER BY rst_DisplayOrder,rst_ID',
@@ -388,7 +389,6 @@ final class DefinitionLookup
             $result = array();
             foreach($rows as $row){
                 $fieldId = intval($row['rst_DetailTypeID']);
-                $targets = self::idList($row['rst_PtrFilteredIDs']);
                 $result[$fieldId] = array(
                     'id' => $fieldId,
                     'name' => trim((string)$row['rst_DisplayName']) !== '' ? (string)$row['rst_DisplayName'] : (string)$row['dty_Name'],
@@ -396,9 +396,8 @@ final class DefinitionLookup
                     'requirement' => strtolower(trim((string)$row['rst_RequirementType'])),
                     'max' => max(0, intval($row['rst_MaxValues'])),
                     'default' => (string)$row['rst_DefaultValue'],
-                    'targetTypes' => !empty($targets) ? $targets : self::idList($row['dty_PtrTargetRectypeIDs']),
+                    'targetTypes' => self::idList($row['dty_PtrTargetRectypeIDs']),
                     'vocabulary' => self::idList($row['dty_JsonTermIDTree']),
-                    'termFilter' => self::idList($row['rst_FilteredJsonTermIDTree']),
                     'order' => intval($row['rst_DisplayOrder']),
                     'help' => (string)$row['rst_DisplayHelpText'],
                     'calcFunctionId' => intval($row['rst_CalcFunctionID']),

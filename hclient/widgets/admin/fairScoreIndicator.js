@@ -6,13 +6,6 @@
 *        System::getFairScoreSummary(), which in turn reads FAIRscore.txt as calculated nightly
 *        by admin/describe/assessFAIR.php). Purely a display layer - no calculation happens here.
 *
-* INTEGRATION NOTE for Ian/Nathan: this is delivered as a self-contained widget with an explicit
-* mount point (heurist.fairScoreIndicator) rather than being wired directly into the shared topbar
-* template, since that markup is assembled dynamically and editing it blind risked breaking layout.
-* To surface it, call:
-*     $('#some-topbar-container').fairScoreIndicator();
-* from wherever the top bar is finalised (e.g. alongside the existing sysadmin/help icons).
-*
 * @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network

@@ -27,10 +27,14 @@ class QueryExecutor
 {
     private DatabaseInterface $database;
 
+    /** Record reads of another table pair (fileRecords, plan 20); null = the shared default tables. */
+    private ?RecordRepository $records;
+
     /** Initialise the executor with the modern database abstraction. */
-    public function __construct(DatabaseInterface $database)
+    public function __construct(DatabaseInterface $database, ?RecordRepository $records = null)
     {
         $this->database = $database;
+        $this->records = $records;
     }
 
     /** Definitions of the database of this executor (field types, terms). */
@@ -42,7 +46,7 @@ class QueryExecutor
     /** Record reads of the database of this executor (headers, links, counts). */
     public function records(): RecordRepository
     {
-        return RecordRepository::shared($this->database);
+        return $this->records ?? RecordRepository::shared($this->database);
     }
 
     /** Execute an IDs query and return integer record IDs in database order. */

@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace Heurist\Runtime;
 
 use Heurist\Controller\DefinitionController;
+use Heurist\Controller\FileController;
 use Heurist\Controller\GraphController;
 use Heurist\Controller\JobController;
 use Heurist\Controller\MapDataController;
@@ -55,13 +56,24 @@ use Heurist\Records\Edit\RecordPermissionService;
 use Heurist\Records\Edit\RecordSaveService;
 use Heurist\Records\Store\RecordAccess;
 use Heurist\Records\Store\RecordRepository;
+use Heurist\Records\Store\RecordSchema;
 use Heurist\Records\Store\RecordStore;
+use Heurist\Files\FileContent;
+use Heurist\Files\FilePaths;
+use Heurist\Files\FileRecordMapping;
+use Heurist\Files\FileStorage;
+use Heurist\Files\FileUrlInspector;
+use Heurist\Files\FileWriteService;
+use Heurist\Files\LegacyFileRows;
+use Heurist\Files\LegacyFileStore;
+use Heurist\Files\RecordFileRows;
+use Heurist\Files\RecordFileStore;
+use Heurist\Files\Upload\ChunkedUpload;
 use Heurist\Records\Edit\RecordTitle;
 use Heurist\Records\Edit\TitleMask;
 use Heurist\Records\Edit\CalculatedFields;
 use Heurist\Records\Files\FileRepository;
 use Heurist\Records\Edit\RecordValidator;
-use Heurist\Records\Edit\WritableRecordTypes;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\RecordSearchService;
@@ -95,6 +107,8 @@ final class ServiceFactory
     private array $reportEnvironment;
     /** @var (\Closure():array)|null Database setting "Languages" (translations), read when needed. */
     private ?\Closure $translationLanguages = null;
+    /** @var array{root?:string,quota?:\Closure} File store root and disk quota (plan 20, /files writes). */
+    private array $fileEnvironment = array();
 
     /** Build the PDO and runtime boundary from the current legacy initialization. */
     public static function fromLegacySystem($system): self
@@ -175,6 +189,14 @@ final class ServiceFactory
             $languages = $system->settings->getDatabaseSetting('Languages');
             return is_array($languages) ? $languages : array();
         };
+        // file store of the database and its disk quota (legacy fileUpload.php: 10 GB when not set)
+        $factory->fileEnvironment = array(
+            'root' => (string)$system->getSysDir(),
+            'quota' => static function() use ($system): int {
+                $quota = intval($system->settings->getDiskQuota());
+                return $quota > 0 ? $quota : 10737418240;
+            }
+        );
         return $factory;
     }
 
@@ -254,6 +276,51 @@ final class ServiceFactory
     }
 
     /**
+     * Create the /files controller (plan 20). Files are read from fileRecords/fileRecDetails
+     * when the database has these tables (after the switch), else from recUploadedFiles.
+     */
+    public function fileController(?FilePaths $paths = null, ?callable $fetch = null): FileController
+    {
+        $fileRecords = new RecordRepository($this->database, new RecordSchema(RecordSchema::FILE_TABLES));
+        $recordStore = $fileRecords->tablesExist();
+        $store = $recordStore
+            ? new RecordFileStore($this->database, $this->runtime)
+            : new LegacyFileStore($this->database, $this->runtime);
+        $root = $paths !== null ? $paths->root : (string)($this->fileEnvironment['root'] ?? '');
+        if($root === '' || !($this->database instanceof WritableDatabaseInterface)){
+            return new FileController($store, $this->runtime); // read only
+        }
+        $paths = $paths ?? new FilePaths($root);
+        $definitions = DefinitionLookup::shared($this->database);
+        $files = FileRepository::shared($this->database);
+        $mapping = new FileRecordMapping($definitions, $files);
+        $rows = $recordStore ? new RecordFileRows($this->database, $mapping) : new LegacyFileRows($this->database);
+        $storage = new FileStorage($paths);
+        $quota = $this->fileEnvironment['quota'] ?? null;
+        $uploads = new ChunkedUpload($paths->uploadSessions(), $this->runtime->userId, $files->mimeTypes(),
+            $quota === null ? null : static function() use ($quota, $storage): array {
+                return array($quota(), $storage->usage());
+            }, self::iniBytes((string)ini_get('post_max_size')));
+        $writer = new FileWriteService($rows, $mapping, $storage, $uploads, new FileUrlInspector($files->mimeTypes(), $fetch),
+            RecordRepository::shared($this->database), $definitions, $this->runtime, $files->mimeTypes());
+        return new FileController($store, $this->runtime, $writer, new FileContent($rows, $storage, $this->runtime));
+    }
+
+    /** Bytes of a php.ini size ("40M", "2G"); 0 when not set. */
+    private static function iniBytes(string $value): int
+    {
+        $value = trim($value);
+        if($value === ''){ return 0; }
+        $number = intval($value);
+        switch(strtolower(substr($value, -1))){
+            case 'g': return $number * 1073741824;
+            case 'm': return $number * 1048576;
+            case 'k': return $number * 1024;
+            default: return $number;
+        }
+    }
+
+    /**
      * Create the record write controller (plan 14): POST/PUT/PATCH/DELETE /records/{id}.
      */
     public function recordEditController(): RecordEditController
@@ -265,7 +332,6 @@ final class ServiceFactory
         $languages = new LanguageCodes(self::languageCodesFile());
         $store = new RecordStore($this->database);
         $permissions = new RecordPermissionService($this->database, $this->runtime);
-        $writable = new WritableRecordTypes($this->codes);
         $title = new RecordTitle($languages, $this->codes->id('DT_NAME'));
         $titleMask = new TitleMask($definitions, $store->records(), FileRepository::shared($this->database), $languages);
         $calculated = new CalculatedFields($definitions, $store, function(string $formula, int $recordId): array {
@@ -280,12 +346,12 @@ final class ServiceFactory
             'cmsExtFiles' => $this->codes->id('DT_CMS_EXTFILES')
         ));
         return new RecordEditController(
-            new RecordSaveService($store, $validator, $permissions, $definitions, $writable, $this->runtime, $title, array(
+            new RecordSaveService($store, $validator, $permissions, $definitions, $this->runtime, $title, array(
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
                 'workflowStage' => $this->codes->id('DT_WORKFLOW_STAGE')
             ), $titleMask, $calculated),
-            new RecordDeleteService($store, $permissions, $definitions, $writable, $this->runtime),
-            new RecordDuplicateService($store, $permissions, $definitions, $writable, $this->runtime, $title, $languages, array(
+            new RecordDeleteService($store, $permissions, $definitions, $this->runtime),
+            new RecordDuplicateService($store, $permissions, $definitions, $this->runtime, $title, $languages, array(
                 'name' => $this->codes->id('DT_NAME'),
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE')
             ), $titleMask),

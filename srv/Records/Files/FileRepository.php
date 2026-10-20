@@ -99,6 +99,80 @@ final class FileRepository
         return $found;
     }
 
+    /** Columns of rows(): every column of a file except the thumbnail blob. */
+    public const COLUMNS = array('ulf_ID', 'ulf_OrigFileName', 'ulf_UploaderUGrpID', 'ulf_Added', 'ulf_Modified',
+        'ulf_ObfuscatedFileID', 'ulf_ExternalFileReference', 'ulf_PreferredSource', 'ulf_Caption', 'ulf_Description',
+        'ulf_Copyright', 'ulf_Copyowner', 'ulf_MimeExt', 'ulf_AddedByImport', 'ulf_FileSizeKB', 'ulf_FilePath',
+        'ulf_FileName', 'ulf_Parameters', 'ulf_WhoCanView', 'ulf_MD5Checksum', 'ulf_OriginatingDBID',
+        'ulf_IDInOriginatingDB');
+
+    /** @var array<string,string>|null Extension => MIME type, loaded once. */
+    private ?array $mimeTypes = null;
+
+    /**
+     * Whole rows of files (COLUMNS + fxm_MimeType) for the /files domain (plan 20), in the order of the ids.
+     *
+     * @param array<int,int> $ids ulf_ID
+     * @return array<int,array<string,mixed>> id => row
+     */
+    public function rows(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static function($id){ return $id > 0; })));
+        $found = array();
+        foreach(array_chunk($ids, self::BATCH_SIZE) as $chunk){
+            foreach($this->database->fetchAll('SELECT f.'.implode(',f.', self::COLUMNS).',m.fxm_MimeType '
+                .'FROM recUploadedFiles f LEFT JOIN defFileExtToMimetype m ON m.fxm_Extension=f.ulf_MimeExt '
+                .'WHERE f.ulf_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).')', $chunk) as $row){
+                $found[intval($row['ulf_ID'])] = $row;
+            }
+        }
+        $result = array();
+        foreach($ids as $id){
+            if(isset($found[$id])){ $result[$id] = $found[$id]; }
+        }
+        return $result;
+    }
+
+    /**
+     * Files registered for an external URL (exact address, as legacy findRegistrationByUrl).
+     *
+     * @return array<int,int> ulf_ID
+     */
+    public function idsByUrl(string $url): array
+    {
+        return array_map('intval', $this->database->fetchColumn(
+            'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference=? ORDER BY ulf_ID', array($url)));
+    }
+
+    /**
+     * Files with the same content (MD5 checksum).
+     *
+     * @return array<int,int> ulf_ID
+     */
+    public function idsByChecksum(string $md5): array
+    {
+        if(!preg_match('/^[a-f0-9]{32}$/i', $md5)){ return array(); }
+        return array_map('intval', $this->database->fetchColumn(
+            'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_MD5Checksum=? ORDER BY ulf_ID', array(strtolower($md5))));
+    }
+
+    /**
+     * Known file extensions with their MIME type (defFileExtToMimetype).
+     *
+     * @return array<string,string> lower-case extension => MIME type
+     */
+    public function mimeTypes(): array
+    {
+        if($this->mimeTypes === null){
+            $this->mimeTypes = array();
+            foreach($this->database->fetchAll('SELECT fxm_Extension,fxm_MimeType FROM defFileExtToMimetype ORDER BY fxm_Extension')
+                as $row){
+                $this->mimeTypes[strtolower(trim((string)$row['fxm_Extension']))] = strtolower(trim((string)$row['fxm_MimeType']));
+            }
+        }
+        return $this->mimeTypes;
+    }
+
     /** Rows of files() by one key column, in the order of the keys. */
     private function load(string $column, array $keys): array
     {

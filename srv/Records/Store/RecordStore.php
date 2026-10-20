@@ -102,6 +102,24 @@ final class RecordStore
         );
     }
 
+    /** Headers setHeaders() may write (registered files and imports keep their own values). */
+    private const SETTABLE_HEADERS = array('rec_Hash', 'rec_URL', 'rec_NonOwnerVisibility', 'rec_OwnerUGrpID',
+        'rec_AddedByUGrpID', 'rec_Added', 'rec_Modified', 'rec_AddedByImport', 'rec_OriginatingDBID',
+        'rec_IDInOriginatingDB', 'rec_Title');
+
+    /**
+     * Set header columns as given (no rec_Modified change unless given): file records (plan 20).
+     *
+     * @param array<string,mixed> $values SETTABLE_HEADERS => value
+     */
+    public function setHeaders(int $recordId, array $values): void
+    {
+        $values = array_intersect_key($values, array_flip(self::SETTABLE_HEADERS));
+        if(empty($values)){ return; }
+        $this->database->execute('UPDATE '.$this->records.' SET '.implode('=?,', array_keys($values)).'=? WHERE rec_ID=?',
+            array_merge(array_values($values), array($recordId)));
+    }
+
     public function setTitle(int $recordId, string $title): void
     {
         $this->database->execute('UPDATE '.$this->records.' SET rec_Title=? WHERE rec_ID=?', array($title, $recordId));

@@ -72,6 +72,14 @@ final class RecordRepository
         return $this->schema;
     }
 
+    /** Whether the record and detail tables of the schema exist in the database (fileRecords, plan 20). */
+    public function tablesExist(): bool
+    {
+        $tables = array($this->schema->records(), $this->schema->details());
+        return intval($this->database->fetchValue('SELECT COUNT(*) FROM information_schema.TABLES '
+            .'WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN (?,?)', $tables, 0)) === count($tables);
+    }
+
     // ------------------------------------------------------------ headers
 
     /**
@@ -112,6 +120,50 @@ final class RecordRepository
     public function header(int $id, array $columns = self::EDIT_HEADERS): ?array
     {
         return $this->headers(array($id), $columns)[$id] ?? null;
+    }
+
+    /**
+     * Records with a header value (rec_Hash or rec_URL; registered files, plan 20).
+     *
+     * @return array<int,int> rec_ID in id order
+     */
+    public function idsByHeader(string $column, string $value): array
+    {
+        if(!in_array($column, array('rec_Hash', 'rec_URL'), true)){
+            throw new InvalidArgumentException('Records cannot be found by '.$column);
+        }
+        return array_map('intval', $this->database->fetchColumn('SELECT rec_ID FROM '.$this->schema->records()
+            .' WHERE '.$column.'=? ORDER BY rec_ID', array($value)));
+    }
+
+    /**
+     * Records with a value of a field (exact).
+     *
+     * @return array<int,int> rec_ID in id order
+     */
+    public function idsByValue(int $fieldId, string $value): array
+    {
+        return array_map('intval', $this->database->fetchColumn('SELECT DISTINCT dtl_RecID FROM '.$this->schema->details()
+            .' WHERE dtl_DetailTypeID=? AND dtl_Value=? ORDER BY dtl_RecID', array($fieldId, $value)));
+    }
+
+    /**
+     * Records whose file fields refer to registered files (dtl_UploadedFileID).
+     *
+     * @param array<int,int> $fileIds
+     * @return array<int,array<int,int>> file id => record ids
+     */
+    public function fileReferences(array $fileIds): array
+    {
+        $fileIds = self::ids($fileIds);
+        $result = array();
+        foreach(array_chunk($fileIds, self::BATCH_SIZE) as $chunk){
+            foreach($this->database->fetchRows('SELECT DISTINCT dtl_UploadedFileID,dtl_RecID FROM '.$this->schema->details()
+                .' WHERE dtl_UploadedFileID IN ('.self::placeholders($chunk).') ORDER BY dtl_RecID', $chunk) as $row){
+                $result[intval($row[0])][] = intval($row[1]);
+            }
+        }
+        return $result;
     }
 
     /**
