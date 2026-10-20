@@ -48,6 +48,55 @@ $mysqli = null;
 $currUserID = 0;
 $sortType = 0;
 
+
+/**
+ * Use a FULLTEXT index for ordinary positive contains searches when possible.
+ * Explicit wildcards, exact comparisons, negative searches and very short queries
+ * retain the caller's legacy SQL. The extra LIKE for multiword/short-word phrases
+ * keeps the existing substring/phrase constraint within the indexed candidates.
+ * Returns null when an indexed candidate search cannot be constructed.
+ */
+function heurist_legacy_contains_sql($db, $column, $text, $table){
+    static $indexCache = array();
+    
+    $text = trim($text);
+
+    if(strlen($text) >= 2 && $text[0] === '%' && substr($text, -1) === '%'){
+        $text = substr($text, 1, -1);
+    }
+
+    if($text === '' || strpbrk($text, '%_') !== false){
+        return null;
+    }    
+
+    if(!in_array($table, array('Records','recDetails'), true)) { return null; }
+    $name = $table==='Records' ? 'rec_Title' : 'dtl_Value';
+    if(!preg_match('/(?:^|\.)'.preg_quote($name, '/').'$/', $column)){ return null; }
+    $key = $table.'.'.$name;
+    if(!array_key_exists($key, $indexCache)){
+        $q = "SELECT 1 FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() "
+            ."AND TABLE_NAME='".$table."' AND COLUMN_NAME='".$name."' AND INDEX_TYPE='FULLTEXT' LIMIT 1";
+        $check = $db->query($q);
+        $indexCache[$key] = $check && $check->num_rows>0;
+        if($check instanceof mysqli_result){ $check->free(); }
+    }
+    if(!$indexCache[$key]){ return null; }
+    preg_match_all('/(\w+)/u', trim($text), $matches);
+    $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','for','from','how','i','in','is','it','la','of','on','or','that','the','this','to','und','was','what','when','where','who','will','with','www');
+    $words = array();
+    foreach($matches[0] as $word){
+        $len = strlen($word);
+        if($len>2 && $len<85 && !in_array(strtolower($word), $stopwords, true)){
+            $words[] = $word;
+        }
+    }
+    if(!$words){ return null; }
+    $boolean = implode(' ', array_map(static function($word){ return '+'.$word.'*'; }, $words));
+    $condition = "MATCH($column) AGAINST ('".$db->real_escape_string($boolean)."' IN BOOLEAN MODE)";
+    if(count($words)===1 && $words[0]===trim($text)){ return $condition; }
+    return '(' . $condition . " AND $column LIKE '%".$db->real_escape_string($text)."%')";
+}
+
 /**
  * Constructs a full SQL query string by combining a SELECT clause with FROM, WHERE, ORDER BY, LIMIT, and OFFSET clauses.
  *
@@ -1584,6 +1633,10 @@ class TitlePredicate extends Predicate {
         }elseif($this->parent->greaterthan){
                 return $not . $topbiblioPrefix.'rec_Title > "'.$evalue.'"';
         }elseif(strpos($this->value,"%")===false){ // If no wildcards in value, add them for LIKE
+                if(!$this->parent->negate){
+                    $ft = heurist_legacy_contains_sql($mysqli, $topbiblioPrefix.'rec_Title', $this->value, 'Records');
+                    if($ft!==null){ return $ft; }
+                }
                 return $topbiblioPrefix."rec_Title $not like '%$evalue%'";
         }else{ // Value already contains wildcards
                 return $topbiblioPrefix."rec_Title $not like '$evalue'";
@@ -1799,16 +1852,25 @@ class AnyPredicate extends Predicate {
                 return '(1=0)'; // Nothing to search
         }
 
-        // Standard LIKE search if not full-text
+        // Ordinary text uses an indexed candidate search when possible.
+        $detailText = 'rd.dtl_Value like "%'.$val.'%"';
+        $linkedTitle = 'link.rec_Title like "%'.$val.'%"';
+        $recordTitle = 'TOPBIBLIO.rec_Title like "%'.$val.'%"';
+        if(!$this->parent->negate && strpos($this->value, '%')===false){
+            $detailText = heurist_legacy_contains_sql($mysqli, 'rd.dtl_Value', $this->value, 'recDetails') ?? $detailText;
+            $linkedTitle = heurist_legacy_contains_sql($mysqli, 'link.rec_Title', $this->value, 'Records') ?? $linkedTitle;
+            $recordTitle = heurist_legacy_contains_sql($mysqli, 'TOPBIBLIO.rec_Title', $this->value, 'Records') ?? $recordTitle;
+        }
+        // Standard LIKE search if no indexed condition is available
         $not = ($this->parent->negate)? SQL_NOT : '';
         return $not . ' (exists (select rd.dtl_ID from recDetails rd '
         . 'left join defDetailTypes on rd.dtl_DetailTypeID=dty_ID '
         . 'left join Records link on rd.dtl_Value=link.rec_ID ' // Join for linked resource titles
         . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
         . '  and if(dty_Type != "resource", ' // If not a resource field
-        . 'if(dty_Type="enum", dtl_Value in (select trm_ID from defTerms where trm_Label like "%'.$val.'%" or trm_Code="'.$val.'"), rd.dtl_Value like "%'.$val.'%"), ' // Search enum by label/code or other detail by value
-        .'link.rec_Title like "%'.$val.'%"))' // Search linked resource title
-        .' or TOPBIBLIO.rec_Title like "%'.$val.'%") '; // Also search main record title
+        . 'if(dty_Type="enum", dtl_Value in (select trm_ID from defTerms where trm_Label like "%'.$val.'%" or trm_Code="'.$val.'"), '.$detailText.'), ' // Search enum by label/code or other detail by value
+        .''.$linkedTitle.'))' // Search linked resource title
+        .' or '.$recordTitle.') '; // Also search main record title
     }
 }
 
@@ -2151,6 +2213,12 @@ class FieldPredicate extends Predicate {
                 $fieldname = 'rd.dtl_Value';
             }
 
+            if(!$this->parent->negate && !$this->parent->exact
+                && !$this->parent->lessthan && !$this->parent->greaterthan
+                && in_array($this->field_type_value, array('freetext','blocktext'), true)){
+                $ft = heurist_legacy_contains_sql($mysqli, 'rd.dtl_Value', $this->value, 'recDetails');
+                if($ft!==null){ $fieldname=''; $match_pred=$ft; }
+            }
             return '('.$not . $sql_detail_exists
                 . $sql_recdetail_link . $sql_and_detailtype . intval($this->field_type)
                 . SQL_AND . $fieldname . ' ' . $match_pred. '))';

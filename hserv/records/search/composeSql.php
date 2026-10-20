@@ -2183,6 +2183,10 @@ class HPredicate {
                         $this->error_message = 'Full text search is allowed for rec_Title only';
                         return null;
                     }
+                }elseif($sHeaderField==='rec_Title' && !$this->negate && !$this->exact
+                    && !$this->lessthan && !$this->greaterthan
+                    && ($ft = heurist_legacy_contains_sql($mysqli, 'r'.$this->qlevel.'.rec_Title', $this->value, 'Records'))!==null){
+                    $res = $ft;
                 }elseif($ignoreApostrophe){
                     $res = "( replace( r".$this->qlevel.".$sHeaderField, \"'\", \"\")".$val.")";
                 }else{
@@ -2224,6 +2228,15 @@ class HPredicate {
                 if($ignoreApostrophe){
                     $field_name = "replace($field_name,".'"\'", "") ';
                 }
+            }
+
+            // Use the indexed text predicate without materialising a potentially huge ID list.
+            if(!$this->fulltext && !$this->negate && !$this->exact
+                && !$this->lessthan && !$this->greaterthan
+                && in_array($this->field_type, array('freetext','blocktext'), true)
+                && ($ft = heurist_legacy_contains_sql($mysqli, $p.'dtl_Value', $this->value, 'recDetails'))!==null){
+                $field_name = '';
+                $val = $ft;
             }
 
             if($this->relation_prefix){ //special case for search related records by values of relationship field
@@ -2367,6 +2380,14 @@ class HPredicate {
             $detal_compare = "MATCH($detal_compare) $val";
             $title_compare = "MATCH($title_compare) $val";
         }else{
+            $ftDetail = (!$this->negate && !$this->exact)
+                ? heurist_legacy_contains_sql($mysqli, 'rd.dtl_Value', $val_wo_prefixes, 'recDetails') : null;
+            $ftTitle = (!$this->negate && !$this->exact)
+                ? heurist_legacy_contains_sql($mysqli, 'link.rec_Title', $val_wo_prefixes, 'Records') : null;
+            if($ftDetail!==null && $ftTitle!==null){
+                $detal_compare = $ftDetail;
+                $title_compare = $ftTitle;
+            }else{
             //$ignoreApostrophe = (stripos($val, 'LIKE') !== false);
             $ignoreApostrophe = (strpos(trim($val), 'LIKE')===0);
             if($ignoreApostrophe){
@@ -2375,9 +2396,9 @@ class HPredicate {
             } else {
                 $detal_compare = "$detal_compare $val";
                 $title_compare = "$title_compare $val";
-            }       
+            }
+            }
         }
-       
 
 $rQuery = <<<QUERY
 SELECT rl.rl_SourceID as dtl_RecID
