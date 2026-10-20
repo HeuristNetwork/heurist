@@ -412,6 +412,20 @@ class ReportRecord
         return $res;
     }
 
+    /** Return one target ID from outgoing relationships, suitable for a calculated pointer. */
+    public function latestRelatedRecord($rec, $targetType, $relationTypes, $dateField = 10)
+    {
+        $id = is_array($rec) ? ($rec['recID'] ?? 0) : $rec;
+        return \hserv\records\edit\RelationshipCalculation::latestTarget(
+            $this->system, $id, $targetType, $relationTypes, $dateField);
+    }
+
+    /** Bound memory during database-wide calculated-field rebuilds. */
+    public function clearRecordCache()
+    {
+        $this->recordsCache = array();
+    }
+
     /**
      * Returns an array of linked records for a given record.
      *
