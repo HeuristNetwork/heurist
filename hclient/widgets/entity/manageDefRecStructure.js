@@ -525,7 +525,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 }
             },
             dblclick: function(event, data){ // open formlet for field
-                data.tree.getNodeByKey(data.node.key).setActive();
+                // The preceding click can close the formlet while leaving its
+                // node active. Reactivate through editField so activate fires
+                // even when double-clicking the already selected field.
+                that.editField(data.node.key);
             },
             activate: function(event, data) { 
                 //main entry point to start edit rts field - open formlet
@@ -537,11 +540,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                             that.options.external_preview.manageRecords('saveQuickWithoutValidation',
                                 function(){
                                     that.previewEditor.manageRecords('setDisabledEditForm', true)
-                                    that._onActionListener(event, {action:'edit'}); //default action of selection            
+                                    // This cached form can open while background requests run;
+                                    // the generic action listener blocks during any server call.
+                                    that.addEditRecord(data.node.key);
                                 });
                         }else{
                             that.previewEditor.manageRecords('setDisabledEditForm', true)
-                            that._onActionListener(event, {action:'edit'}); //default action of selection            
+                            that.addEditRecord(data.node.key);
                         }
                     }
                 }

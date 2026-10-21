@@ -1219,6 +1219,37 @@ if($step == 1){  //first step - info about current status
         $outputLines[] = '<br>';
     }
 
+    // Ensure all record titles are updated, including related + linked records
+    foreach($recordKeys as $recID => $key){
+
+        if(!recordUpdateTitle($system, $recID, null, null)){
+            continue;
+        }
+
+        $relatedRecIDs = [];
+        $relatedRecs = recordGetRelationship($system, $recID, 0, ['detail' => 'ids']);
+        if(!isEmptyArray($relatedRecs)){
+            $relatedRecIDs = $relatedRecs;
+        }
+        $relatedRecs = recordGetRelationship($system, 0, $recID, ['detail' => 'ids']);
+        if(!isEmptyArray($relatedRecs)){
+            $relatedRecIDs = array_merge($relatedRecIDs, $relatedRecs);
+        }
+
+        if(!isEmptyArray($relatedRecIDs)){
+            foreach($relatedRecIDs as $relatedRecID){
+                recordUpdateTitle($system, $relatedRecID, null, null);
+            }
+        }
+
+        $linkedRecords = recordGetLinkedRecords($system, $recID);
+        if(!isEmptyArray($linkedRecords)){
+            foreach($linkedRecords as $linkedRecID => $linkedRecTypeID){
+                recordUpdateTitle($system, $linkedRecID, $linkedRecTypeID, null);
+            }
+        }
+    }
+
     //$output = ob_get_clean();
 
     $detailLines = $outputLines;
@@ -1258,6 +1289,7 @@ if($step == 1){  //first step - info about current status
     $report = '<div class="zotero-sync-report"><p><strong>Zotero synchronisation 2026-10-01-collections-v11</strong></p>'
         .implode('', $outputLines).'</div>';
     $syncStatus->release();
+
     exitServerCall(str_replace('Heurist H-ID', 'H-ID', $report), HEURIST_OK);
 }
 

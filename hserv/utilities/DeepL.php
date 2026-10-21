@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * DeepL.php - Utility classs to contain all DeepL related functions used by Heurist
  * 
@@ -324,6 +326,10 @@ class DeepL{
 
         $originalText = $text;
         foreach($replacements as $placeholder => $value){
+
+            if(is_numeric($placeholder)){
+                continue;
+            }
 
             if(mb_strlen(trim($value)) <= 0){
                 $text = mb_ereg_replace($placeholder, $value, $text);
