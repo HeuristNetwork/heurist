@@ -29,6 +29,10 @@ function getNodeXLFormat() {
     getFormat('nodexl');
 }
 
+function getPajekFormat() {
+    getFormat('pajek');
+}
+
 function getFormat(format){
 
     const ID = Math.floor(Math.random() * 90000);

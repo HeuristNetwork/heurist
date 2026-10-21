@@ -7,7 +7,7 @@
 *
 * parameters
 * db - The target Heurist database name.
-* format - Output format for the records. Supported: geojson, json, csv, kml, xml, hml, gephi, nodexl, iiif.
+* format - Output format for the records. Supported: geojson, json, csv, kml, xml, hml, gephi, nodexl, pajek, iiif.
 * linkmode - Specifies how links between records are handled. Options: direct, direct_links, none, all.
 * prefs - An object containing format-specific parameters.
 *
