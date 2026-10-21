@@ -12,6 +12,8 @@
 * @since       7.0
 */
 
+declare(strict_types=1);
+
 namespace hserv\records\export;
 
 //use Override;
@@ -25,10 +27,8 @@ use function in_array;
 
 class ExportRecordsNODEXL extends ExportRecords{
 
-    /** @var array|string $vertices */
-    private $vertices = [];
-    /** @var array|string $edges */
-    private $edges = [];
+    private array $vertices = [];
+    private array $edges = [];
 
     private ?string $recordIconBase;
     private array $detailFieldNames = [];
@@ -85,9 +85,7 @@ class ExportRecordsNODEXL extends ExportRecords{
                 continue;
             }
 
-            $this->addToRelationEdges($recID);
-            $this->addFromRelationEdges($recID);
-
+            $this->addRelationshipEdges($recID);
             $this->addPointerEdges($recID);
         }
 
@@ -184,54 +182,17 @@ class ExportRecordsNODEXL extends ExportRecords{
         return true;
     }
 
-    private function addToRelationEdges(int $sourceID){
+    private function addRelationshipEdges(int $recID){
 
         $mysqli = $this->system->getMysqli();
 
-        $query = "SELECT rl_TargetID, rl_RelationTypeID FROM recLinks WHERE rl_SourceID = {$sourceID} AND rl_RelationID IS NOT NULL";
-        $targetRelations = mysql__select_assoc($mysqli, $query, 0);
+        $query = "SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID FROM recLinks WHERE rl_RelationID IS NOT NULL AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
+        $relations = mysql__select_assoc($mysqli, $query, 0);
 
-        foreach($targetRelations as $relation){
-
-            $targetID = intval($relation['rl_TargetID']);
-            $relationTermID = intval($relation['rl_RelationTypeID']);
-
-            $relationKey = "{$sourceID}-{$relationTermID}-{$targetID}";
-
-            if(array_key_exists($relationKey, $this->edges)){
-                continue;
-            }
-
-            $relationTerm = @$this->relationTermLabels[$relationTermID] ?? null;
-            if(!$relationTerm){
-                $relationTerm = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $relationTermID]);
-                $this->relationTermLabels[$relationTermID] = $relationTerm;
-            }
-
-            $this->edges[$relationKey] = [
-                $sourceID,
-                $targetID,
-                $relationTerm,
-                1
-            ];
-
-            if(!array_key_exists($targetID, $this->vertices)){
-                $this->records[] = $targetID;
-                $this->skipExpanding[] = $targetID;
-            }
-        }
-    }
-
-    private function addFromRelationEdges(int $targetID){
-
-        $mysqli = $this->system->getMysqli();
-
-        $query = "SELECT rl_SourceID, rl_RelationTypeID FROM recLinks WHERE rl_TargetID = {$targetID} AND rl_RelationID IS NOT NULL";
-        $sourceRelations = mysql__select_assoc($mysqli, $query, 0);
-
-        foreach($sourceRelations as $relation){
+        foreach($relations as $relation){
 
             $sourceID = intval($relation['rl_SourceID']);
+            $targetID = intval($relation['rl_TargetID']);
             $relationTermID = intval($relation['rl_RelationTypeID']);
 
             $relationKey = "{$sourceID}-{$relationTermID}-{$targetID}";
@@ -257,6 +218,10 @@ class ExportRecordsNODEXL extends ExportRecords{
                 $this->records[] = $sourceID;
                 $this->skipExpanding[] = $sourceID;
             }
+            if(!array_key_exists($targetID, $this->vertices)){
+                $this->records[] = $targetID;
+                $this->skipExpanding[] = $targetID;
+            }
         }
     }
 
@@ -265,13 +230,13 @@ class ExportRecordsNODEXL extends ExportRecords{
         $mysqli = $this->system->getMysqli();
 
         $query = "SELECT rl_SourceID, rl_TargetID, rl_DetailTypeID FROM recLinks WHERE rl_DetailTypeID > 0 AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
-        $recPointers = mysql__select_assoc($mysqli, $query, 0);
+        $pointers = mysql__select_assoc($mysqli, $query, 0);
 
-        foreach($recPointers as $pointer){
+        foreach($pointers as $pointer){
 
-            $sourceID = $pointer['rl_SourceID'];
-            $targetID = $pointer['rl_TargetID'];
-            $fieldID = $pointer['rl_DetailTypeID'];
+            $sourceID = intval($pointer['rl_SourceID']);
+            $targetID = intval($pointer['rl_TargetID']);
+            $fieldID = intval($pointer['rl_DetailTypeID']);
 
             $pointerKey = "{$sourceID}-{$fieldID}-{$targetID}";
 
