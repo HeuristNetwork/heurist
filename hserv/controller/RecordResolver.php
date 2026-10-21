@@ -189,7 +189,7 @@ final class RecordResolver
         }
 
         // Export
-        if (in_array($fmt, ['xml','json','rdf','gephi','geojson','iiif'], true)) {
+        if (in_array($fmt, ['xml','json','rdf','gephi','geojson','iiif','nodexl'], true)) {
             $q = [
                 'vers' => 2,
                 'fmt'  => $fmt,

@@ -7,7 +7,7 @@
 *
 * parameters
 * db - The target Heurist database name.
-* format - Output format for the records. Supported: geojson, json, csv, kml, xml, hml, gephi, iiif.
+* format - Output format for the records. Supported: geojson, json, csv, kml, xml, hml, gephi, nodexl, iiif.
 * linkmode - Specifies how links between records are handled. Options: direct, direct_links, none, all.
 * prefs - An object containing format-specific parameters.
 *
@@ -164,7 +164,7 @@
         $search_params['offset'] = $params['offset'];
     }
 
-    if(@$params['format']=='gephi' || @$params['format']=='geojson'){
+    if(@$params['format']=='gephi' || @$params['format']=='geojson' || @$params['format'] == 'nodexl'){
         $search_params['limit'] = (@$params['limit']>0)?intval($params['limit']):null;
     }elseif(!$is_records_api && !(@$params['offset'] || @$params['limit'])){
         $search_params['needall'] = 1;  //search without limit of returned record count
@@ -370,7 +370,7 @@
 
     }else{
 
-            $allowed_formats = array('xml','geojson','gephi','iiif','json','rdf','html');
+            $allowed_formats = array('xml','geojson','gephi','iiif','json','rdf','html', 'nodexl');
             $idx = array_search(strtolower($params['format']),$allowed_formats);
 
             if($idx===false || !($idx>0)){
@@ -379,6 +379,7 @@
 
             $classname = 'hserv\records\export\ExportRecords'.strtoupper($allowed_formats[$idx]);
 
+            $outputHandler = null;
             try{
                 $outputHandler = new $classname($system);
             } catch (\Throwable $e) {

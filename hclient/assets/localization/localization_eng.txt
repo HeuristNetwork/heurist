@@ -195,6 +195,7 @@
 #menu-export-geojson#GeoJSON
 #menu-export-kml#KML
 #menu-export-gephi#GEPHI
+#menu-export-nodexl#NodeXL
 #menu-export-iiif#IIIF
 #menu-export-csv-hint#Export records as delimited text (comma/tab), applying record type
 #menu-export-hml-resultset-hint#Generate HML (Heurist XML format) for current set of search results (current query + expansion)
@@ -202,6 +203,7 @@
 #menu-export-geojson-hint#Generate GeoJSON-T for current set of search results (current query)
 #menu-export-kml-hint#Generate KML for current set of search results (current query + expansion)
 #menu-export-gephi-hint#Generate GEPHI for current set of search results (current query + expansion)
+#menu-export-nodexl-hint#Generate NodeXL for current set of search results (current query + expansion)
 #menu-export-iiif-hnt#Generate IIIF manifest for current set of search results
 #Safeguard#
 #menu-profile-tags#Manage tags

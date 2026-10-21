@@ -153,7 +153,7 @@ $isMediaRequest = false;
 // db/record/2312-123  or  db/record/2312-123.rdf  or db/record/123?db=somedb&fmt=rdf  
 // /db/file/2-26adca36f8e375ae0400b91c124aa04084c22e1e
 // 
-// /db/record/1376-11613  or /db/record/1376-11613?fmt= 'hml','xml','json','rdf','gephi','geojson','iiif'
+// /db/record/1376-11613  or /db/record/1376-11613?fmt= 'hml','xml','json','rdf','gephi','geojson','iiif','nodexl'
 // /db/rty/1376/10
 if( (count($requestUri)==3 || count($requestUri)==4)
     && $requestUri[0]=='db'
@@ -572,7 +572,7 @@ if($database_url!=null){ //redirect to resolver for another database
 
 }elseif(@$_REQUEST['db']){
 
-    if(in_array($format, array('xml','json','rdf','gephi','geojson','iiif'))){
+    if(in_array($format, array('xml','json','rdf','gephi','geojson','iiif','nodexl'))){
 
         $redirect = 'hserv/controller/record_output.php?vers=2&fmt='.$format;
 
