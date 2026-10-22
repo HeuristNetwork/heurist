@@ -276,6 +276,13 @@ final class SystemQueryBuilder
             $where[] = $this->column($this->schema['headers']['owner']).' IN ('.implode(',', array_fill(0, count($owners), '?')).')';
             return;
         }
+        if($this->schema['type'] === 'bookmark' || $this->schema['type'] === 'reminder'){
+            // bookmarks: the user's own only (also for administrators); reminders: the user's own, the database owner all
+            if($this->schema['type'] === 'reminder' && $this->runtime->isDbOwner){ return; }
+            $state->bind($this->runtime->userId, 'i');
+            $where[] = $this->column($this->schema['headers']['owner']).'=?';
+            return;
+        }
         if($this->schema['type'] !== 'filter' || $this->runtime->isDbOwner){ return; }
         // Owner 0 is the legacy public scope; System::hasAccess(0) permits it
         // for every authenticated user. Website filters are readable by everyone.

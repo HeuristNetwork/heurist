@@ -218,6 +218,10 @@ $parentIni = dirname(__FILE__) . "/../heuristConfigIni.php";
 $jwt_Secret = ''; //change to some long random secret string (8 chars min)
 $jwt_TTL    = 600; // 10 minutes
 
+//key for the private notes of bookmarks (encrypted; '' - stored as text). Set it in heuristConfigIni.php;
+//changing it makes the notes encrypted with the old key unreadable
+$privateInfo_Secret = '';
+
 /* Use the parameters above for JWT authentication
  curl -sS -X POST https://your.api.example/auth.php -H "Content-Type: application/json" -d '{"db":"database name", "username":"your login","password":"your password"}'
 

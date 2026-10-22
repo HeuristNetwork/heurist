@@ -8,7 +8,8 @@
 * resource. Files are moved by FileStorage, URLs inspected by FileUrlInspector.
 * The row is written in a transaction that is rolled back when the file cannot
 * be placed. Permissions as legacy: any logged-in user registers; the uploader
-* or the database owner changes and deletes.
+* or the database owner changes and deletes. The body, method and concurrency
+* steps are the base EntityWriteService (plan 20, §10.4).
 *
 * @project     Heurist academic knowledge management system
 * @package     Files
@@ -30,9 +31,10 @@ use Heurist\Records\Edit\RecordEditException;
 use Heurist\Records\Edit\RecordInput;
 use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\RuntimeContext;
+use Heurist\System\Entity\EntityWriteService;
 
 /** File registration and changes. */
-final class FileWriteService
+final class FileWriteService extends EntityWriteService
 {
     private FileRowsInterface $rows;
     private FileRecordMapping $mapping;
@@ -41,7 +43,6 @@ final class FileWriteService
     private FileUrlInspector $inspector;
     private RecordRepository $records;
     private DefinitionLookup $definitions;
-    private RuntimeContext $runtime;
     /** @var array<string,string> Known extension => MIME type. */
     private array $mimeTypes;
 
@@ -57,14 +58,26 @@ final class FileWriteService
         array $mimeTypes
     ) {
         $this->rows = $rows;
+        parent::__construct($runtime);
         $this->mapping = $mapping;
         $this->storage = $storage;
         $this->uploads = $uploads;
         $this->inspector = $inspector;
         $this->records = $records;
         $this->definitions = $definitions;
-        $this->runtime = $runtime;
         $this->mimeTypes = $mimeTypes;
+    }
+
+    /** {@inheritdoc} */
+    protected function noun(): string
+    {
+        return 'file';
+    }
+
+    /** {@inheritdoc} */
+    protected function route(): string
+    {
+        return 'files';
     }
 
     public function uploads(): ChunkedUpload
@@ -95,29 +108,19 @@ final class FileWriteService
      */
     public function save(string $method, int $fileId, ?array $body, bool $force = false, bool $dryRun = false): array
     {
-        $this->assertAccount();
-        $body = $body ?? array();
-        if(isset($body['records']) && is_array($body['records']) && count($body['records']) === 1){
-            $body = array_values($body['records'])[0];
-            if(!is_array($body)){ throw RecordEditException::invalid('The record must be a JSON object'); }
-        }
+        $this->assertAccount('Log in to change files');
+        $body = $this->unwrap($body);
         $token = trim((string)($body['upload'] ?? ''));
         unset($body['upload']);
-        $input = RecordInput::fromBody($body);
-        if($input->has('rec_ID') && $input->intHeader('rec_ID') !== $fileId){
-            throw RecordEditException::invalid('rec_ID of the body is not the file of the path');
-        }
+        $input = $this->input($body, $fileId);
         $columns = $this->mapping->writableColumns($input->details());
         if($input->has('rec_NonOwnerVisibility')){
             $visibility = FileRecordMapping::legacyVisibility((string)$input->header('rec_NonOwnerVisibility'));
             if($visibility === null){ throw RecordEditException::invalid('Visibility of a file is public or viewable'); }
             $columns['ulf_WhoCanView'] = $visibility;
         }
-        if($fileId < 1){
-            if($method !== 'POST'){ throw RecordEditException::invalid('A new file is added with POST /files/0'); }
-            return $this->insert($input, $columns, $token, $force, $dryRun);
-        }
-        if($method === 'POST'){ throw RecordEditException::invalid('Change a file with PUT or PATCH'); }
+        $this->assertMethod($method, $fileId);
+        if($fileId < 1){ return $this->insert($input, $columns, $token, $force, $dryRun); }
         return $this->update($method, $fileId, $input, $columns, $token, $force, $dryRun);
     }
 
@@ -128,7 +131,7 @@ final class FileWriteService
      */
     public function delete(int $fileId): array
     {
-        $this->assertAccount();
+        $this->assertAccount('Log in to change files');
         $row = $this->existing($fileId);
         $this->assertCanEdit($row);
         $references = $this->records->fileReferences(array($fileId))[$fileId] ?? array();
@@ -209,13 +212,9 @@ final class FileWriteService
     private function update(string $method, int $fileId, RecordInput $input, array $columns, string $token, bool $force,
         bool $dryRun): array
     {
-        if(!in_array($method, array('PUT', 'PATCH'), true)){ throw RecordEditException::invalid('Unsupported method '.$method); }
         $row = $this->existing($fileId);
         $this->assertCanEdit($row);
-        if($input->has('rec_Modified') && !$force && (string)$input->header('rec_Modified') !== (string)$row['ulf_Modified']){
-            throw new RecordEditException(409, 'conflict', 'The file was changed by someone else', array(),
-                array('rec_Modified' => $row['ulf_Modified']));
-        }
+        $this->assertNotChanged($input, (string)$row['ulf_Modified'], $force);
         if($method === 'PUT'){
             $columns += array_fill_keys($this->mapping->writableColumnNames(), null);
             if(($columns['ulf_OrigFileName'] ?? null) === null){ unset($columns['ulf_OrigFileName']); } // the name stays
@@ -296,23 +295,12 @@ final class FileWriteService
         return $bytes < 1 ? 0 : max(1, intdiv($bytes, 1024));
     }
 
-    private function issue(string $code, string $message): array
-    {
-        return array('code' => $code, 'severity' => 'warning', 'message' => $message);
-    }
-
     /** @throws RecordEditException 400 */
     private function assertUrl(string $url): void
     {
         if(!preg_match('#^https?://[^\s]+$#i', $url) || strlen($url) > 1000){
             throw RecordEditException::invalid('rec_URL must be an http(s) address of at most 1000 characters');
         }
-    }
-
-    /** @throws RecordEditException 403 */
-    private function assertAccount(): void
-    {
-        if($this->runtime->userId < 1){ throw RecordEditException::denied('Log in to change files'); }
     }
 
     /** The uploader or the database owner (legacy DbRecUploadedFiles::_validatePermission). */

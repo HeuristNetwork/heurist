@@ -93,6 +93,13 @@ use Heurist\Reports\ReportTemplateStore;
 use Heurist\Records\Time\TimeDataService;
 use Heurist\System\Query\SystemQueryService;
 use Heurist\Utilities\LanguageCodes;
+use Heurist\Controller\SystemEditController;
+use Heurist\System\Bookmarks\BookmarkRecordMapping;
+use Heurist\System\Bookmarks\BookmarkWriteService;
+use Heurist\System\Reminders\ReminderRecordMapping;
+use Heurist\System\Reminders\ReminderWriteService;
+use Heurist\System\Tags\TagRecordMapping;
+use Heurist\System\Tags\TagWriteService;
 
 /** Creates one consistent service graph for an initialized request. */
 final class ServiceFactory
@@ -109,6 +116,8 @@ final class ServiceFactory
     private ?\Closure $translationLanguages = null;
     /** @var array{root?:string,quota?:\Closure} File store root and disk quota (plan 20, /files writes). */
     private array $fileEnvironment = array();
+    /** @var (\Closure(array):void)|null Sends a reminder now with the legacy mailer (plan 20, §10.9). */
+    private ?\Closure $reminderSender = null;
 
     /** Build the PDO and runtime boundary from the current legacy initialization. */
     public static function fromLegacySystem($system): self
@@ -197,6 +206,14 @@ final class ServiceFactory
                 return $quota > 0 ? $quota : 10737418240;
             }
         );
+        // "Send now" of a reminder: the legacy mailer (DbUsrReminders, as "Send immediately"; not saved)
+        $factory->reminderSender = static function(array $columns) use ($system): void {
+            $reminders = new \hserv\entity\DbUsrReminders($system, array('fields' => $columns + array('rem_ID' => 0)));
+            if($reminders->batch_action() === false){
+                $error = $system->getError();
+                throw new \RuntimeException(is_array($error) ? (string)($error['message'] ?? '') : '');
+            }
+        };
         return $factory;
     }
 
@@ -396,6 +413,25 @@ final class ServiceFactory
             new SystemQueryService($this->database, $this->runtime),
             $this->runtime
         );
+    }
+
+    /**
+     * Create the writes of /sys (plan 20, §10.4): tags (4a), bookmarks and reminders (4b). Without
+     * a writable database the controller refuses writes (405).
+     */
+    public function systemEditController(): SystemEditController
+    {
+        $query = new SystemQueryService($this->database, $this->runtime);
+        if(!($this->database instanceof WritableDatabaseInterface)){
+            return new SystemEditController($query, $this->runtime);
+        }
+        $definitions = DefinitionLookup::shared($this->database);
+        return new SystemEditController($query, $this->runtime, array(
+            'tag' => new TagWriteService($this->database, $this->runtime, new TagRecordMapping($definitions)),
+            'bookmark' => new BookmarkWriteService($this->database, $this->runtime, new BookmarkRecordMapping($definitions)),
+            'reminder' => new ReminderWriteService($this->database, $this->runtime, new ReminderRecordMapping($definitions),
+                $this->reminderSender)
+        ));
     }
 
     /** Create the QuerySource/Map definition controller. */

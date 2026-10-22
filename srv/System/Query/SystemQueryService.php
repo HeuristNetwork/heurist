@@ -23,6 +23,10 @@ use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\SearchRequest;
 use Heurist\Records\Query\SearchResult;
 use Heurist\Runtime\RuntimeContext;
+use Heurist\System\Bookmarks\BookmarkRecordOutput;
+use Heurist\System\Entity\EntityRecordOutput;
+use Heurist\System\Reminders\ReminderRecordOutput;
+use Heurist\System\Tags\TagRecordOutput;
 use Heurist\Users\UserGroupRepository;
 
 /** Orchestrates filter/user query compilation, execution and record output. */
@@ -85,6 +89,9 @@ final class SystemQueryService
         $result = new SearchResult($ids, $total, $request->offset, $request->limit);
 
         if($request->detail === 'ids'){ return $result->toArray(); }
+        // a mapped type is given in the record format (plan 20, §10.1: tags from 4a, bookmarks and reminders from 4b)
+        $output = $this->recordOutput($type);
+        if($output !== null){ return $this->recordResponse($output, $type, $ids, $params, $recordId, $result); }
         $selection = $this->selectFields($request->fields, $schema, $recordId !== null);
         $records = $this->loadRecords($ids, $schema, $selection);
         if($recordId !== null){ return $records[0] ?? null; }
@@ -110,6 +117,41 @@ final class SystemQueryService
             'meta'=>$meta,
             'pagination'=>$this->pagination($result, $params)
         );
+    }
+
+    /** The record-format output of a mapped type; null for a type still in the former format. */
+    private function recordOutput(string $type): ?EntityRecordOutput
+    {
+        switch($type){
+            case 'tag': return new TagRecordOutput($this->database, $this->runtime);
+            case 'bookmark': return new BookmarkRecordOutput($this->database, $this->runtime);
+            case 'reminder': return new ReminderRecordOutput($this->database, $this->runtime);
+        }
+        return null;
+    }
+
+    /**
+     * A mapped type in the record format: a collection as /records, an item as /files/{id}
+     * ({records: [one], meta}); null when the item is not found.
+     */
+    private function recordResponse(EntityRecordOutput $output, string $type, array $ids, array $params, ?int $recordId, SearchResult $result): ?array
+    {
+        $records = $output->records($ids, $params['fields'] ?? null, $recordId !== null);
+        if($recordId !== null && empty($records['records'])){ return null; }
+        $response = array(
+            'records' => $records['records'],
+            'meta' => array(
+                'database' => $params['db'] ?? $this->runtime->databaseName,
+                'entity' => 'sys',
+                'type' => $type,
+                'fields' => array('headers' => $records['headers'], 'details' => $records['fields']),
+                'currentUser' => array('id' => $this->runtime->userId, 'isAdmin' => $this->runtime->isAdmin || $this->runtime->isDbOwner)
+            )
+        );
+        // bookmarks: whether the private notes are encrypted, and those that cannot be read
+        if($output instanceof BookmarkRecordOutput){ $response['meta']['privateInfo'] = $output->privateInfoMeta(); }
+        if($recordId === null){ $response['pagination'] = $this->pagination($result, $params); }
+        return $response;
     }
 
     private function selectFields($value, array $schema, bool $item): array

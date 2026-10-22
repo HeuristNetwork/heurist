@@ -76,6 +76,39 @@ final class SystemEntitySchemaRegistry
                 'record'=>array('column'=>'tag_ID', 'name'=>'Tagged record', 'type'=>'integer', 'queryOnly'=>true)
             )
         ),
+        // Bookmarks: the personal data of a user on a record (plan 20, §10.9); only the user's own.
+        // The title is the title of the record (not a column): the id stands for it in queries and sort.
+        'bookmark'=>array(
+            'table'=>'usrBookmarks', 'alias'=>'s',
+            'constraint'=>null,
+            'headers'=>array(
+                'id'=>array('column'=>'bkm_ID', 'output'=>'rec_ID', 'type'=>'integer'),
+                'title'=>array('column'=>'bkm_ID', 'output'=>'rec_Title', 'type'=>'integer'),
+                'modified'=>array('column'=>'bkm_Modified', 'output'=>'rec_Modified', 'type'=>'date'),
+                'owner'=>array('column'=>'bkm_UGrpID', 'output'=>'rec_OwnerUGrpID', 'type'=>'integer')
+            ),
+            'fields'=>array(
+                // {"f:record":"81"} - the bookmark of the given record(s)
+                'record'=>array('column'=>'bkm_RecID', 'name'=>'Bookmarked record', 'type'=>'integer'),
+                'rating'=>array('column'=>'bkm_Rating', 'name'=>'Rating', 'type'=>'integer')
+            )
+        ),
+        // Reminders about records (plan 20, §10.9): the user's own; the database owner all
+        'reminder'=>array(
+            'table'=>'usrReminders', 'alias'=>'s',
+            'constraint'=>null,
+            'headers'=>array(
+                'id'=>array('column'=>'rem_ID', 'output'=>'rec_ID', 'type'=>'integer'),
+                'title'=>array('column'=>'rem_ID', 'output'=>'rec_Title', 'type'=>'integer'),
+                'modified'=>array('column'=>'rem_Modified', 'output'=>'rec_Modified', 'type'=>'date'),
+                'owner'=>array('column'=>'rem_OwnerUGrpID', 'output'=>'rec_OwnerUGrpID', 'type'=>'integer')
+            ),
+            'fields'=>array(
+                'record'=>array('column'=>'rem_RecID', 'name'=>'Record', 'type'=>'integer'),
+                'startdate'=>array('column'=>'rem_StartDate', 'name'=>'Start date', 'type'=>'text'),
+                'frequency'=>array('column'=>'rem_Freq', 'name'=>'Frequency', 'type'=>'text')
+            )
+        ),
         'group'=>array(
             'table'=>'sysUGrps', 'alias'=>'s',
             'constraint'=>'s.ugr_Type="workgroup"',
@@ -110,7 +143,7 @@ final class SystemEntitySchemaRegistry
     {
         $type = strtolower(trim($type));
         $aliases = array('filters'=>'filter', 'users'=>'user', 'groups'=>'group', 'workgroup'=>'group',
-            'tags'=>'tag', 'keyword'=>'tag', 'keywords'=>'tag');
+            'tags'=>'tag', 'keyword'=>'tag', 'keywords'=>'tag', 'bookmarks'=>'bookmark', 'reminders'=>'reminder');
         return $aliases[$type] ?? $type;
     }
 

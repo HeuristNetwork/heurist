@@ -2,6 +2,9 @@
 /**
 * FileTransaction.php - One database transaction around a file write
 *
+* Kept for its callers; the work is done by System\Entity\EntityTransaction,
+* shared with the /sys writes (plan 20, §10.4).
+*
 * @project     Heurist academic knowledge management system
 * @package     Files
 * @link        https://HeuristNetwork.org
@@ -17,6 +20,7 @@ declare(strict_types=1);
 namespace Heurist\Files;
 
 use Heurist\Database\WritableDatabaseInterface;
+use Heurist\System\Entity\EntityTransaction;
 
 /** Runs work in a transaction (joins one already open). */
 final class FileTransaction
@@ -24,15 +28,6 @@ final class FileTransaction
     /** @return mixed The result of the work. */
     public static function run(WritableDatabaseInterface $database, callable $work)
     {
-        if($database->inTransaction()){ return $work(); }
-        $database->beginTransaction();
-        try{
-            $result = $work();
-            $database->commit();
-            return $result;
-        }catch(\Throwable $error){
-            if($database->inTransaction()){ $database->rollback(); }
-            throw $error;
-        }
+        return EntityTransaction::run($database, $work);
     }
 }

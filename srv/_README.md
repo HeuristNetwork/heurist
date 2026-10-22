@@ -51,3 +51,14 @@ Dependency direction is Controller → Records → Database/Runtime. Classes bel
   for legacy `usrSavedSearches` and `sysUGrps` storage.
 - `Controller/FileController.php`, `Files/` — registered files as records
   (`/api/{db}/files`, plan 20) on `recUploadedFiles` or `fileRecords`.
+- `System/Entity/` — bases of the entities kept in legacy tables and given in the
+  record format: mapping (`EntityRecordMapping`), row writes (`LegacyEntityTable`),
+  write steps (`EntityWriteService`), `EntityTransaction` (plan 20, §10.4). Files and
+  tags are built on them.
+- `Controller/SystemEditController.php`, `System/Tags/` — tags on `/api/{db}/sys/tag`
+  in the record format with writes, assign and merge (plan 20, Phase 4a).
+- `System/Bookmarks/`, `System/Reminders/` — bookmarks (with the encrypted private note)
+  and reminders (with Send now) on `/api/{db}/sys/bookmark|reminder` (plan 20, Phase 4b).
+- `Records/UserData/` — reads and writes of the user tables of records (tags and their
+  links, bookmarks, reminders), through the `RecordSchema` table keys.
+- `Controller/SameSiteGuard.php` — the same-site and JSON checks of the write controllers.

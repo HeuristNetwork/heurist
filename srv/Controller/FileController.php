@@ -249,23 +249,7 @@ final class FileController
      */
     private function assertSameSite(string $method, array $request, bool $json): void
     {
-        $this->assertUser();
-        $origin = trim((string)($request['origin'] ?? ''));
-        if($origin === 'null'){ throw RecordEditException::denied('Requests from another site are not allowed'); }
-        if($origin !== ''){
-            $originHost = strtolower((string)parse_url($origin, PHP_URL_HOST));
-            $originPort = parse_url($origin, PHP_URL_PORT);
-            $host = strtolower((string)($request['host'] ?? ''));
-            $requestHost = strtolower((string)parse_url('http://'.$host, PHP_URL_HOST));
-            $requestPort = parse_url('http://'.$host, PHP_URL_PORT);
-            if($originHost === '' || $originHost !== $requestHost
-                || ($originPort !== null && $requestPort !== null && $originPort !== $requestPort)){
-                throw RecordEditException::denied('Requests from another site are not allowed');
-            }
-        }
-        if($json && stripos((string)($request['contentType'] ?? ''), 'application/json') !== 0){
-            throw new RecordEditException(415, 'unsupported_media_type', 'Content-Type must be application/json');
-        }
+        SameSiteGuard::assert($this->runtime, $request, $json, 'Log in to see the files');
     }
 
     /** @throws RecordEditException 405 */
