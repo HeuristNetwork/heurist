@@ -22,6 +22,18 @@
  * and their attributes, then triggers a browser download.
  */
 function getGephiFormat() {
+    getFormat('gephi');
+}
+
+function getNodeXLFormat() {
+    getFormat('nodexl');
+}
+
+function getPajekFormat() {
+    getFormat('pajek');
+}
+
+function getFormat(format){
 
     const ID = Math.floor(Math.random() * 90000);
     let query = typeof window.visualiserRequest === 'string' ? {q: window.visualiserRequest} : window.visualiserRequest;
@@ -30,7 +42,7 @@ function getGephiFormat() {
     let params = new URLSearchParams();
 
     params.set('w', 'all');
-    params.set('format', 'gephi');
+    params.set('format', format);
     params.set('file', '1');
     params.set('linkmode', 'none');
     params.set('preparedID', ID);

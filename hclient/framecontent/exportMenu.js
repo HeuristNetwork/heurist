@@ -350,6 +350,10 @@ function hexportMenu( container ) {
                 _popupFields({format:'gephi', save_as_file:save_as_file});
             }
 
+        }else if(action == 'menu-export-nodexl'){
+            _exportRecords({format: 'nodexl', save_as_file: save_as_file});
+        }else if(action == 'menu-export-pajek'){
+            _exportRecords({format: 'pajek', save_as_file: save_as_file});
         }else if(action == "menu-export-iiif"){
             _exportRecords({format:'iiif', save_as_file:save_as_file});
             
@@ -365,7 +369,7 @@ function hexportMenu( container ) {
     }
     
     /**
-     * Handles the export of records in various formats (HML, JSON, GeoJSON, RDF, IIIF, GEPHI).
+     * Handles the export of records in various formats (HML, JSON, GeoJSON, RDF, IIIF, GEPHI, NodeXL, Pajek).
      *
      * It constructs the export URL based on the provided options, current query,
      * and user selections (e.g., for following pointers, including human-readable names,
@@ -374,7 +378,7 @@ function hexportMenu( container ) {
      *
      * @private
      * @param {object} opts - Options for the export.
-     * @param {string} opts.format - The export format (e.g., 'hml', 'json', 'geojson', 'rdf', 'iiif', 'gephi').
+     * @param {string} opts.format - The export format (e.g., 'hml', 'json', 'geojson', 'rdf', 'iiif', 'gephi', 'nodexl', 'pajek').
      * @param {boolean} [opts.isAll=true] - If true, exports the current result set. If false, exports only currently selected records (though this path seems less used now).
      * @param {boolean} [opts.includeRelated] - (Potentially deprecated by linksMode) If true, includes related records.
      * @param {boolean} [opts.multifile=false] - If true (for HML), exports as multiple files (HuNI format).
@@ -564,9 +568,10 @@ function hexportMenu( container ) {
             }else{
                 newURLParams.set('format', opts.format);
 
-                if(opts.format=='gephi'){
-                    if ($('#limitGEPHI').is(':checked')) newURLParams.set('limit', '1000');
-
+                if(opts.format == 'gephi' || opts.format == 'nodexl' || opts.format == 'pajek'){
+                    let idStub = opts.format === 'nodexl' ? 'NodeXL' : 'GEPHI';
+                    idStub = opts.format === 'pajek' ? 'Pajek' : idStub;
+                    if ($(`#limit${idStub}`).is(':checked')) newURLParams.set('limit', '1000');
                 }else if(opts.format=='geojson'){
                     newURLParams.set('detail_mode', $('input[name="detail_mode"]:checked').val());
                 }else if(opts.format=='rdf'){

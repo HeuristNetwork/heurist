@@ -427,6 +427,8 @@ function handleSettingsInUI() {
     }else{
         $('#setDivExport').show();
         $('#gephi-export').button();
+        $('#nodexl-export').button();
+        $('#pajek-export').button();
     }
 
     tBar.show();

@@ -206,6 +206,8 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
             <span style="display: inline-block;margin-left: 0.2em;">
                 <button id="gephi-export" onclick="getGephiFormat()" title="Export to GEXF for Gephi">GEPHI</button>
+                <button id="nodexl-export" onclick="getNodeXLFormat()" title="Export to CSV for NodeXL">NodeXL</button>
+                <button id="pajek-export" onclick="getPajekFormat()" title="Export to Pajek .net file">Pajek</button>
                 <button id="embed-export" title="Get embed code">Embed</button>
             </span>
 

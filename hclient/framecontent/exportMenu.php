@@ -160,6 +160,28 @@ require_once 'initPage.php';
                 <label style="font-size:smaller;"><input type="checkbox" id="limitGEPHI"/>&nbsp;&nbsp;Limit gephi output with 1000 nodes</label>
         </div>
 
+        <div id="menu-export-nodexl" class="export-item">
+            <button class="export-button">NodeXL</button>
+            <a href="#" oncontextmenu="return false;"
+                data-logaction="exp_NodeXL"  style="padding-right:30px"
+                data-action="menu-export-nodexl"
+                title="Generate NodeXL for current set of search results (current query + expansion)">
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
+                NodeXL</a>
+                <label style="font-size:smaller;"><input type="checkbox" id="limitNodeXL"/>&nbsp;&nbsp;Limit NodeXL output with 1000 nodes</label>
+        </div>
+
+        <div id="menu-export-pajek" class="export-item">
+            <button class="export-button">Pajek</button>
+            <a href="#" oncontextmenu="return false;"
+                data-logaction="exp_Pajek"  style="padding-right:30px"
+                data-action="menu-export-pajek"
+                title="Generate Pajek for current set of search results (current query + expansion)">
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
+                Pajek</a>
+                <label style="font-size:smaller;"><input type="checkbox" id="limitPajek"/>&nbsp;&nbsp;Limit Pajek output with 1000 nodes</label>
+        </div>
+
         <div id="menu-export-iiif" class="export-item">
             <button class="export-button">IIIF</button>
             <a href="#" oncontextmenu="return false;"
