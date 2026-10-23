@@ -719,7 +719,7 @@ $.widget( "heurist.editing_input", {
             }
             
             
-            if(this.options.dtID != 'rst_DefaultValue_resource'){
+            if(this.options.dtID != 'rst_DefaultValue_resource' && this.options.dtID != 'rst_DefaultValue_file'){
                 if(this.detailType=="resource" && this._isForRecords){
                     
                     $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"></span></div>')                
@@ -5159,7 +5159,7 @@ $.widget( "heurist.editing_input", {
                             }
 
                             let openseadragon_link = $image_container.find('.openseadragon_link');
-                            if(mimetype.indexOf('image/') === 0 || isIiifImage){
+                            if(mimetype.indexOf('image/') === 0 || isIiifImage || mimetype.indexOf('pdf') > 0){
                                 openseadragon_link.show();
                             }else{
                                 openseadragon_link.hide();
