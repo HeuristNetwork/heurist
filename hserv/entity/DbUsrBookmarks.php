@@ -72,7 +72,45 @@ class DbUsrBookmarks extends DbEntityBase
             $this->searchMgr->setSelFields('bkm_ID,bkm_UGrpID,bkm_RecID,bkm_Rating,bkm_PwdReminder,bkm_Notes');
         }
 
-        return $this->searchMgr->composeAndExecute(null);
+        return $this->decryptPrivateNotes($this->searchMgr->composeAndExecute(null));
+    }
+
+    /**
+     * The private note (bkm_PwdReminder) is stored encrypted (plan 20, §10.9, srv PrivateInfoCipher):
+     * decrypted here for the owner of the bookmark; other users get no note.
+     *
+     * @param mixed $res Result of composeAndExecute.
+     * @return mixed
+     */
+    private function decryptPrivateNotes($res){
+
+        if(!is_array($res)){
+            return $res;
+        }
+        $cipher = \Heurist\System\Bookmarks\PrivateInfoCipher::fromConfiguration();
+        $userID = $this->system->getUserId();
+
+        if(isset($res['fields']) && is_array(@$res['records'])){
+            $idx_note = array_search('bkm_PwdReminder', $res['fields']);
+            $idx_owner = array_search('bkm_UGrpID', $res['fields']);
+            if($idx_note===false){
+                return $res;
+            }
+            foreach($res['records'] as $id=>$row){
+                if(!is_array($row) || @$row[$idx_note]==null){ continue; }
+                $res['records'][$id][$idx_note] = ($idx_owner!==false && $row[$idx_owner]==$userID)
+                        ?$cipher->decrypt($row[$idx_note]) :null;
+            }
+        }elseif(array_key_exists('bkm_PwdReminder', $res)){ //restapi: one bookmark
+            $res['bkm_PwdReminder'] = (@$res['bkm_UGrpID']==$userID) ?$cipher->decrypt($res['bkm_PwdReminder']) :null;
+        }else{ //restapi: list of bookmarks
+            foreach($res as $idx=>$row){
+                if(is_array($row) && array_key_exists('bkm_PwdReminder', $row)){
+                    $res[$idx]['bkm_PwdReminder'] = (@$row['bkm_UGrpID']==$userID) ?$cipher->decrypt($row['bkm_PwdReminder']) :null;
+                }
+            }
+        }
+        return $res;
     }
 
 
@@ -144,6 +182,20 @@ class DbUsrBookmarks extends DbEntityBase
                 $this->records[$idx]['bkm_Added'] = date('Y/m/d H:i:s');
             }
             $this->records[$idx]['bkm_Modified'] = date(DATE_8601);//reset
+
+            //the private note is stored encrypted (plan 20, §10.9)
+            if(array_key_exists('bkm_PwdReminder', $record) && $record['bkm_PwdReminder']!=null){
+                $note = trim($record['bkm_PwdReminder']);
+                try{
+                    //an encrypted value (not read back) is kept as it is
+                    $this->records[$idx]['bkm_PwdReminder'] = ($note=='') ?null
+                        :((strpos($note, \Heurist\System\Bookmarks\PrivateInfoCipher::PREFIX)===0) ?$note
+                        :\Heurist\System\Bookmarks\PrivateInfoCipher::fromConfiguration()->encrypt($note));
+                }catch(\InvalidArgumentException $e){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, $e->getMessage());
+                    return false;
+                }
+            }
         }
 
         return $ret;

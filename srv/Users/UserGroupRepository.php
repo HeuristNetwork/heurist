@@ -126,6 +126,24 @@ final class UserGroupRepository
         ));
     }
 
+    /**
+     * The kind of users and groups.
+     *
+     * @param array<int,int> $ids
+     * @return array<int,string> id => user|workgroup (the ids that exist)
+     */
+    public function types(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static function($id){ return $id > 0; })));
+        $types = array();
+        if(empty($ids)){ return $types; }
+        foreach($this->database->fetchRows('SELECT ugr_ID,ugr_Type FROM sysUGrps WHERE ugr_ID IN ('
+            .implode(',', array_fill(0, count($ids), '?')).')', $ids) as $row){
+            $types[intval($row[0])] = (string)$row[1] === 'user' ? 'user' : 'workgroup';
+        }
+        return $types;
+    }
+
     /** Account state of a user (ugr_Enabled: y, n, y_no_add, ...; '' when unknown). */
     public function enabled(int $userId): string
     {

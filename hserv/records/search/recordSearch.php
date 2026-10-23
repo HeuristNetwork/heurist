@@ -3121,6 +3121,10 @@ function recordSearch($system, $params, $relation_query=null)
             $rec_RecTypeID_index = array_search('rec_RecTypeID', $fields);
             $date_add_index = array_search('rec_Added', $fields);
             $date_mod_index = array_search('rec_Modified', $fields);
+            // the private note of a bookmark is encrypted: decrypted for its owner only (plan 20, §10.9)
+            $pwd_index = array_search('bkm_PwdReminder', $fields);
+            $bkm_owner_index = array_search('bkm_UGrpID', $fields);
+            $private_cipher = $pwd_index!==false ? \Heurist\System\Bookmarks\PrivateInfoCipher::fromConfiguration() : null;
 
             if($needThumbField) {array_push($fields, 'rec_ThumbnailURL');}
             if($needThumbBackground) {array_push($fields, 'rec_ThumbnailBg');}
@@ -3130,6 +3134,11 @@ function recordSearch($system, $params, $relation_query=null)
 
             // load all records
             while ($row = $res->fetch_row()) {
+
+                if($private_cipher!=null && $row[$pwd_index]!=null && $row[$pwd_index]!==''){
+                    $row[$pwd_index] = ($bkm_owner_index!==false && $row[$bkm_owner_index]==$currUserID && $currUserID>0)
+                            ?$private_cipher->decrypt($row[$pwd_index]) :null;
+                }
 
                 if($needThumbField) {
                     $tres = fileGetThumbnailURL($system, $row[$rec_ID_index], $needThumbBackground, true);

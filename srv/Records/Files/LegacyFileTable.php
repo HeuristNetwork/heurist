@@ -5,7 +5,8 @@
 * The /files domain writes registered files here while they are kept in the
 * legacy table (plan 20, §8.3). Rows must look like rows of the legacy code
 * (DbRecUploadedFiles): the old interface reads and writes the same table.
-* Reads stay in FileRepository.
+* Reads stay in FileRepository. The writes are the base LegacyEntityTable
+* (plan 20, §10.4).
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Files
@@ -21,52 +22,26 @@ declare(strict_types=1);
 
 namespace Heurist\Records\Files;
 
-use Heurist\Database\WritableDatabaseInterface;
+use Heurist\System\Entity\LegacyEntityTable;
 
 /** Insert, update and delete of recUploadedFiles rows. */
-final class LegacyFileTable
+final class LegacyFileTable extends LegacyEntityTable
 {
-    private WritableDatabaseInterface $database;
-
-    public function __construct(WritableDatabaseInterface $database)
+    /** {@inheritdoc} */
+    protected function table(): string
     {
-        $this->database = $database;
+        return 'recUploadedFiles';
     }
 
-    /**
-     * Insert a row (ulf_ID is given by the table).
-     *
-     * @param array<string,mixed> $columns FileRepository::COLUMNS => value
-     * @return int ulf_ID
-     */
-    public function insert(array $columns): int
+    /** {@inheritdoc} */
+    protected function idColumn(): string
     {
-        $columns = $this->columns($columns);
-        unset($columns['ulf_ID']);
-        $this->database->execute('INSERT INTO recUploadedFiles ('.implode(',', array_keys($columns)).') VALUES ('
-            .implode(',', array_fill(0, count($columns), '?')).')', array_values($columns));
-        return $this->database->lastInsertId();
+        return 'ulf_ID';
     }
 
-    /** Update the given columns of a row. */
-    public function update(int $fileId, array $columns): void
+    /** {@inheritdoc} FileRepository::COLUMNS. */
+    protected function columnNames(): array
     {
-        $columns = $this->columns($columns);
-        unset($columns['ulf_ID']);
-        if(empty($columns)){ return; }
-        $this->database->execute('UPDATE recUploadedFiles SET '.implode('=?,', array_keys($columns)).'=? WHERE ulf_ID=?',
-            array_merge(array_values($columns), array($fileId)));
-    }
-
-    /** Delete a row. */
-    public function delete(int $fileId): void
-    {
-        $this->database->execute('DELETE FROM recUploadedFiles WHERE ulf_ID=?', array($fileId));
-    }
-
-    /** Known columns only (FileRepository::COLUMNS). */
-    private function columns(array $columns): array
-    {
-        return array_intersect_key($columns, array_flip(FileRepository::COLUMNS));
+        return FileRepository::COLUMNS;
     }
 }

@@ -483,7 +483,24 @@ if($is_graph_query){
 
 // The modern system collection is also a read contract. The optional entity
 // segment selects a mapped system record type: /sys/filter or /sys/user.
+// Writes (plan 20, §10.4) - POST /sys/{type}/0, PUT|PATCH|DELETE /sys/{type}/{id},
+// POST /sys/{type}/{id}/validate|merge, POST /sys/tag/assign - go to
+// SystemEditController; they need a logged-in user.
 $is_system_query = ($resource === 'sys');
+$is_system_write = $is_system_query && !in_array($http_verb, array('GET','HEAD'), true)
+    && isset($requestUri[5]) && $requestUri[5] !== '';
+if($is_system_write){
+    if(!in_array($http_verb, array('POST','PUT','PATCH','DELETE'), true)){
+        exitWithError('Method not allowed', 405, array('Allow'=>'GET, POST, PUT, PATCH, DELETE'));
+    }
+    if(in_array($http_verb, array('POST','PUT','PATCH'), true)
+        && stripos($contentType, 'application/json') === 0
+        && !is_array($json)){
+        exitWithError('Invalid JSON request body', 400);
+    }
+    $is_system_query = false;
+    $method = 'save';
+}
 if($is_system_query){
     $hasSystemItem = isset($requestUri[5]) && $requestUri[5] !== '';
     if($hasSystemItem && (!is_numeric($requestUri[5]) || intval($requestUri[5]) < 1)){
@@ -678,6 +695,24 @@ if($is_def_query){
         ? intval($requestUri[5]) : null;
     $controller = ServiceFactory::fromLegacySystem($system)->systemQueryController();
     $controller->output($req_params, $systemType, $systemId);
+    $system->dbclose();
+    exit;
+
+}elseif($is_system_write){
+
+    $req_params['restapi'] = 1;
+    $controller = ServiceFactory::fromLegacySystem($system)->systemEditController();
+    $controller->handleRequest(
+        $http_verb,
+        array_slice($requestUri, 4),
+        $req_params,
+        is_array($json) ? $json : null,
+        array(
+            'contentType' => $contentType,
+            'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+            'host' => $_SERVER['HTTP_HOST'] ?? ''
+        )
+    );
     $system->dbclose();
     exit;
 

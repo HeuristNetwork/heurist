@@ -5,7 +5,8 @@
 * The one mapping between the legacy file table and the record format of the
 * /files domain (plan 20, §3.1): headers and fields by concept code, with the
 * value conversions (visibility, size, MIME type and registered file type terms).
-* Used for reading now and for writing (Phase 2).
+* Used for reading and for writing. The concept-code fields, the writable columns
+* and the term lookup are the base EntityRecordMapping (plan 20, §10.4).
 *
 * @project     Heurist academic knowledge management system
 * @package     Files
@@ -23,9 +24,10 @@ namespace Heurist\Files;
 
 use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Files\FileRepository;
+use Heurist\System\Entity\EntityRecordMapping;
 
 /** Converts rows of recUploadedFiles to file records and back. */
-final class FileRecordMapping
+final class FileRecordMapping extends EntityRecordMapping
 {
     /** Concept code of the record type "Registered file" (RT_REGISTERED_FILE). */
     public const RECTYPE = '2-1106';
@@ -64,54 +66,36 @@ final class FileRecordMapping
         '2-63' => array('column' => 'ulf_FilePath', 'admin' => true)          // DT_FILE_FOLDER
     );
 
+    /** Fields a client may write (concept codes); the others are set by the server (size, MD5, names, type). */
+    public const WRITABLE_FIELDS = array('2-1185', '2-1', '2-4', '2-35', '2-1188', '2-1187');
+
     /** ulf_WhoCanView => rec_NonOwnerVisibility (an empty value is "viewable"). */
     private const VISIBILITY = array('viewable' => 'public', 'loginrequired' => 'viewable');
 
-    private DefinitionLookup $definitions;
     private FileRepository $files;
-
-    /** @var array<int,array>|null Field id => FIELDS entry + concept, for the fields of this database. */
-    private ?array $fields = null;
-
-    /** @var array<int,array<string,int>> Field id => lower-case term label => term id (its vocabulary). */
-    private array $termsByLabel = array();
 
     public function __construct(DefinitionLookup $definitions, FileRepository $files)
     {
-        $this->definitions = $definitions;
+        parent::__construct($definitions);
         $this->files = $files;
     }
 
-    /** Local id of RT_REGISTERED_FILE (0 when the database does not have it). */
-    public function rectypeId(): int
+    /** {@inheritdoc} */
+    public function rectypeConcept(): string
     {
-        return $this->definitions->localId('rty', self::RECTYPE);
+        return self::RECTYPE;
     }
 
-    /**
-     * Mapped fields that exist in this database.
-     *
-     * @return array<int,array{column:string,concept:string,convert?:string,admin?:bool}> field id => mapping
-     */
-    public function fields(): array
+    /** {@inheritdoc} */
+    protected function fieldMappings(): array
     {
-        if($this->fields === null){
-            $this->fields = array();
-            foreach(self::FIELDS as $concept => $mapping){
-                $id = $this->definitions->localId('dty', $concept);
-                if($id > 0){ $this->fields[$id] = $mapping + array('concept' => $concept); }
-            }
-        }
-        return $this->fields;
+        return self::FIELDS;
     }
 
-    /** Field id of a concept code (0 when the database does not have it). */
-    public function fieldId(string $concept): int
+    /** {@inheritdoc} */
+    protected function writableConcepts(): array
     {
-        foreach($this->fields() as $id => $mapping){
-            if($mapping['concept'] === $concept){ return $id; }
-        }
-        return 0;
+        return self::WRITABLE_FIELDS;
     }
 
     /**
@@ -132,17 +116,8 @@ final class FileRecordMapping
             $headers[$header] = $value === null ? null : (string)$value;
         }
         $headers['rec_ScratchPad'] = null;
-        $details = array();
-        foreach($this->fields() as $id => $mapping){
-            if(!empty($mapping['admin']) && !$admin){ continue; }
-            $value = $this->fieldValue($id, $mapping, $row);
-            if($value !== null && $value !== ''){ $details[$id] = array($value); }
-        }
-        return array('headers' => $headers, 'details' => $details);
+        return array('headers' => $headers, 'details' => $this->detailsOf($row, $admin));
     }
-
-    /** Fields a client may write (concept codes); the others are set by the server (size, MD5, names, type). */
-    public const WRITABLE_FIELDS = array('2-1185', '2-1', '2-4', '2-35', '2-1188', '2-1187');
 
     /**
      * Legacy columns of a stored file record (headers and detail values in database form) -
@@ -161,50 +136,13 @@ final class FileRecordMapping
             if($header === 'rec_NonOwnerVisibility'){ $value = self::legacyVisibility((string)$value) ?? 'viewable'; }
             $columns[$column] = $value;
         }
-        foreach($this->fields() as $fieldId => $mapping){
-            $value = $details[$fieldId][0] ?? null;
-            $columns[$mapping['column']] = $value === null ? null : $this->columnValue($fieldId, $mapping, (string)$value, $details);
-        }
+        $columns = array_merge($columns, $this->columnsOf($details));
         $columns['fxm_MimeType'] = $this->files->mimeTypes()[strtolower((string)($columns['ulf_MimeExt'] ?? ''))] ?? null;
         return $columns;
     }
 
-    /**
-     * Columns of the writable fields of a request (RecordInput details by field id): a field in the
-     * input sets its column (no value: empty), other fields are not returned.
-     *
-     * @param array<int,array<int,mixed>> $details field id => values as given
-     * @return array<string,?string> ulf_* column => value
-     */
-    public function writableColumns(array $details): array
-    {
-        $columns = array();
-        foreach($this->fields() as $fieldId => $mapping){
-            if(!in_array($mapping['concept'], self::WRITABLE_FIELDS, true) || !array_key_exists($fieldId, $details)){ continue; }
-            $value = null;
-            foreach((array)$details[$fieldId] as $item){
-                if(is_array($item)){ $item = $item['value'] ?? null; }
-                $item = $item === null ? '' : trim((string)$item);
-                // translations ("fre:...") are not kept in the legacy table
-                if($item !== '' && !preg_match('/^[a-z]{3}:/', $item)){ $value = $item; break; }
-            }
-            $columns[$mapping['column']] = $value;
-        }
-        return $columns;
-    }
-
-    /** Columns of the writable fields that are empty (PUT replaces the whole record). */
-    public function writableColumnNames(): array
-    {
-        $names = array();
-        foreach($this->fields() as $mapping){
-            if(in_array($mapping['concept'], self::WRITABLE_FIELDS, true)){ $names[] = $mapping['column']; }
-        }
-        return $names;
-    }
-
-    /** Legacy column value of one stored field value. */
-    private function columnValue(int $fieldId, array $mapping, string $value, array $details): ?string
+    /** {@inheritdoc} Sizes, terms and MIME types are converted back to the legacy column values. */
+    protected function columnValue(int $fieldId, array $mapping, string $value, array $details): ?string
     {
         switch($mapping['convert'] ?? ''){
             case 'size':
@@ -292,8 +230,8 @@ final class FileRecordMapping
         return array_values(array_unique($result));
     }
 
-    /** Database form of one mapped field of a row; null when empty or not convertible. */
-    private function fieldValue(int $fieldId, array $mapping, array $row): ?string
+    /** {@inheritdoc} Sizes in bytes, terms and MIME types from the legacy column values. */
+    protected function fieldValue(int $fieldId, array $mapping, array $row): ?string
     {
         $value = $row[$mapping['column']] ?? null;
         if($value === null || trim((string)$value) === ''){ return null; }
@@ -310,25 +248,5 @@ final class FileRecordMapping
             default:
                 return (string)$value;
         }
-    }
-
-    /** Term id of a label in the vocabulary of a field (null when it has no such term). */
-    private function termId(int $fieldId, string $label): ?string
-    {
-        $label = strtolower(trim($label));
-        if($label === ''){ return null; }
-        if(!isset($this->termsByLabel[$fieldId])){
-            $this->termsByLabel[$fieldId] = array();
-            $vocabulary = $this->definitions->field($fieldId)['vocabulary'] ?? array();
-            if(!empty($vocabulary)){
-                foreach($this->definitions->terms($this->definitions->termDescendants($vocabulary)) as $id => $term){
-                    if(in_array($id, $vocabulary, true)){ continue; }
-                    $key = strtolower(trim((string)$term['term']));
-                    if(!isset($this->termsByLabel[$fieldId][$key])){ $this->termsByLabel[$fieldId][$key] = $id; }
-                }
-            }
-        }
-        $id = $this->termsByLabel[$fieldId][$label] ?? null;
-        return $id === null ? null : (string)$id;
     }
 }
