@@ -43,6 +43,7 @@ final class RecordDuplicateService
     /** @var array<string,int> name (DT_NAME), cmsPage (RT_CMS_PAGE) */
     private array $codes;
     private ?TitleMask $titleMask;
+    private ?RecordValidator $validator;
 
     /**
      * @param array<string,int> $codes Local ids: name (DT_NAME), cmsPage (RT_CMS_PAGE).
@@ -56,7 +57,8 @@ final class RecordDuplicateService
         RecordTitle $title,
         LanguageCodes $languages,
         array $codes = array(),
-        ?TitleMask $titleMask = null
+        ?TitleMask $titleMask = null,
+        ?RecordValidator $validator = null
     ) {
         $this->store = $store;
         $this->permissions = $permissions;
@@ -66,6 +68,7 @@ final class RecordDuplicateService
         $this->languages = $languages;
         $this->codes = array_map('intval', $codes);
         $this->titleMask = $titleMask;
+        $this->validator = $validator;
     }
 
     /**
@@ -100,10 +103,20 @@ final class RecordDuplicateService
                 'owner' => $owner,
                 'visibility' => $visibility,
                 'url' => $header['rec_URL'],
-                'scratchPad' => $header['rec_ScratchPad'],
+                'scratchPad' => \Heurist\Utilities\StoredText::clean((string)$header['rec_ScratchPad'], 'blocktext'),
                 'addedBy' => $this->runtime->userId
             ));
             $this->store->copyContent($recordId, $newId);
+            foreach($this->store->records()->editValues($newId) as $fieldId=>$values){
+                $type = $this->definitions->fieldType((int)$fieldId);
+                if(!in_array($type, array('freetext', 'blocktext'), true)){ continue; }
+                foreach($values as $item){
+                    $old = is_array($item) ? (string)($item['value'] ?? '') : (string)$item;
+                    $clean = $this->validator !== null ? $this->validator->cleanText($rectype, (int)$fieldId, $type, $old)
+                        : \Heurist\Utilities\StoredText::clean($old, $type);
+                    if($old !== $clean){ $this->store->updateValue($newId, (int)$fieldId, $old, $clean); }
+                }
+            }
             $names = array();
             if($nameField > 0){
                 foreach($this->store->records()->editValues($newId, array($nameField))[$nameField] ?? array() as $name){

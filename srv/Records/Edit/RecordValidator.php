@@ -10,8 +10,7 @@
 *   1. the record type exists;
 *   2. every field id exists (error), is in the record structure (warning
 *      otherwise) and is not forbidden (error);
-*   3. values per field type: text (trimmed, scripts removed, freetext tag
-*      attributes limited), date (Temporal), integer/float/year/boolean,
+*   3. values per field type: text (shared StoredText HTML policy and authorized CMS code), date (Temporal), integer/float/year/boolean,
 *      enum/relationtype (term of the field vocabulary, or its label),
 *      resource (record exists, pointer constraint), file (ulf_ID exists),
 *      geo (WKT parsed by the database); separator and relmarker are ignored;
@@ -46,6 +45,7 @@ use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\DatabaseSettings;
 use Heurist\Utilities\LanguageCodes;
 use Heurist\Utilities\Temporal;
+use Heurist\Utilities\StoredText;
 
 /** Validates detail values against the record structure. */
 final class RecordValidator
@@ -56,9 +56,10 @@ final class RecordValidator
     private DatabaseInterface $database;
     private DefinitionLookup $definitions;
     private LanguageCodes $languages;
-    /** @var array<string,int> name, shortSummary, extendedDescription, cmsPage, cmsExtFiles */
+    /** @var array<string,int> Names, multilingual fields and CMS code fields/record types. */
     private array $codes;
     private ?bool $newTemporalFormat;
+    private bool $javaScriptAllowed;
     /** @var array<int,array<int,bool>> dty => allowed term ids */
     private array $vocabularies = array();
     /** @var array<int,?int> rec id => record type (null = missing) */
@@ -72,21 +73,24 @@ final class RecordValidator
      * @param LanguageCodes $languages Language codes of value prefixes.
      * @param array<string,int> $codes Local ids: name (DT_NAME), shortSummary (DT_SHORT_SUMMARY),
      *        extendedDescription (DT_EXTENDED_DESCRIPTION), cmsPage (RT_CMS_PAGE),
-     *        cmsExtFiles (DT_CMS_EXTFILES).
+     *        cmsHome, cmsScript, cmsCss, cmsHeader, cmsFooter (server-resolved CMS ids).
      * @param bool|null $newTemporalFormat Store complex dates as JSON; null reads the database version (>= 1.3.14).
+     * @param bool $javaScriptAllowed Server authorization for code in the explicit CMS fields only.
      */
     public function __construct(
         DatabaseInterface $database,
         DefinitionLookup $definitions,
         LanguageCodes $languages,
         array $codes = array(),
-        ?bool $newTemporalFormat = null
+        ?bool $newTemporalFormat = null,
+        bool $javaScriptAllowed = false
     ) {
         $this->database = $database;
         $this->definitions = $definitions;
         $this->languages = $languages;
         $this->codes = array_map('intval', $codes);
         $this->newTemporalFormat = $newTemporalFormat;
+        $this->javaScriptAllowed = $javaScriptAllowed;
     }
 
     /**
@@ -217,7 +221,11 @@ final class RecordValidator
         switch($type){
             case 'freetext':
             case 'blocktext':
-                $text = $this->cleanText($fieldId, $type, (string)$value);
+                $text = $this->cleanText($rectypeId, $fieldId, $type, (string)$value);
+                if($text !== self::trim((string)$value)){
+                    $result->warning($key, $index, 'html_sanitized',
+                        'Unsupported HTML, JavaScript or styles were removed from field "'.$name.'"');
+                }
                 if($text === ''){ return null; }
                 $limit = self::lengthLimit($text);
                 if($limit > 0){
@@ -367,26 +375,10 @@ final class RecordValidator
         }
     }
 
-    /**
-     * Trim, remove script elements and (freetext) tag attributes other than src,
-     * class, style and href, as legacy _prepareDetails.
-     */
-    private function cleanText(int $fieldId, string $type, string $value): string
+    /** Also used for calculated and copied text so they cannot bypass the save policy. */
+    public function cleanText(int $rectypeId, int $fieldId, string $type, string $value): string
     {
-        $value = self::trim($value);
-        if($fieldId === ($this->codes['cmsExtFiles'] ?? -1)){ return $value; }
-        $value = (string)preg_replace('#<script(.*?)>(.*?)</script>#is', '', $value);
-        if($type === 'freetext'){
-            $allowed = array('src', 'class', 'style', 'href');
-            $allowed2 = implode('=|', $allowed).'=';
-            $regex = ')[^>]))*((?:';
-            $allowed = implode('|', $allowed);
-            $value = (string)preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex.$allowed
-                .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.$regex.$allowed
-                .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.$regex.$allowed
-                .')=[\'"][^\'"]*[\'"]\s*)?)[^>]*>#si', '<$1$2$3$4$5>', $value);
-        }
-        return $value;
+        return StoredText::clean($value, $type, $rectypeId, $fieldId, $this->codes, $this->javaScriptAllowed);
     }
 
     /** Trim including non-breaking spaces and BOM (legacy super_trim). */

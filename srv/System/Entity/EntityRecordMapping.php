@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace Heurist\System\Entity;
 
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Utilities\StoredText;
 
 /** Concept-code fields of a legacy table, read and written as record details. */
 abstract class EntityRecordMapping
@@ -107,7 +108,11 @@ abstract class EntityRecordMapping
             foreach((array)$details[$fieldId] as $item){
                 if(is_array($item)){ $item = $item['value'] ?? null; }
                 $item = $item === null ? '' : trim((string)$item);
-                if($item !== '' && !preg_match('/^[a-z]{3}:/', $item)){ $value = $item; break; }
+                if($item !== '' && !preg_match('/^[a-z]{3}:/', $item)){
+                    $type = $this->definitions->fieldType((int)$fieldId);
+                    $value = in_array($type, array('freetext', 'blocktext'), true) ? StoredText::clean($item, $type) : $item;
+                    break;
+                }
             }
             $columns[$mapping['column']] = $value;
         }

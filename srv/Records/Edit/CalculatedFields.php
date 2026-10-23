@@ -35,15 +35,17 @@ final class CalculatedFields
     private RecordStore $store;
     /** @var callable fn(string $formula, int $recordId): array{output:string,error:?string} */
     private $evaluate;
+    private ?RecordValidator $validator;
 
     /**
      * @param callable $evaluate Runs a Smarty formula for a record (SmartyTemplateRunner, txt, $r assigned).
      */
-    public function __construct(DefinitionLookup $definitions, RecordStore $store, callable $evaluate)
+    public function __construct(DefinitionLookup $definitions, RecordStore $store, callable $evaluate, ?RecordValidator $validator = null)
     {
         $this->definitions = $definitions;
         $this->store = $store;
         $this->evaluate = $evaluate;
+        $this->validator = $validator;
     }
 
     /**
@@ -70,6 +72,11 @@ final class CalculatedFields
             }
             $value = trim((string)($result['output'] ?? ''));
             if(in_array($value, array('NAN', 'INF', 'NULL'), true)){ $value = ''; }
+            $type = $this->definitions->fieldType($fieldId);
+            if(in_array($type, array('freetext', 'blocktext'), true)){
+                $value = $this->validator !== null ? $this->validator->cleanText($rectypeId, $fieldId, $type, $value)
+                    : \Heurist\Utilities\StoredText::clean($value, $type);
+            }
             if($value !== '' && $this->definitions->fieldType($fieldId) === 'resource'){
                 $target = ctype_digit($value) && intval($value)>0
                     ? $this->store->records()->header(intval($value), array('rec_ID', 'rec_RecTypeID', 'rec_FlagTemporary')) : null;
