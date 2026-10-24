@@ -120,6 +120,8 @@ final class ServiceFactory
     private array $reportEnvironment;
     /** @var (\Closure():array)|null Database setting "Languages" (translations), read when needed. */
     private ?\Closure $translationLanguages = null;
+    /** Whether the installation has a DeepL key: the legacy translator works (plan 25, meta.translator). */
+    private bool $translatorAvailable = false;
     /** @var array{root?:string,quota?:\Closure} File store root and disk quota (plan 20, /files writes). */
     private array $fileEnvironment = array();
     /** @var (\Closure(array):void)|null Sends a reminder now with the legacy mailer (plan 20, §10.9). */
@@ -208,6 +210,9 @@ final class ServiceFactory
             $languages = $system->settings->getDatabaseSetting('Languages');
             return is_array($languages) ? $languages : array();
         };
+        // machine translation: the legacy translator (usr_info.php translate_string) has a DeepL key
+        // (as System.php sysinfo api_Translator; plan 25)
+        $factory->translatorAvailable = !empty($GLOBALS['accessToken_DeepLAPI'] ?? null);
         // file store of the database and its disk quota (legacy fileUpload.php: 10 GB when not set)
         $factory->fileEnvironment = array(
             'root' => (string)$system->getSysDir(),
@@ -447,7 +452,8 @@ final class ServiceFactory
     {
         return new DefinitionController(
             new DefinitionSnapshotService($this->database, $this->runtime, $this->entityDirectory,
-                $this->translationLanguages ? ($this->translationLanguages)() : array(), $this->javaScriptAllowed()),
+                $this->translationLanguages ? ($this->translationLanguages)() : array(), $this->javaScriptAllowed(),
+                $this->translatorAvailable),
             $this->runtime
         );
     }

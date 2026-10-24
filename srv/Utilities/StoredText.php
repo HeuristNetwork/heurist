@@ -34,8 +34,9 @@ final class StoredText
                 return $cleaned == $json ? $value : (string)json_encode($cleaned, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             }
         }
-        // Plain text is also used for URLs and queries: do not entity-encode it.
-        if(!preg_match('/<\s*[a-z!\/?]/i', $value)){ return $value; }
+        // Plain text is also used for URLs and queries: do not entity-encode it. A tag starts with
+        // "<" directly followed by a letter, "!", "/" or "?" (as in a browser): "a < b" is text.
+        if(!preg_match('/<[a-z!\/?]/i', $value)){ return $value; }
         return self::trim(self::purifier($type)->purify($value));
     }
 

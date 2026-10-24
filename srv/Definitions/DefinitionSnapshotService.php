@@ -47,21 +47,26 @@ final class DefinitionSnapshotService
     /** @var array<int,string> Languages of the database setting "Languages" (db_languages.json). */
     private array $translationLanguages;
     private bool $javaScriptAllowed;
+    /** Whether the legacy translator (DeepL) is configured: meta.translator (plan 25). */
+    private bool $translator;
 
     /**
      * @param string $cacheDirectory Absolute path of the database "entity" dir, or '' to disable caching.
      * @param array<int,string> $translationLanguages The database setting "Languages" (3-letter codes),
      *        offered for translations in the record editor; empty: the legacy default list.
+     * @param bool $translator Whether the installation has a DeepL key (the record editor's Translate).
      */
     public function __construct(
         DatabaseInterface $database,
         RuntimeContext $runtime,
         string $cacheDirectory = '',
         array $translationLanguages = array(),
-        bool $javaScriptAllowed = false
+        bool $javaScriptAllowed = false,
+        bool $translator = false
     ) {
         $this->database = $database;
         $this->javaScriptAllowed = $javaScriptAllowed;
+        $this->translator = $translator;
         $this->runtime = $runtime;
         $this->cacheDirectory = $cacheDirectory === ''
             ? ''
@@ -86,6 +91,7 @@ final class DefinitionSnapshotService
     {
         $snapshot['meta']['javaScriptAllowed'] = $this->javaScriptAllowed;
         $snapshot['meta']['translationLanguages'] = $this->translationLanguages ?: self::TRANSLATION_LANGUAGES;
+        $snapshot['meta']['translator'] = $this->translator;
         return $snapshot;
     }
 
