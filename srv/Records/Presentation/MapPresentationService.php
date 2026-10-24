@@ -249,8 +249,22 @@ class MapPresentationService
             
             $fileId = $this->layers->value($record, 'DT_SERVICE_URL');
             $fileinfo = $this->layers->getUploadedFile($fileId);
+            $mbtiles = false;
             if(!empty($fileinfo)){
-                $url = $fileinfo['ulf_ExternalFileReference'];    
+                $url = $fileinfo['ulf_ExternalFileReference'];
+                // Registered MBTiles stacks store a relative filename, not a tile directory.
+                // The container's extension is unrelated to the images served by mbtiles.php.
+                $mbtiles = !preg_match('~^(?:[a-z][a-z0-9+.-]*:|//)~i', $url)
+                    && strtolower(pathinfo($url, PATHINFO_EXTENSION)) === 'mbtiles';
+                if($mbtiles){
+                    $trmId = intval($this->layers->value($record, 'DT_MIME_TYPE'));
+                    $extension = $trmId > 0 ? $this->terms->getTermCode($trmId) : null;
+                    $extension = $extension ?: 'png';
+                    $tileset = substr($url, 0, -strlen('.mbtiles'));
+                    $tileset = implode('/', array_map('rawurlencode', explode('/', ltrim($tileset, '/'))));
+                    $url = $this->runtime->baseUrl.'mbtiles.php?'
+                        .rawurlencode($this->runtime->databaseName).'/'.$tileset.'/{z}/{x}/{y}.'.$extension;
+                }
                 
                 if(!(strpos($url,'{q}')>0 || strpos($url,'{z}/{x}/{y}')>0)){
                     $url = rtrim($url,'/') . '/{z}/{x}/{y}.'.$fileinfo['ulf_MimeExt'];
@@ -279,7 +293,8 @@ class MapPresentationService
             //if($schema !== null){ $source['tileSchema'] = $schema; }
             //TMS naming schema
             $tmsSchema = $this->definitions->localId('trm', '2-548');
-            if(intval($schema) == $tmsSchema){
+            // mbtiles.php already converts XYZ coordinates to the stored TMS tile rows.
+            if(!$mbtiles && intval($schema) == $tmsSchema){
                 $source['tms'] = true;    
             }
             
