@@ -22,6 +22,7 @@ namespace Heurist\Definitions;
 
 use Heurist\Database\DatabaseInterface;
 use Heurist\Runtime\RuntimeContext;
+use Heurist\System\Users\UserGroupCodes;
 
 /** Builds and caches the read-only database-definitions snapshot. */
 final class DefinitionSnapshotService
@@ -35,9 +36,10 @@ final class DefinitionSnapshotService
      * (2: structure rows have "max"; 3: terms named as the report field tree -
      * term, code, conceptid, desc - by DefinitionLookup; 4: dbconst DT_DATA_SOURCE;
      * 5: dbconst RT_REGISTERED_FILE, the API domain of record types, plan 21;
-     * 6: CMS code field ids and per-response JavaScript authorization).
+     * 6: CMS code field ids and per-response JavaScript authorization;
+     * 7: dbconst of the user and group fields, plan 20 Phase 4d).
      */
-    private const FORMAT = 6;
+    private const FORMAT = 7;
 
     /** Languages offered for translations when the database has no own list (legacy default). */
     private const TRANSLATION_LANGUAGES = array('ENG', 'FRE', 'CHI', 'SPA', 'ITA', 'ARA', 'GER', 'POR', 'LAT', 'GRE', 'GRC', 'IND');
@@ -182,7 +184,8 @@ final class DefinitionSnapshotService
     /** Local IDs of reserved definitions/terms needed by definition-driven clients. */
     private function dbconst(): array
     {
-        return array(
+        // users and groups (plan 20, 4d): their DT_* constants, 0 until a concept code is given
+        return UserGroupCodes::localIds($this->lookup()) + array(
             'RT_RELATION'              => $this->concept('rty', 2, 1),
             'DT_PRIMARY_RESOURCE'      => $this->concept('dty', 2, 7),
             'DT_TARGET_RESOURCE'       => $this->concept('dty', 2, 5),

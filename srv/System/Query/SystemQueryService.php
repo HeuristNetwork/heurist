@@ -26,6 +26,8 @@ use Heurist\Runtime\RuntimeContext;
 use Heurist\System\Bookmarks\BookmarkRecordOutput;
 use Heurist\System\Entity\EntityRecordOutput;
 use Heurist\System\Reminders\ReminderRecordOutput;
+use Heurist\System\Groups\GroupRecordOutput;
+use Heurist\System\Users\UserRecordOutput;
 use Heurist\System\Tags\TagRecordOutput;
 use Heurist\Users\UserGroupRepository;
 
@@ -89,7 +91,8 @@ final class SystemQueryService
         $result = new SearchResult($ids, $total, $request->offset, $request->limit);
 
         if($request->detail === 'ids'){ return $result->toArray(); }
-        // a mapped type is given in the record format (plan 20, §10.1: tags from 4a, bookmarks and reminders from 4b)
+        // a mapped type is given in the record format (plan 20, §10.1: tags from 4a, bookmarks and reminders from 4b,
+        // users and groups from 4d)
         $output = $this->recordOutput($type);
         if($output !== null){ return $this->recordResponse($output, $type, $ids, $params, $recordId, $result); }
         $selection = $this->selectFields($request->fields, $schema, $recordId !== null);
@@ -126,6 +129,9 @@ final class SystemQueryService
             case 'tag': return new TagRecordOutput($this->database, $this->runtime);
             case 'bookmark': return new BookmarkRecordOutput($this->database, $this->runtime);
             case 'reminder': return new ReminderRecordOutput($this->database, $this->runtime);
+            // users and groups (plan 20, Phase 4d)
+            case 'user': return new UserRecordOutput($this->database, $this->runtime);
+            case 'group': return new GroupRecordOutput($this->database, $this->runtime);
         }
         return null;
     }

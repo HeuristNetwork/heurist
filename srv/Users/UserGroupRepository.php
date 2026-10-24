@@ -150,6 +150,66 @@ final class UserGroupRepository
         return (string)$this->database->fetchValue('SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID=?', array($userId), '');
     }
 
+    /** Columns of sysUGrps given to the user and group records (never ugr_Password). */
+    public const COLUMNS = array(
+        'ugr_ID', 'ugr_Type', 'ugr_Name', 'ugr_LongName', 'ugr_Description', 'ugr_eMail', 'ugr_FirstName',
+        'ugr_LastName', 'ugr_Department', 'ugr_Organisation', 'ugr_City', 'ugr_State', 'ugr_Postcode',
+        'ugr_Interests', 'ugr_Enabled', 'ugr_LastLoginTime', 'ugr_LoginCount', 'ugr_URLs', 'ugr_ORCID', 'ugr_Modified'
+    );
+
+    /**
+     * Rows of users or groups (plan 20, Phase 4d): the columns of COLUMNS, without the password.
+     *
+     * @param array<int,int> $ids
+     * @param string $type 'user' or 'workgroup'
+     * @return array<int,array<string,mixed>> id => row, in the order of the ids
+     */
+    public function rows(array $ids, string $type): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static function($id){ return $id > 0; })));
+        $rows = array();
+        foreach(array_chunk($ids, 1000) as $chunk){
+            foreach($this->database->fetchAll('SELECT '.implode(',', self::COLUMNS).' FROM sysUGrps WHERE ugr_Type=? AND ugr_ID IN ('
+                .implode(',', array_fill(0, count($chunk), '?')).')', array_merge(array($type), $chunk)) as $row){
+                $rows[intval($row['ugr_ID'])] = $row;
+            }
+        }
+        $ordered = array();
+        foreach($ids as $id){ if(isset($rows[$id])){ $ordered[$id] = $rows[$id]; } }
+        return $ordered;
+    }
+
+    /**
+     * Members of groups with their roles.
+     *
+     * @param array<int,int> $groupIds
+     * @return array<int,array<int,string>> group id => user id => admin|member
+     */
+    public function members(array $groupIds): array
+    {
+        $groupIds = array_values(array_unique(array_filter(array_map('intval', $groupIds), static function($id){ return $id > 0; })));
+        $members = array();
+        foreach(array_chunk($groupIds, 1000) as $chunk){
+            foreach($this->database->fetchAll('SELECT ugl_GroupID,ugl_UserID,ugl_Role FROM sysUsrGrpLinks WHERE ugl_GroupID IN ('
+                .implode(',', array_fill(0, count($chunk), '?')).') ORDER BY ugl_GroupID,ugl_UserID', $chunk) as $row){
+                $members[intval($row['ugl_GroupID'])][intval($row['ugl_UserID'])] = strtolower((string)$row['ugl_Role']) === 'admin' ? 'admin' : 'member';
+            }
+        }
+        return $members;
+    }
+
+    /**
+     * Whether a name (ugr_Name, users and groups share it) or a user e-mail is taken by
+     * another user or group than the given one.
+     */
+    public function taken(string $column, string $value, int $exceptId = 0): bool
+    {
+        if(!in_array($column, array('ugr_Name', 'ugr_eMail'), true)){ throw new \InvalidArgumentException('Not a unique column: '.$column); }
+        $sql = 'SELECT COUNT(*) FROM sysUGrps WHERE LOWER('.$column.')=LOWER(?) AND ugr_ID<>?'
+            .($column === 'ugr_eMail' ? " AND ugr_Type='user'" : '');
+        return intval($this->database->fetchValue($sql, array($value, $exceptId), 0)) > 0;
+    }
+
     /**
      * Groups of a user with the user's role.
      *

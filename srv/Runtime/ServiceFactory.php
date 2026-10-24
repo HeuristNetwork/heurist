@@ -98,6 +98,12 @@ use Heurist\System\Bookmarks\BookmarkRecordMapping;
 use Heurist\System\Bookmarks\BookmarkWriteService;
 use Heurist\System\Reminders\ReminderRecordMapping;
 use Heurist\System\Reminders\ReminderWriteService;
+use Heurist\System\Users\UserRecordMapping;
+use Heurist\System\Users\UserWriteService;
+use Heurist\System\Groups\GroupRecordMapping;
+use Heurist\System\Groups\GroupWriteService;
+use Heurist\System\Entity\EntityImageService;
+use Heurist\Files\EntityImageStorage;
 use Heurist\System\Tags\TagRecordMapping;
 use Heurist\System\Tags\TagWriteService;
 
@@ -118,6 +124,9 @@ final class ServiceFactory
     private array $fileEnvironment = array();
     /** @var (\Closure(array):void)|null Sends a reminder now with the legacy mailer (plan 20, §10.9). */
     private ?\Closure $reminderSender = null;
+
+    /** @var array<string,\Closure> Legacy code of the user and group writes (plan 20, 4d): hash, delete, notify. */
+    private array $userGroupLegacy = array();
 
     /** Build the PDO and runtime boundary from the current legacy initialization. */
     public static function fromLegacySystem($system): self
@@ -215,6 +224,31 @@ final class ServiceFactory
                 throw new \RuntimeException(is_array($error) ? (string)($error['message'] ?? '') : '');
             }
         };
+        // users and groups (plan 20, 4d): the legacy password hash, delete (with its checks and
+        // clean-up) and e-mails of DbSysUsers / DbSysGroups and dbsUsersGroups.php
+        $legacyError = static function() use ($system): string {
+            $error = $system->getError();
+            return is_array($error) ? (string)($error['message'] ?? '') : '';
+        };
+        $factory->userGroupLegacy = array(
+            'hash' => static function(string $password): string {
+                class_exists('\hserv\entity\DbSysUsers'); // loads dbsUsersGroups.php (hash_it)
+                return (string)\hash_it($password);
+            },
+            'delete' => static function(string $type, int $id) use ($system, $legacyError): void {
+                // the legacy delete removes the entity image (as LookupController, DeepL)
+                if(!defined('HEURIST_FILESTORE_ROOT')){ define('HEURIST_FILESTORE_ROOT', $system->getFileStoreRootFolder()); }
+                $entity = $type === 'group'
+                    ? new \hserv\entity\DbSysGroups($system, array('ugr_ID' => $id))
+                    : new \hserv\entity\DbSysUsers($system, array('ugr_ID' => $id));
+                if($entity->delete() === false){ throw new \RuntimeException($legacyError()); }
+            },
+            'notify' => static function(int $userId, ?string $password, bool $approval) use ($system, $legacyError): void {
+                class_exists('\hserv\entity\DbSysUsers');
+                if(!\user_EmailApproval($system, $userId, (string)$password, $approval)){ throw new \RuntimeException($legacyError()); }
+                \user_SyncCommonCredentials($system, $userId, $approval);
+            }
+        );
         return $factory;
     }
 
@@ -438,11 +472,33 @@ final class ServiceFactory
             return new SystemEditController($query, $this->runtime);
         }
         $definitions = DefinitionLookup::shared($this->database);
+        $users = new UserWriteService($this->database, $this->runtime, new UserRecordMapping($definitions), $this->userGroupLegacy);
+        $groups = new GroupWriteService($this->database, $this->runtime, new GroupRecordMapping($definitions),
+            $this->userGroupLegacy['delete'] ?? null);
         return new SystemEditController($query, $this->runtime, array(
             'tag' => new TagWriteService($this->database, $this->runtime, new TagRecordMapping($definitions)),
             'bookmark' => new BookmarkWriteService($this->database, $this->runtime, new BookmarkRecordMapping($definitions)),
             'reminder' => new ReminderWriteService($this->database, $this->runtime, new ReminderRecordMapping($definitions),
-                $this->reminderSender)
+                $this->reminderSender),
+            'user' => $users,
+            'group' => $groups
+        ), null, null, $this->entityImages($users, $groups));
+    }
+
+    /**
+     * Images of users and groups (plan 20, 4d): the legacy entity folders, uploads as /files.
+     * Null without a file store.
+     */
+    public function entityImages(UserWriteService $users, GroupWriteService $groups, ?FilePaths $paths = null): ?EntityImageService
+    {
+        $root = $paths !== null ? $paths->root : (string)($this->fileEnvironment['root'] ?? '');
+        if($root === ''){ return null; }
+        $paths = $paths ?? new FilePaths($root);
+        $uploads = new ChunkedUpload($paths->uploadSessions(), $this->runtime->userId, FileRepository::shared($this->database)->mimeTypes(),
+            null, self::iniBytes((string)ini_get('post_max_size')));
+        return new EntityImageService(new EntityImageStorage($paths->root.'entity/'), $uploads, $this->runtime, array(
+            'user' => static function(int $id) use ($users): void { $users->assertCanEditImage($id); },
+            'group' => static function(int $id) use ($groups): void { $groups->assertCanEditImage($id); }
         ));
     }
 

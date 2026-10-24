@@ -19,6 +19,9 @@
 *   POST   /sys/bookmark/0, PUT / PATCH / DELETE /sys/bookmark/{id}, POST /sys/bookmark/{id}/validate
 *   POST   /sys/reminder/0, PUT / PATCH / DELETE /sys/reminder/{id}, POST /sys/reminder/{id}/validate
 *   POST   /sys/reminder/send           e-mail the reminder of the body now, without saving it
+*   POST /sys/user/0, PUT / PATCH / DELETE /sys/user/{id}; the same for /sys/group (plan 20, 4d)
+*   POST   /sys/group/{id}/members      {add: [user ids], role} | {remove: [user ids]}
+*   GET | PUT | DELETE /sys/{user|group}/{id}/image   the image ({"upload": token} to put one)
 *
 * The other types are read only for now (405). The reads stay SystemQueryController.
 *
@@ -43,6 +46,7 @@ use Heurist\Runtime\ErrorReporter;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\System\Query\SystemEntitySchemaRegistry;
 use Heurist\System\Query\SystemQueryService;
+use Heurist\System\Entity\EntityImageService;
 use Heurist\System\Entity\EntityWriteService;
 
 /** Write routes of /sys. */
@@ -52,6 +56,7 @@ final class SystemEditController
     private RuntimeContext $runtime;
     /** @var array<string,EntityWriteService> Write service by type (tag, bookmark, reminder). */
     private array $services;
+    private ?EntityImageService $images;
     private ApiResponse $response;
     private ErrorReporter $errors;
 
@@ -60,11 +65,13 @@ final class SystemEditController
         RuntimeContext $runtime,
         array $services = array(),
         ?ApiResponse $response = null,
-        ?ErrorReporter $errors = null
+        ?ErrorReporter $errors = null,
+        ?EntityImageService $images = null
     ) {
         $this->query = $query;
         $this->runtime = $runtime;
         $this->services = $services;
+        $this->images = $images;
         $this->response = $response ?? new ApiResponse();
         $this->errors = $errors ?? new ErrorReporter();
     }
@@ -105,6 +112,21 @@ final class SystemEditController
         }
         if(!preg_match('/^\d+$/', $second)){ throw new RecordEditException(404, 'not_found', 'Unknown /sys route'); }
         $id = intval($second);
+        // the image of a user or group (plan 20, 4d)
+        if($action === 'image' && $this->images !== null){
+            $this->allow($method, array('GET', 'PUT', 'DELETE'));
+            if($method === 'GET'){ return array(200, $this->images->get($type, $id)); }
+            SameSiteGuard::assert($this->runtime, $request, $method === 'PUT', $login);
+            return array(200, $method === 'PUT' ? $this->images->put($type, $id, $json) : $this->images->delete($type, $id));
+        }
+        if($type === 'group' && $action === 'members'){
+            $this->allow($method, array('POST'));
+            SameSiteGuard::assert($this->runtime, $request, true, $login);
+            $result = $service->members($id, $json);
+            $body = $this->item($params, $type, $id);
+            $body['meta']['members'] = $result['members'];
+            return array(200, $body);
+        }
         if($action === 'validate'){
             $this->allow($method, array('POST'));
             SameSiteGuard::assert($this->runtime, $request, true, $login);
