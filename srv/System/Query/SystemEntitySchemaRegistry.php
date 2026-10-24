@@ -50,7 +50,9 @@ final class SystemEntitySchemaRegistry
             'constraint'=>'s.ugr_Type="user"',
             'headers'=>array(
                 'id'=>array('column'=>'ugr_ID', 'output'=>'rec_ID', 'type'=>'integer'),
-                'title'=>array('column'=>'ugr_Name', 'output'=>'rec_Title', 'type'=>'text'),
+                // the title is "Given Family (login)": a title search looks in the three (plan 24 review)
+                'title'=>array('column'=>'ugr_Name', 'output'=>'rec_Title', 'type'=>'text',
+                    'search'=>array('ugr_Name', 'ugr_FirstName', 'ugr_LastName')),
                 'modified'=>array('column'=>'ugr_Modified', 'output'=>'rec_Modified', 'type'=>'date')
             ),
             'fields'=>array(

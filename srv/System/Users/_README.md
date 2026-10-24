@@ -4,8 +4,9 @@
 
 Users on `/sys/user` in the record format (plan 20, Phase 4d; heurist-explorer
 `docs/development/20 System-Data-Transition-and-Files-Plan.md` §10.13). The fields are named
-by DT_* constants: `UserGroupCodes.php` maps them to concept codes (the new fields have an
-empty code until the core definitions have them; such a field is left out).
+by DT_* constants: `UserGroupCodes.php` maps them to concept codes (user codes given 2026-10-24;
+the group Admins / Members still have an empty code; a field without a code, or one the
+database lacks, is left out).
 
 ## Key files
 

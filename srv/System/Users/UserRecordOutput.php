@@ -46,6 +46,12 @@ final class UserRecordOutput extends EntityRecordOutput
     }
 
     /** {@inheritdoc} */
+    protected function entityImageType(): ?string
+    {
+        return 'user';
+    }
+
+    /** {@inheritdoc} */
     protected function headers(): array
     {
         return self::HEADERS;

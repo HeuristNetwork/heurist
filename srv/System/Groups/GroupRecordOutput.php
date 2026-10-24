@@ -2,11 +2,10 @@
 /**
 * GroupRecordOutput.php - Group records of the /sys domain
 *
-* Plan 20, Phase 4d (§10.13): /sys/group in the record format, with the members as the
-* Admins and Members fields. The former keyword `role` (the current user's role in the
+* Plan 20, Phase 4d (§10.13): /sys/group in the record format. The former keyword `role` (the current user's role in the
 * group: admin, member or none) is still given as details.role (UserGroupManager); the keyword
-* `members` (and _all) gives details.members [{id, role}], also while the database lacks the
-* Admins and Members fields.
+* `members` (and _all) gives details.members [{id, role}]: the relmarker DT_GROUP_MEMBERSHIP
+* (plan 24), whose relation type is the role.
 *
 * @project     Heurist academic knowledge management system
 * @package     System\Groups
@@ -53,6 +52,12 @@ final class GroupRecordOutput extends EntityRecordOutput
     }
 
     /** {@inheritdoc} */
+    protected function entityImageType(): ?string
+    {
+        return 'group';
+    }
+
+    /** {@inheritdoc} */
     protected function headers(): array
     {
         return self::HEADERS;
@@ -70,7 +75,7 @@ final class GroupRecordOutput extends EntityRecordOutput
     /** {@inheritdoc} */
     protected function toRecord(array $row): array
     {
-        return $this->mapping->toRecord($row, $this->members[intval($row['ugr_ID'])] ?? array());
+        return $this->mapping->toRecord($row);
     }
 
     /** {@inheritdoc} A group is its own owner. */

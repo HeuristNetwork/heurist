@@ -11,8 +11,8 @@
 * - the name is required and unique (users and groups share the names);
 * - a group keeps at least one admin;
 * - delete: legacy DbSysGroups::delete (never group 1, nor a group that owns records).
-* The members are the Admins and Members fields of the record (when the database has them)
-* and the members action, both kept in sysUsrGrpLinks.
+* The members (sysUsrGrpLinks, the relmarker DT_GROUP_MEMBERSHIP of plan 24) are written by
+* the members action only.
 *
 * @project     Heurist academic knowledge management system
 * @package     System\Groups
@@ -95,29 +95,20 @@ final class GroupWriteService extends EntityWriteService
         }
         $columns = $this->columns($this->mapping->writableColumns($input->details()), $row, $method === 'PUT');
         $columns['ugr_Modified'] = date('Y-m-d H:i:s');
-        $members = $this->mapping->membersOfRequest($input->details());
-        if($members !== null){
-            $this->assertUsers(array_keys($members));
-            // a new group: its creator is an admin (as legacy)
-            if($row === null){ $members[$this->runtime->userId] = 'admin'; }
-            if(!in_array('admin', $members, true)){ throw RecordEditException::invalid('A group has at least one admin'); }
-        }
         if($dryRun){ return array('groupId' => $groupId, 'created' => false, 'issues' => array()); }
 
         if($row === null){
-            $groupId = EntityTransaction::run($this->database, function() use ($columns, $members){
+            $groupId = EntityTransaction::run($this->database, function() use ($columns){
                 // users and groups share the table: a group has no password and no e-mail (legacy placeholders)
                 $groupId = $this->table->insert($columns + array('ugr_Type' => 'workgroup', 'ugr_Enabled' => 'y',
                     'ugr_Password' => 'PASSWORD NOT REQUIRED', 'ugr_eMail' => 'EMAIL NOT SET FOR '.$columns['ugr_Name']));
-                $this->writeMembers($groupId, $members ?? array($this->runtime->userId => 'admin'), array());
+                // its creator is its admin (as legacy)
+                $this->writeMembers($groupId, array($this->runtime->userId => 'admin'), array());
                 return $groupId;
             });
             return array('groupId' => $groupId, 'created' => true, 'issues' => array());
         }
-        EntityTransaction::run($this->database, function() use ($groupId, $columns, $members){
-            $this->table->update($groupId, $columns);
-            if($members !== null){ $this->writeMembers($groupId, $members, $this->groups->members(array($groupId))[$groupId] ?? array()); }
-        });
+        $this->table->update($groupId, $columns);
         return array('groupId' => $groupId, 'created' => false, 'issues' => array());
     }
 

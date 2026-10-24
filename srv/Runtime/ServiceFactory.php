@@ -456,7 +456,7 @@ final class ServiceFactory
     public function systemQueryController(): SystemQueryController
     {
         return new SystemQueryController(
-            new SystemQueryService($this->database, $this->runtime),
+            new SystemQueryService($this->database, $this->runtime, null, $this->entityImageStorage()),
             $this->runtime
         );
     }
@@ -467,7 +467,7 @@ final class ServiceFactory
      */
     public function systemEditController(): SystemEditController
     {
-        $query = new SystemQueryService($this->database, $this->runtime);
+        $query = new SystemQueryService($this->database, $this->runtime, null, $this->entityImageStorage());
         if(!($this->database instanceof WritableDatabaseInterface)){
             return new SystemEditController($query, $this->runtime);
         }
@@ -483,6 +483,13 @@ final class ServiceFactory
             'user' => $users,
             'group' => $groups
         ), null, null, $this->entityImages($users, $groups));
+    }
+
+    /** The legacy entity image folders of users and groups; null without a file store. */
+    private function entityImageStorage(): ?EntityImageStorage
+    {
+        $root = (string)($this->fileEnvironment['root'] ?? '');
+        return $root === '' ? null : new EntityImageStorage($root.'entity/');
     }
 
     /**

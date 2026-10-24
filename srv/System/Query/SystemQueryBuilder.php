@@ -117,6 +117,9 @@ final class SystemQueryBuilder
             case 't': case 'type': case 'typeid': case 'typename':
                 $requested = is_array($value) ? reset($value) : $value;
                 $requested = strtolower(trim((string)$requested));
+                // the record type id of a type in the record format (plan 20 §10, plan 24)
+                $rectypeId = intval($this->schema['rectypeId'] ?? 0);
+                if($rectypeId > 0 && ctype_digit($requested) && intval($requested) === $rectypeId){ return '1=1'; }
                 if($requested !== $this->schema['type'] && $requested !== $this->schema['type'].'s'){
                     throw new QueryValidationException('System query type does not match '.$this->schema['type']);
                 }
@@ -124,7 +127,7 @@ final class SystemQueryBuilder
             case 'id': case 'ids':
                 return $this->idCondition($value, $state);
             case 'title':
-                return $this->textCondition($this->column($this->schema['headers']['title']), $value, $state);
+                return $this->titleCondition($value, $state);
             case 'modified':
                 return $this->values->headerDateCondition($this->column($this->schema['headers']['modified']), $value, $state);
             case 'owner': case 'workgroup': case 'wg':
@@ -138,7 +141,11 @@ final class SystemQueryBuilder
                 if($suffix === 'record' && $this->schema['type'] === 'tag'){
                     return $this->recordTagsCondition($value, $state);
                 }
-                if($suffix === '' || !isset($this->schema['fields'][$suffix])){
+                // f without a field: the text of the record, its title (the search box of a record list)
+                if($suffix === ''){
+                    return $this->titleCondition($value, $state);
+                }
+                if(!isset($this->schema['fields'][$suffix])){
                     throw new QueryValidationException('Unknown '.$this->schema['type'].' field: '.$suffix);
                 }
                 $field = $this->schema['fields'][$suffix];
@@ -228,6 +235,16 @@ final class SystemQueryBuilder
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         foreach($ids as $id){ $state->bind($id, 'i'); }
         return $this->column($this->schema['headers']['id']).' IN ('.$placeholders.')';
+    }
+
+    /** The title: its column, or any of its search columns (a user: login and names). */
+    private function titleCondition($value, SqlBuildContext $state): string
+    {
+        $title = $this->schema['headers']['title'];
+        $columns = $title['search'] ?? array($title['column']);
+        $conditions = array();
+        foreach($columns as $column){ $conditions[] = $this->textCondition($this->column(array('column' => $column)), $value, $state); }
+        return count($conditions) === 1 ? $conditions[0] : '('.implode(' OR ', $conditions).')';
     }
 
     private function textCondition(string $column, $value, SqlBuildContext $state): string

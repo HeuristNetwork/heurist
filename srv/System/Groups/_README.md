@@ -3,8 +3,9 @@
 ## Overview
 
 Workgroups on `/sys/group` in the record format (plan 20, Phase 4d, §10.13): name, long name
-(DT_SHORT_SUMMARY), description, URLs, and the members as the repeatable pointer fields Admins
-and Members (DT_GROUP_ADMINS / DT_GROUP_MEMBERS, `System/Users/UserGroupCodes`).
+(DT_SHORT_SUMMARY), description, URLs. The members are the relmarker field DT_GROUP_MEMBERSHIP
+(2-1200, vocabulary TRM_GROUP_ROLE: admin / member; plan 24): given by the keyword `members`,
+written by `POST /sys/group/{id}/members` only (`System/Users/UserGroupCodes`).
 
 ## Key files
 

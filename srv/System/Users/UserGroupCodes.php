@@ -33,7 +33,7 @@ final class UserGroupCodes
         'RT_SYS_GROUP' => '2-1108'
     );
 
-    /** Fields: existing core fields, and the new ones ('' until Artem gives the concept code). */
+    /** Fields: core fields (user codes given by Artem 2026-10-24); '' = no concept code yet. */
     public const FIELDS = array(
         'DT_NAME' => '2-1',                     // user: family name; group: name
         'DT_SHORT_SUMMARY' => '2-3',            // group: long name
@@ -42,22 +42,24 @@ final class UserGroupCodes
         'DT_EMAIL' => '2-23',                   // user: e-mail
         'DT_DEPARTMENT' => '3-1016',            // user: department / branch / unit
         'DT_URL' => '3-1058',                   // URL(s), comma separated
-        'DT_LOGIN_NAME' => '',                  // user: login name (unique)
-        'DT_PASSWORD' => '',                    // user: password, write only
-        'DT_ACCOUNT_STATUS' => '',              // user: enum TRM_ACCOUNT_STATUS (ugr_Enabled)
-        'DT_ORGANISATION_NAME' => '',           // user: organisation (text)
-        'DT_ORCID' => '',                       // user: ORCID iD
-        'DT_ADDRESS' => '',                     // user: city / state / postcode, one line each
-        'DT_RESEARCH_INTERESTS' => '',          // user: research interests
-        'DT_LAST_LOGIN' => '',                  // user: last login (read only)
-        'DT_LOGIN_COUNT' => '',                 // user: number of logins (read only)
-        'DT_GROUP_ADMINS' => '',                // group: pointers to the admin users
-        'DT_GROUP_MEMBERS' => ''                // group: pointers to the member users
+        'DT_LOGIN_NAME' => '2-1194',            // user: login name (unique)
+        'DT_PASSWORD' => '2-1195',              // user: password, write only
+        'DT_ACCOUNT_STATUS' => '2-1199',        // user: enum TRM_ACCOUNT_STATUS (ugr_Enabled)
+        'DT_ORGANISATION_NAME' => '2-1198',     // user: organisation (text)
+        'DT_ORCID' => '2-37',                   // user: ORCID iD (core "Unique public identifier")
+        'DT_ADDRESS' => '2-1197',               // user: city / state / postcode, one line each
+        'DT_RESEARCH_INTERESTS' => '2-1196',    // user: research interests
+        'DT_LAST_LOGIN' => '2-9',               // user: last login (read only; core "Date")
+        'DT_LOGIN_COUNT' => '2-1189',           // user: number of logins (read only; core "Usage count")
+        // group: relmarker to the users, the role as the relation type (plan 24); hidden in the
+        // structure, written through POST /sys/group/{id}/members (sysUsrGrpLinks)
+        'DT_GROUP_MEMBERSHIP' => '2-1200'
     );
 
     /** Vocabularies. */
     public const TERMS = array(
-        'TRM_ACCOUNT_STATUS' => ''              // y, n, y_no_add, y_no_delete, y_no_add_delete
+        'TRM_ACCOUNT_STATUS' => '2-10566',      // y, n, y_no_add, y_no_delete, y_no_add_delete
+        'TRM_GROUP_ROLE' => '2-10572'           // term codes admin, member (ugl_Role)
     );
 
     /** Concept code of a constant ('' when unknown or not yet given). */

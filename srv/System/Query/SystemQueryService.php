@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace Heurist\System\Query;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Files\EntityImageStorage;
 use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\SearchRequest;
 use Heurist\Records\Query\SearchResult;
@@ -37,6 +38,8 @@ final class SystemQueryService
     private DatabaseInterface $database;
     private RuntimeContext $runtime;
     private SystemEntitySchemaRegistry $schemas;
+    /** Images of users and groups (their rec_ThumbnailURL); null without a file store. */
+    private ?EntityImageStorage $entityImages;
 
     /** @var array<int,string>|null Current user's role per group, loaded once. */
     private ?array $roles = null;
@@ -44,11 +47,13 @@ final class SystemQueryService
     public function __construct(
         DatabaseInterface $database,
         RuntimeContext $runtime,
-        ?SystemEntitySchemaRegistry $schemas = null
+        ?SystemEntitySchemaRegistry $schemas = null,
+        ?EntityImageStorage $entityImages = null
     ) {
         $this->database = $database;
         $this->runtime = $runtime;
         $this->schemas = $schemas ?? new SystemEntitySchemaRegistry();
+        $this->entityImages = $entityImages;
     }
 
     /** Execute a collection or item request and return its stable representation. */
@@ -57,6 +62,9 @@ final class SystemQueryService
         $rawQuery = $params['query'] ?? $params['q'] ?? null;
         $type = $this->schemas->typeFromQuery($rawQuery, $pathType);
         $schema = $this->schemas->get($type);
+        // a mapped type is also named by its record type id (rec_RecTypeID: t:133, the record manager)
+        $mapped = $this->recordOutput($type);
+        if($mapped !== null){ $schema['rectypeId'] = $mapped->mapping()->rectypeId(); }
         $builder = new SystemQueryBuilder($this->database, $this->runtime, $schema);
 
         if($recordId !== null){
@@ -130,8 +138,11 @@ final class SystemQueryService
             case 'bookmark': return new BookmarkRecordOutput($this->database, $this->runtime);
             case 'reminder': return new ReminderRecordOutput($this->database, $this->runtime);
             // users and groups (plan 20, Phase 4d)
-            case 'user': return new UserRecordOutput($this->database, $this->runtime);
-            case 'group': return new GroupRecordOutput($this->database, $this->runtime);
+            case 'user': case 'group':
+                $output = $type === 'user' ? new UserRecordOutput($this->database, $this->runtime) : new GroupRecordOutput($this->database, $this->runtime);
+                // rec_ThumbnailURL: the entity image (plan 24 review)
+                $output->setEntityImages($this->entityImages);
+                return $output;
         }
         return null;
     }
@@ -142,7 +153,8 @@ final class SystemQueryService
      */
     private function recordResponse(EntityRecordOutput $output, string $type, array $ids, array $params, ?int $recordId, SearchResult $result): ?array
     {
-        $records = $output->records($ids, $params['fields'] ?? null, $recordId !== null);
+        $resolve = !empty($params['resolveDetails']) && $params['resolveDetails'] !== '0' && $params['resolveDetails'] !== 'false';
+        $records = $output->records($ids, $params['fields'] ?? null, $recordId !== null, $resolve);
         if($recordId !== null && empty($records['records'])){ return null; }
         $response = array(
             'records' => $records['records'],

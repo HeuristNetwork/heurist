@@ -23,6 +23,8 @@ declare(strict_types=1);
 namespace Heurist\System\Entity;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
+use Heurist\Files\EntityImageStorage;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Data\RecordFieldSelector;
 use Heurist\Runtime\RuntimeContext;
@@ -33,6 +35,8 @@ abstract class EntityRecordOutput
 {
     protected DatabaseInterface $database;
     protected RuntimeContext $runtime;
+    /** Images of users and groups (rec_ThumbnailURL); null without a file store. */
+    private ?EntityImageStorage $entityImages = null;
 
     public function __construct(DatabaseInterface $database, RuntimeContext $runtime)
     {
@@ -42,6 +46,18 @@ abstract class EntityRecordOutput
 
     /** The mapping of the type. */
     abstract public function mapping(): EntityRecordMapping;
+
+    /** The entity images of the type (rec_ThumbnailURL: users and groups, plan 24 review). */
+    public function setEntityImages(?EntityImageStorage $storage): void
+    {
+        $this->entityImages = $storage;
+    }
+
+    /** Type of the entity images (EntityImageStorage: user, group); null: the type has none. */
+    protected function entityImageType(): ?string
+    {
+        return null;
+    }
 
     /** Headers of a record of the type (in this order). */
     abstract protected function headers(): array;
@@ -93,9 +109,10 @@ abstract class EntityRecordOutput
      * Records in the order of the ids, and the field metadata of the selection.
      *
      * @param mixed $fields `fields` of the request (null: rec_ID, rec_RecTypeID, rec_Title; an item: _all).
+     * @param bool $resolveDetails Enum values as terms `{value, trm_ID, trm_Label, trm_Code}` (as /records).
      * @return array{records:array<int,array>,headers:array<int,string>,fields:array<int,array>}
      */
-    public function records(array $ids, $fields, bool $item = false): array
+    public function records(array $ids, $fields, bool $item = false, bool $resolveDetails = false): array
     {
         $selection = $this->selection($fields, $item);
         $rows = $this->rows($ids);
@@ -128,9 +145,13 @@ abstract class EntityRecordOutput
             if(in_array('rec_OwnerName', $selection['virtuals'], true)){
                 $record['rec_OwnerName'] = $owners[intval($rows[$id][$ownerColumn])] ?? null;
             }
+            if(in_array('rec_ThumbnailURL', $selection['virtuals'], true)){
+                $record['rec_ThumbnailURL'] = $this->thumbnailUrl(intval($id));
+            }
             $this->addSpecial($record, $rows[$id], $mapped, $selection);
             $records[] = $record;
         }
+        if($resolveDetails){ $records = $this->resolveTerms($records); }
         return array(
             'records' => $records,
             'headers' => array_values(array_merge($selection['headers'], $selection['virtuals'], $this->specialHeaders($selection))),
@@ -169,8 +190,56 @@ abstract class EntityRecordOutput
         // a record of the type has only its own headers; _all: all of them
         $headers = $special['all'] ? $this->headers() : array_values(array_intersect($this->headers(), $selection['headers']));
         $selection['headers'] = array_values(array_unique(array_merge(array('rec_ID', 'rec_RecTypeID', 'rec_Title'), $headers)));
-        $selection['virtuals'] = array_values(array_intersect($selection['virtuals'], array('rec_OwnerName')));
+        $virtuals = $this->entityImageType() !== null ? array('rec_OwnerName', 'rec_ThumbnailURL') : array('rec_OwnerName');
+        $selection['virtuals'] = array_values(array_intersect($selection['virtuals'], $virtuals));
         return $selection + array('special' => $special);
+    }
+
+    /**
+     * Enum values as terms, as /records gives them with resolveDetails (the built-in record
+     * renderer shows their labels, plan 24 review).
+     */
+    private function resolveTerms(array $records): array
+    {
+        $definitions = DefinitionLookup::shared($this->database);
+        $enums = array();
+        $termIds = array();
+        foreach($records as $record){
+            foreach(is_array($record['details'] ?? null) ? $record['details'] : array() as $fieldId => $values){
+                if(!isset($enums[$fieldId])){
+                    $type = (string)($definitions->field(intval($fieldId))['type'] ?? '');
+                    $enums[$fieldId] = $type === 'enum' || $type === 'relationtype';
+                }
+                if(!$enums[$fieldId]){ continue; }
+                foreach($values as $value){ if(is_scalar($value) && ctype_digit((string)$value)){ $termIds[intval($value)] = true; } }
+            }
+        }
+        if(empty($termIds)){ return $records; }
+        $terms = $definitions->terms(array_keys($termIds));
+        foreach($records as &$record){
+            if(!is_array($record['details'] ?? null)){ continue; }
+            foreach($record['details'] as $fieldId => &$values){
+                if(empty($enums[$fieldId])){ continue; }
+                foreach($values as &$value){
+                    if(!is_scalar($value)){ continue; }
+                    $term = $terms[intval($value)] ?? null;
+                    $value = array('value' => (string)$value, 'trm_ID' => (string)$value, 'trm_Label' => $term['term'] ?? null,
+                        'trm_Code' => $term['code'] ?? null);
+                }
+                unset($value);
+            }
+            unset($values);
+        }
+        unset($record);
+        return $records;
+    }
+
+    /** The legacy URL of the thumbnail of an entity's image; null when it has none. */
+    private function thumbnailUrl(int $id): ?string
+    {
+        $type = $this->entityImageType();
+        if($type === null || $this->entityImages === null || $this->entityImages->path($type, $id, 'thumbnail') === null){ return null; }
+        return EntityImageStorage::url($this->runtime->baseUrl, $this->runtime->databaseName, $type, $id, 'thumbnail');
     }
 
     /** Metadata of the selected fields (as /records). */

@@ -1404,8 +1404,8 @@ paths:
           written only (hashed as legacy) and never given back.
 
         - **group** (any user, who becomes its admin) - record type System User Group 2-1108. A unique name is
-          required; admins and members are the fields DT_GROUP_ADMINS / DT_GROUP_MEMBERS (when the database has
-          them) or POST /sys/group/{id}/members.
+          required; the members (relmarker DT_GROUP_MEMBERSHIP 2-1200, the role as relation type) are written by
+          POST /sys/group/{id}/members only.
       security:
       - bearerAuth: []
       requestBody:
