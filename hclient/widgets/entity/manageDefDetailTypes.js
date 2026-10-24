@@ -2186,7 +2186,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                               rst_PointerMode: this._editing.getValue('rst_PointerMode'),
                               rst_PointerBrowseFilter: this._editing.getValue('rst_PointerBrowseFilter'),
                               rst_CreateChildIfRecPtr: this._editing.getValue('rst_CreateChildIfRecPtr'),
-                              rst_DefaultValue_resource: this._editing.getValue('rst_DefaultValue_resource')
+                              rst_DefaultValue_resource: this._editing.getValue('rst_DefaultValue_resource'),
+                              rst_DefaultValue_file: this._editing.getValue('rst_DefaultValue_file')
                           };
                               
             this._resultOnSelection = { rst_fields:rst_fields, updatedRstField: this.updatedRstField };

@@ -34,15 +34,17 @@ final class DefinitionSnapshotService
      * Snapshot format; a cached snapshot of an older format is rebuilt
      * (2: structure rows have "max"; 3: terms named as the report field tree -
      * term, code, conceptid, desc - by DefinitionLookup; 4: dbconst DT_DATA_SOURCE;
-     * 5: dbconst RT_REGISTERED_FILE, the API domain of record types, plan 21).
+     * 5: dbconst RT_REGISTERED_FILE, the API domain of record types, plan 21;
+     * 6: CMS code field ids and per-response JavaScript authorization).
      */
-    private const FORMAT = 5;
+    private const FORMAT = 6;
 
     /** Languages offered for translations when the database has no own list (legacy default). */
     private const TRANSLATION_LANGUAGES = array('ENG', 'FRE', 'CHI', 'SPA', 'ITA', 'ARA', 'GER', 'POR', 'LAT', 'GRE', 'GRC', 'IND');
 
     /** @var array<int,string> Languages of the database setting "Languages" (db_languages.json). */
     private array $translationLanguages;
+    private bool $javaScriptAllowed;
 
     /**
      * @param string $cacheDirectory Absolute path of the database "entity" dir, or '' to disable caching.
@@ -53,9 +55,11 @@ final class DefinitionSnapshotService
         DatabaseInterface $database,
         RuntimeContext $runtime,
         string $cacheDirectory = '',
-        array $translationLanguages = array()
+        array $translationLanguages = array(),
+        bool $javaScriptAllowed = false
     ) {
         $this->database = $database;
+        $this->javaScriptAllowed = $javaScriptAllowed;
         $this->runtime = $runtime;
         $this->cacheDirectory = $cacheDirectory === ''
             ? ''
@@ -78,6 +82,7 @@ final class DefinitionSnapshotService
      */
     private function withTranslationLanguages(array $snapshot): array
     {
+        $snapshot['meta']['javaScriptAllowed'] = $this->javaScriptAllowed;
         $snapshot['meta']['translationLanguages'] = $this->translationLanguages ?: self::TRANSLATION_LANGUAGES;
         return $snapshot;
     }
@@ -208,6 +213,10 @@ final class DefinitionSnapshotService
             'DT_NAME'                  => $this->concept('dty', 2, 1),
             'DT_SHORT_SUMMARY'         => $this->concept('dty', 2, 3),
             'DT_EXTENDED_DESCRIPTION'  => $this->concept('dty', 2, 4),
+            'DT_CMS_SCRIPT' => $this->concept('dty', 2, 927),
+            'DT_CMS_CSS' => $this->concept('dty', 99, 946),
+            'DT_CMS_HEADER' => $this->concept('dty', 2, 929),
+            'DT_CMS_FOOTER' => $this->concept('dty', 2, 940),
             // special fields of the record editor (query, filter form, rules, columns, symbology)
             'DT_QUERY_STRING'          => $this->concept('dty', 2, 12),
             'DT_EXPANSION_RULES'       => $this->concept('dty', 2, 1163),

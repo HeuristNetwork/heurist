@@ -937,11 +937,13 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     }
                     
                     
-                    requests.push({a: 'save',    //add new relationship record
-                        ID:0, //new record
+                    requests.push({
+                        a: 'save', //add new relationship record
+                        ID: 0, // new record
                         RecTypeID: RT_RELATION,
-                        //RecTitle: 'Relationship ('+sSourceName+' '+sRelation+' '+sTargetName+')',
-                        details: details });
+                        details: details,
+                        no_validation: this._openRelationRecordEditor ? 'relmarker' : null
+                    });
                      
                 }//for
                 res = {
@@ -979,15 +981,19 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             let that = this;
             
             function __callBack(response){
-                    if(response.status == hWin.ResponseStatus.OK){
-                        if(requests[idx].a=='s'){
-                            res.relation_recID = response.data; //add rec id
-                        }
-                        idx = idx + 1;
-                        that.addLinkOrRelation(idx, requests, res);
-                    }else{
-                        hWin.HEURIST4.msg.showMsgErr(response);
+                if(response.status == hWin.ResponseStatus.OK){
+                    if(requests[idx].a=='s'){
+                        res.relation_recID = response.data; //add rec id
                     }
+                    idx = idx + 1;
+                    that.addLinkOrRelation(idx, requests, res);
+                }else{
+                    let index = response.message.indexOf('Please change th');
+                    if(window.hWin.HEURIST4.util.isPositiveInt(that.options.source_ID) && index > 0){
+                        response.message = `${response.message.substr(0, index)}Please click the "${window.hWin.HR('Edit attributes')}" button to enter these attributes, otherwise<br>${response.message.substr(index+7)}`;
+                    }
+                    hWin.HEURIST4.msg.showMsgErr(response);
+                }
             }        
         
             if(request.a=='add'){  //add link - batch update - add new field

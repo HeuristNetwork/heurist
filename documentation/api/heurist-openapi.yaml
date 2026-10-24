@@ -1123,7 +1123,8 @@ paths:
       description: >-
         Uploader or database owner. With "upload" the content is replaced (new name, size, MD5; the same key).
         rec_Modified is a concurrency token (409 when the file was changed since, unless force=1). rec_URL can be
-        changed for external resources only.
+        changed for external resources only. The MIME type 2-29 (a term with a file extension) can be changed for
+        tiled images and external resources only (400 for other types); a tile stack gets a tile stack as new content.
       security:
       - bearerAuth: []
       parameters:

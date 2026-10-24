@@ -442,9 +442,17 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)
     $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
 
+    $rectype = intval(@$record['RecTypeID']);
+    if ($rectype && !dbs_GetRectypeByID($mysqli, $rectype))  {
+        return $system->addError(HEURIST_INVALID_REQUEST, "Record type is wrong");
+    }
+    $system->defineConstant('RT_RELATION');
+
     $validation_mode = 2; //check everything
 
-    if(@$record['no_validation']==='ignore_all'){
+    if(@$record['no_validation'] === 'relmarker'){
+        $validation_mode = $rectype == RT_RELATION ? 3 : 2; //ignore required fields in relation rectype, except source & target pointers, and relation type
+    }elseif(@$record['no_validation'] === 'ignore_all'){
         $validation_mode = 0; //no validation at all
     }elseif($modeImport==2 || @$record['no_validation']){
         $validation_mode = 1; //don't validate resources
@@ -454,12 +462,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         unset($record['no_validation']);
     }
 
-    $rectype = intval(@$record['RecTypeID']);
     $detailValues = null;
-
-    if ($rectype && !dbs_GetRectypeByID($mysqli, $rectype))  {
-        return $system->addError(HEURIST_INVALID_REQUEST, "Record type is wrong");
-    }
 
     $is_insert = ($recID<1);
     $is_save_new_record = false;
@@ -514,9 +517,6 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         return $system->addError(HEURIST_INVALID_REQUEST, "Details not defined");
     }
 
-
-
-    $system->defineConstant('RT_RELATION');
     $system->defineConstant('DT_PARENT_ENTITY');
 
     $calculationSources = RelationshipCalculation::sources($system, array($recID), false);
@@ -2847,6 +2847,7 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
 *   - 0: Minimal validation, mostly skips errors, but still processes values.
 *   - 1: Skips resource pointer validation.
 *   - 2: Full validation.
+*   - 3: For relmarkers, checks only the two record pointers and relationship term
 * - Collects errors and adds them to the system object. If errors occur, returns false.
 * - If `rst_DefaultValue` is defined for a missing required field, it attempts to add this default value.
 *
@@ -2861,6 +2862,7 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
 *                             0: No validation (or minimal, skips most errors).
 *                             1: Don't validate resource pointers' existence or type constraints.
 *                             2: Full validation (default behavior in `recordSave`).
+*                             3: Relmarker, check source + target record pointers and relationship term only
 * @param int $recID The ID of the record being processed. Used primarily for error messages and context
 *                   (e.g., naming snapshot images for file details).
 * @param int $modeImport Indicates if operating in an import context, which can alter some validation stringency.
@@ -2910,12 +2912,30 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
         }
     }
 
+    $system->defineConstant('RT_RELATION');
+    $system->defineConstant('DT_PRIMARY_RESOURCE');
+    $system->defineConstant('DT_TARGET_RESOURCE');
+    $system->defineConstant('DT_RELATION_TYPE');
+
     //get list of fieldtypes for all details
     $query = 'SELECT dty_ID, dty_Type FROM defDetailTypes WHERE dty_ID in (' . implode(',', array_keys($details2)) . ')';
     $det_types = mysql__select_assoc2($mysqli, $query);
 
     $det_required = array();
-    if($validation_mode>1){
+    if($validation_mode == 3){
+
+        $validation_mode = $rectype == RT_RELATION ? 3 : 2;
+
+        if($validation_mode == 3){
+
+            $query = 'SELECT rst_DetailTypeID, IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
+            .'FROM defRecStructure INNER JOIN defDetailTypes ON dty_ID = rst_DetailTypeID '
+            ."WHERE rst_RecTypeID={$rectype} AND rst_DetailTypeID IN (". DT_PRIMARY_RESOURCE .",". DT_TARGET_RESOURCE .",". DT_RELATION_TYPE .")";
+
+            $det_required = mysql__select_assoc2($mysqli, $query);
+        }
+    }
+    if($validation_mode > 1 && $validation_mode != 3){
         //load list of required details except relmarker
         $query = 'SELECT rst_DetailTypeID, IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
         .'FROM defRecStructure, defDetailTypes WHERE '

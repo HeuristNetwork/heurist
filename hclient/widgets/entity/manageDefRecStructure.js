@@ -1447,6 +1447,8 @@ console.log('onEditFormChange @todo check buttons!!!');
             if(fields['rst_TermsAsButtons'] == 1 && fields['rst_DisplayWidth'] < 100){
                 fields['rst_DisplayWidth'] = 100;
             }
+        }else if(dty_type == 'file'){
+            fields['rst_DefaultValue_file'] = rst_fields['rst_DefaultValue_file'];
         }
 
         let that = this;
@@ -2618,6 +2620,8 @@ console.log('onEditFormChange @todo check buttons!!!');
             fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
             fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
         //}else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                           
+        }else if(dt_type == 'file'){
+            fields['rst_DefaultValue'] = fields['rst_DefaultValue_file'];
         }
         if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
             fields['rst_DisplayOrder'] = '0';

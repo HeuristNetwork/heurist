@@ -346,8 +346,8 @@ final class RecordSaveService
 
     private function text($value): ?string
     {
-        $value = (string)$value;
-        return trim($value) === '' ? null : $value;
+        $value = \Heurist\Utilities\StoredText::clean((string)$value, 'blocktext');
+        return $value === '' ? null : $value;
     }
 
     /** Database setting sys_SetPublicToPendingOnEdit. */

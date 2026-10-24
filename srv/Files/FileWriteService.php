@@ -188,6 +188,7 @@ final class FileWriteService extends EntityWriteService
                 $issues[] = $this->issue('duplicate', 'The same file is registered already: '.implode(', ', $upload['duplicates']));
             }
         }
+        $columns['ulf_OrigFileName'] = \Heurist\Utilities\StoredText::clean((string)$columns['ulf_OrigFileName'], 'freetext');
         if(!isset($this->mimeTypes[strtolower((string)$columns['ulf_MimeExt'])])){
             throw new RecordEditException(415, 'file_type_not_allowed', 'Unknown file type: '.$columns['ulf_MimeExt']);
         }
@@ -219,7 +220,12 @@ final class FileWriteService extends EntityWriteService
             $columns += array_fill_keys($this->mapping->writableColumnNames(), null);
             if(($columns['ulf_OrigFileName'] ?? null) === null){ unset($columns['ulf_OrigFileName']); } // the name stays
         }
-        $isRemote = trim((string)($row['ulf_FileName'] ?? '')) === '' && trim((string)($row['ulf_ExternalFileReference'] ?? '')) !== '';
+        // a tile stack is referred to by ulf_ExternalFileReference too, but its content is uploaded
+        $tiled = (string)$row['ulf_PreferredSource'] === 'tiled';
+        $isRemote = !$tiled && trim((string)($row['ulf_FileName'] ?? '')) === ''
+            && trim((string)($row['ulf_ExternalFileReference'] ?? '')) !== '';
+        // the MIME type chosen by the user (tiled, external; plan 20 §10.11), checked before the content changes
+        $mimeExt = $this->requestedMimeExt($input, $row);
         $url = trim((string)$input->header('rec_URL'));
         if($input->has('rec_URL') && $url !== (string)$row['ulf_ExternalFileReference']){
             if(!$isRemote || $row['ulf_PreferredSource'] === 'tiled'){
@@ -236,29 +242,86 @@ final class FileWriteService extends EntityWriteService
         if($token !== ''){
             if($isRemote){ throw RecordEditException::invalid('An external resource has no content to replace'); }
             $upload = $this->uploads->take($token);
-            $columns['ulf_OrigFileName'] = $columns['ulf_OrigFileName'] ?? (string)$upload['name'];
+            $name = (string)$upload['name'];
+            $columns['ulf_OrigFileName'] = $tiled ? '_tiled@'.pathinfo($name, PATHINFO_FILENAME)
+                : ($columns['ulf_OrigFileName'] ?? $name);
             $columns['ulf_MimeExt'] = $upload['ext'];
             $columns['ulf_FileSizeKB'] = self::kilobytes(intval($upload['size']));
             $columns['ulf_MD5Checksum'] = $upload['md5'];
-            $columns['ulf_PreferredSource'] = $this->localSource($upload);
+            // a tile stack stays a tile stack (a zip or mbtiles file)
+            $columns['ulf_PreferredSource'] = $tiled ? 'tiled' : $this->localSource($upload);
             if(!empty($upload['duplicates'])){
                 $issues[] = $this->issue('duplicate', 'The same file is registered already: '.implode(', ', $upload['duplicates']));
             }
         }
+        if($mimeExt !== null){ $columns['ulf_MimeExt'] = $mimeExt; }
+        if(isset($columns['ulf_OrigFileName'])){
+            $columns['ulf_OrigFileName'] = \Heurist\Utilities\StoredText::clean((string)$columns['ulf_OrigFileName'], 'freetext');
+        }
         $columns['ulf_Modified'] = date('Y-m-d H:i:s');
         if($dryRun){ return array('fileId' => $fileId, 'created' => false, 'existing' => false, 'issues' => $issues); }
 
-        $this->rows->transaction(function() use ($fileId, $row, $columns, $upload){
+        $this->rows->transaction(function() use ($fileId, $row, $columns, $upload, $tiled, $mimeExt){
             $this->rows->update($fileId, $columns);
             if($upload !== null){
                 $key = (string)$row['ulf_ObfuscatedFileID'] ?: $this->storage->newKey($fileId);
-                $this->storage->remove($row);
-                $placed = $this->storage->placeUpload($upload, $fileId, (string)$columns['ulf_OrigFileName'], $key);
+                if($tiled){
+                    // the new stack replaces the old one in place (tile stacks are not removed, as legacy)
+                    $this->storage->removeThumbnail($key);
+                    $placed = $this->storage->placeTiles($upload, $fileId, (string)$upload['name'], $key);
+                    // the type of the tiles chosen by the user wins over the one of the first image
+                    if($mimeExt !== null){ $placed['ulf_MimeExt'] = $mimeExt; }
+                }else{
+                    $this->storage->remove($row);
+                    $placed = $this->storage->placeUpload($upload, $fileId, (string)$columns['ulf_OrigFileName'], $key);
+                }
                 $this->rows->update($fileId, $placed + array('ulf_ObfuscatedFileID' => $key));
             }
         });
         if($upload !== null){ $this->uploads->release($token); }
         return array('fileId' => $fileId, 'created' => false, 'existing' => false, 'issues' => $issues);
+    }
+
+    /**
+     * Extension of the MIME type (field 2-29) sent for a file, when it differs from the stored one:
+     * only tiled images and external resources take a MIME type from the user (detection is not
+     * always right); local files and IIIF get it from their content. Null when not sent or unchanged.
+     *
+     * @throws RecordEditException 400 for another type, an unknown term or a term without an extension
+     *         (a group of the MIME vocabulary)
+     */
+    private function requestedMimeExt(RecordInput $input, array $row): ?string
+    {
+        $fieldId = $this->mapping->fieldId('2-29');
+        if($fieldId < 1 || !array_key_exists($fieldId, $input->details())){ return null; }
+        $value = $input->details()[$fieldId][0] ?? null;
+        if(is_array($value)){ $value = $value['value'] ?? null; }
+        $value = trim((string)$value);
+        if($value === ''){ return null; }
+        $term = ctype_digit($value) ? $this->definitions->term(intval($value)) : null;
+        if($term === null){ throw RecordEditException::invalid('Unknown MIME type: '.$value); }
+        $label = strtolower(trim((string)$term['term']));
+        $current = $this->mimeTypes[strtolower((string)($row['ulf_MimeExt'] ?? ''))] ?? '';
+        if($label === strtolower($current)){ return null; }
+        $source = (string)$row['ulf_PreferredSource'];
+        if(!in_array($source, array('tiled', 'external'), true)){
+            throw RecordEditException::invalid('The MIME type of a '.($source ?: 'local').' file is set from its content');
+        }
+        $extensions = array_keys($this->mimeTypes, $label, true);
+        if(empty($extensions)){ throw RecordEditException::invalid('"'.$term['term'].'" is not a MIME type of a file extension'); }
+        // one MIME type has several extensions (application/octet-stream: shp, shx, dat...): the file's own
+        // extension (of its URL or name) when it has this type, so it is not replaced by another one
+        $url = (string)parse_url((string)($input->header('rec_URL') ?? $row['ulf_ExternalFileReference'] ?? ''), PHP_URL_PATH);
+        foreach(array($url, (string)($row['ulf_OrigFileName'] ?? '')) as $name){
+            $own = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+            if($own !== '' && ($this->mimeTypes[$own] ?? '') === $label){ return $own; }
+        }
+        // else the one named in the type (image/jpeg -> jpeg rather than jpe)
+        $subtype = substr($label, strpos($label, '/') + 1);
+        foreach($extensions as $extension){
+            if((string)$extension === $subtype){ return (string)$extension; }
+        }
+        return (string)$extensions[0];
     }
 
     /** local, or iiif/iiif_image for a local IIIF manifest or image information (JSON). */

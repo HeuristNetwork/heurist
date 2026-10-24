@@ -149,7 +149,8 @@ final class ServiceFactory
             // record export (plan 13): KML time span
             'DT_DATE',
             // record editing (plan 14)
-            'RT_CMS_HOME', 'DT_WORKFLOW_STAGE', 'DT_CMS_EXTFILES'
+            'RT_CMS_HOME', 'DT_WORKFLOW_STAGE', 'DT_CMS_EXTFILES',
+            'DT_CMS_SCRIPT', 'DT_CMS_CSS', 'DT_CMS_HEADER', 'DT_CMS_FOOTER'
         );
         $codeIds = array();
         foreach($codeNames as $codeName){
@@ -351,17 +352,21 @@ final class ServiceFactory
         $permissions = new RecordPermissionService($this->database, $this->runtime);
         $title = new RecordTitle($languages, $this->codes->id('DT_NAME'));
         $titleMask = new TitleMask($definitions, $store->records(), FileRepository::shared($this->database), $languages);
-        $calculated = new CalculatedFields($definitions, $store, function(string $formula, int $recordId): array {
-            return $this->smartyRunner()->run(array('body' => $formula), array($recordId),
-                array('mode' => 'txt', 'purpose' => 'render', 'record' => true));
-        });
         $validator = new RecordValidator($this->database, $definitions, $languages, array(
             'name' => $this->codes->id('DT_NAME'),
             'shortSummary' => $this->codes->id('DT_SHORT_SUMMARY'),
             'extendedDescription' => $this->codes->id('DT_EXTENDED_DESCRIPTION'),
             'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
-            'cmsExtFiles' => $this->codes->id('DT_CMS_EXTFILES')
-        ));
+            'cmsHome' => $this->codes->id('RT_CMS_HOME'),
+            'cmsScript' => $this->codes->id('DT_CMS_SCRIPT'),
+            'cmsCss' => $this->codes->id('DT_CMS_CSS'),
+            'cmsHeader' => $this->codes->id('DT_CMS_HEADER'),
+            'cmsFooter' => $this->codes->id('DT_CMS_FOOTER')
+        ), null, $this->javaScriptAllowed());
+        $calculated = new CalculatedFields($definitions, $store, function(string $formula, int $recordId): array {
+            return $this->smartyRunner()->run(array('body' => $formula), array($recordId),
+                array('mode' => 'txt', 'purpose' => 'render', 'record' => true));
+        }, $validator);
         return new RecordEditController(
             new RecordSaveService($store, $validator, $permissions, $definitions, $this->runtime, $title, array(
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
@@ -371,7 +376,7 @@ final class ServiceFactory
             new RecordDuplicateService($store, $permissions, $definitions, $this->runtime, $title, $languages, array(
                 'name' => $this->codes->id('DT_NAME'),
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE')
-            ), $titleMask),
+            ), $titleMask, $validator),
             $this->recordQueryController(),
             $this->runtime
         );
@@ -396,12 +401,19 @@ final class ServiceFactory
         return new GraphController($this->database, $this->runtime);
     }
 
+    /** Authorization is obtained from the server environment, never the request body. */
+    private function javaScriptAllowed(): bool
+    {
+        $allowed = $this->reportEnvironment['javaScriptAllowed'] ?? false;
+        return is_callable($allowed) ? (bool)$allowed() : $allowed === true;
+    }
+
     /** Create the database-definitions snapshot controller (/api/{db}/def). */
     public function definitionController(): DefinitionController
     {
         return new DefinitionController(
             new DefinitionSnapshotService($this->database, $this->runtime, $this->entityDirectory,
-                $this->translationLanguages ? ($this->translationLanguages)() : array()),
+                $this->translationLanguages ? ($this->translationLanguages)() : array(), $this->javaScriptAllowed()),
             $this->runtime
         );
     }

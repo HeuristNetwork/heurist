@@ -198,6 +198,16 @@
                         "rst_FieldConfig": {"entity":"records"}
                     }
                 },
+                {  "dtID": "rst_DefaultValue_file",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Default Value:",
+                        "rst_DisplayHelpText": "Select a file to act as the default value for this field",
+                        "rst_FieldConfig": {"entity":"recUploadedFiles", "csv": false, "popup_options":{"edit_mode": "none"}}
+                    }
+                },
                 
                 {
                     "dtID": "dty_Mode_freetext",

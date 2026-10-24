@@ -50,7 +50,7 @@ $req_params = USanitize::sanitizeInputArray();
 
 //main purpose - download entity images
 $db = @$req_params['db'];
-$filename = basename(@$req_params['file']);
+$filename = basename(@$req_params['file'] ?? '');
 $entity_name = htmlspecialchars(@$req_params['entity']);
 
 $error = mysql__check_dbname($db); // HOSTISSUE !!!

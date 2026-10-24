@@ -6136,7 +6136,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let content = '<div>'
                         + '<span>'
                             + 'For the field <strong>' + fld_name + '</strong><br>'
-                            + 'We cannot unambiguously interpret what you mean by <strong>' + cur_date.org_value + '</strong>'
+                            + 'We cannot unambiguously interpret what you mean by <strong>' + cur_date.org_value + '</strong><br>'
                             + 'Retain ambiguous date? <input type="checkbox" id="remain_ambiguous" name="remain_ambiguous" /> (this will ignore anything entered below)<br>'
                         + '</span><br><br>';
 

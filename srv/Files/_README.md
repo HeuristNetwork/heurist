@@ -62,6 +62,11 @@ user; change and delete: the uploader or the database owner (legacy rule).
   placed; the files of a deleted row are removed after the commit.
 - The file pair has its own permissions table (`filePermissions`): file ids and record
   ids overlap; `RecordSchema` cleans no user tables (reminders, tags...) for it.
+- MIME type 2-29 (plan 20 §10.11, 2026-10-23): set from the content for local files and
+  IIIF; the user may change it only for tiled images and external resources (detection is
+  not always right). The term must be a MIME type with an extension (`jpeg` for image/jpeg);
+  a group term of the vocabulary is refused. New content of a tile stack is placed as a tile
+  stack again (`placeTiles`), and a MIME type sent with it wins over its first image.
 
 ## Mapping
 
