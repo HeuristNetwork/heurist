@@ -25,6 +25,7 @@ use RuntimeException;
 
 use function strlen;
 use function is_string;
+use function in_array;
 
 /**
  * Generates an RO-Crate for the Heurist database.
@@ -39,6 +40,7 @@ use function is_string;
  *       records/
  *         recordType_Name.tsv
  *       database.sql
+ *       database.hml
  *     files/
  *       ...
  */
@@ -59,11 +61,15 @@ class DbExportROCrate{
     private ?System $system;
     private ?\mysqli $mysqli;
 
-    private ?string $crateDirectory;
-    private ?string $databaseDirectory;
-    private ?string $databaseFilestoreDir;
-    private ?string $sqlFile;
-    private ?array $tsvFiles;
+    private string $baseDirectory = '';
+    private string $crateDirectory = '';
+    private string $databaseDirectory = '';
+    private string $databaseFilestoreDir = '';
+    private string $fileDirectory = '';
+
+    private string $sqlFile = '';
+    private string $hmlFile = '';
+    private array $tsvFiles = [];
 
     /**
      * Class constructor
@@ -83,11 +89,14 @@ class DbExportROCrate{
      *
      * Supported options:
      *
-     *   includeSqlDump  bool        Whether to include an SQL database dump.
-     *   includeFiles    bool        Whether to include the files from the filestore.
-     *   sqlDump         string|null Location of existing SQL dump.
-     *   tsvFiles        array|null  Location of existing TSV files.
-     *   parentDir       string|null Location of ro-crate placement, defaults to database filestore.
+     *   includeSqlDump  bool           Whether to include an SQL database dump.
+     *   includeFiles    bool           Whether to include the files from the filestore.
+     *   recordFormat    array|null     Format to export records as by default [TSV,HML], defaults to TSV
+     *   sqlDump         string|null    Location of existing SQL dump.
+     *   hmlDump         string|null    Location of existing HML dump.
+     *   tsvFiles        array|null     Location of existing TSV files.
+     *   fileDirectories array|null     Location of files to pack.
+     *   parentDir       string|null    Location of ro-crate placement, defaults to database filestore.
      *
      * @throws RuntimeException
      * @return string Path to created RO-Crate
@@ -106,6 +115,7 @@ class DbExportROCrate{
         $description = $databaseDetails['sys_dbDescription'] ?? null;
         $ownerName ??= $databaseDetails['sys_dbOwner'];
         $license = $databaseDetails['sys_dbRights'] ?? null;
+        $creationDate = $databaseDetails['firstRecord'] ?? null;
 
         $creator = [
             'name' => $ownerName,
@@ -113,10 +123,14 @@ class DbExportROCrate{
             'orcid' => $databaseOwner['ugr_ORCID'] ?? null
         ];
 
-        $this->databaseFilestoreDir = $options['parentDir'] ?? $this->system->getSysDir(null, $databaseName);
+        $this->databaseFilestoreDir = $this->system->getSysDir(null, $databaseName);
         $this->databaseFilestoreDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->databaseFilestoreDir), DIRECTORY_SEPARATOR);
 
-        $this->crateDirectory = $this->databaseFilestoreDir . DIRECTORY_SEPARATOR . trim($crateDirectory, DIRECTORY_SEPARATOR);
+        $this->baseDirectory = $options['parentDir'] ?? $this->databaseFilestoreDir;
+        $this->baseDirectory = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->baseDirectory), DIRECTORY_SEPARATOR);
+
+        $crateDirectory = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, trim($crateDirectory, '/\\'));
+        $this->crateDirectory = $this->baseDirectory . DIRECTORY_SEPARATOR . $crateDirectory;
 
         if(!folderCreate($this->crateDirectory, true)){
             throw new RuntimeException('Unable to create RO-Crate directory.');
@@ -124,7 +138,9 @@ class DbExportROCrate{
 
         $includeSqlDump = (bool)($options['includeSqlDump'] ?? false);
         $includeFiles = (bool)($options['includeFiles'] ?? false);
+        $recordOutputs = $options['recordFormat'] ?? ['TSV'];
         $sqlDump = $options['sqlDump'] ?? null;
+        $hmlDump = $options['hmlDump'] ?? null;
 
         $this->databaseDirectory = $this->crateDirectory . DIRECTORY_SEPARATOR . 'database';
 
@@ -135,11 +151,11 @@ class DbExportROCrate{
         $this->sqlFile = '';
         $this->tsvFiles = [];
 
+        // Export database content as TSV
         if($options['tsvFiles']){
             $this->processTSVFiles($options['tsvFiles']);
-        }else{
+        }else if(in_array('tsv', $recordOutputs)){
 
-            // Export database content as TSV
             $TSVExporter = new DbExportTSV();
             $TSVExporter->setSession($this->system, '{RTYNAME}');
             $TSVExporter->setBackupFolder($this->databaseDirectory, 'tables', 'records');
@@ -150,11 +166,55 @@ class DbExportROCrate{
                 $warnings = implode('<br>', $warnings);
                 throw new RuntimeException("Encountered the following errors during TSV exporting:<br>{$warnings}");
             }
+
             $this->tsvFiles = array_merge($this->tsvFiles['tables'], $this->tsvFiles['records']);
         }
 
+        // Export HML dump
+        if($hmlDump || in_array('hml', $recordOutputs)){
+
+            $hmlFile = $this->databaseDirectory . DIRECTORY_SEPARATOR . "{$databaseName}.hml";
+
+            $hmlFileStatus = false;
+            if(file_exists($hmlDump)){
+                $hmlFileStatus = fileCopy($hmlDump, $hmlFile);
+            }
+
+            if(!$hmlFileStatus){
+
+                $_REQUEST['w'] = 'all';
+                $_REQUEST['a'] = '1';
+                $_REQUEST['q'] = 'sortby:-m';
+                $_REQUEST['rev'] = 'no';
+                $_REQUEST['depth'] = '0';
+                $_REQUEST['linkmode'] = 'none';
+                $_REQUEST['filename'] = '1';
+
+                $hmlFileOutput = '';
+                if(!defined('DIR_BACKUP')){
+                    define('DIR_BACKUP', "{$crateDirectory}/database");
+                    $hmlFileOutput = $this->databaseFilestoreDir . DIR_BACKUP;
+                }else{
+                    $hmlFileOutput = $hmlDump;
+                }
+
+                $to_include = __DIR__ . '/../../export/xml/flathml.php';
+                if(is_file($to_include)){
+                    include_once $to_include; // Execute HML export script
+                }
+
+                if(file_exists($hmlFileOutput)){
+                    $hmlFileStatus = fileCopy($hmlFileOutput, $hmlFile);
+                    fileDelete($hmlFileOutput);
+                }
+            }
+
+            if($hmlFileStatus){
+                $this->hmlFile = $hmlFile;
+            }
+        }
+
         // Export SQL dump
-        $sqlDumpStatus = false;
         if($includeSqlDump){
 
             $sqlFile = $this->databaseDirectory . DIRECTORY_SEPARATOR . "{$databaseName}.sql";
@@ -169,16 +229,18 @@ class DbExportROCrate{
         }
 
         // Copy loose files into the crate, if supplied
-        if(false && $includeFiles){
+        if($includeFiles){
 
-            $filesDirectory = $this->crateDirectory . DIRECTORY_SEPARATOR . 'files';
-            $filestoreDir = $this->system->getSysDir(null, $databaseName);
+            $this->fileDirectory = $this->crateDirectory . DIRECTORY_SEPARATOR . 'files';
 
-            $this->copyDirectory($filestoreDir, $filesDirectory);
+            $this->copyFiles($this->databaseFilestoreDir, $options['fileDirectories'] ?? []);
         }
 
+        // Get all other users
+        $contributors = $this->getAllUsers();
+
         // Build the RO-Crate metadata after all files have been created
-        $metadata = $this->buildMetadata($databaseName, $description, $creator, $license);
+        $metadata = $this->buildMetadata($databaseName, $description, $creator, $license, $creationDate, $contributors);
 
         $metadataPath = $this->crateDirectory . DIRECTORY_SEPARATOR . 'ro-crate-metadata.json';
 
@@ -203,14 +265,16 @@ class DbExportROCrate{
      * @param ?string $description
      * @param ?array $creator
      * @param ?string $license
+     * @param ?string $creationDate
+     * @param ?array $contributors
      * @return array<string,mixed> RO-Crate metadata as JSON
      */
-    private function buildMetadata(string $databaseName, ?string $description, ?array $creator, ?string $license) : array{
+    private function buildMetadata(string $databaseName, ?string $description, ?array $creator, ?string $license, ?string $creationDate, ?array $contributors) : array{
 
         $graph = [];
 
         // RO-Crate metadata descriptor
-        $graph[] = [
+        $roCrateMetadata = [
             '@id' => 'ro-crate-metadata.json',
             '@type' => 'CreativeWork',
             'conformsTo' => [
@@ -226,22 +290,42 @@ class DbExportROCrate{
             '@id' => './',
             '@type' => 'Dataset',
             'name' => "Heurist RO-Crate for {$databaseName}",
-            'dateCreated' => gmdate('Y-m-d'),
+            'datePublished' => gmdate('Y-m-d'),
             'hasPart' => []
         ];
-        //'datePublished' => ???
 
         if($description !== null){
             $dataset['description'] = $description;
         }
 
         if($creator !== null){
-            $dataset['creator'] = [
-                '@id' => $creator['orcid'] ? "https://orcid.org/{$creator['orcid']}" : null,
+
+            $entity = [
+                '@id' => $creator['orcid'] ? "https://orcid.org/{$creator['orcid']}" : "user:Owner",
                 '@type' => 'Person',
                 'name' => $creator['name'],
                 'email' => $creator['email']
             ];
+
+            $graph[] = $entity;
+            $dataset['creator'] = [['@id' => $entity['@id']]];
+        }
+
+        if($contributors !== null){
+
+            $dataset['contributor'] = [];
+            foreach($contributors as $user){
+
+                $entity = [
+                    '@id' => $user['orcid'] ? "https://orcid.org/{$creator['orcid']}" : "user:{$user['id']}",
+                    '@type' => 'Person',
+                    'name' => $user['name'],
+                    'email' => $user['email']
+                ];
+
+                $graph[] = $entity;
+                $dataset['contributor'][] = ['@id' => $entity['@id']];
+            }
         }
 
         if($license !== null){
@@ -260,11 +344,15 @@ class DbExportROCrate{
             }
         }
 
+        if($creationDate !== null){
+            $dataset['dateCreated'] = $creationDate;
+        }
+
         // Database-specific metadata
         $databaseEntity = [
             '@id' => '#database',
             '@type' => 'Dataset',
-            'name' => $databaseName,
+            'name' => $databaseName
         ];
 
         foreach($this->tsvFiles as $relativePath){
@@ -285,12 +373,12 @@ class DbExportROCrate{
 
             $graph[] = $entity;
             $dataset['hasPart'][] = [
-                '@id' => $relativePath,
+                '@id' => $relativePath
             ];
         }
 
         // SQL dump, if present
-        if(file_exists($this->sqlFile)){
+        if($this->sqlFile && file_exists($this->sqlFile)){
 
             $relativePath = str_replace($this->crateDirectory, '', $this->sqlFile);
 
@@ -300,24 +388,41 @@ class DbExportROCrate{
                 'name' => basename($this->sqlFile),
                 'encodingFormat' => 'application/sql',
                 'contentSize' => filesize($this->sqlFile),
-                'sha256' => hash_file('sha256', $this->sqlFile),
+                'sha256' => hash_file('sha256', $this->sqlFile)
             ];
 
             $dataset['hasPart'][] = [
+                '@id' => $relativePath
+            ];
+        }
+
+        // HML dump, if present
+        if($this->hmlFile && file_exists($this->hmlFile)){
+
+            $relativePath = str_replace($this->crateDirectory, '', $this->hmlFile);
+
+            $graph[] = [
                 '@id' => $relativePath,
+                '@type' => 'File',
+                'name' => basename($this->hmlFile),
+                'encodingFormat' => 'application/xml',
+                'contentSize' => filesize($this->hmlFile),
+                'sha256' => hash_file('sha256', $this->hmlFile)
+            ];
+
+            $dataset['hasPart'][] = [
+                '@id' => $relativePath
             ];
         }
 
         // Filestore files
-        $filesDirectory = $this->crateDirectory . DIRECTORY_SEPARATOR . 'files';
+        if(folderExists($this->fileDirectory, false)){
 
-        if(false && is_dir($filesDirectory)){
-
-            $files = $this->findFiles($filesDirectory);
+            $files = $this->findFiles($this->fileDirectory);
 
             foreach($files as $file){
 
-                $relativePath = $this->relativePath($file);
+                $relativePath = str_replace($this->crateDirectory, '', $file);
 
                 $entity = [
                     '@id' => $relativePath,
@@ -329,7 +434,7 @@ class DbExportROCrate{
 
                 $mimeType = $this->mimeType($file);
 
-                if ($mimeType !== null) {
+                if($mimeType !== null){
                     $entity['encodingFormat'] = $mimeType;
                 }
 
@@ -347,8 +452,10 @@ class DbExportROCrate{
             '@id' => '#database'
         ];
 
-        $graph[] = $databaseEntity;
-        $graph[] = $dataset;
+        // Place the ro-crate-metadata, root dataset, and database entity first
+        array_unshift($graph, $databaseEntity);
+        array_unshift($graph, $dataset);
+        array_unshift($graph, $roCrateMetadata);
 
         return [
             '@context' => [self::RO_CRATE_CONTEXT],
@@ -371,9 +478,16 @@ class DbExportROCrate{
         }
 
         $fromDatabase = !empty($databaseName) ? "{$databaseName}." : '';
+
         $sysInfoRow = mysql__select_row_assoc($this->mysqli, "SELECT sys_dbRegisteredID, sys_dbName, sys_dbOwner, sys_dbRights, sys_dbDescription FROM {$fromDatabase}sysIdentification LIMIT 1");
         if(!$sysInfoRow){
             throw new RuntimeException('Unable to retrieve database details from sysIdentification.');
+        }
+
+        $firstRecordDate = mysql__select_value($this->mysqli, "SELECT rec_Added FROM {$fromDatabase}Records ORDER BY rec_Added LIMIT 1");
+        if($firstRecordDate){
+            $firstRecordDate = date_create($firstRecordDate);
+            $sysInfoRow['firstRecord'] = $firstRecordDate ? $firstRecordDate->format('Y-m-d') : null;
         }
 
         return $sysInfoRow;
@@ -445,6 +559,7 @@ class DbExportROCrate{
         $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS));
 
         foreach($iterator as $file){
+
             if(!$file->isFile()){
                 continue;
             }
@@ -461,6 +576,35 @@ class DbExportROCrate{
         sort($files, SORT_STRING);
 
         return $files;
+    }
+
+    /**
+     * Copy files from the provided sub-directories
+     *
+     * @param string $baseDirectory
+     * @param array $subDirectories
+     */
+    private function copyFiles(string $baseDirectory, array $subDirectories){
+
+        if(empty($subDirectories)){
+            $this->copyDirectory($baseDirectory, $this->fileDirectory);
+            return;
+        }
+
+        foreach($subDirectories as $directory){
+
+            $directory = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $directory);
+            $directory = str_replace($baseDirectory, '', $directory);
+
+            $fullDirectory = "{$baseDirectory}{$directory}";
+            if(folderExists($fullDirectory, false) !== 1){
+                continue;
+            }
+
+            $destination = $this->fileDirectory . DIRECTORY_SEPARATOR . $directory;
+
+            $this->copyDirectory($fullDirectory, $destination);
+        }
     }
 
     /**
@@ -509,28 +653,6 @@ class DbExportROCrate{
     }
 
     /**
-     * Return a relative path from the RO-Crate base
-     *
-     * @param string $path
-     * @throws RuntimeException
-     * @return string
-     */
-    private function relativePath(string $path): string{
-
-        $crateDirectory = rtrim(realpath($this->crateDirectory) ?: $this->crateDirectory, DIRECTORY_SEPARATOR);
-
-        $realPath = realpath($path) ?: $path;
-
-        if ($realPath !== $crateDirectory && strpos($realPath, $crateDirectory . DIRECTORY_SEPARATOR) !== 0){
-            throw new RuntimeException("File is outside crate: {$path}");
-        }
-
-        $relative = substr($realPath, strlen($crateDirectory));
-
-        return ltrim(str_replace(DIRECTORY_SEPARATOR, '/', $relative), '/');
-    }
-
-    /**
      * Determine a MIME type where possible
      * 
      * @param string $file
@@ -553,5 +675,40 @@ class DbExportROCrate{
         finfo_close($finfo);
 
         return is_string($type) ? $type : null;
+    }
+
+    /**
+     * Get a list of non-owner users to list as contributors
+     *
+     * @return array{email: string, id: string, name: string, orcid: string}|null
+     */
+    private function getAllUsers() : ?array{
+
+        $userQuery = "SELECT ugr_ID, ugr_eMail, ugr_FirstName, ugr_LastName, ugr_ORCID, ugr_Name FROM sysUGrps WHERE ugr_Type = 'user' AND ugr_ID != 2";
+        $results = $this->mysqli->query($userQuery);
+
+        if(!$results){
+            return null;
+        }
+
+        $users = [];
+        while($row = $results->fetch_row()){
+
+            $name = $row[2] && $row[3] ? "{$row[2]} {$row[3]}" : null;
+            if(!$name){
+                $name = $row[2] ?? $row[3];
+            }
+            $name ??= $row[5];
+            $name ??= $row[1];
+
+            $users = [
+                'id' => $row[0],
+                'email' => $row[1],
+                'name' => $name,
+                'orcid' => $row[4]
+            ];
+        }
+
+        return $users;
     }
 }

@@ -1632,7 +1632,7 @@ function makeFileContentNode($file) {
 //
 //
 //
-function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
+function outputDetail($dt, $value, $rt, $depth = 0, $outputStub = null) {
 
     global $system,$DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT,
     $rectype_templates, $human_readable_names;
