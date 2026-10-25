@@ -409,6 +409,46 @@ final class RecordRepository
     // ------------------------------------------------------------ links
 
     /**
+     * Virtual parents, derived from incoming resource links and the source structure.
+     * Reuses the link index; no Parent Entity detail is read or written. Only records of a
+     * possible child type are looked up, and only links of the flagged child fields are read.
+     * @return array<int,array<int,array{parent:int,field:int}>> child id => links, ordered by parent/field
+     */
+    public function parentLinks(array $ids): array
+    {
+        $childLinks = DefinitionLookup::shared($this->database)->childLinks();
+        if(empty($childLinks) || empty($ids)){ return array(); }
+        $targets = array(); // "parent type:field" => target types (empty = any)
+        foreach($childLinks as $link){ $targets[$link['rty'].':'.$link['dty']] = $link['targetTypes']; }
+        $children = array_filter($this->rectypeOf($ids), static function(int $type) use ($childLinks): bool {
+            foreach($childLinks as $link){
+                if(empty($link['targetTypes']) || in_array($type, $link['targetTypes'], true)){ return true; }
+            }
+            return false;
+        });
+        if(empty($children)){ return array(); }
+        $links = $this->links(array_keys($children), array('side' => 'target', 'kind' => 'pointer', 'order' => 'ends',
+            'fields' => array_values(array_unique(array_column($childLinks, 'dty')))));
+        if(empty($links)){ return array(); }
+        $headers = $this->headers(array_column($links, 1), array('rec_RecTypeID', 'rec_FlagTemporary'));
+        $result = array();
+        foreach($links as $link){
+            list($child, $parent, , , $field) = $link;
+            $header = $headers[$parent] ?? null;
+            if($header === null || intval($header['rec_FlagTemporary']) === 1){ continue; }
+            $allowed = $targets[intval($header['rec_RecTypeID']).':'.$field] ?? null;
+            if($allowed === null || (!empty($allowed) && !in_array($children[$child], $allowed, true))){ continue; }
+            $result[$child][$parent.':'.$field] = array('parent' => $parent, 'field' => $field);
+        }
+        foreach($result as &$parents){
+            $parents = array_values($parents);
+            usort($parents, static fn($a, $b) => array($a['parent'], $a['field']) <=> array($b['parent'], $b['field']));
+        }
+        unset($parents);
+        return $result;
+    }
+
+    /**
      * Pointer and relationship links of records (recLinks).
      *
      * Options:
