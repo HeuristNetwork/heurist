@@ -70,13 +70,16 @@ final class StoredText
         $config->set('URI.AllowedSchemes', array('http'=>true, 'https'=>true, 'mailto'=>true, 'tel'=>true));
         $config->set('Attr.EnableID', true);
         $config->set('Attr.AllowedFrameTargets', array('_blank', '_self'));
-        $config->set('CSS.AllowedProperties', array());
-        $config->set('HTML.ForbiddenAttributes', array('style'));
         $config->set('Core.HiddenElements', array('script'=>true, 'style'=>true));
         $allowed = 'u,i,b,strong,em';
         if($type === 'blocktext'){
+            // the font, size and colour of the HTML editor (2026-10-25): inline CSS on span only,
+            // these properties only (HTMLPurifier checks their values; no url(), no positioning)
+            $config->set('CSS.AllowedProperties', array('font-family', 'font-size', 'color', 'text-decoration'));
             // TinyMCE text, lists, links, tables and Heurist media; no executable embeds, SVG or forms.
-            $allowed .= ',p,div,span,br,hr,h1,h2,h3,h4,h5,h6,blockquote,pre,code,s,sup,sub,small,'
+            // the Align items of the editor's Formats menu: text-align only on blocks (textAlign())
+            $allowed .= ',p[style],div[style],span[style],br,hr,h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],'
+                .'blockquote,pre,code,s,sup,sub,small,'
                 .'ul,ol[start|type],li[value],dl,dt,dd,a[href|title|target|rel|data-ref],'
                 .'img[src|alt|title|width|height|data-id],'
                 .'table[width|border|cellpadding|cellspacing|summary],caption,colgroup,col[span|width],'
@@ -100,9 +103,32 @@ final class StoredText
             $def->addAttribute('img', 'data-id', 'Number');
             $def->addAttribute('a', 'data-ref', 'Text');
             $def->addAttribute('iframe', 'allowfullscreen', 'Bool');
+            $align = self::textAlign();
+            foreach(array('p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6') as $element){
+                $def->addAttribute($element, 'style', $align);
+            }
         }else{
+            $config->set('CSS.AllowedProperties', array());
+            $config->set('HTML.ForbiddenAttributes', array('style'));
             $config->set('HTML.Allowed', $allowed);
         }
         return self::$purifiers[$type] = new \HTMLPurifier($config);
+    }
+
+    /** The style of a block (2026-10-25): `text-align` with a keyword, nothing else. */
+    private static function textAlign(): \HTMLPurifier_AttrDef
+    {
+        return new class extends \HTMLPurifier_AttrDef {
+            public function validate($string, $config, $context)
+            {
+                foreach(explode(';', (string)$string) as $declaration){
+                    $parts = explode(':', $declaration, 2);
+                    if(count($parts) !== 2 || strtolower(trim($parts[0])) !== 'text-align'){ continue; }
+                    $value = strtolower(trim($parts[1]));
+                    if(in_array($value, array('left', 'center', 'right', 'justify'), true)){ return 'text-align: '.$value.';'; }
+                }
+                return false;
+            }
+        };
     }
 }
