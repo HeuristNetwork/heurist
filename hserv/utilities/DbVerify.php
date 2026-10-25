@@ -2754,15 +2754,19 @@ ORDER BY child.dtl_RecID";
                 if($fix_count>0){
                     fwrite($this->out, '<h3>'.$fix_count.' terms referenced in incorrect vocabulary changed to terms in the vocabulary specified for the field</h3>');
 
-                }elseif(!$this->simplifiedOutput && $suggest_cnt > 0){
+                }elseif($suggest_cnt > 0){
                     $resStatus = false;
+                    
+                    $fixButton = $this->simplifiedOutput ? '' : <<<FIXBTN
+                    <br><button data-fix="expected_terms">Click here to change these terms</button> to the ones in the vocabularies specified for each field,<br>otherwise they can be fixed for each term individually in record editing.
+                    FIXBTN;
 
                     fwrite($this->out, 
 <<<FIXMSG
 <h3>Terms referenced in incorrect vocabulary (n = $suggest_cnt)</h3>
 <span style="font-size:0.9em;">Terms are referenced in a different vocabulary than that specified for the corresponding field,
 <br>however the same term label exists in the vocabulary specified for the field.
-<br><button data-fix="expected_terms">Click here to change these terms</button> to the ones in the vocabularies specified for each field,<br>otherwise they can be fixed for each term individually in record editing.</span><br><br>
+{$fixButton}</span><br>
 FIXMSG
 );
 

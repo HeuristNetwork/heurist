@@ -154,7 +154,7 @@ class DbExportROCrate{
         // Export database content as TSV
         if($options['tsvFiles']){
             $this->processTSVFiles($options['tsvFiles']);
-        }else if(in_array('tsv', $recordOutputs)){
+        }else if(in_array('TSV', $recordOutputs)){
 
             $TSVExporter = new DbExportTSV();
             $TSVExporter->setSession($this->system, '{RTYNAME}');
@@ -171,7 +171,7 @@ class DbExportROCrate{
         }
 
         // Export HML dump
-        if($hmlDump || in_array('hml', $recordOutputs)){
+        if($hmlDump || in_array('HML', $recordOutputs)){
 
             $hmlFile = $this->databaseDirectory . DIRECTORY_SEPARATOR . "{$databaseName}.hml";
 
@@ -317,7 +317,7 @@ class DbExportROCrate{
             foreach($contributors as $user){
 
                 $entity = [
-                    '@id' => $user['orcid'] ? "https://orcid.org/{$creator['orcid']}" : "user:{$user['id']}",
+                    '@id' => $user['orcid'] ? "https://orcid.org/{$user['orcid']}" : "user:{$user['id']}",
                     '@type' => 'Person',
                     'name' => $user['name'],
                     'email' => $user['email']
@@ -701,7 +701,7 @@ class DbExportROCrate{
             $name ??= $row[5];
             $name ??= $row[1];
 
-            $users = [
+            $users[] = [
                 'id' => $row[0],
                 'email' => $row[1],
                 'name' => $name,

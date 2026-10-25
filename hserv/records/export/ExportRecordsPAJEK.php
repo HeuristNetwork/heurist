@@ -25,6 +25,7 @@ use function in_array;
 class ExportRecordsPAJEK extends ExportRecords{
 
     private array $vertices = [];
+    private array $verticesMap = [];
     private array $arcs = [];
     private array $edges = [];
 
@@ -42,9 +43,7 @@ class ExportRecordsPAJEK extends ExportRecords{
             return false;
         }
 
-        for($idx = 0; $idx < count($this->records); $idx ++){
-
-            $record = $this->records[$idx];
+        foreach($this->records as $record){
 
             $recID = is_array($record) ? (int)($record['rec_ID'] ?? 0) : (int)$record;
 
@@ -56,15 +55,13 @@ class ExportRecordsPAJEK extends ExportRecords{
 
             $recTitle = addslashes($record['rec_Title']);
 
-            $this->vertices[$recID] = "{$recID} \"{$recTitle}\"";
-
-            if(in_array($recID, $this->skipExpanding)){
-                continue;
-            }
-
-            $this->getEdges($recID); // relationship markers
-            $this->getArcs($recID); // record pointers
+            $vertexIdx = count($this->verticesMap) + 1;
+            $this->vertices[$recID] = "{$vertexIdx} \"#{$recID} {$recTitle}\"";
+            $this->verticesMap[$recID] = $vertexIdx;
         }
+
+        $this->getEdges(); // relationship markers
+        $this->getArcs(); // record pointers
 
         return $this->_outputResult($params);
     }
@@ -114,66 +111,58 @@ class ExportRecordsPAJEK extends ExportRecords{
         return true;
     }
 
-    private function getEdges(int $recID){
+    private function getEdges(){
 
         $mysqli = $this->system->getMysqli();
 
-        $query = "SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID FROM recLinks WHERE rl_RelationID IS NOT NULL AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
-        $relations = mysql__select_assoc($mysqli, $query, 0);
+        foreach($this->vertices as $recID => $vertex){
 
-        foreach($relations as $relation){
+            $query = "SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID FROM recLinks WHERE rl_RelationID IS NOT NULL AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
+            $relations = mysql__select_assoc($mysqli, $query, 0);
 
-            $sourceID = intval($relation['rl_SourceID']);
-            $targetID = intval($relation['rl_TargetID']);
-            $relationTermID = intval($relation['rl_RelationTypeID']);
+            foreach($relations as $relation){
 
-            $relationKey = "{$sourceID}-{$relationTermID}-{$targetID}";
+                $sourceID = intval($relation['rl_SourceID']);
+                $targetID = intval($relation['rl_TargetID']);
+                $relationTermID = intval($relation['rl_RelationTypeID']);
 
-            if(array_key_exists($relationKey, $this->edges)){
-                continue;
-            }
+                $relationKey = "{$sourceID}-{$relationTermID}-{$targetID}";
 
-            $this->edges[$relationKey] = "{$sourceID} {$targetID} 1";
+                if(array_key_exists($relationKey, $this->edges) || !array_key_exists($sourceID, $this->vertices) || !array_key_exists($targetID, $this->vertices)){
+                    continue;
+                }
 
-            if(!array_key_exists($sourceID, $this->vertices)){
-                $this->records[] = $sourceID;
-                $this->skipExpanding[] = $sourceID;
-            }
-            if(!array_key_exists($targetID, $this->vertices)){
-                $this->records[] = $targetID;
-                $this->skipExpanding[] = $targetID;
+                $sourceIdx = $this->verticesMap[$sourceID];
+                $targetIdx = $this->verticesMap[$targetID];
+                $this->edges[$relationKey] = "{$sourceIdx} {$targetIdx} 1";
             }
         }
     }
 
-    private function getArcs(int $recID){
+    private function getArcs(){
 
         $mysqli = $this->system->getMysqli();
 
-        $query = "SELECT rl_SourceID, rl_TargetID, rl_DetailTypeID FROM recLinks WHERE rl_DetailTypeID > 0 AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
-        $pointers = mysql__select_assoc($mysqli, $query, 0);
+        foreach($this->vertices as $recID => $vertex){
 
-        foreach($pointers as $pointer){
+            $query = "SELECT rl_SourceID, rl_TargetID, rl_DetailTypeID FROM recLinks WHERE rl_DetailTypeID > 0 AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
+            $pointers = mysql__select_assoc($mysqli, $query, 0);
 
-            $sourceID = intval($pointer['rl_SourceID']);
-            $targetID = intval($pointer['rl_TargetID']);
-            $fieldID = intval($pointer['rl_DetailTypeID']);
+            foreach($pointers as $pointer){
 
-            $pointerKey = "{$sourceID}-{$fieldID}-{$targetID}";
+                $sourceID = intval($pointer['rl_SourceID']);
+                $targetID = intval($pointer['rl_TargetID']);
+                $fieldID = intval($pointer['rl_DetailTypeID']);
 
-            if(array_key_exists($pointerKey, $this->edges)){
-                continue;
-            }
+                $pointerKey = "{$sourceID}-{$fieldID}-{$targetID}";
 
-            $this->arcs[$pointerKey] = "{$sourceID} {$targetID} 1";
+                if(array_key_exists($pointerKey, $this->arcs) || !array_key_exists($sourceID, $this->vertices) || !array_key_exists($targetID, $this->vertices)){
+                    continue;
+                }
 
-            if(!array_key_exists($sourceID, $this->vertices)){
-                $this->records[] = $sourceID;
-                $this->skipExpanding[] = $sourceID;
-            }
-            if(!array_key_exists($targetID, $this->vertices)){
-                $this->records[] = $targetID;
-                $this->skipExpanding[] = $targetID;
+                $sourceIdx = $this->verticesMap[$sourceID];
+                $targetIdx = $this->verticesMap[$targetID];
+                $this->arcs[$pointerKey] = "{$sourceIdx} {$targetIdx} 1";
             }
         }
     }
