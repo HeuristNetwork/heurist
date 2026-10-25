@@ -106,3 +106,12 @@ both stores must give the same records.
 ranges (no tables); with `--write` registration, changes, content, permissions and
 delete on both stores. Files go to a temporary file store; every row and table it
 adds is removed again.
+
+## Entity images (plan 20, Phase 4d)
+
+`EntityImageStorage` keeps the one image of a user or group (later record types, terms...)
+in the legacy entity folders (`entity/sysUsers/<id>.<ext>`, `thumbnail/<id>.png`), agreed
+2026-10-23 until the switch at the end of plan 20, when images become registered files. No
+other srv code names these folders. `System/Entity/EntityImageService` gives
+`GET | PUT | DELETE /sys/{type}/{id}/image` (PUT: a finished chunked upload).
+

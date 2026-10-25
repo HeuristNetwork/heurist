@@ -73,11 +73,20 @@ abstract class EntityRecordMapping
         if($this->fields === null){
             $this->fields = array();
             foreach($this->fieldMappings() as $concept => $mapping){
-                $id = $this->definitions->localId('dty', $concept);
+                $id = $this->fieldLocalId($concept);
                 if($id > 0){ $this->fields[$id] = $mapping + array('concept' => $concept); }
             }
         }
         return $this->fields;
+    }
+
+    /**
+     * Local id of a key of fieldMappings(): a concept code here; a mapping that names its fields
+     * by DT_* constants resolves them (users and groups, UserGroupCodes).
+     */
+    protected function fieldLocalId(string $key): int
+    {
+        return $this->definitions->localId('dty', $key);
     }
 
     /** Field id of a concept code (0 when the database does not have it). */

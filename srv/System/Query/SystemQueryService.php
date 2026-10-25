@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace Heurist\System\Query;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Files\EntityImageStorage;
 use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\SearchRequest;
 use Heurist\Records\Query\SearchResult;
@@ -26,6 +27,8 @@ use Heurist\Runtime\RuntimeContext;
 use Heurist\System\Bookmarks\BookmarkRecordOutput;
 use Heurist\System\Entity\EntityRecordOutput;
 use Heurist\System\Reminders\ReminderRecordOutput;
+use Heurist\System\Groups\GroupRecordOutput;
+use Heurist\System\Users\UserRecordOutput;
 use Heurist\System\Tags\TagRecordOutput;
 use Heurist\Users\UserGroupRepository;
 
@@ -35,6 +38,8 @@ final class SystemQueryService
     private DatabaseInterface $database;
     private RuntimeContext $runtime;
     private SystemEntitySchemaRegistry $schemas;
+    /** Images of users and groups (their rec_ThumbnailURL); null without a file store. */
+    private ?EntityImageStorage $entityImages;
 
     /** @var array<int,string>|null Current user's role per group, loaded once. */
     private ?array $roles = null;
@@ -42,11 +47,13 @@ final class SystemQueryService
     public function __construct(
         DatabaseInterface $database,
         RuntimeContext $runtime,
-        ?SystemEntitySchemaRegistry $schemas = null
+        ?SystemEntitySchemaRegistry $schemas = null,
+        ?EntityImageStorage $entityImages = null
     ) {
         $this->database = $database;
         $this->runtime = $runtime;
         $this->schemas = $schemas ?? new SystemEntitySchemaRegistry();
+        $this->entityImages = $entityImages;
     }
 
     /** Execute a collection or item request and return its stable representation. */
@@ -55,6 +62,9 @@ final class SystemQueryService
         $rawQuery = $params['query'] ?? $params['q'] ?? null;
         $type = $this->schemas->typeFromQuery($rawQuery, $pathType);
         $schema = $this->schemas->get($type);
+        // a mapped type is also named by its record type id (rec_RecTypeID: t:133, the record manager)
+        $mapped = $this->recordOutput($type);
+        if($mapped !== null){ $schema['rectypeId'] = $mapped->mapping()->rectypeId(); }
         $builder = new SystemQueryBuilder($this->database, $this->runtime, $schema);
 
         if($recordId !== null){
@@ -89,7 +99,8 @@ final class SystemQueryService
         $result = new SearchResult($ids, $total, $request->offset, $request->limit);
 
         if($request->detail === 'ids'){ return $result->toArray(); }
-        // a mapped type is given in the record format (plan 20, §10.1: tags from 4a, bookmarks and reminders from 4b)
+        // a mapped type is given in the record format (plan 20, §10.1: tags from 4a, bookmarks and reminders from 4b,
+        // users and groups from 4d)
         $output = $this->recordOutput($type);
         if($output !== null){ return $this->recordResponse($output, $type, $ids, $params, $recordId, $result); }
         $selection = $this->selectFields($request->fields, $schema, $recordId !== null);
@@ -126,6 +137,12 @@ final class SystemQueryService
             case 'tag': return new TagRecordOutput($this->database, $this->runtime);
             case 'bookmark': return new BookmarkRecordOutput($this->database, $this->runtime);
             case 'reminder': return new ReminderRecordOutput($this->database, $this->runtime);
+            // users and groups (plan 20, Phase 4d)
+            case 'user': case 'group':
+                $output = $type === 'user' ? new UserRecordOutput($this->database, $this->runtime) : new GroupRecordOutput($this->database, $this->runtime);
+                // rec_ThumbnailURL: the entity image (plan 24 review)
+                $output->setEntityImages($this->entityImages);
+                return $output;
         }
         return null;
     }
@@ -136,7 +153,8 @@ final class SystemQueryService
      */
     private function recordResponse(EntityRecordOutput $output, string $type, array $ids, array $params, ?int $recordId, SearchResult $result): ?array
     {
-        $records = $output->records($ids, $params['fields'] ?? null, $recordId !== null);
+        $resolve = !empty($params['resolveDetails']) && $params['resolveDetails'] !== '0' && $params['resolveDetails'] !== 'false';
+        $records = $output->records($ids, $params['fields'] ?? null, $recordId !== null, $resolve);
         if($recordId !== null && empty($records['records'])){ return null; }
         $response = array(
             'records' => $records['records'],

@@ -487,10 +487,12 @@ if($is_graph_query){
 // POST /sys/{type}/{id}/validate|merge, POST /sys/tag/assign - go to
 // SystemEditController; they need a logged-in user.
 $is_system_query = ($resource === 'sys');
-$is_system_write = $is_system_query && !in_array($http_verb, array('GET','HEAD'), true)
+// GET /sys/{user|group}/{id}/image is answered by the write controller too (plan 20, 4d)
+$is_system_image = $is_system_query && (string)($requestUri[6] ?? '') === 'image';
+$is_system_write = $is_system_query && (!in_array($http_verb, array('GET','HEAD'), true) || $is_system_image)
     && isset($requestUri[5]) && $requestUri[5] !== '';
 if($is_system_write){
-    if(!in_array($http_verb, array('POST','PUT','PATCH','DELETE'), true)){
+    if(!in_array($http_verb, $is_system_image ? array('GET','PUT','DELETE') : array('POST','PUT','PATCH','DELETE'), true)){
         exitWithError('Method not allowed', 405, array('Allow'=>'GET, POST, PUT, PATCH, DELETE'));
     }
     if(in_array($http_verb, array('POST','PUT','PATCH'), true)
