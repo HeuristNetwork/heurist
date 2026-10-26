@@ -106,6 +106,14 @@ use Heurist\System\Entity\EntityImageService;
 use Heurist\Files\EntityImageStorage;
 use Heurist\System\Tags\TagRecordMapping;
 use Heurist\System\Tags\TagWriteService;
+use Heurist\Controller\WebsiteController;
+use Heurist\Website\CmsRecordCheck;
+use Heurist\Website\PageRenderer;
+use Heurist\Website\SiteUrls;
+use Heurist\Website\WebsiteDefinitionsInterface;
+use Heurist\Website\WebsiteRepository;
+use Heurist\Website\WebsiteService;
+use Heurist\Website\WebsiteSetup;
 
 /** Creates one consistent service graph for an initialized request. */
 final class ServiceFactory
@@ -163,7 +171,9 @@ final class ServiceFactory
             'RT_CMS_HOME', 'DT_WORKFLOW_STAGE', 'DT_CMS_EXTFILES',
             'DT_CMS_SCRIPT', 'DT_CMS_CSS', 'DT_CMS_HEADER', 'DT_CMS_FOOTER',
             // virtual parents (plan 26): title masks, Smarty fN / fNs
-            'DT_PARENT_ENTITY'
+            'DT_PARENT_ENTITY',
+            // website format v4 (plan 27a): page translations, joined on read
+            'DT_CMS_PAGE_TRANSLATIONS'
         );
         $codeIds = array();
         foreach($codeNames as $codeName){
@@ -403,8 +413,12 @@ final class ServiceFactory
             'cmsScript' => $this->codes->id('DT_CMS_SCRIPT'),
             'cmsCss' => $this->codes->id('DT_CMS_CSS'),
             'cmsHeader' => $this->codes->id('DT_CMS_HEADER'),
-            'cmsFooter' => $this->codes->id('DT_CMS_FOOTER')
+            'cmsFooter' => $this->codes->id('DT_CMS_FOOTER'),
+            'cmsTranslations' => $definitions->localId('dty', '2-1202')
         ), null, $this->javaScriptAllowed());
+        // website format v4 (plan 27a): configuration and hosts of website and page records
+        $validator->addRecordCheck(new CmsRecordCheck(
+            (new WebsiteRepository($this->database, $this->runtime))->codes(), $this->runtime->baseUrl));
         $calculated = new CalculatedFields($definitions, $store, function(string $formula, int $recordId): array {
             return $this->smartyRunner()->run(array('body' => $formula), array($recordId),
                 array('mode' => 'txt', 'purpose' => 'render', 'record' => true));
@@ -545,6 +559,33 @@ final class ServiceFactory
             new RecordQueryController($this->database, $this->runtime),
             new TimeDataService($this->database, $this->runtime, $this->codes),
             $this->runtime
+        );
+    }
+
+    /**
+     * Create the controller of the v4 websites (plan 27a): live pages, instance frames,
+     * /api/{db}/website/{id}/check and /website/setup.
+     *
+     * @param WebsiteDefinitionsInterface|null $definitions Definition writer (hserv) for setup.
+     */
+    public function websiteController(?WebsiteDefinitionsInterface $definitions = null): WebsiteController
+    {
+        $repository = new WebsiteRepository($this->database, $this->runtime);
+        $languages = new LanguageCodes(self::languageCodesFile());
+        $environment = array(
+            'database' => $this->runtime->databaseName,
+            'baseUrl' => $this->runtime->baseUrl,
+            'javaScriptAllowed' => $this->javaScriptAllowed()
+        );
+        $renderer = static function(bool $pretty) use ($repository, $languages, $environment): PageRenderer {
+            return new PageRenderer($repository->codes(), $languages, $environment
+                + array('urls' => new SiteUrls($environment['database'], $environment['baseUrl'], $pretty)));
+        };
+        return new WebsiteController(
+            new WebsiteService($repository, $languages, $this->runtime->baseUrl),
+            $renderer,
+            $this->runtime,
+            $definitions !== null ? new WebsiteSetup($definitions, $this->runtime) : null
         );
     }
 

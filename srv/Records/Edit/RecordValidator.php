@@ -66,6 +66,8 @@ final class RecordValidator
     private array $targets = array();
     /** @var array<int,bool> ulf_ID => exists */
     private array $files = array();
+    /** @var array<int,callable> Checks of a whole record (rectype, details, result), e.g. the website format v4. */
+    private array $recordChecks = array();
 
     /**
      * @param DatabaseInterface $database Database of the record.
@@ -73,7 +75,8 @@ final class RecordValidator
      * @param LanguageCodes $languages Language codes of value prefixes.
      * @param array<string,int> $codes Local ids: name (DT_NAME), shortSummary (DT_SHORT_SUMMARY),
      *        extendedDescription (DT_EXTENDED_DESCRIPTION), cmsPage (RT_CMS_PAGE),
-     *        cmsHome, cmsScript, cmsCss, cmsHeader, cmsFooter (server-resolved CMS ids).
+     *        cmsHome, cmsScript, cmsCss, cmsHeader, cmsFooter (server-resolved CMS ids),
+     *        cmsTranslations (DT_CMS_PAGE_TRANSLATIONS, plan 27a).
      * @param bool|null $newTemporalFormat Store complex dates as JSON; null reads the database version (>= 1.3.14).
      * @param bool $javaScriptAllowed Server authorization for code in the explicit CMS fields only.
      */
@@ -157,6 +160,10 @@ final class RecordValidator
             }
         }
 
+        foreach($this->recordChecks as $check){
+            $check($rectypeId, $details, $result);
+        }
+
         if($options['required'] ?? true){
             foreach($structure as $fieldId => $row){
                 if($row['requirement'] !== 'required' || isset($filled[$fieldId])
@@ -173,6 +180,17 @@ final class RecordValidator
         return $result;
     }
 
+    /**
+     * Add a check of a whole record, run after the field checks of validate(). Used by
+     * services the record layer does not know (the website format v4, plan 27a).
+     *
+     * @param callable(int,array,ValidationResult):void $check Record type, details as given, result.
+     */
+    public function addRecordCheck(callable $check): void
+    {
+        $this->recordChecks[] = $check;
+    }
+
     /** True for a valid non-owner visibility value. */
     public static function isVisibility($value): bool
     {
@@ -182,11 +200,13 @@ final class RecordValidator
     /**
      * True for the fields that may have values in several languages ("xx:" prefixes):
      * DT_NAME, DT_SHORT_SUMMARY and DT_EXTENDED_DESCRIPTION, except the content of a
-     * website page (RT_CMS_PAGE / DT_EXTENDED_DESCRIPTION, one joined value).
+     * website page (RT_CMS_PAGE / DT_EXTENDED_DESCRIPTION, one joined value), and the
+     * page translations of a v4 website (one value per language, plan 27a).
      */
     public function isMultilang(int $rectypeId, int $fieldId): bool
     {
         if($fieldId < 1){ return false; }
+        if($fieldId === ($this->codes['cmsTranslations'] ?? 0)){ return true; }
         if($fieldId === ($this->codes['extendedDescription'] ?? 0)){
             return $rectypeId !== ($this->codes['cmsPage'] ?? 0);
         }
@@ -221,6 +241,9 @@ final class RecordValidator
         switch($type){
             case 'freetext':
             case 'blocktext':
+                if($fieldId === ($this->codes['cmsTranslations'] ?? -1)){
+                    return $this->prepareTranslation($row, (string)$value, $key, $index, $name, $result);
+                }
                 $text = $this->cleanText($rectypeId, $fieldId, $type, (string)$value);
                 if($text !== self::trim((string)$value)){
                     $result->warning($key, $index, 'html_sanitized',
@@ -351,6 +374,45 @@ final class RecordValidator
                 $row['value'] = trim((string)$value);
                 return array($row);
         }
+    }
+
+    /**
+     * Rows of one page translation (plan 27a): "xx:" + a JSON object {node id: inner HTML}.
+     * The HTML is cleaned as blocktext; a long value is split into rows that all keep
+     * the language prefix, joined again on read (RecordDataService).
+     *
+     * @return array<int,array>|null
+     */
+    private function prepareTranslation(array $row, string $value, string $key, int $index, string $name,
+        ValidationResult $result): ?array
+    {
+        if(!preg_match('/^\s*([A-Za-z]{2,3}):(.*)$/s', $value, $match)){
+            $result->error($key, $index, 'translation', 'Value of field "'.$name.'" must start with a language code ("fre:")');
+            return null;
+        }
+        $json = self::trim($match[2]);
+        $decoded = json_decode($json);
+        if(!($decoded instanceof \stdClass)){
+            $result->error($key, $index, 'translation', 'Value of field "'.$name.'" is not a JSON object of translated text blocks');
+            return null;
+        }
+        $clean = StoredText::clean($json, 'blocktext');
+        if($clean !== $json){
+            $result->warning($key, $index, 'html_sanitized',
+                'Unsupported HTML, JavaScript or styles were removed from field "'.$name.'"');
+        }
+        // one form per language: "fr:" and "fre:" are both saved as "fre:"
+        $prefix = strtolower($this->languages->code3($match[1]) ?? $match[1]).':';
+        $limit = self::lengthLimit($prefix.$clean);
+        if($limit === 0){
+            return array(array_merge($row, array('value'=>$prefix.$clean)));
+        }
+        $rows = array();
+        $size = $limit - 8; // room for the prefix
+        for($start = 0; $start < mb_strlen($clean); $start += $size){
+            $rows[] = array_merge($row, array('value'=>$prefix.mb_substr($clean, $start, $size)));
+        }
+        return $rows;
     }
 
     /** Value of the object form by field type (null when it has none). */

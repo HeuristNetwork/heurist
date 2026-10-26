@@ -189,7 +189,14 @@ if(!$hasAccess){
     exit;
 }
 
-if(__getValue($rec, '2-49')==3){
+$website_format = intval(__getValue($rec, '2-49'));
+if($website_format>=4){
+    // website format v4 (plan 27a) is shown by srv only: /{db}/site/{id}
+    $message = 'This website uses website format version 4. Open it at '
+        .htmlspecialchars(HEURIST_SERVER_URL.'/'.$system->dbname().'/site/'.intval($rec['rec_ID']));
+    include_once ERROR_REDIR;
+    exit;
+}elseif($website_format==3){
 
     $message = 'Sorry, this website uses website format version 3 in old viewer. Remove parameter "ver=2"';
     include_once ERROR_REDIR;

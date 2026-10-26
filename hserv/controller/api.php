@@ -605,6 +605,13 @@ if($is_jobs_query && !in_array($http_method, array('GET','POST','DELETE'), true)
     exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
 }
 
+// Websites of format v4 (plan 27a): /api/{db}/website/{id}/check, POST /api/{db}/website/setup.
+// See srv/Controller/WebsiteController.php; logged-in users only.
+$is_website_query = ($resource === 'website');
+if($is_website_query && !in_array($http_method, array('GET','POST'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+}
+
 // Routes where auth processing is not needed here
 $is_public_annotation_read =
     ($resource === 'annotations'
@@ -795,6 +802,13 @@ if($is_def_query){
         $req_params,
         is_array($json) ? $json : null
     );
+    $system->dbclose();
+    exit;
+
+}elseif($is_website_query){
+
+    $controller = ServiceFactory::fromLegacySystem($system)->websiteController(new hserv\web\WebsiteDefinitions($system));
+    $controller->handleApi($http_method, array_slice($requestUri, 4), $req_params);
     $system->dbclose();
     exit;
 

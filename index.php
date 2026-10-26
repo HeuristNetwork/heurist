@@ -123,6 +123,12 @@ if( @$_REQUEST['isalive']==1){
     }
     exit;
 
+}elseif( array_key_exists('site', $_REQUEST) ){
+    // WEBSITE FORMAT V4 (plan 27a): /<db>/site/<id>[/<pageId>] or ?db=&site=
+    $controller = new FrontController($_REQUEST);
+    $controller->run();
+    exit;
+
 }elseif( array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
     || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) ){
     // CMS WEBSITE MODE

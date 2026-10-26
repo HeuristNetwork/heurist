@@ -16,5 +16,6 @@ entry points during migration.
 - `RecordPresentationController.php` — Dataset, Map Document and Map Layer reads.
 - `MapDataController.php` — query-to-GeoJSON output only.
 - `PublicationController.php` — map/data/timeline/graph/crosstabs publication actions.
+- `WebsiteController.php` — v4 website pages and frames (`/{db}/site/...`), `/api/{db}/website` (plan 27a).
 - `ReportController.php` — reports manager: list, template body, register, import/export, delete, single-record render.
 - `JobController.php` — background jobs: start (answers, closes the connection, then runs), status, Stop, result.

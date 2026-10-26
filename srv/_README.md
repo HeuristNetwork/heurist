@@ -62,3 +62,5 @@ Dependency direction is Controller → Records → Database/Runtime. Classes bel
 - `Records/UserData/` — reads and writes of the user tables of records (tags and their
   links, bookmarks, reminders), through the `RecordSchema` table keys.
 - `Controller/SameSiteGuard.php` — the same-site and JSON checks of the write controllers.
+- `Controller/WebsiteController.php`, `Website/` — live pages of the website format v4
+  (`/{db}/site/{id}`, plan 27a); `Utilities/StoredCss.php` — the save-time CSS policy.

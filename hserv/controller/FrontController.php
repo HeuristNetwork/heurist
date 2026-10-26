@@ -147,6 +147,12 @@ class FrontController
             $controller = new ReportController($this->system, $this->req_params);
             $controller->handleRequest(@$this->req_params['action']);
 
+        }elseif(array_key_exists('site', $this->req_params)){
+
+            // website format v4 (plan 27a); pretty URLs keep the pretty form in menus and links
+            $pretty = strpos((string)parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/site/') !== false;
+            ServiceFactory::fromLegacySystem($this->system)->websiteController()->showPage($this->req_params, $pretty);
+
         }elseif(array_key_exists('website', $this->req_params)){
 
             $website = new WebSite($this->system, $this->req_params);
