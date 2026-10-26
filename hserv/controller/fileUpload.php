@@ -239,6 +239,12 @@ if($response!=null){
         }
 
         if( !($file->size_total>0) || $file->size_total==$file->size){
+            if ($entity_name === 'temp' && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+                if (!\hserv\utilities\ScratchFileAccess::register($system, basename($file->name))) {
+                    $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Cannot register temporary file ownership');
+                    break;
+                }
+            }
 
             if($entity_name=="recUploadedFiles"){ //register at once
 
