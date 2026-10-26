@@ -123,30 +123,27 @@ class FrontController
             || @$this->req_params['template_body']
             || @$this->req_params['template_id']) {
 
-            //validate authentication via TOKEN
-            if(isset($jwt_Secret) && strlen($jwt_Secret)>7)
-            {
-                $auth = UJwt::get_auth_header();
-                
-
-                if ($auth && preg_match('/^Bearer\s+(.+)$/i', $auth, $m)) {
-                    
-                    $payload = UJwt::jwt_verify($m[1], $jwt_Secret);
-                    if ($payload === false) {
-                        //UJwt::json_out(401, ['error'=>'invalid_token'], ['WWW-Authenticate'=>'Bearer error="invalid_token"']);
-                    }else{
-                        // Optional: check scopes
-                        // if (!in_array('read:data', (array)($payload['scope'] ?? []))) { ... }
-                        $userID = $payload['sub'];
-                        $this->system->setCurrentUser([
-                                'ugr_ID'=>$userID, 
-                                'ugr_Groups'=>user_getWorkgroups( $this->system->getMysqli(), $userID )
-                        ]);
-
-                    }
+            $auth = UJwt::get_auth_header();
+            if ($auth) {
+                if (!isset($jwt_Secret) || strlen($jwt_Secret) < 8
+                    || !preg_match('/^Bearer\s+(.+)$/i', $auth, $m)) {
+                    UJwt::json_out(401, ['error'=>'invalid_token']);
+                }
+                $action = $this->req_params['action'] ?? 'execute';
+                $readOnly = in_array($action, ['execute', 'list', 'get', 'export', 'check'], true)
+                    && empty($this->req_params['publish']) && empty($this->req_params['output'])
+                    && empty($this->req_params['template_id']) && empty($this->req_params['id'])
+                    && in_array($_SERVER['REQUEST_METHOD'] ?? '', ['GET', 'HEAD'], true);
+                try {
+                    UJwt::authenticateApiToken($this->system, $m[1], $jwt_Secret,
+                        $readOnly ? 'read:data' : 'write:data');
+                } catch (\DomainException $error) {
+                    $code = $error->getCode() === 403 ? 403 : 401;
+                    $reason = $code === 403 ? 'insufficient_scope' : 'invalid_token';
+                    UJwt::json_out($code, ['error'=>$reason],
+                        ['WWW-Authenticate'=>'Bearer error="'.$reason.'"']);
                 }
             }
-                
             $controller = new ReportController($this->system, $this->req_params);
             $controller->handleRequest(@$this->req_params['action']);
 

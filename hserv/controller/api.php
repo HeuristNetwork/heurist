@@ -663,9 +663,8 @@ if(!$skip_auth_processing){
         $system->errorExitApi(); // exits
     }
 
-    // Preserve existing cookie-backed user if present.
-    // Otherwise try Bearer token auth.
-    if(!$system->getUserId()){
+    // Validate any explicit Bearer credential, even when a cookie is present.
+    if(UJwt::get_auth_header() || !$system->getUserId()){
         authenticateApiRequestWithJwt($system);
     }
 
@@ -1073,7 +1072,10 @@ function authenticateApiRequestWithJwt($system){
     global $jwt_Secret;
 
     if(!isset($jwt_Secret) || strlen($jwt_Secret) < 8){
-        // JWT auth is not configured; just return without authenticating.
+        // An explicit credential must not fall back to cookie authentication.
+        if(UJwt::get_auth_header()){
+            exitWithError('Invalid token', 401, ['WWW-Authenticate' => 'Bearer error="invalid_token"']);
+        }
         return;
     }
 
@@ -1088,32 +1090,18 @@ function authenticateApiRequestWithJwt($system){
         ]);
     }
 
-    $payload = UJwt::jwt_verify($m[1], $jwt_Secret);
-    if($payload === false){
-        exitWithError('Invalid token', 401, [
-            'WWW-Authenticate' => 'Bearer error="invalid_token"'
+    global $method, $http_verb;
+    $requiredScope = $method === 'search' && in_array($http_verb, ['GET', 'HEAD'], true)
+        ? 'read:data' : 'write:data';
+    try {
+        UJwt::authenticateApiToken($system, $m[1], $jwt_Secret, $requiredScope);
+    } catch (\DomainException $error) {
+        $code = $error->getCode() === 403 ? 403 : 401;
+        exitWithError($error->getMessage(), $code, [
+            'WWW-Authenticate' => $code === 403
+                ? 'Bearer error="insufficient_scope"' : 'Bearer error="invalid_token"'
         ]);
     }
-
-    $userID = @$payload['sub'];
-    if(!$userID){
-        exitWithError('Invalid token payload', 401, [
-            'WWW-Authenticate' => 'Bearer error="invalid_token"'
-        ]);
-    }
-
-    // Optional scope enforcement:
-    // $scope = $payload['scope'] ?? null;
-    // if($scope !== 'read:data'){
-    //     exitWithError('Insufficient scope', 403, [
-    //         'WWW-Authenticate' => 'Bearer error="insufficient_scope"'
-    //     ]);
-    // }
-
-    $system->setCurrentUser([
-        'ugr_ID' => $userID,
-        'ugr_Groups' => user_getWorkgroups($system->getMysqli(), $userID)
-    ]);
 }
 
 /**

@@ -64,7 +64,9 @@ class ReportTemplateMgr
     /** Whether the current user may modify database report templates. */
     public function canEditTemplates()
     {
-        return $this->system->getUserId() > 0
+        $user = $this->system->getCurrentUser();
+        return (!isset($user['api_token_scope']) || in_array('write:data', explode(' ', $user['api_token_scope']), true))
+            && $this->system->getUserId() > 0
             && $this->system->hasAccess() && !$this->system->isGuestUser();
     }
 
