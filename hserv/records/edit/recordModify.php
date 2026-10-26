@@ -4764,7 +4764,7 @@ function bugreportUpdate($system, $recID){
 
     $resolution = isset($resolutionDtyID) && array_key_exists($resolutionDtyID, $details) ? $details[$resolutionDtyID] : null;
     $resolution = is_array($resolution) ? array_pop($resolution) : $resolution;
-    $resolution = !empty($resolution) ? "Resolution:<br>$resolution<br><br>" : '';
+    $resolution = !empty($resolution) ? "<strong>Resolution</strong>:<br>$resolution<br><br>" : '';
 
     $url = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$recID";
 

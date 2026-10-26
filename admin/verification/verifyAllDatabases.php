@@ -88,6 +88,10 @@ if(!$system->init(null, false, false)){
 if(!defined('HEURIST_SERVER_NAME') && isset($serverName)){
 	define('HEURIST_SERVER_NAME', $serverName); // 'heurist.huma-num.fr'
 }
+// Setup filestore root, just in case
+if(!defined('HEURIST_FILESTORE_ROOT')){
+    define('HEURIST_FILESTORE_ROOT', $system->getFileStoreRootFolder());
+}
 	
 // Validate server name
 if(!defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME)){
@@ -117,7 +121,6 @@ $allowedActions = [
     'expected_terms' => 'Expected Terms'
 ];
 
-$mysqli = $system->getMysqli();
 $dbVerify = new DbVerify($system, true);
 $verificationResults = [];
 
@@ -127,16 +130,30 @@ if(!defined('HEURIST_RTY_ICON')){
 
 foreach($databases as $database){
 
-    if($requestedDatabases !== [] && !in_array($database, $requestedDatabases)){
+    if(preg_match('/[^A-Za-z0-9_\$]/', $database) && $requestedDatabases !== [] && !in_array($database, $requestedDatabases)){
         continue;
     }
 
-    // Reset term lookup
+    // Setup next database, reset term lookup, and reset verify value
     global $trmLookup;
+
+    $connectDB = mysql__usedatabase($mysqli, $database);
+    if($connectDB !== true || !empty($mysqli->error)){
+        $verificationResults[$database] = $connectDB !== true ? $connectDB[1] : $mysqli->error;
+        continue;
+    }
+
+    if(!$system->setDbnameFull($database, true)){
+        $verificationResults[$database] = 'Failed to prepare Heurist system for database.';
+        continue;
+    }
+
+    $system->setMysqli($mysqli);
+
+    $dbVerify->setSystem($system);
+
     $trmLookup = [];
     VerifyValue::reset();
-
-    mysql__usedatabase($mysqli, $database);
 
     $databaseResults = [];
     foreach($allowedActions as $action => $actionName){
@@ -163,7 +180,7 @@ foreach($databases as $database){
             continue;
         }
 
-        $actionMsg = str_replace(HEURIST_RTY_ICON, HEURIST_BASE_URL . "?db={$database}&icon=", $actionMsg);
+        $actionMsg = str_replace(HEURIST_RTY_ICON, HEURIST_BASE_URL_PRO . "?db={$database}&icon=", $actionMsg);
         $actionMsg = str_replace(['<h3', '</h3>'], ['<div', '</div>'], $actionMsg);
         $actionMsg = strip_tags($actionMsg, '<div><span><a><strong><em><br><table><tr><td>');
 
