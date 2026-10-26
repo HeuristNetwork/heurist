@@ -3,7 +3,7 @@
 ## Overview
 
 Writes of records through the new API (plan 14, heurist-explorer
-`docs/development/14 Record-Editing-Plan.md`): insert, update, duplicate and
+`docs/development/14 DONE Record-Editing-Plan.md`): insert, update, duplicate and
 delete, ported from `hserv/records/edit/recordModify.php`, for every record
 type (heurist-explorer plan 21, 2026-10-19: the list of writable system types,
 `WritableRecordTypes`, was removed). The legacy save steps listed under *Not ported

@@ -61,6 +61,21 @@ class ReportTemplateMgr
         $this->dir = $_dir ?? (defined('HEURIST_SMARTY_TEMPLATES_DIR') ? HEURIST_SMARTY_TEMPLATES_DIR : null);
     }
 
+    /** Whether the current user may modify database report templates. */
+    public function canEditTemplates()
+    {
+        return $this->system->getUserId() > 0
+            && $this->system->hasAccess() && !$this->system->isGuestUser();
+    }
+
+    /** Guard mutations even when the manager is used without the controller. */
+    public function requireEditingPermission()
+    {
+        if (!$this->canEditTemplates()) {
+            throw new \Exception('Report template editing requires a logged-in user with editing permissions');
+        }
+    }
+
     /**
      * Retrieves a list of available Smarty template files.
      *
@@ -87,7 +102,7 @@ class ReportTemplateMgr
             $ind = strpos($filename, "_");
             $isnot_temp = (!(is_numeric($ind) && $ind == 0));
 
-            if (file_exists($this->dir . $filename) && $ext == "gpl") {
+            if (file_exists($this->dir . $filename) && $ext == "gpl" && $this->canEditTemplates()) {
 
                 $processed_template = $this->processGplFile($filename);
                 if ($processed_template) {
@@ -138,6 +153,8 @@ class ReportTemplateMgr
      */
     private function processGplFile($filename)
     {
+        $this->requireEditingPermission();
+
         $template_body = file_get_contents($this->dir . $filename);
         $res = $this->convertTemplate($template_body, 1);
 
@@ -207,6 +224,8 @@ class ReportTemplateMgr
      */
     public function saveTemplate($template_body, $template_file)
     {
+        $this->requireEditingPermission();
+
         $path_parts = pathinfo($template_file);
         $template_file = $path_parts['filename'] . '.tpl';
         $template_file_fullpath = $this->dir . $template_file;
@@ -232,6 +251,8 @@ class ReportTemplateMgr
      */
     public function deleteTemplate($template_file)
     {
+        $this->requireEditingPermission();
+
         $template_file = $this->checkTemplate($template_file);
         unlink($template_file);
         return 'deleted';
@@ -276,6 +297,8 @@ class ReportTemplateMgr
      * @throws \Exception If `checkTemplate` fails (e.g., file not found).
      */
     public function renameTemplate($oldTemplateFile, $newTemplateName){
+
+        $this->requireEditingPermission();
 
         $oldTemplateFile = $this->checkTemplate($oldTemplateFile);
         $newTemplateName = !empty($newTemplateName) ? USanitize::sanitizeFileName(basename(urldecode($newTemplateName)), false) : '';
@@ -542,6 +565,8 @@ class ReportTemplateMgr
      */
     public function importTemplate($params, $for_cms = null)
     {
+        $this->requireEditingPermission();
+
         if (!$params || !$params['size']) {
             throw new \Exception('Error occurred during upload - file is zero size');
         }
