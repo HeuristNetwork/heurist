@@ -3600,7 +3600,11 @@ function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null
         mysql__foreign_check($mysqli, false);
 
         //duplicate record header
-        $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null);
+        // A duplicate is a new local record, not another copy of the source's sync identity.
+        // Omitted columns use their schema defaults (NULL origin identity, local sync state).
+        $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null,
+            array('rec_OriginatingDBID', 'rec_IDInOriginatingDB', 'rec_SyncState'));
+        if(!is_int($new_id)){ $error = $new_id; break; }
 
         $query = "UPDATE Records set rec_Modified=NOW(), rec_Added=NOW(), rec_AddedByUGrpID={$currentUserId}, rec_FlagTemporary=1";
         if(is_numeric($new_owner) && intval($new_owner)>=0){
@@ -3616,10 +3620,6 @@ function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null
             $error = $prefixDbErrorMsg .$mysqli->error;
             break;
         }
-
-
-        if(!is_int($new_id)){ $error = $new_id; break; }
-
 
         if($access_grps!=null){
             updateUsrRecPermissions($mysqli, $new_id, $access_grps, null);
