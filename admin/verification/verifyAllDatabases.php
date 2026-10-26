@@ -67,14 +67,15 @@ if(isset($argv)){
 
     define('ADMIN_PWD_REQUIRED', 1);
 
-    $requestedDatabases = is_string(@$_REQUEST['db']) ? explode(',', $_REQUEST['db']) : [];
-    $requestedActions = is_string(@$_REQUEST['a']) ? explode(',', $_REQUEST['a']) : [];
+    $requestedDatabases = isset($_REQUEST['db']) && is_string($_REQUEST['db']) ? explode(',', $_REQUEST['db']) : [];
+    $requestedActions = isset($_REQUEST['a']) && is_string($_REQUEST['a']) ? explode(',', $_REQUEST['a']) : [];
 }
 
 define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
+require_once 'verifyValue.php';
 
 use hserv\utilities\DbVerify;
 
@@ -133,6 +134,7 @@ foreach($databases as $database){
     // Reset term lookup
     global $trmLookup;
     $trmLookup = [];
+    VerifyValue::reset();
 
     mysql__usedatabase($mysqli, $database);
 
@@ -343,6 +345,11 @@ if($emailOutput || $newline !== '<br>'){
 
                 const dbContainer = document.getElementById('databaseResults');
                 dbContainer.innerHTML = '';
+
+                if(typeof results === 'string'){
+                    dbContainer.textContent = results;
+                    return;
+                }
 
                 for(const action in results){
 

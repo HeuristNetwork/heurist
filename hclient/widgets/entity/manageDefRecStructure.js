@@ -2248,6 +2248,12 @@ console.log('onEditFormChange @todo check buttons!!!');
             if(dt_type=='relmarker' || dt_type=='resource'){
                 this._recreateResourceSelector();
             }
+            if(dt_type == 'file'){
+                const defaultFile = this._editing.getValue('rst_DefaultValue');
+                if(window.hWin.HEURIST4.util.isPositiveInt(defaultFile)){
+                    this._editing.setFieldValueByName('rst_DefaultValue_file', defaultFile, false); //recreates
+                }
+            }
             
             let maxval = parseInt(this._editing.getValue('rst_MaxValues'), 10) || 0;
             let res = 'repeatable';

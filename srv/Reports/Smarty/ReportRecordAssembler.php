@@ -74,7 +74,7 @@ final class ReportRecordAssembler
      * @param LanguageCodes $languages Language codes.
      * @param callable $visibleIds fn(array $ids): array.
      * @param int $userId Current user (personal tags).
-     * @param array<string,int> $codes RT_CMS_PAGE, DT_EXTENDED_DESCRIPTION.
+     * @param array<string,int> $codes RT_CMS_PAGE, DT_EXTENDED_DESCRIPTION, DT_PARENT_ENTITY (virtual parents, plan 26).
      */
     public function __construct(
         RecordDataService $data,
@@ -116,6 +116,13 @@ final class ReportRecordAssembler
             ? array('allDetails' => true, 'resolveDetails' => true)
             : array());
         $tags = $details ? $this->personalTags($ids) : array();
+        $parentField = $this->codes['DT_PARENT_ENTITY'] ?? 0;
+        $parents = $details && $parentField > 0 ? RecordRepository::shared($this->database)->parentLinks($ids) : array();
+        $parentIds = array();
+        foreach($parents as $links){
+            foreach($links as $link){ $parentIds[] = $link['parent']; }
+        }
+        $visibleParents = array_fill_keys(empty($parentIds) ? array() : call_user_func($this->visibleIds, array_unique($parentIds)), true);
         $records = array();
         foreach($loaded as $row){
             $id = intval($row['rec_ID']);
@@ -126,6 +133,15 @@ final class ReportRecordAssembler
             }
             if($details){
                 $record['details'] = $this->rawDetails($row['details'] ?? array(), intval($record['rec_RecTypeID']));
+                if($parentField > 0){
+                    $values = array();
+                    foreach($parents[$id] ?? array() as $link){
+                        if(isset($visibleParents[$link['parent']])){
+                            $values[$link['parent']] = $this->rawValue('resource', $link['parent']);
+                        }
+                    }
+                    $record['details'][$parentField] = array_values($values);
+                }
                 $record['rec_Tags'] = implode(',', $tags[$id] ?? array());
                 $record['rec_IsVisible'] = true;
             }

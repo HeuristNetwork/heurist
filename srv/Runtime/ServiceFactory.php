@@ -161,7 +161,9 @@ final class ServiceFactory
             'DT_DATE',
             // record editing (plan 14)
             'RT_CMS_HOME', 'DT_WORKFLOW_STAGE', 'DT_CMS_EXTFILES',
-            'DT_CMS_SCRIPT', 'DT_CMS_CSS', 'DT_CMS_HEADER', 'DT_CMS_FOOTER'
+            'DT_CMS_SCRIPT', 'DT_CMS_CSS', 'DT_CMS_HEADER', 'DT_CMS_FOOTER',
+            // virtual parents (plan 26): title masks, Smarty fN / fNs
+            'DT_PARENT_ENTITY'
         );
         $codeIds = array();
         foreach($codeNames as $codeName){
@@ -390,7 +392,8 @@ final class ServiceFactory
         $store = new RecordStore($this->database);
         $permissions = new RecordPermissionService($this->database, $this->runtime);
         $title = new RecordTitle($languages, $this->codes->id('DT_NAME'));
-        $titleMask = new TitleMask($definitions, $store->records(), FileRepository::shared($this->database), $languages);
+        $titleMask = new TitleMask($definitions, $store->records(), FileRepository::shared($this->database), $languages,
+            $this->codes->id('DT_PARENT_ENTITY'));
         $validator = new RecordValidator($this->database, $definitions, $languages, array(
             'name' => $this->codes->id('DT_NAME'),
             'shortSummary' => $this->codes->id('DT_SHORT_SUMMARY'),
@@ -690,7 +693,7 @@ final class ServiceFactory
         };
         $codes = array();
         foreach(array('RT_RELATION', 'RT_CMS_PAGE', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
-            'DT_SHORT_SUMMARY', 'DT_START_DATE', 'DT_END_DATE', 'DT_EXTENDED_DESCRIPTION') as $name){
+            'DT_SHORT_SUMMARY', 'DT_START_DATE', 'DT_END_DATE', 'DT_EXTENDED_DESCRIPTION', 'DT_PARENT_ENTITY') as $name){
             $codes[$name] = $this->codes->id($name);
         }
         return new SmartyTemplateRunner(

@@ -37,9 +37,10 @@ final class DefinitionSnapshotService
      * term, code, conceptid, desc - by DefinitionLookup; 4: dbconst DT_DATA_SOURCE;
      * 5: dbconst RT_REGISTERED_FILE, the API domain of record types, plan 21;
      * 6: CMS code field ids and per-response JavaScript authorization;
-     * 7: dbconst of the user and group fields, plan 20 Phase 4d).
+     * 7: dbconst of the user and group fields, plan 20 Phase 4d;
+     * 8: structure createChild flag and dbconst DT_PARENT_ENTITY, plan 26).
      */
-    private const FORMAT = 7;
+    private const FORMAT = 8;
 
     /** Languages offered for translations when the database has no own list (legacy default). */
     private const TRANSLATION_LANGUAGES = array('ENG', 'FRE', 'CHI', 'SPA', 'ITA', 'ARA', 'GER', 'POR', 'LAT', 'GRE', 'GRC', 'IND');
@@ -181,7 +182,7 @@ final class DefinitionSnapshotService
         if(intval($meta['format'] ?? 1) < self::FORMAT){ return false; }
         $dbconst = $meta['dbconst'] ?? null;
         if(!is_array($dbconst)){ return false; }
-        foreach(array('DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'TRM_NO', 'TRM_YES', 'RT_CMS_PAGE', 'DT_NAME', 'DT_SYMBOLOGY', 'DT_GEO_FIELDS') as $name){
+        foreach(array('DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'TRM_NO', 'TRM_YES', 'RT_CMS_PAGE', 'DT_NAME', 'DT_SYMBOLOGY', 'DT_GEO_FIELDS', 'DT_PARENT_ENTITY') as $name){
             if(!array_key_exists($name, $dbconst)){ return false; }
         }
         return true;
@@ -242,7 +243,9 @@ final class DefinitionSnapshotService
             'DT_MAXIMUM_ZOOM_LEVEL'    => $this->concept('dty', 2, 33),
             // record types listed and written on another API domain than /records (plan 21):
             // registered files on /files (plan 20)
-            'RT_REGISTERED_FILE'       => $this->concept('rty', 2, 1106)
+            'RT_REGISTERED_FILE'       => $this->concept('rty', 2, 1106),
+            // the stored Parent Entity field: hidden where virtual parents are shown (plan 26)
+            'DT_PARENT_ENTITY'         => $this->concept('dty', 2, 247)
         );
     }
 

@@ -748,6 +748,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             // --- Collect files and folders to include in the archive ---
             $folders_to_copy = [];
             $copy_uploaded_files = (@$_REQUEST['includeresources'] == '1');
+            $rocrateFileDirectories = [];
 
             if (@$_REQUEST['include_docs'] == '1') { // Include system documentation folders
                 $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR,
@@ -755,6 +756,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                           'tileserver', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons',
                           'term-images', 'webimagecache', 'blurredimagescache')); // Exclude these
                 echo_flush2("<br><br>Exporting system folders<br>");
+                $rocrateFileDirectories = $folders_to_copy;
             }
             
             // Include custom user media folders if defined in settings
@@ -769,8 +771,10 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     if (!file_exists($path)) continue;
 
                     $path_with_slash = rtrim($path, '/') . '/';
+                    $directory = FOLDER_BACKUP."/{$dir}";
                     if ($copy_uploaded_files) {
-                       folderRecurseCopy($path_with_slash, FOLDER_BACKUP.'/'.$dir);
+                        $rocrateFileDirectories[] = $directory;
+                        folderRecurseCopy($path_with_slash, $directory);
                     }
                     // Exclude from $folders_to_copy if already handled
                     $key = array_search($path_with_slash, $folders_to_copy);
@@ -782,8 +786,16 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
 
             if ($copy_uploaded_files) { // Include standard uploaded files and thumbs
-                if (defined('HEURIST_FILES_DIR')) $folders_to_copy[] = HEURIST_FILES_DIR;
-                if (defined('HEURIST_THUMB_DIR')) $folders_to_copy[] = HEURIST_THUMB_DIR;
+
+                if (defined('HEURIST_FILES_DIR')){
+                    $folders_to_copy[] = HEURIST_FILES_DIR;
+                    $rocrateFileDirectories[] = HEURIST_FILES_DIR;
+                }
+                if (defined('HEURIST_THUMB_DIR')){
+                    $folders_to_copy[] = HEURIST_THUMB_DIR;
+                    $rocrateFileDirectories[] = HEURIST_THUMB_DIR;
+                }
+
                 $copy_files_in_root = true; // Copy files from the root of HEURIST_FILESTORE_DIR
             } else {
                 $copy_files_in_root = false;
@@ -801,6 +813,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             if (@$_REQUEST['include_docs'] == '1') { // Include Heurist application documentation
                 echo_flush2('Copy documentation/context_help folder<br>');
                 folderRecurseCopy(HEURIST_DIR.'documentation/context_help/', FOLDER_BACKUP.'/documentation/context_help/');
+                //$rocrateFileDirectories[] = HEURIST_DIR.'documentation/context_help';
             }
 
             // Remove database definition cache files from backup
@@ -808,6 +821,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             fileDelete(FOLDER_BACKUP.'/entity/dbdef_cache.json');
 
             // --- HML Export ---
+            $zipHMLFile = '';
             if (@$_REQUEST['include_hml'] == '1') {
                 echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
 
@@ -919,10 +933,13 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
                     $dbExportCrate->export('ro-crate', [
                         'includeSqlDump' => true,
-                        'includeFiles' => false,// true
+                        'includeFiles' => $copy_uploaded_files,
                         'sqlDump' => $database_dumpfile,
+                        'hmlDump' => $zipHMLFile,
                         'tsvFiles' => $tsvFiles,
-                        'parentDir' => FOLDER_BACKUP
+                        'fileDirectories' => $rocrateFileDirectories,
+                        'parentDir' => FOLDER_BACKUP,
+                        'recordFormat' => ['TSV']
                     ]);
 
                     $separate_crate_zip = $separate_crate_zip && folderSize2(FOLDER_BACKUP . '/ro-crate') > 0;

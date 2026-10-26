@@ -19,11 +19,9 @@ namespace hserv\records\export;
 //use Override;
 use ZipArchive;
 
-use function count;
 use function is_array;
 use function intval;
 use function array_key_exists;
-use function in_array;
 
 class ExportRecordsNODEXL extends ExportRecords{
 
@@ -33,7 +31,6 @@ class ExportRecordsNODEXL extends ExportRecords{
     private ?string $recordIconBase;
     private array $detailFieldNames = [];
     private array $relationTermLabels = [];
-    private array $skipExpanding = [];
 
     //#[Override]
     public function setSession($system){
@@ -48,7 +45,7 @@ class ExportRecordsNODEXL extends ExportRecords{
     }
     protected function _outputFooter(){}
 
-    public function output($data, $params){
+    public function output($data, $params) : bool{
 
         if(!$this->_outputPrepare($data, $params)){
             return false;
@@ -62,37 +59,31 @@ class ExportRecordsNODEXL extends ExportRecords{
             'Record A', 'Record B', 'Relationship', 'Weight'
         ];
 
-        for($idx = 0; $idx < count($this->records); $idx ++){
-
-            $record = $this->records[$idx];
+        foreach($this->records as $record){
 
             $recID = is_array($record) ? (int)($record['rec_ID'] ?? 0) : (int)$record;
-
+    
             if($recID <= 0 || array_key_exists($recID, $this->vertices)){
                 continue;
             }elseif(!is_array($record)){
                 $record = recordSearchByID($this->system, $recID, false, 'rec_RecTypeID,rec_Title');
             }
-
+    
             $this->vertices[$recID] = [
                 $recID,
                 $record['rec_RecTypeID'],
                 $record['rec_Title'],
                 "{$this->recordIconBase}{$recID}"
             ];
-
-            if(in_array($recID, $this->skipExpanding)){
-                continue;
-            }
-
-            $this->addRelationshipEdges($recID);
-            $this->addPointerEdges($recID);
         }
+
+        $this->addRelationshipEdges();
+        $this->addPointerEdges();
 
         return $this->_outputResult($params);
     }
 
-    private function _outputResult(array $params){
+    private function _outputResult(array $params) : bool{
 
         $isDownload = $params['file'] == 1;
         $timestamp = date('YmdHis');
@@ -182,88 +173,76 @@ class ExportRecordsNODEXL extends ExportRecords{
         return true;
     }
 
-    private function addRelationshipEdges(int $recID){
+    private function addRelationshipEdges(){
 
         $mysqli = $this->system->getMysqli();
 
-        $query = "SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID FROM recLinks WHERE rl_RelationID IS NOT NULL AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
-        $relations = mysql__select_assoc($mysqli, $query, 0);
+        foreach($this->vertices as $recID => $vertex){
 
-        foreach($relations as $relation){
+            $query = "SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID FROM recLinks WHERE rl_RelationID IS NOT NULL AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
+            $relations = mysql__select_assoc($mysqli, $query, 0);
 
-            $sourceID = intval($relation['rl_SourceID']);
-            $targetID = intval($relation['rl_TargetID']);
-            $relationTermID = intval($relation['rl_RelationTypeID']);
+            foreach($relations as $relation){
 
-            $relationKey = "{$sourceID}-{$relationTermID}-{$targetID}";
+                $sourceID = intval($relation['rl_SourceID']);
+                $targetID = intval($relation['rl_TargetID']);
+                $relationTermID = intval($relation['rl_RelationTypeID']);
 
-            if(array_key_exists($relationKey, $this->edges)){
-                continue;
-            }
+                $relationKey = "{$sourceID}-{$relationTermID}-{$targetID}";
 
-            $relationTerm = @$this->relationTermLabels[$relationTermID] ?? null;
-            if(!$relationTerm){
-                $relationTerm = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $relationTermID]);
-                $this->relationTermLabels[$relationTermID] = $relationTerm;
-            }
+                if(array_key_exists($relationKey, $this->edges) || !array_key_exists($sourceID, $this->vertices) || !array_key_exists($targetID, $this->vertices)){
+                    continue;
+                }
 
-            $this->edges[$relationKey] = [
-                $sourceID,
-                $targetID,
-                $relationTerm,
-                1
-            ];
+                $relationTerm = @$this->relationTermLabels[$relationTermID] ?? null;
+                if(!$relationTerm){
+                    $relationTerm = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $relationTermID]);
+                    $this->relationTermLabels[$relationTermID] = $relationTerm;
+                }
 
-            if(!array_key_exists($sourceID, $this->vertices)){
-                $this->records[] = $sourceID;
-                $this->skipExpanding[] = $sourceID;
-            }
-            if(!array_key_exists($targetID, $this->vertices)){
-                $this->records[] = $targetID;
-                $this->skipExpanding[] = $targetID;
+                $this->edges[$relationKey] = [
+                    $sourceID,
+                    $targetID,
+                    $relationTerm,
+                    1
+                ];
             }
         }
     }
 
-    private function addPointerEdges(int $recID){
+    private function addPointerEdges(){
 
         $mysqli = $this->system->getMysqli();
 
-        $query = "SELECT rl_SourceID, rl_TargetID, rl_DetailTypeID FROM recLinks WHERE rl_DetailTypeID > 0 AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
-        $pointers = mysql__select_assoc($mysqli, $query, 0);
+        foreach($this->vertices as $recID => $vertex){
 
-        foreach($pointers as $pointer){
+            $query = "SELECT rl_SourceID, rl_TargetID, rl_DetailTypeID FROM recLinks WHERE rl_DetailTypeID > 0 AND (rl_SourceID = {$recID} OR rl_TargetID = {$recID})";
+            $pointers = mysql__select_assoc($mysqli, $query, 0);
 
-            $sourceID = intval($pointer['rl_SourceID']);
-            $targetID = intval($pointer['rl_TargetID']);
-            $fieldID = intval($pointer['rl_DetailTypeID']);
+            foreach($pointers as $pointer){
 
-            $pointerKey = "{$sourceID}-{$fieldID}-{$targetID}";
+                $sourceID = intval($pointer['rl_SourceID']);
+                $targetID = intval($pointer['rl_TargetID']);
+                $fieldID = intval($pointer['rl_DetailTypeID']);
 
-            if(array_key_exists($pointerKey, $this->edges)){
-                continue;
-            }
+                $pointerKey = "{$sourceID}-{$fieldID}-{$targetID}";
 
-            $fieldName = @$this->detailFieldNames[$fieldID] ?? null;
-            if(!$fieldName){
-                $fieldName = mysql__select_value($mysqli, "SELECT dty_Name FROM defDetailTypes WHERE dty_ID = ?", ['i', $fieldID]);
-                $this->relationTermLabels[$fieldID] = $fieldName;
-            }
+                if(array_key_exists($pointerKey, $this->edges) || !array_key_exists($sourceID, $this->vertices) || !array_key_exists($targetID, $this->vertices)){
+                    continue;
+                }
 
-            $this->edges[$pointerKey] = [
-                $sourceID,
-                $targetID,
-                $fieldName,
-                1
-            ];
+                $fieldName = @$this->detailFieldNames[$fieldID] ?? null;
+                if(!$fieldName){
+                    $fieldName = mysql__select_value($mysqli, "SELECT dty_Name FROM defDetailTypes WHERE dty_ID = ?", ['i', $fieldID]);
+                    $this->relationTermLabels[$fieldID] = $fieldName;
+                }
 
-            if(!array_key_exists($sourceID, $this->vertices)){
-                $this->records[] = $sourceID;
-                $this->skipExpanding[] = $sourceID;
-            }
-            if(!array_key_exists($targetID, $this->vertices)){
-                $this->records[] = $targetID;
-                $this->skipExpanding[] = $targetID;
+                $this->edges[$pointerKey] = [
+                    $sourceID,
+                    $targetID,
+                    $fieldName,
+                    1
+                ];
             }
         }
     }

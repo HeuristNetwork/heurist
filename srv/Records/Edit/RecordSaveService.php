@@ -127,6 +127,7 @@ final class RecordSaveService
         $database = $this->store->database();
         $database->beginTransaction();
         try{
+            $before = $insert ? null : $this->parentState($plan['recordId'], $plan['rectype']);
             $this->store->setUser($this->runtime->userId);
             $header = array(
                 'rectype' => $plan['rectype'],
@@ -152,12 +153,93 @@ final class RecordSaveService
             }
             $title = $this->titleMask !== null ? $this->titleMask->fill($recordId) : null;
             $this->store->setTitle($recordId, $title ?? $this->title->fromRows($rows, $recordId));
+            $this->refreshChildTitles($recordId, $plan['rectype'], $before);
             $database->commit();
         }catch(Throwable $exception){
             $database->rollback();
             throw $exception;
         }
         return array('recordId'=>$recordId, 'created'=>$insert, 'issues'=>$issues);
+    }
+
+    /** Child targets of the flagged forward fields, without reverse details. */
+    private function childIds(int $recordId, int $rectype): array
+    {
+        $fields = $this->definitions->childFields($rectype);
+        return empty($fields) ? array() : array_values(array_unique(array_column(
+            $this->store->records()->links(array($recordId), array('kind' => 'pointer', 'fields' => $fields)), 1
+        )));
+    }
+
+    /**
+     * Children, title and a fingerprint of the other values of a parent record (null: its
+     * type has no child fields or titles are not filled from masks).
+     *
+     * @return array{children:array<int,int>,title:string,values:string}|null
+     */
+    private function parentState(int $recordId, int $rectype): ?array
+    {
+        if($this->titleMask === null){ return null; }
+        $fields = $this->definitions->childFields($rectype);
+        if(empty($fields)){ return null; }
+        $values = array();
+        foreach($this->store->records()->details(array($recordId), null, array('order' => 'field')) as $row){
+            // links to the children are compared one by one (children), not in the fingerprint
+            if(in_array($row['field'], $fields, true)){ continue; }
+            $values[] = array($row['field'], $row['value'], $row['wkt'], $row['file']);
+        }
+        $header = $this->store->records()->headers(array($recordId), array('rec_ID', 'rec_Title'))[$recordId] ?? array();
+        return array(
+            'children' => $this->childIds($recordId, $rectype),
+            'title' => (string)($header['rec_Title'] ?? ''),
+            'values' => md5(serialize($values))
+        );
+    }
+
+    /**
+     * Refresh titles affected by linking/unlinking a child or changing its parent (plan 26):
+     * all children when the title or other values of the parent changed, otherwise only the
+     * linked and unlinked ones; changed child titles go on to their own children.
+     *
+     * @param array|null $before parentState() before the save (null for a new record).
+     */
+    private function refreshChildTitles(int $recordId, int $rectype, ?array $before): void
+    {
+        $after = $this->parentState($recordId, $rectype);
+        if($after === null){ return; }
+        if($before === null || $before['title'] !== $after['title'] || $before['values'] !== $after['values']){
+            $pending = array_merge($before['children'] ?? array(), $after['children']);
+        }else{
+            $pending = array_merge(array_diff($before['children'], $after['children']),
+                array_diff($after['children'], $before['children']));
+        }
+        $parentField = $this->titleMask->parentField();
+        $pattern = '/parent entity|record parent|2-247'.($parentField > 0 ? '|\[\s*'.$parentField.'\b' : '').'/i';
+        $usesParent = array(); // record type => its mask refers to the parent
+        $seen = array($recordId => true);
+        while(!empty($pending)){
+            $headers = $this->store->records()->headers(array_values(array_unique($pending)));
+            $pending = array();
+            foreach($headers as $id => $header){
+                if(isset($seen[$id])){ continue; }
+                $seen[$id] = true;
+                $type = intval($header['rec_RecTypeID']);
+                if(!isset($usesParent[$type])){
+                    $usesParent[$type] = preg_match($pattern, (string)($this->definitions->rectype($type)['titleMask'] ?? '')) === 1;
+                }
+                if(!$usesParent[$type]){ continue; }
+                $title = $this->titleMask->fill($id);
+                if($title === null){
+                    $rows = array_map(static fn($row) => array('dty' => $row['field'], 'value' => $row['value']),
+                        $this->store->records()->details(array($id)));
+                    $title = $this->title->fromRows($rows, $id);
+                }
+                if($title !== $header['rec_Title']){
+                    $this->store->setTitle($id, $title);
+                    $pending = array_merge($pending, $this->childIds($id, $type));
+                }
+            }
+        }
     }
 
     /** Values of a new record. */

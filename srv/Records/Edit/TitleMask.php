@@ -51,23 +51,35 @@ final class TitleMask
     /** Original file name of a remote file (ULF_REMOTE). */
     private const REMOTE_FILE = '_remote';
 
-    /** Concept code of the "Parent entity" field (DT_PARENT_ENTITY). */
+    /** Concept code of the "Parent entity" field, accepted as a mask field name. */
     private const PARENT_ENTITY = '2-247';
 
     private DefinitionLookup $definitions;
     private RecordRepository $records;
     private FileRepository $files;
     private LanguageCodes $languages;
+    /** Local id of the "Parent entity" field (DT_PARENT_ENTITY, 0 = none): virtual parents, plan 26 */
+    private int $parentField;
     /** @var array<int,array|null> record id => header and values (per fill) */
     private array $cache = array();
 
+    /**
+     * @param int $parentField DT_PARENT_ENTITY: its values are the virtual parents (plan 26).
+     */
     public function __construct(DefinitionLookup $definitions, RecordRepository $records, FileRepository $files,
-        LanguageCodes $languages)
+        LanguageCodes $languages, int $parentField = 0)
     {
         $this->definitions = $definitions;
         $this->records = $records;
         $this->files = $files;
         $this->languages = $languages;
+        $this->parentField = $parentField;
+    }
+
+    /** @return int Local id of the "Parent entity" field (DT_PARENT_ENTITY, 0 = none). */
+    public function parentField(): int
+    {
+        return $this->parentField;
     }
 
     /**
@@ -318,6 +330,9 @@ final class TitleMask
     private function fieldValue(int $fieldId, int $rectypeId, int $recordId, ?string $termAttribute = null): string
     {
         $type = $this->definitions->fieldType($fieldId);
+        if($this->parentField > 0 && $fieldId === $this->parentField){
+            return implode(', ', $this->pointerIds($fieldId, 'resource', $recordId));
+        }
         if($type === 'relmarker'){
             return implode(', ', $this->relatedIds($fieldId, $recordId));
         }
@@ -371,6 +386,15 @@ final class TitleMask
     private function pointerIds(int $fieldId, string $type, int $recordId): array
     {
         if($type === 'relmarker'){ return $this->relatedIds($fieldId, $recordId); }
+        if($this->parentField > 0 && $fieldId === $this->parentField){
+            if($this->record($recordId) === null){ return array(); }
+            if(!isset($this->cache[$recordId]['parents'])){
+                $this->cache[$recordId]['parents'] = array_values(array_unique(array_column(
+                    $this->records->parentLinks(array($recordId))[$recordId] ?? array(), 'parent'
+                )));
+            }
+            return $this->cache[$recordId]['parents'];
+        }
         $record = $this->record($recordId);
         $ids = array();
         foreach($record['values'][$fieldId] ?? array() as $row){
@@ -421,7 +445,7 @@ final class TitleMask
     private function fieldId(int $rectypeId, string $name): int
     {
         if($this->isParentEntity($name)){
-            return $this->definitions->localId('dty', self::PARENT_ENTITY);
+            return $this->parentField;
         }
         $search = mb_strtolower(trim($name), 'UTF-8');
         $structure = $rectypeId > 0 ? $this->definitions->structureRows($rectypeId) : array();
@@ -455,9 +479,8 @@ final class TitleMask
     private function isParentEntity(string $name): bool
     {
         $name = mb_strtolower(trim($name), 'UTF-8');
-        $local = $this->definitions->localId('dty', self::PARENT_ENTITY);
         return mb_strpos($name, 'parent entity') === 0 || mb_strpos($name, 'record parent') === 0
-            || $name === self::PARENT_ENTITY || ($local > 0 && $name === (string)$local);
+            || $name === self::PARENT_ENTITY || ($this->parentField > 0 && $name === (string)$this->parentField);
     }
 
     /**

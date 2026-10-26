@@ -282,27 +282,6 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
                 $sErrorMsg = DbUtils::databaseValidateName($db_source, 2);//exists    
             }
 
-            // Perform owner and pointer checks before action
-            $dbVerify = new DbVerify($system);
-            $ownerResults = $dbVerify->check_owner_ref(['fix' => 1]);
-            $pointerResults = $dbVerify->check_pointer_targets(['fix' => 1]);
-
-            if(!$sErrorMsg && !$ownerResults['status'] || !$pointerResults['status']){
-
-                $sErrorMsg = "Unable to {$action} database.<br>Failed to verify that ";
-
-                $ownerMsg = !$ownerResults['status'] ? 'all records have owners' : '';
-                $pointerMsg = !$pointerResults['status'] ? 'that all record pointers point to existing records' : '';
-
-                if(!$ownerResults['status'] && !$pointerResults['status']){
-                    $sErrorMsg .= "{$ownerMsg} and {$pointerMsg}.";
-                }else{
-                    $sErrorMsg .= !$ownerResults['status'] ? "{$ownerMsg}." : "{$pointerMsg}.";
-                }
-
-                $sErrorMsg .= '<br>. Please run Admin > Verify integrity to see the specific issues.';
-            }
-
             if ($sErrorMsg!=null) {
                 if(strpos($sErrorMsg,'not exists')>0){
                    $sErrorMsg = 'Operation is possible when database to be cloned or renamed is on the same server. '
@@ -363,6 +342,33 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                             $allow_action = true;
                         }
                     }
+                }
+            }
+
+            if($allow_action){
+
+                // Perform owner and pointer checks before action
+                $dbVerify = new DbVerify($system);
+                $ownerResults = $dbVerify->check_owner_ref(['fix' => 1]);
+                $pointerResults = $dbVerify->check_pointer_targets(['fix' => 1]);
+
+                if(!$ownerResults['status'] || !$pointerResults['status']){
+
+                    $sErrorMsg = "Unable to {$action} database.<br>Failed to verify that ";
+
+                    $ownerMsg = !$ownerResults['status'] ? 'all records have owners' : '';
+                    $pointerMsg = !$pointerResults['status'] ? 'that all record pointers point to existing records' : '';
+
+                    if(!$ownerResults['status'] && !$pointerResults['status']){
+                        $sErrorMsg .= "{$ownerMsg} and {$pointerMsg}.";
+                    }else{
+                        $sErrorMsg .= !$ownerResults['status'] ? "{$ownerMsg}." : "{$pointerMsg}.";
+                    }
+
+                    $sErrorMsg .= '<br>. Please run Admin > Verify integrity to see the specific issues.';
+                    $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
+
+                    $allow_action = false;
                 }
             }
 

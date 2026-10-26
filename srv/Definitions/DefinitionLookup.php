@@ -86,6 +86,8 @@ final class DefinitionLookup
     private array $owners = array();
     /** @var array<string,int> "kind:code" => local id */
     private array $localIds = array();
+    /** @var array<int,array{rty:int,dty:int,targetTypes:array<int,int>}>|null flagged child pointer fields (plan 26) */
+    private ?array $childLinks = null;
 
     /** @param DatabaseInterface $database Database of the definitions. */
     public function __construct(DatabaseInterface $database)
@@ -380,7 +382,7 @@ final class DefinitionLookup
         if(!isset($this->editStructure[$rectypeId])){
             $rows = $this->database->fetchAll(
                 'SELECT rst_DetailTypeID,rst_DisplayName,rst_RequirementType,rst_MaxValues,rst_DefaultValue,'
-                .'rst_DisplayOrder,rst_DisplayHelpText,'
+                .'rst_DisplayOrder,rst_DisplayHelpText,rst_CreateChildIfRecPtr,'
                 .'rst_CalcFunctionID,rst_NonOwnerVisibility,dty_Name,dty_Type,dty_PtrTargetRectypeIDs,dty_JsonTermIDTree '
                 .'FROM defRecStructure JOIN defDetailTypes ON dty_ID=rst_DetailTypeID '
                 .'WHERE rst_RecTypeID=? ORDER BY rst_DisplayOrder,rst_ID',
@@ -399,6 +401,7 @@ final class DefinitionLookup
                     'targetTypes' => self::idList($row['dty_PtrTargetRectypeIDs']),
                     'vocabulary' => self::idList($row['dty_JsonTermIDTree']),
                     'order' => intval($row['rst_DisplayOrder']),
+                    'createChild' => intval($row['rst_CreateChildIfRecPtr'] ?? 0) === 1,
                     'help' => (string)$row['rst_DisplayHelpText'],
                     'calcFunctionId' => intval($row['rst_CalcFunctionID']),
                     'nonOwnerVisibility' => (string)$row['rst_NonOwnerVisibility']
@@ -410,6 +413,43 @@ final class DefinitionLookup
     }
 
     /**
+     * Resource fields that make their targets children (rst_CreateChildIfRecPtr), forbidden ones
+     * left out (plan 26). The flag belongs to the structure row: one field may be a child pointer
+     * in one record type and an ordinary pointer in another.
+     *
+     * @return array<int,array{rty:int,dty:int,targetTypes:array<int,int>}> rty = parent record type;
+     *         targetTypes of the base field, empty = any record type
+     */
+    public function childLinks(): array
+    {
+        if($this->childLinks === null){
+            $this->childLinks = array();
+            $fields = $this->allFields();
+            foreach($this->structure() as $row){
+                $field = $fields[$row['dty']] ?? null;
+                if(empty($row['createChild']) || $field === null || $field['type'] !== 'resource'
+                    || strtolower(trim($row['req'])) === 'forbidden'){ continue; }
+                $this->childLinks[] = array('rty' => $row['rty'], 'dty' => $row['dty'], 'targetTypes' => $field['targetTypes']);
+            }
+        }
+        return $this->childLinks;
+    }
+
+    /**
+     * Child pointer fields of a parent record type (plan 26), see childLinks().
+     *
+     * @return array<int,int> Field ids.
+     */
+    public function childFields(int $rectypeId): array
+    {
+        $ids = array();
+        foreach($this->childLinks() as $link){
+            if($link['rty'] === $rectypeId){ $ids[] = $link['dty']; }
+        }
+        return $ids;
+    }
+
+    /**
      * Placement of the fields in every record type, separators left out (snapshot).
      *
      * @return array<int,array{rty:int,dty:int,name:string,order:int,req:string,max:int}>
@@ -418,7 +458,7 @@ final class DefinitionLookup
     {
         $result = array();
         foreach($this->database->fetchAll(
-            'SELECT rst_RecTypeID,rst_DetailTypeID,rst_DisplayName,rst_DisplayOrder,rst_RequirementType,rst_MaxValues '
+            'SELECT rst_RecTypeID,rst_DetailTypeID,rst_DisplayName,rst_DisplayOrder,rst_RequirementType,rst_MaxValues,rst_CreateChildIfRecPtr '
             .'FROM defRecStructure '
             .'WHERE rst_DetailTypeID NOT IN (SELECT dty_ID FROM defDetailTypes WHERE dty_Type=?) '
             .'ORDER BY rst_RecTypeID,rst_DisplayOrder,rst_DetailTypeID',
@@ -429,6 +469,7 @@ final class DefinitionLookup
                 'dty' => intval($row['rst_DetailTypeID']),
                 'name' => (string)$row['rst_DisplayName'],
                 'order' => intval($row['rst_DisplayOrder']),
+                'createChild' => intval($row['rst_CreateChildIfRecPtr'] ?? 0) === 1,
                 'req' => (string)$row['rst_RequirementType'],
                 'max' => intval($row['rst_MaxValues'])
             );
