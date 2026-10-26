@@ -96,14 +96,20 @@ create a MySQL database yourself.
 ## 5. Configure passwords and data location (optional)
 
 Compose has development defaults so the stack can start without extra setup.
-To set your own database passwords and API signing secret, create a file named
+To set your own database passwords, create a file named
 `.env` beside `docker-compose.yml` before the first startup:
 
 ```dotenv
 HEURIST_MYSQL_ROOT_PASSWORD=choose-a-strong-root-password
 HEURIST_DB_ADMIN_PASSWORD=choose-a-strong-app-password
-HEURIST_JWT_SECRET=choose-a-long-random-secret
 ```
+
+JWT authentication is optional and disabled by default. Ordinary session-based
+login does not require a JWT secret. To enable JWT, add `HEURIST_JWT_SECRET` to
+`.env` with a strong, unique secret generated from at least 32 cryptographically
+random bytes (for example, 64 hexadecimal characters). Leave it unset or empty
+to keep JWT disabled. After changing it, recreate the web container with
+`docker compose up -d --force-recreate web` so it receives the new environment.
 
 Keep `.env` private; it is excluded from Git. If you change the database
 password after MySQL has initialized its data directory, update the MySQL user

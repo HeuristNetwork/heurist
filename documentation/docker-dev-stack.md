@@ -99,7 +99,7 @@ create a `.env` next to `docker-compose.yml` (it is git-ignored):
 |---|---|---|
 | `HEURIST_MYSQL_ROOT_PASSWORD` | `heurist_root` | `db` service root password |
 | `HEURIST_DB_ADMIN_PASSWORD` | `heurist` | MySQL `heurist` user; passed to the web app as `$dbAdminPassword` |
-| `HEURIST_JWT_SECRET` | `dev-only-secret-change-me` | JWT signing for the REST API (`hserv/controller/auth.php`) |
+| `HEURIST_JWT_SECRET` | Empty (JWT disabled) | Optional private signing secret for the REST API (`hserv/controller/auth.php`) |
 
 The MySQL admin username is fixed to `heurist` (`HEURIST_DB_ADMIN_USERNAME` in
 the web environment, `MYSQL_USER` in the db environment).
@@ -198,7 +198,15 @@ docker exec -it heurist-db-1 mysql -uheurist -pheurist hdb_yourdb
 
 With the stack up, the REST API is available at
 `http://localhost:8080/heurist/api/{dbname}/...` (see
-`hserv/controller/api.php`). Login for a JWT token:
+`hserv/controller/api.php`). JWT authentication is disabled by default; ordinary
+session-based login remains available. Token issuance returns HTTP 503 while
+JWT is disabled, and protected API routes reject explicit Bearer credentials.
+
+To enable JWT, set `HEURIST_JWT_SECRET` in your private `.env` file to a strong,
+unique secret generated from at least 32 cryptographically random bytes (for
+example, 64 hexadecimal characters). Then recreate the web container with
+`docker compose up -d --force-recreate web`. Leave the variable unset or empty
+to keep JWT disabled. After enabling JWT, log in for a token:
 
 ```
 POST http://localhost:8080/heurist/hserv/controller/auth.php

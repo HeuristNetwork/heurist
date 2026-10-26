@@ -55,4 +55,6 @@ $dbScriptMode = 0;
 $dbDumpMode   = 0;
 
 // --- [JWT AUTHENTICATION] ---------------------------------------------------
-$jwt_Secret = getenv('HEURIST_JWT_SECRET') ?: 'dev-only-secret-change-me';
+// Empty means disabled; ordinary session-based login remains available.
+// Set a strong, private HEURIST_JWT_SECRET explicitly to enable JWT.
+$jwt_Secret = getenv('HEURIST_JWT_SECRET') ?: '';
