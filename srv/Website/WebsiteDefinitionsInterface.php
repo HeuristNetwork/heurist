@@ -31,4 +31,12 @@ interface WebsiteDefinitionsInterface
      * @return array<int,string> Report lines.
      */
     public function install(array $fieldCodes, array $rectypeCodes): array;
+
+    /**
+     * Make required fields of record types optional (plan 27b: the logo of a website).
+     *
+     * @param array<string,array<int,string>> $fields Record type concept code => field concept codes.
+     * @return array<int,string> Report lines.
+     */
+    public function makeOptional(array $fields): array;
 }

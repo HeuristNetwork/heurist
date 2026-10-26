@@ -15,7 +15,7 @@ entry points during migration.
   `aggregate`/`outputAggregate`, plan 20 Phase 3). Search refuses those as `detail` values.
 - `RecordPresentationController.php` — Dataset, Map Document and Map Layer reads.
 - `MapDataController.php` — query-to-GeoJSON output only.
-- `PublicationController.php` — map/data/timeline/graph/crosstabs publication actions.
-- `WebsiteController.php` — v4 website pages and frames (`/{db}/site/...`), `/api/{db}/website` (plan 27a).
+- `WebsiteController.php` — v4 website pages and frames (`/{db}/site/...`), `/api/{db}/website`: setup, create,
+  summary, validate, menu, delete (plans 27a, 27b).
 - `ReportController.php` — reports manager: list, template body, register, import/export, delete, single-record render.
 - `JobController.php` — background jobs: start (answers, closes the connection, then runs), status, Stop, result.

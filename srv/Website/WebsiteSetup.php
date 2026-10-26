@@ -4,7 +4,8 @@
 *
 * Fields version 2-49, configuration 2-1187 (DT_CONFIGURATION) and page
 * translations 2-1202 (DT_CMS_PAGE_TRANSLATIONS) on the website (99-51) and
-* page (99-52) record types. Database managers only (POST /api/{db}/website/setup).
+* page (99-52) record types; the logo of a website made optional (plan 27b).
+* Database managers only (POST /api/{db}/website/setup).
 *
 * @project     Heurist academic knowledge management system
 * @package     Website
@@ -27,6 +28,8 @@ final class WebsiteSetup
 {
     public const FIELDS = array('2-49', '2-1187', '2-1202');
     public const RECTYPES = array('99-51', '99-52');
+    /** Fields made optional: a new v4 website has no logo (plan 27b, Q3); the legacy editor still asks for it. */
+    public const OPTIONAL = array('99-51' => array('2-38'));
 
     private WebsiteDefinitionsInterface $definitions;
     private RuntimeContext $runtime;
@@ -46,6 +49,7 @@ final class WebsiteSetup
         if(!$this->runtime->isAdmin){
             throw new WebsiteException(403, 'Only database managers can install the website definitions');
         }
-        return $this->definitions->install(self::FIELDS, self::RECTYPES);
+        return array_merge($this->definitions->install(self::FIELDS, self::RECTYPES),
+            $this->definitions->makeOptional(self::OPTIONAL));
     }
 }

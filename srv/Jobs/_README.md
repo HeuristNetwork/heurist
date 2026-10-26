@@ -34,8 +34,9 @@ has a time limit; Stop also runs `KILL QUERY` on the connections a job registere
 
 Job types are supplied by the caller (`hserv/controller/api.php`):
 `report-preview` and `report-generate` (`Reports/Jobs/ReportPreviewJob.php`,
-`ReportGenerateJob.php`, built by `Runtime\ServiceFactory::reportJobHandlers()`) and
-`export` (`Records/Export/ExportJob.php`, `ServiceFactory::exportJobHandlers()`, plan 13).
+`ReportGenerateJob.php`, built by `Runtime\ServiceFactory::reportJobHandlers()`),
+`export` (`Records/Export/ExportJob.php`, `ServiceFactory::exportJobHandlers()`, plan 13) and
+`website-build` (`Website/Build/WebsiteBuildJob.php`, `ServiceFactory::websiteJobHandlers()`, plan 27b).
 The endpoints are in `documentation/api/heurist-openapi.yaml` (tag Jobs).
 
 ## Key files

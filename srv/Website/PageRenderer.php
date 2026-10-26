@@ -106,7 +106,7 @@ final class PageRenderer
 
     /**
      * The page of one instance in an iframe ("mount": "iframe"): the module bundle with
-     * its bootstrap, as PublicationController::showPublication.
+     * its bootstrap (the page of the former module publications).
      */
     public function frame(array $context, string $instanceId): string
     {

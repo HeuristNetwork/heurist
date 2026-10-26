@@ -20,8 +20,18 @@ language, split into rows by `RecordValidator` and joined by `RecordDataService`
 - `CmsValidator.php` — checks of §7 (also used on save through `CmsRecordCheck.php`).
 - `StyleCompiler.php` — base settings and node styles as CSS (values: `Utilities/StoredCss`).
 - `SiteUrls.php` — `/{db}/site/{id}[/{page}]` or `?db=&site=&pageid=`.
-- `WebsiteSetup.php`, `WebsiteDefinitionsInterface.php` — `POST /api/{db}/website/setup`;
-  the definition writer is `hserv/web/WebsiteDefinitions.php`.
+- `WebsiteSetup.php`, `WebsiteDefinitionsInterface.php` — `GET|POST /api/{db}/website/setup`;
+  the definition writer is `hserv/web/WebsiteDefinitions.php` (fields, optional website logo).
+- `WebsiteEditService.php` — the Website manager (plan 27b): status, summary, create
+  (`WebsiteStarter.php`), publish a module as a standalone page, menu add / remove, delete.
+  Writes through `RecordSaveService` / `RecordDeleteService`.
+- `Build/WebsiteBuilder.php`, `Build/WebsiteBuildJob.php` — job `website-build`: all pages ×
+  languages rendered with guest rights into files (`SiteUrls::files()`), zipped in the job folder.
+
+API (`Controller/WebsiteController.php`, logged-in users): `GET|POST /website/setup`,
+`POST /website` (create), `POST /website/publish`, `GET /website/{id}`,
+`GET /website/{id}/validate`, `POST /website/{id}/menu`, `DELETE /website/{id}/menu/{page}`,
+`DELETE /website/{id}[?pages=1]`. Tests: `tests/WebsiteEditTest.php`.
 
 The same checks and CSS are in `heurist-explorer` shared/src/site/cmsDocument.js; both run
 the cases of shared/test/fixtures/cms-v4 (`tests/CmsFormatTest.php`). Database test:

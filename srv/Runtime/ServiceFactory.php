@@ -23,7 +23,6 @@ use Heurist\Controller\FileController;
 use Heurist\Controller\GraphController;
 use Heurist\Controller\JobController;
 use Heurist\Controller\MapDataController;
-use Heurist\Controller\PublicationController;
 use Heurist\Controller\QueryCancelController;
 use Heurist\Controller\RecordEditController;
 use Heurist\Controller\RecordPresentationController;
@@ -39,7 +38,6 @@ use Heurist\Database\WritableDatabaseInterface;
 use Heurist\Jobs\JobHandlerInterface;
 use Heurist\Jobs\JobRunner;
 use Heurist\Jobs\JobStore;
-use Heurist\Publication\PublicationService;
 use Heurist\Records\Map\MapFeatureService;
 use Heurist\Records\Export\ExportJob;
 use Heurist\Records\Export\ExportPlanner;
@@ -110,7 +108,10 @@ use Heurist\Controller\WebsiteController;
 use Heurist\Website\CmsRecordCheck;
 use Heurist\Website\PageRenderer;
 use Heurist\Website\SiteUrls;
+use Heurist\Website\Build\WebsiteBuilder;
+use Heurist\Website\Build\WebsiteBuildJob;
 use Heurist\Website\WebsiteDefinitionsInterface;
+use Heurist\Website\WebsiteEditService;
 use Heurist\Website\WebsiteRepository;
 use Heurist\Website\WebsiteService;
 use Heurist\Website\WebsiteSetup;
@@ -122,7 +123,6 @@ final class ServiceFactory
     private RuntimeContext $runtime;
     private PresentationRecordRepository $presentations;
     private SystemCode $codes;
-    private string $publicationDirectory;
     private string $entityDirectory;
     /** @var array{templates?:string,generated?:string,generatedUrl?:string,jobs?:string,settings?:array} */
     private array $reportEnvironment;
@@ -199,7 +199,6 @@ final class ServiceFactory
             $database,
             $runtime,
             new SystemCode($codeIds),
-            (string)$system->getSysDir('generated-pubs'),
             (string)$system->getSysDir('entity'),
             array(
                 'templates' => (string)$system->getSysDir('smarty-templates'),
@@ -324,7 +323,6 @@ final class ServiceFactory
         DatabaseInterface $database,
         RuntimeContext $runtime,
         SystemCode $codes,
-        string $publicationDirectory = '',
         string $entityDirectory = '',
         array $reportEnvironment = array()
     )
@@ -333,7 +331,6 @@ final class ServiceFactory
         $this->runtime = $runtime;
         $this->codes = $codes;
         $this->presentations = new PresentationRecordRepository($database, $runtime, $codes);
-        $this->publicationDirectory = $publicationDirectory;
         $this->entityDirectory = $entityDirectory;
         $this->reportEnvironment = $reportEnvironment;
     }
@@ -394,6 +391,30 @@ final class ServiceFactory
      */
     public function recordEditController(): RecordEditController
     {
+        $parts = $this->recordWriteParts();
+        return new RecordEditController(
+            $parts['save'],
+            $parts['delete'],
+            new RecordDuplicateService($parts['store'], $parts['permissions'], $parts['definitions'], $this->runtime,
+                $parts['title'], $parts['languages'], array(
+                    'name' => $this->codes->id('DT_NAME'),
+                    'cmsPage' => $this->codes->id('RT_CMS_PAGE')
+                ), $parts['titleMask'], $parts['validator']),
+            $this->recordQueryController(),
+            $this->runtime
+        );
+    }
+
+    /**
+     * The services of the record writes (plan 14), shared by the record edit controller and
+     * the website manager (plan 27b).
+     *
+     * @return array{store:RecordStore,validator:RecordValidator,permissions:RecordPermissionService,
+     *         definitions:DefinitionLookup,languages:LanguageCodes,title:RecordTitle,titleMask:TitleMask,
+     *         save:RecordSaveService,delete:RecordDeleteService}
+     */
+    private function recordWriteParts(): array
+    {
         if(!($this->database instanceof WritableDatabaseInterface)){
             throw new \LogicException('The database adapter does not support writes');
         }
@@ -423,18 +444,19 @@ final class ServiceFactory
             return $this->smartyRunner()->run(array('body' => $formula), array($recordId),
                 array('mode' => 'txt', 'purpose' => 'render', 'record' => true));
         }, $validator);
-        return new RecordEditController(
-            new RecordSaveService($store, $validator, $permissions, $definitions, $this->runtime, $title, array(
+        return array(
+            'store' => $store,
+            'validator' => $validator,
+            'permissions' => $permissions,
+            'definitions' => $definitions,
+            'languages' => $languages,
+            'title' => $title,
+            'titleMask' => $titleMask,
+            'save' => new RecordSaveService($store, $validator, $permissions, $definitions, $this->runtime, $title, array(
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
                 'workflowStage' => $this->codes->id('DT_WORKFLOW_STAGE')
             ), $titleMask, $calculated),
-            new RecordDeleteService($store, $permissions, $definitions, $this->runtime),
-            new RecordDuplicateService($store, $permissions, $definitions, $this->runtime, $title, $languages, array(
-                'name' => $this->codes->id('DT_NAME'),
-                'cmsPage' => $this->codes->id('RT_CMS_PAGE')
-            ), $titleMask, $validator),
-            $this->recordQueryController(),
-            $this->runtime
+            'delete' => new RecordDeleteService($store, $permissions, $definitions, $this->runtime)
         );
     }
 
@@ -563,8 +585,8 @@ final class ServiceFactory
     }
 
     /**
-     * Create the controller of the v4 websites (plan 27a): live pages, instance frames,
-     * /api/{db}/website/{id}/check and /website/setup.
+     * Create the controller of the v4 websites (plans 27a, 27b): live pages, instance frames
+     * and /api/{db}/website (manager operations need a writable database).
      *
      * @param WebsiteDefinitionsInterface|null $definitions Definition writer (hserv) for setup.
      */
@@ -572,11 +594,7 @@ final class ServiceFactory
     {
         $repository = new WebsiteRepository($this->database, $this->runtime);
         $languages = new LanguageCodes(self::languageCodesFile());
-        $environment = array(
-            'database' => $this->runtime->databaseName,
-            'baseUrl' => $this->runtime->baseUrl,
-            'javaScriptAllowed' => $this->javaScriptAllowed()
-        );
+        $environment = $this->websiteEnvironment();
         $renderer = static function(bool $pretty) use ($repository, $languages, $environment): PageRenderer {
             return new PageRenderer($repository->codes(), $languages, $environment
                 + array('urls' => new SiteUrls($environment['database'], $environment['baseUrl'], $pretty)));
@@ -585,16 +603,55 @@ final class ServiceFactory
             new WebsiteService($repository, $languages, $this->runtime->baseUrl),
             $renderer,
             $this->runtime,
-            $definitions !== null ? new WebsiteSetup($definitions, $this->runtime) : null
+            $definitions !== null ? new WebsiteSetup($definitions, $this->runtime) : null,
+            $this->database instanceof WritableDatabaseInterface ? $this->websiteEditService() : null
         );
     }
 
-    /** Create the shared module publication controller. */
-    public function publicationController(): PublicationController
+    /** Website manager operations (plan 27b) with the rights of the current user. */
+    public function websiteEditService(): WebsiteEditService
     {
-        return new PublicationController(
-            new PublicationService($this->runtime, $this->publicationDirectory),
+        $parts = $this->recordWriteParts();
+        return new WebsiteEditService(
+            new WebsiteRepository($this->database, $this->runtime),
+            $parts['save'],
+            $parts['delete'],
+            $parts['permissions'],
+            $parts['languages'],
+            new SiteUrls($this->runtime->databaseName, $this->runtime->baseUrl, true),
             $this->runtime
+        );
+    }
+
+    /**
+     * Background job type of websites (plan 27b): website-build. Pages are rendered with the
+     * rights of a visitor who is not logged in.
+     *
+     * @return array<int,JobHandlerInterface>
+     */
+    public function websiteJobHandlers(): array
+    {
+        $guest = new RuntimeContext($this->runtime->databaseName, $this->runtime->databaseNameFull, 0, $this->runtime->baseUrl);
+        $repository = new WebsiteRepository($this->database, $guest);
+        $languages = new LanguageCodes(self::languageCodesFile());
+        $environment = $this->websiteEnvironment();
+        $builder = new WebsiteBuilder(
+            new WebsiteService($repository, $languages, $this->runtime->baseUrl),
+            static function(string $defaultLanguage) use ($repository, $languages, $environment): PageRenderer {
+                return new PageRenderer($repository->codes(), $languages, $environment
+                    + array('urls' => SiteUrls::files($environment['database'], $environment['baseUrl'], $defaultLanguage)));
+            }
+        );
+        return array(new WebsiteBuildJob($this->websiteEditService(), $builder));
+    }
+
+    /** Values of the website renderer: database, base URL, CMS code exception. */
+    private function websiteEnvironment(): array
+    {
+        return array(
+            'database' => $this->runtime->databaseName,
+            'baseUrl' => $this->runtime->baseUrl,
+            'javaScriptAllowed' => $this->javaScriptAllowed()
         );
     }
 

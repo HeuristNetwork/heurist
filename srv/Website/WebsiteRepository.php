@@ -52,7 +52,9 @@ final class WebsiteRepository
         'subMenu' => array('dty', '99-761'),
         'keywords' => array('dty', '99-948'),
         'pageType' => array('dty', '2-928'),
-        'standalonePage' => array('trm', '2-6254')
+        'standalonePage' => array('trm', '2-6254'),
+        'menuPage' => array('trm', '2-6253'),
+        'logo' => array('dty', '2-38')
     );
 
     /** Depth of the menu tree read for a website (top pages = 1). */
@@ -172,7 +174,7 @@ final class WebsiteRepository
     }
 
     /** Record ids of a pointer field. */
-    private static function ids(array $record, int $fieldId): array
+    public static function ids(array $record, int $fieldId): array
     {
         return array_values(array_filter(array_map('intval', self::values($record, $fieldId))));
     }

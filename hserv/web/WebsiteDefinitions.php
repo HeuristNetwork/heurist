@@ -118,4 +118,29 @@ final class WebsiteDefinitions implements WebsiteDefinitionsInterface
         }
         return $report;
     }
+
+    public function makeOptional(array $fields): array
+    {
+        $report = array();
+        ConceptCode::setSystem($this->system);
+        $mysqli = $this->system->getMysqli();
+        foreach ($fields as $rectypeCode => $fieldCodes) {
+            $rectypeId = intval(ConceptCode::getRecTypeLocalID($rectypeCode));
+            if ($rectypeId < 1) {
+                continue;
+            }
+            foreach ($fieldCodes as $code) {
+                $fieldId = intval(ConceptCode::getDetailTypeLocalID($code));
+                if ($fieldId < 1) {
+                    continue;
+                }
+                $mysqli->query('UPDATE defRecStructure SET rst_RequirementType=\'optional\' WHERE rst_RecTypeID='.$rectypeId
+                    .' AND rst_DetailTypeID='.$fieldId.' AND rst_RequirementType=\'required\'');
+                if ($mysqli->affected_rows > 0) {
+                    $report[] = 'Field '.$code.' of record type '.$rectypeCode.' is now optional';
+                }
+            }
+        }
+        return $report;
+    }
 }

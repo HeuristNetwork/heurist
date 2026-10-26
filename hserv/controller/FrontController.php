@@ -100,20 +100,8 @@ class FrontController
         }
 
         // Detect controller class
-        if (@$this->req_params['controller'] == 'PublicationController' || @$this->req_params['pub_id']) {
-            
-            if(!@$this->req_params['action']){
-                $this->req_params['action'] = 'show';    
-            }
-
-            $controller = ServiceFactory::fromLegacySystem($this->system)->publicationController();
-            $controller->handleRequest(
-                @$this->req_params['action'],
-                $this->req_params['type'] ?? 'map',
-                $this->req_params
-            );
-
-        }elseif (@$this->req_params['controller'] == 'UserController') {
+        // module publications are standalone website pages since plan 27b (heurist-explorer); PublicationController removed
+        if (@$this->req_params['controller'] == 'UserController') {
 
             $controller = new UserController($this->system, $this->req_params);
             $controller->handleRequest(@$this->req_params['action']);

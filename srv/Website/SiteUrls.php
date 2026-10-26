@@ -5,6 +5,9 @@
 * Pretty form `/{db}/site/{id}[/{page id}]` (RequestRouter, action "site") or
 * the parameter form `?db={db}&site={id}[&pageid={page id}]`, which works
 * without the router. The form of the current request is kept.
+* A built site (plan 27b §7, `files()`) links its pages as files
+* `../{lang}/{page id}.html` (`index.html` for the home or a standalone page);
+* instance frames stay on the live server.
 *
 * @project     Heurist academic knowledge management system
 * @package     Website
@@ -27,6 +30,8 @@ final class SiteUrls
     private string $baseUrl;
     /** Server root of the pretty URLs ("https://host"), or '' for the parameter form. */
     private string $prettyRoot;
+    /** Built site: folder of the default language ('' = live URLs). */
+    private string $fileLanguage = '';
 
     /**
      * @param string $database Database name (without prefix).
@@ -46,10 +51,25 @@ final class SiteUrls
         }
     }
 
+    /**
+     * URLs of a built site: pages as relative files, frames on the live server (pretty form).
+     *
+     * @param string $defaultLanguage Folder of the default language (3 letters).
+     */
+    public static function files(string $database, string $baseUrl, string $defaultLanguage): self
+    {
+        $urls = new self($database, $baseUrl, true);
+        $urls->fileLanguage = strtolower($defaultLanguage !== '' ? $defaultLanguage : 'eng');
+        return $urls;
+    }
+
     /** URL of a website page (pageId 0: home) or of a standalone page (id = the page). */
     public function page(int $id, int $pageId = 0, string $language = ''): string
     {
         $lang = $language !== '' ? strtolower($language) : '';
+        if($this->fileLanguage !== ''){
+            return '../'.rawurlencode($lang !== '' ? $lang : $this->fileLanguage).'/'.($pageId > 0 ? $pageId : 'index').'.html';
+        }
         if($this->prettyRoot !== ''){
             return $this->prettyRoot.'/'.rawurlencode($this->database).'/site/'.$id.($pageId > 0 ? '/'.$pageId : '')
                 .($lang !== '' ? '?lang='.rawurlencode($lang) : '');
@@ -65,5 +85,14 @@ final class SiteUrls
             return $this->prettyRoot.'/'.rawurlencode($this->database).'/site/'.$id.($pageId > 0 ? '/'.$pageId : '').'/frame/';
         }
         return $this->baseUrl.'?db='.rawurlencode($this->database).'&site='.$id.($pageId > 0 ? '&pageid='.$pageId : '').'&frame=';
+    }
+
+    /** URL of a legacy website or page (versions 1-3, hserv `websiteRecord.php`). */
+    public function legacy(int $id): string
+    {
+        if($this->prettyRoot !== ''){
+            return $this->prettyRoot.'/'.rawurlencode($this->database).'/web/'.$id;
+        }
+        return $this->baseUrl.'?db='.rawurlencode($this->database).'&website&id='.$id;
     }
 }

@@ -605,11 +605,11 @@ if($is_jobs_query && !in_array($http_method, array('GET','POST','DELETE'), true)
     exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
 }
 
-// Websites of format v4 (plan 27a): /api/{db}/website/{id}/check, POST /api/{db}/website/setup.
+// Websites of format v4 (plans 27a, 27b): /api/{db}/website[/{id}[/validate|menu]], /website/setup.
 // See srv/Controller/WebsiteController.php; logged-in users only.
 $is_website_query = ($resource === 'website');
-if($is_website_query && !in_array($http_method, array('GET','POST'), true)){
-    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST'));
+if($is_website_query && !in_array($http_verb, array('GET','POST','DELETE'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
 }
 
 // Routes where auth processing is not needed here
@@ -791,11 +791,11 @@ if($is_def_query){
 
     $factory = ServiceFactory::fromLegacySystem($system);
     // srv Smarty engine; the legacy renderer only converts templates on import/export.
-    // Job types: report-preview, report-generate (plan 12) and export (plan 13).
+    // Job types: report-preview, report-generate (plan 12), export (plan 13) and website-build (plan 27b).
     $controller = $factory->jobController(array_merge($factory->reportJobHandlers(
         $factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)),
         new hserv\report\ReportRecordWriter($system)
-    ), $factory->exportJobHandlers()));
+    ), $factory->exportJobHandlers(), $factory->websiteJobHandlers()));
     $controller->handleRequest(
         $http_method,
         array_slice($requestUri, 4),
@@ -808,7 +808,11 @@ if($is_def_query){
 }elseif($is_website_query){
 
     $controller = ServiceFactory::fromLegacySystem($system)->websiteController(new hserv\web\WebsiteDefinitions($system));
-    $controller->handleApi($http_method, array_slice($requestUri, 4), $req_params);
+    $controller->handleApi($http_verb, array_slice($requestUri, 4), $req_params, is_array($json) ? $json : null, array(
+        'contentType' => $contentType,
+        'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+        'host' => $_SERVER['HTTP_HOST'] ?? ''
+    ));
     $system->dbclose();
     exit;
 

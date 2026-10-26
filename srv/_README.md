@@ -8,10 +8,9 @@ kept separate from `/hserv`; only HTTP entry points may temporarily bridge the
 initialized legacy runtime into these classes.
 
 The initial migration excludes IIIF, batch/import operations,
-`MapDataSourceService`, and `MapShapefileService`. Module-neutral publication
-storage is provided by `Publication/PublicationService.php`; its writable
-directory and runtime identity are injected by `Runtime/ServiceFactory.php`.
-Record editing (plan 14) is in `Records/Edit/`, for system record types only.
+`MapDataSourceService`, and `MapShapefileService`. A published module is a
+standalone website page of format v4 (`Website/`, plan 27b); the former JSON
+publication files (`Publication/`) were removed. Record editing (plan 14) is in `Records/Edit/`, for system record types only.
 
 Data access (plan 15): services do not query the database tables themselves.
 Definitions are read by `Definitions/DefinitionLookup`, records by
@@ -30,7 +29,6 @@ Dependency direction is Controller → Records → Database/Runtime. Classes bel
 - `Controller/SystemQueryController.php` — mapped filter/user collection and
   item reads for the `/sys` API domain.
 - `Controller/MapDataController.php` — query-to-GeoJSON read adapter.
-- `Controller/PublicationController.php` — shared module publication adapter.
 - `Controller/RecordEditController.php` — record writes (POST/PUT/PATCH/DELETE /records/{id}).
 - `Database/DatabaseInterface.php` — database abstraction.
 - `Database/MysqlDatabase.php` — MySQL implementation of the modern workflow.
@@ -42,7 +40,7 @@ Dependency direction is Controller → Records → Database/Runtime. Classes bel
 - `Records/Data/RecordDataService.php` — batched header/detail retrieval.
 - `Records/Presentation/` — read-only presentation definition services.
 - `Records/Map/MapFeatureService.php` — GeoJSON feature pipeline.
-- `Publication/PublicationService.php` — publication persistence and bootstrap generation.
+- `Controller/WebsiteController.php`, `Website/` — v4 websites: live pages, manager API, build job (plans 27a, 27b).
 - `Controller/ReportController.php` — reports manager (`/api/{db}/reports`).
 - `Reports/` — Smarty report records, template files and engine interfaces.
 - `Controller/JobController.php` — background jobs (`/api/{db}/jobs`).
