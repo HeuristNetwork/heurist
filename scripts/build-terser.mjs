@@ -113,5 +113,5 @@ for (const [outFile, files] of Object.entries(bundles)) {
     await writeFile(path.join(outDir, `${outFile}.map`), result.map, "utf8");
   }
 
-  console.log(`Built ${path.join("build/js", outFile)}`);
+  console.log(`Built ${path.relative(root, path.join(outDir, outFile))}`);
 }
