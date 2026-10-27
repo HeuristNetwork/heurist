@@ -34,7 +34,7 @@
     "argparse": "^2.0.1",
     "balanced-match": "^1.0.2",
     "bluebird": "^3.7.2",
-    "brace-expansion": "^1.1.12",
+    "brace-expansion": "^1.1.21",
     "buffer-from": "^1.1.2",
     "callsites": "^3.1.0",
     "camel-case": "^4.1.2",
