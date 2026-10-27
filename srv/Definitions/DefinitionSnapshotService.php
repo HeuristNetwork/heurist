@@ -22,7 +22,6 @@ namespace Heurist\Definitions;
 
 use Heurist\Database\DatabaseInterface;
 use Heurist\Runtime\RuntimeContext;
-use Heurist\System\Users\UserGroupCodes;
 
 /** Builds and caches the read-only database-definitions snapshot. */
 final class DefinitionSnapshotService
@@ -38,9 +37,10 @@ final class DefinitionSnapshotService
      * 5: dbconst RT_REGISTERED_FILE, the API domain of record types, plan 21;
      * 6: CMS code field ids and per-response JavaScript authorization;
      * 7: dbconst of the user and group fields, plan 20 Phase 4d;
-     * 8: structure createChild flag and dbconst DT_PARENT_ENTITY, plan 26).
+     * 8: structure createChild flag and dbconst DT_PARENT_ENTITY, plan 26;
+     * 9: dbconst has every name of SystemConstants, dbconstVersion, 2026-10-27).
      */
-    private const FORMAT = 8;
+    private const FORMAT = 9;
 
     /** Languages offered for translations when the database has no own list (legacy default). */
     private const TRANSLATION_LANGUAGES = array('ENG', 'FRE', 'CHI', 'SPA', 'ITA', 'ARA', 'GER', 'POR', 'LAT', 'GRE', 'GRC', 'IND');
@@ -152,7 +152,8 @@ final class DefinitionSnapshotService
 
     private function lookup(): DefinitionLookup
     {
-        return DefinitionLookup::shared($this->database);
+        // the resolved constants are cached beside the snapshot (def-snapshot-constants.json)
+        return DefinitionLookup::shared($this->database)->useConstantCache($this->cacheDirectory);
     }
 
     private function cacheFile(): string
@@ -172,87 +173,26 @@ final class DefinitionSnapshotService
             'generated' => gmdate('c'),
             'language'  => 'eng',            // translations deferred; see _README
             'languages' => $languages,
-            'dbconst'   => $this->dbconst()
+            'dbconst'   => $this->dbconst(),
+            // a cached snapshot of another table version is rebuilt
+            'dbconstVersion' => SystemConstants::version()
         );
     }
 
-    /** Whether a cached snapshot contains constants required by the current client contract. */
+    /** Whether a cached snapshot has the current format and the constants of the current table. */
     private function hasCurrentDbconst(array $meta): bool
     {
-        if(intval($meta['format'] ?? 1) < self::FORMAT){ return false; }
-        $dbconst = $meta['dbconst'] ?? null;
-        if(!is_array($dbconst)){ return false; }
-        foreach(array('DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'TRM_NO', 'TRM_YES', 'RT_CMS_PAGE', 'DT_NAME', 'DT_SYMBOLOGY', 'DT_GEO_FIELDS', 'DT_PARENT_ENTITY') as $name){
-            if(!array_key_exists($name, $dbconst)){ return false; }
-        }
-        return true;
+        return intval($meta['format'] ?? 1) >= self::FORMAT && is_array($meta['dbconst'] ?? null)
+            && ($meta['dbconstVersion'] ?? '') === SystemConstants::version();
     }
 
-    /** Local IDs of reserved definitions/terms needed by definition-driven clients. */
+    /**
+     * Local ids of all system constants (Definitions/SystemConstants, 2026-10-27): the client
+     * reads every RT_* / DT_* / TRM_* name with HDbDefs.dbconst() and needs no list of its own.
+     */
     private function dbconst(): array
     {
-        // users and groups (plan 20, 4d): their DT_* constants, 0 until a concept code is given
-        return UserGroupCodes::localIds($this->lookup()) + array(
-            'RT_RELATION'              => $this->concept('rty', 2, 1),
-            'DT_PRIMARY_RESOURCE'      => $this->concept('dty', 2, 7),
-            'DT_TARGET_RESOURCE'       => $this->concept('dty', 2, 5),
-            'DT_RELATION_TYPE'         => $this->concept('dty', 2, 6),
-            
-            'RT_MAP_DOCUMENT'    => $this->concept('rty', 3, 1019),
-            'RT_MAP_LAYER'    => $this->concept('rty', 3, 1020),
-            'RT_QUERY_SOURCE'    => $this->concept('rty', 3, 1021),
-            
-            // Query Source map settings. These are Terms-list fields, so the
-            // client must save local term ids rather than raw 0/1 values.
-            'DT_GEO_OUTPUTMODE'        => $this->concept('dty', 2, 1162),
-            'DT_IS_LOADED_BY_EXTENT'   => $this->concept('dty', 2, 1160),
-            'TRM_NO'                   => $this->concept('trm', 2, 531),
-            'TRM_YES'                  => $this->concept('trm', 2, 532),
-
-            // record editing (plan 14): the system record types (special fields, pointer
-            // modes and the record manager, plan 21) and the multilingual fields
-            'RT_CUSTOM_REPORT'         => $this->concept('rty', 2, 1104),
-            'RT_REPORT_SCHEDULE'       => $this->concept('rty', 2, 1105),
-            'RT_KML_SOURCE'            => $this->concept('rty', 3, 1014),
-            'RT_FILE_SOURCE'           => $this->concept('rty', 2, 53),
-            'RT_SHP_SOURCE'            => $this->concept('rty', 3, 1017),
-            'RT_IMAGE_SOURCE'          => $this->concept('rty', 3, 1018),
-            'RT_TILED_IMAGE_SOURCE'    => $this->concept('rty', 2, 11),
-            'RT_CMS_HOME'              => $this->concept('rty', 99, 51),
-            'RT_CMS_PAGE'              => $this->concept('rty', 99, 52),
-            'DT_NAME'                  => $this->concept('dty', 2, 1),
-            'DT_SHORT_SUMMARY'         => $this->concept('dty', 2, 3),
-            'DT_EXTENDED_DESCRIPTION'  => $this->concept('dty', 2, 4),
-            'DT_CMS_SCRIPT' => $this->concept('dty', 2, 927),
-            'DT_CMS_CSS' => $this->concept('dty', 99, 946),
-            'DT_CMS_HEADER' => $this->concept('dty', 2, 929),
-            'DT_CMS_FOOTER' => $this->concept('dty', 2, 940),
-            // special fields of the record editor (query, filter form, rules, columns, symbology)
-            'DT_QUERY_STRING'          => $this->concept('dty', 2, 12),
-            'DT_EXPANSION_RULES'       => $this->concept('dty', 2, 1163),
-            'DT_TABLE_FIELDS'          => $this->concept('dty', 2, 1164),
-            'DT_FILTER_FORM'           => $this->concept('dty', 2, 1165),
-            'DT_SYMBOLOGY'             => $this->concept('dty', 3, 1092),
-            // the Map Layer's data source: Style of an image source = image filters, Thematic
-            // maps need its Query Source query (plan 17; was missing, 2026-10-14)
-            'DT_DATA_SOURCE'           => $this->concept('dty', 3, 1083),
-            // other Query Source fields written by the Query Source editor
-            'DT_GEO_FIELDS'            => $this->concept('dty', 2, 1161),
-            'DT_TIMELINE_FIELDS'       => $this->concept('dty', 2, 1105),
-            'DT_MINIMUM_ZOOM_LEVEL'    => $this->concept('dty', 2, 32),
-            'DT_MAXIMUM_ZOOM_LEVEL'    => $this->concept('dty', 2, 33),
-            // record types listed and written on another API domain than /records (plan 21):
-            // registered files on /files (plan 20)
-            'RT_REGISTERED_FILE'       => $this->concept('rty', 2, 1106),
-            // the stored Parent Entity field: hidden where virtual parents are shown (plan 26)
-            'DT_PARENT_ENTITY'         => $this->concept('dty', 2, 247)
-        );
-    }
-
-    /** Local id of a definition from its origin database and id (concept code). */
-    private function concept(string $kind, int $originDb, int $originId): int
-    {
-        return $this->lookup()->localId($kind, $originDb.'-'.$originId);
+        return $this->lookup()->constants();
     }
 
     private function rectypes(): array

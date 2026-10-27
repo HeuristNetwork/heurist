@@ -18,6 +18,9 @@
 *   read     - a value without "<db>-" prefix is a local id; "0-<id>" and
 *              "<registered id>-<id>" are local ids; other codes are found by origin.
 *
+* System constants (RT_*, DT_*, TRM_*): names of SystemConstants, resolved by constant()
+* and cached in the database "entity" directory (2026-10-27).
+*
 * Terms use the names of the report field tree and the Smarty term subfields
 * (also HDbDefs.term() in the client):
 *   internalid  local term id
@@ -88,6 +91,10 @@ final class DefinitionLookup
     private array $localIds = array();
     /** @var array<int,array{rty:int,dty:int,targetTypes:array<int,int>}>|null flagged child pointer fields (plan 26) */
     private ?array $childLinks = null;
+    /** File of the resolved system constants ('' = no cache file), see useConstantCache. */
+    private string $constantFile = '';
+    /** @var array<string,int>|null name => local id of every SystemConstants name */
+    private ?array $constants = null;
 
     /** @param DatabaseInterface $database Database of the definitions. */
     public function __construct(DatabaseInterface $database)
@@ -164,6 +171,76 @@ final class DefinitionLookup
             }
         }
         return $this->localIds[$key] = $id;
+    }
+
+    // -------------------------------------------------------- system constants
+
+    /**
+     * Keep the resolved system constants in `def-snapshot-constants.json` of the database
+     * "entity" directory (2026-10-27). Legacy deletes `def-snapshot*.json` on every
+     * definition change, so the file is made again after it.
+     *
+     * @param string $entityDirectory Absolute path of the "entity" directory ('' = no cache file).
+     */
+    public function useConstantCache(string $entityDirectory): self
+    {
+        $directory = rtrim(str_replace('\\', '/', $entityDirectory), '/');
+        $this->constantFile = $directory === '' ? '' : $directory.'/def-snapshot-constants.json';
+        return $this;
+    }
+
+    /**
+     * Local id of a system constant such as RT_QUERY_SOURCE or DT_NAME (SystemConstants).
+     *
+     * @return int Local id, 0 for an unknown name or a definition this database does not have.
+     */
+    public function constant(string $name): int
+    {
+        return $this->constants()[$name] ?? 0;
+    }
+
+    /**
+     * Local ids of all system constants (the client gets them as meta.dbconst of the
+     * definitions snapshot): from the cache file, else resolved and written to it.
+     *
+     * @return array<string,int> name => local id (0 when the database lacks the definition)
+     */
+    public function constants(): array
+    {
+        if($this->constants !== null){ return $this->constants; }
+        $cached = $this->readConstantCache();
+        if($cached !== null){ return $this->constants = $cached; }
+        $ids = array();
+        foreach(SystemConstants::CODES as $name => $code){
+            $ids[$name] = $this->localId($code[0], $code[1]);
+        }
+        $this->writeConstantCache($ids);
+        return $this->constants = $ids;
+    }
+
+    /** @return array<string,int>|null The cached constants of the current table version, or null. */
+    private function readConstantCache(): ?array
+    {
+        if($this->constantFile === '' || !is_readable($this->constantFile)){ return null; }
+        $cached = json_decode((string)@file_get_contents($this->constantFile), true);
+        if(!is_array($cached) || ($cached['version'] ?? '') !== SystemConstants::version()
+            || !is_array($cached['dbconst'] ?? null)){
+            return null;
+        }
+        return array_map('intval', $cached['dbconst']);
+    }
+
+    /** Write the cache file (a temporary file renamed: readers never see a part). */
+    private function writeConstantCache(array $ids): void
+    {
+        if($this->constantFile === '' || !is_dir(dirname($this->constantFile)) || !is_writable(dirname($this->constantFile))){
+            return;
+        }
+        $temporary = $this->constantFile.'.'.getmypid().'.tmp';
+        $json = json_encode(array('version' => SystemConstants::version(), 'dbconst' => $ids), JSON_UNESCAPED_SLASHES);
+        if(@file_put_contents($temporary, $json) !== false && !@rename($temporary, $this->constantFile)){
+            @unlink($temporary);
+        }
     }
 
     /** Whether a definition with this local id exists. */

@@ -11,7 +11,8 @@ class or a collection of global database functions.
 - `RuntimeContext.php` — current database, user and base URL values.
 - `ApiResponse.php` — standard JSON output and HTTP error mapping.
 - `ErrorReporter.php` — safe logging of unexpected server errors.
-- `SystemCode.php` — isolated RT/DT code resolution during migration.
+- `SystemCode.php` — RT/DT/TRM ids by name for injected services: a wrapper of
+  `Definitions/DefinitionLookup::constant()` (table `Definitions/SystemConstants`).
 - `DatabaseSettings.php` — the one reader of sysIdentification (registered id, database
   version, settings), one instance per connection. Concept codes are `Definitions/DefinitionLookup`.
 - `ServiceFactory.php` — temporary composition boundary for existing entry points.

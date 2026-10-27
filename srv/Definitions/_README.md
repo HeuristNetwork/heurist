@@ -37,8 +37,21 @@ full shape. Summary:
 
 - `meta` — `db`, `format` (2; a cached snapshot of an older format is rebuilt),
   `dbId` (registered ID, for concept codes), `version` (cache-file mtime; HTTP ETag hashes the complete response),
-  `generated`, `language`, `languages`, `dbconst`
-  (`RT_RELATION`, `DT_PRIMARY_RESOURCE`, `DT_TARGET_RESOURCE`, `DT_RELATION_TYPE`).
+  `generated`, `language`, `languages`, `dbconst` (every name of `SystemConstants` → local id,
+  0 when the database lacks the definition), `dbconstVersion` (table version; a cached snapshot of
+  another version is rebuilt).
+
+### System constants (RT_* / DT_* / TRM_*, 2026-10-27)
+
+- `SystemConstants.php` is the one table of the names and their concept codes in srv (ported from
+  `hserv/consts.php`, which srv does not include). A new constant is added there only.
+- `DefinitionLookup::constant($name)` gives the local id (0 when unknown or missing);
+  `constants()` gives all. They are cached in `entity/def-snapshot-constants.json` (legacy deletes
+  `def-snapshot*.json` on every definition change). `Runtime/SystemCode` wraps `constant()` for
+  injected services. No srv code reads the legacy global constants.
+- The client reads them with `HDbDefs.dbconst(name)`; it has no list of its own.
+- `tests/SystemConstantsTest.php`: parity with `hserv/consts.php` and legacy ids, the cache file,
+  no legacy constant access in srv.
 - `rectypeGroups`, `fieldGroups` — `{id: {name, order}}`.
 - `rectypes` — `{id: {name, plural, group, concept, showInLists, description?}}`.
 - `fields` — `{id: {name, type, group, concept, vocabulary?, targetTypes?}}`.

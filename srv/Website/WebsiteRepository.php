@@ -32,29 +32,29 @@ use Heurist\Runtime\RuntimeContext;
 /** Website, page and menu records visible to the current user. */
 final class WebsiteRepository
 {
-    /** The definitions of the format: name => [kind, concept code]. */
-    public const CONCEPTS = array(
-        'home' => array('rty', '99-51'),
-        'page' => array('rty', '99-52'),
-        'name' => array('dty', '2-1'),
-        'shortSummary' => array('dty', '2-3'),
-        'content' => array('dty', '2-4'),
-        'version' => array('dty', '2-49'),
-        'configuration' => array('dty', '2-1187'),
-        'translations' => array('dty', '2-1202'),
-        'header' => array('dty', '2-929'),
-        'footer' => array('dty', '2-940'),
-        'css' => array('dty', '99-946'),
-        'script' => array('dty', '2-927'),
-        'extFiles' => array('dty', '2-939'),
-        'languages' => array('dty', '2-967'),
-        'topMenu' => array('dty', '99-742'),
-        'subMenu' => array('dty', '99-761'),
-        'keywords' => array('dty', '99-948'),
-        'pageType' => array('dty', '2-928'),
-        'standalonePage' => array('trm', '2-6254'),
-        'menuPage' => array('trm', '2-6253'),
-        'logo' => array('dty', '2-38')
+    /** The definitions of the format: key => SystemConstants name (2026-10-27: was concept codes). */
+    public const CONSTANTS = array(
+        'home' => 'RT_CMS_HOME',
+        'page' => 'RT_CMS_PAGE',
+        'name' => 'DT_NAME',
+        'shortSummary' => 'DT_SHORT_SUMMARY',
+        'content' => 'DT_EXTENDED_DESCRIPTION',
+        'version' => 'DT_VERSION',
+        'configuration' => 'DT_CONFIGURATION',
+        'translations' => 'DT_CMS_PAGE_TRANSLATIONS',
+        'header' => 'DT_CMS_HEADER',
+        'footer' => 'DT_CMS_FOOTER',
+        'css' => 'DT_CMS_CSS',
+        'script' => 'DT_CMS_SCRIPT',
+        'extFiles' => 'DT_CMS_EXTFILES',
+        'languages' => 'DT_LANGUAGE',
+        'topMenu' => 'DT_CMS_TOP_MENU',
+        'subMenu' => 'DT_CMS_MENU',
+        'keywords' => 'DT_CMS_KEYWORDS',
+        'pageType' => 'DT_CMS_PAGETYPE',
+        'standalonePage' => 'TRM_PAGETYPE_WEBPAGE',
+        'menuPage' => 'TRM_PAGETYPE_MENUITEM',
+        'logo' => 'DT_FILE_RESOURCE'
     );
 
     /** Depth of the menu tree read for a website (top pages = 1). */
@@ -73,13 +73,13 @@ final class WebsiteRepository
         $this->definitions = DefinitionLookup::shared($database);
     }
 
-    /** @return array<string,int> Local ids of CONCEPTS (0 when missing in this database). */
+    /** @return array<string,int> Local ids of CONSTANTS (0 when missing in this database). */
     public function codes(): array
     {
         if($this->codes === null){
             $this->codes = array();
-            foreach(self::CONCEPTS as $name => $concept){
-                $this->codes[$name] = $this->definitions->localId($concept[0], $concept[1]);
+            foreach(self::CONSTANTS as $key => $name){
+                $this->codes[$key] = $this->definitions->constant($name);
             }
         }
         return $this->codes;

@@ -1,9 +1,10 @@
 <?php
 /**
-* SystemCode.php - System record and detail type code resolver
+* SystemCode.php - System record type, field and term ids by their constant names
 *
-* Isolates temporary RT_* and DT_* constant access at the migration boundary so
-* presentation services receive stable IDs without depending on global state.
+* A thin wrapper of DefinitionLookup::constant() (the names are in
+* Definitions/SystemConstants) for the services that get their ids injected.
+* The legacy global constants are not read (2026-10-27).
 *
 * @project     Heurist academic knowledge management system
 * @package     Runtime
@@ -19,22 +20,29 @@ declare(strict_types=1);
 
 namespace Heurist\Runtime;
 
-/** Resolves required system codes from an explicit map or temporary constants. */
+use Heurist\Definitions\DefinitionLookup;
+
+/** Resolves system constants of the current database. */
 final class SystemCode
 {
+    private ?DefinitionLookup $definitions;
     /** @var array<string,int> */
-    private array $codes;
+    private array $overrides;
 
-    /** @param array<string,int> $codes Explicit code-to-local-ID mappings. */
-    public function __construct(array $codes = array())
+    /**
+     * @param DefinitionLookup|null $definitions Definitions of the database (null: only `$overrides`).
+     * @param array<string,int> $overrides Explicit name => local id (tests).
+     */
+    public function __construct(?DefinitionLookup $definitions = null, array $overrides = array())
     {
-        $this->codes = array_map('intval', $codes);
+        $this->definitions = $definitions;
+        $this->overrides = array_map('intval', $overrides);
     }
 
-    /** Return a local ID, temporarily falling back to an initialized constant. */
+    /** Local id of a constant such as RT_QUERY_SOURCE (0 when unknown or missing in the database). */
     public function id(string $name): int
     {
-        if(array_key_exists($name, $this->codes)){ return $this->codes[$name]; }
-        return defined($name) ? intval(constant($name)) : 0;
+        if(array_key_exists($name, $this->overrides)){ return $this->overrides[$name]; }
+        return $this->definitions === null ? 0 : $this->definitions->constant($name);
     }
 }
