@@ -8081,7 +8081,7 @@ $.widget( "heurist.editing_input", {
                 let imageUrl = this._isIiifImageFileValue(currentValue) ? this._iiifImageRasterUrlFromValue(currentValue, 'full') : '';
 
                 let url = `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${window.hWin.HAPI4.database}`
-                    + (imageUrl ? `&image=${encodeURIComponent(imageUrl)}` : `&recID=${fileID}`);
+                    + (imageUrl ? `&image=${encodeURIComponent(imageUrl)}` : `&id=${fileID}`);
 
                 window.hWin.HEURIST4.msg.showDialog(url, {
                     dialogid: 'openseadragon-viewer', default_palette_class: 'ui-heurist-explore',
