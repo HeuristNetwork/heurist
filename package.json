@@ -78,7 +78,7 @@
     "is-glob": "^4.0.3",
     "is-path-inside": "^3.0.3",
     "isexe": "^2.0.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.3.2",
     "js2xmlparser": "^4.0.2",
     "json-buffer": "^3.0.1",
     "json-schema-traverse": "^0.4.1",
