@@ -118,10 +118,7 @@ final class SystemQueryService
         if($type === 'user' || $type === 'group' || $type === 'tag'){
             // lets clients tell which of the listed users is the caller, and
             // whether the list is complete (administrator) or restricted
-            $meta['currentUser'] = array(
-                'id'=>$this->runtime->userId,
-                'isAdmin'=>$this->runtime->isAdmin || $this->runtime->isDbOwner
-            );
+            $meta['currentUser'] = $this->currentUserMeta();
         }
         return array(
             'records'=>$records,
@@ -163,7 +160,7 @@ final class SystemQueryService
                 'entity' => 'sys',
                 'type' => $type,
                 'fields' => array('headers' => $records['headers'], 'details' => $records['fields']),
-                'currentUser' => array('id' => $this->runtime->userId, 'isAdmin' => $this->runtime->isAdmin || $this->runtime->isDbOwner)
+                'currentUser' => $this->currentUserMeta()
             )
         );
         // bookmarks: whether the private notes are encrypted, and those that cannot be read
@@ -420,6 +417,20 @@ final class SystemQueryService
             $this->ownerNames[$id] = UserGroupRepository::shared($this->database)->name($id);
         }
         return $this->ownerNames[$id];
+    }
+
+    /**
+     * Who the caller is: ID, name (so that a client needs no user list for its own
+     * name) and whether they administer the database.
+     */
+    private function currentUserMeta(): array
+    {
+        $userId = $this->runtime->userId;
+        return array(
+            'id' => $userId,
+            'name' => $userId > 0 ? $this->ownerName($userId) : '',
+            'isAdmin' => $this->runtime->isAdmin || $this->runtime->isDbOwner
+        );
     }
 
     /** Load the current user's group roles (admin/member) from sysUsrGrpLinks. */

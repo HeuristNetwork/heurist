@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Heurist Explorer</title>
+  <link rel="icon" href="favicon.ico">
+  <!--
+    Boot page of the bundled Explorer (hclient/bundles/heurist-explorer, from
+    `npm run deploy:explorer` in heurist-explorer). Usage: exp.html?db=<database>[&lang=fre]
+  -->
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var baseUrl = new URL('./', window.location.href).href;
+      window.heuristModuleBootstrap = {
+        runtime: {
+          database: params.get('db') || 'osmak_mapping',
+          baseUrl: baseUrl,
+          apiBaseUrl: baseUrl + 'api',
+          runtimeMode: 'main',
+          language: params.get('lang') || 'eng',
+          moduleModes: {
+            data: 'direct',
+            recordview: 'direct'
+          }
+        }
+      };
+    })();
+  </script>
+  <script type="module" crossorigin src="hclient/bundles/heurist-explorer/heurist-explorer.js"></script>
+  <link rel="stylesheet" crossorigin href="hclient/bundles/heurist-explorer/heurist-explorer-main.css">
+</head>
+<body>
+  <main id="heurist-explorer"></main>
+</body>
+</html>

@@ -142,6 +142,7 @@ final class ServiceFactory
     public static function fromLegacySystem($system): self
     {
         QueryTrace::markBoot();
+        ServerTiming::mark('boot');
         $runtime = RuntimeContext::fromLegacySystem($system);
         $codeNames = array(
             'RT_QUERY_SOURCE', 'RT_MAP_DOCUMENT', 'RT_MAP_LAYER',
