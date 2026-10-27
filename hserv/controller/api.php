@@ -605,6 +605,13 @@ if($is_jobs_query && !in_array($http_method, array('GET','POST','DELETE'), true)
     exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
 }
 
+// Websites of format v4 (plans 27a, 27b): /api/{db}/website[/{id}[/validate|menu]], /website/setup.
+// See srv/Controller/WebsiteController.php; logged-in users only.
+$is_website_query = ($resource === 'website');
+if($is_website_query && !in_array($http_verb, array('GET','POST','DELETE'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
+}
+
 // Routes where auth processing is not needed here
 $is_public_annotation_read =
     ($resource === 'annotations'
@@ -663,9 +670,8 @@ if(!$skip_auth_processing){
         $system->errorExitApi(); // exits
     }
 
-    // Preserve existing cookie-backed user if present.
-    // Otherwise try Bearer token auth.
-    if(!$system->getUserId()){
+    // Validate any explicit Bearer credential, even when a cookie is present.
+    if(UJwt::get_auth_header() || !$system->getUserId()){
         authenticateApiRequestWithJwt($system);
     }
 
@@ -785,17 +791,28 @@ if($is_def_query){
 
     $factory = ServiceFactory::fromLegacySystem($system);
     // srv Smarty engine; the legacy renderer only converts templates on import/export.
-    // Job types: report-preview, report-generate (plan 12) and export (plan 13).
+    // Job types: report-preview, report-generate (plan 12), export (plan 13) and website-build (plan 27b).
     $controller = $factory->jobController(array_merge($factory->reportJobHandlers(
         $factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)),
         new hserv\report\ReportRecordWriter($system)
-    ), $factory->exportJobHandlers()));
+    ), $factory->exportJobHandlers(), $factory->websiteJobHandlers()));
     $controller->handleRequest(
         $http_method,
         array_slice($requestUri, 4),
         $req_params,
         is_array($json) ? $json : null
     );
+    $system->dbclose();
+    exit;
+
+}elseif($is_website_query){
+
+    $controller = ServiceFactory::fromLegacySystem($system)->websiteController(new hserv\web\WebsiteDefinitions($system));
+    $controller->handleApi($http_verb, array_slice($requestUri, 4), $req_params, is_array($json) ? $json : null, array(
+        'contentType' => $contentType,
+        'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+        'host' => $_SERVER['HTTP_HOST'] ?? ''
+    ));
     $system->dbclose();
     exit;
 
@@ -1073,7 +1090,10 @@ function authenticateApiRequestWithJwt($system){
     global $jwt_Secret;
 
     if(!isset($jwt_Secret) || strlen($jwt_Secret) < 8){
-        // JWT auth is not configured; just return without authenticating.
+        // An explicit credential must not fall back to cookie authentication.
+        if(UJwt::get_auth_header()){
+            exitWithError('Invalid token', 401, ['WWW-Authenticate' => 'Bearer error="invalid_token"']);
+        }
         return;
     }
 
@@ -1088,32 +1108,18 @@ function authenticateApiRequestWithJwt($system){
         ]);
     }
 
-    $payload = UJwt::jwt_verify($m[1], $jwt_Secret);
-    if($payload === false){
-        exitWithError('Invalid token', 401, [
-            'WWW-Authenticate' => 'Bearer error="invalid_token"'
+    global $method, $http_verb;
+    $requiredScope = $method === 'search' && in_array($http_verb, ['GET', 'HEAD'], true)
+        ? 'read:data' : 'write:data';
+    try {
+        UJwt::authenticateApiToken($system, $m[1], $jwt_Secret, $requiredScope);
+    } catch (\DomainException $error) {
+        $code = $error->getCode() === 403 ? 403 : 401;
+        exitWithError($error->getMessage(), $code, [
+            'WWW-Authenticate' => $code === 403
+                ? 'Bearer error="insufficient_scope"' : 'Bearer error="invalid_token"'
         ]);
     }
-
-    $userID = @$payload['sub'];
-    if(!$userID){
-        exitWithError('Invalid token payload', 401, [
-            'WWW-Authenticate' => 'Bearer error="invalid_token"'
-        ]);
-    }
-
-    // Optional scope enforcement:
-    // $scope = $payload['scope'] ?? null;
-    // if($scope !== 'read:data'){
-    //     exitWithError('Insufficient scope', 403, [
-    //         'WWW-Authenticate' => 'Bearer error="insufficient_scope"'
-    //     ]);
-    // }
-
-    $system->setCurrentUser([
-        'ugr_ID' => $userID,
-        'ugr_Groups' => user_getWorkgroups($system->getMysqli(), $userID)
-    ]);
 }
 
 /**

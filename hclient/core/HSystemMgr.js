@@ -1504,7 +1504,7 @@ class HSystemMgr {
             if(isArray || isObject){ // stringify objects and arrays
                 value = JSON.stringify(value);
             }else if(!Number.isNaN(value)){
-                value = value.toString();
+                value = String(value);
             }
 
             chunkValue(key, value);

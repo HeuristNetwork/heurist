@@ -631,7 +631,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     
     'DT_ORIGINAL_NAME' => array(2, 1185), 
     'DT_REGISTERED_FILE_TYPE' => array(2, 1186),
-    'DT_CONFIGURATION' => array(2, 1187) 
+    'DT_CONFIGURATION' => array(2, 1187),
+    'DT_CMS_PAGE_TRANSLATIONS' => array(2, 1202) // translated text blocks of a v4 website page (plan 27a)
 
 );
 

@@ -21,6 +21,43 @@ namespace hserv\utilities;
 */
 class UJwt {
 
+    public const API_AUDIENCE = 'heurist-api';
+
+    /** Validate API identity before applying a database-local numeric user ID. */
+    public static function authenticateApiToken($system, string $token, string $secret, string $requiredScope): void {
+        $payload = self::jwt_verify($token, $secret);
+        $userID = is_array($payload) ? ($payload['sub'] ?? null) : null;
+        if (!is_array($payload)
+            || ($payload['db'] ?? null) !== $system->dbnameFull()
+            || ($payload['aud'] ?? null) !== self::API_AUDIENCE
+            || !isset($payload['exp']) || !is_int($payload['exp'])
+            || !(is_int($userID) || (is_string($userID) && ctype_digit($userID)))
+            || filter_var($userID, FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]) === false) {
+            throw new \DomainException('Invalid token', 401);
+        }
+
+        $user = \user_getById($system->getMysqli(), (int)$userID);
+        if (!is_array($user) || ($user['ugr_Type'] ?? '') !== 'user'
+            || !in_array($user['ugr_Enabled'] ?? null, ['y', 'y_no_add', 'y_no_delete', 'y_no_add_delete'], true)) {
+            throw new \DomainException('Invalid token user', 401);
+        }
+
+        $scope = $payload['scope'] ?? null;
+        if (!is_string($scope) || !in_array($requiredScope, explode(' ', $scope), true)) {
+            throw new \DomainException('Insufficient scope', 403);
+        }
+
+        $user['api_token_scope'] = $scope;
+        $user['ugr_ID'] = (int)$userID;
+        $user['ugr_Groups'] = \user_getWorkgroups($system->getMysqli(), (int)$userID);
+        $user['ugr_Permissions'] = [
+            'disabled'=>false,
+            'add'=>strpos($user['ugr_Enabled'], 'add') === false,
+            'delete'=>strpos($user['ugr_Enabled'], 'del') === false
+        ];
+        $system->setCurrentUser($user);
+    }
+
     private static function b64url_encode(string $d): string {
         return rtrim(strtr(base64_encode($d), '+/', '-_'), '=');
     }

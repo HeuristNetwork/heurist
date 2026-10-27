@@ -39,7 +39,7 @@ final class RequestRouter
     private static $databaseFolder = null;
 
     // Actions supported in pretty routes
-    private const ALLOWED_ACTIONS = ['website','web','hml','tpl','view','edit','adm','rec','record','rty','dty','trm'];
+    private const ALLOWED_ACTIONS = ['website','web','site','hml','tpl','view','edit','adm','rec','record','rty','dty','trm'];
 
     // Content negotiation for /db/* when fmt not provided
     private const REQUEST_CONTENT = [
@@ -659,6 +659,22 @@ final class RequestRouter
                     // In this form, the first segment (if numeric) is the page id
                     if (isset($rest[0]) && ctype_digit($rest[0])) {
                         $params['pageid'] = (int)$rest[0];
+                    }
+                }
+                break;
+
+            case 'site':
+                // website format v4 (plan 27a): /<db>/site/<id>[/<pageId>][/frame/<instance>]
+                if (isset($rest[0]) && ctype_digit($rest[0])) {
+                    $params['site'] = (int)$rest[0];
+                    $next = 1;
+                    if (isset($rest[1]) && ctype_digit($rest[1])) {
+                        $params['pageid'] = (int)$rest[1];
+                        $next = 2;
+                    }
+                    if (($rest[$next] ?? '') === 'frame' && isset($rest[$next + 1])
+                        && preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,63}$/', $rest[$next + 1])) {
+                        $params['frame'] = $rest[$next + 1];
                     }
                 }
                 break;

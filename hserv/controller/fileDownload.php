@@ -68,7 +68,12 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
             $force_recreate = (@$req_params['refresh']==1);
 
-            if($system->initPathConstants($db)){
+            if($system->init($db) && $system->initPathConstants($db)){
+                $listpaths = fileGetFullInfo($system, $fileid);
+                if (isEmptyArray($listpaths) || !fileDownloadVisibilityAllowed($system, $listpaths[0])) {
+                    $system->dbclose();
+                    return;
+                }
 
                 $thumbfile = HEURIST_THUMB_DIR.basename('ulf_'.$fileid.'.png');
 
@@ -86,7 +91,7 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
                     checkForExternalServer( $req_params );
                     
                     //recreate thumbnail and output it
-                    $system->init($db);
+
                     fileCreateThumbnail( $system, $fileid, true );
                     $system->dbclose();
                 }
@@ -106,11 +111,11 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
     $size = @$req_params['size'];
 
-    $need_session = (@$req_params['mode']==null && @$req_params['metadata']==null);
+    // All response modes must initialize the database-scoped user session.
 
     if( is_numeric($fileid)         
         || !preg_match('/^[a-z0-9]+$/', $fileid)  //Obfuscated id is allowed only
-        || !$system->init($db, true, $need_session) //database not inited
+        || !$system->init($db) //database not inited
         || !$system->initPathConstants($db) )  //folder not found
     {
         return;
@@ -126,7 +131,11 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
         return;
     }
 
-        $fileinfo = $listpaths[0];//
+        $fileinfo = $listpaths[0];
+        if (!fileDownloadVisibilityAllowed($system, $fileinfo)) {
+            $system->dbclose();
+            return;
+        }
         $filepath = USanitize::sanitizePath($fileinfo['fullPath']);//concat(ulf_FilePath,ulf_FileName as fullPath
         $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
         $mimeType = $fileinfo['fxm_MimeType'];//fxm_MimeType
@@ -135,7 +144,6 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
         $fileSize = $fileinfo['ulf_FileSizeKB'];
         $fileExt = $fileinfo['ulf_MimeExt'];
         $fileParams = $fileinfo['ulf_Parameters'];// external repository service id
-        $all_can_view = empty($fileinfo['ulf_WhoCanView']) || $fileinfo['ulf_WhoCanView'] == 'viewable';
         if($fileParams!=null && !empty($fileParams)){
             $fileParams = json_decode($fileParams, true);
         }
@@ -159,7 +167,6 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
                 redirectURL(HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$system->dbnameEnv().'&file='.$fileid);
 
             }else{
-                $url = HEURIST_BASE_URL.'?mode=tag&db='.$system->dbnameEnv().'&file='.$fileid.'&size='.$size;
 
                 ?>
 <!DOCTYPE html>
@@ -171,14 +178,7 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
     </head>
     <body>
         <?php
-        //debug echo $url.'<br>';
-        //execute this script to get html tag for player
-        $htmlTag = @file_get_contents($url);
-        if ($htmlTag === false) {
-            http_response_code(502);
-            print 'Failed to fetch media url';
-        }       
-        print $htmlTag;
+        print fileGetPlayerTag($system, $fileid, $mimeType, null, $external_url, $size);
         ?>
     </body>
 </html>
@@ -228,23 +228,15 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
                 $is_download = (@$req_params['download']==1);
 
-                $is_image = (strpos($mimeType, DIR_IMAGE)===0);
-                $get_blurred_image = $is_image && !$all_can_view && !$system->hasAccess();
-
                 if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles)
                 { //&& strpos($fileinfo['fullPath'],'file_uploads/')===0
 
                     //show in viewer directly
                     $direct_url = $system->getSysUrl().$fileinfo['fullPath'];
 
-                    if($get_blurred_image){ //!$all_can_view
+                    if(!array_key_exists('fullres', $req_params) || $req_params['fullres'] === '0'){ // get web cached version
 
-                        $blurred_url = getBlurredImage($system, $fileinfo);
-                        $direct_url = !$blurred_url ? HEURIST_BASE_URL . 'hclient/assets/100x100-login-required.png' : $blurred_url;
-
-                    }elseif(!array_key_exists('fullres', $req_params) || $req_params['fullres'] === '0'){ // get web cached version
-
-                        $cache_url = getWebImageCache($system, $fileinfo, !$get_blurred_image);
+                        $cache_url = getWebImageCache($system, $fileinfo, true);
                         if($cache_url){
                             $direct_url = $cache_url;
                         }
@@ -260,9 +252,6 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
                     redirectURL($system->getSysUrl().$fileinfo['fullPath']);
 
                 }else {
-                    if($get_blurred_image){
-                        $filepath = getBlurredImage($system, $fileinfo, false);
-                    }
                     //see recordFile.php
                     downloadFile($mimeType, $filepath, @$req_params['embedplayer']==1?null:$originalFileName);
                 }
@@ -339,6 +328,27 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
     $system->dbclose();
 
+/** Enforce file visibility before content, metadata, redirects or remote access. */
+function fileDownloadVisibilityAllowed($system, array $fileinfo): bool {
+    $visibility = $fileinfo['ulf_WhoCanView'] ?? '';
+    $public = $visibility === '' || $visibility === 'viewable';
+    if ($public || $system->hasAccess()) {
+        if (!$public) {
+            header('Cache-Control: private, no-store');
+            header_register_callback(function () {
+                header('Cache-Control: private, no-store');
+                header('Pragma: no-cache');
+            });
+            header('Pragma: no-cache');
+        }
+        return true;
+    }
+    http_response_code(401);
+    header('Cache-Control: private, no-store');
+    header('Content-Type: text/plain; charset=UTF-8');
+    echo 'Login required to access this file';
+    return false;
+}
 /**
  * Special handling for private Nakala files
  *

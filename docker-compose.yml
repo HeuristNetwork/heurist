@@ -68,7 +68,8 @@ services:
     environment:
       HEURIST_DB_ADMIN_USERNAME: heurist
       HEURIST_DB_ADMIN_PASSWORD: ${HEURIST_DB_ADMIN_PASSWORD:-heurist}
-      HEURIST_JWT_SECRET: ${HEURIST_JWT_SECRET:-dev-only-secret-change-me}
+      # JWT is optional and disabled unless a private signing secret is supplied.
+      HEURIST_JWT_SECRET: ${HEURIST_JWT_SECRET:-}
       HEURIST_SERVER_NAME: ${HEURIST_SERVER_NAME:-}
       HEURIST_BASE_URL: ${HEURIST_BASE_URL:-}
       HEURIST_PUBLIC_PATH: ${HEURIST_PUBLIC_PATH:-}

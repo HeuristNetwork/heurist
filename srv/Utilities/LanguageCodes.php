@@ -59,6 +59,20 @@ final class LanguageCodes
     }
 
     /**
+     * 2-letter code (lower case) of a 2- or 3-letter code, or null when unknown or
+     * when the language has no 2-letter code (the HTML lang attribute).
+     *
+     * @param mixed $lang
+     * @return string|null
+     */
+    public function code2($lang): ?string
+    {
+        $code3 = $this->code3($lang);
+        $code2 = $code3 === null ? '' : ($this->codes[$code3] ?? '');
+        return $code2 === '' ? null : strtolower($code2);
+    }
+
+    /**
      * Language prefix of a value: [language (3 letters, "ALL" or null), value without prefix].
      *
      * @param mixed $value

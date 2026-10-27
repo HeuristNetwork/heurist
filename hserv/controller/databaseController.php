@@ -348,7 +348,9 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
             if($allow_action){
 
                 // Perform owner and pointer checks before action
-                $dbVerify = new DbVerify($system);
+                $sourceSystem = new hserv\System();
+                $sourceSystem->init($db_source, true);
+                $dbVerify = new DbVerify($sourceSystem);
                 $ownerResults = $dbVerify->check_owner_ref(['fix' => 1]);
                 $pointerResults = $dbVerify->check_pointer_targets(['fix' => 1]);
 

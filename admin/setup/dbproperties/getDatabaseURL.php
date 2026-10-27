@@ -84,7 +84,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
 
         }else{
             $err = $system2->getMysqli()->error;
-            if(err){
+            if($err){
                 $error_msg = 'Heurist Reference Index database is not accessible at the moment. Please try later';
             }else{
                 $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Reference Index';

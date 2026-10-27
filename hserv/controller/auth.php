@@ -9,9 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if(!isset($jwt_Secret) || strlen($jwt_Secret)<8){
-  UJwt::json_out(405, ['status'=>405, 'error'=>HEURIST_INVALID_REQUEST, 'message'=>'Method not allowed'], ['Allow'=>'POST']);
+  UJwt::json_out(503, ['status'=>503, 'error'=>HEURIST_ACTION_BLOCKED, 'message'=>'JWT authentication is disabled']);
 }
-
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 $raw = file_get_contents('php://input');
 
@@ -42,6 +41,8 @@ $ttl = ($jwt_TTL??600); //10 minutes
 $now = time();
 $claims = [
   'sub' => $system->getUserId(),  //$username
+  'db' => $system->dbnameFull(),
+  'aud' => UJwt::API_AUDIENCE,
   'iat' => $now,
   'nbf' => $now,
   'exp' => $now + $ttl,   

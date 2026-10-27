@@ -16,6 +16,7 @@
 namespace hserv\utilities;
 use hserv\utilities\DbUtils;
 use hserv\utilities\Temporal;
+use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 require_once dirname(__FILE__).'/../../admin/verification/verifyFieldTypes.php';
@@ -31,12 +32,20 @@ require_once dirname(__FILE__)."/../utilities/geo/mapCoordinates.php";
 */
 class DbVerify {
 
-    private $mysqli = null;
-    private $system = null;
+    private ?\mysqli $mysqli = null;
+    private ?\hserv\System $system = null;
 
     private $simplifiedOutput = false; // whether to include checkboxes and items needing JS
+    /** @var mixed $out */
     private $out = null; //output stream
+    /** @var mixed $keep_autocommit */
     private $keep_autocommit = null;
+
+    private ?int $DT_PARENT_ENTITY = null;
+    private ?int $DT_WORKFLOW_STAGE = null;
+    private ?int $DT_ORIGINAL_RECORD_ID = null;
+    private ?int $RT_RELATION = null;
+    private ?int $TRM_SWF_IMPORT = null;
 
     private const SIMPLIFIED_OUTPUT_LIMIT = 10;
 
@@ -47,9 +56,49 @@ class DbVerify {
      * @param bool $useSimplifiedOutput Keep the results as simple as possible, for mass runs/emailing results
      */
     public function __construct($system, $useSimplifiedOutput = false) {
-       $this->system = $system;
-       $this->mysqli = $system->getMysqli();
-       $this->simplifiedOutput = $useSimplifiedOutput;
+        $this->setSystem($system);
+        $this->simplifiedOutput = $useSimplifiedOutput;
+    }
+
+    /**
+     * Set system and setup common local detail type IDs, record type IDs, and term IDs
+     * @param mixed $system
+     * @return void
+     */
+    public function setSystem($system){
+
+        $this->system = $system;
+        $this->mysqli = $system->getMysqli();
+
+        $this->setupFakeConstants();
+    }
+
+    private function setupFakeConstants(){
+
+        if(empty($this->system->dbname())){ // no database has been selected yet
+            return;
+        }
+
+        // get DT_PARENT_ENTITY, DT_WORKFLOW_STAGE, DT_ORIGINAL_RECORD_ID, RT_RELATION, TRM_SWF_IMPORT
+        global $dtDefines, $rtDefines, $trmDefines;
+
+        $DT_PARENT_ENTITY_CC = $dtDefines['DT_PARENT_ENTITY'];
+        $DT_WORKFLOW_STAGE_CC = $dtDefines['DT_WORKFLOW_STAGE'];
+        $DT_ORIGINAL_RECORD_ID_CC = $dtDefines['DT_ORIGINAL_RECORD_ID'];
+
+        $RT_RELATION_CC = $rtDefines['RT_RELATION'];
+
+        $TRM_SWF_IMPORT_CC = $trmDefines['TRM_SWF_IMPORT'];
+
+        ConceptCode::setSystem($this->system);
+
+        $this->DT_PARENT_ENTITY = ConceptCode::getDetailTypeLocalID(implode('-', $DT_PARENT_ENTITY_CC));
+        $this->DT_WORKFLOW_STAGE = ConceptCode::getDetailTypeLocalID(implode('-', $DT_WORKFLOW_STAGE_CC));
+        $this->DT_ORIGINAL_RECORD_ID = ConceptCode::getDetailTypeLocalID(implode('-', $DT_ORIGINAL_RECORD_ID_CC));
+
+        $this->RT_RELATION = ConceptCode::getRecTypeLocalID(implode('-', $RT_RELATION_CC));
+
+        $this->TRM_SWF_IMPORT = ConceptCode::getTermLocalID(implode('-', $TRM_SWF_IMPORT_CC));
     }
 
     //
@@ -851,8 +900,8 @@ class DbVerify {
         $wasadded1 = 0;
 
         $mysqli = $this->mysqli;
-        $this->system->defineConstant('DT_PARENT_ENTITY');
-        $dt_parent_entity_field_id = DT_PARENT_ENTITY;
+
+        $dt_parent_entity_field_id = $this->DT_PARENT_ENTITY;
 
         $error_msg = 'Cannot delete invalid pointers from Records';
 
@@ -1588,14 +1637,14 @@ ORDER BY child.dtl_RecID";
         WHERE rec_FlagTemporary!=1 AND rst_ID IS NULL';
 
         $except_ids = array();
-        if($this->system->defineConstant('DT_PARENT_ENTITY')){
-            $except_ids[] = DT_PARENT_ENTITY;
+        if(isPositiveInt($this->DT_PARENT_ENTITY)){
+            $except_ids[] = $this->DT_PARENT_ENTITY;
         }
-        if($this->system->defineConstant('DT_WORKFLOW_STAGE')){
-            $except_ids[] = DT_WORKFLOW_STAGE;
+        if(isPositiveInt($this->DT_WORKFLOW_STAGE)){
+            $except_ids[] = $this->DT_WORKFLOW_STAGE;
         }
-        if($this->system->defineConstant('DT_ORIGINAL_RECORD_ID')){
-            $except_ids[] = DT_ORIGINAL_RECORD_ID;
+        if(isPositiveInt($this->DT_ORIGINAL_RECORD_ID)){
+            $except_ids[] = $this->DT_ORIGINAL_RECORD_ID;
         }
         if(!empty($except_ids)){
             $query .= ' AND dtl_DetailTypeID NOT IN ('.implode(',',$except_ids).')';
@@ -1859,19 +1908,20 @@ ORDER BY child.dtl_RecID";
 
             $is_table_exist = hasTable($mysqli, 'recLinks');
 
-            if($is_table_exist){
+            $missed_relationships = 0;
+            $missed_links = 0;
 
-                if(!defined('RT_RELATION')) {$this->system->defineConstant('RT_RELATION');}
+            if($is_table_exist){
 
                 //count of relations
                 $query = 'SELECT count(rec_ID) FROM Records '
-                        .'where rec_RecTypeID='.RT_RELATION
+                        .'where rec_RecTypeID='.$this->RT_RELATION
                         .' and rec_FlagTemporary=0';
                 $cnt_relationships = intval(mysql__select_value($mysqli, $query));
 
                 //count of missed relations in recLinks
                 $query = 'SELECT count(rec_ID) FROM Records left join recLinks on rec_ID=rl_RelationID '
-                        .'where rec_RecTypeID='.RT_RELATION
+                        .'where rec_RecTypeID='.$this->RT_RELATION
                         .' and rec_FlagTemporary=0 and rl_RelationID is null';
                 $missed_relationships = intval(mysql__select_value($mysqli, $query));
 
@@ -1884,7 +1934,7 @@ ORDER BY child.dtl_RecID";
 
                 //count of missed links
                 $query = 'SELECT count(dtl_ID) FROM Records, defDetailTypes, recDetails left join recLinks on dtl_ID=rl_DetailID'
-                        .' where rec_RecTypeID!='.RT_RELATION
+                        .' where rec_RecTypeID!='.$this->RT_RELATION
                         .' and rec_ID=dtl_RecID and dtl_DetailTypeID=dty_ID and dty_Type="resource"'
                         .' and rec_FlagTemporary=0 and rl_DetailID is null';
                 $missed_links = intval(mysql__select_value($mysqli, $query));
@@ -2500,15 +2550,13 @@ ORDER BY child.dtl_RecID";
 
         $mysqli = $this->mysqli;
 
-        $this->system->defineConstant('TRM_SWF_IMPORT');
-
         $completedRecords = array();
-        if( $this->system->defineConstant('DT_WORKFLOW_STAGE') ){
+        if( isPositiveInt($this->DT_WORKFLOW_STAGE) ){
 
             $recsWithManySWF = mysql__select_assoc($mysqli,
                 'SELECT dtl_RecID, rec_RecTypeID, rec_Title '
                 .' FROM recDetails INNER JOIN Records ON rec_ID = dtl_RecID '
-                .' WHERE dtl_DetailTypeID = '. DT_WORKFLOW_STAGE
+                .' WHERE dtl_DetailTypeID = '. $this->DT_WORKFLOW_STAGE
                 .' GROUP BY dtl_RecID HAVING COUNT(dtl_RecID) > 1');
 
             if(!isEmptyArray($recsWithManySWF)){
@@ -2522,7 +2570,7 @@ ORDER BY child.dtl_RecID";
                     $rectype_ID = intval($rectype_ID);
 
                     $repeatability = mysql__select_value($mysqli,
-                        "SELECT rst_MaxValues FROM defRecStructure WHERE rst_RecTypeID = $rectype_ID AND rst_DetailTypeID = " . DT_WORKFLOW_STAGE);
+                        "SELECT rst_MaxValues FROM defRecStructure WHERE rst_RecTypeID = $rectype_ID AND rst_DetailTypeID = {$this->DT_WORKFLOW_STAGE}");
                     $repeatability = $repeatability === null ? 1 : intval($repeatability);
 
                     if($repeatability > 1 || $repeatability == 0){
@@ -2532,14 +2580,14 @@ ORDER BY child.dtl_RecID";
 
                     $stages = mysql__select_assoc2($mysqli,
                         "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $rec_ID AND dtl_DetailTypeID="
-                        .DT_WORKFLOW_STAGE." ORDER BY dtl_ID");
+                        .$this->DT_WORKFLOW_STAGE." ORDER BY dtl_ID");
 
                     $final_stage = [];
                     $found_import = [];
 
                     foreach($stages as $dtl_ID => $swf_ID){
 
-                        if(defined('TRM_SWF_IMPORT') && $swf_ID == TRM_SWF_IMPORT){
+                        if(isPositiveInt($this->TRM_SWF_IMPORT) && $swf_ID == $this->TRM_SWF_IMPORT){
                             $found_import = empty($found_import) ? [$dtl_ID, $swf_ID] : $found_import;
                             continue;
                         }

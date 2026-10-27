@@ -164,7 +164,7 @@
         $search_params['offset'] = $params['offset'];
     }
 
-    if(@$params['format']=='gephi' || @$params['format']=='geojson' || @$params['format'] == 'nodexl'){
+    if(@$params['format']=='gephi' || @$params['format']=='geojson' || @$params['format'] == 'nodexl' || @$params['format'] == 'pajek'){
         $search_params['limit'] = (@$params['limit']>0)?intval($params['limit']):null;
     }elseif(!$is_records_api && !(@$params['offset'] || @$params['limit'])){
         $search_params['needall'] = 1;  //search without limit of returned record count

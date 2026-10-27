@@ -177,6 +177,38 @@ final class RecordDataService
             $record['details'][$content] = array($hidden ? array('value'=>$text, 'hidden'=>true) : $text);
         }
         unset($record);
+        $this->joinPageTranslations($records, $codes);
+    }
+
+    /**
+     * Page translations of a v4 website (DT_CMS_PAGE_TRANSLATIONS, plan 27a): a long
+     * translation is saved in rows that all start with its language code ("fre:");
+     * give one value per language.
+     */
+    private function joinPageTranslations(array &$records, SystemCode $codes): void
+    {
+        $field = (string)$codes->id('DT_CMS_PAGE_TRANSLATIONS');
+        if($field === '0'){ return; }
+        foreach($records as &$record){
+            $rows = $record['details'][$field] ?? null;
+            if(!is_array($rows) || count($rows) < 2){ continue; }
+            $languages = array();
+            foreach($rows as $row){
+                $hidden = is_array($row) && !empty($row['hidden']);
+                $text = (string)(is_array($row) ? ($row['value'] ?? '') : $row);
+                $language = preg_match('/^([A-Za-z]{2,3}):/', $text, $match) ? strtolower($match[1]) : '';
+                $part = $language === '' ? $text : substr($text, strlen($match[0]));
+                if(!isset($languages[$language])){
+                    $languages[$language] = array('text' => $language === '' ? '' : $language.':', 'hidden' => false);
+                }
+                $languages[$language]['text'] .= $part;
+                $languages[$language]['hidden'] = $languages[$language]['hidden'] || $hidden;
+            }
+            $record['details'][$field] = array_values(array_map(static function(array $joined){
+                return $joined['hidden'] ? array('value'=>$joined['text'], 'hidden'=>true) : $joined['text'];
+            }, $languages));
+        }
+        unset($record);
     }
 
     /** Resolve presentation-only fields in one query per page, never per record. */

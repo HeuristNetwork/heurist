@@ -103,6 +103,14 @@ class ReportController
                 $action = 'update';
             }
 
+            if (in_array($action, ['save', 'delete', 'rename', 'import'], true)
+                && !$this->repAction->canEditTemplates()) {
+                $this->system->addError(HEURIST_REQUEST_DENIED,
+                    'Report template editing requires a logged-in user with editing permissions');
+                dataOutput($this->system->getError());
+                return;
+            }
+
             $template_file = $this->getTemplateFileName($action);
             $template_body = $this->getTemplateBody();
             

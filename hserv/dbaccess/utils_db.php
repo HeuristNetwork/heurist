@@ -719,14 +719,19 @@ $mysqli->kill($thread_id);
      * @param string $idfield The name of the primary key ID field.
      * @param int $oldid The ID of the record to duplicate.
      * @param int $newid The new ID for the duplicated record.
+     * @param string[] $excludedColumns Columns to leave at their defaults in the copy.
      * @return int|string The insert ID of the new record on success, or an error string on failure.
      */
-    function mysql__duplicate_table_record($mysqli, $table, $idfield, $oldid, $newid){
+    function mysql__duplicate_table_record($mysqli, $table, $idfield, $oldid, $newid, $excludedColumns = array()){
 
         $columns = mysql__get_table_columns($mysqli, $table);
+        if (!is_array($columns)) {
+            return 'database error - '.$mysqli->error;
+        }
 
         //in our scheme first column is always id (primary key)
         array_shift($columns);
+        $columns = array_diff($columns, $excludedColumns);
 
         $columns3 = array();
         foreach($columns as $idx=>$column){

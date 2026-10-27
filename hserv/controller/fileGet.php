@@ -65,73 +65,34 @@ if($error!==null){
     exit;
 }
 
-$system = new hserv\System();//without db connection and session - just paths
-$system->initPathConstants($db);
+$system = new hserv\System();
 
-if($filename){ //download from scratch (for csv import)
-
-        $msgTempFile = 'Temporary file (uploaded csv data) ';
-
-        //remove slashes - prevents Local file disclosure
-        $filename = USanitize::sanitizeFileName($filename, false);
-
-        $file_read = HEURIST_FILESTORE_DIR.DIR_SCRATCH.$filename;
-
-        $file_read = isPathInHeuristUploadFolder( $file_read );
-
-        if(!$file_read || is_dir($file_read))
-        {
-            print $msgTempFile.htmlspecialchars($filename). ' not found';
-            exit;
+if($filename){ // Private import files require the uploading user and session.
+    if (!$system->init($db)) {
+        http_response_code(400);
+        exit('Invalid database parameter');
+    }
+    try {
+        $copy = \hserv\utilities\ScratchFileAccess::downloadCopy($system, $filename, $req_params['encoding'] ?? null);
+        try {
+            header('Content-Type: text/plain; charset=UTF-8');
+            header('X-Content-Type-Options: nosniff');
+            header('Cache-Control: private, no-store');
+            header('Pragma: no-cache');
+            header(CONTENT_LENGTH . fstat($copy)['size']);
+            fpassthru($copy);
+        } finally {
+            fclose($copy);
         }
-
-        $content_type = null;
-
-        $csv_encoding = @$req_params['encoding'];
-
-        if($csv_encoding && $csv_encoding!='UTF-8'){ //force convert to utf8
-
-            $handle = @fopen($file_read, "r");
-            if (!$handle) {
-                $s = null;
-                if (! file_exists($file_read)){
-                     $s = ' does not exist.This can be caused by bad characters in the source file name eg. use of = and unusual punctuation.<br><br>'
-                    .'Please clear your browser cache and try again. if problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
-                }elseif (! is_readable($file_read)) {
-                    $s = ' is not readable';
-                }
-                else {
-                    $s = ' could not be read';
-                }
-
-                if($s){
-                    print $msgTempFile.htmlspecialchars($file_read). $s;
-                    exit;
-                }
-            }
-
-            setlocale(LC_ALL, 'en_US.utf8');
-            fclose($handle);
-            
-            $content = file_get_contents($file_read);
-            $content = mb_convert_encoding( $content, 'UTF-8', $csv_encoding);
-            if(!$content){
-                print $msgTempFile.htmlspecialchars($file_read)
-                .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
-                exit;
-            }
-
-            $res = file_put_contents($file_read, $content);
-            unset($content);
-            if(!$res){
-                print 'Cant save temporary file (with UTF-8 encoded csv data) '.htmlspecialchars($file_read);
-                exit;
-            }
-
-        }
-        _download_file($file_read, null);
-
+    } catch (\RuntimeException $error) {
+        $code = $error->getCode();
+        http_response_code(in_array($code, [400, 401, 403, 404, 500], true) ? $code : 500);
+        header('Cache-Control: no-store');
+        echo htmlspecialchars($error->getMessage());
+    }
+    exit;
 }else{  //download entity images (icons, thumbs) for entity folder in HEURIST_FILESTORE_DIR
+        $system->initPathConstants($db);
 
 
         $content_type = 'image/png';
