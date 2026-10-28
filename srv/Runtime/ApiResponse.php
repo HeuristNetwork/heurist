@@ -33,6 +33,7 @@ final class ApiResponse
             $data['debug'] = QueryTrace::toArray();
         }
         http_response_code($status);
+        ServerTiming::send();
         header('Content-Type: application/json; charset=utf-8');
         print json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }

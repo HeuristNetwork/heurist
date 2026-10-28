@@ -1,0 +1,28 @@
+{
+  "name": "heurist",
+  "version": "1.0.0",
+  "description": "Heurist network",
+  "main": "layout_default.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:js": "node scripts/build-terser.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HeuristNetwork/heurist.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HeuristNetwork/heurist/issues"
+  },
+  "homepage": "https://github.com/HeuristNetwork/heurist#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "eslint": "^9.8.0",
+    "globals": "^15.8.0",
+    "jsdoc": "^4.0.4",
+    "terser": "^5.48.0"
+  },
+  "keywords": []
+}

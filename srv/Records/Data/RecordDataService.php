@@ -158,7 +158,7 @@ final class RecordDataService
      */
     private function joinPageContent(array &$records): void
     {
-        $codes = new SystemCode();
+        $codes = new SystemCode($this->definitions());
         $page = $codes->id('RT_CMS_PAGE');
         $content = (string)$codes->id('DT_EXTENDED_DESCRIPTION');
         if($page < 1 || $content === '0'){ return; }

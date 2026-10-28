@@ -22,9 +22,11 @@ $imageURL = '';
 $requestParameters = USanitize::sanitizeInputArray();
 
 $database = array_key_exists('db', $requestParameters) ? $requestParameters['db'] : null;
-$ulfID = array_key_exists('recID', $requestParameters) ? $requestParameters['recID'] : null;
+$ulfID = array_key_exists('id', $requestParameters) ? $requestParameters['id'] : null;
+$ulfID = empty($ulfID) && array_key_exists('ulfID', $requestParameters) ? $requestParameters['ulfID'] : $ulfID;
+$recID = array_key_exists('recID', $requestParameters) ? intval($requestParameters['recID']) : null;
 $imageURL = array_key_exists('image', $requestParameters) ? trim((string)$requestParameters['image']) : '';
-if(!$database || !$ulfID && $imageURL === ''){
+if(!$database || !$ulfID && $imageURL === '' && !isPositiveInt($recID)){
     echo !$database ? 'Database is missing' : 'Image is missing';
     exit;
 }
@@ -40,7 +42,51 @@ if(!$system->init($database, true, false)){
 
 $mysqli = $system->getMysqli();
 
+$isLoggedIn = $system->hasAccess();
 $files = [];
+$hasPDFFile = false;
+$__getFileDetails = function($ulfWhereClause) use ($mysqli, $isLoggedIn, $language, $database, &$hasPDFFile, &$files){
+
+    $ulfWhereClause .= $isLoggedIn ? ' AND ulf_WhoCanView="viewable"' : '';
+
+    $ulfRecords = mysql__select_assoc($mysqli, "SELECT * FROM recUploadedFiles WHERE {$ulfWhereClause}", 0);
+
+    foreach($ulfRecords as $ulfRec){
+
+        $fileID = $ulfRec['ulf_ID'];
+
+        $caption = $ulfRec['ulf_Caption'] ?? '';
+        $description = $ulfRec['ulf_Description'] ?? '';
+        if($language && $language !== 'def'){
+
+            $translatedCaption = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Caption' AND trn_Code = {$fileID} AND trn_LanguageCode = '{$language}'");
+            $translatedDesc = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Description' AND trn_Code = {$fileID} AND trn_LanguageCode = '{$language}'");
+
+            $caption = !empty($translatedCaption) ? $translatedCaption : $caption;
+            $description = !empty($translatedDesc) ? $translatedDesc : $description;
+        }
+
+        $type = strpos(strtolower($ulfRec['ulf_MimeExt']), 'pdf') !== false ? 'pdf': 'image';
+
+        if($type === 'pdf' && $hasPDFFile){
+            continue; // allow only one PDF
+        }
+        $hasPDFFile = $type === 'pdf';
+
+        $filename = !empty($ulfRec['ulf_ExternalFileReference']) ? $ulfRec['ulf_ExternalFileReference'] : $ulfRec['ulf_OrigFileName'];
+        $files[] = [
+            'type' => $type,
+            'url' => HEURIST_BASE_URL . "?db={$database}&fullres=1&file={$ulfRec['ulf_ObfuscatedFileID']}",
+            'name' => $filename,
+            'caption' => $caption,
+            'desc' => $description,
+            'copyright' => $ulfRec['ulf_Copyright'],
+            'owner' => $ulfRec['ulf_Copyowner'],
+            'isManifest' => $ulfRec['ulf_OrigFileName'] == '_iiif'
+        ];
+    }
+};
+
 if($imageURL !== ''){
 
     if(!preg_match('~^https?://~i', $imageURL)){
@@ -59,7 +105,7 @@ if($imageURL !== ''){
         'owner' => '',
         'isManifest' => false
     ];
-}else{
+}elseif($ulfID){
 
     $ulfQuery = '';
     $ulfIDs = prepareIds($ulfID);
@@ -76,37 +122,39 @@ if($imageURL !== ''){
         exit;
     }
 
-    $ulfRecords = mysql__select_assoc($mysqli, "SELECT * FROM recUploadedFiles WHERE {$ulfQuery}", 0);
+    $__getFileDetails($ulfQuery);
+}else{
 
-    foreach($ulfRecords as $ulfRec){
-
-        $fileID = $ulfRec['ulf_ID'];
-
-        $caption = $ulfRec['ulf_Caption'] ?? '';
-        $description = $ulfRec['ulf_Description'] ?? '';
-        if($language && $language !== 'def'){
-
-            $translatedCaption = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Caption' AND trn_Code = {$fileID} AND trn_LanguageCode = '{$language}'");
-            $translatedDesc = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'ulf_Description' AND trn_Code = {$fileID} AND trn_LanguageCode = '{$language}'");
-
-            $caption = !empty($translatedCaption) ? $translatedCaption : $caption;
-            $description = !empty($translatedDesc) ? $translatedDesc : $description;
-        }
-
-        $filename = !empty($ulfRec['ulf_ExternalFileReference']) ? $ulfRec['ulf_ExternalFileReference'] : $ulfRec['ulf_OrigFileName'];
-        $files[] = [
-            'type' => strpos(strtolower($ulfRec['ulf_MimeExt']), 'pdf') !== false ? 'pdf': 'image',
-            'url' => HEURIST_BASE_URL . "?db={$database}&fullres=1&file={$ulfRec['ulf_ObfuscatedFileID']}",
-            'name' => $filename,
-            'caption' => $caption,
-            'desc' => $description,
-            'copyright' => $ulfRec['ulf_Copyright'],
-            'owner' => $ulfRec['ulf_Copyowner'],
-            'isManifest' => $ulfRec['ulf_OrigFileName'] == '_iiif'
-        ];
-
-        break; // accept only the first file, for now
+    $record = mysql__select_row_assoc($mysqli, "SELECT rec_ID, rec_NonOwnerVisibility, rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = {$recID}");
+    if(!$record || empty($record)){
+        echo "Cannot retrieve record #{$recID}";
+        exit;
     }
+
+    $record['details'] = [];
+    recordSearchDetails($system, $record, ['file']);
+    if($record['details'] === []){
+        echo "No files to display in record #{$recID}";
+        exit;
+    }
+
+    $fileIDs = [];
+    foreach($record['details'] as $dtyID => $values){
+        foreach($values as $dtlID => $fileInfo){
+            $ulfID = intval($fileInfo['file']['ulf_ID']);
+            if(isPositiveInt($ulfID) && !in_array($ulfID, $fileIDs)){
+                $fileIDs[] = $ulfID;
+            }
+        }
+    }
+
+    if($fileIDs === []){
+        echo "No files to display for record #{$recID}";
+        exit;
+    }
+    $ulfQuery = count($fileIDs) === 1 ? "ulf_ID = {$fileIDs[0]}" : 'ulf_ID IN (' . implode(',', $fileIDs) . ')';
+
+    $__getFileDetails($ulfQuery);
 }
 ?>
 
@@ -212,13 +260,22 @@ if($imageURL !== ''){
                 padding-right: 0.4em;
             }
 
-            .pdf-controller{
+            .pdf-controller, .osd-controller{
                 cursor: pointer;
             }
-            #pdf-page-count{
+            #pdf-page-count, #osd-file-count{
                 padding: 0px 0.5em;
 
                 cursor: default;
+            }
+
+            #osd-controls{
+
+                width: 13vw;
+
+                position: absolute;
+                top: 3em;
+                left: 1em;
             }
 
             .osd-toggle-bg{
@@ -238,9 +295,8 @@ if($imageURL !== ''){
                 cursor: pointer;
                 transition: background-color 0.2s ease, transform 0.1s ease;
 
-                position: absolute;
-                top: 0.4em;
-                left: 1em;
+                margin-bottom: 1em;
+                margin-left: 10vw;
             }
 
             .osd-toggle-bg:active{
@@ -411,6 +467,20 @@ if($imageURL !== ''){
 
                     }else{
                         pdfControls.style.display = 'none';
+                    }
+                }
+
+                let fileControls = document.getElementById('osd-file-controls');
+                if(fileControls){
+
+                    if(files.length > 1){
+                        fileControls.style.display = 'block';
+                        let fileElement = fileControls.querySelector('#osd-file-count');
+                        if(fileElement){
+                            fileElement.textContent = `File ${fileIndex + 1} of ${files.length}`;
+                        }
+                    }else{console.log('hide', fileControls);
+                        fileControls.style.display = 'none';
                     }
                 }
             }
@@ -610,6 +680,34 @@ if($imageURL !== ''){
                 loadFile();
             }
 
+            function handleFileSeek(event){
+
+                let target = event.target;
+                let tagName = target.tagName;
+                if(tagName === 'SPAN'){
+                    target = target.parentNode;
+                }
+
+                let action = target.id;
+
+                let file = 0;
+                let currentFile = Number.parseInt(fileIndex);
+                let fileCount = files.length - 1;
+                if(action === 'osd-seek-backwards' || action === 'osd-seek-forwards'){
+                    file = action === 'osd-seek-backwards' ? 0 : fileCount;
+                }else{
+                    file = action === 'osd-backwards' ? currentFile - 1 : currentFile + 1;
+                }
+
+                file = file < 0 ? 0 : file;
+                file = file > fileCount ? fileCount : file;
+
+                if(file != fileIndex){
+                    fileIndex = file;
+                    loadFile();
+                }
+            }
+
             async function handlePageSeek(event){
 
                 let target = event.target;
@@ -666,6 +764,11 @@ if($imageURL !== ''){
                 pdfControls.forEach((pdfControl, index) => {
                     pdfControl.addEventListener('click', handlePageSeek);
                 });
+
+                let fileControls = document.querySelectorAll('.osd-controller');
+                fileControls.forEach((fileControl, index) => {
+                    fileControl.addEventListener('click', handleFileSeek);
+                });
             }
 
             document.addEventListener("DOMContentLoaded", () => {
@@ -677,7 +780,17 @@ if($imageURL !== ''){
 
     <body>
 
-        <button class="osd-toggle-bg" title="Toggle grey background"><i class="fa-regular fa-lightbulb"></i></button>
+        <div id="osd-controls">
+            <button class="osd-toggle-bg" title="Toggle grey background"><span class="fa-regular fa-lightbulb"></span></button>
+
+            <div id="osd-file-controls" style="display: none; text-align: center;">
+                <span class="osd-controller" id="osd-seek-backwards" title="Go to first file"><span class="fa-solid fa-angles-left"></span></span>
+                <span class="osd-controller" id="osd-backwards" title="Go to the previous file"><span class="fa-solid fa-chevron-left"></span></span>
+                <span id="osd-file-count"></span>
+                <span class="osd-controller" id="osd-forwards" title="Go to the next file"><span class="fa-solid fa-chevron-right"></span></span>
+                <span class="osd-controller" id="osd-seek-forwards" title="Go to last file"><span class="fa-solid fa-angles-right"></span></span>
+            </div>
+        </div>
 
         <div id="img-title"></div>
 

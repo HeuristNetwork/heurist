@@ -142,46 +142,12 @@ final class ServiceFactory
     public static function fromLegacySystem($system): self
     {
         QueryTrace::markBoot();
+        ServerTiming::mark('boot');
         $runtime = RuntimeContext::fromLegacySystem($system);
-        $codeNames = array(
-            'RT_QUERY_SOURCE', 'RT_MAP_DOCUMENT', 'RT_MAP_LAYER',
-            'RT_FILE_SOURCE', 'RT_GEOTIFF_SOURCE', 'RT_IMAGE_SOURCE',
-            'RT_KML_SOURCE', 'RT_SHP_SOURCE', 'RT_TILED_IMAGE_SOURCE',
-            'RT_TLCMAP_DATASET',
-            'DT_DATA_SOURCE', 'DT_QUERY_STRING', 
-            'DT_GEO_FIELDS', 'DT_TABLE_FIELDS', 'DT_TIMELINE_FIELDS', 
-            'DT_EXPANSION_RULES', 'DT_FILTER_FORM',
-            'DT_SHORT_SUMMARY', 'DT_CRS', 'DT_FILE_RESOURCE', 'DT_GEO_OBJECT',
-            'DT_GEO_OUTPUTMODE', 'DT_IS_LOADED_BY_EXTENT', 'DT_IS_VISIBLE',
-            'DT_MAP_BOOKMARK', 'DT_MAP_IMAGE_LAYER_SCHEMA',
-            'DT_MAP_IMAGE_WORLDFILE', 'DT_MAP_LAYER', 'DT_MAXIMUM_ZOOM',
-            'DT_MAXIMUM_ZOOM_LEVEL', 'DT_MIME_TYPE', 'DT_MINIMUM_ZOOM',
-            'DT_MINIMUM_ZOOM_LEVEL', 'DT_SERVICE_URL', 'DT_SMARTY_TEMPLATE',
-            'DT_SYMBOLOGY', 'DT_TIMELINE_FIELDS', 'DT_WORLD_BASEMAP',
-            'DT_ZOOM_KM_POINT', 'DT_START_DATE', 'DT_END_DATE', 'DT_NAME',
-            'DT_EXTENDED_DESCRIPTION',
-            // Smarty reports (plan 12)
-            'RT_CUSTOM_REPORT', 'RT_REPORT_SCHEDULE', 'DT_FILE_NAME',
-            'DT_IS_CARD_VIEW', 'DT_REPORT', 'DT_INTERVAL_MINUTES',
-            // srv Smarty engine (plan 12, Phase 6): relationships, CMS menu descriptions
-            'RT_RELATION', 'RT_CMS_PAGE', 'DT_RELATION_TYPE', 'DT_PRIMARY_RESOURCE', 'DT_TARGET_RESOURCE',
-            // record export (plan 13): KML time span
-            'DT_DATE',
-            // record editing (plan 14)
-            'RT_CMS_HOME', 'DT_WORKFLOW_STAGE', 'DT_CMS_EXTFILES',
-            'DT_CMS_SCRIPT', 'DT_CMS_CSS', 'DT_CMS_HEADER', 'DT_CMS_FOOTER',
-            // virtual parents (plan 26): title masks, Smarty fN / fNs
-            'DT_PARENT_ENTITY',
-            // website format v4 (plan 27a): page translations, joined on read
-            'DT_CMS_PAGE_TRANSLATIONS'
-        );
-        $codeIds = array();
-        foreach($codeNames as $codeName){
-            if($system->defineConstant($codeName)){
-                $codeIds[$codeName] = intval(constant($codeName));
-            }
-        }
         $database = DatabaseFactory::fromHeuristConfiguration($runtime->databaseNameFull);
+        // RT_* / DT_* / TRM_* ids from Definitions/SystemConstants, cached beside the
+        // definitions snapshot (no legacy constants, 2026-10-27)
+        $definitions = DefinitionLookup::shared($database)->useConstantCache((string)$system->getSysDir('entity'));
         // srv/ services never write the PHP session. Releasing its lock lets parallel
         // module requests and a cancel request run while a long query is executing.
         if(session_status() === PHP_SESSION_ACTIVE){ session_write_close(); }
@@ -198,7 +164,7 @@ final class ServiceFactory
         $factory = new self(
             $database,
             $runtime,
-            new SystemCode($codeIds),
+            new SystemCode($definitions),
             (string)$system->getSysDir('entity'),
             array(
                 'templates' => (string)$system->getSysDir('smarty-templates'),
@@ -311,9 +277,6 @@ final class ServiceFactory
             'languageCodesFile' => self::languageCodesFile(),
             'recordLink' => static function(string $reference) use ($system): string {
                 return (string)$system->recordLink($reference);
-            },
-            'constant' => static function(string $name) use ($system) {
-                return $system->getConstant($name);
             }
         );
     }
@@ -435,7 +398,7 @@ final class ServiceFactory
             'cmsCss' => $this->codes->id('DT_CMS_CSS'),
             'cmsHeader' => $this->codes->id('DT_CMS_HEADER'),
             'cmsFooter' => $this->codes->id('DT_CMS_FOOTER'),
-            'cmsTranslations' => $definitions->localId('dty', '2-1202')
+            'cmsTranslations' => $this->codes->id('DT_CMS_PAGE_TRANSLATIONS')
         ), null, $this->javaScriptAllowed());
         // website format v4 (plan 27a): configuration and hosts of website and page records
         $validator->addRecordCheck(new CmsRecordCheck(
@@ -802,8 +765,23 @@ final class ServiceFactory
             $search,
             $runtime->userId,
             $codes,
-            is_callable($values['constant'] ?? null) ? $values['constant'] : null
+            $this->templateConstant()
         );
+    }
+
+    /**
+     * `|constant` and `$heurist->constant()` of templates: RT_* / DT_* / TRM_* ids of this
+     * database (SystemConstants), null for other names or a missing definition. Legacy
+     * returned any defined PHP constant (2026-10-27).
+     */
+    private function templateConstant(): callable
+    {
+        $codes = $this->codes;
+        return static function(string $name) use ($codes): ?int {
+            if(!preg_match('/^(RT|DT|TRM)_[A-Z0-9_]+$/', $name)){ return null; }
+            $id = $codes->id($name);
+            return $id > 0 ? $id : null;
+        };
     }
 
     /** Filter of record ids by the access rules of the current user (order kept). */

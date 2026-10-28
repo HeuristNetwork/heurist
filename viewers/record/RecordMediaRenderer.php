@@ -603,7 +603,7 @@ class RecordMediaRenderer
         }
 
         $fileID = $thumb['id'] ?? $thumb['nonce'] ?? '';
-        return $url.'&recID='.rawurlencode((string)$fileID);
+        return $url.'&id='.rawurlencode((string)$fileID);
     }
 
     private function viewer3dUrl(array $thumb): string

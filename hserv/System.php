@@ -152,7 +152,8 @@ class System {
         }        
 
         $res = mysql__init($this->dbnameFull);
-        
+        $this->timingMark('db');
+
         if (is_a($res, 'mysqli')){
             //connection OK
             $this->mysqli = $res;
@@ -167,15 +168,18 @@ class System {
         }elseif(!$init_session_and_constants){
             $this->isInited = true;
         }elseif( $this->authSession()->startMySession($this->needFullSessionCheck) ){
-            
+            $this->timingMark('session');
+
             if($this->initPathConstants()){
 
                 if($this->needFullSessionCheck){
                     USystem::executeScriptOncePerDay($this);
                 }
+                $this->timingMark('paths');
 
                 //load user info from session on system init
                 $this->authSession()->loginVerify( false );
+                $this->timingMark('login');
                 if($this->getUserId()>0){
                     //set current user for stored procedures (log purposes)
                     $this->mysqli->query('set @logged_in_user_id = '.intval($this->getUserId()));
@@ -191,6 +195,19 @@ class System {
 
         return $this->isInited;
 
+    }
+
+    /**
+     * Marks the end of a start-up phase for the Server-Timing header of srv/ responses.
+     * Only when the Composer autoloader (namespace Heurist\) is registered.
+     *
+     * @param string $name Phase name.
+     * @return void
+     */
+    private function timingMark($name){
+        if(class_exists('\Heurist\Runtime\ServerTiming')){
+            \Heurist\Runtime\ServerTiming::mark($name);
+        }
     }
 
     /**
