@@ -4,7 +4,7 @@
 *
 * The one mapping between the legacy file table and the record format of the
 * /files domain (plan 20, §3.1): headers and fields by concept code, with the
-* value conversions (visibility, size, MIME type and registered file type terms).
+* value conversions (visibility, size, file type and registered file type terms).
 * Used for reading and for writing. The concept-code fields, the writable columns
 * and the term lookup are the base EntityRecordMapping (plan 20, §10.4).
 *
@@ -48,7 +48,7 @@ final class FileRecordMapping extends EntityRecordMapping
     );
 
     /**
-     * Field concept code => legacy column. convert: mime (extension <-> term), term (label <-> term),
+     * Field concept code => legacy column. convert: ext (extension <-> term of 2-533), term (label <-> term),
      * size (KB <-> bytes); admin: given to database administrators only (server paths).
      */
     public const FIELDS = array(
@@ -57,7 +57,7 @@ final class FileRecordMapping extends EntityRecordMapping
         '2-4' => array('column' => 'ulf_Description'),                        // DT_EXTENDED_DESCRIPTION
         '2-35' => array('column' => 'ulf_Copyright'),                         // DT_COPYRIGHT
         '2-1188' => array('column' => 'ulf_Copyowner'),                       // DT_COPYOWNER
-        '2-29' => array('column' => 'ulf_MimeExt', 'convert' => 'mime'),      // DT_MIME_TYPE
+        '2-29' => array('column' => 'ulf_MimeExt', 'convert' => 'ext'),       // DT_FILE_EXT (File type)
         '2-67' => array('column' => 'ulf_FileSizeKB', 'convert' => 'size'),   // DT_FILE_SIZE (bytes)
         '2-68' => array('column' => 'ulf_MD5Checksum'),                       // DT_FILE_MD5
         '2-1186' => array('column' => 'ulf_PreferredSource', 'convert' => 'term'), // DT_REGISTERED_FILE_TYPE
@@ -151,19 +151,9 @@ final class FileRecordMapping extends EntityRecordMapping
             case 'term':
                 $term = $this->definitions->term(intval($value));
                 return $term === null ? null : (string)$term['term'];
-            case 'mime':
+            case 'ext':
                 $term = $this->definitions->term(intval($value));
-                if($term === null){ return null; }
-                $label = strtolower(trim((string)$term['term']));
-                if(strpos($label, '/') === false){ return $label; }
-                // a MIME type term: the extension of the file name when it has this type, else its first extension
-                $names = array_merge($details[$this->fieldId('2-62')] ?? array(), $details[$this->fieldId('2-1185')] ?? array());
-                foreach($names as $name){
-                    $ext = strtolower(pathinfo((string)$name, PATHINFO_EXTENSION));
-                    if(($this->files->mimeTypes()[$ext] ?? '') === $label){ return $ext; }
-                }
-                $extensions = array_keys($this->files->mimeTypes(), $label, true);
-                return empty($extensions) ? null : (string)$extensions[0];
+                return $term === null ? null : self::termExtension($term);
             default:
                 return $value;
         }
@@ -199,7 +189,7 @@ final class FileRecordMapping extends EntityRecordMapping
 
     /**
      * Legacy column values of one value of an enum field (a term id, or a label): the extensions
-     * of a MIME type term (with its child terms), the registered file type of a term.
+     * of a file type term or group (with its child terms), the registered file type of a term.
      *
      * @return array<int,string> lower-case column values
      */
@@ -207,18 +197,22 @@ final class FileRecordMapping extends EntityRecordMapping
     {
         $mapping = $this->fields()[$fieldId] ?? null;
         if($mapping === null){ return array(); }
+        $isExt = ($mapping['convert'] ?? '') === 'ext';
         $text = strtolower(trim((string)$value));
         $labels = array();
         if(ctype_digit($text)){
             foreach($this->definitions->termDescendants(array(intval($text))) as $termId){
                 $term = $this->definitions->term($termId);
-                if($term !== null){ $labels[] = strtolower(trim((string)$term['term'])); }
+                if($term === null){ continue; }
+                // a group of file types has no extension
+                $label = $isExt ? self::termExtension($term) : strtolower(trim((string)$term['term']));
+                if($label !== null && $label !== ''){ $labels[] = $label; }
             }
         }elseif($text !== ''){
             $labels[] = $text;
         }
-        if(($mapping['convert'] ?? '') !== 'mime'){ return array_values(array_unique($labels)); }
-        // MIME type: a label is an extension ("jpg"), a MIME type ("image/jpeg") or a group ("image/*")
+        if(!$isExt){ return array_values(array_unique($labels)); }
+        // file type: a label is an extension ("jpg"), also a MIME type ("image/jpeg") or a MIME group ("image/*")
         $result = array();
         foreach($labels as $label){
             if(strpos($label, '/') === false){ $result[] = $label; continue; }
@@ -240,13 +234,43 @@ final class FileRecordMapping extends EntityRecordMapping
                 return (string)(intval($value) * 1024);
             case 'term':
                 return $this->termId($fieldId, (string)$value);
-            case 'mime':
-                // the extension term ("jpg", child of "image/jpeg"), else the MIME type term
+            case 'ext':
+                // the term of the extension; a database without the vocabulary of extensions yet: its MIME type term
                 $extension = strtolower(trim((string)$value));
                 return $this->termId($fieldId, $extension)
                     ?? $this->termId($fieldId, $this->files->mimeTypes()[$extension] ?? '');
             default:
                 return (string)$value;
         }
+    }
+
+    /**
+     * MIME type of a file record (header fxm_MimeType of fields=_all, 2026-10-27): from its file type
+     * value - a term id, or a resolved value {value, trm_Code} - through defFileExtToMimetype.
+     *
+     * @param mixed $value Value of field 2-29.
+     */
+    public function mimeTypeOfValue($value): ?string
+    {
+        if(is_array($value)){ $value = $value['value'] ?? null; }
+        $term = ctype_digit((string)$value) ? $this->definitions->term(intval($value)) : null;
+        $extension = $term === null ? null : self::termExtension($term);
+        return $extension === null ? null : ($this->files->mimeTypes()[$extension] ?? null);
+    }
+
+    /** MIME type of an extension (defFileExtToMimetype), null when unknown. */
+    public function mimeTypeOfExtension(string $extension): ?string
+    {
+        return $this->files->mimeTypes()[strtolower(trim($extension))] ?? null;
+    }
+
+    /**
+     * Extension of a file type term: its code (label = code = extension since 2026-10-27; the code
+     * of a MIME type term of the older vocabulary is its main extension). Null for a group (no code).
+     */
+    private static function termExtension(array $term): ?string
+    {
+        $code = strtolower(trim((string)($term['code'] ?? '')));
+        return $code === '' ? null : $code;
     }
 }

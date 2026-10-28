@@ -117,7 +117,7 @@ final class SystemConstants
         'DT_TABLE_FIELDS' => array('dty', '2-1164'),
         'DT_FILTER_FORM' => array('dty', '2-1165'), // QuerySource Filter Form layout JSON
         'DT_TIMELINE_FIELDS' => array('dty', '2-1105'),
-        'DT_MIME_TYPE' => array('dty', '2-29'),
+        'DT_FILE_EXT' => array('dty', '2-29'), // File type: a term of vocabulary 2-533 (extensions); 2-41 and 2-64 merged into it (2026-10-27)
         'DT_IMAGE_TYPE' => array('dty', '2-30'),
         'DT_MAP_IMAGE_LAYER_SCHEMA' => array('dty', '2-31'),
         'DT_MINIMUM_ZOOM_LEVEL' => array('dty', '2-32'), //in basemap zoom levels (0-20)
@@ -147,7 +147,6 @@ final class SystemConstants
         'DT_WIDTH' => array('dty', '3-1040'),
         'DT_DURATION' => array('dty', '2-66'),
         'DT_FILTER_STRING' => array('dty', '2-40'),
-        'DT_FILE_TYPE' => array('dty', '2-41'),
         'DT_ANNOTATION_RESOURCE' => array('dty', '2-42'),
         'DT_ANNOTATION_RANGE' => array('dty', '2-43'),
         'DT_START_WORD' => array('dty', '2-44'),
@@ -166,7 +165,6 @@ final class SystemConstants
         'DT_MEDIA_RESOURCE' => array('dty', '2-61'), //refetence to media record
         'DT_FILE_NAME' => array('dty', '2-62'),
         'DT_FILE_FOLDER' => array('dty', '2-63'),
-        'DT_FILE_EXT' => array('dty', '2-64'),
         'DT_FILE_DEVICE' => array('dty', '2-65'),
         'DT_FILE_DURATION' => array('dty', '2-66'),
         'DT_FILE_SIZE' => array('dty', '2-67'),
@@ -245,6 +243,10 @@ final class SystemConstants
         'TRM_LEGEND_OUT_ZOOM_DISABLED' => array('trm', '3-5082'), // Legend item becomes disabled (greyed out)
         // only in srv (not in hserv/consts.php)
         'TRM_YES' => array('trm', '2-532'), // General 'Yes' term
+        // file types (2026-10-27): extensions in groups; subsets by reference for tiled images and reports
+        'TRM_FILE_EXT' => array('trm', '2-533'), // vocabulary of DT_FILE_EXT
+        'TRM_TILE_FORMATS' => array('trm', '2-10639'), // png jpg jpeg gif webp (Artem, 2026-10-28)
+        'TRM_REPORT_FORMATS' => array('trm', '2-10638'), // html csv txt xml json js css (Artem, 2026-10-28)
         // users and groups (plan 20, Phase 4d; user codes given by Artem 2026-10-24)
         'RT_SYS_USER' => array('rty', '2-1107'),
         'RT_SYS_GROUP' => array('rty', '2-1108'),

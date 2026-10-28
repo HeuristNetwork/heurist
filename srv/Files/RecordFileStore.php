@@ -99,6 +99,11 @@ final class RecordFileStore implements FileStoreInterface
                     : HEURIST_BASE_URL.'?db='.rawurlencode($this->runtime->databaseName).'&thumb='.$key;
             }
             if($addedHash){ unset($record['rec_Hash']); }
+            if(isset($record['details']) && is_array($record['details'])){
+                // derived from the file type (extension), for players and inserted media (2026-10-27)
+                $type = $record['details'][(string)$this->mapping->fieldId('2-29')][0] ?? null;
+                $record['fxm_MimeType'] = $type === null ? null : $this->mapping->mimeTypeOfValue($type);
+            }
             foreach(array_keys($hidden) as $fieldId){ unset($record['details'][$fieldId]); }
         }
         unset($record);

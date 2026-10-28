@@ -169,6 +169,7 @@ final class FileWriteService extends EntityWriteService
                 $columns['ulf_MimeExt'] = $info['ext'];
                 $columns['ulf_OrigFileName'] = $columns['ulf_OrigFileName'] ?? $info['name'];
                 $columns['ulf_FileSizeKB'] = 0;
+                if(!empty($info['guessed'])){ $issues[] = $this->fileTypeIssue(); }
             }
             if(!empty($existing)){
                 // as legacy registerURL: the registration of this URL is used
@@ -224,8 +225,9 @@ final class FileWriteService extends EntityWriteService
         $tiled = (string)$row['ulf_PreferredSource'] === 'tiled';
         $isRemote = !$tiled && trim((string)($row['ulf_FileName'] ?? '')) === ''
             && trim((string)($row['ulf_ExternalFileReference'] ?? '')) !== '';
-        // the MIME type chosen by the user (tiled, external; plan 20 §10.11), checked before the content changes
-        $mimeExt = $this->requestedMimeExt($input, $row);
+        // the file type chosen by the user (tiled, external; plan 20 §10.11), checked before the content changes
+        $mimeExt = $this->requestedExt($input, $row);
+        $issues = array();
         $url = trim((string)$input->header('rec_URL'));
         if($input->has('rec_URL') && $url !== (string)$row['ulf_ExternalFileReference']){
             if(!$isRemote || $row['ulf_PreferredSource'] === 'tiled'){
@@ -236,8 +238,9 @@ final class FileWriteService extends EntityWriteService
             $columns['ulf_ExternalFileReference'] = $info['url'];
             $columns['ulf_PreferredSource'] = $info['source'];
             $columns['ulf_MimeExt'] = $info['ext'];
+            // a file type chosen in the same request wins over the guess
+            if(!empty($info['guessed']) && $mimeExt === null){ $issues[] = $this->fileTypeIssue(); }
         }
-        $issues = array();
         $upload = null;
         if($token !== ''){
             if($isRemote){ throw RecordEditException::invalid('An external resource has no content to replace'); }
@@ -283,14 +286,22 @@ final class FileWriteService extends EntityWriteService
     }
 
     /**
-     * Extension of the MIME type (field 2-29) sent for a file, when it differs from the stored one:
-     * only tiled images and external resources take a MIME type from the user (detection is not
-     * always right); local files and IIIF get it from their content. Null when not sent or unchanged.
+     * Extension of the file type (field 2-29, DT_FILE_EXT) sent for a file, when it differs from the
+     * stored one: only tiled images and external resources take a file type from the user (detection
+     * is not always right); local files and IIIF get it from their content. Null when not sent or unchanged.
+     * The term is the extension (vocabulary 2-533 since 2026-10-27; a MIME type term of the older
+     * vocabulary gives its code, the main extension).
      *
-     * @throws RecordEditException 400 for another type, an unknown term or a term without an extension
-     *         (a group of the MIME vocabulary)
+     * @throws RecordEditException 400 for another source, an unknown term, a group, or an extension
+     *         without a MIME type (defFileExtToMimetype)
      */
-    private function requestedMimeExt(RecordInput $input, array $row): ?string
+    /** Warning of a URL whose file type was not detected (registered as bin, 2026-10-27). */
+    private function fileTypeIssue(): array
+    {
+        return $this->issue('file_type', 'The file type could not be detected - choose it in File type');
+    }
+
+    private function requestedExt(RecordInput $input, array $row): ?string
     {
         $fieldId = $this->mapping->fieldId('2-29');
         if($fieldId < 1 || !array_key_exists($fieldId, $input->details())){ return null; }
@@ -299,29 +310,18 @@ final class FileWriteService extends EntityWriteService
         $value = trim((string)$value);
         if($value === ''){ return null; }
         $term = ctype_digit($value) ? $this->definitions->term(intval($value)) : null;
-        if($term === null){ throw RecordEditException::invalid('Unknown MIME type: '.$value); }
-        $label = strtolower(trim((string)$term['term']));
-        $current = $this->mimeTypes[strtolower((string)($row['ulf_MimeExt'] ?? ''))] ?? '';
-        if($label === strtolower($current)){ return null; }
+        if($term === null){ throw RecordEditException::invalid('Unknown file type: '.$value); }
+        $extension = strtolower(trim((string)$term['code']));
+        if($extension === ''){ throw RecordEditException::invalid('"'.$term['term'].'" is a group of file types, not a file type'); }
+        if($extension === strtolower((string)($row['ulf_MimeExt'] ?? ''))){ return null; }
         $source = (string)$row['ulf_PreferredSource'];
         if(!in_array($source, array('tiled', 'external'), true)){
-            throw RecordEditException::invalid('The MIME type of a '.($source ?: 'local').' file is set from its content');
+            throw RecordEditException::invalid('The file type of a '.($source ?: 'local').' file is set from its content');
         }
-        $extensions = array_keys($this->mimeTypes, $label, true);
-        if(empty($extensions)){ throw RecordEditException::invalid('"'.$term['term'].'" is not a MIME type of a file extension'); }
-        // one MIME type has several extensions (application/octet-stream: shp, shx, dat...): the file's own
-        // extension (of its URL or name) when it has this type, so it is not replaced by another one
-        $url = (string)parse_url((string)($input->header('rec_URL') ?? $row['ulf_ExternalFileReference'] ?? ''), PHP_URL_PATH);
-        foreach(array($url, (string)($row['ulf_OrigFileName'] ?? '')) as $name){
-            $own = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-            if($own !== '' && ($this->mimeTypes[$own] ?? '') === $label){ return $own; }
+        if(!isset($this->mimeTypes[$extension])){
+            throw RecordEditException::invalid('The file type "'.$extension.'" is not known in this database');
         }
-        // else the one named in the type (image/jpeg -> jpeg rather than jpe)
-        $subtype = substr($label, strpos($label, '/') + 1);
-        foreach($extensions as $extension){
-            if((string)$extension === $subtype){ return (string)$extension; }
-        }
-        return (string)$extensions[0];
+        return $extension;
     }
 
     /** local, or iiif/iiif_image for a local IIIF manifest or image information (JSON). */

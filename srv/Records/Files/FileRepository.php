@@ -22,6 +22,7 @@ declare(strict_types=1);
 namespace Heurist\Records\Files;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
 use WeakMap;
 
 /** Uploaded file reads. */
@@ -171,6 +172,27 @@ final class FileRepository
             }
         }
         return $this->mimeTypes;
+    }
+
+    /**
+     * Extensions that may be uploaded or registered (2026-10-27): those of mimeTypes() that are also a
+     * term of the file type vocabulary 2-533 (TRM_FILE_EXT, codes = extensions). A database whose
+     * vocabulary has no extension terms yet (MIME type labels) allows all of mimeTypes().
+     *
+     * @return array<string,string> lower-case extension => MIME type
+     */
+    public function allowedTypes(DefinitionLookup $definitions): array
+    {
+        $vocabulary = $definitions->constant('TRM_FILE_EXT');
+        if($vocabulary < 1){ return $this->mimeTypes(); }
+        $extensions = array();
+        foreach($definitions->terms($definitions->termDescendants(array($vocabulary))) as $term){
+            $code = strtolower(trim((string)($term['code'] ?? '')));
+            // an extension term: label = code; a MIME type term of the older vocabulary has a "/" label
+            if($code !== '' && strtolower(trim((string)$term['term'])) === $code){ $extensions[$code] = true; }
+        }
+        if(empty($extensions)){ return $this->mimeTypes(); }
+        return array_intersect_key($this->mimeTypes(), $extensions);
     }
 
     /** Rows of files() by one key column, in the order of the keys. */

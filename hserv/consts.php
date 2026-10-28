@@ -498,7 +498,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_FILTER_FORM' => array(2, 1165), // QuerySource Filter Form layout JSON
     'DT_TIMELINE_FIELDS' => array(2, 1105),
     
-    'DT_MIME_TYPE' => array(2, 29),
+    'DT_FILE_EXT' => array(2, 29), // File type: extension term of 2-533; 2-41 and 2-64 merged into it (2026-10-27)
     'DT_IMAGE_TYPE' => array(2, 30),
     'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2, 31),
     'DT_MINIMUM_ZOOM_LEVEL' => array(2, 32), //in basemap zoom levels (0-20)
@@ -534,7 +534,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
 
     //xslt not used
     'DT_FILTER_STRING' => array(2, 40),
-    'DT_FILE_TYPE' => array(2, 41),
     'DT_ANNOTATION_RESOURCE' => array(2, 42),
     'DT_ANNOTATION_RANGE' => array(2, 43),
     'DT_START_WORD' => array(2, 44),
@@ -554,7 +553,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     //xslt not used
     'DT_FILE_NAME' => array(2, 62),
     'DT_FILE_FOLDER' => array(2, 63),
-    'DT_FILE_EXT' => array(2, 64),
     'DT_FILE_DEVICE' => array(2, 65),
     'DT_FILE_DURATION' => array(2, 66),
     'DT_FILE_SIZE' => array(2, 67),

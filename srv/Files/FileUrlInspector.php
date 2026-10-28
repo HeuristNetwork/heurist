@@ -48,8 +48,9 @@ final class FileUrlInspector
     /**
      * Registered file type and extension of a URL.
      *
-     * @return array{url:string,source:string,ext:string,name:string} source: external, iiif or iiif_image;
-     *         name: the legacy ulf_OrigFileName of remote files (_remote, _iiif, _iiif_image).
+     * @return array{url:string,source:string,ext:string,name:string,guessed:bool} source: external, iiif or
+     *         iiif_image; name: the legacy ulf_OrigFileName of remote files (_remote, _iiif, _iiif_image);
+     *         guessed: neither the address nor the server gave a known file type (ext is bin, 2026-10-27).
      */
     public function inspect(string $url): array
     {
@@ -86,7 +87,8 @@ final class FileUrlInspector
                 return $this->result($url, 'external', in_array($subtype, $byType, true) ? $subtype : (string)$byType[0]);
             }
         }
-        return $this->result($url, 'external', isset($this->mimeTypes[$ext]) ? $ext : $this->known('bin'));
+        if(isset($this->mimeTypes[$ext])){ return $this->result($url, 'external', $ext); }
+        return array('guessed' => true) + $this->result($url, 'external', $this->known('bin'));
     }
 
     /**
@@ -134,7 +136,7 @@ final class FileUrlInspector
     private function result(string $url, string $source, string $ext): array
     {
         $names = array('external' => '_remote', 'iiif' => '_iiif', 'iiif_image' => '_iiif_image');
-        return array('url' => $url, 'source' => $source, 'ext' => $ext, 'name' => $names[$source]);
+        return array('url' => $url, 'source' => $source, 'ext' => $ext, 'name' => $names[$source], 'guessed' => false);
     }
 
     /** The extension when this database knows it, else bin (or the first known extension). */

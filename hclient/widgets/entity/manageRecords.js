@@ -4516,7 +4516,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 const url =  window.hWin.HAPI4.baseURL + '`mbtiles`.php?/' + window.hWin.HAPI4.database + '/ulf_'+ulf_ID;
                                 this._editing.setFieldValueByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'], url);
                                 this._editing.setFieldValueByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_LAYER_SCHEMA'], 'zoomify'); //2-550
-                                this._editing.setFieldValueByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE'], 'image/png'); //2-540
+                                this._editing.setFieldValueByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_EXT'], 'png'); //2-540 (file type = extension, 2026-10-27)
                             }
                       }
                       
@@ -4526,12 +4526,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                       const val = changed_element.getValues();
                       if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty(val[0])){
                           
-                            let mimetype = val[0]['ulf_MimeExt'];
-                            if(mimetype=='image/jpg'){ mimetype='image/jpeg'; }
-                            let ele = this._editing.getInputs( window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE'] );
+                            // the file type terms are extensions, as ulf_MimeExt (2026-10-27)
+                            let extension = String(val[0]['ulf_MimeExt'] || '').toLowerCase();
+                            let ele = this._editing.getInputs( window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_EXT'] );
                             if(ele.length>0){
                                 ele = $(ele[0]);
-                                let idx = ele.find('option:contains("'+mimetype+'")').index();
+                                let idx = ele.find('option').filter(function(){ return $(this).text().trim().toLowerCase()==extension; }).index();
                                 ele[0].selectedIndex = idx;
                                 if( ele.hSelect('instance')!==undefined) ele.hSelect('refresh');
                             }

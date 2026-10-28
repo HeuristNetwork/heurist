@@ -822,7 +822,11 @@ XML;
                     }
                     $key = $fieldhelper_to_heurist_map['extension'];
                     if($key>0){
-                        $details["t:".$key] = array("1"=>$flleinfo['extension']);
+                        // DT_FILE_EXT (2-29) is the file type term of the extension (2026-10-27; was 2-64 text)
+                        $ext_term = \hserv\entity\DbRecUploadedFiles::extensionTermId($system, $key, @$flleinfo['extension']);
+                        if($ext_term>0){
+                            $details["t:".$key] = array("1"=>$ext_term);
+                        }
                     }
                     $key = $fieldhelper_to_heurist_map['filesize'];
                     if($key>0){

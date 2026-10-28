@@ -257,7 +257,7 @@ class MapPresentationService
                 $mbtiles = !preg_match('~^(?:[a-z][a-z0-9+.-]*:|//)~i', $url)
                     && strtolower(pathinfo($url, PATHINFO_EXTENSION)) === 'mbtiles';
                 if($mbtiles){
-                    $trmId = intval($this->layers->value($record, 'DT_MIME_TYPE'));
+                    $trmId = intval($this->layers->value($record, 'DT_FILE_EXT'));
                     $extension = $trmId > 0 ? $this->terms->getTermCode($trmId) : null;
                     $extension = $extension ?: 'png';
                     $tileset = substr($url, 0, -strlen('.mbtiles'));
@@ -269,7 +269,7 @@ class MapPresentationService
                 if(!(strpos($url,'{q}')>0 || strpos($url,'{z}/{x}/{y}')>0)){
                     $url = rtrim($url,'/') . '/{z}/{x}/{y}.'.$fileinfo['ulf_MimeExt'];
                     /*
-                    $mimeType = intval($this->layers->value($record, 'DT_MIME_TYPE'));
+                    $mimeType = intval($this->layers->value($record, 'DT_FILE_EXT'));
                     if($mimeType>0){
                         $mimeType = $this->definitions->term($mimeType)['conceptid'] ?? null;
                         $extension = ($mimeType == '2-540')? 'png' :($mimeType == '2-537'?'jpg':'gif');

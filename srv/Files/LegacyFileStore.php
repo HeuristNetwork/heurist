@@ -180,6 +180,10 @@ final class LegacyFileStore implements FileStoreInterface
                 $record['rec_NonOwnerVisibilityGroups'] = array();
                 $record['rec_FlagTemporary'] = '0';
             }
+            if(!empty($selection['all'])){
+                // derived from the file type (extension), for players and inserted media (2026-10-27)
+                $record['fxm_MimeType'] = $this->mapping->mimeTypeOfExtension((string)($row['ulf_MimeExt'] ?? ''));
+            }
             if($wantsDetails){
                 $record['details'] = array();
                 foreach($mapped['details'] as $fieldId => $values){

@@ -27,6 +27,9 @@ use RuntimeException;
 /** Disk operations of the file store. */
 final class FileStorage
 {
+    /** Image types of tiles: only these entries of a tile stack zip are extracted (2026-10-27). */
+    public const TILE_IMAGE_EXTENSIONS = array('png', 'jpg', 'jpeg', 'gif', 'webp');
+
     private FilePaths $paths;
 
     public function __construct(FilePaths $paths)
@@ -171,30 +174,48 @@ final class FileStorage
         }
     }
 
-    /** Extract a zip, refusing entries that would leave the folder. */
+    /**
+     * Extract the tile images of a zip, refusing entries that would leave the folder. Other files
+     * (scripts, .htaccess, the html / xml pages of gdal2tiles) are not extracted: the folder is in
+     * the file store, which the web server may serve (2026-10-27).
+     */
     private function extract(string $zipPath, string $folder): void
     {
         if(!class_exists('ZipArchive')){ throw new RuntimeException('Zip files cannot be read on this server'); }
         $zip = new \ZipArchive();
         if($zip->open($zipPath) !== true){ throw new RuntimeException('The zip file cannot be read'); }
-        $this->ensureFolder($folder);
+        $images = array();
         for($index = 0; $index < $zip->numFiles; $index++){
-            $entry = str_replace('\\', '/', (string)$zip->getNameIndex($index));
+            $name = (string)$zip->getNameIndex($index);
+            $entry = str_replace('\\', '/', $name);
             if($entry === '' || $entry[0] === '/' || preg_match('#(^|/)\.\.(/|$)#', $entry) || preg_match('/^[A-Za-z]:/', $entry)){
                 $zip->close();
                 throw new RuntimeException('The zip file has an invalid entry: '.$entry);
             }
+            if(self::isTileImage($entry)){ $images[] = $name; }
         }
-        $done = $zip->extractTo($folder);
+        if(empty($images)){
+            $zip->close();
+            throw new RuntimeException('The zip file has no tile images ('.implode(', ', self::TILE_IMAGE_EXTENSIONS).')');
+        }
+        $this->ensureFolder($folder);
+        $done = $zip->extractTo($folder, $images);
         $zip->close();
         if(!$done){ throw new RuntimeException('The zip file cannot be extracted'); }
+    }
+
+    /** Whether a zip entry is a tile image: a file of TILE_IMAGE_EXTENSIONS, not of the upload stop list. */
+    public static function isTileImage(string $entry): bool
+    {
+        if($entry === '' || substr($entry, -1) === '/' || preg_match(Upload\ChunkedUpload::DENIED, $entry)){ return false; }
+        return in_array(strtolower(pathinfo($entry, PATHINFO_EXTENSION)), self::TILE_IMAGE_EXTENSIONS, true);
     }
 
     private function firstImage(string $folder): ?string
     {
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($folder, \FilesystemIterator::SKIP_DOTS));
         foreach($files as $file){
-            if(in_array(strtolower($file->getExtension()), array('png', 'jpg', 'jpeg', 'gif', 'webp'), true)){
+            if(in_array(strtolower($file->getExtension()), self::TILE_IMAGE_EXTENSIONS, true)){
                 return str_replace('\\', '/', $file->getPathname());
             }
         }

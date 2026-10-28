@@ -326,12 +326,14 @@ final class ServiceFactory
         $rows = $recordStore ? new RecordFileRows($this->database, $mapping) : new LegacyFileRows($this->database);
         $storage = new FileStorage($paths);
         $quota = $this->fileEnvironment['quota'] ?? null;
-        $uploads = new ChunkedUpload($paths->uploadSessions(), $this->runtime->userId, $files->mimeTypes(),
+        // uploads and registrations: extensions of the file type vocabulary only (2026-10-27)
+        $allowed = $files->allowedTypes($definitions);
+        $uploads = new ChunkedUpload($paths->uploadSessions(), $this->runtime->userId, $allowed,
             $quota === null ? null : static function() use ($quota, $storage): array {
                 return array($quota(), $storage->usage());
             }, self::iniBytes((string)ini_get('post_max_size')));
-        $writer = new FileWriteService($rows, $mapping, $storage, $uploads, new FileUrlInspector($files->mimeTypes(), $fetch),
-            RecordRepository::shared($this->database), $definitions, $this->runtime, $files->mimeTypes());
+        $writer = new FileWriteService($rows, $mapping, $storage, $uploads, new FileUrlInspector($allowed, $fetch),
+            RecordRepository::shared($this->database), $definitions, $this->runtime, $allowed);
         return new FileController($store, $this->runtime, $writer, new FileContent($rows, $storage, $this->runtime));
     }
 

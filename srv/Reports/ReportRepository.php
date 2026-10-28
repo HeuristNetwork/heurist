@@ -275,7 +275,7 @@ final class ReportRepository
             'name' => $this->codes->id('DT_NAME'),
             'source' => $this->codes->id('DT_DATA_SOURCE'),
             'file' => $this->codes->id('DT_FILE_NAME'),
-            'mime' => $this->codes->id('DT_MIME_TYPE'),
+            'mime' => $this->codes->id('DT_FILE_EXT'),
             'interval' => $this->codes->id('DT_INTERVAL_MINUTES')
         );
         $details = $this->loadDetails($ids, array_values($fields));
