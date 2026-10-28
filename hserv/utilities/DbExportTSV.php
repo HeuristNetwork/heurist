@@ -33,8 +33,8 @@ class DbExportTSV {
     private ?string $backupTablesFolder;
     private ?string $backupRecordsFolder;
 
-    private ?string $recordsFilenameTemplate = '{ConceptCode}_{RTYID}_{RTYNAME}';
-    private ?array $recordsFilenamePlaceholders = ['{ConceptCode}', '{RTYID}', '{RTYNAME}'];
+    private string $recordsFilenameTemplate = '{ConceptCode}_{RTYID}_{RTYNAME}';
+    private array $recordsFilenamePlaceholders = ['{ConceptCode}', '{RTYID}', '{RTYNAME}'];
 
     private array $warnings = [];
     private array $fileOutput = [];
@@ -265,7 +265,7 @@ class DbExportTSV {
 
                 $this->warnings[] = "<span style='color: red;margin-left: 5px;'>$msg</span><br>";
             }else{
-                $this->fileOutput['records'][] = "{$recordDirectory}{$filename}.tsv";
+                $this->fileOutput['records'][$rty_ID] = "{$recordDirectory}{$filename}.tsv";
             }
         }//for
     }
