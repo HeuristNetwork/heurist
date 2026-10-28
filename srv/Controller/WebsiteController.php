@@ -150,6 +150,11 @@ final class WebsiteController
             self::allow($method, 'POST');
             return $this->edit()->publishModule($body);
         }
+        if($first === 'pages'){
+            // standalone pages of a module that the user may update (plan 29); only standalone ones
+            self::allow($method, 'GET');
+            return $this->edit()->pages((string)($params['module'] ?? ''));
+        }
         if(!ctype_digit($first)){ throw new WebsiteException(404, 'Unknown website request'); }
         $id = intval($first);
         $action = (string)($path[1] ?? '');

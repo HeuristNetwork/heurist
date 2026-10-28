@@ -55,7 +55,7 @@ final class WebsiteService
      * @param int $id Website or standalone page.
      * @param int $pageId Page of the website (0: home content).
      * @param string $language Requested language (?lang=, 2 or 3 letters).
-     * @return array{site:?array,page:array,home:bool,menu:array,pages:array,language:?string,
+     * @return array{site:?array,page:array,home:bool,menu:array,pages:array,language:?string,requestedLanguage:?string,
      *         languages:array<int,string>,siteConfig:array,pageConfig:array,siteTexts:array,
      *         pageTexts:array,issues:array}
      * @throws WebsiteException
@@ -103,6 +103,9 @@ final class WebsiteService
         $available = $site !== null ? $this->siteLanguages($site, $codes['languages']) : array_map('strtoupper', array_keys($pageTexts));
         $requested = $this->languages->code3($language);
         $current = $requested !== null && in_array($requested, $available, true) ? $requested : ($available[0] ?? null);
+        // interface language of the modules: a standalone page takes any language asked in the URL
+        // (its texts stay in the first language), a website only one of its languages
+        $requested = $requested !== null && ($site === null || in_array($requested, $available, true)) ? $requested : null;
 
         $parts = array(WebsiteRepository::value($page, $codes['content']));
         if($site !== null){
@@ -125,6 +128,7 @@ final class WebsiteService
             'menu' => $menu['tree'],
             'pages' => $menu['pages'],
             'language' => $current,
+            'requestedLanguage' => $requested,
             'languages' => $available,
             'siteConfig' => $siteParsed !== null ? $siteParsed['config'] : null,
             'pageConfig' => $pageParsed['config'],

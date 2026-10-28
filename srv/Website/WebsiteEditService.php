@@ -131,6 +131,45 @@ final class WebsiteEditService
     }
 
     /**
+     * The standalone v4 pages the user may change that hold an instance of a module (plan 29:
+     * *Update the page* of the publication form), newest first.
+     *
+     * @param string $module Module type (CmsValidator::TYPES['module']).
+     * @return array{pages:array<int,array{id:int,title:string,url:string,modified:string}>}
+     * @throws WebsiteException 400 for an unknown module type.
+     */
+    public function pages(string $module): array
+    {
+        $type = strtolower(trim($module));
+        if(!in_array($type, CmsValidator::TYPES['module'], true)){
+            throw new WebsiteException(400, 'Unknown module type "'.$type.'"');
+        }
+        $codes = $this->repository->codes();
+        $pages = array();
+        foreach($this->repository->standalonePages() as $id => $record){
+            if(WebsiteRepository::value($record, $codes['version']) !== WebsiteService::VERSION || !$this->canEdit($id)){
+                continue;
+            }
+            $parsed = CmsValidator::parse(WebsiteRepository::value($record, $codes['configuration']));
+            $instances = is_array($parsed['config']['instances'] ?? null) ? $parsed['config']['instances'] : array();
+            $holds = false;
+            foreach($instances as $instance){
+                if(is_array($instance) && ($instance['kind'] ?? '') === 'module' && ($instance['type'] ?? '') === $type){
+                    $holds = true;
+                    break;
+                }
+            }
+            if(!$holds){ continue; }
+            $pages[] = array('id' => intval($id), 'title' => $this->name($record), 'url' => $this->urls->page(intval($id)),
+                'modified' => (string)($record['rec_Modified'] ?? ''));
+        }
+        usort($pages, static function(array $a, array $b): int {
+            return strcmp($b['modified'], $a['modified']) ?: $b['id'] <=> $a['id'];
+        });
+        return array('pages' => $pages);
+    }
+
+    /**
      * Create a v4 website: home record (header with a menu, home content, footer) and one
      * "About" page in its top menu.
      *
