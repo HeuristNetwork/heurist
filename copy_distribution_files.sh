@@ -93,15 +93,25 @@ mkdir ../heurist-build/$1
 
 cp -r * ../heurist-build/$1
 
-# remove any superfluous files - add others as appropriate
+# remove any superfluous files - only from the distribution staging directory
+# Installer/update scripts have already been copied separately to DISTRIBUTION.
+rm -f "../heurist-build/$1/"*.sh "../heurist-build/$1/"*.bat
 
-rm ../heurist-build/$1/copy_distribution_files.sh
-rm ../heurist-build/$1/update_heurist.sh
-rm ../heurist-build/$1/install_heurist.sh
-
-# Node/npm development dependencies are not part of the distribution package.
-# The generated bundle in hclient/bundles is included, but node_modules is not.
-rm -rf ../heurist-build/$1/node_modules
+# Docker is a development stack, not needed by the standard PHP distribution.
+# Keep generated hclient/bundles, PHP vendor dependencies and Composer manifests.
+# Keep documentation/api and documentation/context_help: they are served at runtime.
+for item in \
+    docker docker-compose.yml Dockerfile .dockerignore \
+    node_modules package.json package-lock.json eslint.config.mjs \
+    jsdoc.json phpdoc.dist.xml scripts tests \
+    server_management/server_synchronisation \
+    documentation/development documentation/docker-dev-stack.md \
+    documentation/docker-compose-setup.md \
+    sync_code_repo.md sync_code_repo_h8-alpha.md \
+    .git .github .gitignore .gitattributes .idea .vscode .agents .codex .env
+do
+    rm -rf "../heurist-build/$1/$item"
+done
 
 # Now zip it all up as a tarball for distribution on the Heurist web site
 

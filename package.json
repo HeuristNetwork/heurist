@@ -5,7 +5,7 @@
   "main": "layout_default.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:js": "node scripts/build-terser.mjs"
+    "build:js": "node server_management/server_synchronisation/code_synchronisation/build-terser.mjs"
   },
   "repository": {
     "type": "git",
