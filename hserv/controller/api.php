@@ -662,6 +662,11 @@ if($method === 'search'){
         $allow_anonymous = true; // file content and thumbnails; FileContent refuses login-required files
     }
 }
+// GET /sys: a guest (a published Explorer page, plan 27b §11.3) reads only the saved filters of
+// group 4 "Website filters"; SystemQueryBuilder::appendAccess gives guests nothing else
+if($is_system_query && in_array($http_verb, array('GET','HEAD'), true)){
+    $allow_anonymous = true;
+}
 
 if(!$skip_auth_processing){
     $system = new hserv\System();
