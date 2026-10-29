@@ -178,11 +178,13 @@ class UArchive {
      * @param \hserv\System $system The Heurist system instance.
      * @param string $zipfile Path to the ZIP archive file.
      * @param string $destination Path to the destination directory for extraction.
+     * @param array|null $onlyExtensions Optional. Lower case file extensions to extract; other files are skipped
+     *                    (e.g. tile images only, so a script or .htaccess never reaches the file store).
      * @return int The number of files successfully extracted.
      * @throws \Exception If the archive file is not found, destination is invalid, archive contains unsecure entries,
      *                    or other extraction errors occur (e.g., max files/size/ratio exceeded, cannot create subfolder).
      */
-    public static function unzip($system, $zipfile, $destination){
+    public static function unzip($system, $zipfile, $destination, $onlyExtensions = null){
 
         if(!(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination))){
             throw new \Exception('Archive file not found');
@@ -236,8 +238,17 @@ class UArchive {
             $filename = $zip->getNameIndex($i);
             $stats = $zip->statIndex($i);
 
-            if (strpos($filename, '../') !== false || substr($filename, 0, 1) === '/') {
+            $entry = str_replace('\\', '/', $filename);
+            if (strpos($entry, '../') !== false || substr($entry, 0, 1) === '/' || preg_match('/^[A-Za-z]:/', $entry)) {
                 throw new \Exception('Archive contains unsecure entry '.$filename);
+            }
+
+            if (is_array($onlyExtensions)) {
+                //folders are created for extracted files only
+                if (substr($entry, -1) === '/'
+                    || !in_array(strtolower(pathinfo($entry, PATHINFO_EXTENSION)), $onlyExtensions, true)) {
+                    continue;
+                }
             }
 
             if (substr($filename, -1) !== '/') {

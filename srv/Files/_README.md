@@ -47,14 +47,19 @@ user; change and delete: the uploader or the database owner (legacy rule).
 - `Upload/ChunkedUpload` — uploads in `scratch/uploads/<token>`: chunks must continue at
   the received size (409 with `received`), the last chunk gives MD5, MIME type, an image
   thumbnail (`ImageThumbnail`, GD, EXIF orientation) and the files with the same MD5
-  (`duplicates`). Extensions of `defFileExtToMimetype` only, never scripts; disk quota.
+  (`duplicates`). Extensions of `FileRepository::allowedTypes()` only (in `defFileExtToMimetype`
+  and a term of vocabulary 2-533), never the stop list `ChunkedUpload::DENIED`; disk quota.
 - `FileStorage` — the disk part of legacy save/delete with the legacy names:
   `file_uploads/ulf_<id>_<name>`, `filethumbs/ulf_<key>.png`, key `sha1(id.rand)`, tiled
   stacks to `uploaded_tilestacks/<id>/` (zip) or `<name>.mbtiles`; delete removes the file,
-  thumbnail and cached copies. Only paths inside the database file store.
+  thumbnail and cached copies. Only paths inside the database file store. Of a tile stack zip
+  only the tile images (`TILE_IMAGE_EXTENSIONS`: png jpg jpeg gif webp, not of the stop list)
+  are extracted; scripts, `.htaccess` and the pages of gdal2tiles never reach the disk; a zip
+  without tile images is refused (2026-10-27; legacy `DbRecUploadedFiles` still unpacks all).
 - `FileUrlInspector` — external URLs: YouTube/Vimeo/SoundCloud, IIIF manifest and image
   service (canonical `info.json`), else the Content-Type of a HEAD request or the URL
-  extension. An already registered URL gives its file.
+  extension. An already registered URL gives its file. Without a known type the file type is
+  `bin` (`guessed`) and the save returns the warning `file_type`.
 - `FileContent` — content with ranges; external resources, tiled stacks and old absolute
   paths redirect (to the URL or the legacy `?file=`); a missing thumbnail redirects to
   the legacy `?thumb=`. Login-required files are refused to guests (every type).
@@ -62,11 +67,13 @@ user; change and delete: the uploader or the database owner (legacy rule).
   placed; the files of a deleted row are removed after the commit.
 - The file pair has its own permissions table (`filePermissions`): file ids and record
   ids overlap; `RecordSchema` cleans no user tables (reminders, tags...) for it.
-- MIME type 2-29 (plan 20 §10.11, 2026-10-23): set from the content for local files and
-  IIIF; the user may change it only for tiled images and external resources (detection is
-  not always right). The term must be a MIME type with an extension (`jpeg` for image/jpeg);
-  a group term of the vocabulary is refused. New content of a tile stack is placed as a tile
-  stack again (`placeTiles`), and a MIME type sent with it wins over its first image.
+- File type 2-29 (DT_FILE_EXT; plan 20 §10.11, 2026-10-23, extensions since 2026-10-27): set
+  from the content for local files and IIIF; the user may change it only for tiled images and
+  external resources (detection is not always right). The term's code is the extension that is
+  stored (`ulf_MimeExt`); a group of the vocabulary is refused. The MIME type is always derived
+  from the extension (`defFileExtToMimetype`: download, players, export, `fxm_MimeType` of
+  `fields=_all`). New content of a tile stack is placed as a tile stack again (`placeTiles`),
+  and a file type sent with it wins over its first image.
 
 ## Mapping
 
@@ -80,8 +87,8 @@ database is left out.
   loginrequired → viewable), `rec_Added`, `rec_Modified`, import and origin ids.
 - `rec_Title`: the caption, else the original name, else the URL.
 - Fields: original name 2-1185, caption DT_NAME, description, copyright,
-  copyright owner 2-1188, MIME type 2-29 (term of the extension, else of the
-  MIME type), size 2-67 in bytes (KB × 1024), MD5, registered file type 2-1186
+  copyright owner 2-1188, file type 2-29 (the term of the extension; a database with the
+  older vocabulary: its MIME type term), size 2-67 in bytes (KB × 1024), MD5, registered file type 2-1186
   (local, external, iiif, iiif_image, tiled), configuration 2-1187 (JSON);
   stored name 2-62 and folder 2-63 for database administrators only.
 
@@ -90,8 +97,8 @@ database is left out.
 `LegacyFileQueryBuilder` compiles the standard query (`RecordQueryParser`) to SQL on
 `{files}`: `ids`, `title` (and plain text), `url`, `added`, `modified`,
 `owner`/`addedby` (user ids or `current`), `f:<field>` of the mapped fields (`f` without a field = the title, plan 21) and
-`any`/`all`/`not`. MIME type values are term ids, extensions (`pdf`), MIME types
-(`image/jpeg`) or groups (`image/*`); size values are bytes. Sort names are those
+`any`/`all`/`not`. File type values are term ids (an extension, or a group: its extensions),
+extensions (`pdf`), MIME types (`image/jpeg`) or MIME groups (`image/*`); size values are bytes. Sort names are those
 of the records search (`id`, `title`, `added`, `modified`, `url`, `f:<field>`),
 default by id. Logged-in users see every file; guests (not routed now) only
 viewable ones.

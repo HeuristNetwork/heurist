@@ -157,12 +157,15 @@ final class PageRenderer
     {
         $baseUrl = $this->environment['baseUrl'];
         $site = $context['site'];
+        $requested = $context['requestedLanguage'] ?? null;
         return array(
             'database' => $this->environment['database'],
             'baseUrl' => $baseUrl,
             'apiBaseUrl' => $baseUrl.'api',
             'runtimeMode' => 'published',
-            'language' => strtolower((string)($context['language'] ?? 'eng')),
+            // ?lang= wins over the module's own language setting (plan 29, 2026-10-28)
+            'language' => strtolower((string)($requested ?? $context['language'] ?? 'eng')),
+            'languageRequested' => $requested !== null,
             'moduleBaseUrl' => $baseUrl.'hclient/bundles/',
             'frameUrl' => $this->environment['urls']->frame($site !== null ? intval($site['rec_ID']) : intval($context['page']['rec_ID']),
                 $site !== null && !$context['home'] ? intval($context['page']['rec_ID']) : 0)

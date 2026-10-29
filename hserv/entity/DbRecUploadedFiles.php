@@ -880,12 +880,19 @@ class DbRecUploadedFiles extends DbEntityBase
                         $dest = $tilestacks_dir.$ulf_ID.'/';
                         $warn = folderCreate2($dest, '');
 
-                        //unzip archive to HEURIST_TILESTACKS_DIR
+                        //unzip archive to HEURIST_TILESTACKS_DIR - tile images only: the folder is in
+                        //the file store, a script or .htaccess from the zip must never reach it (2026-10-28)
                         $unzip_error = null;
                         try{
-                            UArchive::unzip($this->system, $tmp_name, $dest);
+                            $cnt = UArchive::unzip($this->system, $tmp_name, $dest, array('png','jpg','jpeg','gif','webp'));
+                            if($cnt==0){
+                                $unzip_error = 'The zip file has no tile images (png, jpg, jpeg, gif, webp)';
+                            }
                         } catch (\Exception  $e) {
                             $unzip_error = $e->getMessage();
+                        }
+                        if($unzip_error!=null){
+                            folderDelete2($dest);
                         }
 
                         if($unzip_error==null){
@@ -2407,7 +2414,11 @@ class DbRecUploadedFiles extends DbEntityBase
                         $details[$dty_path] = $file_details['ulf_FilePath'];
                     }
                     if($dty_ext > 0 && !empty($file_details['ulf_MimeExt'])){
-                        $details[$dty_ext] = $file_details['ulf_MimeExt'];
+                        // DT_FILE_EXT (2-29) is the file type term of the extension (2026-10-27; was 2-64 text)
+                        $ext_term = self::extensionTermId($this->system, $dty_ext, $file_details['ulf_MimeExt']);
+                        if($ext_term > 0){
+                            $details[$dty_ext] = $ext_term;
+                        }
                     }
                     if($dty_size > 0 && !empty($file_details['ulf_FileSizeKB'])){
                         $details[$dty_size] = $file_details['ulf_FileSizeKB'];
@@ -3105,6 +3116,34 @@ class DbRecUploadedFiles extends DbEntityBase
         }
 
         return $results;
+    }
+
+    /**
+     * Term id of a file extension in the vocabulary of a file type field (DT_FILE_EXT, 2-29):
+     * the term whose code is the extension (2026-10-27).
+     *
+     * @param mixed $system Initialised legacy system.
+     * @param int $dtyId Field id.
+     * @param string $extension File extension.
+     * @return int Term id, 0 when the vocabulary has no term for the extension.
+     */
+    public static function extensionTermId($system, $dtyId, $extension){
+
+        static $terms = null;
+        static $vocabularies = array();
+
+        $dtyId = intval($dtyId);
+        if(!isset($vocabularies[$dtyId])){
+            $vocabularies[$dtyId] = intval(mysql__select_value($system->getMysqli(),
+                'SELECT dty_JsonTermIDTree FROM defDetailTypes WHERE dty_ID='.$dtyId));
+        }
+        if($vocabularies[$dtyId] < 1 || trim((string)$extension) === ''){
+            return 0;
+        }
+        if($terms === null){
+            $terms = new \DbsTerms($system, \dbs_GetTerms($system));
+        }
+        return intval($terms->getTermByCode($vocabularies[$dtyId], strtolower(trim((string)$extension))));
     }
 }
 ?>

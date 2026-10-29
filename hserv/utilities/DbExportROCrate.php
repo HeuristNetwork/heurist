@@ -69,7 +69,12 @@ class DbExportROCrate{
 
     private string $sqlFile = '';
     private string $hmlFile = '';
-    private array $tsvFiles = [];
+    private array $tsvFiles = [
+        'tables' => [],
+        'records' => []
+    ];
+
+    private array $databaseDetails = [];
 
     /**
      * Class constructor
@@ -103,7 +108,7 @@ class DbExportROCrate{
      */
     public function export(string $crateDirectory, array $options = []) : string{
 
-        $databaseDetails = $this->getDatabaseDetails();
+        $this->getDatabaseDetails();
         $databaseOwner = user_getDbOwner($this->mysqli);
         $ownerName = null;
 
@@ -111,11 +116,11 @@ class DbExportROCrate{
             $ownerName = $databaseOwner['ugr_FirstName'] && $databaseOwner['ugr_LastName'] ? "{$databaseOwner['ugr_FirstName']} {$databaseOwner['ugr_LastName']}" : null;
         }
 
-        $databaseName = $this->system->dbname() ?? $databaseDetails['sys_dbName'];
-        $description = $databaseDetails['sys_dbDescription'] ?? null;
-        $ownerName ??= $databaseDetails['sys_dbOwner'];
-        $license = $databaseDetails['sys_dbRights'] ?? null;
-        $creationDate = $databaseDetails['firstRecord'] ?? null;
+        $databaseName = $this->system->dbname() ?? $this->databaseDetails['sys_dbName'];
+        $description = $this->databaseDetails['sys_dbDescription'] ?? null;
+        $ownerName ??= $this->databaseDetails['sys_dbOwner'];
+        $license = $this->databaseDetails['sys_dbRights'] ?? null;
+        $creationDate = $this->databaseDetails['firstRecord'] ?? null;
 
         $creator = [
             'name' => $ownerName,
@@ -149,7 +154,11 @@ class DbExportROCrate{
         }
 
         $this->sqlFile = '';
-        $this->tsvFiles = [];
+        $this->hmlFile = '';
+        $this->tsvFiles = [
+            'tables' => [],
+            'records' => []
+        ];
 
         // Export database content as TSV
         if($options['tsvFiles']){
@@ -166,8 +175,6 @@ class DbExportROCrate{
                 $warnings = implode('<br>', $warnings);
                 throw new RuntimeException("Encountered the following errors during TSV exporting:<br>{$warnings}");
             }
-
-            $this->tsvFiles = array_merge($this->tsvFiles['tables'], $this->tsvFiles['records']);
         }
 
         // Export HML dump
@@ -352,11 +359,45 @@ class DbExportROCrate{
         $databaseEntity = [
             '@id' => '#database',
             '@type' => 'Dataset',
+            'id' => $this->databaseDetails['sys_dbRegisteredID'] ?? 0,
             'name' => $databaseName
         ];
 
-        foreach($this->tsvFiles as $relativePath){
+        // TSV Files
+        // Records
+        foreach($this->tsvFiles['records'] as $rtyID => $relativePath){
 
+            if(strpos($relativePath, 'records' . DIRECTORY_SEPARATOR) === false){
+                $relativePath = 'records' . DIRECTORY_SEPARATOR . ltrim($relativePath, DIRECTORY_SEPARATOR);
+            }
+            if(strpos($relativePath, 'database' . DIRECTORY_SEPARATOR) === false){
+                $relativePath = DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . ltrim($relativePath, DIRECTORY_SEPARATOR);
+            }
+            $absolutePath = "{$this->crateDirectory}{$relativePath}";
+
+            $entity = [
+                '@id' => $relativePath,
+                '@type' => 'File',
+                'name' => pathinfo($absolutePath, PATHINFO_FILENAME),
+                'encodingFormat' => 'text/tab-separated-values',
+                'contentSize' => filesize($absolutePath),
+                'sha256' => hash_file('sha256', $absolutePath)
+            ];
+
+            $this->retrieveRecTypeDetails($rtyID, $entity);
+
+            $graph[] = $entity;
+            $dataset['hasPart'][] = [
+                '@id' => $relativePath
+            ];
+        }
+
+        // Other Tables
+        foreach($this->tsvFiles['tables'] as $relativePath){
+
+            if(strpos($relativePath, 'tables' . DIRECTORY_SEPARATOR) === false){
+                $relativePath = 'tables' . DIRECTORY_SEPARATOR . ltrim($relativePath, DIRECTORY_SEPARATOR);
+            }
             if(strpos($relativePath, 'database' . DIRECTORY_SEPARATOR) === false){
                 $relativePath = DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . ltrim($relativePath, DIRECTORY_SEPARATOR);
             }
@@ -469,9 +510,8 @@ class DbExportROCrate{
      * @param ?string $databaseName
      * @throws InvalidArgumentException If the database name is invalid
      * @throws RuntimeException If sysIdentification cannot be queried
-     * @return array Database system information from sysIdentification
      */
-    private function getDatabaseDetails(?string $databaseName = null) : array{
+    private function getDatabaseDetails(?string $databaseName = null){
 
         if(!empty($databaseName) && !preg_match(REGEX_ALPHANUM, $databaseName)){
             throw new InvalidArgumentException('Provided database name is invalid.');
@@ -490,7 +530,7 @@ class DbExportROCrate{
             $sysInfoRow['firstRecord'] = $firstRecordDate ? $firstRecordDate->format('Y-m-d') : null;
         }
 
-        return $sysInfoRow;
+        $this->databaseDetails = $sysInfoRow;
     }
 
     /**
@@ -515,6 +555,8 @@ class DbExportROCrate{
             foreach($tsvFiles['tables'] as $file){
 
                 $file = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $file), DIRECTORY_SEPARATOR);
+                $fileParts = explode(DIRECTORY_SEPARATOR, $file);
+                $file = array_pop($fileParts);
 
                 $fullPath = $tsvTablesDir . DIRECTORY_SEPARATOR . $file;
                 if(file_exists($fullPath) && fileCopy($fullPath, $tablesDirectory . DIRECTORY_SEPARATOR . $file)){
@@ -529,13 +571,15 @@ class DbExportROCrate{
                 throw new RuntimeException('Failed to create tables sub-directory within crate.');
             }
 
-            foreach($tsvFiles['tables'] as $file){
+            foreach($tsvFiles['records'] as $rtyID => $file){
 
                 $file = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $file), DIRECTORY_SEPARATOR);
+                $fileParts = explode(DIRECTORY_SEPARATOR, $file);
+                $file = $tsvRecordsDir === '' ? $file : array_pop($fileParts);
 
                 $fullPath = $tsvRecordsDir . DIRECTORY_SEPARATOR . $file;
                 if(file_exists($fullPath) && fileCopy($fullPath, $recordsDirectory . DIRECTORY_SEPARATOR . $file)){
-                    $this->tsvFiles['records'][] = $file;
+                    $this->tsvFiles['records'][$rtyID] = $file;
                 }
             }
         }
@@ -709,6 +753,40 @@ class DbExportROCrate{
             ];
         }
 
+        $results->free();
+
         return $users;
+    }
+
+    /**
+     * Get record type details and add to entity array
+     *
+     * @param int $rtyID
+     * @param array $entity
+     */
+    private function retrieveRecTypeDetails($rtyID, &$entity){
+
+        if(!isPositiveInt($rtyID)){
+            return;
+        }
+
+        $recTypeQuery = "SELECT rty_Description, rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes WHERE rty_ID = {$rtyID}";
+        $results = $this->mysqli->query($recTypeQuery);
+
+        if(!$results){
+            return;
+        }
+
+        $row = $results->fetch_assoc();
+        $dbID = $this->databaseDetails['sys_dbRegisteredID'] ?? 0;
+
+        $entity['Local-ID'] = $rtyID;
+        $entity['description'] = $row['rty_Description'];
+
+        $row['rty_OriginatingDBID'] ??= $dbID;
+        $row['rty_IDInOriginatingDB'] ??= $rtyID;
+        $entity['Concept-ID'] = "{$row['rty_OriginatingDBID']}-{$row['rty_IDInOriginatingDB']}";
+
+        $results->free();
     }
 }

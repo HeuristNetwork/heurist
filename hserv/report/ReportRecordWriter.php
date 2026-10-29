@@ -402,7 +402,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
     }
 
     /**
-     * Term id for an output format in the vocabulary of DT_MIME_TYPE (by MIME type or extension).
+     * Term id for an output format in the vocabulary of DT_FILE_EXT (by extension, or MIME type of the older vocabulary).
      */
     private function mimeTermId(string $format): int
     {

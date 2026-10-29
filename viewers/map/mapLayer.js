@@ -240,7 +240,7 @@ function HMapLayer( _options ) {
         if(!window.hWin.HEURIST4.util.isempty(layer_url)) {
 
             let tilingSchema = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_LAYER_SCHEMA']);
-            let mimeType = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE']);
+            let mimeType = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_EXT']);
             //in basemap zoom levels (1-19)
             let minZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM_LEVEL']); 
             let maxZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM_LEVEL']);
@@ -249,7 +249,10 @@ function HMapLayer( _options ) {
             
             let ccode1 = $Db.getConceptID('trm', tilingSchema);
             let ccode2 = $Db.getConceptID('trm', mimeType);
-            let ext = (ccode2 == '2-540'? ".png" : (ccode2 == '2-537'?'.jpg':".gif"));
+            // the file type term's code is the tile extension (2026-10-27); older terms by concept code
+            let tileCode = mimeType > 0 ? String($Db.trm(mimeType, 'trm_Code') || '').toLowerCase() : '';
+            let ext = ['png', 'jpg', 'jpeg', 'gif', 'webp'].indexOf(tileCode) >= 0 ? '.'+tileCode
+                : (ccode2 == '2-540'? ".png" : (ccode2 == '2-537'?'.jpg':".gif"));
 
             let layer_options = {minZoom:minZoom , maxZoom:maxZoom, extension:ext};
             

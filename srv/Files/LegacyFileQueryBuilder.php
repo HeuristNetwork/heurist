@@ -202,7 +202,7 @@ final class LegacyFileQueryBuilder
         if($convert === 'size'){
             return $this->values->numericCondition('('.$column.'*1024)', $value, $state);
         }
-        if($convert === 'mime' || $convert === 'term'){
+        if($convert === 'ext' || $convert === 'term'){
             $items = is_array($value) ? $value : preg_split('/\s*,\s*/', trim((string)$value));
             $negate = false;
             $legacy = array();
