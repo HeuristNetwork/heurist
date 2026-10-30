@@ -110,6 +110,8 @@ class ExportRecordsRDF extends ExportRecords {
      */
     private $include_resource_file_info = true;
 
+    private $namespaces = [];
+
     /**
      * Prepares for RDF export.
      *

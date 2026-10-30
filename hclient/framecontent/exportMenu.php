@@ -210,6 +210,15 @@ require_once 'initPage.php';
                 title="Generate one HTML file per PUBLIC record (for record view)">
                 Record data HTML pages for public records (file-per-record)</a>
         </div>
+
+        <div id="menu-export-rocrate" class="export-item">
+            <button class="export-button">RO-Crate</button>
+            <a href="#" oncontextmenu="return false;"
+                data-logaction="exp_ROCrate"
+                data-action="menu-export-rocrate"
+                title="Generate an RO-Crate for the search results">
+                RO-Crate</a>
+        </div>
         
         <div class="heurist-prompt" style="padding:6px">
             Allow popup window in your browser preferences
