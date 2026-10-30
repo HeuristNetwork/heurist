@@ -1,19 +1,18 @@
 <?php
 /**
-* WebsiteEditService.php - Website manager operations (plan 27b §5)
+* WebsiteEditService.php - Website operations behind the entities "website" and "page" (plans 27b, 27d)
 *
-* Used by the Website manager of heurist-explorer (apps/website) through
-* /api/{db}/website, later also by the AI agent API (plan 27, phase 7):
-* - status(): are the fields of the format installed (setup needed)?
-* - summary(): website or page with its version, URL, languages and menu tree;
-* - create(): a new v4 website (WebsiteStarter) with one "About" page;
-* - publishModule(): a module or Explorer as a standalone page (module Publish);
-* - addToMenu() / removeFromMenu(): a page into or out of a website menu;
-* - delete(): a standalone page, or a website with the menu pages no other
-*   record points to.
+* Used by WebsiteEntityHandler (hooks and actions of /api/{db}/website and /page, plan 27d)
+* and by the build job:
+* - status(): are the fields of the format installed (setup needed)? With the local ids;
+* - summary(): website or page with its version, URL, languages and menu tree (meta.website);
+* - starterBody() / addStarterPage(): defaults of a new v4 website and its "About" page;
+* - importModule(): a module or Explorer as a standalone page (module Publish);
+* - assign() / removeFromMenu(): a page into, inside or out of a website menu;
+* - shareAccess(): owner and visibility of a website passed on to its menu pages;
+* - deletablePages() / deletePages(): menu pages deleted with a website.
 * Records are written with RecordSaveService / RecordDeleteService (checks,
-* rights, titles), never by SQL. Every save is its own transaction: when a
-* later save of create() fails, the records written before are deleted.
+* rights, titles), never by SQL. Every save is its own transaction.
 *
 * @project     Heurist academic knowledge management system
 * @package     Website
@@ -38,7 +37,7 @@ use Heurist\Runtime\RuntimeContext;
 use Heurist\Utilities\LanguageCodes;
 use Throwable;
 
-/** Create, inspect, link into menus and delete v4 websites and pages. */
+/** Defaults, menus, access and deletion of v4 websites and pages. */
 final class WebsiteEditService
 {
     private WebsiteRepository $repository;
@@ -69,9 +68,10 @@ final class WebsiteEditService
 
     /**
      * Whether the definitions of the format are in place (fields in the structures of
-     * 99-51 / 99-52, the logo of a website optional).
+     * 99-51 / 99-52, the logo of a website optional), and the local ids of the record types,
+     * fields and terms the entities use (WebsiteRepository::CONCEPTS names).
      *
-     * @return array{installed:bool,missing:array<int,string>,canSetup:bool}
+     * @return array{installed:bool,missing:array<int,string>,canSetup:bool,codes:array<string,int>}
      */
     public function status(): array
     {
@@ -89,11 +89,22 @@ final class WebsiteEditService
                 $missing[] = 'optional logo 2-38 in 99-51';
             }
         }
-        return array('installed' => empty($missing), 'missing' => $missing, 'canSetup' => $this->runtime->isAdmin);
+        return array('installed' => empty($missing), 'missing' => $missing, 'canSetup' => $this->runtime->isAdmin,
+            'codes' => $codes);
     }
 
     /**
-     * A website or page for the manager.
+     * Local ids of the record types, fields and terms of websites (WebsiteRepository::CONCEPTS names).
+     *
+     * @return array<string,int>
+     */
+    public function codes(): array
+    {
+        return $this->repository->codes();
+    }
+
+    /**
+     * A website or page for the manager (meta.website of GET /website/{id} and /page/{id}).
      *
      * @return array{id:int,kind:string,version:string,v4:bool,title:string,languages:array<int,string>,url:string,
      *         canEdit:bool,pages:array<int,array>}
@@ -131,109 +142,104 @@ final class WebsiteEditService
     }
 
     /**
-     * The standalone v4 pages the user may change that hold an instance of a module (plan 29:
-     * *Update the page* of the publication form), newest first.
+     * The body of POST /website/0 with the defaults of a new v4 website: version 4, header with
+     * a menu, home content, footer, configuration (WebsiteStarter) and public visibility. Values
+     * given in the body are kept. Language codes ("eng") in the language field become its terms.
      *
-     * @param string $module Module type (CmsValidator::TYPES['module']).
-     * @return array{pages:array<int,array{id:int,title:string,url:string,modified:string}>}
-     * @throws WebsiteException 400 for an unknown module type.
+     * @param array $body Record object (title in DT_NAME required).
+     * @return array The body to save.
+     * @throws WebsiteException 400 without a title or with an unknown language, 409 without the definitions.
      */
-    public function pages(string $module): array
-    {
-        $type = strtolower(trim($module));
-        if(!in_array($type, CmsValidator::TYPES['module'], true)){
-            throw new WebsiteException(400, 'Unknown module type "'.$type.'"');
-        }
-        $codes = $this->repository->codes();
-        $pages = array();
-        foreach($this->repository->standalonePages() as $id => $record){
-            if(WebsiteRepository::value($record, $codes['version']) !== WebsiteService::VERSION || !$this->canEdit($id)){
-                continue;
-            }
-            $parsed = CmsValidator::parse(WebsiteRepository::value($record, $codes['configuration']));
-            $instances = is_array($parsed['config']['instances'] ?? null) ? $parsed['config']['instances'] : array();
-            $holds = false;
-            foreach($instances as $instance){
-                if(is_array($instance) && ($instance['kind'] ?? '') === 'module' && ($instance['type'] ?? '') === $type){
-                    $holds = true;
-                    break;
-                }
-            }
-            if(!$holds){ continue; }
-            $pages[] = array('id' => intval($id), 'title' => $this->name($record), 'url' => $this->urls->page(intval($id)),
-                'modified' => (string)($record['rec_Modified'] ?? ''));
-        }
-        usort($pages, static function(array $a, array $b): int {
-            return strcmp($b['modified'], $a['modified']) ?: $b['id'] <=> $a['id'];
-        });
-        return array('pages' => $pages);
-    }
-
-    /**
-     * Create a v4 website: home record (header with a menu, home content, footer) and one
-     * "About" page in its top menu.
-     *
-     * @param array $input title (required), languages (3-letter codes, the first is the default).
-     * @return array{id:int,pageIds:array<int,int>,url:string,issues:array}
-     * @throws WebsiteException|RecordEditException
-     */
-    public function create(array $input): array
+    public function starterBody(array $body): array
     {
         $codes = $this->repository->codes();
-        $title = trim((string)($input['title'] ?? ''));
-        if($title === ''){ throw new WebsiteException(400, 'The website needs a title'); }
         if(!$this->status()['installed']){
             throw new WebsiteException(409, 'The website definitions are not installed in this database');
         }
-        $languageTerms = $this->languageTerms(is_array($input['languages'] ?? null) ? $input['languages'] : array());
-
-        $starter = WebsiteStarter::page();
-        $created = array();
-        try{
-            $pageDetails = array(
-                $codes['name'] => $starter['title'],
-                $codes['version'] => WebsiteService::VERSION,
-                $codes['content'] => $starter['content'],
-                $codes['configuration'] => $starter['configuration']
-            );
-            if($codes['menuPage'] > 0){ $pageDetails[$codes['pageType']] = array($codes['menuPage']); }
-            $pageId = $this->insert($codes['page'], $pageDetails);
-            $created[] = $pageId;
-
-            $site = WebsiteStarter::website($title);
-            $details = array(
-                $codes['name'] => $title,
-                $codes['version'] => WebsiteService::VERSION,
-                $codes['header'] => $site['header'],
-                $codes['footer'] => $site['footer'],
-                $codes['content'] => $site['content'],
-                $codes['configuration'] => $site['configuration'],
-                $codes['topMenu'] => array($pageId)
-            );
-            if(!empty($languageTerms)){ $details[$codes['languages']] = $languageTerms; }
-            $result = $this->save->save('POST', 0, RecordInput::fromBody(array(
-                'rec_ID' => 0, 'rec_RecTypeID' => $codes['home'], 'rec_NonOwnerVisibility' => 'public', 'details' => $details
-            )));
-            $siteId = intval($result['recordId']);
-        }catch(Throwable $exception){
-            foreach(array_reverse($created) as $id){
-                try{ $this->delete->delete($id, true); }catch(Throwable $ignored){ /* reported by the first error */ }
-            }
-            throw $exception;
+        $details = is_array($body['details'] ?? null) ? $body['details'] : array();
+        $title = trim(strip_tags((string)self::first($details[$codes['name']] ?? '')));
+        if($title === ''){ throw new WebsiteException(400, 'The website needs a title'); }
+        $site = WebsiteStarter::website($title);
+        $defaults = array(
+            $codes['version'] => WebsiteService::VERSION,
+            $codes['header'] => $site['header'],
+            $codes['footer'] => $site['footer'],
+            $codes['content'] => $site['content'],
+            $codes['configuration'] => $site['configuration']
+        );
+        foreach($defaults as $fieldId => $value){
+            if(!self::hasValue($details, $fieldId)){ $details[$fieldId] = $value; }
         }
-        return array('id' => $siteId, 'pageIds' => array($pageId), 'url' => $this->urls->page($siteId), 'issues' => $result['issues']);
+        $body['details'] = $this->languageDetails($details);
+        if(!array_key_exists('rec_NonOwnerVisibility', $body)){ $body['rec_NonOwnerVisibility'] = 'public'; }
+        return $body;
     }
 
     /**
-     * Publish a module (or Explorer) as a standalone page (plan 27b §6): a new page, or the
-     * module's instance replaced in a page published before (its other content is kept).
+     * Language codes in the language field of a body become its terms (PUT / PATCH of a website).
      *
-     * @param array $input type (module), settings, state (bootstrap envelope of the module), title,
-     *        pageId (0: new page).
+     * @throws WebsiteException 400 for a language without a term.
+     */
+    public function languageDetails(array $details): array
+    {
+        $field = $this->repository->codes()['languages'];
+        if($field < 1 || !isset($details[$field])){ return $details; }
+        $values = is_array($details[$field]) ? $details[$field] : array($details[$field]);
+        $codes = array_filter($values, static function($value): bool { return is_string($value) && !ctype_digit($value); });
+        if(empty($codes)){ return $details; }
+        $terms = $this->languageTerms(array_values($codes));
+        $details[$field] = array_values(array_unique(array_merge(array_map('intval', array_diff_key($values, $codes)), $terms)));
+        return $details;
+    }
+
+    /**
+     * The "About" page of a new website (the top menu is required, so it is written before the
+     * website), with the owner and visibility the website body gives (plan 27c §10). Nothing when
+     * the body has a top menu.
+     *
+     * @param array $body Website body after starterBody().
+     * @return array The body with the page in its top menu.
+     * @throws RecordEditException
+     */
+    public function addStarterPage(array $body): array
+    {
+        $codes = $this->repository->codes();
+        if(self::hasValue($body['details'] ?? array(), $codes['topMenu'])){ return $body; }
+        $starter = WebsiteStarter::page();
+        $details = array(
+            $codes['name'] => $starter['title'],
+            $codes['version'] => WebsiteService::VERSION,
+            $codes['content'] => $starter['content'],
+            $codes['configuration'] => $starter['configuration']
+        );
+        if($codes['menuPage'] > 0){ $details[$codes['pageType']] = array($codes['menuPage']); }
+        $page = array('rec_ID' => 0, 'rec_RecTypeID' => $codes['page'], 'details' => $details,
+            'rec_NonOwnerVisibility' => (string)($body['rec_NonOwnerVisibility'] ?? 'public'));
+        if(isset($body['rec_OwnerUGrpID'])){ $page['rec_OwnerUGrpID'] = intval($body['rec_OwnerUGrpID']); }
+        $result = $this->save->save('POST', 0, RecordInput::fromBody($page));
+        $body['details'][$codes['topMenu']] = array(intval($result['recordId']));
+        return $body;
+    }
+
+    /** Delete the starter page of a website that was not saved (addStarterPage()). */
+    public function removeStarterPage(array $body): void
+    {
+        $ids = $body['details'][$this->repository->codes()['topMenu']] ?? array();
+        foreach(is_array($ids) ? $ids : array($ids) as $id){
+            try{ $this->delete->delete(intval($id), true); }catch(Throwable $ignored){ /* reported by the first error */ }
+        }
+    }
+
+    /**
+     * Import a module (or Explorer) configuration into a standalone page (plan 27b §6, 27d): a
+     * new page (id 0), or the module's instance replaced in a page published before (its other
+     * content is kept).
+     *
+     * @param array $input type (module), settings, state (bootstrap envelope of the module), title.
      * @return array{id:int,url:string,title:string,created:bool,issues:array}
      * @throws WebsiteException|RecordEditException
      */
-    public function publishModule(array $input): array
+    public function importModule(int $pageId, array $input): array
     {
         $codes = $this->repository->codes();
         $type = strtolower(trim((string)($input['type'] ?? '')));
@@ -252,7 +258,6 @@ final class WebsiteEditService
         );
         $title = trim(strip_tags((string)($input['title'] ?? '')));
         if($title === ''){ $title = ucfirst($type).' '.gmdate('Y-m-d'); }
-        $pageId = intval($input['pageId'] ?? 0);
 
         if($pageId < 1){
             $node = WebsiteStarter::id('n');
@@ -327,30 +332,53 @@ final class WebsiteEditService
     }
 
     /**
-     * Put a page into the menu of a website (at the end of the top menu or of a page's sub menu).
+     * Put a page into the menu of a website, or move it inside the menu: into the top menu or a
+     * page's sub menu, at a position (null or out of range: at the end). A page added to the
+     * menu becomes a menu page with the owner and visibility of the website (plan 27c §10).
      *
-     * @param int $parentId 0: top menu; else a page of this website.
+     * @param int $parentId 0 (or the website id): top menu; else a page of this website.
+     * @param int|null $index Position in the parent's menu (0 = first).
      * @return array Summary of the website.
      * @throws WebsiteException|RecordEditException
      */
-    public function addToMenu(int $siteId, int $pageId, int $parentId = 0): array
+    public function assign(int $siteId, int $pageId, int $parentId = 0, ?int $index = null): array
     {
         $codes = $this->repository->codes();
         $site = $this->editableV4($siteId, $codes['home']);
         $this->editableV4($pageId, $codes['page']);
         $menu = $this->repository->menu($site);
-        if(isset($menu['pages'][$pageId])){
-            throw new WebsiteException(409, 'Page '.$pageId.' is already in the menu of website '.$siteId);
-        }
-        if($parentId > 0 && $parentId !== $siteId){
-            $parent = $menu['pages'][$parentId] ?? null;
-            if($parent === null){ throw new WebsiteException(404, 'Page '.$parentId.' is not a page of website '.$siteId); }
+        $inMenu = isset($menu['pages'][$pageId]);
+        if($parentId === $siteId){ $parentId = 0; }
+        if($parentId > 0){
+            if(!isset($menu['pages'][$parentId])){
+                throw new WebsiteException(404, 'Page '.$parentId.' is not a page of website '.$siteId);
+            }
+            if($parentId === $pageId || in_array($parentId, self::descendants($menu['tree'], $pageId), true)){
+                throw new WebsiteException(409, 'A page can not be put under itself or its sub pages');
+            }
             $this->assertEditable($parentId);
-            $this->patch($parentId, array($codes['subMenu'] => array_merge(WebsiteRepository::ids($parent, $codes['subMenu']), array($pageId))));
-        }else{
-            $this->patch($siteId, array($codes['topMenu'] => array_merge(WebsiteRepository::ids($site, $codes['topMenu']), array($pageId))));
         }
-        $this->patch($pageId, array($codes['pageType'] => $codes['menuPage'] > 0 ? array($codes['menuPage']) : array()));
+        $parents = array($siteId => array($site, $codes['topMenu']));
+        foreach($menu['pages'] as $id => $record){ $parents[$id] = array($record, $codes['subMenu']); }
+        $target = $parentId > 0 ? $parentId : $siteId;
+
+        // out of its old place (a move)
+        foreach($parents as $id => list($record, $field)){
+            $ids = WebsiteRepository::ids($record, $field);
+            if($id === $target || !in_array($pageId, $ids, true)){ continue; }
+            $this->assertEditable($id);
+            $this->patch($id, array('details' => array($field => array_values(array_diff($ids, array($pageId))))));
+        }
+        list($record, $field) = $parents[$target];
+        $ids = array_values(array_diff(WebsiteRepository::ids($record, $field), array($pageId)));
+        $at = $index === null || $index < 0 || $index > count($ids) ? count($ids) : $index;
+        array_splice($ids, $at, 0, array($pageId));
+        $this->patch($target, array('details' => array($field => $ids)));
+        if(!$inMenu){
+            $this->patch($pageId, array(
+                'details' => array($codes['pageType'] => $codes['menuPage'] > 0 ? array($codes['menuPage']) : array())
+            ) + $this->access($siteId, $site));
+        }
         return $this->summary($siteId);
     }
 
@@ -372,50 +400,88 @@ final class WebsiteEditService
             $ids = WebsiteRepository::ids($record, $field);
             if(!in_array($pageId, $ids, true)){ continue; }
             $this->assertEditable($id);
-            $this->patch($id, array($field => array_values(array_diff($ids, array($pageId)))));
+            $this->patch($id, array('details' => array($field => array_values(array_diff($ids, array($pageId))))));
             $found = true;
         }
         if(!$found){ throw new WebsiteException(404, 'Page '.$pageId.' is not in the menu of website '.$siteId); }
-        $this->patch($pageId, array($codes['pageType'] => $codes['standalonePage'] > 0 ? array($codes['standalonePage']) : array()));
+        $this->patch($pageId, array(
+            'details' => array($codes['pageType'] => $codes['standalonePage'] > 0 ? array($codes['standalonePage']) : array())
+        ));
         return $this->summary($siteId);
     }
 
     /**
-     * Delete a v4 standalone page, or a v4 website. With $withPages the menu pages of the
-     * website go too, except those other records point to (another website, a page outside
-     * this site).
+     * Pass the owner and visibility of a website on to its menu pages (plan 27c §10). Pages the
+     * user may not change are left as they are, with a warning.
      *
-     * @return array{deleted:array<int,int>,kept:array<int,int>}
-     * @throws WebsiteException|RecordEditException
+     * @return array<int,array> Warnings (record issue format).
+     * @throws RecordEditException
      */
-    public function delete(int $id, bool $withPages = false): array
+    public function shareAccess(int $siteId): array
     {
         $codes = $this->repository->codes();
-        $record = $this->recordOf($id);
+        $site = $this->recordOf($siteId);
+        if(intval($site['rec_RecTypeID']) !== $codes['home']){ return array(); }
+        $access = $this->access($siteId, $site);
+        $issues = array();
+        foreach($this->repository->menu($site)['pages'] as $pageId => $page){
+            $current = $this->permissions->owners(intval($pageId));
+            if($current !== null && intval($current['owner']) === $access['rec_OwnerUGrpID']
+                && (string)($page['rec_NonOwnerVisibility'] ?? '') === $access['rec_NonOwnerVisibility']){
+                continue;
+            }
+            if(!$this->canEdit(intval($pageId))){
+                $issues[] = array('field' => 'rec_OwnerUGrpID', 'index' => null, 'code' => 'website', 'severity' => 'warning',
+                    'message' => 'Page '.$pageId.' keeps its owner and visibility: you can not change it');
+                continue;
+            }
+            $this->patch(intval($pageId), $access);
+        }
+        return $issues;
+    }
+
+    /**
+     * The menu pages deleted with a website: those no record outside the site points to and the
+     * user may delete; the others are kept.
+     *
+     * @return array{delete:array<int,int>,kept:array<int,int>}
+     * @throws WebsiteException 409 for a website that is not of format version 4.
+     */
+    public function deletablePages(int $siteId): array
+    {
+        $codes = $this->repository->codes();
+        $record = $this->recordOf($siteId);
+        if(intval($record['rec_RecTypeID']) !== $codes['home']){ return array('delete' => array(), 'kept' => array()); }
         if(WebsiteRepository::value($record, $codes['version']) !== WebsiteService::VERSION){
-            throw new WebsiteException(409, 'Record '.$id.' is not of format version 4; delete it in the legacy website editor');
+            throw new WebsiteException(409, 'Website '.$siteId.' is not of format version 4; delete its pages in the legacy website editor');
         }
-        if(intval($record['rec_RecTypeID']) !== $codes['home']){
-            $this->delete->delete($id, false);
-            return array('deleted' => array($id), 'kept' => array());
-        }
-        $pages = $withPages ? array_keys($this->repository->menu($record)['pages']) : array();
-        $site = array_merge(array($id), $pages);
+        $pages = array_keys($this->repository->menu($record)['pages']);
+        $site = array_merge(array($siteId), $pages);
         $delete = array();
         $kept = array();
         foreach($pages as $pageId){
             $outside = array_filter($this->delete->references($pageId)['pointers'], static function(array $pointer) use ($site): bool {
                 return !in_array(intval($pointer['rec_ID']), $site, true);
             });
-            if(empty($outside) && $this->canEdit($pageId)){ $delete[] = $pageId; }else{ $kept[] = $pageId; }
+            if(empty($outside) && $this->canEdit($pageId)){ $delete[] = intval($pageId); }else{ $kept[] = intval($pageId); }
         }
-        $this->delete->delete($id, true);
-        $deleted = array($id);
-        foreach($delete as $pageId){
-            $this->delete->delete($pageId, true);
-            $deleted[] = $pageId;
+        return array('delete' => $delete, 'kept' => $kept);
+    }
+
+    /**
+     * Delete menu pages of a deleted website (references between them are removed).
+     *
+     * @param array<int,int> $ids From deletablePages().
+     * @return array<int,int> Deleted ids.
+     */
+    public function deletePages(array $ids): array
+    {
+        $deleted = array();
+        foreach($ids as $pageId){
+            $this->delete->delete(intval($pageId), true);
+            $deleted[] = intval($pageId);
         }
-        return array('deleted' => $deleted, 'kept' => $kept);
+        return $deleted;
     }
 
     /**
@@ -448,6 +514,18 @@ final class WebsiteEditService
                 'title' => $this->name($page),
                 'children' => $this->pageTree($item['children'], $pages)
             );
+        }
+        return $result;
+    }
+
+    /** Ids of the sub pages (all levels) of a page in a menu tree. */
+    private static function descendants(array $tree, int $pageId, bool $inside = false): array
+    {
+        $result = array();
+        foreach($tree as $item){
+            $id = intval($item['id']);
+            if($inside){ $result[] = $id; }
+            $result = array_merge($result, self::descendants($item['children'], $pageId, $inside || $id === $pageId));
         }
         return $result;
     }
@@ -501,19 +579,34 @@ final class WebsiteEditService
         return $owners !== null && $this->permissions->canEditOwned($owners['owner'], $owners['editGroups']);
     }
 
-    /** Insert a public record; returns its id. */
-    private function insert(int $rectype, array $details): int
+    /** Owner and visibility of a website, as record headers. */
+    private function access(int $siteId, array $site): array
     {
-        $result = $this->save->save('POST', 0, RecordInput::fromBody(array(
-            'rec_ID' => 0, 'rec_RecTypeID' => $rectype, 'rec_NonOwnerVisibility' => 'public', 'details' => $details
-        )));
-        return intval($result['recordId']);
+        $owners = $this->permissions->owners($siteId);
+        return array(
+            'rec_OwnerUGrpID' => intval($owners['owner'] ?? $this->runtime->userId),
+            'rec_NonOwnerVisibility' => (string)($site['rec_NonOwnerVisibility'] ?? 'public')
+        );
     }
 
-    /** Replace some fields of a record (the others stay). */
-    private function patch(int $id, array $details): void
+    /** Change some headers and fields of a record (the others stay). */
+    private function patch(int $id, array $body): void
     {
-        $this->save->save('PATCH', $id, RecordInput::fromBody(array('rec_ID' => $id, 'details' => $details)));
+        $this->save->save('PATCH', $id, RecordInput::fromBody(array('rec_ID' => $id) + $body));
+    }
+
+    /** Whether a field of a body has a non-empty value. */
+    private static function hasValue(array $details, int $fieldId): bool
+    {
+        $value = $details[$fieldId] ?? null;
+        return is_array($value) ? !empty($value) : ($value !== null && $value !== '');
+    }
+
+    /** First value of a field of a body. */
+    private static function first($value)
+    {
+        while(is_array($value)){ $value = reset($value); }
+        return $value === false ? '' : $value;
     }
 
     /** Website languages as 3-letter codes (DT_LANGUAGE terms), the first is the default. */

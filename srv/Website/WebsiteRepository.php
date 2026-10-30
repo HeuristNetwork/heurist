@@ -118,22 +118,6 @@ final class WebsiteRepository
         return $ordered;
     }
 
-    /**
-     * The standalone pages (99-52 with page type "standalone") visible to the current user, with
-     * all their details, by id (plan 29: the pages a module can be published to).
-     *
-     * @return array<int,array>
-     */
-    public function standalonePages(): array
-    {
-        $codes = $this->codes();
-        if($codes['page'] < 1 || $codes['pageType'] < 1 || $codes['standalonePage'] < 1){ return array(); }
-        $ids = RecordRepository::shared($this->database)->idsByValue($codes['pageType'], (string)$codes['standalonePage']);
-        return array_filter($this->records($ids), static function(array $record) use ($codes): bool {
-            return intval($record['rec_RecTypeID']) === $codes['page'];
-        });
-    }
-
     /** Whether a record exists, visible or not (a 404 and a "log in" page differ). */
     public function exists(int $id): bool
     {

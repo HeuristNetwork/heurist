@@ -4,9 +4,9 @@
 *
 * Port of recordDuplicate() of hserv/records/edit/recordModify.php for every
 * record type (plan 21): the header, detail values and edit/view groups
-* are copied; the copy belongs to the current user (website pages: group 1,
-* public, as on insert) and its name values without language prefix get
-* "Copy of ". Relationship records and linked records are not copied.
+* are copied; the copy belongs to the current user (also website pages, plan 27d)
+* and its name values without language prefix get "Copy of ". Relationship
+* records and linked records are not copied.
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Edit
@@ -87,10 +87,6 @@ final class RecordDuplicateService
         $rectype = intval($header['rec_RecTypeID']);
         $owner = $this->runtime->userId;
         $visibility = (string)$header['rec_NonOwnerVisibility'];
-        if($rectype === ($this->codes['cmsPage'] ?? -1)){
-            $owner = 1;
-            $visibility = 'public';
-        }
         $this->permissions->assertNewOwners($owner, array());
 
         $nameField = $this->codes['name'] ?? 0;

@@ -22,16 +22,22 @@ language, split into rows by `RecordValidator` and joined by `RecordDataService`
 - `SiteUrls.php` — `/{db}/site/{id}[/{page}]` or `?db=&site=&pageid=`.
 - `WebsiteSetup.php`, `WebsiteDefinitionsInterface.php` — `GET|POST /api/{db}/website/setup`;
   the definition writer is `hserv/web/WebsiteDefinitions.php` (fields, optional website logo).
-- `WebsiteEditService.php` — the Website manager (plan 27b): status, summary, create
-  (`WebsiteStarter.php`), publish a module as a standalone page, menu add / remove, delete.
-  Writes through `RecordSaveService` / `RecordDeleteService`.
+- `WebsiteEntityHandler.php` — hooks and actions of the entities `website` and `page`
+  (`Records/Entity`, plan 27d).
+- `WebsiteEditService.php` — what the handler and the build job use: status with local ids,
+  summary (`meta.website`), starter website and page (`WebsiteStarter.php`), import of a module
+  configuration into a standalone page, menu assign (add, move with index) / remove, owner and
+  visibility passed on to menu pages, pages deleted with a website. Writes through
+  `RecordSaveService` / `RecordDeleteService`.
 - `Build/WebsiteBuilder.php`, `Build/WebsiteBuildJob.php` — job `website-build`: all pages ×
   languages rendered with guest rights into files (`SiteUrls::files()`), zipped in the job folder.
 
-API (`Controller/WebsiteController.php`, logged-in users): `GET|POST /website/setup`,
-`POST /website` (create), `POST /website/publish`, `GET /website/{id}`,
-`GET /website/{id}/validate`, `POST /website/{id}/menu`, `DELETE /website/{id}/menu/{page}`,
-`DELETE /website/{id}[?pages=1]`. Tests: `tests/WebsiteEditTest.php`.
+API (plan 27d; generic record controller `RecordEditController::executeEntity`, logged-in users):
+`GET|POST /website/setup`, `POST /website/0` (create), `GET|PUT|PATCH|DELETE /website/{id}`
+(`?pages=1` on delete), `GET /website/{id}/validate`, `POST|DELETE /website/{id}/assign`,
+`POST /website/{id}/execute` (build job), `GET|POST|PUT|PATCH|DELETE /page/{id}`,
+`POST /page/{0|id}/import` (module Publish). Search: `GET /records?q=t:{record type}`.
+`Controller/WebsiteController.php` serves only the pages. Tests: `tests/WebsiteEditTest.php`.
 
 The same checks and CSS are in `heurist-explorer` shared/src/site/cmsDocument.js; both run
 the cases of shared/test/fixtures/cms-v4 (`tests/CmsFormatTest.php`). Database test:

@@ -6,7 +6,7 @@
 * for every record type (plan 21: the list of writable system types was removed):
 *   - insert: rec_ID 0 takes the next id, a negative rec_ID is used as the id
 *     (import); owner is the current user and visibility "viewable" unless the
-*     body gives them; website pages (RT_CMS_PAGE) belong to group 1 and are public;
+*     body gives them (defaults of website pages: Website/WebsiteEntityHandler, plan 27d);
 *   - update: PUT replaces the whole record (missing fields and groups are
 *     cleared), PATCH replaces only the fields in the body ([] clears one) and
 *     keeps missing headers; rec_Modified of the body must match the stored one
@@ -260,11 +260,6 @@ final class RecordSaveService
         }
         $owner = $input->has('rec_OwnerUGrpID') ? $input->intHeader('rec_OwnerUGrpID') : $this->runtime->userId;
         $visibility = $input->has('rec_NonOwnerVisibility') ? (string)$input->header('rec_NonOwnerVisibility') : 'viewable';
-        if($rectype === ($this->codes['cmsPage'] ?? -1)){
-            // website pages: database managers group, public (legacy recordAdd)
-            $owner = 1;
-            $visibility = 'public';
-        }
         $this->assertVisibility($visibility);
         return array(
             'recordId' => $recordId,
