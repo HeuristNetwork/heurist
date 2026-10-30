@@ -26,7 +26,7 @@ hclient/bundles/heurist-core.bundle.min.js.map
 The build script is located in:
 
 ```text
-scripts/build-terser.mjs
+server_management/server_synchronisation/code_synchronisation/build-terser.mjs
 ```
 
 It reads a defined list of JavaScript files in the required loading order, combines them, minifies them with Terser, and writes the result to:
@@ -50,7 +50,7 @@ npm run build:js
 This executes:
 
 ```bash
-node scripts/build-terser.mjs
+node server_management/server_synchronisation/code_synchronisation/build-terser.mjs
 ```
 
 ### 2. Where to use the bundle
@@ -92,7 +92,7 @@ The following files should be committed:
 ```text
 package.json
 package-lock.json
-scripts/build-terser.mjs
+server_management/server_synchronisation/code_synchronisation/build-terser.mjs
 hclient/bundles/heurist-core.bundle.min.js
 hclient/bundles/heurist-core.bundle.min.js.map
 ```
@@ -104,7 +104,7 @@ Committing the generated bundle is useful for Heurist deployments where producti
 Create or update:
 
 ```text
-scripts/build-terser.mjs
+server_management/server_synchronisation/code_synchronisation/build-terser.mjs
 ```
 
 with the following content:
@@ -239,7 +239,7 @@ Add the following npm script:
 
 ```json
 "scripts": {
-  "build:js": "node scripts/build-terser.mjs"
+  "build:js": "node server_management/server_synchronisation/code_synchronisation/build-terser.mjs"
 }
 ```
 
@@ -251,7 +251,7 @@ The relevant part of `package.json` should include:
   "version": "1.0.0",
   "description": "Heurist network",
   "scripts": {
-    "build:js": "node scripts/build-terser.mjs"
+    "build:js": "node server_management/server_synchronisation/code_synchronisation/build-terser.mjs"
   },
   "devDependencies": {
     "terser": "^5.48.0"

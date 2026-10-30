@@ -65,6 +65,8 @@ class CmsManager {
         this.DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'];
         this.DT_LANGUAGE = window.hWin.HAPI4.sysinfo['dbconst']['DT_LANGUAGE'];
         this.DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
+        
+        this.DT_VERSION = window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'];
     }
 
     /**
@@ -188,7 +190,10 @@ class CmsManager {
 
         let query_search_pages = { t: this.RT_CMS_PAGE, sort: '-id' };
         query_search_pages['f:' + this.DT_CMS_PAGETYPE] = window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_WEBPAGE'];
+        query_search_pages['f:' + this.DT_VERSION] = '-4'; //not version 4
 
+console.log(query_search_pages);        
+        
         this.#openCMSlist(window.hWin.HR('Select Web page'), query_search_pages, is_view_mode, false);
     }
 
@@ -247,6 +252,7 @@ class CmsManager {
         }
 
         let query_search_sites = { t: this.RT_CMS_HOME, sort: '-id' };
+        query_search_sites['f:' + this.DT_VERSION] = '-4'; //not version 4
 
         this.#openCMSlist(window.hWin.HR('Select Website'), query_search_sites, is_view_mode, (action=='menu-cms-edit'));
 
@@ -302,7 +308,7 @@ class CmsManager {
                     let request = { q: '{"ids":"'+ ids+'"}',
                         w: 'a',
                         verify_credentials: 'ok',
-                        detail: window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION']??'header',
+                        detail: that.DT_VERSION??'header',
                         id: window.hWin.HEURIST4.util.random(),
                         pageno: pageno };
 
@@ -326,9 +332,11 @@ class CmsManager {
                         let rec_id = rdiv.attr('recid');
                         
                         let record = recordset.getRecord(rec_id);    
-                        const ver = recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION']);
-                        if(ver!=3){
-                            $(btnConvert).appendTo(rdiv);    
+                        const ver = recordset.fld(record, that.DT_VERSION);
+                        if(ver==4){
+                            rdiv.hide();
+                        }else if(ver!=3){
+                            //2026-10-29  $(btnConvert).appendTo(rdiv);    
                         }  
                         const s = `<b>${rec_id}&nbsp;&bull;&nbsp;</b>`;
                         rdiv.find('.recordTitle').prepend($(s));
@@ -496,10 +504,13 @@ class CmsManager {
         sMsg = sMsg 
             + '<p>Check the box if you wish to keep your website private ' 
             + '<br><input type="checkbox"> hide website (can be changed later)</p>'
+            +'</p>';
+            
+/* Disable v3 2026-10-29
             + '<p>Choose the version for CMS  ' 
             + '<br><input name="rbVer" type="radio" checked id="rbV2"/><label for="rbV2">v 2</label>'
             + `<br><input name="rbVer" type="radio" id="rbV3" ${disabled}/><label for="rbV3">v 3 (responsive layouts, testing, contact Heurist team for access)</label>`
-            +'</p>';
+*/                        
 
         let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
             function() {

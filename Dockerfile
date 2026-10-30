@@ -48,7 +48,6 @@ COPY hserv hserv
 COPY import import
 COPY movetoparent movetoparent
 COPY redirects redirects
-COPY scripts scripts
 COPY server_management server_management
 COPY srv srv
 COPY startup startup

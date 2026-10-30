@@ -18,8 +18,8 @@ build_heurist_js_bundle() {
     exit 1
   fi
 
-  if [ ! -f "$repo_dir/scripts/build-terser.mjs" ]; then
-    echo "$LOG_PREFIX [$label] [JS] ERROR: scripts/build-terser.mjs not found in $repo_dir" >&2
+  if [ ! -f "$repo_dir/server_management/server_synchronisation/code_synchronisation/build-terser.mjs" ]; then
+    echo "$LOG_PREFIX [$label] [JS] ERROR: server_management/server_synchronisation/code_synchronisation/build-terser.mjs not found in $repo_dir" >&2
     exit 1
   fi
 
