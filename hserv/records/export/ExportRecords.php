@@ -161,7 +161,12 @@ abstract class ExportRecords {
         }
 
         $this->rt_counts = array();
-        $this->tmp_destination = tempnam($this->system->getSysDir(DIR_SCRATCH), "exp");
+        if(array_key_exists('toFile', $params) && strpos($params['toFile'], $this->system->getFileStoreRootFolder()) === 0){
+            $this->tmp_destination = $params['toFile'];
+        }else{
+            unset($params['toFile']);
+            $this->tmp_destination = tempnam($this->system->getSysDir(DIR_SCRATCH), "exp");
+        }
         $this->fd = fopen($this->tmp_destination, 'w');
 
         if ($this->fd === false) {
@@ -392,6 +397,10 @@ abstract class ExportRecords {
      * @return bool|void
      */
     private function _outputResult($params){
+
+        if(array_key_exists('toFile', $params)){
+            return true;
+        }
 
         $format = @$params['format'];
         if($format==null) {$format = 'xml';}

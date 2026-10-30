@@ -20,7 +20,6 @@ use function count;
 use function is_array;
 use function intval;
 use function array_key_exists;
-use function in_array;
 
 class ExportRecordsPAJEK extends ExportRecords{
 
@@ -28,8 +27,6 @@ class ExportRecordsPAJEK extends ExportRecords{
     private array $verticesMap = [];
     private array $arcs = [];
     private array $edges = [];
-
-    private array $skipExpanding = [];
 
     protected function _outputHeader(){}
     protected function _outputRecord($record){
@@ -47,10 +44,14 @@ class ExportRecordsPAJEK extends ExportRecords{
 
             $recID = is_array($record) ? (int)($record['rec_ID'] ?? 0) : (int)$record;
 
-            if($recID <= 0 || array_key_exists($recID, $this->vertices)){
+            if(!isPositiveInt($recID) || array_key_exists($recID, $this->vertices)){
                 continue;
             }elseif(!is_array($record)){
                 $record = recordSearchByID($this->system, $recID, false, 'rec_RecTypeID,rec_Title');
+            }
+
+            if(!$record || !array_key_exists('rec_RecTypeID', $record) || !array_key_exists('rec_Title', $record)){
+                continue;
             }
 
             $recTitle = addslashes($record['rec_Title']);
