@@ -29,7 +29,8 @@ Dependency direction is Controller → Records → Database/Runtime. Classes bel
 - `Controller/SystemQueryController.php` — mapped filter/user collection and
   item reads for the `/sys` API domain.
 - `Controller/MapDataController.php` — query-to-GeoJSON read adapter.
-- `Controller/RecordEditController.php` — record writes (POST/PUT/PATCH/DELETE /records/{id}).
+- `Controller/RecordEditController.php` — record writes (POST/PUT/PATCH/DELETE /records/{id}) and the record-based
+  entities /{entity}/{id}/{action} (website, page; `Records/Entity`, plan 27d).
 - `Database/DatabaseInterface.php` — database abstraction.
 - `Database/MysqlDatabase.php` — MySQL implementation of the modern workflow.
 - `Database/WritableDatabaseInterface.php` — writes and transactions (record editing).

@@ -605,11 +605,13 @@ if($is_jobs_query && !in_array($http_method, array('GET','POST','DELETE'), true)
     exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
 }
 
-// Websites of format v4 (plans 27a, 27b): /api/{db}/website[/{id}[/validate|menu]], /website/setup.
-// See srv/Controller/WebsiteController.php; logged-in users only.
-$is_website_query = ($resource === 'website');
-if($is_website_query && !in_array($http_verb, array('GET','POST','DELETE'), true)){
-    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
+// Record-based entities (plan 27d, plan 28): /api/{db}/{entity}/{id}[/{action}] and /{entity}/{action},
+// e.g. /website/{id}/assign, /page/0/import, /website/setup; logged-in users only. Served by the generic
+// record controller (srv/Controller/RecordEditController.php::executeEntity) with the entity's hooks and
+// actions (srv/Records/Entity/RecordEntityRegistry.php); POST /{entity}/{id}/execute starts its job.
+$record_entity = Heurist\Records\Entity\RecordEntityRegistry::isEntity((string)$resource) ? (string)$resource : null;
+if($record_entity !== null && !in_array($http_verb, array('GET','POST','PUT','PATCH','DELETE'), true)){
+    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, PATCH, DELETE'));
 }
 
 // Routes where auth processing is not needed here
@@ -810,14 +812,28 @@ if($is_def_query){
     $system->dbclose();
     exit;
 
-}elseif($is_website_query){
+}elseif($record_entity !== null){
 
-    $controller = ServiceFactory::fromLegacySystem($system)->websiteController(new hserv\web\WebsiteDefinitions($system));
-    $controller->handleApi($http_verb, array_slice($requestUri, 4), $req_params, is_array($json) ? $json : null, array(
-        'contentType' => $contentType,
-        'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
-        'host' => $_SERVER['HTTP_HOST'] ?? ''
-    ));
+    $factory = ServiceFactory::fromLegacySystem($system);
+    $entityId = (string)($requestUri[4] ?? '');
+    $entityJob = Heurist\Records\Entity\RecordEntityRegistry::job($record_entity);
+    if((string)($requestUri[5] ?? '') === 'execute' && ctype_digit($entityId) && $entityJob !== null){
+        // the entity's job (e.g. website-build); state and result on /jobs/{id}
+        if($http_verb !== 'POST'){
+            exitWithError('Method not allowed', 405, array('Allow' => 'POST'));
+        }
+        $controller = $factory->jobController($factory->websiteJobHandlers());
+        $controller->handleRequest('POST', array(), $req_params,
+            array('type' => $entityJob, 'params' => array('id' => intval($entityId))));
+    }else{
+        $controller = $factory->recordEditController(new hserv\web\WebsiteDefinitions($system));
+        $controller->handleEntityRequest($record_entity, $http_verb, array_slice($requestUri, 4), $req_params,
+            is_array($json) ? $json : null, array(
+                'contentType' => $contentType,
+                'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+                'host' => $_SERVER['HTTP_HOST'] ?? ''
+            ));
+    }
     $system->dbclose();
     exit;
 

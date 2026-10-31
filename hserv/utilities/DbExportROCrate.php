@@ -764,7 +764,7 @@ class DbExportROCrate{
      * @param int $rtyID
      * @param array $entity
      */
-    private function retrieveRecTypeDetails($rtyID, &$entity){
+    private function retrieveRecTypeDetails(int $rtyID, array &$entity){
 
         if(!isPositiveInt($rtyID)){
             return;
@@ -779,13 +779,13 @@ class DbExportROCrate{
 
         $row = $results->fetch_assoc();
         $dbID = $this->databaseDetails['sys_dbRegisteredID'] ?? 0;
-
-        $entity['Local-ID'] = $rtyID;
-        $entity['description'] = $row['rty_Description'];
-
+        
         $row['rty_OriginatingDBID'] ??= $dbID;
         $row['rty_IDInOriginatingDB'] ??= $rtyID;
-        $entity['Concept-ID'] = "{$row['rty_OriginatingDBID']}-{$row['rty_IDInOriginatingDB']}";
+        $entity['identifier'] = ["{$row['rty_OriginatingDBID']}-{$row['rty_IDInOriginatingDB']}", $rtyID];
+
+        $entity['description'] = $row['rty_Description'];
+        $entity['url'] = rtrim(HEURIST_BASE_URL_PRO ?? HEURIST_BASE_URL, '/\\') . DIRECTORY_SEPARATOR . "?db={$this->system->dbname()}&rty={$rtyID}";
 
         $results->free();
     }

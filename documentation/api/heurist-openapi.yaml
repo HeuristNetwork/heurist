@@ -1977,8 +1977,8 @@ paths:
       operationId: duplicateRecord
       summary: Duplicate a record
       description: >-
-        Copies the header, detail values and edit/view groups. The copy belongs to the current user (website
-        pages - group 1, public) and its name values without language prefix start with "Copy of ".
+        Copies the header, detail values and edit/view groups. The copy belongs to the current user (also website
+        pages, plan 27d) and its name values without language prefix start with "Copy of ".
         Relationship and linked records are not copied. The request needs Content-Type application/json (the
         body may be empty).
       security:
@@ -2074,6 +2074,302 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/RecordEditError'}
+  /{database}/{entity}/{recordId}:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - $ref: '#/components/parameters/RecordEntity'
+    get:
+      tags:
+      - Record entities
+      operationId: readEntityRecord
+      summary: One record of an entity (plan 27d)
+      description: >-
+        A record-based entity is a record type with a name in the URL (plan 28): website (99-51), page
+        (99-52). Read, insert, replace, change and delete are those of /records/{recordId}; the record must be
+        of the entity's type (404 otherwise). The answer of GET has meta.canEdit and the entity's own meta
+        (meta.website: kind, version, URL, languages, menu tree). There is no search on an entity: use
+        GET /records?q=t:{record type}.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RecordId'
+      responses:
+        '200':
+          description: The record.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '401':
+          description: Not logged in
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '404':
+          description: Not found, or not a record of this entity
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+    post:
+      tags:
+      - Record entities
+      operationId: insertEntityRecord
+      summary: Insert a record of an entity (recordId 0)
+      description: >-
+        As POST /records/{recordId}; rec_RecTypeID is the entity's. Website: the server adds the starter
+        header, home content, footer and configuration, makes it public and writes an "About" page for its top
+        menu; language codes ("eng") in DT_LANGUAGE become its terms. Page: public unless the body says
+        otherwise.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RecordWriteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordInput'}
+      responses:
+        '201':
+          description: The new record.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '422':
+          description: Invalid values
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+    put:
+      tags:
+      - Record entities
+      operationId: replaceEntityRecord
+      summary: Replace a record of an entity
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RecordId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordInput'}
+      responses:
+        '200':
+          description: The saved record.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+    patch:
+      tags:
+      - Record entities
+      operationId: patchEntityRecord
+      summary: Change some fields of a record of an entity
+      description: >-
+        Only the fields in the body are replaced ([] clears one); send rec_Modified to get 409 when someone
+        else changed the record (?force=1 overwrites). Website: a new owner or visibility is passed on to its
+        menu pages (warnings in meta.issues for pages the user can not change).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RecordId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordInput'}
+      responses:
+        '200':
+          description: The saved record.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '409':
+          description: Changed by someone else (rec_Modified)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+    delete:
+      tags:
+      - Record entities
+      operationId: deleteEntityRecord
+      summary: Delete a record of an entity
+      description: Website with pages=1 also deletes its menu pages that no other record points to (format 4 only).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RecordId'
+      - name: pages
+        in: query
+        required: false
+        schema: {type: integer, enum: [0, 1]}
+      responses:
+        '200':
+          description: Deleted ids (website with pages=1 also kept page ids).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted: {type: array, items: {type: string}}
+                  kept: {type: array, items: {type: string}}
+  /{database}/{entity}/{recordId}/validate:
+    get:
+      tags:
+      - Record entities
+      operationId: validateEntityRecord
+      summary: Problems of a stored record of an entity
+      description: Website and page - problems of the format v4 (optional page and lang of a website).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordEntity'
+      - $ref: '#/components/parameters/RecordId'
+      - {name: page, in: query, required: false, schema: {type: integer}}
+      - {name: lang, in: query, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: valid is false when an issue has level error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: {type: boolean}
+                  issues: {type: array, items: {type: object}}
+  /{database}/{entity}/setup:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - $ref: '#/components/parameters/RecordEntity'
+    get:
+      tags:
+      - Record entities
+      operationId: entitySetupStatus
+      summary: Are the record types and fields of an entity installed
+      description: With the local ids of the record types, fields and terms the entity uses (codes).
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  installed: {type: boolean}
+                  missing: {type: array, items: {type: string}}
+                  canSetup: {type: boolean}
+                  codes: {type: object, additionalProperties: {type: integer}}
+    post:
+      tags:
+      - Record entities
+      operationId: entitySetup
+      summary: Install the missing record types and fields of an entity (database managers)
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Report lines and the status.
+  /{database}/{entity}/{recordId}/execute:
+    post:
+      tags:
+      - Record entities
+      operationId: executeEntityRecord
+      summary: Start the job of an entity
+      description: Website or standalone page of format 4 - the job website-build (a ZIP). State and result on /jobs/{id}.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordEntity'
+      - $ref: '#/components/parameters/RecordId'
+      responses:
+        '200':
+          description: The queued job (as POST /jobs).
+  /{database}/website/{recordId}/assign:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - $ref: '#/components/parameters/RecordId'
+    post:
+      tags:
+      - Record entities
+      operationId: assignWebsitePage
+      summary: Put a page into the menu of a website, or move it inside the menu
+      description: >-
+        parent 0 = top menu, else a page of the website; index = position (missing - at the end). A page new
+        to the menu becomes a menu page with the owner and visibility of the website.
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [page]
+              properties:
+                page: {type: integer}
+                parent: {type: integer}
+                index: {type: integer, minimum: 0}
+      responses:
+        '200':
+          description: Summary of the website (as meta.website).
+        '409':
+          description: Not format 4, or a page under itself or its sub pages
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordEditError'}
+    delete:
+      tags:
+      - Record entities
+      operationId: unassignWebsitePage
+      summary: Take a page out of the menu of a website (it becomes a standalone page)
+      security:
+      - bearerAuth: []
+      parameters:
+      - {name: page, in: query, required: true, schema: {type: integer}}
+      responses:
+        '200':
+          description: Summary of the website (as meta.website).
+  /{database}/page/{recordId}/import:
+    post:
+      tags:
+      - Record entities
+      operationId: importPageModule
+      summary: Import a module configuration into a standalone page (module Publish)
+      description: >-
+        recordId 0 - a new standalone page; otherwise the module's instance of that standalone page of format
+        4 is replaced and its other content kept.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordWriteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type]
+              properties:
+                type: {type: string, enum: [explorer, data, map, timeline, graph, recordview]}
+                settings: {type: object}
+                state: {type: object, nullable: true}
+                title: {type: string}
+      responses:
+        '200':
+          description: The page.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: {type: integer}
+                  url: {type: string}
+                  title: {type: string}
+                  created: {type: boolean}
   /{database}/rectypes:
     get:
       tags:
@@ -4250,6 +4546,12 @@ components:
       schema:
         type: integer
         minimum: 1
+    RecordEntity:
+      name: entity
+      in: path
+      required: true
+      description: Record-based entity (plan 27d, plan 28) - a record type with a name in the URL.
+      schema: {type: string, enum: [website, page]}
     RecordWriteId:
       name: recordId
       in: path

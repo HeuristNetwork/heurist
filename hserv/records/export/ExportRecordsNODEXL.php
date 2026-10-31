@@ -62,13 +62,17 @@ class ExportRecordsNODEXL extends ExportRecords{
         foreach($this->records as $record){
 
             $recID = is_array($record) ? (int)($record['rec_ID'] ?? 0) : (int)$record;
-    
-            if($recID <= 0 || array_key_exists($recID, $this->vertices)){
+
+            if(!isPositiveInt($recID) || array_key_exists($recID, $this->vertices)){
                 continue;
             }elseif(!is_array($record)){
                 $record = recordSearchByID($this->system, $recID, false, 'rec_RecTypeID,rec_Title');
             }
-    
+
+            if(!$record || !array_key_exists('rec_RecTypeID', $record) || !array_key_exists('rec_Title', $record)){
+                continue;
+            }
+
             $this->vertices[$recID] = [
                 $recID,
                 $record['rec_RecTypeID'],

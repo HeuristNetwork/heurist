@@ -370,7 +370,7 @@
 
     }else{
 
-            $allowed_formats = array('xml','geojson','gephi','iiif','json','rdf','html', 'nodexl');
+            $allowed_formats = ['xml','geojson','gephi','iiif','json','rdf','html','nodexl','pajek','rocrate'];
             $idx = array_search(strtolower($params['format']),$allowed_formats);
 
             if($idx===false || !($idx>0)){

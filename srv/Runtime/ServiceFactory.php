@@ -52,6 +52,7 @@ use Heurist\Records\Edit\RecordDeleteService;
 use Heurist\Records\Edit\RecordDuplicateService;
 use Heurist\Records\Edit\RecordPermissionService;
 use Heurist\Records\Edit\RecordSaveService;
+use Heurist\Records\Entity\RecordEntityRegistry;
 use Heurist\Records\Store\RecordAccess;
 use Heurist\Records\Store\RecordRepository;
 use Heurist\Records\Store\RecordSchema;
@@ -112,6 +113,7 @@ use Heurist\Website\Build\WebsiteBuilder;
 use Heurist\Website\Build\WebsiteBuildJob;
 use Heurist\Website\WebsiteDefinitionsInterface;
 use Heurist\Website\WebsiteEditService;
+use Heurist\Website\WebsiteEntityHandler;
 use Heurist\Website\WebsiteRepository;
 use Heurist\Website\WebsiteService;
 use Heurist\Website\WebsiteSetup;
@@ -352,9 +354,12 @@ final class ServiceFactory
     }
 
     /**
-     * Create the record write controller (plan 14): POST/PUT/PATCH/DELETE /records/{id}.
+     * Create the record write controller (plan 14): POST/PUT/PATCH/DELETE /records/{id}, and the
+     * record-based entities /{entity}/{id}/{action} with their hooks (plan 27d).
+     *
+     * @param WebsiteDefinitionsInterface|null $websiteDefinitions Definition writer (hserv) for /website/setup.
      */
-    public function recordEditController(): RecordEditController
+    public function recordEditController(?WebsiteDefinitionsInterface $websiteDefinitions = null): RecordEditController
     {
         $parts = $this->recordWriteParts();
         return new RecordEditController(
@@ -366,8 +371,37 @@ final class ServiceFactory
                     'cmsPage' => $this->codes->id('RT_CMS_PAGE')
                 ), $parts['titleMask'], $parts['validator']),
             $this->recordQueryController(),
-            $this->runtime
+            $this->runtime,
+            $this->recordEntities($parts, $websiteDefinitions),
+            $parts['store']->records(),
+            $parts['permissions']
         );
+    }
+
+    /**
+     * The record-based entities of the API (plan 28 §6, plan 27d) with their handlers.
+     *
+     * @param array $parts recordWriteParts().
+     */
+    private function recordEntities(array $parts, ?WebsiteDefinitionsInterface $websiteDefinitions): RecordEntityRegistry
+    {
+        $rectypes = array();
+        foreach(RecordEntityRegistry::ENTITIES as $name => $entity){
+            $rectypes[$name] = $this->codes->id($entity['rectype']);
+        }
+        $website = function(string $kind) use ($parts, $websiteDefinitions): WebsiteEntityHandler {
+            $repository = new WebsiteRepository($this->database, $this->runtime);
+            return new WebsiteEntityHandler(
+                $kind,
+                $this->websiteEditService(),
+                new WebsiteService($repository, $parts['languages'], $this->runtime->baseUrl),
+                $websiteDefinitions !== null ? new WebsiteSetup($websiteDefinitions, $this->runtime) : null
+            );
+        };
+        return new RecordEntityRegistry($rectypes, array(
+            'website' => static function() use ($website) { return $website('website'); },
+            'page' => static function() use ($website) { return $website('page'); }
+        ));
     }
 
     /**
@@ -550,12 +584,10 @@ final class ServiceFactory
     }
 
     /**
-     * Create the controller of the v4 websites (plans 27a, 27b): live pages, instance frames
-     * and /api/{db}/website (manager operations need a writable database).
-     *
-     * @param WebsiteDefinitionsInterface|null $definitions Definition writer (hserv) for setup.
+     * Create the controller of the v4 website pages (plan 27a): live pages and instance frames.
+     * The API of websites and pages is the record-based entities (recordEditController, plan 27d).
      */
-    public function websiteController(?WebsiteDefinitionsInterface $definitions = null): WebsiteController
+    public function websiteController(): WebsiteController
     {
         $repository = new WebsiteRepository($this->database, $this->runtime);
         $languages = new LanguageCodes(self::languageCodesFile());
@@ -567,13 +599,11 @@ final class ServiceFactory
         return new WebsiteController(
             new WebsiteService($repository, $languages, $this->runtime->baseUrl),
             $renderer,
-            $this->runtime,
-            $definitions !== null ? new WebsiteSetup($definitions, $this->runtime) : null,
-            $this->database instanceof WritableDatabaseInterface ? $this->websiteEditService() : null
+            $this->runtime
         );
     }
 
-    /** Website manager operations (plan 27b) with the rights of the current user. */
+    /** Website operations of the entities "website" and "page" (plans 27b, 27d) with the rights of the current user. */
     public function websiteEditService(): WebsiteEditService
     {
         $parts = $this->recordWriteParts();
