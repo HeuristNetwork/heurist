@@ -93,7 +93,7 @@ final class StoredText
                 // website format v4 (plan 27a): page structure, tabs and accordions, nodes and hosts
                 .'section,article,aside,nav,header,footer,main,details[open],summary,'
                 .'*[id|class|title|lang|dir|data-heurist-rec|data-heurist-app-id|data-inited'
-                .'|data-h-node|data-h-instance|data-h-text|data-h-control]';
+                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style]';
             $config->set('HTML.SafeIframe', true);
             $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
             $config->set('HTML.Allowed', $allowed);
@@ -115,7 +115,8 @@ final class StoredText
             }
             $blocks = array('div', 'p', 'span', 'section', 'article', 'aside', 'nav', 'header', 'footer', 'main',
                 'details', 'summary', 'figure', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'img');
-            foreach(array('data-h-node', 'data-h-instance', 'data-h-control') as $attribute){
+            // data-h-style: a style preset of the website or page (plan 27c §6a)
+            foreach(array('data-h-node', 'data-h-instance', 'data-h-control', 'data-h-style') as $attribute){
                 foreach($blocks as $element){ $def->addAttribute($element, $attribute, 'Text'); }
             }
             // a text block: a flag without a value (data-h-text="" after purifying)

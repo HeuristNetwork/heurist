@@ -9,6 +9,10 @@
 * `data-h-node`, with overrides for the screen sizes `medium` (<= 1024 px) and
 * `narrow` (<= 640 px). Only the properties of the plan are written and every
 * value is checked (StoredCss); the rest is left out with a warning.
+* Common styles (plan 27c §6a), written before the node styles so that a node's own
+* style wins: `styles.kinds` (defaults of a kind: group, tabs, accordion, text,
+* instance) and `styles.presets` (`{name: {label, ...properties, medium, narrow}}`,
+* used by an element with `data-h-style="name"`). Website first, then the page.
 *
 * @project     Heurist academic knowledge management system
 * @package     Website
@@ -47,6 +51,16 @@ final class StyleCompiler
         'color', 'background-color', 'background-image', 'font-family', 'font-size', 'font-weight', 'line-height', 'text-align'
     );
 
+    /** Kinds of `styles.kinds` and their selectors. */
+    public const KINDS = array(
+        'group' => '[data-h-control="group"]',
+        'tabs' => '[data-h-control="tabs"]',
+        'accordion' => '[data-h-control="accordion"]',
+        'text' => '[data-h-text]',
+        'instance' => '[data-h-instance]'
+    );
+
+    private const NAME = '/^[A-Za-z][A-Za-z0-9_-]{0,63}$/';
     private const DISPLAY = array('block', 'flex', 'grid', 'none');
 
     /** @var array<int,array{level:string,code:string,message:string,node:?string}> */
@@ -66,35 +80,52 @@ final class StyleCompiler
     }
 
     /**
-     * CSS of the base settings and node styles.
+     * CSS of the base settings, kind defaults, presets and node styles.
      *
      * @param array $base Base settings (website merged with page).
      * @param array<int,array> $nodeSets Node styles, in order (website first, then the page).
+     * @param array<int,array> $kindSets Kind defaults (`styles.kinds`), website first, then the page.
+     * @param array<int,array> $presetSets Presets (`styles.presets`), website first, then the page.
      */
-    public function compile(array $base, array $nodeSets): string
+    public function compile(array $base, array $nodeSets, array $kindSets = array(), array $presetSets = array()): string
     {
         $this->issues = array();
         $css = '';
         $variables = $this->variables($base);
         if($variables !== ''){ $css .= 'html.h-site{'.$variables."}\n"; }
         $screens = array_fill_keys(array_keys(self::SCREENS), '');
+        foreach($kindSets as $kinds){
+            if(!is_array($kinds)){ continue; }
+            foreach($kinds as $kind => $style){
+                $kind = (string)$kind;
+                if(!isset(self::KINDS[$kind]) || !is_array($style)){
+                    $this->issue('style_kind', 'Kind style "'.$kind.'" is not valid', null);
+                    continue;
+                }
+                $this->rule(self::KINDS[$kind], $style, null, $css, $screens);
+            }
+        }
+        foreach($presetSets as $presets){
+            if(!is_array($presets)){ continue; }
+            foreach($presets as $name => $style){
+                $name = (string)$name;
+                if(!preg_match(self::NAME, $name) || !is_array($style)){
+                    $this->issue('style_preset', 'Style preset "'.$name.'" is not valid', null);
+                    continue;
+                }
+                unset($style['label']);
+                $this->rule('[data-h-style="'.$name.'"]', $style, null, $css, $screens);
+            }
+        }
         foreach($nodeSets as $nodes){
             if(!is_array($nodes)){ continue; }
             foreach($nodes as $id => $style){
                 $id = (string)$id;
-                if(!preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,63}$/', $id) || !is_array($style)){
+                if(!preg_match(self::NAME, $id) || !is_array($style)){
                     $this->issue('style_node', 'Node style "'.$id.'" is not valid', $id);
                     continue;
                 }
-                $selector = '[data-h-node="'.$id.'"]';
-                $rules = $this->declarations($style, $id);
-                if($rules !== ''){ $css .= $selector.'{'.$rules."}\n"; }
-                foreach(array_keys(self::SCREENS) as $screen){
-                    if(isset($style[$screen]) && is_array($style[$screen])){
-                        $rules = $this->declarations($style[$screen], $id);
-                        if($rules !== ''){ $screens[$screen] .= $selector.'{'.$rules."}\n"; }
-                    }
-                }
+                $this->rule('[data-h-node="'.$id.'"]', $style, $id, $css, $screens);
             }
         }
         // medium first, then narrow: the smaller screen wins
@@ -104,6 +135,19 @@ final class StyleCompiler
             }
         }
         return $css;
+    }
+
+    /** The rule of one selector, and its screen rules into $screens. */
+    private function rule(string $selector, array $style, ?string $id, string &$css, array &$screens): void
+    {
+        $rules = $this->declarations($style, $id);
+        if($rules !== ''){ $css .= $selector.'{'.$rules."}\n"; }
+        foreach(array_keys(self::SCREENS) as $screen){
+            if(isset($style[$screen]) && is_array($style[$screen])){
+                $rules = $this->declarations($style[$screen], $id);
+                if($rules !== ''){ $screens[$screen] .= $selector.'{'.$rules."}\n"; }
+            }
+        }
     }
 
     /** CSS variables of the base settings. */
@@ -129,7 +173,7 @@ final class StyleCompiler
     }
 
     /** Declarations of one node style (screen keys are skipped here). */
-    private function declarations(array $style, string $id): string
+    private function declarations(array $style, ?string $id): string
     {
         $css = '';
         foreach($style as $property => $value){
