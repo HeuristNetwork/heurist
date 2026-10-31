@@ -231,7 +231,8 @@ if(!$syncingStep){
                     db: '<?= $system->dbname() ?>',
                     lib_key: libraryIndex,
                     sessionID: sessionID,
-                    retryOnly: retryOnly ? 1 : 0
+                    retryOnly: retryOnly ? 1 : 0,
+                    useRecTags: $('[name="useRecTags"]').is(':checked') ? 1 : 0
                 };
 
                 if(window.hWin.HEURIST4.util.isPositiveInt(syncID)){
@@ -375,6 +376,7 @@ if(!$step){
 
 $key = $lib_keys[$lib_key_idx];
 $syncID = intval(@$_REQUEST['sinceSync']);
+$useRecTags = intval(@$_REQUEST['useRecTags']) === 1;
 
 $vals = explode(",",$key);
 
@@ -706,6 +708,7 @@ if($step == 1){  //first step - info about current status
                 <a href='#' onclick='__startProcess("{$lib_key_idx}", "{$totalitems}", 0);return false;'><button class='h3button'>Update existing records from Zotero (full library)</button></a><br>
                 <span><br>Updates matched records in place. Existing Heurist record IDs, 
                 <br>links and fields not supplied by Zotero are retained.</span>
+                <span style="display: block; margin-top: 1em;">Set Zotero Item ID as a record tag <input type="checkbox" name="useRecTags" checked="checked" /></span>
             </div><br><br>
             HTML;
             print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../hclient/assets/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
@@ -917,26 +920,32 @@ if($step == 1){  //first step - info about current status
                 $rec_URL = null;
 
                 // 3) try to search record in database by zotero id
-                $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d ".
-                "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID="
-                .intval($dt_SourceRecordID)." and d.dtl_Value='"
-                .$mysqli->real_escape_string($zotero_itemid)."'";
-                try { $res = $mysqli->query($query); } catch (Throwable $e) { $res = false; }
-                if ($res === false) {
-                    $syncStatus->fail($zotero_itemid, $itemtitle, 0, 'Could not look up the existing Heurist record; no new record was created. Check the database error log.');
-                    $isFailure = true;
-                    continue;
-                }
-                if($res){
-                    $row = $res->fetch_row();
-                    if($row){
-                        $recId = $row[0];
+                $res = getExistingRecord($zotero_itemid);
+                if(!$res){
 
-                        $rec_modified = strtotime($row[1]);
-
-                        // 4) compare updated time - if it is less than in Heurist database, ignore this entry
-                        $t_updated = strtotime(strval(findXMLelement($entry, null, "updated")));
+                    $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d ".
+                    "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID="
+                    .intval($dt_SourceRecordID)." and d.dtl_Value='"
+                    .$mysqli->real_escape_string($zotero_itemid)."'";
+                    try { $res = $mysqli->query($query); } catch (Throwable $e) { $res = false; }
+                    if ($res === false) {
+                        $syncStatus->fail($zotero_itemid, $itemtitle, 0, 'Could not look up the existing Heurist record; no new record was created. Check the database error log.');
+                        $isFailure = true;
+                        continue;
                     }
+                    if($res){
+                        $row = $res->fetch_row();
+                        if($row){
+                            $recId = $row[0];
+
+                            $rec_modified = strtotime($row[1]);
+
+                            // 4) compare updated time - if it is less than in Heurist database, ignore this entry
+                            $t_updated = strtotime(strval(findXMLelement($entry, null, "updated")));
+                        }
+                    }
+                }else{
+                    $recId = $res;
                 }
 
                 $content = json_decode(strval(findXMLelement($entry, null, "content")));
@@ -1125,7 +1134,7 @@ if($step == 1){  //first step - info about current status
                                 $details["t:".$detail_id2] = array("0"=>(count($pages)>1)?$pages[1] :$pages[0]);
                             }
 
-                        }else{
+                        }elseif(is_string($value)){
 
                             if($dt_type=='freetext' || $dt_type=='blocktext'){
                                 $value = html_entity_decode($value);
@@ -1988,13 +1997,13 @@ function getConstrainedRecordType($resource_dt_id){
  */
 function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo, $record_count){
 
-    global $system, $rep_errors_only, $dt_SourceRecordID, $outputLines;
+    global $system, $rep_errors_only, $dt_SourceRecordID, $outputLines, $useRecTags;
 
     $new_recid = null;
 
     if( !empty($details)){
 
-        if($zotero_itemid){
+        if(!$useRecTags && $zotero_itemid){
             $details["t:".$dt_SourceRecordID] = array("0"=>$zotero_itemid);
         }
         // Reject raw labels and zero before recordSave's no-validation path.
@@ -2038,6 +2047,9 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
                 $outputLines[] = '['.($new_recid==$recId?"Updated":"Added")."&nbsp;Id&nbsp".$new_recid.']<br>';
             }
 
+            if($useRecTags && $zotero_itemid){
+                setupRecordTag($new_recid, $zotero_itemid);
+            }
 
             if(!$rep_errors_only){
                 if (@$out['warning']) {
@@ -2357,6 +2369,67 @@ function exitServerCall($data, $status){
 
     print json_encode(['data' => $data, 'status' => $status], JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
+}
+
+/**
+ * @param string $zoteroItemID
+ * @return int|false Record ID or false on failure/skip
+ */
+function getExistingRecord($zoteroItemID){
+
+    global $system;
+
+    if(empty($zoteroItemID)){
+        return false;
+    }
+
+    $tagName = "ZoteroID_{$zoteroItemID}";
+    $recordTag = mysql__select_row($system->getMysqli(), "SELECT rtl_RecID, tag_UGrpID FROM usrRecTagLinks INNER JOIN usrTags ON tag_ID = rtl_TagID WHERE tag_Text = ?", ['s', $tagName]);
+
+    if(!$recordTag || !$system->hasAccess($recordTag[1])){
+        return false;
+    }
+
+    return $recordTag[0];
+}
+
+/**
+ * @param int $recID
+ * @param string $zoteroItemID
+ */
+function setupRecordTag($recID, $zoteroItemID){
+
+    global $system, $outputLines;
+
+    $mysqli = $system->getMysqli();
+
+    $tagName = "ZoteroID_{$zoteroItemID}";
+    $existingID = mysql__select_value($mysqli, "SELECT rtl_ID FROM usrRecTagLinks INNER JOIN usrTags ON tag_ID = rtl_TagID WHERE tag_Text = ? AND rtl_RecID = ?", ['si', $tagName, $recID]);
+
+    if(isPositiveInt($existingID)){
+        return;
+    }
+
+    $tagRecord = [
+        'tag_Text' => $tagName,
+        'tag_UGrpID' => 1,
+        'tag_AddedByImport' => 1
+    ];
+
+    $tagID = mysql__insertupdate($mysqli, 'usrTags', 'tag_', $tagRecord, true);
+    if(!isPositiveInt($tagID) && !$tagID){
+        $outputLines[] = "Failed to create record tag for Item ID {$zoteroItemID} connected to Record #{$recID}.<br>MySQLi Error: {$mysqli->error}<br>";
+        return;
+    }
+
+    $tagLinkRecord = [
+        'rtl_TagID' => $tagID,
+        'rtl_RecID' => $recID,
+        'rtl_AddedByImport' => 1
+    ];
+
+    $recTagLinkID = mysql__insertupdate($system->getMysqli(), 'usrRecTagLinks', 'rtl_', $tagLinkRecord, true);
+    $outputLines[] = !isPositiveInt($recTagLinkID) ? "Failed to link record tag #{$tagID} to Record #{$recID}.<br>MySQLi Error: {$mysqli->error}<br>" : "Created Tag #{$tagID} for Record #{$recID}";
 }
 
 if($syncingStep){
