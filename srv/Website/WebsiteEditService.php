@@ -435,7 +435,13 @@ final class WebsiteEditService
                     'message' => 'Page '.$pageId.' keeps its owner and visibility: you can not change it');
                 continue;
             }
-            $this->patch(intval($pageId), $access);
+            // the website is saved already: a page that can not be changed is a warning (2026-10-31)
+            try{
+                $this->patch(intval($pageId), $access);
+            }catch(RecordEditException $error){
+                $issues[] = array('field' => 'rec_OwnerUGrpID', 'index' => null, 'code' => 'website', 'severity' => 'warning',
+                    'message' => 'Page '.$pageId.' keeps its owner and visibility: '.$error->getMessage());
+            }
         }
         return $issues;
     }

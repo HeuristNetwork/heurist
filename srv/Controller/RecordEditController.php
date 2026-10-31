@@ -255,9 +255,12 @@ final class RecordEditController
     /** GET /{entity}/{id}: the record with meta.canEdit and the entity's meta. */
     private function entityRecord(RecordEntityHandler $handler, int $recordId, array $params): array
     {
+        // the output of GET /records/{id} (plan 28): resolved values and definitions on request too
         $response = $this->query->executeItem(array(
             'db' => $params['db'] ?? $this->runtime->databaseName,
-            'fields' => $params['fields'] ?? '_all'
+            'fields' => $params['fields'] ?? '_all',
+            'resolveDetails' => $params['resolveDetails'] ?? false,
+            'defs' => $params['defs'] ?? false
         ), $recordId);
         if(empty($response['records'])){
             throw RecordEditException::notFound('Record '.$recordId.' was not found');

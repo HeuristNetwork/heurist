@@ -24,6 +24,7 @@ use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Files\FileRepository;
 use Heurist\Records\Store\RecordAccess;
 use Heurist\Records\Store\RecordRepository;
+use Heurist\Records\Store\SplitValues;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Runtime\SystemCode;
 use Heurist\Users\UserGroupRepository;
@@ -153,60 +154,20 @@ final class RecordDataService
     }
 
     /**
-     * Website page content (RT_CMS_PAGE / DT_EXTENDED_DESCRIPTION) is saved in parts
-     * when it is long; give it as one value, as legacy recordSearch does.
+     * Website page content (RT_CMS_PAGE / DT_EXTENDED_DESCRIPTION) and the page translations of a
+     * v4 website (DT_CMS_PAGE_TRANSLATIONS, plan 27a) are saved in parts when they are long; give
+     * them as one value (per language), as legacy recordSearch does (SplitValues).
      */
     private function joinPageContent(array &$records): void
     {
         $codes = new SystemCode($this->definitions());
         $page = $codes->id('RT_CMS_PAGE');
-        $content = (string)$codes->id('DT_EXTENDED_DESCRIPTION');
-        if($page < 1 || $content === '0'){ return; }
+        $content = $codes->id('DT_EXTENDED_DESCRIPTION');
+        $translations = $codes->id('DT_CMS_PAGE_TRANSLATIONS');
         foreach($records as &$record){
-            $parts = $record['details'][$content] ?? null;
-            if(intval($record['rec_RecTypeID'] ?? 0) !== $page || !is_array($parts) || count($parts) < 2){ continue; }
-            $hidden = false;
-            $text = '';
-            foreach($parts as $part){
-                if(is_array($part)){
-                    $hidden = $hidden || !empty($part['hidden']);
-                    $part = $part['value'] ?? '';
-                }
-                $text .= (string)$part;
-            }
-            $record['details'][$content] = array($hidden ? array('value'=>$text, 'hidden'=>true) : $text);
-        }
-        unset($record);
-        $this->joinPageTranslations($records, $codes);
-    }
-
-    /**
-     * Page translations of a v4 website (DT_CMS_PAGE_TRANSLATIONS, plan 27a): a long
-     * translation is saved in rows that all start with its language code ("fre:");
-     * give one value per language.
-     */
-    private function joinPageTranslations(array &$records, SystemCode $codes): void
-    {
-        $field = (string)$codes->id('DT_CMS_PAGE_TRANSLATIONS');
-        if($field === '0'){ return; }
-        foreach($records as &$record){
-            $rows = $record['details'][$field] ?? null;
-            if(!is_array($rows) || count($rows) < 2){ continue; }
-            $languages = array();
-            foreach($rows as $row){
-                $hidden = is_array($row) && !empty($row['hidden']);
-                $text = (string)(is_array($row) ? ($row['value'] ?? '') : $row);
-                $language = preg_match('/^([A-Za-z]{2,3}):/', $text, $match) ? strtolower($match[1]) : '';
-                $part = $language === '' ? $text : substr($text, strlen($match[0]));
-                if(!isset($languages[$language])){
-                    $languages[$language] = array('text' => $language === '' ? '' : $language.':', 'hidden' => false);
-                }
-                $languages[$language]['text'] .= $part;
-                $languages[$language]['hidden'] = $languages[$language]['hidden'] || $hidden;
-            }
-            $record['details'][$field] = array_values(array_map(static function(array $joined){
-                return $joined['hidden'] ? array('value'=>$joined['text'], 'hidden'=>true) : $joined['text'];
-            }, $languages));
+            if(!is_array($record['details'] ?? null)){ continue; }
+            $record['details'] = SplitValues::joinDetails($record['details'], intval($record['rec_RecTypeID'] ?? 0),
+                $page, $content, $translations);
         }
         unset($record);
     }

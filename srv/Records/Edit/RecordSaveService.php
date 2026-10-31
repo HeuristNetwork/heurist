@@ -38,6 +38,7 @@ namespace Heurist\Records\Edit;
 
 use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Store\RecordStore;
+use Heurist\Records\Store\SplitValues;
 use Heurist\Runtime\DatabaseSettings;
 use Heurist\Runtime\RuntimeContext;
 use Throwable;
@@ -57,7 +58,8 @@ final class RecordSaveService
     private array $codes;
 
     /**
-     * @param array<string,int> $codes Local ids: cmsPage (RT_CMS_PAGE), workflowStage (DT_WORKFLOW_STAGE).
+     * @param array<string,int> $codes Local ids: cmsPage (RT_CMS_PAGE), content (DT_EXTENDED_DESCRIPTION),
+     *        cmsTranslations (DT_CMS_PAGE_TRANSLATIONS), workflowStage (DT_WORKFLOW_STAGE).
      * @param TitleMask|null $titleMask Title from the mask of the record type (null: DT_NAME only).
      * @param CalculatedFields|null $calculated Calculated fields run on save (null: none).
      */
@@ -318,7 +320,9 @@ final class RecordSaveService
             if($row['requirement'] === 'forbidden'){ $forbidden[] = $fieldId; }
         }
         if($patch){
-            $details = $this->store->records()->editValues($recordId);
+            // the stored rows: long values saved in parts are joined, a part alone is not valid (2026-10-31)
+            $details = SplitValues::joinDetails($this->store->records()->editValues($recordId), $rectype,
+                $this->codes['cmsPage'] ?? 0, $this->codes['content'] ?? 0, $this->codes['cmsTranslations'] ?? 0);
             foreach($input->details() as $fieldId => $values){ $details[$fieldId] = $values; }
             foreach($forbidden as $fieldId){ unset($details[$fieldId]); }
         }else{
