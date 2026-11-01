@@ -1,4 +1,12 @@
-# Modern server records workflow
+### **Heurist Research Data Management System - Overview**
+
+**Artem Osmakov, September/October 2026**
+
+**https://HeuristNetwork.org**
+**(C) 2026 Heurist Network**
+
+# Modern server records workflow, developed 2026 as h8 replacement for existing code
+# Plan refers to the planning tab of HeuristNetwork's internal GDoc work file
 
 ## Overview
 
