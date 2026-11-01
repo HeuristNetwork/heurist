@@ -70,10 +70,11 @@ final class PageRenderer
         $base = $site !== null && !$context['home']
             ? array_merge(self::part($siteConfig, 'base'), self::part($pageConfig, 'base'))
             : self::part($pageConfig, 'base');
-        $nodeSets = $site !== null && !$context['home']
-            ? array(self::part($siteConfig, 'nodes'), self::part($pageConfig, 'nodes'))
-            : array(self::part($pageConfig, 'nodes'));
-        $styles = (new StyleCompiler($baseUrl))->compile($base, $nodeSets);
+        $withSite = $site !== null && !$context['home'];
+        $sets = static function(string $part) use ($withSite, $siteConfig, $pageConfig): array {
+            return $withSite ? array(self::part($siteConfig, $part), self::part($pageConfig, $part)) : array(self::part($pageConfig, $part));
+        };
+        $styles = (new StyleCompiler($baseUrl))->compile($base, $sets('nodes'), $sets('kinds'), $sets('presets'));
 
         $content = CmsHtml::translate(WebsiteRepository::value($page, $this->codes['content']), $pageTexts);
         $header = $site !== null ? CmsHtml::translate(WebsiteRepository::value($site, $this->codes['header']), $siteTexts) : '';
@@ -84,7 +85,8 @@ final class PageRenderer
         $documentTitle = $site !== null && !$context['home'] && $siteTitle !== '' ? $title.' – '.$siteTitle : ($title ?: $siteTitle);
         $keywords = trim(strip_tags(WebsiteRepository::value($page, $this->codes['keywords'])));
 
-        $html = '<!doctype html><html lang="'.self::attr($this->languages->code2($language ?? '') ?? 'en').'" class="h-site">'
+        $html = '<!doctype html><html lang="'.self::attr($this->languages->code2($language ?? '') ?? 'en').'" class="h-site'
+            .(!empty($context['design']) ? ' h-site-design' : '').'">'
             .'<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             .'<title>'.self::text2html($documentTitle).'</title>'
             .($keywords !== '' ? '<meta name="keywords" content="'.self::attr($keywords).'">' : '')
@@ -166,6 +168,10 @@ final class PageRenderer
             // ?lang= wins over the module's own language setting (plan 29, 2026-10-28)
             'language' => strtolower((string)($requested ?? $context['language'] ?? 'eng')),
             'languageRequested' => $requested !== null,
+            // preview of the CMS designer (plan 27c §6): the runtime gives the design hooks
+            'design' => !empty($context['design']),
+            'site' => $site !== null ? intval($site['rec_ID']) : 0,
+            'page' => intval($context['page']['rec_ID']),
             'moduleBaseUrl' => $baseUrl.'hclient/bundles/',
             'frameUrl' => $this->environment['urls']->frame($site !== null ? intval($site['rec_ID']) : intval($context['page']['rec_ID']),
                 $site !== null && !$context['home'] ? intval($context['page']['rec_ID']) : 0)

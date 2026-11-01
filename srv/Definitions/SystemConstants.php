@@ -90,6 +90,8 @@ final class SystemConstants
         'RT_CUSTOM_REPORT' => array('rty', '2-1104'),
         'RT_REPORT_SCHEDULE' => array('rty', '2-1105'),
         'RT_REGISTERED_FILE' => array('rty', '2-1106'),
+        'RT_USER_BOOKMARKS' => array('rty', '2-1110'),
+        'RT_USER_REMINDERS' => array('rty', '2-1111'),
         // Fields (ported from hserv/consts.php $dtDefines)
         'DT_NAME' => array('dty', '2-1'),
         'DT_SHORT_NAME' => array('dty', '2-2'),

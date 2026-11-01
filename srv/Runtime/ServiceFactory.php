@@ -453,6 +453,8 @@ final class ServiceFactory
             'titleMask' => $titleMask,
             'save' => new RecordSaveService($store, $validator, $permissions, $definitions, $this->runtime, $title, array(
                 'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
+                'content' => $this->codes->id('DT_EXTENDED_DESCRIPTION'),
+                'cmsTranslations' => $this->codes->id('DT_CMS_PAGE_TRANSLATIONS'),
                 'workflowStage' => $this->codes->id('DT_WORKFLOW_STAGE')
             ), $titleMask, $calculated),
             'delete' => new RecordDeleteService($store, $permissions, $definitions, $this->runtime)

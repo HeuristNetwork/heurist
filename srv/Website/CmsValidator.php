@@ -118,8 +118,11 @@ final class CmsValidator
             }
         }
         $compiler = new StyleCompiler($baseUrl);
-        $compiler->compile(is_array($config['styles']['base'] ?? null) ? $config['styles']['base'] : array(),
-            array(is_array($config['styles']['nodes'] ?? null) ? $config['styles']['nodes'] : array()));
+        $styles = $config['styles'];
+        $compiler->compile(is_array($styles['base'] ?? null) ? $styles['base'] : array(),
+            array(is_array($styles['nodes'] ?? null) ? $styles['nodes'] : array()),
+            array(is_array($styles['kinds'] ?? null) ? $styles['kinds'] : array()),
+            array(is_array($styles['presets'] ?? null) ? $styles['presets'] : array()));
         $issues = array_merge($issues, $compiler->issues());
         foreach($translations as $language => $blocks){
             foreach(array_keys(is_array($blocks) ? $blocks : array()) as $id){

@@ -6,6 +6,7 @@
 *   GET /{db}/site/{id}[/{page id}][?lang=xxx]        website home / page, or a standalone page
 *   GET /{db}/site/{id}[/{page id}]/frame/{instance}   one module in an iframe ("mount": "iframe")
 *   (parameter form: ?db=&site=&pageid=&frame=&lang=)
+*   ?design=1 (logged-in users): the preview of the CMS designer (plan 27c §6)
 * The API of websites and pages is /api/{db}/website/... and /api/{db}/page/... on the
 * generic record controller (RecordEditController, Website/WebsiteEntityHandler; plan 27d).
 *
@@ -69,6 +70,9 @@ final class WebsiteController
         try{
             $context = $this->service->context(intval($params['site'] ?? 0), intval($params['pageid'] ?? 0),
                 (string)($params['lang'] ?? ''));
+            // the preview of the CMS designer (plan 27c §6): logged-in users only; the page runtime
+            // opens the designer when the page is not inside it
+            $context['design'] = !empty($params['design']) && $this->runtime->userId > 0;
             $renderer = ($this->renderer)($pretty);
             $frame = trim((string)($params['frame'] ?? ''));
             $html = $frame !== '' ? $renderer->frame($context, $frame) : $renderer->render($context);
