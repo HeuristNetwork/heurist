@@ -140,7 +140,10 @@ final class WebsiteEntityHandler extends RecordEntityHandler
             }
             if($action === 'assign' && $this->kind === 'website' && $id > 0){
                 $page = intval($body['page'] ?? $params['page'] ?? 0);
-                if($method === 'DELETE'){ return $this->edit->removeFromMenu($id, $page); }
+                if($method === 'DELETE'){
+                    $standalone = (string)($body['standalone'] ?? $params['standalone'] ?? '1');
+                    return $this->edit->removeFromMenu($id, $page, !in_array($standalone, array('0', 'false'), true));
+                }
                 self::allow($method, array('POST'));
                 $index = isset($body['index']) && $body['index'] !== null && $body['index'] !== '' ? intval($body['index']) : null;
                 return $this->edit->assign($id, $page, intval($body['parent'] ?? 0), $index);

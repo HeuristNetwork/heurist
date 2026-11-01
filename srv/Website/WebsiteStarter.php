@@ -84,8 +84,8 @@ final class WebsiteStarter
             'header' => '<div data-h-node="'.$header.'" data-h-control="group"><div data-h-node="'.$brand.'" data-h-text=""><h2>'.self::html($title).'</h2></div>'
                 .'<nav data-h-node="'.$menuHost.'" data-h-instance="'.$menu.'"></nav></div>',
             'footer' => '<div data-h-node="'.$footer.'" data-h-text=""><p>'.self::html($title).'</p></div>',
-            'content' => '<section data-h-node="'.$home.'" data-h-text=""><h1>'.self::html($title).'</h1>'
-                .'<p>Welcome. Edit this text in the website editor.</p></section>',
+            'content' => '<div data-h-node="'.$home.'" data-h-text=""><h1>'.self::html($title).'</h1>'
+                .'<p>Welcome. Edit this text in the website editor.</p></div>',
             'configuration' => (string)json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
     }
@@ -100,7 +100,7 @@ final class WebsiteStarter
         $node = self::id('n');
         return array(
             'title' => $title,
-            'content' => '<section data-h-node="'.$node.'" data-h-text=""><h1>'.self::html($title).'</h1><p>About this website.</p></section>',
+            'content' => '<div data-h-node="'.$node.'" data-h-text=""><h1>'.self::html($title).'</h1><p>About this website.</p></div>',
             'configuration' => (string)json_encode(array('schema' => CmsValidator::SCHEMA, 'instances' => new \stdClass(),
                 'styles' => array('nodes' => array($node => array('padding' => '1rem')))), JSON_UNESCAPED_SLASHES)
         );

@@ -91,7 +91,8 @@ final class StoredText
                 .'figure,figcaption,audio[src|controls|preload|data-id],video[src|controls|preload|poster|width|height|data-id],'
                 .'source[src|type],iframe[src|width|height|title|frameborder|allowfullscreen],'
                 // website format v4 (plan 27a): page structure, tabs and accordions, nodes and hosts
-                .'section,article,aside,nav,header,footer,main,details[open],summary,'
+                // a group with a caption: section[aria-labelledby] = the id of its heading (plan 27c §20)
+                .'section[aria-labelledby],article,aside,nav,header,footer,main,details[open],summary,'
                 .'*[id|class|title|lang|dir|data-heurist-rec|data-heurist-app-id|data-inited'
                 .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style]';
             $config->set('HTML.SafeIframe', true);
@@ -108,6 +109,7 @@ final class StoredText
             foreach(array('section', 'article', 'aside', 'nav', 'header', 'footer', 'main') as $element){
                 $def->addElement($element, 'Block', 'Flow', 'Common');
             }
+            $def->addAttribute('section', 'aria-labelledby', 'Text');
             $def->addElement('details', 'Block', 'Flow', 'Common', array('open'=>'Bool'));
             $def->addElement('summary', 'Block', 'Flow', 'Common');
             foreach(array('data-heurist-rec', 'data-heurist-app-id', 'data-inited') as $attribute){
