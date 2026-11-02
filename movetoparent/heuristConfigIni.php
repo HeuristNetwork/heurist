@@ -208,6 +208,10 @@ $OPENTHESO_SERVERS = array(
 
 // [TRANSLATIONS]
 
+// Google Cloud Translation Basic v2 for srv/ExternalService/TranslationService.
+// Set in the installation's private heuristConfigIni.php; never send the key to browsers.
+$accessToken_GoogleTranslateAPI = '';
+
 // Set these to enable translations with DEEPL
 $accessToken_DeepLAPI = 'OBTAIN THIS FROM DEEPL';// To enable DeepL translations
 $serverName_DeepL = "DEPENDS ON WHETHER FREE OR PAID SERVICE";

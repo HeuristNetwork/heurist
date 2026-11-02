@@ -1474,7 +1474,7 @@ class System {
                     'pwd_DatabaseDeletion' => (strlen($passwordForDatabaseDeletion ?? '') > 15),
                     'pwd_ReservedChanges' => (strlen($passwordForReservedChanges ?? '') > 6),
                     'pwd_ServerFunctions' => (strlen($passwordForServerFunctions ?? '') > 6),
-                    'api_Translator' => (!empty($accessToken_DeepLAPI)),
+                    'api_Translator' => (!empty($accessToken_DeepLAPI) || !empty($GLOBALS['accessToken_GoogleTranslateAPI'])),
                     'use_redirect' => $useRewriteRulesForRecordLink,
                     'fair_score' => $this->getFairScoreSummary(),
                 ]

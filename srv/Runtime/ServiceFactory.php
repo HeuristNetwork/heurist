@@ -130,8 +130,10 @@ final class ServiceFactory
     private array $reportEnvironment;
     /** @var (\Closure():array)|null Database setting "Languages" (translations), read when needed. */
     private ?\Closure $translationLanguages = null;
-    /** Whether the installation has a DeepL key: the legacy translator works (plan 25, meta.translator). */
+    /** Whether the installation has a DeepL or Google translation key. */
     private bool $translatorAvailable = false;
+    private string $associationMembershipStatus = '';
+    private string $googleTranslationKey = '';
     /** @var array{root?:string,quota?:\Closure} File store root and disk quota (plan 20, /files writes). */
     private array $fileEnvironment = array();
     /** @var (\Closure(array):void)|null Sends a reminder now with the legacy mailer (plan 20, §10.9). */
@@ -146,6 +148,9 @@ final class ServiceFactory
         QueryTrace::markBoot();
         ServerTiming::mark('boot');
         $runtime = RuntimeContext::fromLegacySystem($system);
+        // Resolve membership before releasing the session; services receive values only.
+        $associationMembershipStatus = $runtime->userId > 0
+            ? \hserv\utilities\USystem::checkAssociationMembership($system) : '';
         $database = DatabaseFactory::fromHeuristConfiguration($runtime->databaseNameFull);
         // RT_* / DT_* / TRM_* ids from Definitions/SystemConstants, cached beside the
         // definitions snapshot (no legacy constants, 2026-10-27)
@@ -189,9 +194,11 @@ final class ServiceFactory
             $languages = $system->settings->getDatabaseSetting('Languages');
             return is_array($languages) ? $languages : array();
         };
-        // machine translation: the legacy translator (usr_info.php translate_string) has a DeepL key
-        // (as System.php sysinfo api_Translator; plan 25)
-        $factory->translatorAvailable = !empty($GLOBALS['accessToken_DeepLAPI'] ?? null);
+        $factory->associationMembershipStatus = $associationMembershipStatus;
+        $factory->googleTranslationKey = (string)($GLOBALS['accessToken_GoogleTranslateAPI'] ?? '');
+        // Provider configuration availability, independent of the user's eligibility.
+        $factory->translatorAvailable = !empty($GLOBALS['accessToken_DeepLAPI'] ?? null)
+            || !empty($GLOBALS['accessToken_GoogleTranslateAPI'] ?? null);
         // file store of the database and its disk quota (legacy fileUpload.php: 10 GB when not set)
         $factory->fileEnvironment = array(
             'root' => (string)$system->getSysDir(),
@@ -214,6 +221,8 @@ final class ServiceFactory
             $error = $system->getError();
             return is_array($error) ? (string)($error['message'] ?? '') : '';
         };
+
+        //TO BE REMOVED?
         $factory->userGroupLegacy = array(
             'hash' => static function(string $password): string {
                 class_exists('\hserv\entity\DbSysUsers'); // loads dbsUsersGroups.php (hash_it)
@@ -298,6 +307,38 @@ final class ServiceFactory
         $this->presentations = new PresentationRecordRepository($database, $runtime, $codes);
         $this->entityDirectory = $entityDirectory;
         $this->reportEnvironment = $reportEnvironment;
+    }
+
+    /** Build translation with credentials and eligibility resolved at the legacy boundary. */
+    public function translationService(): \Heurist\ExternalService\TranslationService
+    {
+        $codes = [];
+        $file = dirname(__DIR__, 2).'/hclient/assets/language-codes-active-list.json';
+        $languages = is_file($file) ? json_decode((string)file_get_contents($file), true) : [];
+        foreach (is_array($languages) ? $languages : [] as $language) {
+            if (!empty($language['a3']) && !empty($language['a2'])) {
+                $codes[$language['a3']] = $language['a2'];
+            }
+        }
+        return new \Heurist\ExternalService\TranslationService(
+            $this->runtime->userId, $this->associationMembershipStatus,
+            $this->googleTranslationKey === '' ? null
+                : new \Heurist\ExternalService\TranslationProvider\GoogleTranslation($this->googleTranslationKey),
+            $codes
+        );
+    }
+
+    public function lookupService(): \Heurist\ExternalService\LookupService
+    {
+        return new \Heurist\ExternalService\LookupService();
+    }
+
+    /** Create the controller of the external services (POST /external/translate). */
+    public function externalServiceController(): \Heurist\Controller\ExternalServiceController
+    {
+        return new \Heurist\Controller\ExternalServiceController($this->runtime, function(): \Heurist\ExternalService\TranslationService {
+            return $this->translationService();
+        });
     }
 
     /** Create the records query/retrieval controller. */
