@@ -210,4 +210,137 @@ Test the configuration with:
 sudo logrotate -d /etc/logrotate.d/mysql-slow
 ```
 
-###   
+### Setting up a new server
+
+1/11/2026
+
+We recommend asking ChatGPT or another AI to step through all the verificaitons necessary. The following set of instructions for Alma Linux, which assume prior installation of MySQL and PHP, is a useful starting point but will vary according to the Linux version.
+
+```
+sudo dnf update
+sudo dnf install mc -y
+sudo useradd -m your_user
+sudo passwd your_user
+
+#===== SSH service
+sudo dnf install openssh-server -y
+sudo systemctl enable sshd
+sudo systemctl start sshd
+
+
+#====== APACHE
+sudo dnf install httpd -y
+sudo systemctl restart httpd
+
+#====== MYSQL (version 8.0.43)
+
+sudo dnf install mysql-server -y
+
+sudo systemctl start mysqld
+sudo systemctl enable mysqld
+
+sudo systemctl status mysqld
+
+sudo mysql_secure_installation
+
+mysql -u root -p
+CREATE USER 'heurist'@'localhost' IDENTIFIED BY '[password]';
+GRANT ALL PRIVILEGES ON *.* TO 'heurist'@'localhost';
+FLUSH privileges;
+
+CREATE USER 'heurist'@'127.0.0.1' IDENTIFIED BY '[password]';
+GRANT ALL PRIVILEGES ON *.* TO 'heurist'@'127.0.0.1';
+FLUSH privileges;
+
+ALTER USER 'heurist'@'127.0.0.1' IDENTIFIED BY '[password]';
+ALTER USER 'heurist'@'localhost' IDENTIFIED BY '[password]';
+FLUSH PRIVILEGES;
+
+#====== PHP (php 8.0.30)
+sudo dnf install php php-cli php-mysqlnd -y      
+
+# Note php-fpm is installed along with php, otherwise
+
+sudo dnf install php-fpm -y
+sudo systemctl enable --now php-fpm
+sudo systemctl status php-fpm
+
+====== Firewall
+# If you need install firewall
+sudo dnf install -y firewalld
+sudo systemctl enable --now firewalld
+sudo systemctl status firewalld
+
+# Add services:
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all
+
+====== Composer for development
+
+sudo dnf install php-cli php-json php-mbstring git wget unzip -y
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+
+sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer 
+
+php /usr/local/bin/composer --version
+
+====== HEURIST
+
+chmod +x check_heurist_prereqs.sh
+./check_heurist_prereqs.sh
+
+# It list all missed reqs and hints how to install them.
+# Install missed prerequirements. Like 
+
+sudo dnf install wget
+wget --version
+
+# download and install heurist
+chmod +x install_heurist7.sh
+./install_heurist7.sh h7-alpha sudo
+
+#in heurist folder (if you wish update vendor folder)
+php /usr/local/bin/composer update
+
+# ensure folder has access for php
+sudo chown -R apache:apache /var/www/html/HEURIST/HEURIST_FILESTORE
+sudo chmod 2775 /var/www/html/HEURIST/HEURIST_FILESTORE
+
+# Check SELinux may block php folder operations
+
+# Give httpd writeable context to file_storage (recursively)
+sudo semanage fcontext -a -t httpd_sys_rw_content_t '/var/www/html/HEURIST/HEURIST_FILESTORE(/.*)?'
+sudo restorecon -Rv /var/www/html/HEURIST/HEURIST_FILESTORE
+# to verify later anytime
+ls -ldZ /var/www/html/HEURIST/HEURIST_FILESTORE
+# If PHP needs outbound network
+sudo setsebool -P httpd_can_network_connect on
+======
+#Configure apache
+# To install SSL 
+sudo dnf install -y mod_ssl
+httpd -M | grep ssl
+
+# https://certbot.eff.org/instructions?ws=apache&os=snap
+#Installing snap on AlmaLinux OS https://snapcraft.io/docs/installing-snap-on-almalinux
+sudo dnf install epel-release
+sudo dnf upgrade
+sudo dnf install snapd
+sudo systemctl enable --now snapd.socket
+sudo ln -s /var/lib/snapd/snap /snap
+sudo systemctl start snapd.service
+sudo snap wait system seed.loaded
+sudo snap version
+sudo snap changes
+#install CertBot
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+======
+# Copy files from move_to_parent to installation folder /var/www/html/HEURIST
+# Set params in heuristConfigIni.php
+# Most important are: dbserver user+pwd and url+path to storage folder
+```
