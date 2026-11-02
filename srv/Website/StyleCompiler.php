@@ -36,7 +36,8 @@ final class StyleCompiler
     /** Base settings (key = CSS variable without "--h-"). */
     public const BASE = array(
         'font-family', 'color-text', 'color-bg', 'color-surface', 'color-primary', 'color-link',
-        'color-border', 'radius', 'site-font-size', 'site-heading-font', 'site-heading-color', 'site-width'
+        'color-border', 'radius', 'site-font-size', 'site-heading-font', 'site-heading-color', 'site-width',
+        'color-selected', 'color-selected-border'
     );
 
     /** Screen sizes: key in a node style => max width. */
@@ -44,11 +45,11 @@ final class StyleCompiler
 
     /** Node style properties (plan 27a §4); margin, padding and border by pattern. */
     private const PROPERTIES = array(
-        'display', 'flex-direction', 'flex-wrap', 'justify-content', 'align-items', 'gap', 'grid-template-columns',
+        'display', 'flex-direction', 'flex-wrap', 'justify-content', 'align-items', 'align-content', 'gap', 'flex', 'grid-template-columns',
         'grid-template-rows', 'grid-column', 'grid-row', 'order',
         'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height', 'overflow',
         'border-radius', 'box-shadow',
-        'color', 'background-color', 'background-image', 'font-family', 'font-size', 'font-weight', 'line-height', 'text-align'
+        'color', 'background-color', 'background-image', 'background-position', 'background-repeat', 'background-size', 'font-family', 'font-size', 'font-weight', 'line-height', 'text-align'
     );
 
     /** Kinds of `styles.kinds` and their selectors. */

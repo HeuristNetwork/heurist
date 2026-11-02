@@ -383,12 +383,13 @@ final class WebsiteEditService
     }
 
     /**
-     * Take a page out of the menu of a website; the page record stays (a standalone page).
+     * Take a page out of the menu of a website (its sub menus go with it); the page record stays, as a
+     * standalone page unless $standalone is false (the CMS designer: the page type is kept).
      *
      * @return array Summary of the website.
      * @throws WebsiteException|RecordEditException
      */
-    public function removeFromMenu(int $siteId, int $pageId): array
+    public function removeFromMenu(int $siteId, int $pageId, bool $standalone = true): array
     {
         $codes = $this->repository->codes();
         $site = $this->editableV4($siteId, $codes['home']);
@@ -404,6 +405,7 @@ final class WebsiteEditService
             $found = true;
         }
         if(!$found){ throw new WebsiteException(404, 'Page '.$pageId.' is not in the menu of website '.$siteId); }
+        if(!$standalone){ return $this->summary($siteId); }
         $this->patch($pageId, array(
             'details' => array($codes['pageType'] => $codes['standalonePage'] > 0 ? array($codes['standalonePage']) : array())
         ));
