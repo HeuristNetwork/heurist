@@ -777,6 +777,27 @@ class UImage {
     
     
     /**
+     * The URL of a IIIF `thumbnail` value: a URL, an object with `@id` (v2) or `id` (v3), or a list of them
+     * (the first); null when there is none.
+     *
+     * @param mixed $value
+     * @return string|null
+     */
+    private static function iiifThumbnailId($value){
+        if(is_string($value)){
+            return trim($value)!=='' ? trim($value) : null;
+        }
+        if(!is_array($value) || empty($value)){
+            return null;
+        }
+        if(array_key_exists(0, $value)){
+            return self::iiifThumbnailId($value[0]);
+        }
+        $id = $value['@id'] ?? $value['id'] ?? null;
+        return is_string($id) && $id!=='' ? $id : null;
+    }
+
+    /**
      * Downloads or constructs a thumbnail URL from a IIIF manifest or IIIF image URL,
      * then downloads and saves it as a scaled image file.
      *
@@ -804,21 +825,17 @@ class UImage {
             if($type === 'sc:manifest' || //v2
                $type === 'manifest'){ //v3
 
-                if(@$iiif_manifest['thumbnail']){
-
-                    if(@$iiif_manifest['thumbnail']['@id']){  //v2
-                        $thumbUrl = @$iiif_manifest['thumbnail']['@id'];
-                    }elseif(@$iiif_manifest['thumbnail']['id']){  //v3
-                        $thumbUrl = @$iiif_manifest['thumbnail']['id'];
-                    }
-                }else{
+                // a thumbnail is a URL, an object with @id (v2) / id (v3), or a list of them (2026-11-03)
+                $thumbUrl = self::iiifThumbnailId($iiif_manifest['thumbnail'] ?? null);
+                if($thumbUrl===null){
                     //sequences -> canvases[0] -> images[0] -> resource -> @id or service -> @id
 
                     $thumb_url = @$iiif_manifest['sequences'][0]['canvases'][0];
-                    if($thumb_url){
+                    if(is_array($thumb_url)){
 
-                        if(@$thumb_url['thumbnail']['@id']){
-                            $thumbUrl = @$thumb_url['thumbnail']['@id'];
+                        $canvasThumb = self::iiifThumbnailId($thumb_url['thumbnail'] ?? null);
+                        if($canvasThumb!==null){
+                            $thumbUrl = $canvasThumb;
                         }else{
                             if(@$thumb_url['images'][0]['resource']['service']['@id']){
                                 $image_url = $thumb_url['images'][0]['resource']['service']['@id'];
@@ -838,7 +855,9 @@ class UImage {
                         // ver 3, use first available item as thumbnail
 
                         $thumb_url = @$iiif_manifest['items'][0];
-                        if($thumb_url && @$thumb_url['id']){
+                        if(is_array($thumb_url) && self::iiifThumbnailId($thumb_url['thumbnail'] ?? null)!==null){
+                            $thumbUrl = self::iiifThumbnailId($thumb_url['thumbnail']);
+                        }elseif(is_array($thumb_url) && @$thumb_url['id']){
 
                             $image_url = $thumb_url['id'];
 

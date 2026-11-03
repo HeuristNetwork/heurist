@@ -1533,10 +1533,11 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                         header('Content-type: image/png');
                         echo file_get_contents($thumbnail_file);
                     }else{
-                        redirectURL($placeholder);
+                        // no thumbnail in the manifest / image service: the IIIF logo as a stub (2026-11-03)
+                        redirectURL('../../hclient/assets/iiif_logo200.png');
                     }
                 }
-                
+
                 return;
 
             }elseif(strtolower($file['ulf_MimeExt'] ?? '')==='pdf'

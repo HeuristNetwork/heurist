@@ -185,12 +185,12 @@ final class CmsValidator
 
     /**
      * Why the settings of a media element are not valid, or null: `file` the key of a registered file,
-     * `width` / `height` 'auto', px or %, `player` a boolean (as cmsMediaProblem of cmsDocument.js).
+     * `width` / `height` / `playerWidth` / `playerHeight` 'auto', px or %, `player` a boolean (as cmsMediaProblem of cmsDocument.js).
      */
     public static function mediaProblem(array $settings): ?string
     {
         if(!preg_match('/^[A-Za-z0-9]+$/', (string)($settings['file'] ?? ''))){ return 'the file is missing'; }
-        foreach(array('width', 'height') as $name){
+        foreach(array('width', 'height', 'playerWidth', 'playerHeight') as $name){
             $value = (string)($settings[$name] ?? 'auto');
             if($value !== 'auto' && !preg_match('/^(?:\d+\.?\d*|\.\d+)(?:px|%)$/', $value)){
                 return $name.' must be auto, px or %';

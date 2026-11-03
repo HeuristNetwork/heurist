@@ -62,6 +62,12 @@ final class FileUrlInspector
                 if(strpos($lower, $host) !== false){ return $this->result($url, 'external', $this->known($service)); }
             }
         }
+        // an IIIF Image API request (.../full/!100,100/0/default.jpg): its image service, when it answers (2026-11-03)
+        $service = self::iiifImageService($url);
+        if($service !== null){
+            $iiif = $this->remoteIiif($service.'/info.json');
+            if($iiif !== null && $iiif['source'] === 'iiif_image'){ return $iiif; }
+        }
         $ext = self::urlExtension($url);
         if($ext === 'json' || substr($lower, -10) === '/info.json'){
             $iiif = $this->remoteIiif($url);
@@ -116,6 +122,19 @@ final class FileUrlInspector
         $base = basename($path);
         $dot = strrpos($base, '.');
         return $dot === false ? '' : strtolower(substr($base, $dot + 1));
+    }
+
+    /**
+     * The image service of an IIIF Image API request URL ({service}/{region}/{size}/{rotation}/{quality}.{format}),
+     * or null when the URL is not one.
+     */
+    public static function iiifImageService(string $url): ?string
+    {
+        $path = rawurldecode((string)preg_replace('/[?#].*$/', '', $url));
+        $pattern = '~^(https?://.+?)/(?:full|square|\d+,\d+,\d+,\d+|pct:[\d.]+,[\d.]+,[\d.]+,[\d.]+)'
+            .'/(?:full|max|\^?!?\d*,\d*|\^?!?\d+,|\^?pct:[\d.]+|\^?max)/!?\d+(?:\.\d+)?'
+            .'/(?:default|color|gray|bitonal|native)\.(?:jpe?g|png|gif|tiff?|webp|jp2)$~i';
+        return preg_match($pattern, $path, $match) ? $match[1] : null;
     }
 
     /** Result for a remote IIIF manifest or image service, or null. */
