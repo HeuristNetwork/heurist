@@ -676,6 +676,7 @@ window.hWin.HEURIST4.ui = {
         let useIds = (options.useIds===true);
         let useCheckboxes = (options.useCheckboxes===true);
         let eventHandlers  = options.eventHandlers;
+        let extraOptions = options.extraOptions;
         
         let showAllRectypes = (options.showAllRectypes===true); //otherwise only non-hidden
  
@@ -839,7 +840,7 @@ window.hWin.HEURIST4.ui = {
         }
         }
         
-        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect, null, eventHandlers);
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect, null, eventHandlers, extraOptions);
 
         return $(selObj);
     },

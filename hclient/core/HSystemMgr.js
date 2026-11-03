@@ -1585,7 +1585,9 @@ class HSystemMgr {
         if(typeof EditorCodeMirror === 'undefined'){
             scripts.push(`${editingBase}editorCodeMirror.js`);
         }
-        
+        if(typeof $.heurist.selectMultiValues === 'undefined'){
+            scripts.push(`${editingBase}selectMultiValues.js`);
+        }
 
         //widgets
         if(typeof $.heurist?.manageEntity === 'undefined'){
