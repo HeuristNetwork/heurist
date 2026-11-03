@@ -398,6 +398,13 @@ function editSymbology(current_value, mode_edit, callback, cancelCallback){
                     "rst_DisplayName": "Circle opacity:",
                     "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
                 }
+            },
+            {"dtID": "viewer",
+                "dtFields":{
+                    "dty_Type": "resource",
+                    "rst_DisplayName": "Node template:",
+                    "rst_FieldConfig":{"entity": "reports"}
+                }
             }
         ];
     }

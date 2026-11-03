@@ -106,8 +106,8 @@ function addNodes() {
             })
             .attr("class", "background icon-background")
             .style({'fill-opacity': '0.5', 'display': icon_display})
-            .attr("fill", entitycolor);
-        
+            .attr("fill", !settings.isDatabaseStructure ? determineColour : entitycolor);
+
         //add internal circle
         node.append("circle")
             .attr("r", circleSize)
@@ -340,17 +340,25 @@ function showNodeInformation(d){
         infoFrame.style('display', 'inline');
         infoBox.style('display', 'none');
 
-        if(infoFrame.attr("data-hid") == d.id){ // block retrival of last record in quick succession
+        const rec_ID = d.id;
+        let viewer = settings.nodeSettings?.[d.rty_ID]?.viewer ?? thematicSettings.nodes?.[d.rty_ID]?.settings?.viewer;
+        viewer = !viewer || viewer === 'rec-viewer' ? null : viewer;
+
+        if(infoFrame.attr('data-hid') == rec_ID && infoFrame.attr('data-format') === viewer){ // block retrival of last record in quick succession
             return;
         }
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(infoDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
             'Loading<br><br>'+ window.hWin.HEURIST4.util.stripTags(truncateText(d.name, 40)));
-    
-        const srcURL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${d.id}&db=${window.hWin.HAPI4.database}`; // URL for source of information iframe
 
-        infoFrame.attr("src", srcURL)
-                 .attr("data-hid", d.id)
+        // URL for source of information iframe
+        const srcURL = viewer !== 'rec-viewer' && viewer.slice(-4) === '.tpl'
+            ? `${window.hWin.HAPI4.baseURL}?snippet=1&q=ids:${rec_ID}&db=${window.hWin.HAPI4.database}&template=${encodeURIComponent(viewer)}`
+            : `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
+
+        infoFrame.attr('src', srcURL)
+                 .attr('data-hid', rec_ID)
+                 .attr('data-format', viewer)
                  .on('load', () => {
 
                     window.hWin.HEURIST4.msg.sendCoverallToBack(true);
@@ -446,10 +454,23 @@ function handleNodeAction(action = 'close'){
         return;
     }
 
-    let rec_ID = window.d3.select('#infoIframe').attr('data-hid');
-    let recviewer_URL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
+    const rec_ID = window.d3.select('#infoIframe').attr('data-hid');
+    const viewer = settings.nodeSettings?.[d.rty_ID]?.viewer ?? thematicSettings.nodes?.[d.rty_ID]?.settings?.viewer;
 
-    action == 'popup' ? window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false) : window.open(recviewer_URL, '_blank');
+    const isTemplate = !window.hWin.HEURIST4.util.isempty(viewer) && viewer.slice(-4) === '.tpl';
+    const templateURL = isTemplate ? `${window.hWin.HAPI4.baseURL}?snippet=1&q=ids:${rec_ID}&db=${window.hWin.HAPI4.database}&template=${encodeURIComponent(viewer)}` : '';
+
+    if(action === 'popup'){
+        let templateOpts = {default_palette_class: 'ui-heurist-explore', dialogId: 'vis-template-popup', height: 900, width: 800};
+        isTemplate ? window.hWin.HEURIST4.msg.showMsgDlgUrl(templateURL, null, null, templateOpts) : window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false);
+        return;
+    }
+
+    const recviewer_URL = isTemplate
+        ? templateURL
+        : `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
+
+    window.open(recviewer_URL, '_blank');
 }
 
 function toggleRecordViewer(action){
