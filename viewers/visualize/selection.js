@@ -92,11 +92,7 @@ function updateCircles(selector, fgColor, isSelection) {
     }
 
     let handleForeground = !settings.minimal ? fgColor : (d) => {
-
-        let settings = getSetting(`setting_styling_nodes${d.rty_ID}`, {fillColour: foregroundColor});
-        settings = window.hWin.HEURIST4.util.isJSON(settings) || {fillColour: foregroundColor};
-
-        return isSelection ? fgColor : settings['fillColour'];
+        return isSelection ? fgColor : determineColour(d);
     };
 
     let bgColor = getSetting('setting_entitycolor');
@@ -115,22 +111,56 @@ function updateCircles(selector, fgColor, isSelection) {
  */
 function determineColour(dataColour) {
 
+    const rtyID = dataColour.rty_ID;
     //In the array below there are currently 100 colours which will match up to all 100 unique node type ID's
     const colours = ['#FFEBEE', '#FFCDD2', '#EF9A9A', '#E57373', '#EF5350', '#FCE4EC', '#F8BBD0', '#F48FB1', '#F06292', '#EC407A',
-                     '#FF8A80', '#E1BEE7', '#CE93D8', '#BA68C8','#AB47BC', '#EDE7F6', '#D1C4E9', '#B39DDB','#9575CD', '#7E57C2',
-                     '#E8EAF6', '#C5CAE9','#9FA8DA', '#7986CB', '#5C6BC0', '#E3F2FD','#BBDEFB', '#90CAF9', '#64B5F6', '#42A5F5',
-                     '#E1F5FE', '#B3E5FC', '#81D4FA', '#4FC3F7','#29B6F6', '#E0F7FA', '#B2EBF2', '#80DEEA','#4DD0E1', '#26C6DA',
-                     '#E0F2F1', '#B2DFDB','#80CBC4', '#4DB6AC', '#26A69A', '#E8F5E9','#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A',
-                     '#F1F8E9','#F3E5F5', '#DCEDC8', '#C5E1A5', '#AED581','#9CCC65', '#F9FBE7', '#F0F4C3', '#E6EE9C','#DCE775',
-                     '#D4E157', '#FFFDE7', '#FFF9C4','#FFF59D', '#FFF176', '#FFEE58', '#fff8e1','#ffecb3', '#ffe082', '#ffd54f',
-                     '#ffca28', '#FFF3E0', '#FFE0B2', '#FFCC80', '#FFB74D','#FFA726', '#FBE9E7', '#FFCCBC', '#FFAB91','#FF8A65',
-                     '#FF7043', '#EFEBE9', '#D7CCC8','#BCAAA4', '#A1887F', '#8D6E63', '#FAFAFA','#F5F5F5', '#EEEEEE', '#E0E0E0',
-                     '#BDBDBD', '#ECEFF1', '#CFD8DC', '#B0BEC5', '#90A4AE','#78909C',  '#FF80AB', '#EA80FC', '#B388FF', '#8C9EFF'];
+                     '#FF8A80', '#E1BEE7', '#CE93D8', '#BA68C8', '#AB47BC', '#EDE7F6', '#D1C4E9', '#B39DDB', '#9575CD', '#7E57C2',
+                     '#E8EAF6', '#C5CAE9', '#9FA8DA', '#7986CB', '#5C6BC0', '#E3F2FD', '#BBDEFB', '#90CAF9', '#64B5F6', '#42A5F5',
+                     '#E1F5FE', '#B3E5FC', '#81D4FA', '#4FC3F7', '#29B6F6', '#E0F7FA', '#B2EBF2', '#80DEEA', '#4DD0E1', '#26C6DA',
+                     '#E0F2F1', '#B2DFDB', '#80CBC4', '#4DB6AC', '#26A69A', '#E8F5E9', '#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A',
+                     '#F1F8E9', '#F3E5F5', '#DCEDC8', '#C5E1A5', '#AED581', '#9CCC65', '#F9FBE7', '#F0F4C3', '#E6EE9C', '#DCE775',
+                     '#D4E157', '#FFFDE7', '#FFF9C4', '#FFF59D', '#FFF176', '#FFEE58', '#fff8e1', '#ffecb3', '#ffe082', '#ffd54f',
+                     '#ffca28', '#FFF3E0', '#FFE0B2', '#FFCC80', '#FFB74D', '#FFA726', '#FBE9E7', '#FFCCBC', '#FFAB91', '#FF8A65',
+                     '#FF7043', '#EFEBE9', '#D7CCC8', '#BCAAA4', '#A1887F', '#8D6E63', '#FAFAFA', '#F5F5F5', '#EEEEEE', '#E0E0E0',
+                     '#BDBDBD', '#ECEFF1', '#CFD8DC', '#B0BEC5', '#90A4AE', '#78909C', '#FF80AB', '#EA80FC', '#B388FF', '#8C9EFF'];
+
+    // First check thematic settings (personalised selection)
+    let nodeTheme = thematicSettings.nodes?.[rtyID]?.settings ?? {fillColour: foregroundColor};
+    nodeTheme = window.hWin.HEURIST4.util.isJSON(nodeTheme) || {fillColour: foregroundColor};
+
+    const isDefaultColour = ['#fff', '#ffffff'].includes(nodeTheme?.fillColour.toLowerCase());
+    if(!isDefaultColour && !window.hWin.HEURIST4.util.isempty(nodeTheme?.fillColour)){
+        return nodeTheme.fillColour;
+    }
+
+    // Second, check node settings (these are typically from widget parameters or previous calls)
+    if(!window.hWin.HEURIST4.util.isempty(settings.nodeSettings?.[rtyID]?.fillColour)){
+        return settings.nodeSettings[rtyID].fillColour;
+    }
+
+    // Finally, use a random colour
+    if(!settings.nodeSettings){
+        settings.nodeSettings = {
+            [rtyID]: {
+                fillColour: '',
+                iconColour: '',
+                viewer: ''
+            }
+        };
+    }else if(!Object.hasOwn(rtyID, settings.nodeSettings)){
+        settings.nodeSettings[rtyID] = {
+            fillColour: '',
+            iconColour: '',
+            viewer: ''
+        };
+    }
 
     const colourLength = colours.length;
-    let idx = dataColour.rty_ID - 1;
+    let idx = rtyID - 1;
     idx = idx >= colourLength ? idx % colourLength : idx;
     idx = idx < 0 ? Math.random() * colourLength : idx;
+
+    settings.nodeSettings[rtyID].fillColour = colours[idx];
 
     return colours[idx];
 }

@@ -2789,6 +2789,25 @@ $.widget( "heurist.editing_input", {
                 $input.attr('data-value', value);
             }
         
+        }else if(this.detailType === 'resource' && this.configMode?.entity === 'reports'){
+
+            $input = $('<select>', {
+                class: 'text ui-widget-content ui-corner-all'
+            })
+            .uniqueId()
+            .val(value)
+            .on('change', () => { that.onChange(); })
+            .appendTo($inputdiv);
+
+            window.hWin.HEURIST4.ui.createTemplateSelector($input, [{key: '', title: window.hWin.HR('Record viewer')}], value, {
+                eventHandlers: {
+                    onSelectMenu: () => {
+                        that.newvalues[$input.attr('id')] = $input.val();
+                        that.onChange();
+                    }
+                }
+            });
+
         }
         else if(this.detailType=='resource') //----------------------------------------------------
         {

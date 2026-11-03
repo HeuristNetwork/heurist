@@ -605,6 +605,13 @@ if($is_jobs_query && !in_array($http_method, array('GET','POST','DELETE'), true)
     exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, DELETE'));
 }
 
+// External services (special endpoint, plan 28): POST /api/{db}/external/translate
+// {"text","target","source","format"}; logged-in users only. See srv/Controller/ExternalServiceController.php.
+$is_external_query = ($resource === 'external');
+if($is_external_query && $http_verb !== 'POST'){
+    exitWithError('Method not allowed', 405, array('Allow' => 'POST'));
+}
+
 // Record-based entities (plan 27d, plan 28): /api/{db}/{entity}/{id}[/{action}] and /{entity}/{action},
 // e.g. /website/{id}/assign, /page/0/import, /website/setup; logged-in users only. Served by the generic
 // record controller (srv/Controller/RecordEditController.php::executeEntity) with the entity's hooks and
@@ -808,6 +815,22 @@ if($is_def_query){
         array_slice($requestUri, 4),
         $req_params,
         is_array($json) ? $json : null
+    );
+    $system->dbclose();
+    exit;
+
+}elseif($is_external_query){
+
+    $controller = ServiceFactory::fromLegacySystem($system)->externalServiceController();
+    $controller->handleRequest(
+        $http_verb,
+        array_slice($requestUri, 4),
+        is_array($json) ? $json : null,
+        array(
+            'contentType' => $contentType,
+            'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+            'host' => $_SERVER['HTTP_HOST'] ?? ''
+        )
     );
     $system->dbclose();
     exit;

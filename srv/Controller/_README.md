@@ -21,3 +21,5 @@ entry points during migration.
   entities `website` and `page` (`Website/WebsiteEntityHandler.php`).
 - `ReportController.php` — reports manager: list, template body, register, import/export, delete, single-record render.
 - `JobController.php` — background jobs: start (answers, closes the connection, then runs), status, Stop, result.
+- `ExternalServiceController.php` — external services (special endpoint): `POST /external/translate`
+  (`ExternalService/TranslationService`; logged-in association members, same-site JSON request).

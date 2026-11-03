@@ -171,7 +171,7 @@ function handleSettingsInUI() {
 
     let is_advanced = getSetting('setting_advanced');
 
-    $('#setAdvancedMode').css({cursor:'pointer'}).on('click.visualiser',
+    $('#setAdvancedMode').css({cursor:'pointer'}).on('click',
         function(){
               let is_advanced_current = getSetting('setting_advanced'); // Use a different variable name to avoid confusion
               is_advanced_current = (is_advanced_current ==='false'); // Strict comparison
@@ -225,25 +225,25 @@ function handleSettingsInUI() {
     //-------------------------------
 
     $('#btnSingleSelect').button({icon:'ui-icon-cursor' , showLabel:false})
-        .on('click.visualiser', function(){ window.selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
+        .on('click', function(){ window.selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
     $('#btnMultipleSelect').button({icon: 'ui-icon-select', showLabel:false})
-        .on('click.visualiser', function(){ window.selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
+        .on('click', function(){ window.selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
     $('#setSelectMode').controlgroup();
 
     $('#btnViewModeIcon').button({icon: 'ui-icon-circle' , showLabel:false})
-        .on('click.visualiser', function(){changeViewMode('icons');} );
+        .on('click', function(){changeViewMode('icons');} );
     $('#btnViewModeInfo').button({icon: 'ui-icon-circle-b-info' , showLabel:false})
-        .on('click.visualiser', function(){changeViewMode('infoboxes');} );
+        .on('click', function(){changeViewMode('infoboxes');} );
     $('#btnViewModeFull').button({icon: 'ui-icon-circle-info' , showLabel:false})
-        .on('click.visualiser', function(){changeViewMode('infoboxes_full');} );
+        .on('click', function(){changeViewMode('infoboxes_full');} );
     $( "#setViewMode" ).controlgroup();
 
     $('#gravityMode0').button()
-        .on('click.visualiser', () => setGravity('off') );
+        .on('click', () => setGravity('off') );
     $('#gravityMode1').button()
-        .on('click.visualiser', () => setGravity('touch') );
+        .on('click', () => setGravity('touch') );
     $('#gravityMode2').button()
-        .on('click.visualiser', () => setGravity('aggressive') );
+        .on('click', () => setGravity('aggressive') );
     $("#setGravityMode").controlgroup();
 
     //------------ NODES ----------
@@ -251,7 +251,7 @@ function handleSettingsInUI() {
     let radius = getSetting('setting_entityradius');
     if(radius<circleSize) radius = circleSize;  //min
     else if(radius>maxEntityRadius) radius = maxEntityRadius; //max
-    $('#nodesRadius').val(radius).on('change.visualiser', function(event){ // Added event parameter
+    $('#nodesRadius').val(radius).on('change', function(event){ // Added event parameter
         putSetting('setting_entityradius', $(event.target).val());
         window.d3.selectAll(".node > .background").attr("r", function(d) { // This will apply to all nodes, not just the one being changed if that's the intent
                         return getEntityRadius(d.count);
@@ -259,11 +259,11 @@ function handleSettingsInUI() {
     });
 
     $('#nodesMode0').button().css('width','35px')
-        .on('click.visualiser', function(){ setFormulaMode('linear'); });
+        .on('click', function(){ setFormulaMode('linear'); });
     $('#nodesMode1').button().css('width','40px')
-        .on('click.visualiser', function(){ setFormulaMode('logarithmic'); });
+        .on('click', function(){ setFormulaMode('logarithmic'); });
     $('#nodesMode2').button().css('width','50px')
-        .on('click.visualiser', function(){ setFormulaMode('unweighted'); });
+        .on('click', function(){ setFormulaMode('unweighted'); });
     $( "#setNodesMode" ).controlgroup();
 
     if($('#entityColor').length > 0){
@@ -286,18 +286,18 @@ function handleSettingsInUI() {
     //------------ LINKS ----------
 
     $('#linksMode0').button({icon: 'ui-icon-link-straight', showLabel:false})
-        .on('click.visualiser', function(){ setLinkMode('straight');} );
+        .on('click', function(){ setLinkMode('straight');} );
     $('#linksMode1').button({icon: 'ui-icon-link-curved', showLabel:false})
-        .on('click.visualiser', function(){ setLinkMode('curved');} );
+        .on('click', function(){ setLinkMode('curved');} );
     $('#linksMode2').button({icon: 'ui-icon-link-stepped', showLabel:false})
-        .on('click.visualiser', function(){ setLinkMode('stepped');} );
+        .on('click', function(){ setLinkMode('stepped');} );
 
-    $('#linksEmpty').on('change.visualiser', function(e){
+    $('#linksEmpty').on('change', function(e){
         putSetting('setting_line_empty_link', $(e.target).is(':checked')?1:0);
         visualizeData();
         _syncUI();
     });
-	$('#expand-links').on('change.visualiser', function(){ // expand single links
+	$('#expand-links').on('change', function(){ // expand single links
         tick();
 	});
     if(settings.isDatabaseStructure){ // show all links by default for database structure vis
@@ -310,7 +310,7 @@ function handleSettingsInUI() {
     putSetting('setting_linetype', 'straight'); // Default override
 
     let linksLength = 200; //getSetting('setting_linelength', 200); // Use stored or default
-    $('#linksLength').val(linksLength).on('change.visualiser', function(event){ // Added event parameter
+    $('#linksLength').val(linksLength).on('change', function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_linelength', newval);
         if(getSetting('setting_gravity') != "off"){ // Only redraw if gravity might be affected
@@ -322,7 +322,7 @@ function handleSettingsInUI() {
     if(linksWidth<1) linksWidth = 1;  //min
     else if(linksWidth>maxLinkWidth) linksWidth = maxLinkWidth; //max
 
-    $('#linksWidth').val(linksWidth).on('change.visualiser',
+    $('#linksWidth').val(linksWidth).on('change',
     function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_linewidth', newval);
@@ -331,7 +331,7 @@ function handleSettingsInUI() {
 
     $("#linksPathColor")
         .css({'font-size':'1.8em','font-weight':'bold','color':getSetting('setting_linecolor')})
-        .on('click.visualiser', function(e){
+        .on('click', function(e){
                 window.hWin.HEURIST4.util.stopEvent(e); // Prevent default if it's a link
                 $("#linksPathColor_inpt").colorpicker("showPalette");
         });
@@ -355,7 +355,7 @@ function handleSettingsInUI() {
     $("#linksMarkerColor")
         .addClass('ui-icon ui-icon-triangle-1-e') // Standard jQuery UI icon
         .css({'color':getSetting('setting_markercolor')})
-        .on('click.visualiser', function(e){
+        .on('click', function(e){
                 window.hWin.HEURIST4.util.stopEvent(e);
                 $("#linksMarkerColor_inpt").colorpicker("showPalette");
         });
@@ -379,7 +379,7 @@ function handleSettingsInUI() {
     //------------ LABELS ----------
 
     putSetting('setting_labels', 'on'); // Default override: labels always on initially
-    $('#textOnOff').attr('checked', true).on('change.visualiser', function(event){ // Added event parameter
+    $('#textOnOff').attr('checked', true).on('change', function(event){ // Added event parameter
 
         let newval = $(event.target).is(':checked')?'on':'off';
         putSetting('setting_labels', newval);
@@ -397,7 +397,7 @@ function handleSettingsInUI() {
     });
 
     let textLength = getSetting('setting_textlength', 200);
-    $('#textLength').val(textLength).on('change.visualiser', function(event){ // Added event parameter
+    $('#textLength').val(textLength).on('change', function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_textlength', newval);
         let isLabelCurrentlyVisible = (window.currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
@@ -409,7 +409,7 @@ function handleSettingsInUI() {
     if(Number.isNaN(fontSize) || fontSize<8) fontSize = 8;  //min
     else if(fontSize>25) fontSize = 25; //max
 
-    $('#fontSize').val(fontSize).on('change.visualiser', function(event){ // Added event parameter
+    $('#fontSize').val(fontSize).on('change', function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_fontsize', newval);
         let isLabelCurrentlyVisible = (window.currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
@@ -436,13 +436,13 @@ function handleSettingsInUI() {
 
 function initialiseMiniToolbar(){
 
-    $('#showRecordTitles').prop('checked', true).on('change.visualiser', () => { // show node titles
+    $('#showRecordTitles').prop('checked', true).on('change', () => { // show node titles
         svg.selectAll('text.nodelabel.namelabel').style('display', $('#showRecordTitles').is(':checked') ? '' : 'none');
     });
 
-    $('#recTitleSize').val(9).on('change.visualiser', () => updateScalableElements('labels'));
-    $('#nodeSize').val(window.circleSize).on('change.visualiser', () => updateScalableElements('all'));
-    $('#labelLength').val(20).on('change.visualiser', () => {
+    $('#recTitleSize').val(9).on('change', () => updateScalableElements('labels'));
+    $('#nodeSize').val(window.circleSize).on('change', () => updateScalableElements('all'));
+    $('#labelLength').val(20).on('change', () => {
         const labelLength = $('#labelLength').val();
         const labels = window.d3.selectAll('.nodelabel');
 
@@ -504,15 +504,15 @@ function initialiseMiniToolbar(){
         });
     });
 
-    $('#showSubToolbar').on('click.visualiser', () => {
+    $('#showSubToolbar').on('click', () => {
         $('#showSubToolbar').hide('slide', {direction: 'left'}, 400, () => $('.dropdown-subbar').show('slide', {direction: 'left'}));
         setTimeout(setupAutoHideToolbar, 500);
     });
-    $('#hideSubToolbar').on('click.visualiser', () => {
+    $('#hideSubToolbar').on('click', () => {
         $('.dropdown-subbar').hide('slide', {direction: 'left'}, 400, () => $('#showSubToolbar').show('slide', {direction: 'left'}));
     });
 
-    $('#gravityAmount').val(1).on('change.visualiser', () => {
+    $('#gravityAmount').val(1).on('change', () => {
 
         let amount = Number.parseFloat($('#gravityAmount').val());
         if(!window.force || Number.isNaN(amount) || amount < 0){
@@ -529,12 +529,12 @@ function initialiseMiniToolbar(){
     });
 
     if(window.hWin.HEURIST4.util.isFunction(settings.onExpandLevel)){
-        $('.graphLevelControl').on('click.visualiser', (e) => handleGraphLeveler(e));
+        $('.graphLevelControl').on('click', (e) => handleGraphLeveler(e));
     }else{
         $('#expandedLevels').hide();
     }
 
-    $('#showThematicSettings').on('click.visualiser', () => {
+    $('#showThematicSettings').on('click', () => {
         if($('#thematicSettings').is(':visible')){
             return;
         }

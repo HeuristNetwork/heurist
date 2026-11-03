@@ -75,6 +75,10 @@ tags:
     Registered files (uploads and external resources) as records of the record type Registered file
     (2-1106), in the JSON of /records: search, chunked upload, registration, changes, content and thumbnails.
     Logged-in users only, except the content and thumbnail of viewable files.
+- name: External services
+  description: >-
+    Services of external providers called by the server for logged-in users - machine translation (the server
+    chooses the provider; its key stays on the server).
 paths:
   /databases:
     get:
@@ -2370,6 +2374,91 @@ paths:
                   url: {type: string}
                   title: {type: string}
                   created: {type: boolean}
+  /{database}/external/translate:
+    post:
+      tags:
+      - External services
+      operationId: translateText
+      summary: Translate a text with the translation service of the server
+      description: >-
+        Machine translation for logged-in users of an association member (status database or individual).
+        The server chooses the provider and keeps its key. The definitions snapshot tells clients whether a
+        service is configured (`meta.translator` of GET /def/snapshot). Requests from another site are refused
+        and the body must be JSON. There are no retries, caching or usage accounting; treat translated HTML with
+        the same sanitization as input HTML.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text, target]
+              properties:
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 5000
+                  description: Nonempty UTF-8 text, at most 5,000 characters
+                target:
+                  type: string
+                  description: >-
+                    Target language - a two-letter code, a regional code or a Heurist three-letter code
+                    (e.g. fr, pt-BR, fre)
+                source:
+                  type: string
+                  description: Source language (same codes); omitted - the language is detected
+                format:
+                  type: string
+                  enum: [text, html]
+                  default: html
+                  description: Format of the text
+            example:
+              text: Hello world
+              target: fr
+              source: en
+              format: text
+      responses:
+        '200':
+          description: The translated text
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [text]
+                properties:
+                  text:
+                    type: string
+              example:
+                text: Bonjour le monde
+        '400':
+          $ref: '#/components/responses/ApiBadRequest'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '403':
+          description: Not an association member, or a request from another site
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '404':
+          $ref: '#/components/responses/ApiNotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          description: Content-Type is not application/json
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '502':
+          description: >-
+            No translation provider is configured, or the provider failed (configuration, billing, quota);
+            error service_error with the message of the service
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
   /{database}/rectypes:
     get:
       tags:
