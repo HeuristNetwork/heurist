@@ -147,7 +147,7 @@ function determineColour(dataColour) {
                 viewer: ''
             }
         };
-    }else if(!Object.hasOwn(rtyID, settings.nodeSettings)){
+    }else if(!Object.hasOwn(settings.nodeSettings, rtyID)){
         settings.nodeSettings[rtyID] = {
             fillColour: '',
             iconColour: '',

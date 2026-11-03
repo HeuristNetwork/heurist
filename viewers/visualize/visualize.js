@@ -1878,9 +1878,10 @@ function setupThematicSettings(){
 
         const rty = $Db.rty(rtyID);
         const iconURL = `${window.hWin.HAPI4.iconBaseURL}${rtyID}`;
+        const rtyDefSettings = $.extend({}, defaultNodeStyling, settings.nodeSettings?.[rtyID] ?? {});
 
-        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, defaultNodeStyling); // retrieve thematic settings
-        existingSettings = window.hWin.HEURIST4.util.isJSON(existingSettings) || defaultNodeStyling;
+        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, rtyDefSettings); // retrieve thematic settings
+        existingSettings = window.hWin.HEURIST4.util.isJSON(existingSettings) || rtyDefSettings;
         existingSettings.display = 1; // force initial display
 
         thematicSettings.nodes[rtyID] = {name: rty['rty_Name'], icon: iconURL, settings: {}}; // setup local cache
