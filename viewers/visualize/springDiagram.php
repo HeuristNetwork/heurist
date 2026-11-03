@@ -90,6 +90,14 @@ let nodeRelationMapping = {};
  * Visualiser instance, for calling destroy method
  */
 let visualise = null;
+/**
+ * Backup of callback functions
+ */
+let visualiserCallbackFunctions = {};
+/**
+ * Backup of default node settings
+ */
+let visualiserNodeSettings = {};
 
 /**
  * Callback function executed after the page's initial dependencies are loaded.
@@ -150,7 +158,12 @@ function performSearch(q){
                 // Parse response to spring diagram format
                 let data = __parseData(recordIDs, response_related.data);
 
-                showData(data, [], query, null, null, null, isMinimalVersion ? globalOnExpandLevel : null);
+                let callbackFunctions = visualiserCallbackFunctions;
+                if(isMinimalVersion){
+                    callbackFunctions['onExpandLevel'] = globalOnExpandLevel;
+                }
+
+                showData(data, [], query, null, null, callbackFunctions);
 
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response_related);
@@ -543,11 +556,16 @@ function addNewConnections(recordIDs, data){
          * @param {object} data - The data object for D3 (containing `nodes` and `links`).
          * @param {Array<string|number>} selectedRecordsIds - Array of initially selected record IDs.
          * @param {object} new_request - The search query object that generated this data.
-         * @param {function} [onSelectEvent] - Callback function triggered when nodes are selected in the visualization.
-         * @param {function} [onRefreshData] - Callback function to request a data refresh (e.g., after structural changes).
-         * @param {function} [onExpandRecords] - Callback function to handle requests to expand node connections.
+         * @param {object} callbackFunctions - Callback functions for certain events. keys: [onSelect, onRefresh, onExpand, onThematicSettings, onExpandLevel]
          */
-        function showData(data, selectedRecordsIds, new_request, onSelectEvent, onRefreshData, onExpandRecords, onExpandLevel) {
+        function showData(data, selectedRecordsIds, new_request, callbackFunctions, nodeSettings){
+
+            if(callbackFunctions === null && Object.keys(visualiserCallbackFunctions).length > 0){
+                callbackFunctions = visualiserCallbackFunctions;
+            }
+            if(nodeSettings === null && Object.keys(nodeSettings).length > 0){
+                nodeSettings = visualiserNodeSettings;
+            }
 
             if(visualise !== null){
                 visualise.destroy();
@@ -587,9 +605,10 @@ function addNewConnections(recordIDs, data){
             }
 
             $(window).on('resize', onVisualizeResize); // Bind resize handler
-            setTimeout(()=>onVisualizeResize(),1000); // Initial call
+            setTimeout(() => onVisualizeResize(), 1000); // Initial call
 
-            onExpandLevel = typeof onExpandLevel === 'function' ? onExpandLevel : globalOnExpandLevel;
+            onExpandLevel = typeof callbackFunctions.onExpandLevel === 'function' ? callbackFunctions.onExpandLevel : globalOnExpandLevel;
+            callbackFunctions.onExpandLevel = onExpandLevel;
 
             // Initialize the visualize plugin
             visualise = $("#visualize").visualize({ // Assumes #visualize is the ID of the main container in visualize.php
@@ -599,10 +618,11 @@ function addNewConnections(recordIDs, data){
                 getLineLength: getLineLength,
 
                 selectedNodeIds: selectedRecordsIds,   // Assign current selection
-                triggerSelection: onSelectEvent,       // Callback for selection changes
-                onRefreshData: onRefreshData,          // Callback for data refresh requests
-                onExpandNode: onExpandRecords,         // Callback for node expansion requests
-                onExpandLevel: onExpandLevel,          // Callback for entrire level expansion
+                triggerSelection: callbackFunctions.onSelect,               // Callback for selection changes
+                onRefreshData: callbackFunctions.onRefresh,                 // Callback for data refresh requests
+                onExpandNode: callbackFunctions.onExpand,                   // Callback for node expansion requests
+                onExpandLevel: callbackFunctions.onExpandLevel,             // Callback for entrire level expansion
+                onThematicSettings:callbackFunctions.onThematicSettings,    // Callback for handling thematic settings
 
                 entityradius: 1, // Default, likely overridden by settings.js
                 linewidth: 1,    // Default, likely overridden by settings.js
@@ -611,8 +631,13 @@ function addNewConnections(recordIDs, data){
                 showEntitySettings: false,
                 showFormula: false,
                 gravity: 'off', // Start with gravity off; can be 'touch' to initially scatter
-                minimal: isMinimalVersion
+                minimal: isMinimalVersion,
+
+                nodeSettings: nodeSettings
             });
+
+            visualiserCallbackFunctions = callbackFunctions ?? {};
+            visualiserNodeSettings = nodeSettings ?? {};
 
             let recIDs = new Set();
             if(isMinimalVersion){ // trigger additional settings for minimal mode

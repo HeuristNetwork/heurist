@@ -62,6 +62,8 @@ $.widget( "heurist.connections", {
         nodeLimit: 20, // limit the initial number of nodes, to avoid overworking the browser
         autoExtendSelection: true, // auto extend the graph when is ONLY ONE record shown
 
+        nodeSettings: {}, // node colour + node details display (e.g. record viewer or template)
+
         // Message options
         blank_placeholder: false,
         placeholder_text: 'recvis_nodata', // text to display while no record/recordset is loaded  (search is not performed)
@@ -589,18 +591,22 @@ $.widget( "heurist.connections", {
                 data = {message: message};
             }
 
-            this.graphframe[0].contentWindow.showData(data, this.options.selection, this._lastRequest,
-                    function(selected){ //on select
-                        $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-                        { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
-                    },
-                    function(selected){ //on refresh
-                        that._getRelations(that.options.recordset);
-                    },
-                    function(type, rec_ID){ //on expand search
-                        that._expandSearch(type, rec_ID);
-                    }
-            );
+            let callbacks = {
+                onSelect: (selected) => {
+                    $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, { selection: selected, source: that.element.attr('id'), search_realm: that.options.search_realm } );
+                },
+                onRefresh: (selected) => {
+                    that._getRelations(that.options.recordset);
+                },
+                onExpand: (type, rec_ID) => {
+                    that._expandSearch(type, rec_ID);
+                },
+                onThematicSettings: (settings, type, ID, saveCallback) => {
+                    that._editThematicSettings(settings, type, ID, saveCallback);
+                }
+            };
+
+            this.graphframe[0].contentWindow.showData(data, this.options.selection, this._lastRequest, callbacks, this.options.nodeSettings ?? {});
             this.recordset_changed = false;
         }
     },    
@@ -829,6 +835,30 @@ $.widget( "heurist.connections", {
             that._lastRequest = request;
 
             that._refresh();
+        });
+    },
+
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Handle requests to edit thematic node/edge settings,
+     * it has several problems if the visualiser attempts to call the editor
+     * so connections works inbetween
+     */
+    _editThematicSettings: function(settings, type, ID, saveCallback){
+
+        if(!window.hWin.HEURIST4.util.isPositiveInt(ID) || type !== 'nodes' && type !== 'edges'){
+            return;
+        }
+
+        // Graph node/edge styling intentionally uses the special symbology editor modes
+        // 6 and 7. Route through the shared launcher so mapSymbolEditor.js can remain
+        // dynamically loaded through the centralized map editor launcher.    
+        window.hWin.HEURIST4.ui.showEditSymbologyDialog(settings, type === 'nodes' ? 6 : 7, (styling) => {
+            if(typeof saveCallback === 'function'){
+                saveCallback(styling);
+            }
         });
     }
 

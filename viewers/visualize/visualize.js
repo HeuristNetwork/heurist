@@ -143,6 +143,7 @@ let maxCountForLinks;
             onExpandNode: null, // Callback for node expansion
             onExpandLevel: null, // Callback for entire level expansion
             triggerSelection: function(selection){}, // Callback when selection changes
+            onThematicSettings: null, // Callback for opening thematic settings editor
 
             isDatabaseStructure: false, // True if visualizing DB structure, false for record data
 
@@ -202,7 +203,9 @@ let maxCountForLinks;
             translatey: 200,
             scale: 1,
 
-            minimal: 0
+            minimal: 0,
+
+            nodeSettings: {}
         }, options );
 
         // Handle settings initialization and UI setup (from settings.js)
@@ -230,8 +233,8 @@ let maxCountForLinks;
 
         this.destroy = function(){ // remove event listeners
 
-            $('#toolbar input, #toolbar button, #toolbar .toolbarController').off('click');//.visualiser
-            $('#toolbar input, #toolbar .toolbarController').off('change');//.visualiser
+            $('#toolbar input, #toolbar button, #toolbar .toolbarController').off('click');
+            $('#toolbar input, #toolbar .toolbarController').off('change');
 
             $('#toolbar button').each((idx, button) => {
                 if($(button).button('instance') !== undefined){
@@ -1849,22 +1852,25 @@ function setupThematicSettings(){
 
     let data = settings.getData.call(this, settings.data);
 
+    // Retrieve HTML containers
     let container = document.querySelector('#thematicSettings');
     let nodeContainer = document.querySelector('#thematicNodesList');
     let edgeContainer = document.querySelector('#thematicEdgesList');
 
-    const defaultNodeStyling = {iconColour: '#000000', iconOpacity: '100', fillColour: '#FFFFFF', fillOpacity: '100', display: 1};
+    // Default settings, based on the default settings already used by the visualiser
+    const defaultNodeStyling = {iconColour: '#000000', iconOpacity: '100', fillColour: '#FFFFFF', fillOpacity: '100', display: 1, viewer: ''};
     const defaultLineStyling = {lineColour: '#0070C0', lineOpacity: '100', display: 1};
 
     nodeContainer.innerHTML = '';
     edgeContainer.innerHTML = '';
 
+    // First, handle nodes (records)
     for(let i = 0; i < data.nodes.length; i++){
 
         let node = data.nodes[i];
         const rtyID = Number.parseInt(node.rty_ID);
 
-        if(Object.hasOwn(thematicSettings['nodes'], rtyID) && nodeContainer.querySelector(`[data-nodeid="${rtyID}"]`)){
+        if(Object.hasOwn(thematicSettings.nodes, rtyID) && nodeContainer.querySelector(`[data-nodeid="${rtyID}"]`)){ // node already added to list
             setThematicSetting('nodes', rtyID);
             toggleDisplay('nodes', rtyID, null);
             continue;
@@ -1873,17 +1879,18 @@ function setupThematicSettings(){
         const rty = $Db.rty(rtyID);
         const iconURL = `${window.hWin.HAPI4.iconBaseURL}${rtyID}`;
 
-        thematicSettings['nodes'][rtyID] = {name: rty['rty_Name'], icon: iconURL, settings: {}};
-        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, defaultNodeStyling);
+        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, defaultNodeStyling); // retrieve thematic settings
         existingSettings = window.hWin.HEURIST4.util.isJSON(existingSettings) || defaultNodeStyling;
-        existingSettings.display = 1;
-        thematicSettings['nodes'][rtyID].settings = existingSettings;
+        existingSettings.display = 1; // force initial display
+
+        thematicSettings.nodes[rtyID] = {name: rty['rty_Name'], icon: iconURL, settings: {}}; // setup local cache
+        thematicSettings.nodes[rtyID].settings = existingSettings;
 
         let item = `
         <input name="displayNode" type="checkbox" checked="checked">
-        <img src="${thematicSettings['nodes'][rtyID].icon}" alt="${thematicSettings['nodes'][rtyID].name}" height="16" width="16" style="top: 5px;position: relative;" data-icon-id="${rtyID}">
-        <!--<span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>-->
-        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['nodes'][rtyID].name}" class="truncate">${thematicSettings['nodes'][rtyID].name}</span>
+        <img src="${thematicSettings.nodes[rtyID].icon}" alt="${thematicSettings.nodes[rtyID].name}" height="16" width="16" style="top: 5px;position: relative;" data-icon-id="${rtyID}">
+        <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
+        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings.nodes[rtyID].name}" class="truncate">${thematicSettings.nodes[rtyID].name}</span>
         `;
 
         let div = document.createElement('div');
@@ -1893,13 +1900,14 @@ function setupThematicSettings(){
 
         nodeContainer.appendChild(div);
 
-        //div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('nodes', rtyID));
+        div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('nodes', rtyID));
         div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => toggleDisplay('nodes', rtyID, event.target.checked));
 
         setThematicSetting('nodes', rtyID);
         toggleDisplay('nodes', rtyID, null);
     }
 
+    // Secondly, handle edges (relmarkers and resources)
     for(let i = 0; i < data.links.length; i++){
 
         let link = data.links[i].relation;
@@ -1908,23 +1916,24 @@ function setupThematicSettings(){
             continue;
         }
 
-        if(Object.hasOwn(thematicSettings['edges'], trmID) && edgeContainer.querySelector(`[data-edgeid="${trmID}"]`)){
+        if(Object.hasOwn(thematicSettings.edges, trmID) && edgeContainer.querySelector(`[data-edgeid="${trmID}"]`)){ // edge already listed
             setThematicSetting('edges', trmID);
             toggleDisplay('edges', trmID, null);
             continue;
         }
 
-        thematicSettings['edges'][trmID] = {name: link['name'], settings: {}};
-        let existingSettings = getSetting(`setting_styling_edges${trmID}`, defaultLineStyling);
+        let existingSettings = getSetting(`setting_styling_edges${trmID}`, defaultLineStyling); // get thematic settings
         existingSettings = window.hWin.HEURIST4.util.isJSON(existingSettings) || defaultLineStyling;
-        existingSettings.display = 1;
-        thematicSettings['edges'][trmID].settings = existingSettings;
+        existingSettings.display = 1; // force initial display
+
+        thematicSettings.edges[trmID] = {name: link['name'], settings: {}}; // setup local cache
+        thematicSettings.edges[trmID].settings = existingSettings;
 
         let item = `
         <input name="displayNode" type="checkbox" checked="checked">
         <span class="ui-icon ui-icon-minusthick" style="top: 5px; position: relative;" data-line-id="${trmID}"></span>
-        <!--<span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>-->
-        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['edges'][trmID].name}" class="truncate">${thematicSettings['edges'][trmID].name}</span>
+        <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
+        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings.edges[trmID].name}" class="truncate">${thematicSettings.edges[trmID].name}</span>
         `;
 
         let div = document.createElement('div');
@@ -1934,7 +1943,7 @@ function setupThematicSettings(){
 
         edgeContainer.appendChild(div);
 
-        //div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('edges', trmID));
+        div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('edges', trmID));
         div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => toggleDisplay('edges', trmID, event.target.checked));
 
         setThematicSetting('edges', trmID);
@@ -1945,28 +1954,35 @@ function setupThematicSettings(){
 
     let showContainer = $('#showThematicContainer');
     let hideContainer = $('#hideThematicContainer');
-    showContainer.on('click.visualiser', () => {
+    showContainer.on('click', () => {
         showContainer.hide('slide', {direction: 'left'}, 400, () => $(container).show('slide', {direction: 'left'}));
     });
-    hideContainer.on('click.visualiser', () => {
+    hideContainer.on('click', () => {
         $(container).hide('slide', {direction: 'left'}, 400, () => showContainer.show('slide', {direction: 'left'}));
     });
+
+    if(typeof settings.onThematicSettings !== 'function'){
+        document.querySelectorAll('.editSymbols').forEach((node, index) => node.style.display = 'none');
+    }
 }
 
 function editThematicSetting(type, ID){
+
+    if(typeof settings.onThematicSettings !== 'function'){
+        return;
+    }
 
     if((type !== 'nodes' && type !== 'edges') || !window.hWin.HEURIST4.util.isPositiveInt(ID) || !Object.hasOwn(thematicSettings[type], ID)){
         return;
     }
 
+    // Open thematic editor
     let details = thematicSettings[type][ID];
-
-    // Graph node/edge styling intentionally uses the special symbology editor modes
-    // 6 and 7. Route through the shared launcher so mapSymbolEditor.js can remain
-    // dynamically loaded through the centralized map editor launcher.    
-    window.hWin.HEURIST4.ui.showEditSymbologyDialog(details.settings, type === 'nodes' ? 6 : 7, (styling) => {
+    // connections.js handle the thematic editor to avoid issues with dialog placement & the colour picker
+    settings.onThematicSettings.call(this, details.settings, type, ID, (styling) => {
 
         putSetting(`setting_styling_${type}${ID}`, styling);
+        thematicSettings[type][ID].settings = styling;
 
         setThematicSetting(type, ID);
     });
@@ -1976,14 +1992,14 @@ const hexToFilterCache = {};
 
 function setThematicSetting(type, ID){
 
-    let styling = getSetting(`setting_styling_${type}${ID}`);
+    let styling = thematicSettings.nodes[ID]?.settings;
     styling = window.hWin.HEURIST4.util.isJSON(styling);
 
-    if(true || styling === false || !window.hWin.HEURIST4.util.isObject(styling)){
+    if(styling === false || !window.hWin.HEURIST4.util.isObject(styling)){
         return;
     }
 
-    if(type === 'nodes'){ // @todo the filter is inconsistent (colour picker is also bugged)
+    if(type === 'nodes'){
 
         if(!styling?.iconColour){
             return;
@@ -1996,6 +2012,7 @@ function setThematicSetting(type, ID){
             hexToFilterCache[hexCode] = colourFilter;
         }
 
+        const fillColour = determineColour({rty_ID: ID});
         colourFilter = colourFilter.replace(/;$/, '');
         let icons = document.querySelectorAll(`image[data-icon-id="${ID}"]`);
 
@@ -2009,7 +2026,7 @@ function setThematicSetting(type, ID){
                 continue;
             }
 
-            foregroundCircle.style.setProperty('fill', styling.fillColour);
+            foregroundCircle.style.setProperty('fill', fillColour);
             foregroundCircle.style.setProperty('opacity', styling.fillOpacity);
         }
 
@@ -2017,7 +2034,7 @@ function setThematicSetting(type, ID){
         legendIcon.style.setProperty('filter', colourFilter);
         legendIcon.style.setProperty('opacity', `${styling.iconOpacity}%`);
 
-    }else if(type === 'edges'){ // @todo colour picker is bugged
+    }else if(type === 'edges'){
 
         let lines = document.querySelectorAll(`path.bottom-lines[data-connector*="r${ID}t"]`);
 
