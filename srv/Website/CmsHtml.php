@@ -31,7 +31,7 @@ final class CmsHtml
     /**
      * Elements with `data-h-node` in document order.
      *
-     * @return array<int,array{node:string,instance:?string,text:bool,control:?string,tag:string}>
+     * @return array<int,array{node:string,instance:?string,media:?string,text:bool,control:?string,tag:string}>
      */
     public static function nodes(string $html): array
     {
@@ -44,6 +44,7 @@ final class CmsHtml
             $nodes[] = array(
                 'node' => $element->getAttribute('data-h-node'),
                 'instance' => $element->hasAttribute('data-h-instance') ? $element->getAttribute('data-h-instance') : null,
+                'media' => $element->hasAttribute('data-h-media') ? $element->getAttribute('data-h-media') : null,
                 'text' => $element->hasAttribute('data-h-text'),
                 'control' => $element->hasAttribute('data-h-control') ? $element->getAttribute('data-h-control') : null,
                 'tag' => strtolower($element->tagName)

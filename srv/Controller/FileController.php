@@ -5,6 +5,7 @@
 * Routes (plan 20, Phases 1-2):
 *   GET|POST /files                     search; the parameters and response of /records
 *   GET      /files/{id}                one file record (fields default to _all)
+*   GET      /files/{key}               the same, by the obfuscated key (plan 27c §30; read only)
 *   POST     /files/0                   register: {"upload": token} or rec_URL, with file fields
 *   PUT|PATCH /files/{id}               change; with "upload" the content is replaced
 *   DELETE   /files/{id}                delete (409 while records refer to it)
@@ -103,6 +104,14 @@ final class FileController
             return $this->upload($method, $segments, $json, $request);
         }
         if(!preg_match('/^\d+$/', $first)){
+            // one file by its obfuscated key: the same record as /files/{id}; writes go by the id only
+            if($second === '' && preg_match('/^[A-Za-z0-9]+$/', $first)){
+                $this->allow($method, array('GET'));
+                $this->assertUser();
+                $fileId = $this->store->idByKey($first);
+                if($fileId <= 0){ throw new RecordEditException(404, 'not_found', 'File not found'); }
+                return array(200, $this->store->item($params, $fileId));
+            }
             throw new RecordEditException(404, 'not_found', 'Unknown files route');
         }
         $fileId = intval($first);

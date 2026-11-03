@@ -4,7 +4,7 @@
 *
 * The document: title and keywords; the website bundle CSS (heurist-ui.css and
 * the site styles); one <style> with the base settings and node styles
-* (StyleCompiler); the custom CSS (99-946, StoredCss) of website and page;
+* (StyleCompiler); the custom CSS (99-946) of website and page, only with isJavaScriptAllowed;
 * header, page content and footer with the texts of the current language;
 * the instance configuration in <script type="application/json" id="h-site-config">;
 * the site runtime (apps/website in heurist-explorer), which mounts the modules
@@ -26,7 +26,6 @@ declare(strict_types=1);
 namespace Heurist\Website;
 
 use Heurist\Utilities\LanguageCodes;
-use Heurist\Utilities\StoredCss;
 
 /** HTML of a page context (WebsiteService::context). */
 final class PageRenderer
@@ -246,15 +245,16 @@ final class PageRenderer
         return $links;
     }
 
-    /** Custom CSS of website and page; cleaned again unless the code exception applies now. */
+    /** Custom CSS of website and page, only with the code exception (isJavaScriptAllowed; plan 27a decision 12). */
     private function customCss(?array $site, array $page, bool $home): string
     {
+        if(!$this->environment['javaScriptAllowed']){ return ''; }
         $css = '';
         $records = $site !== null && !$home ? array($site, $page) : array($page);
         foreach($records as $record){
             $value = WebsiteRepository::value($record, $this->codes['css']);
             if(trim($value) === ''){ continue; }
-            $value = $this->environment['javaScriptAllowed'] ? str_ireplace('</style', '<\/style', $value) : StoredCss::clean($value);
+            $value = str_ireplace('</style', '<\/style', $value);
             $css .= '<style class="h-site-custom-css">'."\n".$value."\n".'</style>';
         }
         return $css;

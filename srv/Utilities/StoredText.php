@@ -22,12 +22,9 @@ final class StoredText
     {
         $value = self::trim($value);
         if(self::allowsCode($rectype, $field, $codes, $authorized)){ return $value; }
-        // custom CSS is kept without the JavaScript permission, checked as CSS (plan 27a, decision 12)
-        if($field > 0 && $field === ($codes['cmsCss'] ?? 0)){
-            return StoredCss::clean($value);
-        }
-        // A bare script has no HTML wrapper for a sanitizer to recognize.
-        if($field > 0 && $field === ($codes['cmsScript'] ?? 0)){
+        // custom CSS and scripts of websites only with the JavaScript permission (decision 12 changed 2026-11-03:
+        // CSS is cleared too, it was kept as checked CSS); a bare script has no HTML wrapper for a sanitizer anyway
+        if($field > 0 && in_array($field, array($codes['cmsCss'] ?? 0, $codes['cmsScript'] ?? 0), true)){
             return '';
         }
         // Structured settings must remain valid JSON when one of their string values contains HTML.
@@ -85,16 +82,16 @@ final class StoredText
             $allowed .= ',p[style],div[style],span[style],br,hr,h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],'
                 .'blockquote,pre,code,s,sup,sub,small,'
                 .'ul,ol[start|type],li[value],dl,dt,dd,a[href|title|target|rel|data-ref],'
-                .'img[src|alt|title|width|height|data-id],'
+                .'img[src|alt|title|width|height|data-id|loading],'
                 .'table[width|border|cellpadding|cellspacing|summary],caption,colgroup,col[span|width],'
                 .'thead,tbody,tfoot,tr,th[colspan|rowspan|scope|abbr|width|height],td[colspan|rowspan|width|height],'
                 .'figure,figcaption,audio[src|controls|preload|data-id],video[src|controls|preload|poster|width|height|data-id],'
-                .'source[src|type],iframe[src|width|height|title|frameborder|allowfullscreen],'
+                .'source[src|type],iframe[src|width|height|title|frameborder|allowfullscreen|allow|loading],'
                 // website format v4 (plan 27a): page structure, tabs and accordions, nodes and hosts
                 // a group with a caption: section[aria-labelledby] = the id of its heading (plan 27c §20)
                 .'section[aria-labelledby],article,aside,nav,header,footer,main,details[open],summary,'
                 .'*[id|class|title|lang|dir|data-heurist-rec|data-heurist-app-id|data-inited'
-                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style]';
+                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media]';
             $config->set('HTML.SafeIframe', true);
             $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
             $config->set('HTML.Allowed', $allowed);
@@ -118,7 +115,8 @@ final class StoredText
             $blocks = array('div', 'p', 'span', 'section', 'article', 'aside', 'nav', 'header', 'footer', 'main',
                 'details', 'summary', 'figure', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'img');
             // data-h-style: a style preset of the website or page (plan 27c §6a)
-            foreach(array('data-h-node', 'data-h-instance', 'data-h-control', 'data-h-style') as $attribute){
+            // data-h-media: a media element (plan 27c §33)
+            foreach(array('data-h-node', 'data-h-instance', 'data-h-control', 'data-h-style', 'data-h-media') as $attribute){
                 foreach($blocks as $element){ $def->addAttribute($element, $attribute, 'Text'); }
             }
             // a text block: a flag without a value (data-h-text="" after purifying)
@@ -126,6 +124,10 @@ final class StoredText
             $def->addAttribute('img', 'data-id', 'Number');
             $def->addAttribute('a', 'data-ref', 'Text');
             $def->addAttribute('iframe', 'allowfullscreen', 'Bool');
+            // a media element (plan 27c §33): players load when shown, a service player may start after the click
+            $def->addAttribute('iframe', 'allow', 'Enum#autoplay; fullscreen,fullscreen');
+            $def->addAttribute('iframe', 'loading', 'Enum#lazy,eager');
+            $def->addAttribute('img', 'loading', 'Enum#lazy,eager');
             $align = self::textAlign();
             foreach(array('p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6') as $element){
                 $def->addAttribute($element, 'style', $align);

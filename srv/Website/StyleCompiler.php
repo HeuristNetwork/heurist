@@ -37,7 +37,7 @@ final class StyleCompiler
     public const BASE = array(
         'font-family', 'color-text', 'color-bg', 'color-surface', 'color-primary', 'color-link',
         'color-border', 'radius', 'site-font-size', 'site-heading-font', 'site-heading-color', 'site-width',
-        'color-selected', 'color-selected-border'
+        'color-selected', 'color-selected-border', 'color-primary-text', 'color-text-muted'
     );
 
     /** Screen sizes: key in a node style => max width. */
@@ -57,7 +57,8 @@ final class StyleCompiler
         'group' => '[data-h-control="group"]',
         'tabs' => '[data-h-control="tabs"]',
         'accordion' => '[data-h-control="accordion"]',
-        'text' => '[data-h-text]',
+        'text' => '[data-h-text]:not([data-h-media])',
+        'media' => '[data-h-media]',
         'instance' => '[data-h-instance]'
     );
 
@@ -106,6 +107,7 @@ final class StyleCompiler
                 $this->rule(self::KINDS[$kind], $style, null, $css, $screens);
             }
         }
+        $this->flushScreens($css, $screens);
         foreach($presetSets as $presets){
             if(!is_array($presets)){ continue; }
             foreach($presets as $name => $style){
@@ -118,6 +120,7 @@ final class StyleCompiler
                 $this->rule('[data-h-style="'.$name.'"]', $style, null, $css, $screens);
             }
         }
+        $this->flushScreens($css, $screens);
         foreach($nodeSets as $nodes){
             if(!is_array($nodes)){ continue; }
             foreach($nodes as $id => $style){
@@ -129,13 +132,23 @@ final class StyleCompiler
                 $this->rule('[data-h-node="'.$id.'"]', $style, $id, $css, $screens);
             }
         }
-        // medium first, then narrow: the smaller screen wins
+        $this->flushScreens($css, $screens);
+        return $css;
+    }
+
+    /**
+     * The screen rules collected so far, after the rules of their level (kinds, presets, nodes), so a node's own
+     * style wins over a kind default or a preset on every screen (plan 27c §30). Medium first, then narrow: the
+     * smaller screen wins.
+     */
+    private function flushScreens(string &$css, array &$screens): void
+    {
         foreach(self::SCREENS as $screen => $width){
             if($screens[$screen] !== ''){
                 $css .= '@media (max-width:'.$width."px){\n".$screens[$screen]."}\n";
             }
+            $screens[$screen] = '';
         }
-        return $css;
     }
 
     /** The rule of one selector, and its screen rules into $screens. */
