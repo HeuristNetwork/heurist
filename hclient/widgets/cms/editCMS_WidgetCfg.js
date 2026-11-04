@@ -49,6 +49,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
     const _className = 'editCMS_WidgetCfg';
     
     let _heuristMapSettings = {};
+    let _heuristGraphThematicSettings = {};
 
     const _def_labels = {
         heurist_SearchInput: {
@@ -491,6 +492,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     if(!opts['autoExtendSingle']){
                         opts['autoExtendSingle'] = true;
                     }
+
+                    _setupThematicNetworking(opts['nodeSettings']);
                 
                 }else if(widget_name=='heurist_resultList'){ // standard result list
 
@@ -1838,6 +1841,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['empty_remark'] = empty_remark;
             opts['placeholder_text'] = placeholder;
 
+            opts['nodeSettings'] = _getThematicNetwork();
+
         }else if(widget_name=='heurist_resultList'){
 
             opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode']
@@ -1999,6 +2004,113 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }
         })
 
+    }
+
+    function _setupThematicNetworking(existingSettings){
+
+        const $container = $('#thematic-settings-graph');
+        const $addNewSettings = $container.find('.add-thematic-settings');
+
+        let $__addRow = function(rtyID){
+
+            if(!window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+                rtyID = 'placeholder';
+            }
+
+            if($container.find(`[data-rtyid="${rtyID}"]`).length === 0){
+
+                let $element = $('<div>', {
+                    'data-rtyid': rtyID,
+                    style: 'cursor: pointer;',
+                    html: `<select class="recTypeSelector" title="Set thematic settings record type"></select>
+                    <span style="padding-inline: 1em; text-decoration: underline;" class="editSettings" title="Edit thematic settings for this record type">edit settings</span>
+                    <span class="ui-icon ui-icon-circlesmall-close removeSettings" title="Remove thematic settings"></span>`
+                }).uniqueId().insertBefore($addNewSettings);
+
+                const elementID = $element.attr('id');
+
+                const $select = $element.find('.recTypeSelector');
+
+                let topOption = [{key: 'placeholder', title: window.hWin.HR('Select a record type...')}];
+                let eventHandler = {
+                    onSelectMenu: () => {
+
+                        const rtyID = window.hWin.HEURIST4.util.isPositiveInt($select.val()) ? $select.val() : 'placeholder';
+
+                        $element.attr('data-rtyid', rtyID);
+
+                        let existingSettings = _heuristGraphThematicSettings[elementID];
+                        if(!Array.isArray(existingSettings)){
+                            existingSettings = [rtyID, {}];
+                        }else{
+                            existingSettings[0] = rtyID;
+                        }
+                        _heuristGraphThematicSettings[elementID] = existingSettings;
+                        on_change();
+                    }
+                }
+                window.hWin.HEURIST4.ui.createRectypeSelectNew($select[0], {topOptions: topOption, eventHandlers: eventHandler, extraOptions: {menu_parent: $dlg}});
+                if($select.hSelect('instance') !== undefined){
+                    $select.hSelect('widget')[0].style.setProperty('width', '15em', 'important');;
+                }
+
+                $element.find('.editSettings').on('click', () => _editThematicNetwork(elementID));
+
+                $element.find('.removeSettings').on('click', () => {
+                    delete _heuristGraphThematicSettings[elementID];
+                    $element.remove();
+                });
+            }
+
+            return $container.find(`[data-rtyid="${rtyID}"]`).attr('id');
+        };
+
+        existingSettings = window.hWin.HEURIST4.util.isJSON(existingSettings) ?? {};
+
+        $addNewSettings.on('click', () => {
+            const elementID = $__addRow();
+            _heuristGraphThematicSettings[elementID] = ['placeholder', {}];
+        });
+
+        for(const rtyID in existingSettings){
+            const elementID = $__addRow(rtyID);
+            _heuristGraphThematicSettings[elementID] = [rtyID, existingSettings[rtyID]];
+        }
+    }
+
+    function _editThematicNetwork(elementID){
+
+        if(!Object.hasOwn(_heuristGraphThematicSettings, elementID)){
+            return;
+        }
+
+        let settings = _heuristGraphThematicSettings[elementID];
+        window.hWin.HEURIST4.ui.showEditSymbologyDialog(settings[1], 6, (styling) => {
+            settings[1] = styling;
+            _heuristGraphThematicSettings[elementID] = settings;
+            on_change();
+        });
+    }
+
+    function _getThematicNetwork(){
+
+        let settings = {};
+
+        for(const elementID in _heuristGraphThematicSettings){
+
+            if(!Object.hasOwn(_heuristGraphThematicSettings, elementID) || $(`#${elementID}`).length === 0){
+                continue;
+            }
+
+            let setting = _heuristGraphThematicSettings[elementID];
+            if(!window.hWin.HEURIST4.util.isPositiveInt(setting[0]) || !window.hWin.HEURIST4.util.isJSON(setting[1])){
+                continue;
+            }
+
+            settings[setting[0]] = setting[1];
+        }
+
+        return settings;
     }
 
     //public members

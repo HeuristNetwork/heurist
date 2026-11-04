@@ -43,7 +43,7 @@ final class CmsValidator
      */
     public static function parse(string $json): array
     {
-        $empty = array('schema' => self::SCHEMA, 'instances' => array(), 'styles' => array());
+        $empty = array('schema' => self::SCHEMA, 'instances' => array(), 'styles' => array(), 'media' => array());
         if(trim($json) === ''){ return array('config' => $empty, 'issues' => array()); }
         $config = json_decode($json, true);
         if(!is_array($config) || json_last_error() !== JSON_ERROR_NONE || (isset($config[0]) && !isset($config['schema']))){
@@ -55,7 +55,7 @@ final class CmsValidator
                 'The website configuration is not "'.self::SCHEMA.'"')));
         }
         $issues = array();
-        foreach(array('instances', 'styles') as $part){
+        foreach(array('instances', 'styles', 'media') as $part){
             if(isset($config[$part]) && !is_array($config[$part])){
                 $issues[] = self::issue('error', 'cms_json', 'The "'.$part.'" of the website configuration is not an object');
                 $config[$part] = array();
@@ -63,6 +63,7 @@ final class CmsValidator
         }
         $config['instances'] = $config['instances'] ?? array();
         $config['styles'] = $config['styles'] ?? array();
+        $config['media'] = $config['media'] ?? array();
         return array('config' => $config, 'issues' => $issues);
     }
 
@@ -86,6 +87,8 @@ final class CmsValidator
         }
         $seenNodes = array();
         $seenHosts = array();
+        $seenMedia = array();
+        $media = is_array($config['media'] ?? null) ? $config['media'] : array();
         $texts = array();
         foreach($nodes as $node){
             $id = $node['node'];
@@ -95,6 +98,15 @@ final class CmsValidator
                 }
                 $seenNodes[$id] = true;
                 if($node['text']){ $texts[$id] = true; }
+            }
+            // a media element (plan 27c §33): its settings in config.media, one element each
+            if($node['media'] !== null){
+                if(isset($seenMedia[$node['media']])){
+                    $issues[] = self::issue('warning', 'duplicate_media', 'Media "'.$node['media'].'" has more than one element', $id);
+                }elseif(!isset($media[$node['media']])){
+                    $issues[] = self::issue('warning', 'media_without_config', 'Media "'.$node['media'].'" has no settings', $id);
+                }
+                $seenMedia[$node['media']] = true;
             }
             $instance = $node['instance'];
             if($instance === null){ continue; }
@@ -115,6 +127,16 @@ final class CmsValidator
             $problem = self::instanceProblem(is_array($settings) ? $settings : array());
             if($problem !== null){
                 $issues[] = self::issue('warning', $problem[0], 'Instance "'.$instance.'": '.$problem[1], null);
+            }
+        }
+        foreach($media as $mediaId => $settings){
+            $mediaId = (string)$mediaId;
+            if(!isset($seenMedia[$mediaId])){
+                $issues[] = self::issue('warning', 'media_without_element', 'Media "'.$mediaId.'" has no element in the page');
+            }
+            $problem = self::mediaProblem(is_array($settings) ? $settings : array());
+            if($problem !== null){
+                $issues[] = self::issue('warning', 'media_settings', 'Media "'.$mediaId.'": '.$problem, null);
             }
         }
         $compiler = new StyleCompiler($baseUrl);
@@ -158,6 +180,23 @@ final class CmsValidator
         if(isset($settings['mount']) && !in_array($settings['mount'], array('direct', 'iframe'), true)){
             return array('mount', 'mount must be "direct" or "iframe"');
         }
+        return null;
+    }
+
+    /**
+     * Why the settings of a media element are not valid, or null: `file` the key of a registered file,
+     * `width` / `height` / `playerWidth` / `playerHeight` 'auto', px or %, `player` a boolean (as cmsMediaProblem of cmsDocument.js).
+     */
+    public static function mediaProblem(array $settings): ?string
+    {
+        if(!preg_match('/^[A-Za-z0-9]+$/', (string)($settings['file'] ?? ''))){ return 'the file is missing'; }
+        foreach(array('width', 'height', 'playerWidth', 'playerHeight') as $name){
+            $value = (string)($settings[$name] ?? 'auto');
+            if($value !== 'auto' && !preg_match('/^(?:\d+\.?\d*|\.\d+)(?:px|%)$/', $value)){
+                return $name.' must be auto, px or %';
+            }
+        }
+        if(isset($settings['player']) && !is_bool($settings['player'])){ return 'player must be true or false'; }
         return null;
     }
 

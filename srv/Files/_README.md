@@ -25,6 +25,7 @@ both file tables (`RecordRepository::tablesExist`), otherwise `LegacyFileStore`.
 | GET, POST | `/files` | search: the parameters and response of `/records` (query, fields, detail=ids, resolveDetails, defs, sort, limit, offset) |
 | GET, POST | `/files/aggregate` | `op=count` or `op=rectypes` with the search parameters (plan 20 Phase 3); values/minmax/ranges → 422 |
 | GET | `/files/{id}` | one file record; fields default to `_all` |
+| GET | `/files/{key}` | the same record by the obfuscated key (`rec_Hash`; plan 27c §30, read only; `FileStoreInterface::idByKey`) |
 | POST | `/files/0` | register: `"upload": token` of a finished upload, or `rec_URL` |
 | PUT, PATCH | `/files/{id}` | change; with `"upload"` the content is replaced |
 | DELETE | `/files/{id}` | delete; 409 `file_in_use` while records refer to it |

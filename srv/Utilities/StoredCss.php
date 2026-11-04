@@ -2,10 +2,11 @@
 /**
 * StoredCss.php - Save-time CSS policy (plan 27a, decision 12)
 *
-* Custom CSS of a website or page (DT_CMS_CSS) is kept without the JavaScript
-* permission: CSS cannot run code, so only the parts that can load or run
-* something are removed. The same checks are used for the values of the node
-* styles of a v4 page (Website\StyleCompiler).
+* The checks of the values of the styles of a v4 page (Website\StyleCompiler:
+* base settings, kind defaults, presets, node styles): only the parts that can
+* load or run something are removed. Since 2026-11-03 the custom CSS of a
+* website or page (DT_CMS_CSS) is not cleaned here any more: without the
+* JavaScript permission it is cleared (StoredText) and not shown (PageRenderer).
 *
 * Removed: comments, `expression(`, `behavior`, `-moz-binding`, `javascript:` /
 * `vbscript:` URLs, `data:` URLs other than raster images, `@import` of another

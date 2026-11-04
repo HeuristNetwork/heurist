@@ -120,6 +120,13 @@ final class LegacyFileStore implements FileStoreInterface
         return $response;
     }
 
+    /** {@inheritdoc} */
+    public function idByKey(string $key): int
+    {
+        $found = $this->files->filesByObfuscatedId(array($key));
+        return intval(reset($found)['ulf_ID'] ?? 0);
+    }
+
     /** SearchRequest of the parameters (the same parameters as /records). */
     private function request(array $params): SearchRequest
     {

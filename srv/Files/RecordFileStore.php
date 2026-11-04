@@ -26,17 +26,20 @@ use Heurist\Database\DatabaseInterface;
 use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Files\FileRepository;
 use Heurist\Records\Store\RecordSchema;
+use Heurist\Records\Store\RecordStore;
 use Heurist\Runtime\RuntimeContext;
 
 /** Reads file records from fileRecords/fileRecDetails. */
 final class RecordFileStore implements FileStoreInterface
 {
+    private DatabaseInterface $database;
     private RuntimeContext $runtime;
     private RecordQueryController $records;
     private FileRecordMapping $mapping;
 
     public function __construct(DatabaseInterface $database, RuntimeContext $runtime)
     {
+        $this->database = $database;
         $this->runtime = $runtime;
         $this->records = new RecordQueryController($database, $runtime, null, null, null, null, null,
             new RecordSchema(RecordSchema::FILE_TABLES), 'files');
@@ -61,6 +64,13 @@ final class RecordFileStore implements FileStoreInterface
     {
         list($params, $addedHash) = $this->withHash($params);
         return $this->finish($this->records->executeItem($params, $fileId), $addedHash);
+    }
+
+    /** {@inheritdoc} */
+    public function idByKey(string $key): int
+    {
+        $ids = (new RecordRepository($this->database, new RecordSchema(RecordSchema::FILE_TABLES)))->idsByHeader('rec_Hash', $key);
+        return intval($ids[0] ?? 0);
     }
 
     /**

@@ -352,7 +352,7 @@ function showNodeInformation(d){
             'Loading<br><br>'+ window.hWin.HEURIST4.util.stripTags(truncateText(d.name, 40)));
 
         // URL for source of information iframe
-        const srcURL = viewer !== 'rec-viewer' && viewer.slice(-4) === '.tpl'
+        const srcURL = typeof viewer === 'string' && viewer !== 'rec-viewer' && viewer.slice(-4) === '.tpl'
             ? `${window.hWin.HAPI4.baseURL}?snippet=1&q=ids:${rec_ID}&db=${window.hWin.HAPI4.database}&template=${encodeURIComponent(viewer)}`
             : `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
 
@@ -457,7 +457,7 @@ function handleNodeAction(action = 'close'){
     const rec_ID = window.d3.select('#infoIframe').attr('data-hid');
     const viewer = settings.nodeSettings?.[d.rty_ID]?.viewer ?? thematicSettings.nodes?.[d.rty_ID]?.settings?.viewer;
 
-    const isTemplate = !window.hWin.HEURIST4.util.isempty(viewer) && viewer.slice(-4) === '.tpl';
+    const isTemplate = !window.hWin.HEURIST4.util.isempty(viewer) && typeof viewer === 'string' && viewer.slice(-4) === '.tpl';
     const templateURL = isTemplate ? `${window.hWin.HAPI4.baseURL}?snippet=1&q=ids:${rec_ID}&db=${window.hWin.HAPI4.database}&template=${encodeURIComponent(viewer)}` : '';
 
     if(action === 'popup'){

@@ -45,4 +45,7 @@ interface FileStoreInterface
      * empty when the file does not exist or may not be seen.
      */
     public function item(array $params, int $fileId): array;
+
+    /** The id of a file by its obfuscated key (GET /files/{key}), 0 when there is none. */
+    public function idByKey(string $key): int;
 }
