@@ -980,7 +980,21 @@ $.widget( "heurist.app_storymap", {
             this.options.storyRecordID = recID;
         
             if(!Array.isArray(this.options.storyFields) && typeof this.options.storyFields === 'string'){
+
                 this.options.storyFields = this.options.storyFields.split(',');
+
+                for(let i = 0; i < this.options.storyFields.length; i++){
+
+                    let field = this.options.storyFields[i];
+                    if(field.indexOf('-') > 0){
+
+                        let localID = $Db.getLocalID('dty', field);
+
+                        if(window.hWin.HEURIST4.util.isPositiveInt(localID)){
+                            this.options.storyFields[i] = localID;
+                        }
+                    }
+                }
             }
             if(!Array.isArray(this.options.storyRectypes) && typeof this.options.storyRectypes === 'string'){ //NOT USED
                 this.options.storyRectypes = this.options.storyRectypes.split(',');

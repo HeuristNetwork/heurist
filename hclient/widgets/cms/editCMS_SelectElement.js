@@ -48,6 +48,7 @@ function editCMS_SelectElement( callback ){
             tpl_default: {name:'Simple Page', description:'#simple_page'}, //Simple blank page
             tpl_discover: {name:'Discover (filters/results/map-timeline)', description:'#discover'}, //3 columns layout
             tpl_network: {name:'Network  (filters/results/network diagram)', description:'#network'}, //3 columns layout
+            tpl_storymap: {name:'StoryMap  (filters/results/storymap/map-timeline)', description:'#storymap'}, //3 columns, 2 rows layout
             tpl_database: {name:'Database description', description:'#database'},
             tpl_blog: {name:'Blog', description:'#blog'},
 
@@ -105,6 +106,61 @@ function editCMS_SelectElement( callback ){
           
     };
 
+    let skipDefinitionImport = false;
+
+    let $__retrieveStoryMapDefs = () => {
+
+        // Only retrieve story element RTY if base field is missing, as it isn't necessary
+        const storyElementRTY = $Db.getLocalID('rty', '1414-100');
+        const storyElementDTY = $Db.getLocalID('dty', '1414-1089');
+        let $btnInsertWidget = $dlg.dialog('buttonpane').find('.btnDoAction');
+
+        if(skipDefinitionImport || window.hWin.HEURIST4.util.isPositiveInt(storyElementDTY)){
+            return true;
+        }
+
+        skipDefinitionImport = true; // attempt once, neither definitions are required (more useful to have)
+        window.hWin.HEURIST4.msg.bringCoverallToFront($(document), null, "<span>Retrieving story elements...</span>");
+        window.hWin.HAPI4.SystemMgr.import_definitions(1414, '1414-1089', 'detailtype', false, true, (response) => {
+
+            if(response.status !== window.hWin.ResponseStatus.OK){
+                console.error(response);
+                $btnInsertWidget.trigger('click');
+                return;
+            }
+
+            if(window.hWin.HEURIST4.util.isPositiveInt(storyElementRTY)){
+
+                window.hWin.HAPI4.SystemMgr.import_definitions(1414, '1414-100', 'rectype', false, true, () => {
+
+                    if(response.status !== window.hWin.ResponseStatus.OK){
+
+                        console.error(response);
+
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        $btnInsertWidget.trigger('click');
+
+                        return;
+                    }
+
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,trm,dty,rst', () => {
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        $btnInsertWidget.trigger('click');
+                    });
+                });
+
+                return;
+            }
+
+            window.hWin.HAPI4.EntityMgr.refreshEntityData('dty', () => {
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                $btnInsertWidget.trigger('click');
+            });
+        });
+
+        return false;
+    };
+
 
     let buttons= [
         {text:window.hWin.HR('Cancel'), 
@@ -119,6 +175,10 @@ function editCMS_SelectElement( callback ){
             css:{'float':'right'}, 
             click: function() { 
                 if(selected_element){
+
+                    if((selected_element === 'heurist_StoryMap' || selected_element === 'tpl_storymap') && !$__retrieveStoryMapDefs()){
+                        return;
+                    }
 
                     if(selected_element.indexOf('tpl_') !== -1){
 
@@ -216,7 +276,6 @@ function editCMS_SelectElement( callback ){
                 $dlg.css({padding:'0px 2em', overflow:'auto'});
             }
     });
-
 }
 
 
