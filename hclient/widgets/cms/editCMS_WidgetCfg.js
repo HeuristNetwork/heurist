@@ -221,9 +221,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
            
             selPage.parent().hide();
         }
+
+        let changedOptions = false;
         
         if(opts!==false){
-            
+
             //find map widget on this page
             if(widget_name=='heurist_StoryMap'){
                 if(!opts.map_widget_id){
@@ -231,6 +233,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     
                     if(ele && ele.options.search_realm=='' && ele.dom_id){
                         opts.map_widget_id = ele.dom_id;
+                        changedOptions = true;
                     }
                 }
             }
@@ -242,14 +245,14 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     let sg = window.hWin.HAPI4.layoutMgr.layoutContentFindMainRealm(_layout_content);    
                     if(sg=='') sg = 'search_group_1';
                     opts.search_realm = sg;
+                    changedOptions = true;
                 }
             }
             
         
             
             if(opts.search_page) {
-                $(selPage).val(opts.search_page);        
-               
+                $(selPage).val(opts.search_page);
             }
             $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
             $dlg.find('input[name="widget_id"]').val(opts.widget_id);    
@@ -271,7 +274,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 if(!opts.layout_params){
                     opts.layout_params = {};
                 }
-                
+
                 //map symbology editor            
                 window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_default_style'), opts.layout_params.style);
                 window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_select_style'), opts.layout_params.selection_style );
@@ -1328,22 +1331,37 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 window.hWin.HEURIST4.ui.createRectypeDetailSelect( $elementOrder[0], null, ['date','year','integer']
                     ,[{key:'',title:'As is (order in record)'},{key:'def',title:'Common date fields (##9,10,11)'}]
                     ,{selectedValue:opts['elementOrder']});
-                    
-                /*
-                var selectFields = $dlg.find('select[name="storyFields"]'); 
-                window.hWin.HEURIST4.ui.createRectypeDetailSelect(selectFields[0], 
-                        null, 'resource', 
-                        [{key:'',title:''}], {selectedValue:opts['storyFields']});
-                */
+
                 let defValue = $dlg.find('input[name="storyFields"]').val();
-                
                 if(window.hWin.HEURIST4.util.isempty(defValue)){
                     let DT_STORY_FIELD = $Db.getLocalID('dty','1414-1089');// Story element field    
-                    if(DT_STORY_FIELD>0) defValue = DT_STORY_FIELD;
+                    if(window.hWin.HEURIST4.util.isPositiveInt(DT_STORY_FIELD)){
+                        defValue = DT_STORY_FIELD;
+                        changedOptions = true;
+                    }
+                }else{
+
+                    // Translate concept ID to local ID
+                    let values = defValue.split(',');
+                    for(let i = 0; i < values.length; i++){
+                        let value = values[i];
+                        if(value.indexOf('-') > 0){
+                            let localID = $Db.getLocalID('dty', value);
+                            if(window.hWin.HEURIST4.util.isPositiveInt(localID)){
+                                values[i] = localID;
+                                changedOptions = true;
+                            }
+                        }
+                    }
+                    defValue = values.join(',');
                 }
                 
                 
                 let ele = $dlg.find('#storyFields');
+                const storyElementHelpText = `Please add the Story elements field to the record 
+                type(s) for which you want storied, or choose the 
+                field(s) which point to story elements such as Life 
+                event, Occupation, etc...`;
 
                 const ed_options = {
                         recID: -1,
@@ -1354,7 +1372,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         dtFields:{
                             dty_Type:"resource", rst_MaxValues:1,
                             rst_DisplayName: 'Story element fields', 
-                            rst_DisplayHelpText: 'Defines the field that points to story element records (such as Life event, Ocuppation etc)',
+                            rst_DisplayHelpText: storyElementHelpText,
                             rst_FieldConfig: {entity:'defDetailTypes', csv:true, filters:{types:['resource']}}
                         },
                         change: on_change
@@ -1362,6 +1380,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                 ele.editing_input(ed_options);
                 ele.parent().css('display','block');
+
+                ele.find('.heurist-helper1').css({
+                    'line-height': 1,
+                    'color': 'red'
+                })
                 
                 //----------------
                 /*
@@ -1467,6 +1490,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 let option = element.value;
                 window.hWin.HEURIST4.util.setDisabled(element.parentNode.parentNode.querySelector('textarea'), option !== 'provided');
             });
+        }
+
+        if(changedOptions){
+            on_change();
         }
     }
     

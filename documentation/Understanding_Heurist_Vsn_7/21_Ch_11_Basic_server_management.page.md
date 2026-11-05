@@ -113,6 +113,22 @@ Since this is only available to the server managers, and since the functions are
 
 ![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-kfkdrrre.png)
 
+#### Manul transfer: Databases don't open
+
+If you copy over a database manually by transferring an SQL file and creating an hdb\_ database, then copying the fielstore directory to HEURIST\_FILESTORE, the database often fails to open, giving a 404 error or simply returning to the list of databases. The reason for this is generally file permissions on the filestore directory.
+
+In general, all filestore directories and files should be owned by *apache*, grouped to *heurist* (which includes apache and server admins) and apply *chmod -R ug+rwx* to the directory.
+
+A particular case can arise as follows:
+
+- Directories may have **read-only web content labels** (`<span class="editor-theme-code">httpd_sys_content_t</span>`)
+- They should have **writable labels** (`<span class="editor-theme-code">httpd_sys_rw_content_t</span>`) - Heurist needs write access.
+
+From HEURIST\_FILESTORE apply the working label recursively:   
+ sudo chcon -R -t httpd\_sys\_rw\_content\_t db1 db2 (where db1 and db2 are the database - directory - names)
+
+Note: the `<span class="editor-theme-code">chcon</span>` fix can be undone by a future SELinux relabel; a persistent rule would prevent that.
+
 #### Log files and performance
 
 There are often numerous timestamped tables such as:

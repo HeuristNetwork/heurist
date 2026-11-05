@@ -394,3 +394,98 @@ use hserv\utilities\DeepL;
 
         return [$commonLanguages, $localeFiles];
     }
+
+    /**
+     * Get a translation of the given month
+     *  Month should be numbered between 1 to 12 (or 01 to 12).
+     * It attempts to use the Intl extension, if available, otherwise a hardcoded list is used.
+     *  The list supports the default list of 'commonLanguagesForTranslation' (const.php), except Ancient Greek
+     *
+     * @param string|int $month
+     * @param string $languageCode
+     * @param bool $longName
+     * @return mixed Month as locale string on success, otherwise what was provided is returned
+     */
+    function getMonthLabel($month, $languageCode, $longName = false){
+
+        if(strlen($languageCode) !== 2){
+            $languageCode = getLangCode2($languageCode);
+        }
+
+        if(!is_string($languageCode) || strlen($languageCode) !== 2 || !ctype_digit((string)$month)){
+            return $month;
+        }
+
+        $monthNumber = intval($month);
+
+        if($monthNumber > 12 || $monthNumber < 1){
+            return $month;
+        }
+
+        if(class_exists('IntlDateFormatter')){ // Attempt to translate date for locale, fallback to hardcoded below on failure
+
+            try{
+
+                $preparedDate = new DateTime("2026-{$month}-01");
+
+                $formatter = new IntlDateFormatter($languageCode, IntlDateFormatter::FULL, IntlDateFormatter::NONE, null, null, $longName ? 'MMMM' : 'MMM');
+
+                $month = $formatter->format($preparedDate);
+
+            }catch(\Exception $e){}
+
+            return $month;
+        }
+
+        // Use backup hardcoded source, supports the default 'commonLanguagesForTranslation' list
+        $months = [
+            'ar' => [ // Arabic
+                'long' => [1 => 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+                'short' => [1 => 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+            ],
+            'zh' => [ // Chinese
+                'long' => [1 => '一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                'short' => [1 => '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+            ],
+            'en' => [ // English
+                'long' => [1 => 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                'short' => [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            ],
+            'fr' => [ // French
+                'long' => [1 => 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+                'short' => [1 => 'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']
+            ],
+            'de' => [ // Greman
+                'long' => [1 => 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+                'short' => [1 => 'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
+            ],
+            'el' => [ // Modern Greek
+                'long' => [1 => 'Ιανουάριος', 'Φεβρουάριος', 'Μάρτιος', 'Απρίλιος', 'Μάιος', 'Ιούνιος', 'Ιούλιος', 'Αύγουστος', 'Σεπτέμβριος', 'Οκτώβριος', 'Νοέμβριος', 'Δεκέμβριος'],
+                'short' => [1 => 'Ιαν', 'Φεβ', 'Μάρ', 'Απρ', 'Μάι', 'Ιούν', 'Ιούλ', 'Αύγ', 'Σεπ', 'Οκτ', 'Νοέ', 'Δεκ']
+            ],
+            'id' => [ // Indonesian
+                'long' => [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                'short' => [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+            ],
+            'it' => [ // Italian
+                'long' => [1 => 'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
+                'short' => [1 => 'gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic']
+            ],
+            'la' => [ // Latin
+                'long' => [1 => 'Ianuarius', 'Februarius', 'Martius', 'Aprilis', 'Maius', 'Iunius', 'Iulius', 'Augustus', 'September', 'October', 'November', 'December'],
+                'short' => [1 => 'Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
+            ],
+            'pt' => [ // Portuguese
+                'long' => [1 => 'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
+                'short' => [1 => 'jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.']
+            ],
+            'es' => [ // Spainish, Castilian
+                'long' => [1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+                'short' => [1 => 'ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.']
+            ]
+        ];
+
+        $languageCode = !array_key_exists($languageCode, $months) ? 'en' : $languageCode; // fallback to English if language isn't supported
+
+        return $months[$languageCode][$longName ? 'long' : 'short'][$monthNumber];
+    }

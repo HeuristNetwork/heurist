@@ -1967,6 +1967,11 @@ function(value){
             let _options = {};
             if(widget_type=='heurist_Map2'){
                 _options = {runtimeMode:"website"};
+            }else if(widget_type === 'heurist_StoryMap'){
+                let DT_STORY_FIELD = $Db.getLocalID('dty','1414-1089');
+                if(window.hWin.HEURIST4.util.isPositiveInt(DT_STORY_FIELD)){
+                    _options = {storyFields: [DT_STORY_FIELD]};
+                }
             }
             
             //btn_visible_newrecord, btn_entity_filter, search_button_label, search_input_label
