@@ -31,6 +31,8 @@ final class WebsiteStarter
         'tabs' => array('border' => '1px solid var(--h-color-border)', 'padding' => '8px'),
         'accordion' => array('border' => '1px solid var(--h-color-border)', 'padding' => '8px'),
         'text' => array('line-height' => '1.5'),
+        // a media element (plan 27c §33): a dotted frame around the figure (2026-11-03)
+        'media' => array('border' => '1px dotted var(--h-color-border)', 'padding' => '8px'),
         'instance' => array('min-height' => '300px')
     );
 
@@ -57,6 +59,7 @@ final class WebsiteStarter
     public static function website(string $title): array
     {
         $header = self::id('n');
+        $logo = self::id('n');
         $brand = self::id('n');
         $menuHost = self::id('n');
         $menu = self::id('i');
@@ -80,8 +83,11 @@ final class WebsiteStarter
             )
         );
         return array(
-            // the header is a group: the designer adds elements only into controls (plan 27c §5.1)
-            'header' => '<div data-h-node="'.$header.'" data-h-control="group"><div data-h-node="'.$brand.'" data-h-text=""><h2>'.self::html($title).'</h2></div>'
+            // the header is a group: the designer adds elements only into controls (plan 27c §5.1);
+            // the basic header template (plan 27e): logo and title of the website, menu
+            'header' => '<div data-h-node="'.$header.'" data-h-control="group">'
+                .'<div data-h-node="'.$logo.'" data-h-text="" data-h-field="website.2-38"></div>'
+                .'<h2 data-h-node="'.$brand.'" data-h-text="" data-h-field="website.2-1">'.self::html($title).'</h2>'
                 .'<nav data-h-node="'.$menuHost.'" data-h-instance="'.$menu.'"></nav></div>',
             'footer' => '<div data-h-node="'.$footer.'" data-h-text=""><p>'.self::html($title).'</p></div>',
             'content' => '<div data-h-node="'.$home.'" data-h-text=""><h1>'.self::html($title).'</h1>'

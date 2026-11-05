@@ -69,7 +69,10 @@ tags:
     GET /records/{recordId}. For now only system record types can be written - custom reports, report
     schedules, map documents, map layers and their sources, query sources, website home and pages.
 - name: Reports
-  description: Smarty report templates, their records and schedules (reports manager)
+  description: >-
+    Smarty report templates and the lists of the reports manager. Report and schedule records are written by the
+    common record API (entities report and schedule, /report/{recordId}, /schedule/{recordId}, also /records/{recordId});
+    only the template text is here, it is a file.
 - name: Files
   description: >-
     Registered files (uploads and external resources) as records of the record type Registered file
@@ -2089,10 +2092,14 @@ paths:
       summary: One record of an entity (plan 27d)
       description: >-
         A record-based entity is a record type with a name in the URL (plan 28): website (99-51), page
-        (99-52). Read, insert, replace, change and delete are those of /records/{recordId}; the record must be
-        of the entity's type (404 otherwise). The answer of GET has meta.canEdit and the entity's own meta
-        (meta.website: kind, version, URL, languages, menu tree). There is no search on an entity: use
-        GET /records?q=t:{record type}.
+        (99-52), report (2-1104), schedule (2-1105). Read, insert, replace, change and delete are those of
+        /records/{recordId}; the record must be of the entity's type (404 otherwise). The answer of GET has
+        meta.canEdit and the entity's own meta (meta.website: kind, version, URL, languages, menu tree). There
+        is no search on an entity: use GET /records?q=t:{record type}. The rules of an entity run for every
+        write of its record type, also through /records/{recordId}. report - the file name (2-62) has only
+        letters A-Z, digits, "-", "_", "(", ")" and spaces (422 otherwise); empty is made from the title; a new
+        name renames the template file (422 when the name is taken); a new record gets an empty file or takes a
+        file without a record. schedule - the query (2-12) may not have parameters $X$ (422).
       security:
       - bearerAuth: []
       parameters:
@@ -2197,7 +2204,9 @@ paths:
       - Record entities
       operationId: deleteEntityRecord
       summary: Delete a record of an entity
-      description: Website with pages=1 also deletes its menu pages that no other record points to (format 4 only).
+      description: >-
+        Website with pages=1 also deletes its menu pages that no other record points to (format 4 only). Report -
+        also deletes its template file when no other record uses it, unless keepFile=1.
       security:
       - bearerAuth: []
       parameters:
@@ -2206,9 +2215,13 @@ paths:
         in: query
         required: false
         schema: {type: integer, enum: [0, 1]}
+      - name: keepFile
+        in: query
+        required: false
+        schema: {type: integer, enum: [0, 1]}
       responses:
         '200':
-          description: Deleted ids (website with pages=1 also kept page ids).
+          description: Deleted ids (website with pages=1 also kept page ids; report also fileDeleted).
           content:
             application/json:
               schema:
@@ -2216,13 +2229,14 @@ paths:
                 properties:
                   deleted: {type: array, items: {type: string}}
                   kept: {type: array, items: {type: string}}
+                  fileDeleted: {type: boolean}
   /{database}/{entity}/{recordId}/validate:
     get:
       tags:
       - Record entities
       operationId: validateEntityRecord
       summary: Problems of a stored record of an entity
-      description: Website and page - problems of the format v4 (optional page and lang of a website).
+      description: Website and page - problems of the format v4 (optional page and lang of a website). Other entities have none.
       security:
       - bearerAuth: []
       parameters:
@@ -2250,7 +2264,9 @@ paths:
       - Record entities
       operationId: entitySetupStatus
       summary: Are the record types and fields of an entity installed
-      description: With the local ids of the record types, fields and terms the entity uses (codes).
+      description: >-
+        With the local ids of the record types, fields and terms the entity uses (codes). Website and page only;
+        reports use /reports/setup for now.
       security:
       - bearerAuth: []
       responses:
@@ -2281,7 +2297,9 @@ paths:
       - Record entities
       operationId: executeEntityRecord
       summary: Start the job of an entity
-      description: Website or standalone page of format 4 - the job website-build (a ZIP). State and result on /jobs/{id}.
+      description: >-
+        Website or standalone page of format 4 - the job website-build (a ZIP). State and result on /jobs/{id}.
+        Report and schedule have no job here: POST /jobs with type report-generate.
       security:
       - bearerAuth: []
       parameters:
@@ -3869,39 +3887,6 @@ paths:
         '401': {$ref: '#/components/responses/ApiUnauthorized'}
         '403': {$ref: '#/components/responses/ApiForbidden'}
         '404': {$ref: '#/components/responses/ApiNotFound'}
-    post:
-      tags:
-      - Reports
-      operationId: createReport
-      summary: Create a report
-      description: >-
-        Creates a Custom Report record and its template file.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                title: {type: string}
-                isCardView: {type: boolean}
-                body: {type: string, description: Template text}
-                description: {type: string}
-                file: {type: string}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
   /{database}/reports/generated:
     get:
       tags:
@@ -3960,7 +3945,8 @@ paths:
       operationId: listReportSchedules
       summary: List report schedules
       description: >-
-        All visible schedules with their last generated file.
+        All visible schedules with their last generated file. Each has query (field 2-12), file as stored,
+        language (term code) and languageTerm. A schedule record is written through /schedule/{recordId}.
       security:
       - bearerAuth: []
       parameters:
@@ -4042,54 +4028,18 @@ paths:
         '401': {$ref: '#/components/responses/ApiUnauthorized'}
         '403': {$ref: '#/components/responses/ApiForbidden'}
         '404': {$ref: '#/components/responses/ApiNotFound'}
-    put:
-      tags:
-      - Reports
-      operationId: updateReport
-      summary: Change a report
-      description: >-
-        Changes title, description, isCardView or the template file name.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                title: {type: string}
-                description: {type: string}
-                isCardView: {type: boolean}
-                file: {type: string}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
     delete:
       tags:
       - Reports
-      operationId: deleteReport
-      summary: Delete a report
+      operationId: deleteReportFile
+      summary: Delete a template file without a record
       description: >-
-        Deletes the record and its template file when no other record uses it; keepFile=1 keeps the file.
+        Only for a file without a Custom Report record (400 otherwise). A report is deleted by DELETE /report/{recordId}.
       security:
       - bearerAuth: []
       parameters:
       - $ref: '#/components/parameters/Database'
       - $ref: '#/components/parameters/ReportRef'
-      - name: keepFile
-        in: query
-        schema: {type: boolean}
       responses:
         '200':
           description: 'Success - {status: 0, data}'
@@ -4143,139 +4093,6 @@ paths:
               type: object
               properties:
                 body: {type: string}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/{reportRef}/register:
-    post:
-      tags:
-      - Reports
-      operationId: registerReportFile
-      summary: Register a template file
-      description: >-
-        Creates the Custom Report record of a template file that has none.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                title: {type: string}
-                isCardView: {type: boolean}
-                description: {type: string}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/{reportRef}/schedules:
-    post:
-      tags:
-      - Reports
-      operationId: createReportSchedule
-      summary: Add a schedule
-      description: >-
-        Adds a Report Schedule record of the report.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                title: {type: string}
-                querySource: {type: string}
-                output: {type: string}
-                format: {type: string}
-                intervalMinutes: {type: integer}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/{reportRef}/schedules/{scheduleId}:
-    put:
-      tags:
-      - Reports
-      operationId: updateReportSchedule
-      summary: Change a schedule
-      description: >-
-        Changes a Report Schedule record.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      - name: scheduleId
-        in: path
-        required: true
-        schema: {type: integer, minimum: 1}
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                title: {type: string}
-                querySource: {type: string}
-                suffix: {type: string}
-                format: {type: string}
-                intervalMinutes: {type: integer}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-    delete:
-      tags:
-      - Reports
-      operationId: deleteReportSchedule
-      summary: Delete a schedule
-      description: >-
-        Deletes a Report Schedule record.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      - name: scheduleId
-        in: path
-        required: true
-        schema: {type: integer, minimum: 1}
       responses:
         '200':
           description: 'Success - {status: 0, data}'
@@ -4390,7 +4207,8 @@ paths:
       description: >-
         Validates the parameters, creates the job and answers 202 with the queued job; the connection is closed and
         the same server process runs the job. Poll GET /jobs/{jobId} for progress. Job types: export (record export
-        into a file, parameters ExportJobParams), report-preview and report-generate (Smarty reports). One active
+        into a file, parameters ExportJobParams), report-preview (report or body, ids, replevel, language: language of the
+        test run) and report-generate (schedule, or report with querySource or query) (Smarty reports). One active
         job of the same type per user (a second start is refused with 403; a report-preview replaces the older one)
         and at most maxJobs active jobs per database. Record export has no streaming endpoint by design: a job has
         limits, Stop, progress and a result file that only its owner can download.
@@ -4640,7 +4458,7 @@ components:
       in: path
       required: true
       description: Record-based entity (plan 27d, plan 28) - a record type with a name in the URL.
-      schema: {type: string, enum: [website, page]}
+      schema: {type: string, enum: [website, page, report, schedule]}
     RecordWriteId:
       name: recordId
       in: path

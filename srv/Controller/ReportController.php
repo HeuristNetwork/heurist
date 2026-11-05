@@ -3,23 +3,20 @@
 * ReportController.php - Reports manager HTTP adapter (/api/{db}/reports)
 *
 *   GET    /reports[?scope=all|card|set]   list (card: single-record reports, public)
-*   POST   /reports                        create {title, isCardView, body?, description?}
-*   GET    /reports/generated[?prefix=]    files in generated-reports (name starts with prefix)
+*   GET    /reports/generated[?prefix=|report=]  files in generated-reports (name starts with prefix; of a report)
 *   DELETE /reports/generated/{file}       delete a generated file
 *   GET    /reports/schedules              all visible schedules with their last generated file
 *   POST   /reports/setup                  install definitions, convert old schedules
 *   POST   /reports/import                 multipart "import_template" (.gpl/.tpl)
 *   GET    /reports/{ref}                  one report (ref = record id or file name)
-*   PUT    /reports/{ref}                  change {title?, description?, isCardView?, file?}
-*   DELETE /reports/{ref}[?keepFile=1]     delete record (+ unused file) or file
+*   DELETE /reports/{file}                  delete a template file without a record
 *   GET    /reports/{ref}/template         template body
 *   PUT    /reports/{ref}/template         save {body}
-*   POST   /reports/{ref}/register         create the record of an unregistered file
-*   POST   /reports/{id}/schedules         add a schedule {title?, querySource, output?, format?, intervalMinutes?}
-*   PUT    /reports/{id}/schedules/{sid}   change a schedule {title?, querySource?, suffix?, format?, intervalMinutes?}
-*   DELETE /reports/{id}/schedules/{sid}   delete a schedule
 *   GET    /reports/{ref}/export           download with concept codes (.gpl)
 *   GET    /reports/{ref}/render?rec=N     HTML of one record (always allowed)
+*
+* Report and schedule records are written by the generic record controller:
+* /records/{id}, /report/{id}, /schedule/{id} (Reports/ReportEntityHandler).
 *
 * @project     Heurist academic knowledge management system
 * @package     Controller
@@ -87,16 +84,8 @@ final class ReportController
             if($first === ''){
                 if($method === 'GET'){
                     $this->send($this->service->listReports((string)($params['scope'] ?? 'all')));
-                }elseif($method === 'POST'){
-                    $this->send($this->service->createReport(
-                        (string)($body['title'] ?? $params['title'] ?? ''),
-                        $this->flag($body['isCardView'] ?? $params['isCardView'] ?? false),
-                        (string)($body['body'] ?? ''),
-                        (string)($body['description'] ?? ''),
-                        (string)($body['file'] ?? '')
-                    ));
                 }else{
-                    $this->methodNotAllowed('GET, POST');
+                    $this->methodNotAllowed('GET');
                 }
                 return;
             }
@@ -110,12 +99,10 @@ final class ReportController
                 case '':
                     if($method === 'GET'){
                         $this->send($this->service->getReport($first));
-                    }elseif($method === 'PUT'){
-                        $this->send($this->service->updateReport($first, $body));
                     }elseif($method === 'DELETE'){
-                        $this->send($this->service->deleteReport($first, $this->flag($params['keepFile'] ?? false)));
+                        $this->send($this->service->deleteFile($first));
                     }else{
-                        $this->methodNotAllowed('GET, PUT, DELETE');
+                        $this->methodNotAllowed('GET, DELETE');
                     }
                     break;
 
@@ -129,29 +116,6 @@ final class ReportController
                         $this->send($this->service->saveTemplate($first, $body['body']));
                     }else{
                         $this->methodNotAllowed('GET, PUT');
-                    }
-                    break;
-
-                case 'register':
-                    if($method !== 'POST'){ $this->methodNotAllowed('POST'); break; }
-                    $this->send($this->service->registerFile(
-                        $first,
-                        (string)($body['title'] ?? $params['title'] ?? ''),
-                        $this->flag($body['isCardView'] ?? $params['isCardView'] ?? false),
-                        (string)($body['description'] ?? '')
-                    ));
-                    break;
-
-                case 'schedules':
-                    $scheduleId = intval($segments[2] ?? 0);
-                    if($method === 'POST' && $scheduleId === 0){
-                        $this->send($this->service->createSchedule($first, array_merge($params, $body)));
-                    }elseif($method === 'PUT' && $scheduleId > 0){
-                        $this->send($this->service->updateSchedule($first, $scheduleId, array_merge($params, $body)));
-                    }elseif($method === 'DELETE' && $scheduleId > 0){
-                        $this->send($this->service->deleteSchedule($first, $scheduleId));
-                    }else{
-                        $this->methodNotAllowed('POST, PUT, DELETE');
                     }
                     break;
 
@@ -192,7 +156,7 @@ final class ReportController
             case 'generated':
                 $file = isset($segments[1]) ? rawurldecode((string)$segments[1]) : '';
                 if($method === 'GET' && $file === ''){
-                    $this->send($this->service->listGenerated((string)($params['prefix'] ?? '')));
+                    $this->send($this->service->listGenerated((string)($params['prefix'] ?? ''), (string)($params['report'] ?? '')));
                 }elseif($method === 'DELETE' && $file !== ''){
                     $this->send($this->service->deleteGenerated($file));
                 }else{

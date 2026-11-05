@@ -946,13 +946,12 @@ if(!$system->hasAccess()){
             }
 
             $(document).ready(function() {
+
                 showHidePrivateInfo(null);
 
                 if(window.HeuristRecordMedia){
                     window.HeuristRecordMedia.init({baseURL: baseURL, database: database, language: language});
                 }
-
-                //mediaTooltips();
 
                 toggleHiddenFields();
 
@@ -996,25 +995,6 @@ if(!$system->hasAccess()){
                 $('#pdf-download-link').button().on('click', (event) => downloadRecordAsPDF(event));
 
             });
-
-            /*NOT USED
-            //on document load onLoad="add_sid();"
-            function add_sid() {
-                try{
-                if (top.HEURIST  &&  top.HEURIST.search  &&  top.HEURIST.search.results.querySid) {
-                    var e = document.getElementById("edit-link");
-                    if (e) {
-                        e.href = e.href.replace(/editRecord\.html\?/, "editRecord.html?sid="+top.HEURIST.search.results.querySid+"&");
-                    }
-                }
-                }catch(e){
-                }
-
-                //init image viewer
-                //$('.mediacontent').yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&id=(?:\w+)$/i});
-
-            }
-            */
 
         </script>
 <?php
@@ -1845,7 +1825,7 @@ function recviewer_add_iiif_manifest_thumb(array &$thumbs, array $bib): void {
 //
 function print_public_details(array $bib) {
 
-    global $system, $defTerms, $is_map_popup, $noclutter, $without_header, $is_production, $primary_language, $publishMode,
+    global $system, $defTerms, $is_map_popup, $noclutter, $without_header, $is_production, $primary_language, $publishMode, $lang,
         $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $connectedRecIDs, $group_details, $hide_images;
 
     $has_thumbs = false;
@@ -1960,7 +1940,10 @@ function print_public_details(array $bib) {
             }
         }
 
-
+        $ar2 = getLangCode2($lang);
+        if(is_string($ar2) && strlen($ar2) === 2){ // preset temporal language
+            Temporal::$language = $ar2;
+        }
 
         foreach ($bds_temp as $bd) {
 

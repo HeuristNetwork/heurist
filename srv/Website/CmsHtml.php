@@ -31,7 +31,7 @@ final class CmsHtml
     /**
      * Elements with `data-h-node` in document order.
      *
-     * @return array<int,array{node:string,instance:?string,media:?string,text:bool,control:?string,tag:string}>
+     * @return array<int,array{node:string,instance:?string,media:?string,text:bool,field:?string,control:?string,tag:string}>
      */
     public static function nodes(string $html): array
     {
@@ -46,6 +46,7 @@ final class CmsHtml
                 'instance' => $element->hasAttribute('data-h-instance') ? $element->getAttribute('data-h-instance') : null,
                 'media' => $element->hasAttribute('data-h-media') ? $element->getAttribute('data-h-media') : null,
                 'text' => $element->hasAttribute('data-h-text'),
+                'field' => $element->hasAttribute('data-h-field') ? $element->getAttribute('data-h-field') : null,
                 'control' => $element->hasAttribute('data-h-control') ? $element->getAttribute('data-h-control') : null,
                 'tag' => strtolower($element->tagName)
             );
@@ -77,6 +78,42 @@ final class CmsHtml
             $marker = $token.'x'.count($replacements).'x';
             $element->appendChild($root->ownerDocument->createTextNode($marker));
             $replacements[$marker] = $texts[$id];
+        }
+        if(empty($replacements)){ return $html; }
+        return strtr(self::inner($root), $replacements);
+    }
+
+    /**
+     * Put the resolved content into the elements with `data-h-field` and into the hosts of widgets (plan 27e).
+     *
+     * @param callable(string):?string $field Reference => HTML; null keeps the snapshot of the element.
+     * @param callable(string):?array $host Instance id => {html, class?}; null leaves the host as it is.
+     */
+    public static function fill(string $html, callable $field, callable $host): string
+    {
+        if(strpos($html, 'data-h-field') === false && strpos($html, 'data-h-instance') === false){ return $html; }
+        $root = self::parse($html);
+        if($root === null){ return $html; }
+        $xpath = new \DOMXPath($root->ownerDocument);
+        $replacements = array();
+        $token = 'hcmsfill'.bin2hex(random_bytes(6));
+        foreach($xpath->query('.//*[@data-h-field or @data-h-instance]', $root) as $element){
+            /** @var \DOMElement $element */
+            if($element->hasAttribute('data-h-instance')){
+                $content = $host($element->getAttribute('data-h-instance'));
+                if($content === null){ continue; }
+                $value = (string)$content['html'];
+                if(!empty($content['class'])){
+                    $element->setAttribute('class', trim($element->getAttribute('class').' '.$content['class']));
+                }
+            }else{
+                $value = $field($element->getAttribute('data-h-field'));
+                if($value === null){ continue; }
+            }
+            while($element->firstChild){ $element->removeChild($element->firstChild); }
+            $marker = $token.'x'.count($replacements).'x';
+            $element->appendChild($root->ownerDocument->createTextNode($marker));
+            $replacements[$marker] = $value;
         }
         if(empty($replacements)){ return $html; }
         return strtr(self::inner($root), $replacements);
