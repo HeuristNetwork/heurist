@@ -15,117 +15,135 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 # See the License for the specific language governing permissions and limitations under the License.
 
-# installation source: Heurist reference server
-
-ref_server=https://HeuristRef.Net
+# Download and check everything before changing the installed code. Keep this
+# block self-contained: these scripts are also run directly through curl | sh.
+set -eu
+ref_server=https://heuristref.net
 base_dir="/var/www/html"
-
-# -------------PRELIMINARIES ---------------------------------------------------------------------------------------------
-
-
-# Checking parameters and availability ...
-if [ -z $1 ]
-   then
-      echo "Usage: ./update_heurist.sh hx-alpha sudo codeonly"
-      echo "Please supply version eg. hx-alpha or hx.x.x (this MUST exist as a tar.bz2 file "
-      echo "on $ref_server/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
-      exit
-   fi
-
-# Test download package is valid before we get half way and can't find it ... s=silent
-if ! curl -fs --range 0-100 $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null; then
-        echo "The version parameter you supplied does not point to a Heurist installation package"
-        echo "Please check for the latest version at HeuristNetwork.org/installation"
-        echo "The parameter should be eg. h7.0.1 as given - DO NOT include the url path or .tar.bz2"
-        echo "Supply 'sudo' as the second argument, codeonly as optional third argument eg.  "
-        echo
-        echo "       ./update_heurist.sh h7.0.1 sudo codeonly"
-        exit
-fi
-
-echo
-echo
-echo "----------------------- Installing Update to Heurist ---------------------------"
-echo
-echo
-
-cd "${base_dir}/HEURIST"
-$2 mkdir -p temp_install_unzip
-$2 chmod a+rwx temp_install_unzip
-cd temp_install_unzip
-
-echo "Fetching Heurist code from $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2"
-echo
-$2 rm -f $1.tar.bz2
-$2 curl -O# $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2
-# -j is bzip2 format
-$2 tar -xjf $1.tar.bz2
-$2 rm -f $1.tar.bz2
-# remove existing directory if present then make directory and copy over Heurist
-$2 rm -Rf "${base_dir}/HEURIST/$1"
-$2 mkdir "${base_dir}/HEURIST/$1"
-$2 cp -R $1/* "${base_dir}/HEURIST/$1"
-
-# Ensure correct ownership and mode of HEURIST_SUPPORT (added 19/7/22)
-# Worst case this won't set group if heurist group does not exist
-$2 chown -R apache "${base_dir}/HEURIST/HEURIST_SUPPORT"
-$2 chgrp -R heurist "${base_dir}/HEURIST/HEURIST_SUPPORT"
-$2 chmod -R ug+rwx "${base_dir}/HEURIST/HEURIST_SUPPORT"
-
-# Update support files
-if [ "$2" != "codeonly" ] && [ "$3" != "codeonly" ]; then
-
-    echo
-    echo Obtaining updated support files - external and help files
-    echo
-
-    cd "${base_dir}/HEURIST/HEURIST_SUPPORT"
-
-    $2 rm -f external_h5.tar.bz2
-    $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
-    $2 tar -xjf external_h5.tar.bz2
-    $2 rm -f external_h5.tar.bz2
-
-    $2 rm -f vendor.tar.bz2
-    $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
-    $2 tar -xjf vendor.tar.bz2
-    $2 rm -f vendor.tar.bz2
-
-    $2 rm -f help.tar.bz2
-    $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
-    $2 tar -xjf help.tar.bz2
-    $2 rm -f help.tar.bz2
-    
+version=${1:-}
+privilege=
+codeonly=false
+for argument in "${2:-}" "${3:-}"; do
+    case "$argument" in
+        sudo) privilege=sudo ;;
+        codeonly) codeonly=true ;;
+        "") ;;
+        *) echo "Unknown argument: $argument" >&2; exit 2 ;;
+    esac
+done
+case "$version" in
+    h[0-9]*) ;;
+    *) echo "Usage: $0 <version, e.g. h7-alpha> [sudo] [codeonly]" >&2; exit 2 ;;
+esac
+case "$version" in
+    *[!a-zA-Z0-9._-]*|*..*) echo "Invalid version: $version" >&2; exit 2 ;;
+esac
+run() { $privilege "$@"; }
+fail() { echo "ERROR: $*" >&2; exit 1; }
+install_root="$base_dir/HEURIST"
+run mkdir -p "$install_root"
+# Serialize installation and updates, including support packages shared by versions.
+lock="$install_root/.heurist-install.lock"
+run mkdir "$lock" 2>/dev/null || fail "Another installation may be running ($lock)."
+stage=
+backup=
+published=
+committed=false
+cleanup() {
+    status=$?
+    trap - EXIT HUP INT TERM
+    if [ "$committed" = false ]; then
+        for relative in $published; do
+            run rm -rf "$install_root/$relative"
+            if [ -e "$backup/$relative" ] || [ -L "$backup/$relative" ]; then
+                run mv "$backup/$relative" "$install_root/$relative" ||
+                    echo "Restore $backup/$relative manually" >&2
+            fi
+        done
     fi
-
-# Ensure correct ownership of instance just installed (added 19/7/22)
-# Worst case this won't set group if heurist group does not exist
-$2 chown -R apache "${base_dir}/HEURIST/$1"
-$2 chgrp -R heurist "${base_dir}/HEURIST/$1"
-$2 chmod -R ug+rwx "${base_dir}/HEURIST/$1"
-
-# Place simlinks in instance directory
-cd "${base_dir}/HEURIST/$1"
-$2 ln -s ../HEURIST_SUPPORT/external_h5 external
-$2 ln -s ../HEURIST_SUPPORT/vendor vendor
-$2 ln -s ../HEURIST_SUPPORT/help help
-
-echo "Heurist unpacked"
-
-# This installation of elastic search generated a number of security holes rated HIGH RISK
-# We are therefore removing it pending investigation. Sept 2014
-# $2 mkdir "${base_dir}/HEURIST/HEURIST_SUPPORT/external/elasticsearch"
-# cd "${base_dir}/HEURIST/HEURIST_SUPPORT/external/elasticsearch"
-# $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
-# $2 tar -zxvf elasticsearch-1.3.2.tar.gz
-# cd  "${base_dir}/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2"
-# ./bin/elasticsearch -d
-
-# Remove temporary unzip directory used during installation
-$2 rm -rf "${base_dir}/HEURIST/temp_install_unzip/"
-
-echo ""
-echo ""
-echo "---- Heurist update installed in ${base_dir}/HEURIST/$1 -------------------------------------------"
-echo
-echo
+    [ -z "$stage" ] || run rm -rf "$stage"
+    run rmdir "$lock" || true
+    exit "$status"
+}
+trap cleanup EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+stage=$(run mktemp -d "$install_root/.heurist-stage.XXXXXXXX")
+run chmod 755 "$stage"
+fetch() {
+    package=$1
+    destination=$2
+    archive="$stage/$package.tar.bz2"
+    run curl --fail --location --show-error --silent \
+        --connect-timeout 30 --max-time 1800 \
+        "$ref_server/HEURIST/DISTRIBUTION/$destination$package.tar.bz2" \
+        --output "$archive" || fail "Download failed: $package"
+    # Listing checks the complete compressed archive; reject unexpected roots
+    # and traversal before extraction, including accidentally returned HTML.
+    members=$(run tar -tjf "$archive") || fail "Invalid archive: $package"
+    printf '%s\n' "$members" | awk -v root="$package" '
+        { p=$0; sub(/^\.\//,"",p)
+          if (p !~ ("^" root "(/|$)") || p ~ /(^|\/)\.\.(\/|$)/) bad=1; n++ }
+        END { exit (bad || !n) }
+    ' || fail "Unexpected archive contents: $package"
+    run mkdir -p "$stage/unpacked"
+    run tar -xjf "$archive" -C "$stage/unpacked" || fail "Extraction failed: $package"
+    [ -d "$stage/unpacked/$package" ] && [ ! -L "$stage/unpacked/$package" ] ||
+        fail "Missing package directory: $package"
+}
+fetch "$version" ""
+# Reject empty/partial builds, even when they are valid tarballs.
+for required in index.php configIni.php autoload.php hserv/controller/index.php; do
+    [ -s "$stage/unpacked/$version/$required" ] || fail "Incomplete build: missing $required"
+done
+for required in admin hclient hserv; do
+    [ -d "$stage/unpacked/$version/$required" ] || fail "Incomplete build: missing $required"
+done
+if [ "$codeonly" = false ]; then
+    for support in external_h5 vendor help; do
+        fetch "$support" "HEURIST_SUPPORT/"
+        [ -n "$(run ls -A "$stage/unpacked/$support")" ] || fail "Empty support package: $support"
+    done
+    [ -s "$stage/unpacked/vendor/autoload.php" ] || fail "Missing vendor/autoload.php"
+fi
+for support in external_h5 vendor help; do
+    case "$support" in external_h5) link=external ;; *) link=$support ;; esac
+    run rm -rf "$stage/unpacked/$version/$link"
+    run ln -s "../HEURIST_SUPPORT/$support" "$stage/unpacked/$version/$link"
+done
+# Finish permissions before publishing. Missing platform-specific accounts are OK.
+for package in "$version" external_h5 vendor help; do
+    [ -d "$stage/unpacked/$package" ] || continue
+    for account in apache nginx www-data; do
+        if id "$account" >/dev/null 2>&1; then
+            run chown -R "$account" "$stage/unpacked/$package"
+            break
+        fi
+    done
+    if getent group heurist >/dev/null 2>&1; then
+        run chgrp -R heurist "$stage/unpacked/$package"
+    fi
+    run chmod -R ug+rwX "$stage/unpacked/$package"
+done
+backup=$(run mktemp -d "$install_root/.heurist-backup.XXXXXXXX")
+run chmod 755 "$backup"
+publish() {
+    relative=$1
+    source=$2
+    run mkdir -p "$(dirname "$backup/$relative")"
+    if [ -e "$install_root/$relative" ] || [ -L "$install_root/$relative" ]; then
+        run mv "$install_root/$relative" "$backup/$relative"
+    fi
+    published="$relative $published"
+    run mv "$source" "$install_root/$relative"
+}
+run mkdir -p "$install_root/HEURIST_SUPPORT"
+if [ "$codeonly" = false ]; then
+    for support in external_h5 vendor help; do
+        publish "HEURIST_SUPPORT/$support" "$stage/unpacked/$support"
+    done
+fi
+publish "$version" "$stage/unpacked/$version"
+committed=true
+echo "Installed $install_root/$version; previous files retained in $backup"
