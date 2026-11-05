@@ -84,6 +84,7 @@ use Heurist\Reports\Smarty\ReportEnvironment;
 use Heurist\Reports\Smarty\SmartyTemplateRunner;
 use Heurist\Reports\Smarty\SrvSmartyRenderer;
 use Heurist\Reports\ReportPolicy;
+use Heurist\Reports\ReportEntityHandler;
 use Heurist\Reports\ReportRecordWriterInterface;
 use Heurist\Reports\ReportRendererInterface;
 use Heurist\Reports\ReportRepository;
@@ -440,9 +441,15 @@ final class ServiceFactory
                 $websiteDefinitions !== null ? new WebsiteSetup($websiteDefinitions, $this->runtime) : null
             );
         };
+        $report = function(string $kind): ReportEntityHandler {
+            return new ReportEntityHandler($kind, $this->reportRepository(),
+                new ReportTemplateStore((string)($this->reportEnvironment['templates'] ?? '')), $this->codes);
+        };
         return new RecordEntityRegistry($rectypes, array(
             'website' => static function() use ($website) { return $website('website'); },
-            'page' => static function() use ($website) { return $website('page'); }
+            'page' => static function() use ($website) { return $website('page'); },
+            'report' => static function() use ($report) { return $report('report'); },
+            'schedule' => static function() use ($report) { return $report('schedule'); }
         ));
     }
 
@@ -913,7 +920,9 @@ final class ServiceFactory
             $writer,
             (string)($this->reportEnvironment['generated'] ?? ''),
             (string)($this->reportEnvironment['generatedUrl'] ?? ''),
-            $this->reportEnvironment['javaScriptAllowed'] ?? false
+            $this->reportEnvironment['javaScriptAllowed'] ?? false,
+            function(): RecordSaveService { return $this->recordWriteParts()['save']; },
+            $this->codes
         );
     }
 

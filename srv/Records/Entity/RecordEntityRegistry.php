@@ -32,7 +32,9 @@ final class RecordEntityRegistry
      */
     public const ENTITIES = array(
         'website' => array('rectype' => 'RT_CMS_HOME', 'job' => 'website-build'),
-        'page' => array('rectype' => 'RT_CMS_PAGE', 'job' => 'website-build')
+        'page' => array('rectype' => 'RT_CMS_PAGE', 'job' => 'website-build'),
+        'report' => array('rectype' => 'RT_CUSTOM_REPORT', 'job' => null),
+        'schedule' => array('rectype' => 'RT_REPORT_SCHEDULE', 'job' => null)
     );
 
     /** @var array<string,int> name => local record type id */

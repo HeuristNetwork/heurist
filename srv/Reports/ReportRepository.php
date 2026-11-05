@@ -273,7 +273,7 @@ final class ReportRepository
         $ids = array_map(static function(array $row): int { return intval($row['rec_ID']); }, $rows);
         $fields = array(
             'name' => $this->codes->id('DT_NAME'),
-            'source' => $this->codes->id('DT_DATA_SOURCE'),
+            'query' => $this->codes->id('DT_QUERY_STRING'),
             'file' => $this->codes->id('DT_FILE_NAME'),
             'mime' => $this->codes->id('DT_FILE_EXT'),
             'interval' => $this->codes->id('DT_INTERVAL_MINUTES'),
@@ -294,7 +294,7 @@ final class ReportRepository
                 'id' => $id,
                 'reportId' => intval($row['reportId']),
                 'title' => $this->first($values, $fields['name']) ?? (string)$row['rec_Title'],
-                'dataSourceId' => intval($this->first($values, $fields['source'])),
+                'query' => (string)($this->first($values, $fields['query']) ?? ''),
                 'file' => (string)($this->first($values, $fields['file']) ?? ''),
                 'format' => self::formatFromMime($mime === null ? '' : ($mime['code'] !== '' ? $mime['code'] : $mime['label'])),
                 'intervalMinutes' => is_numeric($interval) ? intval($interval) : null,

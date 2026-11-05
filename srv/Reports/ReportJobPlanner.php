@@ -7,7 +7,7 @@
 * modern search (searchIds), and lists the schedules that cron must regenerate
 * (dueSchedules). The Smarty run itself is done by the hserv job handlers.
 *
-*   report-preview  {report?: ref, body?: string, ids: int[] (1..50), replevel?: 0-3}
+*   report-preview  {report?: ref, body?: string, ids: int[] (1..50), replevel?: 0-3, language?: code}
 *   report-generate {schedule: id} or
 *                   {report: ref, querySource?: id, query?: json|text, format?: html|..., output?: name}
 *
@@ -127,7 +127,8 @@ final class ReportJobPlanner
                 'templateFile' => $file,
                 'body' => $body,
                 'ids' => $ids,
-                'replevel' => max(0, min(3, intval($params['replevel'] ?? 0)))
+                'replevel' => max(0, min(3, intval($params['replevel'] ?? 0))),
+                'language' => preg_match('/^[A-Za-z]{2,3}$/', (string)($params['language'] ?? '')) === 1 ? (string)$params['language'] : ''
             )
         );
     }
@@ -149,11 +150,11 @@ final class ReportJobPlanner
                 throw new OutOfBoundsException('Schedule '.$scheduleId.' is not available');
             }
             $report = $this->reports->resolveReport((string)$schedule['reportId']);
-            if($schedule['dataSourceId'] < 1){
-                throw new InvalidArgumentException('The schedule has no data source');
+            $query = self::scheduleQuery($schedule['query']);
+            if($query === null){
+                throw new InvalidArgumentException('The schedule has no query');
             }
-            $query = $this->querySourceQuery($schedule['dataSourceId']);
-            $output = $schedule['file'] !== '' ? $schedule['file'] : substr($report['file'], 0, -4);
+            $output = ReportService::scheduleOutput($report['file'], $schedule['file']);
             $format = $schedule['format'];
             $title = $schedule['title'];
             $language = $schedule['language'];
@@ -235,13 +236,13 @@ final class ReportJobPlanner
     {
         $due = array();
         foreach($this->repository->allSchedules() as $schedule){
-            if(!($schedule['intervalMinutes'] > 0) || $schedule['dataSourceId'] < 1){ continue; }
+            if(!($schedule['intervalMinutes'] > 0)){ continue; }
             $templateFile = $this->reportFileForCron($schedule['reportId']);
             if($templateFile === ''){ continue; }
-            $output = $this->outputName($schedule['file'] !== '' ? $schedule['file'] : substr($templateFile, 0, -4));
+            $output = $this->outputName(ReportService::scheduleOutput($templateFile, $schedule['file']));
             $path = $this->generatedDirectory.$output.'.'.$schedule['format'];
             if(is_file($path) && time() - filemtime($path) < $schedule['intervalMinutes'] * 60){ continue; }
-            $query = $this->querySourceQueryForCron($schedule['dataSourceId']);
+            $query = self::scheduleQuery($schedule['query']);
             if($query === null){ continue; }
             $schedule['templateFile'] = $templateFile;
             $schedule['query'] = $query;
@@ -278,17 +279,12 @@ final class ReportJobPlanner
         return $source['source']['query'];
     }
 
-    /** Query text of a Query Source regardless of visibility (cron). */
-    private function querySourceQueryForCron(int $recordId)
+    /** Query of a schedule: JSON decoded, else its text; null when it has none. */
+    private static function scheduleQuery(string $value)
     {
-        $records = RecordRepository::shared($this->database);
-        $header = $records->header($recordId, array('rec_FlagTemporary'));
-        $field = $this->codes->id('DT_QUERY_STRING');
-        $value = $header === null || intval($header['rec_FlagTemporary']) !== 0 ? null
-            : ($records->values(array($recordId), array($field))[$recordId][$field][0] ?? null);
-        if($value === null || trim((string)$value) === ''){ return null; }
-        $decoded = json_decode((string)$value, true);
-        return is_array($decoded) ? $decoded : ltrim(trim((string)$value), '?');
+        if(trim($value) === ''){ return null; }
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : ltrim(trim($value), '?');
     }
 
     /** Template file of a report record regardless of visibility (cron). */

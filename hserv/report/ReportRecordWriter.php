@@ -1,15 +1,11 @@
 <?php
 /**
-* ReportRecordWriter.php - Record writes for the srv/ reports manager
-* 
-* It will be removed as soon as new record save will be implemented in /srv
-* 
-* Implements Heurist\Reports\ReportRecordWriterInterface with the legacy record
-* save/delete functions and the definitions import (DbsImport):
-* - creates Custom Report records for template files,
-* - deletes report records,
-* - installs Custom Report (2-1104) and Custom Report Schedule (2-1105) from
-*   Heurist_Core_Definitions and converts usrReportSchedule rows to records.
+* ReportRecordWriter.php - Setup of the report definitions for the srv/ reports manager
+*
+* Implements Heurist\Reports\ReportRecordWriterInterface with the definitions import
+* (DbsImport): installs Custom Report (2-1104) and Custom Report Schedule (2-1105) from
+* Heurist_Core_Definitions and converts usrReportSchedule rows to records. Other record
+* writes are in the generic record services (srv/Records/Edit, Reports/ReportEntityHandler).
 *
 * @project     Heurist academic knowledge management system
 * @package     Report
@@ -29,7 +25,7 @@ require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
 
 /**
- * Creates and deletes report records; installs report definitions.
+ * Installs report definitions and converts the old schedules.
  */
 class ReportRecordWriter implements ReportRecordWriterInterface
 {
@@ -66,7 +62,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
      * @param array $access Optional `OwnerUGrpID` / `NonOwnerVisibility`.
      * @return int New record id.
      */
-    public function createReport(string $title, string $templateFile, bool $isCardView, string $description = '', array $access = array()): int
+    private function createReport(string $title, string $templateFile, bool $isCardView, string $description = '', array $access = array()): int
     {
         $details = array(
             $this->fieldId('2-1') => $title,
@@ -80,167 +76,6 @@ class ReportRecordWriter implements ReportRecordWriterInterface
             $details[$this->fieldId('2-4')] = $description;
         }
         return $this->saveRecord($this->recordTypeId('2-1104'), $details, $access);
-    }
-
-    /**
-     * Create a Report Schedule record owned by the report's owner group.
-     *
-     * @param array $schedule title, reportId, dataSourceId, output, format, intervalMinutes, language (term id).
-     * @param int $ownerGroupId Owner group.
-     * @return int New record id.
-     */
-    public function createSchedule(array $schedule, int $ownerGroupId): int
-    {
-        $details = array(
-            $this->fieldId('2-1') => (string)$schedule['title'],
-            $this->fieldId('2-1183') => intval($schedule['reportId']),
-            $this->fieldId('3-1083') => intval($schedule['dataSourceId']),
-            $this->fieldId('2-62') => (string)$schedule['output']
-        );
-        $mimeTerm = $this->mimeTermId((string)($schedule['format'] ?? 'html'));
-        if ($mimeTerm > 0) {
-            $details[$this->fieldId('2-29')] = $mimeTerm;
-        }
-        if (!empty($schedule['intervalMinutes']) && intval($schedule['intervalMinutes']) > 0) {
-            $details[$this->fieldId('2-1184')] = intval($schedule['intervalMinutes']);
-        }
-        if (!empty($schedule['language'])) {
-            $details[$this->fieldId('2-967')] = intval($schedule['language']);
-        }
-        return $this->saveRecord($this->recordTypeId('2-1105'), $details,
-            array('OwnerUGrpID' => $ownerGroupId, 'NonOwnerVisibility' => 'viewable'));
-    }
-
-    /**
-     * Change a Custom Report record (only the given keys).
-     *
-     * @param int $recordId Record id.
-     * @param array $values title, description, file, isCardView.
-     * @return void
-     */
-    public function updateReport(int $recordId, array $values): void
-    {
-        $details = array();
-        $remove = array();
-        if (array_key_exists('title', $values)) {
-            $details[$this->fieldId('2-1')] = (string)$values['title'];
-        }
-        if (array_key_exists('file', $values)) {
-            $details[$this->fieldId('2-62')] = (string)$values['file'];
-        }
-        if (array_key_exists('description', $values)) {
-            if (trim((string)$values['description']) === '') {
-                $remove[] = $this->fieldId('2-4');
-            } else {
-                $details[$this->fieldId('2-4')] = (string)$values['description'];
-            }
-        }
-        if (array_key_exists('isCardView', $values)) {
-            $flag = $this->flagTermId($values['isCardView'] === true);
-            if ($flag > 0) {
-                $details[$this->fieldId('2-1182', false)] = $flag;
-            }
-        }
-        $this->updateRecord($recordId, $this->recordTypeId('2-1104'), $details, $remove);
-    }
-
-    /**
-     * Change a Report Schedule record (only the given keys).
-     *
-     * @param int $recordId Record id.
-     * @param array $values title, dataSourceId, output, format, intervalMinutes, language (term id, 0: none).
-     * @return void
-     */
-    public function updateSchedule(int $recordId, array $values): void
-    {
-        $details = array();
-        $remove = array();
-        if (array_key_exists('title', $values)) {
-            $details[$this->fieldId('2-1')] = (string)$values['title'];
-        }
-        if (array_key_exists('dataSourceId', $values)) {
-            $details[$this->fieldId('3-1083')] = intval($values['dataSourceId']);
-        }
-        if (array_key_exists('output', $values)) {
-            $details[$this->fieldId('2-62')] = (string)$values['output'];
-        }
-        if (array_key_exists('format', $values)) {
-            $mimeTerm = $this->mimeTermId((string)$values['format']);
-            if ($mimeTerm > 0) {
-                $details[$this->fieldId('2-29')] = $mimeTerm;
-            } else {
-                $remove[] = $this->fieldId('2-29'); // html without a term
-            }
-        }
-        if (array_key_exists('intervalMinutes', $values)) {
-            if (intval($values['intervalMinutes']) > 0) {
-                $details[$this->fieldId('2-1184')] = intval($values['intervalMinutes']);
-            } else {
-                $remove[] = $this->fieldId('2-1184');
-            }
-        }
-        if (array_key_exists('language', $values)) {
-            if (intval($values['language']) > 0) {
-                $details[$this->fieldId('2-967')] = intval($values['language']);
-            } else {
-                $remove[] = $this->fieldId('2-967');
-            }
-        }
-        $this->updateRecord($recordId, $this->recordTypeId('2-1105'), $details, $remove);
-    }
-
-    /**
-     * Replace the values of some fields of a record and remove others; the other
-     * fields are kept. Checks edit rights like the record editor.
-     */
-    private function updateRecord(int $recordId, int $recordTypeId, array $details, array $remove): void
-    {
-        $mysqli = $this->system->getMysqli();
-        $owner = mysql__select_row_assoc($mysqli,
-            'SELECT rec_OwnerUGrpID,rec_NonOwnerVisibility FROM Records WHERE rec_ID='.intval($recordId).' AND rec_RecTypeID='.intval($recordTypeId));
-        if (!$owner) {
-            throw new \OutOfBoundsException('Record '.$recordId.' does not exist');
-        }
-        $keep = array();
-        foreach (mysql__select_all($mysqli,
-            'SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID FROM recDetails WHERE dtl_RecID='.intval($recordId).' ORDER BY dtl_ID') as $row) {
-            $dty = intval($row[0]);
-            if (array_key_exists($dty, $details) || in_array($dty, $remove, true)) {
-                continue;
-            }
-            $keep[$dty][] = $row[2] ? intval($row[2]) : $row[1];
-        }
-        foreach ($details as $dty => $value) {
-            $keep[$dty] = $value;
-        }
-        $result = recordSave($this->system, array(
-            'ID' => $recordId,
-            'RecTypeID' => $recordTypeId,
-            'OwnerUGrpID' => $owner['rec_OwnerUGrpID'],
-            'NonOwnerVisibility' => $owner['rec_NonOwnerVisibility'],
-            'no_validation' => 'ignore_all',
-            'details' => $keep
-        ));
-        if (!is_array($result) || @$result['status'] != HEURIST_OK) {
-            throw new \RuntimeException($this->errorMessage($result ?: $this->system->getError(), 'Cannot save record '.$recordId));
-        }
-    }
-
-    /**
-     * Delete one record with the legacy rules.
-     *
-     * @param int $recordId Record id.
-     * @return void
-     */
-    public function deleteRecord(int $recordId): void
-    {
-        $result = recordDelete($this->system, array($recordId));
-        if (!is_array($result) || @$result['status'] != HEURIST_OK) {
-            throw new \RuntimeException($this->errorMessage($result, 'Cannot delete record '.$recordId));
-        }
-        if (intval(@$result['data']['noaccess']) > 0) {
-            throw new \DomainException('You are not allowed to delete record '.$recordId);
-        }
     }
 
     /**
@@ -319,11 +154,10 @@ class ReportRecordWriter implements ReportRecordWriterInterface
             // records made from shared schedules belong to the Database managers group
             $access = array('OwnerUGrpID' => 1, 'NonOwnerVisibility' => 'viewable');
             $reportId = $this->findOrCreateReport((string)$row['rps_Template'], $access);
-            $sourceId = $this->createQuerySource((string)$row['rps_Title'], (string)$row['rps_HQuery'], $access);
 
             $details = array(
                 $this->fieldId('2-1') => (string)$row['rps_Title'],
-                $this->fieldId('3-1083') => $sourceId,
+                $this->fieldId('2-12') => self::scheduleQuery((string)$row['rps_HQuery']),
                 $this->fieldId('2-1183') => $reportId,
                 $fileField => $output
             );
@@ -361,21 +195,14 @@ class ReportRecordWriter implements ReportRecordWriterInterface
         return $this->createReport(substr($file, 0, -4), $file, false, '', $access);
     }
 
-    /**
-     * Create a Query Source record for the query of an old schedule.
-     * rps_HQuery is either a query or a URL query string ("db=..&w=all&q=...").
-     */
-    private function createQuerySource(string $title, string $hquery, array $access): int
+    /** The query of an old schedule: rps_HQuery is a query or a URL query string ("db=..&w=all&q=..."). */
+    private static function scheduleQuery(string $hquery): string
     {
-        $query = $hquery;
         if (strpos($hquery, 'q=') !== false && strpos($hquery, '&') !== false) {
             parse_str($hquery, $params);
-            $query = (string)($params['q'] ?? '');
+            return (string)($params['q'] ?? '');
         }
-        return $this->saveRecord($this->recordTypeId('3-1021'), array(
-            $this->fieldId('2-1') => $title,
-            $this->fieldId('2-12') => $query
-        ), $access);
+        return $hquery;
     }
 
     /**
