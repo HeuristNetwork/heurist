@@ -85,7 +85,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
     /**
      * Create a Report Schedule record owned by the report's owner group.
      *
-     * @param array $schedule title, reportId, dataSourceId, output, format, intervalMinutes.
+     * @param array $schedule title, reportId, dataSourceId, output, format, intervalMinutes, language (term id).
      * @param int $ownerGroupId Owner group.
      * @return int New record id.
      */
@@ -103,6 +103,9 @@ class ReportRecordWriter implements ReportRecordWriterInterface
         }
         if (!empty($schedule['intervalMinutes']) && intval($schedule['intervalMinutes']) > 0) {
             $details[$this->fieldId('2-1184')] = intval($schedule['intervalMinutes']);
+        }
+        if (!empty($schedule['language'])) {
+            $details[$this->fieldId('2-967')] = intval($schedule['language']);
         }
         return $this->saveRecord($this->recordTypeId('2-1105'), $details,
             array('OwnerUGrpID' => $ownerGroupId, 'NonOwnerVisibility' => 'viewable'));
@@ -145,7 +148,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
      * Change a Report Schedule record (only the given keys).
      *
      * @param int $recordId Record id.
-     * @param array $values title, dataSourceId, output, format, intervalMinutes.
+     * @param array $values title, dataSourceId, output, format, intervalMinutes, language (term id, 0: none).
      * @return void
      */
     public function updateSchedule(int $recordId, array $values): void
@@ -174,6 +177,13 @@ class ReportRecordWriter implements ReportRecordWriterInterface
                 $details[$this->fieldId('2-1184')] = intval($values['intervalMinutes']);
             } else {
                 $remove[] = $this->fieldId('2-1184');
+            }
+        }
+        if (array_key_exists('language', $values)) {
+            if (intval($values['language']) > 0) {
+                $details[$this->fieldId('2-967')] = intval($values['language']);
+            } else {
+                $remove[] = $this->fieldId('2-967');
             }
         }
         $this->updateRecord($recordId, $this->recordTypeId('2-1105'), $details, $remove);

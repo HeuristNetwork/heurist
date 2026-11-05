@@ -41,7 +41,8 @@ interface ReportRendererInterface
      *
      * @param array $source ['file' => template file name] or ['body' => template text].
      * @param array $ids Record ids in report order.
-     * @param array $options `purpose` preview|file, `mode` html|js|txt|csv|xml|json, `replevel` 0-3.
+     * @param array $options `purpose` preview|file|render, `mode` html|js|txt|csv|xml|json, `replevel` 0-3,
+     *        `language` report language (a caller without a request: website generator, schedules).
      * @param JobContext|null $context Running job: progress, Stop and the time limit.
      * @return array{output:string,error:?string} Output (or the error as output) and the error text.
      */

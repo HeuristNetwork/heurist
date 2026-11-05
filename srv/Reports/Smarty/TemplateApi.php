@@ -506,6 +506,12 @@ final class TemplateApi
         return is_array($fileinfo) ? $this->assembler->fileLink($fileinfo) : '';
     }
 
+    /** Report language given by the caller (website generator, schedule): it wins over the request. */
+    public function setLanguage(string $language): void
+    {
+        $this->language = $this->languages->code3($language);
+    }
+
     /** Report language (3 letters): request "lang", else the user's language. */
     public function language(): string
     {

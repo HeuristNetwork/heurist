@@ -85,13 +85,13 @@ final class StoredText
                 .'img[src|alt|title|width|height|data-id|loading],'
                 .'table[width|border|cellpadding|cellspacing|summary],caption,colgroup,col[span|width],'
                 .'thead,tbody,tfoot,tr,th[colspan|rowspan|scope|abbr|width|height],td[colspan|rowspan|width|height],'
-                .'figure,figcaption,audio[src|controls|preload|data-id],video[src|controls|preload|poster|width|height|data-id],'
+                .'figure[data-h-view|data-h-full],figcaption,audio[src|controls|preload|data-id],video[src|controls|preload|poster|width|height|data-id],'
                 .'source[src|type],iframe[src|width|height|title|frameborder|allowfullscreen|allow|loading],'
                 // website format v4 (plan 27a): page structure, tabs and accordions, nodes and hosts
                 // a group with a caption: section[aria-labelledby] = the id of its heading (plan 27c §20)
                 .'section[aria-labelledby],article,aside,nav,header,footer,main,details[open],summary,'
                 .'*[id|class|title|lang|dir|data-heurist-rec|data-heurist-app-id|data-inited'
-                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media]';
+                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media|data-h-field]';
             $config->set('HTML.SafeIframe', true);
             $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
             $config->set('HTML.Allowed', $allowed);
@@ -119,6 +119,12 @@ final class StoredText
             foreach(array('data-h-node', 'data-h-instance', 'data-h-control', 'data-h-style', 'data-h-media') as $attribute){
                 foreach($blocks as $element){ $def->addAttribute($element, $attribute, 'Text'); }
             }
+            // a gallery figure (plan 27e §18): what the action Player / Viewer opens; a checked URL, no scripts
+            $def->addAttribute('figure', 'data-h-view', 'Enum#image,video,audio,service,iiif,3d,3dhop,pdf');
+            $def->addAttribute('figure', 'data-h-full', 'URI');
+            // a Record field element (plan 27e §22): a checked reference to a field of a record
+            $reference = self::fieldReference();
+            foreach($blocks as $element){ $def->addAttribute($element, 'data-h-field', $reference); }
             // a text block: a flag without a value (data-h-text="" after purifying)
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-text', 'Text'); }
             $def->addAttribute('img', 'data-id', 'Number');
@@ -138,6 +144,18 @@ final class StoredText
             $config->set('HTML.Allowed', $allowed);
         }
         return self::$purifiers[$type] = new \HTMLPurifier($config);
+    }
+
+    /** `data-h-field`: `<record id|website|page>.<field id or concept code>`, as CmsValidator. */
+    private static function fieldReference(): \HTMLPurifier_AttrDef
+    {
+        return new class extends \HTMLPurifier_AttrDef {
+            public function validate($string, $config, $context)
+            {
+                $string = trim((string)$string);
+                return preg_match('/^(website|page|\d+)\.\d+(-\d+)?$/', $string) === 1 ? $string : false;
+            }
+        };
     }
 
     /** The style of a block (2026-10-25): `text-align` with a keyword, nothing else. */

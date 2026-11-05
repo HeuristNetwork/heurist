@@ -25,6 +25,7 @@ use Heurist\Runtime\ApiResponse;
 use Heurist\Runtime\ErrorReporter;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Records\Query\Compiler\QueryBuilder;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\RecordSearchService;
 use Heurist\Records\Query\SearchExecutionException;
@@ -46,6 +47,7 @@ final class RecordQueryController
     private ApiResponse $response;
     private ErrorReporter $errors;
     private QueryExecutor $executor;
+    private DatabaseInterface $database;
 
     /** @var QueryBuilder */
     private $builder;
@@ -85,6 +87,7 @@ final class RecordQueryController
     )
     {
         $this->runtime = $runtime;
+        $this->database = $database;
         $this->entity = $entity;
         $this->response = $response ?? new ApiResponse();
         $this->errors = $errors ?? new ErrorReporter();
@@ -340,6 +343,29 @@ final class RecordQueryController
         return $response;
     }
 
+    /**
+     * One field of a record: GET /api/{db}/records/{id}/{field} (plan 28 §9.4). The same
+     * envelope as /records/{id}?fields={field id}; the field is a local id or a concept code.
+     *
+     * @throws \OutOfBoundsException An unknown field (404).
+     */
+    public function executeField(array $params, int $recordId, string $field): array
+    {
+        $fieldId = preg_match('/^\d+(-\d+)?$/', $field) === 1
+            ? DefinitionLookup::shared($this->database)->localId('dty', $field) : 0;
+        if($fieldId < 1){
+            throw new \OutOfBoundsException('Unknown field '.$field);
+        }
+        $params['fields'] = (string)$fieldId;
+        return $this->executeItem($params, $recordId);
+    }
+
+    /** Execute executeField() and write the JSON response (errors as output()). */
+    public function outputField(array $params, int $recordId, string $field): void
+    {
+        $this->send(function() use ($params, $recordId, $field){ return $this->executeField($params, $recordId, $field); });
+    }
+
     /** Execute executeItem() and write the JSON response (errors as output()). */
     public function outputItem(array $params, int $recordId): void
     {
@@ -375,6 +401,8 @@ final class RecordQueryController
             $this->response->sendError(500, 'server_error', 'Record query execution failed');
         }catch(\InvalidArgumentException $e){
             $this->response->sendError(400, 'invalid_request', $e->getMessage());
+        }catch(\OutOfBoundsException $e){
+            $this->response->sendError(404, 'not_found', $e->getMessage());
         }catch(\Throwable $e){
             if($this->response->sendInterrupted($e)){ return; }
             $this->errors->report($e, $this->runtime);

@@ -141,6 +141,7 @@ final class ReportJobPlanner
     {
         $this->policy->requireMember();
         $scheduleId = intval($params['schedule'] ?? 0);
+        $language = '';
 
         if($scheduleId > 0){
             $schedule = $this->repository->getSchedule($scheduleId);
@@ -155,6 +156,7 @@ final class ReportJobPlanner
             $output = $schedule['file'] !== '' ? $schedule['file'] : substr($report['file'], 0, -4);
             $format = $schedule['format'];
             $title = $schedule['title'];
+            $language = $schedule['language'];
         }else{
             $report = $this->reports->resolveReport(trim((string)($params['report'] ?? '')));
             $querySourceId = intval($params['querySource'] ?? 0);
@@ -184,6 +186,7 @@ final class ReportJobPlanner
                 'query' => $query,
                 'output' => $this->outputName($output),
                 'format' => $format,
+                'language' => $language,
                 'scheduleId' => $scheduleId > 0 ? $scheduleId : null
             )
         );

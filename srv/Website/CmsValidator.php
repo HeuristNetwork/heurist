@@ -32,7 +32,7 @@ final class CmsValidator
     /** Known instance types by kind, and the newest configuration version of each kind. */
     public const TYPES = array(
         'module' => array('explorer', 'data', 'map', 'timeline', 'graph', 'recordview'),
-        'widget' => array('menu')
+        'widget' => array('menu', 'report', 'cards', 'gallery')
     );
     public const CONFIG_VERSION = 1;
 
@@ -97,7 +97,11 @@ final class CmsValidator
                     $issues[] = self::issue('warning', 'duplicate_node', 'Node id "'.$id.'" is used more than once', $id);
                 }
                 $seenNodes[$id] = true;
-                if($node['text']){ $texts[$id] = true; }
+                // the value of a field comes from its record, it has no translations here (plan 27e)
+                if($node['text'] && $node['field'] === null){ $texts[$id] = true; }
+            }
+            if($node['field'] !== null && preg_match('/^(website|page|\d+)\.\d+(-\d+)?$/', $node['field']) !== 1){
+                $issues[] = self::issue('warning', 'field_reference', 'Field reference "'.$node['field'].'" is not valid', $id);
             }
             // a media element (plan 27c §33): its settings in config.media, one element each
             if($node['media'] !== null){
@@ -185,7 +189,8 @@ final class CmsValidator
 
     /**
      * Why the settings of a media element are not valid, or null: `file` the key of a registered file,
-     * `width` / `height` / `playerWidth` / `playerHeight` 'auto', px or %, `player` a boolean (as cmsMediaProblem of cmsDocument.js).
+     * `width` / `height` 'auto', px or %, `action` none or viewer; `playerWidth` / `playerHeight` / `player` of older pages
+     * (as cmsMediaProblem of cmsDocument.js).
      */
     public static function mediaProblem(array $settings): ?string
     {
@@ -197,6 +202,7 @@ final class CmsValidator
             }
         }
         if(isset($settings['player']) && !is_bool($settings['player'])){ return 'player must be true or false'; }
+        if(isset($settings['action']) && !in_array($settings['action'], array('none', 'viewer'), true)){ return 'action must be none or viewer'; }
         return null;
     }
 

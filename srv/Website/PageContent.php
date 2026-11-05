@@ -1,0 +1,204 @@
+<?php
+/**
+* PageContent.php - Semi-static content of a website page (plan 27e)
+*
+* Values of the elements with `data-h-field` (`207439.2-1`, `website.2-1`, `page.2-1`) and the HTML of the
+* widgets `report`, `cards` and `gallery`. Used by PageRenderer on a dynamic page (per request, the rights of
+* the visitor) and on a generated page (at build, guest rights): the same classes, no HTTP.
+*
+* @project     Heurist academic knowledge management system
+* @package     Website
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2026 Heurist Network Association. All rights reserved.
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       8.0
+*/
+
+declare(strict_types=1);
+
+namespace Heurist\Website;
+
+use Heurist\Utilities\LanguageCodes;
+use Heurist\Utilities\Temporal;
+
+/** Field values and widget HTML of a page. */
+final class PageContent
+{
+    /** Hard limit of the records of a cards widget (plan 27e §9). */
+    public const CARD_LIMIT = 50;
+
+    private WebsiteRepository $repository;
+    private LanguageCodes $languages;
+    /** @var array{search:callable,render:callable,generated:string,baseUrl:string,database:string} */
+    private array $services;
+    /** @var array<int,array|null> */
+    private array $records = array();
+
+    /**
+     * @param WebsiteRepository $repository Records with the rights of the visitor.
+     * @param array $services `search` (query, limit) => record ids; `render` (template file, record id, language)
+     *        => html or null; `generated` the folder of generated reports; `baseUrl`; `database`.
+     */
+    public function __construct(WebsiteRepository $repository, LanguageCodes $languages, array $services)
+    {
+        $this->repository = $repository;
+        $this->languages = $languages;
+        $this->services = $services;
+    }
+
+    /**
+     * The value of a `data-h-field` reference as HTML.
+     *
+     * @param string $reference `<record id|website|page>.<field id or concept code>`.
+     * @param array $context WebsiteService::context.
+     * @return string|null HTML; '' for an empty field and for a record the visitor may not see (the snapshot must not show it,
+     *         plan 27e §22); null when the reference or field is not valid: the snapshot stays.
+     */
+    public function field(string $reference, array $context): ?string
+    {
+        if(preg_match('/^(website|page|\d+)\.(\d+(?:-\d+)?)$/', $reference, $parts) !== 1){ return null; }
+        $record = $this->sourceRecord($parts[1], $context);
+        if($record === null){ return ''; }
+        $definitions = $this->repository->definitions();
+        $fieldId = $definitions->localId('dty', $parts[2]);
+        if($fieldId < 1){ return null; }
+        $values = WebsiteRepository::values($record, $fieldId);
+        if(empty($values)){ return ''; }
+        $language = (string)($context['language'] ?? 'ENG');
+        switch($definitions->fieldType($fieldId)){
+            case 'file':
+                return $this->image($values);
+            case 'enum':
+            case 'relationtype':
+                return self::text(implode(', ', $this->termLabels($values, $language)));
+            case 'date':
+                return self::text(implode(', ', array_map(static function($value): string {
+                    return (string)Temporal::toHumanReadable((string)$value, true);
+                }, $values)));
+            case 'blocktext':
+                // stored HTML, already purified on save
+                return implode('', $this->inLanguage($values, $language));
+            default:
+                return self::text(implode(', ', $this->inLanguage($values, $language)));
+        }
+    }
+
+    /**
+     * The HTML of a widget for its host.
+     *
+     * @param array $instance Instance of the configuration.
+     * @param array $context WebsiteService::context.
+     * @return array{html:string,class:string}|null Null: not a widget of this class, or nothing to show.
+     */
+    public function widget(array $instance, array $context): ?array
+    {
+        $settings = is_array($instance['settings'] ?? null) ? $instance['settings'] : array();
+        $language = strtolower((string)($context['language'] ?? 'eng'));
+        $list = (string)($settings['presentation'] ?? 'list') !== 'slider';
+        switch((string)($instance['type'] ?? '')){
+            case 'report':
+                $html = $this->report(is_array($settings['files'] ?? null) ? $settings['files'] : array(), $language);
+                return $html === null ? null : array('html' => $html, 'class' => 'h-site-report');
+            case 'cards':
+                return array('html' => $this->cards($settings, $language), 'class' => $list ? 'h-site-cards h-site-widget-list' : 'h-site-cards h-slider-pending');
+            case 'gallery':
+                $html = is_array($settings['html'] ?? null) ? ($settings['html'][$language] ?? $settings['html']['def'] ?? null) : null;
+                return is_string($html) ? array('html' => $html, 'class' => $list ? 'h-site-gallery h-site-widget-list' : 'h-site-gallery h-slider-pending') : null;
+        }
+        return null;
+    }
+
+    /** The record of a reference: the website, the page, or a record the visitor may see. */
+    private function sourceRecord(string $source, array $context): ?array
+    {
+        if($source === 'website'){ return $context['site'] ?? $context['page']; }
+        if($source === 'page'){ return $context['page']; }
+        $id = intval($source);
+        if(!array_key_exists($id, $this->records)){ $this->records[$id] = $this->repository->record($id); }
+        return $this->records[$id];
+    }
+
+    /** The values of the language if there are any, else the values without a language, else all (draft 1 §5b). */
+    private function inLanguage(array $values, string $language): array
+    {
+        $code = $this->languages->code3($language);
+        $own = array();
+        $plain = array();
+        $all = array();
+        foreach($values as $value){
+            list($valueLanguage, $text) = $this->languages->splitPrefix((string)$value);
+            $all[] = (string)$text;
+            if($valueLanguage === null){ $plain[] = (string)$text; }
+            elseif($valueLanguage === $code){ $own[] = (string)$text; }
+        }
+        return !empty($own) ? $own : (!empty($plain) ? $plain : $all);
+    }
+
+    /** Term labels in a language, the label itself without a translation. */
+    private function termLabels(array $termIds, string $language): array
+    {
+        $definitions = $this->repository->definitions();
+        $translated = $definitions->translations('trm_Label', array_map('intval', $termIds), (string)$this->languages->code3($language));
+        $labels = array();
+        foreach($termIds as $termId){
+            $labels[] = $translated[(string)intval($termId)] ?? (string)($definitions->term(intval($termId))['term'] ?? '');
+        }
+        return array_values(array_filter($labels, 'strlen'));
+    }
+
+    /** An image of a file field: the first file. */
+    private function image(array $fileIds): string
+    {
+        $key = $this->repository->fileKey(intval($fileIds[0] ?? 0));
+        return $key === '' ? '' : '<img src="'.self::attribute($this->services['baseUrl'].'?db='.rawurlencode($this->services['database'])
+            .'&file='.rawurlencode($key)).'" alt="">';
+    }
+
+    /** Content of a generated report: the file of the language, else `def`; only the body of a whole document. */
+    private function report(array $files, string $language): ?string
+    {
+        $file = (string)($files[$language] ?? $files['def'] ?? '');
+        if(preg_match('/^[^\/\\\\]+\.html?$/i', $file) !== 1 || $file[0] === '.'){ return null; }
+        $path = rtrim((string)$this->services['generated'], '/\\').'/'.$file;
+        if(!is_file($path)){ return null; }
+        $html = (string)file_get_contents($path);
+        return preg_match('/<body\b[^>]*>(.*)<\/body\s*>/is', $html, $body) === 1 ? $body[1] : $html;
+    }
+
+    /** Cards of the records of the query, each one rendered with the card template. */
+    private function cards(array $settings, string $language): string
+    {
+        $query = $settings['query'] ?? null;
+        if(!is_array($query) || empty($query) || self::hasParameters($query)){ return ''; }
+        $file = $this->repository->reportTemplate($settings['template'] ?? '');
+        if($file === ''){ return ''; }
+        $ids = array_slice(array_map('intval', (array)call_user_func($this->services['search'], $query, self::CARD_LIMIT)), 0, self::CARD_LIMIT);
+        $urls = (string)($settings['action'] ?? '') === 'url' ? $this->repository->recordUrls($ids) : array();
+        $html = '';
+        foreach($ids as $id){
+            $card = call_user_func($this->services['render'], $file, $id, $language);
+            if(!is_string($card) || $card === ''){ continue; }
+            $url = $urls[$id] ?? '';
+            $html .= '<div class="h-site-card" data-h-rec="'.$id.'"'.($url !== '' ? ' data-h-url="'.self::attribute($url).'"' : '').'>'.$card.'</div>';
+        }
+        return $html;
+    }
+
+    /** A query with `$NAME$` parameters can not run without a form. */
+    private static function hasParameters(array $query): bool
+    {
+        return preg_match('/\$[A-Za-z][A-Za-z0-9_]*\$/', (string)json_encode($query)) === 1;
+    }
+
+    private static function text(string $value): string
+    {
+        return htmlspecialchars($value, ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
+    }
+
+    private static function attribute(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+}

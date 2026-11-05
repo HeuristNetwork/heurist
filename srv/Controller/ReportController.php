@@ -4,7 +4,7 @@
 *
 *   GET    /reports[?scope=all|card|set]   list (card: single-record reports, public)
 *   POST   /reports                        create {title, isCardView, body?, description?}
-*   GET    /reports/generated[?prefix=]    files in generated-reports (name starts with prefix)
+*   GET    /reports/generated[?prefix=|report=]  files in generated-reports (name starts with prefix; of a report)
 *   DELETE /reports/generated/{file}       delete a generated file
 *   GET    /reports/schedules              all visible schedules with their last generated file
 *   POST   /reports/setup                  install definitions, convert old schedules
@@ -192,7 +192,7 @@ final class ReportController
             case 'generated':
                 $file = isset($segments[1]) ? rawurldecode((string)$segments[1]) : '';
                 if($method === 'GET' && $file === ''){
-                    $this->send($this->service->listGenerated((string)($params['prefix'] ?? '')));
+                    $this->send($this->service->listGenerated((string)($params['prefix'] ?? ''), (string)($params['report'] ?? '')));
                 }elseif($method === 'DELETE' && $file !== ''){
                     $this->send($this->service->deleteGenerated($file));
                 }else{

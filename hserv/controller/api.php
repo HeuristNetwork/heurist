@@ -1094,8 +1094,13 @@ else
         if($method=='search' && is_numeric($requestUri[4]) && intval($requestUri[4]) > 0){
             // GET /records/{id}: the /records record object and meta (srv), with
             // fields (default _all), detail=ids, resolveDetails and defs.
+            // GET /records/{id}/{field}: one field, by local id or concept code (plan 28 §9.4).
             $controller = ServiceFactory::fromLegacySystem($system)->recordQueryController();
-            $controller->outputItem($req_params, intval($requestUri[4]));
+            if(isset($requestUri[5]) && $requestUri[5] !== ''){
+                $controller->outputField($req_params, intval($requestUri[4]), (string)$requestUri[5]);
+            }else{
+                $controller->outputItem($req_params, intval($requestUri[4]));
+            }
             $system->dbclose();
             exit;
         }

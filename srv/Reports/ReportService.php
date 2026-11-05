@@ -78,6 +78,7 @@ final class ReportService
             }));
         }
 
+        if($this->policy->isMember()){ $reports = $this->withGeneratedCount($reports); }
         $result = array(
             'installed' => $this->reports->isInstalled(),
             'reports' => $reports
@@ -312,21 +313,88 @@ final class ReportService
     }
 
     /**
+     * Which report each generated file belongs to (plan 27e §24): the schedule with this output, else the report with the
+     * longest name followed by a space (a suffix), "_" (a user) or ".". A plain prefix would give `Single` also the files of
+     * `Single22` and of `Single _copy`.
+     *
+     * @param string[] $names File names in generated-reports.
+     * @param array<int,array> $reports Reports with `id`, `file`, `schedules`.
+     * @return array<string,string[]> File names by report id, or file name of a report without a record.
+     */
+    public static function assignGenerated(array $names, array $reports): array
+    {
+        $outputs = array();
+        $bases = array();
+        foreach($reports as $report){
+            $key = (string)($report['id'] ?? $report['file']);
+            foreach($report['schedules'] ?? array() as $schedule){
+                if(($schedule['file'] ?? '') !== ''){ $outputs[strtolower($schedule['file'].'.'.($schedule['format'] ?? 'html'))] = $key; }
+            }
+            $base = strtolower(self::outputBase((string)$report['file']));
+            if($base !== ''){ $bases[$base] = $key; }
+        }
+        // the longest name first
+        uksort($bases, static function($a, $b): int { return strlen((string)$b) - strlen((string)$a); });
+        $result = array();
+        foreach($names as $name){
+            $lower = strtolower($name);
+            $key = $outputs[$lower] ?? null;
+            foreach($key === null ? $bases : array() as $base => $report){
+                $base = (string)$base;
+                if(strpos($lower, $base) === 0 && in_array($lower[strlen($base)] ?? '', array(' ', '_', '.'), true)){
+                    $key = $report;
+                    break;
+                }
+            }
+            if($key !== null){ $result[(string)$key][] = $name; }
+        }
+        return $result;
+    }
+
+    /** The reports of the list with the number of their generated files. */
+    private function withGeneratedCount(array $reports): array
+    {
+        $files = self::assignGenerated($this->generatedNames(), $this->allReports());
+        foreach($reports as $index => $report){
+            $reports[$index]['generatedCount'] = count($files[(string)($report['id'] ?? $report['file'])] ?? array());
+        }
+        return $reports;
+    }
+
+    /** All reports with a record and the template files without one: every file has its report. */
+    private function allReports(): array
+    {
+        return array_merge($this->reports->listReports(), $this->unregisteredFiles());
+    }
+
+    /** @return string[] File names in generated-reports. */
+    private function generatedNames(): array
+    {
+        if($this->generatedDirectory === '' || !is_dir($this->generatedDirectory)){ return array(); }
+        $names = array();
+        foreach(scandir($this->generatedDirectory) ?: array() as $name){
+            // "job-tmp-*": output of a running generation job (ReportGenerateJob)
+            if($name[0] === '.' || $name[0] === '_' || $name === 'index.html' || strpos($name, 'job-tmp-') === 0
+                || !is_file($this->generatedDirectory.$name)){ continue; }
+            $names[] = $name;
+        }
+        return $names;
+    }
+
+    /**
      * Files in the generated-reports folder.
      *
      * @return array<int,array{file:string,size:int,modified:string,url:string}>
      */
-    public function listGenerated(string $prefix = ''): array
+    public function listGenerated(string $prefix = '', string $report = ''): array
     {
         $this->policy->requireMember();
-        if($this->generatedDirectory === '' || !is_dir($this->generatedDirectory)){ return array(); }
         $prefix = strtolower(trim($prefix));
+        $names = $this->generatedNames();
+        if($report !== ''){ $names = self::assignGenerated($names, $this->allReports())[$report] ?? array(); }
         $files = array();
-        foreach(scandir($this->generatedDirectory) ?: array() as $name){
+        foreach($names as $name){
             $path = $this->generatedDirectory.$name;
-            // "job-tmp-*": output of a running generation job (ReportGenerateJob)
-            if($name[0] === '.' || $name[0] === '_' || $name === 'index.html' || strpos($name, 'job-tmp-') === 0
-                || !is_file($path)){ continue; }
             if($prefix !== '' && strpos(strtolower($name), $prefix) !== 0){ continue; }
             $files[] = array(
                 'file' => $name,
@@ -404,7 +472,7 @@ final class ReportService
      *
      * @param string $reference Report record id.
      * @param int $scheduleId Schedule record id.
-     * @param array $params title?, querySource?, suffix?, format?, intervalMinutes?
+     * @param array $params title?, querySource?, suffix?, format?, intervalMinutes?, language? (term id, 0: none)
      * @return array The report with its schedules.
      */
     public function updateSchedule(string $reference, int $scheduleId, array $params): array
@@ -427,8 +495,15 @@ final class ReportService
         if(array_key_exists('suffix', $params)){ $changes['output'] = $this->outputName($report, (string)$params['suffix']); }
         if(isset($params['format'])){ $changes['format'] = ReportRepository::formatFromMime((string)$params['format']); }
         if(array_key_exists('intervalMinutes', $params)){ $changes['intervalMinutes'] = max(0, intval($params['intervalMinutes'])); }
+        if(array_key_exists('language', $params)){ $changes['language'] = max(0, intval($params['language'])); }
         $this->writer->updateSchedule($scheduleId, $changes);
         return $this->resolve($reference);
+    }
+
+    /** The template file name as the start of an output file name. */
+    private static function outputBase(string $file): string
+    {
+        return trim((string)preg_replace('/[\/\\\\:*?"<>|\x00-\x1F]+/u', '_', substr($file, 0, -4)), ' ._');
     }
 
     /**
@@ -437,7 +512,7 @@ final class ReportService
      */
     public function outputName(array $report, string $suffix): string
     {
-        $base = trim((string)preg_replace('/[\/\\\\:*?"<>|\x00-\x1F]+/u', '_', substr($report['file'], 0, -4)), ' ._');
+        $base = self::outputBase($report['file']);
         $suffix = trim($suffix);
         if($suffix !== ''){ $base .= ' '.self::asciiName($suffix, 'File name suffix'); }
         if($base === ''){
@@ -466,7 +541,7 @@ final class ReportService
      * (its owner group, the database owner and managers) manage its schedules.
      *
      * @param string $reference Report record id.
-     * @param array $params title?, querySource, output?, format?, intervalMinutes?
+     * @param array $params title?, querySource, output?, format?, intervalMinutes?, language? (term id)
      * @return array The report with its schedules.
      */
     public function createSchedule(string $reference, array $params): array
@@ -489,7 +564,8 @@ final class ReportService
             'dataSourceId' => $dataSourceId,
             'output' => $output,
             'format' => ReportRepository::formatFromMime((string)($params['format'] ?? 'html')),
-            'intervalMinutes' => is_numeric($interval) && intval($interval) > 0 ? intval($interval) : null
+            'intervalMinutes' => is_numeric($interval) && intval($interval) > 0 ? intval($interval) : null,
+            'language' => intval($params['language'] ?? 0)
         ), intval($report['ownerGroupId']));
         return $this->resolve($reference);
     }
