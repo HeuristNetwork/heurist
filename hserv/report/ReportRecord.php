@@ -646,6 +646,11 @@ class ReportRecord
         //              
         // fNNN_originalvalue 
         //
+
+        $ar2 = getLangCode2($lang);
+        if(is_string($ar2) && strlen($ar2) === 2){ // preset temporal language
+            Temporal::$language = $ar2;
+        }
         
         switch ($detailType) {
             case 'enum':
