@@ -202,32 +202,6 @@ class USystem {
         $path = trim(str_replace('\\', '/', $path),'/');
         $parts = explode('/', $path);
         $version = end($parts) ?? '';
-        
-        // Find the URL prefix that resolves to this running installation.
-        // Addition by ChatGPT 6.1 Sol light 6/11/26 to resolve problem of redirection on new Huma-Num server
-        $documentRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-        $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
-
-        if ($documentRoot !== '' && substr($scriptPath, 0, 1) === '/') {
-            $urlDir = str_replace('\\', '/', dirname($scriptPath));
-
-            while ($urlDir !== '.' && $urlDir !== '') {
-                $candidate = $documentRoot . ($urlDir === '/' ? '' : $urlDir);
-                $resolved = realpath($candidate);
-
-                if ($resolved !== false
-                    && trim(str_replace('\\', '/', $resolved), '/') === $path) {
-                    return array(rtrim($urlDir, '/') . '/', $installDir_pro);
-                }
-
-                if ($urlDir === '/') {
-                    break;
-                }
-
-                $urlDir = dirname($urlDir);
-            }
-}
-        
         if(self::isHeuristCodeFolder($version)){
            $installDir = '/'.$version.'/';
            $wasExplicitInstallDir = true;

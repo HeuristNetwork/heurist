@@ -66,22 +66,18 @@ if (!array_key_exists('embed', $_REQUEST)) {
     $reqPath = preg_replace('~/index\.php$~i', '/', $reqPath);
     $reqPath = preg_replace('~//+~', '/', $reqPath);
 
-    if (preg_match('~^/((?:HEURIST/)?(heurist|h7-alpha|h7-[A-Za-z0-9_-]+))(/|$)~', $reqPath, $m)) {
-        $version = $m[2];
-        $installationPublicPath = '/' . $m[1] . '/';        
+    if (preg_match('~^/(heurist|h7-alpha|h7-[A-Za-z0-9_-]+)(/|$)~', $reqPath, $m)) {
+        $version = $m[1];
     } else {
         // For versionless pretty URLs (eg /db/web/...), choose your public default.
         // If your public default is "heurist", set it to "heurist" here.
         $version = $defaultVersion;
-        
-        $installationPublicPath = '/' . $version . '/';    
     }
-    
-    if (!defined('PDIR')) {
-        // A reverse-proxied deployment may expose a different public path.
+    if(!defined('PDIR')){
+        // A reverse-proxied deployment may expose this code beneath a path
+        // different from the internal Heurist version directory.
         global $heuristPublicPath;
-        define('PDIR', !empty($heuristPublicPath)
-            ? $heuristPublicPath : $installationPublicPath);
+        define('PDIR', !empty($heuristPublicPath) ? $heuristPublicPath : '/' . $version . '/');
     }
 }
 
