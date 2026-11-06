@@ -44,3 +44,8 @@ API (plan 27d; generic record controller `RecordEditController::executeEntity`, 
 The same checks and CSS are in `heurist-explorer` shared/src/site/cmsDocument.js; both run
 the cases of shared/test/fixtures/cms-v4 (`tests/CmsFormatTest.php`). Database test:
 `tests/WebsiteRenderTest.php`.
+
+## Semi-static content (plan 27e)
+
+`PageContent.php` — values of `data-h-field` and HTML of the widgets `report`, `cards`, `gallery`; `CmsHtml::fill` puts them
+into a part of the page, PageRenderer also writes the menu. Same code on a dynamic page and in a build, no HTTP.

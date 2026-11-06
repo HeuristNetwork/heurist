@@ -40,16 +40,19 @@ final class PageRenderer
     private LanguageCodes $languages;
     /** @var array{database:string,baseUrl:string,javaScriptAllowed:bool,urls:SiteUrls} */
     private array $environment;
+    private ?PageContent $content;
 
     /**
      * @param array<string,int> $codes WebsiteRepository::codes().
      * @param array $environment database, baseUrl, javaScriptAllowed, urls (SiteUrls).
+     * @param PageContent|null $content Field values and widgets (plan 27e); null: the stored HTML as it is.
      */
-    public function __construct(array $codes, LanguageCodes $languages, array $environment)
+    public function __construct(array $codes, LanguageCodes $languages, array $environment, ?PageContent $content = null)
     {
         $this->codes = $codes;
         $this->languages = $languages;
         $this->environment = $environment;
+        $this->content = $content;
     }
 
     /** The HTML document of a page. */
@@ -78,6 +81,9 @@ final class PageRenderer
         $content = CmsHtml::translate(WebsiteRepository::value($page, $this->codes['content']), $pageTexts);
         $header = $site !== null ? CmsHtml::translate(WebsiteRepository::value($site, $this->codes['header']), $siteTexts) : '';
         $footer = $site !== null ? CmsHtml::translate(WebsiteRepository::value($site, $this->codes['footer']), $siteTexts) : '';
+        $content = $this->fill($content, $context);
+        $header = $this->fill($header, $context);
+        $footer = $this->fill($footer, $context);
 
         $title = $this->text($page, $this->codes['name'], $language);
         $siteTitle = $site !== null ? $this->text($site, $this->codes['name'], $language) : '';
@@ -130,6 +136,54 @@ final class PageRenderer
             .'<script type="module" src="'.self::attr($assets.$module.'.js').'"></script></body></html>';
     }
 
+    /** Field values, widgets and the menu of one part of the page, written by the server (plan 27e). */
+    private function fill(string $html, array $context): string
+    {
+        $instances = self::instanceList($context['pageConfig']) + self::instanceList($context['siteConfig'] ?? null);
+        return CmsHtml::fill($html, function(string $reference) use ($context): ?string {
+            return $this->content !== null ? $this->content->field($reference, $context) : null;
+        }, function(string $id) use ($instances, $context): ?array {
+            $instance = is_array($instances[$id] ?? null) ? $instances[$id] : array();
+            if(($instance['kind'] ?? '') !== 'widget'){ return null; }
+            if(($instance['type'] ?? '') === 'menu'){ return array('html' => $this->menuHtml($context)); }
+            return $this->content !== null ? $this->content->widget($instance, $context) : null;
+        });
+    }
+
+    /** The website menu as links (for crawlers and visitors without JS); HMenu activates it. */
+    private function menuHtml(array $context): string
+    {
+        $tree = $this->menu($context, $context['menu']);
+        $languages = '';
+        if(count($context['languages']) > 1){
+            $current = strtolower((string)$context['language']);
+            foreach($context['languages'] as $code){
+                $lower = strtolower($code);
+                $languages .= '<a href="'.self::attr($this->url($context, intval($context['page']['rec_ID']), $code)).'" hreflang="'.self::attr($lower).'"'
+                    .($lower === $current ? ' class="is-current" aria-current="true"' : '').'>'.self::text2html(strtoupper($code)).'</a>';
+            }
+            $languages = '<li class="h-site-menu-item h-site-menu-languages">'.$languages.'</li>';
+        }
+        return '<nav class="h-site-menu" aria-label="Site menu"><button type="button" class="h-site-menu-toggle" aria-expanded="false">Menu</button>'
+            .$this->menuList($tree, 'h-site-menu-list', 0, $languages).'</nav>';
+    }
+
+    /** A list of menu items with their sub pages one level down (the HTML of HMenu). */
+    private function menuList(array $items, string $class, int $depth, string $extra = ''): string
+    {
+        $html = '';
+        foreach($items as $item){
+            $children = $depth === 0 ? $item['children'] : array();
+            $classes = 'h-site-menu-item'.($item['current'] ? ' is-current' : '').(!empty($children) ? ' has-children' : '');
+            foreach($children as $child){
+                if($child['current']){ $classes .= ' is-current-parent'; break; }
+            }
+            $html .= '<li class="'.$classes.'"><a href="'.self::attr($item['url']).'"'.($item['current'] ? ' aria-current="page"' : '').'>'
+                .self::text2html($item['title']).'</a>'.(!empty($children) ? $this->menuList($children, 'h-site-menu-sub', $depth + 1) : '').'</li>';
+        }
+        return '<ul class="'.$class.'">'.$html.$extra.'</ul>';
+    }
+
     /** The JSON block read by the site runtime. */
     private function configJson(array $context): string
     {
@@ -147,7 +201,8 @@ final class PageRenderer
                 'languages' => array_map(function(string $code) use ($context){
                     return array('code' => strtolower($code), 'url' => $this->url($context, intval($context['page']['rec_ID']), $code));
                 }, $context['languages']),
-                'menu' => $this->menu($context, $context['menu'])
+                // the page has the menu as HTML; the designer's draft replaces it and needs the tree
+                'menu' => !empty($context['design']) ? $this->menu($context, $context['menu']) : array()
             ),
             'instances' => $this->instances($context)
         ), self::JSON_FLAGS);
@@ -192,7 +247,7 @@ final class PageRenderer
                 'kind' => (string)($instance['kind'] ?? ''),
                 'type' => (string)($instance['type'] ?? ''),
                 'mount' => ($instance['mount'] ?? 'direct') === 'iframe' ? 'iframe' : 'direct',
-                'settings' => is_array($instance['settings'] ?? null) ? $instance['settings'] : array(),
+                'settings' => self::publicSettings($instance, !empty($context['design'])),
                 'state' => $instance['state'] ?? null
             );
             $problem = CmsValidator::instanceProblem($instance);
@@ -200,6 +255,14 @@ final class PageRenderer
             $result[(string)$id] = $entry;
         }
         return $result;
+    }
+
+    /** Settings given to the page: a widget written by the server needs only the options of its start. */
+    private static function publicSettings(array $instance, bool $design): array
+    {
+        $settings = is_array($instance['settings'] ?? null) ? $instance['settings'] : array();
+        if($design || !in_array($instance['type'] ?? '', array('report', 'cards', 'gallery'), true)){ return $settings; }
+        return array_intersect_key($settings, array('presentation' => true, 'action' => true, 'slider' => true));
     }
 
     /** The menu tree with titles and URLs in the current language. */

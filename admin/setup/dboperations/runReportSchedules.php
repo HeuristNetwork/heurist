@@ -55,6 +55,7 @@ foreach ($planner->dueSchedules() as $schedule) {
         'templateFile' => $schedule['templateFile'],
         'query' => $schedule['query'],
         'output' => $schedule['output'],
+        'language' => $schedule['language'],
         'format' => $schedule['format'],
         'scheduleId' => $schedule['id']
     ));

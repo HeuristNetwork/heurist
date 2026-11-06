@@ -77,7 +77,7 @@ final class ReportGenerateJob implements JobHandlerInterface
     }
 
     /**
-     * @param array $params Normalized parameters (templateFile, query, output, format, scheduleId).
+     * @param array $params Normalized parameters (templateFile, query, output, format, language, scheduleId).
      * @param JobContext $context Running job.
      * @return array Generated file: file, url, size, records, scheduleId.
      */
@@ -95,7 +95,8 @@ final class ReportGenerateJob implements JobHandlerInterface
 
         $result = $this->renderer->renderIds(array('file' => (string)$params['templateFile']), $ids, array(
             'purpose' => 'file',
-            'mode' => (string)$params['format']
+            'mode' => (string)$params['format'],
+            'language' => (string)($params['language'] ?? '')
         ), $context);
         if($result['error'] !== null && $result['error'] !== ''){
             throw new RuntimeException($result['error']);

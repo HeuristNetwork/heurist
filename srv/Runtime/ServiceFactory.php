@@ -84,6 +84,7 @@ use Heurist\Reports\Smarty\ReportEnvironment;
 use Heurist\Reports\Smarty\SmartyTemplateRunner;
 use Heurist\Reports\Smarty\SrvSmartyRenderer;
 use Heurist\Reports\ReportPolicy;
+use Heurist\Reports\ReportEntityHandler;
 use Heurist\Reports\ReportRecordWriterInterface;
 use Heurist\Reports\ReportRendererInterface;
 use Heurist\Reports\ReportRepository;
@@ -107,6 +108,7 @@ use Heurist\System\Tags\TagRecordMapping;
 use Heurist\System\Tags\TagWriteService;
 use Heurist\Controller\WebsiteController;
 use Heurist\Website\CmsRecordCheck;
+use Heurist\Website\PageContent;
 use Heurist\Website\PageRenderer;
 use Heurist\Website\SiteUrls;
 use Heurist\Website\Build\WebsiteBuilder;
@@ -439,9 +441,15 @@ final class ServiceFactory
                 $websiteDefinitions !== null ? new WebsiteSetup($websiteDefinitions, $this->runtime) : null
             );
         };
+        $report = function(string $kind): ReportEntityHandler {
+            return new ReportEntityHandler($kind, $this->reportRepository(),
+                new ReportTemplateStore((string)($this->reportEnvironment['templates'] ?? '')), $this->codes);
+        };
         return new RecordEntityRegistry($rectypes, array(
             'website' => static function() use ($website) { return $website('website'); },
-            'page' => static function() use ($website) { return $website('page'); }
+            'page' => static function() use ($website) { return $website('page'); },
+            'report' => static function() use ($report) { return $report('report'); },
+            'schedule' => static function() use ($report) { return $report('schedule'); }
         ));
     }
 
@@ -635,9 +643,10 @@ final class ServiceFactory
         $repository = new WebsiteRepository($this->database, $this->runtime);
         $languages = new LanguageCodes(self::languageCodesFile());
         $environment = $this->websiteEnvironment();
-        $renderer = static function(bool $pretty) use ($repository, $languages, $environment): PageRenderer {
+        $content = $this->pageContent($repository, $languages, $this->runtime);
+        $renderer = static function(bool $pretty) use ($repository, $languages, $environment, $content): PageRenderer {
             return new PageRenderer($repository->codes(), $languages, $environment
-                + array('urls' => new SiteUrls($environment['database'], $environment['baseUrl'], $pretty)));
+                + array('urls' => new SiteUrls($environment['database'], $environment['baseUrl'], $pretty)), $content);
         };
         return new WebsiteController(
             new WebsiteService($repository, $languages, $this->runtime->baseUrl),
@@ -673,14 +682,40 @@ final class ServiceFactory
         $repository = new WebsiteRepository($this->database, $guest);
         $languages = new LanguageCodes(self::languageCodesFile());
         $environment = $this->websiteEnvironment();
+        $content = $this->pageContent($repository, $languages, $guest);
         $builder = new WebsiteBuilder(
             new WebsiteService($repository, $languages, $this->runtime->baseUrl),
-            static function(string $defaultLanguage) use ($repository, $languages, $environment): PageRenderer {
+            static function(string $defaultLanguage) use ($repository, $languages, $environment, $content): PageRenderer {
                 return new PageRenderer($repository->codes(), $languages, $environment
-                    + array('urls' => SiteUrls::files($environment['database'], $environment['baseUrl'], $defaultLanguage)));
+                    + array('urls' => SiteUrls::files($environment['database'], $environment['baseUrl'], $defaultLanguage)), $content);
             }
         );
         return array(new WebsiteBuildJob($this->websiteEditService(), $builder));
+    }
+
+    /**
+     * Field values and widgets of website pages (plan 27e) with the rights of a runtime: classes, no HTTP.
+     * The Smarty engine is made on the first card.
+     */
+    private function pageContent(WebsiteRepository $repository, LanguageCodes $languages, RuntimeContext $runtime): PageContent
+    {
+        $database = $this->database;
+        $runner = null;
+        return new PageContent($repository, $languages, array(
+            'search' => static function(array $query, int $limit) use ($database, $runtime): array {
+                $service = new RecordSearchService($database, $runtime, new QueryBuilder($database));
+                return $service->search(new SearchRequest($query, array('limit' => $limit)))->ids;
+            },
+            'render' => function(string $file, int $recordId, string $language) use (&$runner, $runtime): ?string {
+                $runner = $runner ?? $this->smartyRunner($runtime);
+                $result = $runner->run(array('file' => $file), array($recordId),
+                    array('purpose' => 'render', 'mode' => 'html', 'language' => $language));
+                return $result['error'] === null ? $result['output'] : null;
+            },
+            'generated' => (string)($this->reportEnvironment['generated'] ?? ''),
+            'baseUrl' => $this->runtime->baseUrl,
+            'database' => $this->runtime->databaseName
+        ));
     }
 
     /** Values of the website renderer: database, base URL, CMS code exception. */
@@ -805,7 +840,7 @@ final class ServiceFactory
     }
 
     /** Template runner of the srv Smarty engine. */
-    public function smartyRunner(): SmartyTemplateRunner
+    public function smartyRunner(?RuntimeContext $rights = null): SmartyTemplateRunner
     {
         $values = $this->reportEnvironment['engine'] ?? array();
         if(is_callable($values)){
@@ -817,8 +852,8 @@ final class ServiceFactory
             $values['templateDir'] = (string)($this->reportEnvironment['templates'] ?? '');
         }
         $database = $this->database;
-        $runtime = $this->runtime;
-        $visibleIds = $this->visibleIdsFilter();
+        $runtime = $rights ?? $this->runtime;
+        $visibleIds = $this->visibleIdsFilter($runtime);
         $search = static function(string $query) use ($database, $runtime): array {
             $builder = new QueryBuilder($database);
             $decoded = json_decode($query, true);
@@ -860,10 +895,10 @@ final class ServiceFactory
     }
 
     /** Filter of record ids by the access rules of the current user (order kept). */
-    private function visibleIdsFilter(): callable
+    private function visibleIdsFilter(?RuntimeContext $rights = null): callable
     {
         $records = RecordRepository::shared($this->database);
-        $access = RecordAccess::fromRuntime($this->runtime);
+        $access = RecordAccess::fromRuntime($rights ?? $this->runtime);
         return static function(array $ids) use ($records, $access): array {
             return $records->visibleIds($ids, $access);
         };
@@ -885,7 +920,9 @@ final class ServiceFactory
             $writer,
             (string)($this->reportEnvironment['generated'] ?? ''),
             (string)($this->reportEnvironment['generatedUrl'] ?? ''),
-            $this->reportEnvironment['javaScriptAllowed'] ?? false
+            $this->reportEnvironment['javaScriptAllowed'] ?? false,
+            function(): RecordSaveService { return $this->recordWriteParts()['save']; },
+            $this->codes
         );
     }
 

@@ -63,7 +63,7 @@ final class ReportPreviewJob implements JobHandlerInterface
     }
 
     /**
-     * @param array $params {report?, body?, ids, replevel?}
+     * @param array $params {report?, body?, ids, replevel?, language?}
      * @return array
      */
     public function prepare(array $params): array
@@ -72,7 +72,7 @@ final class ReportPreviewJob implements JobHandlerInterface
     }
 
     /**
-     * @param array $params Normalized parameters (templateFile|body, ids, replevel).
+     * @param array $params Normalized parameters (templateFile|body, ids, replevel, language).
      * @param JobContext $context Running job.
      * @return array Record count and engine error (records, error).
      */
@@ -88,7 +88,8 @@ final class ReportPreviewJob implements JobHandlerInterface
         $result = $this->renderer->renderIds($source, $ids, array(
             'purpose' => 'preview',
             'mode' => 'html',
-            'replevel' => intval($params['replevel'] ?? 0)
+            'replevel' => intval($params['replevel'] ?? 0),
+            'language' => (string)($params['language'] ?? '')
         ), $context);
 
         $context->writeResult($result['output']);

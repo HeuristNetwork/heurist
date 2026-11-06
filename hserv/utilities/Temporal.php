@@ -74,6 +74,8 @@ class Temporal {
         3=>"Slow Finish"
     );
 
+    public static $language = '';
+
     /**
      * Constructor for the Temporal class.
      * Initializes the temporal object by parsing the input date string or array.
@@ -762,6 +764,7 @@ class Temporal {
 
             $res = substr($date,0,$k);//year
             $mmdd = substr($date,$k+1);
+            $day = '01';
             if(strlen($mmdd)<3){
                 $month = str_pad($mmdd,2,'0',STR_PAD_RIGHT);
             }else{
@@ -1051,10 +1054,15 @@ class Temporal {
                     $res2 = $date['day'];
                 }
                 if(@$date['month']){
-                    $res2 = $res2.' '.date('M', mktime(0, 0, 0, $date['month'], 1));//strtotime($date['month'].'01'));
+
+                    $month = mktime(0, 0, 0, $date['month'], 1);
+                    $month = getMonthLabel(date('n', $month), self::$language);
+                    $month = ctype_digit((string)$month) ? date('M', $month) : $month;
+
+                    $res2 = "{$res2} {$month}";
                 }
 
-                $res = trim($res2."  ".$res);// day month year
+                $res = trim("{$res2} {$res}");// day month year
 
             }else{
                 if(@$date['month'] || $has_time){
@@ -1748,7 +1756,7 @@ class Temporal {
                 }
             }
 
-            return $res2;
+            return preg_replace('/  +/', ' ', $res2);
 
         }else{
             return 'undefined temporal';

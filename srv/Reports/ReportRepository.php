@@ -273,13 +273,14 @@ final class ReportRepository
         $ids = array_map(static function(array $row): int { return intval($row['rec_ID']); }, $rows);
         $fields = array(
             'name' => $this->codes->id('DT_NAME'),
-            'source' => $this->codes->id('DT_DATA_SOURCE'),
+            'query' => $this->codes->id('DT_QUERY_STRING'),
             'file' => $this->codes->id('DT_FILE_NAME'),
             'mime' => $this->codes->id('DT_FILE_EXT'),
-            'interval' => $this->codes->id('DT_INTERVAL_MINUTES')
+            'interval' => $this->codes->id('DT_INTERVAL_MINUTES'),
+            'language' => $this->codes->id('DT_LANGUAGE')
         );
-        $details = $this->loadDetails($ids, array_values($fields));
-        $terms = $this->loadTerms($this->collectValues($details, array($fields['mime'])));
+        $details = $this->loadDetails($ids, array_values(array_filter($fields)));
+        $terms = $this->loadTerms($this->collectValues($details, array($fields['mime'], $fields['language'])));
 
         $result = array();
         foreach($rows as $row){
@@ -287,15 +288,19 @@ final class ReportRepository
             $values = $details[$id] ?? array();
             $mime = $terms[intval($this->first($values, $fields['mime']))] ?? null;
             $interval = $this->first($values, $fields['interval']);
+            $languageTerm = intval($this->first($values, $fields['language']));
             $ownerGroupId = intval($row['rec_OwnerUGrpID']);
             $result[] = array(
                 'id' => $id,
                 'reportId' => intval($row['reportId']),
                 'title' => $this->first($values, $fields['name']) ?? (string)$row['rec_Title'],
-                'dataSourceId' => intval($this->first($values, $fields['source'])),
+                'query' => (string)($this->first($values, $fields['query']) ?? ''),
                 'file' => (string)($this->first($values, $fields['file']) ?? ''),
                 'format' => self::formatFromMime($mime === null ? '' : ($mime['code'] !== '' ? $mime['code'] : $mime['label'])),
                 'intervalMinutes' => is_numeric($interval) ? intval($interval) : null,
+                // term of the output language (plan 27e) and its code; none: the user's language
+                'languageTerm' => $languageTerm,
+                'language' => (string)($terms[$languageTerm]['code'] ?? ''),
                 'ownerGroupId' => $ownerGroupId,
                 'canEdit' => $this->canEdit($ownerGroupId)
             );

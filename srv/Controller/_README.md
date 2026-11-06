@@ -18,7 +18,7 @@ entry points during migration.
 - `RecordEditController.php` — record writes `/records/{id}` (plan 14) and the record-based entities
   `/{entity}/{id}/{action}` with their hooks and actions (`executeEntity`, `Records/Entity`, plan 27d).
 - `WebsiteController.php` — v4 website pages and frames (`/{db}/site/...`, plan 27a). The website API is the
-  entities `website` and `page` (`Website/WebsiteEntityHandler.php`).
+  entities `website` and `page` (`Website/WebsiteEntityHandler.php`), `report` and `schedule` (`Reports/ReportEntityHandler.php`).
 - `ReportController.php` — reports manager: list, template body, register, import/export, delete, single-record render.
 - `JobController.php` — background jobs: start (answers, closes the connection, then runs), status, Stop, result.
 - `ExternalServiceController.php` — external services (special endpoint): `POST /external/translate`

@@ -25,6 +25,7 @@ namespace Heurist\Website;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Data\RecordDataService;
+use Heurist\Records\Files\FileRepository;
 use Heurist\Records\Store\RecordAccess;
 use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\RuntimeContext;
@@ -153,6 +154,45 @@ final class WebsiteRepository
             return $tree;
         };
         return array('tree' => $build(self::ids($site, $codes['topMenu']), array()), 'pages' => $pages);
+    }
+
+    /**
+     * Template file of a report: a report record id or a `.tpl` file name (a page template). The report record is
+     * not checked for access: the author of the website chose it; the records of the cards follow the visitor's rights.
+     *
+     * @param mixed $template Record id or file name.
+     * @return string File name, '' when there is none.
+     */
+    public function reportTemplate($template): string
+    {
+        if(is_string($template) && !ctype_digit($template)){
+            return substr($template, -4) === '.tpl' ? basename($template) : '';
+        }
+        $id = intval($template);
+        $field = $this->definitions()->constant('DT_FILE_NAME');
+        if($id < 1 || $field < 1){ return ''; }
+        $values = RecordRepository::shared($this->database)->values(array($id), array($field));
+        return basename((string)($values[$id][$field][0] ?? ''));
+    }
+
+    /** The key of a registered file ('' when it is not found). */
+    public function fileKey(int $fileId): string
+    {
+        return (string)((new FileRepository($this->database))->files(array($fileId))[$fileId]['ulf_ObfuscatedFileID'] ?? '');
+    }
+
+    /**
+     * URLs of records the visitor may see.
+     *
+     * @return array<int,string> Record id => rec_URL (no entry without a URL).
+     */
+    public function recordUrls(array $ids): array
+    {
+        $result = array();
+        foreach(RecordRepository::shared($this->database)->headers($ids, array('rec_URL'), RecordAccess::fromRuntime($this->runtime)) as $id => $row){
+            if((string)($row['rec_URL'] ?? '') !== ''){ $result[$id] = (string)$row['rec_URL']; }
+        }
+        return $result;
     }
 
     /** Values of a field of a record (hidden marks removed). */
