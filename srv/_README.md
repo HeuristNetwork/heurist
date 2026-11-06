@@ -50,7 +50,6 @@ Dependency direction is Controller → Records → Database/Runtime. Classes bel
 - `Records/Presentation/` — read-only presentation definition services.
 - `Records/Map/MapFeatureService.php` — GeoJSON feature pipeline.
 - `Controller/WebsiteController.php`, `Website/` — v4 websites: live pages, manager API, build job (plans 27a, 27b).
-- `Controller/ReportController.php` — reports manager (`/api/{db}/reports`).
 - `Reports/` — Smarty report records, template files and engine interfaces.
 - `Controller/JobController.php` — background jobs (`/api/{db}/jobs`).
 - `Jobs/` — background job runner, JSON state files, Stop and time limits.

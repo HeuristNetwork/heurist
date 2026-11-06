@@ -53,6 +53,7 @@ use Heurist\Records\Edit\RecordPermissionService;
 use Heurist\Records\Edit\RecordSaveService;
 use Heurist\Records\Entity\RecordEntityHandler;
 use Heurist\Records\Entity\RecordEntityRegistry;
+use Heurist\Runtime\RawResponse;
 use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\ApiResponse;
 use Heurist\Runtime\ErrorReporter;
@@ -139,7 +140,9 @@ final class RecordEditController
         if($action === 'duplicate'){
             $this->allow($method, array('POST'));
             $newId = $this->duplicate->duplicate($recordId);
-            return array(201, $this->savedRecord($newId, array(), $params));
+            $handler = $this->handlerFor('PUT', $recordId, null);
+            $issues = $handler !== null ? $handler->afterDuplicate($recordId, $newId, $json ?? array(), $params) : array();
+            return array(201, $this->savedRecord($newId, $issues, $params));
         }
         if($action === 'validate'){
             $this->allow($method, array('POST'));
@@ -211,12 +214,16 @@ final class RecordEditController
         $action = (string)($segments[1] ?? '');
         $isField = preg_match('/^\d+(-\d+)?$/', $action) === 1;
         // a guest reads a record or a field; everything else needs a login (plan 28a)
-        $isRead = $method === 'GET' && ctype_digit($first) && ($action === '' || $isField);
+        $handler = $this->entities->handler($entity);
+        $isRead = $method === 'GET' && ctype_digit($first) && ($action === '' || $isField || $handler->allowsGuest($action));
         if($this->runtime->userId < 1 && !$isRead){
             throw new RecordEditException(401, 'unauthorized', 'Log in to use this action');
         }
+        if($handler->acceptsUpload(preg_match('/^-?\d+$/', $first) ? $action : $first)){
+            // an upload is multipart, the Origin is checked all the same
+            $request['contentType'] = 'application/json';
+        }
         if($method !== 'GET'){ $this->assertSameSite($method, $request); }
-        $handler = $this->entities->handler($entity);
         if(!preg_match('/^-?\d+$/', $first)){
             // an action of the whole entity, e.g. /website/setup
             return array(200, $handler->action($first, $method, 0, $params, $json ?? array()));
@@ -397,6 +404,10 @@ final class RecordEditController
         if(defined('HEADER_CORS_POLICY')){ header(HEADER_CORS_POLICY); }
         try{
             list($status, $body) = $build();
+            if(isset($body['rawResponse']) && $body['rawResponse'] instanceof RawResponse){
+                $body['rawResponse']->send($status);
+                return;
+            }
             $this->response->send($body, $status);
         }catch(RecordEditException $error){
             $body = array('status'=>$error->status(), 'error'=>$error->errorCode(), 'message'=>$error->getMessage());

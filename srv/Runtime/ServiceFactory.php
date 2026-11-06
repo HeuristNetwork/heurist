@@ -27,7 +27,6 @@ use Heurist\Controller\QueryCancelController;
 use Heurist\Controller\RecordEditController;
 use Heurist\Controller\RecordPresentationController;
 use Heurist\Controller\RecordQueryController;
-use Heurist\Controller\ReportController;
 use Heurist\Controller\SystemQueryController;
 use Heurist\Controller\TimeDataController;
 use Heurist\Database\DatabaseFactory;
@@ -85,6 +84,7 @@ use Heurist\Reports\Smarty\SmartyTemplateRunner;
 use Heurist\Reports\Smarty\SrvSmartyRenderer;
 use Heurist\Reports\ReportPolicy;
 use Heurist\Reports\ReportEntityHandler;
+use Heurist\Reports\ReportOutputStore;
 use Heurist\Reports\ReportRecordWriterInterface;
 use Heurist\Reports\ReportRendererInterface;
 use Heurist\Reports\ReportRepository;
@@ -128,8 +128,10 @@ final class ServiceFactory
     private PresentationRecordRepository $presentations;
     private SystemCode $codes;
     private string $entityDirectory;
-    /** @var array{templates?:string,generated?:string,generatedUrl?:string,jobs?:string,settings?:array} */
+    /** @var array{templates?:string,generated?:string,jobs?:string,settings?:array} */
     private array $reportEnvironment;
+    /** @var callable|null `() => array(renderer, writer)` of the entity report. */
+    private $reportEngine = null;
     /** @var (\Closure():array)|null Database setting "Languages" (translations), read when needed. */
     private ?\Closure $translationLanguages = null;
     /** Whether the installation has a DeepL or Google translation key. */
@@ -178,7 +180,6 @@ final class ServiceFactory
             array(
                 'templates' => (string)$system->getSysDir('smarty-templates'),
                 'generated' => (string)$system->getSysDir('generated-reports'),
-                'generatedUrl' => (string)$system->getSysUrl('generated-reports'),
                 'jobs' => (string)$system->getSysDir('scratch').'jobs/',
                 'settings' => is_array($reportSettings) ? $reportSettings : array(),
                 'exportSettings' => is_array($exportSettings) ? $exportSettings : array(),
@@ -404,6 +405,21 @@ final class ServiceFactory
      */
     public function recordEditController(?WebsiteDefinitionsInterface $websiteDefinitions = null): RecordEditController
     {
+        return $this->buildRecordEditController($websiteDefinitions);
+    }
+
+    /**
+     * The report engine of the entity report: `() => array(renderer, record writer)`, the legacy
+     * classes of hserv (api.php).
+     */
+    public function useReportEngine(callable $engine): void
+    {
+        $this->reportEngine = $engine;
+    }
+
+    /** The record edit controller with its entities. */
+    private function buildRecordEditController(?WebsiteDefinitionsInterface $websiteDefinitions): RecordEditController
+    {
         $parts = $this->recordWriteParts();
         return new RecordEditController(
             $parts['save'],
@@ -441,10 +457,7 @@ final class ServiceFactory
                 $websiteDefinitions !== null ? new WebsiteSetup($websiteDefinitions, $this->runtime) : null
             );
         };
-        $report = function(string $kind): ReportEntityHandler {
-            return new ReportEntityHandler($kind, $this->reportRepository(),
-                new ReportTemplateStore((string)($this->reportEnvironment['templates'] ?? '')), $this->codes);
-        };
+        $report = function(string $kind): ReportEntityHandler { return $this->reportHandler($kind); };
         return new RecordEntityRegistry($rectypes, array(
             'website' => static function() use ($website) { return $website('website'); },
             'page' => static function() use ($website) { return $website('page'); },
@@ -562,7 +575,27 @@ final class ServiceFactory
         }
         $records = $this->recordQueryController();
         return new SystemQueryService($this->database, $this->runtime, null, $this->entityImageStorage(),
-            array_filter($rectypes), array($records, 'execute'));
+            array_filter($rectypes), array($records, 'execute'), function(string $entity, array $ids): array {
+                return in_array($entity, array('report', 'output'), true) ? $this->reportHandler($entity)->describeMany($ids) : array();
+            });
+    }
+
+    /** Handler of the entities report and output. */
+    private function reportHandler(string $kind): ReportEntityHandler
+    {
+        return new ReportEntityHandler($kind, $this->reportRepository(),
+            new ReportTemplateStore((string)($this->reportEnvironment['templates'] ?? '')), $this->codes,
+            new ReportOutputStore((string)($this->reportEnvironment['generated'] ?? '')),
+            function(): ?ReportService {
+                if($this->reportEngine === null){ return null; }
+                list($renderer, $writer) = ($this->reportEngine)();
+                return $this->reportService($renderer, $writer);
+            },
+            function(): RecordSaveService { return $this->recordWriteParts()['save']; },
+            function($query): int {
+                $found = $this->recordQueryController()->execute(array('query' => $query, 'detail' => 'ids', 'limit' => 1));
+                return intval($found['ids'][0] ?? $found['records'][0] ?? 0);
+            });
     }
 
     /** Registration id of this database (concept codes of its records). */
@@ -743,18 +776,6 @@ final class ServiceFactory
         );
     }
 
-    /**
-     * Create the reports manager controller. The Smarty engine and record writes
-     * are supplied by the caller (legacy hserv implementations for now).
-     */
-    public function reportController(
-        ReportRendererInterface $renderer,
-        ReportRecordWriterInterface $writer
-    ): ReportController
-    {
-        return new ReportController($this->reportService($renderer, $writer), $this->runtime);
-    }
-
     /** Create the planner used by the report background jobs. */
     public function reportJobPlanner(
         ReportRendererInterface $renderer,
@@ -765,12 +786,10 @@ final class ServiceFactory
             $this->reportService($renderer, $writer),
             $this->reportRepository(),
             $this->reportPolicy(),
-            new QuerySourcePresentationService($this->presentations),
             $this->database,
             $this->runtime,
             $this->codes,
-            (string)($this->reportEnvironment['generated'] ?? ''),
-            (string)($this->reportEnvironment['generatedUrl'] ?? '')
+            new ReportOutputStore((string)($this->reportEnvironment['generated'] ?? ''))
         );
     }
 
@@ -933,8 +952,6 @@ final class ServiceFactory
             $this->reportPolicy(),
             $renderer,
             $writer,
-            (string)($this->reportEnvironment['generated'] ?? ''),
-            (string)($this->reportEnvironment['generatedUrl'] ?? ''),
             $this->reportEnvironment['javaScriptAllowed'] ?? false,
             function(): RecordSaveService { return $this->recordWriteParts()['save']; },
             $this->codes

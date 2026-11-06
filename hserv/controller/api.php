@@ -604,10 +604,6 @@ if($is_def_query){
 // Reports manager (plan 12): /api/{db}/reports[/{ref}[/{action}]]
 // See srv/Controller/ReportController.php for the routes. Anonymous users may
 // only list card reports and render one record; the controller checks the rest.
-$is_reports_query = ($resource === 'reports');
-if($is_reports_query && !in_array($http_method, array('GET','POST','PUT','DELETE'), true)){
-    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, DELETE'));
-}
 
 // Background jobs (plan 12): /api/{db}/jobs[/{id}[/cancel|result]], logged-in users only.
 // See srv/Controller/JobController.php.
@@ -675,8 +671,7 @@ if($method === 'search'){
         'trm', 'terms', 'trl', 'termlinks',
         'rst', 'recstructure',
         'def',
-        'map', 'time',
-        'reports'
+        'map', 'time'
     );
     $allow_anonymous = in_array($resource, $publicSearchResources, true);
     if($is_files_query && $is_files_content){
@@ -868,7 +863,12 @@ if($is_def_query){
     $factory = ServiceFactory::fromLegacySystem($system);
     $entityId = (string)($requestUri[4] ?? '');
     $entityJob = Heurist\Records\Entity\RecordEntityRegistry::job($record_entity);
+    $reportEngine = static function() use ($factory, $system): array {
+        return array($factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)), new hserv\report\ReportRecordWriter($system));
+    };
+    $factory->useReportEngine($reportEngine);
     $controller = $factory->recordEditController(new hserv\web\WebsiteDefinitions($system));
+    $req_params['uploads'] = $_FILES;
     $entityRequest = array(
         'contentType' => $contentType,
         'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
@@ -877,31 +877,16 @@ if($is_def_query){
     if((string)($requestUri[5] ?? '') === 'execute' && ctype_digit($entityId) && $entityJob !== null){
         // the entity's job (e.g. website-build); state and result on /jobs/{id}
         if($controller->allowEntityExecute($record_entity, $http_verb, intval($entityId), $entityRequest)){
-            $controller = $factory->jobController($factory->websiteJobHandlers());
-            $controller->handleRequest('POST', array(), $req_params,
-                array('type' => $entityJob, 'params' => array('id' => intval($entityId))));
+            list($reportRenderer, $reportWriter) = $reportEngine();
+            $controller = $factory->jobController($record_entity === 'output'
+                ? $factory->reportJobHandlers($reportRenderer, $reportWriter) : $factory->websiteJobHandlers());
+            $controller->handleRequest('POST', array(), $req_params, array('type' => $entityJob,
+                'params' => $record_entity === 'output' ? array('output' => intval($entityId)) : array('id' => intval($entityId))));
         }
     }else{
         $controller->handleEntityRequest($record_entity, $http_verb, array_slice($requestUri, 4), $req_params,
             is_array($json) ? $json : null, $entityRequest);
     }
-    $system->dbclose();
-    exit;
-
-}elseif($is_reports_query){
-
-    $factory = ServiceFactory::fromLegacySystem($system);
-    $controller = $factory->reportController(
-        $factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)),
-        new hserv\report\ReportRecordWriter($system)
-    );
-    $controller->handleRequest(
-        $http_method,
-        array_slice($requestUri, 4),
-        $req_params,
-        is_array($json) ? $json : null,
-        $_FILES
-    );
     $system->dbclose();
     exit;
 

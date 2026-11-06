@@ -68,7 +68,7 @@ final class ReportGenerateJob implements JobHandlerInterface
     }
 
     /**
-     * @param array $params {schedule} or {report, querySource|query, format?, suffix?}
+     * @param array $params {output}
      * @return array
      */
     public function prepare(array $params): array
@@ -77,9 +77,9 @@ final class ReportGenerateJob implements JobHandlerInterface
     }
 
     /**
-     * @param array $params Normalized parameters (templateFile, query, output, format, language, scheduleId).
+     * @param array $params Normalized parameters (templateFile, query, format, language, outputId).
      * @param JobContext $context Running job.
-     * @return array Generated file: file, url, size, records, scheduleId.
+     * @return array Generated file: outputId, format, size, records.
      */
     public function run(array $params, JobContext $context): array
     {
@@ -102,35 +102,38 @@ final class ReportGenerateJob implements JobHandlerInterface
             throw new RuntimeException($result['error']);
         }
 
-        $folder = $this->planner->generatedDirectory();
+        $store = $this->planner->outputs();
+        $folder = $store->directory();
         if($folder === '' || (!is_dir($folder) && !@mkdir($folder, 0775, true) && !is_dir($folder))){
             throw new RuntimeException('Failed to create folder for generated reports');
         }
-        $final = $this->planner->generatedFile($params['output'], $params['format']);
-        $temp = $this->planner->generatedFile('job-tmp-'.substr($context->id(), 0, 12), $params['format']);
+        $outputId = intval($params['outputId']);
+        $final = $store->path($outputId, (string)$params['format']);
+        $temp = $folder.'job-tmp-'.substr($context->id(), 0, 12);
         try{
-            if(@file_put_contents($temp['path'], $result['output']) === false){
+            if(@file_put_contents($temp, $result['output']) === false){
                 throw new RuntimeException('The report file was not written. Check permissions for the generated-reports folder');
             }
-            if(is_file($final['path']) && !@unlink($final['path'])){
-                throw new RuntimeException('Cannot replace '.$final['file'].'. Check permissions for the generated-reports folder');
+            if(is_file($final) && !@unlink($final)){
+                throw new RuntimeException('Cannot replace the file of output '.$outputId.'. Check permissions for the generated-reports folder');
             }
-            if(!@rename($temp['path'], $final['path'])){
-                throw new RuntimeException('Cannot write '.$final['file'].'. Check permissions for the generated-reports folder');
+            if(!@rename($temp, $final)){
+                throw new RuntimeException('Cannot write the file of output '.$outputId.'. Check permissions for the generated-reports folder');
             }
+            // the output type of the template changed: the older file goes
+            $store->delete($outputId, (string)$params['format']);
         }finally{
-            if(is_file($temp['path'])){
-                @unlink($temp['path']);
+            if(is_file($temp)){
+                @unlink($temp);
             }
         }
 
         $context->progress(count($ids), count($ids), 'done');
         return array(
-            'file' => $final['file'],
-            'url' => $final['url'],
-            'size' => intval(filesize($final['path'])),
-            'records' => count($ids),
-            'scheduleId' => $params['scheduleId'] ?? null
+            'outputId' => $outputId,
+            'format' => (string)$params['format'],
+            'size' => intval(filesize($final)),
+            'records' => count($ids)
         );
     }
 }

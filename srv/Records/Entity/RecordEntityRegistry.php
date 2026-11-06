@@ -35,7 +35,7 @@ final class RecordEntityRegistry
         'page' => array('rectype' => 'RT_CMS_PAGE', 'job' => 'website-build'),
         'report' => array('rectype' => 'RT_CUSTOM_REPORT', 'job' => null),
         // the generated report, or a scheduled export later (plan 30)
-        'output' => array('rectype' => 'RT_REPORT_SCHEDULE', 'job' => null)
+        'output' => array('rectype' => 'RT_REPORT_SCHEDULE', 'job' => 'report-generate')
     );
 
     /** @var array<string,int> name => local record type id */

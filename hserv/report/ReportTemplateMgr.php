@@ -70,6 +70,35 @@ class ReportTemplateMgr
             && $this->system->hasAccess() && !$this->system->isGuestUser();
     }
 
+    /**
+     * A template file of a Custom Report record follows the rights of the record (plan 30): only who may
+     * change the record changes the file; a report that is not public or viewable is read by them only.
+     * A file without a record has no owner.
+     *
+     * @param string $template_file Template name.
+     * @param bool $forWrite The file is changed, not read.
+     * @throws \Exception Not allowed.
+     */
+    public function requireTemplateRights($template_file, $forWrite)
+    {
+        $mysqli = $this->system->getMysqli();
+        if(!$mysqli || empty($template_file)
+            || !$this->system->defineConstant('RT_CUSTOM_REPORT') || !$this->system->defineConstant('DT_FILE_NAME')){
+            return;
+        }
+        $base = pathinfo(basename($template_file), PATHINFO_FILENAME);
+        $rows = mysql__select_all($mysqli, 'SELECT rec_OwnerUGrpID, rec_NonOwnerVisibility FROM Records, recDetails'
+            .' WHERE dtl_RecID=rec_ID AND rec_RecTypeID='.intval(RT_CUSTOM_REPORT).' AND dtl_DetailTypeID='.intval(DT_FILE_NAME)
+            ." AND dtl_Value IN ('".$mysqli->real_escape_string($base)."','".$mysqli->real_escape_string($base.'.tpl')."')");
+        foreach(is_array($rows) ? $rows : [] as $row){
+            if(!$forWrite && in_array($row[1], ['public', 'viewable'], true)){ continue; }
+            $owner = intval($row[0]);
+            if(!$this->system->hasAccess($owner) && !in_array($owner, (array)$this->system->getUserGroupIds(), false)){
+                throw new \Exception('You are not allowed to use this report template');
+            }
+        }
+    }
+
     /** Guard mutations even when the manager is used without the controller. */
     public function requireEditingPermission()
     {
@@ -330,27 +359,29 @@ class ReportTemplateMgr
         $newNameEncoded = rawurlencode($newFileName);
 
         // Update shorthand links to old template name
-        $dtlValues = mysql__select_assoc2($mysqli, "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_Value LIKE '%/{$oldNameEncoded}%'"); // \d*\/OLD_TEMPLATE_NAME\.tpl
-        $oldNameEncoded = str_replace('.', '\.', $oldNameEncoded);
+        // the names are values in the SQL text: a name may hold a quote
+        $dtlValues = mysql__select_assoc2($mysqli, "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_Value LIKE '%/"
+            .$mysqli->real_escape_string($oldNameEncoded)."%'"); // \d*\/OLD_TEMPLATE_NAME\.tpl
         foreach($dtlValues as $dtlID => $dtlValue){
 
-            $dtlValue = preg_replace("~/{$oldNameEncoded}~g", "/{$newNameEncoded}", $dtlValue);
+            $dtlValue = str_replace("/{$oldNameEncoded}", "/{$newNameEncoded}", $dtlValue);
 
             mysql__insertupdate($mysqli, 'recDetails', 'dtl', ['dtl_ID' => $dtlID, 'dtl_Value' => $dtlValue]);
         }
 
         // Update widget settings that use the old template name
-        $dtlValues = mysql__select_assoc2($mysqli, "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_Value LIKE '%\"{$oldFileName}\"%'");
-        $oldFileNameReg = str_replace('.', '\.', $oldFileName);
+        $dtlValues = mysql__select_assoc2($mysqli, "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_Value LIKE '%\""
+            .$mysqli->real_escape_string($oldFileName)."\"%'");
         foreach($dtlValues as $dtlID => $dtlValue){
 
-            $dtlValue = preg_replace("~\"{$oldFileNameReg}\"~g", "\"{$newFileName}\"", $dtlValue);
+            $dtlValue = str_replace("\"{$oldFileName}\"", "\"{$newFileName}\"", $dtlValue);
 
             mysql__insertupdate($mysqli, 'recDetails', 'dtl', ['dtl_ID' => $dtlID, 'dtl_Value' => $dtlValue]);
         }
 
         // Update scheduled reports that use the old template name
-        $mysqli->query("UPDATE usrReportSchedule SET rps_Template='{$newFileName}' WHERE rps_Template='{$oldFileName}'");
+        mysql__exec_param_query($mysqli, 'UPDATE usrReportSchedule SET rps_Template=? WHERE rps_Template=?',
+            ['ss', $newFileName, $oldFileName]);
 
         return 'renamed';
     }

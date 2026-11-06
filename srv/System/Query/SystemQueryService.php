@@ -46,6 +46,8 @@ final class SystemQueryService
     private array $recordEntities;
     /** @var callable|null Search with the /records parameters (RecordQueryController::execute). */
     private $recordSearch;
+    /** @var callable|null `(entity, ids) => items`: the values of a search besides the records. */
+    private $recordItems;
 
     /** @var array<int,string>|null Current user's role per group, loaded once. */
     private ?array $roles = null;
@@ -53,6 +55,7 @@ final class SystemQueryService
     /**
      * @param array<string,int> $recordEntities Record-based entity => local record type id.
      * @param callable|null $recordSearch `(params) => response` of the /records search.
+     * @param callable|null $recordItems `(entity, ids) => items`, added as meta.items.
      */
     public function __construct(
         DatabaseInterface $database,
@@ -60,7 +63,8 @@ final class SystemQueryService
         ?SystemEntitySchemaRegistry $schemas = null,
         ?EntityImageStorage $entityImages = null,
         array $recordEntities = array(),
-        ?callable $recordSearch = null
+        ?callable $recordSearch = null,
+        ?callable $recordItems = null
     ) {
         $this->database = $database;
         $this->runtime = $runtime;
@@ -68,6 +72,7 @@ final class SystemQueryService
         $this->entityImages = $entityImages;
         $this->recordEntities = $recordEntities;
         $this->recordSearch = $recordSearch;
+        $this->recordItems = $recordItems;
     }
 
     /**
@@ -115,7 +120,13 @@ final class SystemQueryService
         unset($params['q']);
         if(($query === null || $query === '') && isset($params['ids'])){ $query = array(array('ids'=>$params['ids'])); }
         $params['query'] = $this->withRecordType($query, $entity);
-        return call_user_func($this->recordSearch, $params);
+        $response = call_user_func($this->recordSearch, $params);
+        if($this->recordItems !== null && is_array($response) && isset($response['records'])){
+            $ids = array_map(static function($record): int { return intval(is_array($record) ? ($record['rec_ID'] ?? 0) : $record); }, $response['records']);
+            $items = call_user_func($this->recordItems, $entity, $ids);
+            if(!empty($items)){ $response['meta']['items'] = $items; }
+        }
+        return $response;
     }
 
     /** A query with its t predicates as the record type id of the entity; one is added when there is none. */

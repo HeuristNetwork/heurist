@@ -71,12 +71,7 @@ tags:
   description: >-
     Insert, change, duplicate and delete records (logged-in users). The body is the record object of
     GET /records/{recordId}. For now only system record types can be written - custom reports, report
-    schedules, map documents, map layers and their sources, query sources, website home and pages.
-- name: Reports
-  description: >-
-    Smarty report templates and the lists of the reports manager. Report and schedule records are written by the
-    common record API (entities report and output, /report/{recordId}, /output/{recordId}, also /records/{recordId});
-    only the template text is here, it is a file.
+    outputs, map documents, map layers and their sources, query sources, website home and pages.
 - name: Files
   description: >-
     Registered files (uploads and external resources) as records of the record type Registered file
@@ -1783,7 +1778,10 @@ paths:
         the record type, details by field id. The record must be of the entity's type (404 otherwise). recordId may
         be a concept code {this database id}-{record id}. Tags add rec_Usage (the number of tagged records).
         meta has canEdit for website, page, report and output; logged-in users also get the entity's own meta
-        (meta.website: kind, version, URL, languages, menu tree). A guest may read a record that is visible to
+        (meta.website: kind, version, URL, languages, menu tree; meta.report, meta.output). A search of report or
+        output adds meta.items with these values by record id: report - title, file, isCardView, format, canEdit,
+        fileExists, outputCount; output - reportId, reportTitle, query, language, intervalMinutes, format, canEdit,
+        generated {format, size, modified} or null. A guest may read a record that is visible to
         everyone, and one field of it; users and groups are not visible to guests, and every other request of an
         entity needs a login. Users and groups: administrators see all; other users see themselves and their groups.
       security:
@@ -1849,10 +1847,12 @@ paths:
 
         - **page** (99-52) - public unless the body says otherwise.
 
-        - **report** (2-1104) - the file name (2-62) has only letters A-Z, digits, "-", "_", "(", ")" and spaces (422
-          otherwise); empty is made from the title; a new record gets an empty file or takes a file without a record.
+        - **report** (2-1104) - the file name (2-62) is set here and does not change later. It has only letters A-Z, digits,
+          "-", "_", "(", ")" and spaces (422 otherwise); empty is made from the title; a new record gets an empty file or
+          takes a file without a record (registration).
 
-        - **output** (2-1105) - the query (2-12) may not have parameters $X$ (422).
+        - **output** (2-1105, a generated report) - the query (2-12) may not have parameters $X$ (422); its file is
+          generated-reports/{record id}.{format}; the format comes from the template.
 
 
         The rules of website, page, report and output run for every write of their record type, also through
@@ -1888,7 +1888,7 @@ paths:
         its user only (404 for others); reminder: its owner or the database owner; user: the user themselves,
         administrators any (user 2: only user 2), the account status only administrators, an empty password
         keeps it; group: its admins and the database owner; website, page, report, output: the record's owner and
-        editors. report - a new file name (2-62) renames the template file (422 when the name is taken).
+        editors. report - the file name (2-62) can not change (422).
       security:
       - bearerAuth: []
       parameters:
@@ -1947,15 +1947,14 @@ paths:
         then its links are removed first; bookmark: refused while the user has personal tags on the record (409
         has_personal_tags); user / group: the legacy checks and clean-up, never user 2 or group 1, nor a user or group
         that owns records, nor the last admin of a group (409 refused); website: with pages=1 also its menu pages
-        that no other record points to (format 4 only); report: also its template file when no other record uses
-        it, unless keepFile=1.
+        that no other record points to (format 4 only); report: refused while outputs point to it (409 report_in_use with
+        outputs, their number), else also its template file; output: also its generated file.
       security:
       - bearerAuth: []
       parameters:
       - $ref: '#/components/parameters/RecordId'
       - $ref: '#/components/parameters/RecordForce'
       - {name: pages, in: query, required: false, description: website only, schema: {type: integer, enum: [0, 1]}}
-      - {name: keepFile, in: query, required: false, description: report only, schema: {type: integer, enum: [0, 1]}}
       responses:
         '200':
           description: Deleted ids (tags also removed; website with pages=1 also kept page ids; report also fileDeleted).
@@ -1970,7 +1969,7 @@ paths:
                   fileDeleted: {type: boolean}
         '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
         '404': {description: Not found (or not visible to the user), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '409': {description: Refused (tag_in_use, has_personal_tags, refused, references), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Refused (tag_in_use, has_personal_tags, refused, references, report_in_use), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
   /{database}/{entity}/{recordId}/{fieldId}:
     get:
       tags: [Entities]
@@ -2047,7 +2046,9 @@ paths:
       tags: [Entities]
       operationId: duplicateEntityRecord
       summary: Copy a record of an entity
-      description: As POST /records/{recordId}/duplicate. tag, bookmark, reminder, user and group have no copy (405).
+      description: >-
+        As POST /records/{recordId}/duplicate. A body {title} gives the title of the copy of a report, which gets its own
+        template file named after the title. tag, bookmark, reminder, user and group have no copy (405).
       security:
       - bearerAuth: []
       parameters:
@@ -2081,7 +2082,7 @@ paths:
       summary: Are the record types and fields of an entity installed
       description: >-
         With the local ids of the record types, fields and terms the entity uses (codes). Website and page only;
-        reports use /reports/setup for now.
+        reports use /report/setup.
       security:
       - bearerAuth: []
       responses:
@@ -2111,8 +2112,8 @@ paths:
       operationId: executeEntityRecord
       summary: Start the job of an entity
       description: >-
-        Website or standalone page of format 4 - the job website-build (a ZIP). State and result on /jobs/{id}.
-        Report and output have no job here: POST /jobs with type report-generate.
+        Website or standalone page of format 4 - the job website-build (a ZIP). Output - the job report-generate (the
+        right to change the output is needed). State and result on /jobs/{id}. Report: /report/{recordId}/execute.
       security:
       - bearerAuth: []
       parameters:
@@ -2120,8 +2121,8 @@ paths:
       - name: entity
         in: path
         required: true
-        description: Only website and page (404 for the other entities).
-        schema: {type: string, enum: [website, page]}
+        description: Only website, page and output (404 for the other entities).
+        schema: {type: string, enum: [website, page, output]}
       - $ref: '#/components/parameters/RecordId'
       responses:
         '200':
@@ -2386,6 +2387,173 @@ paths:
         '200': {description: Changed, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
         '400': {description: Invalid change, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
         '403': {description: Not an admin of the group, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/report/setup:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    get:
+      tags: [Entities]
+      operationId: reportSetupStatus
+      summary: The state of the report definitions and the template files without a record
+      description: >-
+        Logged-in users. installed, missing (codes), canSetup, allowDynamicReports, settings {javaScriptAllowed,
+        testRecordLimit}, unregistered [{file, title, modified}]. A template file without a record can not be run:
+        register it (POST /report/0 with its name in 2-62) or delete it.
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: The state, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '401': {description: Not logged in, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    post:
+      tags: [Entities]
+      operationId: reportSetup
+      summary: Install Custom Report and Report Schedule and convert old schedules (database managers)
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: Report lines}
+        '403': {description: Not a manager, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    delete:
+      tags: [Entities]
+      operationId: deleteUnregisteredTemplate
+      summary: Delete a template file without a record
+      security:
+      - bearerAuth: []
+      parameters:
+      - {name: file, in: query, required: true, schema: {type: string}}
+      responses:
+        '200': {description: '{file, fileDeleted}'}
+        '400': {description: The file has a report record, or the name is invalid, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: No such file, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/report/import:
+    post:
+      tags: [Entities]
+      operationId: importReport
+      summary: Import a template file and create its report record
+      description: A .tpl or .gpl file (concept codes are converted to local ids). Answer - the new report.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [import_template]
+              properties:
+                import_template: {type: string, format: binary}
+                isCardView: {type: boolean}
+      responses:
+        '200': {description: The new report, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '400': {description: No file, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/report/{recordId}/asset:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - $ref: '#/components/parameters/RecordId'
+    get:
+      tags: [Entities]
+      operationId: getReportTemplate
+      summary: The template of a report
+      description: Answer {report, body}. Logged-in users.
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: The template, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '404': {description: Not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    put:
+      tags: [Entities]
+      operationId: saveReportTemplate
+      summary: Save the template of a report
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, required: [body], properties: {body: {type: string}}}
+      responses:
+        '200': {description: The report, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    delete:
+      tags: [Entities]
+      operationId: deleteReportTemplate
+      summary: Delete the template file; the record stays
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: '{id, fileDeleted}'}
+        '409': {description: Outputs point to the report (report_in_use), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/report/{recordId}/execute:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - $ref: '#/components/parameters/RecordId'
+    - {name: recordId, in: query, schema: {type: integer}, description: The record to render.}
+    - {name: q, in: query, schema: {type: string}, description: 'Without recordId: the first record of this query.'}
+    - {name: lang, in: query, schema: {type: string}}
+    get:
+      tags: [Entities]
+      operationId: executeReport
+      summary: Render one record with a report, as HTML
+      description: >-
+        One record only, with a time limit. Test runs on several records are the job report-preview, generated files the
+        job report-generate. A guest runs card reports only, and sees the records they may see.
+      security:
+      - {}
+      - bearerAuth: []
+      responses:
+        '200': {description: HTML, content: {text/html: {schema: {type: string}}}}
+        '400': {description: No record, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '403': {description: Not a card report (guest), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: Not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    post:
+      tags: [Entities]
+      operationId: executeReportPost
+      summary: As GET, with a long query in the JSON body
+      security:
+      - bearerAuth: []
+      requestBody: {content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+      responses:
+        '200': {description: HTML, content: {text/html: {schema: {type: string}}}}
+  /{database}/report/{recordId}/export:
+    get:
+      tags: [Entities]
+      operationId: exportReport
+      summary: The template with concept codes (.gpl)
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/RecordId'
+      responses:
+        '200': {description: The file, content: {text/plain: {schema: {type: string}}}}
+        '404': {description: Not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/output/{recordId}/asset:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - $ref: '#/components/parameters/RecordId'
+    get:
+      tags: [Entities]
+      operationId: getOutputFile
+      summary: The generated file of an output
+      description: A guest sees the file of an output visible to everyone. download=1 sends it as a file named by the title.
+      security:
+      - {}
+      - bearerAuth: []
+      parameters:
+      - {name: download, in: query, schema: {type: integer, enum: [0, 1]}}
+      responses:
+        '200': {description: The file}
+        '404': {description: Not found, or not generated yet, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    delete:
+      tags: [Entities]
+      operationId: deleteOutputFile
+      summary: Delete the generated file; the record stays
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: '{id, fileDeleted}'}
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
   /{database}/external/translate:
     post:
       tags:
@@ -3855,299 +4023,6 @@ paths:
           description: Query uses an unsupported feature.
         '500':
           $ref: '#/components/responses/ServerError'
-  /{database}/reports:
-    get:
-      tags:
-      - Reports
-      operationId: listReports
-      summary: List reports
-      description: >-
-        Report records and template files. scope=card lists single-record (card) reports and is allowed anonymously; all and set need a logged-in user.
-      security:
-      - {}
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - name: scope
-        in: query
-        schema: {type: string, enum: [all, card, set], default: all}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/generated:
-    get:
-      tags:
-      - Reports
-      operationId: listGeneratedReports
-      summary: List generated report files
-      description: >-
-        Files in the generated-reports folder whose name starts with prefix.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - name: prefix
-        in: query
-        schema: {type: string}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/generated/{file}:
-    delete:
-      tags:
-      - Reports
-      operationId: deleteGeneratedReport
-      summary: Delete a generated report file
-      description: >-
-        Deletes one file of the generated-reports folder.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - name: file
-        in: path
-        required: true
-        schema: {type: string}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/schedules:
-    get:
-      tags:
-      - Reports
-      operationId: listReportSchedules
-      summary: List report schedules
-      description: >-
-        All visible schedules with their last generated file. Each has query (field 2-12), file as stored,
-        language (term code) and languageTerm. A schedule record is written through /output/{recordId}.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/setup:
-    post:
-      tags:
-      - Reports
-      operationId: setupReports
-      summary: Install report definitions
-      description: >-
-        Installs the Custom Report and Report Schedule record types and converts old schedules (database managers).
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/import:
-    post:
-      tags:
-      - Reports
-      operationId: importReportTemplate
-      summary: Import a template
-      description: >-
-        Multipart upload in the field import_template (.gpl or .tpl); isCardView as a request parameter.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/{reportRef}:
-    get:
-      tags:
-      - Reports
-      operationId: getReport
-      summary: Get a report
-      description: >-
-        One report - record values and template file.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-    delete:
-      tags:
-      - Reports
-      operationId: deleteReportFile
-      summary: Delete a template file without a record
-      description: >-
-        Only for a file without a Custom Report record (400 otherwise). A report is deleted by DELETE /report/{recordId}.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/{reportRef}/template:
-    get:
-      tags:
-      - Reports
-      operationId: getReportTemplate
-      summary: Get a template
-      description: >-
-        Template text of a report.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-    put:
-      tags:
-      - Reports
-      operationId: saveReportTemplate
-      summary: Save a template
-      description: >-
-        Saves the template text.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                body: {type: string}
-      responses:
-        '200':
-          description: 'Success - {status: 0, data}'
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/ReportResponse'}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/{reportRef}/export:
-    get:
-      tags:
-      - Reports
-      operationId: exportReportTemplate
-      summary: Download a template
-      description: >-
-        The template with concept codes (.gpl), as a file download.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      responses:
-        '200':
-          description: Template file
-          content:
-            text/plain:
-              schema: {type: string}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
-  /{database}/reports/{reportRef}/render:
-    get:
-      tags:
-      - Reports
-      operationId: renderReport
-      summary: Render a report for one record
-      description: >-
-        HTML of the report for record rec (card reports; allowed anonymously for visible records).
-      security:
-      - {}
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/ReportRef'
-      - name: rec
-        in: query
-        required: true
-        schema: {type: integer, minimum: 1}
-      responses:
-        '200':
-          description: HTML
-          content:
-            text/html:
-              schema: {type: string}
-        '400': {$ref: '#/components/responses/ApiBadRequest'}
-        '401': {$ref: '#/components/responses/ApiUnauthorized'}
-        '403': {$ref: '#/components/responses/ApiForbidden'}
-        '404': {$ref: '#/components/responses/ApiNotFound'}
   /{database}/jobs:
     get:
       tags:
@@ -4201,8 +4076,8 @@ paths:
       description: >-
         Validates the parameters, creates the job and answers 202 with the queued job; the connection is closed and
         the same server process runs the job. Poll GET /jobs/{jobId} for progress. Job types: export (record export
-        into a file, parameters ExportJobParams), report-preview (report or body, ids, replevel, language: language of the
-        test run) and report-generate (schedule, or report with querySource or query) (Smarty reports). One active
+        into a file, parameters ExportJobParams), report-preview (report: record id, or body; ids, replevel, language: language
+        of the test run) and report-generate (output: record id; result outputId, format, size, records) (Smarty reports). One active
         job of the same type per user (a second start is refused with 403; a report-preview replaces the older one)
         and at most maxJobs active jobs per database. Record export has no streaming endpoint by design: a job has
         limits, Stop, progress and a result file that only its owner can download.
