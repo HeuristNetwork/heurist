@@ -2,9 +2,19 @@
 
 This chapter outlines some useful procedures for managing Heurist servers, including the servers managed by the Heurist development team / Heurist Network.
 
-#### **General observations**
+#### Server Manager functions
 
-Heurist is designed to run on any Linux server
+Heurist's web interface includes a restricted menu (Admin &gt; Server Manager) which is accessed through a special password set in the heuristConfigIni.php file. This allows the managers of a particular instance to carry out operations across all the databases on the server, including some general integrity checks and maintenance operations, obtaining lists of users and the databases they are attached to, statistics about usage and disk space, bulk mailing users etc.
+
+Since this is only available to the server managers, and since the functions are relatively self obvious and include some explanation when selected, we will not bother with further documentation.
+
+![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-kfkdrrre.png)
+
+---
+
+## **Heurist and Linux**
+
+Heurist is designed to run on any Linux server. It can also be run under Windows (one example in Sydney) and most probably Mac, but we do not have experience of setting this up. This documentation is therefore oriented towards Unix/Linux.
 
 #### **Emergency Unix commands**
 
@@ -18,8 +28,10 @@ Heurist is designed to run on any Linux server
 
 #### **Handy Unix commands &amp; other useful things**
 
-- <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Find Unix version: cat /etc/os-release</span>  
-    <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"></span>
+<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">First port of call is simply to ask an AI - they will give you the code for almost any requirement.</span>
+
+- <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Find Unix version: cat /etc/os-release</span>
+- <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Extracting bz2 and gz files:</span>
 - <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Disk usage of subdirectories, largest first : </span>  
     <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> </span>*sudo du -sh /var/log/\*/ | sort -hr*
 - <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Delete files older than 30 days : </span>  
@@ -27,6 +39,13 @@ Heurist is designed to run on any Linux server
      (maxdepth 1 will go down one level into immediate subdirectory)
 - The MySQL password (for the *root* and/or *heurist* user) <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">is set in the </span>*user*<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> table of the </span>*mysql*<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> database,</span>  
     <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">and configured in the /var/www/html/HEURIST/heuristConfigIni.php file for all instances, which may be overridden for a specific instance by /var/www/html/HEURIST/hx-xxxxxx/configIni.php.</span>
+- <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);">Before transferring a directory with many small files, such as a database filestore directory, tar it into a single file for transfer with: </span>*tar -cf dirname.tar dirname/*<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> and then untar it with: </span>*tar -xf dirname.tar*
+- *rsync*<span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> between servers (all files in the directory, requires password or keyfile access to target server) </span>  
+    <span style="color: rgb(34, 34, 34); background-color: rgb(255, 255, 255);"> </span> *rsync -a --info=progress2 --partial sourcedir/ username@heurist.huma-num.fr:destinationdir/*
+    - ssh-keygen -t ed25519 -f ~/.ssh/heurist\_transfer  
+        ssh-copy-id -i ~/.ssh/heurist\_transfer.pub username@heurist.huma-num.fr
+    - rsync -a --info=progress2 --partial -e 'ssh -i ~/.ssh/heurist\_transfer' \\  
+         sourcedir/ username@heurist.huma-num.fr:targetdir/
 
 #### **Protocol for full update of Heurist servers**
 
@@ -105,15 +124,71 @@ through a cron setting (typically edited with **sudo crontab -e**<span style="co
 <p class="callout warning">**Remember to update the version number in configIni.php**   
 **and commit to gitHub with a title suh as "Version 7.?.? distribution"** </p>
 
-#### Server Manager functions
+#### MySQL user "heurist"
 
-Heurist's web interface includes a restricted menu (Admin &gt; Server Manager) which is accessed through a special password set in the heuristConfigIni.php file. This allows the managers of a particular instance to carry out operations across all the databases on the server, including some general integrity checks and maintenance operations, obtaining lists of users and the databases they are attached to, statistics about usage and disk space, bulk mailing users etc.
+We recommend using this user as the Heurist access user:
 
-Since this is only available to the server managers, and since the functions are relatively self obvious and include some explanation when selected, we will not bother with further documentation.
+mysql&gt; CREATE USER 'heurist'@'localhost' IDENTIFIED BY 'a-password-of-your-choice';  
+mysql&gt; GRANT ALL PRIVILEGES ON `hdb\\\_%`.\* TO 'heurist'@'localhost';  
+mysql&gt; SHOW GRANTS FOR 'heurist'@'localhost';  
+ | GRANT USAGE ON \*.\* TO `heurist`@`localhost` |  
+ | GRANT ALL PRIVILEGES ON `hdb\\\_%`.\* TO `heurist`@`localhost` |
 
-![](https://docs.heuristref.net/uploads/images/gallery/2026-07/embedded-image-kfkdrrre.png)
+#### SSH timeout prevention
 
-#### Manul transfer: Databases don't open
+For very long operations such as integrity verification or a complete dump of all MySQL databases on a server, you may need to avoid timeout on your SSH client such as, in this case, MobaXTerm.
+
+1. Open **Settings → Configuration → SSH**.
+2. Tick **SSH keepalive**.
+3. Click **OK**, then disconnect and reconnect.
+
+This sends periodic traffic to prevent an idle connection being dropped.
+
+For long server jobs, also use **tmux**, so the job survives even if SSH disconnects: *tmux new -s migration*  
+Run your commands inside it. Detach with **Ctrl+B**, then **D**. After reconnecting: *tmux attach -t migration*  
+If needed, install it on RHEL or Rocky/AlmaLinux servers with: *sudo dnf install tmux*
+
+#### Heurist git repository size
+
+At 5/11/26 the Heurist git repository, located on gitHub, contained the following (run git count-objects -vH to obtain these figures). The total size is ~300MB. The repository includes the daily BookStack documentation data dumps (if *Understanding Heurist* has been edited),
+
+<table id="bkmrk-outputmeaningcount%3A-" style="padding-left: 40px;"><colgroup><col></col><col style="width: 438px;"></col></colgroup><tbody><tr><th>Output
+
+</th><th>Meaning
+
+</th></tr><tr><td>`<span class="editor-theme-code">count: 1015</span>`
+
+</td><td>1,015 objects stored individually, usually from recent activity. Objects include file versions, directory trees and commits.
+
+</td></tr><tr><td>`<span class="editor-theme-code">size: 8.15 MiB</span>`
+
+</td><td>Space used by those individual objects.
+
+</td></tr><tr><td>`<span class="editor-theme-code">in-pack: 172357</span>`
+
+</td><td>172,357 objects stored in compressed packfiles.
+
+</td></tr><tr><td>`<span class="editor-theme-code">packs: 10</span>`
+
+</td><td>Ten packfiles—nothing concerning.
+
+</td></tr><tr><td>`<span class="editor-theme-code">size-pack: 294.95 MiB</span>`
+
+</td><td>Total space occupied by the packed objects.
+
+</td></tr><tr><td>`<span class="editor-theme-code">prune-packable: 0</span>`
+
+</td><td>No loose objects duplicated in packfiles.
+
+</td></tr><tr><td>`<span class="editor-theme-code">garbage: 0</span>`
+
+</td><td>No unexpected files in the object storage.
+
+</td></tr></tbody></table>
+
+These figures cover the entire local repository, including code and documentation history. They exclude the checked-out working files.
+
+#### Manual transfer: Databases don't open
 
 If you copy over a database manually by transferring an SQL file and creating an hdb\_ database, then copying the fielstore directory to HEURIST\_FILESTORE, the database often fails to open, giving a 404 error or simply returning to the list of databases. The reason for this is generally file permissions on the filestore directory.
 
@@ -128,6 +203,48 @@ From HEURIST\_FILESTORE apply the working label recursively:
  sudo chcon -R -t httpd\_sys\_rw\_content\_t db1 db2 (where db1 and db2 are the database - directory - names)
 
 Note: the `<span class="editor-theme-code">chcon</span>` fix can be undone by a future SELinux relabel; a persistent rule would prevent that.
+
+#### Dumping/loading all MySQL databases
+
+This will dump all the hdb\_ databases for transfer to a new server (the corresponding filestores will also need transferring). The final zipfile is unlikely to exceed a few Gbytes (5G for 4000 DBs on the Huma-Num server in Nov 26).
+
+```
+(
+  set -e
+  set -o pipefail
+  umask 077
+
+  mysql -u root -N -B -e "
+    SELECT SCHEMA_NAME FROM information_schema.SCHEMATA
+    WHERE LEFT(SCHEMA_NAME,4)='hdb_'
+    ORDER BY SCHEMA_NAME;" > /backup/MySQL80/hdb_databases.txt
+
+  mapfile -t dbs < /backup/MySQL80/hdb_databases.txt
+  [ "${#dbs[@]}" -gt 0 ]
+
+  mysqldump -u root --databases "${dbs[@]}" \
+    --lock-all-tables --quick --routines --events --triggers \
+    --hex-blob --set-gtid-purged=OFF --no-tablespaces \
+    2>/backup/MySQL80/hdb_dump_errors.log |
+    gzip -1 > /backup/MySQL80/hdb_only.sql.gz.partial
+
+  mv /backup/MySQL80/hdb_only.sql.gz.partial \
+     /backup/MySQL80/hdb_only.sql.gz
+)
+echo "Dump exit status: $?"
+```
+
+**Loading the dump**
+
+Run in tmux. From the directory containing the dump file
+
+(  
+ set -o pipefail  
+ gzip -dc hdb\_only.sql.gz |  
+ mysql -u root -p \\  
+\--init-command="SET SESSION restrict\_fk\_on\_non\_standard\_key=OFF;" \\  
+ 2&gt;import\_errors.log  
+)
 
 #### Log files and performance
 
