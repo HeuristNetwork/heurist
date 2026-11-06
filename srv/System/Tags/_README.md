@@ -1,4 +1,4 @@
-# Tags on /sys/tag
+# Tags on /tag
 
 Plan 20, Phase 4a. Tags stay in `usrTags` + `usrRecTagLinks` for good (§10.1: there
 can be many more tags than records).
@@ -9,7 +9,7 @@ can be many more tags than records).
   `rec_OwnerUGrpID`, `tag_Modified` = `rec_Modified`; record type Tag 2-1109. A database
   without these definitions gets `rec_RecTypeID` 0 and the header `rec_Usage`.
 - `TagRecordOutput` — the records of `GET /sys?q={"t":"tag",...}` and
-  `GET /sys/tag/{id}` (see `System/Query/_README.md`).
+  `GET /tag/{id}` (see `System/Query/_README.md`).
 - `TagWriteService` — the rules of the legacy `DbUsrTags`: a user changes the tags of
   their own and of their groups (the database owner all); a tag on records is
   deleted only with `force` (409 `tag_in_use`); assign / remove / replace on the
@@ -18,10 +18,10 @@ can be many more tags than records).
 
 | Route | Method | |
 |---|---|---|
-| `/sys/tag/0` | POST | add (201) |
-| `/sys/tag/{id}` | PUT / PATCH / DELETE | change; delete (`force=1` for a tag on records) |
-| `/sys/tag/{id}/validate` | POST | the checks only |
-| `/sys/tag/{id}/merge` | POST | `{into}` |
-| `/sys/tag/assign` | POST | `{records, add, remove, replace}` → `{processed, added, removed, bookmarks}` |
+| `/tag/0` | POST | add (201) |
+| `/tag/{id}` | PUT / PATCH / DELETE | change; delete (`force=1` for a tag on records) |
+| `/tag/{id}/validate` | POST | the checks only |
+| `/tag/{id}/merge` | POST | `{into}` |
+| `/tag/assign` | POST | `{records, add, remove, replace}` → `{processed, added, removed, bookmarks}` |
 
 Tests: `tests/SystemTagTest.php [--write]`.

@@ -83,7 +83,7 @@ final class UserWriteService extends EntityWriteService
     /** {@inheritdoc} */
     protected function route(): string
     {
-        return 'sys/user';
+        return 'user';
     }
 
     /**

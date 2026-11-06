@@ -77,7 +77,7 @@ final class ReminderWriteService extends EntityWriteService
     /** {@inheritdoc} */
     protected function route(): string
     {
-        return 'sys/reminder';
+        return 'reminder';
     }
 
     /**

@@ -58,7 +58,7 @@ final class ReportEntityHandler extends RecordEntityHandler
         $this->file = null;
         $record = isset($body['records'][0]) && is_array($body['records'][0]) ? $body['records'][0] : $body;
         $details = is_array($record['details'] ?? null) ? $record['details'] : array();
-        if($this->kind === 'schedule'){
+        if($this->kind === 'output'){
             $this->checkQuery($details);
             return $body;
         }

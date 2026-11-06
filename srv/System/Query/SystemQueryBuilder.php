@@ -117,10 +117,10 @@ final class SystemQueryBuilder
             case 't': case 'type': case 'typeid': case 'typename':
                 $requested = is_array($value) ? reset($value) : $value;
                 $requested = strtolower(trim((string)$requested));
-                // the record type id of a type in the record format (plan 20 §10, plan 24)
-                $rectypeId = intval($this->schema['rectypeId'] ?? 0);
-                if($rectypeId > 0 && ctype_digit($requested) && intval($requested) === $rectypeId){ return '1=1'; }
-                if($requested !== $this->schema['type'] && $requested !== $this->schema['type'].'s'){
+                // SystemQueryService::resolveType: a name, a record type id or a concept code (plan 28a)
+                $isType = $this->schema['isType'] ?? null;
+                $matches = $isType !== null ? $isType($requested) : $requested === $this->schema['type'];
+                if(!$matches){
                     throw new QueryValidationException('System query type does not match '.$this->schema['type']);
                 }
                 return '1=1';
@@ -140,6 +140,9 @@ final class SystemQueryBuilder
             case 'f': case 'field':
                 if($suffix === 'record' && $this->schema['type'] === 'tag'){
                     return $this->recordTagsCondition($value, $state);
+                }
+                if($suffix === 'group' && $this->schema['type'] === 'user'){
+                    return $this->groupMembersCondition($value, $state);
                 }
                 // f without a field: the text of the record, its title (the search box of a record list)
                 if($suffix === ''){
@@ -197,6 +200,17 @@ final class SystemQueryBuilder
             return $this->column($this->schema['headers']['id']).' IN ('.$memberOf.')';
         }
         throw new UnsupportedQueryException('user is not available for '.$this->schema['type']);
+    }
+
+    /** `group` (users only): the members of a group (the mirror of `user` on groups, plan 28a). */
+    private function groupMembersCondition($value, SqlBuildContext $state): string
+    {
+        $text = trim((string)(is_array($value) ? reset($value) : $value));
+        if(!ctype_digit($text) || intval($text) < 1){
+            throw new QueryValidationException('group requires a group ID');
+        }
+        $state->bind(intval($text), 'i');
+        return $this->column($this->schema['headers']['id']).' IN (SELECT ugl_UserID FROM {memberships} WHERE ugl_GroupID=?)';
     }
 
     /** `record` (tags only): the tags attached to the given record(s). */

@@ -18,10 +18,14 @@
 *
 *   POST   /sys/bookmark/0, PUT / PATCH / DELETE /sys/bookmark/{id}, POST /sys/bookmark/{id}/validate
 *   POST   /sys/reminder/0, PUT / PATCH / DELETE /sys/reminder/{id}, POST /sys/reminder/{id}/validate
-*   POST   /sys/reminder/send           e-mail the reminder of the body now, without saving it
+*   POST   /sys/reminder/execute        e-mail the reminder of the body now, without saving it
 *   POST /sys/user/0, PUT / PATCH / DELETE /sys/user/{id}; the same for /sys/group (plan 20, 4d)
-*   POST   /sys/group/{id}/members      {add: [user ids], role} | {remove: [user ids]}
-*   GET | PUT | DELETE /sys/{user|group}/{id}/image   the image ({"upload": token} to put one)
+*   POST   /sys/group/{id}/assign       {add: [user ids], role} | {remove: [user ids]}
+*   DELETE /sys/group/{id}/assign?remove=1,2
+*   DELETE /sys/tag/assign?remove=1,2&records=3,4
+*   GET | PUT | DELETE /sys/{user|group}/{id}/asset   the image ({"upload": token} to put one)
+*
+* All of them also as /{entity}/... (plan 28a).
 *
 * The other types are read only for now (405). The reads stay SystemQueryController.
 *
@@ -101,11 +105,11 @@ final class SystemEditController
         $login = 'Log in to change system records';
 
         if($type === 'tag' && $second === 'assign' && $action === ''){
-            $this->allow($method, array('POST'));
-            SameSiteGuard::assert($this->runtime, $request, true, $login);
-            return array(200, $service->assign($json));
+            $this->allow($method, array('POST', 'DELETE'));
+            SameSiteGuard::assert($this->runtime, $request, $method === 'POST', $login);
+            return array(200, $service->assign($method === 'POST' ? $json : $this->removal($params, true)));
         }
-        if($type === 'reminder' && $second === 'send' && $action === ''){
+        if($type === 'reminder' && $second === 'execute' && $action === ''){
             $this->allow($method, array('POST'));
             SameSiteGuard::assert($this->runtime, $request, true, $login);
             return array(200, $service->send($json));
@@ -113,16 +117,16 @@ final class SystemEditController
         if(!preg_match('/^\d+$/', $second)){ throw new RecordEditException(404, 'not_found', 'Unknown /sys route'); }
         $id = intval($second);
         // the image of a user or group (plan 20, 4d)
-        if($action === 'image' && $this->images !== null){
+        if($action === 'asset' && $this->images !== null){
             $this->allow($method, array('GET', 'PUT', 'DELETE'));
             if($method === 'GET'){ return array(200, $this->images->get($type, $id)); }
             SameSiteGuard::assert($this->runtime, $request, $method === 'PUT', $login);
             return array(200, $method === 'PUT' ? $this->images->put($type, $id, $json) : $this->images->delete($type, $id));
         }
-        if($type === 'group' && $action === 'members'){
-            $this->allow($method, array('POST'));
-            SameSiteGuard::assert($this->runtime, $request, true, $login);
-            $result = $service->members($id, $json);
+        if($type === 'group' && $action === 'assign'){
+            $this->allow($method, array('POST', 'DELETE'));
+            SameSiteGuard::assert($this->runtime, $request, $method === 'POST', $login);
+            $result = $service->members($id, $method === 'POST' ? $json : $this->removal($params, false));
             $body = $this->item($params, $type, $id);
             $body['meta']['members'] = $result['members'];
             return array(200, $body);
@@ -142,6 +146,8 @@ final class SystemEditController
             $body['meta']['moved'] = $result['moved'];
             return array(200, $body);
         }
+        // a record of a legacy table has no copy (plan 28 §2.4)
+        if($action === 'duplicate'){ throw new RecordEditException(405, 'method_not_allowed', 'Records of type '.$type.' cannot be duplicated'); }
         if($action !== ''){ throw new RecordEditException(404, 'not_found', 'Unknown /sys route'); }
         $this->allow($method, array('POST', 'PUT', 'PATCH', 'DELETE'));
         SameSiteGuard::assert($this->runtime, $request, $method !== 'DELETE', $login);
@@ -178,6 +184,21 @@ final class SystemEditController
     {
         $body = $this->query->execute(array('db' => $params['db'] ?? $this->runtime->databaseName, 'fields' => '_all'), $type, $id);
         if(!is_array($body)){ throw RecordEditException::notFound(ucfirst($type).' '.$id.' not found'); }
+        return $body;
+    }
+
+    /**
+     * The body of a removal: a DELETE has no JSON body, so the ids are in the URL (as /website/{id}/assign).
+     *
+     * @param bool $records Also the records (tags).
+     */
+    private function removal(array $params, bool $records): array
+    {
+        $ids = static function($value): array {
+            return is_array($value) ? $value : array_filter(preg_split('/\s*,\s*/', trim((string)$value)), 'strlen');
+        };
+        $body = array('remove' => $ids($params['remove'] ?? ''));
+        if($records){ $body['records'] = $ids($params['records'] ?? ''); }
         return $body;
     }
 

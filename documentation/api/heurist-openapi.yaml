@@ -47,8 +47,12 @@ tags:
   description: List registered databases available on the server
 - name: Records
   description: Search for and retrieve records
-- name: System records
-  description: Search authenticated system records using stable filter and user mappings
+- name: Entities
+  description: >-
+    Record types with a name in the URL: user, group, bookmark, reminder, tag, website, page, report and output. One
+    set of paths for all of them, /{entity}/{recordId}/{action}, in the record format of /records, wherever an entity is
+    stored. GET and POST /sys search them with a query; /{entity}?q=... is the same search for one entity.
+    /sys/{entity}/... is accepted as an alias of /{entity}/... and is not listed here.
 - name: Database structure
   description: Retrieve record types, fields, terms, term links and record structures
 - name: Authentication
@@ -71,7 +75,7 @@ tags:
 - name: Reports
   description: >-
     Smarty report templates and the lists of the reports manager. Report and schedule records are written by the
-    common record API (entities report and schedule, /report/{recordId}, /schedule/{recordId}, also /records/{recordId});
+    common record API (entities report and output, /report/{recordId}, /output/{recordId}, also /records/{recordId});
     only the template text is here, it is a file.
 - name: Files
   description: >-
@@ -831,13 +835,16 @@ paths:
           $ref: '#/components/responses/ServerError'
   /{database}/sys:
     get:
-      tags: [System records]
+      tags: [Entities]
       operationId: searchSystemRecords
-      summary: Search filters, users, groups or tags
+      summary: Search the system entities
       description: >-
         Uses the common Heurist query contract with stable fields mapped to current system tables.
-        The singular t predicate selects filter, user, group, tag, bookmark or reminder (aliases tags, keyword); omission currently
-        defaults to filter. Authentication is required, except for saved filters of the Website filters group (4),
+        The t predicate selects filter, user, group, tag, bookmark, reminder, website, page, report or output, by
+        its name (aliases tags, keyword, keywords, workgroup), record type id or record type concept code; omission
+        currently defaults to filter. GET|POST /{entity}?q=... of these entities (not filter) is the same search with
+        t added: /user, /group, /tag, /bookmark, /reminder, /website, /page, /report, /output. website, page, report
+        and output are searched as GET /records and give its output. Authentication is required, except for saved filters of the Website filters group (4),
         which everyone may read. Filter results are limited to Everyone (0), Website filters (4), the current user
         and the groups they belong to, unless the caller is the database owner; owner accepts a list
         ("0,4,6", or "-1,2" to exclude). Tags (usrTags: id, title = tag text, owner = the user or group owning the
@@ -845,12 +852,13 @@ paths:
         the tags of the groups they belong to. The predicate user=<id|current> selects the tags of that user (their
         personal and their groups' tags), or with t=group the groups that user belongs to - e.g.
         {"t":"tag","user":"current"} (all tags for the current user), {"t":"tag","owner":"6"} (one group's
-        tags), {"t":"group","user":"5"}. The tag predicate record=<id[,id]> selects the tags attached to those
+        tags), {"t":"group","user":"5"}. The predicate group=<id> with t=user selects the members of that group,
+        e.g. [{"t":"user"},{"group":"4"}]. The tag predicate record=<id[,id]> selects the tags attached to those
         records, e.g. {"t":"tag","record":"81","user":"current"} (the current user's tags on record 81) with
         fields=owner,ownername. Users and groups: database administrators see all
         of them; other users see only themselves and the groups they belong to. Group records support the
         virtual field role (admin, member or none for the current user). User, group and tag responses add
-        meta.currentUser {id, isAdmin}.
+        meta.currentUser {id, name, isAdmin}.
       security:
       - bearerAuth: []
       parameters:
@@ -885,9 +893,9 @@ paths:
         '405': {$ref: '#/components/responses/MethodNotAllowed'}
         '500': {$ref: '#/components/responses/ServerError'}
     post:
-      tags: [System records]
+      tags: [Entities]
       operationId: searchSystemRecordsPost
-      summary: Search filters or users using a structured request
+      summary: Search the system entities using a structured request
       security:
       - bearerAuth: []
       parameters:
@@ -1346,349 +1354,30 @@ paths:
         '302': {description: Legacy thumbnail link (made on the first request)}
         '403': {description: Login required}
         '404': {description: Unknown key}
-  /{database}/sys/{entity}/{id}:
-    parameters:
-    - $ref: '#/components/parameters/Database'
-    - $ref: '#/components/parameters/SystemEntity'
-    - name: id
-      in: path
-      required: true
-      description: The id of the system record; 0 with POST adds one.
-      schema: {type: integer, minimum: 0}
+  /{database}/sys/filter/{id}:
     get:
-      tags: [System records]
-      operationId: getSystemRecord
-      summary: Retrieve one system record (filter, user, group, tag, bookmark or reminder)
+      tags: [Entities]
+      operationId: getSavedFilter
+      summary: One saved filter
       description: >-
-        Returns {records: [one], meta} in the record format (plan 20): universal rec_* headers, rec_RecTypeID the
-        local id of the record type of the entity (0 until it exists in the database), details by field id. Tags
-        add rec_Usage (the number of tagged records). The visibility rules are those of GET /sys.
+        Saved filters are read only and are not in the record format yet (rec_RecTypeID is "filter", an item is the
+        bare record). The rules of who sees one are those of GET /sys.
       security:
+      - {}
       - bearerAuth: []
       parameters:
-      - name: fields
-        in: query
-        schema: {type: string}
-        description: Optional fields; omission (or _all) returns every mapped field of the entity.
+      - $ref: '#/components/parameters/Database'
+      - {name: id, in: path, required: true, schema: {type: integer, minimum: 1}}
+      - {name: fields, in: query, schema: {type: string}, description: Optional fields; omission returns every field.}
       responses:
         '200':
-          description: One system record
+          description: One saved filter
           content:
             application/json:
               schema: {$ref: '#/components/schemas/SystemRecord'}
         '400': {$ref: '#/components/responses/BadRequest'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
-        '405': {$ref: '#/components/responses/MethodNotAllowed'}
         '500': {$ref: '#/components/responses/ServerError'}
-    post:
-      tags: [System records]
-      operationId: addSystemRecord
-      summary: Add a system record (id 0)
-      description: >-
-        The body is a record as GET /sys/{entity}/{id} gives it. Answer 201 with the new record as GET gives it
-        (all fields) and meta.issues (warnings). Filters are read only (405). A logged-in user is required;
-        same-site requests with a JSON body only.
-
-
-        Fields and rules by entity:
-
-        - **tag** - 2-1 the tag (required, at most 63 characters), 2-3 description (at most 250); rec_OwnerUGrpID
-          the user (default) or one of the user's groups. The same text of the same owner gives 409 duplicate with
-          "existing" (the tag id).
-
-        - **bookmark** - 2-13 the record (required, visible to the user, not changed later), Rating 2-1190 (0-5),
-          2-4 notes, PrivateInfo 2-1192 (at most 140 characters, stored encrypted with the key of the installation;
-          without a key as text, with the warning not_encrypted in meta.issues). The owner is always the user; only
-          the user reads and changes their bookmarks. One bookmark per record and user (409 duplicate, existing).
-
-        - **reminder** - 2-13 the record (required); exactly one recipient - Recipient 2-1193 (a user or a group)
-          or 2-23 (e-mail addresses, comma separated); 2-4 message (at most 1000 characters); 2-10 start date
-          YYYY-MM-DD (today by default); Frequency 2-1191 (a term of 2-10454, once by default).
-
-        - **user** (administrators only) - record type System user 2-1107; the fields are named by DT_* constants
-          on the server (UserGroupCodes). A login name, an e-mail and a password are required; the password is
-          written only (hashed as legacy) and never given back.
-
-        - **group** (any user, who becomes its admin) - record type System User Group 2-1108. A unique name is
-          required; the members (relmarker DT_GROUP_MEMBERSHIP 2-1200, the role as relation type) are written by
-          POST /sys/group/{id}/members only.
-      security:
-      - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: {type: object, additionalProperties: true}
-      responses:
-        '201':
-          description: The new record
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/RecordItemResponse'}
-        '400': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {description: Another site, or not allowed (e.g. an owner the user is not), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '404': {description: The linked record or recipient is not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '405': {description: The entity is read only (filter), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '409': {description: Duplicate (with "existing"), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-    put:
-      tags: [System records]
-      operationId: replaceSystemRecord
-      summary: Change a system record (the writable fields missing from the body are emptied)
-      description: >-
-        rec_Modified is a concurrency token: 409 conflict when the record was changed since, unless force=1.
-        Who may change it - tag: the tags of the user and of the user's groups (database owner: all); bookmark:
-        its user only (404 for others); reminder: its owner or the database owner; user: the user themselves,
-        administrators any (user 2: only user 2), the account status only administrators, an empty password
-        keeps it; group: its admins and the database owner.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/SystemForce'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: {type: object, additionalProperties: true}
-      responses:
-        '200':
-          description: The changed record
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/RecordItemResponse'}
-        '400': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '404': {description: Not found (or not visible to the user), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '405': {description: The entity is read only (filter), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '409': {description: Conflict or duplicate, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-    patch:
-      tags: [System records]
-      operationId: changeSystemRecord
-      summary: Change the given fields of a system record
-      description: The rules of PUT; fields missing from the body are kept.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/SystemForce'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: {type: object, additionalProperties: true}
-      responses:
-        '200':
-          description: The changed record
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/RecordItemResponse'}
-        '400': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '404': {description: Not found (or not visible to the user), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '405': {description: The entity is read only (filter), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '409': {description: Conflict or duplicate, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-    delete:
-      tags: [System records]
-      operationId: deleteSystemRecord
-      summary: Delete a system record
-      description: >-
-        Answer {deleted} (tags {deleted, removed}). By entity - tag: a tag on records is refused (409 tag_in_use
-        with usage and up to 100 records) unless force=1, then its links are removed first; bookmark: refused
-        while the user has personal tags on the record (409 has_personal_tags); user / group: the legacy checks
-        and clean-up, never user 2 or group 1, nor a user or group that owns records, nor the last admin of a
-        group (409 refused).
-      security:
-      - bearerAuth: []
-      parameters:
-      - name: force
-        in: query
-        description: tag only - remove the tag from its records first.
-        schema: {type: boolean}
-      responses:
-        '200':
-          description: Deleted
-          content:
-            application/json:
-              schema: {type: object, properties: {deleted: {type: integer}, removed: {type: integer}}}
-        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '404': {description: Not found (or not visible to the user), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '405': {description: The entity is read only (filter), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '409': {description: Refused (tag_in_use, has_personal_tags, refused), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/sys/{entity}/{id}/validate:
-    post:
-      tags: [System records]
-      operationId: validateSystemRecord
-      summary: The checks of a save (POST with id 0, PUT otherwise), without saving
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/SystemEntity'
-      - {name: id, in: path, required: true, schema: {type: integer, minimum: 0}}
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: {type: object, additionalProperties: true}
-      responses:
-        '200':
-          description: The record can be saved
-          content:
-            application/json:
-              schema: {type: object, properties: {valid: {type: boolean}, issues: {type: array, items: {type: object}}}}
-        '400': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '405': {description: The entity is read only (filter), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '409': {description: Duplicate, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/sys/{entity}/{id}/image:
-    parameters:
-    - $ref: '#/components/parameters/Database'
-    - name: entity
-      in: path
-      required: true
-      description: Only users and groups have an image (404 for the other entities).
-      schema: {type: string, enum: [user, group]}
-    - {name: id, in: path, required: true, schema: {type: integer, minimum: 1}}
-    get:
-      tags: [System records]
-      operationId: getEntityImage
-      summary: The URLs of the image (null without one)
-      security:
-      - bearerAuth: []
-      responses:
-        '200': {description: '{type, id, image: {url, thumbnail} | null}', content: {application/json: {schema: {type: object, additionalProperties: true}}}}
-        '404': {description: The entity has no image, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-    put:
-      tags: [System records]
-      operationId: putEntityImage
-      summary: Put the image of a finished upload ({"upload" - token of POST /files/upload})
-      description: One image per entity, kept in the legacy entity folders (plan 20, §10.13); a thumbnail is made.
-      security:
-      - bearerAuth: []
-      requestBody: {required: true, content: {application/json: {schema: {type: object, properties: {upload: {type: string}}}}}}
-      responses:
-        '200': {description: The image URLs, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
-        '400': {description: Not an image, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-    delete:
-      tags: [System records]
-      operationId: deleteEntityImage
-      summary: Remove the image
-      security:
-      - bearerAuth: []
-      responses:
-        '200': {description: 'image: null', content: {application/json: {schema: {type: object, additionalProperties: true}}}}
-        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/sys/tag/{tagId}/merge:
-    post:
-      tags: [System records]
-      operationId: mergeTag
-      summary: Merge a tag into another tag of the same owner
-      description: >-
-        Body {"into": tag id}. The records of the tag get the other tag (a record with both keeps one link), the
-        tag is deleted. Answer: the tag merged into, with meta.merged and meta.moved.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - {name: tagId, in: path, required: true, schema: {type: integer, minimum: 1}}
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: {type: object, required: [into], properties: {into: {type: integer}}}
-      responses:
-        '200':
-          description: The tag merged into
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/RecordItemResponse'}
-        '400': {description: Invalid request or owners differ, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '404': {description: Not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/sys/tag/assign:
-    post:
-      tags: [System records]
-      operationId: assignTags
-      summary: Put tags on records and take tags off
-      description: >-
-        Body {records: [ids], add: [tag ids], remove: [tag ids], replace: false}. Only on records the user can see
-        and with tags the user may change. replace: the tags of the records that the user may change and that are
-        not in "add" are removed. A personal tag also bookmarks the record for its user (as legacy).
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [records]
-              properties:
-                records: {type: array, items: {type: integer}}
-                add: {type: array, items: {type: integer}}
-                remove: {type: array, items: {type: integer}}
-                replace: {type: boolean}
-      responses:
-        '200':
-          description: The numbers of the change
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  processed: {type: integer}
-                  added: {type: integer}
-                  removed: {type: integer}
-                  bookmarks: {type: integer}
-        '400': {description: Invalid request, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '404': {description: Unknown tag or no record, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/sys/reminder/send:
-    post:
-      tags: [System records]
-      operationId: sendReminder
-      summary: E-mail a reminder now, without saving it
-      description: >-
-        The body is a reminder record (as for POST /sys/reminder/0). It is sent by the legacy mailer, as the legacy
-        "Send immediately". Answer {sent, record}.
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: {type: object, additionalProperties: true}
-      responses:
-        '200':
-          description: Sent
-          content:
-            application/json:
-              schema: {type: object, properties: {sent: {type: boolean}, record: {type: integer}}}
-        '400': {description: Invalid reminder, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '404': {description: The record or the recipient is not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '502': {description: The mail was not sent (not_sent), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/sys/group/{groupId}/members:
-    post:
-      tags: [System records]
-      operationId: changeGroupMembers
-      summary: Add users to a group with a role, or remove them
-      description: >-
-        Body {add: [user ids], role: admin|member} or {remove: [user ids]}. A group keeps at least one admin (400).
-        Answer: the group record, with meta.members [{id, role}].
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/Database'
-      - {name: groupId, in: path, required: true, schema: {type: integer, minimum: 1}}
-      requestBody: {required: true, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
-      responses:
-        '200': {description: Changed, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
-        '400': {description: Invalid change, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-        '403': {description: Not an admin of the group, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
   /{database}/records/{recordId}:
     get:
       tags:
@@ -2084,52 +1773,90 @@ paths:
   /{database}/{entity}/{recordId}:
     parameters:
     - $ref: '#/components/parameters/Database'
-    - $ref: '#/components/parameters/RecordEntity'
+    - $ref: '#/components/parameters/Entity'
     get:
-      tags:
-      - Record entities
-      operationId: readEntityRecord
-      summary: One record of an entity (plan 27d)
+      tags: [Entities]
+      operationId: getEntityRecord
+      summary: One record of an entity
       description: >-
-        A record-based entity is a record type with a name in the URL (plan 28): website (99-51), page
-        (99-52), report (2-1104), schedule (2-1105). Read, insert, replace, change and delete are those of
-        /records/{recordId}; the record must be of the entity's type (404 otherwise). The answer of GET has
-        meta.canEdit and the entity's own meta (meta.website: kind, version, URL, languages, menu tree). There
-        is no search on an entity: use GET /records?q=t:{record type}. The rules of an entity run for every
-        write of its record type, also through /records/{recordId}. report - the file name (2-62) has only
-        letters A-Z, digits, "-", "_", "(", ")" and spaces (422 otherwise); empty is made from the title; a new
-        name renames the template file (422 when the name is taken); a new record gets an empty file or takes a
-        file without a record. schedule - the query (2-12) may not have parameters $X$ (422).
+        Returns {records: [one], meta} in the record format: universal rec_* headers, rec_RecTypeID the local id of
+        the record type, details by field id. The record must be of the entity's type (404 otherwise). recordId may
+        be a concept code {this database id}-{record id}. Tags add rec_Usage (the number of tagged records).
+        meta has canEdit for website, page, report and output; logged-in users also get the entity's own meta
+        (meta.website: kind, version, URL, languages, menu tree). A guest may read a record that is visible to
+        everyone, and one field of it; users and groups are not visible to guests, and every other request of an
+        entity needs a login. Users and groups: administrators see all; other users see themselves and their groups.
       security:
+      - {}
       - bearerAuth: []
       parameters:
-      - $ref: '#/components/parameters/RecordId'
+      - name: recordId
+        in: path
+        required: true
+        description: Record id, or a concept code {this database id}-{record id}.
+        schema: {type: string}
+      - name: fields
+        in: query
+        schema: {type: string}
+        description: Optional fields; omission (or _all) returns every field.
       responses:
         '200':
-          description: The record.
+          description: The record
           content:
             application/json:
               schema: {$ref: '#/components/schemas/RecordItemResponse'}
-        '401':
-          description: Not logged in
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '400': {$ref: '#/components/responses/BadRequest'}
         '404':
-          description: Not found, or not a record of this entity
+          description: Not found, not visible, or not a record of this entity
           content:
             application/json:
               schema: {$ref: '#/components/schemas/RecordEditError'}
+        '500': {$ref: '#/components/responses/ServerError'}
     post:
-      tags:
-      - Record entities
+      tags: [Entities]
       operationId: insertEntityRecord
       summary: Insert a record of an entity (recordId 0)
       description: >-
-        As POST /records/{recordId}; rec_RecTypeID is the entity's. Website: the server adds the starter
-        header, home content, footer and configuration, makes it public and writes an "About" page for its top
-        menu; language codes ("eng") in DT_LANGUAGE become its terms. Page: public unless the body says
-        otherwise.
+        The body is a record as GET gives it. Answer 201 with the new record (all fields) and meta.issues (warnings).
+        A logged-in user is required; same-site requests with a JSON body only. rec_RecTypeID is the entity's.
+
+
+        Fields and rules by entity:
+
+        - **tag** - 2-1 the tag (required, at most 63 characters), 2-3 description (at most 250); rec_OwnerUGrpID
+          the user (default) or one of the user's groups. The same text of the same owner gives 409 duplicate with
+          "existing" (the tag id).
+
+        - **bookmark** - 2-13 the record (required, visible to the user, not changed later), Rating 2-1190 (0-5),
+          2-4 notes, PrivateInfo 2-1192 (at most 140 characters, stored encrypted with the key of the installation;
+          without a key as text, with the warning not_encrypted in meta.issues). The owner is always the user; only
+          the user reads and changes their bookmarks. One bookmark per record and user (409 duplicate, existing).
+
+        - **reminder** - 2-13 the record (required); exactly one recipient - Recipient 2-1193 (a user or a group)
+          or 2-23 (e-mail addresses, comma separated); 2-4 message (at most 1000 characters); 2-10 start date
+          YYYY-MM-DD (today by default); Frequency 2-1191 (a term of 2-10454, once by default).
+
+        - **user** (administrators only) - record type System user 2-1107; the fields are named by DT_* constants
+          on the server (UserGroupCodes). A login name, an e-mail and a password are required; the password is
+          written only (hashed as legacy) and never given back.
+
+        - **group** (any user, who becomes its admin) - record type System User Group 2-1108. A unique name is
+          required; the members (relmarker DT_GROUP_MEMBERSHIP 2-1200, the role as relation type) are written by
+          POST /group/{id}/assign only.
+
+        - **website** (99-51) - the server adds the starter header, home content, footer and configuration, makes it
+          public and writes an "About" page for its top menu; language codes ("eng") in DT_LANGUAGE become its terms.
+
+        - **page** (99-52) - public unless the body says otherwise.
+
+        - **report** (2-1104) - the file name (2-62) has only letters A-Z, digits, "-", "_", "(", ")" and spaces (422
+          otherwise); empty is made from the title; a new record gets an empty file or takes a file without a record.
+
+        - **output** (2-1105) - the query (2-12) may not have parameters $X$ (422).
+
+
+        The rules of website, page, report and output run for every write of their record type, also through
+        /records/{recordId}.
       security:
       - bearerAuth: []
       parameters:
@@ -2141,48 +1868,32 @@ paths:
             schema: {$ref: '#/components/schemas/RecordInput'}
       responses:
         '201':
-          description: The new record.
+          description: The new record
           content:
             application/json:
               schema: {$ref: '#/components/schemas/RecordItemResponse'}
-        '422':
-          description: Invalid values
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/RecordEditError'}
+        '400': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {description: Another site, or not allowed (e.g. an owner the user is not), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: The linked record or recipient is not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Duplicate (with "existing"), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '422': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
     put:
-      tags:
-      - Record entities
+      tags: [Entities]
       operationId: replaceEntityRecord
-      summary: Replace a record of an entity
-      security:
-      - bearerAuth: []
-      parameters:
-      - $ref: '#/components/parameters/RecordId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: {$ref: '#/components/schemas/RecordInput'}
-      responses:
-        '200':
-          description: The saved record.
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/RecordItemResponse'}
-    patch:
-      tags:
-      - Record entities
-      operationId: patchEntityRecord
-      summary: Change some fields of a record of an entity
+      summary: Replace a record of an entity (the writable fields missing from the body are emptied)
       description: >-
-        Only the fields in the body are replaced ([] clears one); send rec_Modified to get 409 when someone
-        else changed the record (?force=1 overwrites). Website: a new owner or visibility is passed on to its
-        menu pages (warnings in meta.issues for pages the user can not change).
+        rec_Modified is a concurrency token: 409 conflict when the record was changed since, unless force=1.
+        Who may change it - tag: the tags of the user and of the user's groups (database owner: all); bookmark:
+        its user only (404 for others); reminder: its owner or the database owner; user: the user themselves,
+        administrators any (user 2: only user 2), the account status only administrators, an empty password
+        keeps it; group: its admins and the database owner; website, page, report, output: the record's owner and
+        editors. report - a new file name (2-62) renames the template file (422 when the name is taken).
       security:
       - bearerAuth: []
       parameters:
       - $ref: '#/components/parameters/RecordId'
+      - $ref: '#/components/parameters/RecordForce'
       requestBody:
         required: true
         content:
@@ -2190,58 +1901,111 @@ paths:
             schema: {$ref: '#/components/schemas/RecordInput'}
       responses:
         '200':
-          description: The saved record.
+          description: The saved record
           content:
             application/json:
               schema: {$ref: '#/components/schemas/RecordItemResponse'}
-        '409':
-          description: Changed by someone else (rec_Modified)
+        '400': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: Not found (or not visible to the user), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Conflict or duplicate, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '422': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    patch:
+      tags: [Entities]
+      operationId: patchEntityRecord
+      summary: Change the given fields of a record of an entity
+      description: >-
+        The rules of PUT; only the fields in the body are replaced ([] clears one). Website: a new owner or visibility
+        is passed on to its menu pages (warnings in meta.issues for pages the user can not change).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RecordId'
+      - $ref: '#/components/parameters/RecordForce'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordInput'}
+      responses:
+        '200':
+          description: The saved record
           content:
             application/json:
-              schema: {$ref: '#/components/schemas/RecordEditError'}
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '400': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: Not found (or not visible to the user), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Conflict or duplicate, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '422': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
     delete:
-      tags:
-      - Record entities
+      tags: [Entities]
       operationId: deleteEntityRecord
       summary: Delete a record of an entity
       description: >-
-        Website with pages=1 also deletes its menu pages that no other record points to (format 4 only). Report -
-        also deletes its template file when no other record uses it, unless keepFile=1.
+        By entity - tag: a tag on records is refused (409 tag_in_use with usage and up to 100 records) unless force=1,
+        then its links are removed first; bookmark: refused while the user has personal tags on the record (409
+        has_personal_tags); user / group: the legacy checks and clean-up, never user 2 or group 1, nor a user or group
+        that owns records, nor the last admin of a group (409 refused); website: with pages=1 also its menu pages
+        that no other record points to (format 4 only); report: also its template file when no other record uses
+        it, unless keepFile=1.
       security:
       - bearerAuth: []
       parameters:
       - $ref: '#/components/parameters/RecordId'
-      - name: pages
-        in: query
-        required: false
-        schema: {type: integer, enum: [0, 1]}
-      - name: keepFile
-        in: query
-        required: false
-        schema: {type: integer, enum: [0, 1]}
+      - $ref: '#/components/parameters/RecordForce'
+      - {name: pages, in: query, required: false, description: website only, schema: {type: integer, enum: [0, 1]}}
+      - {name: keepFile, in: query, required: false, description: report only, schema: {type: integer, enum: [0, 1]}}
       responses:
         '200':
-          description: Deleted ids (website with pages=1 also kept page ids; report also fileDeleted).
+          description: Deleted ids (tags also removed; website with pages=1 also kept page ids; report also fileDeleted).
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  deleted: {type: array, items: {type: string}}
+                  deleted: {}
+                  removed: {type: integer}
                   kept: {type: array, items: {type: string}}
                   fileDeleted: {type: boolean}
-  /{database}/{entity}/{recordId}/validate:
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: Not found (or not visible to the user), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Refused (tag_in_use, has_personal_tags, refused, references), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/{entity}/{recordId}/{fieldId}:
     get:
-      tags:
-      - Record entities
-      operationId: validateEntityRecord
-      summary: Problems of a stored record of an entity
-      description: Website and page - problems of the format v4 (optional page and lang of a website). Other entities have none.
+      tags: [Entities]
+      operationId: getEntityRecordField
+      summary: One field of a record of an entity
+      description: >-
+        As GET /records/{recordId}/{fieldId} - the envelope of GET /{entity}/{recordId}, with this field only. fieldId
+        is a local field id or a concept code. A word that is not a field or an action is 404.
       security:
+      - {}
       - bearerAuth: []
       parameters:
       - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/RecordEntity'
+      - $ref: '#/components/parameters/Entity'
+      - $ref: '#/components/parameters/RecordId'
+      - {name: fieldId, in: path, required: true, schema: {type: string}, example: 2-1}
+      responses:
+        '200':
+          description: The record with one field
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '404': {description: Unknown field or record, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/{entity}/{recordId}/validate:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - $ref: '#/components/parameters/Entity'
+    get:
+      tags: [Entities]
+      operationId: validateStoredEntityRecord
+      summary: Problems of a stored record
+      description: Website and page - problems of the format v4 (optional page and lang of a website). report and output have none.
+      security:
+      - bearerAuth: []
+      parameters:
       - $ref: '#/components/parameters/RecordId'
       - {name: page, in: query, required: false, schema: {type: integer}}
       - {name: lang, in: query, required: false, schema: {type: string}}
@@ -2255,13 +2019,64 @@ paths:
                 properties:
                   valid: {type: boolean}
                   issues: {type: array, items: {type: object}}
+        '404': {description: Not found; tag, bookmark, reminder, user and group have only POST, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    post:
+      tags: [Entities]
+      operationId: validateEntityRecord
+      summary: The checks of a save (POST with id 0, PUT otherwise), without saving
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RecordWriteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecordInput'}
+      responses:
+        '200':
+          description: The record can be saved
+          content:
+            application/json:
+              schema: {type: object, properties: {valid: {type: boolean}, issues: {type: array, items: {type: object}}}}
+        '400': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '409': {description: Duplicate, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '422': {description: Invalid values, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/{entity}/{recordId}/duplicate:
+    post:
+      tags: [Entities]
+      operationId: duplicateEntityRecord
+      summary: Copy a record of an entity
+      description: As POST /records/{recordId}/duplicate. tag, bookmark, reminder, user and group have no copy (405).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/Entity'
+      - $ref: '#/components/parameters/RecordId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+      responses:
+        '201':
+          description: The new record
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '404': {description: Not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '405': {description: This entity has no copy, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
   /{database}/{entity}/setup:
     parameters:
     - $ref: '#/components/parameters/Database'
-    - $ref: '#/components/parameters/RecordEntity'
+    - name: entity
+      in: path
+      required: true
+      description: Only website and page (404 for the other entities).
+      schema: {type: string, enum: [website, page]}
     get:
-      tags:
-      - Record entities
+      tags: [Entities]
       operationId: entitySetupStatus
       summary: Are the record types and fields of an entity installed
       description: >-
@@ -2282,8 +2097,7 @@ paths:
                   canSetup: {type: boolean}
                   codes: {type: object, additionalProperties: {type: integer}}
     post:
-      tags:
-      - Record entities
+      tags: [Entities]
       operationId: entitySetup
       summary: Install the missing record types and fields of an entity (database managers)
       security:
@@ -2293,18 +2107,21 @@ paths:
           description: Report lines and the status.
   /{database}/{entity}/{recordId}/execute:
     post:
-      tags:
-      - Record entities
+      tags: [Entities]
       operationId: executeEntityRecord
       summary: Start the job of an entity
       description: >-
         Website or standalone page of format 4 - the job website-build (a ZIP). State and result on /jobs/{id}.
-        Report and schedule have no job here: POST /jobs with type report-generate.
+        Report and output have no job here: POST /jobs with type report-generate.
       security:
       - bearerAuth: []
       parameters:
       - $ref: '#/components/parameters/Database'
-      - $ref: '#/components/parameters/RecordEntity'
+      - name: entity
+        in: path
+        required: true
+        description: Only website and page (404 for the other entities).
+        schema: {type: string, enum: [website, page]}
       - $ref: '#/components/parameters/RecordId'
       responses:
         '200':
@@ -2314,8 +2131,7 @@ paths:
     - $ref: '#/components/parameters/Database'
     - $ref: '#/components/parameters/RecordId'
     post:
-      tags:
-      - Record entities
+      tags: [Entities]
       operationId: assignWebsitePage
       summary: Put a page into the menu of a website, or move it inside the menu
       description: >-
@@ -2343,8 +2159,7 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/RecordEditError'}
     delete:
-      tags:
-      - Record entities
+      tags: [Entities]
       operationId: unassignWebsitePage
       summary: Take a page out of the menu of a website (it becomes a standalone page)
       security:
@@ -2356,8 +2171,7 @@ paths:
           description: Summary of the website (as meta.website).
   /{database}/page/{recordId}/import:
     post:
-      tags:
-      - Record entities
+      tags: [Entities]
       operationId: importPageModule
       summary: Import a module configuration into a standalone page (module Publish)
       description: >-
@@ -2392,6 +2206,186 @@ paths:
                   url: {type: string}
                   title: {type: string}
                   created: {type: boolean}
+  /{database}/{entity}/{recordId}/asset:
+    parameters:
+    - $ref: '#/components/parameters/Database'
+    - name: entity
+      in: path
+      required: true
+      description: Only users and groups have an image (404 for the other entities).
+      schema: {type: string, enum: [user, group]}
+    - $ref: '#/components/parameters/RecordId'
+    get:
+      tags: [Entities]
+      operationId: getEntityImage
+      summary: The URLs of the image (null without one)
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: '{type, id, image: {url, thumbnail} | null}', content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '404': {description: The entity has no image, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    put:
+      tags: [Entities]
+      operationId: putEntityImage
+      summary: Put the image of a finished upload ({"upload" - token of POST /files/upload})
+      description: One image per entity, kept in the legacy entity folders (plan 20, §10.13); a thumbnail is made.
+      security:
+      - bearerAuth: []
+      requestBody: {required: true, content: {application/json: {schema: {type: object, properties: {upload: {type: string}}}}}}
+      responses:
+        '200': {description: The image URLs, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '400': {description: Not an image, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    delete:
+      tags: [Entities]
+      operationId: deleteEntityImage
+      summary: Remove the image
+      security:
+      - bearerAuth: []
+      responses:
+        '200': {description: 'image: null', content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/tag/{tagId}/merge:
+    post:
+      tags: [Entities]
+      operationId: mergeTag
+      summary: Merge a tag into another tag of the same owner
+      description: >-
+        Body {"into": tag id}. The records of the tag get the other tag (a record with both keeps one link), the
+        tag is deleted. Answer: the tag merged into, with meta.merged and meta.moved.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - {name: tagId, in: path, required: true, schema: {type: integer, minimum: 1}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, required: [into], properties: {into: {type: integer}}}
+      responses:
+        '200':
+          description: The tag merged into
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecordItemResponse'}
+        '400': {description: Invalid request or owners differ, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: Not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/tag/assign:
+    delete:
+      tags: [Entities]
+      operationId: removeTagsFromRecords
+      summary: Take tags off records
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - {name: remove, in: query, required: true, description: Tag ids, schema: {type: string}}
+      - {name: records, in: query, required: true, description: Record ids, schema: {type: string}}
+      responses:
+        '200': {description: The numbers of the change, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '400': {description: Invalid request, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: Unknown tag or no record, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    post:
+      tags: [Entities]
+      operationId: assignTags
+      summary: Put tags on records and take tags off
+      description: >-
+        Body {records: [ids], add: [tag ids], remove: [tag ids], replace: false}. Only on records the user can see
+        and with tags the user may change. replace: the tags of the records that the user may change and that are
+        not in "add" are removed. A personal tag also bookmarks the record for its user (as legacy).
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [records]
+              properties:
+                records: {type: array, items: {type: integer}}
+                add: {type: array, items: {type: integer}}
+                remove: {type: array, items: {type: integer}}
+                replace: {type: boolean}
+      responses:
+        '200':
+          description: The numbers of the change
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processed: {type: integer}
+                  added: {type: integer}
+                  removed: {type: integer}
+                  bookmarks: {type: integer}
+        '400': {description: Invalid request, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '403': {description: Not allowed, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: Unknown tag or no record, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/reminder/execute:
+    post:
+      tags: [Entities]
+      operationId: sendReminder
+      summary: E-mail a reminder now, without saving it
+      description: >-
+        The body is a reminder record (as for POST /reminder/0). It is sent by the legacy mailer, as the legacy
+        "Send immediately". Answer {sent, record}.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '200':
+          description: Sent
+          content:
+            application/json:
+              schema: {type: object, properties: {sent: {type: boolean}, record: {type: integer}}}
+        '400': {description: Invalid reminder, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '404': {description: The record or the recipient is not found, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '502': {description: The mail was not sent (not_sent), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+  /{database}/group/{groupId}/assign:
+    delete:
+      tags: [Entities]
+      operationId: removeGroupMembers
+      summary: Remove users from a group
+      description: A group keeps at least one admin (400). Answer as for POST.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - {name: groupId, in: path, required: true, schema: {type: integer, minimum: 1}}
+      - {name: remove, in: query, required: true, description: User ids, schema: {type: string}}
+      responses:
+        '200': {description: Changed, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '400': {description: Invalid change, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '403': {description: Not an admin of the group, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+    post:
+      tags: [Entities]
+      operationId: changeGroupMembers
+      summary: Add users to a group with a role, or remove them
+      description: >-
+        Body {add: [user ids], role: admin|member} or {remove: [user ids]}. A group keeps at least one admin (400).
+        Answer: the group record, with meta.members [{id, role}].
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - {name: groupId, in: path, required: true, schema: {type: integer, minimum: 1}}
+      requestBody: {required: true, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+      responses:
+        '200': {description: Changed, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
+        '400': {description: Invalid change, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
+        '403': {description: Not an admin of the group, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
   /{database}/external/translate:
     post:
       tags:
@@ -3946,7 +3940,7 @@ paths:
       summary: List report schedules
       description: >-
         All visible schedules with their last generated file. Each has query (field 2-12), file as stored,
-        language (term code) and languageTerm. A schedule record is written through /schedule/{recordId}.
+        language (term code) and languageTerm. A schedule record is written through /output/{recordId}.
       security:
       - bearerAuth: []
       parameters:
@@ -4453,12 +4447,12 @@ components:
       schema:
         type: integer
         minimum: 1
-    RecordEntity:
+    Entity:
       name: entity
       in: path
       required: true
-      description: Record-based entity (plan 27d, plan 28) - a record type with a name in the URL.
-      schema: {type: string, enum: [website, page, report, schedule]}
+      description: The entity - a record type with a name in the URL (plan 28).
+      schema: {type: string, enum: [user, group, bookmark, reminder, tag, website, page, report, output]}
     RecordWriteId:
       name: recordId
       in: path
@@ -4466,18 +4460,6 @@ components:
       description: Record id. On insert (POST) 0 takes the next id and a negative value gives the id (import).
       schema:
         type: integer
-    SystemEntity:
-      name: entity
-      in: path
-      required: true
-      description: >-
-        The system entity. All of them are read with GET; filter is read only for now (writes give 405).
-      schema: {type: string, enum: [filter, user, group, tag, bookmark, reminder]}
-    SystemForce:
-      name: force
-      in: query
-      description: Save even when rec_Modified differs (overwrites another change).
-      schema: {type: boolean, default: false}
     RecordForce:
       name: force
       in: query

@@ -24,6 +24,12 @@ use Heurist\Records\Query\QueryValidationException;
 /** Provides validated, hardcoded mappings for supported system record types. */
 final class SystemEntitySchemaRegistry
 {
+    /** Entities with a URL of their own, /{entity}/... = /sys/{entity}/... (plan 28a). api.php reads it. */
+    public const ENTITIES = array('user', 'group', 'bookmark', 'reminder', 'tag');
+
+    /** The `t` predicate of a text query. */
+    public const TEXT_TYPE = '/(^|\s)(?:t|type|typeid|typename):\s*"?([a-z0-9][a-z0-9_-]*)"?/i';
+
     private const SCHEMAS = array(
         'filter'=>array(
             'table'=>'usrSavedSearches', 'alias'=>'s',
@@ -56,7 +62,9 @@ final class SystemEntitySchemaRegistry
                 'modified'=>array('column'=>'ugr_Modified', 'output'=>'rec_Modified', 'type'=>'date')
             ),
             'fields'=>array(
-                'email'=>array('column'=>'ugr_eMail', 'name'=>'Email', 'type'=>'text')
+                'email'=>array('column'=>'ugr_eMail', 'name'=>'Email', 'type'=>'text'),
+                // query only: {"group":"4"} - the members of the group (plan 28a)
+                'group'=>array('column'=>'ugr_ID', 'name'=>'Member of group', 'type'=>'integer', 'queryOnly'=>true)
             )
         ),
         // Tags (keywords): personal tags (owner = a user) and group tags (owner = a workgroup)
@@ -144,9 +152,15 @@ final class SystemEntitySchemaRegistry
     public function normalizeType(string $type): string
     {
         $type = strtolower(trim($type));
-        $aliases = array('filters'=>'filter', 'users'=>'user', 'groups'=>'group', 'workgroup'=>'group',
+        $aliases = array('filters'=>'filter', 'workgroup'=>'group',
             'tags'=>'tag', 'keyword'=>'tag', 'keywords'=>'tag', 'bookmarks'=>'bookmark', 'reminders'=>'reminder');
         return $aliases[$type] ?? $type;
+    }
+
+    /** Whether a (normalized) name has a mapping here. */
+    public function has(string $type): bool
+    {
+        return isset(self::SCHEMAS[$type]);
     }
 
     /** Return logical entity-specific field names for the shared parser. */
@@ -155,17 +169,8 @@ final class SystemEntitySchemaRegistry
         return array_keys($this->get($type)['fields']);
     }
 
-    /** Resolve a top-level t predicate, defaulting the initial /sys route to filter. */
-    public function typeFromQuery($query, ?string $pathType = null): string
-    {
-        if($pathType !== null && trim($pathType) !== ''){
-            return $this->get($pathType)['type'];
-        }
-        $value = $this->findTypeValue($query);
-        return $this->get($value === null ? 'filter' : (string)$value)['type'];
-    }
-
-    private function findTypeValue($query)
+    /** The first value of a t predicate of a query, or null: a name, a record type id or a concept code. */
+    public function findTypeValue($query)
     {
         if(is_string($query)){
             $text = trim($query);
@@ -173,8 +178,8 @@ final class SystemEntitySchemaRegistry
             if(json_last_error() === JSON_ERROR_NONE && is_array($decoded)){
                 return $this->findTypeValue($decoded);
             }
-            if(preg_match('/(?:^|\s)(?:t|type):\s*"?([a-z][a-z0-9_-]*)/i', $text, $matches)){
-                return $matches[1];
+            if(preg_match(self::TEXT_TYPE, $text, $matches)){
+                return $matches[2];
             }
             return null;
         }

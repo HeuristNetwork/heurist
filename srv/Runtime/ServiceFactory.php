@@ -449,7 +449,7 @@ final class ServiceFactory
             'website' => static function() use ($website) { return $website('website'); },
             'page' => static function() use ($website) { return $website('page'); },
             'report' => static function() use ($report) { return $report('report'); },
-            'schedule' => static function() use ($report) { return $report('schedule'); }
+            'output' => static function() use ($report) { return $report('output'); }
         ));
     }
 
@@ -550,10 +550,25 @@ final class ServiceFactory
     /** Create the mapped filter/user query and retrieval controller. */
     public function systemQueryController(): SystemQueryController
     {
-        return new SystemQueryController(
-            new SystemQueryService($this->database, $this->runtime, null, $this->entityImageStorage()),
-            $this->runtime
-        );
+        return new SystemQueryController($this->systemQueryService(), $this->runtime);
+    }
+
+    /** Search of /sys: the entities in legacy tables, and the record-based ones through the /records search. */
+    private function systemQueryService(): SystemQueryService
+    {
+        $rectypes = array();
+        foreach(RecordEntityRegistry::ENTITIES as $name => $entity){
+            $rectypes[$name] = $this->codes->id($entity['rectype']);
+        }
+        $records = $this->recordQueryController();
+        return new SystemQueryService($this->database, $this->runtime, null, $this->entityImageStorage(),
+            array_filter($rectypes), array($records, 'execute'));
+    }
+
+    /** Registration id of this database (concept codes of its records). */
+    public function registeredDatabaseId(): int
+    {
+        return \Heurist\Runtime\DatabaseSettings::shared($this->database)->registeredId();
     }
 
     /**
@@ -562,7 +577,7 @@ final class ServiceFactory
      */
     public function systemEditController(): SystemEditController
     {
-        $query = new SystemQueryService($this->database, $this->runtime, null, $this->entityImageStorage());
+        $query = $this->systemQueryService();
         if(!($this->database instanceof WritableDatabaseInterface)){
             return new SystemEditController($query, $this->runtime);
         }

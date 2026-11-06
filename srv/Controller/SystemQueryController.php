@@ -46,16 +46,19 @@ final class SystemQueryController
     }
 
     /** Execute without writing output, primarily for integration tests. */
-    public function execute(array $params, ?string $type = null, ?int $recordId = null)
+    public function execute(array $params, ?string $type = null, ?int $recordId = null, ?string $field = null)
     {
+        if($field !== null){
+            return $this->service->executeField($params, (string)$type, (int)$recordId, $field);
+        }
         return $this->service->execute($params, $type, $recordId);
     }
 
     /** Execute and emit one collection or item response. */
-    public function output(array $params, ?string $type = null, ?int $recordId = null): void
+    public function output(array $params, ?string $type = null, ?int $recordId = null, ?string $field = null): void
     {
         try{
-            $result = $this->execute($params, $type, $recordId);
+            $result = $this->execute($params, $type, $recordId, $field);
             if($recordId !== null && $result === null){
                 $this->response->sendError(404, 'not_found', 'System record is not available');
                 return;

@@ -71,7 +71,7 @@ final class BookmarkWriteService extends EntityWriteService
     /** {@inheritdoc} */
     protected function route(): string
     {
-        return 'sys/bookmark';
+        return 'bookmark';
     }
 
     /**
