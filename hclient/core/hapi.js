@@ -194,22 +194,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if (loc.host.indexOf('.huma-num.fr') > 0 && loc.host !== 'heurist.huma-num.fr') {
             installDir = '/heurist/';
         } else {
-            // Take only the first real path segment
-            // Examples:
-            //   /heurist/dbname/web/...       -> heurist
-            //   /h7-alpha/dbname/view/...     -> h7-alpha
-            //   /dbname/anything             -> dbname
-            //   /124/117                     -> 124
-            const firstSegment = pathname.split('/').filter(Boolean)[0] || '';
+            
+             const installation = pathname.match(
+                /^\/((?:HEURIST\/)?(?:heurist|h7-[A-Za-z0-9_-]+))(?:\/|$)/
+            );
 
-            // Only these first segments are valid install dirs.
-            // Everything else is considered a pretty URL where installDir is /heurist/
-            if (
-                firstSegment === 'heurist' ||
-                /^h7-[A-Za-z0-9_-]+$/.test(firstSegment)
-            ) {
-                installDir = '/' + firstSegment + '/';
-            }
+            if (installation) {
+                installDir = '/' + installation[1] + '/';
+            }            
+            
         }
 
         that.installDir = installDir;
