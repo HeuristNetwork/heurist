@@ -100,7 +100,8 @@ final class PageContent
     {
         $settings = is_array($instance['settings'] ?? null) ? $instance['settings'] : array();
         $language = strtolower((string)($context['language'] ?? 'eng'));
-        $list = (string)($settings['presentation'] ?? 'list') !== 'slider';
+        // one visible: slideshow (`slider`) or carousel (plan 27e §29)
+        $list = !in_array((string)($settings['presentation'] ?? 'list'), array('slider', 'carousel'), true);
         switch((string)($instance['type'] ?? '')){
             case 'report':
                 $html = $this->report($settings, $language, $context);
@@ -170,6 +171,9 @@ final class PageContent
     {
         $outputs = is_array($settings['files'] ?? null) ? $settings['files'] : array();
         $outputId = self::reportOutput($outputs, $language, strtolower((string)($context['languages'][0] ?? '')));
+        // the file may hold data the visitor can not see (generated with the rights of its owner): only an output record
+        // the visitor may see is shown, the same rule as its link (plan 27e §30)
+        if($outputId < 1 || $this->repository->record($outputId) === null){ return null; }
         $file = (new ReportOutputStore((string)$this->services['generated']))->find($outputId);
         if($file === null || $file['format'] !== 'html'){ return null; }
         $display = (string)($settings['display'] ?? 'full');
