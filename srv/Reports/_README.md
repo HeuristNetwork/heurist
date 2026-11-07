@@ -37,7 +37,7 @@ from report output) and `testRecordLimit`.
 - `ReportService.php` — state, template text, import, export, one record as HTML.
 - `ReportRepository.php` — report and output records with visibility rules.
 - `ReportOutputStore.php` — generated files by the id of the output.
-- `ReportTemplateStore.php` — .tpl files: list, read, write, delete, safe names.
+- `ReportTemplateStore.php` — .tpl files: list, read, write, delete; the one file name rule (`NAME_PATTERN`, `nameFromTitle`) for new and stored names.
 - `ReportPolicy.php` — logged-in/manager checks; database setting `Reports`
   (`settings/reports.json`, `allowDynamicReports`, default true when missing;
   also time limits, `maxJobs` and `generateMaxRecords`).

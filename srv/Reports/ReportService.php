@@ -114,7 +114,11 @@ final class ReportService
         return array('report' => $report, 'body' => $this->templates->read($report['file']));
     }
 
-    /** Save the template body of a report. */
+    /**
+     * Save the template body of a report. Refused when another report record uses the same file.
+     *
+     * @throws DomainException|InvalidArgumentException
+     */
     public function saveTemplate(int $reportId, string $body): array
     {
         $this->policy->requireMember();
@@ -122,12 +126,14 @@ final class ReportService
         if($report['file'] === ''){
             throw new InvalidArgumentException('The report has no template file');
         }
+        $this->assertOwnFile($report['file']);
         $this->templates->write($report['file'], $body);
         return $this->report($reportId);
     }
 
     /**
-     * Delete the template file of a report; the record stays. Refused while outputs point to the report.
+     * Delete the template file of a report; the record stays. Refused while outputs point to the report,
+     * or when another report record uses the same file.
      *
      * @throws DomainException|ReportInUseException
      */
@@ -137,8 +143,27 @@ final class ReportService
         $report = $this->editable($reportId);
         $this->assertNoOutputs($reportId);
         $deleted = $report['file'] !== '' && $this->templates->exists($report['file']);
-        if($deleted){ $this->templates->delete($report['file']); }
+        if($deleted){
+            $this->assertOwnFile($report['file']);
+            $this->templates->delete($report['file']);
+        }
         return array('id' => $reportId, 'fileDeleted' => $deleted);
+    }
+
+    /**
+     * A template file used by more than one report record is changed by none of them through the new API.
+     * The new API never gives two records one file, but a legacy save, a batch update or an import of
+     * 2-62 can: then the edit right on one report must not change the template of another.
+     *
+     * @throws DomainException
+     */
+    private function assertOwnFile(string $file): void
+    {
+        $uses = $this->reports->registeredFiles()[strtolower($file)] ?? 0;
+        if($uses > 1){
+            throw new DomainException('The template file '.$file.' is used by '.$uses
+                .' report records. Give this report its own file (Save as) before changing it');
+        }
     }
 
     /** @throws ReportInUseException Outputs point to the report. */
@@ -271,30 +296,5 @@ final class ReportService
             }
         }
         return $result;
-    }
-
-    /**
-     * A new template file name: letters A-Z, digits, "-", "_", "(", ")" and spaces (without extension).
-     *
-     * @param string $name Requested name; ".tpl" is removed.
-     * @param string $what Field name for the error message.
-     */
-    public static function asciiName(string $name, string $what = 'File name'): string
-    {
-        $name = trim((string)preg_replace('/\.tpl$/i', '', trim($name)));
-        if($name === '' || strlen($name) > 100 || !preg_match('/^[A-Za-z0-9 _()-]+$/', $name)){
-            throw new InvalidArgumentException($what.' may contain only the letters A-Z, digits, "-", "_", "(", ")" and spaces');
-        }
-        return $name;
-    }
-
-    /** A template file name (letters A-Z, digits, "-", "_", spaces) derived from a title. */
-    public static function fileNameFromTitle(string $title): string
-    {
-        $ascii = function_exists('iconv') ? (string)@iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $title) : $title;
-        $name = preg_replace('/[^A-Za-z0-9 _()-]+/', '_', $ascii);
-        $name = trim(preg_replace('/\s+/', ' ', (string)$name), " _");
-        if($name === ''){ $name = 'report'; }
-        return substr($name, 0, 100).'.tpl';
     }
 }

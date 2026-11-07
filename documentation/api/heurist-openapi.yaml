@@ -1847,8 +1847,8 @@ paths:
 
         - **page** (99-52) - public unless the body says otherwise.
 
-        - **report** (2-1104) - the file name (2-62) is set here and does not change later. It has only letters A-Z, digits,
-          "-", "_", "(", ")" and spaces (422 otherwise); empty is made from the title; a new record gets an empty file or
+        - **report** (2-1104) - the file name (2-62) is set here and does not change later. It has only letters, digits, spaces
+          and - _ ( ) . , @, and starts with a letter, a digit or "(" (422 otherwise); empty is made from the title; a new record gets an empty file or
           takes a file without a record (registration).
 
         - **output** (2-1105, a generated report) - the query (2-12) may not have parameters $X$ (422); its file is

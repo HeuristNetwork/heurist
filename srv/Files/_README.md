@@ -3,7 +3,7 @@
 ## Overview
 
 The `/api/{db}/files` domain (plan 20, heurist-explorer
-`docs/development/20 System-Data-Transition-and-Files-Plan.md`): registered
+`docs/development/20 DONE System-Data-Transition-and-Files-Plan.md`): registered
 files (uploads and external resources) as records of the record type
 "Registered file" (`RT_REGISTERED_FILE`, 2-1106), in the same JSON as
 `/records`. Clients use the same request and response for records and files.
