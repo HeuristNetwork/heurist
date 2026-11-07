@@ -58,40 +58,73 @@ final class WebsiteStarter
      */
     public static function website(string $title): array
     {
-        $header = self::id('n');
-        $logo = self::id('n');
-        $brand = self::id('n');
-        $menuHost = self::id('n');
+        $ids = array();
+        foreach(array('header', 'row1', 'logo', 'brand', 'title', 'subtitle', 'row2', 'menuHost', 'langHost', 'footer',
+            'copyBlock', 'copy', 'heuristBlock', 'heurist', 'hostBlock', 'hostText', 'hostHost', 'home') as $name){
+            $ids[$name] = self::id('n');
+        }
         $menu = self::id('i');
-        $footer = self::id('n');
-        $home = self::id('n');
+        $language = self::id('i');
+        $host = self::id('i');
+        $widget = static function(string $type, array $settings = array()): array {
+            return array('kind' => 'widget', 'type' => $type, 'configVersion' => 1,
+                'settings' => empty($settings) ? new \stdClass() : $settings);
+        };
+        $row = array('display' => 'flex', 'flex-wrap' => 'wrap', 'align-items' => 'center', 'gap' => '1rem');
+        $column = array('display' => 'flex', 'flex-direction' => 'column');
+        // a widget host: not the min-height of the instance kind (meant for modules)
+        $host0 = array('min-height' => '0');
         $config = array(
             'schema' => CmsValidator::SCHEMA,
-            'instances' => array($menu => array('kind' => 'widget', 'type' => 'menu', 'configVersion' => 1, 'settings' => new \stdClass())),
+            'instances' => array($menu => $widget('menu'), $language => $widget('language'),
+                $host => $widget('badges', array('source' => 'host', 'height' => 40))),
             'styles' => array(
                 'base' => new \stdClass(),
                 'kinds' => self::KINDS,
                 'presets' => self::PRESETS,
                 'nodes' => array(
-                    $header => array('display' => 'flex', 'flex-wrap' => 'wrap', 'align-items' => 'center',
-                        'justify-content' => 'space-between', 'gap' => '1rem', 'padding' => '0.5rem 1rem'),
-                    // a widget host: not the min-height of the instance kind (meant for modules)
-                    $menuHost => array('min-height' => '0'),
-                    $home => array('padding' => '1rem'),
-                    $footer => array('padding' => '1rem', 'text-align' => 'center')
+                    // the Basic header template (plan 27f §3.1), as cmsEdit.js _header makes it
+                    $ids['header'] => $column + array('gap' => '0.5rem', 'padding' => '0.75rem 1rem', 'background-color' => 'var(--h-color-surface)'),
+                    $ids['row1'] => $row,
+                    $ids['brand'] => $column + array('gap' => '2px'),
+                    $ids['row2'] => $row + array('justify-content' => 'space-between'),
+                    $ids['menuHost'] => $host0 + array('flex' => '1'),
+                    $ids['langHost'] => $host0,
+                    // a composed footer (plan 27f §3.2): copyright, Powered by Heurist, Hosted at
+                    $ids['footer'] => array('display' => 'grid', 'grid-template-columns' => 'repeat(3, minmax(0, 1fr))', 'gap' => '16px',
+                        'padding' => '1rem', 'align-items' => 'start', 'narrow' => array('grid-template-columns' => '1fr')),
+                    $ids['copyBlock'] => $column + array('gap' => '0.5rem'),
+                    $ids['heuristBlock'] => $column + array('gap' => '0.5rem'),
+                    $ids['hostBlock'] => $column + array('gap' => '0.5rem'),
+                    $ids['hostHost'] => $host0,
+                    $ids['home'] => array('padding' => '1rem')
                 )
             )
         );
+        $group = static function(string $id, string $children): string {
+            return '<div data-h-node="'.$id.'" data-h-control="group">'.$children.'</div>';
+        };
+        $text = static function(string $id, string $html, string $extra = ''): string {
+            return '<div data-h-node="'.$id.'" data-h-text=""'.$extra.'>'.$html.'</div>';
+        };
         return array(
-            // the header is a group: the designer adds elements only into controls (plan 27c §5.1);
-            // the basic header template (plan 27e): logo and title of the website, menu
-            'header' => '<div data-h-node="'.$header.'" data-h-control="group">'
-                .'<div data-h-node="'.$logo.'" data-h-text="" data-h-field="website.2-38"></div>'
-                .'<h2 data-h-node="'.$brand.'" data-h-text="" data-h-field="website.2-1">'.self::html($title).'</h2>'
-                .'<nav data-h-node="'.$menuHost.'" data-h-instance="'.$menu.'"></nav></div>',
-            'footer' => '<div data-h-node="'.$footer.'" data-h-text=""><p>'.self::html($title).'</p></div>',
-            'content' => '<div data-h-node="'.$home.'" data-h-text=""><h1>'.self::html($title).'</h1>'
-                .'<p>Welcome. Edit this text in the website editor.</p></div>',
+            // the header is a group: the designer adds elements only into controls (plan 27c §5.1)
+            'header' => $group($ids['header'],
+                $group($ids['row1'],
+                    '<div data-h-node="'.$ids['logo'].'" data-h-text="" data-h-field="website.2-38" class="h-site-logo"></div>'
+                    .$group($ids['brand'],
+                        $text($ids['title'], self::html($title), ' data-h-field="website.2-1" class="h-site-title"')
+                        .$text($ids['subtitle'], '<p>define subtitle</p>', ' class="h-site-subtitle"')))
+                .$group($ids['row2'],
+                    '<nav data-h-node="'.$ids['menuHost'].'" data-h-instance="'.$menu.'"></nav>'
+                    .'<div data-h-node="'.$ids['langHost'].'" data-h-instance="'.$language.'"></div>')),
+            'footer' => $group($ids['footer'],
+                $group($ids['copyBlock'], $text($ids['copy'], '<p>© '.date('Y').' '.self::html($title).'</p>'))
+                .$group($ids['heuristBlock'], $text($ids['heurist'],
+                    '<p>Powered by <a href="https://heuristnetwork.org" target="_blank" rel="noopener">Heurist</a></p>'))
+                .$group($ids['hostBlock'], $text($ids['hostText'], '<p>Hosted at</p>')
+                    .'<nav data-h-node="'.$ids['hostHost'].'" data-h-instance="'.$host.'"></nav>')),
+            'content' => $text($ids['home'], '<h1>'.self::html($title).'</h1><p>Welcome. Edit this text in the website editor.</p>'),
             'configuration' => (string)json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
     }

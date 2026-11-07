@@ -108,6 +108,15 @@ final class PageContent
                 return $html === null ? null : array('html' => $html, 'class' => 'h-site-report');
             case 'cards':
                 return array('html' => $this->cards($settings, $language), 'class' => $list ? 'h-site-cards h-site-widget-list' : 'h-site-cards h-slider-pending');
+            case 'badges':
+                // the hosting organisation (block Hosted at, plan 27f §9.6), written now from the files of the installation
+                if(($settings['source'] ?? '') === 'host'){
+                    $html = HostInfo::badgeHtml((string)$this->services['baseUrl'], intval($settings['height'] ?? 48));
+                    return array('html' => $html, 'class' => $html === '' ? 'h-site-badges h-site-badges-empty' : 'h-site-badges');
+                }
+                // logos with links (plan 27f §7): HTML made by the designer per language, as a gallery
+                $html = is_array($settings['html'] ?? null) ? ($settings['html'][$language] ?? $settings['html']['def'] ?? null) : null;
+                return is_string($html) ? array('html' => $html, 'class' => 'h-site-badges') : null;
             case 'gallery':
                 $html = is_array($settings['html'] ?? null) ? ($settings['html'][$language] ?? $settings['html']['def'] ?? null) : null;
                 return is_string($html) ? array('html' => $html, 'class' => $list ? 'h-site-gallery h-site-widget-list' : 'h-site-gallery h-slider-pending') : null;
@@ -156,9 +165,15 @@ final class PageContent
     /** An image of a file field: the first file. */
     private function image(array $fileIds): string
     {
-        $key = $this->repository->fileKey(intval($fileIds[0] ?? 0));
-        return $key === '' ? '' : '<img src="'.self::attribute($this->services['baseUrl'].'?db='.rawurlencode($this->services['database'])
-            .'&file='.rawurlencode($key)).'" alt="">';
+        $url = $this->fileUrl(intval($fileIds[0] ?? 0));
+        return $url === '' ? '' : '<img src="'.self::attribute($url).'" alt="">';
+    }
+
+    /** URL of a registered file (the icon of a menu entry, an image field), or ''. */
+    public function fileUrl(int $fileId): string
+    {
+        $key = $fileId > 0 ? $this->repository->fileKey($fileId) : '';
+        return $key === '' ? '' : $this->services['baseUrl'].'?db='.rawurlencode($this->services['database']).'&file='.rawurlencode($key);
     }
 
     /**

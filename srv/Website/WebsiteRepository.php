@@ -55,7 +55,12 @@ final class WebsiteRepository
         'pageType' => 'DT_CMS_PAGETYPE',
         'standalonePage' => 'TRM_PAGETYPE_WEBPAGE',
         'menuPage' => 'TRM_PAGETYPE_MENUITEM',
-        'logo' => 'DT_FILE_RESOURCE'
+        'logo' => 'DT_FILE_RESOURCE',
+        // menu entry of a page (plan 27f §4): icon (thumbnail) and what is shown: name, icon or both
+        'thumbnail' => 'DT_THUMBNAIL',
+        'menuFormat' => 'DT_CMS_MENU_FORMAT',
+        'menuIconOnly' => 'TRM_ICON_ONLY',
+        'menuNameAndIcon' => 'TRM_NAME_AND_ICON'
     );
 
     /** Depth of the menu tree read for a website (top pages = 1). */
